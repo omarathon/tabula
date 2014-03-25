@@ -144,16 +144,34 @@
 								</#if>
 							</#local>
 
-							<select
+							<#if hasReported!false>
+								<#-- only defined when recording single student attendance via profile -->
+								<#if !hasState>
+									<#local class = "label-warning" />
+									<#local label = "Unrecorded" />
+								<#elseif checkpointData.state == "attended">
+									<#local class = "label-success" />
+									<#local label = "Attended" />
+								<#elseif checkpointData.state == "authorised">
+									<#local class = "label-info" />
+									<#local label = "Missed (authorised)" />
+								<#elseif checkpointData.state == "unauthorised">
+									<#local class = "label-important" />
+									<#local label = "Missed (unauthorised)" />
+								</#if>
+								<span class="use-popover label ${class}" data-content="A checkpoint cannot be set as this student's attendance data has already been submitted for this period" data-html="true" data-placement="left">${label}</span>
+							<#else>
+								<select
 									id="studentsState-${student.universityId}-${point.id}"
 									name="studentsState[${student.universityId}][${point.id}]"
 									title="${title}"
-									>
-								<option value="" <#if !hasState >selected</#if>>Not recorded</option>
-								<#list allCheckpointStates as state>
-									<option value="${state.dbValue}" <#if hasState && checkpointState.dbValue == state.dbValue>selected</#if>>${state.description}</option>
-								</#list>
-							</select>
+								>
+									<option value="" <#if !hasState >selected</#if>>Not recorded</option>
+									<#list allCheckpointStates as state>
+										<option value="${state.dbValue}" <#if hasState && checkpointState.dbValue == state.dbValue>selected</#if>>${state.description}</option>
+									</#list>
+								</select>
+							</#if>
 
 							<#if features.attendanceMonitoringNote>
 								<#local hasNote = mapGet(mapGet(command.attendanceNotes, student), point)?? />

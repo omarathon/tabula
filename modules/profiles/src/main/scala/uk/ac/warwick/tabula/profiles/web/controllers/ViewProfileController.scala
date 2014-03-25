@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.PermissionDeniedException
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model._
@@ -14,6 +13,7 @@ import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.web.Mav
+import org.joda.time.DateTime
 
 
 class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
@@ -45,6 +45,7 @@ abstract class ViewProfileController extends ProfilesController {
 
 	def viewProfileForCourse(
 		studentCourseDetails: Option[StudentCourseDetails],
+		studentCourseYearDetails: Option[StudentCourseYearDetails],
 		openMeetingId: String,
 		agentId: String,
 		profiledStudentMember: StudentMember): Mav = {
@@ -62,8 +63,8 @@ abstract class ViewProfileController extends ProfilesController {
 			}.toMap
 
 		val relationshipTypes: List[String] =
-			if (currentMember.isStaff) relationshipService.listAllStudentRelationshipTypesWithMember(currentMember).map (_.studentRole + "s").distinct.toList
-			else relationshipService.listAllStudentRelationshipTypesWithStudentMember(currentMember.asInstanceOf[StudentMember]).map (_.agentRole).distinct.toList
+			if (currentMember.isStudent) relationshipService.listAllStudentRelationshipTypesWithStudentMember(currentMember.asInstanceOf[StudentMember]).map (_.agentRole).distinct.toList
+			else relationshipService.listAllStudentRelationshipTypesWithMember(currentMember).map (_.studentRole + "s").distinct.toList
 
 		def relationshipTypesFormatted = relationshipTypes match {
 			case Nil => ""
@@ -103,8 +104,12 @@ abstract class ViewProfileController extends ProfilesController {
 			"memberNotes" -> memberNotes,
 			"agent" -> agent,
 			"allRelationshipTypes" -> allRelationshipTypes,
-			"studentCourseDetails" -> studentCourseDetails)
+			"studentCourseDetails" -> studentCourseDetails,
+			"studentCourseYearDetails" -> studentCourseYearDetails)
 			.crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}
+
+	def studentCourseYearFromYear(studentCourseDetails: StudentCourseDetails, year: AcademicYear) =
+		studentCourseDetails.freshStudentCourseYearDetails.filter(_.academicYear == year).seq.headOption
 
 }

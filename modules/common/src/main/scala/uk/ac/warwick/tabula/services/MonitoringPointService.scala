@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import org.joda.time.DateTime
 import uk.ac.warwick.util.termdates.Term
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventAttendance
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroupEventAttendance}
 import uk.ac.warwick.tabula.commands.MemberOrUser
 
 trait MonitoringPointServiceComponent {
@@ -25,7 +25,6 @@ trait MonitoringPointService {
 	def delete(monitoringPoint : MonitoringPoint)
 	def saveOrUpdate(monitoringPoint : MonitoringPointTemplate)
 	def delete(monitoringPoint : MonitoringPointTemplate)
-	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
 	def saveOrUpdate(set: MonitoringPointSet)
 	def saveOrUpdate(template: MonitoringPointSetTemplate)
 	def saveOrUpdate(report : MonitoringPointReport)
@@ -44,17 +43,26 @@ trait MonitoringPointService {
 	def countCheckpointsForPoint(point: MonitoringPoint): Int
 	def getCheckpoints(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[MonitoringCheckpoint]]]
 	def deleteCheckpoint(student: StudentMember, point: MonitoringPoint): Unit
-	def saveOrUpdateCheckpoint(
+	def saveOrUpdateCheckpointByUser(
 		student: StudentMember,
 		point: MonitoringPoint,
 		state: AttendanceState,
-		user: CurrentUser
+		user: CurrentUser,
+		autocreated: Boolean = false
 	) : MonitoringCheckpoint
-	def saveOrUpdateCheckpoint(
+	def saveOrUpdateCheckpointByMember(
 		student: StudentMember,
 		point: MonitoringPoint,
 		state: AttendanceState,
-		member: Member
+		member: Member,
+		autocreated: Boolean = false
+	) : MonitoringCheckpoint
+	def saveOrUpdateCheckpointByUsercode(
+		student: StudentMember,
+		point: MonitoringPoint,
+		state: AttendanceState,
+		usercode: String,
+		autocreated: Boolean = false
 	) : MonitoringCheckpoint
 	def getPointSetForStudent(student: StudentMember, academicYear: AcademicYear): Option[MonitoringPointSet]
 	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet]
@@ -138,35 +146,49 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		}
 	}
 
-	def saveOrUpdateCheckpoint(
+	def saveOrUpdateCheckpointByUser(
 		student: StudentMember,
 		point: MonitoringPoint,
 		state: AttendanceState,
-		user: CurrentUser
-	) : MonitoringCheckpoint = saveOrUpdateCheckpointForUser(student, point, state, user.apparentId)
+		user: CurrentUser,
+		autocreated: Boolean = false
+	) : MonitoringCheckpoint = saveOrUpdateCheckpointByUsercode(student, point, state, user.apparentId, autocreated)
 
-	def saveOrUpdateCheckpoint(
+	def saveOrUpdateCheckpointByMember(
 		student: StudentMember,
 		point: MonitoringPoint,
 		state: AttendanceState,
-		member: Member
+		member: Member,
+		autocreated: Boolean = false
 	) : MonitoringCheckpoint =
-		saveOrUpdateCheckpointForUser(student, point, state, member.userId)
+		saveOrUpdateCheckpointByUsercode(student, point, state, member.userId, autocreated)
 
-	private def saveOrUpdateCheckpointForUser(student: StudentMember,
-		point: MonitoringPoint,	state: AttendanceState,	usercode: String
+	def saveOrUpdateCheckpointByUsercode(
+		student: StudentMember,
+		point: MonitoringPoint,
+		state: AttendanceState,
+		usercode: String,
+		autocreated: Boolean
 	) : MonitoringCheckpoint = {
 		val checkpoint = monitoringPointDao.getCheckpoint(point, student).getOrElse({
 			val newCheckpoint = new MonitoringCheckpoint
 			newCheckpoint.point = point
 			newCheckpoint.student = student
+			newCheckpoint.updatedBy = usercode
+			newCheckpoint.updatedDate = DateTime.now
+			newCheckpoint.state = state
+			newCheckpoint.autoCreated = autocreated
+			monitoringPointDao.saveOrUpdate(newCheckpoint)
 			newCheckpoint
 		})
-		checkpoint.state = state
-		checkpoint.updatedBy = usercode
-		checkpoint.updatedDate = DateTime.now
-		checkpoint.autoCreated = false
-		monitoringPointDao.saveOrUpdate(checkpoint)
+		// TAB-2087
+		if (checkpoint.state != state) {
+			checkpoint.updatedBy = usercode
+			checkpoint.updatedDate = DateTime.now
+			checkpoint.state = state
+			monitoringPointDao.saveOrUpdate(checkpoint)
+		}
+
 		checkpoint
 	}
 
@@ -240,7 +262,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 
 	def studentAlreadyReportedThisTerm(student:StudentMember, point:MonitoringPoint): Boolean = {
 		val nonReportedTerms = findNonReportedTerms(Seq(student), point.pointSet.academicYear)
-		!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.academicYear).getTermTypeAsString)
+		!nonReportedTerms.contains(termService.getTermFromAcademicWeekIncludingVacations(point.validFromWeek, point.pointSet.academicYear).getTermTypeAsString)
 	}
 
 	def hasAnyPointSets(department: Department): Boolean = {
@@ -377,7 +399,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 		else if (dateWeek == Term.WEEK_NUMBER_AFTER_END)
 			false
 		else
-			dateWeek >= point.validFromWeek && dateWeek <= point.requiredFromWeek
+			point.includesWeek(dateWeek)
 	}
 
 	/**
@@ -420,7 +442,7 @@ trait AutowiringMonitoringPointGroupProfileServiceComponent extends MonitoringPo
 }
 
 trait MonitoringPointGroupProfileService {
-	def getCheckpointsForAttendance(attendance: Seq[SmallGroupEventAttendance], includeTheseAttendances: Boolean = true): Seq[MonitoringCheckpoint]
+	def getCheckpointsForAttendance(attendance: Seq[SmallGroupEventAttendance]): Seq[MonitoringCheckpoint]
 	def updateCheckpointsForAttendance(attendance: Seq[SmallGroupEventAttendance]): Seq[MonitoringCheckpoint]
 }
 
@@ -428,7 +450,7 @@ abstract class AbstractMonitoringPointGroupProfileService extends MonitoringPoin
 
 	self: MonitoringPointServiceComponent with ProfileServiceComponent with SmallGroupServiceComponent =>
 
-	def getCheckpointsForAttendance(attendances: Seq[SmallGroupEventAttendance], includeTheseAttendances: Boolean = true): Seq[MonitoringCheckpoint] = {
+	def getCheckpointsForAttendance(attendances: Seq[SmallGroupEventAttendance]): Seq[MonitoringCheckpoint] = {
 		attendances.filter(_.state == AttendanceState.Attended).flatMap(attendance => {
 			profileService.getMemberByUniversityId(attendance.universityId).flatMap{
 				case studentMember: StudentMember =>
@@ -436,12 +458,10 @@ abstract class AbstractMonitoringPointGroupProfileService extends MonitoringPoin
 						val relevantPoints = getRelevantPoints(pointSet.points.asScala, attendance, studentMember)
 						val checkpoints = relevantPoints.filter(point => checkQuantity(point, attendance, studentMember)).map(point => {
 							val checkpoint = new MonitoringCheckpoint
-							checkpoint.autoCreated = true
 							checkpoint.point = point
 							checkpoint.monitoringPointService = monitoringPointService
 							checkpoint.student = studentMember
 							checkpoint.updatedBy = attendance.updatedBy
-							checkpoint.updatedDate = DateTime.now
 							checkpoint.state = AttendanceState.Attended
 							checkpoint
 						})
@@ -454,8 +474,7 @@ abstract class AbstractMonitoringPointGroupProfileService extends MonitoringPoin
 
 	def updateCheckpointsForAttendance(attendances: Seq[SmallGroupEventAttendance]): Seq[MonitoringCheckpoint] = {
 		getCheckpointsForAttendance(attendances).map(checkpoint => {
-			monitoringPointService.saveOrUpdate(checkpoint)
-			checkpoint
+			monitoringPointService.saveOrUpdateCheckpointByUsercode(checkpoint.student, checkpoint.point, checkpoint.state, checkpoint.updatedBy, autocreated = true)
 		})
 	}
 
@@ -505,3 +524,131 @@ class MonitoringPointGroupProfileServiceImpl
 	with AutowiringMonitoringPointServiceComponent
 	with AutowiringProfileServiceComponent
 	with AutowiringSmallGroupServiceComponent
+
+
+
+/// MonitoringPointProfileTermAssignmentService ///
+
+
+trait MonitoringPointProfileTermAssignmentServiceComponent {
+	def monitoringPointProfileTermAssignmentService: MonitoringPointProfileTermAssignmentService
+}
+
+trait AutowiringMonitoringPointProfileTermAssignmentServiceComponent extends MonitoringPointProfileTermAssignmentServiceComponent {
+	var monitoringPointProfileTermAssignmentService = Wire[MonitoringPointProfileTermAssignmentService]
+}
+
+trait MonitoringPointProfileTermAssignmentService {
+	def getCheckpointsForSubmission(submission: Submission): Seq[MonitoringCheckpoint]
+	def updateCheckpointsForSubmission(submission: Submission): Seq[MonitoringCheckpoint]
+}
+
+abstract class AbstractMonitoringPointProfileTermAssignmentService extends MonitoringPointProfileTermAssignmentService {
+
+	self: MonitoringPointServiceComponent with ProfileServiceComponent with TermServiceComponent with AssignmentServiceComponent =>
+
+	def getCheckpointsForSubmission(submission: Submission): Seq[MonitoringCheckpoint] = {
+		if (submission.isLate) {
+			Seq()
+		} else {
+			profileService.getMemberByUniversityId(submission.universityId).flatMap{
+				case studentMember: StudentMember =>
+					monitoringPointService.getPointSetForStudent(studentMember, submission.assignment.academicYear).flatMap(pointSet => {
+						val relevantPoints = getRelevantPoints(pointSet.points.asScala, submission, studentMember)
+						val checkpoints = relevantPoints.filter(point => checkQuantity(point, submission, studentMember)).map(point => {
+							val checkpoint = new MonitoringCheckpoint
+							checkpoint.autoCreated = true
+							checkpoint.point = point
+							checkpoint.monitoringPointService = monitoringPointService
+							checkpoint.student = studentMember
+							checkpoint.updatedBy = submission.userId
+							checkpoint.updatedDate = DateTime.now
+							checkpoint.state = AttendanceState.Attended
+							checkpoint
+						})
+						Option(checkpoints)
+					})
+				case _ => None
+			}.getOrElse(Seq())
+		}
+	}
+
+	def updateCheckpointsForSubmission(submission: Submission): Seq[MonitoringCheckpoint] = {
+		getCheckpointsForSubmission(submission).map(checkpoint => {
+			monitoringPointService.saveOrUpdateCheckpointByUsercode(checkpoint.student, checkpoint.point, checkpoint.state, checkpoint.updatedBy, autocreated = true)
+		})
+	}
+
+	private def getRelevantPoints(points: Seq[MonitoringPoint], submission: Submission, studentMember: StudentMember): Seq[MonitoringPoint] = {
+		points.filter(point =>
+		// Is it the correct type
+			point.pointType == MonitoringPointType.AssignmentSubmission
+				// Is the assignment's due date inside the point's weeks
+				&& isDateValidForPoint(point, submission.assignment.closeDate)
+				// Is the submission's assignment or module valid
+				&& isAssignmentOrModuleValidForPoint(point, submission.assignment)
+				// Is there no existing checkpoint
+				&& monitoringPointService.getCheckpoint(studentMember, point).isEmpty
+				// The student hasn't been sent to SITS for this point
+				&& !monitoringPointService.studentAlreadyReportedThisTerm(studentMember, point)
+		)
+	}
+
+	private def isDateValidForPoint(point: MonitoringPoint, date: DateTime) = {
+		val dateWeek = termService.getAcademicWeekForAcademicYear(date, point.pointSet.academicYear)
+		if (dateWeek == Term.WEEK_NUMBER_BEFORE_START)
+			true
+		else if (dateWeek == Term.WEEK_NUMBER_AFTER_END)
+			false
+		else
+			point.includesWeek(dateWeek)
+	}
+
+	private def isAssignmentOrModuleValidForPoint(point: MonitoringPoint, assignment: Assignment) = {
+		if (point.assignmentSubmissionIsSpecificAssignments)
+			point.assignmentSubmissionAssignments.contains(assignment)
+		else
+			point.assignmentSubmissionModules.contains(assignment.module)
+	}
+
+	private def checkQuantity(point: MonitoringPoint, submission: Submission, studentMember: StudentMember): Boolean = {
+		val weeksForYear = termService.getAcademicWeeksForYear(point.pointSet.academicYear.dateInTermOne).toMap
+		def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek) =
+			weeksForYear(weekNumber).getStart.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
+
+		if (point.assignmentSubmissionIsSpecificAssignments) {
+			if (point.assignmentSubmissionIsDisjunction) {
+				true
+			} else {
+				val submissions = assignmentService.getSubmissionsForAssignmentsBetweenDates(
+					studentMember.universityId,
+					weekNumberToDate(point.validFromWeek, DayOfWeek.Monday),
+					weekNumberToDate(point.requiredFromWeek + 1, DayOfWeek.Monday)
+				).filterNot(_.isLate).filterNot(s => s.assignment == submission.assignment) ++ Seq(submission)
+
+				point.assignmentSubmissionAssignments.forall(a => submissions.exists(s => s.assignment == a))
+			}
+		} else {
+			if (point.assignmentSubmissionQuantity == 1) {
+				true
+			} else {
+				val submissions = (assignmentService.getSubmissionsForAssignmentsBetweenDates(
+						studentMember.universityId,
+						weekNumberToDate(point.validFromWeek, DayOfWeek.Monday),
+						weekNumberToDate(point.requiredFromWeek + 1, DayOfWeek.Monday)
+					).filterNot(_.isLate).filterNot(s => s.assignment == submission.assignment) ++ Seq(submission)
+				).filter(s => point.assignmentSubmissionModules.contains(s.assignment.module))
+
+				submissions.size >= point.assignmentSubmissionQuantity
+			}
+		}
+	}
+}
+
+@Service("monitoringPointProfileTermAssignmentService")
+class MonitoringPointProfileTermAssignmentServiceImpl
+	extends AbstractMonitoringPointProfileTermAssignmentService
+	with AutowiringMonitoringPointServiceComponent
+	with AutowiringProfileServiceComponent
+	with AutowiringTermServiceComponent
+	with AutowiringAssignmentServiceComponent

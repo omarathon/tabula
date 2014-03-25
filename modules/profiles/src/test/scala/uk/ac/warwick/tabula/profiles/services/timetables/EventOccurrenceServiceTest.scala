@@ -2,9 +2,10 @@ package uk.ac.warwick.tabula.profiles.services.timetables
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek}
 import org.joda.time._
-import uk.ac.warwick.tabula.services.{TermServiceComponent, TermService, WeekToDateConverterComponent, WeekToDateConverter}
+import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent, TermServiceComponent, TermService, WeekToDateConverterComponent, WeekToDateConverter}
 import uk.ac.warwick.util.termdates.{TermImpl,  TermFactory}
 import uk.ac.warwick.util.termdates.Term.TermType
+import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 
 class EventOccurrenceServiceTest extends TestBase with Mockito {
 
@@ -28,16 +29,17 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 	val intervalIncludingTwoOccurrences = new Interval(week1Start,week2End)
 
 
-	val singleOccurrence = new TimetableEvent("test","test",TimetableEventType.Lecture,singleWeek, DayOfWeek.Monday,tenAm,tenThirty,None,"XX-123",Nil,year)
-	val doubleOccurrenence	= new TimetableEvent("test","test",TimetableEventType.Lecture,twoWeeks, DayOfWeek.Monday,tenAm,tenThirty,None,"XX-123",Nil,year)
+	val singleOccurrence = new TimetableEvent("test","test",TimetableEventType.Lecture,singleWeek, DayOfWeek.Monday,tenAm,tenThirty,None,Some("XX-123"),Nil,year)
+	val doubleOccurrenence	= new TimetableEvent("test","test",TimetableEventType.Lecture,twoWeeks, DayOfWeek.Monday,tenAm,tenThirty,None,Some("XX-123"),Nil,year)
 
 
 
 	val intervalOutsideOccurrence = new Interval(1,2)
 
-	val osc = new TermBasedEventOccurrenceComponent with WeekToDateConverterComponent with TermServiceComponent{
+	val osc = new TermBasedEventOccurrenceComponent with WeekToDateConverterComponent with TermServiceComponent with ProfileServiceComponent {
 		val weekToDateConverter = mock[WeekToDateConverter]
 		var termService = mock[TermService]
+		val profileService = mock[ProfileService]
 	}
 
 	val termFactory = mock[TermFactory]

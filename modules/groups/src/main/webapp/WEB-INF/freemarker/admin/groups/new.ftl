@@ -2,7 +2,7 @@
 
 <h1>Create small groups for <@fmt.module_name module /></h1>
 
-<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/groups/new')}" commandName="createSmallGroupSetCommand" cssClass="form-horizontal">
+<@f.form method="post" action="${url('/groups/admin/module/${module.code}/groups/new')}" commandName="createSmallGroupSetCommand" cssClass="form-horizontal">
 
 	<@f.errors cssClass="error form-errors" />
 	

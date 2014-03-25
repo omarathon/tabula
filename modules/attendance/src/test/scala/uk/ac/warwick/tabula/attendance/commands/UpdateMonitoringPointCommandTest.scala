@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointReport, MonitoringCheckpoint, MonitoringPointType, MonitoringPointSet, MonitoringPoint}
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.{Module, StudentRelationshipType, Department, Route}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, StudentRelationshipType, Department, Route}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.attendance.commands.manage.{UpdateMonitoringPointState, UpdateMonitoringPointValidation, UpdateMonitoringPointCommand}
 import scala.collection.JavaConverters._
@@ -12,10 +12,12 @@ import uk.ac.warwick.util.termdates.Term
 
 class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends TermServiceComponent with MonitoringPointServiceComponent
-		with UpdateMonitoringPointValidation with UpdateMonitoringPointState {
+	trait CommandTestSupport extends TermServiceComponent with MonitoringPointServiceComponent with SmallGroupServiceComponent
+		with ModuleAndDepartmentServiceComponent with UpdateMonitoringPointValidation with UpdateMonitoringPointState {
 		val monitoringPointService = mock[MonitoringPointService]
 		val termService = mock[TermService]
+		val smallGroupService = mock[SmallGroupService]
+		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 	}
 
 	trait Fixture {
@@ -55,6 +57,8 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 			var errors = new BindException(command, "command")
 			command.validate(errors)
 			errors.hasFieldErrors should be (right = false)
+			// TAB-2025
+			there was no(command.termService).getTermFromAcademicWeek(any[Int], any[AcademicYear], any[Boolean])
 		}
 	}
 
@@ -298,6 +302,94 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
+	def validateValidSubmissionSpecificModules() {
+		new Fixture {
+			command.name = "Name"
+			command.validFromWeek = 1
+			command.requiredFromWeek = 1
+			command.pointType = MonitoringPointType.AssignmentSubmission
+			command.assignmentSubmissionQuantity = 1
+			command.isAssignmentSubmissionDisjunction = false
+			command.assignmentSubmissionModules = JSet(new Module, new Module)
+			command.isSpecificAssignments = false
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = false)
+		}
+	}
+
+	@Test
+	def validateSpecificModulesSubmissionZeroQuantity() {
+		new Fixture {
+			command.name = "Name"
+			command.validFromWeek = 1
+			command.requiredFromWeek = 1
+			command.pointType = MonitoringPointType.AssignmentSubmission
+			command.assignmentSubmissionQuantity = 0
+			command.isAssignmentSubmissionDisjunction = false
+			command.assignmentSubmissionModules = JSet(new Module, new Module)
+			command.isSpecificAssignments = false
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = true)
+			errors.getFieldError("assignmentSubmissionQuantity") should not be null
+		}
+	}
+
+	@Test
+	def validateSpecificModulesEmpty() {
+		new Fixture {
+			command.name = "Name"
+			command.validFromWeek = 1
+			command.requiredFromWeek = 1
+			command.pointType = MonitoringPointType.AssignmentSubmission
+			command.assignmentSubmissionQuantity = 1
+			command.isAssignmentSubmissionDisjunction = false
+			command.assignmentSubmissionModules = JSet()
+			command.isSpecificAssignments = false
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = true)
+			errors.getFieldErrors.size should be(1)
+			errors.getFieldError("assignmentSubmissionModules") should not be null
+		}
+	}
+
+	@Test
+	def validateValidSpecificAssignments() {
+		new Fixture {
+			command.name = "Name"
+			command.validFromWeek = 1
+			command.requiredFromWeek = 1
+			command.pointType = MonitoringPointType.AssignmentSubmission
+			command.assignmentSubmissionQuantity = 1
+			command.isAssignmentSubmissionDisjunction = false
+			command.isSpecificAssignments = true
+			command.assignmentSubmissionAssignments = JSet(new Assignment)
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = false)
+		}
+	}
+
+	@Test
+	def validateSpecificAssignmentsEmpty() {
+		new Fixture {
+			command.name = "Name"
+			command.validFromWeek = 1
+			command.requiredFromWeek = 1
+			command.pointType = MonitoringPointType.AssignmentSubmission
+			command.assignmentSubmissionQuantity = 1
+			command.isAssignmentSubmissionDisjunction = false
+			command.isSpecificAssignments = true
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = true)
+			errors.getFieldError("assignmentSubmissionAssignments") should not be null
+		}
+	}
+
+	@Test
 	def validateAlreadyReportedThisTerm() {
 		new Fixture {
 			command.name = "New name"
@@ -306,8 +398,8 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 
 			val student = Fixtures.student("12345")
 
-			command.termService.getTermFromAcademicWeek(monitoringPoint.validFromWeek, set.academicYear) returns term
-			command.termService.getTermFromAcademicWeek(otherMonitoringPoint.validFromWeek, set.academicYear) returns term
+			command.termService.getTermFromAcademicWeekIncludingVacations(monitoringPoint.validFromWeek, set.academicYear) returns term
+			command.termService.getTermFromAcademicWeekIncludingVacations(otherMonitoringPoint.validFromWeek, set.academicYear) returns term
 			command.monitoringPointService.getCheckpointsByStudent(set.points.asScala) returns Seq((student, mock[MonitoringCheckpoint]))
 			// there is already a report sent for this term, so we cannot edit this Monitoring Point
 			command.monitoringPointService.findReports(Seq(student), set.academicYear, term.getTermTypeAsString ) returns Seq(new MonitoringPointReport)

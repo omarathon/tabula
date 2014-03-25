@@ -3,7 +3,9 @@
 
 <#macro student_item profile bindpath="">
 	<#local mostSignificantCourseDetails = profile.mostSignificantCourseDetails />
-	<#local route = mostSignificantCourseDetails.route />
+	<#if mostSignificantCourseDetails??>
+		<#local route = mostSignificantCourseDetails.route />
+	</#if>
 	<li class="student well well-small"
 	data-f-gender="${(profile.gender.dbValue)!}"
 	data-f-route="${(route.code)!}"
@@ -223,7 +225,7 @@
 								</div>
 							</#macro>
 
-							<#list allocateStudentsToRelationshipCommand.mapping?keys as agent>
+							<#list allocateStudentsToRelationshipCommand.mapping?keys?sort_by("lastName") as agent>
 								<#assign existingStudents = mappingById[agent.universityId]![] />
 
 								<@agent_item agent.universityId agent.fullName existingStudents />

@@ -1,9 +1,7 @@
-<#if oldAgent??>
-<#if newAgent??>
+<#if oldAgent?? && newAgent??>
 Your ${relationshipType.agentRole} has been changed from ${oldAgent.officialName} to ${newAgent.officialName}.
-<#else>
+<#elseif oldAgent??>
 ${oldAgent.officialName} is no longer assigned as your ${relationshipType.agentRole}.
-</#if>
-<#else>
+<#elseif newAgent??>
 You have been assigned ${newAgent.officialName} as a ${relationshipType.agentRole}.
 </#if>

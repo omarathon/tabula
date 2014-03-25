@@ -90,9 +90,13 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	</#if>
 </#compress></#macro>
 
-<#macro assignment_name assignment>
-	<@module_name assignment.module /> <span class="ass-name">${assignment.name}</span>
-</#macro>
+<#macro assignment_name assignment withFormatting=true><#compress>
+	<#if withFormatting>
+		<@module_name assignment.module /> <span class="ass-name">${assignment.name}</span>
+	<#else>
+		<@module_name assignment.module false /> ${assignment.name}
+	</#if>
+</#compress></#macro>
 
 <#macro assignment_link assignment>
 	<@module_name assignment.module />
@@ -112,7 +116,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	<#if withFormatting>
 		<span class="route-code">${route.code?upper_case}</span> <span class="route-name">${route.name}</span>
 	<#else>
-		${route.code?upper_case} ${route.name}k
+		${route.code?upper_case} ${route.name}
 	</#if>
 </#macro>
 
@@ -336,8 +340,8 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 		${(studentCourseDetails.statusOnCourse.fullName?lower_case?cap_first)!}
 </#macro>
 
-<#macro enrolment_status studentCourseDetails>
-		${(studentCourseDetails.latestStudentCourseYearDetails.enrolmentStatus.fullName?lower_case?cap_first)!}
+<#macro enrolment_status studentCourseYearDetails>
+		${(studentCourseYearDetails.enrolmentStatus.fullName?lower_case?cap_first)!}
 </#macro>
 
 <#macro lightbox_link enabled url>

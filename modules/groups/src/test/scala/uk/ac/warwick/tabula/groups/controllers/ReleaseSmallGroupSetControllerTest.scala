@@ -105,12 +105,14 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
   @Test
   def batchControllerInvokesCommand() {
     withUser("test") {
-
+      val dept = new Department {
+        code = "xx"
+      }
       val controller = new ReleaseAllSmallGroupSetsController()
       val command = mock[Appliable[Seq[ReleasedSmallGroupSet]]]
       val model = mock[controller.ModuleListViewModel]
       when(model.createCommand(any[User])).thenReturn(command)
-      controller.submit(model, new Department)
+      controller.submit(model, dept)
       verify(command, times(1)).apply()
     }
   }
@@ -128,7 +130,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
 
       val formView = controller.submit(model, department)
 
-      formView.viewName should be("redirect:/admin/department/xyz/groups/release")
+      formView.viewName should be("redirect:/groups/admin/department/xyz/groups/release")
       formView.map.get("batchReleaseSuccess") should be(Some(true))
     }
   }

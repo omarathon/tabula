@@ -450,7 +450,7 @@
                                     },
                                     eventAfterRender: function(event, element, view){
 										var content = "<table class='event-info'>";
-                                        if (event.description.length > 0){
+                                        if (event.description && event.description.length > 0){
                                         	content = content + "<tr><th>What</th><td>" + event.description +"</td></tr>";
                                         }
                                         content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
@@ -472,4 +472,11 @@
     			createCalendar($(this),$(this).data('viewname'),$(this).data('studentid'));
     		});
     	});
+
+		$(function(){
+			$('#timetable-pane h4 a').on('click', function(e){
+				e.preventDefault();
+				$('#timetable-ical-modal').modal('show');
+			});
+		});
 }(jQuery));

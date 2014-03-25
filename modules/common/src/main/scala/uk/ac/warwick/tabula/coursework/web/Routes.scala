@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.coursework.web
 import java.net.URLEncoder
 import uk.ac.warwick.tabula.data.model.{Module, MarkingWorkflow, Department, Assignment}
 import uk.ac.warwick.tabula.web.RoutesUtils
+import uk.ac.warwick.tabula.data.model.forms.Extension
 
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs
@@ -23,6 +24,7 @@ object Routes {
 	object admin {
 		def department(department: Department) = context + "/admin/department/%s/" format (encoded(department.code))
 		def feedbackTemplates (department: Department) = context + "/admin/department/%s/settings/feedback-templates/" format (encoded(department.code))
+		def extensionSettings (department: Department) = context + "/admin/department/%s/settings/extensions" format (encoded(department.code))
 		def feedbackReports (department: Department) = context + "/admin/department/%s/reports/feedback/" format (encoded(department.code))
 
 		object markingWorkflow {
@@ -73,7 +75,9 @@ object Routes {
 			}
 
 			object extension {
-				def review(assignment: Assignment, uniId: String) = assignmentroot(assignment) + "/extensions?highlight=" + uniId
+				def expandrow (assignment: Assignment, universityId: String) = assignmentroot(assignment) + "/extensions?universityId=" + universityId
+				def detail (assignment: Assignment) = assignmentroot(assignment) + "/extensions/detail"
+				def revoke (assignment: Assignment, universityId: String) = assignmentroot(assignment) + "/extensions/revoke/" + universityId
 			}
 		}
 	}

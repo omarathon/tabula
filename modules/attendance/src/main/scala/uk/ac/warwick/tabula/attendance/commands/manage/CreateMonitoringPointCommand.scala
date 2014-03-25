@@ -7,7 +7,7 @@ import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, AutowiringTermServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringMonitoringPointServiceComponent, AutowiringTermServiceComponent}
 
 
 object CreateMonitoringPointCommand {
@@ -19,6 +19,8 @@ object CreateMonitoringPointCommand {
 		with CreateMonitoringPointPermission
 		with AutowiringTermServiceComponent
 		with AutowiringMonitoringPointServiceComponent
+		with AutowiringSmallGroupServiceComponent
+		with AutowiringModuleAndDepartmentServiceComponent
 }
 
 /**
@@ -59,6 +61,14 @@ trait CreateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 					smallGroupEventModules, "smallGroupEventModules",
 					isAnySmallGroupEventModules,
 					smallGroupEventQuantity, "smallGroupEventQuantity",
+					dept
+				)
+			case MonitoringPointType.AssignmentSubmission =>
+				validateTypeAssignmentSubmission(errors,
+					isSpecificAssignments,
+					assignmentSubmissionQuantity, "assignmentSubmissionQuantity",
+					assignmentSubmissionModules, "assignmentSubmissionModules",
+					assignmentSubmissionAssignments, "assignmentSubmissionAssignments",
 					dept
 				)
 			case _ =>

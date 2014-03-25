@@ -1,11 +1,11 @@
 (function ($) { "use strict";
 /*
-	Applied to tables. When a table row is clicked then a some hidden content is made visible and placed beneath the
+	Applied to tables. When a table row is clicked then some hidden content is made visible and placed beneath the
 	row. The following rows in the table are moved down to make space for the content. Clicking on the row again hides
 	the content.
 
 
-	A table cell in each row is designated as the content cell. This cell should contain a the follwing markup
+	A table cell in each row is designated as the content cell. This cell should contain the follwing markup
 	Note that the class names given here can be overriden in the options.
 
 	<td class="content-cell">
@@ -149,13 +149,16 @@ jQuery.fn.expandingTable = function(options) {
 
 					$icon.removeClass('icon-chevron-right').addClass('icon-spinner icon-spin');
 
-					$content.load(dataUrl, function() {
+					$content.load(dataUrl, function(resp, status, req) {
+						if ("403" == req.status) {
+							$content.html("<p class='text-error'><i class='icon-warning-sign'></i> Sorry, you don't have permission to see that. Have you signed out of Tabula?</p><p class='text-error'>Refresh the page and try again. If it remains a problem, please let us know using the comments link on the edge of the page.</p>");
+						}
 						$icon.removeClass('icon-spinner icon-spin');
 						showContent($content, $row, $icon);
 						$content.data("loaded", "true");
 						$content.trigger('tabula.expandingTable.contentChanged');
 					});
-					
+
 				} else {
 					showContent($content, $row, $icon);
 				}
@@ -211,7 +214,21 @@ jQuery.fn.expandingTable = function(options) {
 		$table.tablesorter(sortOptions);
 	}
 
-}
+	// TAB-2075 open expanded row when fragment identifier present
+	// expects to find a data attribute on the table called row-to-open
+	// which contains the content id for that row
+	var contentIdToOpen = $('.expanding-table').data('row-to-open');
 
+	if(contentIdToOpen) {
+		var $content = $('#content-' + contentIdToOpen);
+		var $row = $("tr[data-contentid='" + contentIdToOpen + "']");
+		var $icon = $(iconSelector, $row).first().find(".row-icon");
+		toggleRow($content, $row, $icon);
+		$content.on('tabula.expandingTable.contentChanged', function() {
+			$content[0].scrollIntoView();
+		});
+	}
+
+}
 
 })(jQuery);

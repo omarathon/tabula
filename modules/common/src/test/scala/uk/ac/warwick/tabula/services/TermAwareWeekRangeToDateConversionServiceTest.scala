@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 
 class TermAwareWeekRangeToDateConversionServiceTest extends TestBase with Mockito{
 
-	val localNow = LocalDateTime.now
+	val localNow = LocalDateTime.now.withDayOfWeek(DateTimeConstants.MONDAY)
 	val dtNow = localNow.toDateTime
 
   val localCurrentYear = AcademicYear.guessByDate(localNow.toDateTime)

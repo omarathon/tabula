@@ -55,7 +55,7 @@ abstract class AgentStudentRecordCommand(val agent: Member, val relationshipType
 				monitoringPointService.deleteCheckpoint(student, point)
 				None
 			} else {
-				Option(monitoringPointService.saveOrUpdateCheckpoint(student, point, state, agent))
+				Option(monitoringPointService.saveOrUpdateCheckpointByMember(student, point, state, agent))
 			}
 		}.toSeq
 	}
@@ -73,7 +73,7 @@ trait AgentStudentRecordValidation extends SelfValidating {
 			if (!points.contains(point)) {
 				errors.rejectValue("", "monitoringPointSet.invalidPoint")
 			}
-			if (!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, pointSet.academicYear).getTermTypeAsString)){
+			if (!nonReportedTerms.contains(termService.getTermFromAcademicWeekIncludingVacations(point.validFromWeek, pointSet.academicYear).getTermTypeAsString)){
 				errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
 			}
 

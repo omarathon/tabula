@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-
+import uk.ac.warwick.tabula.helpers.Tap._
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import org.junit.Before
@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
+import org.springframework.transaction.annotation.Transactional
 
 // scalastyle:off magic.number
 class ProfileServiceTest extends PersistenceTestBase with Mockito {
@@ -117,43 +118,50 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		val testRoute = new Route
 		testRoute.code = "test"
 
-		val studentInBothYears = new StudentCourseDetails(Fixtures.student(), "studentInBothYears")
-		studentInBothYears.addStudentCourseYearDetails(
-			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		val studentBothYears = Fixtures.student(universityId = "0000001")
+		val courseDetailsBothYears = new StudentCourseDetails(studentBothYears, "studentInBothYears")
+		courseDetailsBothYears.addStudentCourseYearDetails(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012), studentCourseDetails = courseDetailsBothYears)
 		)
-		studentInBothYears.addStudentCourseYearDetails(
-			Fixtures.studentCourseYearDetails(AcademicYear(2013))
+		courseDetailsBothYears.addStudentCourseYearDetails(
+			Fixtures.studentCourseYearDetails(AcademicYear(2013), studentCourseDetails = courseDetailsBothYears)
 		)
-		studentInBothYears.statusOnRoute = new SitsStatus("C")
-		studentInBothYears.mostSignificant = true
-
-		val studentInFirstYear = new StudentCourseDetails(Fixtures.student(), "studentInFirstYear")
-		studentInFirstYear.addStudentCourseYearDetails(
-			Fixtures.studentCourseYearDetails(AcademicYear(2012))
-		)
-		studentInFirstYear.statusOnRoute = new SitsStatus("C")
-		studentInFirstYear.mostSignificant = true
-
-		val studentInSecondYear = new StudentCourseDetails(Fixtures.student(), "studentInSecondYear")
-		studentInSecondYear.addStudentCourseYearDetails(
-			Fixtures.studentCourseYearDetails(AcademicYear(2013))
-		)
-		studentInSecondYear.statusOnRoute = new SitsStatus("C")
-		studentInSecondYear.mostSignificant = true
+		courseDetailsBothYears.statusOnRoute = new SitsStatus("C")
+		courseDetailsBothYears.mostSignificant = true
+		studentBothYears.attachStudentCourseDetails(courseDetailsBothYears)
 
 
-		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(studentInBothYears, studentInFirstYear, studentInSecondYear)
+		val studentFirstYear = Fixtures.student(universityId = "0000002")
+		val courseDetailsFirstYear = new StudentCourseDetails(studentFirstYear, "studentInFirstYear")
+		courseDetailsFirstYear.addStudentCourseYearDetails(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012), studentCourseDetails = courseDetailsFirstYear)
+		)
+		courseDetailsFirstYear.statusOnRoute = new SitsStatus("C")
+		courseDetailsFirstYear.mostSignificant = true
+		studentFirstYear.attachStudentCourseDetails(courseDetailsFirstYear)
+
+
+		val studentSecondYear = Fixtures.student(universityId = "0000003")
+		val courseDetailsSecondYear = new StudentCourseDetails(studentSecondYear, "studentInSecondYear")
+		courseDetailsSecondYear.addStudentCourseYearDetails(
+			Fixtures.studentCourseYearDetails(AcademicYear(2013), studentCourseDetails = courseDetailsSecondYear)
+		)
+		courseDetailsSecondYear.statusOnRoute = new SitsStatus("C")
+		courseDetailsSecondYear.mostSignificant = true
+		studentSecondYear.attachStudentCourseDetails(courseDetailsSecondYear)
+
+		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(courseDetailsBothYears, courseDetailsFirstYear, courseDetailsSecondYear)
 
 		val studentsInFirstYear = service.getStudentsByRoute(testRoute, AcademicYear(2012))
 		studentsInFirstYear.size should be (2)
 		studentsInFirstYear.exists(
-			s => s.freshStudentCourseDetails.head.scjCode.equals(studentInSecondYear.scjCode)
+			s => s.freshStudentCourseDetails.head.scjCode.equals(courseDetailsSecondYear.scjCode)
 		) should be (false)
 
 		val studentsInSecondYear = service.getStudentsByRoute(testRoute, AcademicYear(2013))
 		studentsInSecondYear.size should be (2)
 		studentsInSecondYear.exists(
-			s => s.freshStudentCourseDetails.head.scjCode.equals(studentInFirstYear.scjCode)
+			s => s.freshStudentCourseDetails.head.scjCode.equals(courseDetailsFirstYear.scjCode)
 		) should be (false)
 	}
 
@@ -327,5 +335,63 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 			profileServiceWithMocks.getDisability("SITS has no integrity checks") should be (None)
 		}
 	}
+
+	@Transactional
+	@Test def regenerateEmptyTimetableHash {
+		val member = Fixtures.student()
+		member.timetableHash should be (null)
+		profileService.regenerateTimetableHash(member)
+		member.timetableHash should not be (null)
+	}
+
+	@Transactional
+	@Test def regenerateExistingTimetableHash {
+		val member = Fixtures.student()
+		val existingHash = "1234567"
+		member.timetableHash = existingHash
+		member.timetableHash should be (existingHash)
+		profileService.regenerateTimetableHash(member)
+		member.timetableHash should not be (null)
+		member.timetableHash should not be (existingHash)
+	}
+
+	@Test def getMemberByUser { transactional { tx =>
+		// TAB-2014
+		val m1 = Fixtures.student(universityId = "1000001", userId="student")
+		m1.email = "student@warwick.ac.uk"
+
+		val m2 = Fixtures.staff(universityId = "1000002", userId="staff")
+		m2.email = "staff@warwick.ac.uk"
+
+		profileService.save(m1)
+		profileService.save(m2)
+
+		profileService.getMemberByUser(m1.asSsoUser) should be (Some(m1))
+		profileService.getMemberByUser(m2.asSsoUser) should be (Some(m2))
+
+		session.enableFilter(Member.StudentsOnlyFilter)
+
+		profileService.getMemberByUser(m1.asSsoUser) should be (Some(m1))
+		profileService.getMemberByUser(m2.asSsoUser) should be (None)
+		profileService.getMemberByUser(m2.asSsoUser, disableFilter = true) should be (Some(m2))
+
+		// Usercode matches, but warwickId doesn't. Still returns correctly
+		profileService.getMemberByUser(m1.asSsoUser.tap(_.setWarwickId("0000001"))) should be (Some(m1))
+		profileService.getMemberByUser(m2.asSsoUser.tap(_.setWarwickId("0000001")), disableFilter = true) should be (Some(m2))
+
+		// Usercode doesn't match, but warwickId matches - but with the wrong email address
+		profileService.getMemberByUser(new User("blabla").tap(_.setWarwickId("1000001"))) should be (None)
+		profileService.getMemberByUser(new User("blabla").tap(_.setWarwickId("1000002")), disableFilter = true) should be (None)
+
+		// Usercode doesn't match, but warwickId matches and so does email address
+		profileService.getMemberByUser(new User("blabla").tap { u =>
+			u.setWarwickId("1000001")
+			u.setEmail("STUDENT@warwick.ac.uk   ")
+		}) should be (Some(m1))
+		profileService.getMemberByUser(new User("blabla").tap { u =>
+			u.setWarwickId("1000002")
+			u.setEmail("STAFF@warwick.ac.uk   ")
+		}, disableFilter = true) should be (Some(m2))
+	}}
 
 }

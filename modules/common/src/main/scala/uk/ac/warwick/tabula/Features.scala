@@ -79,11 +79,13 @@ abstract class Features {
 	@Value("${features.profiles.visa:true}") var visaInStudentProfile = defaults.visaInStudentProfile
 	@Value("${features.attendanceMonitoring.note:true}") var attendanceMonitoringNote = defaults.attendanceMonitoringNote
 	@Value("${features.profiles.scheduledMeetings:true}") var scheduledMeetings = defaults.scheduledMeetings
-	@Value("${features.disability.rendering.profiles:false}") var disabilityRenderingInProfiles = defaults.disabilityRenderingInProfiles
-	@Value("${features.disability.rendering.extensions:false}") var disabilityRenderingInExtensions = defaults.disabilityRenderingInExtensions
+	@Value("${features.disability.rendering.profiles:true}") var disabilityRenderingInProfiles = defaults.disabilityRenderingInProfiles
+	@Value("${features.disability.rendering.extensions:true}") var disabilityRenderingInExtensions = defaults.disabilityRenderingInExtensions
 	@Value("${features.includePastYears:true}") var includePastYears = defaults.includePastYears
-	@Value("${features.attendanceMonitoring.smallGroupPointType:false}") var attendanceMonitoringSmallGroupPointType = defaults.attendanceMonitoringSmallGroupPointType
-	@Value("${features.activityStreams:false}") var activityStreams = defaults.activityStreams
+	@Value("${features.attendanceMonitoring.smallGroupPointType:true}") var attendanceMonitoringSmallGroupPointType = defaults.attendanceMonitoringSmallGroupPointType
+	@Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}") var attendanceMonitoringAssignmentSubmissionPointType = defaults.attendanceMonitoringAssignmentSubmissionPointType
+	@Value("${features.xSendfile:true}") var xSendfile = defaults.xSendfile
+	@Value("${features.activityStreams:true}") var activityStreams = defaults.activityStreams
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -151,11 +153,13 @@ class FeaturesMessage {
 	@BeanProperty var attendanceMonitoringNote = true
 	@BeanProperty var visaInStudentProfile = true
 	@BeanProperty var scheduledMeetings = true
-	@BeanProperty var disabilityRenderingInProfiles = false
-	@BeanProperty var disabilityRenderingInExtensions = false
-	@BeanProperty var attendanceMonitoringSmallGroupPointType = false
+	@BeanProperty var disabilityRenderingInProfiles = true
+	@BeanProperty var disabilityRenderingInExtensions = true
+	@BeanProperty var attendanceMonitoringSmallGroupPointType = true
 	@BeanProperty var includePastYears = true
-	@BeanProperty var activityStreams = false
+	@BeanProperty var attendanceMonitoringAssignmentSubmissionPointType = true
+	@BeanProperty var xSendfile = true
+	@BeanProperty var activityStreams = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

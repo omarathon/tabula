@@ -67,13 +67,13 @@
 										<a class="btn btn-block btn-primary" href="<@url context='/coursework' page='/module/${assignment.module.code}/${assignment.id}/' />">
 											<i class="icon-folder-close icon-white"></i> Submit
 										</a>
-	
-										<#if !assignment.openEnded>
+
+										<#if assignment.module.department.allowExtensionRequests!false && assignment.allowExtensions!false && !assignment.openEnded>
 											<#if extensionRequested>
 												<a href="<@routes.extensionRequest assignment=assignment />?returnTo=/coursework" class="btn btn-block">
 													<i class="icon-calendar"></i> Review extension request
 												</a>
-											<#elseif !isExtended && !assignment.closed && assignment.module.department.allowExtensionRequests!false && assignment.allowExtensions!false>
+											<#elseif !isExtended && !assignment.closed>
 												<a href="<@routes.extensionRequest assignment=assignment />?returnTo=/coursework" class="btn btn-block">
 													<i class="icon-calendar"></i> Request extension
 												</a>

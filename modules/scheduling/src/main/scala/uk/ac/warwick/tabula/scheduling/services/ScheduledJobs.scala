@@ -6,9 +6,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.scheduling.commands._
 import uk.ac.warwick.tabula.scheduling.commands.imports._
-import uk.ac.warwick.tabula.services.AuditEventIndexService
-import uk.ac.warwick.tabula.services.MaintenanceModeService
-import uk.ac.warwick.tabula.services.ProfileIndexService
+import uk.ac.warwick.tabula.services.{NotificationIndexService, AuditEventIndexService, MaintenanceModeService, ProfileIndexService}
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.tabula.JavaImports._
@@ -23,15 +21,13 @@ class ScheduledJobs {
 
 	var fileSyncEnabled = Wire[JBoolean]("${environment.standby:false}")
 
-	var exceptionResolver = Wire.auto[ExceptionResolver]
+	var exceptionResolver = Wire[ExceptionResolver]
+	var maintenanceModeService = Wire[MaintenanceModeService]
 
-	var maintenanceModeService = Wire.auto[MaintenanceModeService]
-
-	var auditIndexingService = Wire.auto[AuditEventIndexService]
-
-	var profileIndexingService = Wire.auto[ProfileIndexService]
-
-	var jobService = Wire.auto[JobService]
+	var auditIndexingService = Wire[AuditEventIndexService]
+	var profileIndexingService = Wire[ProfileIndexService]
+	var jobService = Wire[JobService]
+	var notificationIndexService = Wire[NotificationIndexService]
 
 	def maintenanceGuard[A](fn: => A) = if (!maintenanceModeService.enabled) fn
 
@@ -66,10 +62,13 @@ class ScheduledJobs {
 	}
 
 	@Scheduled(fixedRate = 60 * 1000) // every minute
-	def indexAuditEvents: Unit = exceptionResolver.reportExceptions { auditIndexingService.incrementalIndex }
+	def indexAuditEvents: Unit = exceptionResolver.reportExceptions { auditIndexingService.incrementalIndex() }
 
 	@Scheduled(fixedRate = 300 * 1000) // every 5 minutes
-	def indexProfiles: Unit = exceptionResolver.reportExceptions { profileIndexingService.incrementalIndex }
+	def indexProfiles: Unit = exceptionResolver.reportExceptions { profileIndexingService.incrementalIndex() }
+
+	@Scheduled(fixedRate = 60 * 1000) // every minute
+	def indexNotifications: Unit = exceptionResolver.reportExceptions { notificationIndexService.incrementalIndex() }
 
 	@Scheduled(fixedDelay = 10 * 1000) // every 10 seconds, non-concurrent
 	def jobs: Unit = maintenanceGuard {

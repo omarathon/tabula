@@ -1,24 +1,24 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import scala.collection.JavaConversions._
 
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.data.model.{StudentRelationship, StudentMember, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{StudentMember, Assignment, Module}
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions._
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
 import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService, RelationshipService}
-import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser}
-import com.fasterxml.jackson.databind.ObjectMapper
+import uk.ac.warwick.tabula.{JsonHelper, CurrentUser}
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.helpers.DateBuilder
 import javax.validation.Valid
-import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import com.fasterxml.jackson.databind.ObjectMapper
+
 
 
 abstract class ExtensionController extends CourseworkController {
@@ -27,258 +27,147 @@ abstract class ExtensionController extends CourseworkController {
 	var relationshipService = Wire[RelationshipService]
 	var profileService = Wire[ProfileService]
 
-	// Add the common breadcrumbs to the model.
-	def crumbed(mav:Mav, module:Module)
+	// Add the common breadcrumbs to the model
+	def crumbed(mav: Mav, module: Module)
 		= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 
-	def toJson(extensions: Seq[Extension]) = {
-		def toJson(extension:Extension) = {
-			val expiryDate =  extension.expiryDate match {
-				case d:DateTime => DateBuilder.format(extension.expiryDate)
-				case _ => ""
-			}
+	class ExtensionMap(extension: Extension) {
+		def asMap: Map[String, String] = {
+
+			def convertDateToString(date: DateTime) =
+				Option(date) match {
+					case Some(d: DateTime) => DateBuilder.format(d)
+					case _ => ""
+				}
+
+			def convertDateToMillis(date: DateTime) =
+				Option(date) match {
+					case Some(d: DateTime) => d.getMillis.toString
+					case _ => null
+				}
 
 			Map(
 				"id" -> extension.universityId,
 				"status" -> extension.state.description,
-				"expiryDate" -> expiryDate,
+				"requestedExpiryDate" -> convertDateToString(extension.requestedExpiryDate),
+				"expiryDate" -> convertDateToString(extension.expiryDate),
+				"expiryDateMillis" -> convertDateToMillis(extension.expiryDate),
+				"extensionDuration" -> extension.duration.toString,
+				"requestedExtraExtensionDuration" -> extension.requestedExtraDuration.toString,
 				"reviewerComments" -> extension.reviewerComments
 			)
 		}
-
-		val extensionMap = Map() ++ extensions.map(e => e.universityId -> toJson(e))
-		extensionMap
 	}
+	import scala.language.implicitConversions
+	implicit def asMap(e: Extension) = new ExtensionMap(e)
 }
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions"))
-class ListExtensionRequestsController extends ExtensionController {
+class ListExtensionsController extends ExtensionController {
 
 	@ModelAttribute
 	def listCommand(
-	 @PathVariable("module") module:Module,
-	 @PathVariable("assignment") assignment:Assignment
-	) = new ListExtensionsCommand(module, assignment, user)
+									 @PathVariable("module") module:Module,
+									 @PathVariable("assignment") assignment:Assignment
+									 ) = new ListExtensionsCommand(module, assignment, user)
 
 	@RequestMapping(method=Array(HEAD,GET))
-	def listExtensions(cmd: ListExtensionsCommand):Mav = {
-		val extensionsInfo = cmd.apply()
+	def listExtensions(cmd: ListExtensionsCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
+		val extensionGraphs = cmd.apply()
 
-		val model = Mav("admin/assignments/extensions/list",
-			"studentNameLookup" -> extensionsInfo.students,
+		val model = Mav("admin/assignments/extensions/summary",
+			"detailUrl" -> Routes.admin.assignment.extension.detail(cmd.assignment),
 			"module" -> cmd.module,
+			"extensionToOpen" -> universityId,
 			"assignment" -> cmd.assignment,
-			"existingExtensions" -> extensionsInfo.manualExtensions,
-			"extensionRequests" -> extensionsInfo.extensionRequests,
-			"isExtensionManager" -> extensionsInfo.isExtensionManager,
-			"potentialExtensions" -> extensionsInfo.potentialExtensions
+			"extensionGraphs" -> extensionGraphs,
+			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar
 		)
 
 		crumbed(model, cmd.module)
 	}
-
 }
 
-@Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions/add"))
-class AddExtensionController extends ExtensionController {
-
-	@ModelAttribute("modifyExtensionCommand")
-	def addCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, user:CurrentUser, @RequestParam(defaultValue="") action: String) =
-		new AddExtensionCommand(module, assignment, user, action)
-
-	validatesSelf[AddExtensionCommand]
-
-	// manually add an extension - requests will not be handled here
-	@RequestMapping(method=Array(GET))
-	def addExtension(
-		@RequestParam("universityId") universityId:String,
-		@ModelAttribute("modifyExtensionCommand") cmd:AddExtensionCommand,
-		errors:Errors
-	):Mav = {
-		val model = Mav("admin/assignments/extensions/add",
-			"module" -> cmd.module,
-			"assignment" -> cmd.assignment,
-			"universityId" -> universityId,
-			"userFullName" -> userLookup.getUserByWarwickUniId(universityId).getFullName
-		).noLayout()
-		model
-	}
-
-	@RequestMapping(method=Array(POST))
-	@ResponseBody
-	def persistExtension(@Valid @ModelAttribute("modifyExtensionCommand") cmd:AddExtensionCommand, result:BindingResult,
-						 response:HttpServletResponse, errors: Errors):Mav = {
-		if (errors.hasErrors) {
-			val errorList = errors.getFieldErrors
-			val errorMap = Map() ++ (errorList map (error => (error.getField, getMessage(error.getCode))))
-			val errorJson = Map("status" -> "error", "result" -> errorMap)
-			Mav(new JSONView(errorJson))
-		} else {
-			val extensions = cmd.apply()
-
-			val extensionMap = toJson(extensions)
-			val extensionsJson = Map("status" -> "success", "action" -> "add", "result" -> extensionMap)
-			Mav(new JSONView(extensionsJson))
-		}
-	}
-
-}
 
 @Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions/edit/{universityId}"))
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions/detail/{universityId}"))
 class EditExtensionController extends ExtensionController {
 
 	@ModelAttribute("modifyExtensionCommand")
 	def editCommand(
-			@PathVariable("module") module:Module,
-			@PathVariable("assignment") assignment:Assignment,
-			@PathVariable("universityId") universityId:String,
-			user:CurrentUser,
-			@RequestParam(defaultValue = "") action: String) =
-		new EditExtensionCommand(module, assignment, mandatory(assignment.findExtension(universityId)), user, action)
+		@PathVariable("module") module: Module,
+		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable("universityId") universityId: String,
+		user: CurrentUser,
+		@RequestParam(defaultValue = "") action: String
+	) = EditExtensionCommand(module, assignment, universityId, user, action)
 
-	validatesSelf[EditExtensionCommand]
+	validatesSelf[SelfValidating]
 
-	// edit an existing manually created extension
+	// view an extension (or request)
 	@RequestMapping(method=Array(GET))
-	def editExtension(@ModelAttribute("modifyExtensionCommand") cmd:EditExtensionCommand, errors:Errors):Mav = {
-		val model = Mav("admin/assignments/extensions/edit",
-			"command" -> cmd,
-			"module" -> cmd.module,
-			"assignment" -> cmd.assignment,
-			"universityId" -> cmd.extension.universityId,
-			"userFullName" -> userLookup.getUserByWarwickUniId(cmd.extension.universityId).getFullName
-		).noLayout()
-		model
-	}
-
-	@RequestMapping(method=Array(POST))
-	@ResponseBody
-	def persistExtension(@Valid @ModelAttribute("modifyExtensionCommand") cmd:EditExtensionCommand, result:BindingResult,
-						 response:HttpServletResponse, errors: Errors):Mav = {
-		if (errors.hasErrors) {
-			val errorList = errors.getFieldErrors
-			val errorMap = Map() ++ (errorList map (error => (error.getField, getMessage(error.getCode))))
-			val errorJson = Map("status" -> "error", "result" -> errorMap)
-			Mav(new JSONView(errorJson))
-		} else {
-			val extensions = cmd.apply()
-			val extensionMap = toJson(extensions)
-			val extensionsJson = Map("status" -> "success", "action" -> "add", "result" -> extensionMap)
-			Mav(new JSONView(extensionsJson))
-		}
-	}
-
-}
-
-@Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions/review-request/{universityId}"))
-class ReviewExtensionRequestController extends ExtensionController {
-
-	@ModelAttribute("modifyExtensionCommand")
-	def editCommand(
-			@PathVariable("module") module:Module,
-			@PathVariable("assignment") assignment:Assignment,
-			@PathVariable("universityId") universityId:String,
-			user:CurrentUser,
-			@RequestParam(defaultValue = "") action : String) =
-		new ReviewExtensionRequestCommand(module, assignment, mandatory(assignment.findExtension(universityId)), user, action)
-
-	validatesSelf[ReviewExtensionRequestCommand]
-
-	// review an extension request
-	@RequestMapping(method=Array(GET))
-	def reviewExtensionRequest(@ModelAttribute("modifyExtensionCommand") cmd:ReviewExtensionRequestCommand, errors:Errors):Mav = {
-
-		val user = userLookup.getUserByWarwickUniId(cmd.extension.universityId)
+	def editExtension(@ModelAttribute("modifyExtensionCommand") cmd: Appliable[Extension] with ModifyExtensionCommandState, errors: Errors): Mav = {
 		val student = profileService.getMemberByUniversityId(cmd.extension.universityId)
-		val studentRelationships = relationshipService.allStudentRelationshipTypes
 
-		val extraInfo = student match {
-			case Some(student: StudentMember) => {
-				val relationships = studentRelationships.map { relationshipType =>
+		val studentContext = student match {
+			case Some(student: StudentMember) =>
+				val relationships = relationshipService.allStudentRelationshipTypes.map { relationshipType =>
 					(relationshipType.description, relationshipService.findCurrentRelationships(relationshipType, student))
-				}.toMap
+				}.toMap.filter({case (relationshipType,relations) => relations.length != 0})
 
 				Map(
-					"relationships" -> relationships.filter({case (relationshipType,relations) => relations.length != 0}),
-					"student" -> student
-				) ++ student.mostSignificantCourseDetails.map { scd =>
-					Map("studentCourseDetails" -> scd)
-				}.getOrElse(Map())
-			}
-			case _ => Map()
+					"relationships" -> relationships,
+					"course" -> student.mostSignificantCourseDetails
+				)
+			case _ => Map.empty
 		}
 
-		val model = Mav("admin/assignments/extensions/review_request", Map(
+		val model = Mav("admin/assignments/extensions/detail",
 			"command" -> cmd,
-			"extension" ->  cmd.extension,
-			"module" -> cmd.module,
-			"assignment" -> cmd.assignment,
-			"universityId" -> cmd.extension.universityId,
-			"email" -> user.getEmail(),
-			"userFullName" -> user.getFullName()) ++ extraInfo
-		).noLayout()
-		model
-	}
-
-	@RequestMapping(method=Array(POST))
-	@ResponseBody
-	def persistExtensionRequest(@Valid @ModelAttribute("modifyExtensionCommand") cmd:ReviewExtensionRequestCommand, result:BindingResult,
-															response:HttpServletResponse, errors: Errors):Mav = {
-		if (errors.hasErrors) {
-			val errorList = errors.getFieldErrors
-			val errorMap = Map() ++ (errorList map (error => (error.getField, getMessage(error.getCode))))
-			val errorJson = Map("status" -> "error", "result" -> errorMap)
-			Mav(new JSONView(errorJson))
-		} else {
-			val extensions = cmd.apply()
-			val extensionMap = toJson(extensions)
-			val extensionsJson = Map("status" -> "success", "action" -> "edit", "result" -> extensionMap)
-			Mav(new JSONView(extensionsJson))
-		}
-	}
-}
-
-@Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions/delete/{universityId}"))
-class DeleteExtensionController extends ExtensionController {
-
-	@ModelAttribute
-	def deleteCommand(
-		@PathVariable("module") module:Module,
-		@PathVariable("assignment") assignment:Assignment,
-		@PathVariable("universityId") universityId:String,
-		user:CurrentUser
-	) = new DeleteExtensionCommand(module, assignment, universityId, user)
-
-	// delete a manually created extension item - this revokes the extension
-	@RequestMapping(method=Array(GET))
-	def deleteExtension(@ModelAttribute cmd:DeleteExtensionCommand):Mav = {
-		val student = userLookup.getUserByWarwickUniId(cmd.universityId)
-		val model = Mav("admin/assignments/extensions/delete",
 			"module" -> cmd.module,
 			"assignment" -> cmd.assignment,
 			"universityId" -> cmd.universityId,
-			"extension" -> cmd.assignment.findExtension(cmd.universityId).getOrElse(""),
-			"userFullName" -> student.getFullName,
-			"userFirstName" -> student.getFirstName
+			"student" -> student,
+			"studentContext" -> studentContext,
+			"userFullName" -> userLookup.getUserByWarwickUniId(cmd.universityId).getFullName,
+			"updateAction" -> cmd.UpdateApprovalAction,
+			"approvalAction" -> cmd.ApprovalAction,
+			"rejectionAction" -> cmd.RejectionAction,
+			"revocationAction" -> cmd.RevocationAction
 		).noLayout()
 		model
 	}
 
 	@RequestMapping(method=Array(POST))
 	@ResponseBody
-	def deleteExtension(@ModelAttribute cmd: DeleteExtensionCommand, response:HttpServletResponse,
-						errors: Errors):Mav = {
-		val universityIds = cmd.apply().map { _.universityId }
-
-		// rather verbose json structure for a list of ids but mirrors the result structure used by add and edit
-		val result = Map() ++ universityIds.map(id => id -> Map("id" -> id))
-		val deletedJson = Map("status" -> "success", "action" -> "delete", "result" -> result)
-		Mav(new JSONView(deletedJson))
+	def persistExtension(@Valid @ModelAttribute("modifyExtensionCommand") cmd: Appliable[Extension] with ModifyExtensionCommandState, result: BindingResult, errors: Errors): Mav = {
+		if (errors.hasErrors) {
+			editExtension(cmd, errors)
+		} else {
+			val extensionJson = JsonHelper.toJson(cmd.apply().asMap)
+			Mav("ajax_success", "data" -> extensionJson).noLayout()
+		}
 	}
+}
 
+
+@Controller
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions/revoke/{universityId}"))
+class DeleteExtensionController extends ExtensionController {
+
+	@ModelAttribute("deleteExtensionCommand")
+	def deleteCommand(
+		@PathVariable("module") module: Module,
+		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable("universityId") universityId: String,
+		user: CurrentUser
+	) = DeleteExtensionCommand(module, assignment, universityId, user)
+
+	// delete a manually created extension item - this revokes the extension
+	@RequestMapping(method=Array(POST))
+	def deleteExtension(@ModelAttribute("deleteExtensionCommand") cmd: Appliable[Extension] with ModifyExtensionCommandState): Mav = {
+		val extensionJson = JsonHelper.toJson(cmd.apply().asMap)
+		Mav("ajax_success", "data" -> extensionJson).noLayout()
+	}
 }

@@ -4,7 +4,6 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup._
 import uk.ac.warwick.util.cache._
-import uk.ac.warwick.util.cache.Caches.CacheStrategy
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import javax.annotation.PreDestroy
 import uk.ac.warwick.userlookup.User
@@ -14,6 +13,7 @@ import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.services.UserLookupService._
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
 
 object UserLookupService {
 	type UniversityId = String
@@ -45,7 +45,7 @@ trait UserLookupService extends UserLookupInterface {
 	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean): Map[UniversityId, User]
 }
 
-class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService with UserByWarwickIdCache with Logging {
+class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService with UserByWarwickIdCache with AutowiringCacheStrategyComponent with Logging {
 	
 	var profileService = Wire[ProfileService]
 
@@ -108,14 +108,17 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 
 }
 
-trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self: UserLookupAdapter =>
+trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self: UserLookupAdapter with CacheStrategyComponent =>
 	final val UserByWarwickIdCacheName = "UserByWarwickIdCache"
 	final val UserByWarwickIdCacheMaxAgeSecs = 60 * 60 * 24 // 1 day
 	final val UserByWarwickIdCacheMaxSize = 100000
 
-	final val UserByWarwickIdCache = Caches.newCache(UserByWarwickIdCacheName, this, UserByWarwickIdCacheMaxAgeSecs, CacheStrategy.EhCacheIfAvailable)
-	UserByWarwickIdCache.setAsynchronousUpdateEnabled(true)
-	UserByWarwickIdCache.setMaxSize(UserByWarwickIdCacheMaxSize)
+	final lazy val UserByWarwickIdCache = {
+		val cache = Caches.newCache(UserByWarwickIdCacheName, this, UserByWarwickIdCacheMaxAgeSecs, cacheStrategy)
+		cache.setAsynchronousUpdateEnabled(true)
+		cache.setMaxSize(UserByWarwickIdCacheMaxSize)
+		cache
+	}
 	
 	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean): User
 	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean): Map[UniversityId, User]

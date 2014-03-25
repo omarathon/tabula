@@ -20,7 +20,7 @@ object FiltersStudents {
 		),
 		"moduleRegistration" -> Seq(
 			"mostSignificantCourse" -> "studentCourseDetails",
-			"studentCourseDetails.moduleRegistrations" -> "moduleRegistration"
+			"studentCourseDetails._moduleRegistrations" -> "moduleRegistration"
 		),
 		"course" -> Seq(
 			"mostSignificantCourse" -> "studentCourseDetails",

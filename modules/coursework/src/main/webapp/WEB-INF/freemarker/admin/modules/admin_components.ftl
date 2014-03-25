@@ -30,7 +30,7 @@
 							<i class="icon-user"></i> Edit module permissions
 						</a></li>
 					</#if>
-	
+
 					<li>
 						<#assign create_url><@routes.createAssignment module /></#assign>
 						<@fmt.permission_button
@@ -61,7 +61,7 @@
 							<i class="icon-folder-close"></i> Archive assignments
 						</@fmt.permission_button>
 					</li>
-	
+
 					<#if has_archived_assignments>
 						<li><a class="show-archived-assignments" href="#">
 							<i class="icon-eye-open"></i> Show archived assignments
@@ -70,11 +70,11 @@
 					</#if>
 			  </ul>
 			</div>
-	
+
 			<h2 class="section-title with-button"><@fmt.module_name module /></h2>
 		</div>
-	
-	
+
+
 		<#if has_assignments || has_archived_assignments>
 		<div class="module-info-contents striped-section-contents">
 			<#if has_assignments && expand_by_default>
@@ -82,7 +82,7 @@
 			</#if>
 		</div>
 		</#if>
-	
+
 	</div>
 </#macro>
 
@@ -180,20 +180,23 @@
 				<#if (features.submissions && assignment.collectSubmissions) || has_feedback>
 					<div class="submission-and-feedback-count">
 						<i class="icon-file"></i>
-						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />" title="View all submissions and feedback">
+						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />">
+							<span class="use-tooltip" title="View all submissions and feedback">
 							<@fmt.p assignment.submissions?size "submission" /><#--
 							--><#if has_feedback> and ${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> of feedback</#if><#--
-						--></a>
+						--></span></a>
 
 						<#assign numUnapprovedExtensions = assignment.countUnapprovedExtensions />
 						<#if numUnapprovedExtensions gt 0>
 							<span class="has-unapproved-extensions">
 								<i class="icon-info-sign"></i>
-								<#if numUnapprovedExtensions gt 1>
-									${numUnapprovedExtensions} extensions need granting
-								<#else>
-									1 extension needs granting
-								</#if>
+								<a href="<@routes.extensions assignment=assignment />" title="Manage extensions" class="use-tooltip">
+									<#if numUnapprovedExtensions gt 1>
+										${numUnapprovedExtensions} extensions need granting
+									<#else>
+										1 extension needs granting
+									</#if>
+								</a>
 							</span>
 						</#if>
 
@@ -251,8 +254,8 @@
 					<#if !assignment.openEnded>
 						<#if assignment.allowExtensions || assignment.hasExtensions>
 							<li>
-								<#if can.do('Extension.ReviewRequest', assignment)>
-									<#assign ext_caption='Grant extensions' />
+								<#if can.do('Extension.Update', assignment)>
+									<#assign ext_caption='Manage extensions' />
 								<#else>
 									<#assign ext_caption='View extensions' />
 								</#if>
@@ -268,7 +271,7 @@
 						<#else>
 							<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Extensions are not allowed on this assignment."><i class="icon-calendar"></i> Grant extensions </a></li>
 						</#if>
-	
+
 						<li class="divider"></li>
 					</#if>
 

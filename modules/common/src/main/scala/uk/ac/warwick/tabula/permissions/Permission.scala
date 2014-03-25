@@ -219,7 +219,6 @@ object Permissions {
 
 	object Extension {
 		case object MakeRequest extends Permission("Make an extension request")
-		case object ReviewRequest extends Permission("Review an extension request")
 
 		case object Create extends Permission("Make an extension request")
 		case object Read extends Permission("View an extension request")
@@ -243,6 +242,7 @@ object Permissions {
 
 	object Profiles {
 		case object Search extends ScopelessPermission("Search student profiles")
+		case object ViewSearchResults extends Permission("View profile search results")
 
 		object Read {
 			case object Core extends Permission("View a member's photo, name, Warwick email, job title and University number")

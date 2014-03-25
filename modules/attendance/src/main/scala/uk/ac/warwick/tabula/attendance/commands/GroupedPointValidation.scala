@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.data.model.{Route, StudentMember}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, AttendanceState, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.{SecurityServiceComponent, MonitoringPointServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.{MonitoringPointServiceComponent, TermServiceComponent}
 import scala.collection.JavaConverters._
 
 trait GroupedPointValidation {
@@ -34,7 +34,7 @@ trait GroupedPointValidation {
 
 					if (!monitoringPointService.findNonReportedTerms(Seq(student),
 						pointSet.academicYear).contains(
-							termService.getTermFromAcademicWeek(point.validFromWeek, pointSet.academicYear).getTermTypeAsString)
+							termService.getTermFromAcademicWeekIncludingVacations(point.validFromWeek, pointSet.academicYear).getTermTypeAsString)
 					){
 						errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
 					}

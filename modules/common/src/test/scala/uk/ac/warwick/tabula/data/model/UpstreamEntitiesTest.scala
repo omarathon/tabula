@@ -1,11 +1,9 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions.seqAsJavaList
-import uk.ac.warwick.tabula.{Mockito, AcademicYear, PersistenceTestBase}
-import uk.ac.warwick.tabula.services.{AssignmentService, AssignmentServiceImpl}
-import org.junit.Before
-import uk.ac.warwick.tabula.services.AssignmentMembershipServiceImpl
-import uk.ac.warwick.tabula.data.AssignmentMembershipDaoImpl
+import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase}
+import uk.ac.warwick.tabula.services.{AbstractAssignmentService, AssignmentMembershipServiceImpl}
+import uk.ac.warwick.tabula.data.{AssignmentDaoComponent, AssignmentDaoImpl, AssignmentMembershipDaoImpl}
 
 // scalastyle:off magic.number
 class UpstreamEntitiesTest extends PersistenceTestBase {
@@ -13,8 +11,12 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 	@Test def associations() {
 		transactional { t =>
 
-			val assignmentService = new AssignmentServiceImpl
-			assignmentService.sessionFactory = sessionFactory
+			val thisAssignmentDao = new AssignmentDaoImpl
+			thisAssignmentDao.sessionFactory = sessionFactory
+
+			val assignmentService = new AbstractAssignmentService with AssignmentDaoComponent {
+				val assignmentDao = thisAssignmentDao
+			}
 
 			val dao = new AssignmentMembershipDaoImpl
 			dao.sessionFactory = sessionFactory
@@ -122,9 +124,8 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			}
 
 			session.load(classOf[StudentMember], "0812345") match {
-				case loadedMember:StudentMember => {
+				case loadedMember:StudentMember =>
 					loadedMember.firstName should be ("My")
-				}
 				case _ => fail("Student not found")
 			}
 		}

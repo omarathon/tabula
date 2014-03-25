@@ -5,6 +5,7 @@ import scala.xml.XML
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import org.joda.time.LocalTime
+import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 
 class TimetableFetchingServiceTest extends TestBase {
 	
@@ -20,7 +21,7 @@ class TimetableFetchingServiceTest extends TestBase {
 			day=DayOfWeek.Friday,
 			eventType=TimetableEventType.Lecture,
 			location=Some("L5"),
-			moduleCode="CS132",
+			context=Some("CS132"),
 			staffUniversityIds=Seq("1170047"),
 		  year = AcademicYear(2012)
 		))

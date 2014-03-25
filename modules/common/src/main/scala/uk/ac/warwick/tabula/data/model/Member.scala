@@ -26,7 +26,6 @@ import org.hibernate.annotations.FilterDefs
 import org.hibernate.annotations.Filters
 import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.ForeignKey
-import org.hibernate.annotations.Formula
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Filter
@@ -228,7 +227,7 @@ class StudentMember extends Member with StudentProperties {
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def freshStudentCourseDetails = {
-		studentCourseDetails.asScala.filter(scd => scd.isFresh)
+		studentCourseDetails.asScala.filter(scd => scd.isFresh).toSeq.sorted
 	}
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
@@ -244,10 +243,6 @@ class StudentMember extends Member with StudentProperties {
 	@JoinColumn(name = "mostSignificantCourse")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var mostSignificantCourse: StudentCourseDetails = _
-
-	@Column(name="tier4_visa_requirement")
-	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
-	var tier4VisaRequirement: JBoolean = _
 
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	def casUsed: Option[Boolean] = {
@@ -316,6 +311,8 @@ class StudentMember extends Member with StudentProperties {
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def mostSignificantCourseDetails: Option[StudentCourseDetails] = Option(mostSignificantCourse).filter(course => course.isFresh)
+
+	def defaultYearDetails: Option[StudentCourseYearDetails] = mostSignificantCourseDetails.map(_.latestStudentCourseYearDetails)
 
 	def hasCurrentEnrolment: Boolean = freshStudentCourseDetails.exists(_.hasCurrentEnrolment)
 
@@ -449,6 +446,10 @@ trait MemberProperties extends StringId {
 
 	@Restricted(Array("Profiles.Read.MobileNumber"))
 	var mobileNumber: String = _
+
+	@Column(name = "timetable_hash")
+	var timetableHash: String = _
+
 }
 
 trait StudentProperties {
@@ -471,6 +472,10 @@ trait StudentProperties {
 	@JoinColumn(name = "disability")
 	@Restricted(Array("Profiles.Read.Disability"))
 	var disability: Disability = _
+
+	@Column(name="tier4_visa_requirement")
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
+	var tier4VisaRequirement: JBoolean = _
 }
 
 trait StaffProperties {

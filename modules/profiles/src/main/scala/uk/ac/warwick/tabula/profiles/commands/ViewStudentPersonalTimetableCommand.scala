@@ -1,14 +1,17 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.commands.{Unaudited, ComposableCommand, Appliable, CommandInternal}
+import uk.ac.warwick.tabula.commands.{Command, Unaudited, ComposableCommand, Appliable, CommandInternal}
 import uk.ac.warwick.tabula.profiles.services.timetables._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking, PubliclyVisiblePermissions}
+import uk.ac.warwick.tabula.system.permissions.Public
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.services._
 import org.joda.time.{Interval, LocalDate}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering
 import uk.ac.warwick.tabula.commands.ReadOnly
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
+import uk.ac.warwick.tabula.CurrentUser
 
 trait ViewStudentPersonalTimetableCommandState {
 	val student: StudentMember
@@ -36,7 +39,7 @@ trait ViewStudentPersonalTimetableCommandState {
  *  the StudentTimetableEventSource
  *
  */
-class ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource:StudentTimetableEventSource, val student:StudentMember) extends CommandInternal[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState {
+class ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource: StudentTimetableEventSource, scheduledMeetingEventSource: ScheduledMeetingEventSource, val student: StudentMember, val currentUser: CurrentUser) extends CommandInternal[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState {
 	this: EventOccurrenceServiceComponent =>
 
 	def eventsToOccurrences: TimetableEvent => Seq[EventOccurrence] =
@@ -44,9 +47,12 @@ class ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource:Studen
 
 	def applyInternal(): Seq[EventOccurrence] = {
 		val timetableEvents = studentTimetableEventSource.eventsFor(student)
-		val occurrences = timetableEvents flatMap eventsToOccurrences
+		val occurrences =
+			timetableEvents.flatMap(eventsToOccurrences) ++
+			scheduledMeetingEventSource.occurrencesFor(student, currentUser)
+
 		// Converter to make localDates sortable
-		import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedLocalDateTime
+		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 		occurrences.sortBy(_.start)
 	}
 }
@@ -64,16 +70,29 @@ object ViewStudentPersonalTimetableCommand {
 	// mmm, cake.
 	// have to pass in the student in the constructor so that we have enough data for the permissions check to work
 
-	def apply(eventSource:StudentTimetableEventSource, student:StudentMember): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState = {
-
-		new ViewStudentPersonalTimetableCommandImpl(eventSource, student)
+	def apply(studentTimetableEventSource:StudentTimetableEventSource, scheduledMeetingEventSource: ScheduledMeetingEventSource, student: StudentMember, currentUser: CurrentUser): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState =
+		new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource, scheduledMeetingEventSource, student, currentUser)
 			with ComposableCommand[Seq[EventOccurrence]]
 			with ViewStudentTimetablePermissions
 			with ReadOnly with Unaudited
 			with TermBasedEventOccurrenceComponent
 			with TermAwareWeekToDateConverterComponent
 			with AutowiringTermServiceComponent
-	}
+			with AutowiringProfileServiceComponent
+}
+
+object PublicStudentPersonalTimetableCommand {
+
+	def apply(studentTimetableEventSource:StudentTimetableEventSource, scheduledMeetingEventSource: ScheduledMeetingEventSource, student: StudentMember, currentUser: CurrentUser): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState =
+		new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource, scheduledMeetingEventSource, student, currentUser)
+			with Command[Seq[EventOccurrence]]
+			with Public
+			with ReadOnly with Unaudited
+			with TermBasedEventOccurrenceComponent
+			with TermAwareWeekToDateConverterComponent
+			with AutowiringTermServiceComponent
+			with AutowiringProfileServiceComponent
+
 }
 
 

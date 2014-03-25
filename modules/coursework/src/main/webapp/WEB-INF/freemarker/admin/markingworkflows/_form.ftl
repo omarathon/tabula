@@ -37,24 +37,31 @@ Common form fields.
 	<@f.select disabled="${isDisabled?string('disabled','')}" path="markingMethod">
 		<option <#if !command.markingMethod?has_content>selected="selected"</#if> value=""></option>
 		<option value="StudentsChooseMarker"
-				<#if ((command.markingMethod.toString)!"") = "StudentsChooseMarker">selected="selected"</#if>
-				data-firstrolename="Marker"
-				data-firstrolename=""
-				>
+			<#if ((command.markingMethod.toString)!"") = "StudentsChooseMarker">selected="selected"</#if>
+			data-firstrolename="Marker"
+			data-firstrolename=""
+		>
 			Students choose marker
 		</option>
 		<option value="SeenSecondMarking" class="uses-second-markers"
-				<#if ((command.markingMethod.toString)!"") = "SeenSecondMarking">selected="selected"</#if>
-				data-firstrolename="First marker"
-				data-secondrolename="Second marker"
-				>
+			<#if ((command.markingMethod.toString)!"") = "SeenSecondMarking">selected="selected"</#if>
+			data-firstrolename="First marker"
+			data-secondrolename="Second marker"
+		>
 			Seen second marking
 		</option>
 		<option value="ModeratedMarking" class="uses-second-markers"
-				<#if ((command.markingMethod.toString)!"") = "ModeratedMarking">selected="selected"</#if>
-				data-firstrolename="Marker"
-				data-secondrolename="Moderator"
-				>Moderated marking
+			<#if ((command.markingMethod.toString)!"") = "ModeratedMarking">selected="selected"</#if>
+			data-firstrolename="Marker"
+			data-secondrolename="Moderator"
+		>
+			Moderated marking
+		</option>
+		<option value="FirstMarkerOnly"
+			<#if ((command.markingMethod.toString)!"") = "FirstMarkerOnly">selected="selected"</#if>
+			data-firstrolename="Marker"
+		>
+			First marker only
 		</option>
 	</@f.select>
 

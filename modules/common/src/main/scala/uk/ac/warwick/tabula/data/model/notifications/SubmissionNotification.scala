@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications
 
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, NotificationWithTarget, SingleItemNotification, Assignment, Submission}
+import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 
@@ -24,4 +25,6 @@ abstract class SubmissionNotification
 		"module" -> module,
 		"user" -> userLookup.getUserByWarwickUniId(submission.universityId))
 	)
+
+	def url = Routes.assignment.receipt(assignment)
 }

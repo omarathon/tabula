@@ -4,16 +4,18 @@ import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, MonitoringPoint}
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.{Module, StudentRelationshipType, Department}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, StudentRelationshipType, Department}
 import org.springframework.util.AutoPopulatingList
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.attendance.commands.manage.{MonitoringPointState, AddMonitoringPointValidation, AddMonitoringPointCommand}
 
 class AddMonitoringPointCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends TermServiceComponent
+	trait CommandTestSupport extends TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent
 			with AddMonitoringPointValidation with MonitoringPointState {
 		val termService = mock[TermService]
+		val smallGroupService = mock[SmallGroupService]
+		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 	}
 
 	trait Fixture {
@@ -244,4 +246,91 @@ class AddMonitoringPointCommandTest extends TestBase with Mockito {
 		}
 	}
 
+	@Test
+	def validateValidSubmissionSpecificModules() {
+		new Fixture {
+			command.name = "Name"
+			command.validFromWeek = 1
+			command.requiredFromWeek = 1
+			command.pointType = MonitoringPointType.AssignmentSubmission
+			command.assignmentSubmissionQuantity = 1
+			command.isAssignmentSubmissionDisjunction = false
+			command.assignmentSubmissionModules = JSet(new Module, new Module)
+			command.isSpecificAssignments = false
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = false)
+		}
+	}
+
+	@Test
+	def validateSpecificModulesSubmissionZeroQuantity() {
+		new Fixture {
+			command.name = "Name"
+			command.validFromWeek = 1
+			command.requiredFromWeek = 1
+			command.pointType = MonitoringPointType.AssignmentSubmission
+			command.assignmentSubmissionQuantity = 0
+			command.isAssignmentSubmissionDisjunction = false
+			command.assignmentSubmissionModules = JSet(new Module, new Module)
+			command.isSpecificAssignments = false
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = true)
+			errors.getFieldError("assignmentSubmissionQuantity") should not be null
+		}
+	}
+
+	@Test
+	def validateSpecificModulesEmpty() {
+		new Fixture {
+			command.name = "Name"
+			command.validFromWeek = 1
+			command.requiredFromWeek = 1
+			command.pointType = MonitoringPointType.AssignmentSubmission
+			command.assignmentSubmissionQuantity = 1
+			command.isAssignmentSubmissionDisjunction = false
+			command.assignmentSubmissionModules = JSet()
+			command.isSpecificAssignments = false
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = true)
+			errors.getFieldErrors.size should be(1)
+			errors.getFieldError("assignmentSubmissionModules") should not be null
+		}
+	}
+
+	@Test
+	def validateValidSpecificAssignments() {
+		new Fixture {
+			command.name = "Name"
+			command.validFromWeek = 1
+			command.requiredFromWeek = 1
+			command.pointType = MonitoringPointType.AssignmentSubmission
+			command.assignmentSubmissionQuantity = 1
+			command.isAssignmentSubmissionDisjunction = false
+			command.isSpecificAssignments = true
+			command.assignmentSubmissionAssignments = JSet(new Assignment)
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = false)
+		}
+	}
+
+	@Test
+	def validateSpecificAssignmentsEmpty() {
+		new Fixture {
+			command.name = "Name"
+			command.validFromWeek = 1
+			command.requiredFromWeek = 1
+			command.pointType = MonitoringPointType.AssignmentSubmission
+			command.assignmentSubmissionQuantity = 1
+			command.isAssignmentSubmissionDisjunction = false
+			command.isSpecificAssignments = true
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = true)
+			errors.getFieldError("assignmentSubmissionAssignments") should not be null
+		}
+	}
 }

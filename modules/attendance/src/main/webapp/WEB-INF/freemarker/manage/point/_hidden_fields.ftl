@@ -15,6 +15,14 @@
 </#list>
 <input type="hidden" name="monitoringPoints[${thisPointIndex}].meetingQuantity" value="${point.meetingQuantity}" />
 <#list point.smallGroupEventModules as module>
-<input type="hidden" name="monitoringPoints[${thisPointIndex}].smallGroupEventModulesSpring" value="${module.id}" />
+	<input type="hidden" name="monitoringPoints[${thisPointIndex}].smallGroupEventModulesSpring" value="${module.id}" />
 </#list>
 <input type="hidden" name="monitoringPoints[${thisPointIndex}].smallGroupEventQuantity" value="${point.smallGroupEventQuantity}" />
+<#list point.assignmentSubmissionModules as module>
+	<input type="hidden" name="monitoringPoints[${thisPointIndex}].assignmentSubmissionModulesSpring" value="${module.id}" />
+</#list>
+<input type="hidden" name="monitoringPoints[${thisPointIndex}].assignmentSubmissionQuantity" value="${point.assignmentSubmissionQuantity}" />
+<#list point.assignmentSubmissionAssignments as assignment>
+	<input type="hidden" name="monitoringPoints[${thisPointIndex}].assignmentSubmissionAssignmentsSpring" value="${assignment.id}" />
+</#list>
+<input type="hidden" name="monitoringPoints[${thisPointIndex}].assignmentSubmissionIsDisjunction" value="<#if point.assignmentSubmissionIsDisjunction>true<#else>false</#if>" />

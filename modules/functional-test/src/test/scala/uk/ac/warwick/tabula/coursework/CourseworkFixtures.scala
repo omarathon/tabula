@@ -7,11 +7,19 @@ import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.LoginDetails
 import uk.ac.warwick.tabula.home.{FixturesDriver, FeaturesDriver}
 import org.scalatest.exceptions.TestFailedException
+import org.scalatest.GivenWhenThen
 
-trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver {
+trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen {
 
 	before {
+		Given("The test department exists")
 		go to (Path("/scheduling/fixtures/setup"))
+
+		And("There is an assessment component for module xxx101")
+		createAssessmentComponent("XXX", "XXX101-15", "Cool essay")
+
+		And("There is an upstream assessment group for xxx101 with students1-4 in it")
+		createUpstreamAssessmentGroup("XXX101-15", Seq(P.Student1.warwickId, P.Student2.warwickId, P.Student3.warwickId, P.Student4.warwickId))
 	}
 
 	def as[T](user: LoginDetails)(fn: => T) = {
@@ -120,6 +128,8 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		}
 
 		// The assignment submission page uses FormFields which don't have readily memorable names, so we need to get fields by their label
+		getInputByLabel("File") should be ('defined)
+
 		click on (getInputByLabel("File").orNull)
 		pressKeys(getClass.getResource(file).getFile)
 
@@ -187,17 +197,19 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		// Make sure JS is working
 		id("js-hint").findElement should be ('empty)
 
-		click on linkText("Add students manually")
-		eventually { textArea("massAddUsers").isDisplayed should be (true) }
+		if (!members.isEmpty) {
+			click on linkText("Add students manually")
+			eventually { textArea("massAddUsers").isDisplayed should be (true) }
 
-		textArea("massAddUsers").value = members.mkString("\n")
-		click on className("add-students")
+			textArea("massAddUsers").value = members.mkString("\n")
+			click on className("add-students")
 
-		// Eventually, a Jax!
-		eventuallyAjax { textArea("massAddUsers").isDisplayed should be (false) }
-		// there will be a delay between the dialog being dismissed and the source being updated by the
-		// ajax response. So wait some more
-		eventuallyAjax{pageSource should include(members.size + " manually enrolled")}
+			// Eventually, a Jax!
+			eventuallyAjax { textArea("massAddUsers").isDisplayed should be (false) }
+			// there will be a delay between the dialog being dismissed and the source being updated by the
+			// ajax response. So wait some more
+			eventuallyAjax{pageSource should include(members.size + " manually enrolled")}
+		}
 
 		checkbox("collectSubmissions").select()
 

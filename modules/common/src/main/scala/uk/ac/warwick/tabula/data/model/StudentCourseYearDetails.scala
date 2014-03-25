@@ -44,7 +44,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	@JoinColumn(name="scjCode", referencedColumnName="scjCode")
 	var studentCourseDetails: StudentCourseDetails = _
 
-	def toStringProps = Seq("studentCourseDetails" -> studentCourseDetails)
+	def toStringProps = Seq("studentCourseDetails" -> studentCourseDetails, "sceSequenceNumber" -> sceSequenceNumber, "academicYear" -> academicYear)
 
 	def permissionsParents = Option(studentCourseDetails).toStream
 
@@ -52,8 +52,8 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	 * This is used to calculate StudentCourseDetails.latestStudentCourseYearDetails
 	 */
 	def compare(that:StudentCourseYearDetails): Int = {
-		if (this.academicYear != that.academicYear) {
-			this.academicYear.compare(that.academicYear)
+		if (this.studentCourseDetails.scjCode != that.studentCourseDetails.scjCode) {
+			this.studentCourseDetails.compare(that.studentCourseDetails)
 		}
 		else {
 			this.sceSequenceNumber - that.sceSequenceNumber
@@ -61,10 +61,15 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	}
 
 	def equals(that: StudentCourseYearDetails) = {
-		(this.studentCourseDetails == that.studentCourseDetails) && (this.sceSequenceNumber == that.sceSequenceNumber)
+		(this.studentCourseDetails.scjCode == that.studentCourseDetails.scjCode) && (this.sceSequenceNumber == that.sceSequenceNumber)
 	}
 
 	def isFresh = (missingFromImportSince == null)
+
+	// There can be more than one StudentCourseYearDetails per year if there are multiple sequence numbers,
+	// so moduleRegistrations are not attached directly - instead, get them from StudentCourseDetails,
+	// filtering by year:
+	def moduleRegistrations = studentCourseDetails.moduleRegistrations.filter(_.academicYear == this.academicYear)
 }
 
 trait BasicStudentCourseYearProperties {

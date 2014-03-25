@@ -20,7 +20,7 @@ class AddModuleController extends AdminController {
 	type AddModuleCommand = Appliable[Module]
 	validatesSelf[SelfValidating]
 
-	@ModelAttribute
+	@ModelAttribute("addModuleCommand")
 	def command(@PathVariable("dept") department: Department): AddModuleCommand = AddModuleCommand(mandatory(department))
 	
 	@RequestMapping(method = Array(HEAD, GET))
@@ -31,7 +31,7 @@ class AddModuleController extends AdminController {
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute cmd: AddModuleCommand, errors: Errors, @PathVariable("dept") department: Department) = {
+	def submit(@Valid @ModelAttribute("addModuleCommand") cmd: AddModuleCommand, errors: Errors, @PathVariable("dept") department: Department) = {
 		if (errors.hasErrors) {
 			showForm(department)
 		} else {

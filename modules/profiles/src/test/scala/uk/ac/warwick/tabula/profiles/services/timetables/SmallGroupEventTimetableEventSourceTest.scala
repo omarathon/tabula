@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 
 class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 
@@ -51,7 +52,7 @@ class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 		tte.endTime should be(event.endTime)
 		tte.eventType should be(TimetableEventType.Practical)
 		tte.location should be(Some("location"))
-		tte.moduleCode should be("modcode")
+		tte.context should be(Some("MODCODE"))
 		tte.name should be("group name")
 		tte.startTime should be (event.startTime)
 	}

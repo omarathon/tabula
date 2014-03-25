@@ -45,13 +45,20 @@
 			<@fmt.help_popover id="pointType-smallGroup" content="This monitoring point will be marked as 'attended' if the student attends a small group teaching event recorded in Tabula between the start and end dates" />
 		</@form.label>
 	</#if>
+	<#if features.attendanceMonitoringAssignmentSubmissionPointType>
+		<@form.label clazz="radio" checkbox=true>
+			<@f.radiobutton path="pointType" value="assignmentSubmission" />
+			Coursework
+			<@fmt.help_popover id="pointType-assignmentSubmission" content="This monitoring point will be marked as 'attended' if the student submits coursework via Tabula to an assignment with a close date between the start and end dates" />
+		</@form.label>
+	</#if>
 </@form.labelled_row>
 
 <#if features.attendanceMonitoringMeetingPointType>
 
 	<#assign meetingRelationshipsStrings = extractParam(command.meetingRelationships, 'urlPart') />
 	<#assign meetingFormatsStrings = extractParam(command.meetingFormats, 'description') />
-	<div class="pointTypeOption meeting row-fluid" <#if ((command.pointType.dbValue)!'null') == 'meeting'>style="display:none"</#if>>
+	<div class="pointTypeOption meeting row-fluid" <#if ((command.pointType.dbValue)!'null') != 'meeting'>style="display:none"</#if>>
 		<div class="span5">
 			<@form.labelled_row "meetingRelationships" "Meeting with">
 				<#list command.dept.displayedStudentRelationshipTypes as relationship>
@@ -100,7 +107,7 @@
 					Specific
 				</@form.label>
 				<div class="module-search input-append">
-					<input class="module-search-query module-picker" type="text" value=""/>
+					<input class="module-search-query smallGroup" type="text" value=""/>
 					<span class="add-on"><i class="icon-search"></i></span>
 				</div>
 				<button class="btn add-module"><i class="icon-plus"></i> </button>
@@ -111,7 +118,7 @@
 						<#list command.smallGroupEventModules![] as module>
 							<li>
 								<input type="hidden" name="smallGroupEventModules" value="${module.id}" />
-								<i class="icon-fixed-width"></i><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
+								<#if command.moduleHasSmallGroups(module)><i class="icon-fixed-width"></i><#else><i class="icon-fixed-width icon-exclamation-sign" title="This module has no small groups set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
 							</li>
 						</#list>
 
@@ -141,6 +148,111 @@
 
 </#if>
 
+<#if features.attendanceMonitoringAssignmentSubmissionPointType>
+
+<div class="pointTypeOption assignmentSubmission row-fluid" <#if ((command.pointType.dbValue)!'null') != 'assignmentSubmission'>style="display:none"</#if>>
+
+	<@form.labelled_row "specificAssignments" "Assignments">
+		<@form.label clazz="radio" checkbox=true>
+			<input name="isSpecificAssignments" type="radio" value="false" <#if !command.isSpecificAssignments()>checked</#if>>
+			By module
+			<@fmt.help_popover id="isSpecificAssignmentsFalse" content="Submission to any assignment for the specified modules with a close date between the start and end dates will count towards this monitoring point" />
+		</@form.label>
+		<@form.label clazz="radio" checkbox=true>
+			<input name="isSpecificAssignments" type="radio" value="true" <#if command.isSpecificAssignments()>checked</#if>>
+			Specific assignments
+			<@fmt.help_popover id="isSpecificAssignmentsTrue" content="Submissions to the specified assignments that have a close date between the start and end dates will count towards this monitoring point" />
+		</@form.label>
+	</@form.labelled_row>
+
+	<div class="isSpecificAssignments" <#if !command.isSpecificAssignments()>style="display:none"</#if>>
+		<div class="assignment-choice">
+			<@form.labelled_row "assignmentSubmissionAssignments" "">
+				<div class="assignment-search input-append">
+					<input class="assignment-search-query" type="text" value="" placeholder="Search for an assignment"/>
+					<span class="add-on"><i class="icon-search"></i></span>
+				</div>
+				<button class="btn add-assignment"><i class="icon-plus"></i> </button>
+				<div class="assignments-list">
+					<input type="hidden" name="_assignmentSubmissionAssignments" value="false" />
+					<ul>
+						<#list command.assignmentSubmissionAssignments![] as assignment>
+							<li>
+								<input type="hidden" name="assignmentSubmissionAssignments" value="${assignment.id}" />
+								<span title="<@fmt.assignment_name assignment false />"><@fmt.assignment_name assignment false /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
+							</li>
+						</#list>
+					</ul>
+				</div>
+			</@form.labelled_row>
+
+			<@form.labelled_row "assignmentSubmissionDisjunction" "">
+				<@form.label clazz="radio" checkbox=true>
+					<input name="isAssignmentSubmissionDisjunction" type="radio" value="true" <#if command.isAssignmentSubmissionDisjunction()>checked</#if>>
+					Any
+					<@fmt.help_popover id="isAssignmentSubmissionDisjunctionTrue" content="The student must submit coursework to any specified assignment with a close date between the start and end dates in order to meet this monitoring point" />
+				</@form.label>
+				<@form.label clazz="radio" checkbox=true>
+					<input name="isAssignmentSubmissionDisjunction" type="radio" value="false" <#if !command.isAssignmentSubmissionDisjunction()>checked</#if>>
+					All
+					<@fmt.help_popover id="isAssignmentSubmissionDisjunctionFalse" content="The student must submit coursework to all of the specified assignments with a close date between the start and end dates in order to meet this monitoring point" />
+				</@form.label>
+			</@form.labelled_row>
+		</div>
+	</div>
+
+	<div class="modules" <#if command.isSpecificAssignments()>style="display:none"</#if>>
+		<div class="module-choice">
+			<@form.labelled_row "assignmentSubmissionModules" "">
+				<div class="module-search input-append">
+					<input class="module-search-query assignment" type="text" value="" placeholder="Search for a module"/>
+					<span class="add-on"><i class="icon-search"></i></span>
+				</div>
+				<button class="btn add-module"><i class="icon-plus"></i> </button>
+				<div class="modules-list">
+					<input type="hidden" name="_assignmentSubmissionModules" value="false" />
+					<ul>
+						<#list command.assignmentSubmissionModules![] as module>
+							<li>
+								<input type="hidden" name="assignmentSubmissionModules" value="${module.id}" />
+								<#if command.moduleHasAssignments(module)><i class="icon-fixed-width"></i><#else><i class="icon-fixed-width icon-exclamation-sign" title="This module has no assignments set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
+							</li>
+						</#list>
+					</ul>
+				</div>
+			</@form.labelled_row>
+		</div>
+
+		<@form.labelled_row "assignmentSubmissionQuantity" "Number of assignments">
+			<input class="input-mini" type="text" <#if (command.assignmentSubmissionQuantity?? && command.assignmentSubmissionQuantity > 0)>value="${command.assignmentSubmissionQuantity}"</#if> name="assignmentSubmissionQuantity" />
+			<@fmt.help_popover id="assignmentSubmissionQuantity" content="The student must submit coursework to this many assignments for any of the specified modules with a close date between the start and end dates in order to meet this monitoring point" />
+		</@form.labelled_row>
+	</div>
+
+</div>
+
+<script>
+(function($) {
+	// Show relavant extra options when changing assignment type
+	if ($('form input[name=isSpecificAssignments]').length > 0) {
+		var showOptions = function() {
+			var value = $('form input[name=isSpecificAssignments]:checked').val();
+			if (value && value === "true") {
+				$('.pointTypeOption.assignmentSubmission .isSpecificAssignments').show();
+				$('.pointTypeOption.assignmentSubmission .modules').hide();
+			} else {
+				$('.pointTypeOption.assignmentSubmission .isSpecificAssignments').hide();
+				$('.pointTypeOption.assignmentSubmission .modules').show();
+			}
+		};
+		$('form input[name=isSpecificAssignments]').on('click', showOptions);
+		showOptions();
+	}
+})(jQuery);
+</script>
+
+</#if>
+
 <script>
 (function($) {
 	// Show relavant extra options when changing point type
@@ -161,9 +273,8 @@
 			trigger: 'click',
 			container: '#container'
 		});
-		$('.module-picker').modulePicker({});
-
-		Attendance.bindModulePicker();
+		Attendance.bindModulePickers();
+		Attendance.bindAssignmentPickers();
 	});
 })(jQuery);
 </script>

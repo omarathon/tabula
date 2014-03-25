@@ -416,7 +416,7 @@ ul {
 	padding: 10px;
  	margin-bottom: 20px;
 
-	.edit-generic-container {
+	.edit-generic-feedback-container {
 		padding: 10px;
 	}
 
@@ -433,13 +433,13 @@ fieldset.internal {
 	margin-left: 180px !important;
 }
 
-.workflow-container, .feedback-container {
+.content-container {
 	position: absolute;
 	width: 100%;
 	padding: 10px;
 	border-top: 1px solid @tableBorder;
 
-	.workflow, .feedback {
+	.content {
 		h3 {
 			font-size: 18px;
 			letter-spacing: -1px;
@@ -1015,8 +1015,9 @@ h2 {
 
 .use-tooltip, .use-popover, .use-wide-popover, .use-introductory {
 	cursor: help;
-}
 
+	&:link { cursor: auto; }
+}
 
 .profile-link {
   color: @tabulaGray;
@@ -1717,7 +1718,7 @@ input.flexi-picker {
 		padding: 0.5em;
 	}
 
-	.description, .department, .no-groups {
+	.description, .department, .no-groups, .no-assignments {
 		font-size: 75%;
 		opacity: 0.8;
 		padding-left: 3px;

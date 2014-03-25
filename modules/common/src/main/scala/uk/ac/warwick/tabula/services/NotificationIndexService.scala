@@ -23,6 +23,7 @@ class RecipientNotification(val notification: Notification[_,_], val recipient: 
 
 trait NotificationIndexService {
 	def indexFrom(startDate: DateTime): Unit
+	def incrementalIndex(): Unit
 }
 
 trait NotificationQueryMethods { self: NotificationIndexServiceImpl =>

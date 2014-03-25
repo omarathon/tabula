@@ -30,7 +30,7 @@ trait CanPointBeChanged extends MonitoringPointServiceComponent with TermService
 		else {
 			val studentsWithCheckpoints = checkpoints.map { case (student , checkpoint) => student}
 			monitoringPointService.findReports(studentsWithCheckpoints, academicYear,
-				termService.getTermFromAcademicWeek(validFromWeek, academicYear).getTermTypeAsString).size > 0
+				termService.getTermFromAcademicWeekIncludingVacations(validFromWeek, academicYear).getTermTypeAsString).size > 0
 		}
 
 	}

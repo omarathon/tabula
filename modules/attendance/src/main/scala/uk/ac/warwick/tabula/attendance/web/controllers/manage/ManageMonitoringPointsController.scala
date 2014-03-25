@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.attendance.commands.manage.ManageHomeCommand
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
+import uk.ac.warwick.tabula.web.Routes
 
 /**
  * Displays the managing home screen, allowing users to choose the department to manage.
@@ -23,7 +24,7 @@ class ManageMonitoringPointsController extends AttendanceController {
 	def home(@ModelAttribute("command") cmd: Appliable[Set[Department]]) = {
 		val departments = cmd.apply()
 		if (departments.size == 1)
-			Redirect(s"/manage/${departments.head.code}")
+			Redirect(Routes.attendance.department.manage(departments.head))
 		else
 			Mav("manage/home", "departments" -> departments)
 	}

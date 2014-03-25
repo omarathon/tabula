@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.commands.{Describable, Appliable}
 import uk.ac.warwick.tabula.web.Cookie
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.web.Cookies._
+import uk.ac.warwick.tabula.web.Routes
 
 class MasqueradeControllerTest extends TestBase with Mockito {
 	
@@ -31,7 +32,7 @@ class MasqueradeControllerTest extends TestBase with Mockito {
 
 		val response = mock[HttpServletResponse]
 
-		controller.submit(command, response).viewName should be ("redirect:/masquerade")
+		controller.submit(command, response).viewName should be (s"redirect:${Routes.admin.masquerade}")
 		there was one (response).addCookie(cookie)
 	}
 
