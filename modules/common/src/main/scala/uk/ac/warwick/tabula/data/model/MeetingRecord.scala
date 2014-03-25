@@ -6,6 +6,7 @@ import org.hibernate.annotations.BatchSize
 import uk.ac.warwick.tabula.JavaImports._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
+import uk.ac.warwick.tabula.timetables.{TimetableEventType, EventOccurrence}
 
 object MeetingRecord {
 	val DefaultMeetingTimeOfDay = 12 // Should be used for legacy meetings (where isRealTime is false)
@@ -24,14 +25,22 @@ class MeetingRecord extends AbstractMeetingRecord {
 		this.relationship = relationship
 	}
 
+	@Column(name="real_time")
+	var isRealTime: Boolean = true
+
+	def toEventOccurrence: Option[EventOccurrence] = {
+		if (isRealTime) {
+			this.asEventOccurrence
+		}	else {
+			None
+		}
+	}
+
 	// Workflow definitions
 
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
 	@BatchSize(size=200)
 	var approvals: JList[MeetingRecordApproval] = JArrayList()
-
-	@Column(name="real_time")
-	var isRealTime: Boolean = true
 
 	// true if the specified user needs to perform a workflow action on this meeting record
 	def pendingActionBy(member: Member): Boolean = pendingApprovalBy(member) || pendingRevisionBy(member)
