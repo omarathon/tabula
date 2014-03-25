@@ -36,4 +36,5 @@ class FeedbackPublishedNotification
 
 	def url = Routes.assignment.receipt(assignment)
 	def urlTitle = "view your feedback"
+	def actionRequired = true
 }

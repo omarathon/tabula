@@ -1,4 +1,4 @@
-This message confirms that you made a submission for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name}.
+This message confirms that you made a submission for the assignment '${assignment.name}' for ${module.code?upper_case} ${module.name}.
 
 - Submission date: ${submissionDate}
 - Submission ID: ${submission.id}

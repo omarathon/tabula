@@ -1,6 +1,6 @@
-This record of your ${role} meeting has been ${verbed} by ${actor.fullName}:
+${actor.fullName} has ${verbed} a record of your ${role} meeting:
 
-${meetingRecord.title} on ${dateFormatter.print(meetingRecord.meetingDate)}
+${meetingRecord.title} at ${dateFormatter.print(meetingRecord.meetingDate)}
 <#if reason??>
 
 Because: "${reason}"

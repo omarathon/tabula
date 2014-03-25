@@ -22,6 +22,7 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 	def markerFeedback = item.entity
 	def parentFeedback = markerFeedback.feedback
 	def rejectionFeeback = parentFeedback.secondMarkerFeedback
+	def actionRequired = true
 
 	def assignment = markerFeedback.feedback.assignment
 

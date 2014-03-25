@@ -25,6 +25,7 @@ abstract class MeetingRecordApprovalNotification(val verb: String)
 	def relationship = target.entity
 
 	def title = "Meeting record approval required"
+	def actionRequired = true
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
 		"actor" -> agent,
 		"role"->agentRole,

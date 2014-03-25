@@ -1,4 +1,4 @@
-${actor.fullName} has marked that the following scheduled ${role} meeting did not take place:
+${actor.fullName} has recorded that a scheduled ${role} meeting with you did not take place:
 
 ${meetingRecord.title} on ${dateTimeFormatter.print(meetingRecord.meetingDate)}
 

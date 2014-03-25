@@ -1,5 +1,5 @@
-A user (${student.fullName} in ${student.department}) has requested access to the assignment "${assignment.name}" in module ${assignment.module.code?upper_case}, because they believe that they should have access to this assignment.
+${student.fullName} who is a student in ${student.department} has requested access to the assignment "${assignment.name}" for ${assignment.module.code?upper_case}.
 
-If you agree that they should have access, you should update the assignment membership.
+If you agree that they should be able to submit to this assignment, you should enrol them on the assignment via the assignment properties.
 
-In any case, you may wish to contact the user at ${student.email}. This message has been sent to all department administrators.
+You can contact the student via ${student.email}.

@@ -38,7 +38,7 @@ abstract class StudentRelationshipChangeNotification
 			"relationshipType" -> relationship.relationshipType,
 			"path" -> url
 		))
-
+	def actionRequired = false
 	def url: String = Routes.profile.view(relationship.studentMember.get)
 }
 
@@ -47,7 +47,7 @@ trait RelationshipChangeAgent {
 	this : StudentRelationshipChangeNotification =>
 
 	private def name = relationship.studentMember.map{ "for " + _ }.getOrElse("")
-	def urlTitle = s"view the student profile ${name}"
+	def urlTitle = s"view the student profile $name"
 }
 
 @Entity

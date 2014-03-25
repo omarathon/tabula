@@ -9,8 +9,7 @@ import javax.persistence.{Entity, DiscriminatorValue}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.profiles.commands.relationships.StudentRelationshipChange
 
-abstract class BulkRelationshipChangeNotification
-		extends Notification[StudentRelationship, Unit] {
+abstract class BulkRelationshipChangeNotification extends Notification[StudentRelationship, Unit] {
 	@transient val templateLocation: String
 
 	def relationshipType = items.get(0).entity.relationshipType
@@ -18,7 +17,7 @@ abstract class BulkRelationshipChangeNotification
 	var relationshipService = Wire[RelationshipService]
 
 	def verb: String = "change"
-	def title: String = relationshipType.description + " change"
+
 	def content = {
 		FreemarkerModel(templateLocation, Map(
 			"changes" -> items.asScala.map { reference =>
@@ -30,6 +29,8 @@ abstract class BulkRelationshipChangeNotification
 			"path" -> url
 		) ++ extraModel)
 	}
+
+	def actionRequired = false
 
 	def oldAgent = {
 		val rel = items.asScala.headOption.map{ _.entity }
@@ -46,7 +47,9 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
 	@transient val templateLocation = BulkRelationshipChangeNotification.StudentTemplate
 
 	def modifiedRelationship = item.entity
-		
+
+	def title: String = s"${relationshipType.agentRole} allocation"
+
 	def newAgent =
 		if (modifiedRelationship.endDate != null && modifiedRelationship.endDate.isBeforeNow) None
 		else modifiedRelationship.agentMember
@@ -75,6 +78,8 @@ class BulkNewAgentRelationshipNotification extends BulkRelationshipChangeNotific
 
 	def newAgent = items.asScala.headOption.flatMap { _.entity.agentMember }
 
+	def title: String = s"Allocation of new ${relationshipType.studentRole}s"
+
 	def recipients = newAgent.map { _.asSsoUser }.toSeq
 
 	def url: String = Routes.students(relationshipType)
@@ -94,11 +99,13 @@ class BulkNewAgentRelationshipNotification extends BulkRelationshipChangeNotific
 class BulkOldAgentRelationshipNotification extends BulkRelationshipChangeNotification{
 	@transient val templateLocation = BulkRelationshipChangeNotification.OldAgentTemplate
 
+	def title: String = s"Change to ${relationshipType.studentRole}s"
+
 	def recipients = oldAgent.map { _.asSsoUser }.toSeq
-		
+
 	def url: String = Routes.students(relationshipType)
 
-	def urlTitle: String = s"view all of your ${relationshipType.studentRole}s"
+	def urlTitle: String = s"view your ${relationshipType.studentRole}s"
 
 	def extraModel = Map(
 		"oldAgent" -> oldAgent

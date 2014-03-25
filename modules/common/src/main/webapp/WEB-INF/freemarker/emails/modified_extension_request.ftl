@@ -1,6 +1,6 @@
-${student.fullName} has amended their extension request for the assignment '${assignment.name}' for ${assignment.module.code?upper_case}, ${assignment.module.name}. The date or reason fields may have been changed
+${student.fullName} has made changes to their extension request for the assignment '${assignment.name}' for ${assignment.module.code?upper_case} ${assignment.module.name}.
 
-They have requested until ${requestedExpiryDate} to complete the assignment. The following reasons were given for the request:
+They have requested an extension until ${requestedExpiryDate} and gave the following reasons:
 
 ${reasonForRequest}
 

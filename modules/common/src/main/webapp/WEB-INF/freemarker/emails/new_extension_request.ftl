@@ -1,6 +1,6 @@
-${student.fullName} has requested an extension for the assignment '${assignment.name}' for ${assignment.module.code?upper_case}, ${assignment.module.name}.
+${student.fullName} has requested an extension for the assignment '${assignment.name}' for ${assignment.module.code?upper_case} ${assignment.module.name}.
 
-They have requested until ${requestedExpiryDate} to complete the assignment. The following reasons were given for the request:
+They have requested an extension until ${requestedExpiryDate} and gave the following reasons:
 
 ${reasonForRequest}
 

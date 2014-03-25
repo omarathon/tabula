@@ -15,6 +15,7 @@ class MeetingRecordApprovedNotification
 	def relationship = meeting.relationship
 
 	def verb = "approve"
+	def actionRequired = false
 
 	def title = "Meeting record approved"
 	def content = FreemarkerModel(FreemarkerTemplate, Map(

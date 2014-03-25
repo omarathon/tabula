@@ -9,6 +9,7 @@ abstract class ExtensionStudentNotification extends ExtensionNotification with S
 	def recipient = student
 	def url = Routes.assignment(assignment)
 	def template: String
+	def actionRequired = false
 
 	def content = FreemarkerModel(template, Map (
 			"assignment" -> assignment,
@@ -25,7 +26,7 @@ abstract class ExtensionStudentNotification extends ExtensionNotification with S
 @DiscriminatorValue("ExtensionChanged")
 class ExtensionChangedNotification extends ExtensionStudentNotification {
 	def verb = "updated"
-	def title = titlePrefix + "Extension details have been changed"
+	def title = titlePrefix + "Extended deadline changed"
 	def template = "/WEB-INF/freemarker/emails/modified_manual_extension.ftl"
 	def urlTitle = "view the modified deadline"
 }
@@ -34,7 +35,7 @@ class ExtensionChangedNotification extends ExtensionStudentNotification {
 @DiscriminatorValue("ExtensionGranted")
 class ExtensionGrantedNotification extends ExtensionStudentNotification {
 	def verb = "grant"
-	def title = titlePrefix + "Extension granted"
+	def title = titlePrefix + "Deadline extended"
 	def template = "/WEB-INF/freemarker/emails/new_manual_extension.ftl"
 	def urlTitle = "view your new deadline"
 }
@@ -45,7 +46,7 @@ class ExtensionRequestApprovedNotification extends ExtensionStudentNotification 
 	def verb = "approve"
 	def title = titlePrefix + "Extension request approved"
 	def template = "/WEB-INF/freemarker/emails/extension_request_approved.ftl"
-	def urlTitle = "view your new deadline"
+	def urlTitle = "view your extension"
 }
 
 @Entity

@@ -22,6 +22,8 @@ abstract class ExtensionRequestNotification extends ExtensionNotification {
 	def studentMember = profileService.getMemberByUniversityId(student.getWarwickId)
 	def studentRelationships = relationshipService.allStudentRelationshipTypes
 
+	def actionRequired = true
+
 	def profileInfo = studentMember.collect { case student: StudentMember => student }.flatMap(_.mostSignificantCourseDetails).map(scd => {
 		val relationships = studentRelationships.map(x => (
 			x.description,

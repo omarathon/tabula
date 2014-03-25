@@ -48,4 +48,5 @@ class SubmissionReceivedNotification extends SubmissionNotification with PreSave
 		val allAdmins = moduleManagers.users
 		allAdmins.filter(canEmailUser)
 	}
+	def actionRequired = false
 }

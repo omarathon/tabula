@@ -19,14 +19,15 @@ class ExtensionRevokedNotification extends Notification[Assignment, Unit]
 	with AutowiringUserLookupComponent {
 
 	priority = Warning
+	def actionRequired = false
 
 	def assignment = item.entity
 
 	def verb = "revoke"
 
-	def title =	s"${assignment.module.code.toUpperCase} : Extension revoked"
+	def title =	"Extended deadline revoked"
 	def url = Routes.assignment.apply(assignment)
-	def urlTitle = "view assignment deadline"
+	def urlTitle = "view the assignment"
 
 	def content = FreemarkerModel(ExtensionRevokedNotification.templateLocation, Map (
 		"assignment" -> assignment,

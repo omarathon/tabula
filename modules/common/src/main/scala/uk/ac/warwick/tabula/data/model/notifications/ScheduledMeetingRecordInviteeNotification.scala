@@ -30,4 +30,6 @@ class ScheduledMeetingRecordInviteeNotification
 			meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)).asSsoUser
 		}
 	}
+
+	def actionRequired = false
 }

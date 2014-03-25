@@ -17,6 +17,7 @@ class MeetingRecordRejectedNotification
 	def relationship = meeting.relationship
 
 	def verb = "reject"
+	def actionRequired = true
 
 	def title = "Meeting record rejected"
 	def content = FreemarkerModel(FreemarkerTemplate, Map(

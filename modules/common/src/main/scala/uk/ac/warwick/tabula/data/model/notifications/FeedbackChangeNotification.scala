@@ -38,4 +38,5 @@ class FeedbackChangeNotification extends NotificationWithTarget[Feedback, Assign
 
 	def url = Routes.assignment.receipt(assignment)
 	def urlTitle = "view your new feedback"
+	def actionRequired = true
 }
