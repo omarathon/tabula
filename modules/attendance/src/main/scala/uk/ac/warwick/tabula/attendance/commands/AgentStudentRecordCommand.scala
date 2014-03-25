@@ -55,7 +55,7 @@ abstract class AgentStudentRecordCommand(val agent: Member, val relationshipType
 				monitoringPointService.deleteCheckpoint(student, point)
 				None
 			} else {
-				Option(monitoringPointService.saveOrUpdateCheckpoint(student, point, state, agent))
+				Option(monitoringPointService.saveOrUpdateCheckpointByMember(student, point, state, agent))
 			}
 		}.toSeq
 	}

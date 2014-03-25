@@ -9,11 +9,11 @@ import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.RoleDefinition
-import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, UserLookupService, AutowiringSecurityServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 import uk.ac.warwick.tabula.RequestInfo
-import scala.reflect.ClassTag
+import scala.reflect._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object GrantRoleCommand {
@@ -25,6 +25,7 @@ object GrantRoleCommand {
 				with GrantRoleCommandDescription[A]
 				with AutowiringPermissionsServiceComponent
 				with AutowiringSecurityServiceComponent
+				with AutowiringUserLookupComponent
 
 	def apply[A <: PermissionsTarget : ClassTag](scope: A, defin: RoleDefinition): Appliable[GrantedRole[A]] with GrantRoleCommandState[A] = {
 		val command = apply(scope)
@@ -34,7 +35,7 @@ object GrantRoleCommand {
 }
 
 class GrantRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[GrantedRole[A]] with GrantRoleCommandState[A] {
-	self: PermissionsServiceComponent with SecurityServiceComponent =>
+	self: PermissionsServiceComponent with UserLookupComponent =>
 
 	lazy val grantedRole = permissionsService.getGrantedRole(scope, roleDefinition)
 
@@ -44,6 +45,11 @@ class GrantRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) 
 		usercodes.asScala.foreach(role.users.knownType.addUserId)
 
 		permissionsService.saveOrUpdate(role)
+
+		// For each usercode that we've added, clear the cache
+		usercodes.asScala.foreach { usercode =>
+			permissionsService.clearCachesForUser((usercode, classTag[A]))
+		}
 
 		role
 	}

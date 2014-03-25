@@ -340,8 +340,8 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 		${(studentCourseDetails.statusOnCourse.fullName?lower_case?cap_first)!}
 </#macro>
 
-<#macro enrolment_status studentCourseDetails>
-		${(studentCourseDetails.latestStudentCourseYearDetails.enrolmentStatus.fullName?lower_case?cap_first)!}
+<#macro enrolment_status studentCourseYearDetails>
+		${(studentCourseYearDetails.enrolmentStatus.fullName?lower_case?cap_first)!}
 </#macro>
 
 <#macro lightbox_link enabled url>

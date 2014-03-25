@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.{AcademicYear, TestBase, Fixtures, Mockito}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPointType, MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPointType, MonitoringPoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model._
 import org.joda.time.{Interval, DateTimeConstants, DateMidnight, DateTime}
@@ -104,7 +104,7 @@ class MonitoringPointProfileTermAssignmentServiceTest extends TestBase with Mock
 		service.getCheckpointsForSubmission(submission).size should be (1)
 
 		service.updateCheckpointsForSubmission(submission)
-		there was one (service.monitoringPointService).saveOrUpdate(any[MonitoringCheckpoint])
+		there was one (service.monitoringPointService).saveOrUpdateCheckpointByUsercode(student, assignmentThisYearPoint, AttendanceState.Attended, student.userId, autocreated = true)
 	}}
 
 	@Test
@@ -117,7 +117,7 @@ class MonitoringPointProfileTermAssignmentServiceTest extends TestBase with Mock
 		service.getCheckpointsForSubmission(submission).size should be (1)
 
 		service.updateCheckpointsForSubmission(submission)
-		there was one (service.monitoringPointService).saveOrUpdate(any[MonitoringCheckpoint])
+		there was one (service.monitoringPointService).saveOrUpdateCheckpointByUsercode(student, assignmentThisYearPoint, AttendanceState.Attended, student.userId, autocreated = true)
 	}}
 
 	@Test

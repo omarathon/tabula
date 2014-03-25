@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
-import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{RequestParam, InitBinder, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat
@@ -22,7 +22,6 @@ import org.springframework.validation.BeanPropertyBindingResult
 import uk.ac.warwick.tabula.commands.{UpstreamGroupPropertyEditor, UpstreamGroup, Appliable}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewModule, ViewSet}
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
@@ -121,7 +120,9 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	}
 	
 	@RequestMapping
-	def form(cmd: EditSmallGroupSetCommand, @PathVariable("set") set: SmallGroupSet) = {
+	def form(cmd: EditSmallGroupSetCommand, @PathVariable("set") set: SmallGroupSet,
+		@RequestParam(value="openGroupsDetails", required=false) openGroupsDetails: Boolean
+	) = {
 		cmd.copyGroupsFrom(set)
 
 		cmd.afterBind()
@@ -130,7 +131,8 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 			"allTermWeekRanges" -> allTermWeekRanges(cmd),
 			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
-			"assessmentGroups" -> cmd.assessmentGroups
+			"assessmentGroups" -> cmd.assessmentGroups,
+			"openGroupsDetails" -> openGroupsDetails
 		).crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
 	}
 
@@ -142,14 +144,14 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 			cmd.apply()
 		}
 
-		form(cmd, set)
+		form(cmd, set, false)
 	}
 
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh", "action!=update"))
 	def submit(@Valid cmd: EditSmallGroupSetCommand, errors: Errors, @PathVariable("set") set: SmallGroupSet) = {
 		cmd.afterBind()
 
-		if (errors.hasErrors) form(cmd, set)
+		if (errors.hasErrors) form(cmd, set, false)
 		else {
 			cmd.apply()
 			Redirect(Routes.admin.module(cmd.module))

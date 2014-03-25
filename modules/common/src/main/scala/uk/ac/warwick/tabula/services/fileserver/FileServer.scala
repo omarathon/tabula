@@ -5,22 +5,31 @@ import javax.servlet.http.HttpServletResponse
 import org.springframework.util.FileCopyUtils
 import javax.servlet.http.HttpServletRequest
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.Features
+import uk.ac.warwick.spring.Wire
 
 @Service
 class FileServer {
+	var features = Wire[Features]
+
 	def stream(file: RenderableFile)(implicit request: HttpServletRequest, out: HttpServletResponse) {
 		val inStream = file.inputStream
 		
 		out.addHeader("Content-Type", file.contentType)
-		
-		file.contentLength.map { length =>
-			out.addHeader("Content-Length", length.toString)
-		}
 
 		handleCaching(file, request, out)
 
-		if (request.getMethod.toUpperCase != "HEAD")
-			Option(inStream) map { FileCopyUtils.copy(_, out.getOutputStream) }
+		if (request.getMethod.toUpperCase != "HEAD") {
+			if (file.file.isDefined && features.xSendfile) {
+				out.addHeader("X-Sendfile", file.file.get.getAbsolutePath)
+			} else {
+				file.contentLength.foreach { length => out.addHeader("Content-Length", length.toString) }
+
+				Option(inStream).foreach { FileCopyUtils.copy(_, out.getOutputStream) }
+			}
+		} else {
+			file.contentLength.foreach { length => out.addHeader("Content-Length", length.toString) }
+		}
 	}
 	
 	/**

@@ -1,24 +1,25 @@
 package uk.ac.warwick.tabula.commands.permissions
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.{MockUserLookup, TestBase, Mockito, Fixtures}
 import uk.ac.warwick.tabula.services.permissions.{PermissionsServiceComponent, PermissionsService}
-import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.{SecurityServiceComponent, SecurityService}
+import uk.ac.warwick.tabula.services.{UserLookupComponent, SecurityServiceComponent, SecurityService}
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.{Describable, SelfValidating, Appliable, DescriptionImpl}
+import scala.reflect._
+import scala.Some
 
 class RevokeRoleCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport[A <: PermissionsTarget] extends RevokeRoleCommandState[A] with PermissionsServiceComponent with SecurityServiceComponent {
+	trait CommandTestSupport[A <: PermissionsTarget] extends RevokeRoleCommandState[A] with PermissionsServiceComponent with SecurityServiceComponent with UserLookupComponent {
 		val permissionsService = mock[PermissionsService]
 		val securityService = mock[SecurityService]
+		val userLookup = new MockUserLookup()
 	}
 
 	// a role with a single permission to keep things simple
@@ -53,6 +54,8 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		command.roleDefinition = singlePermissionsRoleDefinition
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
+
+		command.userLookup.registerUsers("cuscav", "cusebr")
 		
 		val existing = GrantedRole(department, singlePermissionsRoleDefinition)
 		existing.users.knownType.addUserId("cuscao")
@@ -61,17 +64,19 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 
 		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (Some(existing))
 				
-		val grantedPerm = command.applyInternal()
-		(grantedPerm.eq(existing)) should be (true)
+		val grantedRole = command.applyInternal()
+		(grantedRole.eq(existing)) should be (true)
 		
-		grantedPerm.roleDefinition should be (singlePermissionsRoleDefinition)
-		grantedPerm.users.size should be (1)
-		grantedPerm.users.knownType.includesUserId("cuscav") should be (false)
-		grantedPerm.users.knownType.includesUserId("cusebr") should be (false)
-		grantedPerm.users.knownType.includesUserId("cuscao") should be (true)
-		grantedPerm.scope should be (department)
+		grantedRole.roleDefinition should be (singlePermissionsRoleDefinition)
+		grantedRole.users.size should be (1)
+		grantedRole.users.knownType.includesUserId("cuscav") should be (false)
+		grantedRole.users.knownType.includesUserId("cusebr") should be (false)
+		grantedRole.users.knownType.includesUserId("cuscao") should be (true)
+		grantedRole.scope should be (department)
 
 		there was one (command.permissionsService).saveOrUpdate(existing)
+		there was atLeastOne (command.permissionsService).clearCachesForUser(("cuscav", classTag[Department]))
+		there was atLeastOne (command.permissionsService).clearCachesForUser(("cusebr", classTag[Department]))
 	}}
 	
 	@Test def validatePasses { withUser("cuscav", "0672089") { new Fixture {

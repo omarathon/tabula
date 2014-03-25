@@ -59,7 +59,9 @@ class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixt
 			eventuallyAjax { className("link-sits").element.isDisplayed should be (false) }
 			// there will be a delay between the dialog being dismissed and the source being updated by the
 			// ajax response. So wait some more
-			eventuallyAjax{pageSource should include("4 enrolled")}
+			eventuallyAjax { pageSource should include("4 enrolled") }
+
+			click on id("assignmentComment")
 		}
 
 		withAssignment("xxx101", "Fully featured assignment", assignmentSettings, Nil) { assignmentId =>
@@ -67,7 +69,12 @@ class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixt
 			submitAssignment(P.Student3, "xxx101", "Fully featured assignment", assignmentId, "/file1.txt", true)
 
 			// Student 5 isn't in the SITS group. Poor Student5
-			submitAssignment(P.Student5, "xxx101", "Fully featured assignment", assignmentId, "/file2.txt", false)
+			as(P.Student5) {
+				// Use the assignment ID to mock up a URL
+				go to Path("/coursework/module/xxx101/" + assignmentId + "/")
+
+				pageSource contains ("You're not enrolled") should be (true)
+			}
 		}
 	}
 

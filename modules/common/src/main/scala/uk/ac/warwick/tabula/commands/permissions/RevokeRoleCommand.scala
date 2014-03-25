@@ -9,11 +9,12 @@ import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.RoleDefinition
-import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, AutowiringSecurityServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.RequestInfo
-import scala.reflect.ClassTag
+import scala.reflect._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import scala.Some
 
 object RevokeRoleCommand {
 	def apply[A <: PermissionsTarget : ClassTag](scope: A): Appliable[GrantedRole[A]] with RevokeRoleCommandState[A] =
@@ -24,6 +25,7 @@ object RevokeRoleCommand {
 			with RevokeRoleCommandDescription[A]
 			with AutowiringPermissionsServiceComponent
 			with AutowiringSecurityServiceComponent
+			with AutowiringUserLookupComponent
 
 	def apply[A <: PermissionsTarget : ClassTag](scope: A, defin: RoleDefinition): Appliable[GrantedRole[A]] with RevokeRoleCommandState[A] = {
 		val command = apply(scope)
@@ -33,7 +35,7 @@ object RevokeRoleCommand {
 }
 
 class RevokeRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[GrantedRole[A]] with RevokeRoleCommandState[A] {
-	self: PermissionsServiceComponent with SecurityServiceComponent =>
+	self: PermissionsServiceComponent with UserLookupComponent =>
 
 	lazy val grantedRole = permissionsService.getGrantedRole(scope, roleDefinition)
 
@@ -42,6 +44,11 @@ class RevokeRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A)
 			usercodes.asScala.foreach(role.users.knownType.removeUserId)
 
 			permissionsService.saveOrUpdate(role)
+
+			// For each usercode that we've removed, clear the cache
+			usercodes.asScala.foreach { usercode =>
+				permissionsService.clearCachesForUser((usercode, classTag[A]))
+			}
 		}
 
 		grantedRole.orNull

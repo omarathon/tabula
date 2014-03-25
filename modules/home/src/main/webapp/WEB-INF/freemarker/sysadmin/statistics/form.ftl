@@ -28,32 +28,62 @@
 
 </div>
 
+<div class="well">
+	<h2>memcached statistics</h2>
+
+	<p>Uses the default memcached client, so if you have any special config you're out-of-luck.</p>
+
+	<table>
+		<tbody>
+			<#list memcachedStatistics as stat>
+				<tr>
+					<th>${stat._1()}</th>
+					<td>${stat._2()}</td>
+				</tr>
+			</#list>
+		</tbody>
+	</table>
+
+	<button id="clear-memcached">Flush the cache (expires all items)</button>
+
+	<div class="alert" id="memcached-response"></div>
+</div>
+
 <script>
-jQuery(function($){
+	jQuery(function($){
 
-	var debugResponse = function(data) {
-		$('#hib-response').html(data);
-	}
+		var debugResponse = function(data) {
+			$('#hib-response').html(data);
+		}
 
-	$('#enable-hib-stats').click(function(e){
-		e.preventDefault();
-		$.post('/sysadmin/statistics/hibernate/toggleAsync.json', { enabled: true }, debugResponse);
-	});
+		$('#enable-hib-stats').click(function(e){
+			e.preventDefault();
+			$.post('/sysadmin/statistics/hibernate/toggleAsync.json', { enabled: true }, debugResponse);
+		});
 
-	$('#disable-hib-stats').click(function(e){
-		e.preventDefault();
-		$.post('/sysadmin/statistics/hibernate/toggleAsync.json', { enabled: false }, debugResponse);
-	});
+		$('#disable-hib-stats').click(function(e){
+			e.preventDefault();
+			$.post('/sysadmin/statistics/hibernate/toggleAsync.json', { enabled: false }, debugResponse);
+		});
 
-	$('#log-hib-stats').click(function(e){
-		e.preventDefault();
-		$.post('/sysadmin/statistics/hibernate/log', debugResponse);
-	});
+		$('#log-hib-stats').click(function(e){
+			e.preventDefault();
+			$.post('/sysadmin/statistics/hibernate/log', debugResponse);
+		});
 
-	$('#clear-hib-stats').click(function(e){
-		e.preventDefault();
-		$.post('/sysadmin/statistics/hibernate/clearAsync.json', debugResponse);
-	});
+		$('#clear-hib-stats').click(function(e){
+			e.preventDefault();
+			$.post('/sysadmin/statistics/hibernate/clearAsync.json', debugResponse);
+		});
 
-})
+		var debugResponseMemcached = function(data) {
+			$('#memcached-response').html(data);
+		}
+
+		$('#clear-memcached').click(function(e){
+			e.preventDefault();
+			$.post('/sysadmin/statistics/memcached/clearAsync.json', debugResponseMemcached);
+		});
+
+	})
 </script>

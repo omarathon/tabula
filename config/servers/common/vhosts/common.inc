@@ -40,4 +40,14 @@ Header append Vary X-Requested-With env=dont-vary
 <IfModule mod_headers.c>
 Header unset X-Powered-By
 Header set Server Warwick
-</IfModule> 
+</IfModule>
+
+# X-Sendfile support
+<IfModule mod_xsendfile.c>
+	XSendFile on
+	XSendFileIgnoreLastModified On
+	XSendFileIgnoreEtag On
+
+	# list all possible paths where we may serve files through X-Sendfile
+	XSendFilePath /var/tabula/
+</IfModule>

@@ -1,22 +1,23 @@
 package uk.ac.warwick.tabula.commands.permissions
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.{MockUserLookup, TestBase, Mockito, Fixtures}
 import uk.ac.warwick.tabula.services.permissions.{PermissionsServiceComponent, PermissionsService}
-import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.{SecurityServiceComponent, SecurityService}
+import uk.ac.warwick.tabula.services.{UserLookupComponent, SecurityServiceComponent, SecurityService}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.{Describable, SelfValidating, Appliable, DescriptionImpl}
+import scala.reflect._
+import scala.Some
 
 class RevokePermissionsCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport[A <: PermissionsTarget] extends RevokePermissionsCommandState[A] with PermissionsServiceComponent with SecurityServiceComponent {
+	trait CommandTestSupport[A <: PermissionsTarget] extends RevokePermissionsCommandState[A] with PermissionsServiceComponent with SecurityServiceComponent with UserLookupComponent {
 		val permissionsService = mock[PermissionsService]
 		val securityService = mock[SecurityService]
+		val userLookup = new MockUserLookup()
 	}
 
 	trait Fixture {
@@ -35,6 +36,8 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 				
 		// Doesn't blow up, just a no-op
 		command.applyInternal() should be (null)
+
+		there was no (command.permissionsService).saveOrUpdate(any[GrantedPermission[_]])
 	}}
 	
 	@Test def itWorksWithExisting { new Fixture {
@@ -42,6 +45,8 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 		command.overrideType = GrantedPermission.Allow
+
+		command.userLookup.registerUsers("cuscav", "cusebr")
 		
 		val existing = GrantedPermission(department, Permissions.Department.ManageExtensionSettings, true)
 		existing.users.knownType.addUserId("cuscav")
@@ -60,8 +65,12 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		grantedPerm.users.knownType.includesUserId("cuscao") should be (true)
 		grantedPerm.overrideType should be (GrantedPermission.Allow)
 		grantedPerm.scope should be (department)
+
+		there was one (command.permissionsService).saveOrUpdate(existing)
+		there was atLeastOne (command.permissionsService).clearCachesForUser(("cuscav", classTag[Department]))
+		there was atLeastOne (command.permissionsService).clearCachesForUser(("cusebr", classTag[Department]))
 	}}
-	
+
 	@Test def validatePasses { withUser("cuscav", "0672089") { new Fixture {
 		command.permission = Permissions.Department.ManageExtensionSettings
 		command.usercodes.add("cuscav")

@@ -16,7 +16,7 @@ abstract class ExtensionRequestNotification extends ExtensionNotification {
 
 	def template: String
 
-	def url = Routes.admin.assignment.extension.detail(assignment)
+	def url = Routes.admin.assignment.extension.expandrow(assignment, student.getWarwickId)
 
 	def studentMember = profileService.getMemberByUniversityId(student.getWarwickId)
 	def studentRelationships = relationshipService.allStudentRelationshipTypes

@@ -169,7 +169,7 @@
 </@form.row>
 
 <fieldset id="groups">
-	<details id="groups-details">
+	<details id="groups-details" <#if openGroupsDetails!false> open </#if>>
 		<summary class="collapsible large-chevron" id="groups-summary">
 			<span class="legend" >Groups <small>Create and name empty groups and add weekly events for these groups</small> </span>
 

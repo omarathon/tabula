@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.AcademicYear
 
 
-class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow, academicYear: AcademicYear) extends Command[Option[ModuleRegistration]]
+class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends Command[Option[ModuleRegistration]]
 	with Logging with Unaudited with PropertyCopying {
 
 	PermissionCheck(Permissions.ImportSystemData)
@@ -36,6 +36,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow, academi
 	val assessmentGroup = modRegRow.assessmentGroup
 	val selectionStatusCode = modRegRow.selectionStatusCode
 	val occurrence = modRegRow.occurrence
+	val academicYear = AcademicYear.parse(modRegRow.academicYear)
 	val selectionStatus: ModuleSelectionStatus = null
 
 	override def applyInternal(): Option[ModuleRegistration] = transactional() ({
@@ -45,7 +46,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow, academi
 				None
 			}
 			case Some(module: Module) => {
-				logger.debug("Importing module registration for student " + scjCode + ", module " + modRegRow.sitsModuleCode + " in " + academicYear)
+				logger.debug("Importing module registration for student " + scjCode + ", module " + modRegRow.sitsModuleCode)
 
 				studentCourseDetailsDao.getByScjCode(scjCode) match {
 					case None => {
@@ -107,6 +108,6 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow, academi
 		"assessmentGroup", "occurrence"
 	)
 	
-	override def describe(d: Description) = d.properties("scjCode" -> scjCode, "academicYear" -> academicYear.toString)
+	override def describe(d: Description) = d.properties("scjCode" -> scjCode)
 
 }
