@@ -13,14 +13,14 @@ import uk.ac.warwick.tabula.data.FileDao
 class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecordTests {
 
 	@Test
-	def validMeeting = withUser("cuscav") { withFakeTime(aprilFool) {
+	def validMeeting() = withUser("cuscav") { withFakeTime(aprilFool) {
 
 		val cmd = new CreateMeetingRecordCommand(creator, relationship, false) {
 			override val session = mockSession
 		}
 		cmd.title = "A title"
 		cmd.format = FaceToFace
-		cmd.meetingDate  = dateTime(3903, DateTimeConstants.MARCH).toLocalDate // it's the future
+		cmd.meetingDateTime  = dateTime(3903, DateTimeConstants.MARCH) // it's the future
 		cmd.maintenanceMode = maintenanceModeService
 		cmd.notificationService = notificationService
 
@@ -32,7 +32,7 @@ class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRec
 		errors.getFieldError.getField should be ("meetingDate")
 		errors.getFieldError.getCode should be ("meetingRecord.date.future")
 
-		cmd.meetingDate = dateTime(2007, DateTimeConstants.MARCH).toLocalDate // > 5 years ago
+		cmd.meetingDateTime = dateTime(2007, DateTimeConstants.MARCH) // > 5 years ago
 
 		// check invalid past date
 		errors = new BindException(cmd, "command")
@@ -42,7 +42,7 @@ class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRec
 		errors.getFieldError.getField should be ("meetingDate")
 		errors.getFieldError.getCode should be ("meetingRecord.date.prehistoric")
 
-		cmd.meetingDate = marchHare
+		cmd.meetingDateTime = marchHare
 		cmd.title = ""
 		cmd.features = emptyFeatures
 		cmd.features.meetingRecordApproval = true

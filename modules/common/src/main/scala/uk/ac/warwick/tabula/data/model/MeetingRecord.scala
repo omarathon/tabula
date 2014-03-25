@@ -8,7 +8,7 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
 
 object MeetingRecord {
-	val DefaultMeetingTimeOfDay = 12
+	val DefaultMeetingTimeOfDay = 12 // Should be used for legacy meetings (where isRealTime is false)
 	val MeetingTooOldThresholdYears = 5
 	val MaxTitleLength = 140
 }
@@ -29,6 +29,9 @@ class MeetingRecord extends AbstractMeetingRecord {
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
 	@BatchSize(size=200)
 	var approvals: JList[MeetingRecordApproval] = JArrayList()
+
+	@Column(name="real_time")
+	var isRealTime: Boolean = true
 
 	// true if the specified user needs to perform a workflow action on this meeting record
 	def pendingActionBy(member: Member): Boolean = pendingApprovalBy(member) || pendingRevisionBy(member)
