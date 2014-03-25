@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import org.joda.time.LocalTime
 import uk.ac.warwick.util.cache.Caches
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
+import net.spy.memcached.transcoders.SerializingTranscoder
 
 class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 
@@ -52,5 +53,13 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		there was one (delegate).getTimetableForStaff(studentId)
 
 	}}
+
+	@Test
+	def serialization() {
+		val transcoder: SerializingTranscoder = new SerializingTranscoder
+		transcoder.encode(TimetableCacheKey.StudentKey("0672089"))
+		transcoder.encode(TimetableCacheKey.StudentKey(""))
+		transcoder.encode(TimetableCacheKey.ModuleKey("cs118"))
+	}
 
 }

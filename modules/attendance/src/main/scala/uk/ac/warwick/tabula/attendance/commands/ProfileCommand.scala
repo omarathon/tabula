@@ -4,9 +4,11 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.commands.{TaskBenchmarking, ReadOnly, Unaudited, ComposableCommand, CommandInternal}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.permissions.Permissions
+import org.springframework.beans.factory.annotation.Value
+import uk.ac.warwick.tabula.helpers.Logging
 
 case class AttendanceProfileInformation(
 	pointsData: StudentPointsData,
@@ -47,11 +49,17 @@ abstract class ProfileCommand(val student: StudentMember, val academicYear: Acad
 	}
 }
 
-trait ProfilePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+trait ProfilePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods with Logging {
 
 	self: ProfileCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) = {
+		// TODO there's probably a better place to do this
+		if (academicYear.startYear < yearZero) {
+			logger.info("Not showing attendance monitoring profile for year less than year zero: " + academicYear)
+			throw new ItemNotFoundException
+		}
+
 		p.PermissionCheck(Permissions.MonitoringPoints.View, mandatory(student))
 	}
 
@@ -60,4 +68,6 @@ trait ProfilePermissions extends RequiresPermissionsChecking with PermissionsChe
 trait ProfileCommandState {
 	def student: StudentMember
 	def academicYear: AcademicYear
+
+	@Value("${tabula.yearZero}") var yearZero: Int = _
 }
