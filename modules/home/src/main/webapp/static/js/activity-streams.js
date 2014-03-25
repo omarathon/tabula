@@ -33,7 +33,7 @@ jQuery(function($) {
 
 		return $('<div>', {'class': 'activity ' + priority})
 			.data('notification-id', item._id)
-			.append($('<button>', {'class':'close', title: 'Dismiss'}).html('&times;'))
+			/*.append($('<button>', {'class':'close', title: 'Dismiss'}).html('&times;'))*/
 			.append($('<div>', {'class': 'headline'})
 				.append($('<i></i>', {'class': icons[priority]}))
 				.append($('<h5>', {'class': 'title'})
@@ -45,7 +45,7 @@ jQuery(function($) {
 				.append(item.content)
 				.append($('<p>', {'class': 'url'}).append(
 					$('<a></a>', {'href': item.url}).html(urlTitle) // TODO use urlTitle from TAB-1964
-				)))
+				)));
 	}
 
 	function capitalise(text) {
