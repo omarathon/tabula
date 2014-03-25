@@ -52,7 +52,7 @@ class MeetingRecordApprovalNotificationTest extends TestBase with Mockito with F
 			meeting.creator = agent
 			meeting.title = "End of term progress meeting"
 			meeting.meetingDate = new DateTime(2013, DateTimeConstants.DECEMBER, 5, 12, 0, 0, 0)
-			
+
 			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 			meeting.relationship = StudentRelationship(agent, relationshipType, student)
 			
@@ -62,11 +62,10 @@ class MeetingRecordApprovalNotificationTest extends TestBase with Mockito with F
 
 			val notificationContent = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
 			notificationContent should be (
-"""This record of your personal tutor meeting has been created by Karen Bradbury:
+				"""Karen Bradbury has created a record of your personal tutor meeting:
 
-End of term progress meeting on 5 December 2013
-
-Please visit https://tabula.warwick.ac.uk/profiles/view/1218503?meeting=fd269caf-c739-4a44-8f3e-27e79110c73d to approve or reject it.""")
+End of term progress meeting at 5 December 2013
+""")
 		}
 	}
 

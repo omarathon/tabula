@@ -3,9 +3,10 @@ package uk.ac.warwick.tabula.profiles.services.timetables
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import org.joda.time.LocalTime
-import uk.ac.warwick.util.cache.Caches
+import uk.ac.warwick.util.cache.{HashMapCacheStore, Caches}
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 import net.spy.memcached.transcoders.SerializingTranscoder
+import org.junit.Before
 
 class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 
@@ -17,11 +18,11 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 
 		delegate.getTimetableForStudent(studentId) returns studentEvents
 		
-		Caches.resetEhCacheCheck()
-		System.setProperty("warwick.ehcache.disk.store.dir", createTemporaryDirectory().getAbsolutePath)
-		System.setProperty("warwick.ehcache.config", "/ehcache-config.xml")
-
 		val cache = new CachedTimetableFetchingService(delegate)
+	}
+
+	@Before def clearCaches {
+		HashMapCacheStore.clearAll()
 	}
 
 	@Test
