@@ -27,7 +27,7 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 		transactional { transactionStatus =>
 			dao.attachmentDir = createTemporaryDirectory
 			dao.attachmentDir.list.size should be (0)
-			for (i <- Range(0,10)) {
+			for (i <- 0 to 50) {
 				val attachment = new FileAttachment
 				attachment.dateUploaded = new DateTime().plusHours(1).minusDays(i)
 				attachment.uploadedData = new ByteArrayInputStream("This is the best file ever".getBytes)
@@ -36,7 +36,7 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 			}
 		}
 		transactional { transactionStatus =>
-			dao.deleteOldTemporaryFiles should be (7)
+			dao.deleteOldTemporaryFiles should be (36) // 50 files, 14 days of leeway
 		}
 	}
 	
