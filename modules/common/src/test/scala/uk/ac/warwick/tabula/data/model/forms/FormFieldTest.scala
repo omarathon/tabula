@@ -17,7 +17,7 @@ class FormFieldTest extends TestBase with Mockito {
 
 	val userLookup = new MockUserLookup
 
-	@Test def commentField {
+	@Test def commentField() {
 		val field = new CommentField
 		field.value should be (null)
 		field.value = "my comment\n\nwith newlines!"
@@ -27,7 +27,7 @@ class FormFieldTest extends TestBase with Mockito {
 		field.template should be ("comment")
 	}
 
-	@Test def textField {
+	@Test def textField() {
 		val field = new TextField
 		field.value should be (null)
 		field.value = "my comment"
@@ -36,7 +36,7 @@ class FormFieldTest extends TestBase with Mockito {
 		field.template should be ("text")
 	}
 
-	@Test def textAreaField {
+	@Test def textAreaField() {
 		val field = new TextareaField
 		field.value should be (null)
 		field.value = "my comment"
@@ -45,7 +45,7 @@ class FormFieldTest extends TestBase with Mockito {
 		field.template should be ("textarea")
 	}
 
-	@Test def nullWordCount {
+	@Test def nullWordCount() {
 		val field = new WordCountField
 		field.min = 3
 		field.max = 10
@@ -61,7 +61,7 @@ class FormFieldTest extends TestBase with Mockito {
 		errors.getFieldError.getCodes should contain ("assignment.submit.wordCount.missing")
 	}
 	
-	@Test def nullWordCountMinAndMax {
+	@Test def nullWordCountMinAndMax() {
 		val field = new WordCountField
 
 		val number = new IntegerFormValue(field)
@@ -73,7 +73,7 @@ class FormFieldTest extends TestBase with Mockito {
 		errors.hasErrors should be (false)
 	}
 
-	@Test def wordCountField {
+	@Test def wordCountField() {
 		val field = new WordCountField
 		field.max = 10
 		field.min = 3
@@ -115,12 +115,12 @@ class FormFieldTest extends TestBase with Mockito {
 		errors.hasErrors should be (false)
 	}
 
-	@Test def checkboxField {
+	@Test def checkboxField() {
 		val field = new CheckboxField
 		field.template should be ("checkbox")
 	}
 
-	@Test def markerSelectField {
+	@Test def markerSelectField() {
 		val assignment = Fixtures.assignment("my assignment")
 		val workflow = Fixtures.seenSecondMarkingLegacyWorkflow("my workflow")
 		workflow.firstMarkers.addUserId("cuscav")
@@ -174,7 +174,7 @@ class FormFieldTest extends TestBase with Mockito {
 		errors.hasErrors should be (false)
 	}
 
-	@Test def fileField {
+	@Test def fileField() {
 		val field = new FileField
 		field.attachmentLimit = 2
 		field.attachmentTypes = Seq("doc", "txt")
@@ -255,14 +255,14 @@ class FormFieldTest extends TestBase with Mockito {
 		errors.hasErrors should be (false)
 	}
 
-	@Test def commentFieldFormatting {
+	@Test def commentFieldFormatting() {
 		val comment = new CommentField
 
 		comment.value = " Text.\nMore text.\n\n   <b>New</b> paragraph "
 		comment.formattedHtml should be ("<p> Text.\nMore text.</p><p>&lt;b&gt;New&lt;/b&gt; paragraph </p>")
 	}
 
-	@Test def fileFieldCustomProperties {
+	@Test def fileFieldCustomProperties() {
 		val file = new FileField
 		file.attachmentLimit should be (1)
 		file.attachmentTypes should be ('empty)
@@ -275,12 +275,12 @@ class FormFieldTest extends TestBase with Mockito {
 
 		// TAB-705
 		file.json = json
-		file.setProperties(file.getProperties)
+		file.setProperties(file.getProperties())
 
 		file.attachmentTypes should be (Seq("pdf","doc"))
 	}
 
-	@Test def wordCountFieldRange {
+	@Test def wordCountFieldRange() {
 		val wc = new WordCountField
 		wc.min should be (null)
 		wc.max should be (null)
@@ -295,7 +295,7 @@ class FormFieldTest extends TestBase with Mockito {
 		wc.max should be (5000)
 	}
 
-	@Test def maintainFieldOrder
+	@Test def maintainFieldOrder()
 	{
 		val assignment = new Assignment
 		assignment.assignmentService = mock[AssignmentService]
@@ -337,7 +337,7 @@ class FormFieldTest extends TestBase with Mockito {
 		commentField.position should be (0)
 		uploadField.position should be (1)
 		val feedbackComment = assignment.findField(Assignment.defaultFeedbackTextFieldName)
-		feedbackComment should not be (None)
+		feedbackComment should not be None
 		feedbackComment.get.position should be (0)
 	}
 

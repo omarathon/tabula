@@ -42,7 +42,7 @@ object MarkingState {
 		if (code == null || code == "Received") null
 		else values.find{_.name == code} match {
 			case Some(state) => state
-			case None => throw new IllegalArgumentException(s"Invalid marking state: ${code}")
+			case None => throw new IllegalArgumentException(s"Invalid marking state: $code")
 		}
 }
 

@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.Features
-import uk.ac.warwick.tabula.data.model.MarkingMethod
 import scala.collection.immutable.ListMap
 import uk.ac.warwick.tabula.data.model.FileAttachment
 
@@ -39,7 +38,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 			enhancedExtension=extension map { e => ExtensionListItem(e, withinExtension) }
 		)
 		
-	@Test def getStagesForAssignment {
+	@Test def stagesForAssignment() {
 		import WorkflowStages._
 		
 		assignment.collectMarks = false
@@ -94,7 +93,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		))
 	}
 	
-	@Test def progress {
+	@Test def progress() {
 		// Start with a very basic assignment, only the 3 core feedback workflows.
 		assignment.collectMarks = false
 		assignment.collectSubmissions = false
@@ -107,10 +106,10 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		{
 			val p = service.progress(assignment)(workflowItems(feedback=None))
 			p.stages should be (ListMap(
-				"AddFeedback" -> StageProgress(AddFeedback, false, "workflow.AddFeedback.notUploaded", Good, false, true),
-				"ReleaseFeedback" -> StageProgress(ReleaseFeedback, false, "workflow.ReleaseFeedback.notReleased", Good, false, false),
-				"ViewOnlineFeedback" -> StageProgress(ViewOnlineFeedback, false, "workflow.ViewOnlineFeedback.notViewed", Good, false, false),
-				"DownloadFeedback" -> StageProgress(DownloadFeedback, false, "workflow.DownloadFeedback.notDownloaded", Good, false, false)
+				"AddFeedback" -> StageProgress(AddFeedback, started = false, "workflow.AddFeedback.notUploaded", Good, completed = false, preconditionsMet = true),
+				"ReleaseFeedback" -> StageProgress(ReleaseFeedback, started = false, "workflow.ReleaseFeedback.notReleased", Good, completed = false, preconditionsMet = false),
+				"ViewOnlineFeedback" -> StageProgress(ViewOnlineFeedback, started = false, "workflow.ViewOnlineFeedback.notViewed", Good, completed = false, preconditionsMet = false),
+				"DownloadFeedback" -> StageProgress(DownloadFeedback, started = false, "workflow.DownloadFeedback.notDownloaded", Good, completed = false, preconditionsMet = false)
 			))
 			p.percentage should be (0)
 			p.nextStage should be (None) // no next stage because we haven't started
@@ -126,10 +125,10 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		{
 			val p = service.progress(assignment)(workflowItems(feedback=Some(feedback)))
 			p.stages should be (ListMap(
-				"AddFeedback" -> StageProgress(AddFeedback, true, "workflow.AddFeedback.uploaded", Good, true, true),
-				"ReleaseFeedback" -> StageProgress(ReleaseFeedback, true, "workflow.ReleaseFeedback.notReleased", Warning, false, true),
-				"ViewOnlineFeedback" -> StageProgress(ViewOnlineFeedback, false, "workflow.ViewOnlineFeedback.notViewed", Good, false, false),
-				"DownloadFeedback" -> StageProgress(DownloadFeedback, false, "workflow.DownloadFeedback.notDownloaded", Good, false, false)
+				"AddFeedback" -> StageProgress(AddFeedback, started = true, "workflow.AddFeedback.uploaded", Good, completed = true, preconditionsMet = true),
+				"ReleaseFeedback" -> StageProgress(ReleaseFeedback, started = true, "workflow.ReleaseFeedback.notReleased", Warning, completed = false, preconditionsMet = true),
+				"ViewOnlineFeedback" -> StageProgress(ViewOnlineFeedback, started = false, "workflow.ViewOnlineFeedback.notViewed", Good, completed = false, preconditionsMet = false),
+				"DownloadFeedback" -> StageProgress(DownloadFeedback, started = false, "workflow.DownloadFeedback.notDownloaded", Good, completed = false, preconditionsMet = false)
 			))
 			p.percentage should be (50)
 			p.nextStage should be (Some(ReleaseFeedback))
@@ -143,10 +142,10 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		{
 			val p = service.progress(assignment)(workflowItems(feedback=Some(feedback), feedbackDownloaded=false, onlineFeedbackViewed=false))
 			p.stages should be (ListMap(
-				"AddFeedback" -> StageProgress(AddFeedback, true, "workflow.AddFeedback.uploaded", Good, true, true),
-				"ReleaseFeedback" -> StageProgress(ReleaseFeedback, true, "workflow.ReleaseFeedback.released", Good, true, true),
-				"ViewOnlineFeedback" -> StageProgress(ViewOnlineFeedback, true, "workflow.ViewOnlineFeedback.notViewed", Warning, false, true),
-				"DownloadFeedback" -> StageProgress(DownloadFeedback, false, "workflow.DownloadFeedback.notDownloaded", Good, false, true)
+				"AddFeedback" -> StageProgress(AddFeedback, started = true, "workflow.AddFeedback.uploaded", Good, completed = true, preconditionsMet = true),
+				"ReleaseFeedback" -> StageProgress(ReleaseFeedback, started = true, "workflow.ReleaseFeedback.released", Good, completed = true, preconditionsMet = true),
+				"ViewOnlineFeedback" -> StageProgress(ViewOnlineFeedback, started = true, "workflow.ViewOnlineFeedback.notViewed", Warning, completed = false, preconditionsMet = true),
+				"DownloadFeedback" -> StageProgress(DownloadFeedback, started = false, "workflow.DownloadFeedback.notDownloaded", Good, completed = false, preconditionsMet = true)
 			))
 			p.percentage should be (75)
 			p.nextStage should be (Some(ViewOnlineFeedback)) // Complete
@@ -158,10 +157,10 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		{
 			val p = service.progress(assignment)(workflowItems(feedback=Some(feedback), feedbackDownloaded=true, onlineFeedbackViewed=true))
 			p.stages should be (ListMap(
-				"AddFeedback" -> StageProgress(AddFeedback, true, "workflow.AddFeedback.uploaded", Good, true, true),
-				"ReleaseFeedback" -> StageProgress(ReleaseFeedback, true, "workflow.ReleaseFeedback.released", Good, true, true),
-				"ViewOnlineFeedback" -> StageProgress(ViewOnlineFeedback, true, "workflow.ViewOnlineFeedback.viewed", Good, true, true),
-				"DownloadFeedback" -> StageProgress(DownloadFeedback, true, "workflow.DownloadFeedback.downloaded", Good, true, true)
+				"AddFeedback" -> StageProgress(AddFeedback, started = true, "workflow.AddFeedback.uploaded", Good, completed = true, preconditionsMet = true),
+				"ReleaseFeedback" -> StageProgress(ReleaseFeedback, started = true, "workflow.ReleaseFeedback.released", Good, completed = true, preconditionsMet = true),
+				"ViewOnlineFeedback" -> StageProgress(ViewOnlineFeedback, started = true, "workflow.ViewOnlineFeedback.viewed", Good, completed = true, preconditionsMet = true),
+				"DownloadFeedback" -> StageProgress(DownloadFeedback, started = true, "workflow.DownloadFeedback.downloaded", Good, completed = true, preconditionsMet = true)
 			))
 			p.percentage should be (100)
 			p.nextStage should be (None) // Complete

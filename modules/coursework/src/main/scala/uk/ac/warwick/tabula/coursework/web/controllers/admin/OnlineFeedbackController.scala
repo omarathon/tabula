@@ -111,12 +111,12 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineMarkerFeedbackFormCommand, errors: Errors): Mav = {
 
-		val isCompleted = command.markerFeedback.map(_.state == MarkingCompleted).getOrElse(false)
+		val isCompleted = command.markerFeedback.exists(_.state == MarkingCompleted)
 
 		val parentFeedback = command.markerFeedback.map(_.feedback)
 		val firstMarkerFeedback = parentFeedback.flatMap(feedback => Option(feedback.firstMarkerFeedback))
 		val secondMarkerFeedback =  parentFeedback.flatMap(feedback => Option(feedback.secondMarkerFeedback))
-		val isRejected = secondMarkerFeedback.map(_.state == Rejected).getOrElse(false)
+		val isRejected = secondMarkerFeedback.exists(_.state == Rejected)
 		val isFirstMarker = command.assignment.isFirstMarker(command.currentUser.apparentUser)
 		val isSecondMarker = command.assignment.isSecondMarker(command.currentUser.apparentUser)
 

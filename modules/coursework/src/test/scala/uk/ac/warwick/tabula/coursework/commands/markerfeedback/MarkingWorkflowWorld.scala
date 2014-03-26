@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
-import java.util.HashMap
 
 import collection.JavaConversions._
 
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.TestFixtures
+import java.util
 
 // reusable environment for marking workflow tests
 trait MarkingWorkflowWorld extends TestFixtures {
@@ -24,7 +24,7 @@ trait MarkingWorkflowWorld extends TestFixtures {
 	markingWorkflow.secondMarkers = makeUserGroup("cuslat", "cuday")
 	assignment.markingWorkflow = markingWorkflow
 
-	assignment.markerMap = new HashMap[String, UserGroup]()
+	assignment.markerMap = new util.HashMap[String, UserGroup]()
 	assignment.markerMap.put("cuslaj", makeUserGroup("cusxad", "cuscao", "curef"))
 	assignment.markerMap.put("cuscav", makeUserGroup("cusebr", "cuscav"))
 	assignment.markerMap.put("cuslat", makeUserGroup("cusxad", "cuscao", "curef"))

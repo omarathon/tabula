@@ -5,8 +5,6 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.MarkingMethod.{SeenSecondMarking, FirstMarkerOnly, ModeratedMarking, StudentsChooseMarker, SeenSecondMarkingLegacy}
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.AssignmentServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringAssignmentServiceComponent
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking

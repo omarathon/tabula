@@ -31,7 +31,7 @@ trait FeedbackAttachments {
 		if (!isIdentical) {
 			// if an attachment with the same name as this one exists then replace it
 			val duplicateAttachment = attachments.find(_.name == a.name)
-			duplicateAttachment.foreach(removeAttachment(_))
+			duplicateAttachment.foreach(removeAttachment)
 			addAttachment(a)
 		}
 		!isIdentical

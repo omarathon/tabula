@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.commands
 import uk.ac.warwick.tabula.TestBase
-import org.junit.Test
 import uk.ac.warwick.tabula.services.MaintenanceModeEnabledException
 import uk.ac.warwick.tabula.services.MaintenanceModeServiceImpl
 import uk.ac.warwick.tabula.events.Log4JEventListener
@@ -11,13 +10,13 @@ import uk.ac.warwick.tabula.events.EventHandling
 class CommandTest extends TestBase {
 	
 
-	@Test def commandName {
+	@Test def commandName() {
 		Spell6Command().eventName should be("DefendCastle")
 		HealSelfSpell().eventName should be("HealSelfSpell")
 		CastFlameSpellCommand().eventName should be("CastFlameSpell")
 	}
 	
-	@Test def maintenanceModeDisabled {
+	@Test def maintenanceModeDisabled() {
 		val mmService = new MaintenanceModeServiceImpl()
 		mmService.disable
 		
@@ -28,7 +27,7 @@ class CommandTest extends TestBase {
 		cmd.apply() should be (true)
 	}
 	
-	@Test(expected=classOf[MaintenanceModeEnabledException]) def maintenanceModeEnabled {
+	@Test(expected=classOf[MaintenanceModeEnabledException]) def maintenanceModeEnabled() {
 		EventHandling.enabled = true
 		
 		val mmService = new MaintenanceModeServiceImpl()
@@ -41,7 +40,7 @@ class CommandTest extends TestBase {
 		fail("expected exception")
 	}
 	
-	@Test def maintenanceModeEnabledButReadOnly {
+	@Test def maintenanceModeEnabledButReadOnly() {
 		val mmService = new MaintenanceModeServiceImpl()
 		mmService.enable
 		
@@ -52,9 +51,9 @@ class CommandTest extends TestBase {
 		cmd.apply() should be (true)
 	}
 	
-	@Test def description {
+	@Test def description() {
 		val description = new DescriptionImpl
-		description.properties(("yes" -> "no"), ("steve" -> Seq("tom", "jerry")))
+		description.properties("yes" -> "no", "steve" -> Seq("tom", "jerry"))
 		description.properties(Map("queen" -> "sheeba", "nine" -> 9))
 		
 		val department = Fixtures.department("in", "IT Services")
@@ -113,7 +112,7 @@ class CommandTest extends TestBase {
 // confused by the fact that "Command" appears in the outer class name.
 class TestCommand extends Command[Boolean] {
 	def describe(d:Description) {}
-	def applyInternal = true
+	def applyInternal() = true
 }
 
 // set event name via overriding value

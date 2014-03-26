@@ -3,19 +3,15 @@ package uk.ac.warwick.tabula.coursework.commands.markingworkflows
 import scala.collection.JavaConverters._
 import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils._
-import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.model.{MarkingMethod, Department, MarkingWorkflow}
 import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
-import uk.ac.warwick.tabula.services.AssignmentService
-import uk.ac.warwick.spring.Wire
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.CommandInternal
-import uk.ac.warwick.tabula.services.AssignmentServiceComponent
 import uk.ac.warwick.tabula.services.MarkingWorkflowServiceComponent
 
 /** Abstract base command for either creating or editing a MarkingWorkflow */
@@ -108,7 +104,7 @@ trait MarkingWorkflowCommandValidation extends SelfValidating {
 	}
 
 	def hasDuplicates(strings: Seq[String]): Boolean = {
-		strings.filter { _.hasText }.distinct.size != strings.filter { _.hasText }.size
+		strings.filter { _.hasText }.distinct.size != strings.count { _.hasText }
 	}
 
 	// If there's a current markingWorkflow, returns whether "other" is a different

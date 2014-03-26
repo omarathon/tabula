@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.coursework.web
 
-import java.net.URLEncoder
 import uk.ac.warwick.tabula.data.model.{Module, MarkingWorkflow, Department, Assignment}
 import uk.ac.warwick.tabula.web.RoutesUtils
-import uk.ac.warwick.tabula.data.model.forms.Extension
 
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs
@@ -22,10 +20,10 @@ object Routes {
 	}
 
 	object admin {
-		def department(department: Department) = context + "/admin/department/%s/" format (encoded(department.code))
-		def feedbackTemplates (department: Department) = context + "/admin/department/%s/settings/feedback-templates/" format (encoded(department.code))
-		def extensionSettings (department: Department) = context + "/admin/department/%s/settings/extensions" format (encoded(department.code))
-		def feedbackReports (department: Department) = context + "/admin/department/%s/reports/feedback/" format (encoded(department.code))
+		def department(department: Department) = context + "/admin/department/%s/" format encoded(department.code)
+		def feedbackTemplates (department: Department) = context + "/admin/department/%s/settings/feedback-templates/" format encoded(department.code)
+		def extensionSettings (department: Department) = context + "/admin/department/%s/settings/extensions" format encoded(department.code)
+		def feedbackReports (department: Department) = context + "/admin/department/%s/reports/feedback/" format encoded(department.code)
 
 		object markingWorkflow {
 			def list(department: Department) = admin.department(department) + "/markingworkflows"
@@ -58,7 +56,7 @@ object Routes {
 				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/feedback/online/secondmarker"
 			}
 
-			def create(module: Module) = context + "/admin/module/%s/assignments/new" format (encoded(module.code))
+			def create(module: Module) = context + "/admin/module/%s/assignments/new" format encoded(module.code)
 
 			private def assignmentroot(assignment: Assignment) = context + "/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), assignment.id)
 

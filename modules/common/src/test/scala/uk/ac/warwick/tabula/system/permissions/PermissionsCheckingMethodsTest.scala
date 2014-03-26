@@ -2,12 +2,9 @@ package uk.ac.warwick.tabula.system.permissions
 
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Department}
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.services.permissions.{PermissionDefinition, RoleService}
-import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
+import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.tabula.system.CustomDataBinder
 import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
 
@@ -28,7 +25,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 
 	private def clearAnyChecks() { permissionsAnyChecks.clear() }
 
-	@Test def checks {
+	@Test def checks() {
 		PermissionCheck(Permissions.Module.Create, dept)
 		PermissionCheck(Permissions.Module.Delete, dept)
 		PermissionCheckAll(Permissions.Module.ManageAssignments, Seq(mod1, mod2))
@@ -42,7 +39,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 		))
 	}
 
-	@Test def linkedAssignmentToModule {
+	@Test def linkedAssignmentToModule() {
 		val assignment = Fixtures.assignment("my assignment")
 		assignment.module = mod1
 
@@ -58,7 +55,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 		}
 	}
 
-	@Test def linkedFeedbackToAssignment {
+	@Test def linkedFeedbackToAssignment() {
 		val ass1 = Fixtures.assignment("my assignment")
 		ass1.id = "ass1"
 
@@ -81,7 +78,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 		}
 	}
 
-	@Test def linkedSubmissionToAssignment {
+	@Test def linkedSubmissionToAssignment() {
 		val ass1 = Fixtures.assignment("my assignment")
 		ass1.id = "ass1"
 
@@ -104,7 +101,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 		}
 	}
 
-	@Test def linkedMarkingWorkflowToDepartment {
+	@Test def linkedMarkingWorkflowToDepartment() {
 		val markingWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("my workflow")
 		markingWorkflow.department = dept
 
@@ -123,7 +120,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 		}
 	}
 
-	@Test def linkedFeedbackTemplateToDepartment {
+	@Test def linkedFeedbackTemplateToDepartment() {
 		val template = Fixtures.feedbackTemplate("my template")
 		template.department = dept
 
@@ -142,7 +139,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 		}
 	}
 
-	@Test def mandatory {
+	@Test def mandatory() {
 		val assignment = Fixtures.assignment("my assignment")
 		mandatory(assignment) should be (assignment)
 
@@ -163,7 +160,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 		}
 	}
 
-	@Test def notDeleted {
+	@Test def notDeleted() {
 		val assignment = Fixtures.assignment("my assignment")
 		notDeleted(assignment)
 
@@ -176,7 +173,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 		}
 	}
 
-	@Test def checkOneOf {
+	@Test def checkOneOf() {
 		val user = new User("custard")
 		user.setIsLoggedIn(true)
 		user.setFoundUser(true)
@@ -184,9 +181,9 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 
 		val securityService = new SecurityService
 		val roleService = mock[RoleService]
-		roleService.getExplicitPermissionsFor(currentUser, mod1) returns (Stream(
+		roleService.getExplicitPermissionsFor(currentUser, mod1) returns Stream(
 			PermissionDefinition(Permissions.Assignment.Create, Some(mod1), true)
-		))
+		)
 		securityService.roleService = roleService
 
 		PermissionCheckAny(

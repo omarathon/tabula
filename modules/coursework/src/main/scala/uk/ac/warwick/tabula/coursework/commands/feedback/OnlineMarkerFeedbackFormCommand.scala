@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.{MarkingState, FileAttachment, Feedback, MarkerFeedback, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{FileAttachment, Feedback, MarkerFeedback, Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.services.{ZipServiceComponent, FileAttachmentServiceComponent, FeedbackServiceComponent, AutowiringZipServiceComponent, AutowiringFileAttachmentServiceComponent, AutowiringFeedbackServiceComponent}
@@ -77,12 +77,11 @@ trait MarkerFeedbackStateCopy {
 	*/
 	def copyState(markerFeedback: Option[MarkerFeedback], copyFunction: MarkerFeedback => Unit): Unit = markerFeedback match {
 		case Some(f) => copyFunction(f)
-		case None => {
+		case None =>
 			fields = {
 				val pairs = assignment.feedbackFields.map { field => field.id -> field.blankFormValue }
 				Map(pairs: _*).asJava
 			}
-		}
 	}
 
 	// when we dont specify a copy function use the one in this trait

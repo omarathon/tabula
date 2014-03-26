@@ -5,7 +5,7 @@ import scala.collection.JavaConverters._
 import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
-import org.hibernate.annotations.{ForeignKey, Filter, FilterDef, AccessType, BatchSize, Type, IndexColumn}
+import org.hibernate.annotations.{ForeignKey, Filter, FilterDef, AccessType, BatchSize, Type}
 import org.joda.time.{LocalDate, DateTime}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
@@ -193,7 +193,7 @@ class Assignment
 	def members_=(group: UserGroup) { _members = group }
 
 	// TAB-1446 If hibernate sets members to null, make a new empty usergroup
-	override def postLoad {
+	override def postLoad() {
 		ensureMembersGroup
 	}
 
@@ -262,7 +262,7 @@ class Assignment
 
 	def isOpened(now: DateTime) = now.isAfter(openDate)
 
-	def isOpened(): Boolean = isOpened(new DateTime)
+	def isOpened: Boolean = isOpened(new DateTime)
 
 	/**
 	 * Whether it's after the close date. Depending on the assignment
@@ -270,7 +270,7 @@ class Assignment
 	 */
 	def isClosed(now: DateTime) = !openEnded && now.isAfter(closeDate)
 
-	def isClosed(): Boolean = isClosed(new DateTime)
+	def isClosed: Boolean = isClosed(new DateTime)
 
 	/**
 	 * True if the specified user has been granted an extension and that extension has not expired on the specified date
@@ -337,13 +337,13 @@ class Assignment
 	/**
 	 * Calculates whether we could submit to this assignment.
 	 */
-	def submittable(user: User) = isAlive && collectSubmissions && isOpened() && (allowLateSubmissions || !isClosed() || isWithinExtension(user))
+	def submittable(user: User) = isAlive && collectSubmissions && isOpened && (allowLateSubmissions || !isClosed || isWithinExtension(user))
 
 	/**
 	 * Calculates whether we could re-submit to this assignment (assuming that the current
 	 * student has already submitted).
 	 */
-	def resubmittable(user: User) = submittable(user) && allowResubmission && (!isClosed() || isWithinExtension(user))
+	def resubmittable(user: User) = submittable(user) && allowResubmission && (!isClosed || isWithinExtension(user))
 
 	def mostRecentFeedbackUpload = feedbacks.maxBy {
 		_.uploadedDate
@@ -361,7 +361,7 @@ class Assignment
 		fields.remove(field)
 		assignmentService.deleteFormField(field)
 		// manually update all fields in the context to reflect their new positions
-		fields.filter(_.context == field.context).zipWithIndex foreach {case (field, index) => field.position = index}
+		fields.filter(_.context == field.context).zipWithIndex foreach {case (f, index) => f.position = index}
 	}
 
 	def attachmentField: Option[FileField] = findFieldOfType[FileField](Assignment.defaultUploadName)
@@ -489,7 +489,7 @@ class Assignment
 	def getMarkerFeedback(uniId:String, user:User) : Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.universityId == uniId)
 		parentFeedback match {
-			case Some(f) => {
+			case Some(f) =>
 				if(this.isFirstMarker(user)) {
 					val firstMarkerFeedback = f.retrieveFirstMarkerFeedback
 					if (firstMarkerFeedback.state == MarkingState.MarkingCompleted) {
@@ -503,7 +503,6 @@ class Assignment
 					Some(f.retrieveSecondMarkerFeedback)
 				else
 					None
-			}
 			case None => None
 		}
 	}
@@ -556,7 +555,7 @@ class Assignment
 
 }
 
-case class SubmissionsReport(val assignment: Assignment) {
+case class SubmissionsReport(assignment: Assignment) {
 
 	private def feedbacks = assignment.fullFeedback
 	private def submissions = assignment.submissions

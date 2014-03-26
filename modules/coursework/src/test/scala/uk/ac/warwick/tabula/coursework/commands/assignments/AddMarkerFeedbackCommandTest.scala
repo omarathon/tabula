@@ -8,14 +8,13 @@ import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.MockUserLookup
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.FileDao
 
 // scalastyle:off magic.number
 class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 
 	var dao: FileDao = mock[FileDao]
-	dao.getData(null) returns (None)
+	dao.getData(null) returns None
 
 	val module = Fixtures.module("cs118")
 	val assignment = Fixtures.assignment("my assignment")
@@ -30,7 +29,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 	/**
 	 * TAB-535
 	 */
-	@Test def duplicateFileNamesInParent = withUser("cuscav") {
+	@Test def duplicateFileNamesInParent() = withUser("cuscav") {
 		val cmd = new AddMarkerFeedbackCommand(module, assignment, currentUser)
 		cmd.userLookup = userLookup
 		
@@ -64,7 +63,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		item.duplicateFileNames should be ('empty)
 	}
 	
-	@Test def duplicateFileNames = withUser("cuscav") {
+	@Test def duplicateFileNames() = withUser("cuscav") {
 		val cmd = new AddMarkerFeedbackCommand(module, assignment, currentUser)
 		cmd.userLookup = userLookup
 		

@@ -259,7 +259,7 @@ object Fixtures extends Mockito {
 	def monitoringCheckpoint(point: MonitoringPoint, student: StudentMember, state: AttendanceState) = {
 		val checkpoint = new MonitoringCheckpoint
 		val monitoringPointService = smartMock[MonitoringPointService]
-		monitoringPointService.studentAlreadyReportedThisTerm(student, point) returns (false)
+		monitoringPointService.studentAlreadyReportedThisTerm(student, point) returns false
 		checkpoint.monitoringPointService = monitoringPointService
 		checkpoint.point = point
 		checkpoint.student = student
