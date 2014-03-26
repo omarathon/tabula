@@ -177,7 +177,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 				.setParameterList("ids", okayToDelete.map(_.id))
 				.run()
 			for (attachment <- okayToDelete; file <- getData(attachment.id)) {
-				logger.info(s"Deleting attachment: id=${attachment.id}, path=${file.getAbsolutePath}, name=${attachment.name}, created=${attachment.dateUploaded.toString()}")
+				logger.info(s"Deleting attachment: id=${attachment.id}, path=${file.getAbsolutePath}, name=${attachment.name}, uploadedDate=${attachment.dateUploaded.toString()}, uploadedBy=${attachment.uploadedBy}")
 
 				file.delete()
 			}

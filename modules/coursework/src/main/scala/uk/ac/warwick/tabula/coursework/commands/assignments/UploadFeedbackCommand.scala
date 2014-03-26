@@ -241,6 +241,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 					f.name = filenameOf(name)
 					f.uploadedData = new ZipEntryInputStream(zip, entry)
 					f.uploadedDataLength = entry.getSize
+					f.uploadedBy = submitter.userId
 					fileDao.saveTemporary(f)
 					(name, f)
 				}

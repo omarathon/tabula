@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.NoBind
 import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.RequestInfo
 
 /**
  * Encapsulates initially-uploaded MultipartFiles with a reference to
@@ -93,6 +94,7 @@ class UploadedFile extends BindListener {
 						a.name = new File(item.getOriginalFilename()).getName
 						a.uploadedData = item.getInputStream
 						a.uploadedDataLength = item.getSize
+						RequestInfo.fromThread.foreach { info => a.uploadedBy = info.user.userId }
 						fileDao.saveTemporary(a)
 						a
 					}
