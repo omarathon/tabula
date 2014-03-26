@@ -31,23 +31,23 @@ class ReleaseSmallGroupSetsNotification extends Notification[SmallGroup, Unit]
 	def isStudent = getBooleanSetting("isStudent", default=false)
 	def isStudent_= (b:Boolean) { settings += ("isStudent" -> b) }
 
-	def title: String = {
-		val formatString = groups.toList match {
-			case Nil => ""
-			case singleGroup :: Nil => singleGroup.groupSet.format.description
-			case _ => {
-				val formats = groups.map(g => g.groupSet.format.description).toList.distinct
-				formats.init.mkString(", ") + " and " + formats.last
-			}
+	def formatString = groups.toList match {
+		case Nil => ""
+		case singleGroup :: Nil => singleGroup.groupSet.format.description
+		case _ => {
+			val formats = groups.map(g => g.groupSet.format.description).toList.distinct
+			formats.init.mkString(", ") + " and " + formats.last
 		}
-		formatString + " allocation"
 	}
+
+	def title: String = s"$formatString allocation"
 
 	def content =
 		FreemarkerModel(ReleaseSmallGroupSetsNotification.templateLocation,
 			Map("user" -> recipient, "groups" -> groups, "profileUrl" -> url)
 		)
 
+	def actionRequired = false
 	
 	def url: String = {
 		if (isStudent) {
@@ -56,5 +56,7 @@ class ReleaseSmallGroupSetsNotification extends Notification[SmallGroup, Unit]
 			Routes.groups.tutor.mygroups
 		}
 	}
+
+	def urlTitle = s"view your $formatString groups"
 
 }

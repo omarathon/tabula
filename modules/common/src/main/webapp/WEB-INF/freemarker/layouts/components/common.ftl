@@ -3,6 +3,7 @@
 <@script "/static/js/jquery-biglist.js" />
 <@script "/static/js/jquery-confirmmodal.js" />
 <@script "/static/js/jquery-details.js" />
+<@script "/static/js/jquery-collapsible.js" />
 <@script "/static/js/jquery-tableform.js" />
 <@script "/static/js/jquery-draganddrop.js" />
 <@script "/static/js/jquery-expandingTable.js" />

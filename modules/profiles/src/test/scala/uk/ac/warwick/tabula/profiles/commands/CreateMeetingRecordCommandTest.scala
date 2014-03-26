@@ -8,19 +8,20 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.data.FileDao
+import scala.collection.JavaConverters._
 
 // scalastyle:off magic.number
 class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecordTests {
 
 	@Test
-	def validMeeting = withUser("cuscav") { withFakeTime(aprilFool) {
+	def validMeeting() = withUser("cuscav") { withFakeTime(aprilFool) {
 
 		val cmd = new CreateMeetingRecordCommand(creator, relationship, false) {
 			override val session = mockSession
 		}
 		cmd.title = "A title"
 		cmd.format = FaceToFace
-		cmd.meetingDate  = dateTime(3903, DateTimeConstants.MARCH).toLocalDate // it's the future
+		cmd.meetingDateTime  = dateTime(3903, DateTimeConstants.MARCH) // it's the future
 		cmd.maintenanceMode = maintenanceModeService
 		cmd.notificationService = notificationService
 
@@ -28,21 +29,21 @@ class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRec
 		var errors = new BindException(cmd, "command")
 		cmd.validate(errors)
 		errors.hasErrors should be (true)
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("meetingDate")
+		errors.getErrorCount should be (2)
+		errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateTime") should be (true)
 		errors.getFieldError.getCode should be ("meetingRecord.date.future")
 
-		cmd.meetingDate = dateTime(2007, DateTimeConstants.MARCH).toLocalDate // > 5 years ago
+		cmd.meetingDateTime = dateTime(2007, DateTimeConstants.MARCH) // > 5 years ago
 
 		// check invalid past date
 		errors = new BindException(cmd, "command")
 		cmd.validate(errors)
 		errors.hasErrors should be (true)
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("meetingDate")
+		errors.getErrorCount should be (2)
+		errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateTime") should be (true)
 		errors.getFieldError.getCode should be ("meetingRecord.date.prehistoric")
 
-		cmd.meetingDate = marchHare
+		cmd.meetingDateTime = marchHare
 		cmd.title = ""
 		cmd.features = emptyFeatures
 		cmd.features.meetingRecordApproval = true
@@ -99,7 +100,7 @@ class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRec
 		meeting.lastUpdatedDate should be (aprilFool)
 		meeting.title should be ("A good title")
 		meeting.description should be ("Lovely words")
-		meeting.meetingDate.toLocalDate should be (marchHare)
+		meeting.meetingDate should be (marchHare)
 		meeting.attachments.get(0).name should be ("Beltane")
 		meeting.format should be (Email)
 	}}

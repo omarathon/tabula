@@ -1,28 +1,13 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import org.joda.time.DateTimeConstants
-import org.joda.time.LocalDate
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.validation.BindException
 import org.springframework.web.multipart.MultipartFile
-import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.StaffMember
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import org.springframework.validation.BindException
 import org.springframework.transaction.annotation.Transactional
-import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.data.model.StaffMember
-import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.data.model.ExternalStudentRelationship
@@ -35,9 +20,7 @@ class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 	@Transactional
 	@Test
-	def validMeeting = withUser("cusdx") { withFakeTime(aprilFool) {
-
-		val ps = mock[ProfileService]
+	def validMeeting() = withUser("cusdx") { withFakeTime(aprilFool) {
 
 		val creator = transactional { tx =>
 			val m = new StaffMember("9876543")
@@ -61,7 +44,7 @@ class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		val createMeetingRecordCommand = new CreateMeetingRecordCommand(creator, relationship, false)
 		createMeetingRecordCommand.title = "Title"
 		createMeetingRecordCommand.format = FaceToFace
-		createMeetingRecordCommand.meetingDate  = dateTime(3903, DateTimeConstants.MARCH).toLocalDate // it's the future
+		createMeetingRecordCommand.meetingDateTime  = dateTime(3903, DateTimeConstants.MARCH) // it's the future
 		createMeetingRecordCommand.description = "Lovely words"
 
 		// add a file

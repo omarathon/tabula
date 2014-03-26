@@ -53,14 +53,6 @@ class SmallGroupSetChangedNotificationTemplateTest extends TestBase with Freemar
   }}
 
   @Test
-  def rendersProfileUrlOnceOnly{new NotificationFixture {
-    val output =
-      renderToString(SmallGroupSetChangedNotification.templateLocation,
-				Map("groups" -> groupSet1.groups, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
-    verify(urlModel.mockDirective, times(1)).execute(anyObject(),anyMap,anyObject(),anyObject())
-  }}
-
-  @Test
   def callsWeekRangeFormatterForEachEvent() {
     new NotificationFixture {
       val output =

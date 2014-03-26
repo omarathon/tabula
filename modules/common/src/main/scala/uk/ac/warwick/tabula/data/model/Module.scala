@@ -85,6 +85,8 @@ object Module {
 	// where cats can be a decimal number.
 	private val ModuleCatsPattern = new Regex("""(.+?)-(\d+(?:\.\d+)?)""")
 
+	private val ModuleCodeOnlyPattern = new Regex("""([a-zA-Z0-9]+)""")
+
 	private val WebgroupPattern = new Regex("""(.+?)-(.+)""")
 
 	def nameFromWebgroupName(groupName: String): String = groupName match {
@@ -93,12 +95,14 @@ object Module {
 	}
 
 	def stripCats(fullModuleName: String): String = fullModuleName match {
-		case ModuleCatsPattern(module, cats) => module
+		case ModuleCatsPattern(module, _) => module
+		case ModuleCodeOnlyPattern(module) => module
 		case _ => throw new IllegalArgumentException(fullModuleName + " didn't match pattern")
 	}
 
 	def extractCats(fullModuleName: String): Option[String] = fullModuleName match {
-		case ModuleCatsPattern(module, cats) => Some(cats)
+		case ModuleCatsPattern(_, cats) => Some(cats)
+		case ModuleCodeOnlyPattern(_) => None
 		case _ => None
 	}
 

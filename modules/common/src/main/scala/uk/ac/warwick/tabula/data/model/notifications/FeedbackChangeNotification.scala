@@ -33,9 +33,10 @@ class FeedbackChangeNotification extends NotificationWithTarget[Feedback, Assign
 
 	def content = FreemarkerModel("/WEB-INF/freemarker/emails/feedbackchanged.ftl", Map(
 		"assignment" -> assignment,
-		"module" -> module,
-		"path" -> url
+		"module" -> module
 	))
 
 	def url = Routes.assignment.receipt(assignment)
+	def urlTitle = "view your new feedback"
+	def actionRequired = true
 }

@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.profiles.commands
 import uk.ac.warwick.tabula.data.model.{Notification, MeetingRecord}
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import scala.language.implicitConversions
 import uk.ac.warwick.tabula.data.model.notifications.EditedMeetingRecordApprovalNotification
@@ -23,8 +22,13 @@ class EditMeetingRecordCommand(meetingRecord: MeetingRecord)
 
 		title = title.getOrElse(meetingRecord.title)
 		description = description.getOrElse(meetingRecord.description)
-		meetingDate = meetingDate.getOrElse(meetingRecord.meetingDate.toLocalDate)
+		meetingRecord.isRealTime match {
+			case true => meetingDateTime = meetingDateTime.getOrElse(meetingRecord.meetingDate)
+			case false => meetingDate = meetingDate.getOrElse(meetingRecord.meetingDate.toLocalDate)
+		}
 		format = format.getOrElse(meetingRecord.format)
+		isRealTime = meetingRecord.isRealTime
+
 		attachedFiles = if(posted){
 			// we posted so attachments must have been removed
 			attachedFiles.getOrElse(JList())

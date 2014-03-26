@@ -17,6 +17,7 @@ class MeetingRecordRejectedNotification
 	def relationship = meeting.relationship
 
 	def verb = "reject"
+	def actionRequired = true
 
 	def title = "Meeting record rejected"
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
@@ -25,9 +26,10 @@ class MeetingRecordRejectedNotification
 		"dateFormatter" -> dateOnlyFormatter,
 		"meetingRecord" -> approval.meetingRecord,
 		"verbed" -> "rejected",
-		"nextActionDescription" -> "edit the record and submit it for approval again",
-		"reason" -> approval.comments,
-		"profileLink" -> url
+		"reason" -> approval.comments
 	))
+
+	def urlTitle = "edit the record and submit it for approval again"
+
 	def recipients = Seq(approval.meetingRecord.creator.asSsoUser)
 }

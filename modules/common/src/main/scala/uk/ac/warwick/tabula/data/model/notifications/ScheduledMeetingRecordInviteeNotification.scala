@@ -20,9 +20,9 @@ class ScheduledMeetingRecordInviteeNotification
 		"role" -> agentRole,
 		"verb" -> verb,
 		"dateTimeFormatter" -> dateTimeFormatter,
-		"meetingRecord" -> meeting,
-		"profileLink" -> url
+		"meetingRecord" -> meeting
 	))
+
 	def recipient = {
 		if (meeting.creator.universityId == meeting.relationship.studentId) {
 			meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage)).asSsoUser
@@ -30,4 +30,6 @@ class ScheduledMeetingRecordInviteeNotification
 			meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)).asSsoUser
 		}
 	}
+
+	def actionRequired = false
 }

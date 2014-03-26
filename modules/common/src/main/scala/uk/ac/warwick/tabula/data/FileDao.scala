@@ -36,6 +36,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 
 	val TemporaryFileBatch = 1000 // query for this many each time
 	val TemporaryFileSubBatch = 50 // run a separate transaction for each one
+	val TemporaryFileMaxAgeInDays = 14 // TAB-2109
 
 	private def partition(id: String, splitSize: Int): String = id.replace("-", "").grouped(splitSize).mkString("/")
 	private def partition(id: String): String = partition(id, idSplitSize)
@@ -152,7 +153,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	private def findOldTemporaryFiles = transactional() {
 		session.newCriteria[FileAttachment]
 			.add(is("temporary", true))
-			.add(Is.lt("dateUploaded", now minusDays (2)))
+			.add(Is.lt("dateUploaded", now.minusDays(TemporaryFileMaxAgeInDays)))
 			.setMaxResults(TemporaryFileBatch)
 			.list
 	}
@@ -176,7 +177,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 				.setParameterList("ids", okayToDelete.map(_.id))
 				.run()
 			for (attachment <- okayToDelete; file <- getData(attachment.id)) {
-				logger.info(s"Deleting attachment: id=${attachment.id}, path=${file.getAbsolutePath}, name=${attachment.name}, created=${attachment.dateUploaded.toString()}")
+				logger.info(s"Deleting attachment: id=${attachment.id}, path=${file.getAbsolutePath}, name=${attachment.name}, uploadedDate=${attachment.dateUploaded.toString()}, uploadedBy=${attachment.uploadedBy}")
 
 				file.delete()
 			}

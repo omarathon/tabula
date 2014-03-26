@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.{Heron, Notification, NotificationPriority, HeronWarningNotification}
+import uk.ac.warwick.tabula.data.model.{HeronDefeatedNotification, Heron, Notification, NotificationPriority, HeronWarningNotification}
 import org.apache.lucene.store.RAMDirectory
 import org.apache.lucene.index.Term
 import org.apache.lucene.search.{Sort, SortField, TermQuery}
@@ -35,7 +35,12 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 
 	// Selection of notifications intended for a couple of different recipients
 	lazy val items = for (i <- 1 to 100) yield {
-		val notification = new HeronWarningNotification
+		val notification =
+			if (i % 2 == 0) {
+				new HeronWarningNotification
+			} else {
+				new HeronDefeatedNotification
+			}
 		notification.id = "nid"+i
 		notification.created = now.plusMinutes(i)
 		dao.getById(notification.id) returns Some(notification)
@@ -127,6 +132,20 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 		page2.items.size should be (20)
 
 		page2.items.map{_.id} should be (expectedIds.reverse.slice(20, 40))
+	}
+
+	@Test
+	def typeFilteredUserStreamEmpty() {
+		indexTestItems()
+		val request = ActivityStreamRequest(user=recipient, types=Some(Set("Nonexistent")), pagination=None)
+		service.userStream(request).items.size should be (0)
+	}
+
+	@Test
+	def typeFilteredUserStream() {
+		indexTestItems()
+		val request = ActivityStreamRequest(user=otherRecipient, types=Some(Set("heronDefeat")), pagination=None)
+		service.userStream(request).items.size should be (50)
 	}
 
 	@Test

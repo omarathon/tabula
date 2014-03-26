@@ -1895,3 +1895,83 @@ ul.nav-pills {
 	font-family: Bitter, Cambria, "Liberation Serif", Georgia, "Times New Roman", Times, serif;
 	margin-top: 30px;
 }
+
+.home-page-activity {
+	margin-top: 2em;
+}
+
+// General activity stream styles.
+.activity-stream {
+	.activity {
+		padding-bottom: @grid-size * 0.75;
+		margin-bottom: @grid-size * 0.75;
+		border-bottom: 1px solid #cccccc;
+	}
+	.headline {
+		i {
+			padding-right: 1em;
+			position: relative;
+			left: 8px;
+			top: -1px;
+		}
+		h5 {
+			display: inline;
+		}
+		a h5 {
+			color: @linkColor;
+		}
+	}
+
+	.priority-info .headline i { color: @tabulaBlue; }
+	.priority-warning .headline i { color: @tabulaOrangeLight; }
+	.priority-critical .headline i { color: @tabulaRed; }
+
+	.timestamp {
+		color: #666;
+		font-size: @fontSizeSmall;
+		display: inline;
+		padding-left: 1em;
+	}
+	.content {
+		padding-left: @grid-size * 2.5;
+
+		// Compact down some content.
+		// Annoyingly need !important as the ID6 styles are qualified by ID.
+		p { margin: 0 !important; }
+		ul { margin: 0.2em !important; }
+		li { margin: 0 !important; color: @tabulaGray; }
+
+	}
+	.more-link {
+		margin-top: @grid-size;
+	}
+	.deleted-notice {
+		margin-bottom: 0;
+	}
+
+	.collapsible {
+		@detailsRightArrow: '\25b8';
+		@detailsDownArrow: '\25be';
+
+		height: 1.6em;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		cursor: hand;
+		cursor: pointer;
+
+		&::before {
+			content: @detailsRightArrow;
+			position: absolute;
+			margin-left: -13px;
+			margin-top: -1px;
+		}
+		&.open {
+			height: auto;
+			white-space: inherit;
+			&::before {
+				content: @detailsDownArrow;
+			}
+		}
+	}
+}

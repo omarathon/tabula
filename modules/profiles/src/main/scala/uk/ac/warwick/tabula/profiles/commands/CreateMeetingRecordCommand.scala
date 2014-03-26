@@ -10,7 +10,8 @@ import uk.ac.warwick.tabula.data.model.notifications.NewMeetingRecordApprovalNot
 class CreateMeetingRecordCommand(creator: Member, relationship: StudentRelationship, considerAlternatives: Boolean)
 	extends ModifyMeetingRecordCommand(creator, relationship, considerAlternatives) {
 
-	meetingDate = DateTime.now.toLocalDate
+	meetingDateTime = DateTime.now.hourOfDay.roundFloorCopy
+	isRealTime = true
 
 	val meeting = new MeetingRecord(creator, relationship)
 
