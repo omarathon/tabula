@@ -163,6 +163,8 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 
 	def hasOnlineFeedback: Boolean = onlineFeedbackComments.isDefined
 
+	def allMarkerFeedbackCompleted: Boolean = Seq(firstMarkerFeedback.state, secondMarkerFeedback.state, finalMarkerFeedback.state).forall(_ == MarkingState.MarkingCompleted)
+
 	def hasGenericFeedback: Boolean = Option(assignment.genericFeedback).isDefined
 
 	/**

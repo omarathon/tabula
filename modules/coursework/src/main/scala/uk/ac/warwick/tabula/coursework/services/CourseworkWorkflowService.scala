@@ -277,13 +277,19 @@ object WorkflowStages {
 	
 	case object AddFeedback extends WorkflowStage {
 		def actionCode = "workflow.AddFeedback.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) =
+		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
-				case Some(item) if item.feedback.hasAttachments || item.feedback.hasOnlineFeedback =>
+				case Some(item) if (item.feedback.allMarkerFeedbackCompleted || item.feedback.hasAttachments || item.feedback.hasOnlineFeedback) => {
 					StageProgress(AddFeedback, true, "workflow.AddFeedback.uploaded", Good, true)
-				case Some(_) => StageProgress(AddFeedback, true, "workflow.AddFeedback.notUploaded", Warning, false)
-				case _ => StageProgress(AddFeedback, false, "workflow.AddFeedback.notUploaded")
 			}
+				case Some(_) => {
+					StageProgress(AddFeedback, true, "workflow.AddFeedback.notUploaded", Warning, false)
+				}
+				case _ => {
+					StageProgress(AddFeedback, false, "workflow.AddFeedback.notUploaded")
+				}
+			}
+		}
 	}
 	
 	case object ReleaseFeedback extends WorkflowStage {
