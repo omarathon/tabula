@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
-import org.joda.time.LocalDate
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.{MeetingRecordServiceComponent, AutowiringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, FileAttachmentServiceComponent}
@@ -30,7 +30,8 @@ trait ConvertScheduledMeetingRecordCommandPopulate	extends PopulateOnForm {
 	override def populate() = {
 		title = meetingRecord.title
 		description = meetingRecord.description
-		meetingDate = meetingRecord.meetingDate.toLocalDate
+		meetingDateTime = meetingRecord.meetingDate
+		isRealTime = true
 		format = meetingRecord.format
 		attachedFiles = meetingRecord.attachments
 	}
@@ -67,7 +68,8 @@ trait ConvertScheduledMeetingRecordState {
 
 	var title: String = _
 	var description: String = _
-	var meetingDate: LocalDate = _
+	var meetingDateTime: DateTime = _
+	var isRealTime: Boolean = _
 	var format: MeetingFormat = _
 
 	var file: UploadedFile = new UploadedFile

@@ -86,26 +86,19 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 		this.relationship = relationship
 	}
 
-	def toEventOccurrence: Option[EventOccurrence] = {
-		/*
-		 * TAB-1928
-		 * TODO Somehow include non-scheduled meetings
-		 */
+	def toEventOccurrence: Option[EventOccurrence]
 
-		if (isScheduled) {
-			Some(EventOccurrence(
-				title,
-				description,
-				TimetableEventType.Meeting,
-				meetingDate.toLocalDateTime,
-				meetingDate.plusHours(1).toLocalDateTime,
-				(if (format == MeetingFormat.FaceToFace) None else Option(format).map { _.description }),
-				Some(relationship.relationshipType.description),
-				relationship.agentMember.map { _.universityId }.toSeq
-			))
-		}	else {
-			None
-		}
+	protected def asEventOccurrence: Option[EventOccurrence] = {
+		Some(EventOccurrence(
+			title,
+			description,
+			TimetableEventType.Meeting,
+			meetingDate.toLocalDateTime,
+			meetingDate.plusHours(1).toLocalDateTime,
+			if (format == MeetingFormat.FaceToFace) None else Option(format).map { _.description },
+			Some(relationship.relationshipType.description),
+			relationship.agentMember.map { _.universityId }.toSeq
+		))
 	}
 
 	def permissionsParents = relationship.studentMember.toStream

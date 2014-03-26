@@ -12,7 +12,8 @@ class ModuleTest extends PersistenceTestBase {
 		Module.stripCats("md101-15") should be ("md101")
 		Module.stripCats("md105-5") should be ("md105")
 		Module.stripCats("md105-7.5") should be ("md105")
-		intercept[IllegalArgumentException] { Module.stripCats("md105") }
+		Module.stripCats("md105") should be ("md105")
+		intercept[IllegalArgumentException] { Module.stripCats("what the feck!") }
 	}
 
 	@Test def extractCats {

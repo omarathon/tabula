@@ -86,6 +86,7 @@ abstract class Features {
 	@Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}") var attendanceMonitoringAssignmentSubmissionPointType = defaults.attendanceMonitoringAssignmentSubmissionPointType
 	@Value("${features.xSendfile:true}") var xSendfile = defaults.xSendfile
 	@Value("${features.newSeenSecondMarkingWorkflows:false}") var newSeenSecondMarkingWorkflows = defaults.newSeenSecondMarkingWorkflows
+	@Value("${features.activityStreams:true}") var activityStreams = defaults.activityStreams
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -160,6 +161,7 @@ class FeaturesMessage {
 	@BeanProperty var attendanceMonitoringAssignmentSubmissionPointType = true
 	@BeanProperty var xSendfile = true
 	@BeanProperty var newSeenSecondMarkingWorkflows = false
+	@BeanProperty var activityStreams = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

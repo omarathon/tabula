@@ -21,7 +21,7 @@ tabula-private.properties
 atlassian-ide-plugin.xml
 
 # Error dumps, logs
-/hs_err*
+hs_err*
 ajcore*
 .attach_pid*
 

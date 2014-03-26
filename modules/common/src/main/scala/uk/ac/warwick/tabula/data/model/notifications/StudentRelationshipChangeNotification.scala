@@ -38,8 +38,16 @@ abstract class StudentRelationshipChangeNotification
 			"relationshipType" -> relationship.relationshipType,
 			"path" -> url
 		))
-
+	def actionRequired = false
 	def url: String = Routes.profile.view(relationship.studentMember.get)
+}
+
+
+trait RelationshipChangeAgent {
+	this : StudentRelationshipChangeNotification =>
+
+	private def name = relationship.studentMember.map{ "for " + _ }.getOrElse("")
+	def urlTitle = s"view the student profile $name"
 }
 
 @Entity
@@ -47,18 +55,23 @@ abstract class StudentRelationshipChangeNotification
 class StudentRelationshipChangeToStudentNotification extends StudentRelationshipChangeNotification {
 	def templateLocation = StudentRelationshipChangeNotification.StudentTemplate
 	def recipients = relationship.studentMember.map { _.asSsoUser }.toSeq
+	def urlTitle = "view your student profile"
 }
 
 @Entity
 @DiscriminatorValue("StudentRelationshipChangeToOldAgent")
-class StudentRelationshipChangeToOldAgentNotification extends StudentRelationshipChangeNotification {
+class StudentRelationshipChangeToOldAgentNotification extends StudentRelationshipChangeNotification
+	with RelationshipChangeAgent{
+
 	def templateLocation = StudentRelationshipChangeNotification.OldAgentTemplate
 	def recipients = oldAgent.map { _.asSsoUser }.toSeq
 }
 
 @Entity
 @DiscriminatorValue("StudentRelationshipChangeToNewAgent")
-class StudentRelationshipChangeToNewAgentNotification extends StudentRelationshipChangeNotification {
+class StudentRelationshipChangeToNewAgentNotification extends StudentRelationshipChangeNotification
+	with RelationshipChangeAgent{
+
 	def templateLocation = StudentRelationshipChangeNotification.NewAgentTemplate
 	def recipients = relationship.agentMember.map { _.asSsoUser }.toSeq
 }

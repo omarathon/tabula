@@ -57,7 +57,7 @@
 					<details class="meeting ${deletedClasses} ${pendingActionClasses} ${openClass!} <#if meeting.scheduled>scheduled<#else>normal</#if>" ${openAttribute!}>
 						<summary>
 							<span class="date">
-								<#if meeting.scheduled>
+								<#if meeting.scheduled || meeting.realTime>
 									<@fmt.date date=meeting.meetingDate includeTime=true />
 								<#else>
 									<@fmt.date date=meeting.meetingDate includeTime=false />
