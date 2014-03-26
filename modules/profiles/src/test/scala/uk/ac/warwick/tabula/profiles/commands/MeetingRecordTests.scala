@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.Fixtures
 trait MeetingRecordTests extends PersistenceTestBase with Mockito {
 
 	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)
-	val marchHare = dateTime(2013, DateTimeConstants.MARCH).toLocalDate
+	val marchHare = dateTime(2013, DateTimeConstants.MARCH)
 
 	val ps = mock[ProfileService]
 
@@ -33,10 +33,10 @@ trait MeetingRecordTests extends PersistenceTestBase with Mockito {
 	var meeting: MeetingRecord = _
 
 	val user = mock[CurrentUser]
-	user.universityId returns("9876543")
+	user.universityId returns "9876543"
 
 	@Before
-	def setUp {
+	def setUp() {
 		creator = transactional { tx =>
 			val m = new StaffMember("9876543")
 			m.userId = "staffmember"
