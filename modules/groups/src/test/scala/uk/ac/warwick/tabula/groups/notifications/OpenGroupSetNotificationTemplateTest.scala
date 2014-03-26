@@ -14,8 +14,7 @@ class OpenGroupSetNotificationTemplateTest extends TestBase with FreemarkerTestH
 
 		val urlModel = new StubFreemarkerDirectiveModel
 
-		implicit val config = newFreemarkerConfiguration(JHashMap(
-			"url" -> urlModel))
+		implicit val config = newFreemarkerConfiguration
 	}
 
 	@Test
@@ -23,19 +22,10 @@ class OpenGroupSetNotificationTemplateTest extends TestBase with FreemarkerTestH
 		new NotificationFixture {
 			val output =
 				renderToString(OpenSmallGroupSetsNotification.templateLocation,
-					Map("user" -> recipient, "groupsets" -> List(groupSet1, groupSet2), "profileUrl" -> "profileUrl"))
+					Map("formatsString" -> "great", "groupsets" -> List(groupSet1, groupSet2), "profileUrl" -> "profileUrl"))
 			output should include(groupSet1.name)
 			output should include(groupSet2.name)
 		}}
-
-
-	@Test
-	def rendersProfileUrlOnceOnly{new NotificationFixture {
-		val output =
-			renderToString(OpenSmallGroupSetsNotification.templateLocation,
-				Map("user" -> recipient, "groupsets" -> List(groupSet1, groupSet2), "profileUrl" -> "profileUrl"))
-		verify(urlModel.mockDirective, times(1)).execute(anyObject(),anyMap,anyObject(),anyObject())
-	}}
 
 
 }

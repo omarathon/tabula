@@ -5,7 +5,7 @@ by an administrator or instructor.
 If you wish to check submissions for this module through Tabula, you (or your departmental administrator)
 must raise a helpdesk 'ticket' directly with the University's supplier, Turnitin:
 
-Visit https://submit.ac.uk/help/helpdesk.asp
+Visit [https://submit.ac.uk/help/helpdesk.asp]
 
 Complete the form, quoting:
 

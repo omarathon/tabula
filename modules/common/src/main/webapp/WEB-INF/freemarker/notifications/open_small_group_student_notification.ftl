@@ -1,7 +1,5 @@
-You need to sign up for the following small teaching groups:
+The following ${formatsString} groups are open for sign up:
 
 <#list groupsets as groupSet>
-${groupSet.name} ${groupSet.format.description} for ${groupSet.module.code?upper_case} - ${groupSet.module.name}
+* ${groupSet.name}
 </#list>
-
-Please visit <@url page=profileUrl /> to sign up for these groups.

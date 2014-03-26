@@ -15,6 +15,7 @@ class MeetingRecordApprovedNotification
 	def relationship = meeting.relationship
 
 	def verb = "approve"
+	def actionRequired = false
 
 	def title = "Meeting record approved"
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
@@ -22,10 +23,11 @@ class MeetingRecordApprovedNotification
 		"role"->agentRole,
 		"dateFormatter" -> dateOnlyFormatter,
 		"meetingRecord" -> approval.meetingRecord,
-		"verbed" -> "approved",
-		"nextActionDescription" -> "if you wish to view it",
-		"profileLink" -> url
+		"verbed" -> "approved"
 	))
+
+	def urlTitle = "view the meeting record"
+
 	def recipients = Seq(approval.meetingRecord.creator.asSsoUser)
 }
 

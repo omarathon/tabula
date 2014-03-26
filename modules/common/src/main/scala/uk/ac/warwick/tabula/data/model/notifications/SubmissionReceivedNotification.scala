@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model.notifications
 
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.UserSettings
 import uk.ac.warwick.userlookup.User
 import javax.persistence.{Entity, DiscriminatorValue}
@@ -40,9 +40,12 @@ class SubmissionReceivedNotification extends SubmissionNotification with PreSave
 		}
 	}
 
+	def urlTitle = "view all submissions for this assignment"
+
 	def recipients = {
 		val moduleManagers = submission.assignment.module.managers
 		val allAdmins = moduleManagers.users
 		allAdmins.filter(canEmailUser)
 	}
+	def actionRequired = false
 }

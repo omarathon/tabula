@@ -7,10 +7,12 @@ import uk.ac.warwick.tabula.data.model.{FreemarkerModel, Notification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.NotificationListener
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRendererComponent, TextRenderer}
+import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 
 @Component
 class EmailNotificationListener extends NotificationListener with UnicodeEmails with AutowiredTextRendererComponent {
+
+	var topLevelUrl: String = Wire.property("${toplevel.url}")
 
 	var mailSender = Wire[WarwickMailSender]("studentMailSender")
 
@@ -21,7 +23,15 @@ class EmailNotificationListener extends NotificationListener with UnicodeEmails 
 	val mailFooter = "\n\nThank you,\nTabula"
 	val replyWarning = "\n\nThis email was sent from an automated system, and replies to it will not reach a real person."
 
-	def render(model: FreemarkerModel) = textRenderer.renderTemplate(model.template, model.model)
+	def link(n: Notification[_,_]) = if(n.actionRequired) {
+		s"\n\nYou need to ${n.urlTitle}. Please visit ${topLevelUrl}${n.url}."
+	} else {
+		s"\n\nTo ${n.urlTitle}, please visit ${topLevelUrl}${n.url}."
+	}
+		
+
+	// add an isEmail property for the model for emails
+	def render(model: FreemarkerModel) = textRenderer.renderTemplate(model.template, model.model + ("isEmail" -> true))
 
 	def listen(notification: Notification[_,_]) {
 		val validRecipients = notification.recipients.filter(_.getEmail.hasText)
@@ -35,6 +45,7 @@ class EmailNotificationListener extends NotificationListener with UnicodeEmails 
 				val body = new StringBuilder("")
 				body.append(mailHeader.format(recipient.getFirstName))
 				body.append(render(notification.content))
+				body.append(link(notification))
 				body.append(mailFooter)
 				body.append(replyWarning)
 				message.setText(body.toString())
@@ -42,4 +53,5 @@ class EmailNotificationListener extends NotificationListener with UnicodeEmails 
 			mailSender.send(message)
 		}
 	}
+
 }

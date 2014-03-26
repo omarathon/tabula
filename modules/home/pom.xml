@@ -240,6 +240,8 @@
 								<include>libs/jquery-fixedheadertable/jquery.fixedheadertable.min.js</include>
 								<include>libs/jquery-rating/jquery.rating.pack.js</include>
 								<include>libs/jquery-tablesorter/jquery.tablesorter.min.js</include>
+								<include>js/moment.min.js</include>
+								<include>js/moment-lang.en-gb.js</include>
 								<include>libs/popup/popup.js</include>
 								<include>libs/bootstrap/js/bootstrap.js</include>
 								<include>libs/bootstrap-editable/js/bootstrap-editable.js</include>
@@ -248,6 +250,7 @@
 								<include>libs/spin-js/jquery.spin.js</include>
 								<include>js/modernizr.js</include>
 								<include>js/browser-info.js</include>
+								<include>js/activity-streams.js</include>
 							</includes>
 						</aggregation>
 						<aggregation>
@@ -260,6 +263,7 @@
 								<include>jquery-biglist.js</include>
 								<include>jquery-confirmmodal.js</include>
 								<include>jquery-details.js</include>
+								<include>jquery-collapsible.js</include>
 								<include>jquery-tableform.js</include>
 								<include>jquery-draganddrop.js</include>
 								<include>jquery-expandingTable.js</include>

@@ -29,7 +29,7 @@ class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
 	@Test
 	def titleIncludesModuleAndAssignmentName(){ new ReleaseNotificationFixture {
 		val n =  createNotification(marker1, marker2, Seq(mf1, mf2), testAssignment, isFirstMarker = true)
-		n.title should be("Feedback released for HERON101 - Test assignment")
+		n.title should be("Submissions released for HERON101 - Test assignment")
 	} }
 
 	@Test
@@ -53,9 +53,9 @@ class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
 
 		val model = n.content.model
 
-		model.get("markingUrl") should be(Some(n.url))
-		model.get("assignment") should be(Some(testAssignment))
-		model.get("numReleasedFeedbacks") should be(Some(2))
-		model.get("verb") should be(Some(Some("mark")))
+		n.url should be("/coursework/admin/module/heron101/assignments/1/marker/list")
+		model("assignment") should be(testAssignment)
+		model("numReleasedFeedbacks") should be(2)
+		model("workflowVerb") should be(Some("mark"))
 	}
 }

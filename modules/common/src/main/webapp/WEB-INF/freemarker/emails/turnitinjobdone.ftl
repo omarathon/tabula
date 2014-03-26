@@ -11,6 +11,3 @@ ${failureCount} submission could not be checked:
 ${key} --  ${failedUploads[key]}
 </#list>
 </#if>
-You may see the results on the list of submissions page, which you can find here:
-
-<@url page=path />

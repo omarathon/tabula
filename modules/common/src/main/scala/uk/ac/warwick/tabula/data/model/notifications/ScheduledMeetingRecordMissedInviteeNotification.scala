@@ -11,15 +11,15 @@ class ScheduledMeetingRecordMissedInviteeNotification
 
 	verbSetting.value = "missed"
 	priority = Warning
+	def actionRequired = false
 
 	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/scheduled_meeting_record_missed_invitee_notification.ftl"
-	def title = s"Scheduled meeting missed"
+	def title = s"Scheduled personal tutor meeting did not take place"
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
 		"actor" -> agent,
 		"role" -> agentRole,
 		"dateTimeFormatter" -> dateTimeFormatter,
-		"meetingRecord" -> meeting,
-		"profileLink" -> url
+		"meetingRecord" -> meeting
 	))
 	def recipient = {
 		if (meeting.creator.universityId == meeting.relationship.studentId) {

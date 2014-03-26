@@ -50,10 +50,10 @@ class ExtensionRequestCreatedNotificationTest extends TestBase with ExtensionNot
 	@Test
 	def shouldCallTextRendererWithCorrectModel():Unit = new ExtensionFixture {
 		val n = createNotification(extension, student)
-		n.content.model.get("requestedExpiryDate").get should be("23 August 2013 at 12:00:00")
-		n.content.model.get("reasonForRequest").get should be("My hands have turned to flippers. Like the ones that dolphins have. It makes writing and typing super hard. Pity me.")
-		n.content.model.get("path").get should be("/coursework/admin/module/xxx/assignments/123/extensions?universityId="+student.getWarwickId)
-		n.content.model.get("assignment").get should be(assignment)
-		n.content.model.get("student").get should be(student)
+		n.content.model("requestedExpiryDate") should be("23 August 2013 at 12:00:00")
+		n.content.model("reasonForRequest") should be("My hands have turned to flippers. Like the ones that dolphins have. It makes writing and typing super hard. Pity me.")
+		n.url should be("/coursework/admin/module/xxx/assignments/123/extensions?universityId="+student.getWarwickId)
+		n.content.model("assignment") should be(assignment)
+		n.content.model("student") should be(student)
 	 }
  }

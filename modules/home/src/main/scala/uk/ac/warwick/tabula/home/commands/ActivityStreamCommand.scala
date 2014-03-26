@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.system.permissions.{PubliclyVisiblePermissions, Perm
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.data.Transactions._
 
 
 object ActivityStreamCommand {
@@ -24,7 +25,7 @@ abstract class ActivityStreamCommandInternal(
 		with ReadOnly
 		with NotificationServiceComponent {
 
-	def applyInternal() = {
+	def applyInternal() = transactional(readOnly=true) {
 		val results = notificationService.stream(request)
 		new PagedActivities(
 			results.items,

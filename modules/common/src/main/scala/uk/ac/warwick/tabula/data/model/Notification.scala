@@ -110,6 +110,9 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.NotificationPriorityUserType")
 	var priority: NotificationPriority = NotificationPriority.Info
 
+	// The priority, or if it is null then the default value of Info.
+	def priorityOrDefault = Option(priority).getOrElse(NotificationPriority.Info)
+
 	@OneToMany(mappedBy="notification", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
 	var recipientNotificationInfos: JList[RecipientNotificationInfo] = JArrayList()
 
@@ -141,6 +144,16 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	@transient def title: String
 	@transient def content: FreemarkerModel
 	@transient def url: String
+
+	@transient def actionRequired: Boolean
+
+	/**
+	 * URL title will be used to generate the links in notifications
+	 *
+	 * Activities will use - <a href=${url}>${urlTitle}</a>  (first letter of url title will be converted to upper case)
+	 * Emails will use - Please visit [${url}] to ${urlTitle}
+	 */
+	@transient def urlTitle: String
 	@transient def recipients: Seq[User]
 
 	def addItems(seq: Seq[A]) = {

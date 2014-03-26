@@ -42,14 +42,6 @@ class ReleaseSmallGroupNotificationTemplateTest extends TestBase with Freemarker
   }}
 
   @Test
-  def rendersProfileUrlOnceOnly{new NotificationFixture {
-    val output =
-      renderToString(ReleaseSmallGroupSetsNotification.templateLocation,
-        Map("user" -> recipient, "groups" -> List(group1, group2), "profileUrl" -> "profileUrl"))
-    verify(urlModel.mockDirective, times(1)).execute(anyObject(),anyMap,anyObject(),anyObject())
-  }}
-
-  @Test
   def callsWeekRangeFormatterOncePerEvent() {
     new NotificationFixture {
       val output =

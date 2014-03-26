@@ -7,7 +7,4 @@ You have now been assigned as ${relationshipType.agentRole} to the following stu
 	</#if>
 </#compress>
 </#compress>
-
 </#list>
-
-You can view all of your ${relationshipType.studentRole}s at <@url page=path />.

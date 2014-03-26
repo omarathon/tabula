@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.data.model.{SingleRecipientNotification, FreemarkerM
 import javax.persistence.{Entity, DiscriminatorValue}
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import org.springframework.util.Assert
+import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 
 @Entity
 @DiscriminatorValue(value="TurnitinClassDeleted")
