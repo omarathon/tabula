@@ -8,11 +8,9 @@ import org.hibernate.annotations.{BatchSize, AccessType, Type}
 import org.joda.time.DateTime
 
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
-import scala.collection.JavaConverters._
 
 
 trait FeedbackAttachments {
@@ -233,6 +231,6 @@ object Feedback {
 }
 
 sealed trait FeedbackPosition
-case object  FirstFeedback extends FeedbackPosition
-case object  SecondFeedback extends FeedbackPosition
-case object  ThirdFeedback extends FeedbackPosition
+case object  FirstFeedback extends FeedbackPosition { val description = "First marker's feedback" }
+case object  SecondFeedback extends FeedbackPosition { val description = "Second marker's feedback" }
+case object  ThirdFeedback extends FeedbackPosition { val description = "Third marker's feedback" }

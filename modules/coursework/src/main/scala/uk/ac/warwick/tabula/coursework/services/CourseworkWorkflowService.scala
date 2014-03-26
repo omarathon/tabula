@@ -262,7 +262,7 @@ object WorkflowStages {
 		def actionCode = "workflow.AddFeedback.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
-				case Some(item) if (item.feedback.allMarkerFeedbackCompleted || item.feedback.hasAttachments || item.feedback.hasOnlineFeedback) => {
+				case Some(item) if (item.feedback.hasAttachments || item.feedback.hasOnlineFeedback) => {
 					StageProgress(AddFeedback, true, "workflow.AddFeedback.uploaded", Good, true)
 			}
 				case Some(_) => {
