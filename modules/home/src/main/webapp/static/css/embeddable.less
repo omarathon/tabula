@@ -1948,30 +1948,30 @@ ul.nav-pills {
 	.deleted-notice {
 		margin-bottom: 0;
 	}
-}
 
-.collapsible {
-	@detailsRightArrow: '\25b8';
-	@detailsDownArrow: '\25be';
+	.collapsible {
+		@detailsRightArrow: '\25b8';
+		@detailsDownArrow: '\25be';
 
-	height: 1.6em;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	cursor: hand;
-	cursor: pointer;
+		height: 1.6em;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		cursor: hand;
+		cursor: pointer;
 
-	&::before {
-		content: @detailsRightArrow;
-		position: absolute;
-		margin-left: -13px;
-		margin-top: -1px;
-	}
-	&.open {
-		height: auto;
-		white-space: inherit;
 		&::before {
-			content: @detailsDownArrow;
+			content: @detailsRightArrow;
+			position: absolute;
+			margin-left: -13px;
+			margin-top: -1px;
+		}
+		&.open {
+			height: auto;
+			white-space: inherit;
+			&::before {
+				content: @detailsDownArrow;
+			}
 		}
 	}
 }
