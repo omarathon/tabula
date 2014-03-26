@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.web.Routes
 
 @Entity
 @DiscriminatorValue(value="FirstMarkerOnly")
-class FirstMarkerOnlyWorkflow extends MarkingWorkflow with NoSecondMarker with AssignmentMarkerMap {
+class FirstMarkerOnlyWorkflow extends MarkingWorkflow with NoSecondMarker with NoThirdMarker with AssignmentMarkerMap {
 
 	def this(dept: Department) = {
 		this()

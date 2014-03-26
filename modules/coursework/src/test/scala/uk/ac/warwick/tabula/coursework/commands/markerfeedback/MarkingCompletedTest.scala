@@ -73,7 +73,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			command.feedbackService = feedbackService
 
 			command.applyInternal()
-			val releasedFeedback = assignment.feedbacks.map(_.firstMarkerFeedback).filter(_.state == MarkingState.AwaitingSecondMarking)
+			val releasedFeedback = assignment.feedbacks.map(_.firstMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
 			releasedFeedback.size should be (3)
 
 			val secondMarkerFeedback = assignment.feedbacks.flatMap(f => Option(f.secondMarkerFeedback)).filter(_.state == MarkingState.ReleasedForMarking)
@@ -98,7 +98,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			command.preSubmitValidation()
 			command.noFeedback.size should be (2)
 			command.noMarks.size should be (2)
-			setFirstMarkerFeedbackState(MarkingState.AwaitingSecondMarking)
+			setFirstMarkerFeedbackState(MarkingState.MarkingCompleted)
 
 			command.feedbackService = feedbackService
 
@@ -109,10 +109,10 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			completedSecondMarking.size should be (2)
 
 			val firstFeedback = assignment.feedbacks.flatMap(f => Option(f.firstMarkerFeedback))
-			val completedFirstMarking = firstFeedback.filter(_.state == MarkingState.SecondMarkingCompleted)
+			val completedFirstMarking = firstFeedback.filter(_.state == MarkingState.MarkingCompleted)
 			completedFirstMarking.size should be (2)
 
-			val finalFeedback = assignment.feedbacks.flatMap(f => Option(f.finalMarkerFeedback)).filter(_.state == MarkingState.ReleasedForMarking)
+			val finalFeedback = assignment.feedbacks.flatMap(f => Option(f.thirdMarkerFeedback)).filter(_.state == MarkingState.ReleasedForMarking)
 			finalFeedback.size should be (2)
 
 
@@ -128,9 +128,9 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			val isFirstMarker = assignment.isFirstMarker(currentUser.apparentUser)
 			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, isFirstMarker)
 
-			assignment.feedbacks.map(addMarkerFeedback(_,FinalFeedback))
+			assignment.feedbacks.map(addMarkerFeedback(_,ThirdFeedback))
 			setFinalMarkerFeedbackState(MarkingState.InProgress)
-			setFirstMarkerFeedbackState(MarkingState.SecondMarkingCompleted)
+			setFirstMarkerFeedbackState(MarkingState.MarkingCompleted)
 
 			command.stateService = stateService
 			command.students = List("9876004", "0270954", "9170726")
@@ -152,7 +152,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			val completedFirstMarking = firstFeedback.filter(_.state == MarkingState.MarkingCompleted)
 			completedFirstMarking.size should be (3)
 
-			val releasedFeedback = assignment.feedbacks.map(_.finalMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
+			val releasedFeedback = assignment.feedbacks.map(_.thirdMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
 			releasedFeedback.size should be (3)
 		}
 

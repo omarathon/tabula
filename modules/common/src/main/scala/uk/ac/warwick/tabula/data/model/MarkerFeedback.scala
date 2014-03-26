@@ -21,6 +21,8 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 
 	def getFeedbackPosition = feedback.getFeedbackPosition(this)
 
+
+
 	def getMarkerUsercode: Option[String] = {
 		val student = feedback.universityId
 		val assignment = feedback.assignment
@@ -28,7 +30,7 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 		getFeedbackPosition match {
 			case Some(FirstFeedback) => workflow.getStudentsFirstMarker(assignment, student)
 			case Some(SecondFeedback) => workflow.getStudentsSecondMarker(assignment, student)
-			case Some(FinalFeedback) => workflow.getStudentsFirstMarker(assignment, student)
+			case Some(ThirdFeedback) => workflow.getStudentsFirstMarker(assignment, student)
 			case _ => None
 		}
 	}

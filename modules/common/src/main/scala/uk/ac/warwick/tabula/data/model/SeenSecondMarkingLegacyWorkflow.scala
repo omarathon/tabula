@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.web.Routes
 
 @Entity
 @DiscriminatorValue(value="SeenSecondMarking")
-class SeenSecondMarkingLegacyWorkflow extends MarkingWorkflow with AssignmentMarkerMap {
+class SeenSecondMarkingLegacyWorkflow extends MarkingWorkflow with NoThirdMarker with AssignmentMarkerMap {
 
 	def this(dept: Department) = {
 		this()

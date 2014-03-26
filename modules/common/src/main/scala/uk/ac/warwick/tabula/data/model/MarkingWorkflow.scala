@@ -66,6 +66,10 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	def secondMarkerRoleName: Option[String]
 	def secondMarkerVerb: Option[String]
 
+	def hasThirdMarker: Boolean
+	def thirdMarkerRoleName: Option[String]
+	def thirdMarkerVerb: Option[String]
+
 	def studentHasMarker(assignment:Assignment, universityId: String): Boolean =
 		getStudentsFirstMarker(assignment, universityId).isDefined || getStudentsSecondMarker(assignment, universityId).isDefined
 
@@ -130,6 +134,12 @@ trait NoSecondMarker {
 	def hasSecondMarker = false
 	def secondMarkerRoleName = None
 	def secondMarkerVerb = None
+}
+
+trait NoThirdMarker {
+	def hasThirdMarker = false
+	def thirdMarkerRoleName = None
+	def thirdMarkerVerb = None
 }
 
 

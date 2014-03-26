@@ -50,11 +50,11 @@ trait MarkingWorkflowWorld extends TestFixtures {
 		assignment.feedbacks.foreach( mf => mf.secondMarkerFeedback.state = state )
 
 	def setFinalMarkerFeedbackState(state: MarkingState) =
-		assignment.feedbacks.foreach( mf => mf.finalMarkerFeedback.state = state )
+		assignment.feedbacks.foreach( mf => mf.thirdMarkerFeedback.state = state )
 
 	def addMarkerFeedback(feedback: Feedback, position: FeedbackPosition) = {
 		val mf = position match {
-			case (FinalFeedback) => feedback.retrieveFinalMarkerFeedback
+			case (ThirdFeedback) => feedback.retrieveThirdMarkerFeedback
 			case _ => feedback.retrieveFirstMarkerFeedback
 		}
 		mf.state = MarkingState.InProgress

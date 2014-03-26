@@ -21,17 +21,21 @@ object MarkingState {
 	// initial state - ready to be distributed to markers
 	case object ReleasedForMarking extends MarkingState("ReleasedForMarking"){ def transitionStates = Set(InProgress, MarkingCompleted) }
 	// has been downloaded by the marker and is being marked
-	case object InProgress extends MarkingState("InProgress"){ def transitionStates =  Set(AwaitingSecondMarking, MarkingCompleted) }
-	// has been marked by the 1st but not 2nd marker
-	case object AwaitingSecondMarking extends MarkingState("AwaitingSecondMarking"){ def transitionStates =  Set(SecondMarkingCompleted) }
-	// has been marked by the 2nd marker
-	case object SecondMarkingCompleted extends MarkingState("SecondMarkingCompleted"){ def transitionStates =  Set(MarkingCompleted) }
+	case object InProgress extends MarkingState("InProgress"){ def transitionStates =  Set(MarkingCompleted) }
+
+	// awaiting a previous marker feedback
+	case object AwaitingPrevious extends MarkingState("AwaitingPrevious"){ def transitionStates =  Set(ReleasedForMarking) }
+
+//	// has been marked by the 1st but not 2nd marker
+//	case object AwaitingSecondMarking extends MarkingState("AwaitingSecondMarking"){ def transitionStates =  Set(SecondMarkingCompleted) }
+//	// has been marked by the 2nd marker
+//	case object SecondMarkingCompleted extends MarkingState("SecondMarkingCompleted"){ def transitionStates =  Set(MarkingCompleted) }
 	// the uploaded feedback was rejected by a moderator and must be reviewed
 	case object Rejected extends MarkingState("Rejected"){ def transitionStates = Set(ReleasedForMarking, MarkingCompleted) }
 	// submission has been marked and feedback has been uploaded
-	case object MarkingCompleted extends MarkingState("MarkingCompleted"){ def transitionStates = Set(SecondMarkingCompleted, Rejected) }
+	case object MarkingCompleted extends MarkingState("MarkingCompleted"){ def transitionStates = Set(Rejected) }
 
-	val values: Set[MarkingState] = Set(ReleasedForMarking, InProgress, AwaitingSecondMarking, SecondMarkingCompleted, MarkingCompleted, Rejected)
+	val values: Set[MarkingState] = Set(ReleasedForMarking, InProgress, AwaitingPrevious, MarkingCompleted, Rejected)
 
 
 	def fromCode(code: String): MarkingState =

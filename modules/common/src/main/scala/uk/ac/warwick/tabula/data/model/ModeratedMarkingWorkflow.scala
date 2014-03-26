@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.web.Routes
 
 @Entity
 @DiscriminatorValue(value="ModeratedMarking")
-class ModeratedMarkingWorkflow extends MarkingWorkflow with AssignmentMarkerMap {
+class ModeratedMarkingWorkflow extends MarkingWorkflow with NoThirdMarker with AssignmentMarkerMap {
 
 	def this(dept: Department) = {
 		this()

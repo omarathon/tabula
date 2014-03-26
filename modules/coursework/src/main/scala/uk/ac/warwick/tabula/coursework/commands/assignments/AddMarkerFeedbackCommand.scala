@@ -2,17 +2,16 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.MarkingState._
-import uk.ac.warwick.tabula.data.model.{MarkingState, Feedback, Assignment, MarkerFeedback, Module}
+import uk.ac.warwick.tabula.data.model.{Feedback, Assignment, MarkerFeedback, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{UploadedFile, Description}
 import uk.ac.warwick.tabula.data.Transactions._
-import reflect.BeanProperty
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.Errors
 
 
-class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter: CurrentUser, val firstMarker:Boolean)
+class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter: CurrentUser)
 	extends UploadFeedbackCommand[List[MarkerFeedback]](module, assignment, submitter)  {
 	
 	PermissionCheck(Permissions.Feedback.Create, assignment)
@@ -36,7 +35,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 		val markedIds = markedSubmissions.map(_.universityId)
 		invalidStudents = items.filter(item => !universityIds.contains(item.uniNumber))
 		markedStudents = items.filter(item => !markedIds.contains(item.uniNumber))
-		items = (items.toList.diff(invalidStudents.toList)).diff(markedStudents.toList)
+		items = items.toList.diff(invalidStudents.toList).diff(markedStudents.toList)
 	}
 
 	private def saveMarkerFeedback(uniNumber: String, file: UploadedFile) = {
@@ -50,17 +49,15 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 			newFeedback
 		})
 
-		val markerFeedback:MarkerFeedback = firstMarker match {
-			case true => if(parentFeedback.retrieveFirstMarkerFeedback.state == MarkingState.SecondMarkingCompleted){
-											parentFeedback.retrieveFinalMarkerFeedback
-										}	else parentFeedback.retrieveFirstMarkerFeedback
-			case false => parentFeedback.retrieveSecondMarkerFeedback
+		val markerFeedback:MarkerFeedback = parentFeedback.getCurrentWorkflowFeedback match {
+			case None => throw new IllegalArgumentException
+			case Some(mf) => mf
 		}
 
-				for (attachment <- file.attached){
+		for (attachment <- file.attached){
 			// if an attachment with the same name as this one exists then delete it
 			val duplicateAttachment = markerFeedback.attachments.find(_.name == attachment.name)
-			duplicateAttachment.foreach(markerFeedback.removeAttachment(_))
+			duplicateAttachment.foreach(markerFeedback.removeAttachment)
 			markerFeedback.addAttachment(attachment)
 		}
 		session.saveOrUpdate(parentFeedback)
@@ -85,18 +82,14 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 	}
 	
 	override def validateExisting(item: FeedbackItem, errors: Errors) {
-		def toMarkerFeedback(feedback: Feedback) = 
-			if (firstMarker) Option(feedback.firstMarkerFeedback)
-			else Option(feedback.secondMarkerFeedback)
-		
+
 		// warn if feedback for this student is already uploaded
-		assignment.feedbacks.find { feedback => feedback.universityId == item.uniNumber } flatMap { toMarkerFeedback(_) } match {
-			case Some(markerFeedback) if markerFeedback.hasFeedback => {
+		assignment.feedbacks.find { feedback => feedback.universityId == item.uniNumber } flatMap { _.getCurrentWorkflowFeedback } match {
+			case Some(markerFeedback) if markerFeedback.hasFeedback =>
 				// set warning flag for existing feedback and check if any existing files will be overwritten
 				item.submissionExists = true
 				checkForDuplicateFiles(item, markerFeedback)
-			}
-			case _ => {}
+			case _ => errors.reject("No more feedback can be added")
 		}
 	}
 

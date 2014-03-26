@@ -99,15 +99,39 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	var secondMarkerFeedback: MarkerFeedback = _
 
 	@OneToOne(cascade=Array(ALL), fetch = FetchType.LAZY)
-	@JoinColumn(name = "final_marker_feedback")
-	var finalMarkerFeedback: MarkerFeedback = _
+	@JoinColumn(name = "third_marker_feedback")
+	var thirdMarkerFeedback: MarkerFeedback = _
 
 
 	def getFeedbackPosition(markerFeedback: MarkerFeedback) : Option[FeedbackPosition] = {
 		if(markerFeedback == firstMarkerFeedback) Some(FirstFeedback)
 		else if (markerFeedback == secondMarkerFeedback) Some(SecondFeedback)
-		else if (markerFeedback == finalMarkerFeedback) Some(FinalFeedback)
+		else if (markerFeedback == thirdMarkerFeedback) Some(ThirdFeedback)
 		else None
+	}
+
+	def getCurrentWorkflowFeedbackPosition: Option[FeedbackPosition] = {
+		val workflow = assignment.markingWorkflow
+		if (workflow.hasThirdMarker && thirdMarkerFeedback != null && thirdMarkerFeedback.state == MarkingState.MarkingCompleted)
+			None
+		else if (workflow.hasThirdMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
+			Some(ThirdFeedback)
+		else if (workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
+			None
+		else if (workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
+			Some(SecondFeedback)
+		else if (firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
+			None
+		else Some(FirstFeedback)
+	}
+
+	def getCurrentWorkflowFeedback: Option[MarkerFeedback] = {
+		getCurrentWorkflowFeedbackPosition match {
+			case Some(FirstFeedback) => Some(retrieveFirstMarkerFeedback)
+			case Some(SecondFeedback) => Some(retrieveSecondMarkerFeedback)
+			case Some(ThirdFeedback) => Some(retrieveThirdMarkerFeedback)
+			case _ => None
+		}
 	}
 
 	@Column(name = "released_date")
@@ -139,10 +163,10 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 		})
 	}
 
-	def retrieveFinalMarkerFeedback:MarkerFeedback = {
-		Option(finalMarkerFeedback).getOrElse({
-			finalMarkerFeedback = new MarkerFeedback(this)
-			finalMarkerFeedback
+	def retrieveThirdMarkerFeedback:MarkerFeedback = {
+		Option(thirdMarkerFeedback).getOrElse({
+			thirdMarkerFeedback = new MarkerFeedback(this)
+			thirdMarkerFeedback
 		})
 	}
 
@@ -163,7 +187,7 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 
 	def hasOnlineFeedback: Boolean = onlineFeedbackComments.isDefined
 
-	def allMarkerFeedbackCompleted: Boolean = Seq(firstMarkerFeedback.state, secondMarkerFeedback.state, finalMarkerFeedback.state).forall(_ == MarkingState.MarkingCompleted)
+	def getAllCompletedMarkerFeedback: Seq[MarkerFeedback] = Seq(firstMarkerFeedback, secondMarkerFeedback, thirdMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
 
 	def hasGenericFeedback: Boolean = Option(assignment.genericFeedback).isDefined
 
@@ -211,4 +235,4 @@ object Feedback {
 sealed trait FeedbackPosition
 case object  FirstFeedback extends FeedbackPosition
 case object  SecondFeedback extends FeedbackPosition
-case object  FinalFeedback extends FeedbackPosition
+case object  ThirdFeedback extends FeedbackPosition

@@ -9,7 +9,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.CurrentUser
 import javax.validation.Valid
-import uk.ac.warwick.tabula.data.model.MarkingState.{AwaitingSecondMarking, SecondMarkingCompleted, Rejected, MarkingCompleted}
+import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.MarkingMethod.ModeratedMarking
 import uk.ac.warwick.userlookup.User
@@ -118,20 +118,33 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 		val secondMarkerFeedback =  parentFeedback.flatMap(feedback => Option(feedback.secondMarkerFeedback))
 		val isRejected = secondMarkerFeedback.map(_.state == Rejected).getOrElse(false)
 		val isFirstMarker = command.assignment.isFirstMarker(command.currentUser.apparentUser)
+		val isSecondMarker = command.assignment.isSecondMarker(command.currentUser.apparentUser)
 
-		val secondMarkingCompleted = firstMarkerFeedback.map(_.state == SecondMarkingCompleted).getOrElse(false)
-		val awaitingSecondMarking = firstMarkerFeedback.map(_.state == AwaitingSecondMarking).getOrElse(false)
+		val currentPosition = parentFeedback.get.getCurrentWorkflowFeedbackPosition
+		val isFirstMarkingPosition = currentPosition.getOrElse(false) == FirstFeedback
+		val isSecondMarkingPosition = currentPosition.getOrElse(false) == SecondFeedback
+		val isThirdMarkingPosition = currentPosition.getOrElse(false) == ThirdFeedback
+
+		val allCompletedMarkerFeedback = parentFeedback.get.getAllCompletedMarkerFeedback
+
+
+
+//		val secondMarkingCompleted = firstMarkerFeedback.map(_.state == SecondMarkingCompleted).getOrElse(false)
+//		val awaitingSecondMarking = firstMarkerFeedback.map(_.state == AwaitingSecondMarking).getOrElse(false)
 
 
 		Mav("admin/assignments/feedback/marker_online_feedback" ,
 			"command" -> command,
 			"isCompleted" -> isCompleted,
 			"isFirstMarker" -> isFirstMarker,
+			"isSecondMarker" -> isSecondMarker,
 			"firstMarkerFeedback" -> firstMarkerFeedback,
 			"isRejected" -> isRejected,
 			"secondMarkerFeedback" -> secondMarkerFeedback,
-			"awaitingSecondMarking" -> awaitingSecondMarking,
-			"secondMarkingCompleted" -> secondMarkingCompleted
+			"isFirstMarkingPosition" -> isFirstMarkingPosition,
+			"isSecondMarkingPosition" -> isSecondMarkingPosition,
+			"isThirdMarkingPosition" -> isThirdMarkingPosition,
+			"allCompletedMarkerFeedback" -> allCompletedMarkerFeedback
 		).noLayout()
 	}
 

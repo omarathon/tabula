@@ -2,18 +2,11 @@ package uk.ac.warwick.tabula.coursework.services
 
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.Features
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.MarkingMethod
-import javax.persistence.Entity
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
-import uk.ac.warwick.tabula.data.model.MarkingState
 import scala.collection.immutable.ListMap
-import uk.ac.warwick.tabula.data.model.MarkingState.{AwaitingSecondMarking, SecondMarkingCompleted, Rejected, MarkingCompleted}
+import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
 import uk.ac.warwick.tabula.data.model.MarkingMethod.SeenSecondMarking
 
 @Service
@@ -207,10 +200,7 @@ object WorkflowStages {
 		def actionCode = "workflow.FirstMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedFeedback match {
 			case Some(item) => {
-				if (item.feedback.retrieveFirstMarkerFeedback.state == MarkingCompleted ||
-					item.feedback.retrieveFirstMarkerFeedback.state == AwaitingSecondMarking ||
-					item.feedback.retrieveFirstMarkerFeedback.state == SecondMarkingCompleted
-				)
+				if (item.feedback.retrieveFirstMarkerFeedback.state == MarkingCompleted)
 					StageProgress(FirstMarking, true, "workflow.FirstMarking.marked", Good, true)
 				else
 					StageProgress(FirstMarking, true, "workflow.FirstMarking.notMarked", Warning, false)
@@ -220,19 +210,12 @@ object WorkflowStages {
 		override def preconditions = Seq(Seq(Submission, ReleaseForMarking))
 	}
 
-
-	
 	case object SecondMarking extends WorkflowStage {
 		def actionCode = "workflow.SecondMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
 			val hasSubmission = coursework.enhancedSubmission.exists(_.submission.isReleasedToSecondMarker)
 			coursework.enhancedFeedback match {
-
-				case Some(item) if hasSubmission &&  item.feedback.retrieveSecondMarkerFeedback.state != Rejected && item.feedback.retrieveSecondMarkerFeedback.state == SecondMarkingCompleted => {
-					StageProgress(SecondMarking, true, "workflow.SecondMarking.marked", Good, true)
-				}
 				case Some(item) if hasSubmission &&  item.feedback.retrieveSecondMarkerFeedback.state != Rejected => {
-
 					if (item.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted)
 						StageProgress(SecondMarking, true, "workflow.SecondMarking.marked", Good, true)
 					else
@@ -249,8 +232,8 @@ object WorkflowStages {
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
 			val hasSubmission = coursework.enhancedSubmission.exists(_.submission.isReleasedToSecondMarker)
 			coursework.enhancedFeedback match {
-				case Some(item) if hasSubmission &&  item.feedback.retrieveSecondMarkerFeedback.state != Rejected => {
-					if (item.feedback.retrieveFinalMarkerFeedback.state == MarkingCompleted )
+				case Some(item) if hasSubmission &&  item.feedback.retrieveThirdMarkerFeedback.state != Rejected => {
+					if (item.feedback.retrieveThirdMarkerFeedback.state == MarkingCompleted )
 						StageProgress(FinaliseSeenSecondMarking, true, "workflow.FinaliseSeenSecondMarking.finalised", Good, true)
 					else
 						StageProgress(FinaliseSeenSecondMarking, true, "workflow.FinaliseSeenSecondMarking.notFinalised", Warning, false)

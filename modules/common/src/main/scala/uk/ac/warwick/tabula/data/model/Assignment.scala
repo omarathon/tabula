@@ -482,7 +482,7 @@ class Assignment
 		}
 
 	/*
-		get a MarkerFeedback for the given student ID and user  if one exists. firstMarker = true returns the first markers feedback item.
+		get a MarkerFeedback for the given student ID and user  if one exists. firstMarker = true returns the first marker's feedback item.
 		false returns the second markers item
 	 */
 
@@ -492,8 +492,8 @@ class Assignment
 			case Some(f) => {
 				if(this.isFirstMarker(user)) {
 					val firstMarkerFeedback = f.retrieveFirstMarkerFeedback
-					if (firstMarkerFeedback.state == MarkingState.SecondMarkingCompleted) {
-						Some(f.retrieveFinalMarkerFeedback)
+					if (firstMarkerFeedback.state == MarkingState.MarkingCompleted) {
+						Some(f.retrieveThirdMarkerFeedback)
 					}
 					else {
 						Some(f.retrieveFirstMarkerFeedback)
