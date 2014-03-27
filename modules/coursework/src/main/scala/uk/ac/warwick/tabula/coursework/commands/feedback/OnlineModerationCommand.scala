@@ -44,7 +44,7 @@ abstract class OnlineModerationCommand(module: Module, assignment: Assignment, s
 
 	val user = currentUser.apparentUser
 
-	def markerFeedback = assignment.getMarkerFeedback(student.getWarwickId, user)
+	def markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(student.getWarwickId, user)
 
 	copyState(markerFeedback, copyModerationFieldsFrom)
 

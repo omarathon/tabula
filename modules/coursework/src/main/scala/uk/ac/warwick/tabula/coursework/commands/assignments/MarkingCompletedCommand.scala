@@ -34,7 +34,7 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 	this: StateServiceComponent with FeedbackServiceComponent =>
 
 	def onBind() {
-		markerFeedbacks = students.flatMap(assignment.getMarkerFeedback(_, user))
+		markerFeedbacks = students.flatMap(assignment.getMarkerFeedbackForCurrentPosition(_, user))
 	}
 
 	def applyInternal() {
@@ -62,7 +62,7 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 		newReleasedFeedback = feedbackForRelease.map{ mf =>
 			val parentFeedback = mf.feedback
 			val nextMarkerFeedback = {
-				if (mf.state == MarkingState.MarkingCompleted)	{
+				if (mf.state == MarkingState.MarkingCompleted && mf.getFeedbackPosition.get == FirstFeedback)	{
 					parentFeedback.retrieveSecondMarkerFeedback
 				}
 				else {

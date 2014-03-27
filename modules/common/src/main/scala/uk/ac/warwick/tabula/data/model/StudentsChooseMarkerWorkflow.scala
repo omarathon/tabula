@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.web.Routes
 
 @Entity
 @DiscriminatorValue(value="StudentsChooseMarker")
-class StudentsChooseMarkerWorkflow extends MarkingWorkflow with NoThirdMarker with NoSecondMarker {
+class StudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarker {
 
 	def this(dept: Department) = {
 		this()

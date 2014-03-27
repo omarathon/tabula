@@ -25,7 +25,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 
 	def processStudents() {
 		val markedSubmissions = submissions.filter{ submission =>
-			val markerFeedback =  assignment.getMarkerFeedback(submission.universityId, submitter.apparentUser)
+			val markerFeedback =  assignment.getMarkerFeedbackForCurrentPosition(submission.universityId, submitter.apparentUser)
 			markerFeedback match {
 				case Some(f) if f.state != MarkingCompleted => true
 				case _ => false

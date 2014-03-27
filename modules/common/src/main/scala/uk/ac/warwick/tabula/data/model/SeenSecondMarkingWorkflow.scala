@@ -25,4 +25,6 @@ class SeenSecondMarkingWorkflow extends MarkingWorkflow with AssignmentMarkerMap
 	def hasThirdMarker = true
 	def thirdMarkerRoleName = Some("Final marker")
 	def thirdMarkerVerb = Some("mark")
+
+	override def thirdMarkers = this.firstMarkers
 }

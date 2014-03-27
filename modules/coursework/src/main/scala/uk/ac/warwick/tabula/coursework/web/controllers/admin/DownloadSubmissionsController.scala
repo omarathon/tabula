@@ -58,7 +58,7 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 		
 		// do not download submissions where the marker has completed marking
 		val filteredSubmissions = submissions.filter{ submission =>
-			val markerFeedback =  assignment.getMarkerFeedback(submission.universityId, user.apparentUser)
+			val markerFeedback =  assignment.getMarkerFeedbackForCurrentPosition(submission.universityId, user.apparentUser)
 			markerFeedback.exists(mf => mf.state != MarkingCompleted)
 		}
 		

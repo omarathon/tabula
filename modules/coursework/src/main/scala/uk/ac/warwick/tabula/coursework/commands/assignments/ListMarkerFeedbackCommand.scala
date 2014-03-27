@@ -26,7 +26,7 @@ class ListMarkerFeedbackCommand(val assignment:Assignment, module: Module, val u
 
 		val markerFeedbacks = submissions.map { submission =>
 			val student = userLookup.getUserByWarwickUniId(submission.universityId)
-			val markerFeedback = assignment.getMarkerFeedback(submission.universityId, user.apparentUser)
+			val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(submission.universityId, user.apparentUser)
 			val firstMarkerFeedback =
 				if (!firstMarker)
 					assignment.feedbacks.find(_.universityId == submission.universityId) match {
@@ -37,11 +37,11 @@ class ListMarkerFeedbackCommand(val assignment:Assignment, module: Module, val u
 			MarkerFeedbackItem(student, submission, markerFeedback.getOrElse(null), firstMarkerFeedback)
 		}
 
-		completedFeedback = markerFeedbacks.filter(_.markerFeedback.state == MarkingCompleted)
-		rejectedFeedback = markerFeedbacks.filter(_.markerFeedback.state == Rejected)
+		completedFeedback = markerFeedbacks.filter(mf => (mf.markerFeedback != null && mf.markerFeedback.state == MarkingCompleted))
+		rejectedFeedback = markerFeedbacks.filter(mf => (mf.markerFeedback != null && mf.markerFeedback.state == Rejected))
 
 		markerFeedbacks.filterNot(mfi =>
-			mfi.markerFeedback.state == MarkingCompleted || mfi.markerFeedback.state == MarkingCompleted)
+			mfi.markerFeedback == null || mfi.markerFeedback.state == MarkingCompleted || mfi.markerFeedback.state == MarkingCompleted)
 
 	}
 }

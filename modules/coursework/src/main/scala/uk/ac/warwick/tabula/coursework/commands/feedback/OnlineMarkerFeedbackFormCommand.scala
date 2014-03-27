@@ -34,7 +34,7 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 
 	self: FeedbackServiceComponent with ZipServiceComponent 	with MarkerFeedbackStateCopy =>
 
-	def markerFeedback = assignment.getMarkerFeedback(student.getWarwickId, currentUser.apparentUser)
+	def markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(student.getWarwickId, currentUser.apparentUser)
 
 	copyState(markerFeedback)
 

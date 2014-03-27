@@ -65,6 +65,7 @@ class Assignment
 		with PostLoadBehaviour
 		with Serializable
 		with ToEntityReference {
+
 	import Assignment._
 
 	type Entity = Assignment
@@ -118,7 +119,8 @@ class Assignment
 	var summative: JBoolean = _
 	var dissertation: JBoolean = _
 	var allowExtensions: JBoolean = _
-	var allowExtensionRequests: JBoolean = _ // by students
+	var allowExtensionRequests: JBoolean = _
+	// by students
 	var genericFeedback: String = ""
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -128,25 +130,25 @@ class Assignment
 	def permissionsParents = Option(module).toStream
 
 	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BatchSize(size=200)
+	@BatchSize(size = 200)
 	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@OrderBy("submittedDate")
-	@BatchSize(size=200)
+	@BatchSize(size = 200)
 	var submissions: JList[Submission] = JArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
-	@BatchSize(size=200)
+	@BatchSize(size = 200)
 	var extensions: JList[Extension] = JArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
-	@BatchSize(size=200)
+	@BatchSize(size = 200)
 	var feedbacks: JList[Feedback] = JArrayList()
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_template_id")
-	@BatchSize(size=200)
+	@BatchSize(size = 200)
 	var feedbackTemplate: FeedbackTemplate = _
 
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
@@ -176,21 +178,28 @@ class Assignment
 
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
-	@BatchSize(size=200)
+	@BatchSize(size = 200)
 	var fields: JList[FormField] = JArrayList()
 
 	// IndexColumn is a busted flush for fields because of reuse of non-uniqueness.
 	// Use manual position management on add/removeFields, and in these getters
 	def submissionFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Submission).sortBy(_.position)
+
 	def feedbackFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
 
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "membersgroup_id")
 	private var _members: UserGroup = UserGroup.ofUsercodes
+
 	def members: UnspecifiedTypeUserGroup = {
-		Option(_members).map { new UserGroupCacheManager(_, assignmentMembershipService.assignmentManualMembershipHelper) }.orNull
+		Option(_members).map {
+			new UserGroupCacheManager(_, assignmentMembershipService.assignmentManualMembershipHelper)
+		}.orNull
 	}
-	def members_=(group: UserGroup) { _members = group }
+
+	def members_=(group: UserGroup) {
+		_members = group
+	}
 
 	// TAB-1446 If hibernate sets members to null, make a new empty usergroup
 	override def postLoad() {
@@ -203,12 +212,13 @@ class Assignment
 	}
 
 	@ManyToOne(fetch = LAZY)
-	@JoinColumn(name="markscheme_id")
+	@JoinColumn(name = "markscheme_id")
 	var markingWorkflow: MarkingWorkflow = _
 
 	/** Map between markers and the students assigned to them */
-	@OneToMany @JoinTable(name="marker_usergroup")
-	@MapKeyColumn(name="marker_uni_id")
+	@OneToMany
+	@JoinTable(name = "marker_usergroup")
+	@MapKeyColumn(name = "marker_uni_id")
 	var markerMap: JMap[String, UserGroup] = JMap[String, UserGroup]()
 
 	def setAllFileTypesAllowed() {
@@ -275,7 +285,8 @@ class Assignment
 	/**
 	 * True if the specified user has been granted an extension and that extension has not expired on the specified date
 	 */
-	def isWithinExtension(user: User, time: DateTime): Boolean = isWithinExtension(user.getWarwickId, user.getUserId, time) 
+	def isWithinExtension(user: User, time: DateTime): Boolean = isWithinExtension(user.getWarwickId, user.getUserId, time)
+
 	def isWithinExtension(universityId: String, usercode: String, time: DateTime) =
 		extensions.exists(e => e.isForUser(universityId, usercode) && e.approved && e.expiryDate.isAfter(time))
 
@@ -283,6 +294,7 @@ class Assignment
 	 * True if the specified user has been granted an extension and that extension has not expired now
 	 */
 	def isWithinExtension(user: User): Boolean = isWithinExtension(user, new DateTime)
+
 	def isWithinExtension(universityId: String, usercode: String): Boolean = isWithinExtension(universityId, usercode, new DateTime)
 
 	/**
@@ -326,8 +338,10 @@ class Assignment
 	def membershipInfo = assignmentMembershipService.determineMembership(upstreamAssessmentGroups, Option(members))
 
 	// converts the assessmentGroups to upstream assessment groups
-	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = 
-		assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroup(academicYear) }
+	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
+		assessmentGroups.asScala.flatMap {
+			_.toUpstreamAssessmentGroup(academicYear)
+		}
 
 	/**
 	 * Whether the assignment is not archived or deleted.
@@ -361,7 +375,9 @@ class Assignment
 		fields.remove(field)
 		assignmentService.deleteFormField(field)
 		// manually update all fields in the context to reflect their new positions
-		fields.filter(_.context == field.context).zipWithIndex foreach {case (f, index) => f.position = index}
+		fields.filter(_.context == field.context).zipWithIndex foreach {
+			case (f, index) => f.position = index
+		}
 	}
 
 	def attachmentField: Option[FileField] = findFieldOfType[FileField](Assignment.defaultUploadName)
@@ -394,8 +410,10 @@ class Assignment
 
 	// feedback that has been been through the marking process (not placeholders for marker feedback)
 	def fullFeedback = feedbacks.filterNot(_.isPlaceholder).toSeq
+
 	// safer to use in overview pages like the department homepage as does not require the feedback list to be inflated
 	def countFullFeedback = feedbackService.countFullFeedback(this)
+
 	def hasFullFeedback = countFullFeedback > 0
 
 	/**
@@ -407,14 +425,22 @@ class Assignment
 	def unreleasedFeedback = fullFeedback.filterNot(_.released == true) // ==true because can be null
 
 	// safer to use in overview pages like the department homepage as does not require the feedback list to be inflated
-	def countReleasedFeedback  = feedbackService.countPublishedFeedback(this)
-	def countUnreleasedFeedback  = countFullFeedback - countReleasedFeedback
+	def countReleasedFeedback = feedbackService.countPublishedFeedback(this)
+
+	def countUnreleasedFeedback = countFullFeedback - countReleasedFeedback
+
 	def hasReleasedFeedback = countReleasedFeedback > 0
+
 	def hasUnreleasedFeedback = countReleasedFeedback < countFullFeedback
+
 	def countExtensions = extensionService.countExtensions(this)
+
 	def hasExtensions = extensionService.hasExtensions(this)
+
 	def countUnapprovedExtensions = extensionService.countUnapprovedExtensions(this)
+
 	def hasUnapprovedExtensions = extensionService.hasUnapprovedExtensions(this)
+
 	def getUnapprovedExtensions = extensionService.getUnapprovedExtensions(this)
 
 	def addFields(fieldz: FormField*) = for (field <- fieldz) addField(field)
@@ -448,14 +474,14 @@ class Assignment
 		if (restrictSubmissions) {
 			// users can always submit to assignments if they have a submission or piece of feedback
 			submissions.asScala.exists(_.universityId == user.getWarwickId) ||
-			fullFeedback.exists(_.universityId == user.getWarwickId) ||
-			assignmentMembershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
+				fullFeedback.exists(_.universityId == user.getWarwickId) ||
+				assignmentMembershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
 		} else {
 			true
 		}
 	}
 
-	def isMarker(user: User) = isFirstMarker(user)|| isSecondMarker(user)
+	def isMarker(user: User) = isFirstMarker(user) || isSecondMarker(user)
 
 	def isFirstMarker(user: User): Boolean = {
 		if (markingWorkflow != null)
@@ -469,42 +495,58 @@ class Assignment
 		else false
 	}
 
-	def isReleasedForMarking(submission:Submission) : Boolean =
+	def isThirdMarker(user: User): Boolean = {
+		if (markingWorkflow != null)
+			markingWorkflow.thirdMarkers.includesUser(user)
+		else false
+	}
+
+	def isReleasedForMarking(submission: Submission): Boolean =
 		feedbacks.find(_.universityId == submission.universityId) match {
 			case Some(f) => f.firstMarkerFeedback != null
 			case _ => false
 		}
 
-	def isReleasedToSecondMarker(submission:Submission) : Boolean =
+	def isReleasedToSecondMarker(submission: Submission): Boolean =
 		feedbacks.find(_.universityId == submission.universityId) match {
 			case Some(f) => f.secondMarkerFeedback != null
 			case _ => false
 		}
 
-	/*
-		get a MarkerFeedback for the given student ID and user  if one exists. firstMarker = true returns the first marker's feedback item.
-		false returns the second markers item
-	 */
-
-	def getMarkerFeedback(uniId:String, user:User) : Option[MarkerFeedback] = {
+	def getMarkerFeedback(uniId: String, user: User, feedbackPosition: FeedbackPosition): Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.universityId == uniId)
-		parentFeedback match {
-			case Some(f) =>
-				if(this.isFirstMarker(user)) {
-					val firstMarkerFeedback = f.retrieveFirstMarkerFeedback
-					if (firstMarkerFeedback.state == MarkingState.MarkingCompleted) {
-						Some(f.retrieveThirdMarkerFeedback)
-					}
-					else {
-						Some(f.retrieveFirstMarkerFeedback)
-					}
-				}
-				else if(this.isSecondMarker(user))
-					Some(f.retrieveSecondMarkerFeedback)
-				else
-					None
-			case None => None
+		parentFeedback.flatMap {
+			f => getMarkerFeedbackForPositionInFeedback(uniId, user, feedbackPosition, f)
 		}
+	}
+
+	def getMarkerFeedbackForCurrentPosition(uniId: String, user: User): Option[MarkerFeedback] = {
+		val parentFeedback = feedbacks.find(_.universityId == uniId)
+		parentFeedback.flatMap {
+			f => f.getCurrentWorkflowFeedbackPosition.flatMap {
+				p => getMarkerFeedbackForPositionInFeedback(uniId, user, p, f)
+			}
+		}
+	}
+
+	private def getMarkerFeedbackForPositionInFeedback(uniId: String, user: User, feedbackPosition: FeedbackPosition, feedback: Feedback): Option[MarkerFeedback] = {
+		Some(feedbackPosition match {
+			case FirstFeedback =>
+				if (this.isFirstMarker(user))
+					feedback.retrieveFirstMarkerFeedback
+				else
+					null
+			case SecondFeedback =>
+				if (this.markingWorkflow.hasSecondMarker && this.isSecondMarker(user))
+					feedback.retrieveSecondMarkerFeedback
+				else
+					null
+			case ThirdFeedback =>
+				if (this.markingWorkflow.hasThirdMarker && this.isThirdMarker(user))
+					feedback.retrieveThirdMarkerFeedback
+				else
+					null
+		})
 	}
 
 	/**

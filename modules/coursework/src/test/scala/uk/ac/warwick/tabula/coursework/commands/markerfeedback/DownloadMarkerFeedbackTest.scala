@@ -34,7 +34,7 @@ class DownloadMarkerFeedbackTest extends AppContextTestBase with MarkingWorkflow
 	@Test
 	def downloadSingle()= transactional{ts=>
 		withUser("cuslaj"){
-			val markerFeedback = assignment.getMarkerFeedback("9876004", currentUser.apparentUser)
+			val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition("9876004", currentUser.apparentUser)
 			val command = new AdminGetSingleMarkerFeedbackCommand(assignment.module, assignment, markerFeedback.get)
 			val renderable = command.apply()
 			val stream = new ZipInputStream(new FileInputStream(renderable.file.get))

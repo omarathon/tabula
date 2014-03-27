@@ -53,6 +53,8 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	@JoinColumn(name = "secondmarkers_id")
 	var secondMarkers = UserGroup.ofUsercodes
 
+	def thirdMarkers: UserGroup
+
 	def markingMethod: MarkingMethod
 
 	/** If true, the submitter chooses their first marker from a dropdown */
@@ -130,16 +132,17 @@ trait AssignmentMarkerMap {
 
 }
 
-trait NoSecondMarker {
-	def hasSecondMarker = false
-	def secondMarkerRoleName = None
-	def secondMarkerVerb = None
-}
-
 trait NoThirdMarker {
 	def hasThirdMarker = false
 	def thirdMarkerRoleName = None
 	def thirdMarkerVerb = None
+	def thirdMarkers: UserGroup = UserGroup.ofUsercodes
+}
+
+trait NoSecondMarker extends NoThirdMarker {
+	def hasSecondMarker = false
+	def secondMarkerRoleName = None
+	def secondMarkerVerb = None
 }
 
 

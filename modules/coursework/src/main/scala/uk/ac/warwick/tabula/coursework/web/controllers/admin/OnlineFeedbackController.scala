@@ -127,12 +127,6 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 
 		val allCompletedMarkerFeedback = parentFeedback.get.getAllCompletedMarkerFeedback
 
-
-
-//		val secondMarkingCompleted = firstMarkerFeedback.map(_.state == SecondMarkingCompleted).getOrElse(false)
-//		val awaitingSecondMarking = firstMarkerFeedback.map(_.state == AwaitingSecondMarking).getOrElse(false)
-
-
 		Mav("admin/assignments/feedback/marker_online_feedback" ,
 			"command" -> command,
 			"isCompleted" -> isCompleted,
