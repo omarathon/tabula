@@ -15,6 +15,10 @@ import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
 
 trait FeedbackAttachments {
 
+	// Do not remove
+	// Should be import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+
 	var attachments: JList[FileAttachment]
 	def addAttachment(attachment: FileAttachment)
 
