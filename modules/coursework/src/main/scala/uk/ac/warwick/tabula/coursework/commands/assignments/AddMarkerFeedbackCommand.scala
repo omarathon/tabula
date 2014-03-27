@@ -89,6 +89,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 				// set warning flag for existing feedback and check if any existing files will be overwritten
 				item.submissionExists = true
 				checkForDuplicateFiles(item, markerFeedback)
+			case Some(markerFeedback) =>
 			case _ => errors.reject("No more feedback can be added")
 		}
 	}

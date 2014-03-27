@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
 import collection.JavaConversions._
-import uk.ac.warwick.tabula.{Mockito, AppContextTestBase}
+import uk.ac.warwick.tabula.AppContextTestBase
 import org.junit.Before
 import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.data.model.FileAttachment
@@ -15,10 +15,10 @@ import java.io.FileOutputStream
 class DownloadMarkerFeedbackTest extends AppContextTestBase with MarkingWorkflowWorld {
 
 	@Before
-	def setup {
+	def setup() {
 		val attachment = new FileAttachment
 		
-		val file = createTemporaryFile
+		val file = createTemporaryFile()
 		FileCopyUtils.copy(new ByteArrayInputStream("yes".getBytes), new FileOutputStream(file))
 		
 		attachment.file = file
