@@ -119,11 +119,7 @@ jQuery(function($) {
 			}
 			jQuery.get(url, data).then(function(data) {
 				if (first) {
-					if ($(data.items).size() == 0) {
-						$container.html('<span class="hint">No recent activity to display</span>');
-					} else {
-						$container.html('');
-					}
+					$container.html('');
 				}
 
 				$(data.items).each(function(i, item) {
@@ -133,8 +129,8 @@ jQuery(function($) {
 					$activity.appendTo($container);
 				});
 
+				$container.append($moreLink);
 				if (data.pagination && data.pagination.token) {
-					$container.append($moreLink);
 					if (data.items.length) {
 						$moreLink.off('click');
 						$moreLink.on('click', 'a', function() {
@@ -148,7 +144,7 @@ jQuery(function($) {
 						loadPage(data.pagination, first);
 					}
 				} else {
-					var noMoreMsg = first ? 'No activity to show.' : 'No more activity to show.';
+					var noMoreMsg = first ? '<span class="hint">No recent activity to display.</span>' : '<span class="hint">No more activity to display.</span>';
 					$moreLink.after(noMoreMsg);
 					$moreLink.remove(); // il n'y a pas de items
 				}
