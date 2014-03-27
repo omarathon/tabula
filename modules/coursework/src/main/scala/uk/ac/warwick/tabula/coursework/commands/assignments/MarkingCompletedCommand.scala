@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{ReleasedState, FeedbackReleasedNotifier}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.notifications.ReleaseToMarkerNotification
-import uk.ac.warwick.tabula.data.model.MarkingMethod.SeenSecondMarking
 import scala.collection.mutable
 
 object MarkingCompletedCommand {
@@ -49,13 +48,8 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 
 	private def nextMarkerFeedback(feedbackForRelease: mutable.Buffer[MarkerFeedback]){
 
-		val feedbackToFinalise = {
-			if (assignment.markingWorkflow.markingMethod == SeenSecondMarking) feedbackForRelease.filter(_.getFeedbackPosition == ThirdFeedback)
-			else feedbackForRelease.filter( _.state == MarkingState.MarkingCompleted)
-		}
-
 		def finaliseFeedback(){
-			val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, feedbackToFinalise)
+			val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, feedbackForRelease)
 			finaliseFeedbackCommand.apply()
 		}
 
@@ -74,8 +68,14 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 				stateService.updateState(nextMarkerFeedback, MarkingState.ReleasedForMarking)
 			}
 			feedbackService.save(nextMarkerFeedback)
+
+
+			// if we're completing the last piece of marker feedback, then finalise the feedback
+			if (mf.getFeedbackPosition.get == nextMarkerFeedback.getFeedbackPosition.get) finaliseFeedback()
+
 			nextMarkerFeedback
 		}
+
 	}
 
 	def preSubmitValidation() {
