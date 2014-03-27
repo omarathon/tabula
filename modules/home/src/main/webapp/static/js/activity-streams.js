@@ -44,7 +44,7 @@ jQuery(function($) {
 			.append($('<div>', {'class': 'content'})
 				.append(item.content)
 				.append($('<p>', {'class': 'url'}).append(
-					$('<a></a>', {'href': item.url}).html(urlTitle) // TODO use urlTitle from TAB-1964
+					$('<a></a>', {'href': item.url}).html(urlTitle)
 				)));
 	}
 
@@ -118,7 +118,13 @@ jQuery(function($) {
 				data.lastDoc = pagination.doc;
 			}
 			jQuery.get(url, data).then(function(data) {
-				if (first) $container.html('');
+				if (first) {
+					if ($(data.items).size() == 0) {
+						$container.html('<span class="hint">No recent activity to display</span>');
+					} else {
+						$container.html('');
+					}
+				}
 
 				$(data.items).each(function(i, item) {
 					var activity = new Activity(item);

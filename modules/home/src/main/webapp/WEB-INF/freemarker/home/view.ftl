@@ -107,10 +107,4 @@
 	</div>
 </#if>
 
-<#if !ajax>
-	<p id="what-is-tabula">
-		<i class="icon-info-sign"></i> <span title="Tabula was originated as 'My Department'.">Tabula</span> supports the administration of teaching and learning in academic departments at Warwick.
-	</p>
-</#if>
-
 </#escape>
