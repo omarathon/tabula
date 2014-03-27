@@ -7,7 +7,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.MockUserLookup
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.{StudentsChooseMarkerWorkflow, FileAttachment}
 import uk.ac.warwick.tabula.data.FileDao
 
 // scalastyle:off magic.number
@@ -19,6 +19,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 	val module = Fixtures.module("cs118")
 	val assignment = Fixtures.assignment("my assignment")
 	assignment.module = module
+	assignment.markingWorkflow = new StudentsChooseMarkerWorkflow
 	
 	val userLookup = new MockUserLookup
 	val user = new User("student")
@@ -50,6 +51,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		val feedback = Fixtures.feedback("1010101")
 		feedback.addAttachment(a)
 		assignment.feedbacks.add(feedback)
+		feedback.assignment = assignment
 		
 		item.submissionExists should be (false)
 		
@@ -85,6 +87,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
 		feedback.firstMarkerFeedback.addAttachment(a)
 		assignment.feedbacks.add(feedback)
+		feedback.assignment = assignment
 		
 		item.submissionExists should be (false)
 		
