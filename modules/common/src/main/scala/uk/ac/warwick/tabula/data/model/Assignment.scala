@@ -541,23 +541,23 @@ class Assignment
 	}
 
 	private def getMarkerFeedbackForPositionInFeedback(uniId: String, user: User, feedbackPosition: FeedbackPosition, feedback: Feedback): Option[MarkerFeedback] = {
-		Some(feedbackPosition match {
+		feedbackPosition match {
 			case FirstFeedback =>
 				if (this.isFirstMarker(user))
-					feedback.retrieveFirstMarkerFeedback
+					Some(feedback.retrieveFirstMarkerFeedback)
 				else
-					null
+					None
 			case SecondFeedback =>
 				if (this.markingWorkflow.hasSecondMarker && this.isSecondMarker(user))
-					feedback.retrieveSecondMarkerFeedback
+					Some(feedback.retrieveSecondMarkerFeedback)
 				else
-					null
+					None
 			case ThirdFeedback =>
 				if (this.markingWorkflow.hasThirdMarker && this.isThirdMarker(user))
-					feedback.retrieveThirdMarkerFeedback
+					Some(feedback.retrieveThirdMarkerFeedback)
 				else
-					null
-		})
+					None
+		}
 	}
 
 	/**
