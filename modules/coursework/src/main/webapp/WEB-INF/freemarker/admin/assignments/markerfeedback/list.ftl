@@ -129,14 +129,15 @@
 	    </#if>
 	</div>
 	<div class="submission-feedback-list">
-		<#if features.markerFeedback>
-			<div class="clearfix">
-				<@form.selector_check_all />
-			</div>
-		</#if>
 		<table class="table table-bordered table-striped">
 			<thead><tr>
-				<#if features.markerFeedback><th></th></#if>
+				<#if features.markerFeedback>
+					<th>
+						<div class="clearfix">
+							<@form.selector_check_all />
+						</div>
+					</th>
+				</#if>
 				<th>Student</th>
 				<th>Date submitted</th>
 				<#if !isFirstMarker>
