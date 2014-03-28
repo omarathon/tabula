@@ -111,9 +111,9 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineMarkerFeedbackFormCommand, errors: Errors): Mav = {
 
-		val isCompleted = command.markerFeedback.exists(_.state == MarkingCompleted)
+		val isCompleted = command.allMarkerFeedbacks.forall(_.state == MarkingCompleted)
 
-		val parentFeedback = command.markerFeedback.map(_.feedback)
+		val parentFeedback = Some(command.allMarkerFeedbacks.head.feedback)
 		val firstMarkerFeedback = parentFeedback.flatMap(feedback => Option(feedback.firstMarkerFeedback))
 		val secondMarkerFeedback =  parentFeedback.flatMap(feedback => Option(feedback.secondMarkerFeedback))
 		val isRejected = secondMarkerFeedback.exists(_.state == Rejected)
@@ -121,6 +121,7 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 		val isSecondMarker = command.assignment.isSecondMarker(command.currentUser.apparentUser)
 
 		val currentPosition = parentFeedback.get.getCurrentWorkflowFeedbackPosition
+
 		val isFirstMarkingPosition = currentPosition.getOrElse(false) == FirstFeedback
 		val isSecondMarkingPosition = currentPosition.getOrElse(false) == SecondFeedback
 		val isThirdMarkingPosition = currentPosition.getOrElse(false) == ThirdFeedback

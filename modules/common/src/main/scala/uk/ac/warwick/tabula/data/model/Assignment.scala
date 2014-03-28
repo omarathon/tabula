@@ -529,6 +529,17 @@ class Assignment
 		}
 	}
 
+	def getAllMarkerFeedbacks(uniId: String, user: User): Seq[MarkerFeedback] = {
+		val feedback = feedbacks.find(_.universityId == uniId)
+		if (this.markingWorkflow.hasThirdMarker && this.isThirdMarker(user)) {
+			Seq(feedback.get.retrieveThirdMarkerFeedback, feedback.get.retrieveSecondMarkerFeedback, feedback.get.retrieveFirstMarkerFeedback)
+		} else if (this.markingWorkflow.hasSecondMarker && this.isSecondMarker(user)) {
+			Seq(feedback.get.retrieveSecondMarkerFeedback, feedback.get.retrieveFirstMarkerFeedback)
+		} else if (this.isFirstMarker(user)) {
+			Seq(feedback.get.retrieveFirstMarkerFeedback)
+		} else null
+	}
+
 	private def getMarkerFeedbackForPositionInFeedback(uniId: String, user: User, feedbackPosition: FeedbackPosition, feedback: Feedback): Option[MarkerFeedback] = {
 		Some(feedbackPosition match {
 			case FirstFeedback =>
