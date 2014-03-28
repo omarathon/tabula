@@ -81,7 +81,6 @@ abstract class OnlineMarkerFeedbackCommand(val module: Module, val assignment: A
 			val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(submission.universityId, marker)
 
 			val (hasFeedback, hasCompletedFeedback, hasRejectedFeedback) = markerFeedback match {
-				case Some(null) => (false, false, false)
 				case Some(mf) =>
 					(mf.hasContent, mf.state == MarkingCompleted,  mf.state == Rejected)
 				case None => (false, false, false)

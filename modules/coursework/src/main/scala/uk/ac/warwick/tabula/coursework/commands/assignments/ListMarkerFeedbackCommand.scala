@@ -37,8 +37,8 @@ class ListMarkerFeedbackCommand(val assignment:Assignment, module: Module, val u
 			MarkerFeedbackItem(student, submission, markerFeedback.getOrElse(null), firstMarkerFeedback)
 		}
 
-		completedFeedback = markerFeedbacks.filter(mf => (mf.markerFeedback != null && mf.markerFeedback.state == MarkingCompleted))
-		rejectedFeedback = markerFeedbacks.filter(mf => (mf.markerFeedback != null && mf.markerFeedback.state == Rejected))
+		completedFeedback = markerFeedbacks.filter(mf => mf.markerFeedback != null && mf.markerFeedback.state == MarkingCompleted)
+		rejectedFeedback = markerFeedbacks.filter(mf => mf.markerFeedback != null && mf.markerFeedback.state == Rejected)
 
 		markerFeedbacks.filterNot(mfi =>
 			mfi.markerFeedback == null || mfi.markerFeedback.state == MarkingCompleted || mfi.markerFeedback.state == MarkingCompleted)
