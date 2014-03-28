@@ -95,7 +95,24 @@ object SandboxData {
 				Route("Public Speaking (Research)", "xp3p0", DegreeType.Postgraduate, CourseType.PGR, true, Seq(), 4400201, 4400300),
 			"xp3p1" -> 
 				Route("Public Speaking (Taught)", "xp3p1", DegreeType.Postgraduate, CourseType.PGT, false, Seq(), 4400301, 4400350)
-		), 5400001, 5400030)
+		), 5400001, 5400030),
+		"trn" -> Department("Training Methods", "trn", "I", Map(
+			"trn101" -> Module("Introduction to Tabula Training", "trn101"),
+			"trn102" -> Module("Advanced Sitebuilder Training", "trn102")
+		), Map(
+			"tr301" ->
+				Route("Training Methods", "tr301", DegreeType.Undergraduate, CourseType.UG, false,
+					Seq("trn101", "trn102"),
+					4500001, 4500100),
+			"tr302" ->
+				Route("Training Methods with Intercalated Year", "tr302", DegreeType.Undergraduate, CourseType.UG, false,
+					Seq("trn101", "trn102"),
+					4500101, 4500130),
+			"tr3p0" ->
+				Route("Training Methods (Research)", "tr3p0", DegreeType.Postgraduate, CourseType.PGR, true, Seq(), 4500201, 4500300),
+			"tr3p1" ->
+				Route("Training Methods (Taught)", "tr3p1", DegreeType.Postgraduate, CourseType.PGT, false, Seq(), 4500301, 4500350)
+		), 5500001, 5500030)
 	)
 	
 	def randomName(id: Long, gender: Gender) = {
