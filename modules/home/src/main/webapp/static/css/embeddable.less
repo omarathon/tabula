@@ -1898,10 +1898,14 @@ ul.nav-pills {
 
 .home-page-activity {
 	margin-top: 2em;
+	margin-left: 12px;
 }
 
 // General activity stream styles.
 .activity-stream {
+
+	.hint { color: @tabulaGrayLight; }
+
 	.activity {
 		padding-bottom: @grid-size * 0.75;
 		margin-bottom: @grid-size * 0.75;
@@ -1937,7 +1941,7 @@ ul.nav-pills {
 
 		// Compact down some content.
 		// Annoyingly need !important as the ID6 styles are qualified by ID.
-		p { margin: 0 !important; }
+		p { margin: 0 0 0.2em !important; }
 		ul { margin: 0.2em !important; }
 		li { margin: 0 !important; color: @tabulaGray; }
 
@@ -1954,11 +1958,26 @@ ul.nav-pills {
 		@detailsDownArrow: '\25be';
 
 		height: 1.6em;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
 		cursor: hand;
 		cursor: pointer;
+
+		width: 100%;
+		-moz-box-sizing: border-box;
+		-webkit-box-sizing: border-box;
+		box-sizing: border-box;
+		overflow: hidden;
+		position: relative;
+
+		* {
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+
+			// show an ellipsis even if the first line fits - there will be a URL below the fold maybe more
+			&:first-child::after {
+				content: ' …';
+			}
+		}
 
 		&::before {
 			content: @detailsRightArrow;
@@ -1966,9 +1985,19 @@ ul.nav-pills {
 			margin-left: -13px;
 			margin-top: -1px;
 		}
+
+
+
 		&.open {
 			height: auto;
-			white-space: inherit;
+
+			* {
+				white-space: normal;
+				&:first-child::after {
+					content: "";
+				}
+			}
+
 			&::before {
 				content: @detailsDownArrow;
 			}

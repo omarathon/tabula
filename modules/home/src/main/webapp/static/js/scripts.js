@@ -1212,7 +1212,8 @@ jQuery(function($){
 			return $el.data('popover').$tip.find('.popover-content').html();
 		} else {
 			$.get('/', function (data) {
-				$el.data('popover').$tip.find('.popover-content').html(data);
+				var $componentList = $('<div>'+data+'</div>').find('ul#home-list');
+				$el.data('popover').$tip.find('.popover-content').html('').append($componentList);
 				$el.data('loaded', true);
 				$el.data('popover').show();
 	    }, 'html');
