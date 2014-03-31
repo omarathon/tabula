@@ -33,12 +33,12 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 	this: StateServiceComponent with FeedbackServiceComponent =>
 
 	def onBind() {
-		markerFeedbacks = students.flatMap(assignment.getMarkerFeedbackForCurrentPosition(_, user))
+		pendingMarkerFeedbacks = students.flatMap(assignment.getMarkerFeedbackForCurrentPosition(_, user)).filter(null != _)
 	}
 
 	def applyInternal() {
 		// do not update previously released feedback
-		val feedbackForRelease = markerFeedbacks -- releasedFeedback
+		val feedbackForRelease = pendingMarkerFeedbacks -- releasedFeedback
 
 		feedbackForRelease.foreach(stateService.updateState(_, MarkingState.MarkingCompleted))
 
@@ -79,13 +79,14 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 	}
 
 	def preSubmitValidation() {
-		noMarks = markerFeedbacks.filter(!_.hasMark)
-		noFeedback = markerFeedbacks.filter(!_.hasFeedback)
-		releasedFeedback = markerFeedbacks.filter(_.state == MarkingState.MarkingCompleted)
+		noMarks = pendingMarkerFeedbacks.filter(!_.hasMark)
+		noFeedback = pendingMarkerFeedbacks.filter(!_.hasFeedback)
+		releasedFeedback = pendingMarkerFeedbacks.filter(_.state == MarkingState.MarkingCompleted)
 	}
 
 	def validate(errors: Errors) {
 		if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
+		if (pendingMarkerFeedbacks.isEmpty) errors.rejectValue("students", "markers.finishMarking.noStudents")
 	}
 }
 
@@ -107,7 +108,7 @@ trait MarkingCompletedDescription extends Describable[Unit] {
 
 	override def describeResult(d: Description){
 		d.assignment(assignment)
-			.property("numFeedbackUpdated" -> markerFeedbacks.size())
+			.property("numFeedbackUpdated" -> pendingMarkerFeedbacks.size())
 	}
 }
 
@@ -119,7 +120,7 @@ trait MarkingCompletedState {
 	val module: Module
 
 	var students: JList[String] = JArrayList()
-	var markerFeedbacks: JList[MarkerFeedback] = JArrayList()
+	var pendingMarkerFeedbacks: JList[MarkerFeedback] = JArrayList()
 
 	var noMarks: JList[MarkerFeedback] = JArrayList()
 	var noFeedback: JList[MarkerFeedback] = JArrayList()
