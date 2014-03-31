@@ -159,9 +159,8 @@ class StudentCourseDetails
 			_.studentRelationshipDisplayed.get(relationshipType.id)
 		}.map(_.toBoolean).contains(true)
 
-		// if not, fall back on the parent department setting
-		if (relationshipDisplayedForSubDepts == true) true
-		else department.getStudentRelationshipDisplayed(relationshipType)
+		// if either a sub-dept is set to display this relationship type or the parent department is, then display it:
+		relationshipDisplayedForSubDepts || department.getStudentRelationshipDisplayed(relationshipType)
 	}
 
 }
