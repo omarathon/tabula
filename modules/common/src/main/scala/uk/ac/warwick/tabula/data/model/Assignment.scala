@@ -513,6 +513,12 @@ class Assignment
 			case _ => false
 		}
 
+	def isReleasedToThirdMarker(submission: Submission): Boolean =
+		feedbacks.find(_.universityId == submission.universityId) match {
+			case Some(f) => f.thirdMarkerFeedback != null
+			case _ => false
+		}
+
 	def getMarkerFeedback(uniId: String, user: User, feedbackPosition: FeedbackPosition): Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.universityId == uniId)
 		parentFeedback.flatMap {
@@ -530,14 +536,39 @@ class Assignment
 	}
 
 	def getAllMarkerFeedbacks(uniId: String, user: User): Seq[MarkerFeedback] = {
-		val feedback = feedbacks.find(_.universityId == uniId)
+		feedbacks.find(_.universityId == uniId).map {
+			feedback =>
+				feedback.getCurrentWorkflowFeedbackPosition match {
+					case None => getUpToThirdFeedbacks(user, feedback)
+					case Some(ThirdFeedback) =>	getUpToThirdFeedbacks(user, feedback)
+					case Some(SecondFeedback) => getUpToSecondFeedbacks(user, feedback)
+					case Some(FirstFeedback) => getUpToFirstFeedbacks(user, feedback)
+				}
+		}.getOrElse(Seq())
+	}
+
+	private def getUpToThirdFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
 		if (this.markingWorkflow.hasThirdMarker && this.isThirdMarker(user)) {
-			Seq(feedback.get.retrieveThirdMarkerFeedback, feedback.get.retrieveSecondMarkerFeedback, feedback.get.retrieveFirstMarkerFeedback)
-		} else if (this.markingWorkflow.hasSecondMarker && this.isSecondMarker(user)) {
-			Seq(feedback.get.retrieveSecondMarkerFeedback, feedback.get.retrieveFirstMarkerFeedback)
-		} else if (this.isFirstMarker(user)) {
-			Seq(feedback.get.retrieveFirstMarkerFeedback)
-		} else null
+			Seq(feedback.retrieveThirdMarkerFeedback, feedback.retrieveSecondMarkerFeedback, feedback.retrieveFirstMarkerFeedback)
+		} else {
+			getUpToSecondFeedbacks(user, feedback)
+		}
+	}
+
+	private def getUpToSecondFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
+		if (this.markingWorkflow.hasSecondMarker && this.isSecondMarker(user)) {
+			Seq(feedback.retrieveSecondMarkerFeedback, feedback.retrieveFirstMarkerFeedback)
+		} else {
+			getUpToFirstFeedbacks(user, feedback)
+		}
+	}
+
+	private def getUpToFirstFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
+		if (this.isFirstMarker(user)) {
+			Seq(feedback.retrieveFirstMarkerFeedback)
+		} else {
+			Seq()
+		}
 	}
 
 	private def getMarkerFeedbackForPositionInFeedback(uniId: String, user: User, feedbackPosition: FeedbackPosition, feedback: Feedback): Option[MarkerFeedback] = {
@@ -570,7 +601,7 @@ class Assignment
 	def getStudentsSecondMarker(submission: Submission): Option[String] =
 		Option(markingWorkflow) flatMap {_.getStudentsSecondMarker(this, submission.universityId)}
 
-		/**
+	/**
 	 * Optionally returns the submissions that are to be marked by the given user
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */

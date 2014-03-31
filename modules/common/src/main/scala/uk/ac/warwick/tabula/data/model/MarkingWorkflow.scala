@@ -113,11 +113,14 @@ trait AssignmentMarkerMap {
 
 		val isFirstMarker = assignment.isFirstMarker(marker)
 		val isSecondMarker = assignment.markingWorkflow.hasSecondMarker && assignment.isSecondMarker(marker)
+		val isThirdMarker = assignment.markingWorkflow.hasThirdMarker && assignment.isThirdMarker(marker)
 
 		if(isFirstMarker)
 			allSubmissions.filter(_.isReleasedForMarking)
 		else if(isSecondMarker)
 			allSubmissions.filter(_.isReleasedToSecondMarker)
+		else if(isThirdMarker)
+			allSubmissions.filter(_.isReleasedToThirdMarker)
 		else Seq()
 	}
 

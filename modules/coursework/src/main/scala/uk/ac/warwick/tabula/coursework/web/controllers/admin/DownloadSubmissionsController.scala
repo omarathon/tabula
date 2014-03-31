@@ -1,16 +1,14 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import scala.collection.JavaConversions._
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.coursework.commands.assignments.{DownloadFeedbackSheetsCommand, DownloadAllSubmissionsCommand, DownloadSubmissionsCommand}
-import uk.ac.warwick.tabula.services.fileserver.FileServer
+import uk.ac.warwick.tabula.services.fileserver.{RenderableZip, FileServer}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.AdminGetSingleSubmissionCommand
 import javax.servlet.http.HttpServletRequest
@@ -20,6 +18,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmi
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadAttachmentCommand
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.services.SubmissionService
+import uk.ac.warwick.tabula.commands.ApplyWithCallback
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.zip"))
@@ -45,25 +44,16 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
 	
-	@ModelAttribute def getMarkersSubmissionCommand(
+	@ModelAttribute("command")
+	def getMarkersSubmissionCommand(
 			@PathVariable("module") module: Module, 
 			@PathVariable("assignment") assignment: Assignment, 
-			user: CurrentUser) = 
-		new DownloadMarkersSubmissionsCommand(module, assignment, user)
+			user: CurrentUser
+	) =	DownloadMarkersSubmissionsCommand(module, assignment, user)
 
 	@RequestMapping
-	def downloadMarkersSubmissions(command: DownloadMarkersSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		val assignment = command.assignment
-		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
-		
-		// do not download submissions where the marker has completed marking
-		val filteredSubmissions = submissions.filter{ submission =>
-			val markerFeedback =  assignment.getMarkerFeedbackForCurrentPosition(submission.universityId, user.apparentUser)
-			markerFeedback.exists(mf => mf.state != MarkingCompleted)
-		}
-		
-		command.submissions = filteredSubmissions.toList
-			
+	def downloadMarkersSubmissions(@ModelAttribute("command") command: ApplyWithCallback[RenderableZip])
+		(implicit request: HttpServletRequest, response: HttpServletResponse) = {
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
