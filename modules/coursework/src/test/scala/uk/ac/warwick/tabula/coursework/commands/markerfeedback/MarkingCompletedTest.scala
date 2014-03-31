@@ -60,11 +60,10 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	def firstMarkerFinished() {
 		withUser("cuslaj") {
 
-			val isFirstMarker = assignment.isFirstMarker(currentUser.apparentUser)
-			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, isFirstMarker)
+			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser)
 			command.stateService = stateService
 			command.students = List("9876004", "0270954", "9170726")
-			command.onBind()
+			command.onBind(null)
 
 			command.preSubmitValidation()
 			command.noFeedback.size should be (3)
@@ -89,11 +88,10 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		inContext[MarkingCompletedTest.Ctx] {
 		withUser("cuday"){
 
-			val isFirstMarker = assignment.isFirstMarker(currentUser.apparentUser)
-			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, isFirstMarker)
+			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser)
 			command.stateService = stateService
 			command.students = List("0672088", "0672089")
-			command.onBind()
+			command.onBind(null)
 
 			command.preSubmitValidation()
 			command.noFeedback.size should be (2)
@@ -125,8 +123,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	def finalMarkingComplete() {
 		withUser("cuslaj") {
 
-			val isFirstMarker = assignment.isFirstMarker(currentUser.apparentUser)
-			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, isFirstMarker)
+			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser)
 
 			assignment.feedbacks.map(addMarkerFeedback(_,ThirdFeedback))
 			setFinalMarkerFeedbackState(MarkingState.InProgress)
@@ -134,7 +131,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 
 			command.stateService = stateService
 			command.students = List("9876004", "0270954", "9170726")
-			command.onBind()
+			command.onBind(null)
 
 			command.feedbackService = feedbackService
 

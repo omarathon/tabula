@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import org.springframework.validation.Errors
+import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.services.{FeedbackServiceComponent, AutowiringFeedbackServiceComponent, AutowiringUserLookupComponent, UserLookupComponent, AutowiringStateServiceComponent, StateServiceComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
@@ -13,10 +12,11 @@ import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.notifications.ReleaseToMarkerNotification
 import scala.collection.mutable
+import uk.ac.warwick.tabula.system.BindListener
 
 object MarkingCompletedCommand {
-	def apply(module: Module, assignment: Assignment, user: User, firstMarker:Boolean) =
-		new MarkingCompletedCommand(module, assignment, user, firstMarker)
+	def apply(module: Module, assignment: Assignment, user: User) =
+		new MarkingCompletedCommand(module, assignment, user)
 			with ComposableCommand[Unit]
 			with MarkingCompletedCommandPermissions
 			with MarkingCompletedDescription
@@ -26,56 +26,13 @@ object MarkingCompletedCommand {
 			with AutowiringFeedbackServiceComponent
 }
 
-abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User, val firstMarker:Boolean)
-	extends CommandInternal[Unit] with Appliable[Unit] with SelfValidating with UserAware with MarkingCompletedState
-	with ReleasedState {
+abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User)
+	extends CommandInternal[Unit] with Appliable[Unit] with SelfValidating with UserAware with MarkingCompletedState with ReleasedState with BindListener {
 
-	this: StateServiceComponent with FeedbackServiceComponent =>
+	self: StateServiceComponent with FeedbackServiceComponent =>
 
-	def onBind() {
+	override def onBind(result: BindingResult) {
 		pendingMarkerFeedbacks = students.flatMap(assignment.getMarkerFeedbackForCurrentPosition(_, user)).filter(null != _)
-	}
-
-	def applyInternal() {
-		// do not update previously released feedback
-		val feedbackForRelease = pendingMarkerFeedbacks -- releasedFeedback
-
-		feedbackForRelease.foreach(stateService.updateState(_, MarkingState.MarkingCompleted))
-
-		nextMarkerFeedback(feedbackForRelease)
-
-	}
-
-	private def nextMarkerFeedback(feedbackForRelease: mutable.Buffer[MarkerFeedback]){
-
-		def finaliseFeedback(){
-			val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, feedbackForRelease)
-			finaliseFeedbackCommand.apply()
-		}
-
-		newReleasedFeedback = feedbackForRelease.map{ mf =>
-			val parentFeedback = mf.feedback
-			val nextMarkerFeedback = {
-				if (mf.state == MarkingState.MarkingCompleted && mf.getFeedbackPosition.get == FirstFeedback)	{
-					parentFeedback.retrieveSecondMarkerFeedback
-				}
-				else {
-					parentFeedback.retrieveThirdMarkerFeedback
-
-				}
-			}
-			if (mf.getFeedbackPosition.get != ThirdFeedback)	{
-				stateService.updateState(nextMarkerFeedback, MarkingState.ReleasedForMarking)
-			}
-			feedbackService.save(nextMarkerFeedback)
-
-
-			// if we're completing the last piece of marker feedback, then finalise the feedback
-			if (mf.getFeedbackPosition.get == nextMarkerFeedback.getFeedbackPosition.get) finaliseFeedback()
-
-			nextMarkerFeedback
-		}
-
 	}
 
 	def preSubmitValidation() {
@@ -87,6 +44,40 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 	def validate(errors: Errors) {
 		if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
 		if (pendingMarkerFeedbacks.isEmpty) errors.rejectValue("students", "markers.finishMarking.noStudents")
+	}
+
+	def applyInternal() {
+		// do not update previously released feedback
+		val feedbackForRelease = pendingMarkerFeedbacks -- releasedFeedback
+
+		feedbackForRelease.foreach(stateService.updateState(_, MarkingState.MarkingCompleted))
+
+		releaseNextMarkerFeedbackOrFinalise(feedbackForRelease)
+	}
+
+	private def releaseNextMarkerFeedbackOrFinalise(feedbackForRelease: mutable.Buffer[MarkerFeedback]) {
+		newReleasedFeedback = feedbackForRelease.filter(nextMarkerFeedback(_).isDefined).map{ nextMarkerFeedback =>
+			stateService.updateState(nextMarkerFeedback, MarkingState.ReleasedForMarking)
+			feedbackService.save(nextMarkerFeedback)
+			nextMarkerFeedback
+		}
+
+		finaliseFeedback(feedbackForRelease.filter(!nextMarkerFeedback(_).isDefined))
+	}
+
+	private def nextMarkerFeedback(markerFeedback: MarkerFeedback): Option[MarkerFeedback] = {
+		markerFeedback.getFeedbackPosition match {
+			case Some(FirstFeedback) if markerFeedback.feedback.assignment.markingWorkflow.hasSecondMarker =>
+				Option(markerFeedback.feedback.retrieveSecondMarkerFeedback)
+			case Some(SecondFeedback) if markerFeedback.feedback.assignment.markingWorkflow.hasThirdMarker =>
+				Option(markerFeedback.feedback.retrieveThirdMarkerFeedback)
+			case _ => None
+		}
+	}
+
+	private def finaliseFeedback(feedbackForRelease: Seq[MarkerFeedback]) = {
+		val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, feedbackForRelease)
+		finaliseFeedbackCommand.apply()
 	}
 }
 

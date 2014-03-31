@@ -108,7 +108,9 @@
 		</#if>
 		<a class="btn use-tooltip ${disabledClass}"
 		   title="Download a zip of submissions due to be marked. Note that submissions with a status of 'Marking completed' will not be included in this zip"
-		   href="<@routes.downloadmarkersubmissions assignment=assignment />">
+		   href="<@routes.downloadmarkersubmissions assignment=assignment />"
+		   data-container="body"
+		>
 			<i class="icon-download"></i> Download submissions (${inProgressFeedback?size})
 		</a>
 		<#if hasFirstMarkerFeedback && hasSecondMarkerFeedback>
