@@ -71,25 +71,31 @@ object StudentCourseworkCommand {
 			with AutowiringFeaturesComponent
 			with ReadOnly with Unaudited
 	
-	def getHistoricAssignmentsInfo(assignmentsWithFeedbackInfo: Seq[AssignmentInfo], assignmentsWithSubmissionInfo: Seq[AssignmentInfo], lateFormativeAssignmentsInfo: Seq[AssignmentInfo]): Seq[AssignmentInfo] = {
-		assignmentsWithFeedbackInfo
-			.union(assignmentsWithSubmissionInfo)
-			.union(lateFormativeAssignmentsInfo)
-			.sortWith {	(info1, info2) =>
-			def toDate(info: AssignmentInfo) = {
-				val assignment = info("assignment").asInstanceOf[Assignment]
-				val submission = info("submission").asInstanceOf[Option[Submission]]
+	def getHistoricAssignmentsInfo(
+		assignmentsWithFeedbackInfo: Seq[AssignmentInfo],
+		assignmentsWithSubmissionInfo: Seq[AssignmentInfo],
+		lateFormativeAssignmentsInfo: Seq[AssignmentInfo]): Seq[AssignmentInfo] = {
+			assignmentsWithFeedbackInfo
+				.union(assignmentsWithSubmissionInfo)
+				.union(lateFormativeAssignmentsInfo)
+				.sortWith {	(info1, info2) =>
+				def toDate(info: AssignmentInfo) = {
+					val assignment = info("assignment").asInstanceOf[Assignment]
+					val submission = info("submission").asInstanceOf[Option[Submission]]
 
-				submission map { _.submittedDate } getOrElse { if (assignment.openEnded) assignment.openDate else assignment.closeDate }
-			}
+					submission map { _.submittedDate } getOrElse { if (assignment.openEnded) assignment.openDate else assignment.closeDate }
+				}
 
-			toDate(info1) < toDate(info2)
-		}.distinct.reverse
+				toDate(info1) < toDate(info2)
+			}.distinct.reverse
 	}
 }
 
-class StudentCourseworkCommandInternal(val user: MemberOrUser) extends CommandInternal[StudentAssignments] with StudentCourseworkCommandState with TaskBenchmarking {
-	self: AssignmentServiceComponent with 
+class StudentCourseworkCommandInternal(val user: MemberOrUser) extends CommandInternal[StudentAssignments]
+	with StudentCourseworkCommandState
+	with TaskBenchmarking {
+
+	self: AssignmentServiceComponent with
 		  AssignmentMembershipServiceComponent with
 		  FeaturesComponent =>
 	
