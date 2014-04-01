@@ -44,7 +44,7 @@
 </div>-->
 
 
-	<div style="padding: 0 1rem 0rem 1rem; background-color: #f5f5f5;">
+	<div class="${feedback.feedbackPosition.toString}" style="padding: 0 1rem 0rem 1rem; background-color: #f5f5f5;">
 
 		<#if feedback.mark?has_content || feedback.grade?has_content>
 			<div style='margin: 0.5rem 0 0.5rem 0;
@@ -56,14 +56,14 @@
 			line-height: 1.4em;
 			'>
 				<div style="display:table-row; width: 600px; padding: 1rem 0 2rem 0;">
-					<div style="display:table-cell; padding-right: 0.5rem;">Mark:</div><div style="padding-right: 3rem;">${feedback.mark!""}%</div>
-					<div style="display:table-cell; padding-right: 0.5rem;">Grade:</div><div>${feedback.grade!"No grade added"}</div>
+					<div style="display:table-cell; padding-right: 0.5rem;">Mark:</div><div style="padding-right: 3rem;"><span class="mark">${feedback.mark!""}</span><span>%</span></div>
+					<div style="display:table-cell; padding-right: 0.5rem;">Grade:</div><div class="grade">${feedback.grade!""}</div>
 				</div>
 			</div>
 		</#if>
-		<div style="float: left; max-width:550px; margin: 0 1.5rem 1.5rem 0;">
+		<div style="float: left; max-width:550px; margin: 0 1.5rem 1.5rem 0;" >
 			<h5>Feedback Comments</h5>
-			<div style="margin-top: 0.3rem;">
+			<div style="margin-top: 0.3rem;" class="feedback-summary-comments">
 			<#list feedback.customFormValues as formValue>
 				${formValue.value!""}
 			</#list>

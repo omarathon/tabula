@@ -25,3 +25,22 @@
 		<#include "_submission_summary.ftl">
 	</#if>
 </#if>
+
+
+<script>
+(function( $ ) {
+  $('body').on("tabula.expandingTable.contentChanged", function(){
+	  $(".copyFeedback").off("click").on("click",function(){
+
+		  var $button = $(this);
+		  var className = $button.data('feedback');
+		  var $summaryFeeback = $button.closest(".content-container").find("." + className);
+		  var $feedbackForm = $button.closest("form");
+
+		  $feedbackForm.find(".big-textarea").val($.trim($summaryFeeback.find(".feedback-summary-comments").text()));
+		  $feedbackForm.find("input[name='mark']").val($summaryFeeback.find(".mark").text());
+		  $feedbackForm.find("input[name='grade']").val($summaryFeeback.find(".grade").text());
+	  })
+  })
+})(jQuery)
+</script>

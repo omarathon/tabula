@@ -32,9 +32,9 @@
 				<@form.label><i class="icon-lightbulb"></i> Populate with previous</@form.label>
 				<@form.field>
 					<#list allCompletedMarkerFeedback as feedback>
-						<a id="copy-complete-button" class="btn" title="Populate final feedback with ${feedback.getFeedbackPosition().description}">
+						<a data-feedback="${feedback.feedbackPosition.toString}" class="copyFeedback btn" title="Populate final feedback with ${feedback.feedbackPosition.description}">
 							<i class="icon-arrow-down"></i>
-							Copy ${feedback.getFeedbackPosition().description}
+							Copy ${feedback.feedbackPosition.description}
 						</a>
 					</#list>
 				</@form.field>
@@ -91,3 +91,4 @@
 
 	</@f.form>
 </div>
+
