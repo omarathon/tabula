@@ -20,6 +20,7 @@ object DownloadMarkersSubmissionsCommand {
 	def apply(module: Module, assignment: Assignment, user: CurrentUser) =
 		new DownloadMarkersSubmissionsCommand(module, assignment, user)
 		with ComposableCommand[RenderableZip]
+		with ApplyWithCallback[RenderableZip]
 		with AutowiringZipServiceComponent
 		with AutowiringAssignmentServiceComponent
 		with AutowiringStateServiceComponent
@@ -30,8 +31,7 @@ object DownloadMarkersSubmissionsCommand {
 }
 
 class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assignment, val user: CurrentUser)
-		extends CommandInternal[RenderableZip] with ApplyWithCallback[RenderableZip]
-		with DownloadMarkersSubmissionsDescription with DownloadMarkersSubmissionsCommandState {
+	extends CommandInternal[RenderableZip] with HasCallback[RenderableZip] {
 
 	self: ZipServiceComponent with AssignmentServiceComponent with StateServiceComponent =>
 

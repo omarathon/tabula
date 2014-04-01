@@ -91,24 +91,24 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser)
 			command.stateService = stateService
 			command.students = List("0672088", "0672089")
+			setFirstMarkerFeedbackState(MarkingState.MarkingCompleted)
 			command.onBind(null)
 
 			command.preSubmitValidation()
 			command.noFeedback.size should be (2)
 			command.noMarks.size should be (2)
-			setFirstMarkerFeedbackState(MarkingState.MarkingCompleted)
 
 			command.feedbackService = feedbackService
 
 			command.applyInternal()
 
+			val firstFeedback = assignment.feedbacks.flatMap(f => Option(f.firstMarkerFeedback))
+			val completedFirstMarking = firstFeedback.filter(_.state == MarkingState.MarkingCompleted)
+			completedFirstMarking.size should be (5)
+
 			val secondFeedback = assignment.feedbacks.flatMap(f => Option(f.secondMarkerFeedback))
 			val completedSecondMarking = secondFeedback.filter(_.state == MarkingState.MarkingCompleted)
 			completedSecondMarking.size should be (2)
-
-			val firstFeedback = assignment.feedbacks.flatMap(f => Option(f.firstMarkerFeedback))
-			val completedFirstMarking = firstFeedback.filter(_.state == MarkingState.MarkingCompleted)
-			completedFirstMarking.size should be (2)
 
 			val finalFeedback = assignment.feedbacks.flatMap(f => Option(f.thirdMarkerFeedback)).filter(_.state == MarkingState.ReleasedForMarking)
 			finalFeedback.size should be (2)
@@ -121,39 +121,42 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 
 	@Test
 	def finalMarkingComplete() {
-		withUser("cuslaj") {
+		inContext[MarkingCompletedTest.Ctx] {
+			withUser("cuslaj") {
 
-			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser)
+				val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser)
 
-			assignment.feedbacks.map(addMarkerFeedback(_,ThirdFeedback))
-			setFinalMarkerFeedbackState(MarkingState.InProgress)
-			setFirstMarkerFeedbackState(MarkingState.MarkingCompleted)
+				assignment.feedbacks.map(addMarkerFeedback(_, ThirdFeedback))
+				assignment.feedbacks.map(addMarkerFeedback(_, SecondFeedback))
+				setFinalMarkerFeedbackState(MarkingState.InProgress)
+				setFirstMarkerFeedbackState(MarkingState.MarkingCompleted)
+				setSecondMarkerFeedbackState(MarkingState.MarkingCompleted)
 
-			command.stateService = stateService
-			command.students = List("9876004", "0270954", "9170726")
-			command.onBind(null)
+				command.stateService = stateService
+				command.students = List("9876004", "0270954", "9170726")
+				command.onBind(null)
 
-			command.feedbackService = feedbackService
+				command.feedbackService = feedbackService
 
-			command.preSubmitValidation()
-			command.noFeedback.size should be (3)
-			command.noMarks.size should be (3)
+				command.preSubmitValidation()
+				command.noFeedback.size should be(3)
+				command.noMarks.size should be(3)
 
-			command.applyInternal()
+				command.applyInternal()
 
-			val secondFeedback = assignment.feedbacks.flatMap(f => Option(f.secondMarkerFeedback))
-			val completedSecondMarking = secondFeedback.filter(_.state == MarkingState.MarkingCompleted)
-			completedSecondMarking.size should be (3)
+				val firstFeedback = assignment.feedbacks.flatMap(f => Option(f.firstMarkerFeedback))
+				val completedFirstMarking = firstFeedback.filter(_.state == MarkingState.MarkingCompleted)
+				completedFirstMarking.size should be(5)
 
-			val firstFeedback = assignment.feedbacks.flatMap(f => Option(f.firstMarkerFeedback))
-			val completedFirstMarking = firstFeedback.filter(_.state == MarkingState.MarkingCompleted)
-			completedFirstMarking.size should be (3)
+				val secondFeedback = assignment.feedbacks.flatMap(f => Option(f.secondMarkerFeedback))
+				val completedSecondMarking = secondFeedback.filter(_.state == MarkingState.MarkingCompleted)
+				completedSecondMarking.size should be(5)
 
-			val releasedFeedback = assignment.feedbacks.map(_.thirdMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
-			releasedFeedback.size should be (3)
+				val releasedFeedback = assignment.feedbacks.map(_.thirdMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
+				releasedFeedback.size should be(3)
+			}
+
 		}
-
-
 	}
 
 

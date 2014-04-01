@@ -44,7 +44,7 @@ class DownloadMarkerSubmissionTest extends AppContextTestBase with MarkingWorkfl
   def downloadSubmissionsTest() {
     withUser("cuslaj") {
       val command = new DownloadMarkersSubmissionsCommand(assignment.module, assignment, currentUser) with CommandTestSupport
-      command.apply {
+			command.callback = {
         zip =>
           val stream = new ZipInputStream(new FileInputStream(zip.file.get))
           val items = Zips.map(stream) {
@@ -52,6 +52,7 @@ class DownloadMarkerSubmissionTest extends AppContextTestBase with MarkingWorkfl
           }
           items.size should be(3)
       }
+			command.applyInternal()
     }
   }
 

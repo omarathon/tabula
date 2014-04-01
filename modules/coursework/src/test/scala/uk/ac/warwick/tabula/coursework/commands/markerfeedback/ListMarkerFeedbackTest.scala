@@ -35,6 +35,8 @@ class ListMarkerFeedbackTest extends AppContextTestBase with MarkingWorkflowWorl
 	@Transactional @Test
 	def secondMarkerTest() {
 		assignment.feedbacks.foreach{feedback =>
+			val fmFeedback = feedback.retrieveFirstMarkerFeedback
+			fmFeedback.state = MarkingState.MarkingCompleted
 			val smFeedback = feedback.retrieveSecondMarkerFeedback
 			smFeedback.state = MarkingState.ReleasedForMarking
 		}

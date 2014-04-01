@@ -21,7 +21,8 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 
 	def markerFeedback = item.entity
 	def parentFeedback = markerFeedback.feedback
-	def rejectionFeeback = parentFeedback.secondMarkerFeedback
+	def rejectionFeedback = parentFeedback.secondMarkerFeedback
+	def rejectedFeedback = parentFeedback.firstMarkerFeedback
 	def actionRequired = true
 
 	def assignment = markerFeedback.feedback.assignment
@@ -35,14 +36,14 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 			"moderatorName" -> agent.getFullName,
 			"studentId" -> parentFeedback.universityId,
 			"assignment" -> assignment,
-			"rejectionComments" -> rejectionFeeback.rejectionComments,
-			"adjustedMark" -> rejectionFeeback.mark,
-			"adjustedGrade" -> rejectionFeeback.grade
+			"rejectionComments" -> rejectionFeedback.rejectionComments,
+			"adjustedMark" -> rejectionFeedback.mark,
+			"adjustedGrade" -> rejectionFeedback.grade
 		))
 
 	def url: String = Routes.admin.assignment.markerFeedback(assignment)
 	def urlTitle = "update the feedback and submit it for moderation again"
 
 	// the recepient is the first marker
-	def recipients = markerFeedback.getMarkerUsercode.map(userId => userLookup.getUserByUserId(userId)).toSeq
+	def recipients = rejectedFeedback.getMarkerUsercode.map(userId => userLookup.getUserByUserId(userId)).toSeq
 }

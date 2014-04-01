@@ -100,7 +100,8 @@
 	<p>You are the <#if hasSecondMarkerFeedback>${thirdMarkerRoleName}<#elseif hasFirstMarkerFeedback>${secondMarkerRoleName}<#else>${firstMarkerRoleName}</#if> for the following submissions</p>
 
 	<div class="btn-toolbar">
-		<#assign disabledClass><#if inProgressFeedback?size == 0>disabled</#if></#assign>
+		<#assign feedbackToDoCount = inProgressFeedback?size + rejectedFeedback?size />
+		<#assign disabledClass><#if feedbackToDoCount == 0>disabled</#if></#assign>
 		<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 			<a class="btn use-tooltip" title="Download feedback templates for all students as a ZIP file." href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker-templates.zip'/>"><i class="icon-download"></i>
 				Download feedback templates
@@ -111,7 +112,7 @@
 		   href="<@routes.downloadmarkersubmissions assignment=assignment />"
 		   data-container="body"
 		>
-			<i class="icon-download"></i> Download submissions (${inProgressFeedback?size})
+			<i class="icon-download"></i> Download submissions (${feedbackToDoCount})
 		</a>
 		<#if hasFirstMarkerFeedback && hasSecondMarkerFeedback>
 			<div class="btn-group">

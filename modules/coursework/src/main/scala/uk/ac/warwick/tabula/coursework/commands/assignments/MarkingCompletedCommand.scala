@@ -56,13 +56,15 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 	}
 
 	private def releaseNextMarkerFeedbackOrFinalise(feedbackForRelease: mutable.Buffer[MarkerFeedback]) {
-		newReleasedFeedback = feedbackForRelease.filter(nextMarkerFeedback(_).isDefined).map{ nextMarkerFeedback =>
+		newReleasedFeedback = feedbackForRelease.flatMap(nextMarkerFeedback).map{ nextMarkerFeedback =>
 			stateService.updateState(nextMarkerFeedback, MarkingState.ReleasedForMarking)
 			feedbackService.save(nextMarkerFeedback)
 			nextMarkerFeedback
 		}
 
-		finaliseFeedback(feedbackForRelease.filter(!nextMarkerFeedback(_).isDefined))
+		val feedbackToFinalise = feedbackForRelease.filter(!nextMarkerFeedback(_).isDefined)
+		if (!feedbackToFinalise.isEmpty)
+			finaliseFeedback(feedbackToFinalise)
 	}
 
 	private def nextMarkerFeedback(markerFeedback: MarkerFeedback): Option[MarkerFeedback] = {

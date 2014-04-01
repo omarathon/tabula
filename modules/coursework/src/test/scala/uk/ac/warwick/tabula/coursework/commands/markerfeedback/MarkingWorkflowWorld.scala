@@ -55,6 +55,7 @@ trait MarkingWorkflowWorld extends TestFixtures {
 	def addMarkerFeedback(feedback: Feedback, position: FeedbackPosition) = {
 		val mf = position match {
 			case (ThirdFeedback) => feedback.retrieveThirdMarkerFeedback
+			case (SecondFeedback) => feedback.retrieveSecondMarkerFeedback
 			case _ => feedback.retrieveFirstMarkerFeedback
 		}
 		mf.state = MarkingState.InProgress

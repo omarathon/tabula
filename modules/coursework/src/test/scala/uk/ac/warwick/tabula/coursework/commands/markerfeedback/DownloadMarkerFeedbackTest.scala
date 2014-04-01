@@ -4,11 +4,11 @@ import collection.JavaConversions._
 import uk.ac.warwick.tabula.AppContextTestBase
 import org.junit.Before
 import uk.ac.warwick.tabula.data.model.MarkingState._
-import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.{FirstFeedback, FileAttachment}
 import java.io.{FileInputStream, ByteArrayInputStream}
-import uk.ac.warwick.tabula.coursework.commands.feedback.{DownloadFirstMarkersFeedbackCommand, AdminGetSingleMarkerFeedbackCommand}
+import uk.ac.warwick.tabula.coursework.commands.feedback.{DownloadMarkersFeedbackForPositionCommand, AdminGetSingleMarkerFeedbackCommand}
 import java.util.zip.ZipInputStream
-import uk.ac.warwick.tabula.services.Zips
+import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, Zips}
 import org.springframework.util.FileCopyUtils
 import java.io.FileOutputStream
 
@@ -34,7 +34,7 @@ class DownloadMarkerFeedbackTest extends AppContextTestBase with MarkingWorkflow
 	@Test
 	def downloadSingle()= transactional{ts=>
 		withUser("cuslaj"){
-			val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition("9876004", currentUser.apparentUser)
+			val markerFeedback = assignment.getMarkerFeedback("9876004", currentUser.apparentUser, FirstFeedback)
 			val command = new AdminGetSingleMarkerFeedbackCommand(assignment.module, assignment, markerFeedback.get)
 			val renderable = command.apply()
 			val stream = new ZipInputStream(new FileInputStream(renderable.file.get))
@@ -46,8 +46,8 @@ class DownloadMarkerFeedbackTest extends AppContextTestBase with MarkingWorkflow
 	@Test
 	def downloadAll()= transactional{ts=>
 		withUser("cuslat"){
-			val command = new DownloadFirstMarkersFeedbackCommand(assignment.module, assignment, currentUser)
-			val renderable = command.apply()
+			val command = new DownloadMarkersFeedbackForPositionCommand(assignment.module, assignment, currentUser, FirstFeedback) with AutowiringZipServiceComponent
+			val renderable = command.applyInternal()
 			val stream = new ZipInputStream(new FileInputStream(renderable.file.get))
 			val items = Zips.map(stream){item => item.getName}
 			items.size should be (3)
