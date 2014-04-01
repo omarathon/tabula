@@ -113,33 +113,18 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 
 		val isCompleted = command.allMarkerFeedbacks.forall(_.state == MarkingCompleted)
 
-		val parentFeedback = Some(command.allMarkerFeedbacks.head.feedback)
-		val firstMarkerFeedback = parentFeedback.flatMap(feedback => Option(feedback.firstMarkerFeedback))
-		val secondMarkerFeedback =  parentFeedback.flatMap(feedback => Option(feedback.secondMarkerFeedback))
-		val isRejected = secondMarkerFeedback.exists(_.state == Rejected)
-		val isFirstMarker = command.assignment.isFirstMarker(command.currentUser.apparentUser)
-		val isSecondMarker = command.assignment.isSecondMarker(command.currentUser.apparentUser)
+		val parentFeedback = command.allMarkerFeedbacks.head.feedback
+		val isRejected = command.allMarkerFeedbacks.exists(mf => mf.getFeedbackPosition.get == SecondFeedback && mf.state == Rejected)
 
-		val currentPosition = parentFeedback.get.getCurrentWorkflowFeedbackPosition
-
-		val isFirstMarkingPosition = currentPosition.getOrElse(false) == FirstFeedback
-		val isSecondMarkingPosition = currentPosition.getOrElse(false) == SecondFeedback
-		val isThirdMarkingPosition = currentPosition.getOrElse(false) == ThirdFeedback
-
-		val allCompletedMarkerFeedback = parentFeedback.get.getAllCompletedMarkerFeedback
+		val isCurrentUserFeebackEntry = parentFeedback.getCurrentWorkflowFeedback.exists(_.getMarkerUser == command.currentUser.apparentUser)
+		val allCompletedMarkerFeedback = parentFeedback.getAllCompletedMarkerFeedback
 
 		Mav("admin/assignments/feedback/marker_online_feedback" ,
 			"command" -> command,
 			"isCompleted" -> isCompleted,
-			"isFirstMarker" -> isFirstMarker,
-			"isSecondMarker" -> isSecondMarker,
-			"firstMarkerFeedback" -> firstMarkerFeedback,
 			"isRejected" -> isRejected,
-			"secondMarkerFeedback" -> secondMarkerFeedback,
-			"isFirstMarkingPosition" -> isFirstMarkingPosition,
-			"isSecondMarkingPosition" -> isSecondMarkingPosition,
-			"isThirdMarkingPosition" -> isThirdMarkingPosition,
-			"allCompletedMarkerFeedback" -> allCompletedMarkerFeedback
+			"allCompletedMarkerFeedback" -> allCompletedMarkerFeedback,
+			"isCurrentUserFeedbackEntry" -> isCurrentUserFeebackEntry
 		).noLayout()
 	}
 

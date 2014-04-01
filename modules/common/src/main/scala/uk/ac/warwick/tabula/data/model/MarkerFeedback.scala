@@ -9,6 +9,9 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
 import org.hibernate.annotations.AccessType
 import javax.persistence.Entity
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.UserLookupService
 
 @Entity @AccessType("field")
 class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityReference {
@@ -19,9 +22,10 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 		feedback = parent
 	}
 
+	@transient
+	var userLookup = Wire[UserLookupService]("userLookup")
+
 	def getFeedbackPosition = feedback.getFeedbackPosition(this)
-
-
 
 	def getMarkerUsercode: Option[String] = {
 		val student = feedback.universityId
@@ -34,6 +38,8 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 			case _ => None
 		}
 	}
+
+	def getMarkerUser: User = userLookup.getUserByUserId(getMarkerUsercode.get)
 
 	@OneToOne(fetch = FetchType.LAZY, optional = false, cascade=Array())
 	@JoinColumn(name = "feedback_id")

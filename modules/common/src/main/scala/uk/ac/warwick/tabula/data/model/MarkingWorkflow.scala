@@ -133,19 +133,20 @@ trait AssignmentMarkerMap {
 		}.getOrElse(Seq())
 	}
 
+
 }
 
 trait NoThirdMarker {
-	def hasThirdMarker = false
-	def thirdMarkerRoleName = None
-	def thirdMarkerVerb = None
-	def thirdMarkers: UserGroup = UserGroup.ofUsercodes
+		def hasThirdMarker = false
+		def thirdMarkerRoleName = None
+		def thirdMarkerVerb = None
+		def thirdMarkers: UserGroup = UserGroup.ofUsercodes
 }
 
 trait NoSecondMarker extends NoThirdMarker {
-	def hasSecondMarker = false
-	def secondMarkerRoleName = None
-	def secondMarkerVerb = None
+		def hasSecondMarker = false
+		def secondMarkerRoleName = None
+		def secondMarkerVerb = None
 }
 
 

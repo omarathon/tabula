@@ -27,6 +27,19 @@
 	<@f.form cssClass="form-horizontal double-submit-protection"
 			method="post" enctype="multipart/form-data" commandName="command" action="${submit_url}">
 
+		<#if (allCompletedMarkerFeedback?size > 1)>
+			<@form.row cssClass="alert alert-success" >
+				<@form.label><i class="icon-lightbulb"></i> Populate with previous</@form.label>
+				<@form.field>
+					<#list allCompletedMarkerFeedback as feedback>
+						<a id="copy-complete-button" class="btn" title="Populate final feedback with ${feedback.getFeedbackPosition().description}">
+							<i class="icon-arrow-down"></i>
+							Copy ${feedback.getFeedbackPosition().description}
+						</a>
+					</#list>
+				</@form.field>
+			</@form.row>
+		</#if>
 		<#list assignment.feedbackFields as field>
 			<div class="feedback-field">
 				<#include "/WEB-INF/freemarker/submit/formfields/${field.template}.ftl">
@@ -44,7 +57,6 @@
 					<@f.errors path="mark" cssClass="error" />
 				</@form.field>
 			</@form.row>
-
 			<@form.row>
 				<@form.label path="grade">Grade</@form.label>
 				<@form.field>

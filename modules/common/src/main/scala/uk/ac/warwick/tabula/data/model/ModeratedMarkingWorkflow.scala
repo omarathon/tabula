@@ -20,8 +20,6 @@ class ModeratedMarkingWorkflow extends MarkingWorkflow with NoThirdMarker with A
 		if (assignment.isFirstMarker(marker)) Routes.coursework.admin.assignment.onlineMarkerFeedback(assignment)
 		else Routes.coursework.admin.assignment.onlineModeration(assignment)
 
-
-
 	// True if this marking workflow uses a second marker
 	def hasSecondMarker = true
 	def secondMarkerRoleName = Some("Moderator")
