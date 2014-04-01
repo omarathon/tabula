@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.data.model.{Module, Assignment}
+import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Module, Assignment}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.web.Routes
 import org.springframework.validation.Errors
@@ -11,6 +11,7 @@ import javax.validation.Valid
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.coursework.commands.assignments.MarkingCompletedCommand
 import uk.ac.warwick.tabula.commands.SelfValidating
+import scala.collection.JavaConversions._
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/marking-completed"))
@@ -43,9 +44,25 @@ class MarkingCompletedController extends CourseworkController {
 		errors: Errors
 	) = {
 		form.preSubmitValidation()
+
+		val isUserALaterMarker = form.pendingMarkerFeedbacks.exists{ markerFeedback =>
+
+			def checkNextMarkerFeedbackForMarker(thisMarkerFeedback: MarkerFeedback): Boolean = {
+				form.nextMarkerFeedback(thisMarkerFeedback).exists{ mf =>
+					if (mf.getMarkerUsercode.getOrElse("") == user.apparentId)
+						true
+					else
+						checkNextMarkerFeedbackForMarker(mf)
+				}
+			}
+
+			checkNextMarkerFeedbackForMarker(markerFeedback)
+		}
 		Mav("admin/assignments/markerfeedback/marking-complete",
 			"assignment" -> assignment,
-			"onlineMarking" -> form.onlineMarking)
+			"onlineMarking" -> form.onlineMarking,
+			"isUserALaterMarker" -> isUserALaterMarker
+		)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
