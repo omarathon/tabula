@@ -1,23 +1,30 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import uk.ac.warwick.tabula.commands.{Description, Describable, ComposableCommand, CommandInternal, SelfValidating}
+import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.{Submission, Assignment}
+import uk.ac.warwick.tabula.data.model.{Notification, Submission, Assignment}
 import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, SubmissionServiceComponent}
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, SuspectPlagiarised}
 
+import uk.ac.warwick.tabula.data.model.notifications.MarkedPlagiarisedNotification
+import uk.ac.warwick.userlookup.User
+
 object PlagiarismInvestigationCommand {
-	def apply(assignment: Assignment) =
+	def apply(assignment: Assignment, _user: User) =
 		new PlagiarismInvestigationCommandInternal(assignment)
 			with ComposableCommand[Unit]
 			with PlagiarismInvestigationCommandPermissions
 			with PlagiarismInvestigationCommandDescription
 			with PlagiarismInvestigationCommandValidation
-			with AutowiringSubmissionServiceComponent
+			with PlagiarismInvestigationCommandNotification
+			with UserAware
+			with AutowiringSubmissionServiceComponent {
+			val user = _user
+		}
 }
 
 class PlagiarismInvestigationCommandInternal(val assignment: Assignment)
@@ -45,6 +52,7 @@ trait PlagiarismInvestigationCommandValidation extends SelfValidating {
 
 trait PlagiarismInvestigationCommandState {
 	val assignment: Assignment
+
 	var students: JList[String] = JArrayList()
 	var confirm: Boolean = false
 	var markPlagiarised: Boolean = true
@@ -74,5 +82,15 @@ trait PlagiarismInvestigationCommandDescription extends Describable[Unit] {
 			.submissions(submissions)
 			.property("submissionCount" -> submissions.size)
 			.property("markedPlagarised" -> markPlagiarised)
+	}
+}
+
+trait PlagiarismInvestigationCommandNotification extends Notifies[Unit, Unit] {
+	self: PlagiarismInvestigationCommandState with UserAware =>
+
+	def emit(result: Unit) = if(markPlagiarised) {
+		submissions.map(s=> Notification.init(new MarkedPlagiarisedNotification, user, s, s.assignment))
+	} else {
+		Seq()
 	}
 }

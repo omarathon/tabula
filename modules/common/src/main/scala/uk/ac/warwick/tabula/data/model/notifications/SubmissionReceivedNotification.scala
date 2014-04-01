@@ -14,8 +14,10 @@ import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 class SubmissionReceivedNotification extends SubmissionNotification with PreSaveBehaviour {
 
 	override def preSave(isNew: Boolean) {
-		// if this submission was late then the priority is higher
-		if (submission.isLate) priority = Warning
+		// if this submission was noteworthy then the priority is higher
+		if (submission.isNoteworthy) {
+			priority = Warning
+		}
 	}
 
 	@transient
@@ -40,12 +42,16 @@ class SubmissionReceivedNotification extends SubmissionNotification with PreSave
 		}
 	}
 
+	def url = Routes.assignment.receipt(assignment)
 	def urlTitle = "view all submissions for this assignment"
 
 	def recipients = {
-		val moduleManagers = submission.assignment.module.managers
-		val allAdmins = moduleManagers.users
-		allAdmins.filter(canEmailUser)
+		val moduleManagers = module.managers
+		val departmentAdmins = module.department.owners
+
+		val allAdmins = moduleManagers.users ++ departmentAdmins.users
+		allAdmins.filter(canEmailUser(_))
 	}
+
 	def actionRequired = false
 }
