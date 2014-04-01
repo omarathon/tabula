@@ -72,7 +72,7 @@
 	</div>
 
 	<#if extensionGraphs?size gt 0>
-		<table class="students table table-bordered table-striped tabula-orangeLight sticky-table-headers expanding-table"
+		<table id="student-extension-management" class="students table table-bordered table-striped tabula-orangeLight sticky-table-headers expanding-table"
 			   data-max-days="${maxDaysToDisplayAsProgressBar}"
 			   data-row-to-open="${extensionToOpen!""}">
 			<thead>

@@ -99,12 +99,16 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 	
 	def applyInternal() = {
 		if (user.loggedIn) {
-			val ownedDepartments = benchmarkTask("Get owned departments") { moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Module.ManageAssignments) }
+			val ownedDepartments = benchmarkTask("Get owned departments") {
+				moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Module.ManageAssignments)
+			}
 			val ownedModules = benchmarkTask("Get owned modules") { moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.ManageAssignments) }
 
 			val pagedActivities = benchmarkTask("Get noteworthy submissions") { activityService.getNoteworthySubmissions(user) }
 
-			val assignmentsForMarking = benchmarkTask("Get assignments for marking") { assignmentService.getAssignmentWhereMarker(user.apparentUser).sortBy(_.closeDate) }
+			val assignmentsForMarking = benchmarkTask("Get assignments for marking") {
+				assignmentService.getAssignmentWhereMarker(user.apparentUser).sortBy(_.closeDate)
+			}
 			// add the number of submissions to each assignment for marking
 			val assignmentsForMarkingInfo = benchmarkTask("Get markers submissions") { 
 				for (assignment <- assignmentsForMarking) yield {
@@ -144,8 +148,12 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 	
 	hideDeletedItems
 	
-	@ModelAttribute("command") def command(user: CurrentUser, @PathVariable("doc") doc: Int, @PathVariable("field") field: Long, @PathVariable("token") token: Long) =
-		CourseworkHomepageActivityPageletCommand(user, doc, field, token)
+	@ModelAttribute("command") def command(
+		user: CurrentUser,
+		@PathVariable("doc") doc: Int,
+		@PathVariable("field") field: Long,
+		@PathVariable("token") token: Long) =
+			CourseworkHomepageActivityPageletCommand(user, doc, field, token)
 
 	@RequestMapping(Array("/api/activity/pagelet/{doc}/{field}/{token}"))
 	def pagelet(@ModelAttribute("command") cmd: Appliable[Option[PagedActivities]]) = {
