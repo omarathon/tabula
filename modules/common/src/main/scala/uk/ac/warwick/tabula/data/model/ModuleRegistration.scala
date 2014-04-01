@@ -29,6 +29,7 @@ class ModuleRegistration() extends GeneratedId {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="moduleCode", referencedColumnName="code")
 	var module: Module = null
+
 	var cats: java.math.BigDecimal = null
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
@@ -41,6 +42,10 @@ class ModuleRegistration() extends GeneratedId {
 	var assessmentGroup: String = null
 
 	var occurrence: String = null
+
+	var agreedMark: java.math.BigDecimal = null
+
+	var agreedGrade: String = null
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleSelectionStatusUserType")
 	@Column(name="selectionstatuscode")

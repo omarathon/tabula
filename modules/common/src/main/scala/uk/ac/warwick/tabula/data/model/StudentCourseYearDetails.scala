@@ -70,6 +70,8 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	// so moduleRegistrations are not attached directly - instead, get them from StudentCourseDetails,
 	// filtering by year:
 	def moduleRegistrations = studentCourseDetails.moduleRegistrations.filter(_.academicYear == this.academicYear)
+
+	def isLatest = this.equals(studentCourseDetails.latestStudentCourseYearDetails)
 }
 
 trait BasicStudentCourseYearProperties {

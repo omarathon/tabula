@@ -8,7 +8,7 @@ sealed abstract class ModuleSelectionStatus(val dbValue: String, val description
 object ModuleSelectionStatus {
 	case object Core extends ModuleSelectionStatus("C", "Core")
 	case object Option extends ModuleSelectionStatus("O", "Option")
-	case object OptionalCore extends ModuleSelectionStatus("CO", "Optional Core") // core that can be taken in different years
+	case object OptionalCore extends ModuleSelectionStatus("CO", "Opt. Core") // core that can be taken in different years
 
 	def fromCode(code: String) = code match {
 	  	case Core.dbValue => Core

@@ -84,7 +84,9 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 				assessmentGroup = "A",
 				selectionStatusCode = "C",
 				occurrence = "A",
-				academicYear = AcademicYear.guessByDate(DateTime.now).toString
+				academicYear = AcademicYear.guessByDate(DateTime.now).toString,
+				agreedMark = 90.0,
+				agreedGrade = "A"
 			)
 
 			new ImportModuleRegistrationsCommand(row)
@@ -100,7 +102,8 @@ object ModuleRegistrationImporter {
 	// 2. confirmed module registrations from the SMO table where there is a module registration status of confirmed
 	// 3. confirmed module registrations from the SMO table where no status is recorded, i.e. where MRs have been imported
 	val UnconfirmedModuleRegistrations = f"""
-			select scj_code, sms.mod_code, sms.sms_mcrd as credit, sms.sms_agrp as assess_group, sms.ses_code, sms.ayr_code, sms_occl as occurrence
+			select scj_code, sms.mod_code, sms.sms_mcrd as credit, sms.sms_agrp as assess_group,
+			sms.ses_code, sms.ayr_code, sms_occl as occurrence, null as agreed_mark, null as agreed_grade
 				from $sitsSchema.ins_stu stu
 					join $sitsSchema.ins_spr spr 
 						on spr.spr_stuc = stu.stu_code
@@ -119,7 +122,8 @@ object ModuleRegistrationImporter {
 				where stu.stu_code = :universityId"""
 					
 	val ConfirmedModuleRegistrations = f"""
-			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group, smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence
+			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
+			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence, smr_agrm, smr_agrg
 				from $sitsSchema.ins_stu stu
 					join $sitsSchema.ins_spr spr 
 						on spr.spr_stuc = stu.stu_code
@@ -132,13 +136,19 @@ object ModuleRegistrationImporter {
 					
 					join $sitsSchema.srs_vco vco 
 						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
+
+					join $sitsSchema.ins_smr
+						on smo.spr_code = smr.spr_code
+						and smo.ayr_code = smr.ayr_code
+						and smo.mod_code = smr.mod_code
 					
 					join $sitsSchema.cam_ssn ssn 
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code and ssn.ssn_mrgs = 'CON'
 				where stu.stu_code = :universityId"""
 					
 	val AutoUploadedConfirmedModuleRegistrations = f"""
-			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group, smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence
+			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
+			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence, smr_agrm, smr_agrg
 				from $sitsSchema.ins_stu stu
 					join $sitsSchema.ins_spr spr 
 						on spr.spr_stuc = stu.stu_code
@@ -151,8 +161,13 @@ object ModuleRegistrationImporter {
 					
 					join $sitsSchema.srs_vco vco 
 						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
-					
-					left outer join $sitsSchema.cam_ssn ssn 
+
+					join $sitsSchema.ins_smr
+						on smo.spr_code = smr.spr_code
+						and smo.ayr_code = smr.ayr_code
+						and smo.mod_code = smr.mod_code
+
+					left outer join $sitsSchema.cam_ssn ssn
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
 				where stu.stu_code = :universityId
 					and ssn.ssn_sprc is null
@@ -166,7 +181,9 @@ object ModuleRegistrationImporter {
 			resultSet.getString("assess_group"),
 			resultSet.getString("ses_code"),
 			resultSet.getString("occurrence"),
-			resultSet.getString("ayr_code")
+			resultSet.getString("ayr_code"),
+			resultSet.getBigDecimal("smr_agrm"),
+			resultSet.getString("smr_agrg")
 		)
 
 	class UnconfirmedModuleRegistrationsQuery(ds: DataSource)
@@ -198,5 +215,7 @@ case class ModuleRegistrationRow(
 	val assessmentGroup: String,
 	val selectionStatusCode: String,
 	val occurrence: String,
-	val academicYear: String
+	val academicYear: String,
+	val agreedMark: BigDecimal,
+	val agreedGrade: String
 )

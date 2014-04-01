@@ -105,8 +105,8 @@ abstract class ViewProfileController extends ProfilesController {
 			"agent" -> agent,
 			"allRelationshipTypes" -> allRelationshipTypes,
 			"studentCourseDetails" -> studentCourseDetails,
-			"studentCourseYearDetails" -> studentCourseYearDetails)
-			.crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
+			"studentCourseYearDetails" -> studentCourseYearDetails
+		).crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}
 
 	def studentCourseYearFromYear(studentCourseDetails: StudentCourseDetails, year: AcademicYear) =
