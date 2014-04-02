@@ -44,6 +44,12 @@ with SingleItemNotification[Heron] with SingleRecipientNotification {
 }
 
 @Entity
+@DiscriminatorValue(value="heron")
+class HeronScheduledNotification extends ScheduledNotification[Heron] {
+	def generateNotifications = Nil
+}
+
+@Entity
 class Heron extends GeneratedId with ToEntityReference {
 
 	def this(v: User) = {
@@ -63,3 +69,31 @@ class HeronEntityReference extends EntityReference[Heron] {
 	@ManyToOne()
 	var entity: Entity = null
 }
+/*
+                                       _____
+                                 _.::::::::::::-.
+                             _.-:::::='=::=. _   `.
+                         _.-'.:'          ""(@)`"- `-----....__
+                     _.-'-'.:::....            `' -----------__:=
+                  .-'-''.::::::::::._    .       .'""""""""""
+                   _.-::::::::::::::')    `-- - :
+                .-:::::::::::::'     /  ._.'   )
+             .-::::::::::::'    _   .'  .__.:' :
+           .::::::::::'      -=' _.'--.  .   ..'
+         .:::::::'           _.-'      )  :-'.'
+       .::::'  ___..==''          .-   : .  .'
+     .::'" _.           _.- _.-        ' .-'
+    :'         __.'     _=-'    _.' __' :/
+   ,' _.=  _.-==_.  -==        __.. .-'.'
+  .'.-_.        _      __..--__..-"_.-''
+ .' \ \_.=   -'  __..-'__.--==. .'"
+.'\ \_.-= __... __.--'\\     / /
+\\__...__.--''"'       \\   ("(
+ /_.--'                 \\_.'`.`.
+                       .:._.'  `.`.,.     _
+                     =''   `:,   `.`.`..-::'
+                                   `.` :"
+                                   .:.-.`.
+                                 .:'    `.:
+                                          '
+ */

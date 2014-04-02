@@ -4,20 +4,22 @@ import scala.collection.JavaConversions.{asScalaBuffer, seqAsJavaList}
 import scala.collection.JavaConverters._
 
 import org.hibernate.validator.constraints.{Length, NotEmpty}
-import org.joda.time.DateTime
+import org.joda.time.{Days, DateTime}
 import org.springframework.validation.Errors
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.data.model.notifications.scheduled.ScheduledAssignmentDeadlineNotification
 
 
 /**
  * Common behaviour
  */
- abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembershipGroupIsUniversityIds:Boolean=false) extends Command[Assignment]
-	with SharedAssignmentProperties with SelfValidating with UpdatesStudentMembership with SpecifiesGroupType with CurrentAcademicYear {
+ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembershipGroupIsUniversityIds:Boolean=false)
+	extends Command[Assignment] with SharedAssignmentProperties with SelfValidating with UpdatesStudentMembership
+	with SpecifiesGroupType with CurrentAcademicYear with SchedulesNotifications[Assignment] {
 
 	var service = Wire.auto[AssignmentService]
 
@@ -153,4 +155,15 @@ import uk.ac.warwick.tabula.services.AssignmentService
 		}).distinct.asJava
 	}
 
+	override def scheduledNotifications(assignment: Assignment) = {
+		val dayOfDeadline = assignment.closeDate.withTime(0,0,0,0)
+		val surroundingTimes = for (day <- Seq(-7, -1, 1, 7)) yield assignment.closeDate.plusDays(day)
+		val allTimes = Seq(dayOfDeadline) ++ surroundingTimes
+
+		allTimes.map { when =>
+			new ScheduledAssignmentDeadlineNotification(assignment, when)
+		}
+	}
+
 }
+

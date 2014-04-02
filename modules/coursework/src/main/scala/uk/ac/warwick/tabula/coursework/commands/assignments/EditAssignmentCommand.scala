@@ -88,5 +88,4 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 			)
 		}
 	}
-
 }
