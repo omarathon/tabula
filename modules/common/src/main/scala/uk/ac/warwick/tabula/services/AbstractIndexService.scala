@@ -384,10 +384,10 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 	}
 
 	/**
-	 * Remove saved searchers over 20 minutes old
+	 * Remove saved searchers over 3 minutes old
 	 */
 	protected def prune = {
-		val ageInSeconds = 20*60
+		val ageInSeconds = 3*60
 		initialiseSearching
 		if (searcherLifetimeManager != null) searcherLifetimeManager.prune(new PruneByAge(ageInSeconds))
 	}
