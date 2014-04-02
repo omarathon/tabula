@@ -25,26 +25,31 @@ trait TimetableDriver extends FixturesDriver  {
 				getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
 			}
 		}
-		val requestor = asUser.getOrElse(user)
-		// request all the events for the current year
-		val termDates = new AcademicDateHelper(new TermFactoryImpl)
-		val startOfYear = termDates.getFirstTermOfYearContaining(new DateTime).getStartDate
-		val start = startOfYear.getMillis / 1000
-		val end = startOfYear.plusYears(1).getMillis / 1000
-		val req = (url(FunctionalTestProperties.SiteRoot + "/profiles/timetable/api") <<?
+		try {
+			val requestor = asUser.getOrElse(user)
+			// request all the events for the current year
+			val termDates = new AcademicDateHelper(new TermFactoryImpl)
+			val startOfYear = termDates.getFirstTermOfYearContaining(new DateTime).getStartDate
+			val start = startOfYear.getMillis / 1000
+			val end = startOfYear.plusYears(1).getMillis / 1000
+			val req = (url(FunctionalTestProperties.SiteRoot + "/profiles/timetable/api") <<?
 				Map(
 					"from" -> start.toString,
-					"to"->end.toString,
-				  "whoFor"->user.warwickId,
-					"forceBasic"->"true"
+					"to" -> end.toString,
+					"whoFor" -> user.warwickId,
+					"forceBasic" -> "true"
 				)
-			).as_!(requestor.usercode, requestor.password)
+				).as_!(requestor.usercode, requestor.password)
 
-		import scala.language.postfixOps
-		val rawJSON = http.x(req as_str)
-		JSON.parseFull(rawJSON) match {
-			case Some(events:Seq[Map[String,Any]] @unchecked)=>events
-			case _ => throw new RuntimeException(s"Couldn't parse JSON into sequence\n $rawJSON")
+			import scala.language.postfixOps
+			val rawJSON = http.x(req as_str)
+			JSON.parseFull(rawJSON) match {
+				case Some(events: Seq[Map[String, Any]]@unchecked) => events
+				case _ => throw new RuntimeException(s"Couldn't parse JSON into sequence\n $rawJSON")
+			}
+		} finally {
+			http.shutdown()
 		}
+
 	}
 }

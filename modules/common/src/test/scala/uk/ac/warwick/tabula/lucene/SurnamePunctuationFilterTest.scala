@@ -17,6 +17,8 @@ class SurnamePunctuationFilterTest extends TestBase {
 	@Test def itWorks() {
 		val tokenStream = analyzer.tokenStream("name", new StringReader("sarah o'toole"))
 		val attribute = tokenStream.addAttribute(classOf[CharTermAttribute])
+
+		tokenStream.reset()
 		
 		tokenStream.incrementToken() should be (true)
 		term(attribute) should be ("sarah")
@@ -31,6 +33,9 @@ class SurnamePunctuationFilterTest extends TestBase {
 		term(attribute) should be ("otoole")
 		
 		tokenStream.incrementToken() should be (false)
+
+		tokenStream.end()
+		tokenStream.close()
 	}
 	
 	private def term(term: CharTermAttribute) = new String(term.buffer, 0, term.length)
