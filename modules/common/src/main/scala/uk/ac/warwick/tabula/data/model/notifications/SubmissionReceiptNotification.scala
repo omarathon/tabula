@@ -24,6 +24,6 @@ class SubmissionReceiptNotification extends SubmissionNotification
 
 	def actionRequired = false
 
-	def url = Routes.admin.assignment.submissionsandfeedback(assignment)
+	def url = Routes.assignment.receipt(assignment)
 
 }
