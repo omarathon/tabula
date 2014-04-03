@@ -231,7 +231,7 @@ object WorkflowStages {
 	case object FinaliseSeenSecondMarking extends WorkflowStage {
 		def actionCode = "workflow.FinaliseSeenSecondMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
-			val hasSubmission = coursework.enhancedSubmission.exists(_.submission.isReleasedToSecondMarker)
+			val hasSubmission = coursework.enhancedSubmission.exists(_.submission.isReleasedToThirdMarker)
 			coursework.enhancedFeedback match {
 				case Some(item) if hasSubmission &&  item.feedback.retrieveThirdMarkerFeedback.state != Rejected =>
 					if (item.feedback.retrieveThirdMarkerFeedback.state == MarkingCompleted )
