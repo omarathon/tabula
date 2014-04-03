@@ -11,7 +11,7 @@ object HeronWarningNotification {
 
 @Entity
 @DiscriminatorValue(value="heronWarning")
-class HeronWarningNotification extends NotificationWithTarget[Heron, Heron]
+class HeronWarningNotification extends Notification[Heron, Unit]
 	with SingleItemNotification[Heron] with SingleRecipientNotification {
 
 	import HeronWarningNotification._
@@ -28,7 +28,7 @@ class HeronWarningNotification extends NotificationWithTarget[Heron, Heron]
 
 @Entity
 @DiscriminatorValue(value="heronDefeat")
-class HeronDefeatedNotification extends NotificationWithTarget[Heron, Heron]
+class HeronDefeatedNotification extends Notification[Heron, Unit]
 with SingleItemNotification[Heron] with SingleRecipientNotification {
 
 	import HeronWarningNotification._
@@ -41,12 +41,6 @@ with SingleItemNotification[Heron] with SingleRecipientNotification {
 	def urlTitle = "wallow in glory"
 	def recipient = item.entity.victim
 	def actionRequired = false
-}
-
-@Entity
-@DiscriminatorValue(value="heron")
-class HeronScheduledNotification extends ScheduledNotification[Heron] {
-	def generateNotifications = Nil
 }
 
 @Entity

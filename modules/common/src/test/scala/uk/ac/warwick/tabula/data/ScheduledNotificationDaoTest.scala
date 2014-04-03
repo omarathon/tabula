@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase}
 import org.junit.Before
-import uk.ac.warwick.tabula.data.model.{HeronScheduledNotification, Heron, SSOUserType}
+import uk.ac.warwick.tabula.data.model.{ScheduledNotification, Heron, SSOUserType}
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.joda.time.DateTime
 
@@ -15,10 +15,7 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 	val heron2 = new Heron()
 
 	def testNotification(target: Heron, date: DateTime) = {
-		val sn = new HeronScheduledNotification()
-		sn.id = "heronScheduledNotification"
-		sn.scheduledDate = date
-		sn.target = target.toEntityReference
+		val sn = new ScheduledNotification[Heron]("heronWarning", target, date)
 		sn
 	}
 
@@ -44,7 +41,7 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 		session.flush()
 		session.clear()
 
-		val retrievedNotification = dao.getById(notification.id).get.asInstanceOf[HeronScheduledNotification]
+		val retrievedNotification = dao.getById(notification.id).get.asInstanceOf[ScheduledNotification[Heron]]
 		retrievedNotification.completed should be (false)
 		retrievedNotification.scheduledDate should be (tomorrow)
 		retrievedNotification.target should not be null
@@ -52,11 +49,15 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 
 
 		session.clear()
+		session.delete(notification)
 		session.delete(heron)
 		session.flush()
 	}
 
-	@Test def getScheduledNotifications() {
+	@Test def scheduledNotifications() {
+
+		session.save(heron)
+		session.save(heron2)
 
 		val n1 = testNotification(heron, DateTime.now.plusDays(1))
 		val n2 = testNotification(heron2, DateTime.now.plusDays(2))
@@ -66,8 +67,7 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		val notifications = Seq(n1, n2, n3, n4)
 
-		session.save(heron)
-		session.save(heron2)
+
 		notifications.foreach(dao.save)
 
 		session.flush()

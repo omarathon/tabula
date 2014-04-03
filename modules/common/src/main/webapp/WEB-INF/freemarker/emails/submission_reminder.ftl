@@ -1,0 +1,1 @@
+Your assignment '${assignment.name}' for ${module.code?upper_case} ${module.name} ${timeStatement}. Your deadline for this assignment ${assignmentDate}.<#if !assignment.allowLateSubmissions> You can no longer submit this assignment via Tabula.</#if>

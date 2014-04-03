@@ -6,9 +6,11 @@ import scala.beans.BeanProperty
 import scala.annotation.meta.field
 
 @Entity(name = "Scheduled_Notification")
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="SCHEDULED_NOTIFICATION_TYPE")
-abstract class ScheduledNotification[A >: Null <: ToEntityReference](
+class ScheduledNotification[A >: Null <: ToEntityReference](
+
+		// holds the discriminator value for the notification that will be spawned when this is completed
+		@(Column @field)(name="notification_type")
+		var notificationType: String,
 
 		targetEntity: ToEntityReference,
 
@@ -18,7 +20,7 @@ abstract class ScheduledNotification[A >: Null <: ToEntityReference](
 	) extends GeneratedId with Serializable {
 
 	def this() {
-		this(null, null)
+		this(null, null, null)
 	}
 
 	@Access(value=AccessType.PROPERTY)
@@ -28,7 +30,5 @@ abstract class ScheduledNotification[A >: Null <: ToEntityReference](
 		e.toEntityReference.asInstanceOf[EntityReference[A]]
 	}.orNull
 
-	var completed: Boolean = false && false
-
-	def generateNotifications: Seq[Notification[_,_]]
+	var completed: Boolean = false
 }

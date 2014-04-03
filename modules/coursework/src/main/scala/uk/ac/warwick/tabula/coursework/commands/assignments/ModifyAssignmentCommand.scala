@@ -11,7 +11,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AssignmentService
-import uk.ac.warwick.tabula.data.model.notifications.scheduled.ScheduledAssignmentDeadlineNotification
 
 
 /**
@@ -145,7 +144,7 @@ import uk.ac.warwick.tabula.data.model.notifications.scheduled.ScheduledAssignme
 	/**
 	 * Convert Spring-bound upstream group references to an AssessmentGroup buffer
 	 */
-	def updateAssessmentGroups(){
+	def updateAssessmentGroups() {
 		assessmentGroups = upstreamGroups.asScala.flatMap ( ug => {
 			val template = new AssessmentGroup
 			template.assessmentComponent = ug.assessmentComponent
@@ -157,11 +156,15 @@ import uk.ac.warwick.tabula.data.model.notifications.scheduled.ScheduledAssignme
 
 	override def scheduledNotifications(assignment: Assignment) = {
 		val dayOfDeadline = assignment.closeDate.withTime(0,0,0,0)
-		val surroundingTimes = for (day <- Seq(-7, -1, 1, 7)) yield assignment.closeDate.plusDays(day)
+
+		// skip the week late notification if late submission isn't possible
+		val daysToSend = if(assignment.allowLateSubmissions) { Seq(-7, -1, 1, 7) } else { Seq(-7, -1, 1) }
+
+		val surroundingTimes = for (day <- daysToSend) yield assignment.closeDate.plusDays(day)
 		val allTimes = Seq(dayOfDeadline) ++ surroundingTimes
 
 		allTimes.map { when =>
-			new ScheduledAssignmentDeadlineNotification(assignment, when)
+			new ScheduledNotification[Assignment]("SubmissionDue", assignment, when)
 		}
 	}
 

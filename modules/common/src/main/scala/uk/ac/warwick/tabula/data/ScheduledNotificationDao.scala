@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data
 import uk.ac.warwick.tabula.data.model.{ScheduledNotification, ToEntityReference}
 import org.springframework.stereotype.Repository
 import org.hibernate.criterion.{Order, Restrictions}
+import org.joda.time.DateTime
 
 trait ScheduledNotificationDao {
 
@@ -11,6 +12,8 @@ trait ScheduledNotificationDao {
 		def delete(scheduledNotification: ScheduledNotification[_]): Unit
 
 		def getById(id: String): Option[ScheduledNotification[_  >: Null <: ToEntityReference]]
+
+		def getNotificationsToComplete : Seq[ScheduledNotification[_  >: Null <: ToEntityReference]]
 
 		def getScheduledNotifications(entity: Any): Seq[ScheduledNotification[_  >: Null <: ToEntityReference]]
 
@@ -33,4 +36,12 @@ class ScheduledNotificationDaoImpl extends ScheduledNotificationDao with Daoisms
 	}
 
 	override def delete(scheduledNotification: ScheduledNotification[_]) = session.delete(scheduledNotification)
+
+	override def getNotificationsToComplete = {
+		session.newCriteria[ScheduledNotification[_  >: Null <: ToEntityReference]]
+			.add(Restrictions.ne("completed", true))
+			.add(Restrictions.le("scheduledDate", DateTime.now))
+			.addOrder(Order.asc("scheduledDate"))
+			.seq
+	}
 }
