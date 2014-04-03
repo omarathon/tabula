@@ -116,12 +116,12 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 		val workflow = assignment.markingWorkflow
 		if (workflow.hasThirdMarker && thirdMarkerFeedback != null && thirdMarkerFeedback.state == MarkingState.MarkingCompleted)
 			None
-		else if (workflow.hasThirdMarker && secondMarkerFeedback != null
-			&& (secondMarkerFeedback.state == MarkingState.MarkingCompleted || secondMarkerFeedback.state == MarkingState.Rejected)
-		)	Some(ThirdFeedback)
-		else if (workflow.hasSecondMarker && secondMarkerFeedback != null
-			&& (secondMarkerFeedback.state == MarkingState.MarkingCompleted || secondMarkerFeedback.state == MarkingState.Rejected)
-		)	None
+		else if (workflow.hasThirdMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
+			Some(ThirdFeedback)
+		else if (workflow.hasSecondMarker && secondMarkerFeedback != null	&& secondMarkerFeedback.state == MarkingState.MarkingCompleted)
+			None
+		else if (workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.Rejected)
+			Some(FirstFeedback)
 		else if (workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
 			Some(SecondFeedback)
 		else if (firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)

@@ -72,11 +72,11 @@
 		<#if feedback.attachments?has_content >
 			<div style="float: left; width: 260px;">
 				<h5>Attachments</h5>
-			<div style="display: table-row; margin-bottom: 0.5rem;">
-				<@fmt.download_attachments feedback.attachments "/admin/module/${feedback.feedback.assignment.module.code}/assignments/${feedback.feedback.assignment.id}/marker/${feedback.feedback.id}/download/" />
+				<div style="display: table-row; margin-bottom: 0.5rem;">
+					<@fmt.download_attachments feedback.attachments "/admin/module/${feedback.feedback.assignment.module.code}/assignments/${feedback.feedback.assignment.id}/marker/${feedback.feedback.id}/download/" />
+				</div>
 			</div>
 		</#if>
-			</div>
 
 		 <div style="clear: both;"></div>
 	</div>
