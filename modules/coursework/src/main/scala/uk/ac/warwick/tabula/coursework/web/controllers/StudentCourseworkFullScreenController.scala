@@ -55,11 +55,11 @@ class StudentCourseworkFullScreenCommandInternal(val memberOrUser: MemberOrUser)
 		  AssignmentMembershipServiceComponent with
 		  FeaturesComponent =>
 
-	override def getAssignmentsWithFeedback = assignmentService.getAssignmentsWithFeedback(memberOrUser.universityId)
+	override val getAssignmentsWithFeedback = assignmentService.getAssignmentsWithFeedback(memberOrUser.universityId)
 
-	override def getEnrolledAssignments = assignmentMembershipService.getEnrolledAssignments(memberOrUser.asUser)
+	override val getEnrolledAssignments = assignmentMembershipService.getEnrolledAssignments(memberOrUser.asUser)
 
-	override def getAssignmentsWithSubmission = assignmentService.getAssignmentsWithSubmission(memberOrUser.universityId)
+	override val getAssignmentsWithSubmission = assignmentService.getAssignmentsWithSubmission(memberOrUser.universityId)
 
 	override def universityId: String = memberOrUser.universityId
 
