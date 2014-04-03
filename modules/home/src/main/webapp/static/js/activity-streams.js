@@ -161,7 +161,12 @@ jQuery(function($) {
 			var $container = $(container);
 			var options = {};
 			options.max = $container.data('max');
-			// TODO more options
+			options.minPriority = $container.data('minpriority');
+			var types = $container.data('types');
+			if (types) {
+				options.types = types;
+			}
+
 			initStream($container, options);
 		});
 	}

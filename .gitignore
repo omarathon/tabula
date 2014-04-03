@@ -35,6 +35,7 @@ ajcore*
 .unison*
 /activemq-data
 /out
+${*
 
 # Eclipse IDE
 /.classpath

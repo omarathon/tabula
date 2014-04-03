@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.lucene
 
 import uk.ac.warwick.tabula.TestBase
-import org.apache.lucene.analysis.standard.StandardTokenizer
+import org.apache.lucene.analysis.standard.{ClassicTokenizer, StandardTokenizer}
 import org.apache.lucene.util.Version
 import java.io.Reader
 import org.apache.lucene.analysis.Analyzer
@@ -17,7 +17,9 @@ class DelimitByCharacterFilterTest extends TestBase {
 	@Test def itWorks() {
 		val tokenStream = analyzer.tokenStream("name", new StringReader("sarah o'toole"))
 		val attribute = tokenStream.addAttribute(classOf[CharTermAttribute])
-		
+
+		tokenStream.reset()
+
 		tokenStream.incrementToken() should be (true)
 		term(attribute) should be ("sarah")
 		
@@ -28,6 +30,9 @@ class DelimitByCharacterFilterTest extends TestBase {
 		term(attribute) should be ("toole")
 		
 		tokenStream.incrementToken() should be (false)
+
+		tokenStream.end()
+		tokenStream.close()
 	}
 	
 	private def term(term: CharTermAttribute) = new String(term.buffer, 0, term.length)

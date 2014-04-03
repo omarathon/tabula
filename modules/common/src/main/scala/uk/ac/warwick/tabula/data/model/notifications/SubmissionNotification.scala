@@ -25,6 +25,4 @@ abstract class SubmissionNotification
 		"module" -> module,
 		"user" -> userLookup.getUserByWarwickUniId(submission.universityId))
 	)
-
-	def url = Routes.assignment.receipt(assignment)
 }

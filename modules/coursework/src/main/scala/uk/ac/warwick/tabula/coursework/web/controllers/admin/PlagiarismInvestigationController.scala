@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 class PlagiarismInvestigationController extends CourseworkController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable("assignment") assignment: Assignment) = PlagiarismInvestigationCommand(assignment)
+	def command(@PathVariable("assignment") assignment: Assignment) = PlagiarismInvestigationCommand(assignment, user.apparentUser)
 
 	validatesSelf[PlagiarismInvestigationCommandValidation]
 
