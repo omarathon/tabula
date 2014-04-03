@@ -29,7 +29,11 @@ trait AssignmentService {
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment]
+	def getAssignmentsWithFeedback(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
+
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment]
+	def getAssignmentsWithSubmission(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
+
 	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment]
@@ -42,6 +46,8 @@ trait AssignmentService {
 	def getAssignmentsByName(partialName: String, department: Department): Seq[Assignment]
 
 	def findAssignmentsByNameOrModule(query: String): Seq[Assignment]
+
+	def filterAssignmentsByCourseAndYear(assignments: Seq[Assignment], studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
 
 }
 
@@ -57,7 +63,19 @@ abstract class AbstractAssignmentService extends AssignmentService {
 		assignmentDao.getAssignmentByNameYearModule(name, year, module)
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] = assignmentDao.getAssignmentsWithFeedback(universityId)
+
+	def getAssignmentsWithFeedback(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
+		val allAssignments = getAssignmentsWithFeedback(studentCourseYearDetails.studentCourseDetails.student.universityId)
+		filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
+	}
+
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] = assignmentDao.getAssignmentsWithSubmission(universityId)
+
+	def getAssignmentsWithSubmission(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
+		val allAssignments = getAssignmentsWithSubmission(studentCourseYearDetails.studentCourseDetails.student.universityId)
+		filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
+	}
+
 	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
 		assignmentDao.getSubmissionsForAssignmentsBetweenDates(universityId, startInclusive, endExclusive)
 
@@ -71,6 +89,19 @@ abstract class AbstractAssignmentService extends AssignmentService {
 	def getAssignmentsByName(partialName: String, department: Department): Seq[Assignment] = assignmentDao.getAssignmentsByName(partialName, department)
 
 	def findAssignmentsByNameOrModule(query: String): Seq[Assignment] = assignmentDao.findAssignmentsByNameOrModule(query)
+
+	def filterAssignmentsByCourseAndYear(assignments: Seq[Assignment], studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
+		assignments
+			.filter(_.academicYear == studentCourseYearDetails.academicYear)
+			.filter(assignment => {
+				val allStudentsModulesForYear = studentCourseYearDetails.studentCourseDetails.student.registeredModulesByYear(Some(assignment.academicYear))
+
+				// include the assignment only for the course with the relevant module registration -
+				// unless the student isn't registered on the module at all, in which case include this assignment under all the student's course tabs
+				studentCourseYearDetails.registeredModules.contains(assignment.module) || !allStudentsModulesForYear.contains(assignment.module)
+			}
+		)
+	}
 }
 
 @Service(value = "assignmentService")

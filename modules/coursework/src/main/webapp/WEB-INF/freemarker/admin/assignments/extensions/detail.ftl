@@ -73,7 +73,7 @@
 				</details>
 			</#if>
 
-			<details>
+			<details class="">
 				<summary>About this student</summary>
 				<dl class="unstyled">
 					<#if (studentContext.course)?has_content>

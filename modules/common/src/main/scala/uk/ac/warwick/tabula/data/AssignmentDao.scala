@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Submission, Department, Module, Assignment}
+import uk.ac.warwick.tabula.data.model.{StudentCourseYearDetails, Submission, Department, Module, Assignment}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.forms.FormField
 import org.joda.time.DateTime
@@ -25,7 +25,9 @@ trait AssignmentDao {
 	def deleteFormField(field: FormField): Unit
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment]
+
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment]
+
 	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment]
@@ -59,8 +61,8 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] =
 		session.newQuery[Assignment]("""select a from Assignment a
-				join a.submissions as f
-				where f.universityId = :universityId""")
+				join a.submissions as s
+				where s.universityId = :universityId""")
 			.setString("universityId", universityId)
 			.distinct.seq
 

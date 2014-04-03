@@ -121,7 +121,7 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 				}
 			}
 			
-			val courseworkInformation = StudentCourseworkCommand(MemberOrUser(None, user.apparentUser)).apply()
+			val courseworkInformation = StudentCourseworkFullScreenCommand(MemberOrUser(None, user.apparentUser)).apply()
 
 			Some(CourseworkHomepageInformation(
 				enrolledAssignments = courseworkInformation.enrolledAssignments,
