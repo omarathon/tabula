@@ -17,6 +17,8 @@ import org.apache.lucene.analysis.miscellaneous._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import AuditEventIndexService._
+import org.apache.lucene.index.IndexWriterConfig
+import org.apache.lucene.index.sorter.{NumericDocValuesSorter, Sorter, SortingMergePolicy}
 
 object AuditEventIndexService {
 	type PagedAuditEvents = PagingSearchResultItems[AuditEvent]
@@ -320,6 +322,17 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		service.listNewerThan(startDate, batchSize).filter { _.eventStage == "before" }
 
 	/**
+	 * Set merge policy so that when segments of index are merged, it sorts them
+	 * by descending docvalue (date) at the same time. Then a correctly configured
+	 * search query can more efficiently look by the same sort
+	 */
+	override def configureIndexWriter(config: IndexWriterConfig) {
+		val sorter: Sorter = new NumericDocValuesSorter(UpdatedDateField, false)
+		val sortingMergePolicy = new SortingMergePolicy(config.getMergePolicy, sorter)
+		config.setMergePolicy(sortingMergePolicy)
+	}
+
+	/**
 	 * Convert a list of Lucene Documents to a list of AuditEvents.
 	 * Any events not found in the database will be returned as placeholder
 	 * events with whatever data we kept in the Document, just in case
@@ -375,20 +388,22 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	 */
 	protected def toDocuments(item: AuditEvent): Seq[Document] = {
 		val doc = new Document
+		doc add plainStringField(IdField, item.id.toString)
+		doc add plainStringField("eventType", item.eventType)
 
 		if (item.related == null || item.related.isEmpty) {
 			service.addRelated(item)
 		}
 
-		doc add plainStringField(IdField, item.id.toString)
 		if (item.eventId != null) { // null for old events
 			doc add plainStringField("eventId", item.eventId)
 		}
-		if (item.userId != null) // system-run actions have no user
+		if (item.userId != null) { // system-run actions have no user
 			doc add plainStringField("userId", item.userId)
-		if (item.masqueradeUserId != null)
+		}
+		if (item.masqueradeUserId != null) {
 			doc add plainStringField("masqueradeUserId", item.masqueradeUserId)
-		doc add plainStringField("eventType", item.eventType)
+		}
 
 		// add data from all stages of the event, before and after.
 		for (i <- item.related) {
@@ -399,6 +414,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		}
 
 		doc add dateField(UpdatedDateField, item.eventDate)
+		doc add docValuesField(UpdatedDateField, item.eventDate.getMillis)
 		Seq(doc)
 	}
 
