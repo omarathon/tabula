@@ -62,8 +62,6 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 		}
 		session.saveOrUpdate(parentFeedback)
 		session.saveOrUpdate(markerFeedback)
-		//TODO - UPDATE STATE
-
 
 		markerFeedback
 	}
