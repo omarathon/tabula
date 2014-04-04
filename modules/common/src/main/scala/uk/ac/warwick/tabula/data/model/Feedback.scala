@@ -105,11 +105,11 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	var thirdMarkerFeedback: MarkerFeedback = _
 
 
-	def getFeedbackPosition(markerFeedback: MarkerFeedback) : Option[FeedbackPosition] = {
-		if(markerFeedback == firstMarkerFeedback) Some(FirstFeedback)
-		else if (markerFeedback == secondMarkerFeedback) Some(SecondFeedback)
-		else if (markerFeedback == thirdMarkerFeedback) Some(ThirdFeedback)
-		else None
+	def getFeedbackPosition(markerFeedback: MarkerFeedback) : FeedbackPosition = {
+		if(markerFeedback == firstMarkerFeedback) FirstFeedback
+		else if (markerFeedback == secondMarkerFeedback) SecondFeedback
+		else if (markerFeedback == thirdMarkerFeedback) ThirdFeedback
+		else throw new IllegalArgumentException
 	}
 
 	def getCurrentWorkflowFeedbackPosition: Option[FeedbackPosition] = {
@@ -118,7 +118,7 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 			None
 		else if (workflow.hasThirdMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
 			Some(ThirdFeedback)
-		else if (workflow.hasSecondMarker && secondMarkerFeedback != null	&& secondMarkerFeedback.state == MarkingState.MarkingCompleted)
+		else if (workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
 			None
 		else if (workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.Rejected)
 			Some(FirstFeedback)

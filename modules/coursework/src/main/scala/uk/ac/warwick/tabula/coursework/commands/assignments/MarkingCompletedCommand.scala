@@ -69,9 +69,9 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 
 	def nextMarkerFeedback(markerFeedback: MarkerFeedback): Option[MarkerFeedback] = {
 		markerFeedback.getFeedbackPosition match {
-			case Some(FirstFeedback) if markerFeedback.feedback.assignment.markingWorkflow.hasSecondMarker =>
+			case FirstFeedback if markerFeedback.feedback.assignment.markingWorkflow.hasSecondMarker =>
 				Option(markerFeedback.feedback.retrieveSecondMarkerFeedback)
-			case Some(SecondFeedback) if markerFeedback.feedback.assignment.markingWorkflow.hasThirdMarker =>
+			case SecondFeedback if markerFeedback.feedback.assignment.markingWorkflow.hasThirdMarker =>
 				Option(markerFeedback.feedback.retrieveThirdMarkerFeedback)
 			case _ => None
 		}
