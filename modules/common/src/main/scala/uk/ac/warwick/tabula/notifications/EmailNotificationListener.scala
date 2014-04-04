@@ -18,7 +18,7 @@ class EmailNotificationListener extends NotificationListener with UnicodeEmails 
 
 	// email constants
 	var replyAddress: String = Wire.property("${mail.noreply.to}")
-	var fromAddress: String = Wire.property("${mail.exceptions.to}")
+	var fromAddress: String = Wire.property("${mail.admin.to}")
 	val mailHeader = "Dear %s,\n\n"
 	val mailFooter = "\n\nThank you,\nTabula"
 	val replyWarning = "\n\nThis email was sent from an automated system, and replies to it will not reach a real person."
