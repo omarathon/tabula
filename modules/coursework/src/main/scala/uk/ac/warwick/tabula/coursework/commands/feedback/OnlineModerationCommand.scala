@@ -124,7 +124,6 @@ trait FinaliseFeedbackComponentImpl extends FinaliseFeedbackComponent {
 
 trait ModerationState {
 	var approved: Boolean = true
-	var rejectionComments: String = _
 	var secondMarkerFeedback: MarkerFeedback = _
 }
 

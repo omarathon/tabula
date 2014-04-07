@@ -14,6 +14,10 @@ import javax.servlet.http.HttpServletRequest
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.{ApplyWithCallback, Appliable}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.BaseController
+import org.springframework.beans.factory.annotation.Autowired
+import scala.Some
+
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}.zip"))
@@ -107,6 +111,33 @@ class DownloadMarkerFeedbackController extends CourseworkController {
 		}
 	}
 }
+
+@Controller
+class DownloadMarkerFeebackFilesController extends BaseController {
+
+	@Autowired var fileServer: FileServer = _
+
+	@ModelAttribute def command( @PathVariable module: Module,
+															 @PathVariable assignment: Assignment,
+															 @PathVariable markerFeedback: String)
+	= new DownloadMarkerFeedbackFilesCommand(module, assignment, markerFeedback)
+
+	// the difference between the RequestMapping paths for these two methods is a bit subtle - the first has
+	// attachments plural, the second has attachments singular.
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachments/*"))
+	def getAll(command: DownloadMarkerFeedbackFilesCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+		getOne(command, null)
+	}
+
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachment/{filename}"))
+	def getOne(command: DownloadMarkerFeedbackFilesCommand, @PathVariable("filename") filename: String)
+						(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+		// specify callback so that audit logging happens around file serving
+		command.callback = { (renderable) => fileServer.serve(renderable) }
+		command.apply().orElse { throw new ItemNotFoundException() }
+	}
+}
+
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/{position}/feedbacks.zip"))

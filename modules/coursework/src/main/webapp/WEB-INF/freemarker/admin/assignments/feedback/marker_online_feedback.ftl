@@ -36,10 +36,32 @@
 		  var className = $button.data('feedback');
 		  var $summaryFeeback = $button.closest(".content-container").find("." + className);
 		  var $feedbackForm = $button.closest("form");
+		  var attachments = ""
+		  $targetFormSection = $feedbackForm.find(".attachments")
 
-		  $feedbackForm.find(".big-textarea").val($.trim($summaryFeeback.find(".feedback-summary-comments").text()));
-		  $feedbackForm.find("input[name='mark']").val($summaryFeeback.find(".mark").text());
-		  $feedbackForm.find("input[name='grade']").val($summaryFeeback.find(".grade").text());
+		  $feedbackForm.find(".big-textarea").val($.trim($summaryFeeback.find(".feedback-summary-comments").text())).css("border-color","#9d5c14");
+		  $feedbackForm.find("input[name='mark']").val($summaryFeeback.find(".mark").text()).css("border-color","#9d5c14");
+		  $feedbackForm.find("input[name='grade']").val($summaryFeeback.find(".grade").text()).css("border-color","#9d5c14");
+
+		  $(".copyFeedback").find("i").css("color", "#3a3a3c");
+		  $button.find("i").css("color","#9d5c14");
+
+		  $summaryAttachments = $summaryFeeback.find('input[type="hidden"]');
+		  if($summaryAttachments.length > 0) {
+			  $summaryAttachments.each(function(){
+				  $this = $(this)
+				  attachments += 	'<li id="attachment-' + $this.val() +'" class="attachment"><i class="icon-file-alt"></i>' +
+						   			'<span>' + $this.attr("name") +' </span>&nbsp;<i class="icon-remove-sign remove-attachment"></i>' +
+				  					'<input id="attachedFiles" name="attachedFiles" value="'+  $this.val() +'" type="hidden"></li>'
+			  })
+			  $targetFormSection.html(attachments)
+			  $feedbackForm.find('.feedbackAttachments').slideDown()
+		  } else {
+			  attachments = '<input name="attachedFiles" type="hidden" />'
+			  $feedbackForm.find('.feedbackAttachments').slideUp(function(){ $targetFormSection.html(attachments) })
+		  }
+
+
 	  })
   })
 })(jQuery)

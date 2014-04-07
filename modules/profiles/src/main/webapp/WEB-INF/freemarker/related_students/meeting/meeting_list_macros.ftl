@@ -89,7 +89,8 @@
 							</#if>
 
 							<#if meeting.attachments?? && meeting.attachments?size gt 0>
-								<@fmt.download_attachments meeting.attachments "/profiles/${relationshipType.urlPart}/meeting/${meeting.id}/" "for this meeting record" "${meeting.title?url}" />
+								<#assign mrDownloadUrl><@routes.download_meeting_record_attachment relationshipType meeting /></#assign>
+								<@fmt.download_attachments meeting.attachments mrDownloadUrl "for this meeting record" "${meeting.title?url}" />
 							</#if>
 
 							<#if meeting.scheduled>

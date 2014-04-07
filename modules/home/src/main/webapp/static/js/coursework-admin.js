@@ -645,11 +645,12 @@ $(function() {
 		var $li = $this.closest("li");
 		$li.find('input, a').remove();
 		$li.find('span').before('<i class="icon-remove"></i>&nbsp;').wrap('<del />');
+		$li.find('i').css('display', 'none');
 		var $ul = $li.closest('ul');
 
-		if (!$ul.next().is('.alert')) {
-			var alertMarkup = '<p class="alert pending-removal"><i class="icon-lightbulb"></i> Files marked for removal won\'t be deleted until you <samp>Save</samp>.</p>';
-			$ul.after(alertMarkup);
+		if (!$ul.find('li').last().is('.alert')) {
+			var alertMarkup = '<li class="alert pending-removal"><i class="icon-lightbulb"></i> Files marked for removal won\'t be deleted until you <samp>Save</samp>.</li>';
+			$ul.append(alertMarkup);
 		}
 
 		if($('input[name=attachedFiles]').length == 0){
