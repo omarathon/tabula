@@ -7,19 +7,21 @@ import org.joda.time.{Days, DateTime}
 import uk.ac.warwick.tabula.data.model.NotificationPriority._
 import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
+import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.userlookup.UserLookup
+import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
-@Entity
-@DiscriminatorValue("SubmissionDue")
-class SubmissionDueNotification extends Notification[Assignment, Unit] with SingleItemNotification[Assignment]
-	with PreSaveBehaviour {
+trait SubmissionReminder {
+	self : Notification[_, Unit] with PreSaveBehaviour =>
 
-	def assignment = item.entity
+	def deadline: DateTime
+	def assignment: Assignment
 	def module = assignment.module
 	def moduleCode = module.code.toUpperCase
 
 	def daysLeft = {
 		val now = DateTime.now.withTimeAtStartOfDay()
-		val closeDate = assignment.closeDate.withTimeAtStartOfDay()
+		val closeDate = deadline.withTimeAtStartOfDay()
 		Days.daysBetween(now, closeDate).getDays
 	}
 
@@ -31,16 +33,6 @@ class SubmissionDueNotification extends Notification[Assignment, Unit] with Sing
 		} else {
 			Info
 		}
-	}
-
-	def recipients = {
-		val submissions = assignment.submissions.asScala
-		val extensions = assignment.extensions.asScala
-		val allStudents = assignment.membershipInfo.items.map(_.user)
-		// fist filter out students that have submitted already
-		val withoutSubmission = allStudents.filterNot(user => submissions.exists(_.universityId == user.getWarwickId))
-		// finally filter students that have an extension
-		withoutSubmission.filterNot(user => extensions.exists(_.universityId == user.getWarwickId))
 	}
 
 	def actionRequired = true
@@ -76,4 +68,37 @@ class SubmissionDueNotification extends Notification[Assignment, Unit] with Sing
 	))
 
 	def verb = "Remind"
+
+}
+
+@Entity
+@DiscriminatorValue("SubmissionDueGeneral")
+class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] with SingleItemNotification[Assignment]
+	with SubmissionReminder with PreSaveBehaviour {
+
+	def deadline = assignment.closeDate
+	def assignment = item.entity
+
+	def recipients = {
+		val submissions = assignment.submissions.asScala
+		val extensions = assignment.extensions.asScala
+		val allStudents = assignment.membershipInfo.items.map(_.user)
+		// fist filter out students that have submitted already
+		val withoutSubmission = allStudents.filterNot(user => submissions.exists(_.universityId == user.getWarwickId))
+		// finally filter students that have an extension
+		withoutSubmission.filterNot(user => extensions.exists(_.universityId == user.getWarwickId))
+	}
+}
+
+@Entity
+@DiscriminatorValue("SubmissionDueExtension")
+class SubmissionDueWithExtensionNotification extends Notification[Extension, Unit] with SingleItemNotification[Extension]
+	with SubmissionReminder with PreSaveBehaviour with AutowiringUserLookupComponent {
+
+	def extension = item.entity
+
+	def deadline = extension.expiryDate
+	def assignment = extension.assignment
+
+	def recipients = Seq(userLookup.getUserByWarwickUniId(extension.universityId))
 }

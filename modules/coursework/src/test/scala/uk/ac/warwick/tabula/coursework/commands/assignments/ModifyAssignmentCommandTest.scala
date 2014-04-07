@@ -198,6 +198,7 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 		val currentUser = new CurrentUser(user, user)
 		val module = Fixtures.module(code="ls101")
 		val assignment = Fixtures.assignment("test")
+		assignment.closeDate = DateTime.now.plusDays(30)
 		val extension1 = new Extension
 		val extension2 = new Extension
 		val sometime = new DateTime().minusWeeks(1)

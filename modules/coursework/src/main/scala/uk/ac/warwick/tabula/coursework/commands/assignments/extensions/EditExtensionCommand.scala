@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
-import uk.ac.warwick.tabula.commands.{Notifies, ComposableCommand}
+import uk.ac.warwick.tabula.commands.{SchedulesNotifications, Notifies, ComposableCommand}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.forms.Extension
@@ -86,4 +86,7 @@ trait EditExtensionCommandNotification extends Notifies[Extension, Option[Extens
 	}
 }
 
+trait EditExtensionCommandScheduledNotification extends SchedulesNotifications[Extension] {
+	self: ModifyExtensionCommandState =>
 
+}

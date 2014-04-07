@@ -167,7 +167,7 @@ import uk.ac.warwick.tabula.services.AssignmentService
 		val allTimes = proposedTimes.filter(_.isAfterNow)
 
 		allTimes.map { when =>
-			new ScheduledNotification[Assignment]("SubmissionDue", assignment, when)
+			new ScheduledNotification[Assignment]("SubmissionDueGeneral", assignment, when)
 		}
 	}
 
