@@ -144,7 +144,7 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 	@Test
 	def typeFilteredUserStream() {
 		indexTestItems()
-		val request = ActivityStreamRequest(user=otherRecipient, types=Some(Set("heronDefeat")), pagination=None)
+		val request = ActivityStreamRequest(user=otherRecipient, types=Some(Set("HeronDefeat")), pagination=None)
 		service.userStream(request).items.size should be (50)
 	}
 
