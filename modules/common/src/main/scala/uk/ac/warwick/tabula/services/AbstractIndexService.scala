@@ -217,13 +217,17 @@ abstract class AbstractIndexService[A]
 		ifNotIndexing { doIndexItems(items, false) }
 	}
 
-	def indexItemsWithoutNewTransaction(items: Traversable[A]) =  {
+	def indexItemsWithoutNewTransaction(items: Traversable[A]) = {
 		ifNotIndexing { doIndexItems(items, false) }
 	}
+
+	// Overridable - configure index writer
+	def configureIndexWriter(config: IndexWriterConfig): Unit = {}
 
 	private def doIndexItems(items: Traversable[A], isIncremental: Boolean) {
 		logger.debug("Writing to the index at " + indexPath + " with analyzer " + indexAnalyzer)
 		val writerConfig = new IndexWriterConfig(LuceneVersion, indexAnalyzer)
+		configureIndexWriter(writerConfig)
 		closeThis(new IndexWriter(openDirectory(), writerConfig)) { writer =>
 			for (item <- items) {
 				tryDescribe(s"indexing ${item}") {
@@ -384,10 +388,10 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 	}
 
 	/**
-	 * Remove saved searchers over 20 minutes old
+	 * Remove saved searchers over 3 minutes old
 	 */
 	protected def prune = {
-		val ageInSeconds = 20*60
+		val ageInSeconds = 3*60
 		initialiseSearching
 		if (searcherLifetimeManager != null) searcherLifetimeManager.prune(new PruneByAge(ageInSeconds))
 	}
@@ -498,6 +502,8 @@ trait FieldGenerators {
 	}
 
 	protected def dateField(name: String, value: DateTime) = new LongField(name, value.getMillis, Store.YES)
+
+	protected def docValuesField(name: String, value: Long) = new NumericDocValuesField(name, value)
 
 	protected def doubleField(name: String, value: Double) = new DoubleField(name, value, Store.YES)
 
