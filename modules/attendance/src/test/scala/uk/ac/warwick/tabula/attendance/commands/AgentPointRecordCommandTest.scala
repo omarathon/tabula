@@ -332,6 +332,7 @@ object AgentPointRecordCommandTest {
 		bean() { smartMock[TermService] }
 		bean() { smartMock[EventListener] }
 		bean() { smartMock[NotificationService] }
+		bean() { smartMock[ScheduledNotificationService] }
 		bean() { smartMock[MaintenanceModeService] }
 		bean() {
 			val permissionsService = mock[PermissionsService]
