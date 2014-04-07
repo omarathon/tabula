@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformatio
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportProfilesCommand
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
 import uk.ac.warwick.tabula.scheduling.services.ProfileImporter
-import uk.ac.warwick.tabula.services.{NotificationIndexService, AuditEventIndexService, ModuleAndDepartmentService, ProfileIndexService}
+import uk.ac.warwick.tabula.services.{ScheduledNotificationService, NotificationIndexService, AuditEventIndexService, ModuleAndDepartmentService, ProfileIndexService}
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.UrlMethodModel
 import uk.ac.warwick.userlookup.UserLookupInterface
@@ -99,6 +99,16 @@ class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
 	}
 
 	def describe(d: Description) = d.property("from" -> from).property("deptCode" -> deptCode)
+}
+
+class CompleteScheduledNotificationsCommand extends Command[Unit] with ReadOnly {
+	PermissionCheck(Permissions.ImportSystemData)
+
+	def applyInternal() = {
+		scheduledNotificationService.processNotifications()
+	}
+
+	def describe(d: Description) = d.property("from" -> DateTime.now)
 }
 
 @Controller
@@ -219,6 +229,16 @@ class SanityCheckFilesystemController extends BaseSysadminController {
 	@RequestMapping
 	def sanityCheck() = {
 		new SanityCheckFilesystemCommand().apply()
+		redirectToHome
+	}
+}
+
+@Controller
+@RequestMapping(Array("/sysadmin/complete-scheduled-notification"))
+class CompleteScheduledNotificationsController extends BaseSysadminController {
+	@RequestMapping
+	def complete() = {
+		new CompleteScheduledNotificationsCommand().apply()
 		redirectToHome
 	}
 }

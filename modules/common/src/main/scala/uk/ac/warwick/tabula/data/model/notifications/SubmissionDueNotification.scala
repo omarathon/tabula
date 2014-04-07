@@ -65,7 +65,7 @@ class SubmissionDueNotification extends Notification[Assignment, Unit] with Sing
 		s"is ${0 - daysLeft} days late"
 	}
 
-	def be = if (daysLeft <= 0) "is" else "was"
+	def be = if (daysLeft >= 0) "is" else "was"
 	def assignmentDate = be + " " + dateTimeFormatter.print(assignment.closeDate)
 
 	def content = FreemarkerModel("/WEB-INF/freemarker/emails/submission_reminder.ftl", Map(

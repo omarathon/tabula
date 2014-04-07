@@ -10,7 +10,7 @@ object HeronWarningNotification {
 }
 
 @Entity
-@DiscriminatorValue(value="heronWarning")
+@DiscriminatorValue(value="HeronWarning")
 class HeronWarningNotification extends Notification[Heron, Unit]
 	with SingleItemNotification[Heron] with SingleRecipientNotification {
 
@@ -27,7 +27,7 @@ class HeronWarningNotification extends Notification[Heron, Unit]
 }
 
 @Entity
-@DiscriminatorValue(value="heronDefeat")
+@DiscriminatorValue(value="HeronDefeat")
 class HeronDefeatedNotification extends Notification[Heron, Unit]
 with SingleItemNotification[Heron] with SingleRecipientNotification {
 

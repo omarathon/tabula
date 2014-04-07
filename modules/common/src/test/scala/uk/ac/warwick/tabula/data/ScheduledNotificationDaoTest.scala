@@ -66,8 +66,6 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 		n4.completed = true
 
 		val notifications = Seq(n1, n2, n3, n4)
-
-
 		notifications.foreach(dao.save)
 
 		session.flush()
@@ -75,6 +73,29 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		dao.getScheduledNotifications(heron) should be (Seq(n1, n3))
 		dao.getScheduledNotifications(heron2) should be (Seq(n2))
+
+		session.clear()
+		session.delete(heron)
+		session.flush()
+	}
+
+	@Test def getNotificationsToComplete() {
+		session.save(heron)
+
+		val n1 = testNotification(heron, DateTime.now.minusDays(2))
+		n1.completed = true
+		val n2 = testNotification(heron, DateTime.now.minusDays(1))
+		val n3 = testNotification(heron, DateTime.now)
+		val n4 = testNotification(heron, DateTime.now.plusDays(1))
+
+
+		val notifications = Seq(n1, n2, n3, n4)
+		notifications.foreach(dao.save)
+
+		session.flush()
+		session.clear()
+
+		dao.notificationsToComplete should be (Seq(n2,n3))
 
 		session.clear()
 		session.delete(heron)
