@@ -18,7 +18,7 @@ class ReflectionHelperTest extends TestBase with ReflectionsSetup {
 
 	@Test def notifications = {
 		val map = ReflectionHelper.allNotifications
-		map.contains("SubmissionDue") should be (true)
+		map.contains("SubmissionDueGeneral") should be (true)
 	}
 	
 	@Test def allPermissions = {
