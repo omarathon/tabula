@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.data.model.NotificationPriority._
 import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.userlookup.UserLookup
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 trait SubmissionReminder {
