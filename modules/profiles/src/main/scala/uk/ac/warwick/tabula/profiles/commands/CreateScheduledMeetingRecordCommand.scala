@@ -58,7 +58,7 @@ trait CreateScheduledMeetingRecordCommandValidation extends SelfValidating with 
 
 	override def validate(errors: Errors) {
 		sharedValidation(errors, title, meetingDate)
-		meetingRecordService.listScheduled(Set(relationship), creator).foreach(
+		meetingRecordService.listScheduled(Set(relationship), Some(creator)).foreach(
 		 m => if (m.meetingDate == meetingDate) errors.rejectValue("meetingDate", "meetingRecord.date.duplicate")
 		)
 	}
