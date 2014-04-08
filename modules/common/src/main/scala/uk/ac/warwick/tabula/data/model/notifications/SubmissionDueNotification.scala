@@ -57,13 +57,14 @@ trait SubmissionReminder {
 	}
 
 	def be = if (daysLeft >= 0) "is" else "was"
-	def assignmentDate = be + " " + dateTimeFormatter.print(assignment.closeDate)
+	def deadlineDate = be + " " + dateTimeFormatter.print(deadline)
 
 	def content = FreemarkerModel("/WEB-INF/freemarker/emails/submission_reminder.ftl", Map(
 		"assignment" -> assignment,
 		"module" -> module,
 		"timeStatement" -> timeStatement,
-		"assignmentDate" -> assignmentDate
+		"cantSubmit" -> (!assignment.allowLateSubmissions && DateTime.now.isAfter(deadline)),
+		"deadlineDate" -> deadlineDate
 	))
 
 	def verb = "Remind"
