@@ -23,9 +23,9 @@ class StudentCourseworkControllerTest extends TestBase with Mockito {
 	trait CommandTestSupport extends AssignmentServiceComponent
 			with AssignmentMembershipServiceComponent
 			with FeaturesComponent {
-		override def assignmentService = smartMock[AssignmentService]
-		override def assignmentMembershipService = smartMock[AssignmentMembershipService]
-		override def features = {
+		override val assignmentService = smartMock[AssignmentService]
+		override val assignmentMembershipService = smartMock[AssignmentMembershipService]
+		override val features = {
 			val f = Features.empty
 			f.assignmentMembership = true
 			f
@@ -35,6 +35,8 @@ class StudentCourseworkControllerTest extends TestBase with Mockito {
 		assignmentService.filterAssignmentsByCourseAndYear(any[Seq[Assignment]], any[StudentCourseYearDetails]) returns Seq()
 		assignmentService.getAssignmentsWithSubmission(any[StudentCourseYearDetails]) returns Seq()
 		assignmentMembershipService.getEnrolledAssignments(any[User]) returns Seq()
+		assignmentService.getAssignmentsWithFeedback(any[String]) returns Seq()
+		assignmentService.getAssignmentsWithSubmission(any[String]) returns Seq()
 	}
 
 	@Test
