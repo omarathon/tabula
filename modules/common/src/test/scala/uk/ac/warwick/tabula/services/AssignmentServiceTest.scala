@@ -288,6 +288,51 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignments(0) should be (assignment1)
 	}
 
+	@Transactional @Test def findAssignmentsWithFeedbackForCourseAndYear() {
+		val ThisUser = 	"1234567"
+		val OtherUser = "1234568"
+
+		val myFeedback = new Feedback
+		myFeedback.universityId = ThisUser
+		myFeedback.released = true
+
+		val otherFeedback = new Feedback
+		otherFeedback.universityId = OtherUser
+		otherFeedback.released = true
+
+		val unreleasedFeedback = new Feedback
+		unreleasedFeedback.universityId = ThisUser
+
+		val deletedFeedback = new Feedback
+		deletedFeedback.universityId = ThisUser
+		deletedFeedback.released = true
+
+		val assignment1 = new Assignment
+		val assignment2 = new Assignment
+		val assignment3 = new Assignment
+		assignment3.markDeleted()
+
+		assignment1.addFeedback(myFeedback)
+		assignment1.addFeedback(otherFeedback)
+		assignment2.addFeedback(unreleasedFeedback)
+		assignment3.addFeedback(deletedFeedback)
+
+		assignmentService.save(assignment1)
+		assignmentService.save(assignment2)
+		assignmentService.save(assignment3)
+
+		session.save(myFeedback)
+		session.save(otherFeedback)
+		session.save(unreleasedFeedback)
+		session.save(deletedFeedback)
+
+		session.enableFilter("notDeleted")
+
+		val assignments = assignmentService.getAssignmentsWithFeedback(ThisUser)
+		assignments.size should be (1)
+		assignments(0) should be (assignment1)
+	}
+
 	@Transactional @Test def findAssignmentsWithSubmission() {
 		val ThisUser = 	"1234567"
 		val OtherUser = "1234568"

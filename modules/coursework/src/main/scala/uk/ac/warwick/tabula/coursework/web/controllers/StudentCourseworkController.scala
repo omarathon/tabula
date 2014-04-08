@@ -33,8 +33,7 @@ object StudentCourseworkCommand extends CourseworkCommandTypes {
 }
 
 trait StudentCourseworkCommandInternal
-	extends CommandInternal[StudentAssignments]
-	with StudentCourseworkCommandHelper {
+	extends CommandInternal[StudentAssignments] {
 	self: AssignmentServiceComponent with
 		AssignmentMembershipServiceComponent with
 		FeaturesComponent =>
@@ -48,27 +47,31 @@ trait StudentCourseworkCommandHelper
 		AssignmentMembershipServiceComponent with
 		FeaturesComponent =>
 
-	val getAssignmentsWithFeedback: Seq[Assignment]
-	val getEnrolledAssignments: Seq[Assignment]
-	val getAssignmentsWithSubmission: Seq[Assignment]
+	def overridableAssignmentsWithFeedback: Seq[Assignment]
+	def overridableEnrolledAssignments: Seq[Assignment]
+	def overridableAssignmentsWithSubmission: Seq[Assignment]
 	def user: User
 	def universityId: String
 
-	val assignmentsWithFeedback = benchmarkTask("Get assignments with feedback") { getAssignmentsWithFeedback }
+	val assignmentsWithFeedback = benchmarkTask("Get assignments with feedback") { overridableAssignmentsWithFeedback }
 
 	val enrolledAssignments = benchmarkTask("Get enrolled assignments") {
 		if (features.assignmentMembership) {
-			getEnrolledAssignments
+			overridableEnrolledAssignments
 		}
 		else Seq.empty
 	}
 
 	val assignmentsWithSubmission = benchmarkTask("Get assignments with submission") {
-		if (features.submissions) getAssignmentsWithSubmission
+		if (features.submissions) overridableAssignmentsWithSubmission
 		else Seq.empty
 	}
 
-	val lateFormativeAssignments = enrolledAssignments.filter { ass => !ass.summative && ass.isClosed } // TAB-706
+	val lateFormativeAssignments = {
+		enrolledAssignments.filter {
+			ass => !ass.summative && ass.isClosed
+		}
+	} // TAB-706
 
 	// exclude assignments already included in other lists.
 	def enrolledAssignmentsTrimmed(user: User, universityId: String) =
