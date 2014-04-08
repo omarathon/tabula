@@ -7,9 +7,11 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.home.commands.DismissNotificationCommand
 import uk.ac.warwick.tabula.data.model.{ToEntityReference, Activity, Notification}
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.web.views.MarkdownRendererImpl
 
-@Controller
-class DismissNotificationController extends BaseController with ActivityJsonMav {
+// Disabled until TAB-1959 is properly fixed
+//@Controller
+class DismissNotificationController extends BaseController with ActivityJsonMav with MarkdownRendererImpl {
 
 	@ModelAttribute("dismissCommand")
 	def dismissCommand(user: CurrentUser, @PathVariable notification: Notification[_ >: Null <: ToEntityReference ,_]) =

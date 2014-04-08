@@ -3,15 +3,16 @@ package uk.ac.warwick.tabula.data.model.notifications
 import uk.ac.warwick.tabula.coursework.web.Routes
 import javax.persistence.{Entity, DiscriminatorValue}
 import uk.ac.warwick.tabula.data.model.FreemarkerModel
-import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 
 
 abstract class ExtensionRequestRespondedNotification(val verbed: String) extends ExtensionNotification {
 
 	def verb = "respond"
 
-	def title = "%sExtension request by %s was %s".format(titlePrefix, student.getFullName, verbed)
-	def url = Routes.admin.assignment.extension.detail(assignment)
+	def title = s"${titlePrefix}Extension request by ${student.getFullName} was $verbed"
+
+	def url = Routes.admin.assignment.extension.expandrow(assignment, student.getWarwickId)
+	def urlTitle = "review this extension request"
 
 	def content = FreemarkerModel("/WEB-INF/freemarker/emails/responded_extension_request.ftl", Map(
 		"studentName" -> student.getFullName,
@@ -23,6 +24,7 @@ abstract class ExtensionRequestRespondedNotification(val verbed: String) extends
 	))
 
 	def recipients = assignment.module.department.extensionManagers.users.filterNot(_ == agent)
+	def actionRequired = false
 }
 
 @Entity
@@ -31,6 +33,4 @@ class ExtensionRequestRespondedApproveNotification extends ExtensionRequestRespo
 
 @Entity
 @DiscriminatorValue("ExtensionRequestRespondedReject")
-class ExtensionRequestRespondedRejectNotification extends ExtensionRequestRespondedNotification("rejected") {
-	priority = Warning
-}
+class ExtensionRequestRespondedRejectNotification extends ExtensionRequestRespondedNotification("rejected") {}

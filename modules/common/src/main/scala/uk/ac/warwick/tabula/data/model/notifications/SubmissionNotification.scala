@@ -23,9 +23,6 @@ abstract class SubmissionNotification
 		"submissionDate" -> dateTimeFormatter.print(submission.submittedDate),
 		"assignment" -> assignment,
 		"module" -> module,
-		"user" -> userLookup.getUserByWarwickUniId(submission.universityId),
-		"path" -> url)
+		"user" -> userLookup.getUserByWarwickUniId(submission.universityId))
 	)
-
-	def url = Routes.assignment.receipt(assignment)
 }

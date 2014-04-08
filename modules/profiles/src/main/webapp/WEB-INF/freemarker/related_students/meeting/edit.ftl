@@ -71,12 +71,21 @@
 			});
 		</script>
 
-		<@form.labelled_row "meetingDate" "Date of meeting">
-			<div class="input-append">
-				<@f.input type="text" path="meetingDate" cssClass="input-medium date-picker" placeholder="Pick the date" />
-				<span class="add-on"><i class="icon-calendar"></i></span>
-			</div>
-		</@form.labelled_row>
+		<#if command.realTime>
+			<@form.labelled_row "meetingDateTime" "Date of meeting">
+				<div class="input-append">
+					<@f.input type="text" path="meetingDateTime" cssClass="input-medium date-time-minute-picker" placeholder="Pick the date" />
+					<span class="add-on"><i class="icon-calendar"></i></span>
+				</div>
+			</@form.labelled_row>
+		<#else>
+			<@form.labelled_row "meetingDate" "Date of meeting">
+				<div class="input-append">
+					<@f.input type="text" path="meetingDate" cssClass="input-medium date-picker" placeholder="Pick the date" />
+					<span class="add-on"><i class="icon-calendar"></i></span>
+				</div>
+			</@form.labelled_row>
+		</#if>
 
 		<@form.labelled_row "format" "Format">
 			<@f.select path="format" cssClass="input-large">

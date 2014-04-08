@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.data.model.Notification
+import uk.ac.warwick.tabula.data.model.{NotificationPriority, Notification}
 import java.io.File
 import org.apache.lucene.analysis.Analyzer
 import org.joda.time.DateTime
@@ -14,8 +14,9 @@ import org.springframework.stereotype.Service
 import org.hibernate.ObjectNotFoundException
 import javax.persistence.DiscriminatorValue
 import org.apache.lucene.search._
-import org.apache.lucene.index.Term
+import org.apache.lucene.index.{IndexWriterConfig, Term}
 import uk.ac.warwick.tabula.JavaImports._
+import org.apache.lucene.index.sorter.{SortingMergePolicy, NumericDocValuesSorter, Sorter}
 
 class RecipientNotification(val notification: Notification[_,_], val recipient: User) {
 	def id = s"${notification.id}-${recipient.getUserId}"
@@ -40,6 +41,14 @@ trait NotificationQueryMethods { self: NotificationIndexServiceImpl =>
 		if (!req.includeDismissed) {
 			val dismissedQuery = new TermQuery(new Term("dismissed", "false"))
 			query.add(dismissedQuery, BooleanClause.Occur.MUST)
+		}
+
+		req.types.foreach { types =>
+			val typesQuery = new BooleanQuery()
+			types.foreach { typ =>
+				typesQuery.add(new TermQuery(new Term("notificationType", typ)), BooleanClause.Occur.SHOULD)
+			}
+			query.add(typesQuery, BooleanClause.Occur.MUST)
 		}
 
 		val sort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, true))
@@ -92,13 +101,16 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 
 		if (recipient.isFoundUser && recipient.getUserId != null) {
 			val notificationType = notification.getClass.getAnnotation(classOf[DiscriminatorValue]).value()
+			val priority = notification.priorityOrDefault
 			doc.add(plainStringField(IdField, item.id))
 			doc.add(plainStringField("notification", notification.id))
 			doc.add(plainStringField("recipient", recipient.getUserId))
 			doc.add(plainStringField("notificationType", notificationType))
-			doc.add(doubleField("priority", notification.priority.toNumericalValue))
+			doc.add(doubleField("priority", priority.toNumericalValue))
 			doc.add(booleanField("dismissed", notification.isDismissed(recipient)))
 			doc.add(dateField(UpdatedDateField, notification.created))
+			// Index date as a DocValue so we can do efficient sorts on it.
+			doc.add(docValuesField(UpdatedDateField, notification.created.getMillis))
 			Seq(doc)
 		} else {
 			debug("Skipping RecipientNotification because foundUser=%b and userId=%s", recipient.isFoundUser, recipient.getUserId)
@@ -122,5 +134,16 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 					Nil
 			}
 		}
+
+	/**
+	 * Set merge policy so that when segments of index are merged, it sorts them
+	 * by descending docvalue (date) at the same time. Then a correctly configured
+	 * search query can more efficiently look by the same sort
+	 */
+	override def configureIndexWriter(config: IndexWriterConfig) {
+		val sorter: Sorter = new NumericDocValuesSorter(UpdatedDateField, false)
+		val sortingMergePolicy = new SortingMergePolicy(config.getMergePolicy, sorter)
+		config.setMergePolicy(sortingMergePolicy)
+	}
 
 }

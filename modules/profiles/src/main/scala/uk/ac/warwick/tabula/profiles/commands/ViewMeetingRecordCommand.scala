@@ -29,11 +29,7 @@ class ViewMeetingRecordCommandInternal(val  studentCourseDetails: StudentCourseD
 
 	def applyInternal() = {
 		val rels = relationshipService.getRelationships(relationshipType, studentCourseDetails.student)
-
-		currentMember match {
-			case None => Seq()
-			case Some(mem)=> meetingRecordService.listAll(rels.toSet, mem)
-		}
+		meetingRecordService.listAll(rels.toSet, currentMember)
 	}
 }
 

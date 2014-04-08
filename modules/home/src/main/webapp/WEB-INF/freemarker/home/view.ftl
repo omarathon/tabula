@@ -63,6 +63,14 @@
 			</li>
 		</#if>
 	</ul>
+
+	<#if features.activityStreams>
+		<#import "*/activity_macros.ftl" as activity />
+		<div class="home-page-activity">
+		<h3>Activity stream</h3>
+		<@activity.activity_stream max=5 />
+		</div>
+	</#if>
 </#if>
 
 <#if !ajax && (activeSpringProfiles!"") == "sandbox">
@@ -97,12 +105,6 @@
 			});
 		</script>
 	</div>
-</#if>
-
-<#if !ajax>
-	<p id="what-is-tabula">
-		<i class="icon-info-sign"></i> <span title="Tabula was originated as 'My Department'.">Tabula</span> supports the administration of teaching and learning in academic departments at Warwick.
-	</p>
 </#if>
 
 </#escape>

@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import java.util.ArrayList
 import scala.collection.JavaConversions._
 import scala.util.matching.Regex
 import org.springframework.validation.{BindingResult, Errors}
@@ -13,7 +12,7 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, FileAttachment}
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.Logging
@@ -49,7 +48,7 @@ class FeedbackItem {
 		this.uniNumber = uniNumber
 	}
 
-	class AttachmentItem(val name: String, val duplicate: Boolean, val ignore: Boolean){}
+	class AttachmentItem(val name: String, val duplicate: Boolean, val ignore: Boolean)
 }
 
 // Purely for storing in command to display on the model.
@@ -111,12 +110,12 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 
 	def preExtractValidation(errors: Errors) {
 		if (batch) {
-			if (archive != null && !archive.isEmpty()) {
-				logger.debug("file name is " + archive.getOriginalFilename())
+			if (archive != null && !archive.isEmpty) {
+				logger.debug("file name is " + archive.getOriginalFilename)
 				if (!"zip".equals(FileUtils.getLowerCaseExtension(archive.getOriginalFilename))) {
 					errors.rejectValue("archive", "archive.notazip")
 				}
-			} else if (items != null && items.isEmpty() && file.isMissing) {
+			} else if (items != null && items.isEmpty && file.isMissing) {
 				errors.rejectValue("file.upload", "file.missing")
 			}
 		}
@@ -224,7 +223,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 		file.onBind(result)
 
 		// ZIP has been uploaded. unpack it
-		if (archive != null && !archive.isEmpty()) {
+		if (archive != null && !archive.isEmpty) {
 			val zip = new ZipArchiveInputStream(archive.getInputStream)
 
 			val bits = Zips.iterator(zip) { (iterator) =>
@@ -232,7 +231,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 					entry <- iterator
 					if !entry.isDirectory
 					if !(disallowedFilenames contains entry.getName)
-					if !(disallowedPrefixes.exists(filenameOf(entry.getName).startsWith))
+					if !disallowedPrefixes.exists(filenameOf(entry.getName).startsWith)
 				) yield {
 					val f = new FileAttachment
 					// Funny char from Windows? We can't work out what it is so
@@ -241,6 +240,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 					f.name = filenameOf(name)
 					f.uploadedData = new ZipEntryInputStream(zip, entry)
 					f.uploadedDataLength = entry.getSize
+					f.uploadedBy = submitter.userId
 					fileDao.saveTemporary(f)
 					(name, f)
 				}
@@ -255,7 +255,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 			new ExtractFeedbackZip(this).apply()
 
 		} else {
-			if (batch && !file.attached.isEmpty()) {
+			if (batch && !file.attached.isEmpty) {
 				val bits = file.attached.map { (attachment) => attachment.name -> attachment }
 				processFiles(bits)
 			}

@@ -46,12 +46,15 @@ class AssignmentController extends CourseworkController {
 
 	}
 
-	@ModelAttribute("willCheckpointBeCreated") def willCheckpointBeCreated(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) = {
-		val submission = new Submission(user.universityId)
-		submission.assignment = assignment
-		submission.submittedDate = DateTime.now
-		submission.userId = user.userId
-		!monitoringPointProfileTermAssignmentService.getCheckpointsForSubmission(submission).isEmpty
+	@ModelAttribute("willCheckpointBeCreated") def willCheckpointBeCreated(
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		user: CurrentUser) = {
+			val submission = new Submission(user.universityId)
+			submission.assignment = assignment
+			submission.submittedDate = DateTime.now
+			submission.userId = user.userId
+			!monitoringPointProfileTermAssignmentService.getCheckpointsForSubmission(submission).isEmpty
 	}
 
 	/**

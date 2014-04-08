@@ -40,6 +40,7 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 	@Resource(name = "mailSender") var mailer: WarwickMailSender = _
 
 	@Value("${mail.noreply.to}") var replyAddress: String = _
+	@Value("${mail.admin.to}") var adminFromAddress: String = _
 	val excelContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 	val WaitingRetries = 50
 	val WaitingSleep = 20000
@@ -142,7 +143,8 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 
 
 				val helper = new MimeMessageHelper(mime, true)
-				helper.setFrom(replyAddress)
+				helper.setFrom(adminFromAddress)
+				helper.setReplyTo(replyAddress)
 				helper.setTo(job.user.email)
 				helper.setSubject("Feedback report generated for %s" format (department.name))
 				helper.setText(renderJobDoneEmailText(job.user, department, startDate, endDate))

@@ -37,7 +37,7 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 
 	source.relationshipService.getAllPastAndPresentRelationships(student) returns relationships
 	source.securityService.can(user, Permissions.Profiles.MeetingRecord.Read(relationshipType), student) returns (true)
-	source.meetingRecordService.listAll(relationships.toSet, student) returns meetings
+	source.meetingRecordService.listAll(relationships.toSet, Some(student)) returns meetings
 
 	@Test
 	def callsBothServicesAndGeneratesOccurrence(){

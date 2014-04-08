@@ -8,6 +8,8 @@
 	<@script "/static/libs/jquery-fixedheadertable/jquery.fixedheadertable.js" />
 	<@script "/static/libs/jquery-rating/jquery.rating.pack.js" />
 	<@script "/static/libs/jquery-tablesorter/jquery.tablesorter.js" />
+	<@script "/static/js/moment.min.js" />
+	<@script "/static/js/moment-lang.en-gb.js" />
 	<@script "/static/libs/popup/popup.js" />
 	<@script "/static/libs/bootstrap/js/bootstrap.js" />
 	<@script "/static/libs/bootstrap-editable/js/bootstrap-editable.js" />
@@ -16,6 +18,7 @@
 	<@script "/static/libs/spin-js/jquery.spin.js" />
 	<@script "/static/js/modernizr.js" />
 	<@script "/static/js/browser-info.js" />
+	<@script "/static/js/activity-streams.js" />
 <#else>
 	<@script "/static/js/render.js" />
 </#if>

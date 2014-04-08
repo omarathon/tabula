@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>65-SNAPSHOT</version>
+		<version>65</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -431,6 +431,11 @@
 			<artifactId>lucene-analyzers-common</artifactId>
 			<version>${org.apache.lucene.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-misc</artifactId>
+			<version>${org.apache.lucene.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.tiles</groupId>
@@ -536,6 +541,12 @@
 			<groupId>com.googlecode.libphonenumber</groupId>
 			<artifactId>geocoder</artifactId>
 			<version>2.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.pegdown</groupId>
+			<artifactId>pegdown</artifactId>
+			<version>1.4.2</version>
 		</dependency>
 
 		<dependency>

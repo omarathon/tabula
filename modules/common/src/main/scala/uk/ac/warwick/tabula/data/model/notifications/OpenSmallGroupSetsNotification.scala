@@ -27,20 +27,26 @@ class OpenSmallGroupSetsNotification
 		}
 	}
 
+	def actionRequired = entities.exists(_.allocationMethod == StudentSignUp)
+
 	def verb = "Opened"
 
-	def title: String = {
-		val formats: List[String] = entities.map(_.format.description).distinct.toList
+	def formats: List[String] = entities.map(_.format.description).distinct.toList
 
-		val formatsString = formats match {
-			case singleFormat :: Nil => singleFormat
-			case _ => Seq(formats.init.mkString(", "), formats.last).mkString(" and ")
-		}
-		formatsString + " groups are now open for sign up."
+	def formatsString = formats match {
+		case singleFormat :: Nil => singleFormat
+		case _ => Seq(formats.init.mkString(", "), formats.last).mkString(" and ")
 	}
 
-	def content = FreemarkerModel(OpenSmallGroupSetsNotification.templateLocation, Map("groupsets" -> entities, "profileUrl" -> url))
+	def title: String = formatsString + " groups are now open for sign up."
+
+	def content = FreemarkerModel(OpenSmallGroupSetsNotification.templateLocation, Map(
+		"groupsets" -> entities,
+		"profileUrl" -> url,
+		"formatsString" -> formatsString
+	))
 
 	def url: String = "/groups"
+	def urlTitle = s"sign up for these $formatsString groups"
 
 }

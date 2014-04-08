@@ -4,7 +4,6 @@ import scala.language.postfixOps
 import java.io._
 import com.google.common.io.Files
 import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
@@ -70,7 +69,8 @@ class FileAttachment extends GeneratedId {
 
 	var temporary: JBoolean = true
 
-	var dateUploaded: DateTime = new DateTime
+	var dateUploaded: DateTime = DateTime.now
+	var uploadedBy: String = _
 
 	@transient private var _file: File = null
 	def file = {

@@ -217,13 +217,17 @@ abstract class AbstractIndexService[A]
 		ifNotIndexing { doIndexItems(items, false) }
 	}
 
-	def indexItemsWithoutNewTransaction(items: Traversable[A]) =  {
+	def indexItemsWithoutNewTransaction(items: Traversable[A]) = {
 		ifNotIndexing { doIndexItems(items, false) }
 	}
+
+	// Overridable - configure index writer
+	def configureIndexWriter(config: IndexWriterConfig): Unit = {}
 
 	private def doIndexItems(items: Traversable[A], isIncremental: Boolean) {
 		logger.debug("Writing to the index at " + indexPath + " with analyzer " + indexAnalyzer)
 		val writerConfig = new IndexWriterConfig(LuceneVersion, indexAnalyzer)
+		configureIndexWriter(writerConfig)
 		closeThis(new IndexWriter(openDirectory(), writerConfig)) { writer =>
 			for (item <- items) {
 				tryDescribe(s"indexing ${item}") {
@@ -384,10 +388,10 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 	}
 
 	/**
-	 * Remove saved searchers over 20 minutes old
+	 * Remove saved searchers over 3 minutes old
 	 */
 	protected def prune = {
-		val ageInSeconds = 20*60
+		val ageInSeconds = 3*60
 		initialiseSearching
 		if (searcherLifetimeManager != null) searcherLifetimeManager.prune(new PruneByAge(ageInSeconds))
 	}
@@ -458,22 +462,27 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 		finally searcherLifetimeManager.release(searcher)
 	}
 
+	/**
+	 * Get the searcher that has been recorded in the searcher lifetime manager under this
+	 * name. If no token is passed, we acquire a new searcher and record it in the lifetime
+	 * manager. We also acquire a new searcher if the requested one couldn't be found.
+	 */
 	private def acquireSearcher(token: Option[Long]): (Long, IndexSearcher) = {
-		var searcher: IndexSearcher = null
-		var newToken: Long = 0
+		def newSearcher() = {
+			val searcher = searcherManager.acquire()
+			(searcherLifetimeManager.record(searcher), searcher)
+		}
 
-		token match {
-			case None => {
-				searcher = searcherManager.acquire
-				newToken = searcherLifetimeManager.record(searcher)
-			}
-			case Some(t) => {
-				searcher = searcherLifetimeManager.acquire(t)
-				newToken = t
+		def existingSearcher(t: Long) = {
+			val searcher = searcherLifetimeManager.acquire(t)
+			if (searcher == null) {
+				newSearcher()
+			} else {
+				(t, searcher)
 			}
 		}
 
-		(newToken, searcher)
+		token.map(existingSearcher).getOrElse(newSearcher)
 	}
 }
 
@@ -493,6 +502,8 @@ trait FieldGenerators {
 	}
 
 	protected def dateField(name: String, value: DateTime) = new LongField(name, value.getMillis, Store.YES)
+
+	protected def docValuesField(name: String, value: Long) = new NumericDocValuesField(name, value)
 
 	protected def doubleField(name: String, value: Double) = new DoubleField(name, value, Store.YES)
 

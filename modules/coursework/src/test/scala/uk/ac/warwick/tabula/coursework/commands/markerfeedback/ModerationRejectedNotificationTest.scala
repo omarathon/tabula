@@ -46,7 +46,7 @@ class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 	def shouldCallTextRendererWithCorrectModel():Unit = new ModeratorRejectedNotificationFixture {
 
 		val n =  createNotification(marker2, marker1, mf1)
-		n.content.model.get("markingUrl") should be(Some(n.url))
+		n.url should be ("/coursework/admin/module/heron101/assignments/1/marker/list")
 		n.content.model.get("assignment") should be(Some(testAssignment))
 		n.content.model.get("studentId") should be(Some("student1"))
 		n.content.model.get("moderatorName") should be(Some("Snorkeldink Wafflesmack"))

@@ -14,15 +14,15 @@ class ScheduledMeetingRecordInviteeNotification
 	}
 
 	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/scheduled_meeting_record_invitee_notification.ftl"
-	def title = s"Scheduled meeting $verb"
+	def title = s"Meeting $verb"
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
 		"actor" -> agent,
 		"role" -> agentRole,
 		"verb" -> verb,
 		"dateTimeFormatter" -> dateTimeFormatter,
-		"meetingRecord" -> meeting,
-		"profileLink" -> url
+		"meetingRecord" -> meeting
 	))
+
 	def recipient = {
 		if (meeting.creator.universityId == meeting.relationship.studentId) {
 			meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage)).asSsoUser
@@ -30,4 +30,6 @@ class ScheduledMeetingRecordInviteeNotification
 			meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)).asSsoUser
 		}
 	}
+
+	def actionRequired = false
 }

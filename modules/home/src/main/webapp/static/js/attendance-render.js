@@ -229,7 +229,7 @@ $(function(){
 		});
 
 		// Update Preview button to preview the currently selected template.
-		$form.find('select.template[name=existingSet]').on('change', function() {
+		$form.find('select.template[name=template]').on('change', function() {
 			var $button = $('.monitoring-point-preview-button'),
 			    newHref = $button.data('hreftemplate').replace('_TEMPLATE_ID_', this.value);
 			$button.attr('href', newHref);

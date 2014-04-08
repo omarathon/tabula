@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import org.joda.time.DateTime
+import org.joda.time.{LocalDate, DateTime}
 import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils.rejectIfEmptyOrWhitespace
 import uk.ac.warwick.spring.Wire
@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.system.BindListener
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.FileDao
-import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -29,8 +28,10 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 	var title: String = _
 	var description: String = _
+	var meetingDateTime: DateTime = _
 	var meetingDate: LocalDate = _
 	var format: MeetingFormat = _
+	var isRealTime: Boolean = _
 
 	var file: UploadedFile = new UploadedFile
 	var attachedFiles:JList[FileAttachment] = _
@@ -64,7 +65,10 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 		meeting.title = title
 		meeting.description = description
-		meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
+		meeting.isRealTime match {
+			case true => meeting.meetingDate = meetingDateTime
+			case false => meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
+		}
 		meeting.format = format
 		meeting.lastUpdatedDate = DateTime.now
 		meeting.relationship = relationship
@@ -115,15 +119,22 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 		rejectIfEmptyOrWhitespace(errors, "relationship", "NotEmpty")
 		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
 
-		meetingDate match {
-			case date:LocalDate => {
-				if (meetingDate.isAfter(DateTime.now.toLocalDate)) {
-					errors.rejectValue("meetingDate", "meetingRecord.date.future")
-				} else if (meetingDate.isBefore(DateTime.now.minusYears(MeetingRecord.MeetingTooOldThresholdYears).toLocalDate)) {
-					errors.rejectValue("meetingDate", "meetingRecord.date.prehistoric")
-				}
+		val dateToCheck: DateTime = isRealTime match {
+			case true => meetingDateTime
+			case false => meetingDate.toDateTimeAtStartOfDay
+		}
+
+		if (dateToCheck == null) {
+			errors.rejectValue("meetingDate", "meetingRecord.date.missing")
+			errors.rejectValue("meetingDateTime", "meetingRecord.date.missing")
+		} else {
+			if (dateToCheck.isAfter(DateTime.now)) {
+				errors.rejectValue("meetingDate", "meetingRecord.date.future")
+				errors.rejectValue("meetingDateTime", "meetingRecord.date.future")
+			} else if (dateToCheck.isBefore(DateTime.now.minusYears(MeetingRecord.MeetingTooOldThresholdYears))) {
+				errors.rejectValue("meetingDate", "meetingRecord.date.prehistoric")
+				errors.rejectValue("meetingDateTime", "meetingRecord.date.prehistoric")
 			}
-			case _ => errors.rejectValue("meetingDate", "meetingRecord.date.missing")
 		}
 	}
 
