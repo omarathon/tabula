@@ -24,7 +24,7 @@ trait SubmissionReminder {
 		Days.daysBetween(now, closeDate).getDays
 	}
 
-	override def preSave(newRecord: Boolean) {
+	override final def preSave(newRecord: Boolean) {
 		priority = if (daysLeft == 1) {
 			Warning
 		} else if (daysLeft < 1) {
