@@ -25,9 +25,7 @@ trait AssignmentDao {
 	def deleteFormField(field: FormField): Unit
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment]
-
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment]
-
 	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment]
