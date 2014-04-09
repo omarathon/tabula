@@ -42,9 +42,9 @@ trait StudentCourseworkCommandHelper
 		AssignmentMembershipServiceComponent with
 		FeaturesComponent =>
 
-	def overridableAssignmentsWithFeedback: Seq[Assignment]
-	def overridableEnrolledAssignments: Seq[Assignment]
-	def overridableAssignmentsWithSubmission: Seq[Assignment]
+	val overridableAssignmentsWithFeedback: Seq[Assignment]
+	val overridableEnrolledAssignments: Seq[Assignment]
+	val overridableAssignmentsWithSubmission: Seq[Assignment]
 	val user: User
 	val universityId: String
 
