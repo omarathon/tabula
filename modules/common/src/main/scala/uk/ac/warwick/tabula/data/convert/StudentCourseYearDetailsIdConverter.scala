@@ -8,10 +8,7 @@ class StudentCourseYearDetailsIdConverter extends TwoWayConverter[String, Studen
 	var dao = Wire.auto[StudentCourseYearDetailsDao]
 
 	// print
-	override def convertLeft(scyd: StudentCourseYearDetails) = Option(scyd) match {
-		case Some(s) => s.id
-		case None => null
-	}
+	override def convertLeft(scyd: StudentCourseYearDetails) = Option(scyd).map { _.id }.orNull
 
 	// parse
 	override def convertRight(id: String) = dao.getStudentCourseYearDetails(id).orNull
