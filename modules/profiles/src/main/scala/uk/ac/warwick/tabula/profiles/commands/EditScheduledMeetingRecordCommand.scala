@@ -87,7 +87,7 @@ trait EditScheduledMeetingRecordCommandValidation extends SelfValidating with Sc
 	self: EditScheduledMeetingRecordState with MeetingRecordServiceComponent =>
 	override def validate(errors: Errors) {
 		sharedValidation(errors, title, meetingDate)
-		meetingRecordService.listScheduled(Set(meetingRecord.relationship), creator).foreach(
+		meetingRecordService.listScheduled(Set(meetingRecord.relationship), Some(creator)).foreach(
 			m => if (m.meetingDate == meetingDate && m.id != meetingRecord.id) errors.rejectValue("meetingDate", "meetingRecord.date.duplicate")
 		)
 	}

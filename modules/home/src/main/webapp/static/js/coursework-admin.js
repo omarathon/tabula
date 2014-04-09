@@ -352,6 +352,9 @@ $(function() {
 	$('#main-content').on('tabula.expandingTable.contentChanged', '.content-container', function(e) {
 		var $container = $(this);
 		var $form = $container.find('form');
+
+		$form.find('details').details(); // re-apply the details/summary tag fix for Firefox & IE post ajax insert
+
 		var contentId = $container.attr('data-contentid');
 		var $row = $('tr.itemContainer[data-contentid='+contentId+']');
 
