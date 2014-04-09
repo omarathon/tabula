@@ -443,11 +443,6 @@
 										center: '',
 										right:  'today prev,next'
 									},
-									eventClick: function(event, jsEvent, view) {
-										var $this = $(this);
-										$this.popover('show');
-										return false;
-                                    },
                                     eventAfterRender: function(event, element, view){
 										var content = "<table class='event-info'>";
                                         if (event.description && event.description.length > 0){
