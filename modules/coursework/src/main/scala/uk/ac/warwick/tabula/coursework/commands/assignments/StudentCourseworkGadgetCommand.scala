@@ -38,16 +38,16 @@ class StudentCourseworkGadgetCommandInternal(val studentCourseYearDetails: Stude
 		FeaturesComponent with
 		StudentCourseworkCommandHelper =>
 
-	override def overridableAssignmentsWithFeedback = {
+	override lazy val overridableAssignmentsWithFeedback = {
 		assignmentService.getAssignmentsWithFeedback(studentCourseYearDetails)
 	}
 
-	override def overridableEnrolledAssignments = {
+	override lazy val overridableEnrolledAssignments = {
 		val allAssignments = assignmentMembershipService.getEnrolledAssignments(studentCourseYearDetails.studentCourseDetails.student.asSsoUser)
 		assignmentService.filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
 	}
 
-	override def overridableAssignmentsWithSubmission = assignmentService.getAssignmentsWithSubmission(studentCourseYearDetails)
+	override lazy val overridableAssignmentsWithSubmission = assignmentService.getAssignmentsWithSubmission(studentCourseYearDetails)
 
 	override val user: User = student.asSsoUser
 	override val universityId: String = student.universityId
