@@ -1,12 +1,7 @@
-package uk.ac.warwick.tabula.coursework.web.controllers
+package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
 
 import uk.ac.warwick.tabula.AutowiringFeaturesComponent
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.FeaturesComponent
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.ComposableCommand
@@ -20,22 +15,9 @@ import uk.ac.warwick.tabula.services.AutowiringAssignmentMembershipServiceCompon
 import uk.ac.warwick.tabula.services.AutowiringAssignmentServiceComponent
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
-import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.coursework.web.controllers.StudentCourseworkCommand.StudentAssignments
-
-@Controller
-@RequestMapping(Array("/student/bycourseandyear/{studentCourseYearDetails}"))
-class StudentCourseworkGadgetController extends StudentCourseworkController {
-
-	@ModelAttribute("command") def command(@PathVariable studentCourseYearDetails: StudentCourseYearDetails) =
-		StudentCourseworkGadgetCommand(studentCourseYearDetails)
-
-	@RequestMapping
-	def listAssignments(@ModelAttribute("command") command: Appliable[StudentAssignments], @PathVariable studentCourseYearDetails: StudentCourseYearDetails, user: CurrentUser): Mav =
-		getMav(studentCourseYearDetails.studentCourseDetails.student, command.apply())
-
-}
+import uk.ac.warwick.tabula.coursework.web.controllers.{StudentCourseworkCommandInternal, StudentCourseworkCommandHelper}
 
 object StudentCourseworkGadgetCommand {
 	def apply(studentCourseYearDetails: StudentCourseYearDetails): Appliable[StudentAssignments] =

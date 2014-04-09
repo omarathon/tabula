@@ -45,6 +45,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.MemberOrUser
+import uk.ac.warwick.tabula.coursework.commands.assignments.StudentCourseworkFullScreenCommand
 
 @Controller class HomeController extends CourseworkController {
 	

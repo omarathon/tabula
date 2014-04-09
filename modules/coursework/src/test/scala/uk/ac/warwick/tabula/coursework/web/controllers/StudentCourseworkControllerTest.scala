@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AssignmentService, AssignmentMembershipServiceComponent, AssignmentServiceComponent}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.{StudentCourseYearDetails, Assignment}
+import uk.ac.warwick.tabula.coursework.commands.assignments.{StudentCourseworkGadgetCommandInternal, StudentCourseworkFullScreenCommandInternal}
 
 class StudentCourseworkControllerTest extends TestBase with Mockito {
 
