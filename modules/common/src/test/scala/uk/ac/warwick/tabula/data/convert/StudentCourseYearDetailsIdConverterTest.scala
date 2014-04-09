@@ -4,15 +4,21 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
+import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
 
 class StudentCourseYearDetailsIdConverterTest extends TestBase with Mockito {
-	
+	val scyd = new StudentCourseYearDetails
+	scyd.id = "foo"
+
 	val converter = new StudentCourseYearDetailsIdConverter
+	val dao = smartMock[StudentCourseYearDetailsDao]
+	converter.dao = dao
+
+	dao.getStudentCourseYearDetails("foo") returns Some(scyd)
+	dao.getStudentCourseYearDetails("bar") returns None
 
 	@Test def validInput {
-		val scyd = new StudentCourseYearDetails
-		scyd.id = "foo"
-			
+
 		converter.convertRight("foo") should be (scyd)
 	}
 	

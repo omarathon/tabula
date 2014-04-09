@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{StudentCourseYearDetails, Submission, Department, Module, Assignment}
+import uk.ac.warwick.tabula.data.model.{Submission, Department, Module, Assignment}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.forms.FormField
 import org.joda.time.DateTime

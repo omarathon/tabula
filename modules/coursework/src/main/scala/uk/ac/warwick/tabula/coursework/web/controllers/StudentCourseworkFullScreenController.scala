@@ -63,11 +63,10 @@ class StudentCourseworkFullScreenCommandInternal(val memberOrUser: MemberOrUser)
 
 	override def overridableAssignmentsWithSubmission = assignmentService.getAssignmentsWithSubmission(memberOrUser.universityId)
 
-	override def universityId: String = memberOrUser.universityId
+	override val universityId: String = memberOrUser.universityId
 
-	override def user: User = memberOrUser.asUser
+	override val user: User = memberOrUser.asUser
 
-	def applyInternal() = getAssignments
 }
 
 trait StudentCourseworkFullScreenCommandState {

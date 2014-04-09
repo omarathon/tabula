@@ -25,7 +25,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.coursework.web.controllers.StudentCourseworkCommand.StudentAssignments
 
 @Controller
-@RequestMapping(Array("/student/byCourseAndYear/{studentCourseYearDetails}"))
+@RequestMapping(Array("/student/bycourseandyear/{studentCourseYearDetails}"))
 class StudentCourseworkGadgetController extends StudentCourseworkController {
 
 	@ModelAttribute("command") def command(@PathVariable studentCourseYearDetails: StudentCourseYearDetails) =
@@ -67,10 +67,9 @@ class StudentCourseworkGadgetCommandInternal(val studentCourseYearDetails: Stude
 
 	override def overridableAssignmentsWithSubmission = assignmentService.getAssignmentsWithSubmission(studentCourseYearDetails)
 
-	override def user: User = student.asSsoUser
-	override def universityId: String = student.universityId
+	override val user: User = student.asSsoUser
+	override val universityId: String = student.universityId
 
-	def applyInternal() = getAssignments
 }
 
 trait StudentCourseworkGadgetCommandState {
