@@ -50,7 +50,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 
 	// QueryParser isn't thread safe, hence why this is a def
 	// Overrides AbstractIndexService when used in ProfileIndexService
-	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
+	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(IndexService.ProfileIndexLuceneVersion, nameFields, analyzer)
 
 	def findWithQuery(
 		query: String,

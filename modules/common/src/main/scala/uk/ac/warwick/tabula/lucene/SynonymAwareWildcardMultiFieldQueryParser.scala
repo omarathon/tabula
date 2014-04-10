@@ -6,12 +6,10 @@ import org.apache.lucene.queryparser.classic.MultiFieldQueryParser
 import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search.{BooleanQuery, PhraseQuery, Query, TermQuery, WildcardQuery}
 import org.apache.lucene.queryparser.classic.QueryParser.Operator
-import uk.ac.warwick.tabula.services.IndexService
+import org.apache.lucene.util.Version
 
-class SynonymAwareWildcardMultiFieldQueryParser(
-		fields: Traversable[String],
-		analyzer: Analyzer)
-		extends MultiFieldQueryParser(IndexService.TabulaLuceneVersion, fields.toArray[String], analyzer) {
+class SynonymAwareWildcardMultiFieldQueryParser(matchVersion: Version, fields: Traversable[String], analyzer: Analyzer)
+	extends MultiFieldQueryParser(matchVersion, fields.toArray[String], analyzer) {
 
 	setDefaultOperator(Operator.AND)
 
