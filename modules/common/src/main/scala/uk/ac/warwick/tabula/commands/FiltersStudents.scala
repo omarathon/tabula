@@ -58,5 +58,5 @@ trait FiltersStudents extends FilterStudentsOrRelationships {
 	lazy val allCourseTypes: Seq[CourseType] = mandatory(department).filterRule.courseTypes
 	lazy val allRoutes: Seq[Route] = routesForDepartmentAndSubDepartments(mandatory(department)).sorted(Route.DegreeTypeOrdering)
 	lazy val allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(mandatory(department).rootDepartment)
-	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = profileService.allModesOfAttendance(mandatory(department))
+	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = profileService.allModesOfAttendance(mandatory(department).rootDepartment)
 }

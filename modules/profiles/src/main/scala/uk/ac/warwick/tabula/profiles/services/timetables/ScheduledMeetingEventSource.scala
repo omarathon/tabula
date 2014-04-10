@@ -25,9 +25,7 @@ trait MeetingRecordServiceScheduledMeetingEventSourceComponent extends Scheduled
 				securityService.can(currentUser, Permissions.Profiles.MeetingRecord.Read(meeting.relationship.relationshipType), student)
 
 			val relationships = relationshipService.getAllPastAndPresentRelationships(student).toSet
-			val currentMember = currentUser.profile.getOrElse(new RuntimeMember(currentUser))
-
-			val meetings = meetingRecordService.listAll(relationships, currentMember)
+			val meetings = meetingRecordService.listAll(relationships, currentUser.profile)
 			meetings.flatMap { meeting => meeting.toEventOccurrence.map {
 				case occurrence if canReadMeeting(meeting) => occurrence
 				case occurrence => {

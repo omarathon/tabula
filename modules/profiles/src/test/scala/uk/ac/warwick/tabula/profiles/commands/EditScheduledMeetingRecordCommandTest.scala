@@ -12,7 +12,7 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		val relationship: StudentRelationship = mock[StudentRelationship]
 
 		val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
-		mockMeetingRecordService.listScheduled(Set(relationship), creator) returns Seq()
+		mockMeetingRecordService.listScheduled(Set(relationship), Some(creator)) returns Seq()
 
 		var creator: StaffMember = _
 		var scheduledMeetingRecord: ScheduledMeetingRecord = new ScheduledMeetingRecord()
@@ -125,7 +125,7 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 
 		command.meetingRecord.id = "B"
 
-		mockMeetingRecordService.listScheduled(Set(relationship), creator) returns Seq(meetingWithDupeDate)
+		mockMeetingRecordService.listScheduled(Set(relationship), Some(creator)) returns Seq(meetingWithDupeDate)
 
 		val errors = new BindException(command, "command")
 		command.format = MeetingFormat.FaceToFace
