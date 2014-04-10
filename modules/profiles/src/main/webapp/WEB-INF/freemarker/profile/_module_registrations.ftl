@@ -4,7 +4,7 @@
 		View in MRM<img class="targetBlank" alt="" title="Link opens in a new window" src="/static/images/shim.gif"/> </a>
 	</div>
 	
-	<h4>Module Registrations for ${(studentCourseYearDetails.academicYear.toString)!}</h4>
+	<h4>Modules</h4>
 	<p><span class="muted">Module Registration Status:</span>
 		<#if studentCourseYearDetails.moduleRegistrationStatus??>
 			${(studentCourseYearDetails.moduleRegistrationStatus.description)!}
