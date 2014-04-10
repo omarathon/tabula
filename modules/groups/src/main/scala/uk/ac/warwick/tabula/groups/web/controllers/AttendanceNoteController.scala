@@ -56,7 +56,7 @@ class AttendanceNoteAttachmentController extends GroupsController {
 	def get(@ModelAttribute("command") cmd: ApplyWithCallback[Option[RenderableFile]])
 		(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		// specify callback so that audit logging happens around file serving
-		cmd.callback = { (renderable) => renderable.map{fileServer.serve} }
+		cmd.callback = { (renderable) => renderable.foreach { fileServer.serve(_) } }
 		cmd.apply().orElse { throw new ItemNotFoundException() }
 	}
 

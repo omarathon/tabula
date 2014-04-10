@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmi
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadAttachmentCommand
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.services.SubmissionService
+import uk.ac.warwick.userlookup.AnonymousUser
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.zip"))
@@ -98,6 +99,7 @@ class DownloadSingleSubmissionController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
 	var submissionService = Wire.auto[SubmissionService]
+	var userLookup = Wire[UserLookupService]
 	
 	@ModelAttribute def getSingleSubmissionCommand(
 			@PathVariable("module") module: Module, 
@@ -109,7 +111,16 @@ class DownloadSingleSubmissionController extends CourseworkController {
 	def downloadSingle(
 			cmd: AdminGetSingleSubmissionCommand, 
 			@PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		fileServer.serve(cmd.apply())
+		val moduleCode = cmd.assignment.module.code
+		val user = userLookup.getUserByUserId(cmd.submission.userId)
+
+		val userIdentifier = if(!cmd.assignment.module.department.showStudentName || (user==null || !user.isInstanceOf[AnonymousUser])) {
+			cmd.submission.universityId
+		} else {
+			s"${user.getFullName} - ${cmd.submission.universityId}"
+		}
+
+		fileServer.serve(cmd.apply(), Some(s"${moduleCode} - ${userIdentifier} - ${filename}.zip"))
 	}
 	
 }
@@ -121,6 +132,7 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
 	var submissionService = Wire.auto[SubmissionService]
+	var userLookup = Wire[UserLookupService]
 
 	@ModelAttribute def getSingleSubmissionCommand(
 			@PathVariable("module") module: Module, 
@@ -134,7 +146,16 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 			@PathVariable("filename") filename: String,
 			request: HttpServletRequest, 
 		response: HttpServletResponse) {
-		cmd.callback = { (renderable) => fileServer.serve(renderable)(request, response) }
+		val moduleCode = cmd.assignment.module.code
+		val user = userLookup.getUserByUserId(cmd.submission.userId)
+
+		val userIdentifier = if(!cmd.assignment.module.department.showStudentName || (user==null || !user.isInstanceOf[AnonymousUser])) {
+			cmd.submission.universityId
+		} else {
+			s"${user.getFullName} - ${cmd.submission.universityId}"
+		}
+
+		cmd.callback = { (renderable) => fileServer.serve(renderable, Some(s"${moduleCode} - ${userIdentifier} - ${filename}"))(request, response) }
 		cmd.apply().orElse { throw new ItemNotFoundException() }
 	}
 
