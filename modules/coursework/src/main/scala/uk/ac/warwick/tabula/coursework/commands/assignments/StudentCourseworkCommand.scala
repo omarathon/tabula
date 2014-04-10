@@ -51,15 +51,13 @@ trait StudentCourseworkCommandHelper
 	val assignmentsWithFeedback = benchmarkTask("Get assignments with feedback") { overridableAssignmentsWithFeedback }
 
 	val enrolledAssignments = benchmarkTask("Get enrolled assignments") {
-		if (features.assignmentMembership) {
-			overridableEnrolledAssignments
-		}
-		else Seq.empty
+		if (features.assignmentMembership) overridableEnrolledAssignments
+		else Nil
 	}
 
 	val assignmentsWithSubmission = benchmarkTask("Get assignments with submission") {
 		if (features.submissions) overridableAssignmentsWithSubmission
-		else Seq.empty
+		else Nil
 	}
 
 	val lateFormativeAssignments = {
@@ -76,23 +74,23 @@ trait StudentCourseworkCommandHelper
 			.filter {_.collectSubmissions} // TAB-475
 			.filterNot(lateFormativeAssignments.contains(_))
 			.sortWith { (ass1, ass2) =>
-		// TAB-569 personal time to deadline - if ass1 is "due" before ass2 for the current user
-		// Show open ended assignments after
-			if (ass2.openEnded && !ass1.openEnded) true
-			else if (ass1.openEnded && !ass2.openEnded) false
-			else {
-				def timeToDeadline(ass: Assignment) = {
-					val extension = ass.extensions.asScala.find(e => e.universityId == universityId || e.userId == user.getUserId)
-					val isExtended = ass.isWithinExtension(user)
+				// TAB-569 personal time to deadline - if ass1 is "due" before ass2 for the current user
+				// Show open ended assignments after
+				if (ass2.openEnded && !ass1.openEnded) true
+				else if (ass1.openEnded && !ass2.openEnded) false
+				else {
+					def timeToDeadline(ass: Assignment) = {
+						val extension = ass.extensions.asScala.find(e => e.universityId == universityId || e.userId == user.getUserId)
+						val isExtended = ass.isWithinExtension(user)
 
-					if (ass.openEnded) ass.openDate
-					else if (isExtended) (extension map { _.expiryDate }).get
-					else ass.closeDate
+						if (ass.openEnded) ass.openDate
+						else if (isExtended) (extension map { _.expiryDate }).get
+						else ass.closeDate
+					}
+
+					timeToDeadline(ass1) < timeToDeadline(ass2)
 				}
-
-				timeToDeadline(ass1) < timeToDeadline(ass2)
 			}
-		}
 
 	private def enhanced(assignment: Assignment, user: User, universityId: String) = {
 		val extension = assignment.extensions.asScala.find(e => e.isForUser(user))
