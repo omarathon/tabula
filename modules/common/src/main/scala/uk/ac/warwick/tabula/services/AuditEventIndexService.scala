@@ -143,10 +143,9 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		// take most recent event and find submissions made before then.
 		val submissions1: Seq[Submission] = allDownloaded.headOption match {
 			case None => Nil
-			case Some(event) => {
+			case Some(event) =>
 				val latestDate = event.eventDate
 				assignment.submissions.filter { _.submittedDate isBefore latestDate }
-			}
 		}
 
 		// find events where selected submissions were downloaded
@@ -157,7 +156,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		// find events where individual submissions were downloaded
 		val individualDownloads = parsedAuditEvents(
 				search(all(assignmentTerm, termQuery("eventType", "AdminGetSingleSubmission"))))
-		val submissions3 = individualDownloads.flatMap(_.submissionId).flatMap(id => assignment.submissions.find((_.id == id)))
+		val submissions3 = individualDownloads.flatMap(_.submissionId).flatMap(id => assignment.submissions.find(_.id == id))
 		(submissions1 ++ submissions2 ++ submissions3).distinct
 	}
 
@@ -206,7 +205,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 			.filterNot { _.hadError }
 			.flatMap(auditEvent => auditEvent.students.map( student => (student, auditEvent.eventDate)))
 			.groupBy( _._1)
-			.map(x => (x._2.maxBy(_._2)))
+			.map(x => x._2.maxBy(_._2))
 			.toSeq
 			
 	def whoDownloadedFeedback(assignment: Assignment) =
@@ -247,12 +246,10 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		search(all(term("eventType" -> "AddAssignment"), assignmentRangeRestriction(assignment)))
 			.transform { doc: Document =>
 				doc.getField("eventDate") match {
-					case field: StoredField if field.numericValue() != null => {
+					case field: StoredField if field.numericValue() != null =>
 						Some(new DateTime(field.numericValue()))
-					}
-					case _ => {
+					case _ =>
 						None
-					}
 				}
 			}
 			.headOption
@@ -301,13 +298,12 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	@Value("${audit.index.weeksbacklog}") var weeksBacklog: Int = _
 
 	override val analyzer = {
-		//val standard = new StandardAnalyzer(LuceneVersion)
 		val token = new KeywordAnalyzer()
-		val whitespace: Analyzer = new WhitespaceAnalyzer(LuceneVersion)
+		val whitespace: Analyzer = new WhitespaceAnalyzer(IndexService.AuditEventIndexLuceneVersion)
 
-		val tokenListMappings = tokenListFields.map(field => (field -> whitespace))
+		val tokenListMappings = tokenListFields.map(field => field -> whitespace)
 		//val tokenMappings = tokenFields.map(field=> (field -> token))
-		val mappings = (tokenListMappings /* ++ tokenMappings*/ ).toMap.asJava
+		val mappings = tokenListMappings.toMap.asJava
 
 		new PerFieldAnalyzerWrapper(token, mappings)
 	}
@@ -341,7 +337,9 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	protected def toItems(docs: Seq[Document]): Seq[AuditEvent] = {
 		// Pair Documents up with the contained ID if present
 		val docIds = docs.map { doc =>
-			(doc -> documentValue(doc, IdField).map{ _.toLong })
+			doc -> documentValue(doc, IdField).map {
+				_.toLong
+			}
 		}
 		val ids = docIds.flatMap {
 			case (_, id) => id
@@ -429,12 +427,10 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	}
 	
 	private def addFieldToDoc(field: String, data: Map[String, Any], doc: Document) = data.get(field) match  {
-		case Some(value: String) => {
+		case Some(value: String) =>
 			doc add plainStringField(field, value, isStored = false)
-		}
-		case Some(value: Boolean) => {
+		case Some(value: Boolean) =>
 			doc add plainStringField(field, value.toString, isStored = false)
-		}
 		case _ => // missing or not a string
 	}
 	

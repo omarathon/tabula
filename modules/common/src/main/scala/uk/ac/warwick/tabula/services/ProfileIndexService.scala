@@ -1,20 +1,14 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import org.springframework.stereotype.Component
-import org.apache.lucene.util.Version
 import uk.ac.warwick.spring.Wire
 import org.springframework.beans.factory.annotation.Value
 import java.io.File
-import java.util.concurrent.ScheduledExecutorService
-import org.joda.time.Duration
 import org.joda.time.DateTime
-import java.util.concurrent.Executors
 import uk.ac.warwick.tabula.data.model.Member
 import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper
 import org.apache.lucene.analysis.core.KeywordAnalyzer
-import uk.ac.warwick.tabula.data.model.AuditEvent
 import org.apache.lucene.document.Document
 import org.apache.lucene.analysis.Analyzer
 import org.apache.lucene.analysis.standard.StandardTokenizer
@@ -26,12 +20,10 @@ import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter
 import org.apache.lucene.analysis.core.LowerCaseFilter
 import org.apache.lucene.analysis.TokenFilter
 import org.apache.lucene.analysis.TokenStream
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.lucene.DelimitByCharacterFilter
 import uk.ac.warwick.tabula.lucene.SurnamePunctuationFilter
 import uk.ac.warwick.tabula.lucene.SynonymAwareWildcardMultiFieldQueryParser
-import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.MemberDao
 import org.apache.lucene.queryparser.classic.ParseException
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer
@@ -41,7 +33,6 @@ import org.apache.lucene.search.BooleanQuery
 import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search.TermQuery
 import org.apache.lucene.index.Term
-import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.helpers.Logging
 import org.apache.lucene.search.WildcardQuery
 import uk.ac.warwick.tabula.data.model.StudentMember
@@ -58,6 +49,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 	private val FullStops = """\.(\S)""".r
 
 	// QueryParser isn't thread safe, hence why this is a def
+	// Overrides AbstractIndexService when used in ProfileIndexService
 	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
 
 	def findWithQuery(
@@ -101,18 +93,18 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 			inUseQuery.add(new WildcardQuery(new Term("inUseFlag", "Inactive - Starts *")), Occur.SHOULD)
 			bq.add(inUseQuery, Occur.MUST)
 
-			search(bq) transformAll { toItems(_) }
+			search(bq) transformAll { toItems }
 		} catch {
 			case e: ParseException => Seq() // Invalid query string
 		}
 
 	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member] = {
 		if (!query.hasText) Seq()
-		else findWithQuery(query, departments, true, userTypes, isGod)
+		else findWithQuery(query, departments, includeTouched = true, userTypes = userTypes, searchAcrossAllDepartments = isGod)
 	}
 
 	def find(ownDepartment: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member] =
-		findWithQuery("", Seq(ownDepartment), includeTouched, userTypes, false)
+		findWithQuery("", Seq(ownDepartment), includeTouched, userTypes, searchAcrossAllDepartments = false)
 
 	def stripTitles(query: String) =
 		FullStops.replaceAllIn(
@@ -156,18 +148,18 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		val defaultAnalyzer = new KeywordAnalyzer()
 
 		val nameAnalyzer = new ProfileAnalyzer(forIndexing)
-		val nameMappings = nameFields.map(field => (field -> nameAnalyzer))
+		val nameMappings = nameFields.map(field => field -> nameAnalyzer)
 
-		val whitespaceAnalyzer = new WhitespaceAnalyzer(LuceneVersion)
-		val whitespaceMappings = whitespaceDelimitedFields.map(field => (field -> whitespaceAnalyzer))
+		val whitespaceAnalyzer = new WhitespaceAnalyzer(IndexService.ProfileIndexLuceneVersion)
+		val whitespaceMappings = whitespaceDelimitedFields.map(field => field -> whitespaceAnalyzer)
 
 		val mappings = (nameMappings ++ whitespaceMappings).toMap[String, Analyzer].asJava
 
 		new PerFieldAnalyzerWrapper(defaultAnalyzer, mappings)
 	}
 
-	override val analyzer = makeAnalyzer(false)
-	override lazy val indexAnalyzer = makeAnalyzer(true)
+	override val analyzer = makeAnalyzer(forIndexing = false)
+	override lazy val indexAnalyzer = makeAnalyzer(forIndexing = true)
 
 	override val IdField = "universityId"
 	override def getId(item: Member) = item.universityId
@@ -236,15 +228,13 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 
 class ProfileAnalyzer(val indexing: Boolean) extends Analyzer {
 
-	final val LuceneVersion = Version.LUCENE_40
-
-	val StopWords = StopFilter.makeStopSet(LuceneVersion,
+	val StopWords = StopFilter.makeStopSet(IndexService.ProfileIndexLuceneVersion,
 			"whois", "who", "email", "address", "room", "e-mail",
 			"mail", "phone", "extension", "ext", "homepage", "tel",
 			"mobile", "mob")
 
 	override def createComponents(fieldName: String, reader: Reader) = {
-		val source = new StandardTokenizer(LuceneVersion, reader)
+		val source = new StandardTokenizer(IndexService.ProfileIndexLuceneVersion, reader)
 
 		// Filter stack
 		var result: TokenStream = new DelimitByCharacterFilter(source, '&')
@@ -252,12 +242,12 @@ class ProfileAnalyzer(val indexing: Boolean) extends Analyzer {
 			if (indexing) new SurnamePunctuationFilter(result)
 			else new DelimitByCharacterFilter(result, '\'')
 
-		def standard(delegate: TokenFilter) = new StandardFilter(LuceneVersion, delegate)
+		def standard(delegate: TokenFilter) = new StandardFilter(IndexService.ProfileIndexLuceneVersion, delegate)
 
-		result = new StandardFilter(LuceneVersion, result)
-		result = new LowerCaseFilter(LuceneVersion, result)
+		result = new StandardFilter(IndexService.ProfileIndexLuceneVersion, result)
+		result = new LowerCaseFilter(IndexService.ProfileIndexLuceneVersion, result)
 		result = new ASCIIFoldingFilter(result)
-		result = new StopFilter(LuceneVersion, result, StopWords)
+		result = new StopFilter(IndexService.ProfileIndexLuceneVersion, result, StopWords)
 
 		new TokenStreamComponents(source, result)
 	}
