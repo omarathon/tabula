@@ -58,9 +58,9 @@
 						<summary>
 							<span class="date">
 								<#if meeting.scheduled || meeting.realTime>
-									<@fmt.date date=meeting.meetingDate includeTime=true />
+									<@fmt.date date=meeting.meetingDate shortMonth=true includeTime=true />
 								<#else>
-									<@fmt.date date=meeting.meetingDate includeTime=false />
+									<@fmt.date date=meeting.meetingDate shortMonth=true includeTime=false />
 								</#if>
 							</span>
 							<span class="title">${meeting.title!}</span>
