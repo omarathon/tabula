@@ -88,5 +88,7 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 
 	def hasFeedback = attachments != null && attachments.size() > 0
 
+	def hasComments = customFormValues.exists(_.value != null)
+
 	override def toEntityReference = new MarkerFeedbackEntityReference().put(this)
 }

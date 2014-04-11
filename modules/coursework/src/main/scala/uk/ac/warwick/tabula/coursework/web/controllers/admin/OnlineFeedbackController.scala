@@ -115,7 +115,6 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 
 		val parentFeedback = command.allMarkerFeedbacks.head.feedback
 		val isRejected = command.allMarkerFeedbacks.exists(_.state == Rejected)
-		val sthg = command.markerFeedback.map(_.rejectionComments)
 		val isCurrentUserFeebackEntry = parentFeedback.getCurrentWorkflowFeedback.exists(_.getMarkerUser == command.currentUser.apparentUser)
 		val allCompletedMarkerFeedback = parentFeedback.getAllCompletedMarkerFeedback
 

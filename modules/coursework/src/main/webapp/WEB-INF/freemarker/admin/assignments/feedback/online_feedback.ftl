@@ -10,8 +10,9 @@
 	</#if>
 </#function>
 
-<div class="content online-feedback">
-	<#if command.submission??>
+<div class="content online-feedback feedback-summary">
+
+	<#if command.submission?? && !finalMarkingStage>
 		<#assign submission = command.submission />
 		<#include "_submission_summary.ftl">
 	</#if>
@@ -20,8 +21,8 @@
 	</#if>
 	<#if secondMarkerNotes?? && finalMarkingStage>
 		<div class="well" >
-			<h4>Notes from Second Marker</h4>
-			<div style="margin-top: 0.3rem; max-width: 550px;" class="feedback-summary-comments">
+			<div class="feedback-notes">
+				<h4>Notes from Second Marker</h4>
 				${secondMarkerNotes!""}
 			</div>
 		</div>
@@ -35,20 +36,7 @@
 	</#assign>
 	<@f.form cssClass="form-horizontal double-submit-protection"
 			method="post" enctype="multipart/form-data" commandName="command" action="${submit_url}">
-
-		<#if finalMarkingStage>
-			<@form.row cssClass="alert alert-success" >
-				<@form.label><i class="icon-lightbulb"></i> Populate with previous</@form.label>
-				<@form.field>
-					<#list allCompletedMarkerFeedback as feedback>
-						<a data-feedback="${feedback.feedbackPosition.toString}" class="copyFeedback btn" title="Populate final feedback with ${feedback.feedbackPosition.description}">
-							<i class="icon-arrow-down"></i>
-							Copy ${feedback.feedbackPosition.description}
-						</a>
-					</#list>
-				</@form.field>
-			</@form.row>
-		</#if>
+		<div class="alert alert-success hide"></div>
 		<#list assignment.feedbackFields as field>
 			<div class="feedback-field">
 				<#include "/WEB-INF/freemarker/submit/formfields/${field.template}.ftl">
@@ -76,14 +64,19 @@
 		</#if>
 
 		<#if (allCompletedMarkerFeedback?? && allCompletedMarkerFeedback?size == 1)>
-		<details class="control-group">
-			<summary class="controls"><strong>Second Marker Notes </strong><span style="color: #606063;">add further comments about the first marker feedback</span></summary>
+		<details class="control-group second-marker-notes">
+			<summary class="controls"><strong>Second Marker Notes </strong><span>add further comments about the first marker feedback</span></summary>
+			<div class="control-group">
+				<label class="control-label"></label>
+				<div class="controls">
+					<div class="alert warning marker-notes-warn">
+							Notes are not released to the student.
+					</div>
+				</div>
+			</div>
+
 			<@form.labelled_row "rejectionComments" "Notes">
-
-
 				<@f.textarea path="rejectionComments" cssClass="big-textarea" />
-				<div style="margin: 0.5rem 0.5rem 0.5rem 0; width: 80%;" class="alert warning">Notes are not released to the student.</div>
-
 			</@form.labelled_row>
 		</details>
 

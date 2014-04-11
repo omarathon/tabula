@@ -342,6 +342,101 @@ ul {
 	}
 }
 
+#container .online-feedback {
+	.second-marker-notes {
+		> span { color: @tabulaGrayLight; }
+		.alert { margin-bottom: 0; }
+		.marker-notes-warn { width: 75%; margin: 1rem 0 0 0; }
+	}
+}
+
+.feedback-summary-heading {
+	h3 {
+		max-width: 550px;
+		float: left;
+	}
+	div { float: right; }
+}
+
+.feedback-summary {
+
+	.feedback-details {
+		float: left;
+		max-width:550px;
+
+		.mark-grade {
+			font-size: 22px;
+			font-family: Bitter, Cambria, "Liberation Serif", Georgia, "Times New Roman", Times, serif;
+			line-height: 1.4em;
+
+			> div {
+				display:table-row;
+				width: 600px;
+				padding: 1rem 0 2rem 0;
+
+				.mg-label {
+					display:table-cell;
+					padding-right: 0.5rem;
+					+ div { padding-right: 0.5rem; }
+				}
+			}
+		}
+
+		.feedback-comments {
+
+
+			> div {
+				margin-top: 0.3rem;
+				max-width: 550px;
+			}
+		}
+	}
+
+
+	.feedback-notes{
+		margin-top: 0.3rem;
+		max-width: 550px;
+		clear: both;
+	}
+
+	.feedback-attachments {
+		float: left;
+		width: 260px;
+
+		> div {
+			display: table-row;
+			margin-bottom: 0.5rem;
+		}
+	}
+
+
+	.collapsible {
+		@detailsRightArrow: '\25b8';
+		@detailsDownArrow: '\25be';
+
+		height: 3rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		cursor: hand;
+		cursor: pointer;
+
+		&::before {
+			content: @detailsRightArrow;
+			position: absolute;
+			margin-left: -13px;
+			margin-top: -1px;
+		}
+		&.open {
+			height: auto;
+			white-space: inherit;
+			&::before {
+				content: @detailsDownArrow;
+			}
+		}
+	}
+}
+
 
 #main-content .feedback-table,
 #main-content .submission-table {
