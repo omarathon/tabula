@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.lucene
 
 import uk.ac.warwick.tabula.TestBase
-import org.apache.lucene.analysis.standard.{ClassicTokenizer, StandardTokenizer}
-import org.apache.lucene.util.Version
+import org.apache.lucene.analysis.standard.StandardTokenizer
 import java.io.Reader
 import org.apache.lucene.analysis.Analyzer
 import org.apache.lucene.analysis.TokenStream
 import org.apache.lucene.analysis.Analyzer.TokenStreamComponents
 import java.io.StringReader
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
+import uk.ac.warwick.tabula.services.IndexService
 
 class DelimitByCharacterFilterTest extends TestBase {
 	
@@ -41,10 +41,8 @@ class DelimitByCharacterFilterTest extends TestBase {
 
 class DelimitByCharacterFilterAnalyzer extends Analyzer {
 	
-	final val LuceneVersion = Version.LUCENE_40
-	
 	override def createComponents(fieldName: String, reader: Reader) = {
-		val source = new StandardTokenizer(LuceneVersion, reader)
+		val source = new StandardTokenizer(IndexService.TabulaLuceneVersion, reader)
 		val result: TokenStream = new DelimitByCharacterFilter(source, '\'')
 		
 		new TokenStreamComponents(source, result)

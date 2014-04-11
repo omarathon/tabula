@@ -45,6 +45,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.MemberOrUser
+import uk.ac.warwick.tabula.coursework.commands.assignments.StudentCourseworkFullScreenCommand
 
 @Controller class HomeController extends CourseworkController {
 	
@@ -121,7 +122,7 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 				}
 			}
 			
-			val courseworkInformation = StudentCourseworkCommand(MemberOrUser(None, user.apparentUser)).apply()
+			val courseworkInformation = StudentCourseworkFullScreenCommand(MemberOrUser(None, user.apparentUser)).apply()
 
 			Some(CourseworkHomepageInformation(
 				enrolledAssignments = courseworkInformation.enrolledAssignments,
