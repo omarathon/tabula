@@ -94,7 +94,7 @@ abstract class ViewStudentsCommand(val department: Department, val academicYearO
 	def onBind(result: BindingResult) {
 		// Add all non-withdrawn codes to SPR statuses by default
 		if (sprStatuses.isEmpty) {
-			allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach { sprStatuses.add }
+			allSprStatuses.find { _.code == "C" }.foreach { sprStatuses.add }
 		}
 
 		// Filter chosen routes by those that the user has permission to see
