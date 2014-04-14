@@ -46,8 +46,12 @@ abstract class StudentRelationshipChangeNotification
 trait RelationshipChangeAgent {
 	this : StudentRelationshipChangeNotification =>
 
-	private def name = relationship.studentMember.map{ "for " + _ }.getOrElse("")
-	def urlTitle = s"view the student profile $name"
+	private def name = relationship.studentMember match {
+		case Some(sm) => " for " + sm.fullName
+		case None => ""
+	}
+
+	def urlTitle = s"view the student profile$name"
 }
 
 @Entity

@@ -48,7 +48,7 @@ class FeedbackItem {
 		this.uniNumber = uniNumber
 	}
 
-	class AttachmentItem(val name: String, val duplicate: Boolean, val ignore: Boolean){}
+	class AttachmentItem(val name: String, val duplicate: Boolean, val ignore: Boolean)
 }
 
 // Purely for storing in command to display on the model.

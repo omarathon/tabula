@@ -151,6 +151,18 @@ class StudentCourseDetails
 			}
 		case end: LocalDate => new Integer(end.year().getAsText)
 	}
+
+	def isStudentRelationshipTypeForDisplay(relationshipType: StudentRelationshipType): Boolean = {
+
+		// first see if any of the sub-departments that the student is in are set to display this relationship type
+		val relationshipDisplayedForSubDepts = department.subDepartmentsContaining(student).flatMap {
+			_.studentRelationshipDisplayed.get(relationshipType.id)
+		}.map(_.toBoolean).contains(true)
+
+		// if either a sub-dept is set to display this relationship type or the parent department is, then display it:
+		relationshipDisplayedForSubDepts || department.getStudentRelationshipDisplayed(relationshipType)
+	}
+
 }
 
 // properties for a student on a course which come direct from SITS - those that need to be

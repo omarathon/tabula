@@ -33,7 +33,8 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 
 	  val studentsWithSubmissionOrFeedbackUniversityIds = studentsWithSubmissionOrFeedback.map(_.getWarwickId)
 
-		val unsubmittedStudents = assignment.membershipInfo.items.map(_.user).filterNot { x => studentsWithSubmissionOrFeedbackUniversityIds.contains(x.getWarwickId) }
+		val unsubmittedStudents =
+			assignment.membershipInfo.items.map(_.user).filterNot { x => studentsWithSubmissionOrFeedbackUniversityIds.contains(x.getWarwickId) }
 
 		val students = studentsWithSubmissionOrFeedback ++ unsubmittedStudents
 		students.map { student =>

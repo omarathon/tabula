@@ -12,7 +12,7 @@ class CreateScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		val relationship: StudentRelationship = mock[StudentRelationship]
 
 		val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
-		mockMeetingRecordService.listScheduled(Set(relationship), creator) returns Seq()
+		mockMeetingRecordService.listScheduled(Set(relationship), Some(creator)) returns Seq()
 
 		var creator: StaffMember = _
 		val command = new CreateScheduledMeetingRecordCommand(creator, relationship, false) with CreateScheduledMeetingRecordCommandValidation with MeetingRecordServiceComponent {
@@ -72,7 +72,7 @@ class CreateScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		val meetingWithDupeDate: ScheduledMeetingRecord = new ScheduledMeetingRecord
 		meetingWithDupeDate.meetingDate = meetingTime
 
-		mockMeetingRecordService.listScheduled(Set(relationship), creator) returns Seq(meetingWithDupeDate)
+		mockMeetingRecordService.listScheduled(Set(relationship), Some(creator)) returns Seq(meetingWithDupeDate)
 
 		val errors = new BindException(command, "command")
 		command.format = MeetingFormat.FaceToFace

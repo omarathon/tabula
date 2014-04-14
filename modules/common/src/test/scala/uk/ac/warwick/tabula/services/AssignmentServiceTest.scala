@@ -247,6 +247,8 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val ThisUser = 	"1234567"
 		val OtherUser = "1234568"
 
+		val thisStudent = Fixtures.student("1234567")
+
 		val myFeedback = new Feedback
 		myFeedback.universityId = ThisUser
 		myFeedback.released = true
@@ -286,11 +288,19 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val assignments = assignmentService.getAssignmentsWithFeedback(ThisUser)
 		assignments.size should be (1)
 		assignments(0) should be (assignment1)
+
+		// thisStudent doesn't have a module registration so the assignment should be returned for their most significant details
+		val assignmentsByCourseAndYear = assignmentService.getAssignmentsWithFeedback(thisStudent.mostSignificantCourse.latestStudentCourseYearDetails)
+		assignmentsByCourseAndYear.size should be (1)
+		assignmentsByCourseAndYear(0) should be (assignment1)
+
 	}
 
 	@Transactional @Test def findAssignmentsWithSubmission() {
 		val ThisUser = 	"1234567"
 		val OtherUser = "1234568"
+
+		val thisStudent = Fixtures.student("1234567")
 
 		val mySubmission = new Submission
 		mySubmission.universityId = ThisUser
@@ -326,6 +336,10 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val assignments = assignmentService.getAssignmentsWithSubmission(ThisUser)
 		assignments.size should be (1)
 		assignments(0) should be (assignment1)
+
+		val assignmentsByCourseAndYear = assignmentService.getAssignmentsWithSubmission(thisStudent.mostSignificantCourse.latestStudentCourseYearDetails)
+		assignmentsByCourseAndYear.size should be (1)
+		assignmentsByCourseAndYear(0) should be (assignment1)
 	}
 
 	@Test def upstreamAssessmentGroups() = transactional { tx =>
@@ -883,5 +897,57 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		result.size should be (1)
 		result.head should be (submissionInside)
 	}
+
+	@Transactional
+	@Test def filterAssignments() {
+
+		val assignment1 = Fixtures.assignment("Ass1")
+		val assignment2 = Fixtures.assignment("Ass2")
+
+		val module1 = Fixtures.module("FO02", "Flowers in the Mesolithic Diet")
+		val module2 = Fixtures.module("FO03", "Distinguishing Umbellifers")
+		assignment1.module = module1
+		assignment2.module = module2
+
+		session.save(assignment1)
+		session.save(assignment2)
+
+		val thisStudent = Fixtures.student("1234567")
+		val scd = thisStudent.mostSignificantCourse
+		val scyd = scd.latestStudentCourseYearDetails
+
+		// first, the case where the student isn't registered for any modules so the filter won't remove any:
+		val result = assignmentService.filterAssignmentsByCourseAndYear(Seq(assignment1, assignment2), scyd)
+		result.size should be (2)
+
+		// now mismatch the year:
+		scyd.academicYear = new AcademicYear(2012)
+		val resultForDifferentYear = assignmentService.filterAssignmentsByCourseAndYear(Seq(assignment1, assignment2), scyd)
+		resultForDifferentYear.size should be (0)
+
+		// now register the student on a module:
+		val mr = Fixtures.moduleRegistration(scd, module1, new java.math.BigDecimal("12.0"), new AcademicYear(2013), "A")
+
+		// this shouldn't affect anything if the assignment is not for that module:
+		scyd.academicYear = new AcademicYear(2013)
+		val resultWhenSomeMR = assignmentService.filterAssignmentsByCourseAndYear(Seq(assignment1, assignment2), scyd)
+		resultWhenSomeMR.size should be (2)
+
+		// one of the modules is for this course and the other for none - should still get both assignments back
+		scd.addModuleRegistration(mr)
+		val resultWhenOneMR = assignmentService.filterAssignmentsByCourseAndYear(Seq(assignment1, assignment2), scyd)
+		resultWhenOneMR.size should be (2)
+
+		// now register the student on a different course
+		val dept = Fixtures.department("fo", "Foraging")
+		val status = Fixtures.sitsStatus("C", "Current", "Current Student")
+		val scd2 = Fixtures.studentCourseDetails(thisStudent, dept, status)
+
+		val resultWhenOneMismatchedMR = assignmentService.filterAssignmentsByCourseAndYear(Seq(assignment1, assignment2), scd2.latestStudentCourseYearDetails)
+		resultWhenOneMismatchedMR.size should be (1)
+
+		}
+
+
 
 }

@@ -1,6 +1,4 @@
-This message confirms that a submission for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name} has been received.
-
-This message is sent to you as a manager of the module.
+A submission for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name} has been received.
 
 Submission date: ${submissionDate}
 Submission ID: ${submission.id}

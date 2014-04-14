@@ -4,14 +4,12 @@ import org.apache.lucene.analysis.Analyzer
 import org.apache.lucene.index.Term
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser
 import org.apache.lucene.search.BooleanClause.Occur
-import org.apache.lucene.search.{BooleanClause, BooleanQuery, PhraseQuery, Query, TermQuery, WildcardQuery}
-import org.apache.lucene.util.Version
+import org.apache.lucene.search.{BooleanQuery, PhraseQuery, Query, TermQuery, WildcardQuery}
 import org.apache.lucene.queryparser.classic.QueryParser.Operator
+import org.apache.lucene.util.Version
 
-class SynonymAwareWildcardMultiFieldQueryParser(
-		fields: Traversable[String],
-		analyzer: Analyzer)
-		extends MultiFieldQueryParser(Version.LUCENE_40, fields.toArray[String], analyzer) {
+class SynonymAwareWildcardMultiFieldQueryParser(matchVersion: Version, fields: Traversable[String], analyzer: Analyzer)
+	extends MultiFieldQueryParser(matchVersion, fields.toArray[String], analyzer) {
 
 	setDefaultOperator(Operator.AND)
 
@@ -21,17 +19,17 @@ class SynonymAwareWildcardMultiFieldQueryParser(
 	def handleQuery(query: Query) =
 		query match {
 			case null => null
-			case q: BooleanQuery => {
+			case q: BooleanQuery =>
 				val bq = new BooleanQuery(false)
-				for (clause <- q.getClauses())
-					bq.add(clause.getQuery() match {
+				for (clause <- q.getClauses)
+					bq.add(clause.getQuery match {
 						case query: TermQuery =>
 							// Synonyms
 							val term = query.getTerm
 							val text = term.text
 
 							Synonyms.names.get(text.toLowerCase) match {
-								case Some(synonyms) => {
+								case Some(synonyms) =>
 									val synonymBq = new BooleanQuery
 
 									// all of these SHOULD occur, not MUST
@@ -44,7 +42,6 @@ class SynonymAwareWildcardMultiFieldQueryParser(
 										synonymBq.add(new TermQuery(new Term(term.field, synonym)), Occur.SHOULD)
 
 									synonymBq
-								}
 
 								case None => new WildcardQuery(new Term(term.field, text + "*"))
 							}
@@ -64,8 +61,7 @@ class SynonymAwareWildcardMultiFieldQueryParser(
 					}, clause.getOccur)
 
 				bq
-			}
-			case q: PhraseQuery => {
+			case q: PhraseQuery =>
 				val bq = new BooleanQuery(false)
 
 				val terms = q.getTerms
@@ -76,7 +72,6 @@ class SynonymAwareWildcardMultiFieldQueryParser(
 				bq.add(new WildcardQuery(new Term(last.field, last.text + "*")), Occur.MUST)
 
 				bq
-			}
 			case q => q
 		}
 

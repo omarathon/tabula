@@ -3,23 +3,30 @@
 
 	<div class="row-fluid">
 		<div class="span6">
-			<h6>Late &amp; suspicious activity</h6>
-			
-			<#if activities?has_content && activities.total gt 0>
-				<table class="table table-condensed table-hover" id="activities">
-					<#include "activities.ftl" />
-					
-					<tfoot aria-hidden="true" id="activity-fetcher" style="display:none;">
+			<h6>Late &amp; unusual activity</h6>
+
+			<#if features.activityStreams>
+				<#import "*/activity_macros.ftl" as activity />
+				<div class="home-page-activity">
+					<@activity.activity_stream max=5 minPriority=0.5 types="SubmissionReceived,MarkedPlagarised"/>
+				</div>
+			<#else>
+				<#if activities?has_content && activities.total gt 0>
+					<table class="table table-condensed table-hover" id="activities">
+						<#include "activities.ftl" />
+
+						<tfoot aria-hidden="true" id="activity-fetcher" style="display:none;">
 						<tr><td>
 							<a href="#">See more</a>
 						</td></tr>
-					</tfoot>
-				</table>
-			<#else>
-				<p class="alert">There is no notable activity to show you right now.</p>
+						</tfoot>
+					</table>
+				<#else>
+					<p class="alert">There is no notable activity to show you right now.</p>
+				</#if>
 			</#if>
 		</div>
-		
+
 		<div class="span6">
 			<#if nonempty(ownedModuleDepartments)>
 				<h6>My managed <@fmt.p number=ownedModuleDepartments?size singular="module" shownumber=false /></h6>

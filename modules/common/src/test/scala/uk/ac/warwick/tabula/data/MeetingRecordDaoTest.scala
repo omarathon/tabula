@@ -42,7 +42,7 @@ class MeetingRecordDaoTest extends PersistenceTestBase {
 		val currentMember = new StaffMember
 		currentMember.universityId = "0070790"
 
-		meetingDao.list(relSet, currentMember).size should be (0)
+		meetingDao.list(relSet, Some(currentMember)).size should be (0)
 
 		// create some meetings, out of order
 		val middleMeeting = new MeetingRecord(creator, relationship)
@@ -61,7 +61,7 @@ class MeetingRecordDaoTest extends PersistenceTestBase {
 		meetingDao.saveOrUpdate(earliestMeeting)
 		meetingDao.saveOrUpdate(newestMeeting)
 
-		val savedMeetings = meetingDao.list(relSet, currentMember)
+		val savedMeetings = meetingDao.list(relSet, Some(currentMember))
 
 		savedMeetings.size should be (3)
 		savedMeetings.head should be (newestMeeting)

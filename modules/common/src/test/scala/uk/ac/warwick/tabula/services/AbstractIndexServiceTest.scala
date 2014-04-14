@@ -2,15 +2,16 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.TestBase
 import org.joda.time.DateTime
-import org.apache.lucene.document.{LongField, Document}
+import org.apache.lucene.document.Document
 import org.apache.lucene.analysis.Analyzer
 import java.io.File
-import org.apache.lucene.store.{IOContext, Directory, RAMDirectory}
+import org.apache.lucene.store.RAMDirectory
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import scala.util.Random
-import org.scalatest.{FunSpec, FlatSpec}
-import org.apache.lucene.search.{WildcardQuery, TermQuery, SortField, Sort, NumericRangeQuery, Query}
+import org.apache.lucene.search._
 import org.apache.lucene.index.Term
+import org.apache.lucene.search.SearcherLifetimeManager.Pruner
+import scala.Some
 
 /** Overrides the default file-based directory with an in-memory one.
 	* Faster than the disk one, plus data is entirely scoped to the instance of
@@ -23,10 +24,12 @@ trait RAMDirectoryOverride { self: OpensLuceneDirectory =>
 }
 
 class AbstractIndexServiceTest extends TestBase {
-	case class Item(val name: String, val date: DateTime)
+	case class Item(name: String, date: DateTime)
 
 	val fakeItems = for (i <- 1 to 100) yield Item(s"item$i", new DateTime().plusMinutes(i))
 	val service = new MockIndexService()
+
+	val dateRangeQuery = NumericRangeQuery.newLongRange("date", DateTime.now.minusYears(2).getMillis, null, true, true)
 
 	@Test
 	def newest() {
@@ -36,12 +39,31 @@ class AbstractIndexServiceTest extends TestBase {
 		newest.get("date").toLong should be (fakeItems.last.date.getMillis)
 	}
 
+	// Paging that passes the DocID of the last item on the previous page. Also passes a token
+	// to try to reuse an existing IndexSearcher if possible.
+	@Test
+	def docBasedPaging() {
+		indexFakeItems()
+		val query = dateRangeQuery
+		val page1 = service.search(query, 5, service.reverseDateSort, None, None)
+		val page1Results = toItems(page1.results)
+		page1Results.map{ _.name } should be ((96 to 100).reverse.map{ i => s"item$i"} )
+
+		// Clear the searcher to simulate the searcher not being found; instance restarted,
+		// or second request went to a different instance, or searcher timed out.
+		service.clearSearcher(page1.token)
+
+		val page2 = service.search(query, 5, service.reverseDateSort, page1.last, Some(page1.token))
+		val page2Results = toItems(page2.results)
+		page2Results.map{ _.name } should be ((91 to 95).reverse.map{ i => s"item$i"} )
+	}
+
 	/** Check that retrieving paged results according to an overall search works,
 		* and doesn't do anything annoying like only sorting within the N results in the page. */
 	@Test
 	def pagedSearchSortedByDate() {
 		indexFakeItems()
-		val query = NumericRangeQuery.newLongRange("date", DateTime.now.minusYears(2).getMillis, null, true, true)
+		val query = dateRangeQuery
 
 		val pages = for (p <- 0 to 9) yield toItems(service.search(query, 10, service.reverseDateSort, p*10))
 		pages.length should be (10)
@@ -87,7 +109,7 @@ class AbstractIndexServiceTest extends TestBase {
 		val MaxBatchSize: Int = 1000
 		val IncrementalBatchSize: Int = 1000
 
-		val analyzer: Analyzer = new StandardAnalyzer(LuceneVersion)
+		val analyzer: Analyzer = new StandardAnalyzer(IndexService.TabulaLuceneVersion)
 		val UpdatedDateField: String = "date"
 		val IdField: String = "name"
 
@@ -96,6 +118,14 @@ class AbstractIndexServiceTest extends TestBase {
 		protected def getId(item: Item): String = item.name
 
 		def convert(docs: Seq[Document]) = toItems(docs)
+
+		def clearSearcher(searcherToken: Long) {
+			val searcher = this.searcherLifetimeManager.acquire(searcherToken)
+			this.searcherLifetimeManager.release(searcher)
+			this.searcherLifetimeManager.prune(new Pruner {
+				override def doPrune(ageSec: Double, searcher: IndexSearcher): Boolean = true
+			})
+		}
 
 		protected def toDocuments(item: Item): Seq[Document] = {
 			val doc = new Document()

@@ -13,32 +13,32 @@ final class DelimitByCharacterFilter(val source: TokenStream, val character: Cha
 	var remainingText: String = _
 	
 	override def incrementToken(): Boolean = {
-		var text = if (!useRemainingText) {
+		val text = if (!useRemainingText) {
 			if (!source.incrementToken()) ""
 			else new String(term.buffer, 0, term.length)
 		} else {
 			useRemainingText = false
 			remainingText
 		}
-		
+
 		if (text.hasText) {
-		
+
 			val matchedLength = text.indexOf(character)
 			if (matchedLength != -1) {
 				useRemainingText = true
-				
+
 				val firstToken = text.substring(0, matchedLength)
 				val secondToken = text.substring(matchedLength + 1, text.length)
-				
+
 				remainingText = secondToken
-				
+
 				setTermBuffer(firstToken)
 			} else {
 				setTermBuffer(text)
 			}
-			
+
 			true
-			
+
 		} else {
 			false
 		}

@@ -17,6 +17,8 @@ import org.apache.lucene.analysis.miscellaneous._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import AuditEventIndexService._
+import org.apache.lucene.index.IndexWriterConfig
+import org.apache.lucene.index.sorter.{NumericDocValuesSorter, Sorter, SortingMergePolicy}
 
 object AuditEventIndexService {
 	type PagedAuditEvents = PagingSearchResultItems[AuditEvent]
@@ -141,10 +143,9 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		// take most recent event and find submissions made before then.
 		val submissions1: Seq[Submission] = allDownloaded.headOption match {
 			case None => Nil
-			case Some(event) => {
+			case Some(event) =>
 				val latestDate = event.eventDate
 				assignment.submissions.filter { _.submittedDate isBefore latestDate }
-			}
 		}
 
 		// find events where selected submissions were downloaded
@@ -155,7 +156,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		// find events where individual submissions were downloaded
 		val individualDownloads = parsedAuditEvents(
 				search(all(assignmentTerm, termQuery("eventType", "AdminGetSingleSubmission"))))
-		val submissions3 = individualDownloads.flatMap(_.submissionId).flatMap(id => assignment.submissions.find((_.id == id)))
+		val submissions3 = individualDownloads.flatMap(_.submissionId).flatMap(id => assignment.submissions.find(_.id == id))
 		(submissions1 ++ submissions2 ++ submissions3).distinct
 	}
 
@@ -204,7 +205,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 			.filterNot { _.hadError }
 			.flatMap(auditEvent => auditEvent.students.map( student => (student, auditEvent.eventDate)))
 			.groupBy( _._1)
-			.map(x => (x._2.maxBy(_._2)))
+			.map(x => x._2.maxBy(_._2))
 			.toSeq
 			
 	def whoDownloadedFeedback(assignment: Assignment) =
@@ -245,12 +246,10 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		search(all(term("eventType" -> "AddAssignment"), assignmentRangeRestriction(assignment)))
 			.transform { doc: Document =>
 				doc.getField("eventDate") match {
-					case field: StoredField if field.numericValue() != null => {
+					case field: StoredField if field.numericValue() != null =>
 						Some(new DateTime(field.numericValue()))
-					}
-					case _ => {
+					case _ =>
 						None
-					}
 				}
 			}
 			.headOption
@@ -299,13 +298,12 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	@Value("${audit.index.weeksbacklog}") var weeksBacklog: Int = _
 
 	override val analyzer = {
-		//val standard = new StandardAnalyzer(LuceneVersion)
 		val token = new KeywordAnalyzer()
-		val whitespace: Analyzer = new WhitespaceAnalyzer(LuceneVersion)
+		val whitespace: Analyzer = new WhitespaceAnalyzer(IndexService.AuditEventIndexLuceneVersion)
 
-		val tokenListMappings = tokenListFields.map(field => (field -> whitespace))
+		val tokenListMappings = tokenListFields.map(field => field -> whitespace)
 		//val tokenMappings = tokenFields.map(field=> (field -> token))
-		val mappings = (tokenListMappings /* ++ tokenMappings*/ ).toMap.asJava
+		val mappings = tokenListMappings.toMap.asJava
 
 		new PerFieldAnalyzerWrapper(token, mappings)
 	}
@@ -320,6 +318,17 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		service.listNewerThan(startDate, batchSize).filter { _.eventStage == "before" }
 
 	/**
+	 * Set merge policy so that when segments of index are merged, it sorts them
+	 * by descending docvalue (date) at the same time. Then a correctly configured
+	 * search query can more efficiently look by the same sort
+	 */
+	override def configureIndexWriter(config: IndexWriterConfig) {
+		val sorter: Sorter = new NumericDocValuesSorter(UpdatedDateField, false)
+		val sortingMergePolicy = new SortingMergePolicy(config.getMergePolicy, sorter)
+		config.setMergePolicy(sortingMergePolicy)
+	}
+
+	/**
 	 * Convert a list of Lucene Documents to a list of AuditEvents.
 	 * Any events not found in the database will be returned as placeholder
 	 * events with whatever data we kept in the Document, just in case
@@ -328,7 +337,9 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	protected def toItems(docs: Seq[Document]): Seq[AuditEvent] = {
 		// Pair Documents up with the contained ID if present
 		val docIds = docs.map { doc =>
-			(doc -> documentValue(doc, IdField).map{ _.toLong })
+			doc -> documentValue(doc, IdField).map {
+				_.toLong
+			}
 		}
 		val ids = docIds.flatMap {
 			case (_, id) => id
@@ -375,20 +386,22 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	 */
 	protected def toDocuments(item: AuditEvent): Seq[Document] = {
 		val doc = new Document
+		doc add plainStringField(IdField, item.id.toString)
+		doc add plainStringField("eventType", item.eventType)
 
 		if (item.related == null || item.related.isEmpty) {
 			service.addRelated(item)
 		}
 
-		doc add plainStringField(IdField, item.id.toString)
 		if (item.eventId != null) { // null for old events
 			doc add plainStringField("eventId", item.eventId)
 		}
-		if (item.userId != null) // system-run actions have no user
+		if (item.userId != null) { // system-run actions have no user
 			doc add plainStringField("userId", item.userId)
-		if (item.masqueradeUserId != null)
+		}
+		if (item.masqueradeUserId != null) {
 			doc add plainStringField("masqueradeUserId", item.masqueradeUserId)
-		doc add plainStringField("eventType", item.eventType)
+		}
 
 		// add data from all stages of the event, before and after.
 		for (i <- item.related) {
@@ -399,6 +412,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		}
 
 		doc add dateField(UpdatedDateField, item.eventDate)
+		doc add docValuesField(UpdatedDateField, item.eventDate.getMillis)
 		Seq(doc)
 	}
 
@@ -413,12 +427,10 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	}
 	
 	private def addFieldToDoc(field: String, data: Map[String, Any], doc: Document) = data.get(field) match  {
-		case Some(value: String) => {
+		case Some(value: String) =>
 			doc add plainStringField(field, value, isStored = false)
-		}
-		case Some(value: Boolean) => {
+		case Some(value: Boolean) =>
 			doc add plainStringField(field, value.toString, isStored = false)
-		}
 		case _ => // missing or not a string
 	}
 	
