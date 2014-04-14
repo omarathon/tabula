@@ -50,10 +50,6 @@ class FileAttachment extends GeneratedId {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinTable(name="MarkerFeedbackAttachment",
-
-
-
-
 		joinColumns=Array( new JoinColumn(name="file_attachment_id") ),
 		inverseJoinColumns=Array( new JoinColumn(name="marker_feedback_id")) )
 	var markerFeedback:MarkerFeedback = _
