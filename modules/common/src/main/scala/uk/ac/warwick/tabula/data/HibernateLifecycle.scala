@@ -15,7 +15,7 @@ trait PreLoadBehaviour {
 	def preLoad()
 }
 
-/** Happens before save, BUT changes to properties here won't get saved! Rendering it quite useless. */
+/** Happens before save */
 trait PreSaveBehaviour {
 	def preSave(newRecord: Boolean)
 }

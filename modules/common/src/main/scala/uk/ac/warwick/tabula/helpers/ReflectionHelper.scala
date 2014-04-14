@@ -17,7 +17,8 @@ import org.springframework.util.FileCopyUtils
 import com.google.common.base.Predicate
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.permissions.PermissionsSelector
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.data.model.{ToEntityReference, Notification, StudentRelationshipType}
+import javax.persistence.DiscriminatorValue
 
 object ReflectionHelper {
 	
@@ -27,7 +28,15 @@ object ReflectionHelper {
 	private def subtypesOf[A : ClassTag] = reflections
 			.getSubTypesOf(classTag[A].runtimeClass.asInstanceOf[Class[A]])
 			.asScala.toList
-	
+
+	lazy val allNotifications : Map[String, Class[_ <: Notification[ToEntityReference, Unit]]] = {
+		val notifications = subtypesOf[Notification[ToEntityReference, Unit]].filter(_.getAnnotation(classOf[DiscriminatorValue]) != null)
+		notifications.map { n =>
+			val discriminator : DiscriminatorValue = n.getAnnotation(classOf[DiscriminatorValue])
+			discriminator.value -> n
+		}.toMap
+	}
+
 	lazy val allPermissionTargets = subtypesOf[PermissionsTarget].sortBy(_.getSimpleName)
 	
 	lazy val allPermissions = {
