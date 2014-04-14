@@ -105,6 +105,11 @@ trait ViewMonitoringPointsState extends FiltersStudents with PermissionsAwareRou
 	var hasBeenFiltered = false
 
 	// For Attendance Monitoring, we shouldn't consider sub-departments
-	override lazy val allRoutes = department.routes.asScala.sorted(Route.DegreeTypeOrdering)
+	// but we will use the root department if the current dept has no routes at all
+	override lazy val allRoutes = department.routes.asScala.toList match {
+		case Nil => department.rootDepartment.routes.asScala.sorted(Route.DegreeTypeOrdering)
+		case deptRoutes => deptRoutes.sorted(Route.DegreeTypeOrdering)
+	}
+
 	lazy val canSeeAllRoutes = visibleRoutes.size == allRoutes.size
 }
