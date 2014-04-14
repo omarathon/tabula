@@ -178,6 +178,9 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 
 	@Test def purgeExtensionRequests = transactional {
 		t =>
+			// hbm2ddl generates a swathe of conflicting foreign key constraints for entity_id, so ignore for this test
+			session.createSQLQuery("SET DATABASE REFERENTIAL INTEGRITY FALSE").executeUpdate()
+
 			val f = MyFixtures()
 			f.assignment.extensions.size should be (2)
 			f.assignment.countUnapprovedExtensions should be (1)
