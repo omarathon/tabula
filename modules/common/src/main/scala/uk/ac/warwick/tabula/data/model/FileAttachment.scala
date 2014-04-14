@@ -22,7 +22,7 @@ class FileAttachment extends GeneratedId {
 
 	@Column(name="file_hash")
 	var hash: String = _
-TAB-2052 - Remove
+
 	// optional link to a SubmissionValue
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "submission_id")
