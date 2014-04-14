@@ -22,7 +22,7 @@ class FileAttachment extends GeneratedId {
 
 	@Column(name="file_hash")
 	var hash: String = _
-
+TAB-2052 - Remove
 	// optional link to a SubmissionValue
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "submission_id")
@@ -118,12 +118,11 @@ class FileAttachment extends GeneratedId {
 	@transient var uploadedDataLength: Long = 0
 
 	def isDataEqual(other: Any) = other match {
-		case that: FileAttachment => {
+		case that: FileAttachment =>
 			if (this.actualDataLength != that.actualDataLength) false
-			else{
+			else {
 				Files.equal(this.file, that.file)
 			}
-		}
 		case _ => false
 	}
 

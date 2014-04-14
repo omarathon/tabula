@@ -368,8 +368,6 @@ $(function() {
 
         $form.tabulaSubmitOnce();
 
-
-
 		// record the initial values of the fields
 		$('input, textarea', $form).each(function() {
 			$(this).data('initialvalue', $(this).val());
