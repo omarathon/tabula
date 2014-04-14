@@ -19,14 +19,6 @@
 	<#if (isMarking!false) && (isRejected!false)>
 		<#include "_rejection_summary.ftl">
 	</#if>
-	<#if secondMarkerNotes?? && finalMarkingStage>
-		<div class="well" >
-			<div class="feedback-notes">
-				<h4>Notes from Second Marker</h4>
-				${secondMarkerNotes!""}
-			</div>
-		</div>
-	</#if>
 	<#assign submit_url>
 		<#if isMarking!false>
 			<@routes.markerOnlinefeedbackform assignment markingId(command.student) />

@@ -1,5 +1,5 @@
 <div class="${feedback.feedbackPosition.toString} feedback-summary" >
-	<div class="feedback-details" style="float: left; max-width: 550px;">
+	<div class="feedback-details">
 		<#if feedback.mark?has_content || feedback.grade?has_content>
 			<div class="mark-grade" >
 				<div>
@@ -17,17 +17,27 @@
 		<#else>
 			<h5>No mark or grade added.</h5>
 		</#if>
-
-		<#list feedback.customFormValues as formValue>
-			<#if formValue.value?has_content>
-		<div class="feedback-comments" style="clear: left;">
-				<h5>Feedback Comments</h5>
+		<#if isModerated?? && isModerated && feedback.feedbackPosition.toString == "SecondFeedback">
+			<#if feedback.rejectionComments?has_content>
+				<div class="feedback-comments">
+					<h5>Feedback Comments</h5>
+					${feedback.rejectionComments}
+				</div>
 			<#else>
-		<div>
+				<div><h5>No feedback comments added.</h5></div>
 			</#if>
-			${formValue.value!"<h5>No feedback comments added.</h5>"}
-		</#list>
-		</div>
+		<#else>
+			<#list feedback.customFormValues as formValue>
+				<#if formValue.value?has_content>
+			<div class="feedback-comments" style="clear: left;">
+					<h5>Feedback Comments</h5>
+				<#else>
+			<div>
+				</#if>
+				${formValue.value!"<h5>No feedback comments added.</h5>"}
+			</#list>
+			</div>
+		</#if>
 	</div>
 
 
