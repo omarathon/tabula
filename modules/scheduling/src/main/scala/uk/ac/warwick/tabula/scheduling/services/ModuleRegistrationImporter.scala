@@ -85,7 +85,7 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 				selectionStatusCode = "C",
 				occurrence = "A",
 				academicYear = AcademicYear.guessByDate(DateTime.now).toString,
-				agreedMark = 90.0,
+				agreedMark = Some(90.0),
 				agreedGrade = "A"
 			)
 
@@ -137,7 +137,7 @@ object ModuleRegistrationImporter {
 					join $sitsSchema.srs_vco vco 
 						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
 
-					join $sitsSchema.ins_smr
+					join $sitsSchema.ins_smr smr
 						on smo.spr_code = smr.spr_code
 						and smo.ayr_code = smr.ayr_code
 						and smo.mod_code = smr.mod_code
@@ -162,7 +162,7 @@ object ModuleRegistrationImporter {
 					join $sitsSchema.srs_vco vco 
 						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
 
-					join $sitsSchema.ins_smr
+					join $sitsSchema.ins_smr smr
 						on smo.spr_code = smr.spr_code
 						and smo.ayr_code = smr.ayr_code
 						and smo.mod_code = smr.mod_code
@@ -173,8 +173,8 @@ object ModuleRegistrationImporter {
 					and ssn.ssn_sprc is null
 			"""
 						
-	def mapResultSet(resultSet: ResultSet) = 
-		ModuleRegistrationRow(
+	def mapResultSet(resultSet: ResultSet): ModuleRegistrationRow = {
+		var row = ModuleRegistrationRow(
 			resultSet.getString("scj_code"),
 			resultSet.getString("mod_code"),
 			resultSet.getBigDecimal("credit"),
@@ -182,9 +182,22 @@ object ModuleRegistrationImporter {
 			resultSet.getString("ses_code"),
 			resultSet.getString("occurrence"),
 			resultSet.getString("ayr_code"),
-			resultSet.getBigDecimal("smr_agrm"),
+			None,
 			resultSet.getString("smr_agrg")
 		)
+		if (resultSet.getBigDecimal("smr_agrm") != null)
+			row = ModuleRegistrationRow(
+				resultSet.getString("scj_code"),
+				resultSet.getString("mod_code"),
+				resultSet.getBigDecimal("credit"),
+				resultSet.getString("assess_group"),
+				resultSet.getString("ses_code"),
+				resultSet.getString("occurrence"),
+				resultSet.getString("ayr_code"),
+				Some(resultSet.getBigDecimal("smr_agrm")),
+				resultSet.getString("smr_agrg"))
+		row
+	}
 
 	class UnconfirmedModuleRegistrationsQuery(ds: DataSource)
 		extends MappingSqlQuery[ModuleRegistrationRow](ds, UnconfirmedModuleRegistrations) {
@@ -216,6 +229,7 @@ case class ModuleRegistrationRow(
 	val selectionStatusCode: String,
 	val occurrence: String,
 	val academicYear: String,
-	val agreedMark: BigDecimal,
+	var agreedMark: Option[BigDecimal],
 	val agreedGrade: String
-)
+) {
+}

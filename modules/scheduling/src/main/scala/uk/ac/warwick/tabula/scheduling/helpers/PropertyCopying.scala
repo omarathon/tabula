@@ -22,11 +22,10 @@ trait PropertyCopying extends Logging {
 			val oldValue = destinationBean.getPropertyValue(property)
 			val newValue = commandBean.getPropertyValue(property)
 
-			logger.debug("Property " + property + ": " + oldValue + " -> " + newValue)
-
 			// null == null in Scala so this is safe for unset values
 			if (oldValue != newValue) {
-				logger.debug("Detected property change for " + property + " (" + oldValue + " -> " + newValue + "); setting value")
+				//logger.debug("Detected property change for " + property + " (" + oldValue + " -> " + newValue + "); setting value")
+				logger.info(s"Detected property change for $property $oldValue -> $newValue; setting value")
 
 				destinationBean.setPropertyValue(property, newValue)
 				true
