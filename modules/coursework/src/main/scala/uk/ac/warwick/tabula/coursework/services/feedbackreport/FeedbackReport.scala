@@ -68,8 +68,8 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			val numberOfStudents = assignmentMembershipService.determineMembershipUsers(assignment).size
 			addNumericCell(numberOfStudents, row)
 			addNumericCell(assignment.submissions.size, row)
-			addNumericCell(assignment.submissions.filter(submission => submission.isAuthorisedLate).size, row)
-			addNumericCell(assignment.submissions.filter(submission => submission.isLate && !submission.isAuthorisedLate).size, row)
+			addNumericCell(assignment.submissions.count(submission => submission.isAuthorisedLate), row)
+			addNumericCell(assignment.submissions.count(submission => submission.isLate && !submission.isAuthorisedLate), row)
 			val feedbackCount = getFeedbackCount(assignment)
 			val totalPublished = feedbackCount.onTime + feedbackCount.late
 			val totalUnPublished = assignment.submissions.size - totalPublished
@@ -103,8 +103,8 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 				assignment.summative,
 				assignment.dissertation,
 				assignment.submissions.size,
-				assignment.submissions.filter(submission => submission.isAuthorisedLate).size,
-				assignment.submissions.filter(submission => submission.isLate && !submission.isAuthorisedLate).size,
+				assignment.submissions.count(submission => submission.isAuthorisedLate),
+				assignment.submissions.count(submission => submission.isLate && !submission.isAuthorisedLate),
 				feedbackCount,
 				totalPublished,
 				assignment
@@ -185,7 +185,9 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			feedback <- feedbackService.getFeedbackByUniId(assignment, student.getWarwickId)
 			if feedback.released
 			submissionEventDate <- Option(submission.submittedDate)
-			publishEventDate <- Option(feedback.releasedDate).orElse { auditEventQueryMethods.publishFeedbackForStudent(assignment, student).headOption.map { _.eventDate } }
+			publishEventDate <- Option(feedback.releasedDate).orElse {
+				auditEventQueryMethods.publishFeedbackForStudent(assignment, student).headOption.map { _.eventDate }
+			}
 			assignmentCloseDate <- Option(assignment.closeDate)
 		} yield {
 			val submissionCandidateDate =
@@ -234,24 +236,24 @@ object FeedbackReport {
 	val ModuleSheetSize = 11
 
 	case class FeedbackCount(
-		val onTime: Int,
-		val late: Int,
-		val earliest: DateTime,
-		val latest: DateTime
+		onTime: Int,
+		late: Int,
+		earliest: DateTime,
+		latest: DateTime
 	)
 
 	case class AssignmentInfo (
-		val moduleCode: String,
-		val moduleName: String,
-		val membership: Int,
-		val summative: Boolean,
+		moduleCode: String,
+		moduleName: String,
+		membership: Int,
+		summative: Boolean,
 		var dissertation: Boolean,
-		val numberOfSubmissions: Int,
-		val submissionsLateWithExt: Int,
-		val submissionsLateWithoutExt: Int,
-		val feedbackCount: FeedbackCount,
-		val totalPublished: Int,
-		val assignment: Assignment
+		numberOfSubmissions: Int,
+		submissionsLateWithExt: Int,
+		submissionsLateWithoutExt: Int,
+		feedbackCount: FeedbackCount,
+		totalPublished: Int,
+		assignment: Assignment
 	)
 
 }

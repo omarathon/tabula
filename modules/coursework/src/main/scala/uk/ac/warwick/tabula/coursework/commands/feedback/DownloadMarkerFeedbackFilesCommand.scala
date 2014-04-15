@@ -10,7 +10,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 
 
-class DownloadMarkerFeedbackFilesCommand (val module: Module, val assignment: Assignment, val markerFeedbackId: String) extends Command[Option[RenderableFile]] with ReadOnly {
+class DownloadMarkerFeedbackFilesCommand (val module: Module, val assignment: Assignment, val markerFeedbackId: String)
+	extends Command[Option[RenderableFile]] with ReadOnly {
 
 		var feedbackService = Wire[FeedbackService]
 
@@ -35,15 +36,14 @@ class DownloadMarkerFeedbackFilesCommand (val module: Module, val assignment: As
 		def applyInternal() = {
 			val result: Option[RenderableFile] =
 				filename match {
-					case filename: String if filename.hasText => {
+					case filename: String if filename.hasText =>
 						markerFeedback.attachments.asScala.find(_.name == filename).map(new RenderableAttachment(_))
-					}
 					case _ => Some(zipped(markerFeedback))
 				}
 
 			fileFound = result.isDefined
 			if (callback != null) {
-				result.map { callback(_) }
+				result.map { callback }
 			}
 			result
 		}

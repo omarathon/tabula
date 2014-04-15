@@ -72,7 +72,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 
 	def persistFileData(file: FileAttachment, inputStream: InputStream) {
 		val target = targetFile(file.id)
-		val directory = target.getParentFile()
+		val directory = target.getParentFile
 		directory.mkdirs()
 		if (!directory.exists) throw new IllegalStateException("Couldn't create directory to store file")
 		FileCopyUtils.copy(inputStream, new FileOutputStream(target))
@@ -177,7 +177,17 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 				.setParameterList("ids", okayToDelete.map(_.id))
 				.run()
 			for (attachment <- okayToDelete; file <- getData(attachment.id)) {
-				logger.info(s"Deleting attachment: id=${attachment.id}, path=${file.getAbsolutePath}, name=${attachment.name}, uploadedDate=${attachment.dateUploaded.toString()}, uploadedBy=${attachment.uploadedBy}")
+				logger.info(s"Deleting attachment: id=${
+					attachment.id
+				}, path=${
+					file.getAbsolutePath
+				}, name=${
+					attachment.name
+				}, uploadedDate=${
+					attachment.dateUploaded.toString()
+				}, uploadedBy=${
+					attachment.uploadedBy
+				}")
 
 				file.delete()
 			}
@@ -185,11 +195,11 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	}
 
 	def afterPropertiesSet {
-		if (!attachmentDir.isDirectory()) {
+		if (!attachmentDir.isDirectory) {
 			if (createMissingDirectories) {
-				attachmentDir.mkdirs();
+				attachmentDir.mkdirs()
 			} else {
-				throw new IllegalStateException("Attachment store '" + attachmentDir + "' must be an existing directory");
+				throw new IllegalStateException("Attachment store '" + attachmentDir + "' must be an existing directory")
 			}
 		}
 	}

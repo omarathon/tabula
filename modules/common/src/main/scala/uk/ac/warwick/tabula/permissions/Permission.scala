@@ -14,7 +14,9 @@ sealed abstract class Permission(val description: String) extends CaseObjectEqua
 sealed abstract class ScopelessPermission(description: String) extends Permission(description) {
 	override val isScoped = false
 }
-sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val selector: PermissionsSelector[A], description: String) extends Permission(description) {
+sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val selector: PermissionsSelector[A], description: String)
+	extends Permission(description) {
+
 	override val getName = SelectorPermission.shortName(getClass.asInstanceOf[Class[_ <: SelectorPermission[A]]])
 	def <= [B <: PermissionsSelector[B]](other: SelectorPermission[B]) = other match {
 		case that: SelectorPermission[A] => selector <= that.selector.asInstanceOf[PermissionsSelector[A]]

@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import org.hibernate.criterion.Order._
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Order
-import uk.ac.warwick.tabula.data.ScalaRestriction
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.BindingResult
@@ -51,7 +50,9 @@ trait ViewRelatedStudentsCommandState extends FiltersRelationships {
 	var sprStatuses: JList[SitsStatus] = JArrayList()
 	var modules: JList[Module] = JArrayList()
 	
-	lazy val allCourses = profileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, currentMember, Nil).flatMap(student => Option(student.mostSignificantCourse))
+	lazy val allCourses =
+		profileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, currentMember, Nil)
+			.flatMap(student => Option(student.mostSignificantCourse))
 	def allDepartments = allCourses.map(_.department).distinct
 	def allRoutes = allCourses.map(_.route).distinct
 }

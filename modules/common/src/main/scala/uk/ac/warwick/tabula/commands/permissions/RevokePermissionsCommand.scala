@@ -30,7 +30,9 @@ object RevokePermissionsCommand {
 			with AutowiringUserLookupComponent
 }
 
-class RevokePermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[GrantedPermission[A]] with RevokePermissionsCommandState[A] {
+class RevokePermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A)
+	extends CommandInternal[GrantedPermission[A]] with RevokePermissionsCommandState[A] {
+
 	self: PermissionsServiceComponent with UserLookupComponent =>
 
 	lazy val grantedPermission = permissionsService.getGrantedPermission(scope, permission, overrideType)

@@ -672,7 +672,7 @@
 				<plugin>
 					<groupId>org.scalastyle</groupId>
 					<artifactId>scalastyle-maven-plugin</artifactId>
-					<version>0.3.2</version>
+					<version>0.4.0</version>
 					<configuration>
 						<!-- TAB-697 -->
 						<skip>true</skip>

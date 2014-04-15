@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.home.commands.sysadmin.pointsettemplates
 
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointTemplate, MonitoringPointSetTemplate, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointTemplate, MonitoringPointSetTemplate}
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import scala.collection.JavaConverters._
@@ -19,7 +19,8 @@ object CreateMonitoringPointCommand {
 /**
  * Create a new monitoring point for the given template.
  */
-abstract class CreateMonitoringPointCommand(val template: MonitoringPointSetTemplate) extends CommandInternal[MonitoringPointTemplate] with CreateMonitoringPointState {
+abstract class CreateMonitoringPointCommand(val template: MonitoringPointSetTemplate)
+	extends CommandInternal[MonitoringPointTemplate] with CreateMonitoringPointState {
 
 	override def applyInternal() = {
 		val point = new MonitoringPointTemplate

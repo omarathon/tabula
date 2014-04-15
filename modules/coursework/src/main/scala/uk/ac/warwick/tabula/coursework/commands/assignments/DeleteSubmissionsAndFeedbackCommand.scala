@@ -21,7 +21,8 @@ import uk.ac.warwick.tabula.data.model.Submission
  * Takes a list of student university IDs and deletes either all their submissions, or all their feedback, or both,
  * depending on the value of submissionOrFeedback
  */
-class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[(Seq[Submission], Seq[Feedback])] with SelfValidating {
+class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: Assignment)
+	extends Command[(Seq[Submission], Seq[Feedback])] with SelfValidating {
 	
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Delete, assignment)

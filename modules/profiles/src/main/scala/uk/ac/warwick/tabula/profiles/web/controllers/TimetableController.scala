@@ -91,7 +91,11 @@ with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponen
 	}
 
 	@RequestMapping(value = Array("/api"))
-	def getEvents(@RequestParam from: Long, @RequestParam to: Long, @ModelAttribute("command") command:Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState): Mav = {
+	def getEvents(
+		@RequestParam from: Long,
+		@RequestParam to: Long,
+		@ModelAttribute("command") command:Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState
+	): Mav = {
 		// from and to are seconds since the epoch, because that's what FullCalendar likes to send.
 		// This conversion could move onto the command, if anyone felt strongly that it was a concern of the command
 		// or we could write an EpochSecondsToDateTime 2-way converter.

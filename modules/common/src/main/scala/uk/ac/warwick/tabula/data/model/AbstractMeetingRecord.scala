@@ -35,7 +35,9 @@ object AbstractMeetingRecord {
 @Entity
 @Table(name = "meetingrecord")
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
-abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted with FormattedHtml with ToEntityReference with MeetingRecordAttachments {
+abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted
+	with FormattedHtml with ToEntityReference with MeetingRecordAttachments {
+
 	type Entity = AbstractMeetingRecord
 
 	def isScheduled: Boolean = this match {

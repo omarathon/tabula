@@ -134,7 +134,9 @@ class DownloadMarkerFeebackFilesController extends BaseController {
 						(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		// specify callback so that audit logging happens around file serving
 		val prefixFileName = "-" + Option(filename).getOrElse(command.module.code)
-		command.callback = { (renderable) => fileServer.serve(renderable, Some(s"${command.markerFeedback.feedback.universityId}${prefixFileName}"))(request, response) }
+		command.callback = {
+			(renderable) => fileServer.serve(renderable, Some(s"${command.markerFeedback.feedback.universityId}$prefixFileName"))(request, response)
+		}
 		command.apply().orElse { throw new ItemNotFoundException() }
 	}
 }

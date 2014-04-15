@@ -107,7 +107,10 @@ class EditExtensionController extends ExtensionController {
 
 	// view an extension (or request)
 	@RequestMapping(method=Array(GET))
-	def editExtension(@ModelAttribute("modifyExtensionCommand") cmd: Appliable[Extension] with ModifyExtensionCommandState, errors: Errors): Mav = {
+	def editExtension(
+		@ModelAttribute("modifyExtensionCommand") cmd: Appliable[Extension] with ModifyExtensionCommandState,
+		errors: Errors
+	): Mav = {
 		val student = profileService.getMemberByUniversityId(cmd.extension.universityId)
 
 		val studentContext = student match {
@@ -141,7 +144,11 @@ class EditExtensionController extends ExtensionController {
 
 	@RequestMapping(method=Array(POST))
 	@ResponseBody
-	def persistExtension(@Valid @ModelAttribute("modifyExtensionCommand") cmd: Appliable[Extension] with ModifyExtensionCommandState, result: BindingResult, errors: Errors): Mav = {
+	def persistExtension(
+		@Valid @ModelAttribute("modifyExtensionCommand") cmd: Appliable[Extension] with ModifyExtensionCommandState,
+		result: BindingResult,
+		errors: Errors
+	): Mav = {
 		if (errors.hasErrors) {
 			editExtension(cmd, errors)
 		} else {

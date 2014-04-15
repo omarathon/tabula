@@ -39,7 +39,9 @@ object ProfilesHomeCommand {
 		
 }
 
-abstract class ProfilesHomeCommand(val user: CurrentUser, val currentMember: Option[Member]) extends CommandInternal[ProfilesHomeInformation] with TaskBenchmarking {
+abstract class ProfilesHomeCommand(val user: CurrentUser, val currentMember: Option[Member])
+	extends CommandInternal[ProfilesHomeInformation] with TaskBenchmarking {
+
 	self: FeaturesComponent with SmallGroupServiceComponent with RelationshipServiceComponent with ModuleAndDepartmentServiceComponent =>
 
 	override def applyInternal() = {

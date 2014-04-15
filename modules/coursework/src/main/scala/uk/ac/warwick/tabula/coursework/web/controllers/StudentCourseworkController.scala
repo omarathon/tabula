@@ -41,7 +41,11 @@ class StudentCourseworkGadgetController extends StudentCourseworkController {
 		StudentCourseworkGadgetCommand(studentCourseYearDetails)
 
 	@RequestMapping
-	def listAssignments(@ModelAttribute("command") command: Appliable[StudentAssignments], @PathVariable studentCourseYearDetails: StudentCourseYearDetails, user: CurrentUser): Mav =
+	def listAssignments(
+		@ModelAttribute("command") command: Appliable[StudentAssignments],
+		@PathVariable studentCourseYearDetails: StudentCourseYearDetails,
+		user: CurrentUser
+	): Mav =
 		getMav(studentCourseYearDetails.studentCourseDetails.student, command.apply())
 
 }

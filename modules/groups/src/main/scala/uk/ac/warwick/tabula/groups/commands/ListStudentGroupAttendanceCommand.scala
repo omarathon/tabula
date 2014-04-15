@@ -106,7 +106,9 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 		)
 	}
 
-	def groupByTerm(instances: Seq[(EventInstance, Option[SmallGroupEventOccurrence])]): SortedMap[Term, Seq[(EventInstance, Option[SmallGroupEventOccurrence])]] = {
+	def groupByTerm(
+		instances: Seq[(EventInstance, Option[SmallGroupEventOccurrence])]
+	): SortedMap[Term, Seq[(EventInstance, Option[SmallGroupEventOccurrence])]] = {
 		val approxStartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
 		val day = DayOfWeek.Thursday
 		lazy val weeksForYear = termService.getAcademicWeeksForYear(approxStartDate).toMap

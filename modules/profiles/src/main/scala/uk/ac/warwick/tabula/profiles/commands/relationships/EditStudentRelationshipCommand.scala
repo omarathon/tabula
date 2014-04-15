@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.notifications.{StudentRelationshipChangeToNewAgentNotification, StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToStudentNotification}
@@ -28,9 +27,13 @@ import uk.ac.warwick.tabula.data.model.notifications.{StudentRelationshipChangeT
  * been ended with other agents (for example when removing multiple agents) that
  * weren't initially requested.
  */
-class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDetails, val relationshipType: StudentRelationshipType, val currentAgent: Option[Member], val currentUser: CurrentUser, val remove: Boolean)
-	extends Command[Seq[StudentRelationship]]
-	with Notifies[Seq[StudentRelationship], StudentRelationship] 		with SelfValidating {
+class EditStudentRelationshipCommand(
+	val studentCourseDetails: StudentCourseDetails,
+	val relationshipType: StudentRelationshipType,
+	val currentAgent: Option[Member],
+	val currentUser: CurrentUser,
+	val remove: Boolean
+) extends Command[Seq[StudentRelationship]] with Notifies[Seq[StudentRelationship], StudentRelationship] with SelfValidating {
 
 	var relationshipService = Wire[RelationshipService]
 
@@ -56,7 +59,7 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 		}
 	}
 
-	def applyInternal = {
+	def applyInternal() = {
 		if (!currentAgent.isDefined) {
 			// Brand new agent
 			val newRelationship = relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(agent)).head
@@ -69,11 +72,10 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 			// Is there an existing relationship for this agent?
 			// Could happen if a student has two agents, and we're trying to replace the second with the first
 			currentRelationships.find(_.agent == agent.universityId) match {
-				case Some(existingRelationship) => {
+				case Some(existingRelationship) =>
 					// Just return the existing relationship without any notifications
 					Nil
-				}
-				case _ => {
+				case _ =>
 					// Find the relationship for the current agent, and end it
 					endAgentRelationship(currentRelationships)
 
@@ -81,7 +83,6 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 					val newRelationship = relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(agent)).head
 
 					Seq(newRelationship)
-				}
 			}
 		} else if (currentAgent.get == agent && remove) {		
 			val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)

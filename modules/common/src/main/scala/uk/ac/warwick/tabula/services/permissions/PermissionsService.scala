@@ -333,7 +333,11 @@ trait GrantedPermissionsForUserCache { self: PermissionsDaoComponent with CacheS
 	final val GrantedPermissionsForUserCacheMaxSize = 1000
 
 	final lazy val GrantedPermissionsForUserCache = {
-		val cache = Caches.newCache(GrantedPermissionsForUserCacheName, new GrantedPermissionsForUserCacheFactory, GrantedPermissionsForUserCacheMaxAgeSecs, cacheStrategy)
+		val cache = Caches.newCache(
+			GrantedPermissionsForUserCacheName,
+			new GrantedPermissionsForUserCacheFactory,
+			GrantedPermissionsForUserCacheMaxAgeSecs, cacheStrategy
+		)
 		cache.setMaxSize(GrantedPermissionsForUserCacheMaxSize)
 		cache
 	}
@@ -352,7 +356,12 @@ trait GrantedPermissionsForGroupCache { self: PermissionsDaoComponent with Cache
 	final val GrantedPermissionsForGroupCacheMaxSize = 1000
 
 	final lazy val GrantedPermissionsForGroupCache = {
-		val cache = Caches.newCache(GrantedPermissionsForGroupCacheName, new GrantedPermissionsForGroupCacheFactory, GrantedPermissionsForGroupCacheMaxAgeSecs, cacheStrategy)
+		val cache = Caches.newCache(
+			GrantedPermissionsForGroupCacheName,
+			new GrantedPermissionsForGroupCacheFactory,
+			GrantedPermissionsForGroupCacheMaxAgeSecs,
+			cacheStrategy
+		)
 		cache.setMaxSize(GrantedPermissionsForGroupCacheMaxSize)
 		cache
 	}
@@ -372,7 +381,10 @@ trait PermissionsServiceCaches {
 	def GrantedPermissionsForUserCache: Cache[(String, ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
 	def GrantedPermissionsForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
 }
-trait PermissionsServiceCachesImpl extends PermissionsServiceCaches with GrantedRolesForUserCache with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache with AutowiringCacheStrategyComponent with AutowiringUserLookupComponent {
+trait PermissionsServiceCachesImpl extends PermissionsServiceCaches with GrantedRolesForUserCache
+	with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache
+	with AutowiringCacheStrategyComponent with AutowiringUserLookupComponent {
+
 	this: PermissionsDaoComponent =>
 	val rolesByIdCache: GrantedRoleByIdCache = new GrantedRoleByIdCache(permissionsDao)
 	val permissionsByIdCache = new GrantedPermissionsByIdCache(permissionsDao)
