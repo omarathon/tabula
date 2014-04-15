@@ -1,44 +1,64 @@
-<div class="form onlineFeedback">
-	<form class="form-horizontal">
-		<div class="feedback-field">
-			<div class="control-group">
-				<label class="control-label">Feedback</label>
-				<div class="controls">
-					<#list feedback.customFormValues as formValue>
-						<textarea class="big-textarea" disabled="disabled">${formValue.value!""}</textarea>
-					</#list>
+<div class="${feedback.feedbackPosition.toString} feedback-summary" >
+	<div class="feedback-details">
+		<#if feedback.mark?has_content || feedback.grade?has_content>
+			<div class="mark-grade" >
+				<div>
+					<div class="mg-label" >
+						Mark:</div>
+					<div >
+						<span class="mark">${feedback.mark!""}</span>
+						<span>%</span>
+					</div>
+					<div class="mg-label" >
+						Grade:</div>
+					<div class="grade">${feedback.grade!""}</div>
 				</div>
 			</div>
-		</div>
-
-		<div class="control-group">
-			<label class="control-label">Mark</label>
-			<div class="controls">
-				<div class="input-append">
-					<input type="text" disabled="disabled" value="${feedback.mark!""}" class="input-small">
-					<span class="add-on">%</span>
+		<#else>
+			<h5>No mark or grade added.</h5>
+		</#if>
+		<#if isModerated?? && isModerated && feedback.feedbackPosition.toString == "SecondFeedback">
+			<#if feedback.rejectionComments?has_content>
+				<div class="feedback-comments">
+					<h5>Feedback Comments</h5>
+					${feedback.rejectionComments}
 				</div>
-			</div>
-		</div>
-
-		<div class="control-group">
-			<label class="control-label">Grade</label>
-			<div class="controls">
-				<input type="text" disabled="disabled" value="${feedback.grade!""}" class="input-small">
-			</div>
-		</div>
-
-		<#if feedback.attachments?has_content >
-			<div class="control-group">
-				<label class="control-label">Attachments</label>
-				<div class="controls">
-					<a class="btn long-running" href="<@routes.markerFeedbackFiles assignment feedback/>">
-						<i class="icon-download"></i>
-						<@fmt.p number=feedback.attachments?size singular="file" />
-					</a>
-				</div>
+			<#else>
+				<div><h5>No feedback comments added.</h5></div>
+			</#if>
+		<#else>
+			<#list feedback.customFormValues as formValue>
+				<#if formValue.value?has_content>
+			<div class="feedback-comments" style="clear: left;">
+					<h5>Feedback Comments</h5>
+				<#else>
+			<div>
+				</#if>
+				${formValue.value!"<h5>No feedback comments added.</h5>"}
+			</#list>
 			</div>
 		</#if>
+	</div>
 
-	</form>
+
+
+
+
+		<#if feedback.attachments?has_content >
+		<div class="feedback-attachments attachments">
+			<h5>Attachments</h5>
+			<div>
+				<#assign downloadMFUrl><@routes.markerFeedbackFilesDownload feedback/></#assign>
+				<@fmt.download_attachments feedback.attachments downloadMFUrl "for ${feedback.feedbackPosition.description?uncap_first}" "feedback-${feedback.feedback.universityId}" />
+				<#list feedback.attachments as attachment>
+					<input value="${attachment.id}" name="${attachment.name}" type="hidden"/>
+				</#list>
+			</div>
+		</div>
+		</#if>
+
+
+
+	<div style="clear: both;"></div>
+
 </div>

@@ -124,8 +124,8 @@ object Fixtures extends Mockito {
 			occurrence = "A")
 
 
-	def seenSecondMarkingWorkflow(name: String) = {
-		val workflow = new SeenSecondMarkingWorkflow
+	def seenSecondMarkingLegacyWorkflow(name: String) = {
+		val workflow = new SeenSecondMarkingLegacyWorkflow
 		workflow.name = name
 		workflow
 	}
@@ -259,7 +259,7 @@ object Fixtures extends Mockito {
 	def monitoringCheckpoint(point: MonitoringPoint, student: StudentMember, state: AttendanceState) = {
 		val checkpoint = new MonitoringCheckpoint
 		val monitoringPointService = smartMock[MonitoringPointService]
-		monitoringPointService.studentAlreadyReportedThisTerm(student, point) returns (false)
+		monitoringPointService.studentAlreadyReportedThisTerm(student, point) returns false
 		checkpoint.monitoringPointService = monitoringPointService
 		checkpoint.point = point
 		checkpoint.student = student

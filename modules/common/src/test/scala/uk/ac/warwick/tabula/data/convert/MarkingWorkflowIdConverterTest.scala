@@ -5,7 +5,7 @@ import org.hibernate.Session
 import uk.ac.warwick.tabula.Mockito
 
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.data.model.{StudentsChooseMarkerWorkflow, SeenSecondMarkingWorkflow, MarkingWorkflow}
+import uk.ac.warwick.tabula.data.model.{StudentsChooseMarkerWorkflow, SeenSecondMarkingLegacyWorkflow, MarkingWorkflow}
 
 class MarkingWorkflowIdConverterTest extends TestBase with Mockito {
 
@@ -14,27 +14,27 @@ class MarkingWorkflowIdConverterTest extends TestBase with Mockito {
 	val sessionFactory = mock[SessionFactory]
 	val session = mock[Session]
 
-	sessionFactory.getCurrentSession() returns (session)
+	sessionFactory.getCurrentSession returns session
 
 	converter.sessionFactory = sessionFactory
 
-	@Test def validInput {
-		val workflow = new SeenSecondMarkingWorkflow
+	@Test def validInput() {
+		val workflow = new SeenSecondMarkingLegacyWorkflow
 		workflow.id = "steve"
 
-		session.get(classOf[MarkingWorkflow].getName(), "steve") returns (workflow)
+		session.get(classOf[MarkingWorkflow].getName, "steve") returns workflow
 
 		converter.convertRight("steve") should be (workflow)
 	}
 
-	@Test def invalidInput {
-		session.get(classOf[MarkingWorkflow].getName(), "20X6") returns (null)
+	@Test def invalidInput() {
+		session.get(classOf[MarkingWorkflow].getName, "20X6") returns null
 
 		converter.convertRight("20X6") should be (null)
 		converter.convertRight(null) should be (null)
 	}
 
-	@Test def formatting {
+	@Test def formatting() {
 		val workflow = new StudentsChooseMarkerWorkflow
 		workflow.id = "steve"
 		

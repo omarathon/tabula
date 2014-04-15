@@ -85,6 +85,7 @@ abstract class Features {
 	@Value("${features.attendanceMonitoring.smallGroupPointType:true}") var attendanceMonitoringSmallGroupPointType = defaults.attendanceMonitoringSmallGroupPointType
 	@Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}") var attendanceMonitoringAssignmentSubmissionPointType = defaults.attendanceMonitoringAssignmentSubmissionPointType
 	@Value("${features.xSendfile:true}") var xSendfile = defaults.xSendfile
+	@Value("${features.newSeenSecondMarkingWorkflows:false}") var newSeenSecondMarkingWorkflows = defaults.newSeenSecondMarkingWorkflows
 	@Value("${features.activityStreams:true}") var activityStreams = defaults.activityStreams
 
 	private val bean = new BeanWrapperImpl(this)
@@ -159,6 +160,7 @@ class FeaturesMessage {
 	@BeanProperty var includePastYears = true
 	@BeanProperty var attendanceMonitoringAssignmentSubmissionPointType = true
 	@BeanProperty var xSendfile = true
+	@BeanProperty var newSeenSecondMarkingWorkflows = false
 	@BeanProperty var activityStreams = true
 }
 

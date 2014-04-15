@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.web.Routes
 
 @Entity
 @DiscriminatorValue(value="ModeratedMarking")
-class ModeratedMarkingWorkflow extends MarkingWorkflow with AssignmentMarkerMap {
+class ModeratedMarkingWorkflow extends MarkingWorkflow with NoThirdMarker with AssignmentMarkerMap {
 
 	def this(dept: Department) = {
 		this()
@@ -19,8 +19,6 @@ class ModeratedMarkingWorkflow extends MarkingWorkflow with AssignmentMarkerMap 
 	def onlineMarkingUrl(assignment: Assignment, marker: User) =
 		if (assignment.isFirstMarker(marker)) Routes.coursework.admin.assignment.onlineMarkerFeedback(assignment)
 		else Routes.coursework.admin.assignment.onlineModeration(assignment)
-
-
 
 	// True if this marking workflow uses a second marker
 	def hasSecondMarker = true

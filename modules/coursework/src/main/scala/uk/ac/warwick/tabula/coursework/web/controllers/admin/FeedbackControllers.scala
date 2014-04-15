@@ -9,11 +9,15 @@ import uk.ac.warwick.tabula.coursework.commands.feedback._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.fileserver.FileServer
+import uk.ac.warwick.tabula.services.fileserver.{RenderableZip, FileServer}
 import javax.servlet.http.HttpServletRequest
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{ApplyWithCallback, Appliable}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.BaseController
+import org.springframework.beans.factory.annotation.Autowired
+import scala.Some
+
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}.zip"))
@@ -41,22 +45,24 @@ class DownloadSelectedFeedbackController extends CourseworkController {
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
 class DownloadSelectedFeedbackFileController extends CourseworkController {
+
 	var feedbackDao = Wire.auto[FeedbackDao]
 	var fileServer = Wire.auto[FileServer]
 	
 	@ModelAttribute def singleFeedbackCommand(
-			@PathVariable("module") module: Module, 
-			@PathVariable("assignment") assignment: Assignment, 
-			@PathVariable("feedbackId") feedbackId: String) = 
+		@PathVariable("module") module: Module,
+		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable("feedbackId") feedbackId: String
+	) =
 		new AdminGetSingleFeedbackFileCommand(module, assignment, mandatory(feedbackDao.getFeedback(feedbackId)))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def get(
-			cmd: AdminGetSingleFeedbackFileCommand, 
-			@PathVariable("filename") filename: String,
-			req: HttpServletRequest, 
-			res: HttpServletResponse) {
-		//fileServer.serve(cmd.apply())
+		cmd: AdminGetSingleFeedbackFileCommand,
+		@PathVariable("filename") filename: String,
+		req: HttpServletRequest,
+		res: HttpServletResponse
+	) {
 		cmd.callback = { (renderable) => fileServer.serve(renderable)(req, res) }
 		cmd.apply().orElse { throw new ItemNotFoundException() }
 	}
@@ -74,8 +80,7 @@ class DownloadAllFeedbackController extends CourseworkController {
 		new DownloadSelectedFeedbackCommand(module, assignment)
 
 	@RequestMapping
-	def getSelected(command: DownloadSelectedFeedbackCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		val (assignment, module, filename) = (command.assignment, command.module, command.filename)
+	def getSelected(command: DownloadSelectedFeedbackCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) = {
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
@@ -90,37 +95,79 @@ class DownloadMarkerFeedbackController extends CourseworkController {
 	var feedbackDao = Wire.auto[FeedbackDao]
 
 	@RequestMapping
-	def getMarkerFeedback(
-			@PathVariable module: Module, 
-			@PathVariable assignment: Assignment, 
-			@PathVariable feedbackId: String, 
-			@PathVariable filename: String,
-			req: HttpServletRequest, 
-			res: HttpServletResponse) {
+	def markerFeedback(
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable feedbackId: String,
+		@PathVariable filename: String,
+		req: HttpServletRequest,
+		res: HttpServletResponse
+	) = {
 		feedbackDao.getMarkerFeedback(feedbackId) match {
-			case Some(markerFeedback) => {
+			case Some(markerFeedback) =>
 				val renderable = new AdminGetSingleMarkerFeedbackCommand(module, assignment, markerFeedback).apply()
 				fileServer.serve(renderable)(req, res)
-			}
 			case None => throw new ItemNotFoundException
 		}
 	}
 }
 
 @Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/firstmarker/feedbacks.zip"))
+class DownloadMarkerFeebackFilesController extends BaseController {
+
+	@Autowired var fileServer: FileServer = _
+
+	@ModelAttribute def command( @PathVariable module: Module,
+															 @PathVariable assignment: Assignment,
+															 @PathVariable markerFeedback: String)
+	= new DownloadMarkerFeedbackFilesCommand(module, assignment, markerFeedback)
+
+	// the difference between the RequestMapping paths for these two methods is a bit subtle - the first has
+	// attachments plural, the second has attachments singular.
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachments/*"))
+	def getAll(command: DownloadMarkerFeedbackFilesCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+		getOne(command, null)
+	}
+
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachment/{filename}"))
+	def getOne(command: DownloadMarkerFeedbackFilesCommand, @PathVariable("filename") filename: String)
+						(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+		// specify callback so that audit logging happens around file serving
+		val prefixFileName = "-" + Option(filename).getOrElse(command.module.code)
+		command.callback = { (renderable) => fileServer.serve(renderable, Some(s"${command.markerFeedback.feedback.universityId}${prefixFileName}"))(request, response) }
+		command.apply().orElse { throw new ItemNotFoundException() }
+	}
+}
+
+
+@Controller
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/{position}/feedbacks.zip"))
 class DownloadFirstMarkersFeedbackController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
 
-	@ModelAttribute def downloadFirstMarkersFeedbackCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, currentUser:CurrentUser) =
-		new DownloadFirstMarkersFeedbackCommand(module, assignment, currentUser)
+	@ModelAttribute("command")
+	def downloadFirstMarkersFeedbackCommand(
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable position: String,
+		currentUser:CurrentUser
+	) = {
+		val feedbackPosition = position match {
+			case "firstmarker" => FirstFeedback
+			case "secondmarker" => SecondFeedback
+		}
+		DownloadMarkersFeedbackForPositionCommand(module, assignment, currentUser, feedbackPosition)
+	}
 
 	@RequestMapping
-	def getSelected(command: DownloadFirstMarkersFeedbackCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+	def getSelected(@ModelAttribute("command") command: ApplyWithCallback[RenderableZip])
+		(implicit request: HttpServletRequest, response: HttpServletResponse) = {
+
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
+
 	}
 }
 

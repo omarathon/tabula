@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, MarkerSelectField}
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.services.{UserLookupService, SubmissionService}
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.data.model.MarkingMethod.{ModeratedMarking, SeenSecondMarking}
+import uk.ac.warwick.tabula.data.model.MarkingMethod.{SeenSecondMarking, ModeratedMarking, SeenSecondMarkingLegacy}
 
 class MarkingWorkflowTest extends TestBase with Mockito {
 
@@ -120,7 +120,21 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		assignment.getStudentsFirstMarker(sub4) should be (Some("cuscav"))
 	}}
 
-	@Test def seenSecondMarking() = withUser("cuscav") { new MarkingWorkflowFixture {
+	@Test def seenSecondMarkingLegacy() = withUser("cuscav") { new MarkingWorkflowFixture {
+		val workflow = new SeenSecondMarkingLegacyWorkflow()
+		assignment.markingWorkflow = workflow
+
+		workflow.markingMethod should be(SeenSecondMarkingLegacy)
+		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online")
+
+		workflow.firstMarkerRoleName should be("First marker")
+		workflow.hasSecondMarker should be(true)
+		workflow.secondMarkerRoleName should be(Some("Second marker"))
+		workflow.secondMarkerVerb should be(Some("mark"))
+
+	}}
+
+	@Test def seenSecondMarking() = withUser("cuscao") { new MarkingWorkflowFixture {
 		val workflow = new SeenSecondMarkingWorkflow()
 		assignment.markingWorkflow = workflow
 
@@ -150,7 +164,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 
 	@Test def assignmentMarkerMap() { new MarkerMapFixture {
 
-		val workflow = new SeenSecondMarkingWorkflow // this could be any workflow that extends AssignmentMarkerMap
+		val workflow = new SeenSecondMarkingLegacyWorkflow // this could be any workflow that extends AssignmentMarkerMap
 		setupWorkflow()
 
 
@@ -183,14 +197,14 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 	@Test def convertToObject() {
 		val t = new MarkingMethodUserType
 		t.convertToObject("StudentsChooseMarker") should be (MarkingMethod.StudentsChooseMarker)
-		t.convertToObject("SeenSecondMarking") should be (MarkingMethod.SeenSecondMarking)
+		t.convertToObject("SeenSecondMarkingLegacy") should be (MarkingMethod.SeenSecondMarkingLegacy)
 		evaluating { t.convertToObject("Q") } should produce [IllegalArgumentException]
 	}
 
 	@Test def convertToValue() {
 		val t = new MarkingMethodUserType
 		t.convertToValue(MarkingMethod.StudentsChooseMarker) should be ("StudentsChooseMarker")
-		t.convertToValue(MarkingMethod.SeenSecondMarking) should be ("SeenSecondMarking")
+		t.convertToValue(MarkingMethod.SeenSecondMarkingLegacy) should be ("SeenSecondMarkingLegacy")
 	}
 
 }

@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
-import java.util.HashMap
 
 import collection.JavaConversions._
 
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.TestFixtures
+import java.util
 
 // reusable environment for marking workflow tests
 trait MarkingWorkflowWorld extends TestFixtures {
@@ -18,30 +18,47 @@ trait MarkingWorkflowWorld extends TestFixtures {
 	generateSubmission(assignment, "0672089", "cuscav")
 	addFeedback(assignment)
 
-	val markingWorkflow = new SeenSecondMarkingWorkflow()
+	var markingWorkflow = new SeenSecondMarkingWorkflow()
 	markingWorkflow.department = assignment.module.department
 	markingWorkflow.firstMarkers = makeUserGroup("cuslaj", "cuscav")
 	markingWorkflow.secondMarkers = makeUserGroup("cuslat", "cuday")
 	assignment.markingWorkflow = markingWorkflow
 
-	assignment.markerMap = new HashMap[String, UserGroup]()
+	assignment.markerMap = new util.HashMap[String, UserGroup]()
 	assignment.markerMap.put("cuslaj", makeUserGroup("cusxad", "cuscao", "curef"))
 	assignment.markerMap.put("cuscav", makeUserGroup("cusebr", "cuscav"))
 	assignment.markerMap.put("cuslat", makeUserGroup("cusxad", "cuscao", "curef"))
 	assignment.markerMap.put("cuday", makeUserGroup("cusebr", "cuscav"))
 
 	def addFeedback(assignment:Assignment){
-		val feedback = assignment.submissions.map{s=>
+		val feedback = assignment.submissions.map{ s =>
 			val newFeedback = new Feedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = "cuslaj"
 			newFeedback.universityId = s.universityId
 			newFeedback.released = false
-			val fmFeedback = newFeedback.retrieveFirstMarkerFeedback
-			fmFeedback.state = MarkingState.ReleasedForMarking
+			addMarkerFeedback(newFeedback,FirstFeedback)
 			newFeedback
 		}
 		assignment.feedbacks = feedback
+	}
+
+	def setFirstMarkerFeedbackState(state: MarkingState) =
+		assignment.feedbacks.foreach( mf => mf.firstMarkerFeedback.state = state )
+
+	def setSecondMarkerFeedbackState(state: MarkingState) =
+		assignment.feedbacks.foreach( mf => mf.secondMarkerFeedback.state = state )
+
+	def setFinalMarkerFeedbackState(state: MarkingState) =
+		assignment.feedbacks.foreach( mf => mf.thirdMarkerFeedback.state = state )
+
+	def addMarkerFeedback(feedback: Feedback, position: FeedbackPosition) = {
+		val mf = position match {
+			case (ThirdFeedback) => feedback.retrieveThirdMarkerFeedback
+			case (SecondFeedback) => feedback.retrieveSecondMarkerFeedback
+			case _ => feedback.retrieveFirstMarkerFeedback
+		}
+		mf.state = MarkingState.InProgress
 	}
 
 

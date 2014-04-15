@@ -118,12 +118,11 @@ class FileAttachment extends GeneratedId {
 	@transient var uploadedDataLength: Long = 0
 
 	def isDataEqual(other: Any) = other match {
-		case that: FileAttachment => {
+		case that: FileAttachment =>
 			if (this.actualDataLength != that.actualDataLength) false
-			else{
+			else {
 				Files.equal(this.file, that.file)
 			}
-		}
 		case _ => false
 	}
 

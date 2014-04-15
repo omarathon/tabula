@@ -1,11 +1,9 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.{Notifies, Command, Description, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Notification, Feedback, Assignment, Module}
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.UserLookupService
@@ -42,7 +40,7 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 
 	// validation done even when showing initial form.
 	def prevalidate(errors: Errors) {
-		if (!assignment.openEnded && !assignment.isClosed()) {
+		if (!assignment.openEnded && !assignment.isClosed) {
 			errors.reject("feedback.publish.notclosed")
 		} else if (assignment.fullFeedback.isEmpty) {
 			errors.reject("feedback.publish.nofeedback")

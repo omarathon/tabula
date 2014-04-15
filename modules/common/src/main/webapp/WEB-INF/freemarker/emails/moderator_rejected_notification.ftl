@@ -1,4 +1,4 @@
-${moderatorName} has rejected your feedback for student ${studentId} on ${assignment.name} for ${module.code?upper_case} ${module.name}.
+${moderatorName} has rejected your feedback for student ${studentId} on ${assignment.name} for ${assignment.module.code?upper_case} ${assignment.module.name}.
 
 The moderator left the following comments ...
 
