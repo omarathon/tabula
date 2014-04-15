@@ -4,7 +4,7 @@
 		View in MRM<img class="targetBlank" alt="" title="Link opens in a new window" src="/static/images/shim.gif"/> </a>
 	</div>
 	
-	<h4>Module Registrations for ${(studentCourseYearDetails.academicYear.toString)!}</h4>
+	<h4>Modules</h4>
 	<p><span class="muted">Module Registration Status:</span>
 		<#if studentCourseYearDetails.moduleRegistrationStatus??>
 			${(studentCourseYearDetails.moduleRegistrationStatus.description)!}
@@ -18,15 +18,27 @@
 				<th>Code</th>
 				<th>Title</th>
 				<th>CATS</th>
-				<th>Assess Group </th>
-				<th>Select Status</th>
+				<#if studentCourseYearDetails.latest>
+					<th>Assess</th>
+				<#else>
+					<th>Mark</th>
+					<th>Grade</th>
+				</#if>
+				<th>Status</th>
 			</tr>
 				<#list studentCourseYearDetails.moduleRegistrations as moduleRegistration>
 					<tr>
 						<td>${(moduleRegistration.module.code?upper_case)!}</td>
 						<td>${(moduleRegistration.module.name)!}</td>
 						<td>${(moduleRegistration.cats)!}</td>
-						<td>${(moduleRegistration.assessmentGroup)!}</td>
+
+						<#if studentCourseYearDetails.latest>
+							<td>${(moduleRegistration.assessmentGroup)!}</td>
+						<#else>
+							<td>${(moduleRegistration.agreedMark)!}</td>
+							<td>${(moduleRegistration.agreedGrade)!}</td>
+						</#if>
+
 						<td>
 							<#if moduleRegistration.selectionStatus??>
 								${(moduleRegistration.selectionStatus.description)!}

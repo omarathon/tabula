@@ -73,6 +73,9 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 
 	def registeredModules = moduleRegistrations.map(mr => mr.module)
 
+	def hasModuleRegistrations = !moduleRegistrations.isEmpty
+
+	def isLatest = this.equals(studentCourseDetails.latestStudentCourseYearDetails)
 }
 
 trait BasicStudentCourseYearProperties {

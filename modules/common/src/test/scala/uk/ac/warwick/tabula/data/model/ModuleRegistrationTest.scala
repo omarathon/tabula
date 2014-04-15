@@ -21,7 +21,7 @@ class ModuleRegistrationTest extends TestBase {
 			modReg.assessmentGroup = "D"
 			modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
 
-			modReg.selectionStatus.description should be ("Optional Core")
+			modReg.selectionStatus.description should be ("O Core")
 
 			modReg.selectionStatus = ModuleSelectionStatus.fromCode("C")
 
