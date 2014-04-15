@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 class AddMarkerFeedbackController extends CourseworkController {
 
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
-		new AddMarkerFeedbackCommand(module, assignment, user, assignment.isFirstMarker(user.apparentUser))
+		new AddMarkerFeedbackCommand(module, assignment, user)
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def uploadForm(@ModelAttribute cmd: AddMarkerFeedbackCommand): Mav = {

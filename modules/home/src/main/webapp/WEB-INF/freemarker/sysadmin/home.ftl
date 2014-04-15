@@ -18,6 +18,7 @@
 <p><a class="btn" href="<@url page="/sysadmin/jobs/list" context="/scheduling" />">Background jobs</a></p>
 <p><a class="btn" href="<@url page="/sysadmin/features" />">Set feature flags</a></p>
 <p><a class="btn" href="<@url page="/sysadmin/statistics" />">Internal statistics</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/complete-scheduled-notification" context="/scheduling" />">Complete scheduled notifications</a></p>
 
 <h2>File syncing</h2>
 <p><a class="btn" href="<@url page="/sysadmin/sync" context="/scheduling" />">Run file syncing</a></p>

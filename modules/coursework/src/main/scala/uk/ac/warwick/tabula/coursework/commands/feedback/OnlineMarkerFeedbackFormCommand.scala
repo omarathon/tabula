@@ -32,11 +32,12 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, currentUser)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] {
 
-	self: FeedbackServiceComponent with ZipServiceComponent 	with MarkerFeedbackStateCopy =>
+	self: FeedbackServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy =>
 
-	def markerFeedback = assignment.getMarkerFeedback(student.getWarwickId, currentUser.apparentUser)
+	def markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(student.getWarwickId, currentUser.apparentUser)
+	def allMarkerFeedbacks = assignment.getAllMarkerFeedbacks(student.getWarwickId, currentUser.apparentUser)
 
-	copyState(markerFeedback)
+	if (markerFeedback.isDefined) copyState(markerFeedback)
 
 	def applyInternal(): MarkerFeedback = {
 
@@ -50,12 +51,10 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 			newFeedback
 		})
 
-		val firstMarker = assignment.isFirstMarker(currentUser.apparentUser)
-
 		// see if marker feedback already exists - if not create one
-		val markerFeedback:MarkerFeedback = firstMarker match {
-			case true => parentFeedback.retrieveFirstMarkerFeedback
-			case false => parentFeedback.retrieveSecondMarkerFeedback
+		val markerFeedback:MarkerFeedback = parentFeedback.getCurrentWorkflowFeedback match {
+			case None => throw new IllegalArgumentException
+			case Some(mf) => mf
 		}
 
 		copyTo(markerFeedback)
@@ -73,18 +72,19 @@ trait MarkerFeedbackStateCopy {
 	self: OnlineFeedbackState with OnlineFeedbackStudentState with CopyFromFormFields with WriteToFormFields
 		with FileAttachmentServiceComponent =>
 
+
+	var rejectionComments: String = _
 	/*
 		If there is a marker feedback then use the specified copy function to copy it's state to the form object
 		if not then set up blank field values
 	*/
 	def copyState(markerFeedback: Option[MarkerFeedback], copyFunction: MarkerFeedback => Unit): Unit = markerFeedback match {
 		case Some(f) => copyFunction(f)
-		case None => {
+		case None =>
 			fields = {
 				val pairs = assignment.feedbackFields.map { field => field.id -> field.blankFormValue }
 				Map(pairs: _*).asJava
 			}
-		}
 	}
 
 	// when we dont specify a copy function use the one in this trait
@@ -103,6 +103,10 @@ trait MarkerFeedbackStateCopy {
 			grade = markerFeedback.grade.getOrElse("")
 		}
 
+		if(markerFeedback.rejectionComments.hasText) {
+			rejectionComments = markerFeedback.rejectionComments
+		}
+
 		// get attachments
 		attachedFiles = markerFeedback.attachments
 	}
@@ -117,13 +121,24 @@ trait MarkerFeedbackStateCopy {
 			if (grade.hasText) markerFeedback.grade = Some(grade)
 		}
 
+
+		if(rejectionComments.hasText) {
+			markerFeedback.rejectionComments = rejectionComments
+		}
+
+
 		// save attachments
 		if (markerFeedback.attachments != null) {
 			val filesToKeep =  Option(attachedFiles).getOrElse(JList()).asScala
 			val existingFiles = Option(markerFeedback.attachments).getOrElse(JList()).asScala
 			val filesToRemove = existingFiles -- filesToKeep
+			val filesToReplicate = (filesToKeep -- existingFiles).toSeq
 			fileAttachmentService.deleteAttachments(filesToRemove)
 			markerFeedback.attachments = JArrayList[FileAttachment](filesToKeep)
+			val replicatedFiles = filesToReplicate.map{ x => val newFile = new FileAttachment(x.getName)
+																									newFile.file = x.file
+																									newFile }
+			replicatedFiles.foreach(markerFeedback.addAttachment(_))
 		}
 		markerFeedback.addAttachments(file.attached.asScala)
 	}

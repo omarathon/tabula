@@ -87,7 +87,7 @@ trait OpensLuceneDirectory {
 }
 
 object IndexService {
-	final val TabulaLuceneVersion = Version.LUCENE_40
+	final val TabulaLuceneVersion = Version.LUCENE_47
 	final val AuditEventIndexLuceneVersion = TabulaLuceneVersion
 	final val NotificationIndexLuceneVersion = TabulaLuceneVersion
 	final val ProfileIndexLuceneVersion = TabulaLuceneVersion

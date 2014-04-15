@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.model.FreemarkerModel
 import javax.persistence.{Entity, DiscriminatorValue}
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
+import uk.ac.warwick.tabula.helpers.Logging
 
 object ReleaseToMarkerNotification {
 	val templateLocation = "/WEB-INF/freemarker/emails/released_to_marker_notification.ftl"
@@ -17,16 +18,20 @@ class ReleaseToMarkerNotification
 	extends NotificationWithTarget[MarkerFeedback, Assignment]
 	with SingleRecipientNotification
 	with UserIdRecipientNotification
-	with AutowiringUserLookupComponent {
+	with AutowiringUserLookupComponent
+	with Logging {
 
 	def this(markerNumber: Int) {
 		this()
 		whichMarker.value = markerNumber
 	}
 
-	def workflowVerb: Option[String] = whichMarker.value match {
-		case 1 => Some(assignment.markingWorkflow.firstMarkerVerb)
-		case 2 => assignment.markingWorkflow.secondMarkerVerb
+	def workflowVerb: String = whichMarker.value match {
+		case 1 => assignment.markingWorkflow.firstMarkerVerb
+		case 2 => assignment.markingWorkflow.secondMarkerVerb.getOrElse{
+			logger.warn("Attempted to read secondMarkerVerb for workflow without second marker")
+			""
+		}
 	}
 
 	@transient val whichMarker = IntSetting("marker", 1)

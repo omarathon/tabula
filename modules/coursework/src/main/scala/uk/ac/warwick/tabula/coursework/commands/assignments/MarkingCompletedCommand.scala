@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, AutowiringStateServiceComponent, StateServiceComponent}
+import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.services.{FeedbackServiceComponent, AutowiringFeedbackServiceComponent, AutowiringUserLookupComponent, UserLookupComponent, AutowiringStateServiceComponent, StateServiceComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConversions._
@@ -12,62 +11,75 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{ReleasedState, FeedbackReleasedNotifier}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.notifications.ReleaseToMarkerNotification
+import scala.collection.mutable
+import uk.ac.warwick.tabula.system.BindListener
 
 object MarkingCompletedCommand {
-	def apply(module: Module, assignment: Assignment, user: User, firstMarker:Boolean) =
-		new MarkingCompletedCommand(module, assignment, user, firstMarker)
+	def apply(module: Module, assignment: Assignment, user: User) =
+		new MarkingCompletedCommand(module, assignment, user)
 			with ComposableCommand[Unit]
 			with MarkingCompletedCommandPermissions
 			with MarkingCompletedDescription
 			with SecondMarkerReleaseNotifier
 			with AutowiringUserLookupComponent
 			with AutowiringStateServiceComponent
+			with AutowiringFeedbackServiceComponent
 }
 
-abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User, val firstMarker:Boolean)
-	extends CommandInternal[Unit] with Appliable[Unit] with SelfValidating with UserAware with MarkingCompletedState
-	with ReleasedState {
+abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User)
+	extends CommandInternal[Unit] with Appliable[Unit] with SelfValidating with UserAware with MarkingCompletedState with ReleasedState with BindListener {
 
-	this: StateServiceComponent =>
+	self: StateServiceComponent with FeedbackServiceComponent =>
 
-	def onBind() {
-		markerFeedbacks = students.flatMap(assignment.getMarkerFeedback(_, user))
-	}
-
-	def applyInternal() {
-		// do not update previously released feedback
-		val feedbackForRelease = markerFeedbacks -- releasedFeedback
-		feedbackForRelease.foreach(stateService.updateState(_, MarkingState.MarkingCompleted))
-
-		def finaliseFeedback(){
-			val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, feedbackForRelease)
-			finaliseFeedbackCommand.apply()
-		}
-
-		def createSecondMarkerFeedback(){
-			newReleasedFeedback = feedbackForRelease.map{ mf =>
-				val parentFeedback = mf.feedback
-				val secondMarkerFeedback = parentFeedback.retrieveSecondMarkerFeedback
-				stateService.updateState(secondMarkerFeedback, MarkingState.ReleasedForMarking)
-				secondMarkerFeedback
-			}
-		}
-
-		if (assignment.markingWorkflow.hasSecondMarker && firstMarker)
-			createSecondMarkerFeedback()
-		else
-			finaliseFeedback()
-
+	override def onBind(result: BindingResult) {
+		pendingMarkerFeedbacks = students.flatMap(assignment.getMarkerFeedbackForCurrentPosition(_, user)).filter(null != _)
 	}
 
 	def preSubmitValidation() {
-		noMarks = markerFeedbacks.filter(!_.hasMark)
-		noFeedback = markerFeedbacks.filter(!_.hasFeedback)
-		releasedFeedback = markerFeedbacks.filter(_.state == MarkingState.MarkingCompleted)
+		noMarks = pendingMarkerFeedbacks.filter(!_.hasMark)
+		noFeedback = pendingMarkerFeedbacks.filter(!_.hasFeedback)
+		releasedFeedback = pendingMarkerFeedbacks.filter(_.state == MarkingState.MarkingCompleted)
 	}
 
 	def validate(errors: Errors) {
 		if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
+		if (pendingMarkerFeedbacks.isEmpty) errors.rejectValue("students", "markers.finishMarking.noStudents")
+	}
+
+	def applyInternal() {
+		// do not update previously released feedback
+		val feedbackForRelease = pendingMarkerFeedbacks -- releasedFeedback
+
+		feedbackForRelease.foreach(stateService.updateState(_, MarkingState.MarkingCompleted))
+
+		releaseNextMarkerFeedbackOrFinalise(feedbackForRelease)
+	}
+
+	private def releaseNextMarkerFeedbackOrFinalise(feedbackForRelease: mutable.Buffer[MarkerFeedback]) {
+		newReleasedFeedback = feedbackForRelease.flatMap(nextMarkerFeedback).map{ nextMarkerFeedback =>
+			stateService.updateState(nextMarkerFeedback, MarkingState.ReleasedForMarking)
+			feedbackService.save(nextMarkerFeedback)
+			nextMarkerFeedback
+		}
+
+		val feedbackToFinalise = feedbackForRelease.filter(!nextMarkerFeedback(_).isDefined)
+		if (!feedbackToFinalise.isEmpty)
+			finaliseFeedback(feedbackToFinalise)
+	}
+
+	def nextMarkerFeedback(markerFeedback: MarkerFeedback): Option[MarkerFeedback] = {
+		markerFeedback.getFeedbackPosition match {
+			case FirstFeedback if markerFeedback.feedback.assignment.markingWorkflow.hasSecondMarker =>
+				Option(markerFeedback.feedback.retrieveSecondMarkerFeedback)
+			case SecondFeedback if markerFeedback.feedback.assignment.markingWorkflow.hasThirdMarker =>
+				Option(markerFeedback.feedback.retrieveThirdMarkerFeedback)
+			case _ => None
+		}
+	}
+
+	private def finaliseFeedback(feedbackForRelease: Seq[MarkerFeedback]) = {
+		val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, feedbackForRelease)
+		finaliseFeedbackCommand.apply()
 	}
 }
 
@@ -89,7 +101,7 @@ trait MarkingCompletedDescription extends Describable[Unit] {
 
 	override def describeResult(d: Description){
 		d.assignment(assignment)
-			.property("numFeedbackUpdated" -> markerFeedbacks.size())
+			.property("numFeedbackUpdated" -> pendingMarkerFeedbacks.size())
 	}
 }
 
@@ -101,7 +113,7 @@ trait MarkingCompletedState {
 	val module: Module
 
 	var students: JList[String] = JArrayList()
-	var markerFeedbacks: JList[MarkerFeedback] = JArrayList()
+	var pendingMarkerFeedbacks: JList[MarkerFeedback] = JArrayList()
 
 	var noMarks: JList[MarkerFeedback] = JArrayList()
 	var noFeedback: JList[MarkerFeedback] = JArrayList()

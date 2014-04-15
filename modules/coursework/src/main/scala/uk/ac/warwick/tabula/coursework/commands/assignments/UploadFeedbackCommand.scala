@@ -184,7 +184,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 		
 		// go through individual files, extracting the uni number and grouping
 		// them into feedback items.
-		var itemMap = new collection.mutable.HashMap[String, FeedbackItem]()
+		val itemMap = new collection.mutable.HashMap[String, FeedbackItem]()
 		unrecognisedFiles.clear()
 
 		for ((filename, file) <- bits) {

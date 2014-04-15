@@ -1,49 +1,73 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.{ReadOnly, Unaudited, Command}
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, Unaudited}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
+case class MarkerFeedbackItem(
+	student: User,
+	submission: Submission,
+	feedbacks: Seq[MarkerFeedback]
+)
 
-class ListMarkerFeedbackCommand(val assignment:Assignment, module: Module, val user:CurrentUser,  val firstMarker:Boolean)
-	extends Command[Seq[MarkerFeedbackItem]] with Unaudited with ReadOnly{
+case class MarkerFeedbackCollections(
+	inProgressFeedback: Seq[MarkerFeedbackItem],
+	completedFeedback: Seq[MarkerFeedbackItem],
+	rejectedFeedback: Seq[MarkerFeedbackItem]
+)
 
-	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Feedback.Create, assignment)
+object ListMarkerFeedbackCommand {
+	def apply(assignment:Assignment, module: Module, user:CurrentUser) =
+		new ListMarkerFeedbackCommand(assignment, module, user)
+		with ComposableCommand[MarkerFeedbackCollections]
+		with ListMarkerFeedbackPermissions
+		with ListMarkerFeedbackCommandState
+		with AutowiringUserLookupComponent
+		with Unaudited with ReadOnly
+}
 
-	var userLookup = Wire.auto[UserLookupService]
-	var completedFeedback:Seq[MarkerFeedbackItem] = _
-	var rejectedFeedback:Seq[MarkerFeedbackItem] = _
+class ListMarkerFeedbackCommand(val assignment: Assignment, val module: Module, val user: CurrentUser) extends CommandInternal[MarkerFeedbackCollections] {
 
-	def applyInternal():Seq[MarkerFeedbackItem] = {
+	self: UserLookupComponent =>
+
+	def applyInternal() = {
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 
-		val markerFeedbacks = submissions.map { submission =>
-			val student = userLookup.getUserByWarwickUniId(submission.universityId)
-			val markerFeedback = assignment.getMarkerFeedback(submission.universityId, user.apparentUser)
-			val firstMarkerFeedback =
-				if (!firstMarker)
-					assignment.feedbacks.find(_.universityId == submission.universityId) match {
-						case Some(f) => f.firstMarkerFeedback
-						case None => null
-					}
-				else null
-			MarkerFeedbackItem(student, submission, markerFeedback.getOrElse(null), firstMarkerFeedback)
+		val (inProgressFeedback: Seq[MarkerFeedbackItem], completedFeedback: Seq[MarkerFeedbackItem], rejectedFeedback: Seq[MarkerFeedbackItem]) = {
+			val markerFeedbackItems = submissions.map{ submission =>
+				val student = userLookup.getUserByWarwickUniId(submission.universityId)
+				val feedbacks = assignment.getAllMarkerFeedbacks(submission.universityId, user.apparentUser).reverse
+				MarkerFeedbackItem(student, submission, feedbacks)
+			}
+
+			(
+				markerFeedbackItems.filter(f => f.feedbacks.last.state != MarkingState.MarkingCompleted && f.feedbacks.last.state != MarkingState.Rejected),
+				markerFeedbackItems.filter(f => f.feedbacks.last.state == MarkingState.MarkingCompleted),
+				markerFeedbackItems.filter(f => f.feedbacks.last.state == MarkingState.Rejected)
+			)
 		}
 
-		completedFeedback = markerFeedbacks.filter(_.markerFeedback.state == MarkingCompleted)
-		rejectedFeedback = markerFeedbacks.filter(_.markerFeedback.state == Rejected)
-
-		markerFeedbacks.filterNot(mfi =>
-			mfi.markerFeedback.state == MarkingCompleted || mfi.markerFeedback.state == MarkingCompleted)
-
+		MarkerFeedbackCollections(inProgressFeedback, completedFeedback, rejectedFeedback)
 	}
 }
 
-case class MarkerFeedbackItem(student: User, submission: Submission, markerFeedback: MarkerFeedback, firstMarkerFeedback:MarkerFeedback)
+trait ListMarkerFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+
+	self: ListMarkerFeedbackCommandState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		mustBeLinked(assignment, module)
+		p.PermissionCheck(Permissions.Feedback.Create, assignment)
+	}
+
+}
+
+trait ListMarkerFeedbackCommandState {
+	def assignment: Assignment
+	def module: Module
+	def user: CurrentUser
+}

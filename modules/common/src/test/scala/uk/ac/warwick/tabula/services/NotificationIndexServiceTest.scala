@@ -63,7 +63,7 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 
 	lazy val dismissedItem = {
 		val heron2 = new Heron(recipient)
-		val notification = Notification.init(new HeronWarningNotification, agent, heron2, heron2)
+		val notification = Notification.init(new HeronWarningNotification, agent, heron2)
 		notification.id = "nid101"
 		notification.created = now.plusMinutes(101)
 		dao.getById(notification.id) returns Some(notification)
@@ -101,7 +101,7 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 	@Test
 	def missingRecipient() {
 		val anonUser = new AnonymousUser()
-		val notification = Notification.init(new HeronWarningNotification, agent, heron, heron)
+		val notification = Notification.init(new HeronWarningNotification, agent, heron)
 		service.indexItems(Seq(new RecipientNotification(notification, anonUser)))
 	}
 
@@ -144,7 +144,7 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 	@Test
 	def typeFilteredUserStream() {
 		indexTestItems()
-		val request = ActivityStreamRequest(user=otherRecipient, types=Some(Set("heronDefeat")), pagination=None)
+		val request = ActivityStreamRequest(user=otherRecipient, types=Some(Set("HeronDefeat")), pagination=None)
 		service.userStream(request).items.size should be (50)
 	}
 

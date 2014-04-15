@@ -12,12 +12,12 @@ class MarkingWorkflowDaoTest extends PersistenceTestBase {
 		dao.sessionFactory = sessionFactory
 	}
 
-	@Test def crud = transactional { tx =>
+	@Test def crud() = transactional { tx =>
 		val dept = Fixtures.department("in")
 		session.save(dept)
-		session.flush
+		session.flush()
 		
-		val mw1 = Fixtures.seenSecondMarkingWorkflow("mw1")
+		val mw1 = Fixtures.seenSecondMarkingLegacyWorkflow("mw1")
 		mw1.department = dept
 		
 		val mw2 = Fixtures.studentsChooseMarkerWorkflow("mw2")
@@ -25,13 +25,12 @@ class MarkingWorkflowDaoTest extends PersistenceTestBase {
 		
 		val ass1 = Fixtures.assignment("ass1")
 		val ass2 = Fixtures.assignment("ass2")
-		val ass3 = Fixtures.assignment("ass3")
 		
 		session.save(ass1)
 		session.save(ass2)
 		session.save(mw1)
 		session.save(mw2)
-		session.flush
+		session.flush()
 		
 		dao.getAssignmentsUsingMarkingWorkflow(mw1) should be ('empty)
 		dao.getAssignmentsUsingMarkingWorkflow(mw2) should be ('empty)

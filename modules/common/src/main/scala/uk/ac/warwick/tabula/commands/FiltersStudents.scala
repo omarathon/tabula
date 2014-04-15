@@ -56,7 +56,10 @@ trait FiltersStudents extends FilterStudentsOrRelationships {
 	// Do we need to consider out-of-department modules/routes or can we rely on users typing them in manually?
 	lazy val allModules: Seq[Module] = modulesForDepartmentAndSubDepartments(mandatory(department))
 	lazy val allCourseTypes: Seq[CourseType] = mandatory(department).filterRule.courseTypes
-	lazy val allRoutes: Seq[Route] = routesForDepartmentAndSubDepartments(mandatory(department)).sorted(Route.DegreeTypeOrdering)
+	lazy val allRoutes: Seq[Route] = routesForDepartmentAndSubDepartments(mandatory(department)) match {
+		case Nil => routesForDepartmentAndSubDepartments(mandatory(department.rootDepartment)).sorted(Route.DegreeTypeOrdering)
+		case routes => routes.sorted(Route.DegreeTypeOrdering)
+	}
 	lazy val allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(mandatory(department).rootDepartment)
 	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = profileService.allModesOfAttendance(mandatory(department).rootDepartment)
 }

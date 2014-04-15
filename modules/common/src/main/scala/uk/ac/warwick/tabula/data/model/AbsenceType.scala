@@ -10,6 +10,8 @@ object AbsenceType {
 	case object Medical extends AbsenceType("medical", "Medical")
 	case object Personal extends AbsenceType("personal", "Personal")
 	case object ChangeOfStudyLocation extends AbsenceType("cosl", "Change of study location")
+	case object SelfCertification extends AbsenceType("self", "Self certification")
+	case object Cancelled extends AbsenceType("cancel", "Event cancelled")
 	case object Other extends AbsenceType("other", "Other")
 
 	def fromCode(code: String) = code match {
@@ -22,7 +24,7 @@ object AbsenceType {
 		case _ => throw new IllegalArgumentException()
 	}
 
-	val values: Seq[AbsenceType] = Seq(Academic, Medical, Personal, ChangeOfStudyLocation, Other)
+	val values: Seq[AbsenceType] = Seq(Academic, Medical, Personal, ChangeOfStudyLocation, SelfCertification, Cancelled, Other)
 }
 
 class AbsenceTypeUserType extends AbstractBasicUserType[AbsenceType, String] {

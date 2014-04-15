@@ -67,6 +67,9 @@ trait ModifyExtensionCommandValidation extends SelfValidating {
 
 
 trait ModifyExtensionCommandState {
+
+	var isNew: Boolean = _
+
 	var universityId: String =_
 	var assignment: Assignment =_
 	var module: Module =_

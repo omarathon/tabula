@@ -4,7 +4,7 @@ import scala.collection.JavaConversions.{asScalaBuffer, seqAsJavaList}
 import scala.collection.JavaConverters._
 
 import org.hibernate.validator.constraints.{Length, NotEmpty}
-import org.joda.time.DateTime
+import org.joda.time.{Days, DateTime}
 import org.springframework.validation.Errors
 
 import uk.ac.warwick.spring.Wire
@@ -16,8 +16,9 @@ import uk.ac.warwick.tabula.services.AssignmentService
 /**
  * Common behaviour
  */
- abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembershipGroupIsUniversityIds:Boolean=false) extends Command[Assignment]
-	with SharedAssignmentProperties with SelfValidating with UpdatesStudentMembership with SpecifiesGroupType with CurrentAcademicYear {
+ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembershipGroupIsUniversityIds:Boolean=false)
+	extends Command[Assignment] with SharedAssignmentProperties with SelfValidating with UpdatesStudentMembership
+	with SpecifiesGroupType with CurrentAcademicYear with SchedulesNotifications[Assignment] {
 
 	var service = Wire.auto[AssignmentService]
 
@@ -143,7 +144,7 @@ import uk.ac.warwick.tabula.services.AssignmentService
 	/**
 	 * Convert Spring-bound upstream group references to an AssessmentGroup buffer
 	 */
-	def updateAssessmentGroups(){
+	def updateAssessmentGroups() {
 		assessmentGroups = upstreamGroups.asScala.flatMap ( ug => {
 			val template = new AssessmentGroup
 			template.assessmentComponent = ug.assessmentComponent
@@ -153,4 +154,22 @@ import uk.ac.warwick.tabula.services.AssignmentService
 		}).distinct.asJava
 	}
 
+	override def scheduledNotifications(assignment: Assignment) = {
+		val dayOfDeadline = assignment.closeDate.withTime(0,0,0,0)
+
+		// skip the week late notification if late submission isn't possible
+		val daysToSend = if(assignment.allowLateSubmissions) { Seq(-7, -1, 1, 7) } else { Seq(-7, -1, 1) }
+
+		val surroundingTimes = for (day <- daysToSend) yield assignment.closeDate.plusDays(day)
+		val proposedTimes = Seq(dayOfDeadline) ++ surroundingTimes
+
+		// Filter out all times that are in the past. This should only generate ScheduledNotifications for the future.
+		val allTimes = proposedTimes.filter(_.isAfterNow)
+
+		allTimes.map { when =>
+			new ScheduledNotification[Assignment]("SubmissionDueGeneral", assignment, when)
+		}
+	}
+
 }
+

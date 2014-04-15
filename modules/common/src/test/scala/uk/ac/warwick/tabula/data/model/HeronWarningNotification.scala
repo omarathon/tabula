@@ -10,8 +10,8 @@ object HeronWarningNotification {
 }
 
 @Entity
-@DiscriminatorValue(value="heronWarning")
-class HeronWarningNotification extends NotificationWithTarget[Heron, Heron]
+@DiscriminatorValue(value="HeronWarning")
+class HeronWarningNotification extends Notification[Heron, Unit]
 	with SingleItemNotification[Heron] with SingleRecipientNotification {
 
 	import HeronWarningNotification._
@@ -27,8 +27,8 @@ class HeronWarningNotification extends NotificationWithTarget[Heron, Heron]
 }
 
 @Entity
-@DiscriminatorValue(value="heronDefeat")
-class HeronDefeatedNotification extends NotificationWithTarget[Heron, Heron]
+@DiscriminatorValue(value="HeronDefeat")
+class HeronDefeatedNotification extends Notification[Heron, Unit]
 with SingleItemNotification[Heron] with SingleRecipientNotification {
 
 	import HeronWarningNotification._
@@ -63,3 +63,31 @@ class HeronEntityReference extends EntityReference[Heron] {
 	@ManyToOne()
 	var entity: Entity = null
 }
+/*
+                                       _____
+                                 _.::::::::::::-.
+                             _.-:::::='=::=. _   `.
+                         _.-'.:'          ""(@)`"- `-----....__
+                     _.-'-'.:::....            `' -----------__:=
+                  .-'-''.::::::::::._    .       .'""""""""""
+                   _.-::::::::::::::')    `-- - :
+                .-:::::::::::::'     /  ._.'   )
+             .-::::::::::::'    _   .'  .__.:' :
+           .::::::::::'      -=' _.'--.  .   ..'
+         .:::::::'           _.-'      )  :-'.'
+       .::::'  ___..==''          .-   : .  .'
+     .::'" _.           _.- _.-        ' .-'
+    :'         __.'     _=-'    _.' __' :/
+   ,' _.=  _.-==_.  -==        __.. .-'.'
+  .'.-_.        _      __..--__..-"_.-''
+ .' \ \_.=   -'  __..-'__.--==. .'"
+.'\ \_.-= __... __.--'\\     / /
+\\__...__.--''"'       \\   ("(
+ /_.--'                 \\_.'`.`.
+                       .:._.'  `.`.,.     _
+                     =''   `:,   `.`.`..-::'
+                                   `.` :"
+                                   .:.-.`.
+                                 .:'    `.:
+                                          '
+ */
