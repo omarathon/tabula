@@ -71,6 +71,8 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	// filtering by year:
 	def moduleRegistrations = studentCourseDetails.moduleRegistrations.filter(_.academicYear == this.academicYear)
 
+	def hasModuleRegistrations = !moduleRegistrations.isEmpty
+
 	def isLatest = this.equals(studentCourseDetails.latestStudentCourseYearDetails)
 }
 

@@ -128,10 +128,6 @@ class StudentCourseDetails
 		latestStudentCourseYearDetails = freshStudentCourseYearDetails.max
 	}
 
-	def hasModuleRegistrations = {
-		!moduleRegistrations.isEmpty
-	}
-
 	def isFresh = (missingFromImportSince == null)
 
 	def addStudentCourseYearDetails(scyd: StudentCourseYearDetails) = studentCourseYearDetails.add(scyd)

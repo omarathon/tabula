@@ -48,7 +48,7 @@ class ModuleRegistrationImporterImpl extends ModuleRegistrationImporter with Tas
 			membersAndCategories.filter { _.member.userType == Student }.par.flatMap { mac =>
 				val universityId = mac.member.universityId
 				val params = HashMap(("universityId", universityId))
-
+				logger.debug(f"getting module registrations for $universityId")
 				queries.flatMap { query => query.executeByNamedParam(params) }.distinct.map { new ImportModuleRegistrationsCommand(_) }
 			}.seq
 		}
@@ -101,9 +101,14 @@ object ModuleRegistrationImporter {
 	// 1. unconfirmed module registrations from the SMS table
 	// 2. confirmed module registrations from the SMO table where there is a module registration status of confirmed
 	// 3. confirmed module registrations from the SMO table where no status is recorded, i.e. where MRs have been imported
+	//
+	// the 3 queries should be mutually exclusive - 1st has SSN_MRGS != CON, 2nd has SSN_MRGS == CON and 3rd has no SSN.
+	//
+	// Although the 3 queries aren't unioned in SQL now, the column names still need to match.
+
 	val UnconfirmedModuleRegistrations = f"""
 			select scj_code, sms.mod_code, sms.sms_mcrd as credit, sms.sms_agrp as assess_group,
-			sms.ses_code, sms.ayr_code, sms_occl as occurrence, null as agreed_mark, null as agreed_grade
+			sms.ses_code, sms.ayr_code, sms_occl as occurrence, null as smr_agrm, null as smr_agrg
 				from $sitsSchema.ins_stu stu
 					join $sitsSchema.ins_spr spr 
 						on spr.spr_stuc = stu.stu_code
@@ -145,7 +150,9 @@ object ModuleRegistrationImporter {
 					join $sitsSchema.cam_ssn ssn 
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code and ssn.ssn_mrgs = 'CON'
 				where stu.stu_code = :universityId"""
-					
+
+	// the left outer join to SSN excludes rows with a matching SSN since is only matching where SSN_SPRC is null
+	// but that column has a non-null constraint
 	val AutoUploadedConfirmedModuleRegistrations = f"""
 			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
 			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence, smr_agrm, smr_agrg
