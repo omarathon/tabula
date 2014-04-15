@@ -46,10 +46,3 @@
 <#if isCurrentUserFeedbackEntry>
 	<#include "online_feedback.ftl">
 </#if>
-
-<#if (allCompletedMarkerFeedback?size > 1) && !isCompleted>
-	<#if command.submission??>
-		<#assign submission = command.submission />
-		<#include "_submission_summary.ftl">
-	</#if>
-</#if>
