@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModuleRegistration
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import org.joda.time.DateTime
+import java.math.BigDecimal
 
 /**
  * Import module registration data from SITS.
@@ -77,6 +78,7 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 			if (route.studentsStartId to route.studentsEndId).contains(universityId.toInt)
 			moduleCode <- route.moduleCodes
 		} yield {
+
 			val row = ModuleRegistrationRow(
 				scjCode = "%s/1".format(universityId),
 				sitsModuleCode = "%s-15".format(moduleCode.toUpperCase),
@@ -85,7 +87,7 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 				selectionStatusCode = "C",
 				occurrence = "A",
 				academicYear = AcademicYear.guessByDate(DateTime.now).toString,
-				agreedMark = Some(90.0),
+				agreedMark = Some(new java.math.BigDecimal("90.0")),
 				agreedGrade = "A"
 			)
 
@@ -236,7 +238,7 @@ case class ModuleRegistrationRow(
 	val selectionStatusCode: String,
 	val occurrence: String,
 	val academicYear: String,
-	var agreedMark: Option[BigDecimal],
+	var agreedMark: Option[java.math.BigDecimal],
 	val agreedGrade: String
 ) {
 }
