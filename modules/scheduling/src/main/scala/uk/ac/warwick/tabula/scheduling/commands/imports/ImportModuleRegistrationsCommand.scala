@@ -105,12 +105,12 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 		else false
 	}
 
-	def copyAgreedMark(destinationBean: BeanWrapper, agreedMark:Option[BigDecimal]) = {
+	def copyAgreedMark(destinationBean: BeanWrapper, agreedMark:Option[java.math.BigDecimal]) = {
 		val property = "agreedMark"
 		val oldValue = destinationBean.getPropertyValue(property)
 
 		agreedMark match {
-			case Some(mark: BigDecimal) => {
+			case Some(mark: java.math.BigDecimal) => {
 				if (oldValue != mark) {
 					destinationBean.setPropertyValue(property, mark)
 					true
