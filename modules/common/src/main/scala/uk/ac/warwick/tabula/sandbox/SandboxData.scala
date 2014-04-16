@@ -6,6 +6,7 @@ import uk.co.halfninja.randomnames.Gender._
 import uk.ac.warwick.tabula.data.model.Gender
 import uk.ac.warwick.tabula.data.model.CourseType
 
+// scalastyle:off magic.number
 object SandboxData {
 	final val NameGenerator = NameGenerators.standardGenerator()
 	type NameGender = uk.co.halfninja.randomnames.Gender

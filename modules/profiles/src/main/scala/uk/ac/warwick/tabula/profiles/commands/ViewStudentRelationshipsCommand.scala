@@ -25,7 +25,8 @@ object SortableAgentIdentifier{
 	val KeyOrdering = Ordering.by { a:SortableAgentIdentifier => a.sortkey }
 }
 
-class ViewStudentRelationshipsCommand(val department: Department, val relationshipType: StudentRelationshipType) extends Command[RelationshipGraph] with Unaudited {
+class ViewStudentRelationshipsCommand(val department: Department, val relationshipType: StudentRelationshipType)
+	extends Command[RelationshipGraph] with Unaudited {
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
 
@@ -49,7 +50,7 @@ class ViewStudentRelationshipsCommand(val department: Department, val relationsh
 		val groupedAgentRelationships = unsortedAgentRelationships.groupBy(r=>SortableAgentIdentifier(r))
 
 		//  alpha sort by constructing a TreeMap
-		val sortedAgentRelationships = TreeMap((groupedAgentRelationships).toSeq:_*)(SortableAgentIdentifier.KeyOrdering)
+		val sortedAgentRelationships = TreeMap(groupedAgentRelationships.toSeq:_*)(SortableAgentIdentifier.KeyOrdering)
 
 		// count students
 		val studentsInDepartmentCount = profileService.countStudentsByDepartment(department)
@@ -60,11 +61,16 @@ class ViewStudentRelationshipsCommand(val department: Department, val relationsh
 			unsortedAgentRelationshipsByStaffDept.map(_.studentId).distinct
 				.filterNot(id=>studentIdsInDepartment.exists(_ == id)).size
 
-		RelationshipGraph(sortedAgentRelationships, studentsInDepartmentCount + studentsOutsideDepartmentCount, (studentsInDepartmentCount + studentsOutsideDepartmentCount) - studentsWithAgentsCount)
+		RelationshipGraph(
+			sortedAgentRelationships,
+			studentsInDepartmentCount + studentsOutsideDepartmentCount,
+			(studentsInDepartmentCount + studentsOutsideDepartmentCount) - studentsWithAgentsCount
+		)
 	}
 }
 
-class MissingStudentRelationshipCommand(val department: Department, val relationshipType: StudentRelationshipType) extends Command[(Int, Seq[Member])] with Unaudited {
+class MissingStudentRelationshipCommand(val department: Department, val relationshipType: StudentRelationshipType)
+	extends Command[(Int, Seq[Member])] with Unaudited {
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
 

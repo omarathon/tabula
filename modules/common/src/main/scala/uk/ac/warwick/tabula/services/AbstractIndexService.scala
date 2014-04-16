@@ -416,9 +416,9 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 
 			val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
 			val results =
-				if (sort == null) searcher.search(query, null, offset+maxResults)
+				if (sort == null) searcher.search(query, null, offset + maxResults)
 				else if (searcher.getIndexReader.maxDoc <= 0) new TopDocs(0, Array(), 0f)
-				else searcher.search(query, null, offset+maxResults, sort)
+				else searcher.search(query, null, offset + maxResults, sort)
 			transformResults(searcher, results, offset, maxResults)
 		}
 	}

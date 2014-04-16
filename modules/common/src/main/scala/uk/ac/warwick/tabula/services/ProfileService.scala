@@ -36,9 +36,19 @@ trait ProfileService {
 	def getStudentCourseDetailsByScjCode(scjCode: String): Option[StudentCourseDetails]
 	def getStudentCourseDetailsBySprCode(sprCode: String): Seq[StudentCourseDetails]
 	def countStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Int
-	def findStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq(), maxResults: Int = 50, startResult: Int = 0): (Int, Seq[StudentMember])
+	def findStudentsByRestrictions(
+		department: Department,
+		restrictions: Seq[ScalaRestriction],
+		orders: Seq[ScalaOrder] = Seq(),
+		maxResults: Int = 50,
+		startResult: Int = 0
+	): (Int, Seq[StudentMember])
 	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[StudentMember]
-	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agent: Member, restrictions: Seq[ScalaRestriction]): Seq[StudentMember]
+	def getStudentsByAgentRelationshipAndRestrictions(
+		relationshipType: StudentRelationshipType,
+		agent: Member,
+		restrictions: Seq[ScalaRestriction]
+	): Seq[StudentMember]
 	def findAllUniversityIdsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Seq[String]
 	def findStaffMembersWithAssistant(user: User): Seq[StaffMember]
 	def allModesOfAttendance(department: Department): Seq[ModeOfAttendance]
@@ -146,7 +156,13 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	/**
 	 * this returns a tuple of the startResult (offset into query) actually returned, with the resultset itself
 	 */
-	def findStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq(), maxResults: Int = 50, startResult: Int = 0): (Int, Seq[StudentMember]) = transactional(readOnly = true) {
+	def findStudentsByRestrictions(
+		department: Department,
+		restrictions: Seq[ScalaRestriction],
+		orders: Seq[ScalaOrder] = Seq(),
+		maxResults: Int = 50,
+		startResult: Int = 0
+	): (Int, Seq[StudentMember]) = transactional(readOnly = true) {
 		// If we're a sub/parent department then we have to fetch everyone, boo! Otherwise, we can use nice things
 		if (department.hasParent || department.hasChildren) {
 			val allRestrictions = ScalaRestriction.is(
@@ -186,7 +202,11 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 			}
 		}
 	}
-	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()) = transactional(readOnly = true) {
+	def findAllStudentsByRestrictions(
+		department: Department,
+		restrictions: Seq[ScalaRestriction],
+		orders: Seq[ScalaOrder] = Seq()
+	) = transactional(readOnly = true) {
 		if (department.hasParent) {
 			val allRestrictions = ScalaRestriction.is(
 				"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
@@ -206,7 +226,11 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	}
 
 
-	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agent: Member, restrictions: Seq[ScalaRestriction]): Seq[StudentMember] = transactional(readOnly = true) {
+	def getStudentsByAgentRelationshipAndRestrictions(
+		relationshipType: StudentRelationshipType,
+		agent: Member,
+		restrictions: Seq[ScalaRestriction]
+	): Seq[StudentMember] = transactional(readOnly = true) {
 		memberDao.getStudentsByAgentRelationshipAndRestrictions(relationshipType, agent.id, restrictions)
 	}
 

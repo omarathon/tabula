@@ -8,6 +8,8 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.services._
 import org.joda.time.{Interval, LocalDate}
 import uk.ac.warwick.tabula.permissions.Permissions
+// Do not remove
+// Should be import uk.ac.warwick.tabula.helpers.DateTimeOrdering
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
@@ -39,7 +41,12 @@ trait ViewStudentPersonalTimetableCommandState {
  *  the StudentTimetableEventSource
  *
  */
-class ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource: StudentTimetableEventSource, scheduledMeetingEventSource: ScheduledMeetingEventSource, val student: StudentMember, val currentUser: CurrentUser) extends CommandInternal[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState {
+class ViewStudentPersonalTimetableCommandImpl(
+	studentTimetableEventSource: StudentTimetableEventSource,
+	scheduledMeetingEventSource: ScheduledMeetingEventSource,
+	val student: StudentMember,
+	val currentUser: CurrentUser
+) extends CommandInternal[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState {
 	this: EventOccurrenceServiceComponent =>
 
 	def eventsToOccurrences: TimetableEvent => Seq[EventOccurrence] =
@@ -70,7 +77,12 @@ object ViewStudentPersonalTimetableCommand {
 	// mmm, cake.
 	// have to pass in the student in the constructor so that we have enough data for the permissions check to work
 
-	def apply(studentTimetableEventSource:StudentTimetableEventSource, scheduledMeetingEventSource: ScheduledMeetingEventSource, student: StudentMember, currentUser: CurrentUser): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState =
+	def apply(
+		studentTimetableEventSource:StudentTimetableEventSource,
+		scheduledMeetingEventSource: ScheduledMeetingEventSource,
+		student: StudentMember,
+		currentUser: CurrentUser
+	): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState =
 		new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource, scheduledMeetingEventSource, student, currentUser)
 			with ComposableCommand[Seq[EventOccurrence]]
 			with ViewStudentTimetablePermissions
@@ -83,7 +95,12 @@ object ViewStudentPersonalTimetableCommand {
 
 object PublicStudentPersonalTimetableCommand {
 
-	def apply(studentTimetableEventSource:StudentTimetableEventSource, scheduledMeetingEventSource: ScheduledMeetingEventSource, student: StudentMember, currentUser: CurrentUser): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState =
+	def apply(
+		studentTimetableEventSource:StudentTimetableEventSource,
+		scheduledMeetingEventSource: ScheduledMeetingEventSource,
+		student: StudentMember,
+		currentUser: CurrentUser
+	): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState =
 		new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource, scheduledMeetingEventSource, student, currentUser)
 			with Command[Seq[EventOccurrence]]
 			with Public

@@ -103,7 +103,13 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		}
 	}
 	
-	def saveOrUpdateAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, state: AttendanceState, user: CurrentUser): SmallGroupEventAttendance = {
+	def saveOrUpdateAttendance(
+		studentId: String,
+		event: SmallGroupEvent,
+		weekNumber: Int,
+		state: AttendanceState,
+		user: CurrentUser
+	): SmallGroupEventAttendance = {
 		val occurrence = getOrCreateSmallGroupEventOccurrence(event, weekNumber)
 		
 		val attendance = smallGroupDao.getAttendance(studentId, occurrence).getOrElse({

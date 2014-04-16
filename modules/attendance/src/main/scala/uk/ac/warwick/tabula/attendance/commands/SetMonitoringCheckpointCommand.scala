@@ -30,8 +30,12 @@ object SetMonitoringCheckpointCommand {
 			with AutowiringTermServiceComponent
 }
 
-abstract class SetMonitoringCheckpointCommand(val department: Department, val templateMonitoringPoint: MonitoringPoint, val user: CurrentUser, val routes: JList[Route])
-	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with SetMonitoringCheckpointState
+abstract class SetMonitoringCheckpointCommand(
+	val department: Department,
+	val templateMonitoringPoint: MonitoringPoint,
+	val user: CurrentUser,
+	val routes: JList[Route]
+)	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with SetMonitoringCheckpointState
 	with BindListener with PopulateOnForm with PopulateGroupedPoints with TaskBenchmarking {
 
 	self: MonitoringPointServiceComponent with UserLookupComponent with ProfileServiceComponent =>

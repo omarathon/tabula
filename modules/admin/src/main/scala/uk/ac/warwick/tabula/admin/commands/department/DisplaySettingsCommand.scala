@@ -4,15 +4,13 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.Department.Settings
-import uk.ac.warwick.tabula.services.{ AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent, ModuleAndDepartmentService }
+import uk.ac.warwick.tabula.services.{ AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent }
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 import uk.ac.warwick.tabula.system.permissions.{ PermissionsChecking, RequiresPermissionsChecking }
 import org.springframework.validation.{ BindingResult, Errors }
 import uk.ac.warwick.tabula.system.BindListener
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.services.RelationshipServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringRelationshipServiceComponent
 
@@ -48,7 +46,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 	var defaultGroupAllocationMethod = department.defaultGroupAllocationMethod.dbValue
 	var studentRelationshipDisplayed: JMap[String, JBoolean] =
 		JHashMap(department.studentRelationshipDisplayed.map {
-			case (id, bString) => (id -> java.lang.Boolean.valueOf(bString))
+			case (id, bString) => id -> java.lang.Boolean.valueOf(bString)
 		})
 
 	def populate() {
@@ -69,14 +67,16 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 		department.autoGroupDeregistration = autoGroupDeregistration
 		department.defaultGroupAllocationMethod = SmallGroupAllocationMethod(defaultGroupAllocationMethod)
 		department.weekNumberingSystem = weekNumberingSystem
-		department.studentRelationshipDisplayed = studentRelationshipDisplayed.asScala.map { case (id, bool) => (id -> Option(bool).getOrElse(false).toString) }.toMap
+		department.studentRelationshipDisplayed = studentRelationshipDisplayed.asScala.map {
+			case (id, bool) => id -> Option(bool).getOrElse(false).toString
+		}.toMap
 
 		moduleAndDepartmentService.save(department)
 		department
 	}
 
 	override def onBind(result: BindingResult) {
-		turnitinExcludeSmallMatches = (turnitinSmallMatchWordLimit != 0 || turnitinSmallMatchPercentageLimit != 0)
+		turnitinExcludeSmallMatches = turnitinSmallMatchWordLimit != 0 || turnitinSmallMatchPercentageLimit != 0
 	}
 
 	override def validate(errors: Errors) {

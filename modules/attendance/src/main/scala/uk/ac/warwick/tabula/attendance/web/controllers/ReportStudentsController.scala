@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.attendance.commands.report.{ReportStudentsState, ReportStudentsConfirmCommand, ReportStudentsChoosePeriodCommand}
 import javax.validation.Valid
 import org.springframework.validation.Errors
@@ -33,7 +33,7 @@ class ReportStudentsChoosePeriodController extends AttendanceController {
 			form(cmd)
 		} else {
 			val studentReportStatuses = cmd.apply()
-			Mav("report/students", "studentReportStatuses" -> studentReportStatuses, "unrecordedStudentsCount" -> studentReportStatuses.filter(_.unrecorded > 0).size)
+			Mav("report/students", "studentReportStatuses" -> studentReportStatuses, "unrecordedStudentsCount" -> studentReportStatuses.count(_.unrecorded > 0))
 		}
 	}
 
@@ -55,7 +55,11 @@ class ReportStudentsConfirmController extends AttendanceController {
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointReport]] with ReportStudentsState, errors: Errors, @PathVariable department: Department) = {
+	def submit(
+		@Valid @ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointReport]] with ReportStudentsState,
+		errors: Errors,
+		@PathVariable department: Department
+	) = {
 		if(errors.hasErrors) {
 			form(cmd)
 		} else {

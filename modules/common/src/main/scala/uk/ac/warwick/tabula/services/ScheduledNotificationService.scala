@@ -6,6 +6,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.ScheduledNotificationDao
 import uk.ac.warwick.tabula.helpers.ReflectionHelper
 import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.tabula.data.Transactions._
 
 
 trait ScheduledNotificationService {
@@ -41,7 +42,7 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService {
 	/**
 	 * This is called peridoically to convert uncompleted ScheduledNotifications into real instances of notification.
 	 */
-	override def processNotifications() = {
+	override def processNotifications() = transactional(readOnly = true) {
 		for (sn <- dao.notificationsToComplete) {
 			val notification = generateNotification(sn)
 			notificationService.push(notification)

@@ -20,7 +20,8 @@ object ScheduledMeetingRecordMissedCommand {
 
 }
 
-class ScheduledMeetingRecordMissedCommand (val meetingRecord: ScheduledMeetingRecord) extends CommandInternal[ScheduledMeetingRecord] with ScheduledMeetingRecordMissedState {
+class ScheduledMeetingRecordMissedCommand (val meetingRecord: ScheduledMeetingRecord)
+	extends CommandInternal[ScheduledMeetingRecord] with ScheduledMeetingRecordMissedState {
 
 	self: MeetingRecordServiceComponent =>
 

@@ -78,7 +78,8 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 	}
 
 	// Setting for MonitoringPointType.Meeting
-	def meetingRelationships = getStringSeqSetting(Settings.MeetingRelationships, Seq()).map(relationshipService.getStudentRelationshipTypeById(_).getOrElse(null))
+	def meetingRelationships = getStringSeqSetting(Settings.MeetingRelationships, Seq())
+		.map(relationshipService.getStudentRelationshipTypeById(_).getOrElse(null))
 	def meetingRelationships_= (relationships: Seq[StudentRelationshipType]):Unit =
 		settings += (Settings.MeetingRelationships -> relationships.map(_.id))
 	// Ugh. This sucks. But Spring always wants to use the Seq version if they share a method name, and therefore won't bind
@@ -107,7 +108,8 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 		}
 	}
 
-	def smallGroupEventModules = getStringSeqSetting(Settings.SmallGroupEventModules, Seq()).map(moduleAndDepartmentService.getModuleById(_).getOrElse(null))
+	def smallGroupEventModules = getStringSeqSetting(Settings.SmallGroupEventModules, Seq())
+		.map(moduleAndDepartmentService.getModuleById(_).getOrElse(null))
 	def smallGroupEventModules_= (modules: Seq[Module]) =
 		settings += (Settings.SmallGroupEventModules -> modules.map(_.id))
 	// See above
@@ -128,14 +130,16 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 		}
 	}
 
-	def assignmentSubmissionModules = getStringSeqSetting(Settings.AssignmentSubmissionModules, Seq()).map(moduleAndDepartmentService.getModuleById(_).getOrElse(null))
+	def assignmentSubmissionModules = getStringSeqSetting(Settings.AssignmentSubmissionModules, Seq())
+		.map(moduleAndDepartmentService.getModuleById(_).getOrElse(null))
 	def assignmentSubmissionModules_= (modules: Seq[Module]) =
 		settings += (Settings.AssignmentSubmissionModules -> modules.map(_.id))
 	// See above
 	def assignmentSubmissionModulesSpring_= (modules: JSet[Module]) =
 		assignmentSubmissionModules = modules.asScala.toSeq
 
-	def assignmentSubmissionAssignments = getStringSeqSetting(Settings.AssignmentSubmissionAssignments, Seq()).map(assignmentService.getAssignmentById(_).getOrElse(null))
+	def assignmentSubmissionAssignments = getStringSeqSetting(Settings.AssignmentSubmissionAssignments, Seq())
+		.map(assignmentService.getAssignmentById(_).getOrElse(null))
 	def assignmentSubmissionAssignments_= (assignments: Seq[Assignment]) =
 		settings += (Settings.AssignmentSubmissionAssignments -> assignments.map(_.id))
 	// See above

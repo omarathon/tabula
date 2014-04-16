@@ -427,13 +427,13 @@ $(function() {
 			var attachments = ""
 			var $targetFormSection = $form.find(".attachments")
 
-			$form.find(".big-textarea").val($.trim($summaryFeeback.find(".feedback-comments").contents(':not(h5)').text()))
-			$form.find("input[name='mark']").val($summaryFeeback.find(".mark").text())
-			$form.find("input[name='grade']").val($summaryFeeback.find(".grade").text())
+			$feedbackForm.find(".big-textarea").val($.trim($summaryFeeback.find(".feedback-comments").contents(':not(h5)').text()))
+			$feedbackForm.find("input[name='mark']").val($summaryFeeback.find(".mark").text())
+			$feedbackForm.find("input[name='grade']").val($summaryFeeback.find(".grade").text())
 
 			$(".copyFeedback").find("i").css("color", "#ffffff");
 			$button.find("i").css("color","#7DDB6B");
-			var $copyAlert = $form.find(".alert-success");
+			var $copyAlert = $feedbackForm.find(".alert-success");
 			$copyAlert.text("Feedback copied from "+feedbackHeading.charAt(0).toLowerCase() + feedbackHeading.substr(1)).show();
 
 			$('body').animate({ scrollTop: ($copyAlert.offset().top - ($copyAlert.height() * 2)) }, '500', 'swing', function() {

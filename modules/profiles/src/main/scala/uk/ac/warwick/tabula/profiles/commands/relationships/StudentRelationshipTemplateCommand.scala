@@ -21,7 +21,8 @@ import org.apache.poi.xssf.usermodel.XSSFDataValidation
 import scala.Option.option2Iterable
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
-class StudentRelationshipTemplateCommand(val department: Department, val relationshipType: StudentRelationshipType) extends Command[ExcelView] with ReadOnly with Unaudited {
+class StudentRelationshipTemplateCommand(val department: Department, val relationshipType: StudentRelationshipType)
+	extends Command[ExcelView] with ReadOnly with Unaudited {
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
 	
@@ -65,7 +66,7 @@ class StudentRelationshipTemplateCommand(val department: Department, val relatio
 				}
 				
 		val allAllocations = 
-			(existingAllocations ++ (unallocated.map { (_, Nil) }))
+			(existingAllocations ++ unallocated.map { (_, Nil) })
 			.sortBy { case (student, _) => student.lastName + ", " + student.firstName }
 
 		val workbook = new XSSFWorkbook()
@@ -83,7 +84,7 @@ class StudentRelationshipTemplateCommand(val department: Department, val relatio
 			row.createCell(1).setCellValue(student.fullName.getOrElse(""))
 			
 			val agentNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown agent name
-			agents.headOption.flatMap { _.fullName }.foreach(agentNameCell.setCellValue(_))
+			agents.headOption.flatMap { _.fullName }.foreach(agentNameCell.setCellValue)
 			
 			row.createCell(3).setCellFormula(
 				"IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
@@ -98,7 +99,7 @@ class StudentRelationshipTemplateCommand(val department: Department, val relatio
 		val agentSheet: XSSFSheet = workbook.createSheet(agentLookupSheetName)
 
 		for (agent <- agents) {
-			val row = agentSheet.createRow(agentSheet.getLastRowNum() + 1)
+			val row = agentSheet.createRow(agentSheet.getLastRowNum + 1)
 			row.createCell(0).setCellValue(agent.fullName.getOrElse(agent.universityId))
 			row.createCell(1).setCellValue(agent.universityId)
 		}
@@ -120,7 +121,9 @@ class StudentRelationshipTemplateCommand(val department: Department, val relatio
 	// Excel data validation - will only accept the values fed to this method, also puts a dropdown on each cell
 	def getDataValidation(agents: Seq[_], sheet: XSSFSheet, addressList: CellRangeAddressList) = {
 		val dvHelper = new XSSFDataValidationHelper(sheet)
-		val dvConstraint = dvHelper.createFormulaListConstraint(agentLookupSheetName + "!$A$2:$A$" + (agents.length + 1)).asInstanceOf[XSSFDataValidationConstraint]
+		val dvConstraint = dvHelper.createFormulaListConstraint(
+			agentLookupSheetName + "!$A$2:$A$" + (agents.length + 1)
+		).asInstanceOf[XSSFDataValidationConstraint]
 		val validation = dvHelper.createValidation(dvConstraint, addressList).asInstanceOf[XSSFDataValidation]
 
 		validation.setShowErrorBox(true)

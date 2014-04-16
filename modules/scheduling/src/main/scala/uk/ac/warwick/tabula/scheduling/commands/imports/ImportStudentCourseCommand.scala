@@ -128,14 +128,18 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 				.foreach { relationshipType =>
 					// only save the personal tutor if we can match the ID with a staff member in Tabula
 					val member = memberDao.getByUniversityId(row.tutorUniId) match {
-						case Some(mem: Member) => {
+						case Some(mem: Member) =>
 							logger.info("Got a personal tutor from SITS! SprCode: " + row.sprCode + ", tutorUniId: " + row.tutorUniId)
 
 							relationshipService.replaceStudentRelationships(relationshipType, studentCourseDetails, Seq(mem))
-						}
-						case _ => {
-							logger.warn("SPR code: " + row.sprCode + ": no staff member found for uni ID " + row.tutorUniId + " - not importing this personal tutor from SITS")
-						}
+						case _ =>
+							logger.warn(
+								"SPR code: "
+									+ row.sprCode
+									+ ": no staff member found for uni ID "
+									+ row.tutorUniId
+									+ " - not importing this personal tutor from SITS"
+							)
 					}
 				}
 		}

@@ -17,9 +17,11 @@ import scala.collection.mutable
  */
 trait PermissionsChecking extends PermissionsCheckingMethods  {
 	
-	type PermissionsCheckMultiMap = mutable.HashMap[Permission, mutable.Set[Option[PermissionsTarget]]] with mutable.MultiMap[Permission, Option[PermissionsTarget]]
+	type PermissionsCheckMultiMap = mutable.HashMap[Permission, mutable.Set[Option[PermissionsTarget]]]
+		with mutable.MultiMap[Permission, Option[PermissionsTarget]]
 	
-	private def newMap(): PermissionsCheckMultiMap = new mutable.HashMap[Permission, mutable.Set[Option[PermissionsTarget]]] with mutable.MultiMap[Permission, Option[PermissionsTarget]]
+	private def newMap(): PermissionsCheckMultiMap = new mutable.HashMap[Permission, mutable.Set[Option[PermissionsTarget]]]
+		with mutable.MultiMap[Permission, Option[PermissionsTarget]]
 	
 	var permissionsAnyChecks: PermissionsCheckMultiMap = newMap()
 	var permissionsAllChecks: PermissionsCheckMultiMap = newMap()
