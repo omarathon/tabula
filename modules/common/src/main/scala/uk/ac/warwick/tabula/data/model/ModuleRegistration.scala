@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 
 @Entity
 @AccessType("field")
-class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Logging {
+class ModuleRegistration() extends GeneratedId	with PermissionsTarget {
 
 	def this(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String) {
 		this()

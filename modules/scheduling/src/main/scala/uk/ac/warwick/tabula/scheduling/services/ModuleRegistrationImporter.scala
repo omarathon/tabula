@@ -49,7 +49,6 @@ class ModuleRegistrationImporterImpl extends ModuleRegistrationImporter with Tas
 			membersAndCategories.filter { _.member.userType == Student }.par.flatMap { mac =>
 				val universityId = mac.member.universityId
 				val params = HashMap(("universityId", universityId))
-				logger.debug(f"getting module registrations for $universityId")
 				queries.flatMap { query => query.executeByNamedParam(params) }.distinct.map { new ImportModuleRegistrationsCommand(_) }
 			}.seq
 		}
