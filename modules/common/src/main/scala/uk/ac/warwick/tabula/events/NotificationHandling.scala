@@ -1,25 +1,48 @@
 package uk.ac.warwick.tabula.events
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.NotificationService
-import uk.ac.warwick.tabula.commands.{Notifies, Command}
+import uk.ac.warwick.tabula.services.{ScheduledNotificationService, NotificationService}
+import uk.ac.warwick.tabula.commands.{SchedulesNotifications, Notifies, Command}
 import uk.ac.warwick.tabula.jobs.{Job, NotifyingJob}
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.data.model.Notification
+import uk.ac.warwick.tabula.helpers.Logging
 
-trait NotificationHandling {
+trait NotificationHandling extends Logging {
 
 	var notificationService = Wire.auto[NotificationService]
+	var scheduledNotificationService = Wire.auto[ScheduledNotificationService]
 
-	def notify[A, B](cmd: Command[A])(f: => A): A = cmd match {
-		case ns: Notifies[A, B] => {
-			val result = f
-			for (notification <- ns.emit(result)) {
-				notificationService.push(notification)
+	def notify[A, B](cmd: Command[A])(f: => A): A = {
+
+		val result = f
+
+		cmd match {
+			case ns: Notifies[A, B] => {
+				for (notification <- ns.emit(result)) {
+					notificationService.push(notification)
+				}
 			}
-			result
+			case _ =>
 		}
-		case _ => f
+
+		cmd match {
+			case sn: SchedulesNotifications[A] => {
+
+				scheduledNotificationService.removeInvalidNotifications(result)
+
+				for (scheduledNotification <- sn.scheduledNotifications(result)) {
+					if (scheduledNotification.scheduledDate.isBeforeNow) {
+						logger.warn("ScheduledNotification generated in the past, ignoring: " + scheduledNotification)
+					} else {
+						scheduledNotificationService.push(scheduledNotification)
+					}
+				}
+			}
+			case _ =>
+		}
+
+		result
 	}
 
 	/**

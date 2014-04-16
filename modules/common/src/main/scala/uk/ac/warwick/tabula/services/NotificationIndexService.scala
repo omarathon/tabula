@@ -14,8 +14,9 @@ import org.springframework.stereotype.Service
 import org.hibernate.ObjectNotFoundException
 import javax.persistence.DiscriminatorValue
 import org.apache.lucene.search._
-import org.apache.lucene.index.Term
+import org.apache.lucene.index.{IndexWriterConfig, Term}
 import uk.ac.warwick.tabula.JavaImports._
+import org.apache.lucene.index.sorter.{SortingMergePolicy, NumericDocValuesSorter, Sorter}
 
 class RecipientNotification(val notification: Notification[_,_], val recipient: User) {
 	def id = s"${notification.id}-${recipient.getUserId}"
@@ -77,7 +78,7 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 	override val IncrementalBatchSize: Int = 5000
 	override val MaxBatchSize: Int = 1000000
 
-	private def createAnalyzer = new StandardAnalyzer(LuceneVersion)
+	private def createAnalyzer = new StandardAnalyzer(IndexService.NotificationIndexLuceneVersion)
 
 	protected def toNotification(doc: Document): Option[Notification[_,_]] =
 		for {
@@ -108,6 +109,8 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 			doc.add(doubleField("priority", priority.toNumericalValue))
 			doc.add(booleanField("dismissed", notification.isDismissed(recipient)))
 			doc.add(dateField(UpdatedDateField, notification.created))
+			// Index date as a DocValue so we can do efficient sorts on it.
+			doc.add(docValuesField(UpdatedDateField, notification.created.getMillis))
 			Seq(doc)
 		} else {
 			debug("Skipping RecipientNotification because foundUser=%b and userId=%s", recipient.isFoundUser, recipient.getUserId)
@@ -131,5 +134,16 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 					Nil
 			}
 		}
+
+	/**
+	 * Set merge policy so that when segments of index are merged, it sorts them
+	 * by descending docvalue (date) at the same time. Then a correctly configured
+	 * search query can more efficiently look by the same sort
+	 */
+	override def configureIndexWriter(config: IndexWriterConfig) {
+		val sorter: Sorter = new NumericDocValuesSorter(UpdatedDateField, false)
+		val sortingMergePolicy = new SortingMergePolicy(config.getMergePolicy, sorter)
+		config.setMergePolicy(sortingMergePolicy)
+	}
 
 }

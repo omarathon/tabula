@@ -1,1 +1,1 @@
-<@fmt.p number=numReleasedFeedbacks singular="item" /> submissions for ${assignment.name} - ${assignment.module.code?upper_case} are ready for you to ${workflowVerb}.
+<@fmt.p number=numReleasedFeedbacks singular="submission" /> for ${assignment.name} - ${assignment.module.code?upper_case} are ready for you to ${workflowVerb}.

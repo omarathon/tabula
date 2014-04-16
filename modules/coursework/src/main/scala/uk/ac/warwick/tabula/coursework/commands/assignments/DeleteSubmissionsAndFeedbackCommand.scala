@@ -6,10 +6,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.userlookup.User
@@ -24,7 +21,8 @@ import uk.ac.warwick.tabula.data.model.Submission
  * Takes a list of student university IDs and deletes either all their submissions, or all their feedback, or both,
  * depending on the value of submissionOrFeedback
  */
-class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[(Seq[Submission], Seq[Feedback])] with SelfValidating {
+class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: Assignment)
+	extends Command[(Seq[Submission], Seq[Feedback])] with SelfValidating {
 	
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Delete, assignment)
@@ -44,8 +42,8 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	val FeedbackOnly = "feedbackOnly"
 	val SubmissionAndFeedback = "submissionAndFeedback"
 	
-	def shouldDeleteSubmissions = ( submissionOrFeedback == SubmissionAndFeedback || submissionOrFeedback == SubmissionOnly )
-	def shouldDeleteFeedback = ( submissionOrFeedback == SubmissionAndFeedback || submissionOrFeedback == FeedbackOnly )
+	def shouldDeleteSubmissions = submissionOrFeedback == SubmissionAndFeedback || submissionOrFeedback == SubmissionOnly
+	def shouldDeleteFeedback = submissionOrFeedback == SubmissionAndFeedback || submissionOrFeedback == FeedbackOnly
 
 	def applyInternal() = {			
 		val submissions = if (shouldDeleteSubmissions) {

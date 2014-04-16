@@ -352,6 +352,9 @@ $(function() {
 	$('#main-content').on('tabula.expandingTable.contentChanged', '.content-container', function(e) {
 		var $container = $(this);
 		var $form = $container.find('form');
+
+		$form.find('details').details(); // re-apply the details/summary tag fix for Firefox & IE post ajax insert
+
 		var contentId = $container.attr('data-contentid');
 		var $row = $('tr.itemContainer[data-contentid='+contentId+']');
 
@@ -412,6 +415,44 @@ $(function() {
 				resetFormValues($form, $row);
 			}
 		});
+
+		$('.feedback-comments').off('click').collapsible();
+
+		$(".copyFeedback").off("click").on("click", function(){
+
+			var $button = $(this);
+			var feedbackHeading = $button.closest(".well").find("h3").text();
+			var $summaryFeeback = $button.closest(".well");
+			var $feedbackForm = $button.closest(".content-container").find("form");
+			var attachments = ""
+			var $targetFormSection = $form.find(".attachments")
+
+			$feedbackForm.find(".big-textarea").val($.trim($summaryFeeback.find(".feedback-comments").contents(':not(h5)').text()))
+			$feedbackForm.find("input[name='mark']").val($summaryFeeback.find(".mark").text())
+			$feedbackForm.find("input[name='grade']").val($summaryFeeback.find(".grade").text())
+
+			$(".copyFeedback").find("i").css("color", "#ffffff");
+			$button.find("i").css("color","#7DDB6B");
+			var $copyAlert = $feedbackForm.find(".alert-success");
+			$copyAlert.text("Feedback copied from "+feedbackHeading.charAt(0).toLowerCase() + feedbackHeading.substr(1)).show();
+
+			$('body').animate({ scrollTop: ($copyAlert.offset().top - ($copyAlert.height() * 2)) }, '500', 'swing', function() {
+				var $summaryAttachments = $summaryFeeback.find('input[type="hidden"]');
+				if($summaryAttachments.length > 0) {
+					$summaryAttachments.each(function(){
+						var $this = $(this)
+						attachments += 	'<li id="attachment-' + $this.val() +'" class="attachment"><i class="icon-file-alt"></i>' +
+							'<span>' + $this.attr("name") +' </span>&nbsp;<i class="icon-remove-sign remove-attachment"></i>' +
+							'<input id="attachedFiles" name="attachedFiles" value="'+  $this.val() +'" type="hidden"></li>'
+					})
+					$targetFormSection.html(attachments)
+					$feedbackForm.find('.feedbackAttachments').slideDown();
+				} else {
+					attachments = '<input name="attachedFiles" type="hidden" />'
+					$feedbackForm.find('.feedbackAttachments').slideUp(function(){ $targetFormSection.html(attachments) })
+				}
+			})
+		})
 
 		/**
 		 * Helper for ajaxified forms in tabula expanding tables
@@ -645,11 +686,12 @@ $(function() {
 		var $li = $this.closest("li");
 		$li.find('input, a').remove();
 		$li.find('span').before('<i class="icon-remove"></i>&nbsp;').wrap('<del />');
+		$li.find('i').css('display', 'none');
 		var $ul = $li.closest('ul');
 
-		if (!$ul.next().is('.alert')) {
-			var alertMarkup = '<p class="alert pending-removal"><i class="icon-lightbulb"></i> Files marked for removal won\'t be deleted until you <samp>Save</samp>.</p>';
-			$ul.after(alertMarkup);
+		if (!$ul.find('li').last().is('.alert')) {
+			var alertMarkup = '<li class="alert pending-removal"><i class="icon-lightbulb"></i> Files marked for removal won\'t be deleted until you <samp>Save</samp>.</li>';
+			$ul.append(alertMarkup);
 		}
 
 		if($('input[name=attachedFiles]').length == 0){

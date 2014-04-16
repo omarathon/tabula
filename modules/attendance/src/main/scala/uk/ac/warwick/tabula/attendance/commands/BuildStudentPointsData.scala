@@ -31,7 +31,9 @@ trait BuildStudentPointsData extends MonitoringPointServiceComponent with TermSe
 		missedCounts: Seq[(StudentMember, Int)] = Seq(),
 		unrecordedCounts: Seq[(StudentMember, Int)] = Seq()
 	): Seq[StudentPointsData] = {
-		val pointSetsByStudent = benchmarkTask("Find point sets for students, by student") { monitoringPointService.findPointSetsForStudentsByStudent(students, academicYear) }
+		val pointSetsByStudent = benchmarkTask("Find point sets for students, by student") {
+			monitoringPointService.findPointSetsForStudentsByStudent(students, academicYear)
+		}
 		val allPoints = pointSetsByStudent.flatMap(_._2.points.asScala).toSeq
 		val checkpoints = benchmarkTask("Get checkpoints for all students") { monitoringPointService.getCheckpointsByStudent(allPoints) }
 		lazy val currentAcademicWeek = benchmarkTask("Get current academic week") { termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear) }

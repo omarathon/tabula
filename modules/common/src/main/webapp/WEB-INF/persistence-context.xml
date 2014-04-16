@@ -117,29 +117,21 @@
 	<beans profile="dev,production">
 	    <bean id="academicDataStore" class="org.springframework.jndi.JndiObjectFactoryBean">
 		   <property name="jndiName" value="java:/AcademicDS"/>
+		   <property name="lookupOnStartup" value="false" />
+		   <property name="proxyInterface" value="javax.sql.DataSource" />
 	    </bean>
 	    
 	    <bean id="sitsDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		   <property name="jndiName" value="java:/SITSDS"/>
+		   <property name="lookupOnStartup" value="false" />
+	       <property name="proxyInterface" value="javax.sql.DataSource" />
 	    </bean>
 	    
 	    <bean id="membershipDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		   <property name="jndiName" value="java:/MembershipDS"/>
+		   <property name="lookupOnStartup" value="false" />
+		   <property name="proxyInterface" value="javax.sql.DataSource" />
 	    </bean>
-		 
-			<!-- ADS doesn't support Unicode -->
-			<!-- <bean id="adsEncodingChecker" class="uk.ac.warwick.tabula.system.DataSourceDatabaseEncodingChecker"
-				c:dataSource-ref="academicDataStore"
-			 /> -->
-			 
-			<bean id="sitsEncodingChecker" class="uk.ac.warwick.tabula.system.DataSourceDatabaseEncodingChecker"
-				c:dataSource-ref="sitsDataSource"
-			 />
-			 
-			<!-- Membership doesn't support Unicode -->
-			<!-- <bean id="membershipEncodingChecker" class="uk.ac.warwick.tabula.system.DataSourceDatabaseEncodingChecker"
-				c:dataSource-ref="membershipDataSource"
-			 /> -->
 	</beans>
 	
 	<beans profile="sandbox,test">

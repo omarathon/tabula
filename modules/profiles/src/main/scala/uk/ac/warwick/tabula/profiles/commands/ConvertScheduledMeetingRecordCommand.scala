@@ -88,7 +88,10 @@ trait ConvertScheduledMeetingRecordPermissions extends RequiresPermissionsChecki
 	self: ConvertScheduledMeetingRecordState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.MeetingRecord.Create(meetingRecord.relationship.relationshipType), mandatory(meetingRecord.relationship.studentMember))
+		p.PermissionCheck(
+			Permissions.Profiles.MeetingRecord.Create(meetingRecord.relationship.relationshipType),
+			mandatory(meetingRecord.relationship.studentMember)
+		)
 	}
 }
 

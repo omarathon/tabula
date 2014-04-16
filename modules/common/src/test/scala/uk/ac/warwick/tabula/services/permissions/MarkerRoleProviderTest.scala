@@ -9,10 +9,10 @@ class MarkerRoleProviderTest extends TestBase {
 	
 	val provider = new MarkerRoleProvider
 	
-	val mw1 = Fixtures.seenSecondMarkingWorkflow("workflow is marker")
+	val mw1 = Fixtures.seenSecondMarkingLegacyWorkflow("workflow is marker")
 	mw1.firstMarkers.addUserId("cuscav")
 	
-	val mw2 = Fixtures.seenSecondMarkingWorkflow("workflow not marker")
+	val mw2 = Fixtures.seenSecondMarkingLegacyWorkflow("workflow not marker")
 	mw2.firstMarkers.addUserId("cusebr")
 	
 	val assignmentIsMarker1 = Fixtures.assignment("assignment is marker 1")	
@@ -43,23 +43,23 @@ class MarkerRoleProviderTest extends TestBase {
 	mod2.assignments.addAll(Seq(assignmentIsMarker2))
 	mod3.assignments.addAll(Seq(assignmentNotMarker))
 	
-	@Test def forAssignment = withUser("cuscav") {
+	@Test def forAssignment() = withUser("cuscav") {
 		provider.getRolesFor(currentUser, assignmentIsMarker1) should be (Seq(Marker(assignmentIsMarker1)))
 		provider.getRolesFor(currentUser, assignmentIsMarker2) should be (Seq(Marker(assignmentIsMarker2)))
 		provider.getRolesFor(currentUser, assignmentNotMarker) should be (Seq())
 	}
 	
-	@Test def forModule = withUser("cuscav") {
+	@Test def forModule() = withUser("cuscav") {
 		provider.getRolesFor(currentUser, mod1) should be (Seq(Marker(assignmentIsMarker1)))
 		provider.getRolesFor(currentUser, mod2) should be (Seq(Marker(assignmentIsMarker2)))
 		provider.getRolesFor(currentUser, mod3) should be (Seq())
 	}
 	
-	@Test def forDepartment = withUser("cuscav") {
+	@Test def forDepartment() = withUser("cuscav") {
 		provider.getRolesFor(currentUser, dept) should be (Seq(Marker(assignmentIsMarker1), Marker(assignmentIsMarker2)))
 	}
 	
-	@Test def handlesDefault = withUser("cuscav") {
+	@Test def handlesDefault() = withUser("cuscav") {
 		provider.getRolesFor(currentUser, Fixtures.feedback()) should be (Seq())
 	}
 

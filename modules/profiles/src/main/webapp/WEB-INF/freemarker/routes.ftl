@@ -56,6 +56,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro purge_meeting_record meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/purge" /></#macro>
 <#macro save_meeting_approval meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/approval" /></#macro>
 
+<#macro download_meeting_record_attachment relationshipType meeting><@_u page="/${relationshipType.urlPart}/meeting/${meeting.id}/"/></#macro>
+
 <#macro create_scheduled_meeting_record scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/create" /></#macro>
 <#macro edit_scheduled_meeting_record meetingRecord scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/edit" /></#macro>
 <#macro choose_action_scheduled_meeting_record meetingRecord scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/chooseaction" /></#macro>
@@ -72,6 +74,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro delete_member_note memberNote ><@_u page="/${memberNote.member.universityId}/note/${memberNote.id}/delete" /></#macro>
 <#macro restore_member_note memberNote ><@_u page="/${memberNote.member.universityId}/note/${memberNote.id}/restore" /></#macro>
 <#macro purge_member_note memberNote ><@_u page="/${memberNote.member.universityId}/note/${memberNote.id}/purge" /></#macro>
+<#macro download_member_note_attachment memberNote><@_u page="/notes/${memberNote.id}/" /></#macro>
 
 <#macro meeting_will_create_checkpoint student><@_u page="/profile/${student.universityId}/meetingcheckpoint" context="/attendance" /></#macro>
 

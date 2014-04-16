@@ -18,7 +18,13 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.attendance.commands.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes, GroupMonitoringPointsByTerm}
 
 object AddMonitoringPointSetCommand {
-	def apply(user: CurrentUser, dept: Department, academicYear: AcademicYear, existingSetOption: Option[MonitoringPointSet], template: Option[MonitoringPointSetTemplate]) =
+	def apply(
+		user: CurrentUser,
+		dept: Department,
+		academicYear: AcademicYear,
+		existingSetOption: Option[MonitoringPointSet],
+		template: Option[MonitoringPointSetTemplate]
+	) =
 		new AddMonitoringPointSetCommand(user, dept, academicYear, existingSetOption, template)
 			with ComposableCommand[Seq[MonitoringPointSet]]
 			with AutowiringSecurityServicePermissionsAwareRoutes
@@ -31,8 +37,13 @@ object AddMonitoringPointSetCommand {
 }
 
 
-abstract class AddMonitoringPointSetCommand(val user: CurrentUser, val dept: Department, val academicYear: AcademicYear, val existingSetOption: Option[MonitoringPointSet], val template: Option[MonitoringPointSetTemplate])
-	extends CommandInternal[Seq[MonitoringPointSet]] with AddMonitoringPointSetState {
+abstract class AddMonitoringPointSetCommand(
+	val user: CurrentUser,
+	val dept: Department,
+	val academicYear: AcademicYear,
+	val existingSetOption: Option[MonitoringPointSet],
+	val template: Option[MonitoringPointSetTemplate]
+)	extends CommandInternal[Seq[MonitoringPointSet]] with AddMonitoringPointSetState {
 
 	self: MonitoringPointServiceComponent =>
 

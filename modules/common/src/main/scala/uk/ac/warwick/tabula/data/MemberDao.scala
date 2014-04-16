@@ -37,7 +37,11 @@ trait MemberDao {
 	
 	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[String]
 	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember]
-	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agentId: String, restrictions: Seq[ScalaRestriction]): Seq[StudentMember]
+	def getStudentsByAgentRelationshipAndRestrictions(
+		relationshipType: StudentRelationshipType,
+		agentId: String,
+		restrictions: Seq[ScalaRestriction]
+	): Seq[StudentMember]
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]): Int
 	
 	def getAllModesOfAttendance(department: Department): Seq[ModeOfAttendance]
@@ -250,7 +254,12 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		idCriteria.project[String](distinct(property("universityId"))).seq
 	}
 
-	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember] = {
+	def findStudentsByRestrictions(
+		restrictions: Iterable[ScalaRestriction],
+		orders: Iterable[ScalaOrder],
+		maxResults: Int,
+		startResult: Int
+	): Seq[StudentMember] = {
 		val universityIds = findUniversityIdsByRestrictions(restrictions)
 
 		if (universityIds.isEmpty)
@@ -263,7 +272,11 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		c.setMaxResults(maxResults).setFirstResult(startResult).distinct.seq
 	}
 
-	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agentId: String, restrictions: Seq[ScalaRestriction]): Seq[StudentMember] = {
+	def getStudentsByAgentRelationshipAndRestrictions(
+		relationshipType: StudentRelationshipType,
+		agentId: String,
+		restrictions: Seq[ScalaRestriction]
+	): Seq[StudentMember] = {
 		if (relationshipType == null) Nil
 		else {
 			val d = DetachedCriteria.forClass(classOf[MemberStudentRelationship])

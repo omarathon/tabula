@@ -9,6 +9,9 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
 import org.hibernate.annotations.AccessType
 import javax.persistence.Entity
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.UserLookupService
 
 @Entity @AccessType("field")
 class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityReference {
@@ -19,18 +22,24 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 		feedback = parent
 	}
 
-	def getFeedbackPosition = feedback.getFeedbackPosition(this)
+	@transient
+	var userLookup = Wire[UserLookupService]("userLookup")
+
+	def getFeedbackPosition: FeedbackPosition = feedback.getFeedbackPosition(this)
 
 	def getMarkerUsercode: Option[String] = {
 		val student = feedback.universityId
 		val assignment = feedback.assignment
 		val workflow = assignment.markingWorkflow
 		getFeedbackPosition match {
-			case Some(FirstFeedback) => workflow.getStudentsFirstMarker(assignment, student)
-			case Some(SecondFeedback) => workflow.getStudentsSecondMarker(assignment, student)
+			case FirstFeedback => workflow.getStudentsFirstMarker(assignment, student)
+			case SecondFeedback => workflow.getStudentsSecondMarker(assignment, student)
+			case ThirdFeedback => workflow.getStudentsFirstMarker(assignment, student)
 			case _ => None
 		}
 	}
+
+	def getMarkerUser: User = userLookup.getUserByUserId(getMarkerUsercode.get)
 
 	@OneToOne(fetch = FetchType.LAZY, optional = false, cascade=Array())
 	@JoinColumn(name = "feedback_id")
@@ -78,6 +87,8 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	def hasGrade: Boolean = grade.isDefined
 
 	def hasFeedback = attachments != null && attachments.size() > 0
+
+	def hasComments = customFormValues.exists(_.value != null)
 
 	override def toEntityReference = new MarkerFeedbackEntityReference().put(this)
 }

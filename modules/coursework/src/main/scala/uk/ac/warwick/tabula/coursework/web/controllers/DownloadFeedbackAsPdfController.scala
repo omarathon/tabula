@@ -32,19 +32,25 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
 	
 	var feedbackService = Wire[FeedbackService]
 	
-	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser): DownloadFeedbackAsPdfCommand = {
-		// We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
-		if (!user.loggedIn) {
-			throw new PermissionDeniedException(user, Permissions.Feedback.Read, assignment)
-		}
+	@ModelAttribute def command(
+		@PathVariable("module") module: Module,
+		@PathVariable("assignment") assignment: Assignment,
+		user: CurrentUser): DownloadFeedbackAsPdfCommand = {
+			// We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
+			if (!user.loggedIn) {
+				throw new PermissionDeniedException(user, Permissions.Feedback.Read, assignment)
+			}
 		
-		DownloadFeedbackAsPdfCommand(module, assignment, mandatory(feedbackService.getFeedbackByUniId(assignment, user.universityId).filter(_.released)))
+			DownloadFeedbackAsPdfCommand(module, assignment, mandatory(feedbackService.getFeedbackByUniId(assignment, user.universityId).filter(_.released)))
 	}
 		
 	@RequestMapping
 	def viewAsPdf(command: DownloadFeedbackAsPdfCommand, user: CurrentUser) = {
-		new PDFView("feedback.pdf", "/WEB-INF/freemarker/admin/assignments/markerfeedback/feedback-download.ftl", Map("feedback" -> command.apply(), "user"-> user))
-			with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent
+		new PDFView(
+			"feedback.pdf",
+			"/WEB-INF/freemarker/admin/assignments/markerfeedback/feedback-download.ftl",
+			Map("feedback" -> command.apply(), "user"-> user)
+		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent
 	}
 
 }
@@ -57,7 +63,8 @@ object DownloadFeedbackAsPdfCommand {
 			with DownloadFeedbackAsPdfAudit
 }
 
-class DownloadFeedbackAsPdfCommandInternal(val module: Module, val assignment: Assignment, val feedback: Feedback) extends CommandInternal[Feedback] with DownloadFeedbackAsPdfState {
+class DownloadFeedbackAsPdfCommandInternal(val module: Module, val assignment: Assignment, val feedback: Feedback)
+	extends CommandInternal[Feedback] with DownloadFeedbackAsPdfState {
 	override def applyInternal() = feedback
 }
 

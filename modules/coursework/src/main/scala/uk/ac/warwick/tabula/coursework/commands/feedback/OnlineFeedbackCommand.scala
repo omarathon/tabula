@@ -29,11 +29,14 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 
 	def applyInternal() = {
 		val studentsWithSubmissionOrFeedback = 
-			userLookup.getUsersByWarwickUniIds(assignment.getUniIdsWithSubmissionOrFeedback.filter { _.hasText }.toSeq).values.filter { _.isFoundUser }.toSeq.sortBy { _.getWarwickId }
+			userLookup.getUsersByWarwickUniIds(
+				assignment.getUniIdsWithSubmissionOrFeedback.filter { _.hasText }.toSeq
+			).values.filter { _.isFoundUser }.toSeq.sortBy { _.getWarwickId }
 
 	  val studentsWithSubmissionOrFeedbackUniversityIds = studentsWithSubmissionOrFeedback.map(_.getWarwickId)
 
-		val unsubmittedStudents = assignment.membershipInfo.items.map(_.user).filterNot { x => studentsWithSubmissionOrFeedbackUniversityIds.contains(x.getWarwickId) }
+		val unsubmittedStudents =
+			assignment.membershipInfo.items.map(_.user).filterNot { x => studentsWithSubmissionOrFeedbackUniversityIds.contains(x.getWarwickId) }
 
 		val students = studentsWithSubmissionOrFeedback ++ unsubmittedStudents
 		students.map { student =>
@@ -78,12 +81,11 @@ abstract class OnlineMarkerFeedbackCommand(val module: Module, val assignment: A
 			val student = userLookup.getUserByWarwickUniId(submission.universityId)
 			val hasSubmission = true
 			val feedback = feedbackService.getFeedbackByUniId(assignment, submission.universityId)
-			val markerFeedback = assignment.getMarkerFeedback(submission.universityId, marker)
+			val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(submission.universityId, marker)
 
 			val (hasFeedback, hasCompletedFeedback, hasRejectedFeedback) = markerFeedback match {
-				case Some(mf) => {
+				case Some(mf) =>
 					(mf.hasContent, mf.state == MarkingCompleted,  mf.state == Rejected)
-				}
 				case None => (false, false, false)
 			}
 

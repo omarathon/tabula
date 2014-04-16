@@ -25,7 +25,6 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import org.springframework.beans.factory.DisposableBean
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
-import scala.collection.GenTraversableOnce
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import language.implicitConversions
 
@@ -87,6 +86,13 @@ trait OpensLuceneDirectory {
 	protected def openDirectory(): Directory
 }
 
+object IndexService {
+	final val TabulaLuceneVersion = Version.LUCENE_47
+	final val AuditEventIndexLuceneVersion = TabulaLuceneVersion
+	final val NotificationIndexLuceneVersion = TabulaLuceneVersion
+	final val ProfileIndexLuceneVersion = TabulaLuceneVersion
+}
+
 abstract class AbstractIndexService[A]
 		extends CommonQueryMethods[A]
 			with QueryHelpers[A]
@@ -97,8 +103,6 @@ abstract class AbstractIndexService[A]
 			with InitializingBean
 			with Logging
 			with DisposableBean {
-
-	final val LuceneVersion = Version.LUCENE_40
 
 	// largest batch of items we'll load in at once.
 	val MaxBatchSize: Int
@@ -148,10 +152,10 @@ abstract class AbstractIndexService[A]
 		}
 
 	// QueryParser isn't thread safe, hence why this is a def
-	def parser = new QueryParser(LuceneVersion, "", analyzer)
+	def parser = new QueryParser(IndexService.TabulaLuceneVersion, "", analyzer)
 
 
-	override def afterPropertiesSet {
+	override def afterPropertiesSet() {
 		if (!indexPath.exists) {
 			if (createMissingDirectories) indexPath.mkdirs
 			else throw new IllegalStateException("Index path missing", new FileNotFoundException(indexPath.getAbsolutePath))
@@ -161,17 +165,17 @@ abstract class AbstractIndexService[A]
 		// don't want this. http://www.lifeinthefastlane.ca/wp-content/uploads/2008/12/santa_claus_13sfw.jpg
 		BooleanQuery.setMaxClauseCount(Integer.MAX_VALUE)
 
-		initialiseSearching
+		initialiseSearching()
 
 		// Reopen the index reader periodically, else it won't notice changes.
 		executor.scheduleAtFixedRate(Runnable {
 			//logger.debug("Trying to reopen index")
 			try reopen catch { case e: Throwable => logger.error("Index service reopen failed", e) }
-			try prune catch { case e: Throwable => logger.error("Pruning old searchers failed", e) }
+			try prune() catch { case e: Throwable => logger.error("Pruning old searchers failed", e) }
 		}, IndexReopenPeriodInSeconds, IndexReopenPeriodInSeconds, TimeUnit.SECONDS)
 	}
 
-	override def destroy {
+	override def destroy() {
 		executor.shutdown()
 	}
 
@@ -194,7 +198,7 @@ abstract class AbstractIndexService[A]
 					logger.debug("No new items to index.")
 				} else {
 					if (debugEnabled) logger.debug("Indexing items from " + startDate)
-					doIndexItems(newItems, true)
+					doIndexItems(newItems, isIncremental = true)
 				}
 			}
 			lastIndexDuration = Some(new Duration(stopWatch.getTotalTimeMillis))
@@ -206,7 +210,7 @@ abstract class AbstractIndexService[A]
 
 	def indexFrom(startDate: DateTime) = transactional(readOnly = true) {
 		ifNotIndexing {
-			doIndexItems(listNewerThan(startDate, MaxBatchSize), true)
+			doIndexItems(listNewerThan(startDate, MaxBatchSize), isIncremental = true)
 		}
 	}
 
@@ -214,19 +218,23 @@ abstract class AbstractIndexService[A]
 	 * Indexes a specific given list of items.
 	 */
 	def indexItems(items: Traversable[A]) = transactional(readOnly = true) {
-		ifNotIndexing { doIndexItems(items, false) }
+		ifNotIndexing { doIndexItems(items, isIncremental = false) }
 	}
 
-	def indexItemsWithoutNewTransaction(items: Traversable[A]) =  {
-		ifNotIndexing { doIndexItems(items, false) }
+	def indexItemsWithoutNewTransaction(items: Traversable[A]) = {
+		ifNotIndexing { doIndexItems(items, isIncremental = false) }
 	}
+
+	// Overridable - configure index writer
+	def configureIndexWriter(config: IndexWriterConfig): Unit = {}
 
 	private def doIndexItems(items: Traversable[A], isIncremental: Boolean) {
 		logger.debug("Writing to the index at " + indexPath + " with analyzer " + indexAnalyzer)
-		val writerConfig = new IndexWriterConfig(LuceneVersion, indexAnalyzer)
+		val writerConfig = new IndexWriterConfig(IndexService.TabulaLuceneVersion, indexAnalyzer)
+		configureIndexWriter(writerConfig)
 		closeThis(new IndexWriter(openDirectory(), writerConfig)) { writer =>
 			for (item <- items) {
-				tryDescribe(s"indexing ${item}") {
+				tryDescribe(s"indexing $item") {
 					if (isIncremental) {
 						doUpdateMostRecent(item)
 					}
@@ -265,7 +273,7 @@ abstract class AbstractIndexService[A]
 				.map { v => new DateTime(v.toLong).minusMinutes(10) }
 				.getOrElse {
 					logger.info("No recent document found, indexing since Tabula year zero")
-					new DateTime(yearZero.toInt,1,1,0,0)
+					new DateTime(yearZero,1,1,0,0)
 				}
 		}
 	}
@@ -339,7 +347,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 	 * @param since Optional lower bound for date - recommended if possible, as it is faster.
 	 */
 	def newest(since: DateTime = null): Option[Document] = {
-		initialiseSearching
+		initialiseSearching()
 
 		if (searcherManager == null) { // usually if we've never indexed before, no index file
 			None
@@ -353,7 +361,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 		}
 	}
 
-	protected def initialiseSearching = {
+	protected def initialiseSearching() = {
 		if (searcherManager == null) {
 			try {
 				logger.debug("Opening a new searcher manager at " + indexPath)
@@ -379,16 +387,16 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 	protected def reopen = {
 		//logger.debug("Reopening index")
 
-		initialiseSearching
+		initialiseSearching()
 		if (searcherManager != null) searcherManager.maybeRefresh
 	}
 
 	/**
-	 * Remove saved searchers over 20 minutes old
+	 * Remove saved searchers over 3 minutes old
 	 */
-	protected def prune = {
-		val ageInSeconds = 20*60
-		initialiseSearching
+	protected def prune() = {
+		val ageInSeconds = 3*60
+		initialiseSearching()
 		if (searcherLifetimeManager != null) searcherLifetimeManager.prune(new PruneByAge(ageInSeconds))
 	}
 
@@ -399,7 +407,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 		doPagingSearch(query, Option(max), Option(sort), last, token)
 
 	private def doSearch(query: Query, max: Option[Int], sort: Sort, offset: Int): RichSearchResults = {
-		initialiseSearching
+		initialiseSearching()
 		if (searcherManager == null) {
 			logger.warn("Tried to search but no searcher manager is available")
 			Seq.empty
@@ -408,9 +416,9 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 
 			val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
 			val results =
-				if (sort == null) searcher.search(query, null, offset+maxResults)
+				if (sort == null) searcher.search(query, null, offset + maxResults)
 				else if (searcher.getIndexReader.maxDoc <= 0) new TopDocs(0, Array(), 0f)
-				else searcher.search(query, null, offset+maxResults, sort)
+				else searcher.search(query, null, offset + maxResults, sort)
 			transformResults(searcher, results, offset, maxResults)
 		}
 	}
@@ -428,7 +436,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 
 	private def doPagingSearch(query: Query, max: Option[Int], sort: Option[Sort], lastDoc: Option[ScoreDoc], token: Option[Long]): PagingSearchResult = {
 		// guard
-		initialiseSearching
+		initialiseSearching()
 
 		val (newToken, searcher) = acquireSearcher(token)
 		if (searcher == null)
@@ -449,10 +457,9 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 			val totalHits = results.totalHits
 			hits match {
 				case Array() => PagingSearchResult(Nil, None, newToken, 0)
-				case _ => {
+				case _ =>
 					val hitsOnThisPage = hits.length
 					PagingSearchResult(hits.toStream.map (hit => searcher.doc(hit.doc)).toList, Option(hits(hitsOnThisPage-1)), newToken, totalHits)
-				}
 			}
 		}
 		finally searcherLifetimeManager.release(searcher)
@@ -478,7 +485,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 			}
 		}
 
-		token.map(existingSearcher).getOrElse(newSearcher)
+		token.map(existingSearcher).getOrElse(newSearcher())
 	}
 }
 
@@ -498,6 +505,8 @@ trait FieldGenerators {
 	}
 
 	protected def dateField(name: String, value: DateTime) = new LongField(name, value.getMillis, Store.YES)
+
+	protected def docValuesField(name: String, value: Long) = new NumericDocValuesField(name, value)
 
 	protected def doubleField(name: String, value: Double) = new DoubleField(name, value, Store.YES)
 

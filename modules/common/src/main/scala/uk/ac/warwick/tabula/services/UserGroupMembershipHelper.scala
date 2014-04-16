@@ -129,7 +129,9 @@ trait UserGroupMembershipHelperLookup {
 
 	// To override in tests
 	protected def getUser(usercode: String) = userLookup.getUserByUserId(usercode)
-	protected def getWebgroups(usercode: String): Seq[String] = usercode.maybeText.map { usercode => userLookup.getGroupService.getGroupsNamesForUser(usercode).asScala }.getOrElse(Nil)
+	protected def getWebgroups(usercode: String): Seq[String] = usercode.maybeText.map {
+		usercode => userLookup.getGroupService.getGroupsNamesForUser(usercode).asScala
+	}.getOrElse(Nil)
 
 	protected def findByInternal(user: User): Seq[String] = {
 		val groupsByUser = session.createQuery(groupsByUserSql)
@@ -179,7 +181,12 @@ class UserGroupMembershipCacheBean extends ScalaFactoryBean[Cache[String, Array[
 	def cacheName = runtimeClass.getSimpleName + "-" + path.replace(".","-")
 
 	def createInstance = {
-		Caches.newCache(cacheName, new UserGroupMembershipCacheFactory(runtimeClass, path, checkUniversityIds), Days.ONE.toStandardSeconds.getSeconds, cacheStrategy)
+		Caches.newCache(
+			cacheName,
+			new UserGroupMembershipCacheFactory(runtimeClass, path, checkUniversityIds),
+			Days.ONE.toStandardSeconds.getSeconds,
+			cacheStrategy
+		)
 	}
 
 	override def afterPropertiesSet() {
@@ -237,7 +244,8 @@ class UserGroupMembershipHelperCacheBusterMessage {
 	@BeanProperty var usercode: String = _
 }
 
-class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private val helper: UserGroupMembershipHelperMethods[_]) extends UnspecifiedTypeUserGroup with KnownTypeUserGroup {
+class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private val helper: UserGroupMembershipHelperMethods[_])
+	extends UnspecifiedTypeUserGroup with KnownTypeUserGroup {
 
 	// FIXME this isn't really an optional wire, it's just represented as such to make testing easier
 	var cacheService = Wire.option[UserGroupMembershipHelperCacheService]
@@ -280,31 +288,36 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
 		underlying.knownType.unexcludeUserId(userId)
 		cacheService.foreach { _.invalidate(helper, getUserFromUserId(userId)) }
 	}
-	def staticUserIds_=(userIds: Seq[String]) = {
-		underlying.knownType.staticUserIds = userIds
+	def staticUserIds_=(newIds: Seq[String]) = {
+		val allIds = (underlying.knownType.staticUserIds ++ newIds).distinct
 
-		for (cacheService <- cacheService; user <- userIds.map(getUserFromUserId))
+		underlying.knownType.staticUserIds = newIds
+
+		for (cacheService <- cacheService; user <- allIds.map(getUserFromUserId))
 			cacheService.invalidate(helper, user)
 	}
-	def includedUserIds_=(userIds: Seq[String]) = {
-		underlying.knownType.includedUserIds = userIds
+	def includedUserIds_=(newIds: Seq[String]) = {
+		val allIds = (underlying.knownType.includedUserIds ++ newIds).distinct
 
-		for (cacheService <- cacheService; user <- userIds.map(getUserFromUserId))
+		underlying.knownType.includedUserIds = newIds
+
+		for (cacheService <- cacheService; user <- allIds.map(getUserFromUserId))
 			cacheService.invalidate(helper, user)
 	}
-	def excludedUserIds_=(userIds: Seq[String]) = {
-		underlying.knownType.excludedUserIds = userIds
+	def excludedUserIds_=(newIds: Seq[String]) = {
+		val allIds = (underlying.knownType.excludedUserIds ++ newIds).distinct
 
-		for (cacheService <- cacheService; user <- userIds.map(getUserFromUserId))
+		underlying.knownType.excludedUserIds = newIds
+
+		for (cacheService <- cacheService; user <- allIds.map(getUserFromUserId))
 			cacheService.invalidate(helper, user)
 	}
 	def copyFrom(otherGroup: UnspecifiedTypeUserGroup) = {
-		val oldIds = underlying.knownType.members
-		val newIds = otherGroup.knownType.members
+		val allIds = (underlying.knownType.members ++ otherGroup.knownType.members).distinct
 
 		underlying.copyFrom(otherGroup)
 
-		for (cacheService <- cacheService; user <- (oldIds ++ newIds).distinct.map(getUserFromUserId))
+		for (cacheService <- cacheService; user <- allIds.map(getUserFromUserId))
 			cacheService.invalidate(helper, user)
 	}
 
@@ -318,7 +331,7 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
 	def hasSameMembersAs(other: UnspecifiedTypeUserGroup) = underlying.hasSameMembersAs(other)
 	def duplicate() = new UserGroupCacheManager(underlying.duplicate(), helper) // Should this be wrapped or not?
 	val universityIds = underlying.universityIds
-	def knownType = underlying.knownType
+	def knownType = this
 	def allIncludedIds = underlying.knownType.allIncludedIds
 	def allExcludedIds = underlying.knownType.allExcludedIds
 	def members = underlying.knownType.members

@@ -4,12 +4,11 @@ import scala.collection.JavaConverters._
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.AssignmentMembershipDao
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentGroup, Assignment, Department, Module, UnspecifiedTypeUserGroup, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.userlookup.User
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-
 
 trait AssignmentMembershipService {
 	def assignmentManualMembershipHelper: UserGroupMembershipHelperMethods[Assignment]

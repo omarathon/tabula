@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.jobs.TestingJob
+import uk.ac.warwick.tabula.web.Routes
 
 class JobQuery {
 	var page: Int = 0
@@ -42,9 +43,10 @@ class JobController extends BaseController {
 
 	@RequestMapping(Array("/create-test"))
 	def test = {
-		val id = jobService.add(Some(user), TestingJob("sysadmin test", TestingJob.DefaultDelay)).id
+		val jobInstance = jobService.add(Some(user), TestingJob("sysadmin test", TestingJob.DefaultDelay))
+		val id = jobInstance.id
 		testStatus(id)
-		Redirect("/sysadmin/jobs/job-status?id=" + id)
+		Redirect(Routes.sysadmin.jobs.status(jobInstance))
 	}
 
 	@RequestMapping(Array("/job-status"))
@@ -59,7 +61,7 @@ class JobController extends BaseController {
 	def kill(@RequestParam("id") id: String) = {
 		val instance = jobService.getInstance(id)
 		jobService.kill(instance.get)
-		Redirect("/sysadmin/jobs/list")
+		Redirect(Routes.sysadmin.jobs.list)
 	}
 	
 	@RequestMapping(Array("/run"))
@@ -68,7 +70,7 @@ class JobController extends BaseController {
 		val job = jobService.findJob(instance.jobType).get
 		
 		jobService.processInstance(instance, job)
-		Redirect("/sysadmin/jobs/list")
+		Redirect(Routes.sysadmin.jobs.list)
 	}
 
 }

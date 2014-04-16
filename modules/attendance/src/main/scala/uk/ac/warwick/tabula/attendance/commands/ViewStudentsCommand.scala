@@ -94,7 +94,7 @@ abstract class ViewStudentsCommand(val department: Department, val academicYearO
 	def onBind(result: BindingResult) {
 		// Add all non-withdrawn codes to SPR statuses by default
 		if (sprStatuses.isEmpty) {
-			allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach { sprStatuses.add }
+			allSprStatuses.find { _.code == "C" }.foreach { sprStatuses.add }
 		}
 
 		// Filter chosen routes by those that the user has permission to see
@@ -138,13 +138,22 @@ trait ViewStudentsState extends FiltersStudents with PermissionsAwareRoutes {
 
 	var courseTypes: JList[CourseType] = JArrayList()
 	var routes: JList[Route] = JArrayList()
-	lazy val visibleRoutes = routesForPermission(user, Permissions.MonitoringPoints.View, department)
+	lazy val visibleRoutes =
+		if (department.routes.isEmpty) {
+			routesForPermission(user, Permissions.MonitoringPoints.View, department.rootDepartment)
+		} else routesForPermission(user, Permissions.MonitoringPoints.View, department)
 	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
 	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()
 	var modules: JList[Module] = JArrayList()
 
 	// For Attendance Monitoring, we shouldn't consider sub-departments
-	override lazy val allRoutes = department.routes.asScala.sorted(Route.DegreeTypeOrdering)
+	// but we will use the root department if the current dept has no routes at all
+	override lazy val allRoutes =
+		if (department.routes.isEmpty) {
+			department.rootDepartment.routes.asScala.sorted(Route.DegreeTypeOrdering)
+		} else department.routes.asScala.sorted(Route.DegreeTypeOrdering)
+
+
 	lazy val canSeeAllRoutes = visibleRoutes.size == allRoutes.size
 }

@@ -39,7 +39,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 	}
 
 	def newHeronNotification(agent: User, heron: Heron) = {
-		Notification.init(new HeronWarningNotification, agent, heron, heron)
+		Notification.init(new HeronWarningNotification, agent, heron)
 	}
 
 	@Test def saveAndFetch() {
@@ -59,8 +59,6 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 			retrievedNotification.title should be ("You all need to know. Herons would love to kill you in your sleep")
 			retrievedNotification.url should be ("/beware/herons")
 			retrievedNotification.item.entity should be(heron)
-			retrievedNotification.target should not be(null)
-			retrievedNotification.target.entity should be(heron)
 			retrievedNotification.recipient should be (victim)
 			retrievedNotification.content.template should be ("/WEB-INF/freemarker/notifications/i_really_hate_herons.ftl")
 

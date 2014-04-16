@@ -23,8 +23,13 @@ object ViewAgentsStudentsCommand {
 			with ReadOnly with Unaudited
 }
 
-abstract class ViewAgentsStudentsCommand(val department: Department, val agent: Member, val relationshipType: StudentRelationshipType, val academicYearOption: Option[AcademicYear])
-	extends CommandInternal[Seq[StudentPointsData]] with ViewAgentsStudentsState with BuildStudentPointsData {
+abstract class ViewAgentsStudentsCommand(
+	val department: Department,
+	val agent: Member,
+	val relationshipType: StudentRelationshipType,
+	val academicYearOption: Option[AcademicYear]
+)	extends CommandInternal[Seq[StudentPointsData]] with ViewAgentsStudentsState with BuildStudentPointsData {
+
 	self: RelationshipServiceComponent =>
 
 	def applyInternal() = {

@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.attendance.web.controllers
 
 import uk.ac.warwick.tabula.data.model.{MeetingFormat, MeetingRecord, StudentMember}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import org.springframework.web.bind.annotation.{PathVariable, RequestMapping, ModelAttribute}
 import uk.ac.warwick.tabula.commands.{Unaudited, ReadOnly, CommandInternal, ComposableCommand, Appliable}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, AutowiringRelationshipServiceComponent, RelationshipServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
 import scala.collection.mutable
 import org.springframework.stereotype.Controller
@@ -33,7 +34,7 @@ class ViewMeetingsForPointCommand(val student: StudentMember, val point: Monitor
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 
 		val allMeetings = allRelationshipTypes.flatMap{ relationshipType =>
-			relationshipService.getRelationships(relationshipType, student).flatMap(meetingRecordDao.list(_))
+			relationshipService.getRelationships(relationshipType, student).flatMap(meetingRecordDao.list)
 		}
 
 		allMeetings.map{meeting => meeting -> {

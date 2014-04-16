@@ -301,14 +301,14 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 <#macro download_link filePath mimeType title="Download file" text="">
 	<#if mimeType?matches("^audio/(mpeg|mp3|mp4|ogg|wav)$")>
 		<audio controls="controls">
-			<source src="<@url page='${filePath}'/>" type="${mimeType}" />
+			<source src="${filePath}" type="${mimeType}" />
 		</audio>
 	<#elseif mimeType?matches("^video/(mp4|webm|ogv)$")>
 		<video controls="controls">
-			<source src="<@url page='${filePath}'/>" type="${mimeType}" />
+			<source src="${filePath}" type="${mimeType}" />
 		</video>
 	</#if>
-	<a class="long-running use-tooltip" href="<@url page='${filePath}'/>" title="${title}"><i class="icon-download"></i><#if text?has_content> ${text}</#if></a>
+	<a class="long-running use-tooltip" href="${filePath}" title="${title}"><i class="icon-download"></i><#if text?has_content> ${text}</#if></a>
 </#macro>
 
 <#macro role_definition_description role_definition><#compress>

@@ -8,12 +8,11 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import org.hibernate.criterion.Order._
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Order
-import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, AutowiringTermServiceComponent, MonitoringPointServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, AutowiringTermServiceComponent, MonitoringPointServiceComponent}
+import uk.ac.warwick.tabula.services.{ProfileServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.attendance.commands.GroupMonitoringPointsByTerm
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.{Errors, BindingResult}
-import org.joda.time.DateTime
-import uk.ac.warwick.util.termdates.Term
 import uk.ac.warwick.tabula.attendance.commands.report.ReportStudentsChoosePeriodCommand.StudentReportStatus
 
 object ReportStudentsChoosePeriodCommand {
@@ -28,7 +27,7 @@ object ReportStudentsChoosePeriodCommand {
 			with AutowiringMonitoringPointServiceComponent
 			with ReadOnly with Unaudited
 
-	case class StudentReportStatus(val student: StudentMember, val unreported: Int, val unrecorded: Int)
+	case class StudentReportStatus(student: StudentMember, unreported: Int, unrecorded: Int)
 }
 
 abstract class ReportStudentsChoosePeriodCommand(val department: Department, val academicYear: AcademicYear)

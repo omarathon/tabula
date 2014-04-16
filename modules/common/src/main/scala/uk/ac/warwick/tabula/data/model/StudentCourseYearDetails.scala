@@ -71,9 +71,14 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	// filtering by year:
 	def moduleRegistrations = studentCourseDetails.moduleRegistrations.filter(_.academicYear == this.academicYear)
 
+<<<<<<< HEAD
 	def hasModuleRegistrations = !moduleRegistrations.isEmpty
 
 	def isLatest = this.equals(studentCourseDetails.latestStudentCourseYearDetails)
+=======
+	def registeredModules = moduleRegistrations.map(mr => mr.module)
+
+>>>>>>> develop
 }
 
 trait BasicStudentCourseYearProperties {

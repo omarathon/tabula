@@ -24,7 +24,7 @@ class ViewMeetingRecordCommandTest extends TestBase with Mockito {
 
 			// these are the calls we expect the applyInternal method to make
 			command.relationshipService.getRelationships(relationshipType, studentCourseDetails.student) returns Seq(relationship)
-			command.meetingRecordService.listAll(Set(relationship), requestor) returns  Seq(meeting)
+			command.meetingRecordService.listAll(Set(relationship), Some(requestor)) returns  Seq(meeting)
 
 			command.applyInternal() should be (Seq(meeting))
 		}

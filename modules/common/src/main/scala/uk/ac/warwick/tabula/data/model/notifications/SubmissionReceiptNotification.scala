@@ -17,9 +17,13 @@ class SubmissionReceiptNotification extends SubmissionNotification
 	}
 
 	def title = moduleCode + ": Submission receipt"
+
 	@transient val templateLocation = "/WEB-INF/freemarker/emails/submissionreceipt.ftl"
 
 	def urlTitle = "review your submission"
 
 	def actionRequired = false
+
+	def url = Routes.assignment.receipt(assignment)
+
 }

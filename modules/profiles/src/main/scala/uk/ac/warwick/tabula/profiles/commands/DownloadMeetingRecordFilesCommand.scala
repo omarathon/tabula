@@ -50,6 +50,7 @@ class DownloadMeetingRecordFilesCommand (val meetingRecord: AbstractMeetingRecor
 	private def zipped(meetingRecord: AbstractMeetingRecord) = new RenderableZip(zipService.getSomeMeetingRecordAttachmentsZip(meetingRecord))
 
 	override def describe(d: Description) = {
+		d.meeting(meetingRecord)
 		d.property("filename", filename)
 	}
 

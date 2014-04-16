@@ -160,6 +160,7 @@ object AdminDepartmentHomeCommandTest {
 		bean(){mock[RelationshipService]}
 		bean(){mock[PermissionsService]}
 		bean(){mock[NotificationService]}
+		bean(){mock[ScheduledNotificationService]}
 		bean(){mock[EventListener]}
 		bean(){mock[MaintenanceModeService]}
 		bean(){

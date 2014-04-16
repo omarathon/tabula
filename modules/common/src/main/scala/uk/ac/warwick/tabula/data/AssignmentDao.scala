@@ -59,8 +59,8 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] =
 		session.newQuery[Assignment]("""select a from Assignment a
-				join a.submissions as f
-				where f.universityId = :universityId""")
+				join a.submissions as s
+				where s.universityId = :universityId""")
 			.setString("universityId", universityId)
 			.distinct.seq
 

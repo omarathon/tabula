@@ -6,7 +6,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.Routes
 
 @Entity
-@DiscriminatorValue(value="SeenSecondMarking")
+@DiscriminatorValue(value="SeenSecondMarkingNew")
 class SeenSecondMarkingWorkflow extends MarkingWorkflow with AssignmentMarkerMap {
 
 	def this(dept: Department) = {
@@ -22,4 +22,9 @@ class SeenSecondMarkingWorkflow extends MarkingWorkflow with AssignmentMarkerMap
 	def hasSecondMarker = true
 	def secondMarkerRoleName = Some("Second marker")
 	def secondMarkerVerb = Some("mark")
+	def hasThirdMarker = true
+	def thirdMarkerRoleName = Some("Final marker")
+	def thirdMarkerVerb = Some("mark")
+
+	override def thirdMarkers = this.firstMarkers
 }

@@ -43,18 +43,25 @@ class ExportAttendanceToSitsCommand extends CommandInternal[Seq[MonitoringPointR
 					TermService.orderedTermNames.flatMap(term => {
 						reportsInAcademicYear.find(_.monitoringPeriod == term) match {
 							case None => None
-							case Some(report: MonitoringPointReport) => {
+							case Some(report: MonitoringPointReport) =>
 								val result = exportAttendanceToSitsService.exportToSits(report)
 								if (result) {
 										monitoringPointService.markReportAsPushed(report)
-										logger.info(s"Reported ${report.missed} missed points for ${report.student.universityId} for ${report.monitoringPeriod} ${report.academicYear.toString}")
+										logger.info(s"Reported ${
+											report.missed
+										} missed points for ${
+											report.student.universityId
+										} for ${
+											report.monitoringPeriod
+										} ${
+											report.academicYear.toString
+										}")
 										Option(report)
 									}
 								else {
 									logger.error(s"Could not push monitoring report to SITS for ${report.student.universityId}")
 									None
 								}
-							}
 						}
 					})
 				}

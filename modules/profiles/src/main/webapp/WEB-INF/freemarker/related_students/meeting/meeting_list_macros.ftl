@@ -58,9 +58,9 @@
 						<summary>
 							<span class="date">
 								<#if meeting.scheduled || meeting.realTime>
-									<@fmt.date date=meeting.meetingDate includeTime=true />
+									<@fmt.date date=meeting.meetingDate shortMonth=true includeTime=true />
 								<#else>
-									<@fmt.date date=meeting.meetingDate includeTime=false />
+									<@fmt.date date=meeting.meetingDate shortMonth=true includeTime=false />
 								</#if>
 							</span>
 							<span class="title">${meeting.title!}</span>
@@ -89,7 +89,8 @@
 							</#if>
 
 							<#if meeting.attachments?? && meeting.attachments?size gt 0>
-								<@fmt.download_attachments meeting.attachments "/profiles/${relationshipType.urlPart}/meeting/${meeting.id}/" "for this meeting record" "${meeting.title?url}" />
+								<#assign mrDownloadUrl><@routes.download_meeting_record_attachment relationshipType meeting /></#assign>
+								<@fmt.download_attachments meeting.attachments mrDownloadUrl "for this meeting record" "${meeting.title?url}" />
 							</#if>
 
 							<#if meeting.scheduled>

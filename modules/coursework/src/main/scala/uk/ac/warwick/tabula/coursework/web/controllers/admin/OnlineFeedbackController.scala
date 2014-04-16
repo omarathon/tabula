@@ -53,6 +53,7 @@ class OnlineMarkerFeedbackController extends CourseworkController {
 		val feedbackGraphs = command.apply()
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
+		// will need to take into account Seen Second Marking also
 		val showMarkingCompleted =
 			assignment.markingWorkflow.markingMethod != ModeratedMarking || assignment.isFirstMarker(command.marker)
 
@@ -110,20 +111,23 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineMarkerFeedbackFormCommand, errors: Errors): Mav = {
 
-		val isCompleted = command.markerFeedback.map(_.state == MarkingCompleted).getOrElse(false)
-		val parentFeedback = command.markerFeedback.map(_.feedback)
-		val firstMarkerFeedback = parentFeedback.flatMap(feedback => Option(feedback.firstMarkerFeedback))
-		val secondMarkerFeedback =  parentFeedback.flatMap(feedback => Option(feedback.secondMarkerFeedback))
-		val isRejected = secondMarkerFeedback.map(_.state == Rejected).getOrElse(false)
-		val isFirstMarker = command.assignment.isFirstMarker(command.currentUser.apparentUser)
+		val isCompleted = command.allMarkerFeedbacks.forall(_.state == MarkingCompleted)
+
+		val parentFeedback = command.allMarkerFeedbacks.head.feedback
+		val isRejected = command.allMarkerFeedbacks.exists(_.state == Rejected)
+		val isCurrentUserFeebackEntry = parentFeedback.getCurrentWorkflowFeedback.exists(_.getMarkerUser == command.currentUser.apparentUser)
+		val allCompletedMarkerFeedback = parentFeedback.getAllCompletedMarkerFeedback
+
 
 		Mav("admin/assignments/feedback/marker_online_feedback" ,
 			"command" -> command,
 			"isCompleted" -> isCompleted,
-			"isFirstMarker" -> isFirstMarker,
-			"firstMarkerFeedback" -> firstMarkerFeedback,
 			"isRejected" -> isRejected,
-			"secondMarkerFeedback" -> secondMarkerFeedback
+			"allCompletedMarkerFeedback" -> allCompletedMarkerFeedback,
+			"isCurrentUserFeedbackEntry" -> isCurrentUserFeebackEntry,
+			"parentFeedback" -> parentFeedback,
+		  "secondMarkerNotes" -> Option(parentFeedback.secondMarkerFeedback).map(_.rejectionComments).orNull,
+			"isModerated" -> (command.assignment.markingWorkflow.markingMethod == MarkingMethod.ModeratedMarking)
 		).noLayout()
 	}
 

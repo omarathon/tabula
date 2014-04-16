@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>65-SNAPSHOT</version>
+	<version>SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
@@ -28,12 +28,11 @@
 		<scala.version>2.10.1</scala.version>
 		<scala.major.version>2.10</scala.major.version>
 		<org.springframework.version>3.2.3.RELEASE</org.springframework.version>
-		<org.apache.lucene.version>4.0.0</org.apache.lucene.version>
+		<org.apache.lucene.version>4.7.0</org.apache.lucene.version>
 		<net.databinder.dispatch.version>0.8.9</net.databinder.dispatch.version>
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
-
-		<warwickutils.version>20140326</warwickutils.version>
+		<warwickutils.version>20140408</warwickutils.version>
 		<surefire.version>2.14.1</surefire.version>
 		<recompileMode><!-- incremental --></recompileMode>
 
@@ -673,7 +672,7 @@
 				<plugin>
 					<groupId>org.scalastyle</groupId>
 					<artifactId>scalastyle-maven-plugin</artifactId>
-					<version>0.3.2</version>
+					<version>0.4.0</version>
 					<configuration>
 						<!-- TAB-697 -->
 						<skip>true</skip>

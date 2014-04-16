@@ -3,7 +3,8 @@ package uk.ac.warwick.tabula.attendance.commands
 import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType, Department, Member}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{CommandInternal, Unaudited, ReadOnly, ComposableCommand}
-import uk.ac.warwick.tabula.services.{TermServiceComponent, MonitoringPointServiceComponent, RelationshipServiceComponent, AutowiringTermServiceComponent, AutowiringMonitoringPointServiceComponent, AutowiringRelationshipServiceComponent}
+import uk.ac.warwick.tabula.services.{TermServiceComponent, MonitoringPointServiceComponent, RelationshipServiceComponent, AutowiringTermServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, AutowiringRelationshipServiceComponent}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -37,9 +38,13 @@ class ViewAgentsCommand(val department: Department, val relationshipType: Studen
 	self: RelationshipServiceComponent with MonitoringPointServiceComponent with TermServiceComponent =>
 
 	def applyInternal() = {
-		val relationships = benchmarkTask("Get all relationships in department") { relationshipService.listStudentRelationshipsByDepartment(relationshipType, department) }
+		val relationships = benchmarkTask("Get all relationships in department") {
+			relationshipService.listStudentRelationshipsByDepartment(relationshipType, department)
+		}
 		val students = relationships.flatMap(_.studentMember)
-		val pointSetsByStudent = benchmarkTask("Get point sets for students in relationships") { monitoringPointService.findPointSetsForStudentsByStudent(students, academicYear) }
+		val pointSetsByStudent = benchmarkTask("Get point sets for students in relationships") {
+			monitoringPointService.findPointSetsForStudentsByStudent(students, academicYear)
+		}
 		val allPoints = benchmarkTask("Collect all points") { pointSetsByStudent.flatMap(_._2.points.asScala).toSeq }
 		val checkpoints = benchmarkTask("Get all checkpoints for all points") { monitoringPointService.getCheckpointsByStudent(allPoints) }
 		val currentAcademicWeek = benchmarkTask("Get current academic week") { termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear) }

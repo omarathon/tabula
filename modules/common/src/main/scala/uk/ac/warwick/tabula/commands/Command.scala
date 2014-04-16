@@ -44,6 +44,13 @@ trait KnowsEventName {
 trait Notifies[A, B] {
 	def emit(result: A): Seq[Notification[_, _]]
 }
+
+
+trait SchedulesNotifications[A] {
+	def scheduledNotifications(result: A): Seq[ScheduledNotification[_]]
+}
+
+
 trait Appliable[A]{
   def apply():A
 }

@@ -82,7 +82,10 @@ trait AgentPointRecordPermissions extends RequiresPermissionsChecking with Permi
 
 	def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), agent)
-		p.PermissionCheckAll(Permissions.MonitoringPoints.Record, relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember))
+		p.PermissionCheckAll(
+			Permissions.MonitoringPoints.Record,
+			relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember)
+		)
 	}
 }
 

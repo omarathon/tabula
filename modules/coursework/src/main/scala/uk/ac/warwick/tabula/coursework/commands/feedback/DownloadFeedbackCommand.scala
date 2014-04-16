@@ -1,21 +1,18 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import scala.collection.JavaConversions.asScalaBuffer
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 import uk.ac.warwick.tabula.services.fileserver._
 import uk.ac.warwick.tabula.services.ZipService
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions._
 
 
-class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, val feedback: Feedback) extends Command[Option[RenderableFile]] with HasCallback[RenderableFile] with ReadOnly {
+class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, val feedback: Feedback)
+	extends Command[Option[RenderableFile]] with HasCallback[RenderableFile] with ReadOnly {
 	
 	notDeleted(assignment)
 	mustBeLinked(assignment, module)
@@ -35,14 +32,13 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 	def applyInternal() = {
 		val result: Option[RenderableFile] = 
 			filename match {
-				case filename: String if filename.hasText => {
+				case filename: String if filename.hasText =>
 					feedback.attachments.find(_.name == filename).map(new RenderableAttachment(_))
-				}
 				case _ => Some(zipped(feedback))
 			}
 
 		if (callback != null) {
-			result.map { callback(_) }
+			result.map { callback }
 		}
 		result
 	}
