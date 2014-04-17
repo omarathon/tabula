@@ -303,6 +303,7 @@ object Permissions {
 			case object Update extends Permission("Edit a scheduled meeting record")
 			case object Delete extends Permission("Remove a scheduled meeting record")
 		}
+
 	}
 
 	object SmallGroups {
@@ -357,5 +358,11 @@ object Permissions {
 
 	object Notification {
 		case object Dismiss extends Permission("Dismiss and restore notifications")
+	}
+
+
+	object ModuleRegistration {
+		case object Core extends Permission("View a student's module registrations")
+		case object Results extends Permission( "View a student's module results")
 	}
 }

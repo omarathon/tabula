@@ -61,9 +61,9 @@ class StudentCourseDetails
 	def freshOrStaleStudentCourseYearDetails = studentCourseYearDetails.asScala
 
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	@BatchSize(size=200)
 	private val _moduleRegistrations: JSet[ModuleRegistration] = JHashSet()
+
 	def moduleRegistrations = _moduleRegistrations.asScala.toSeq.sortBy { reg => (reg.module.code) }
 	def addModuleRegistration(moduleRegistration: ModuleRegistration) = _moduleRegistrations.add(moduleRegistration)
 	def removeModuleRegistration(moduleRegistration: ModuleRegistration) = _moduleRegistrations.remove(moduleRegistration)
@@ -126,10 +126,6 @@ class StudentCourseDetails
 		studentCourseYearDetails.add(yearDetailsToAdd)
 
 		latestStudentCourseYearDetails = freshStudentCourseYearDetails.max
-	}
-
-	def hasModuleRegistrations = {
-		!moduleRegistrations.isEmpty
 	}
 
 	def isFresh = (missingFromImportSince == null)

@@ -15,7 +15,7 @@
 	</#if>
 
 	<!-- the check on profile.freshStudentCourseDetails is just a way of nailing down the permissions -->
-	<#if (studentCourseDetails)?? && (profile.freshStudentCourseDetails)??>
+	<#if can.do("Profiles.Read.StudentCourseDetails.Core", profile) && (studentCourseDetails)?? && (profile.freshStudentCourseDetails)??>
 		<#include "_courses.ftl" />
 	</#if>
 

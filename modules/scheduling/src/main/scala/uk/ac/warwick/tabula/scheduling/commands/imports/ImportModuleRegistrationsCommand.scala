@@ -37,6 +37,8 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 	val occurrence = modRegRow.occurrence
 	val academicYear = AcademicYear.parse(modRegRow.academicYear)
 	val selectionStatus: ModuleSelectionStatus = null
+	val agreedMark = modRegRow.agreedMark
+	val agreedGrade = modRegRow.agreedGrade
 
 	override def applyInternal(): Option[ModuleRegistration] = transactional() ({
 		tabulaModule match {
@@ -69,8 +71,8 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 						val moduleRegistrationBean = new BeanWrapperImpl(moduleRegistration)
 
 						val hasChanged = copyBasicProperties(properties, commandBean, moduleRegistrationBean) |
-							copySelectionStatus(moduleRegistrationBean, selectionStatusCode)
-
+							copySelectionStatus(moduleRegistrationBean, selectionStatusCode) |
+							copyAgreedMark(moduleRegistrationBean, agreedMark)
 
 						if (isTransient || hasChanged) {
 							logger.debug("Saving changes for " + moduleRegistration)
@@ -103,8 +105,30 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 		else false
 	}
 
+	def copyAgreedMark(destinationBean: BeanWrapper, agreedMark:Option[java.math.BigDecimal]) = {
+		val property = "agreedMark"
+		val oldValue = destinationBean.getPropertyValue(property)
+
+		agreedMark match {
+			case Some(mark: java.math.BigDecimal) => {
+				if (oldValue != mark) {
+					destinationBean.setPropertyValue(property, mark)
+					true
+				}
+				else false
+			}
+			case None => {
+				if (oldValue != null) {
+					destinationBean.setPropertyValue(property, null)
+					true
+				}
+				else false
+			}
+		}
+	}
+
 	private val properties = Set(
-		"assessmentGroup", "occurrence"
+		"assessmentGroup", "occurrence", "agreedGrade"
 	)
 	
 	override def describe(d: Description) = d.properties("scjCode" -> scjCode)
