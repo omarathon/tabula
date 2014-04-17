@@ -20,7 +20,7 @@
 				<th>CATS</th>
 				<#if studentCourseYearDetails.latest>
 					<th>Assess</th>
-				<#else>
+				<#elseif features.showModuleResults>
 					<th>Mark</th>
 					<th>Grade</th>
 				</#if>
@@ -34,7 +34,7 @@
 
 						<#if studentCourseYearDetails.latest>
 							<td>${(moduleRegistration.assessmentGroup)!}</td>
-						<#else>
+						<#elseif features.showModuleResults>
 							<td>${(moduleRegistration.agreedMark)!}</td>
 							<td>${(moduleRegistration.agreedGrade)!}</td>
 						</#if>

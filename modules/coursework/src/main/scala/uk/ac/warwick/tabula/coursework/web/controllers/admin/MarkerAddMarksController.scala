@@ -46,7 +46,7 @@ class MarkerAddMarksController extends CourseworkController {
 				case Some(f) if f.state != MarkingCompleted => noteMarkItem(member, Option(f))
 				case None => noteMarkItem(member, None)
 			}
-		}
+		}.sortBy(_.universityId)
 
 		Mav("admin/assignments/markerfeedback/marksform", "marksToDisplay" -> marksToDisplay)
 	}

@@ -89,6 +89,7 @@ abstract class Features {
 	@Value("${features.xSendfile:true}") var xSendfile = defaults.xSendfile
 	@Value("${features.newSeenSecondMarkingWorkflows:false}") var newSeenSecondMarkingWorkflows = defaults.newSeenSecondMarkingWorkflows
 	@Value("${features.activityStreams:true}") var activityStreams = defaults.activityStreams
+	@Value("${features.profiles.showModuleResults:false}") var showModuleResults = defaults.showModuleResults
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -164,6 +165,7 @@ class FeaturesMessage {
 	@BeanProperty var xSendfile = true
 	@BeanProperty var newSeenSecondMarkingWorkflows = false
 	@BeanProperty var activityStreams = true
+	@BeanProperty var showModuleResults = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

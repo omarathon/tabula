@@ -51,7 +51,10 @@ case class StudentRelationshipAgentRoleDefinition(relationshipType: PermissionsS
 		// Can read Coursework info for student
 		Submission.Read,
 		Feedback.Read,
-		Extension.Read
+		Extension.Read,
+
+		ModuleRegistration.Core,
+		ModuleRegistration.Results
 	)
 	final def canDelegateThisRolesPermissions: JavaImports.JBoolean = true
 
