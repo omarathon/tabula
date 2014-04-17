@@ -122,7 +122,7 @@
 						</tr>
 					</#if>
 
-					<#if profile.mobileNumber??>
+					<#if can.do("Profiles.Read.MobileNumber", profile) && profile.mobileNumber??>
 						<tr>
 							<th>Mobile phone</th>
 							<td>${phoneNumberFormatter(profile.mobileNumber)}</td>
