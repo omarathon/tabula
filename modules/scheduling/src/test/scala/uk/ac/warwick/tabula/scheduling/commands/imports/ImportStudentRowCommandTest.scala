@@ -57,7 +57,7 @@ trait ImportStudentCourseCommandSetup extends ImportCommandFactoryForTesting wit
 	importCommandFactory.courseAndRouteService = courseAndRouteService
 
 	val courseImporter = smartMock[CourseImporter]
-	courseImporter.getCourseForCode("UESA-H612") returns new Course("UESA-H612", "Computer Systems Engineering MEng")
+	courseImporter.getCourseByCodeCached("UESA-H612") returns Some(new Course("UESA-H612", "Computer Systems Engineering MEng"))
 	importCommandFactory.courseImporter = courseImporter
 
 	val awardImporter: AwardImporter = smartMock[AwardImporter]

@@ -15,15 +15,22 @@ import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformationCommand
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait CourseImporter extends Logging {
 	var courseDao = Wire[CourseDao]
 
 	private var courseMap: Map[String, Course] = _
 
-	def getCourseForCode(code: String) = {
+	def getCourseByCodeCached(code: String): Option[Course] = {
 		if (courseMap == null) updateCourseMap()
-		courseMap(code)
+
+		code.maybeText.flatMap {
+			ccode => {
+				if (courseMap.containsKey(ccode.toLowerCase)) Some(courseMap(ccode.toLowerCase))
+				else None
+			}
+		}
 	}
 
 	protected def updateCourseMap() {

@@ -3,25 +3,23 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 import org.joda.time.DateTime
 import org.springframework.beans.BeanWrapperImpl
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.commands.{Description, Command, Unaudited}
 import uk.ac.warwick.tabula.data.{AccreditedPriorLearningDao, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.{Award, AccreditedPriorLearning, StudentCourseDetails, Level}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
-import uk.ac.warwick.tabula.scheduling.services.AccreditedPriorLearningRow
+import uk.ac.warwick.tabula.scheduling.services.{AutowiringLevelImporterComponent, AutowiringAwardImporterComponent, AccreditedPriorLearningRow}
 import org.springframework.beans.BeanWrapper
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.services.{LevelServiceComponent, AccreditedPriorLearningServiceComponent, AwardServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringLevelServiceComponent, AutowiringAwardServiceComponent, LevelServiceComponent, AccreditedPriorLearningServiceComponent, AwardServiceComponent}
 
 class ImportAccreditedPriorLearningCommand(accreditedPriorLearningRow: AccreditedPriorLearningRow)
 	extends Command[Option[AccreditedPriorLearning]]
 	with Logging with Unaudited with PropertyCopying
-	with AwardServiceComponent
-	with AccreditedPriorLearningServiceComponent
-	with LevelServiceComponent {
+	with AutowiringAwardImporterComponent
+	with AutowiringLevelImporterComponent {
 
 	PermissionCheck(Permissions.ImportSystemData)
 
@@ -44,7 +42,7 @@ class ImportAccreditedPriorLearningCommand(accreditedPriorLearningRow: Accredite
 				logger.warn("Can't record accredited prior learning - could not find a StudentCourseDetails for " + scjCode)
 				None
 			case Some(scd: StudentCourseDetails) => {
-				awardService.awardFromCode(awardCode) match {
+				awardImporter.getAwardByCodeCached(awardCode) match {
 					case None =>
 						logger.warn("Can't record accredited prior learning - could not find award for award code " + awardCode)
 						None
@@ -52,7 +50,7 @@ class ImportAccreditedPriorLearningCommand(accreditedPriorLearningRow: Accredite
 						val accreditedPriorLearningExisting: Option[AccreditedPriorLearning] = accreditedPriorLearningDao.getByNotionalKey(scd, award, sequenceNumber)
 						val isTransient = !accreditedPriorLearningExisting.isDefined
 
-						levelService.levelFromCode(levelCode) match {
+						levelImporter.getLevelByCodeCached(levelCode) match {
 							case None =>
 								logger.warn ("Can't record accredited prior learning - couldn't find level for level code " + levelCode)
 								None

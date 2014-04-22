@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.Level
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportLevelCommand
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.sandbox.SandboxData
-import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformationCommand
 
 trait LevelImporter extends Logging {
@@ -21,10 +21,17 @@ trait LevelImporter extends Logging {
 
 	private var levelMap: Map[String, Level] = _
 
-	def getLevelForCode(code: String) = {
+	def getLevelByCodeCached(code: String): Option[Level] = {
 		if (levelMap == null) updateLevelMap()
-		levelMap(code)
+
+		code.maybeText.flatMap {
+			levelCode => {
+				if (levelMap.containsKey(levelCode.toLowerCase)) Some(levelMap(levelCode.toLowerCase))
+				else None
+			}
+		}
 	}
+
 
 	protected def updateLevelMap() {
 		levelMap = slurpLevels()

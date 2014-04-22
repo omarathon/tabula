@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.scheduling.services
 import java.sql.ResultSet
 import java.sql.Types
 import scala.collection.JavaConversions._
-import scala.collection.immutable.HashMap
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
@@ -39,14 +38,13 @@ class AccreditedPriorLearningImporterImpl extends AccreditedPriorLearningImporte
 
 	lazy val accreditedPriorLearningQuery = new AccreditedPriorLearningQuery(sits)
 
-	def getAccreditedPriorLearningDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]):
+	def getAccreditedPriorLearning(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]):
 		Seq[ImportAccreditedPriorLearningCommand] = {
 
 		benchmarkTask("Fetch accredited prior learning") {
 			membersAndCategories.filter { _.member.userType == Student }.par.flatMap { mac =>
 				val universityId = mac.member.universityId
-				val row = accreditedPriorLearningQuery.executeByNamedParam(Map("universityId" -> universityId))
-				new ImportAccreditedPriorLearningCommand(row)
+				accreditedPriorLearningQuery.executeByNamedParam(Map("universityId" -> universityId)).toSeq.map(row => new ImportAccreditedPriorLearningCommand(row))
 			}.seq
 		}
 	}
@@ -130,7 +128,6 @@ object AccreditedPriorLearningImporter {
 		resultSet.getBigDecimal("sac_crdt"),
 		resultSet.getString("lev_code"),
 		resultSet.getString("sac_resn"))
-		)
 	}
 
 	class AccreditedPriorLearningQuery(ds: DataSource)
