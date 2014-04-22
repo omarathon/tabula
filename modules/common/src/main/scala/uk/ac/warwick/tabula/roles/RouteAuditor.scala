@@ -41,7 +41,9 @@ case object RouteAuditorRoleDefinition extends BuiltInRoleDefinition {
 		Extension.Read,
 
 		ModuleRegistration.Core,
-		ModuleRegistration.Results
+		ModuleRegistration.Results,
+
+		AccreditedPriorLearning.Read
 	)
 
 	def canDelegateThisRolesPermissions: JavaImports.JBoolean = false

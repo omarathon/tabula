@@ -39,12 +39,14 @@ class AccreditedPriorLearningImporterImpl extends AccreditedPriorLearningImporte
 
 	lazy val accreditedPriorLearningQuery = new AccreditedPriorLearningQuery(sits)
 
-	def getAccreditedPriorLearningDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportAccreditedPriorLearningCommand] = {
+	def getAccreditedPriorLearningDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]):
+		Seq[ImportAccreditedPriorLearningCommand] = {
 
-		benchmarkTask("Fetch module registrations") {
+		benchmarkTask("Fetch accredited prior learning") {
 			membersAndCategories.filter { _.member.userType == Student }.par.flatMap { mac =>
 				val universityId = mac.member.universityId
-				accreditedPriorLearningQuery.executeByNamedParam(Map("universityId" -> universityId))
+				val row = accreditedPriorLearningQuery.executeByNamedParam(Map("universityId" -> universityId))
+				new ImportAccreditedPriorLearningCommand(row)
 			}.seq
 		}
 	}
@@ -54,7 +56,7 @@ class AccreditedPriorLearningImporterImpl extends AccreditedPriorLearningImporte
 class SandboxAccreditedPriorLearningImporter extends AccreditedPriorLearningImporter {
 	var memberDao = Wire.auto[MemberDaoImpl]
 
-	def getAccreditedPriorLearningDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportAccreditedPriorLearningCommand] =
+	def getAccreditedPriorLearning(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportAccreditedPriorLearningCommand] =
 		membersAndCategories flatMap { mac =>
 			val universityId = mac.member.universityId
 			val ssoUser = users(universityId)
@@ -75,14 +77,12 @@ class SandboxAccreditedPriorLearningImporter extends AccreditedPriorLearningImpo
 
 			val row = AccreditedPriorLearningRow(
 				scjCode = "%s/1".format(universityId),
-				sitsModuleCode = "%s-15".format(moduleCode.toUpperCase),
-				cats = new java.math.BigDecimal(15),
-				assessmentGroup = "A",
-				selectionStatusCode = "C",
-				occurrence = "A",
+				awardCode = "BA",
+				sequenceNumber = 1,
 				academicYear = AcademicYear.guessByDate(DateTime.now).toString,
-				agreedMark = Some(new java.math.BigDecimal("90.0")),
-				agreedGrade = "A"
+				cats = new java.math.BigDecimal(15),
+				levelCode = "2",
+				reason = "Exemption of 30 CATS for 3 terms of Open Studies Languages"
 			)
 
 			new ImportAccreditedPriorLearningCommand(row)
@@ -123,29 +123,14 @@ object AccreditedPriorLearningImporter {
 		where stu.stu_code = :universityId"""
 
 	def mapResultSet(resultSet: ResultSet): AccreditedPriorLearningRow = {
-		var row = AccreditedPriorLearningRow(
-			resultSet.getString("scj_code"),
-			resultSet.getString("awd_code"),
-			resultSet.getBigDecimal("sac_seq"),
-			resultSet.getString("ayr_code"),
-			resultSet.getString("ses_code"),
-			resultSet.getString("occurrence"),
-			resultSet.getString("ayr_code"),
-			None,
-			resultSet.getString("smr_agrg")
+		new AccreditedPriorLearningRow(resultSet.getString("scj_code"),
+		resultSet.getString("awd_code"),
+		resultSet.getInt("sac_seq"),
+		resultSet.getString("ayr_code"),
+		resultSet.getBigDecimal("sac_crdt"),
+		resultSet.getString("lev_code"),
+		resultSet.getString("sac_resn"))
 		)
-		if (resultSet.getBigDecimal("smr_agrm") != null)
-			row = AccreditedPriorLearningRow(
-				resultSet.getString("scj_code"),
-				resultSet.getString("mod_code"),
-				resultSet.getBigDecimal("credit"),
-				resultSet.getString("assess_group"),
-				resultSet.getString("ses_code"),
-				resultSet.getString("occurrence"),
-				resultSet.getString("ayr_code"),
-				Some(resultSet.getBigDecimal("smr_agrm")),
-				resultSet.getString("smr_agrg"))
-		row
 	}
 
 	class AccreditedPriorLearningQuery(ds: DataSource)
@@ -157,6 +142,10 @@ object AccreditedPriorLearningImporter {
 }
 
 case class AccreditedPriorLearningRow(
-																	...
-																	) {
-}
+	val scjCode: String,
+	val awardCode: String,
+	val sequenceNumber: Int,
+	val academicYear: String,
+	val cats: java.math.BigDecimal,
+	val levelCode: String,
+	val reason: String) {}

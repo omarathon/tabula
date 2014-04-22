@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.StudyLevel
+import uk.ac.warwick.tabula.data.model.Level
 import uk.ac.warwick.spring.Wire
 
 trait LevelDaoComponent {
@@ -12,8 +12,8 @@ trait AutowiringLevelDaoComponent extends LevelDaoComponent {
 }
 
 trait LevelDao {
-	def saveOrUpdate(level: StudyLevel)
-	def getByCode(code: String): Option[StudyLevel]
+	def saveOrUpdate(level: Level)
+	def getByCode(code: String): Option[Level]
 	def getAllLevelCodes: Seq[String]
 
 }
@@ -21,10 +21,10 @@ trait LevelDao {
 @Repository
 class LevelDaoImpl extends LevelDao with Daoisms {
 
-	def saveOrUpdate(level: StudyLevel) = session.saveOrUpdate(level)
+	def saveOrUpdate(level: Level) = session.saveOrUpdate(level)
 
 	def getByCode(code: String) = {
-		val ret = session.newQuery[StudyLevel]("from StudyLevel level where code = :code").setString("code", code).uniqueResult
+		val ret = session.newQuery[Level]("from StudyLevel level where code = :code").setString("code", code).uniqueResult
 		ret
 	}
 

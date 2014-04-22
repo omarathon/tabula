@@ -6,10 +6,10 @@ import javax.persistence.Id
 import javax.persistence.NamedQueries
 import javax.persistence.NamedQuery
 
-@Entity
+@Entity(name="StudyLevel") // Level is a reserved word in Oracle so the table is called StudyLevel
 @NamedQueries(Array(
 	new NamedQuery(name = "level.code", query = "select level from StudyLevel level where code = :code")))
-class StudyLevel {
+class Level {
 
 	def this(code: String = null, name: String = null) {
 		this()

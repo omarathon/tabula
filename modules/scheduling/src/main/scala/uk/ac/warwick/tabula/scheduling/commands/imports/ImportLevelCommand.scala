@@ -12,11 +12,11 @@ import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.LevelDao
-import uk.ac.warwick.tabula.data.model.StudyLevel
+import uk.ac.warwick.tabula.data.model.Level
 import uk.ac.warwick.tabula.scheduling.services.LevelInfo
 
 class ImportLevelCommand(info: LevelInfo)
-	extends Command[(StudyLevel, ImportAcademicInformationCommand.ImportResult)] with Logging with Daoisms
+	extends Command[(Level, ImportAcademicInformationCommand.ImportResult)] with Logging with Daoisms
 	with Unaudited with PropertyCopying {
 
 	PermissionCheck(Permissions.ImportSystemData)
@@ -35,8 +35,8 @@ class ImportLevelCommand(info: LevelInfo)
 		val isTransient = !levelExisting.isDefined
 
 		val level = levelExisting match {
-			case Some(crs: StudyLevel) => crs
-			case _ => new StudyLevel()
+			case Some(crs: Level) => crs
+			case _ => new Level()
 		}
 
 		val commandBean = new BeanWrapperImpl(this)

@@ -9,7 +9,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.LevelDao
-import uk.ac.warwick.tabula.data.model.StudyLevel
+import uk.ac.warwick.tabula.data.model.Level
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportLevelCommand
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.sandbox.SandboxData
@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformatio
 trait LevelImporter extends Logging {
 	var levelDao = Wire[LevelDao]
 
-	private var levelMap: Map[String, StudyLevel] = _
+	private var levelMap: Map[String, Level] = _
 
 	def getLevelForCode(code: String) = {
 		if (levelMap == null) updateLevelMap()
@@ -30,7 +30,7 @@ trait LevelImporter extends Logging {
 		levelMap = slurpLevels()
 	}
 
-	private def slurpLevels(): Map[String, StudyLevel] = {
+	private def slurpLevels(): Map[String, Level] = {
 		transactional(readOnly = true) {
 			logger.debug("refreshing SITS level map")
 
