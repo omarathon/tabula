@@ -42,7 +42,7 @@ class ListMarkerFeedbackCommand(val assignment: Assignment, val module: Module, 
 				val student = userLookup.getUserByWarwickUniId(submission.universityId)
 				val feedbacks = assignment.getAllMarkerFeedbacks(submission.universityId, user.apparentUser).reverse
 				MarkerFeedbackItem(student, submission, feedbacks)
-			}
+			}.filterNot(_.feedbacks.isEmpty)
 
 			(
 				markerFeedbackItems.filter(f => f.feedbacks.last.state != MarkingState.MarkingCompleted && f.feedbacks.last.state != MarkingState.Rejected),
