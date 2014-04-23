@@ -49,10 +49,7 @@ trait AwardImporter extends Logging {
 		if (awardMap == null) updateAwardMap()
 
 		code.maybeText.flatMap {
-			awardCode => {
-				if (awardMap.contains(awardCode.toLowerCase)) Some(awardMap(awardCode.toLowerCase))
-				else None
-			}
+			awardCode => awardMap.get(awardCode)
 		}
 	}
 

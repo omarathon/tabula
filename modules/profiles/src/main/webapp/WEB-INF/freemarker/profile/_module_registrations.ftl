@@ -26,28 +26,52 @@
 				</#if>
 				<th>Status</th>
 			</tr>
-				<#list studentCourseYearDetails.moduleRegistrations as moduleRegistration>
-					<tr>
-						<td>${(moduleRegistration.module.code?upper_case)!}</td>
-						<td>${(moduleRegistration.module.name)!}</td>
-						<td>${(moduleRegistration.cats)!}</td>
+			<#list studentCourseYearDetails.moduleRegistrations as moduleRegistration>
+				<tr>
+					<td>${(moduleRegistration.module.code?upper_case)!}</td>
+					<td>${(moduleRegistration.module.name)!}</td>
+					<td>${(moduleRegistration.cats)!}</td>
 
-						<#if studentCourseYearDetails.latest>
-							<td>${(moduleRegistration.assessmentGroup)!}</td>
-						<#elseif features.showModuleResults>
-							<td>${(moduleRegistration.agreedMark)!}</td>
-							<td>${(moduleRegistration.agreedGrade)!}</td>
+					<#if studentCourseYearDetails.latest>
+						<td>${(moduleRegistration.assessmentGroup)!}</td>
+					<#elseif features.showModuleResults>
+						<td>${(moduleRegistration.agreedMark)!}</td>
+						<td>${(moduleRegistration.agreedGrade)!}</td>
+					</#if>
+
+					<td>
+						<#if moduleRegistration.selectionStatus??>
+							${(moduleRegistration.selectionStatus.description)!}
+						<#else>
+							-
 						</#if>
-
-						<td>
-							<#if moduleRegistration.selectionStatus??>
-								${(moduleRegistration.selectionStatus.description)!}
-							<#else>
-								-
-							</#if>
-						</td>
-					</tr>
-				</#list>
+					</td>
+				</tr>
+			</#list>
 		</tbody>
 	</table>
+
+	<#if features.showAccreditedPriorLearning>
+		<div id="accredited-prior-learning">
+			<#if can.do("AccreditedPriorLearning.Read", studentCourseDetails) && studentCourseYearDetails.hasAccreditedPriorLearning>
+				<h5>Accredited Prior Learning</h5>
+				<table id="accredited-prior-learning-table">
+					<#list studentCourseYearDetails.accreditedPriorLearning as apl>
+						<tr>
+							<th>Credit</th>
+							<td>${apl.cats}</td>
+						</tr>
+						<tr>
+							<th>Level</th>
+							<td>${apl.level.name}</td>
+						</tr>
+						<tr>
+							<th>Reason</th>
+							<td>${apl.reason}</td>
+						</tr>
+					</#list>
+				</table>
+			</#if>
+		</div>
+	</#if>
 </section>

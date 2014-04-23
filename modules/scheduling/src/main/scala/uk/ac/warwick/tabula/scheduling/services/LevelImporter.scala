@@ -25,13 +25,9 @@ trait LevelImporter extends Logging {
 		if (levelMap == null) updateLevelMap()
 
 		code.maybeText.flatMap {
-			levelCode => {
-				if (levelMap.containsKey(levelCode.toLowerCase)) Some(levelMap(levelCode.toLowerCase))
-				else None
-			}
+			levelCode => levelMap.get(levelCode)
 		}
 	}
-
 
 	protected def updateLevelMap() {
 		levelMap = slurpLevels()

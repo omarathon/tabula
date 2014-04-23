@@ -123,8 +123,8 @@
 		</#if>
 
 		<#if studentCourseYearDetails??
-			&& studentCourseYearDetails.hasModuleRegistrations
-			&& can.do("ModuleRegistration.Core", studentCourseDetails) >
+			&& (studentCourseYearDetails.hasModuleRegistrations || studentCourseYearDetails.hasAccreditedPriorLearning)
+			&& (can.do("ModuleRegistration.Core", studentCourseDetails) || can.do("AccreditedPriorLearning.Read", studentCourseDetails)) >
 			<li id="module-registration-pane">
 				<#include "_module_registrations.ftl" />
 			</li>

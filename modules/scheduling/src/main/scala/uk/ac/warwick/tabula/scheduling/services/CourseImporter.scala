@@ -26,10 +26,7 @@ trait CourseImporter extends Logging {
 		if (courseMap == null) updateCourseMap()
 
 		code.maybeText.flatMap {
-			ccode => {
-				if (courseMap.containsKey(ccode.toLowerCase)) Some(courseMap(ccode.toLowerCase))
-				else None
-			}
+			courseCode => courseMap.get(courseCode)
 		}
 	}
 

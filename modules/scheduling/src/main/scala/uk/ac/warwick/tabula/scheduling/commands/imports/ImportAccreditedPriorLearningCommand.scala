@@ -64,7 +64,8 @@ class ImportAccreditedPriorLearningCommand(accreditedPriorLearningRow: Accredite
 								val commandBean = new BeanWrapperImpl(this)
 								val accreditedPriorLearningBean = new BeanWrapperImpl(accreditedPriorLearning)
 
-								val hasChanged = copyBasicProperties(properties, commandBean, accreditedPriorLearningBean)
+								val hasChanged = copyBasicProperties(properties, commandBean, accreditedPriorLearningBean) |
+									copyLevel(accreditedPriorLearningBean, levelCode)
 
 								if (isTransient || hasChanged) {
 									logger.debug("Saving changes for " + accreditedPriorLearning)
@@ -82,8 +83,31 @@ class ImportAccreditedPriorLearningCommand(accreditedPriorLearningRow: Accredite
 		}
 	})
 
+	def copyLevel(destinationBean: BeanWrapper, levelCode: String) = {
+		val property = "level"
+		val oldValue = destinationBean.getPropertyValue(property)
+
+		val level = levelImporter.getLevelByCodeCached(levelCode)
+		level match {
+			case Some(level: Level) => {
+				if (oldValue != level) {
+					destinationBean.setPropertyValue(property, level)
+					true
+				}
+				else false
+			}
+			case None => {
+				if (oldValue != null) {
+					destinationBean.setPropertyValue(property, null)
+					true
+				}
+				else false
+			}
+		}
+	}
+
 	private val properties = Set(
-		"academicYear", "cats", "level", "reason"
+		"academicYear", "cats", "reason"
 	)
 
 	override def describe(d: Description) = d.properties("scjCode" -> scjCode)

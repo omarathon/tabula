@@ -91,6 +91,8 @@ class SandboxAccreditedPriorLearningImporter extends AccreditedPriorLearningImpo
 object AccreditedPriorLearningImporter {
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
+	// Choose the most significant course if there is one for this SPR.
+	// If there is no most signif SCJ for this SPR, choose the SCJ with the max sequence number.
 	val AccreditedPriorLearning = f"""
 		select scj.scj_code, sac.awd_code, sac.sac_seq, sac.ayr_code, sac.sac_crdt, sac.lev_code, sac.sac_resn
 		from $sitsSchema.ins_stu stu
@@ -105,10 +107,8 @@ object AccreditedPriorLearningImporter {
 		on (
 			scj.scj_sprc = sac.spr_code
 			and (
-				-- choose the most significant course if there is one for this spr:
 				scj.scj_udfa = 'Y'
 				or (
-					-- if there's no most signif scj for this spr, choose the scj with the max sequence number:
 					scj.scj_seq2 = (
 						select max(scj2.scj_seq2) from intuit.srs_scj scj2
 							where scj2.scj_sprc = spr.spr_code
