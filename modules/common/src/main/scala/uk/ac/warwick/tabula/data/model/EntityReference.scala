@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroupSet, SmallGroup}
-import org.hibernate.annotations.ForeignKey
 
 /**
  * Stores a reference to an entity that is being pointed at in a
@@ -42,78 +40,78 @@ abstract class EntityReference[A >: Null <: AnyRef] extends GeneratedId {
 
 @Entity @DiscriminatorValue(value="assignment")
 class AssignmentEntityReference extends EntityReference[Assignment] {
-	@ManyToOne()
+	@ManyToOne
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="submission")
 class SubmissionEntityReference extends EntityReference[Submission] {
-	@ManyToOne()
+	@ManyToOne
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="feedback")
 class FeedbackEntityReference extends EntityReference[Feedback] {
-	@ManyToOne()
+	@ManyToOne
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="markerFeedback")
 class MarkerFeedbackEntityReference extends EntityReference[MarkerFeedback] {
-	@ManyToOne()
+	@ManyToOne
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="module")
 class ModuleEntityReference extends EntityReference[Module] {
-	@ManyToOne()
+	@ManyToOne
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="extension")
 class ExtensionEntityReference extends EntityReference[Extension] {
-	@ManyToOne()
+	@ManyToOne
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="studentRelationship")
 class StudentRelationshipEntityReference extends EntityReference[StudentRelationship] {
-	@ManyToOne()
+	@ManyToOne
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="meetingRecord")
 class MeetingRecordEntityReference extends EntityReference[AbstractMeetingRecord] {
-	@ManyToOne()
+	@ManyToOne
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="meetingRecordApprovel")
 class MeetingRecordApprovalEntityReference extends EntityReference[MeetingRecordApproval] {
-	@ManyToOne()
+	@ManyToOne
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="smallGroup")
 class SmallGroupEntityReference extends EntityReference[SmallGroup] {
-	@ManyToOne()
+	@ManyToOne
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="smallGroupSet")
 class SmallGroupSetEntityReference extends EntityReference[SmallGroupSet] {
-	@ManyToOne()
+	@ManyToOne
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="smallGroupEvent")
 class SmallGroupEventEntityReference extends EntityReference[SmallGroupEvent] {
-	@ManyToOne()
+	@ManyToOne
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="originalityReport")
 class OriginalityReportEntityReference extends EntityReference[OriginalityReport] {
-	@ManyToOne()
+	@ManyToOne
 	var entity: Entity = null
 }
