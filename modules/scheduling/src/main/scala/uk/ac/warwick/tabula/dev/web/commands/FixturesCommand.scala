@@ -137,14 +137,11 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 					session.delete(staff)
 				}
 
-
-
 				def invalidateAndDeletePermissions[A <: PermissionsTarget : ClassTag](scope: A) {
 					// Invalidate any permissions or roles set
 					val usersToInvalidate =
 						permissionsService.getAllGrantedRolesFor(scope).flatMap { role => role.users.users } ++
 						permissionsService.getAllGrantedPermissionsFor(scope).flatMap { perm => perm.users.users }
-
 
 					usersToInvalidate.foreach { user =>
 						permissionsService.clearCachesForUser((user.getUserId, classTag[A]))
@@ -152,7 +149,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 					permissionsService.getAllGrantedRolesFor(scope).foreach(session.delete)
 					permissionsService.getAllGrantedPermissionsFor(scope).foreach(session.delete)
-
 				}
 
 				val modules = dept.modules
