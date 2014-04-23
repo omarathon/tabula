@@ -50,7 +50,7 @@ class SubmissionReceivedNotification extends SubmissionNotification with PreSave
 		val departmentAdmins = module.department.owners
 
 		val allAdmins = moduleManagers.users ++ departmentAdmins.users
-		allAdmins.filter(canEmailUser(_))
+		allAdmins.filter(canEmailUser)
 	}
 
 	def actionRequired = false
