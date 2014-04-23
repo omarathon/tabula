@@ -125,7 +125,7 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 	override protected def listNewerThan(startDate: DateTime, batchSize: Int) =
 		dao.recent(startDate).take(batchSize).flatMap { notification =>
 			try {
-				notification.recipients.map { user => new RecipientNotification(notification, user) }
+				notification.recipients.toList.map { user => new RecipientNotification(notification, user) }
 			} catch {
 				// Can happen if reference to an entity has since been deleted, e.g.
 				// a submission is resubmitted and the old submission is removed. Skip this notification.
