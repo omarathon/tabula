@@ -428,6 +428,11 @@ $(function() {
 			var $targetFormSection = $form.find(".attachments")
 
 			var bigTextArea = $feedbackForm.find(".big-textarea");
+
+			if (bigTextArea.val()){
+				bigTextArea.val(bigTextArea.val() + '\n')
+			}
+
 			bigTextArea.val(bigTextArea.val() + $.trim($summaryFeeback.find(".feedback-comments").contents(':not(h5)').text()))
 
 			$feedbackForm.find("input[name='mark']").val($summaryFeeback.find(".mark").text())
@@ -438,22 +443,20 @@ $(function() {
 			var $copyAlert = $feedbackForm.find(".alert-success");
 			$copyAlert.text("Feedback copied from "+feedbackHeading.charAt(0).toLowerCase() + feedbackHeading.substr(1)).show();
 
-			$('body').animate({ scrollTop: ($copyAlert.offset().top - ($copyAlert.height() * 2)) }, '500', 'swing', function() {
-				var $summaryAttachments = $summaryFeeback.find('input[type="hidden"]');
-				if($summaryAttachments.length > 0) {
-					$summaryAttachments.each(function(){
-						var $this = $(this)
-						attachments += 	'<li id="attachment-' + $this.val() +'" class="attachment"><i class="icon-file-alt"></i>' +
-							'<span>' + $this.attr("name") +' </span>&nbsp;<i class="icon-remove-sign remove-attachment"></i>' +
-							'<input id="attachedFiles" name="attachedFiles" value="'+  $this.val() +'" type="hidden"></li>'
-					})
-					$targetFormSection.html(attachments)
-					$feedbackForm.find('.feedbackAttachments').slideDown();
-				} else {
-					attachments = '<input name="attachedFiles" type="hidden" />'
-					$feedbackForm.find('.feedbackAttachments').slideUp(function(){ $targetFormSection.html(attachments) })
-				}
-			})
+			var $summaryAttachments = $summaryFeeback.find('input[type="hidden"]');
+			if($summaryAttachments.length > 0) {
+				$summaryAttachments.each(function(){
+					var $this = $(this)
+					attachments += 	'<li id="attachment-' + $this.val() +'" class="attachment"><i class="icon-file-alt"></i>' +
+						'<span>' + $this.attr("name") +' </span>&nbsp;<i class="icon-remove-sign remove-attachment"></i>' +
+						'<input id="attachedFiles" name="attachedFiles" value="'+  $this.val() +'" type="hidden"></li>'
+				})
+				$targetFormSection.html(attachments)
+				$feedbackForm.find('.feedbackAttachments').slideDown();
+			} else {
+				attachments = '<input name="attachedFiles" type="hidden" />'
+				$feedbackForm.find('.feedbackAttachments').slideUp(function(){ $targetFormSection.html(attachments) })
+			}
 		})
 
 		/**
