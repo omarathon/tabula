@@ -427,7 +427,9 @@ $(function() {
 			var attachments = ""
 			var $targetFormSection = $form.find(".attachments")
 
-			$feedbackForm.find(".big-textarea").val($.trim($summaryFeeback.find(".feedback-comments").contents(':not(h5)').text()))
+			var bigTextArea = $feedbackForm.find(".big-textarea");
+			bigTextArea.val(bigTextArea.val() + $.trim($summaryFeeback.find(".feedback-comments").contents(':not(h5)').text()))
+
 			$feedbackForm.find("input[name='mark']").val($summaryFeeback.find(".mark").text())
 			$feedbackForm.find("input[name='grade']").val($summaryFeeback.find(".grade").text())
 
