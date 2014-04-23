@@ -54,13 +54,18 @@ trait ImportStudentCourseCommandSetup extends ImportCommandFactoryForTesting wit
 	val courseAndRouteService = smartMock[CourseAndRouteService]
 	val route = smartMock[Route]
 	courseAndRouteService.getRouteByCode("C100") returns Some(new Route("c100", smartMock[Department]))
+	courseAndRouteService.getRouteByCode(null) returns None
 	importCommandFactory.courseAndRouteService = courseAndRouteService
 
 	val courseImporter = smartMock[CourseImporter]
 	courseImporter.getCourseByCodeCached("UESA-H612") returns Some(new Course("UESA-H612", "Computer Systems Engineering MEng"))
+	courseImporter.getCourseByCodeCached(null) returns None
 	importCommandFactory.courseImporter = courseImporter
 
 	val awardImporter: AwardImporter = smartMock[AwardImporter]
+	awardImporter.getAwardByCodeCached("BA") returns Some(new Award("BA", "Bachelor of Arts"))
+	awardImporter.getAwardByCodeCached("") returns None
+	importCommandFactory.awardImporter = awardImporter
 }
 
 trait PropertyCopyingSetup extends ImportCommandFactoryForTesting {
@@ -129,6 +134,7 @@ trait MockedResultSet extends Mockito {
 	rs.getString("mod_reg_status") returns ("CON")
 	rs.getString("course_code") returns ("UESA-H612")
 	rs.getString("disability") returns ("Q")
+	rs.getString("award_code") returns ("BA")
 }
 
 // scalastyle:off magic.number
