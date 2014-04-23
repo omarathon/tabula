@@ -48,7 +48,7 @@ class FeedbackReportController extends CourseworkController {
 			Mav(new JSONErrorView(errors))
 		} else {
 			val jobId = cmd.apply().id
-			val successUrl = context + Routes.admin.feedbackReports(cmd.department) + "?jobId=" + jobId
+			val successUrl = Routes.admin.feedbackReports(cmd.department) + "?jobId=" + jobId
 			Mav(new JSONView(Map("status" -> "success", "result" -> successUrl)))
 		}
 	}
