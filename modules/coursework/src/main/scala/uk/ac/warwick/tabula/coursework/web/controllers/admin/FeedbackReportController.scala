@@ -25,7 +25,6 @@ class FeedbackReportController extends CourseworkController {
 	validatesSelf[FeedbackReportCommand]
 
 	var jobService = Wire.auto[JobService]
-	var context = Wire[String]("${module.context}")
 
 	@ModelAttribute def command(@PathVariable(value = "dept") dept: Department, user: CurrentUser) =
 		new FeedbackReportCommand(dept, user)
@@ -33,12 +32,11 @@ class FeedbackReportController extends CourseworkController {
 	@RequestMapping(method=Array(HEAD, GET), params = Array("!jobId"))
 	def requestReport(cmd:FeedbackReportCommand, errors:Errors):Mav = {
 		val formatter = DateTimeFormat.forPattern(DateFormats.DateTimePicker)
-		val model = Mav("admin/assignments/feedbackreport/report_range",
+		Mav("admin/assignments/feedbackreport/report_range",
 			"department" -> cmd.department,
 			"startDate" ->  formatter.print(new DateTime().minusMonths(3)),
 			"endDate" ->  formatter.print(new DateTime())
 		).noLayout()
-		model
 	}
 
 
@@ -56,8 +54,7 @@ class FeedbackReportController extends CourseworkController {
 	@RequestMapping(params = Array("jobId"))
 	def checkProgress(@RequestParam jobId: String) = {
 		val job = jobService.getInstance(jobId)
-		val mav = Mav("admin/assignments/feedbackreport/progress", "job" -> job).noLayoutIf(ajax)
-		mav
+		Mav("admin/assignments/feedbackreport/progress", "job" -> job).noLayoutIf(ajax)
 	}
 
 
