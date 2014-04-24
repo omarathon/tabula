@@ -90,23 +90,16 @@ trait AssignmentMarkerMap {
 	this : MarkingWorkflow =>
 
 	// gets the usercode of the students current marker from the given markers UserGroup
-	private def getMarkerFromAssignmentMap(assignment: Assignment, universityId: UniversityId, markers: UserGroup) = {
+	private def getMarkerFromAssignmentMap(universityId: UniversityId, markerMap: Map[String, UserGroup]): Option[String] = {
 		val student = userLookup.getUserByWarwickUniId(universityId)
-
-		val mapEntry = Option(assignment.markerMap) flatMap { _.find {
-			case (markerUserId: String, group: UserGroup) =>
-				group.includesUser(student) && markers.knownType.includesUserId(markerUserId)
-			}
-		}
-
-		mapEntry.map { case (markerUserId, _) => markerUserId }
+		markerMap.find{case(markerUserId, group) => group.includesUser(student)}.map{ case (markerUserId, _) => markerUserId }
 	}
 
-	def getStudentsFirstMarker(assignment: Assignment, universityId: UniversityId) =
-		getMarkerFromAssignmentMap(assignment, universityId, assignment.markingWorkflow.firstMarkers)
+	def getStudentsFirstMarker(assignment: Assignment, universityId: UniversityId): Option[String] =
+		getMarkerFromAssignmentMap(universityId, assignment.firstMarkerMap)
 
-	def getStudentsSecondMarker(assignment: Assignment, universityId: UniversityId) =
-		getMarkerFromAssignmentMap(assignment, universityId, assignment.markingWorkflow.secondMarkers)
+	def getStudentsSecondMarker(assignment: Assignment, universityId: UniversityId): Option[String] =
+		getMarkerFromAssignmentMap(universityId, assignment.secondMarkerMap)
 
 	def getSubmissions(assignment: Assignment, marker: User) = {
 		val allSubmissions = getSubmissionsFromMap(assignment, marker)
@@ -126,11 +119,11 @@ trait AssignmentMarkerMap {
 
 	// returns all submissions made by students assigned to this marker
 	private def getSubmissionsFromMap(assignment: Assignment, marker: User): Seq[Submission] = {
-		val students = Option(assignment.markerMap.get(marker.getUserId))
-		students.map { ug =>
-			val submissionIds = ug.knownType.allIncludedIds
-			assignment.submissions.filter(s => submissionIds.exists(_ == s.userId))
-		}.getOrElse(Seq())
+		val studentIds =
+			assignment.firstMarkerMap.get(marker.getUserId).map{_.knownType.allIncludedIds}.getOrElse(Seq()) ++
+				assignment.secondMarkerMap.get(marker.getUserId).map{_.knownType.allIncludedIds}.getOrElse(Seq())
+
+		assignment.submissions.filter(s => studentIds.exists(_ == s.userId))
 	}
 
 

@@ -25,9 +25,9 @@ class ReleaseForMarkingNotifiesTest extends TestBase with Mockito {
 		val m1UserGroup = userGroup("student1", "student2")
 		val m2UserGroup = userGroup("student3", "student4")
 
-		testAssignment.markerMap = Map(
-			"marker1" -> m1UserGroup,
-			"marker2" -> m2UserGroup
+		testAssignment.firstMarkers = Seq(
+			FirstMarkersMap(testAssignment, "marker1", m1UserGroup),
+			FirstMarkersMap(testAssignment, "marker2", m2UserGroup)
 		)
 
 		val (f1, mf1) = makeMarkerFeedback(student1)(MarkingNotificationFixture.FirstMarkerLink)

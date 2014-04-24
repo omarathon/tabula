@@ -41,16 +41,20 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 
 		val workflow: MarkingWorkflow with AssignmentMarkerMap
 
-		assignment.markerMap.putAll(Map(
-			"cuscav" -> UserGroup.ofUsercodes,
-			"cusebr" -> UserGroup.ofUsercodes,
-			"curef" -> UserGroup.ofUsercodes,
-			"cusfal" -> UserGroup.ofUsercodes
+		assignment.firstMarkers.addAll(Seq(
+			FirstMarkersMap(assignment, "cuscav", UserGroup.ofUsercodes),
+			FirstMarkersMap(assignment, "cusebr", UserGroup.ofUsercodes)
 		).asJava)
 
-		assignment.markerMap.get("cuscav").addUserId("student1")
-		assignment.markerMap.get("cuscav").addUserId("student2")
-		assignment.markerMap.get("curef").addUserId("student4")
+		assignment.firstMarkerMap.get("cuscav").get.addUserId("student1")
+		assignment.firstMarkerMap.get("cuscav").get.addUserId("student2")
+
+		assignment.secondMarkers.addAll(Seq(
+			SecondMarkersMap(assignment, "curef", UserGroup.ofUsercodes),
+			SecondMarkersMap(assignment, "cusfal", UserGroup.ofUsercodes)
+		).asJava)
+
+		assignment.secondMarkerMap.get("curef").get.addUserId("student4")
 
 		val s1 = Fixtures.user(universityId="0000001", userId="student1")
 		val s2 = Fixtures.user(universityId="0000002", userId="student2")
