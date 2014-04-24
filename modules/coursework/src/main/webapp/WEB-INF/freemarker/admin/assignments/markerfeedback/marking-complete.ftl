@@ -45,7 +45,7 @@
 		</div>
 	</#if>
 
-	<#if (noMarks?size > 0) >
+	<#if (assignment.collectMarks && noMarks?size > 0) >
 		<#if isUserALaterMarker>
 			<div class="alert alert-info">
 				<#if (noMarks?size > 1)>

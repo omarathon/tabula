@@ -97,7 +97,10 @@
 
 
 		<@form.labelled_row "file.upload" "Attachments">
-			<input type="file" name="file.upload" />
+			<input type="file" name="file.upload" multiple/>
+			<div id="multifile-column-description" class="help-block">
+				<#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
+			</div>
 		</@form.labelled_row>
 
 		<div class="submit-buttons">
