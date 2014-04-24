@@ -27,9 +27,9 @@ class AssignMarkersCommandTest extends TestBase with Mockito {
 		command.applyInternal()
 
 		assignment.firstMarkerMap.get("cuslaj").get.size should be(2)
-		assignment.firstMarkerMap.get("cuscav").size should be(3)
-		assignment.firstMarkerMap.get("cuslat").size should be(4)
-		assignment.firstMarkerMap.get("cuday").size should be(1)
+		assignment.firstMarkerMap.get("cuscav").get.size should be(3)
+		assignment.firstMarkerMap.get("cuslat").get.size should be(4)
+		assignment.firstMarkerMap.get("cuday").get.size should be(1)
 
 	} }
 

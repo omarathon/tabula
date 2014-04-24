@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
-import collection.JavaConversions._
 
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.TestFixtures
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.JavaImports._
+import collection.JavaConverters._
 
 // reusable environment for marking workflow tests
 trait MarkingWorkflowWorld extends TestFixtures {
@@ -23,15 +23,18 @@ trait MarkingWorkflowWorld extends TestFixtures {
 	markingWorkflow.secondMarkers = makeUserGroup("cuslat", "cuday")
 	assignment.markingWorkflow = markingWorkflow
 
-	assignment.firstMarkers = Seq(
+	val firstMarkers: JList[FirstMarkersMap] = JArrayList()
+	firstMarkers.addAll(Seq(
 		FirstMarkersMap(assignment, "cuslaj", makeUserGroup("cusxad", "cuscao", "curef")),
 		FirstMarkersMap(assignment, "cuscav", makeUserGroup("cusebr", "cuscav")),
 		FirstMarkersMap(assignment, "cuslat", makeUserGroup("cusxad", "cuscao", "curef")),
 		FirstMarkersMap(assignment, "cuday", makeUserGroup("cusebr", "cuscav"))
-	).asJava
+	).asJava)
+
+	assignment.firstMarkers = firstMarkers
 
 	def addFeedback(assignment:Assignment){
-		val feedback = assignment.submissions.map{ s =>
+		val feedback = assignment.submissions.asScala.map{ s =>
 			val newFeedback = new Feedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = "cuslaj"
@@ -40,17 +43,17 @@ trait MarkingWorkflowWorld extends TestFixtures {
 			addMarkerFeedback(newFeedback,FirstFeedback)
 			newFeedback
 		}
-		assignment.feedbacks = feedback
+		assignment.feedbacks = feedback.asJava
 	}
 
 	def setFirstMarkerFeedbackState(state: MarkingState) =
-		assignment.feedbacks.foreach( mf => mf.firstMarkerFeedback.state = state )
+		assignment.feedbacks.asScala.foreach( mf => mf.firstMarkerFeedback.state = state )
 
 	def setSecondMarkerFeedbackState(state: MarkingState) =
-		assignment.feedbacks.foreach( mf => mf.secondMarkerFeedback.state = state )
+		assignment.feedbacks.asScala.foreach( mf => mf.secondMarkerFeedback.state = state )
 
 	def setFinalMarkerFeedbackState(state: MarkingState) =
-		assignment.feedbacks.foreach( mf => mf.thirdMarkerFeedback.state = state )
+		assignment.feedbacks.asScala.foreach( mf => mf.thirdMarkerFeedback.state = state )
 
 	def addMarkerFeedback(feedback: Feedback, position: FeedbackPosition) = {
 		val mf = position match {

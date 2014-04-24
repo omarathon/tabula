@@ -37,7 +37,12 @@ class AssignMarkersCommand(val module: Module, val assignment: Assignment) exten
 
 	def applyInternal() = {
 
-		assignment.firstMarkers.clear()
+		if (assignment.firstMarkers != null) {
+			assignment.firstMarkers.clear()
+		} else {
+			assignment.firstMarkers = JArrayList()
+		}
+
 		assignment.firstMarkers.addAll(firstMarkerMapping.asScala.map { case (markerId, studentIds) =>
 			val group = UserGroup.ofUsercodes
 			group.includedUserIds = studentIds.asScala
@@ -45,7 +50,12 @@ class AssignMarkersCommand(val module: Module, val assignment: Assignment) exten
 			FirstMarkersMap(assignment, markerId, group)
 		}.toSeq.asJava)
 
-		assignment.secondMarkers.clear()
+		if (assignment.secondMarkers != null) {
+			assignment.secondMarkers.clear()
+		} else {
+			assignment.secondMarkers = JArrayList()
+		}
+
 		assignment.secondMarkers.addAll(secondMarkerMapping.asScala.map { case (markerId, studentIds) =>
 			val group = UserGroup.ofUsercodes
 			group.includedUserIds = studentIds.asScala
