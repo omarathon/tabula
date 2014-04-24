@@ -113,9 +113,9 @@ class StudentCourseDetails
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var latestStudentCourseYearDetails: StudentCourseYearDetails = _
 
-	def courseType = {
-		if (course == null) false
-		else CourseType.fromCourseCode(course.code)
+	def courseType: Option[CourseType] = {
+		if (course == null) None
+		else Some(CourseType.fromCourseCode(course.code))
 	}
 
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.PERSIST))

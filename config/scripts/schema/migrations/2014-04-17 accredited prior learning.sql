@@ -5,7 +5,7 @@ create table accreditedpriorlearning (
   scjcode nvarchar2(20) not null,
   awardcode nvarchar2(20) not null,
   sequencenumber nvarchar2(10) not null,
-  academicyear number(4,0),
+  academicyear number(4,0) not null,
   cats number(5,2),
   levelcode nvarchar2(20),
   reason nvarchar2(200),

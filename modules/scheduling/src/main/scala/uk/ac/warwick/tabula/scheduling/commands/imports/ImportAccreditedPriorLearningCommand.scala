@@ -13,7 +13,6 @@ import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import uk.ac.warwick.tabula.scheduling.services.{AutowiringLevelImporterComponent, AutowiringAwardImporterComponent, AccreditedPriorLearningRow}
 import org.springframework.beans.BeanWrapper
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.services.{AutowiringLevelServiceComponent, AutowiringAwardServiceComponent, LevelServiceComponent, AccreditedPriorLearningServiceComponent, AwardServiceComponent}
 
 class ImportAccreditedPriorLearningCommand(accreditedPriorLearningRow: AccreditedPriorLearningRow)
 	extends Command[Option[AccreditedPriorLearning]]
@@ -47,41 +46,43 @@ class ImportAccreditedPriorLearningCommand(accreditedPriorLearningRow: Accredite
 						logger.warn("Can't record accredited prior learning - could not find award for award code " + awardCode)
 						None
 					case Some(award: Award) => {
-						val accreditedPriorLearningExisting: Option[AccreditedPriorLearning] = accreditedPriorLearningDao.getByNotionalKey(scd, award, sequenceNumber)
-						val isTransient = !accreditedPriorLearningExisting.isDefined
-
 						levelImporter.getLevelByCodeCached(levelCode) match {
 							case None =>
 								logger.warn ("Can't record accredited prior learning - couldn't find level for level code " + levelCode)
 								None
-							case Some(level: Level) => {
-
-								val accreditedPriorLearning = accreditedPriorLearningExisting match {
-									case Some(accreditedPriorLearning: AccreditedPriorLearning) => accreditedPriorLearning
-									case _ => new AccreditedPriorLearning(scd, award, sequenceNumber, academicYear, cats, level, reason)
-								}
-
-								val commandBean = new BeanWrapperImpl(this)
-								val accreditedPriorLearningBean = new BeanWrapperImpl(accreditedPriorLearning)
-
-								val hasChanged = copyBasicProperties(properties, commandBean, accreditedPriorLearningBean) |
-									copyLevel(accreditedPriorLearningBean, levelCode)
-
-								if (isTransient || hasChanged) {
-									logger.debug("Saving changes for " + accreditedPriorLearning)
-
-									accreditedPriorLearning.lastUpdatedDate = DateTime.now
-									accreditedPriorLearningDao.saveOrUpdate(accreditedPriorLearning)
-								}
-
-								Some(accreditedPriorLearning)
-							}
+							case Some(level: Level) => storeAccreditedPriorLearning(scd, award, level)
 						}
 					}
 				}
 			}
 		}
 	})
+
+
+	def storeAccreditedPriorLearning(scd: StudentCourseDetails, award: Award, level: Level): Some[AccreditedPriorLearning] = {
+		val accreditedPriorLearningExisting: Option[AccreditedPriorLearning] = accreditedPriorLearningDao.getByNotionalKey(scd, award, sequenceNumber)
+		val isTransient = !accreditedPriorLearningExisting.isDefined
+
+		val accreditedPriorLearning = accreditedPriorLearningExisting match {
+			case Some(accreditedPriorLearning: AccreditedPriorLearning) => accreditedPriorLearning
+			case _ => new AccreditedPriorLearning(scd, award, sequenceNumber, academicYear, cats, level, reason)
+		}
+
+		val commandBean = new BeanWrapperImpl(this)
+		val accreditedPriorLearningBean = new BeanWrapperImpl(accreditedPriorLearning)
+
+		val hasChanged = copyBasicProperties(properties, commandBean, accreditedPriorLearningBean) |
+			copyLevel(accreditedPriorLearningBean, levelCode)
+
+		if (isTransient || hasChanged) {
+			logger.debug("Saving changes for " + accreditedPriorLearning)
+
+			accreditedPriorLearning.lastUpdatedDate = DateTime.now
+			accreditedPriorLearningDao.saveOrUpdate(accreditedPriorLearning)
+		}
+
+		Some(accreditedPriorLearning)
+	}
 
 	def copyLevel(destinationBean: BeanWrapper, levelCode: String) = {
 		val property = "level"

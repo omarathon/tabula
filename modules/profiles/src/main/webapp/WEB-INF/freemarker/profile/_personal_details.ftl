@@ -122,6 +122,7 @@
 						</tr>
 					</#if>
 
+					// FIXME can.do shouldn't be needed.  Need to figure out why it is and remove it if possible.
 					<#if can.do("Profiles.Read.MobileNumber", profile) && profile.mobileNumber??>
 						<tr>
 							<th>Mobile phone</th>

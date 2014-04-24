@@ -83,9 +83,9 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 	 */
 	def displayIfEmpty(studentCourseDetails: StudentCourseDetails): Boolean = {
 			studentCourseDetails.courseType match {
-			case CourseType.UG => expectedUG
-			case CourseType.PGT => expectedPGT
-			case CourseType.PGR => expectedPGR
+			case Some(CourseType.UG) => expectedUG
+			case Some(CourseType.PGT) => expectedPGT
+			case Some(CourseType.PGR) => expectedPGR
 			case _ => false
 		}
 	}

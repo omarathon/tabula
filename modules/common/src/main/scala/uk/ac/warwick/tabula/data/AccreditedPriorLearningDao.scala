@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.{Award, AccreditedPriorLearning, StudentCourseDetails, Module}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.{Award, AccreditedPriorLearning, StudentCourseDetails}
 import uk.ac.warwick.spring.Wire
 
 trait AccreditedPriorLearningDaoComponent {

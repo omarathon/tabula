@@ -118,7 +118,8 @@ object AccreditedPriorLearningImporter {
 			)
 		)
 
-		where stu.stu_code = :universityId"""
+		where stu.stu_code = :universityId and sac.ayr_code is not null"""
+
 
 	def mapResultSet(resultSet: ResultSet): AccreditedPriorLearningRow = {
 		new AccreditedPriorLearningRow(resultSet.getString("scj_code"),

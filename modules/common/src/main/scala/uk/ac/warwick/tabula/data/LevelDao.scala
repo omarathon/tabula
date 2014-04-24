@@ -24,8 +24,7 @@ class LevelDaoImpl extends LevelDao with Daoisms {
 	def saveOrUpdate(level: Level) = session.saveOrUpdate(level)
 
 	def getByCode(code: String) = {
-		val ret = session.newQuery[Level]("from StudyLevel level where code = :code").setString("code", code).uniqueResult
-		ret
+		session.newQuery[Level]("from StudyLevel level where code = :code").setString("code", code).uniqueResult
 	}
 
 	def getAllLevelCodes: Seq[String] =
