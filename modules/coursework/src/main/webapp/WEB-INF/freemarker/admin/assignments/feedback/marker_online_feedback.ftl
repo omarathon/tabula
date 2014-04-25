@@ -22,7 +22,7 @@
 			</h3>
 		<#if (allCompletedMarkerFeedback?size > 1 && (feedback.hasComments || feedback.hasContent) && !isCompleted)>
 			<div>
-				<a data-feedback="${feedback.feedbackPosition.toString}" class="copyFeedback btn btn-primary"><i class="icon-arrow-down"></i> Copy</a>
+				<a data-feedback="${feedback.feedbackPosition.toString}" class="copyFeedback btn btn-primary"><i class="icon-arrow-down"></i> Copy Feedback Comments</a>
 			</div>
 		</#if>
 		<div style="clear: both;"></div>

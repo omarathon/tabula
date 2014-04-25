@@ -435,9 +435,6 @@ $(function() {
 
 			bigTextArea.val(bigTextArea.val() + $.trim($summaryFeeback.find(".feedback-comments").contents(':not(h5)').text()))
 
-			$feedbackForm.find("input[name='mark']").val($summaryFeeback.find(".mark").text())
-			$feedbackForm.find("input[name='grade']").val($summaryFeeback.find(".grade").text())
-
 			$(".copyFeedback").find("i").css("color", "#ffffff");
 			$button.find("i").css("color","#7DDB6B");
 			var $copyAlert = $feedbackForm.find(".alert-success");
