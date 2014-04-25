@@ -87,7 +87,7 @@ abstract class Features {
 	@Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}")
 	var attendanceMonitoringAssignmentSubmissionPointType = defaults.attendanceMonitoringAssignmentSubmissionPointType
 	@Value("${features.xSendfile:true}") var xSendfile = defaults.xSendfile
-	@Value("${features.newSeenSecondMarkingWorkflows:false}") var newSeenSecondMarkingWorkflows = defaults.newSeenSecondMarkingWorkflows
+	@Value("${features.newSeenSecondMarkingWorkflows:true}") var newSeenSecondMarkingWorkflows = defaults.newSeenSecondMarkingWorkflows
 	@Value("${features.activityStreams:true}") var activityStreams = defaults.activityStreams
 	@Value("${features.profiles.showModuleResults:false}") var showModuleResults = defaults.showModuleResults
 
@@ -163,7 +163,7 @@ class FeaturesMessage {
 	@BeanProperty var includePastYears = true
 	@BeanProperty var attendanceMonitoringAssignmentSubmissionPointType = true
 	@BeanProperty var xSendfile = true
-	@BeanProperty var newSeenSecondMarkingWorkflows = false
+	@BeanProperty var newSeenSecondMarkingWorkflows = true
 	@BeanProperty var activityStreams = true
 	@BeanProperty var showModuleResults = false
 }
