@@ -110,9 +110,9 @@ object AccreditedPriorLearningImporter {
 				scj.scj_udfa = 'Y'
 				or (
 					scj.scj_seq2 = (
-						select max(scj2.scj_seq2) from intuit.srs_scj scj2
+						select max(scj2.scj_seq2) from $sitsSchema.srs_scj scj2
 							where scj2.scj_sprc = spr.spr_code
-							and not exists (select * from intuit.srs_scj where scj_udfa in ('Y','y') and scj.scj_sprc = sac.spr_code)
+							and not exists (select * from $sitsSchema.srs_scj where scj_udfa in ('Y','y') and scj.scj_sprc = sac.spr_code)
 					)
 				)
 			)
