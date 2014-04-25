@@ -26,7 +26,7 @@ object Routes {
 		def feedbackReports (department: Department) = context + "/admin/department/%s/reports/feedback/" format encoded(department.code)
 
 		object markingWorkflow {
-			def list(department: Department) = admin.department(department) + "/markingworkflows"
+			def list(department: Department) = admin.department(department) + "markingworkflows"
 			def add(department: Department) = list(department) + "/add"
 			def edit(scheme: MarkingWorkflow) = list(scheme.department) + "/edit/" + scheme.id
 		}
