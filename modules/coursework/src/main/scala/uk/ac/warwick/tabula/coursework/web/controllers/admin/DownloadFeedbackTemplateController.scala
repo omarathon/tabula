@@ -29,7 +29,7 @@ class DownloadFeedbackTemplateController extends CourseworkController {
 			new DownloadFeedbackTemplateCommand(department, template, filename, user)	
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def getAttachment(command:DownloadFeedbackTemplateCommand, user:CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse) = {
+	def getAttachment(command:DownloadFeedbackTemplateCommand, user:CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		// specify callback so that audit logging happens around file serving
 		command.callback = {(renderable) => fileServer.serve(renderable)}
 		command.apply().orElse{ throw new ItemNotFoundException() }

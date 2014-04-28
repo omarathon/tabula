@@ -80,7 +80,7 @@ class DownloadAllFeedbackController extends CourseworkController {
 		new DownloadSelectedFeedbackCommand(module, assignment)
 
 	@RequestMapping
-	def getSelected(command: DownloadSelectedFeedbackCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) = {
+	def getSelected(command: DownloadSelectedFeedbackCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
@@ -164,7 +164,7 @@ class DownloadFirstMarkersFeedbackController extends CourseworkController {
 
 	@RequestMapping
 	def getSelected(@ModelAttribute("command") command: ApplyWithCallback[RenderableZip])
-		(implicit request: HttpServletRequest, response: HttpServletResponse) = {
+		(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 
 		command.apply { renderable =>
 			fileServer.serve(renderable)
