@@ -103,9 +103,14 @@
 		<#assign feedbackToDoCount = inProgressFeedback?size + rejectedFeedback?size />
 		<#assign disabledClass><#if feedbackToDoCount == 0>disabled</#if></#assign>
 		<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
-			<a class="btn use-tooltip" title="Download feedback templates for all students as a ZIP file." href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker-templates.zip'/>"><i class="icon-download"></i>
-				Download feedback templates
+			<a class="btn use-tooltip"
+				title="Download feedback templates for all students as a ZIP file."
+				href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker-templates.zip'/>"
+				data-container="body"
+			>
+				<i class="icon-download"></i> Download feedback templates
 			</a>
+
 		</#if>
 		<a class="btn use-tooltip ${disabledClass}"
 		   title="Download a zip of submissions due to be marked. Note that submissions with a status of 'Marking completed' will not be included in this zip"
