@@ -32,6 +32,7 @@ class DownloadMarkerSubmissionTest extends AppContextTestBase with MarkingWorkfl
           sv
         })
     }
+		assignment.markingWorkflow.userLookup = mockUserLookup
   }
 
 	trait CommandTestSupport extends AutowiringZipServiceComponent with AssignmentServiceComponent with StateServiceComponent {
