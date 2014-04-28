@@ -185,14 +185,21 @@ object Fixtures extends Mockito {
 		moa
 	}
 
-	def student(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null, courseDepartment: Department = null, sprStatus: SitsStatus = null)	= {
+	def student(universityId: String = "0123456",
+							userId: String = "cuspxp",
+							department: Department = null,
+							courseDepartment: Department = null,
+							sprStatus: SitsStatus = new SitsStatus("C", "Current", "Current Student"))	= {
 		val m = member(MemberUserType.Student, universityId, userId, department).asInstanceOf[StudentMember]
 
 		studentCourseDetails(m, courseDepartment, sprStatus)
 		m
 	}
 
-	def studentCourseDetails(member: StudentMember, courseDepartment: Department, sprStatus: SitsStatus = null, scjCode: String = null) = {
+	def studentCourseDetails(member: StudentMember,
+													 courseDepartment: Department,
+													 sprStatus: SitsStatus = new SitsStatus("C", "Current", "Current Student"),
+													 scjCode: String = null) = {
 		val scjCodeToUse = scjCode match {
 			case null => member.universityId + "/1"
 			case _ => scjCode
