@@ -152,12 +152,22 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 
 	}}
 
-	@Test def moderatedMarking() = withUser("cuscav") { new MarkingWorkflowFixture {
+	@Test def moderatedMarking() = withUser("curef") { new MarkingWorkflowFixture {
+		val s4 = Fixtures.user(universityId="0000004", userId="student4")
+
 		val workflow = new ModeratedMarkingWorkflow
+		workflow.userLookup = smartMock[UserLookupService]
+		workflow.userLookup.getUserByWarwickUniId(sub4.universityId) returns s4
+
 		assignment.markingWorkflow = workflow
+		assignment.secondMarkers = Seq(
+			SecondMarkersMap(assignment, currentUser.apparentUser.getUserId, UserGroup.ofUsercodes)
+		).asJava
+		assignment.secondMarkerMap.get(currentUser.apparentUser.getUserId).get.addUserId(s4.getUserId)
+		f4.secondMarkerFeedback = Fixtures.markerFeedback(f4)
 
 		workflow.markingMethod should be(ModeratedMarking)
-		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser, null) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online/moderation")
+		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser, sub4.userId) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online/moderation")
 
 		workflow.firstMarkerRoleName should be("Marker")
 		workflow.hasSecondMarker should be(true)
