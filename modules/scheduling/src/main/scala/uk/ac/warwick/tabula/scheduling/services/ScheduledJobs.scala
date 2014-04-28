@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.scheduling.commands._
 import uk.ac.warwick.tabula.scheduling.commands.imports._
-import uk.ac.warwick.tabula.services.{ScheduledNotificationService, NotificationIndexService, AuditEventIndexService, MaintenanceModeService, ProfileIndexService}
+import uk.ac.warwick.tabula.services.{EmailNotificationService, ScheduledNotificationService, NotificationIndexService, AuditEventIndexService, MaintenanceModeService, ProfileIndexService}
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.tabula.JavaImports._
@@ -28,6 +28,7 @@ class ScheduledJobs {
 	var profileIndexingService = Wire[ProfileIndexService]
 	var jobService = Wire[JobService]
 	var notificationIndexService = Wire[NotificationIndexService]
+	var notificationEmailService = Wire[EmailNotificationService]
 	var scheduledNotificationService = Wire[ScheduledNotificationService]
 
 	def maintenanceGuard[A](fn: => A) = if (!maintenanceModeService.enabled) fn
@@ -74,9 +75,14 @@ class ScheduledJobs {
 	@Scheduled(fixedRate = 60 * 1000) // every minute
 	def resolveScheduledNotifications: Unit = exceptionResolver.reportExceptions { scheduledNotificationService.processNotifications() }
 
+	@Scheduled(fixedRate = 60 * 1000) // every minute
+	def processEmailQueue: Unit = exceptionResolver.reportExceptions {
+		notificationEmailService.processNotifications()
+	}
+
 	@Scheduled(fixedDelay = 10 * 1000) // every 10 seconds, non-concurrent
 	def jobs: Unit = maintenanceGuard {
-		exceptionResolver.reportExceptions { jobService.run }
+		exceptionResolver.reportExceptions { jobService.run() }
 	}
 
 	@Scheduled(fixedDelay = 5 * 60 * 1000) // every 5 minutes, non-concurrent

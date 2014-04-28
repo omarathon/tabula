@@ -24,7 +24,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 	/** Spring should wire in all beans that extend Job */
 	@Autowired var jobs: Array[Job] = Array()
 
-	def run {
+	def run() {
 		jobDao.findOutstandingInstances(RunBatchSize).par foreach processInstance
 	}
 

@@ -88,7 +88,7 @@ object Notification {
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="notification_type")
 abstract class Notification[A >: Null <: ToEntityReference, B]
-	extends GeneratedId with Serializable with HasSettings with PermissionsTarget {
+	extends GeneratedId with Serializable with HasSettings with PermissionsTarget with PreSaveBehaviour with NotificationPreSaveBehaviour {
 
 	def permissionsParents = Stream.empty
 
@@ -163,6 +163,14 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 		this
 	}
 
+	final override def preSave(newRecord: Boolean) {
+		onPreSave(newRecord)
+
+		// Generate recipientNotificationInfos
+		recipients.foreach(getRecipientNotificationInfo)
+	}
+	def onPreSave(newRecord: Boolean) {}
+
 	override def toString = List(agent.getFullName, verb, items.getClass.getSimpleName).mkString("notification{", ", ", "}")
 }
 
@@ -194,27 +202,30 @@ trait SingleItemNotification[A >: Null <: ToEntityReference] {
 }
 
 /** Stores a single recipient as a User ID in the Notification table. */
-trait UserIdRecipientNotification extends SingleRecipientNotification with PreSaveBehaviour {
+trait UserIdRecipientNotification extends SingleRecipientNotification with NotificationPreSaveBehaviour {
 
 	this : UserLookupComponent =>
 
 	var recipientUserId: String = null
 	def recipient = userLookup.getUserByUserId(recipientUserId)
 
-	override def preSave(newRecord: Boolean) {
+	override def onPreSave(newRecord: Boolean) {
 		Assert.notNull(recipientUserId, "recipientUserId must be set")
 	}
 }
 
-/** Stores a single recipient as a University ID in the Notification table. */
-trait UniversityIdRecipientNotification extends SingleRecipientNotification with PreSaveBehaviour {
+trait NotificationPreSaveBehaviour {
+	def onPreSave(newRecord: Boolean)
+}
 
+/** Stores a single recipient as a University ID in the Notification table. */
+trait UniversityIdRecipientNotification extends SingleRecipientNotification with NotificationPreSaveBehaviour {
 	this : UserLookupComponent =>
 
 	var recipientUniversityId: String = null
 	def recipient = userLookup.getUserByWarwickUniId(recipientUniversityId)
 
-	override def preSave(newRecord: Boolean) {
+	override def onPreSave(newRecord: Boolean) {
 		Assert.notNull(recipientUniversityId, "recipientUniversityId must be set")
 	}
 }

@@ -3,16 +3,14 @@ package uk.ac.warwick.tabula.data.model.notifications
 import uk.ac.warwick.tabula.data.model.{SingleItemNotification, StudentRelationship, NotificationWithTarget, FreemarkerModel, MeetingRecord}
 import javax.persistence.{Entity, DiscriminatorValue}
 import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Warning}
-import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import org.joda.time.DateTime
 
 abstract class MeetingRecordApprovalNotification(val verb: String)
 	extends NotificationWithTarget[MeetingRecord, StudentRelationship]
 	with MeetingRecordNotificationTrait
-	with SingleItemNotification[MeetingRecord]
-	with PreSaveBehaviour {
+	with SingleItemNotification[MeetingRecord] {
 
-	override def preSave(newRecord: Boolean) {
+	override def onPreSave(newRecord: Boolean) {
 		// if the meeting took place more than a week ago then this is more important
 		priority = if (meeting.meetingDate.isBefore(DateTime.now.minusWeeks(1))) {
 			Critical

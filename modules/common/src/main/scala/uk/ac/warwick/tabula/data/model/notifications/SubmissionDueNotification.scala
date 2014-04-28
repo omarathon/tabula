@@ -1,17 +1,16 @@
 package uk.ac.warwick.tabula.data.model.notifications
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleItemNotification, Assignment, Notification}
+import uk.ac.warwick.tabula.data.model.{NotificationPreSaveBehaviour, FreemarkerModel, SingleItemNotification, Assignment, Notification}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import org.joda.time.{Days, DateTime}
 import uk.ac.warwick.tabula.data.model.NotificationPriority._
 import javax.persistence.{DiscriminatorValue, Entity}
-import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 trait SubmissionReminder {
-	self : Notification[_, Unit] with PreSaveBehaviour =>
+	self : Notification[_, Unit] with NotificationPreSaveBehaviour =>
 
 	def deadline: DateTime
 	def assignment: Assignment
@@ -24,7 +23,7 @@ trait SubmissionReminder {
 		Days.daysBetween(now, closeDate).getDays
 	}
 
-	override final def preSave(newRecord: Boolean) {
+	override final def onPreSave(newRecord: Boolean) {
 		priority = if (daysLeft == 1) {
 			Warning
 		} else if (daysLeft < 1) {
@@ -74,7 +73,7 @@ trait SubmissionReminder {
 @Entity
 @DiscriminatorValue("SubmissionDueGeneral")
 class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] with SingleItemNotification[Assignment]
-	with SubmissionReminder with PreSaveBehaviour {
+	with SubmissionReminder {
 
 	def deadline = assignment.closeDate
 	def assignment = item.entity
@@ -93,7 +92,7 @@ class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] wi
 @Entity
 @DiscriminatorValue("SubmissionDueExtension")
 class SubmissionDueWithExtensionNotification extends Notification[Extension, Unit] with SingleItemNotification[Extension]
-	with SubmissionReminder with PreSaveBehaviour with AutowiringUserLookupComponent {
+	with SubmissionReminder with AutowiringUserLookupComponent {
 
 	def extension = item.entity
 

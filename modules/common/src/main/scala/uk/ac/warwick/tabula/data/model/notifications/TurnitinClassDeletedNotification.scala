@@ -2,16 +2,13 @@ package uk.ac.warwick.tabula.data.model.notifications
 
 import uk.ac.warwick.tabula.data.model.{SingleRecipientNotification, FreemarkerModel}
 import javax.persistence.{Entity, DiscriminatorValue}
-import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import org.springframework.util.Assert
-import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 
 @Entity
 @DiscriminatorValue(value="TurnitinClassDeleted")
 class TurnitinClassDeletedNotification
 		extends TurnitinReportNotification
-		with SingleRecipientNotification
-		with PreSaveBehaviour {
+		with SingleRecipientNotification {
 
 	def title = "Turnitin check has not completed successfully for %s - %s" format (assignment.module.code.toUpperCase, assignment.name)
 
@@ -28,7 +25,7 @@ class TurnitinClassDeletedNotification
 
 	def recipient = agent
 
-	override def preSave(newRecord: Boolean) {
+	override def onPreSave(newRecord: Boolean) {
 		Assert.isTrue(className.value.isDefined, "className must be set")
 		Assert.isTrue(classId.value.isDefined, "classId must be set")
 	}
