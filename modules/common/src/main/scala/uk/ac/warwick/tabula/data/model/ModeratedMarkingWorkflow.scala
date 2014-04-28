@@ -4,6 +4,8 @@ import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.tabula.data.model.MarkingMethod.ModeratedMarking
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.Routes
+import collection.JavaConverters._
+import uk.ac.warwick.tabula.ItemNotFoundException
 
 @Entity
 @DiscriminatorValue(value="ModeratedMarking")
@@ -16,9 +18,17 @@ class ModeratedMarkingWorkflow extends MarkingWorkflow with NoThirdMarker with A
 
 	def markingMethod = ModeratedMarking
 
-	def onlineMarkingUrl(assignment: Assignment, marker: User) =
-		if (assignment.isFirstMarker(marker)) Routes.coursework.admin.assignment.onlineMarkerFeedback(assignment)
-		else Routes.coursework.admin.assignment.onlineModeration(assignment)
+	override def onlineMarkingUrl(assignment: Assignment, marker: User, studentId: String) = {
+		assignment.submissions.asScala.find(_.userId == studentId) match {
+			case None => throw new ItemNotFoundException
+			case Some(submission) =>
+				if (submission.isReleasedToSecondMarker && getStudentsSecondMarker(assignment, submission.universityId).exists(_ == marker.getUserId))
+					Routes.coursework.admin.assignment.onlineModeration(assignment)
+				else
+					Routes.coursework.admin.assignment.onlineMarkerFeedback(assignment)
+		}
+
+	}
 
 	// True if this marking workflow uses a second marker
 	def hasSecondMarker = true

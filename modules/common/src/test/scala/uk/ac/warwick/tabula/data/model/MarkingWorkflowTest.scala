@@ -129,7 +129,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		assignment.markingWorkflow = workflow
 
 		workflow.markingMethod should be(SeenSecondMarkingLegacy)
-		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online")
+		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser, null) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online")
 
 		workflow.firstMarkerRoleName should be("First marker")
 		workflow.hasSecondMarker should be(true)
@@ -143,7 +143,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		assignment.markingWorkflow = workflow
 
 		workflow.markingMethod should be(SeenSecondMarking)
-		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online")
+		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser, null) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online")
 
 		workflow.firstMarkerRoleName should be("First marker")
 		workflow.hasSecondMarker should be(true)
@@ -157,7 +157,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		assignment.markingWorkflow = workflow
 
 		workflow.markingMethod should be(ModeratedMarking)
-		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online/moderation")
+		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser, null) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online/moderation")
 
 		workflow.firstMarkerRoleName should be("Marker")
 		workflow.hasSecondMarker should be(true)

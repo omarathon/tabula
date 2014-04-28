@@ -35,8 +35,8 @@
 			Apply the tablesorter JQuery plugin to this table. Defaults to true
 		tableSorterOptions:
 			An option map that will be passed to the tableSorter plugin
-		contentUrl:
-			When this is specified we will use ajax to load the content from the specified URL
+		contentUrlFuction:
+			A function to return which URL we will use to load the content. Function's argument is the selected row.
 */
 jQuery.fn.expandingTable = function(options) {
 
@@ -143,9 +143,9 @@ jQuery.fn.expandingTable = function(options) {
 			if (isOpen) {
 				hideContent($content, $row, $icon);
 			} else {
-				if(options.contentUrl && !$content.data("loaded")) {
+				if(options.contentUrlFunction && !$content.data("loaded")) {
 					var contentId = $row.attr("data-contentid");
-					var dataUrl = options.contentUrl + '/' + contentId;
+					var dataUrl = options.contentUrlFunction($row) + '/' + contentId;
 
 					$icon.removeClass('icon-chevron-right').addClass('icon-spinner icon-spin');
 

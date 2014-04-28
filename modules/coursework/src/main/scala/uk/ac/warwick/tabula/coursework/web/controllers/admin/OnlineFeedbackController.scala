@@ -58,13 +58,15 @@ class OnlineMarkerFeedbackController extends CourseworkController {
 			assignment.markingWorkflow.markingMethod != ModeratedMarking || assignment.isFirstMarker(command.marker)
 
 		Mav("admin/assignments/feedback/online_framework",
-			"markingUrl" -> assignment.markingWorkflow.onlineMarkingUrl(assignment, command.marker),
 			"showMarkingCompleted" -> showMarkingCompleted,
 			"showGenericFeedback" -> false,
 			"assignment" -> assignment,
 			"command" -> command,
-			"studentFeedbackGraphs" -> feedbackGraphs)
-			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Online marking for ${assignment.name}"))
+			"studentFeedbackGraphs" -> feedbackGraphs,
+			"onlineMarkingUrls" -> feedbackGraphs.map{ graph =>
+				graph.student.getUserId -> assignment.markingWorkflow.onlineMarkingUrl(assignment, command.marker, graph.student.getUserId)
+			}.toMap
+		).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Online marking for ${assignment.name}"))
 	}
 }
 
