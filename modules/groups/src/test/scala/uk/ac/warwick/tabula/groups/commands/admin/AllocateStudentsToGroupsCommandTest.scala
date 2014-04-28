@@ -30,7 +30,10 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		user1.setLastName("Mannion")
 		user1.setWarwickId("0672089")
 
-		val student1 = Fixtures.student("0672089", "cuscav")
+		val sitsStatus = Fixtures.sitsStatus() // defaults to fully enrolled
+		val department = Fixtures.department("CE", "Centre for Lifelong Learning")
+
+		val student1 = Fixtures.student("0672089", "cuscav", department, department, sitsStatus)
 		student1.firstName = "Mathew"
 		student1.lastName = "Mannion"
 
@@ -40,7 +43,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		user2.setLastName("Howes")
 		user2.setWarwickId("0672088")
 
-		val student2 = Fixtures.student("0672088", "cusebr")
+		val student2 = Fixtures.student("0672088", "cusebr", department, department, sitsStatus)
 		student2.firstName = "Nick"
 		student2.lastName = "Howes"
 
@@ -50,7 +53,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		user3.setLastName("Jones")
 		user3.setWarwickId("9293883")
 
-		val student3 = Fixtures.student("9293883", "cusfal")
+		val student3 = Fixtures.student("9293883", "cusfal", department, department, sitsStatus)
 		student3.firstName = "Matthew"
 		student3.lastName = "Jones"
 
@@ -60,7 +63,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		user4.setLastName("Dale")
 		user4.setWarwickId("0200202")
 
-		val student4 = Fixtures.student("0200202", "curef")
+		val student4 = Fixtures.student("0200202", "curef", department, department, sitsStatus)
 		student4.firstName = "John"
 		student4.lastName = "Dale"
 
@@ -70,7 +73,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		user5.setLastName("Carpenter")
 		user5.setWarwickId("8888888")
 
-		val student5 = Fixtures.student("8888888", "cusmab")
+		val student5 = Fixtures.student("8888888", "cusmab", department, department, sitsStatus)
 		student5.firstName = "Steven"
 		student5.lastName = "Carpenter"
 
@@ -119,7 +122,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 			cmd.populate()
 			cmd.sort()
 
-			student1.freshStudentCourseDetails.head.statusOnRoute.code should be ("C")
+			student1.freshStudentCourseDetails.head.statusOnRoute.code should be ("F")
 
 			cmd.unallocated should be(JList(user5, user4, user2, user3, user1))
 			cmd.mapping should be(JMap(group1 -> JArrayList(), group2 -> JArrayList()))

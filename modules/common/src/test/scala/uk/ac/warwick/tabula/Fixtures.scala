@@ -189,7 +189,7 @@ object Fixtures extends Mockito {
 							userId: String = "cuspxp",
 							department: Department = null,
 							courseDepartment: Department = null,
-							sprStatus: SitsStatus = new SitsStatus("C", "Current", "Current Student"))	= {
+							sprStatus: SitsStatus = null)	= {
 		val m = member(MemberUserType.Student, universityId, userId, department).asInstanceOf[StudentMember]
 
 		studentCourseDetails(m, courseDepartment, sprStatus)
@@ -198,7 +198,7 @@ object Fixtures extends Mockito {
 
 	def studentCourseDetails(member: StudentMember,
 													 courseDepartment: Department,
-													 sprStatus: SitsStatus = new SitsStatus("C", "Current", "Current Student"),
+													 sprStatus: SitsStatus = null,
 													 scjCode: String = null) = {
 		val scjCodeToUse = scjCode match {
 			case null => member.universityId + "/1"
