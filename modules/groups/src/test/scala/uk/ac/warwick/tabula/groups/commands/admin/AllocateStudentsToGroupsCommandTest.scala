@@ -8,8 +8,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.MockUserLookup
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.{SitsStatus, Department, UserGroup}
-import uk.ac.warwick.tabula.data.model.MemberUserType.Student
+import uk.ac.warwick.tabula.data.model.{SitsStatus, UserGroup}
 
 class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 

@@ -316,7 +316,8 @@ class StudentMember extends Member with StudentProperties {
 
 	def hasCurrentEnrolment: Boolean = freshStudentCourseDetails.exists(_.hasCurrentEnrolment)
 
-	// perm withdrawn if there are no fresh studentCourseDetails with a non-null route status that's not P
+	// perm withdrawn if the member is inactive or
+	// there are no fresh studentCourseDetails with a non-null route status that's not P
 	def permanentlyWithdrawn: Boolean = {
 		inUseFlag.matches("Inactive.*") ||
 		freshStudentCourseDetails
