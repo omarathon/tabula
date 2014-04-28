@@ -164,14 +164,16 @@ class StudentCourseDetails
 	}
 
 	def isStudentRelationshipTypeForDisplay(relationshipType: StudentRelationshipType): Boolean = {
+		if (department == null) false
+		else {
+			// first see if any of the sub-departments that the student is in are set to display this relationship type
+			val relationshipDisplayedForSubDepts = department.subDepartmentsContaining(student).flatMap {
+				_.studentRelationshipDisplayed.get(relationshipType.id)
+			}.map(_.toBoolean).contains(true)
 
-		// first see if any of the sub-departments that the student is in are set to display this relationship type
-		val relationshipDisplayedForSubDepts = department.subDepartmentsContaining(student).flatMap {
-			_.studentRelationshipDisplayed.get(relationshipType.id)
-		}.map(_.toBoolean).contains(true)
-
-		// if either a sub-dept is set to display this relationship type or the parent department is, then display it:
-		relationshipDisplayedForSubDepts || department.getStudentRelationshipDisplayed(relationshipType)
+			// if either a sub-dept is set to display this relationship type or the parent department is, then display it:
+			relationshipDisplayedForSubDepts || department.getStudentRelationshipDisplayed(relationshipType)
+		}
 	}
 
 }
