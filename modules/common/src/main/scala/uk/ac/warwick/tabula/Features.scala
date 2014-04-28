@@ -90,6 +90,7 @@ abstract class Features {
 	@Value("${features.newSeenSecondMarkingWorkflows:true}") var newSeenSecondMarkingWorkflows = defaults.newSeenSecondMarkingWorkflows
 	@Value("${features.activityStreams:true}") var activityStreams = defaults.activityStreams
 	@Value("${features.profiles.showModuleResults:false}") var showModuleResults = defaults.showModuleResults
+	@Value("${features.profiles.showAccreditedPriorLearning:false}") var showAccreditedPriorLearning = defaults.showAccreditedPriorLearning
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -166,6 +167,7 @@ class FeaturesMessage {
 	@BeanProperty var newSeenSecondMarkingWorkflows = true
 	@BeanProperty var activityStreams = true
 	@BeanProperty var showModuleResults = false
+	@BeanProperty var showAccreditedPriorLearning = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

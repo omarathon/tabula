@@ -75,7 +75,19 @@ class StudentCourseDetails
 		moduleRegistrations.collect {
 			case modReg if year.isEmpty => modReg
 			case modReg if modReg.academicYear == year.getOrElse(null) => modReg
-	}
+		}
+
+	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
+	private val _accreditedPriorLearning: JSet[AccreditedPriorLearning] = JHashSet()
+
+	def accreditedPriorLearning = _accreditedPriorLearning.asScala.toSeq
+
+	def accreditedPriorLearningByYear(year: Option[AcademicYear]): Seq[AccreditedPriorLearning] =
+		accreditedPriorLearning.collect {
+			case apl if year.isEmpty => apl
+			case apl if apl.academicYear == year.getOrElse(null) => apl
+		}
 
 	def toStringProps = Seq(
 		"scjCode" -> scjCode,
@@ -101,7 +113,10 @@ class StudentCourseDetails
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var latestStudentCourseYearDetails: StudentCourseYearDetails = _
 
-	def courseType = CourseType.fromCourseCode(course.code)
+	def courseType: Option[CourseType] = {
+		if (course == null) None
+		else Some(CourseType.fromCourseCode(course.code))
+	}
 
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.PERSIST))
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))

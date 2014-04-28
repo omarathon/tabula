@@ -365,4 +365,8 @@ object Permissions {
 		case object Core extends Permission("View a student's module registrations")
 		case object Results extends Permission( "View a student's module results")
 	}
+
+	object AccreditedPriorLearning {
+		case object Read extends Permission("View a student's accredited prior learning")
+	}
 }
