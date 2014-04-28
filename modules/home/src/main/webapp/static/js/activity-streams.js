@@ -20,13 +20,12 @@ jQuery(function($) {
 
 	Activity.prototype.render = function() {
 		var item = this.item;
-		var date = new Date(item.published);
 		var priority = 'priority-info';
 		if (item.priority >= 0.5) priority = 'priority-warning';
 		if (item.priority >= 0.75) priority = 'priority-critical';
 
 		var now = moment();
-		var time = moment.utc(item.published);
+		var time = moment(item.published);
 		var fullDate = time.format('LLLL');
 		var $timestamp = $('<div>', {'class':'timestamp', title: fullDate}).html(toTimestamp(now, time));
 		var urlTitle = capitalise(item.urlTitle || 'further info');
@@ -58,9 +57,9 @@ jQuery(function($) {
 		if (now.diff(then) < 60000) { // less than a minute ago
 			return then.from(now);
 		} else if (now.isSame(then, 'day')) {
-			return then.format('H:mma [Today]');
+			return then.format('LT [Today]');
 		} else if (yesterday.isSame(then, 'day')) {
-			return then.format('H:mma [Yesterday]');
+			return then.format('LT [Yesterday]');
 		} else if (now.isSame(then, 'year')) {
 			return then.format('ddd Do MMM LT');
 		} else {
