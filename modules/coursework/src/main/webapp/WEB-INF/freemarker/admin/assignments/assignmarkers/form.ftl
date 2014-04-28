@@ -145,7 +145,7 @@
 	formatAgentsLayout();
 
 	// debounced on window resize, reformat agents layout...
-	on_resize(formatAgentsLayout());
+	on_resize(formatAgentsLayout);
 
 
 	function formatAgentsLayout() {

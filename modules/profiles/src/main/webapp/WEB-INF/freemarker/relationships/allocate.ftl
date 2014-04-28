@@ -284,7 +284,7 @@
 			formatAgentsLayout();
 
 			// debounced on window resize, reformat agents layout...
-			on_resize(formatAgentsLayout());
+			on_resize(formatAgentsLayout);
 
 			// when new agents are added, reformat agents layout...
 			$('#add-agents').on('hidden', formatAgentsLayout());
