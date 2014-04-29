@@ -45,6 +45,18 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 	}
 
 	def save(notification: Notification[_,_]) {
+		/**
+		 * FIXME This should no longer be required but submitting assignments
+		 * doesn't work without it.
+		 *
+		 * PreSaveBehaviour usually doesn't happen until flush, but we need
+		 * properties to be set before flush to avoid ConcurrentModificationExceptions.
+		 *
+		 * There are other pre-flush Hibernate event types we could create listeners for.
+		 */
+		val isNew = notification.id == null
+		notification.preSave(isNew)
+
 		session.save(notification)
 	}
 
