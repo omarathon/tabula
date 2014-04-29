@@ -7,9 +7,9 @@
 		<#list studentCourseDetails.freshStudentCourseYearDetails as scyd>
 			<#assign year=scyd.academicYear.startYear?string.computer />
 			<#if scyd.academicYear.value != studentCourseYearDetails.academicYear.value>
-					<li><a href="/profiles/view/course/${studentCourseDetails.urlSafeId}/${year}">
-						${scyd.academicYear.toString}
-					</a></li>
+				<li><a href="/profiles/view/course/${studentCourseDetails.urlSafeId}/${year}">
+					${scyd.academicYear.toString}
+				</a></li>
 			<#else>
 				<li class="active"><a href="/profiles/view/course/${studentCourseDetails.urlSafeId}/${year}">
 					${scyd.academicYear.toString}

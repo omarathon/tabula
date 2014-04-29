@@ -2,4 +2,4 @@
 
 <#import "*/modal_macros.ftl" as modal />
 
-	<#include "_course_in_year.ftl"/>
+<#include "_course_in_year.ftl"/>
