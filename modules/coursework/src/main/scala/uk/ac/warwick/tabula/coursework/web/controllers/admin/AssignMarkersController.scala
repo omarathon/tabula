@@ -2,15 +2,13 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.coursework.commands.assignments.{Student, AssignMarkersCommand}
+import uk.ac.warwick.tabula.coursework.commands.assignments.AssignMarkersCommand
 import uk.ac.warwick.tabula.data.model.{UserGroup, Assignment, Module}
-import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm}
+import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.services.{AssignmentMembershipService, UserLookupService}
 import org.springframework.beans.factory.annotation.Autowired
-import scala.Some
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/assign-markers"))
