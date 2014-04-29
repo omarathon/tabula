@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data.model.notifications
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
-import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import javax.persistence.{Entity, DiscriminatorValue}
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 
@@ -13,8 +12,7 @@ class FeedbackChangeNotification extends NotificationWithTarget[Feedback, Assign
 	with SingleItemNotification[Feedback]
 	with SingleRecipientNotification
 	with UniversityIdRecipientNotification
-	with AutowiringUserLookupComponent
-	with PreSaveBehaviour {
+	with AutowiringUserLookupComponent {
 
 	def feedback = item.entity
 	def assignment = target.entity
@@ -23,7 +21,7 @@ class FeedbackChangeNotification extends NotificationWithTarget[Feedback, Assign
 
 	priority = Warning
 
-	override def preSave(newRecord: Boolean) {
+	override def onPreSave(newRecord: Boolean) {
 		recipientUniversityId = feedback.universityId
 	}
 

@@ -11,6 +11,8 @@ import javax.persistence.DiscriminatorValue
 import org.joda.time.{DateTimeUtils, DateTime}
 import uk.ac.warwick.tabula.data.model.notifications.{ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification, SubmissionReceivedNotification}
 import org.hibernate.ObjectNotFoundException
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
 
 @Transactional
 class NotificationDaoTest extends PersistenceTestBase with Mockito {
@@ -87,6 +89,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		val submission = Fixtures.submission()
 		val assignment = Fixtures.assignment("Fun")
 		assignment.addSubmission(submission)
+
 		val notification = Notification.init(new SubmissionReceivedNotification, agent, submission, assignment)
 
 		notificationDao.save(notification)
@@ -95,14 +98,24 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 	@Test
 	def scheduledMeetings() {
-		val meeting = new ScheduledMeetingRecord
-		val relationship = new MemberStudentRelationship
+		val staff = Fixtures.staff("1234567")
+		val student = Fixtures.student("9876543")
+		val relType = StudentRelationshipType("tutor", "tutor", "tutor", "tutor")
 
-		session.save(meeting)
+		val meeting = new ScheduledMeetingRecord
+		meeting.creator = staff
+
+		val relationship = StudentRelationship(staff, relType, student)
+		meeting.relationship = relationship
+
+		session.save(staff)
+		session.save(student)
+		session.save(relType)
 		session.save(relationship)
+		session.save(meeting)
 
 		val r: StudentRelationship = relationship
-		relationship.agentMember = agentMember
+
 		val notification = Notification.init(new ScheduledMeetingRecordInviteeNotification, agent, Seq(meeting), r)
 		notificationDao.save(notification)
 
@@ -110,7 +123,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		session.clear()
 
 		val retrieved = notificationDao.getById(notification.id).get.asInstanceOf[ScheduledMeetingRecordNotification]
-		retrieved.meeting
+		retrieved.meeting should be (meeting)
 	}
 
 	@Test def recent() {

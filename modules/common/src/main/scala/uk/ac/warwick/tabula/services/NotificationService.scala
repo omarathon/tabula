@@ -9,6 +9,8 @@ import uk.ac.warwick.userlookup.User
 import org.apache.lucene.search.FieldDoc
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import org.hibernate.ObjectNotFoundException
+import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
+import uk.ac.warwick.tabula.data.Transactions._
 
 case class ActivityStreamRequest(
 		user: User,
@@ -28,7 +30,6 @@ case class SearchPagination(lastDoc: Int, lastField: Long, token: Long) {
 @Service
 class NotificationService extends Logging with FreemarkerTextRenderer {
 
-	val listeners = Wire.all[NotificationListener]
 	var dao = Wire[NotificationDao]
 	var index = Wire[NotificationIndexServiceImpl]
 
@@ -38,7 +39,8 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 		// TODO - In future pushing a notification will add it to a queue, aggregate similar notifications etc.
 		logger.info("Notification pushed - " + notification)
 		dao.save(notification)
-		this.notify(notification) // for now we just hard call notify
+
+		// Individual listeners are responsible for pulling notifications
 	}
 
 	// update the notifications and rebuild their entries index
@@ -47,12 +49,6 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 		val recipientNotifications = notifications.map(new RecipientNotification(_, user))
 		index.indexItems(recipientNotifications)
 	}
-
-	def notify[A](notification: Notification[_,_]) {
-		logger.info("Notify listeners - " + notification)
-		for (l <- listeners) l.listen(notification)
-	}
-
 
 	def stream(req: ActivityStreamRequest): PagingSearchResultItems[Activity[Any]] = {
 		val notifications = index.userStream(req)
@@ -83,10 +79,18 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 		}
 	}
 
+	def save(recipientInfo: RecipientNotificationInfo) = transactional() {
+		dao.save(recipientInfo)
+	}
+
 }
 
 trait NotificationListener {
-	def listen(n: Notification[_,_]): Unit
+	def listen(notification: Notification[_,_]): Unit
+}
+
+trait RecipientNotificationListener {
+	def listen(recipient: RecipientNotificationInfo): Unit
 }
 
 trait NotificationServiceComponent {

@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.tabula.web.Routes
 import javax.persistence.{DiscriminatorValue, Entity}
-import uk.ac.warwick.tabula.data.PreSaveBehaviour
 
 object ReleaseSmallGroupSetsNotification {
 	val templateLocation = "/WEB-INF/freemarker/notifications/release_small_group_notification.ftl"
@@ -15,12 +14,11 @@ object ReleaseSmallGroupSetsNotification {
 @DiscriminatorValue("ReleaseSmallGroupSets")
 class ReleaseSmallGroupSetsNotification extends Notification[SmallGroup, Unit]
 	with UserIdRecipientNotification
-	with AutowiringUserLookupComponent
-	with PreSaveBehaviour  {
+	with AutowiringUserLookupComponent {
 
 	def verb: String = "Release"
 
-	override def preSave(newRecord: Boolean) {
+	override def onPreSave(newRecord: Boolean) {
 		if (entities.isEmpty) {
 			throw new IllegalArgumentException("Attempted to create a ReleaseSmallGroupSetsNotification with no SmallGroups!")
 		}

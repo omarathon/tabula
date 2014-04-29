@@ -2,17 +2,15 @@ package uk.ac.warwick.tabula.data.model.notifications
 
 import uk.ac.warwick.tabula.data.model.{UniversityIdRecipientNotification, SingleRecipientNotification}
 import javax.persistence.{Entity, DiscriminatorValue}
-import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Entity
 @DiscriminatorValue("SubmissionReceipt")
 class SubmissionReceiptNotification extends SubmissionNotification
 	with SingleRecipientNotification
-	with UniversityIdRecipientNotification
-	with PreSaveBehaviour {
+	with UniversityIdRecipientNotification {
 
-	override def preSave(isNew: Boolean) {
+	override def onPreSave(isNew: Boolean) {
 		recipientUniversityId = submission.universityId
 	}
 
