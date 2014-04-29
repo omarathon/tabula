@@ -62,10 +62,8 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	def removePermanentlyWithdrawn(users: Seq[User]) = {
 		val members: Seq[Member] = users.flatMap(usr => profileService.getMemberByUser(usr))
 		val membersFiltered: Seq[Member] = members filter {
-			mem  => mem match {
-				case (student: StudentMember) => !student.permanentlyWithdrawn
-				case (member: Member) => true
-			}
+			case (student: StudentMember) => !student.permanentlyWithdrawn
+			case (member: Member) => true
 		}
 		membersFiltered.map { mem => mem.asSsoUser}
 	}
