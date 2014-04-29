@@ -54,10 +54,10 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 		 * be fetching saved notifications from the database. Otherwise there
 		 * are other pre-flush Hibernate event types we could create listeners for.
 		 */
-		if (notification.isInstanceOf[PreSaveBehaviour]) {
-			val isNew = notification.id == null
-			notification.asInstanceOf[PreSaveBehaviour].preSave(isNew)
-		}
+//		if (notification.isInstanceOf[PreSaveBehaviour]) {
+//			val isNew = notification.id == null
+//			notification.asInstanceOf[PreSaveBehaviour].preSave(isNew)
+//		}
 		session.save(notification)
 	}
 

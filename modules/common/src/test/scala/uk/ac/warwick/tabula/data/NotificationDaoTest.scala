@@ -11,6 +11,8 @@ import javax.persistence.DiscriminatorValue
 import org.joda.time.{DateTimeUtils, DateTime}
 import uk.ac.warwick.tabula.data.model.notifications.{ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification, SubmissionReceivedNotification}
 import org.hibernate.ObjectNotFoundException
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
 
 @Transactional
 class NotificationDaoTest extends PersistenceTestBase with Mockito {
@@ -87,6 +89,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		val submission = Fixtures.submission()
 		val assignment = Fixtures.assignment("Fun")
 		assignment.addSubmission(submission)
+
 		val notification = Notification.init(new SubmissionReceivedNotification, agent, submission, assignment)
 
 		notificationDao.save(notification)
@@ -96,7 +99,9 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 	@Test
 	def scheduledMeetings() {
 		val meeting = new ScheduledMeetingRecord
-		val relationship = new MemberStudentRelationship
+		meeting.creator = Fixtures.staff()
+
+		val relationship = StudentRelationship(meeting.creator, StudentRelationshipType("tutor", "tutor", "tutor", "tutor"), Fixtures.student())
 
 		session.save(meeting)
 		session.save(relationship)
@@ -110,7 +115,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		session.clear()
 
 		val retrieved = notificationDao.getById(notification.id).get.asInstanceOf[ScheduledMeetingRecordNotification]
-		retrieved.meeting
+		retrieved.meeting should be (meeting)
 	}
 
 	@Test def recent() {

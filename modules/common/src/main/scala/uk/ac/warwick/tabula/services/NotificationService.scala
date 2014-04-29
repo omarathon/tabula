@@ -39,6 +39,8 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 		// TODO - In future pushing a notification will add it to a queue, aggregate similar notifications etc.
 		logger.info("Notification pushed - " + notification)
 		dao.save(notification)
+
+		// Individual listeners are responsible for pulling notifications
 	}
 
 	// update the notifications and rebuild their entries index
