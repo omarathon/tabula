@@ -4,17 +4,12 @@ package uk.ac.warwick.tabula.web.views
  * Taken from http://code.google.com/p/sweetscala
  */
 
-import freemarker.ext.beans.{ BeansWrapper }
-import freemarker.ext.util.{ ModelCache, ModelFactory }
 import freemarker.template._
-import scala.collection.mutable
-import java.{ util => jutil }
 import freemarker.template.DefaultObjectWrapper
 import scala.util.matching.Regex
 import freemarker.ext.beans.BeanModel
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
-import scala.reflect.runtime.universe._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.spring.Wire
@@ -22,7 +17,7 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.system.permissions.{RestrictionProvider, Restricted}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.ScopelessPermission
-import uk.ac.warwick.tabula.{RequestInfo}
+import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import java.lang.reflect.Method
 import scala.util.{Try,Success, Failure}

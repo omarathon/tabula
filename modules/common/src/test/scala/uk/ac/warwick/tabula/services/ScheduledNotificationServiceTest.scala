@@ -25,7 +25,7 @@ class ScheduledNotificationServiceTest extends TestBase with Mockito {
 
 	@Test
 	def generateNotifications() {
-		val notification = service.generateNotification(sn1)
+		val notification = service.generateNotification(sn1).get
 
 		notification.isInstanceOf[HeronWarningNotification] should be (true)
 		notification.title should be("You all need to know. Herons would love to kill you in your sleep")
