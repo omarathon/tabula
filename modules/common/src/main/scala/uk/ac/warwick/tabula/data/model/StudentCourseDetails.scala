@@ -61,9 +61,9 @@ class StudentCourseDetails
 	def freshOrStaleStudentCourseYearDetails = studentCourseYearDetails.asScala
 
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	@BatchSize(size=200)
 	private val _moduleRegistrations: JSet[ModuleRegistration] = JHashSet()
+
 	def moduleRegistrations = _moduleRegistrations.asScala.toSeq.sortBy { reg => (reg.module.code) }
 	def addModuleRegistration(moduleRegistration: ModuleRegistration) = _moduleRegistrations.add(moduleRegistration)
 	def removeModuleRegistration(moduleRegistration: ModuleRegistration) = _moduleRegistrations.remove(moduleRegistration)
@@ -75,7 +75,19 @@ class StudentCourseDetails
 		moduleRegistrations.collect {
 			case modReg if year.isEmpty => modReg
 			case modReg if modReg.academicYear == year.getOrElse(null) => modReg
-	}
+		}
+
+	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
+	private val _accreditedPriorLearning: JSet[AccreditedPriorLearning] = JHashSet()
+
+	def accreditedPriorLearning = _accreditedPriorLearning.asScala.toSeq
+
+	def accreditedPriorLearningByYear(year: Option[AcademicYear]): Seq[AccreditedPriorLearning] =
+		accreditedPriorLearning.collect {
+			case apl if year.isEmpty => apl
+			case apl if apl.academicYear == year.getOrElse(null) => apl
+		}
 
 	def toStringProps = Seq(
 		"scjCode" -> scjCode,
@@ -101,7 +113,10 @@ class StudentCourseDetails
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var latestStudentCourseYearDetails: StudentCourseYearDetails = _
 
-	def courseType = CourseType.fromCourseCode(course.code)
+	def courseType: Option[CourseType] = {
+		if (course == null) None
+		else Some(CourseType.fromCourseCode(course.code))
+	}
 
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.PERSIST))
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
@@ -128,10 +143,6 @@ class StudentCourseDetails
 		latestStudentCourseYearDetails = freshStudentCourseYearDetails.max
 	}
 
-	def hasModuleRegistrations = {
-		!moduleRegistrations.isEmpty
-	}
-
 	def isFresh = (missingFromImportSince == null)
 
 	def addStudentCourseYearDetails(scyd: StudentCourseYearDetails) = studentCourseYearDetails.add(scyd)
@@ -153,14 +164,16 @@ class StudentCourseDetails
 	}
 
 	def isStudentRelationshipTypeForDisplay(relationshipType: StudentRelationshipType): Boolean = {
+		if (department == null) false
+		else {
+			// first see if any of the sub-departments that the student is in are set to display this relationship type
+			val relationshipDisplayedForSubDepts = department.subDepartmentsContaining(student).flatMap {
+				_.studentRelationshipDisplayed.get(relationshipType.id)
+			}.map(_.toBoolean).contains(true)
 
-		// first see if any of the sub-departments that the student is in are set to display this relationship type
-		val relationshipDisplayedForSubDepts = department.subDepartmentsContaining(student).flatMap {
-			_.studentRelationshipDisplayed.get(relationshipType.id)
-		}.map(_.toBoolean).contains(true)
-
-		// if either a sub-dept is set to display this relationship type or the parent department is, then display it:
-		relationshipDisplayedForSubDepts || department.getStudentRelationshipDisplayed(relationshipType)
+			// if either a sub-dept is set to display this relationship type or the parent department is, then display it:
+			relationshipDisplayedForSubDepts || department.getStudentRelationshipDisplayed(relationshipType)
+		}
 	}
 
 }

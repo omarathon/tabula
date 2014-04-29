@@ -1,17 +1,20 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.annotations.AccessType
 import org.springframework.stereotype.Repository
-import javax.persistence.Entity
 import uk.ac.warwick.tabula.data.model.ModuleRegistration
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Module
-import org.hibernate.criterion.Restrictions
 
 trait ModuleRegistrationDao {
 	def saveOrUpdate(moduleRegistration: ModuleRegistration)
-	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String): Option[ModuleRegistration]
+	def getByNotionalKey(
+		studentCourseDetails: StudentCourseDetails,
+		module: Module,
+		cats: java.math.BigDecimal,
+		academicYear: AcademicYear,
+		occurrence: String
+	): Option[ModuleRegistration]
 	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear) : Seq[ModuleRegistration]
 }
 
@@ -20,7 +23,13 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 
 	def saveOrUpdate(moduleRegistration: ModuleRegistration) = session.saveOrUpdate(moduleRegistration)
 
-	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String) =
+	def getByNotionalKey(
+		studentCourseDetails: StudentCourseDetails,
+		module: Module,
+		cats: java.math.BigDecimal,
+		academicYear: AcademicYear,
+		occurrence: String
+	) =
 		session.newCriteria[ModuleRegistration]
 				.add(is("studentCourseDetails", studentCourseDetails))
 				.add(is("module", module))

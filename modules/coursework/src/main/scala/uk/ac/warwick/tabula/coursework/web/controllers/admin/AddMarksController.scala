@@ -13,7 +13,6 @@ import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.Feedback
@@ -44,7 +43,7 @@ class AddMarksController extends CourseworkController {
 		val marksToDisplay = members.map { member =>
 			val feedback = feedbackService.getStudentFeedback(assignment, member.getWarwickId)
 			noteMarkItem(member, feedback)
-		}
+		}.sortBy(_.universityId)
 
 		crumbed(Mav("admin/assignments/marks/marksform", "marksToDisplay" -> marksToDisplay), cmd.module)
 
@@ -58,14 +57,12 @@ class AddMarksController extends CourseworkController {
 		markItem.universityId = member.getWarwickId
 
 		feedback match {
-			case Some(f) => {
+			case Some(f) =>
 				markItem.actualMark = f.actualMark.map { _.toString }.getOrElse("")
 				markItem.actualGrade = f.actualGrade.map { _.toString }.getOrElse("")
-			}
-			case None => {
+			case None =>
 				markItem.actualMark = ""
 				markItem.actualGrade = ""
-			}
 		}
 
 		markItem

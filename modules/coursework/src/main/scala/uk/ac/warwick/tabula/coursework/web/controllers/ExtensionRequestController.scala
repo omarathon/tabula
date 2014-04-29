@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
-import scala.collection.JavaConversions._
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{StudentMember, Member, MeetingRecordApproval, Module, Assignment}
+import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.web.Mav
@@ -13,8 +12,8 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import javax.validation.Valid
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.commands.{ComposableCommand, Appliable, SelfValidating}
-import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, ProfileService}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
 
 @Controller
@@ -24,7 +23,13 @@ class ExtensionRequestController extends CourseworkController{
 	var profileService = Wire.auto[ProfileService]
 
 	@ModelAttribute("command")
-	def cmd(@PathVariable("module") module: Module, @PathVariable("assignment") assignment:Assignment, @RequestParam(defaultValue = "") action: String, user:CurrentUser) =
+	def cmd(
+		@PathVariable("module") module: Module,
+		@PathVariable("assignment") assignment:Assignment,
+		@RequestParam(defaultValue = "")
+		action: String,
+		user:CurrentUser
+	) =
 		RequestExtensionCommand(module, assignment, user, action)
 
 	validatesSelf[SelfValidating]
@@ -43,7 +48,7 @@ class ExtensionRequestController extends CourseworkController{
 		} else {
 			if (user.loggedIn){
 				val existingRequest = assignment.findExtension(user.universityId)
-				existingRequest.foreach(cmd.presetValues(_))
+				existingRequest.foreach(cmd.presetValues)
 				val profile = profileService.getMemberByUser(user.apparentUser)
 				// is this an edit of an existing request
 				val isModification = existingRequest.isDefined && !existingRequest.get.isManual

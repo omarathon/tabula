@@ -31,7 +31,9 @@ object GrantPermissionsCommand {
 			with AutowiringUserLookupComponent
 }
 
-class GrantPermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[GrantedPermission[A]] with GrantPermissionsCommandState[A] {
+class GrantPermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A)
+	extends CommandInternal[GrantedPermission[A]] with GrantPermissionsCommandState[A] {
+
 	self: PermissionsServiceComponent with UserLookupComponent =>
 
 	lazy val grantedPermission = permissionsService.getGrantedPermission(scope, permission, overrideType)

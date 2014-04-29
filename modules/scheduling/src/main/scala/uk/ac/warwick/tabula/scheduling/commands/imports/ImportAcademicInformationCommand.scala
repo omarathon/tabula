@@ -22,6 +22,7 @@ object ImportAcademicInformationCommand {
 			with ImportModesOfAttendance
 			with ImportAwards
 			with ImportDisabilities
+			with ImportLevels
 			with AutowiringModuleAndDepartmentServiceComponent
 			with AutowiringModuleImporterComponent
 			with AutowiringCourseAndRouteServiceComponent
@@ -30,6 +31,7 @@ object ImportAcademicInformationCommand {
 			with AutowiringModeOfAttendanceImporterComponent
 			with AutowiringAwardImporterComponent
 			with AutowiringDisabilityImporterComponent
+			with AutowiringLevelImporterComponent
 			with ImportSystemDataPermissions
 			with ImportAcademicInformationDescription
 			with Logging
@@ -44,7 +46,8 @@ object ImportAcademicInformationCommand {
 		sitsStatuses: ImportResult,
 		modesOfAttendance: ImportResult,
 		awards: ImportResult,
-		disabilities: ImportResult
+		disabilities: ImportResult,
+		levels: ImportResult
 	)
 
 	def combineResults(results: Seq[ImportResult]): ImportResult =
@@ -95,7 +98,8 @@ class ImportAcademicInformationCommandInternal extends CommandInternal[ImportAca
 		  ImportSitsStatuses with
 		  ImportModesOfAttendance with
 		  ImportAwards with
-			ImportDisabilities =>
+			ImportDisabilities with
+			ImportLevels =>
 
 	def applyInternal() = transactional() {
 		ImportAcademicInformationResults(
@@ -106,7 +110,8 @@ class ImportAcademicInformationCommandInternal extends CommandInternal[ImportAca
 			sitsStatuses = benchmarkTask("Import SITS status codes") { importSitsStatuses() },
 			modesOfAttendance = benchmarkTask("Import modes of attendance") { importModesOfAttendance() },
 			awards = benchmarkTask("Import awards") { importAwards() },
-			disabilities = benchmarkTask("Import disabilities") { importDisabilities() }
+			disabilities = benchmarkTask("Import disabilities") { importDisabilities() },
+			levels = benchmarkTask("Import levels") { importLevels() }
 		)
 	}
 }
@@ -278,6 +283,15 @@ trait ImportDisabilities {
 	}
 }
 
+trait ImportLevels {
+	self: LevelImporterComponent with Logging =>
+
+	def importLevels(): ImportResult = {
+		logger.info("Importing levels")
+		levelImporter.importLevels()
+	}
+}
+
 trait ImportSystemDataPermissions extends RequiresPermissionsChecking {
 	def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.ImportSystemData)
@@ -305,5 +319,6 @@ trait ImportAcademicInformationDescription extends Describable[ImportAcademicInf
 		importProperties(d, "modesOfAttendance", result.modesOfAttendance)
 		importProperties(d, "awards", result.awards)
 		importProperties(d, "disabilities", result.disabilities)
+		importProperties(d, "levels", result.levels)
 	}
 }

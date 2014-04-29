@@ -2,10 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
-import org.mockito.Mockito._
-import org.mockito.{ArgumentCaptor, Matchers}
-import uk.ac.warwick.tabula.data.model.{Notification, ModeratedMarkingWorkflow, Feedback, Assignment, MarkerFeedback}
-import uk.ac.warwick.tabula.coursework.MockRenderer
+import uk.ac.warwick.tabula.data.model.{Notification, ModeratedMarkingWorkflow, Assignment, MarkerFeedback}
 import uk.ac.warwick.tabula.data.model.notifications.ReleaseToMarkerNotification
 
 class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
@@ -56,6 +53,6 @@ class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
 		n.url should be("/coursework/admin/module/heron101/assignments/1/marker/list")
 		model("assignment") should be(testAssignment)
 		model("numReleasedFeedbacks") should be(2)
-		model("workflowVerb") should be(Some("mark"))
+		model("workflowVerb") should be("mark")
 	}
 }

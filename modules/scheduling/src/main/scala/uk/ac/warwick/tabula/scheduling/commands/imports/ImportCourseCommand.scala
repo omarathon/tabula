@@ -5,11 +5,7 @@ import org.springframework.beans.BeanWrapperImpl
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.SitsStatusDao
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.SitsStatus
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying

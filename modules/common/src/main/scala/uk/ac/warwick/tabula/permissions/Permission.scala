@@ -14,7 +14,9 @@ sealed abstract class Permission(val description: String) extends CaseObjectEqua
 sealed abstract class ScopelessPermission(description: String) extends Permission(description) {
 	override val isScoped = false
 }
-sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val selector: PermissionsSelector[A], description: String) extends Permission(description) {
+sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val selector: PermissionsSelector[A], description: String)
+	extends Permission(description) {
+
 	override val getName = SelectorPermission.shortName(getClass.asInstanceOf[Class[_ <: SelectorPermission[A]]])
 	def <= [B <: PermissionsSelector[B]](other: SelectorPermission[B]) = other match {
 		case that: SelectorPermission[A] => selector <= that.selector.asInstanceOf[PermissionsSelector[A]]
@@ -301,6 +303,7 @@ object Permissions {
 			case object Update extends Permission("Edit a scheduled meeting record")
 			case object Delete extends Permission("Remove a scheduled meeting record")
 		}
+
 	}
 
 	object SmallGroups {
@@ -355,5 +358,15 @@ object Permissions {
 
 	object Notification {
 		case object Dismiss extends Permission("Dismiss and restore notifications")
+	}
+
+
+	object ModuleRegistration {
+		case object Core extends Permission("View a student's module registrations")
+		case object Results extends Permission( "View a student's module results")
+	}
+
+	object AccreditedPriorLearning {
+		case object Read extends Permission("View a student's accredited prior learning")
 	}
 }

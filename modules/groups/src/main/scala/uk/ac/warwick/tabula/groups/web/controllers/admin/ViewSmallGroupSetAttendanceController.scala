@@ -19,7 +19,10 @@ class ViewSmallGroupSetAttendanceController extends GroupsController {
 	def command(@PathVariable set: SmallGroupSet) = ViewSmallGroupSetAttendanceCommand(set)
 
 	@RequestMapping
-	def show(@ModelAttribute("command") command: Appliable[SortedMap[SmallGroup, ViewSmallGroupAttendanceCommand.SmallGroupAttendanceInformation]], @PathVariable set: SmallGroupSet): Mav = {
+	def show(
+		@ModelAttribute("command") command: Appliable[SortedMap[SmallGroup, ViewSmallGroupAttendanceCommand.SmallGroupAttendanceInformation]],
+		@PathVariable set: SmallGroupSet
+	): Mav = {
 		val groups = command.apply()
 		val module = set.module
 		

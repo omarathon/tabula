@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.coursework.services.turnitin.Turnitin._
 import uk.ac.warwick.tabula.coursework.services.turnitin._
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.jobs._
-import java.util.HashMap
 import uk.ac.warwick.tabula.services.OriginalityReportService
 import language.implicitConversions
 import uk.ac.warwick.tabula.data.model.notifications.{TurnitinJobSuccessNotification, TurnitinJobErrorNotification, TurnitinClassDeletedNotification}
@@ -78,13 +77,12 @@ class SubmitToTurnitinJob extends Job
 		debug(s"Checking for existing submissions in ${classId.value}, ${assignmentId.value}")
 
 		val existingSubmissions = session.listSubmissions(classId, className, assignmentId, assignmentName) match {
-			case ClassNotFound() | AssignmentNotFound() => { // class or assignment don't exist
+			case ClassNotFound() | AssignmentNotFound() => // class or assignment don't exist
 				// ensure assignment and class (Tabula module) are created, as submitPaper doesn't always do that for you
 				debug("Missing class or assignment, creating...")
 				session.createAssignment(classId, className, assignmentId, assignmentName, department)
 				Nil // clearly there are no submissions yet.
-			}
-			case ClassDeleted() => { // class deleted on Turnitin (outside Tabula)
+			case ClassDeleted() => // class deleted on Turnitin (outside Tabula)
 				debug(s"${classId.value} is deleted on Turnitin...")
 				if (sendNotifications) {
 					debug("Sending an email to " + job.user.email)
@@ -93,20 +91,19 @@ class SubmitToTurnitinJob extends Job
 					notification.classId.value = classId.value
 					pushNotification(job, notification)
 				}
-				throw new FailedJobException(s"Failed. The class corresponding to the module ${assignment.module.code.toUpperCase} has been deleted by someone on Turnitin.")
-			}
-			case GotSubmissions(list) => {
+				throw new FailedJobException(s"Failed. The class corresponding to the module ${
+					assignment.module.code.toUpperCase
+				} has been deleted by someone on Turnitin.")
+			case GotSubmissions(list) =>
 				debug("Got list of " + list.size + " existing submissions: " + list.map(_.title))
 				list
-			}
-			case failure => {
+			case failure =>
 				if (sendNotifications) {
 					debug("Sending an email to " + job.user.email)
 					val notification = Notification.init(new TurnitinJobErrorNotification, job.user.apparentUser, Seq[OriginalityReport](), assignment)
 					pushNotification(job, notification)
 				}
 				throw new FailedJobException("Failed to get list of existing submissions: " + failure)
-			}
 		}
 
 		def run() {
@@ -210,7 +207,7 @@ class SubmitToTurnitinJob extends Job
 					val matchingAttachment = attachments.find(attachment => report.matches(attachment))
 
 					matchingAttachment match {
-						case Some(attachment) => {
+						case Some(attachment) =>
 							// FIXME this is a clunky way to replace an existing report
 							if (attachment.originalityReport != null) {
 								originalityReportService.deleteOriginalityReport(attachment)
@@ -227,11 +224,9 @@ class SubmitToTurnitinJob extends Job
 							attachment.originalityReport = r
 							originalityReportService.saveOriginalityReport(attachment)
 							Some(r)
-						}
-						case None => {
-							logger.warn("Got plagiarism report for %s but no corresponding Submission item" format (report.universityId))
+						case None =>
+							logger.warn("Got plagiarism report for %s but no corresponding Submission item" format report.universityId)
 							None
-						}
 					}
 				}
 
@@ -260,7 +255,7 @@ class SubmitToTurnitinJob extends Job
 			def getSubmissions() = {
 				Thread.sleep(WaitingSleep)
 				session.listSubmissions(classId, className, assignmentId, assignmentName) match {
-					case GotSubmissions(list) => {
+					case GotSubmissions(list) =>
 						val checked = list filter { _.hasBeenChecked }
 						if (checked.size == list.size) {
 							// all checked
@@ -271,11 +266,9 @@ class SubmitToTurnitinJob extends Job
 							updateStatus("Waiting for documents to be checked (%d/%d)..." format (checked.size, list.size))
 							None
 						}
-					}
-					case somethingElse => {
+					case somethingElse =>
 						debug("listSubmissions returned " + somethingElse)
 						None
-					}
 				}
 			}
 

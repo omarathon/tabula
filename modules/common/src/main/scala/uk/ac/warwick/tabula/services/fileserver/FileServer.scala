@@ -35,14 +35,19 @@ class FileServer {
 	/**
 	 * Serves a RenderableFile out to an HTTP response.
 	 */
-	def serve(file: RenderableFile)(implicit request: HttpServletRequest, out: HttpServletResponse) {
+	def serve(file: RenderableFile, fileName: Option[String] = None)(implicit request: HttpServletRequest, out: HttpServletResponse) {
 		/*
 		 * There's no consistent standard for encoding in the optional
 		 * "filename" attribute of Content-Disposition, so you should stick
 		 * to the only reliable method of specifying the filename which
 		 * is to put it as the last part of the URL path.
 		 */
-		out.addHeader("Content-Disposition", "attachment")
+		val dispositionHeader = fileName match {
+			case Some(fileName) => s"attachment;filename=${fileName}"
+			case _ => "attachment"
+		}
+
+		out.addHeader("Content-Disposition", dispositionHeader)
 		
 		stream(file)
 	}

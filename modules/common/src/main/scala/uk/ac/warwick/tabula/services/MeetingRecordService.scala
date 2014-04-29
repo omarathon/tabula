@@ -37,7 +37,8 @@ abstract class AbstractMeetingRecordService extends MeetingRecordService {
 	def saveOrUpdate(meeting: AbstractMeetingRecord) = meetingRecordDao.saveOrUpdate(meeting)
 	def saveOrUpdate(approval: MeetingRecordApproval) = meetingRecordDao.saveOrUpdate(approval)
 	def list(rel: Set[StudentRelationship], currentMember: Option[Member]): Seq[MeetingRecord] = meetingRecordDao.list(rel, currentMember)
-	def listScheduled(rel: Set[StudentRelationship], currentMember: Option[Member]): Seq[ScheduledMeetingRecord] = meetingRecordDao.listScheduled(rel, currentMember)
+	def listScheduled(rel: Set[StudentRelationship], currentMember: Option[Member]): Seq[ScheduledMeetingRecord] =
+		meetingRecordDao.listScheduled(rel, currentMember)
 	def list(rel: StudentRelationship): Seq[MeetingRecord] = meetingRecordDao.list(rel)
 	def listAll(rel: Set[StudentRelationship], currentMember: Option[Member]): Seq[AbstractMeetingRecord] = {
 		(meetingRecordDao.list(rel, currentMember) ++ meetingRecordDao.listScheduled(rel, currentMember)).sorted

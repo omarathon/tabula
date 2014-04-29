@@ -2,13 +2,12 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.TestBase
 import org.joda.time.DateTime
-import org.apache.lucene.document.{LongField, Document}
+import org.apache.lucene.document.Document
 import org.apache.lucene.analysis.Analyzer
 import java.io.File
-import org.apache.lucene.store.{IOContext, Directory, RAMDirectory}
+import org.apache.lucene.store.RAMDirectory
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import scala.util.Random
-import org.scalatest.{FunSpec, FlatSpec}
 import org.apache.lucene.search._
 import org.apache.lucene.index.Term
 import org.apache.lucene.search.SearcherLifetimeManager.Pruner
@@ -25,7 +24,7 @@ trait RAMDirectoryOverride { self: OpensLuceneDirectory =>
 }
 
 class AbstractIndexServiceTest extends TestBase {
-	case class Item(val name: String, val date: DateTime)
+	case class Item(name: String, date: DateTime)
 
 	val fakeItems = for (i <- 1 to 100) yield Item(s"item$i", new DateTime().plusMinutes(i))
 	val service = new MockIndexService()
@@ -110,7 +109,7 @@ class AbstractIndexServiceTest extends TestBase {
 		val MaxBatchSize: Int = 1000
 		val IncrementalBatchSize: Int = 1000
 
-		val analyzer: Analyzer = new StandardAnalyzer(LuceneVersion)
+		val analyzer: Analyzer = new StandardAnalyzer(IndexService.TabulaLuceneVersion)
 		val UpdatedDateField: String = "date"
 		val IdField: String = "name"
 

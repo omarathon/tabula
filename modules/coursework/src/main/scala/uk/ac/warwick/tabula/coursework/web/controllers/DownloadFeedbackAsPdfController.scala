@@ -46,8 +46,11 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
 		
 	@RequestMapping
 	def viewAsPdf(command: DownloadFeedbackAsPdfCommand, user: CurrentUser) = {
-		new PDFView("feedback.pdf", "/WEB-INF/freemarker/admin/assignments/markerfeedback/feedback-download.ftl", Map("feedback" -> command.apply(), "user"-> user))
-			with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent
+		new PDFView(
+			"feedback.pdf",
+			"/WEB-INF/freemarker/admin/assignments/markerfeedback/feedback-download.ftl",
+			Map("feedback" -> command.apply(), "user"-> user)
+		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent
 	}
 
 }
@@ -60,7 +63,8 @@ object DownloadFeedbackAsPdfCommand {
 			with DownloadFeedbackAsPdfAudit
 }
 
-class DownloadFeedbackAsPdfCommandInternal(val module: Module, val assignment: Assignment, val feedback: Feedback) extends CommandInternal[Feedback] with DownloadFeedbackAsPdfState {
+class DownloadFeedbackAsPdfCommandInternal(val module: Module, val assignment: Assignment, val feedback: Feedback)
+	extends CommandInternal[Feedback] with DownloadFeedbackAsPdfState {
 	override def applyInternal() = feedback
 }
 

@@ -7,29 +7,45 @@ import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.ListMarkerFeedbackCommand
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.coursework.commands.assignments.MarkerFeedbackCollections
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/list"))
 class ListMarkerFeedbackController  extends CourseworkController {
 
-
-	@ModelAttribute def command(@PathVariable assignment: Assignment ,@PathVariable module: Module, user: CurrentUser) =
-		new ListMarkerFeedbackCommand(assignment, module, user, assignment.isFirstMarker(user.apparentUser))
+	@ModelAttribute("command")
+	def createCommand(@PathVariable assignment: Assignment, @PathVariable module: Module, user: CurrentUser) =
+		ListMarkerFeedbackCommand(assignment, module, user)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def list(@ModelAttribute command: ListMarkerFeedbackCommand): Mav = {
-		val markerFeedbackItems = command.apply()
+	def list(@ModelAttribute("command") command: Appliable[MarkerFeedbackCollections], @PathVariable assignment: Assignment): Mav = {
+		val markerFeedbackCollections = command.apply()
+		val inProgressFeedback = markerFeedbackCollections.inProgressFeedback
+		val completedFeedback = markerFeedbackCollections.completedFeedback
+		val rejectedFeedback = markerFeedbackCollections.rejectedFeedback
 
-		val firstMarkerRoleName = command.assignment.markingWorkflow.firstMarkerRoleName
-		val secondMarkerRoleName = command.assignment.markingWorkflow.secondMarkerRoleName
+		val maxFeedbackCount = Math.max(
+			rejectedFeedback.map(_.feedbacks.size).reduceOption(_ max _).getOrElse(0),
+			Math.max(
+				inProgressFeedback.map(_.feedbacks.size).reduceOption(_ max _).getOrElse(0),
+				completedFeedback.map(_.feedbacks.size).reduceOption(_ max _).getOrElse(0)
+			)
+		)
+		val hasFirstMarkerFeedback = maxFeedbackCount > 1
+		val hasSecondMarkerFeedback = maxFeedbackCount > 2
 
 		Mav("admin/assignments/markerfeedback/list",
-			"items" -> markerFeedbackItems,
-			"completedFeedback" -> command.completedFeedback,
-			"rejectedFeedback" -> command.rejectedFeedback,
-			"isFirstMarker" -> command.firstMarker,
-			"firstMarkerRoleName" -> firstMarkerRoleName,
-			"secondMarkerRoleName" -> secondMarkerRoleName)
+			"assignment" -> assignment,
+			"inProgressFeedback" -> inProgressFeedback,
+			"completedFeedback" -> completedFeedback,
+			"rejectedFeedback" -> rejectedFeedback,
+			"firstMarkerRoleName" -> assignment.markingWorkflow.firstMarkerRoleName,
+			"secondMarkerRoleName" -> assignment.markingWorkflow.secondMarkerRoleName,
+			"thirdMarkerRoleName" -> assignment.markingWorkflow.thirdMarkerRoleName,
+			"hasFirstMarkerFeedback" -> hasFirstMarkerFeedback,
+			"hasSecondMarkerFeedback" -> hasSecondMarkerFeedback
+		)
 	}
 
 }

@@ -82,10 +82,15 @@ abstract class Features {
 	@Value("${features.disability.rendering.profiles:true}") var disabilityRenderingInProfiles = defaults.disabilityRenderingInProfiles
 	@Value("${features.disability.rendering.extensions:true}") var disabilityRenderingInExtensions = defaults.disabilityRenderingInExtensions
 	@Value("${features.includePastYears:true}") var includePastYears = defaults.includePastYears
-	@Value("${features.attendanceMonitoring.smallGroupPointType:true}") var attendanceMonitoringSmallGroupPointType = defaults.attendanceMonitoringSmallGroupPointType
-	@Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}") var attendanceMonitoringAssignmentSubmissionPointType = defaults.attendanceMonitoringAssignmentSubmissionPointType
+	@Value("${features.attendanceMonitoring.smallGroupPointType:true}")
+	var attendanceMonitoringSmallGroupPointType = defaults.attendanceMonitoringSmallGroupPointType
+	@Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}")
+	var attendanceMonitoringAssignmentSubmissionPointType = defaults.attendanceMonitoringAssignmentSubmissionPointType
 	@Value("${features.xSendfile:true}") var xSendfile = defaults.xSendfile
+	@Value("${features.newSeenSecondMarkingWorkflows:true}") var newSeenSecondMarkingWorkflows = defaults.newSeenSecondMarkingWorkflows
 	@Value("${features.activityStreams:true}") var activityStreams = defaults.activityStreams
+	@Value("${features.profiles.showModuleResults:false}") var showModuleResults = defaults.showModuleResults
+	@Value("${features.profiles.showAccreditedPriorLearning:false}") var showAccreditedPriorLearning = defaults.showAccreditedPriorLearning
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -159,7 +164,10 @@ class FeaturesMessage {
 	@BeanProperty var includePastYears = true
 	@BeanProperty var attendanceMonitoringAssignmentSubmissionPointType = true
 	@BeanProperty var xSendfile = true
+	@BeanProperty var newSeenSecondMarkingWorkflows = true
 	@BeanProperty var activityStreams = true
+	@BeanProperty var showModuleResults = false
+	@BeanProperty var showAccreditedPriorLearning = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

@@ -33,7 +33,7 @@ class MarkerAddMarksController extends CourseworkController {
 	             		   @ModelAttribute cmd: MarkerAddMarksCommand, errors: Errors): Mav = {
 
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
-		val markerFeedbacks = submissions.flatMap(s => assignment.getMarkerFeedback(s.universityId, user.apparentUser))
+		val markerFeedbacks = submissions.flatMap(s => assignment.getMarkerFeedbackForCurrentPosition(s.universityId, user.apparentUser))
 		val filteredFeedbackId = markerFeedbacks.filter(_.state != MarkingCompleted).map(_.feedback.universityId)
 		val filteredSubmissions = submissions.filter(s => filteredFeedbackId.contains(s.universityId))
 
@@ -46,7 +46,7 @@ class MarkerAddMarksController extends CourseworkController {
 				case Some(f) if f.state != MarkingCompleted => noteMarkItem(member, Option(f))
 				case None => noteMarkItem(member, None)
 			}
-		}
+		}.sortBy(_.universityId)
 
 		Mav("admin/assignments/markerfeedback/marksform", "marksToDisplay" -> marksToDisplay)
 	}
@@ -55,14 +55,12 @@ class MarkerAddMarksController extends CourseworkController {
 		val markItem = new MarkItem()
 		markItem.universityId = member.getWarwickId
 		markerFeedback match {
-			case Some(f) => {
+			case Some(f) =>
 				markItem.actualMark = f.mark.map { _.toString }.getOrElse("")
 				markItem.actualGrade = f.grade.getOrElse("")
-			}
-			case None => {
+			case None =>
 				markItem.actualMark = ""
 				markItem.actualGrade = ""
-			}
 		}
 		markItem
 	}

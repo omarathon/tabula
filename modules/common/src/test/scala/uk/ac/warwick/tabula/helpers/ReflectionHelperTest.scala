@@ -15,6 +15,11 @@ class ReflectionHelperTest extends TestBase with ReflectionsSetup {
 	@Test def allPermissionsTargets = {
 		ReflectionHelper.allPermissionTargets.contains(classOf[Department]) should be (true)
 	}
+
+	@Test def notifications = {
+		val map = ReflectionHelper.allNotifications
+		map.contains("SubmissionDueGeneral") should be (true)
+	}
 	
 	@Test def allPermissions = {
 		ReflectionHelper.allPermissions.contains(Permissions.Module.ManageAssignments) should be (true) 

@@ -124,8 +124,8 @@ object Fixtures extends Mockito {
 			occurrence = "A")
 
 
-	def seenSecondMarkingWorkflow(name: String) = {
-		val workflow = new SeenSecondMarkingWorkflow
+	def seenSecondMarkingLegacyWorkflow(name: String) = {
+		val workflow = new SeenSecondMarkingLegacyWorkflow
 		workflow.name = name
 		workflow
 	}
@@ -185,14 +185,21 @@ object Fixtures extends Mockito {
 		moa
 	}
 
-	def student(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null, courseDepartment: Department = null, sprStatus: SitsStatus = null)	= {
+	def student(universityId: String = "0123456",
+							userId: String = "cuspxp",
+							department: Department = null,
+							courseDepartment: Department = null,
+							sprStatus: SitsStatus = null)	= {
 		val m = member(MemberUserType.Student, universityId, userId, department).asInstanceOf[StudentMember]
 
 		studentCourseDetails(m, courseDepartment, sprStatus)
 		m
 	}
 
-	def studentCourseDetails(member: StudentMember, courseDepartment: Department, sprStatus: SitsStatus = null, scjCode: String = null) = {
+	def studentCourseDetails(member: StudentMember,
+													 courseDepartment: Department,
+													 sprStatus: SitsStatus = null,
+													 scjCode: String = null) = {
 		val scjCodeToUse = scjCode match {
 			case null => member.universityId + "/1"
 			case _ => scjCode
@@ -259,7 +266,7 @@ object Fixtures extends Mockito {
 	def monitoringCheckpoint(point: MonitoringPoint, student: StudentMember, state: AttendanceState) = {
 		val checkpoint = new MonitoringCheckpoint
 		val monitoringPointService = smartMock[MonitoringPointService]
-		monitoringPointService.studentAlreadyReportedThisTerm(student, point) returns (false)
+		monitoringPointService.studentAlreadyReportedThisTerm(student, point) returns false
 		checkpoint.monitoringPointService = monitoringPointService
 		checkpoint.point = point
 		checkpoint.student = student
@@ -279,7 +286,7 @@ object Fixtures extends Mockito {
 
 	def notification(agent:User, recipient: User) = {
 		val heron = new Heron(recipient)
-		Notification.init(new HeronWarningNotification, agent, heron, heron)
+		Notification.init(new HeronWarningNotification, agent, heron)
 	}
 
 }

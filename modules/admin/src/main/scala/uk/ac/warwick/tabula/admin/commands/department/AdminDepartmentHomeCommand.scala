@@ -4,7 +4,8 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.{Route, Module, Department}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited, ReadOnly}
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, SecurityServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringSecurityServiceComponent}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, SecurityServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSecurityServiceComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 

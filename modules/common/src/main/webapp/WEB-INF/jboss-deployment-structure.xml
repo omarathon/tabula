@@ -5,7 +5,7 @@
 	<deployment>
 		<dependencies>
 			<!-- conf directory module -->
-			<module name="warwick.tabula.configuration" />
+			<module name="tabula-config" />
 			<!-- XML libs for OpenSAML -->
 			<module name="org.apache.xalan" />
 			<module name="org.apache.xerces" />

@@ -14,7 +14,19 @@ import uk.ac.warwick.tabula.services.SubmissionService
  *  In future, perhaps we'd extend this to take a collection of entities
  *  for more complex interactions.
  */
-class Activity[A](val id: String, val title: String, val date: DateTime, val priority: Double, val agent: User, val url: String, val urlTitle: String, val verb: String, val message: String, val entity: A, target: AnyRef=null) {
+class Activity[A](
+	val id: String,
+	val title: String,
+	val date: DateTime,
+	val priority: Double,
+	val agent: User,
+	val url: String,
+	val urlTitle: String,
+	val verb: String,
+	val message: String,
+	val entity: A,
+	target: AnyRef=null
+) {
 
 	// Expose entity type for Freemarker
 	def getEntityType = entity.getClass.getSimpleName
@@ -30,7 +42,7 @@ object Activity {
 	// given an AuditEvent...
 	def apply(event: AuditEvent): Option[Activity[Any]] = {
 		event.eventType match {
-			case "SubmitAssignment" if (event.hasProperty("submission")) => {
+			case "SubmitAssignment" if event.hasProperty("submission") =>
 				val submission = submissionService.getSubmission(event.submissionId getOrElse "")
 
 				val title = if (submission.isDefined) {
@@ -43,10 +55,8 @@ object Activity {
 				val date = event.eventDate
 				val agent = userLookup.getUserByUserId(event.userId)
 				Some(new Activity[Any](null, title, date, 0, agent, null, null, "submit", "", entity))
-			}
-			case _ => {
+			case _ =>
 				None
-			}
 		}
 	}
 	

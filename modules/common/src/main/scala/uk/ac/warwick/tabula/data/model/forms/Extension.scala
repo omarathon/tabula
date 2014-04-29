@@ -81,6 +81,11 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 		attachments.add(attachment)
 	}
 
+	def removeAttachment(attachment: FileAttachment) = {
+		attachment.extension = null
+		attachments.remove(attachment)
+	}
+
 	// this extension was manually created by an administrator, rather than requested by a student
 	def isManual = requestedOn == null
 	def isInitiatedByStudent = !isManual

@@ -13,10 +13,10 @@ import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.web.Mav
-import org.joda.time.DateTime
 
 
-class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
+class ViewProfileCommand(user: CurrentUser, profile: StudentMember)
+	extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
 
 	if (user.isStudent && user.universityId != profile.universityId) {
 		logger.info("Denying access for user " + user + " to view profile " + profile)
@@ -36,7 +36,10 @@ abstract class ViewProfileController extends ProfilesController {
 	def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
 
-	def getViewMeetingRecordCommand(studentCourseDetails: Option[StudentCourseDetails], relationshipType: StudentRelationshipType): Option[Command[Seq[AbstractMeetingRecord]]] = {
+	def getViewMeetingRecordCommand(
+		studentCourseDetails: Option[StudentCourseDetails],
+		relationshipType: StudentRelationshipType
+	): Option[Command[Seq[AbstractMeetingRecord]]] = {
 		studentCourseDetails match {
 			case Some(scd: StudentCourseDetails) => restricted(ViewMeetingRecordCommand(scd, optionalCurrentMember, relationshipType))
 			case None => None
@@ -63,7 +66,9 @@ abstract class ViewProfileController extends ProfilesController {
 			}.toMap
 
 		val relationshipTypes: List[String] =
-			if (currentMember.isStudent) relationshipService.listAllStudentRelationshipTypesWithStudentMember(currentMember.asInstanceOf[StudentMember]).map (_.agentRole).distinct.toList
+			if (currentMember.isStudent)
+				relationshipService.listAllStudentRelationshipTypesWithStudentMember(currentMember.asInstanceOf[StudentMember])
+					.map(_.agentRole).distinct.toList
 			else relationshipService.listAllStudentRelationshipTypesWithMember(currentMember).map (_.studentRole + "s").distinct.toList
 
 		def relationshipTypesFormatted = relationshipTypes match {
@@ -105,8 +110,8 @@ abstract class ViewProfileController extends ProfilesController {
 			"agent" -> agent,
 			"allRelationshipTypes" -> allRelationshipTypes,
 			"studentCourseDetails" -> studentCourseDetails,
-			"studentCourseYearDetails" -> studentCourseYearDetails)
-			.crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
+			"studentCourseYearDetails" -> studentCourseYearDetails
+		).crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}
 
 	def studentCourseYearFromYear(studentCourseDetails: StudentCourseDetails, year: AcademicYear) =

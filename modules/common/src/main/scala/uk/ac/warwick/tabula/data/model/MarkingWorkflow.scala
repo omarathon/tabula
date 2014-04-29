@@ -53,6 +53,8 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	@JoinColumn(name = "secondmarkers_id")
 	var secondMarkers = UserGroup.ofUsercodes
 
+	def thirdMarkers: UserGroup
+
 	def markingMethod: MarkingMethod
 
 	/** If true, the submitter chooses their first marker from a dropdown */
@@ -65,6 +67,10 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	def hasSecondMarker: Boolean
 	def secondMarkerRoleName: Option[String]
 	def secondMarkerVerb: Option[String]
+
+	def hasThirdMarker: Boolean
+	def thirdMarkerRoleName: Option[String]
+	def thirdMarkerVerb: Option[String]
 
 	def studentHasMarker(assignment:Assignment, universityId: String): Boolean =
 		getStudentsFirstMarker(assignment, universityId).isDefined || getStudentsSecondMarker(assignment, universityId).isDefined
@@ -107,11 +113,14 @@ trait AssignmentMarkerMap {
 
 		val isFirstMarker = assignment.isFirstMarker(marker)
 		val isSecondMarker = assignment.markingWorkflow.hasSecondMarker && assignment.isSecondMarker(marker)
+		val isThirdMarker = assignment.markingWorkflow.hasThirdMarker && assignment.isThirdMarker(marker)
 
 		if(isFirstMarker)
 			allSubmissions.filter(_.isReleasedForMarking)
 		else if(isSecondMarker)
 			allSubmissions.filter(_.isReleasedToSecondMarker)
+		else if(isThirdMarker)
+			allSubmissions.filter(_.isReleasedToThirdMarker)
 		else Seq()
 	}
 
@@ -124,12 +133,20 @@ trait AssignmentMarkerMap {
 		}.getOrElse(Seq())
 	}
 
+
 }
 
-trait NoSecondMarker {
-	def hasSecondMarker = false
-	def secondMarkerRoleName = None
-	def secondMarkerVerb = None
+trait NoThirdMarker {
+		def hasThirdMarker = false
+		def thirdMarkerRoleName = None
+		def thirdMarkerVerb = None
+		def thirdMarkers: UserGroup = UserGroup.ofUsercodes
+}
+
+trait NoSecondMarker extends NoThirdMarker {
+		def hasSecondMarker = false
+		def secondMarkerRoleName = None
+		def secondMarkerVerb = None
 }
 
 
@@ -142,12 +159,14 @@ sealed abstract class MarkingMethod(val name: String){
 
 object MarkingMethod {
 	case object StudentsChooseMarker extends MarkingMethod("StudentsChooseMarker")
+	case object SeenSecondMarkingLegacy extends MarkingMethod("SeenSecondMarkingLegacy")
 	case object SeenSecondMarking extends MarkingMethod("SeenSecondMarking")
 	case object ModeratedMarking extends MarkingMethod("ModeratedMarking")
 	case object FirstMarkerOnly extends MarkingMethod("FirstMarkerOnly")
 
 	val values: Set[MarkingMethod] = Set(
 		StudentsChooseMarker,
+		SeenSecondMarkingLegacy,
 		SeenSecondMarking,
 		ModeratedMarking,
 		FirstMarkerOnly

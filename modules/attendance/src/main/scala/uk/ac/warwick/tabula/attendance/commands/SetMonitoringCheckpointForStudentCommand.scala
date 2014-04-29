@@ -103,7 +103,9 @@ trait SetMonitoringCheckpointForStudentCommandValidation extends SelfValidating 
 					errors.rejectValue("", "monitoringPoint.invalidStudent")
 				}	else {
 
-					if (!nonReportedTerms.contains(termService.getTermFromAcademicWeekIncludingVacations(point.validFromWeek, point.pointSet.academicYear).getTermTypeAsString)){
+					if (!nonReportedTerms.contains(
+						termService.getTermFromAcademicWeekIncludingVacations(point.validFromWeek, point.pointSet.academicYear).getTermTypeAsString)
+					){
 						errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
 					}
 

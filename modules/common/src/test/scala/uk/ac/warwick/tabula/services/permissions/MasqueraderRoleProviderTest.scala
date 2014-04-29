@@ -11,7 +11,7 @@ class MasqueraderRoleProviderTest extends TestBase {
 	
 	val userLookup = new MockUserLookup
 	provider.userLookup = userLookup
-	provider.masqueradeGroup = "tabula-masques"
+	provider.webgroup = "tabula-masques"
 		
 	userLookup.groupService.usersInGroup ++= Map(
 		("cuscav", "othergroup") -> true,

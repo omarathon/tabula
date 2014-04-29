@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.{MonitoringPointServiceComponent, AutowiringMonitoringPointServiceComponent, CourseAndRouteServiceComponent, AutowiringCourseAndRouteServiceComponent}
+import uk.ac.warwick.tabula.services.{MonitoringPointServiceComponent, AutowiringMonitoringPointServiceComponent}
+import uk.ac.warwick.tabula.services.{CourseAndRouteServiceComponent, AutowiringCourseAndRouteServiceComponent}
 import uk.ac.warwick.tabula.data.model.{Route, Department}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -25,8 +26,8 @@ object ManageMonitoringPointSetCommand {
 }
 
 
-abstract class ManageMonitoringPointSetCommand(val user: CurrentUser, val dept: Department, val academicYearOption: Option[AcademicYear]) extends CommandInternal[Seq[MonitoringPointSetTemplate]]
-	with ManageMonitoringPointSetState {
+abstract class ManageMonitoringPointSetCommand(val user: CurrentUser, val dept: Department, val academicYearOption: Option[AcademicYear])
+	extends CommandInternal[Seq[MonitoringPointSetTemplate]] with ManageMonitoringPointSetState {
 
 	override def applyInternal() = {
 		monitoringPointService.listTemplates

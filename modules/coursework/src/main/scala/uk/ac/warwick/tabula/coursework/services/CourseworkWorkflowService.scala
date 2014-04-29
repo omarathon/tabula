@@ -2,18 +2,12 @@ package uk.ac.warwick.tabula.coursework.services
 
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.Features
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.MarkingMethod
-import javax.persistence.Entity
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
-import uk.ac.warwick.tabula.data.model.MarkingState
 import scala.collection.immutable.ListMap
 import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
+import uk.ac.warwick.tabula.data.model.MarkingMethod.SeenSecondMarking
 
 @Service
 class CourseworkWorkflowService {
@@ -38,6 +32,10 @@ class CourseworkWorkflowService {
 				
 				if (assignment.markingWorkflow.hasSecondMarker) {
 					stages = stages ++ Seq(SecondMarking)
+				}
+
+				if (assignment.markingWorkflow.markingMethod == SeenSecondMarking) {
+					stages = stages ++ Seq(FinaliseSeenSecondMarking)
 				}
 			}
 		}
@@ -99,16 +97,16 @@ class CourseworkWorkflowService {
 			) 
 		})
 		
-		builder.result
+		builder.result()
 	}
 }
 
 case class Progress(
-	val percentage: Int,
-	val messageCode: String,
-	val cssClass: String,
-	val nextStage: Option[WorkflowStage],
-	val stages: ListMap[String, WorkflowStages.StageProgress]
+	percentage: Int,
+	messageCode: String,
+	cssClass: String,
+	nextStage: Option[WorkflowStage],
+	stages: ListMap[String, WorkflowStages.StageProgress]
 )
 
 sealed abstract class WorkflowStage {
@@ -124,12 +122,12 @@ sealed abstract class WorkflowStageHealth(val cssClass: String)
 
 object WorkflowStages {
 	case class StageProgress(
-		val stage: WorkflowStage,
-		val started: Boolean,
-		val messageCode: String,
-		val health: WorkflowStageHealth=Good,
-		val completed: Boolean=false,
-		val preconditionsMet: Boolean=false
+		stage: WorkflowStage,
+		started: Boolean,
+		messageCode: String,
+		health: WorkflowStageHealth=Good,
+		completed: Boolean=false,
+		preconditionsMet: Boolean=false
 	)
 	
 	case object Good extends WorkflowStageHealth("success")
@@ -140,36 +138,39 @@ object WorkflowStages {
 		def actionCode = "workflow.Submission.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedSubmission match {
 			// If the student hasn't submitted, but we have uploaded feedback for them, don't record their submission status
-			case None if coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).isDefined => StageProgress(Submission, false, "workflow.Submission.unsubmitted.withFeedback")
-			
-			case Some(submission) if submission.submission.isLate => StageProgress(Submission, true, "workflow.Submission.late", Warning, true)
-			
-			case Some(submission) if submission.submission.isAuthorisedLate => StageProgress(Submission, true, "workflow.Submission.authorisedLate", Good, true)
-			
-			case Some(_) => StageProgress(Submission, true, "workflow.Submission.onTime", Good, true)
-			
-			case None if !assignment.isClosed => StageProgress(Submission, false, "workflow.Submission.unsubmitted.withinDeadline")
-			
+			case None if coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).isDefined =>
+				StageProgress(Submission, started = false, messageCode = "workflow.Submission.unsubmitted.withFeedback")
+			case Some(submission) if submission.submission.isLate =>
+				StageProgress(Submission, started = true, messageCode = "workflow.Submission.late", health = Warning, completed = true)
+			case Some(submission) if submission.submission.isAuthorisedLate =>
+				StageProgress(Submission, started = true, messageCode = "workflow.Submission.authorisedLate", health = Good, completed = true)
+			case Some(_) =>
+				StageProgress(Submission, started = true, messageCode = "workflow.Submission.onTime", health = Good, completed = true)
+			case None if !assignment.isClosed =>
+				StageProgress(Submission, started = false, messageCode = "workflow.Submission.unsubmitted.withinDeadline")
 			// Not submitted, check extension
 			case _ => unsubmittedProgress(assignment)(coursework)
 		}
 		
 		private def unsubmittedProgress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedExtension match {
-			case Some(extension) if extension.within => StageProgress(Submission, false, "workflow.Submission.unsubmitted.withinExtension")
-			
+			case Some(extension) if extension.within =>
+				StageProgress(Submission, started = false, messageCode = "workflow.Submission.unsubmitted.withinExtension")
 			case _ if assignment.isClosed && !assignment.allowLateSubmissions =>
-				StageProgress(Submission, true, "workflow.Submission.unsubmitted.failedToSubmit", Danger, false)
+				StageProgress(Submission, started = true, messageCode = "workflow.Submission.unsubmitted.failedToSubmit", health = Danger, completed = false)
 			
-			case _ => StageProgress(Submission, true, "workflow.Submission.unsubmitted.late", Danger, false)
+			case _ => StageProgress(Submission, started = true, messageCode = "workflow.Submission.unsubmitted.late", health = Danger, completed = false)
 		} 
 	}
 	
 	case object DownloadSubmission extends WorkflowStage {
 		def actionCode = "workflow.DownloadSubmission.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedSubmission match {
-			case Some(submission) if submission.downloaded => StageProgress(DownloadSubmission, true, "workflow.DownloadSubmission.downloaded", Good, true)
-			case Some(_) => StageProgress(DownloadSubmission, false, "workflow.DownloadSubmission.notDownloaded")
-			case _ => StageProgress(DownloadSubmission, false, "workflow.DownloadSubmission.notDownloaded")
+			case Some(submission) if submission.downloaded =>
+				StageProgress(DownloadSubmission, started = true, messageCode = "workflow.DownloadSubmission.downloaded", health = Good, completed = true)
+			case Some(_) =>
+				StageProgress(DownloadSubmission, started = false, messageCode = "workflow.DownloadSubmission.notDownloaded")
+			case _ =>
+				StageProgress(DownloadSubmission, started = false, messageCode = "workflow.DownloadSubmission.notDownloaded")
 		}
 		override def preconditions = Seq(Seq(Submission))
 	}
@@ -178,11 +179,11 @@ object WorkflowStages {
 		def actionCode = "workflow.CheckForPlagiarism.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedSubmission match {
 			case Some(item) if item.submission.suspectPlagiarised =>
-				StageProgress(CheckForPlagiarism, true, "workflow.CheckForPlagiarism.suspectPlagiarised", Danger, true)
-			case Some(item) if item.submission.allAttachments.find(_.originalityReport != null).isDefined => 
-				StageProgress(CheckForPlagiarism, true, "workflow.CheckForPlagiarism.checked", Good, true)
-			case Some(_) => StageProgress(CheckForPlagiarism, false, "workflow.CheckForPlagiarism.notChecked")
-			case _ => StageProgress(CheckForPlagiarism, false, "workflow.CheckForPlagiarism.notChecked")
+				StageProgress(CheckForPlagiarism, started = true, messageCode = "workflow.CheckForPlagiarism.suspectPlagiarised", health = Danger, completed = true)
+			case Some(item) if item.submission.allAttachments.exists(_.originalityReport != null) =>
+				StageProgress(CheckForPlagiarism, started = true, messageCode = "workflow.CheckForPlagiarism.checked", health = Good, completed = true)
+			case Some(_) => StageProgress(CheckForPlagiarism, started = false, messageCode = "workflow.CheckForPlagiarism.notChecked")
+			case _ => StageProgress(CheckForPlagiarism, started = false, messageCode = "workflow.CheckForPlagiarism.notChecked")
 		}
 		override def preconditions = Seq(Seq(Submission))
 	}
@@ -191,9 +192,9 @@ object WorkflowStages {
 		def actionCode = "workflow.ReleaseForMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedSubmission match {
 			case Some(item) if item.submission.isReleasedForMarking =>
-				StageProgress(ReleaseForMarking, true, "workflow.ReleaseForMarking.released", Good, true)
-			case Some(_) => StageProgress(ReleaseForMarking, false, "workflow.ReleaseForMarking.notReleased")
-			case _ => StageProgress(ReleaseForMarking, false, "workflow.ReleaseForMarking.notReleased")
+				StageProgress(ReleaseForMarking, started = true, messageCode = "workflow.ReleaseForMarking.released", health = Good, completed = true)
+			case Some(_) => StageProgress(ReleaseForMarking, started = false, messageCode = "workflow.ReleaseForMarking.notReleased")
+			case _ => StageProgress(ReleaseForMarking, started = false, messageCode = "workflow.ReleaseForMarking.notReleased")
 		}
 		override def preconditions = Seq(Seq(Submission))
 	}
@@ -201,32 +202,58 @@ object WorkflowStages {
 	case object FirstMarking extends WorkflowStage {
 		def actionCode = "workflow.FirstMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedFeedback match {
-			case Some(item) => {
+			case Some(item) =>
 				if (item.feedback.retrieveFirstMarkerFeedback.state == MarkingCompleted)
-					StageProgress(FirstMarking, true, "workflow.FirstMarking.marked", Good, true)
+					StageProgress(FirstMarking, started = true, messageCode = "workflow.FirstMarking.marked", health = Good, completed = true)
 				else
-					StageProgress(FirstMarking, true, "workflow.FirstMarking.notMarked", Warning, false)
-			}
-			case _ => StageProgress(FirstMarking, false, "workflow.FirstMarking.notMarked")
+					StageProgress(FirstMarking, started = true, messageCode = "workflow.FirstMarking.notMarked", health = Warning, completed = false)
+			case _ => StageProgress(FirstMarking, started = false, messageCode = "workflow.FirstMarking.notMarked")
 		}
 		override def preconditions = Seq(Seq(Submission, ReleaseForMarking))
 	}
-	
+
 	case object SecondMarking extends WorkflowStage {
 		def actionCode = "workflow.SecondMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
 			val hasSubmission = coursework.enhancedSubmission.exists(_.submission.isReleasedToSecondMarker)
 			coursework.enhancedFeedback match {
-				case Some(item) if hasSubmission &&  item.feedback.retrieveSecondMarkerFeedback.state != Rejected => {
+				case Some(item) if hasSubmission &&  item.feedback.retrieveSecondMarkerFeedback.state != Rejected =>
 					if (item.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted)
-						StageProgress(SecondMarking, true, "workflow.SecondMarking.marked", Good, true)
+						StageProgress(SecondMarking, started = true, messageCode = "workflow.SecondMarking.marked", health = Good, completed = true)
 					else
-						StageProgress(SecondMarking, true, "workflow.SecondMarking.notMarked", Warning, false)
-				}
-				case _ => StageProgress(SecondMarking, false, "workflow.SecondMarking.notMarked")
+						StageProgress(SecondMarking, started = true, messageCode = "workflow.SecondMarking.notMarked", health = Warning, completed = false)
+				case _ => StageProgress(SecondMarking, started = false, messageCode = "workflow.SecondMarking.notMarked")
 			}
 		}
 		override def preconditions = Seq(Seq(Submission, ReleaseForMarking, FirstMarking))
+	}
+
+	case object FinaliseSeenSecondMarking extends WorkflowStage {
+		def actionCode = "workflow.FinaliseSeenSecondMarking.action"
+		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
+			val hasSubmission = coursework.enhancedSubmission.exists(_.submission.isReleasedToThirdMarker)
+			coursework.enhancedFeedback match {
+				case Some(item) if hasSubmission &&  item.feedback.retrieveThirdMarkerFeedback.state != Rejected =>
+					if (item.feedback.retrieveThirdMarkerFeedback.state == MarkingCompleted )
+						StageProgress(
+							FinaliseSeenSecondMarking,
+							started = true,
+							messageCode = "workflow.FinaliseSeenSecondMarking.finalised",
+							health = Good,
+							completed = true
+						)
+					else
+						StageProgress(
+							FinaliseSeenSecondMarking,
+							started = true,
+							messageCode = "workflow.FinaliseSeenSecondMarking.notFinalised",
+							health = Warning,
+							completed = false
+						)
+				case _ => StageProgress(FinaliseSeenSecondMarking, started = false, messageCode = "workflow.FinaliseSeenSecondMarking.notFinalised")
+			}
+		}
+		override def preconditions = Seq(Seq(Submission, ReleaseForMarking, FirstMarking, SecondMarking))
 	}
 
 
@@ -237,21 +264,22 @@ object WorkflowStages {
 		def progress(assignment: Assignment)(coursework: WorkflowItems) =
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 				case Some(item) if item.feedback.hasMarkOrGrade =>
-					StageProgress(AddMarks, true, "workflow.AddMarks.marked", Good, true)
-				case Some(_) => StageProgress(AddMarks, true, "workflow.AddMarks.notMarked", Warning, false)
-				case _ => StageProgress(AddMarks, false, "workflow.AddMarks.notMarked")
+					StageProgress(AddMarks, started = true, messageCode = "workflow.AddMarks.marked", health = Good, completed = true)
+				case Some(_) => StageProgress(AddMarks, started = true, messageCode = "workflow.AddMarks.notMarked", health = Warning, completed = false)
+				case _ => StageProgress(AddMarks, started = false, messageCode = "workflow.AddMarks.notMarked")
 			}
 	}
 	
 	case object AddFeedback extends WorkflowStage {
 		def actionCode = "workflow.AddFeedback.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) =
-			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
-				case Some(item) if item.feedback.hasAttachments || item.feedback.hasOnlineFeedback =>
-					StageProgress(AddFeedback, true, "workflow.AddFeedback.uploaded", Good, true)
-				case Some(_) => StageProgress(AddFeedback, true, "workflow.AddFeedback.notUploaded", Warning, false)
-				case _ => StageProgress(AddFeedback, false, "workflow.AddFeedback.notUploaded")
-			}
+		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
+			case Some(item) if item.feedback.hasAttachments || item.feedback.hasOnlineFeedback =>
+				StageProgress(AddFeedback, started = true, messageCode = "workflow.AddFeedback.uploaded", health = Good, completed = true)
+			case Some(_) =>
+				StageProgress(AddFeedback, started = true, messageCode = "workflow.AddFeedback.notUploaded", health = Warning, completed = false)
+			case _ =>
+				StageProgress(AddFeedback, started = false, messageCode = "workflow.AddFeedback.notUploaded")
+		}
 	}
 	
 	case object ReleaseFeedback extends WorkflowStage {
@@ -259,10 +287,10 @@ object WorkflowStages {
 		def progress(assignment: Assignment)(coursework: WorkflowItems) =
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 				case Some(item) if item.feedback.released =>
-					StageProgress(ReleaseFeedback, true, "workflow.ReleaseFeedback.released", Good, true)
+					StageProgress(ReleaseFeedback, started = true, messageCode = "workflow.ReleaseFeedback.released", health = Good, completed = true)
 				case Some(item) if item.feedback.hasAttachments || item.feedback.hasOnlineFeedback || item.feedback.hasMarkOrGrade =>
-					StageProgress(ReleaseFeedback, true, "workflow.ReleaseFeedback.notReleased", Warning, false)
-				case _ => StageProgress(ReleaseFeedback, false, "workflow.ReleaseFeedback.notReleased")
+					StageProgress(ReleaseFeedback, started = true, messageCode = "workflow.ReleaseFeedback.notReleased", health = Warning, completed = false)
+				case _ => StageProgress(ReleaseFeedback, started = false, messageCode = "workflow.ReleaseFeedback.notReleased")
 			}
 		override def preconditions = Seq(Seq(AddMarks), Seq(AddFeedback))
 	}
@@ -272,10 +300,10 @@ object WorkflowStages {
 		def progress(assignment: Assignment)(coursework: WorkflowItems) =
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 				case Some(item) if item.feedback.released && item.onlineViewed =>
-					StageProgress(ViewOnlineFeedback, true, "workflow.ViewOnlineFeedback.viewed", Good, true)
+					StageProgress(ViewOnlineFeedback, started = true, messageCode = "workflow.ViewOnlineFeedback.viewed", health = Good, completed = true)
 				case Some(item) if item.feedback.released =>
-					StageProgress(ViewOnlineFeedback, true, "workflow.ViewOnlineFeedback.notViewed", Warning, false)
-				case _ => StageProgress(ViewOnlineFeedback, false, "workflow.ViewOnlineFeedback.notViewed")
+					StageProgress(ViewOnlineFeedback, started = true, messageCode = "workflow.ViewOnlineFeedback.notViewed", health = Warning, completed = false)
+				case _ => StageProgress(ViewOnlineFeedback, started = false, messageCode = "workflow.ViewOnlineFeedback.notViewed")
 		}
 		override def preconditions = Seq(Seq(ReleaseFeedback))
 	}
@@ -285,12 +313,12 @@ object WorkflowStages {
 		def progress(assignment: Assignment)(coursework: WorkflowItems) =
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 				case Some(item) if !(item.onlineViewed && (item.feedback.hasGenericFeedback || item.feedback.hasOnlineFeedback)) && !item.downloaded  =>
-					StageProgress(DownloadFeedback, false, "workflow.DownloadFeedback.notDownloaded")
+					StageProgress(DownloadFeedback, started = false, messageCode = "workflow.DownloadFeedback.notDownloaded")
 				case Some(item) if item.downloaded || !item.feedback.hasAttachments =>
-					StageProgress(DownloadFeedback, true, "workflow.DownloadFeedback.downloaded", Good, true)
+					StageProgress(DownloadFeedback, started = true, messageCode = "workflow.DownloadFeedback.downloaded", health = Good, completed = true)
 				case Some(item) if item.feedback.released =>
-					StageProgress(DownloadFeedback, true, "workflow.DownloadFeedback.notDownloaded", Warning, false)
-				case _ => StageProgress(DownloadFeedback, false, "workflow.DownloadFeedback.notDownloaded")
+					StageProgress(DownloadFeedback, started = true, messageCode = "workflow.DownloadFeedback.notDownloaded", health = Warning, completed = false)
+				case _ => StageProgress(DownloadFeedback, started = false, messageCode = "workflow.DownloadFeedback.notDownloaded")
 			}
 		override def preconditions = Seq(Seq(ReleaseFeedback, ViewOnlineFeedback), Seq(ReleaseFeedback))
 	}

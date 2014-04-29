@@ -42,7 +42,7 @@ abstract class ViewMonitoringPointsCommand(val department: Department, val acade
 		// Add all non-withdrawn codes to SPR statuses by default
 		// TODO: What if the user wants to select 'Any' status? The collection will be empty
 		if (sprStatuses.isEmpty) {
-			allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach { sprStatuses.add }
+			allSprStatuses.find { _.code == "C" }.foreach { sprStatuses.add }
 		}
 		// Filter chosen routes by those that the user has permission to see
 		routes = (routes.asScala.toSet & visibleRoutes).toSeq.asJava
@@ -105,6 +105,11 @@ trait ViewMonitoringPointsState extends FiltersStudents with PermissionsAwareRou
 	var hasBeenFiltered = false
 
 	// For Attendance Monitoring, we shouldn't consider sub-departments
-	override lazy val allRoutes = department.routes.asScala.sorted(Route.DegreeTypeOrdering)
+	// but we will use the root department if the current dept has no routes at all
+	override lazy val allRoutes = department.routes.asScala.toList match {
+		case Nil => department.rootDepartment.routes.asScala.sorted(Route.DegreeTypeOrdering)
+		case deptRoutes => deptRoutes.sorted(Route.DegreeTypeOrdering)
+	}
+
 	lazy val canSeeAllRoutes = visibleRoutes.size == allRoutes.size
 }

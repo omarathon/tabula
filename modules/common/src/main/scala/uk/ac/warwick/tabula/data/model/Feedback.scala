@@ -8,14 +8,16 @@ import org.hibernate.annotations.{BatchSize, AccessType, Type}
 import org.joda.time.DateTime
 
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
-import scala.collection.JavaConverters._
 
 
 trait FeedbackAttachments {
+
+	// Do not remove
+	// Should be import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 	var attachments: JList[FileAttachment]
 	def addAttachment(attachment: FileAttachment)
@@ -33,7 +35,7 @@ trait FeedbackAttachments {
 		if (!isIdentical) {
 			// if an attachment with the same name as this one exists then replace it
 			val duplicateAttachment = attachments.find(_.name == a.name)
-			duplicateAttachment.foreach(removeAttachment(_))
+			duplicateAttachment.foreach(removeAttachment)
 			addAttachment(a)
 		}
 		!isIdentical
@@ -98,10 +100,42 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	@JoinColumn(name = "second_marker_feedback")
 	var secondMarkerFeedback: MarkerFeedback = _
 
-	def getFeedbackPosition(markerFeedback: MarkerFeedback) : Option[FeedbackPosition] = {
-		if(markerFeedback == firstMarkerFeedback) Some(FirstFeedback)
-		else if (markerFeedback == secondMarkerFeedback) Some(SecondFeedback)
-		else None
+	@OneToOne(cascade=Array(ALL), fetch = FetchType.LAZY)
+	@JoinColumn(name = "third_marker_feedback")
+	var thirdMarkerFeedback: MarkerFeedback = _
+
+
+	def getFeedbackPosition(markerFeedback: MarkerFeedback) : FeedbackPosition = {
+		if(markerFeedback == firstMarkerFeedback) FirstFeedback
+		else if (markerFeedback == secondMarkerFeedback) SecondFeedback
+		else if (markerFeedback == thirdMarkerFeedback) ThirdFeedback
+		else throw new IllegalArgumentException
+	}
+
+	def getCurrentWorkflowFeedbackPosition: Option[FeedbackPosition] = {
+		val workflow = assignment.markingWorkflow
+		if (workflow.hasThirdMarker && thirdMarkerFeedback != null && thirdMarkerFeedback.state == MarkingState.MarkingCompleted)
+			None
+		else if (workflow.hasThirdMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
+			Some(ThirdFeedback)
+		else if (workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
+			None
+		else if (workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.Rejected)
+			Some(FirstFeedback)
+		else if (workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
+			Some(SecondFeedback)
+		else if (firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
+			None
+		else Some(FirstFeedback)
+	}
+
+	def getCurrentWorkflowFeedback: Option[MarkerFeedback] = {
+		getCurrentWorkflowFeedbackPosition match {
+			case Some(FirstFeedback) => Some(retrieveFirstMarkerFeedback)
+			case Some(SecondFeedback) => Some(retrieveSecondMarkerFeedback)
+			case Some(ThirdFeedback) => Some(retrieveThirdMarkerFeedback)
+			case _ => None
+		}
 	}
 
 	@Column(name = "released_date")
@@ -133,6 +167,13 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 		})
 	}
 
+	def retrieveThirdMarkerFeedback:MarkerFeedback = {
+		Option(thirdMarkerFeedback).getOrElse({
+			thirdMarkerFeedback = new MarkerFeedback(this)
+			thirdMarkerFeedback
+		})
+	}
+
 	// if the feedback has no marks or attachments then it is a placeholder for marker feedback
 	def isPlaceholder = !(hasMarkOrGrade || hasAttachments || hasOnlineFeedback)
 
@@ -149,6 +190,12 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	}
 
 	def hasOnlineFeedback: Boolean = onlineFeedbackComments.isDefined
+
+	def getAllMarkerFeedback: Seq[MarkerFeedback] = Seq(firstMarkerFeedback, secondMarkerFeedback, thirdMarkerFeedback)
+
+	def getAllCompletedMarkerFeedback: Seq[MarkerFeedback] = Seq(firstMarkerFeedback, secondMarkerFeedback, thirdMarkerFeedback)
+		.filter(_ != null)
+		.filter(_.state == MarkingState.MarkingCompleted)
 
 	def hasGenericFeedback: Boolean = Option(assignment.genericFeedback).isDefined
 
@@ -194,5 +241,6 @@ object Feedback {
 }
 
 sealed trait FeedbackPosition
-case object  FirstFeedback extends FeedbackPosition
-case object  SecondFeedback extends FeedbackPosition
+case object  FirstFeedback extends FeedbackPosition { val description = "First marker's feedback" }
+case object  SecondFeedback extends FeedbackPosition { val description = "Second marker's feedback" }
+case object  ThirdFeedback extends FeedbackPosition { val description = "Third marker's feedback" }

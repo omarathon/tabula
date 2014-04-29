@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.profiles.web
 
 import uk.ac.warwick.tabula.data.model._
-import java.net.URLEncoder
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
@@ -27,10 +26,14 @@ object Routes {
 	def students(relationshipType: StudentRelationshipType) = context + "/%s/students" format encoded(relationshipType.urlPart)
 		
 	object relationships {
-		def apply(department: Department, relationshipType: StudentRelationshipType) = context + "/department/%s/%s" format (encoded(department.code), encoded(relationshipType.urlPart))
-		def missing(department: Department, relationshipType: StudentRelationshipType) = context + "/department/%s/%s/missing" format (encoded(department.code), encoded(relationshipType.urlPart))
-		def allocate(department: Department, relationshipType: StudentRelationshipType) = context + "/department/%s/%s/allocate" format (encoded(department.code), encoded(relationshipType.urlPart))
-		def template(department: Department, relationshipType: StudentRelationshipType) = context + "/department/%s/%s/template" format (encoded(department.code), encoded(relationshipType.urlPart))
+		def apply(department: Department, relationshipType: StudentRelationshipType) =
+			context + "/department/%s/%s" format (encoded(department.code), encoded(relationshipType.urlPart))
+		def missing(department: Department, relationshipType: StudentRelationshipType) =
+			context + "/department/%s/%s/missing" format (encoded(department.code), encoded(relationshipType.urlPart))
+		def allocate(department: Department, relationshipType: StudentRelationshipType) =
+			context + "/department/%s/%s/allocate" format (encoded(department.code), encoded(relationshipType.urlPart))
+		def template(department: Department, relationshipType: StudentRelationshipType) =
+			context + "/department/%s/%s/template" format (encoded(department.code), encoded(relationshipType.urlPart))
 	}
 	
 	object admin {
@@ -40,10 +43,18 @@ object Routes {
 
 	object scheduledMeeting {
 		def confirm(meetingRecord: ScheduledMeetingRecord, studentCourseDetails: StudentCourseDetails, relationshipType: StudentRelationshipType) =
-			context + "/%s/meeting/%s/schedule/%s/confirm" format(encoded(relationshipType.urlPart), encoded(studentCourseDetails.urlSafeId), encoded(meetingRecord.id))
+			context + "/%s/meeting/%s/schedule/%s/confirm" format(
+				encoded(relationshipType.urlPart),
+				encoded(studentCourseDetails.urlSafeId),
+				encoded(meetingRecord.id)
+			)
 
 		def reschedule(meetingRecord: ScheduledMeetingRecord, studentCourseDetails: StudentCourseDetails, relationshipType: StudentRelationshipType) =
-			context + "/%s/meeting/%s/schedule/%s/edit" format(encoded(relationshipType.urlPart), encoded(studentCourseDetails.urlSafeId), encoded(meetingRecord.id))
+			context + "/%s/meeting/%s/schedule/%s/edit" format(
+				encoded(relationshipType.urlPart),
+				encoded(studentCourseDetails.urlSafeId),
+				encoded(meetingRecord.id)
+			)
 
 		def missed(meetingRecord: ScheduledMeetingRecord, studentCourseDetails: StudentCourseDetails, relationshipType: StudentRelationshipType) =
 			context + "/%s/meeting/%s/missed" format(encoded(relationshipType.urlPart), encoded(meetingRecord.id))

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.{ImportCommandFactory, ImportRowTracker}
-import uk.ac.warwick.tabula.scheduling.services.{MembershipInformation, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware}
+import uk.ac.warwick.tabula.scheduling.services.{AccreditedPriorLearningImporter, MembershipInformation, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileIndexService, ProfileService, SmallGroupService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
@@ -28,6 +28,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	var profileService = Wire.auto[ProfileService]
 	var userLookup = Wire.auto[UserLookupService]
 	var moduleRegistrationImporter = Wire.auto[ModuleRegistrationImporter]
+	var accreditedPriorLearningImporter = Wire.auto[AccreditedPriorLearningImporter]
 	var features = Wire.auto[Features]
 	var moduleRegistrationDao = Wire.auto[ModuleRegistrationDaoImpl]
 	var smallGroupService = Wire.auto[SmallGroupService]
@@ -107,6 +108,12 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 							updateModuleRegistrationsAndSmallGroups(membershipInfos, users)
 						}
 					}
+
+					benchmarkTask("Update accredited prior learning") {
+						transactional() {
+							updateAccreditedPriorLearning(membershipInfos, users)
+						}
+					}
 				}
 			}
 		}
@@ -163,6 +170,14 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 		newModuleRegistrations
 	}
 
+	def updateAccreditedPriorLearning(membershipInfo: Seq[MembershipInformation], users: Map[UniversityId, User]): Seq[AccreditedPriorLearning] = {
+
+		val importAccreditedPriorLearningCommands = accreditedPriorLearningImporter.getAccreditedPriorLearning(membershipInfo, users)
+
+		(importAccreditedPriorLearningCommands map {_.apply }).flatten
+	}
+
+
 	// For each student in the batch, find out if they have used a
 	// Confirmation of Acceptance to Study letter to obtain a visa.
 	//
@@ -217,6 +232,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 					// re-import module registrations and delete old module and group registrations:
 					val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(warwickId -> user))
+					val newAccreditedPriorLearning = updateAccreditedPriorLearning(List(membInfo), Map(warwickId -> user))
 
 					// TAB-1435 refresh profile index
 					profileIndexService.indexItemsWithoutNewTransaction(members.flatMap { m => profileService.getMemberByUniversityId(m.universityId) })

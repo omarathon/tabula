@@ -56,7 +56,16 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 			mapping.put(group, JArrayList(group.students.users.toList))
 
 		unallocated.clear()
-		unallocated.addAll(set.unallocatedStudents.asJavaCollection)
+		unallocated.addAll(removePermanentlyWithdrawn(set.unallocatedStudents).asJava)
+	}
+
+	def removePermanentlyWithdrawn(users: Seq[User]) = {
+		val members: Seq[Member] = users.flatMap(usr => profileService.getMemberByUser(usr))
+		val membersFiltered: Seq[Member] = members filter {
+			case (student: StudentMember) => !student.permanentlyWithdrawn
+			case (member: Member) => true
+		}
+		membersFiltered.map { mem => mem.asSsoUser}
 	}
 
 	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.

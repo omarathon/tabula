@@ -1,16 +1,14 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import scala.collection.JavaConversions._
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.coursework.commands.assignments.{DownloadFeedbackSheetsCommand, DownloadAllSubmissionsCommand, DownloadSubmissionsCommand}
-import uk.ac.warwick.tabula.services.fileserver.FileServer
+import uk.ac.warwick.tabula.services.fileserver.{RenderableZip, FileServer}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.AdminGetSingleSubmissionCommand
 import javax.servlet.http.HttpServletRequest
@@ -20,6 +18,9 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmi
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadAttachmentCommand
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.services.SubmissionService
+import uk.ac.warwick.tabula.commands.ApplyWithCallback
+import uk.ac.warwick.userlookup.AnonymousUser
+
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.zip"))
@@ -45,25 +46,16 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
 	
-	@ModelAttribute def getMarkersSubmissionCommand(
+	@ModelAttribute("command")
+	def getMarkersSubmissionCommand(
 			@PathVariable("module") module: Module, 
 			@PathVariable("assignment") assignment: Assignment, 
-			user: CurrentUser) = 
-		new DownloadMarkersSubmissionsCommand(module, assignment, user)
+			user: CurrentUser
+	) =	DownloadMarkersSubmissionsCommand(module, assignment, user)
 
 	@RequestMapping
-	def downloadMarkersSubmissions(command: DownloadMarkersSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		val assignment = command.assignment
-		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
-		
-		// do not download submissions where the marker has completed marking
-		val filteredSubmissions = submissions.filter{ submission =>
-			val markerFeedback =  assignment.getMarkerFeedback(submission.universityId, user.apparentUser)
-			markerFeedback.exists(mf => mf.state != MarkingCompleted)
-		}
-		
-		command.submissions = filteredSubmissions.toList
-			
+	def downloadMarkersSubmissions(@ModelAttribute("command") command: ApplyWithCallback[RenderableZip])
+		(implicit request: HttpServletRequest, response: HttpServletResponse) = {
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
@@ -98,6 +90,7 @@ class DownloadSingleSubmissionController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
 	var submissionService = Wire.auto[SubmissionService]
+	var userLookup = Wire[UserLookupService]
 	
 	@ModelAttribute def getSingleSubmissionCommand(
 			@PathVariable("module") module: Module, 
@@ -109,7 +102,16 @@ class DownloadSingleSubmissionController extends CourseworkController {
 	def downloadSingle(
 			cmd: AdminGetSingleSubmissionCommand, 
 			@PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		fileServer.serve(cmd.apply())
+		val moduleCode = cmd.assignment.module.code
+		val user = userLookup.getUserByUserId(cmd.submission.userId)
+
+		val userIdentifier = if(!cmd.assignment.module.department.showStudentName || (user==null || !user.isInstanceOf[AnonymousUser])) {
+			cmd.submission.universityId
+		} else {
+			s"${user.getFullName} - ${cmd.submission.universityId}"
+		}
+
+		fileServer.serve(cmd.apply(), Some(s"${moduleCode} - ${userIdentifier} - ${filename}.zip"))
 	}
 	
 }
@@ -121,6 +123,7 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
 	var submissionService = Wire.auto[SubmissionService]
+	var userLookup = Wire[UserLookupService]
 
 	@ModelAttribute def getSingleSubmissionCommand(
 			@PathVariable("module") module: Module, 
@@ -134,7 +137,16 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 			@PathVariable("filename") filename: String,
 			request: HttpServletRequest, 
 		response: HttpServletResponse) {
-		cmd.callback = { (renderable) => fileServer.serve(renderable)(request, response) }
+		val moduleCode = cmd.assignment.module.code
+		val user = userLookup.getUserByUserId(cmd.submission.userId)
+
+		val userIdentifier = if(!cmd.assignment.module.department.showStudentName || (user==null || !user.isInstanceOf[AnonymousUser])) {
+			cmd.submission.universityId
+		} else {
+			s"${user.getFullName} - ${cmd.submission.universityId}"
+		}
+
+		cmd.callback = { (renderable) => fileServer.serve(renderable, Some(s"${moduleCode} - ${userIdentifier} - ${filename}"))(request, response) }
 		cmd.apply().orElse { throw new ItemNotFoundException() }
 	}
 

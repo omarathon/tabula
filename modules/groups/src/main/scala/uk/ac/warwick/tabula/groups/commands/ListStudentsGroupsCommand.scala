@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.groups.commands
 
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.commands.{Unaudited, ReadOnly, Command}
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.SmallGroupService
+import uk.ac.warwick.tabula.commands.{Unaudited, ReadOnly}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewModules
 import uk.ac.warwick.tabula.groups.web.controllers.GroupsDisplayHelper
@@ -27,7 +25,8 @@ object ListStudentsGroupsCommand {
 /**
  * Gets the data for a students view of all small groups they're a member of.
  */
-class ListStudentsGroupsCommandInternal(val member: Member, val currentUser: CurrentUser) extends CommandInternal[ViewModules] with ListStudentsGroupsCommandState {
+class ListStudentsGroupsCommandInternal(val member: Member, val currentUser: CurrentUser)
+	extends CommandInternal[ViewModules] with ListStudentsGroupsCommandState {
 	self: SmallGroupServiceComponent =>
 
 	import GroupsDisplayHelper._

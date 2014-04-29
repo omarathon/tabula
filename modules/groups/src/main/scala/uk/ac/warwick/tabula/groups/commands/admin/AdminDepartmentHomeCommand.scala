@@ -2,10 +2,8 @@ package uk.ac.warwick.tabula.groups.commands.admin
 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.{Module, Department}
-import uk.ac.warwick.tabula.{PermissionDeniedException, CurrentUser}
-import uk.ac.warwick.tabula.commands.{Unaudited, ReadOnly, Command}
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, SecurityService}
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.{Unaudited, ReadOnly}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.commands.ComposableCommand
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking

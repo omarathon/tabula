@@ -14,17 +14,12 @@ import uk.ac.warwick.tabula.data.model.Award
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAwardCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformationCommand
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait AwardImporter extends Logging {
 	var awardDao = Wire[AwardDao]
 
 	private var awardMap: Map[String, Award] = _
-
-	def getAwardForCode(code: String): Option[Award] = {
-		if (awardMap == null) updateAwardMap()
-		if (!awardMap.contains(code)) None
-		else Some(awardMap(code))
-	}
 
 	protected def updateAwardMap() {
 		awardMap = slurpAwards()
@@ -48,6 +43,14 @@ trait AwardImporter extends Logging {
 		updateAwardMap()
 		
 		ImportAcademicInformationCommand.combineResults(results)
+	}
+
+	def getAwardByCodeCached(code: String): Option[Award] = {
+		if (awardMap == null) updateAwardMap()
+
+		code.maybeText.flatMap {
+			awardCode => awardMap.get(awardCode)
+		}
 	}
 
 	def getImportCommands(): Seq[ImportAwardCommand]

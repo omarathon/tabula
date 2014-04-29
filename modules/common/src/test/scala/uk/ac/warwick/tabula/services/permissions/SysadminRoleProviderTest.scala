@@ -1,17 +1,18 @@
 package uk.ac.warwick.tabula.services.permissions
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.MockUserLookup
+import uk.ac.warwick.tabula.{Mockito, MockGroupService, TestBase, MockUserLookup, Fixtures}
 import uk.ac.warwick.tabula.roles.Sysadmin
-import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.userlookup.{UserLookup, GroupService}
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.userlookup.webgroups.GroupServiceException
 
-class SysadminRoleProviderTest extends TestBase {
+class SysadminRoleProviderTest extends TestBase with Mockito {
 	
 	val provider = new SysadminRoleProvider
 	
 	val userLookup = new MockUserLookup
 	provider.userLookup = userLookup
-	provider.adminGroup = "tabula-sysadmins"
+	provider.webgroup = "tabula-sysadmins"
 		
 	userLookup.groupService.usersInGroup ++= Map(
 		("cuscav", "othergroup") -> true,
@@ -24,6 +25,18 @@ class SysadminRoleProviderTest extends TestBase {
 		}
 		
 		withUser("cusebr") {
+			provider.getRolesFor(currentUser) should be (Seq())
+		}
+	}
+
+	@Test def groupServiceException {
+		val userLookup = mock[UserLookupService]
+		val groupService = mock[GroupService]
+		userLookup.getGroupService() returns (groupService)
+		groupService.isUserInGroup(any[String], any[String]) throws (new GroupServiceException("Unhandled webgroups downtime"))
+		provider.userLookup = userLookup
+
+		withUser("cuscav") {
 			provider.getRolesFor(currentUser) should be (Seq())
 		}
 	}

@@ -78,7 +78,7 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 	override val IncrementalBatchSize: Int = 5000
 	override val MaxBatchSize: Int = 1000000
 
-	private def createAnalyzer = new StandardAnalyzer(LuceneVersion)
+	private def createAnalyzer = new StandardAnalyzer(IndexService.NotificationIndexLuceneVersion)
 
 	protected def toNotification(doc: Document): Option[Notification[_,_]] =
 		for {

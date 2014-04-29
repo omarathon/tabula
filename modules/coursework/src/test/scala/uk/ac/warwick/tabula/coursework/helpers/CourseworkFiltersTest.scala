@@ -12,18 +12,16 @@ import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.data.model.MarkingMethod
 import uk.ac.warwick.tabula.data.model.MarkingState
 import uk.ac.warwick.tabula.data.model.OriginalityReport
 import uk.ac.warwick.tabula.data.model.Submission
-import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, SavedFormValue, Extension, MarkerSelectField, WordCountField}
+import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, Extension, MarkerSelectField, WordCountField}
 import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
 import org.joda.time.DateTimeConstants
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.userlookup.UserLookup
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.services.{SubmissionService, UserLookupService}
+import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, NotInvestigated, SuspectPlagiarised}
 
 // scalastyle:off magic.number
@@ -35,24 +33,24 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 	assignment.module = module
 	module.department = department
 
-	@Test def of {
+	@Test def of() {
 		CourseworkFilters.of("NotReleasedForMarking") match {
 			case CourseworkFilters.NotReleasedForMarking =>
 			case what:Any => fail("what is this?" + what)
 		}
 	}
 
-	@Test(expected=classOf[IllegalArgumentException]) def invalidFilter {
+	@Test(expected=classOf[IllegalArgumentException]) def invalidFilter() {
 		CourseworkFilters.of("Spank")
 	}
 
-	@Test def name {
+	@Test def name() {
 		CourseworkFilters.AllStudents.getName should be ("AllStudents")
 		CourseworkFilters.NotReleasedForMarking.getName should be ("NotReleasedForMarking")
 		CourseworkFilters.of("NotReleasedForMarking").getName should be ("NotReleasedForMarking")
 	}
 
-	@Test def AllStudents {
+	@Test def AllStudents() {
 		val filter = CourseworkFilters.AllStudents
 
 		// Should pass anything and any assignment, so just check with null
@@ -92,10 +90,10 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 
 	class SampleFilteringCommand(elems: (String, String)*) {
 		var filter: JMap[String, String] = JHashMap()
-		elems foreach { case (key, value) => filter.put(key, value) }
+		elems foreach { case (k, v) => filter.put(k, v) }
 	}
 
-	@Test def SubmittedBetweenDates {
+	@Test def SubmittedBetweenDates() {
 		val filter = CourseworkFilters.SubmittedBetweenDates
 
 		// Only applies to assignments that collect submissions
@@ -115,9 +113,9 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 
 			errors.getErrorCount should be (2)
 			errors.getFieldErrors.asScala(0).getField should be ("filter[startDate]")
-			errors.getFieldErrors.asScala(0).getCodes() should contain ("NotEmpty")
+			errors.getFieldErrors.asScala(0).getCodes should contain ("NotEmpty")
 			errors.getFieldErrors.asScala(1).getField should be ("filter[endDate]")
-			errors.getFieldErrors.asScala(1).getCodes() should contain ("NotEmpty")
+			errors.getFieldErrors.asScala(1).getCodes should contain ("NotEmpty")
 		}
 
 		{
@@ -185,7 +183,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(params)(student(submission=Some(submission))) should be (true)
 	}
 
-	@Test def OnTime {
+	@Test def OnTime() {
 		val filter = CourseworkFilters.OnTime
 
 		// Only applies to assignments that collect submissions
@@ -228,7 +226,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(submission=Some(submission), extension=Some(extension), withinExtension=true)) should be (false)
 	}
 
-	@Test def Late {
+	@Test def Late() {
 		val filter = CourseworkFilters.Late
 
 		// Only applies to assignments that collect submissions
@@ -270,7 +268,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(submission=Some(submission), extension=Some(extension), withinExtension=true)) should be (false)
 	}
 
-	@Test def WithExtension {
+	@Test def WithExtension() {
 		val filter = CourseworkFilters.WithExtension
 
 		// Only applies to assignments that collect submissions and accept extensions
@@ -295,7 +293,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(extension=Some(Fixtures.extension()))) should be (true)
 	}
 
-	@Test def WithinExtension {
+	@Test def WithinExtension() {
 		val filter = CourseworkFilters.WithinExtension
 
 		// Only applies to assignments that collect submissions and accept extensions
@@ -347,7 +345,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(submission=Some(submission), extension=Some(extension), withinExtension=true)) should be (true)
 	}
 
-	@Test def WithWordCount {
+	@Test def WithWordCount() {
 		val filter = CourseworkFilters.WithWordCount
 
 		// Only applies to assignments that collect submissions and have a word count field defined
@@ -375,9 +373,9 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 
 			errors.getErrorCount should be (2)
 			errors.getFieldErrors.asScala(0).getField should be ("filter[minWords]")
-			errors.getFieldErrors.asScala(0).getCodes() should contain ("NotEmpty")
+			errors.getFieldErrors.asScala(0).getCodes should contain ("NotEmpty")
 			errors.getFieldErrors.asScala(1).getField should be ("filter[maxWords]")
-			errors.getFieldErrors.asScala(1).getCodes() should contain ("NotEmpty")
+			errors.getFieldErrors.asScala(1).getCodes should contain ("NotEmpty")
 		}
 
 		{
@@ -390,24 +388,24 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 
 			errors.getErrorCount should be (1)
 			errors.getFieldErrors.asScala(0).getField should be ("filter[maxWords]")
-			errors.getFieldErrors.asScala(0).getCodes() should contain ("typeMismatch")
+			errors.getFieldErrors.asScala(0).getCodes should contain ("typeMismatch")
 		}
 
 		{
 			val cmd = new SampleFilteringCommand(
-				"minWords" -> -15.toString,
-				"maxWords" -> -200.toString
+				"minWords" -> (-15).toString,
+				"maxWords" -> (-200).toString
 			)
 			val errors = new BindException(cmd, "cmd")
 			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
 
 			errors.getErrorCount should be (3)
 			errors.getFieldErrors.asScala(0).getField should be ("filter[maxWords]")
-			errors.getFieldErrors.asScala(0).getCodes() should contain ("filters.WithWordCount.max.lessThanMin")
+			errors.getFieldErrors.asScala(0).getCodes should contain ("filters.WithWordCount.max.lessThanMin")
 			errors.getFieldErrors.asScala(1).getField should be ("filter[minWords]")
-			errors.getFieldErrors.asScala(1).getCodes() should contain ("filters.WithWordCount.min.lessThanZero")
+			errors.getFieldErrors.asScala(1).getCodes should contain ("filters.WithWordCount.min.lessThanZero")
 			errors.getFieldErrors.asScala(2).getField should be ("filter[maxWords]")
-			errors.getFieldErrors.asScala(2).getCodes() should contain ("filters.WithWordCount.max.lessThanZero")
+			errors.getFieldErrors.asScala(2).getCodes should contain ("filters.WithWordCount.max.lessThanZero")
 		}
 
 		{
@@ -451,7 +449,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(params)(student(submission=Some(submission))) should be (true)
 	}
 
-	@Test def Submitted {
+	@Test def Submitted() {
 		val filter = CourseworkFilters.Submitted
 
 		// Only applies to assignments that collect submissions
@@ -466,7 +464,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(submission=Some(Fixtures.submission()))) should be (true)
 	}
 
-	@Test def Unsubmitted {
+	@Test def Unsubmitted() {
 		val filter = CourseworkFilters.Unsubmitted
 
 		// Only applies to assignments that collect submissions
@@ -481,7 +479,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(submission=Some(Fixtures.submission()))) should be (false)
 	}
 
-	@Test def NotReleasedForMarking {
+	@Test def NotReleasedForMarking() {
 		val filter = CourseworkFilters.NotReleasedForMarking
 
 		// Only applies to assignments that collect submissions and have a marking workflow
@@ -493,7 +491,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		assignment.collectSubmissions = true
 		filter.applies(assignment) should be (false)
 
-		assignment.markingWorkflow = Fixtures.seenSecondMarkingWorkflow("my marking workflow")
+		assignment.markingWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("my marking workflow")
 
 		assignment.collectSubmissions = false
 		filter.applies(assignment) should be (false)
@@ -520,7 +518,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(submission=Some(submission))) should be (false)
 	}
 
-	@Test def NotMarked {
+	@Test def NotMarked() {
 		val filter = CourseworkFilters.NotMarked
 
 		// Only applies to assignments that collect submissions and have a marking workflow
@@ -547,7 +545,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
-		when(workflow.submissionService.getSubmissionByUniId(assignment, "0672089"))thenReturn(Some(submission))
+		when(workflow.submissionService.getSubmissionByUniId(assignment, "0672089")) thenReturn Some(submission)
 
 		submission.isReleasedForMarking should be (false)
 
@@ -571,7 +569,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(submission=Some(submission))) should be (true)
 	}
 
-	@Test def MarkedByFirst {
+	@Test def MarkedByFirst() {
 		val filter = CourseworkFilters.MarkedByFirst
 
 		// Only applies to assignments that collect submissions and have a marking workflow
@@ -583,7 +581,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		assignment.collectSubmissions = true
 		filter.applies(assignment) should be (false)
 
-		assignment.markingWorkflow = Fixtures.seenSecondMarkingWorkflow("my marking workflow")
+		assignment.markingWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("my marking workflow")
 
 		assignment.collectSubmissions = false
 		filter.applies(assignment) should be (false)
@@ -613,7 +611,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(feedback=Some(feedback))) should be (true)
 	}
 
-	@Test def MarkedBySecond {
+	@Test def MarkedBySecond() {
 		val filter = CourseworkFilters.MarkedBySecond
 
 		// Only applies to assignments that collect submissions and have a marking workflow, and only if it's seen second marking
@@ -625,7 +623,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		assignment.collectSubmissions = true
 		filter.applies(assignment) should be (false)
 
-		assignment.markingWorkflow = Fixtures.seenSecondMarkingWorkflow("my marking workflow")
+		assignment.markingWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("my marking workflow")
 
 		assignment.collectSubmissions = false
 		filter.applies(assignment) should be (false)
@@ -651,7 +649,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(feedback=Some(feedback))) should be (true)
 	}
 
-	@Test def CheckedForPlagiarism {
+	@Test def CheckedForPlagiarism() {
 		val filter = CourseworkFilters.CheckedForPlagiarism
 
 		// Only applies to assignments that collect submissions and the department has plagiarism detection enabled
@@ -690,7 +688,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(submission=Some(submission))) should be (true)
 	}
 
-	@Test def WithOverlapPercentage {
+	@Test def WithOverlapPercentage() {
 		val filter = CourseworkFilters.WithOverlapPercentage
 
 		// Only applies to assignments that collect submissions and the department has plagiarism detection enabled
@@ -718,9 +716,9 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 
 			errors.getErrorCount should be (2)
 			errors.getFieldErrors.asScala(0).getField should be ("filter[minOverlap]")
-			errors.getFieldErrors.asScala(0).getCodes() should contain ("NotEmpty")
+			errors.getFieldErrors.asScala(0).getCodes should contain ("NotEmpty")
 			errors.getFieldErrors.asScala(1).getField should be ("filter[maxOverlap]")
-			errors.getFieldErrors.asScala(1).getCodes() should contain ("NotEmpty")
+			errors.getFieldErrors.asScala(1).getCodes should contain ("NotEmpty")
 		}
 
 		{
@@ -733,7 +731,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 
 			errors.getErrorCount should be (1)
 			errors.getFieldErrors.asScala(0).getField should be ("filter[maxOverlap]")
-			errors.getFieldErrors.asScala(0).getCodes() should contain ("typeMismatch")
+			errors.getFieldErrors.asScala(0).getCodes should contain ("typeMismatch")
 		}
 
 		{
@@ -746,11 +744,11 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 
 			errors.getErrorCount should be (3)
 			errors.getFieldErrors.asScala(0).getField should be ("filter[maxOverlap]")
-			errors.getFieldErrors.asScala(0).getCodes() should contain ("filters.WithOverlapPercentage.max.lessThanMin")
+			errors.getFieldErrors.asScala(0).getCodes should contain ("filters.WithOverlapPercentage.max.lessThanMin")
 			errors.getFieldErrors.asScala(1).getField should be ("filter[minOverlap]")
-			errors.getFieldErrors.asScala(1).getCodes() should contain ("filters.WithOverlapPercentage.min.notInRange")
+			errors.getFieldErrors.asScala(1).getCodes should contain ("filters.WithOverlapPercentage.min.notInRange")
 			errors.getFieldErrors.asScala(2).getField should be ("filter[maxOverlap]")
-			errors.getFieldErrors.asScala(2).getCodes() should contain ("filters.WithOverlapPercentage.max.notInRange")
+			errors.getFieldErrors.asScala(2).getCodes should contain ("filters.WithOverlapPercentage.max.notInRange")
 		}
 
 		{
@@ -798,7 +796,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(params)(student(submission=Some(submission))) should be (true)
 	}
 
-	@Test def NotCheckedForPlagiarism {
+	@Test def NotCheckedForPlagiarism() {
 		val filter = CourseworkFilters.NotCheckedForPlagiarism
 
 		// Only applies to assignments that collect submissions and the department has plagiarism detection enabled
@@ -838,7 +836,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(submission=Some(submission))) should be (false)
 	}
 
-	@Test def markedPlagiarised {
+	@Test def markedPlagiarised() {
 		val filter = CourseworkFilters.MarkedPlagiarised
 
 		// Only applies to assignments that collect submissions
@@ -867,7 +865,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(submission=Some(submission))) should be (false)
 	}
 
-	@Test def NoFeedback {
+	@Test def NoFeedback() {
 		val filter = CourseworkFilters.NoFeedback
 
 		// Should pass any assignment, so just check with null
@@ -878,7 +876,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(feedback=Some(new Feedback{ actualMark=Some(41) }))) should be (false)
 	}
 
-	@Test def FeedbackNotReleased {
+	@Test def FeedbackNotReleased() {
 		val filter = CourseworkFilters.FeedbackNotReleased
 
 		// Should pass any assignment, so just check with null
@@ -898,7 +896,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(feedback=Some(feedback))) should be (false)
 	}
 
-	@Test def FeedbackNotDownloaded {
+	@Test def FeedbackNotDownloaded() {
 		val filter = CourseworkFilters.FeedbackNotDownloaded
 
 		// Should pass any assignment, so just check with null

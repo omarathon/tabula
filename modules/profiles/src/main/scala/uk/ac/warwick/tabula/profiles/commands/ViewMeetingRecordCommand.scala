@@ -22,8 +22,11 @@ trait ViewMeetingRecordCommandState{
 	val relationshipType: StudentRelationshipType
 }
 
-class ViewMeetingRecordCommandInternal(val  studentCourseDetails: StudentCourseDetails, val currentMember: Option[Member], val relationshipType: StudentRelationshipType)
-	extends CommandInternal[Seq[AbstractMeetingRecord]] with ViewMeetingRecordCommandState {
+class ViewMeetingRecordCommandInternal(
+	val studentCourseDetails: StudentCourseDetails,
+	val currentMember: Option[Member],
+	val relationshipType: StudentRelationshipType
+) extends CommandInternal[Seq[AbstractMeetingRecord]] with ViewMeetingRecordCommandState {
 
 	this: ProfileServiceComponent with RelationshipServiceComponent with MeetingRecordServiceComponent =>
 

@@ -40,7 +40,11 @@ class DisplaySettingsController extends AdminController {
 			), dept)
 
 	@RequestMapping(method=Array(POST))
-	def saveSettings(@Valid @ModelAttribute("displaySettingsCommand") cmd: DisplaySettingsCommand, errors:Errors, @PathVariable("dept") department: Department) = {
+	def saveSettings(
+		@Valid @ModelAttribute("displaySettingsCommand") cmd: DisplaySettingsCommand,
+		errors:Errors,
+		@PathVariable("dept") department: Department
+	) = {
 		if (errors.hasErrors){
 			viewSettings(department)
 		} else {

@@ -45,7 +45,8 @@ trait UserLookupService extends UserLookupInterface {
 	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean): Map[UniversityId, User]
 }
 
-class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService with UserByWarwickIdCache with AutowiringCacheStrategyComponent with Logging {
+class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService
+	with UserByWarwickIdCache with AutowiringCacheStrategyComponent with Logging {
 	
 	var profileService = Wire[ProfileService]
 

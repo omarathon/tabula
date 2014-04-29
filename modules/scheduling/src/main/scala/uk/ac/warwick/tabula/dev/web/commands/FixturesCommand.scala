@@ -90,11 +90,11 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	private def setupDepartmentAndModules() {
 		// Blitz members
 		transactional() {
-			session.newQuery("delete from StudentCourseYearDetails where studentCourseDetails.scjCode like '3000%'").executeUpdate()
-			session.newQuery("delete from ModuleRegistration where studentCourseDetails.scjCode like '3000%'").executeUpdate()
-			session.newQuery("delete from MemberStudentRelationship where studentCourseDetails.scjCode like '3000%'").executeUpdate()
-			session.newQuery("delete from StudentCourseDetails where scjCode like '3000%'").executeUpdate()
-			session.newQuery("delete from StudentMember where universityId like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newQuery("delete from StudentCourseYearDetails where studentCourseDetails.scjCode like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newQuery("delete from ModuleRegistration where studentCourseDetails.scjCode like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newQuery("delete from MemberStudentRelationship where studentCourseDetails.scjCode like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newQuery("delete from StudentCourseDetails where scjCode like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newQuery("delete from StudentMember where universityId like '3000%'").executeUpdate()
 		}
 		
 		// Blitz the test department
@@ -137,7 +137,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 					session.delete(staff)
 				}
 
-				def invalidatePermissions[A <: PermissionsTarget : ClassTag](scope: A) {
+				def invalidateAndDeletePermissions[A <: PermissionsTarget : ClassTag](scope: A) {
 					// Invalidate any permissions or roles set
 					val usersToInvalidate =
 						permissionsService.getAllGrantedRolesFor(scope).flatMap { role => role.users.users } ++
@@ -146,10 +146,13 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 					usersToInvalidate.foreach { user =>
 						permissionsService.clearCachesForUser((user.getUserId, classTag[A]))
 					}
+
+					permissionsService.getAllGrantedRolesFor(scope).foreach(session.delete)
+					permissionsService.getAllGrantedPermissionsFor(scope).foreach(session.delete)
 				}
 
 				val modules = dept.modules
-				modules.foreach(invalidatePermissions[Module])
+				modules.foreach(invalidateAndDeletePermissions[Module])
 				modules.foreach(session.delete)
 				dept.modules.clear()
 
@@ -169,16 +172,16 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 						session.delete(set)
 					}
 				}
-				routes.foreach(invalidatePermissions[Route])
+				routes.foreach(invalidateAndDeletePermissions[Route])
 				routes.foreach(session.delete)
 				dept.routes.clear()
 
 				val children = recursivelyGetChildren(dept)
-				children.foreach(invalidatePermissions[Department])
+				children.foreach(invalidateAndDeletePermissions[Department])
 				children.foreach(session.delete)
 				dept.children.clear()
 
-				invalidatePermissions[Department](dept)
+				invalidateAndDeletePermissions[Department](dept)
 				session.delete(dept)
 			}
 		}

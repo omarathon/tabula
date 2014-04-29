@@ -129,7 +129,9 @@ trait UserGroupMembershipHelperLookup {
 
 	// To override in tests
 	protected def getUser(usercode: String) = userLookup.getUserByUserId(usercode)
-	protected def getWebgroups(usercode: String): Seq[String] = usercode.maybeText.map { usercode => userLookup.getGroupService.getGroupsNamesForUser(usercode).asScala }.getOrElse(Nil)
+	protected def getWebgroups(usercode: String): Seq[String] = usercode.maybeText.map {
+		usercode => userLookup.getGroupService.getGroupsNamesForUser(usercode).asScala
+	}.getOrElse(Nil)
 
 	protected def findByInternal(user: User): Seq[String] = {
 		val groupsByUser = session.createQuery(groupsByUserSql)
@@ -179,7 +181,12 @@ class UserGroupMembershipCacheBean extends ScalaFactoryBean[Cache[String, Array[
 	def cacheName = runtimeClass.getSimpleName + "-" + path.replace(".","-")
 
 	def createInstance = {
-		Caches.newCache(cacheName, new UserGroupMembershipCacheFactory(runtimeClass, path, checkUniversityIds), Days.ONE.toStandardSeconds.getSeconds, cacheStrategy)
+		Caches.newCache(
+			cacheName,
+			new UserGroupMembershipCacheFactory(runtimeClass, path, checkUniversityIds),
+			Days.ONE.toStandardSeconds.getSeconds,
+			cacheStrategy
+		)
 	}
 
 	override def afterPropertiesSet() {
@@ -237,7 +244,8 @@ class UserGroupMembershipHelperCacheBusterMessage {
 	@BeanProperty var usercode: String = _
 }
 
-class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private val helper: UserGroupMembershipHelperMethods[_]) extends UnspecifiedTypeUserGroup with KnownTypeUserGroup {
+class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private val helper: UserGroupMembershipHelperMethods[_])
+	extends UnspecifiedTypeUserGroup with KnownTypeUserGroup {
 
 	// FIXME this isn't really an optional wire, it's just represented as such to make testing easier
 	var cacheService = Wire.option[UserGroupMembershipHelperCacheService]

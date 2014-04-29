@@ -30,8 +30,6 @@ class SupervisorImporterImpl extends SupervisorImporter {
 	lazy val supervisorMappingQuery = new SupervisorMappingQuery(sits)
 
 	def getSupervisorUniversityIds(scjCode: String, relationshipType: StudentRelationshipType): Seq[(String, JBigDecimal)] = {
-		val debug = supervisorMappingQuery.executeByNamedParam(Map("scj_code" -> scjCode, "sits_examiner_type" -> relationshipType.defaultRdxType))
-
 		supervisorMappingQuery.executeByNamedParam(Map("scj_code" -> scjCode, "sits_examiner_type" -> relationshipType.defaultRdxType))
 	}
 }
