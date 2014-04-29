@@ -45,19 +45,6 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 	}
 
 	def save(notification: Notification[_,_]) {
-		/**
-		 * PreSaveBehaviour usually doesn't happen until flush, but we need
-		 * properties to be set before flush at the moment so that the existing
-		 * emailer can use those properties, so we call it manually here.
-		 *
-		 * In future we hopefully can get rid of this as the emailer will
-		 * be fetching saved notifications from the database. Otherwise there
-		 * are other pre-flush Hibernate event types we could create listeners for.
-		 */
-//		if (notification.isInstanceOf[PreSaveBehaviour]) {
-//			val isNew = notification.id == null
-//			notification.asInstanceOf[PreSaveBehaviour].preSave(isNew)
-//		}
 		session.save(notification)
 	}
 
