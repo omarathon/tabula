@@ -26,6 +26,7 @@ import uk.ac.warwick.tabula.{RequestInfo}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import java.lang.reflect.Method
 import scala.util.{Try,Success, Failure}
+import org.hibernate.proxy.HibernateProxyHelper
 
 /**
  * A implementation of BeansWrapper that support native Scala basic and collection types
@@ -85,14 +86,13 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 	class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper) extends BeanModel(sobj, wrapper) {
 		import ScalaHashModel._
 
+		val objectClass = HibernateProxyHelper.getClassWithoutInitializingProxy(sobj)
+
 		def lowercaseFirst(camel: String) = camel.head.toLower + camel.tail
 
 		def isGetter(m: Getter) = !m.getName.endsWith("_$eq") && m.getParameterTypes.length == 0
 		
-		val getters = {
-			val cls = sobj.getClass
-			gettersCache.getOrElseUpdate(cls, generateGetterInformation(cls))
-		}
+		val getters = gettersCache.getOrElseUpdate(objectClass, generateGetterInformation(objectClass))
 
 		def generateGetterInformation(cls: Class[_]) = {
 			val javaGetterRegex = new Regex("^(is|get)([A-Z]\\w*)")
@@ -182,7 +182,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 	
 		def checkInnerClasses(key: String): Option[TemplateModel] = {
 			try {
-				Some(wrapper.wrap(Class.forName(sobj.getClass.getName + key + "$").getField("MODULE$").get(null)))
+				Some(wrapper.wrap(Class.forName(objectClass.getName + key + "$").getField("MODULE$").get(null)))
 			} catch {
 				case e @ (_: ClassNotFoundException | _: NoSuchFieldException) =>
 					None
