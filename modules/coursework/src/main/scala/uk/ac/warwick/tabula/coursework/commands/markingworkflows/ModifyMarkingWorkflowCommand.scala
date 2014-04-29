@@ -95,12 +95,6 @@ trait MarkingWorkflowCommandValidation extends SelfValidating {
 			}
 			secondMarkersValidator.validate(errors)
 		}
-
-		// there is a marker in both lists
-		val trimmedFirst = firstMarkers.asScala.map{ _.trim }.filterNot{ _.isEmpty }.toSet
-		val trimmedSecond = secondMarkers.asScala.map{ _.trim }.filterNot{ _.isEmpty }.toSet
-		if ((trimmedFirst & trimmedSecond).size > 0)
-			errors.reject("markingWorkflow.markers.bothLists")
 	}
 
 	def hasDuplicates(strings: Seq[String]): Boolean = {

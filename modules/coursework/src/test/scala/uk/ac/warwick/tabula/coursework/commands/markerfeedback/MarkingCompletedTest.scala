@@ -172,9 +172,9 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		val m2UserGroup = userGroup("student1", "student2")
 		val m3UserGroup = userGroup("student3", "student4")
 
-		testAssignment.markerMap = Map(
-			"marker2" -> m2UserGroup,
-			"marker3" -> m3UserGroup
+		testAssignment.secondMarkers = Seq(
+			SecondMarkersMap(testAssignment, "marker2", m2UserGroup),
+			SecondMarkersMap(testAssignment, "marker3", m3UserGroup)
 		)
 
 		val (f1, mf1) = makeMarkerFeedback(student1)(MarkingNotificationFixture.SecondMarkerLink)

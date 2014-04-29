@@ -15,7 +15,7 @@
 
 <#macro row graph>
 	<#assign u = graph.student />
-	<tr class="itemContainer" data-contentid="${markingId(u)}">
+	<tr class="itemContainer" data-contentid="${markingId(u)}" data-markingurl="${onlineMarkingUrls[u.userId]}">
 		<#if showMarkingCompleted>
 			<td class="check-col">
 				<input type="checkbox" class="collection-checkbox" name="students" value="${markingId(u)}">
@@ -129,7 +129,7 @@
 			};
 
 			$('.expanding-table').expandingTable({
-				contentUrl: '${url(markingUrl!"")}',
+				contentUrlFunction: function($row){ return $row.data('markingurl'); },
 				useIframe: true,
 				tableSorterOptions: tsOptions
 			});
