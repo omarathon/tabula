@@ -39,7 +39,7 @@ trait SubmissionReminder {
 
 	def urlTitle = "upload your submission"
 
-	def titleEnding = if(daysLeft < 0) { "isLate" } else { "due" }
+	def titleEnding = if(daysLeft < 0) { "is late" } else { "due" }
 
 	def title = s"$moduleCode assignment $titleEnding"
 
