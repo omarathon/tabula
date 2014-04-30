@@ -51,7 +51,7 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 	/**
 	 * This is called peridoically to convert uncompleted ScheduledNotifications into real instances of notification.
 	 */
-	override def processNotifications() = transactional(readOnly = true) {
+	override def processNotifications() = transactional() {
 		dao.notificationsToComplete.foreach { sn =>
 			generateNotification(sn).foreach(notificationService.push)
 
