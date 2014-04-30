@@ -3,7 +3,7 @@
 <@f.form method="post" class="form-horizontal" action="${url('/settings')}" commandName="userSettingsCommand">
 	
 
-<#if isCourseworkModuleManager>		
+<#if isCourseworkModuleManager || isDepartmentalAdmin>
 	<@form.row>
 		<@form.label>Submission email alerts</@form.label>
 		<@form.field>
