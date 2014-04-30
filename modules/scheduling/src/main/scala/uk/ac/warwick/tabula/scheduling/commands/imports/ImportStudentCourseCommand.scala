@@ -26,15 +26,37 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 	var awardImporter = Wire.auto[AwardImporter]
 
 	override def applyInternal(): StudentCourseDetails = {
-		val studentCourseDetailsExisting = studentCourseDetailsDao.getByScjCodeStaleOrFresh(row.scjCode)
 
 		logger.debug("Importing student course details for " + row.scjCode)
+
+		val studentCourseDetailsExisting = studentCourseDetailsDao.getByScjCodeStaleOrFresh(row.scjCode)
 
 		val (isTransient, studentCourseDetails) = studentCourseDetailsExisting match {
 			case Some(studentCourseDetails: StudentCourseDetails) => (false, studentCourseDetails)
 			case _ => (true, new StudentCourseDetails(stuMem, row.scjCode))
 		}
 
+		if (!importCommandFactory.rowTracker.scjCodesSeen.contains(studentCourseDetails.scjCode)) {
+			updateStudentCourseDetails(studentCourseDetails, isTransient)
+		}
+
+		updateStudentCourseYearDetails(studentCourseDetails)
+
+		importCommandFactory.rowTracker.scjCodesSeen.add(studentCourseDetails.scjCode)
+
+		studentCourseDetails
+	}
+
+
+	def updateStudentCourseYearDetails(studentCourseDetails: StudentCourseDetails) {
+		// Update the db:
+		val studentCourseYearDetails = importCommandFactory.createImportStudentCourseYearCommand(row, studentCourseDetails).apply
+
+		// then bring the in-memory data up to speed:
+		studentCourseDetails.attachStudentCourseYearDetails(studentCourseYearDetails)
+	}
+
+	def updateStudentCourseDetails(studentCourseDetails: StudentCourseDetails, isTransient: Boolean) {
 		val studentCourseDetailsBean = new BeanWrapperImpl(studentCourseDetails)
 
 		val hasChanged = copyStudentCourseProperties(new BeanWrapperImpl(row), studentCourseDetailsBean) | markAsSeenInSits(studentCourseDetailsBean)
@@ -45,29 +67,29 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 
 				if (row.mostSignificant) {
 					stuMem.mostSignificantCourse = studentCourseDetails
-					logger.debug("Updating member most significant course to "+ studentCourseDetails +" for " + stuMem)
+					logger.debug("Updating member most significant course to " + studentCourseDetails + " for " + stuMem)
 				}
 
 				studentCourseDetails.lastUpdatedDate = DateTime.now
 				studentCourseDetailsDao.saveOrUpdate(studentCourseDetails)
 			}
-			catch  {
+			catch {
 				case exception: ConstraintViolationException => {
 					logger.warn("Couldn't update course details for SCJ "
-							+ studentCourseDetails.scjCode + ", SPR " + studentCourseDetails.sprCode
-							+ ".  Might be invalid data in SITS - working on the assumption "
-							+ "there shouldn't be multiple SPR codes for one current SCJ code")
+						+ studentCourseDetails.scjCode + ", SPR " + studentCourseDetails.sprCode
+						+ ".  Might be invalid data in SITS - working on the assumption "
+						+ "there shouldn't be multiple SPR codes for one current SCJ code")
 					exception.printStackTrace
 				}
 			}
 		}
 
-		val studentCourseYearDetails = importCommandFactory.createImportStudentCourseYearCommand(row, studentCourseDetails).apply
+		updateRelationships(studentCourseDetails)
+	}
 
-		// Apply above will take care of the db.  This brings the in-memory data up to speed:
-		studentCourseDetails.attachStudentCourseYearDetails(studentCourseYearDetails)
-
-		// just check the SPR (status on route) code.  The SCJ code may indicate that they are
+	def updateRelationships(studentCourseDetails: StudentCourseDetails) {
+		// Check the SPR (status on route) code to see if they are permanently withdrawn, and
+		// end relationships if so.  The SCJ code may indicate that they are
 		// permanently withdrawn from the course, but it may have the same route code as their
 		// current course (surprisingly).  In that case we don't want to go ahead and end all
 		// relationships for the route code.
@@ -81,10 +103,6 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 			if (row.scjCode != null && row.scjStatusCode != null && !row.scjStatusCode.startsWith("P"))
 				new ImportSupervisorsForStudentCommand(studentCourseDetails).apply()
 		}
-
-		importCommandFactory.rowTracker.scjCodesSeen.add(studentCourseDetails.scjCode)
-
-		studentCourseDetails
 	}
 
 	private val basicStudentCourseProperties = Set(
