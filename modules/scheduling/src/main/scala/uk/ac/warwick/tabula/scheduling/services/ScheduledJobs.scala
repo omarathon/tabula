@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.services.{EmailNotificationService, ScheduledNotific
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.Features
 
 /**
  * The scheduled jobs don't particularly have to all be in one class,
@@ -20,6 +21,7 @@ import uk.ac.warwick.tabula.JavaImports._
 class ScheduledJobs {
 
 	var fileSyncEnabled = Wire[JBoolean]("${environment.standby:false}")
+	var features = Wire[Features]
 
 	var exceptionResolver = Wire[ExceptionResolver]
 	var maintenanceModeService = Wire[MaintenanceModeService]
@@ -36,73 +38,89 @@ class ScheduledJobs {
 	def syncGuard[A](fn: => A) = if (fileSyncEnabled) fn
 
 	@Scheduled(cron = "0 0 7,14 * * *")
-	def importData: Unit = maintenanceGuard {
-		exceptionResolver.reportExceptions {
-			ImportAcademicInformationCommand().apply()
+	def importData: Unit =
+		if (features.schedulingAcademicInformationImport) maintenanceGuard {
+			exceptionResolver.reportExceptions {
+				ImportAcademicInformationCommand().apply()
+			}
 		}
-	}
 
 	@Scheduled(cron = "0 30 0 * * *")
-	def importMembers: Unit = maintenanceGuard {
-		exceptionResolver.reportExceptions {
-			new ImportProfilesCommand().apply()
+	def importMembers: Unit =
+		if (features.schedulingProfilesImport) maintenanceGuard {
+			exceptionResolver.reportExceptions {
+				new ImportProfilesCommand().apply()
+			}
 		}
-	}
 
 	@Scheduled(cron = "0 0 7 * * *")
-	def importAssignments: Unit = maintenanceGuard {
-		exceptionResolver.reportExceptions {
-			ImportAssignmentsCommand().apply()
+	def importAssignments: Unit =
+		if (features.schedulingAssignmentsImport) maintenanceGuard {
+			exceptionResolver.reportExceptions {
+				ImportAssignmentsCommand().apply()
+			}
 		}
-	}
 
 	@Scheduled(cron = "0 0 2 * * *") // 2am
-	def cleanupTemporaryFiles: Unit = maintenanceGuard {
-		exceptionResolver.reportExceptions {
-			new CleanupTemporaryFilesCommand().apply()
+	def cleanupTemporaryFiles: Unit =
+		if (features.schedulingCleanupTemporaryFiles) maintenanceGuard {
+			exceptionResolver.reportExceptions {
+				new CleanupTemporaryFilesCommand().apply()
+			}
 		}
-	}
 
 	@Scheduled(fixedRate = 60 * 1000) // every minute
-	def indexAuditEvents: Unit = exceptionResolver.reportExceptions { auditIndexingService.incrementalIndex() }
+	def indexAuditEvents: Unit =
+		if (features.schedulingAuditIndex)
+			exceptionResolver.reportExceptions { auditIndexingService.incrementalIndex() }
 
 	@Scheduled(fixedRate = 300 * 1000) // every 5 minutes
-	def indexProfiles: Unit = exceptionResolver.reportExceptions { profileIndexingService.incrementalIndex() }
+	def indexProfiles: Unit =
+		if (features.schedulingProfilesIndex)
+			exceptionResolver.reportExceptions { profileIndexingService.incrementalIndex() }
 
 	@Scheduled(fixedRate = 60 * 1000) // every minute
-	def indexNotifications: Unit = exceptionResolver.reportExceptions { notificationIndexService.incrementalIndex() }
+	def indexNotifications: Unit =
+		if (features.schedulingNotificationsIndex)
+			exceptionResolver.reportExceptions { notificationIndexService.incrementalIndex() }
 
 	@Scheduled(fixedRate = 60 * 1000) // every minute
-	def resolveScheduledNotifications: Unit = exceptionResolver.reportExceptions { scheduledNotificationService.processNotifications() }
+	def resolveScheduledNotifications: Unit =
+		if (features.schedulingProcessScheduledNotifications)
+			exceptionResolver.reportExceptions { scheduledNotificationService.processNotifications() }
 
 	@Scheduled(fixedRate = 60 * 1000) // every minute
-	def processEmailQueue: Unit = exceptionResolver.reportExceptions {
-		notificationEmailService.processNotifications()
-	}
+	def processEmailQueue: Unit =
+		if (features.schedulingNotificationEmails) exceptionResolver.reportExceptions {
+			notificationEmailService.processNotifications()
+		}
 
 	@Scheduled(fixedDelay = 10 * 1000) // every 10 seconds, non-concurrent
-	def jobs: Unit = maintenanceGuard {
-		exceptionResolver.reportExceptions { jobService.run() }
-	}
+	def jobs: Unit =
+		if (features.schedulingJobService) maintenanceGuard {
+			exceptionResolver.reportExceptions { jobService.run() }
+		}
 
 	@Scheduled(fixedDelay = 5 * 60 * 1000) // every 5 minutes, non-concurrent
-	def exportAttendanceToSits: Unit = maintenanceGuard {
-		exceptionResolver.reportExceptions { ExportAttendanceToSitsCommand().apply() }
-	}
+	def exportAttendanceToSits: Unit =
+		if (features.schedulingExportAttendanceToSits) maintenanceGuard {
+			exceptionResolver.reportExceptions { ExportAttendanceToSitsCommand().apply() }
+		}
 
 	/* Filesystem syncing jobs, should only run on standby */
 	@Scheduled(fixedRate = 300 * 1000) // every 5 minutes
-	def fileSync: Unit = syncGuard {
-		exceptionResolver.reportExceptions {
-			new SyncReplicaFilesystemCommand().apply()
+	def fileSync: Unit =
+		if (features.schedulingFileSync) syncGuard {
+			exceptionResolver.reportExceptions {
+				new SyncReplicaFilesystemCommand().apply()
+			}
 		}
-	}
 
 	@Scheduled(cron = "0 0 19 * * *") // 7pm
 	def cleanupUnreferencedFilesAndSanityCheck: Unit =
 		exceptionResolver.reportExceptions {
-			new CleanupUnreferencedFilesCommand().apply()
-			new SanityCheckFilesystemCommand().apply()
+			if (features.schedulingCleanupUnreferencedFiles) new CleanupUnreferencedFilesCommand().apply()
+			if (features.schedulingSanityCheckFilesystem) new SanityCheckFilesystemCommand().apply()
 		}
 
 }
