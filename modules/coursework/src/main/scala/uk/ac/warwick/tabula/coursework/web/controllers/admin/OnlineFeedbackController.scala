@@ -23,19 +23,21 @@ class OnlineFeedbackController extends CourseworkController {
 		OnlineFeedbackCommand(module, assignment)
 
 	@RequestMapping
-	def showTable(@ModelAttribute command: OnlineFeedbackCommand, errors: Errors): Mav = {
+	def showTable(@ModelAttribute command: OnlineFeedbackCommand, errors: Errors, currentUser: CurrentUser): Mav = {
 
 		val feedbackGraphs = command.apply()
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
 		Mav("admin/assignments/feedback/online_framework",
-			"markingUrl" -> Routes.admin.assignment.onlineFeedback(assignment),
 			"showMarkingCompleted" -> false,
 			"showGenericFeedback" -> true,
 			"assignment" -> assignment,
 			"command" -> command,
-			"studentFeedbackGraphs" -> feedbackGraphs)
-			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Online marking for ${assignment.name}"))
+			"studentFeedbackGraphs" -> feedbackGraphs,
+			"onlineMarkingUrls" -> feedbackGraphs.map{ graph =>
+				graph.student.getUserId -> Routes.admin.assignment.onlineFeedback(assignment)
+			}.toMap
+		).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Online marking for ${assignment.name}"))
 	}
 }
 
