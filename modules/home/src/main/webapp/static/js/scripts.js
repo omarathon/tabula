@@ -902,7 +902,12 @@
 				var $tabContainer = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
 				var $tabs = $tabContainer.find('ul');
 				$panes.children('li').each(function() {
-					var title = $(this).find('h4').html();
+
+					var title = $(this).attr('data-title');
+					if (!title) {
+						title = $(this).find('h4').html();
+					}
+
 					var link = '#' + $(this).attr('id');
 					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '"><span class="title">' + title + '</span> <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>');
 					$tabs.append($tab);

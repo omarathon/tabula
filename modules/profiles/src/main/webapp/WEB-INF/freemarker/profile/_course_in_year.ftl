@@ -61,7 +61,7 @@
 	<ol class="panes">
 
 		<#if showTimetablePane>
-			<li id="timetable-pane">
+			<li id="timetable-pane" data-title="Timetable">
 				<section id="timetable-details" class="clearfix" >
 					<h4>
 						Timetable
@@ -111,13 +111,13 @@
 		</#list>
 
 		<#if features.courseworkInStudentProfile && can.do("Profiles.Read.Coursework", profile)>
-			<li id="coursework-pane" style="display:none;">
+			<li id="coursework-pane" style="display:none;" data-title="Coursework">
 				<#include "_coursework.ftl" />
 			</li>
 		</#if>
 
 		<#if numSmallGroups gt 0>
-			<li id="sg-pane" style="display:none;">
+			<li id="sg-pane" style="display:none;" data-title="Groups">
 				<#include "_small_groups.ftl" />
 			</li>
 		</#if>
@@ -125,13 +125,13 @@
 		<#if studentCourseYearDetails??
 			&& (studentCourseYearDetails.hasModuleRegistrations || studentCourseYearDetails.hasAccreditedPriorLearning)
 			&& (can.do("ModuleRegistration.Core", studentCourseDetails) || can.do("AccreditedPriorLearning.Read", studentCourseDetails)) >
-			<li id="module-registration-pane">
+			<li id="module-registration-pane" data-title="Modules">
 				<#include "_module_registrations.ftl" />
 			</li>
 		</#if>
 
 		<#if features.attendanceMonitoring>
-			<li id="attendance-pane" style="display:none;">
+			<li id="attendance-pane" style="display:none;" data-title="Attendance">
 				<#include "_attendance.ftl" />
 			</li>
 		</#if>
