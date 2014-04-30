@@ -22,7 +22,10 @@ trait ScheduledNotificationDao {
 @Repository
 class ScheduledNotificationDaoImpl extends ScheduledNotificationDao with Daoisms {
 
-	override def save(scheduledNotification: ScheduledNotification[_]) = session.saveOrUpdate(scheduledNotification)
+	override def save(scheduledNotification: ScheduledNotification[_]) = {
+		session.saveOrUpdate(scheduledNotification)
+		session.flush()
+	}
 
 	override def getById(id: String) = getById[ScheduledNotification[_ >: Null <: ToEntityReference]](id)
 
