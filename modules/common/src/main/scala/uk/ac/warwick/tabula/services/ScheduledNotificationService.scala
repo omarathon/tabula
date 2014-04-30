@@ -24,7 +24,7 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 	var notificationService = Wire.auto[NotificationService]
 
 	// a map of DiscriminatorValue -> Notification
-	val notificationMap = ReflectionHelper.allNotifications
+	lazy val notificationMap = ReflectionHelper.allNotifications
 
 	override def push(sn: ScheduledNotification[_]) = dao.save(sn)
 
