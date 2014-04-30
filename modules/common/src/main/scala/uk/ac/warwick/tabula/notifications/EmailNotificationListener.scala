@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import java.util.concurrent.{ExecutionException, TimeoutException, TimeUnit}
+import org.hibernate.ObjectNotFoundException
+import javax.mail.internet.MimeMessage
 
 @Component
 class EmailNotificationListener extends RecipientNotificationListener with UnicodeEmails with AutowiredTextRendererComponent with Logging {
@@ -35,12 +37,12 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 	// add an isEmail property for the model for emails
 	def render(model: FreemarkerModel) = textRenderer.renderTemplate(model.template, model.model + ("isEmail" -> true))
 
-	def listen(recipientInfo: RecipientNotificationInfo) = {
-		if (!recipientInfo.emailSent && recipientInfo.recipient.getEmail.hasText) {
+	private def generateMessage(recipientInfo: RecipientNotificationInfo): Option[MimeMessage] = {
+		try {
 			val notification = recipientInfo.notification
 			val recipient = recipientInfo.recipient
 
-			val message = createMessage(mailSender) { message =>
+			Some(createMessage(mailSender) { message =>
 				message.setFrom(fromAddress)
 				message.setReplyTo(replyAddress)
 				message.setTo(recipient.getEmail)
@@ -53,23 +55,41 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 				body.append(mailFooter)
 				body.append(replyWarning)
 				message.setText(body.toString())
-			}
+			})
+		} catch {
+			// referenced entity probably missing, oh well.
+			case e: ObjectNotFoundException => None
+		}
+	}
 
-			val future = mailSender.send(message)
-			try {
-				val successful = future.get(30, TimeUnit.SECONDS)
+	def listen(recipientInfo: RecipientNotificationInfo) = {
+		if (!recipientInfo.emailSent && recipientInfo.recipient.getEmail.hasText) {
+			generateMessage(recipientInfo) match {
+				case Some(message) => {
+					val future = mailSender.send(message)
+					try {
+						val successful = future.get(30, TimeUnit.SECONDS)
 
-				if (successful) {
+						if (successful) {
+							recipientInfo.emailSent = true
+							service.save(recipientInfo)
+						}
+					} catch {
+						case e: TimeoutException => {
+							logger.info(s"Timeout waiting for message ${message} to be sent; cancelling to try again later", e)
+							future.cancel(true)
+						}
+						case e @ (_: ExecutionException | _: InterruptedException) => {
+							logger.warn("Could not send email ${message}, will try later", e)
+						}
+					}
+				}
+				case None => {
+					logger.warn(s"Couldn't send email for Notification because object no longer exists: ${recipientInfo}")
+
+					// TODO This is incorrect, really - we're not sending the email, we're cancelling the sending of the email
 					recipientInfo.emailSent = true
 					service.save(recipientInfo)
-				}
-			} catch {
-				case e: TimeoutException => {
-					logger.info(s"Timeout waiting for message ${message} to be sent; cancelling to try again later", e)
-					future.cancel(true)
-				}
-				case e @ (_: ExecutionException | _: InterruptedException) => {
-					logger.warn("Could not send email ${message}, will try later", e)
 				}
 			}
 		}
