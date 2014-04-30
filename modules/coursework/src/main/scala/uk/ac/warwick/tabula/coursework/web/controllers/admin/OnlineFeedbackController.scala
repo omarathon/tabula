@@ -23,7 +23,7 @@ class OnlineFeedbackController extends CourseworkController {
 		OnlineFeedbackCommand(module, assignment)
 
 	@RequestMapping
-	def showTable(@ModelAttribute command: OnlineFeedbackCommand, errors: Errors, currentUser: CurrentUser): Mav = {
+	def showTable(@ModelAttribute command: OnlineFeedbackCommand, errors: Errors): Mav = {
 
 		val feedbackGraphs = command.apply()
 		val (assignment, module) = (command.assignment, command.assignment.module)
