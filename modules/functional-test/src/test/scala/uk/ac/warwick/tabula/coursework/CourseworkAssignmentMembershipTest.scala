@@ -15,7 +15,7 @@ class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixt
 				// Use the assignment ID to mock up a URL
 				go to Path("/coursework/module/xxx101/" + assignmentId + "/")
 
-				pageSource contains ("You're not enrolled") should be (true)
+				pageSource contains "You're not enrolled" should be (true)
 
 				// Let's request enrolment
 				click on className("btn")
@@ -35,10 +35,10 @@ class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixt
 
 		withAssignment("xxx101", "Fully featured assignment", assignmentSettings) { assignmentId =>
 			// Student1 is enrolled
-			submitAssignment(P.Student1, "xxx101", "Fully featured assignment", assignmentId, "/file1.txt", true)
+			submitAssignment(P.Student1, "xxx101", "Fully featured assignment", assignmentId, "/file1.txt", mustBeEnrolled = true)
 
 			// Student 3 is not enrolled but can submit anyway
-			submitAssignment(P.Student3, "xxx101", "Fully featured assignment", assignmentId, "/file2.txt", false)
+			submitAssignment(P.Student3, "xxx101", "Fully featured assignment", assignmentId, "/file2.txt", mustBeEnrolled = false)
 		}
 	}
 
@@ -73,7 +73,7 @@ class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixt
 				// Use the assignment ID to mock up a URL
 				go to Path("/coursework/module/xxx101/" + assignmentId + "/")
 
-				pageSource contains ("You're not enrolled") should be (true)
+				pageSource contains "You're not enrolled" should be (true)
 			}
 		}
 	}

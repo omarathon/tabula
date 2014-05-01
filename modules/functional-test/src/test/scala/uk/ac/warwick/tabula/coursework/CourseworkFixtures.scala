@@ -13,18 +13,24 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 	before {
 		Given("The test department exists")
-		go to (Path("/scheduling/fixtures/setup"))
+		go to Path("/scheduling/fixtures/setup")
 
 		And("There is an assessment component for module xxx101")
 		createAssessmentComponent("XXX", "XXX101-15", "Cool essay")
 
 		And("There is an upstream assessment group for xxx101 with students1-4 in it")
 		createUpstreamAssessmentGroup("XXX101-15", Seq(P.Student1.warwickId, P.Student2.warwickId, P.Student3.warwickId, P.Student4.warwickId))
+
+		And("student1-4 are members")
+		createStudentMember(P.Student1.usercode)
+		createStudentMember(P.Student2.usercode)
+		createStudentMember(P.Student3.usercode)
+		createStudentMember(P.Student4.usercode)
 	}
 
 	def as[T](user: LoginDetails)(fn: => T) = {
 		currentUser = user
-		signIn as(user) to (Path("/coursework"))
+		signIn as user to Path("/coursework")
 
 		fn
 	}
@@ -48,27 +54,27 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		if ((assistants ++ managers).size > 0) {
 			// Optionally add module assistants/managers if requested
 			val info = getModuleInfo(moduleCode)
-			click on (info.findElement(By.className("module-manage-button")).findElement(By.partialLinkText("Manage")))
+			click on info.findElement(By.className("module-manage-button")).findElement(By.partialLinkText("Manage"))
 
 			val editPerms = info.findElement(By.partialLinkText("Edit module permissions"))
 			eventually {
 				editPerms.isDisplayed should be (true)
 			}
-			click on (editPerms)
+			click on editPerms
 
 			def pick(table: String, usercodes: Seq[String]) {
 				verifyPageLoaded{
-					find(cssSelector(s"${table} .pickedUser")) should be ('defined)
+					find(cssSelector(s"$table .pickedUser")) should be ('defined)
 				}
 				usercodes.foreach { u =>
-					click on cssSelector(s"${table} .pickedUser")
+					click on cssSelector(s"$table .pickedUser")
 					enter(u)
-					val typeahead = cssSelector(s"${table} .typeahead .active a")
+					val typeahead = cssSelector(s"$table .typeahead .active a")
 					eventuallyAjax {
-						find(typeahead) should not be (None)
+						find(typeahead) should not be None
 					}
 					click on typeahead
-					find(cssSelector(s"${table} form.add-permissions")).get.underlying.submit()
+					find(cssSelector(s"$table form.add-permissions")).get.underlying.submit()
 				}
 			}
 
@@ -76,7 +82,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			pick(".moduleassistant-table", assistants)
 
 			// as you were...
-			go to (Path("/coursework"))
+			go to Path("/coursework")
 			click on linkText("Go to the Test Services admin page")
 			verifyPageLoaded{
 				// wait for the page to load
@@ -86,14 +92,14 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		}
 
 		val info = getModuleInfo(moduleCode)
-		click on (info.findElement(By.className("module-manage-button")).findElement(By.partialLinkText("Manage")))
+		click on info.findElement(By.className("module-manage-button")).findElement(By.partialLinkText("Manage"))
 
 		val addAssignment = info.findElement(By.partialLinkText("Create new assignment"))
 		eventually {
 			addAssignment.isDisplayed should be (true)
 		}
 
-		click on (addAssignment)
+		click on addAssignment
 
 		textField("name").value = assignmentName
 		settings(members)
@@ -130,7 +136,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		// The assignment submission page uses FormFields which don't have readily memorable names, so we need to get fields by their label
 		getInputByLabel("File") should be ('defined)
 
-		click on (getInputByLabel("File").orNull)
+		click on getInputByLabel("File").orNull
 		pressKeys(getClass.getResource(file).getFile)
 
 		new TextField(getInputByLabel("Word count").orNull).value = "1000"
@@ -248,7 +254,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		if (matchingModule.isEmpty)
 			throw new TestFailedException(s"No module-info found for ${moduleCode.toUpperCase}", 0)
 
-		matchingModule.next.underlying
+		matchingModule.next().underlying
 	}
 
 	def getAssignmentInfo(moduleCode: String, assignmentName: String) = {
@@ -269,7 +275,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		val matchingAssignment = assignmentBlocks.filter(_.findElement(By.className("name")).getText.trim == assignmentName)
 
 		if (matchingAssignment.isEmpty)
-			throw new TestFailedException(s"No module-info found for ${assignmentName}", 0)
+			throw new TestFailedException(s"No module-info found for $assignmentName", 0)
 
 		matchingAssignment.head
 	}
