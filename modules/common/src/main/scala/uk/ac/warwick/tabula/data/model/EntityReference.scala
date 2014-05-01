@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroupSet, S
 abstract class EntityReference[A >: Null <: AnyRef] extends GeneratedId {
 	// Maps to Notification.items
 	@ManyToOne
-	@JoinColumn(name = "notification_id")
+	@JoinColumn(name = "notification_id", insertable = false, updatable = false)
 	var notification: Notification[_, _] = null
 
 	var entity: A
