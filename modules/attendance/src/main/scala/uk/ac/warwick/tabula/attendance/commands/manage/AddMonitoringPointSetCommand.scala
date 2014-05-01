@@ -47,6 +47,8 @@ abstract class AddMonitoringPointSetCommand(
 
 	self: MonitoringPointServiceComponent =>
 
+	assert(academicYear.startYear <= 2013, "Tried to create a point set for 2014/15")
+
 	override def applyInternal() = {
 		selectedRoutesAndYears.asScala.map{case (route, allYears) =>
 				allYears.asScala.filter(_._2).keySet.map(year => {
