@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import collection.mutable
 import org.hibernate.{Session, ScrollableResults}
 import uk.ac.warwick.tabula.helpers.Closeables
 
@@ -32,30 +33,30 @@ class Scrollable[A](results: ScrollableResults, session: Session) {
 	class CountLimitedScrollable(count: Int) extends LimitedScrollable {
 		override def map[B](f: (A) => B) = Closeables.closeThis(results) { r =>
 			var i = 0
-			var result = List[B]()
+			val result = mutable.ListBuffer[B]()
 			while (i < count && results.next()) {
 				val entity: A = results.get(0).asInstanceOf[A]
-				result = f(entity) :: result
+				result += f(entity)
 				session.evict(entity)
 				i += 1
 			}
-			result
+			result.toSeq
 		}
 	}
 
 	class WhileLimitedScrollable(when: (A) => Boolean) extends LimitedScrollable {
 		def map[B](f: (A) => B): Seq[B] = Closeables.closeThis(results) { r =>
 			var shouldContinue = true
-			var result = List[B]()
+			val result = mutable.ListBuffer[B]()
 			while (shouldContinue && results.next()) {
 				val entity: A = results.get(0).asInstanceOf[A]
 				shouldContinue = when(entity)
 				if (shouldContinue) {
-					result = f(entity) :: result
+					result += f(entity)
 					session.evict(entity)
 				}
 			}
-			result
+			result.toSeq
 		}
 	}
 }

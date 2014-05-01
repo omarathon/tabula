@@ -47,6 +47,11 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 		retrievedNotification.target should not be null
 		retrievedNotification.target.entity should be(heron)
 
+		retrievedNotification.completed = true
+		dao.save(retrievedNotification)
+		session.flush()
+		session.clear()
+		dao.getById(notification.id).get.asInstanceOf[ScheduledNotification[Heron]].completed should be (true)
 
 		session.clear()
 		session.delete(notification)
@@ -95,7 +100,13 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 		session.flush()
 		session.clear()
 
-		dao.notificationsToComplete should be (Seq(n2,n3))
+		// FIXME make Scrollable.map() work properly so I don't have to do this silly list append
+		val result = collection.mutable.ListBuffer[ScheduledNotification[_]]()
+		dao.notificationsToComplete.take(100).foreach{ e =>
+			result += e
+		}
+
+		result should be (Seq(n2,n3))
 
 		session.clear()
 		session.delete(heron)
