@@ -13,7 +13,7 @@ trait ScheduledNotificationDao {
 
 		def getById(id: String): Option[ScheduledNotification[_  >: Null <: ToEntityReference]]
 
-		def notificationsToComplete : Seq[ScheduledNotification[_  >: Null <: ToEntityReference]]
+		def notificationsToComplete: Scrollable[ScheduledNotification[_  >: Null <: ToEntityReference]]
 
 		def getScheduledNotifications(entity: Any): Seq[ScheduledNotification[_  >: Null <: ToEntityReference]]
 
@@ -24,7 +24,6 @@ class ScheduledNotificationDaoImpl extends ScheduledNotificationDao with Daoisms
 
 	override def save(scheduledNotification: ScheduledNotification[_]) = {
 		session.saveOrUpdate(scheduledNotification)
-		session.flush()
 	}
 
 	override def getById(id: String) = getById[ScheduledNotification[_ >: Null <: ToEntityReference]](id)
@@ -40,11 +39,13 @@ class ScheduledNotificationDaoImpl extends ScheduledNotificationDao with Daoisms
 
 	override def delete(scheduledNotification: ScheduledNotification[_]) = session.delete(scheduledNotification)
 
-	override def notificationsToComplete = {
-		session.newCriteria[ScheduledNotification[_  >: Null <: ToEntityReference]]
+	override def notificationsToComplete: Scrollable[ScheduledNotification[_  >: Null <: ToEntityReference]] = {
+		val scrollable =
+			session.newCriteria[ScheduledNotification[_  >: Null <: ToEntityReference]]
 			.add(Restrictions.ne("completed", true))
 			.add(Restrictions.le("scheduledDate", DateTime.now))
 			.addOrder(Order.asc("scheduledDate"))
-			.seq
+			.scroll()
+		new Scrollable(scrollable, session)
 	}
 }

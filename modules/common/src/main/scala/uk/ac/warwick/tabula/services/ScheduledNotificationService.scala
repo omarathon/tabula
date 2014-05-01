@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.{ToEntityReference, Notification, ScheduledNotification}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.ScheduledNotificationDao
+import uk.ac.warwick.tabula.data.{Daoisms, ScheduledNotificationDao}
 import uk.ac.warwick.tabula.helpers.{Logging, ReflectionHelper}
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.data.Transactions._
@@ -18,7 +18,9 @@ trait ScheduledNotificationService {
 }
 
 @Service
-class ScheduledNotificationServiceImpl extends ScheduledNotificationService with Logging {
+class ScheduledNotificationServiceImpl extends ScheduledNotificationService with Logging with Daoisms {
+
+	val RunBatchSize = 10
 
 	var dao = Wire.auto[ScheduledNotificationDao]
 	var notificationService = Wire.auto[NotificationService]
@@ -52,12 +54,13 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 	 * This is called peridoically to convert uncompleted ScheduledNotifications into real instances of notification.
 	 */
 	override def processNotifications() = transactional() {
-		dao.notificationsToComplete.foreach { sn =>
+		dao.notificationsToComplete.take(RunBatchSize).foreach { sn =>
 			generateNotification(sn).foreach(notificationService.push)
 
 			// Even if we threw an error above and didn't actually push a notification, still mark it as completed
 			sn.completed = true
 			dao.save(sn)
+			session.flush()
 		}
 	}
 }
