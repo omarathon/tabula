@@ -20,6 +20,9 @@
 				<th>CATS</th>
 				<#if studentCourseYearDetails.latest>
 					<th>Assess</th>
+					<#if studentCourseYearDetails.hasModuleRegistrationWithNonStandardOccurrence>
+						<th>Occur</th>
+					</#if>
 				<#elseif features.showModuleResults>
 					<th>Mark</th>
 					<th>Grade</th>
@@ -34,6 +37,9 @@
 
 					<#if studentCourseYearDetails.latest>
 						<td>${(moduleRegistration.assessmentGroup)!}</td>
+						<#if studentCourseYearDetails.hasModuleRegistrationWithNonStandardOccurrence>
+							<td>${(moduleRegistration.occurrence)!}</td>
+						</#if>
 					<#elseif features.showModuleResults>
 						<td>${(moduleRegistration.agreedMark)!}</td>
 						<td>${(moduleRegistration.agreedGrade)!}</td>

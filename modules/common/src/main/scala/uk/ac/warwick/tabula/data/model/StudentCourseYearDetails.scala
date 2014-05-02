@@ -79,6 +79,9 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	def registeredModules = moduleRegistrations.map(mr => mr.module)
 
 	def hasModuleRegistrations = !moduleRegistrations.isEmpty
+
+	def hasModuleRegistrationWithNonStandardOccurrence = !moduleRegistrations.filter(_.occurrence != "A").isEmpty
+
 	def hasAccreditedPriorLearning = !accreditedPriorLearning.isEmpty
 
 	def isLatest = this.equals(studentCourseDetails.latestStudentCourseYearDetails)
