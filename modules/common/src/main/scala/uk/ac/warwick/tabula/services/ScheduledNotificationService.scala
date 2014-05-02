@@ -55,6 +55,7 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 	 */
 	override def processNotifications() = transactional() {
 		dao.notificationsToComplete.take(RunBatchSize).foreach { sn =>
+			logger.info(s"Processing scheduled notification ${sn}")
 			generateNotification(sn).foreach(notificationService.push)
 
 			// Even if we threw an error above and didn't actually push a notification, still mark it as completed
