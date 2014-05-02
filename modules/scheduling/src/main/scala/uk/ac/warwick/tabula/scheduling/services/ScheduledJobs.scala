@@ -86,13 +86,18 @@ class ScheduledJobs {
 
 	@Scheduled(fixedRate = 60 * 1000) // every minute
 	def resolveScheduledNotifications: Unit =
-		if (features.schedulingProcessScheduledNotifications)
-			exceptionResolver.reportExceptions { scheduledNotificationService.processNotifications() }
+		if (features.schedulingProcessScheduledNotifications) maintenanceGuard {
+			exceptionResolver.reportExceptions {
+				scheduledNotificationService.processNotifications()
+			}
+		}
 
 	@Scheduled(fixedRate = 60 * 1000) // every minute
 	def processEmailQueue: Unit =
-		if (features.schedulingNotificationEmails) exceptionResolver.reportExceptions {
-			notificationEmailService.processNotifications()
+		if (features.schedulingNotificationEmails) maintenanceGuard {
+			exceptionResolver.reportExceptions {
+				notificationEmailService.processNotifications()
+			}
 		}
 
 	@Scheduled(fixedDelay = 10 * 1000) // every 10 seconds, non-concurrent
