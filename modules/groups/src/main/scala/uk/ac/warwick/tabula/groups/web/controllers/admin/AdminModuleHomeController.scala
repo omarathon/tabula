@@ -30,7 +30,7 @@ class AdminModuleHomeController extends GroupsController {
 		val moduleItems =
 			Seq(
 				ViewModule(module,
-					module.groupSets.asScala map { set => ViewSet(set, set.groups.asScala, Tutor) },
+					module.groupSets.asScala map { set => ViewSet(set, set.groups.asScala.sorted, Tutor) },
 					canManageGroups=securityService.can(user, Permissions.Module.ManageSmallGroups, module)
 				)
 			)
