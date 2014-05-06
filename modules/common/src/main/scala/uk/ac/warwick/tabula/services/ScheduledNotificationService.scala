@@ -8,6 +8,8 @@ import uk.ac.warwick.tabula.helpers.{Logging, ReflectionHelper}
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.data.Transactions._
 import org.hibernate.ObjectNotFoundException
+import org.springframework.transaction.annotation.Propagation._
+import scala.Some
 
 
 trait ScheduledNotificationService {
@@ -53,21 +55,34 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 	/**
 	 * This is called peridoically to convert uncompleted ScheduledNotifications into real instances of notification.
 	 */
-	override def processNotifications() = transactional() {
-		dao.notificationsToComplete.take(RunBatchSize).foreach {
-			sn =>
-				logger.info(s"Processing scheduled notification ${sn}")
-				val notification = generateNotification(sn)
-				notification.foreach(notificationService.push)
+	override def processNotifications() = {
+		val ids = transactional(readOnly = true) { dao.notificationsToComplete.take(RunBatchSize).map[String] { _.id }.toList }
 
-				// Even if we threw an error above and didn't actually push a notification, still mark it as completed
-				sn.completed = true
-				dao.save(sn)
-				session.flush()
+		// FIXME we are doing this manually (TAB-2221) because Hibernate keeps failing to do this properly. Importantly, we're not
+		// using notificationService.push, which is dangerous
+		ids.foreach { id =>
+			inSession { session =>
+				transactional(readOnly = true) { // Some things that use notification require a read-only session to be bound to the thread
+					Option(session.get(classOf[ScheduledNotification[_]], id)).foreach {
+						rawSn =>
+							val sn = rawSn.asInstanceOf[ScheduledNotification[_ >: Null <: ToEntityReference]]
 
-				// We're evicting here to avoid problems seen in TAB-2221 where there are multiple reference to Notification.items
-				// Since we've just flushed the session, this is totally safe (and the ScheduledNotification itself is about to be evicted)
-				notification.foreach(session.evict)
+							logger.info(s"Processing scheduled notification ${sn}")
+							// Even if we threw an error above and didn't actually push a notification, still mark it as completed
+							sn.completed = true
+							session.saveOrUpdate(sn)
+
+							val notification = generateNotification(sn)
+							notification.foreach { notification =>
+								logger.info("Notification pushed - " + notification)
+								notification.preSave(true)
+								session.saveOrUpdate(notification)
+							}
+
+							session.flush()
+					}
+				}
+			}
 		}
 	}
 }
