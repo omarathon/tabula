@@ -5,17 +5,19 @@ import uk.ac.warwick.tabula.data.model.{FileAttachment, Feedback, MarkerFeedback
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.services.{ZipServiceComponent, FileAttachmentServiceComponent, FeedbackServiceComponent, AutowiringZipServiceComponent, AutowiringFileAttachmentServiceComponent, AutowiringFeedbackServiceComponent}
-import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
+import uk.ac.warwick.tabula.data.{FileDao, Daoisms, AutowiringSavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.data.model.MarkingState.InProgress
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.spring.Wire
 
 object OnlineMarkerFeedbackFormCommand {
 	def apply(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser) =
 		new OnlineMarkerFeedbackFormCommand(module, assignment, student, currentUser)
 			with ComposableCommand[MarkerFeedback]
 			with MarkerFeedbackStateCopy
+			with Daoisms
 			with OnlineFeedbackFormPermissions
 			with CopyFromFormFields
 			with WriteToFormFields
@@ -69,11 +71,13 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 
 trait MarkerFeedbackStateCopy {
 
-	self: OnlineFeedbackState with OnlineFeedbackStudentState with CopyFromFormFields with WriteToFormFields
+	self: OnlineFeedbackState with OnlineFeedbackStudentState with CopyFromFormFields with WriteToFormFields with Daoisms
 		with FileAttachmentServiceComponent =>
 
 
 	var rejectionComments: String = _
+
+	var fileDao = Wire.auto[FileDao]
 	/*
 		If there is a marker feedback then use the specified copy function to copy it's state to the form object
 		if not then set up blank field values
@@ -136,7 +140,10 @@ trait MarkerFeedbackStateCopy {
 			fileAttachmentService.deleteAttachments(filesToRemove)
 			markerFeedback.attachments = JArrayList[FileAttachment](filesToKeep)
 			val replicatedFiles = filesToReplicate.map{ x => val newFile = new FileAttachment(x.getName)
-																									newFile.file = x.file
+																									newFile.uploadedData = x.dataStream
+																									newFile.uploadedDataLength = x.uploadedDataLength
+																									newFile.uploadedBy = x.uploadedBy
+																									fileDao.savePermanent(newFile)
 																									newFile }
 			replicatedFiles.foreach(markerFeedback.addAttachment(_))
 		}

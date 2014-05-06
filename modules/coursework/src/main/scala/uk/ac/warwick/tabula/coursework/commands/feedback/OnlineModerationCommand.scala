@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{UserAware, Notifies, Appliable, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
+import uk.ac.warwick.tabula.data.{Daoisms, AutowiringSavedFormValueDaoComponent}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.{Notification, MarkerFeedback}
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
@@ -21,6 +21,7 @@ object OnlineModerationCommand {
 			with ComposableCommand[MarkerFeedback]
 			with OnlineFeedbackFormPermissions
 			with MarkerFeedbackStateCopy
+			with Daoisms
 			with CopyFromFormFields
 			with WriteToFormFields
 			with ModerationRejectedNotifier
