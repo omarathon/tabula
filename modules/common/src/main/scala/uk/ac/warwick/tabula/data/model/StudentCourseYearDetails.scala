@@ -80,7 +80,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 
 	def hasModuleRegistrations = !moduleRegistrations.isEmpty
 
-	def hasModuleRegistrationWithNonStandardOccurrence = !moduleRegistrations.filter(_.occurrence != "A").isEmpty
+	def hasModuleRegistrationWithNonStandardOccurrence = moduleRegistrations.exists(_.occurrence != "A")
 
 	def hasAccreditedPriorLearning = !accreditedPriorLearning.isEmpty
 
