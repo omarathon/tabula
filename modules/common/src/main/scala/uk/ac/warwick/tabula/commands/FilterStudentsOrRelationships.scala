@@ -61,10 +61,10 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with ProfileServ
 	)
 
 	def visitingRestriction: Option[ScalaRestriction] = isIfTicked(
-		"studentCourseDetails.route.department.code",
+		"department.code",
 		"io",
 		otherCriteria.contains("Visiting"),
-		getAliasPaths("studentCourseDetails") : _*
+		getAliasPaths("department") : _*
 	)
 
 	protected def buildRestrictions(): Seq[ScalaRestriction] = {
