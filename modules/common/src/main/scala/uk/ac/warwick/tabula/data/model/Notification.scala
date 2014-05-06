@@ -16,6 +16,7 @@ import org.hibernate.annotations.Type
 import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import org.hibernate.ObjectNotFoundException
 
 object Notification {
 	/**
@@ -203,7 +204,12 @@ case class FreemarkerModel(template:String, model:Map[String,Any], contentType: 
 trait SingleItemNotification[A >: Null <: ToEntityReference] {
 	self: Notification[A, _] =>
 
-	def item: EntityReference[A] = items.get(0)
+	def item: EntityReference[A] =
+		try {
+			items.get(0)
+		} catch {
+			case e: IndexOutOfBoundsException => throw new ObjectNotFoundException("", "")
+		}
 }
 
 /** Stores a single recipient as a User ID in the Notification table. */
