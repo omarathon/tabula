@@ -106,6 +106,15 @@ class FileAttachment extends GeneratedId {
 		}
 	}
 
+	def duplicate(): FileAttachment = {
+		val newFile = new FileAttachment(name)
+		newFile.uploadedData = dataStream
+		newFile.uploadedDataLength = uploadedDataLength
+		newFile.uploadedBy = uploadedBy
+		fileDao.savePermanent(newFile)
+		newFile
+	}
+
 	/**
 	 * A stream to read the entirety of the data Blob, or null
 	 * if there is no Blob.
