@@ -56,10 +56,12 @@ trait AddSubDepartmentCommandValidation extends SelfValidating {
 		if (!code.hasText) { 
 			errors.rejectValue("code", "department.code.empty")
 		} else {
-			if (!code.startsWith(parent.code + "-")) { 
+			if (code.endsWith("-")) {
+				errors.rejectValue("code", "department.code.mustNotEndWithHypen")
+			} else if (!code.startsWith(parent.code + "-")) {
 				errors.rejectValue("code", "department.code.mustStartWithParent", Array(parent.code), "")
 			}
-			
+
 			// Code must not exceed 20 characters
 			if (code.length > 20) {
 				errors.rejectValue("code", "department.code.tooLong", Array(20: java.lang.Integer), "")
@@ -73,16 +75,20 @@ trait AddSubDepartmentCommandValidation extends SelfValidating {
 			// Code must not already exist
 			if (moduleAndDepartmentService.getDepartmentByCode(code).isDefined) {
 				errors.rejectValue("code", "department.code.exists")
-			} 
-		}
+			}
 		
 		// Name must be non-empty and start with parent name
 		if (!name.hasText) {
 			errors.rejectValue("name", "department.name.empty")
 		} else {
-			if (!name.startsWith(parent.name + " ")) {
+			if (name == (parent.name)){
+				errors.rejectValue("name", "department.name.mustDifferFromParent", Array(parent.name), "")
+			}
+			if (!name.startsWith(parent.name)) {
 				errors.rejectValue("name", "department.name.mustStartWithParent", Array(parent.name), "")
 			}
+		}
+
 		
 			// Name must not exceed 100 characters
 			if (name.length > 100) {
