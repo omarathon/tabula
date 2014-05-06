@@ -25,13 +25,23 @@ class ScheduledNotificationServiceTest extends TestBase with Mockito {
 	val session = mock[Session]
 
 	sessionFactory.getCurrentSession() returns (session)
+	sessionFactory.openSession() returns (session)
 
 	service.sessionFactory = sessionFactory
 
 	val heron = new Heron()
 	val sn1 = new ScheduledNotification("HeronWarning", heron, DateTime.now.minusDays(1))
+	sn1.id = "sn1"
+
 	val sn2 = new ScheduledNotification("HeronDefeat", heron, DateTime.now.minusDays(2))
+	sn2.id = "sn2"
+
 	val sn3 = new ScheduledNotification("HeronWarning", heron, DateTime.now.minusDays(3))
+	sn3.id = "sn3"
+
+	session.get(classOf[ScheduledNotification[_]], "sn1") returns (sn1)
+	session.get(classOf[ScheduledNotification[_]], "sn2") returns (sn2)
+	session.get(classOf[ScheduledNotification[_]], "sn3") returns (sn3)
 
 	val scheduledNotifications = Seq(sn1, sn2, sn3)
 	val itr = scheduledNotifications.iterator
@@ -90,7 +100,7 @@ class ScheduledNotificationServiceTest extends TestBase with Mockito {
 	def processNotifications() {
 		service.processNotifications()
 
-		verify(notificationService, times(3)).push(isA[Notification[_,_]])
+		verify(session, times(3)).saveOrUpdate(isA[Notification[_,_]])
 
 		for(sn <- scheduledNotifications) {
 			sn.completed should be (true)

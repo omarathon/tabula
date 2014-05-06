@@ -85,7 +85,6 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	def hasAccreditedPriorLearning = !accreditedPriorLearning.isEmpty
 
 	def isLatest = this.equals(studentCourseDetails.latestStudentCourseYearDetails)
-
 }
 
 trait BasicStudentCourseYearProperties {

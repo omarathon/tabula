@@ -57,7 +57,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 		val isNew = notification.id == null
 		notification.preSave(isNew)
 
-		session.saveOrUpdate(notification)
+		session.save(notification)
 	}
 
 	def save(recipientInfo: RecipientNotificationInfo) {

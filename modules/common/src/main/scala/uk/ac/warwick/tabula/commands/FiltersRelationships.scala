@@ -24,6 +24,10 @@ object FiltersRelationships {
 		),
 		"statusOnRoute" -> Seq(
 			"statusOnRoute" -> "statusOnRoute"
+		),
+		"department" -> Seq(
+			"route" -> "route",
+			"route.department" -> "department"
 		)
 	).toMap
 
