@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.web.views
 import uk.ac.warwick.tabula.TestBase
 
 import scala.concurrent._
+import scala.util.{Try, Success, Failure}
 import ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import java.util.concurrent.TimeUnit
@@ -28,12 +29,18 @@ class MarkdownRendererTest extends TestBase {
 		output should (include("<li>Whatever</li>") and include("<li>University ID: ${user.warwickId}</li>"))
 
 		// Check multithreadedness by rendering a lot at once.
-		val result = Future.sequence((1 to 100).map (
-			i => future { renderer.renderMarkdown(input + i); throw new RuntimeException("Pazam")	}
-		))
+		val results = (1 to 10).map (
+			i => future { renderer.renderMarkdown(input + i) 	}
+		)
 
-		val realResult = Await.ready(result, Duration(5, TimeUnit.SECONDS))
-
+		for (result <- results) {
+			// Blocking wait
+			Await.ready(result, Duration(1, TimeUnit.SECONDS))
+			result.value.get match {
+				case Success(v) => //
+				case Failure(e) => fail(e)
+			}
+		}
 	}
 
 
