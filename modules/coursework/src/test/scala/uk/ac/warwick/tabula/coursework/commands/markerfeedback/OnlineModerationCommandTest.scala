@@ -7,7 +7,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Feedback, Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.feedback._
-import uk.ac.warwick.tabula.data.{Daoisms, SavedFormValueDao, SavedFormValueDaoComponent}
+import uk.ac.warwick.tabula.data.{SavedFormValueDao, SavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.MarkingState.{ReleasedForMarking, MarkingCompleted, Rejected}
 import uk.ac.warwick.tabula.coursework.commands.assignments.FinaliseFeedbackCommand
@@ -80,7 +80,7 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 
 	trait ModerationCommandSupport extends FeedbackServiceComponent with Appliable[MarkerFeedback]
 		with FileAttachmentServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy with OnlineFeedbackState
-		with OnlineFeedbackStudentState with CopyFromFormFields with WriteToFormFields with SavedFormValueDaoComponent with Daoisms
+		with OnlineFeedbackStudentState with CopyFromFormFields with WriteToFormFields with SavedFormValueDaoComponent
 	{
 		def feedbackService = mock[FeedbackService]
 		def fileAttachmentService = mock[FileAttachmentService]
