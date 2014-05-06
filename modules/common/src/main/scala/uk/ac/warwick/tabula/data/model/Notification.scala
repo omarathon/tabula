@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.services.UserLookupComponent
 import org.springframework.util.Assert
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{BatchSize, Type}
 import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -101,6 +101,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	final var agent: User = null // the actor in open social activity speak
 
 	@OneToMany(mappedBy="notification", fetch=FetchType.LAZY, targetEntity=classOf[EntityReference[_]], cascade=Array(CascadeType.ALL))
+	@BatchSize(size = 1)
 	var items: JList[EntityReference[A]] = JArrayList()
 
 	def entities = items.asScala.map { _.entity }.toSeq
@@ -172,7 +173,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	}
 	def onPreSave(newRecord: Boolean) {}
 
-	override def toString = List(agent.getFullName, verb, items.getClass.getSimpleName).mkString("notification{", ", ", "}")
+	override def toString = s"Notification[${(if (id != null) id else "transient " + hashCode)}]{${agent.getFullName}, ${verb}, ${items.getClass.getSimpleName}}"
 }
 
 /**

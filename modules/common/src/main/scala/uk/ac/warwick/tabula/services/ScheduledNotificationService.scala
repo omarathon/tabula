@@ -54,14 +54,20 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 	 * This is called peridoically to convert uncompleted ScheduledNotifications into real instances of notification.
 	 */
 	override def processNotifications() = transactional() {
-		dao.notificationsToComplete.take(RunBatchSize).foreach { sn =>
-			logger.info(s"Processing scheduled notification ${sn}")
-			generateNotification(sn).foreach(notificationService.push)
+		dao.notificationsToComplete.take(RunBatchSize).foreach {
+			sn =>
+				logger.info(s"Processing scheduled notification ${sn}")
+				val notification = generateNotification(sn)
+				notification.foreach(notificationService.push)
 
-			// Even if we threw an error above and didn't actually push a notification, still mark it as completed
-			sn.completed = true
-			dao.save(sn)
-			session.flush()
+				// Even if we threw an error above and didn't actually push a notification, still mark it as completed
+				sn.completed = true
+				dao.save(sn)
+				session.flush()
+
+				// We're evicting here to avoid problems seen in TAB-2221 where there are multiple reference to Notification.items
+				// Since we've just flushed the session, this is totally safe (and the ScheduledNotification itself is about to be evicted)
+				notification.foreach(session.evict)
 		}
 	}
 }
