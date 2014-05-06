@@ -60,6 +60,13 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with ProfileServ
 		getAliasPaths("studentCourseYearDetails") : _*
 	)
 
+	def visitingRestriction: Option[ScalaRestriction] = isIfTicked(
+		"studentCourseDetails.route.department.code",
+		"io",
+		otherCriteria.contains("Visiting"),
+		getAliasPaths("studentCourseDetails") : _*
+	)
+
 	protected def buildRestrictions(): Seq[ScalaRestriction] = {
 		Seq(
 				courseTypeRestriction,
@@ -68,10 +75,11 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with ProfileServ
 				yearOfStudyRestriction,
 				sprStatusRestriction,
 				registeredModulesRestriction,
-				tier4Restriction
+				tier4Restriction,
+				visitingRestriction
 		).flatten
 	}
 
 	lazy val allYearsOfStudy: Seq[Int] = 1 to 8
-	lazy val allOtherCriteria: Seq[String] = Seq("Tier 4 only") // only one 'other' criteria so far - tier4
+	lazy val allOtherCriteria: Seq[String] = Seq("Tier 4 only", "Visiting")
 }

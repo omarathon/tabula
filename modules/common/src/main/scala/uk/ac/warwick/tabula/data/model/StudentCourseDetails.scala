@@ -176,6 +176,8 @@ class StudentCourseDetails
 		}
 	}
 
+	def visiting: Boolean = route.department.code == "io"
+
 }
 
 // properties for a student on a course which come direct from SITS - those that need to be
