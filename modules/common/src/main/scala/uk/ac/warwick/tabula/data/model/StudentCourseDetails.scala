@@ -93,7 +93,7 @@ class StudentCourseDetails
 		"scjCode" -> scjCode,
 		"sprCode" -> sprCode)
 
-	def permissionsParents = Stream(Option(student), Option(route)).flatten
+	def permissionsParents = Stream(Option(student), Option(route)).flatten.append(moduleRegistrations.map(_.module).toStream)
 
 	def hasCurrentEnrolment: Boolean = {
 		Option(latestStudentCourseYearDetails).map { scyd =>
