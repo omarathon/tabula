@@ -62,11 +62,12 @@ class ImportStudentRowCommandInternal(
 
 				val (isTransient, member) = memberExisting match {
 					case Some(member: StudentMember) => (false, member)
-					case Some(member: OtherMember) => {
+					case Some(member: OtherMember) =>
 						// TAB-692 delete the existing member, then return a brand new one
+						// TAB-2188
+						logger.info(s"Deleting $member while importing $universityId")
 						memberDao.delete(member)
 						(true, new StudentMember(universityId))
-					}
 					case Some(member) => throw new IllegalStateException("Tried to convert " + member + " into a student!")
 					case _ => (true, new StudentMember(universityId))
 				}
