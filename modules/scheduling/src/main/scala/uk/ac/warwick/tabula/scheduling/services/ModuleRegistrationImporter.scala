@@ -147,6 +147,7 @@ object ModuleRegistrationImporter {
 						on smo.spr_code = smr.spr_code
 						and smo.ayr_code = smr.ayr_code
 						and smo.mod_code = smr.mod_code
+						and smo.mav_occur = smr.mav_occur
 					
 					join $sitsSchema.cam_ssn ssn 
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code and ssn.ssn_mrgs = 'CON'
@@ -174,6 +175,7 @@ object ModuleRegistrationImporter {
 						on smo.spr_code = smr.spr_code
 						and smo.ayr_code = smr.ayr_code
 						and smo.mod_code = smr.mod_code
+						and smo.mav_occur = smr.mav_occur
 
 					left outer join $sitsSchema.cam_ssn ssn
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
