@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConverters._
 import javax.persistence._
-import javax.persistence.CascadeType._
 import org.joda.time.DateTime
 
 import uk.ac.warwick.tabula.JavaImports._
@@ -101,8 +100,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	@Type(`type`="uk.ac.warwick.tabula.data.model.SSOUserType")
 	final var agent: User = null // the actor in open social activity speak
 
-	@OneToMany(fetch=FetchType.LAZY, targetEntity=classOf[EntityReference[_]], cascade=Array(ALL))
-	@JoinColumn(name = "notification_id")
+	@OneToMany(mappedBy="notification", fetch=FetchType.LAZY, targetEntity=classOf[EntityReference[_]], cascade=Array(CascadeType.ALL))
 	var items: JList[EntityReference[A]] = JArrayList()
 
 	def entities = items.asScala.map { _.entity }.toSeq
@@ -116,7 +114,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	// The priority, or if it is null then the default value of Info.
 	def priorityOrDefault = Option(priority).getOrElse(NotificationPriority.Info)
 
-	@OneToMany(mappedBy="notification", fetch=FetchType.LAZY, cascade=Array(ALL))
+	@OneToMany(mappedBy="notification", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
 	var recipientNotificationInfos: JList[RecipientNotificationInfo] = JArrayList()
 
 	// when performing operations on recipientNotificationInfos you should use this to fetch a users info.
