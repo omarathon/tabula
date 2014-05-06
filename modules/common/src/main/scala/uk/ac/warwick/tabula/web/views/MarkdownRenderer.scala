@@ -8,7 +8,8 @@ trait MarkdownRenderer {
 
 trait MarkdownRendererImpl extends MarkdownRenderer {
 	private val markdownOptions = Extensions.AUTOLINKS
-	private val markdown = new PegDownProcessor(markdownOptions)
+	// PegDownProcessor not threadsafe, so we get a new one each time.
+	def markdown = new PegDownProcessor(markdownOptions)
 
 	override def renderMarkdown(source: String) =
 		markdown.markdownToHtml(source)
