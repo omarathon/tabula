@@ -89,8 +89,8 @@ abstract class Features {
 	@Value("${features.xSendfile:true}") var xSendfile = defaults.xSendfile
 	@Value("${features.newSeenSecondMarkingWorkflows:true}") var newSeenSecondMarkingWorkflows = defaults.newSeenSecondMarkingWorkflows
 	@Value("${features.activityStreams:true}") var activityStreams = defaults.activityStreams
-	@Value("${features.profiles.showModuleResults:false}") var showModuleResults = defaults.showModuleResults
-	@Value("${features.profiles.showAccreditedPriorLearning:false}") var showAccreditedPriorLearning = defaults.showAccreditedPriorLearning
+	@Value("${features.profiles.showModuleResults:true}") var showModuleResults = defaults.showModuleResults
+	@Value("${features.profiles.showAccreditedPriorLearning:true}") var showAccreditedPriorLearning = defaults.showAccreditedPriorLearning
 	@Value("${features.scheduling.academicInformationImport:true}") var schedulingAcademicInformationImport = defaults.schedulingAcademicInformationImport
 	@Value("${features.scheduling.profilesImport:true}") var schedulingProfilesImport = defaults.schedulingProfilesImport
 	@Value("${features.scheduling.assignmentsImport:true}") var schedulingAssignmentsImport = defaults.schedulingAssignmentsImport
@@ -180,8 +180,8 @@ class FeaturesMessage {
 	@BeanProperty var xSendfile = true
 	@BeanProperty var newSeenSecondMarkingWorkflows = true
 	@BeanProperty var activityStreams = true
-	@BeanProperty var showModuleResults = false
-	@BeanProperty var showAccreditedPriorLearning = false
+	@BeanProperty var showModuleResults = true
+	@BeanProperty var showAccreditedPriorLearning = true
 	@BeanProperty var schedulingAcademicInformationImport = true
 	@BeanProperty var schedulingProfilesImport = true
 	@BeanProperty var schedulingAssignmentsImport = true
