@@ -1,11 +1,6 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.ScrollableResults
-import org.hibernate.`type`.Type
-import java.util.{Date, Calendar, TimeZone, Locale}
-import java.sql.{Blob, Clob}
-import java.math.{BigInteger, BigDecimal}
-import java.lang
 
 /**
  * Minimal implementation of ScrollableResults that we can use to mock up a Scrollable
