@@ -8,10 +8,10 @@ import javax.persistence._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.system.permissions._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.helpers.Logging
+import org.apache.commons.lang3.builder.CompareToBuilder
 
 /*
- * sprCode, moduleCode, cat score and academicYear are a notional key for this table but giving it a generated ID to be
+ * sprCode, moduleCode, cat score, academicYear and occurrence are a notional key for this table but giving it a generated ID to be
  * consistent with the other tables in Tabula which all have a key that's a single field.  In the db, there should be
  * a unique constraint on the combination of those three.
  */
@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 
 @Entity
 @AccessType("field")
-class ModuleRegistration() extends GeneratedId	with PermissionsTarget {
+class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Ordered[ModuleRegistration] {
 
 	def this(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String) {
 		this()
@@ -70,5 +70,14 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget {
 	override def toString = studentCourseDetails.scjCode + "-" + module.code + "-" + cats + "-" + AcademicYear.toString
 
 	def permissionsParents = Stream(Option(studentCourseDetails)).flatten
+
+	override def compare(that: ModuleRegistration): Int =
+		new CompareToBuilder()
+			.append(studentCourseDetails, that.studentCourseDetails)
+			.append(module, that.module)
+			.append(cats, that.cats)
+			.append(academicYear, that.academicYear)
+			.append(occurrence, that.occurrence)
+			.build()
 
 }
