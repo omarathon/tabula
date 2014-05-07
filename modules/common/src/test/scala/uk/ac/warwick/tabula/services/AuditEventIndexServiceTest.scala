@@ -1,40 +1,27 @@
 package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula._
-import org.apache.lucene.util.LuceneTestCase
-import org.junit.Test
-import uk.ac.warwick.tabula.JavaImports._
 import org.junit.After
 import org.junit.Before
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.{Assignment, AuditEvent, Submission}
+import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
 import uk.ac.warwick.tabula.commands._
-import org.apache.lucene.index.IndexReader
-import org.apache.lucene.store.FSDirectory
-import org.apache.lucene.search.IndexSearcher
-import org.apache.lucene.analysis.standard.StandardAnalyzer
-import org.apache.lucene.util.Version
 import uk.ac.warwick.userlookup.User
 import collection.JavaConversions._
 import uk.ac.warwick.util.core.StopWatch
 import java.io.File
-import uk.ac.warwick.tabula.events.EventHandling
-import uk.ac.warwick.tabula.events.EventListener
 import uk.ac.warwick.tabula.events.Event
 import uk.ac.warwick.tabula.commands.Command
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Department
 import org.apache.commons.io.FileUtils
-import org.springframework.test.annotation.DirtiesContext
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import org.hibernate.dialect.HSQLDialect
 import uk.ac.warwick.tabula.data.SessionComponent
 
 // scalastyle:off magic.number
-//@DirtiesContext(classMode=AFTER_EACH_TEST_METHOD)
 class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with Logging {
 
 	var indexer:AuditEventIndexService = _
