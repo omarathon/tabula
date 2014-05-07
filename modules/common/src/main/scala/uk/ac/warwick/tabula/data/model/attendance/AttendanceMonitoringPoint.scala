@@ -35,7 +35,7 @@ class AttendanceMonitoringPoint extends GeneratedId with HasSettings with PostLo
 	@Column(name = "start_week")
 	var startWeek: Int = _
 
-	@Column(name = "start_week")
+	@Column(name = "end_week")
 	var endWeek: Int = _
 
 	@NotNull

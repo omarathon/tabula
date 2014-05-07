@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import javax.persistence.{Column, JoinColumn, FetchType, ManyToOne, Entity}
-import uk.ac.warwick.tabula.data.model.StudentMember
+import javax.persistence.{Table, Column, JoinColumn, FetchType, ManyToOne, Entity}
+import uk.ac.warwick.tabula.data.model.{GeneratedId, StudentMember}
 import javax.validation.constraints.NotNull
 import org.joda.time.DateTime
 
 @Entity
-class AttendanceMonitoringCheckpointTotal {
+@Table(name="ATTENDANCEMONITORINGTOTAL")
+class AttendanceMonitoringCheckpointTotal extends GeneratedId {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "student_id")
