@@ -11,9 +11,10 @@ import org.hibernate.annotations.{Type, BatchSize}
 import uk.ac.warwick.tabula.JavaImports._
 import scala.Some
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Entity
-class AttendanceMonitoringScheme extends GeneratedId {
+class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with Serializable {
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
 	@transient var attendanceMonitoringService = Wire.option[AttendanceMonitoringService with AttendanceMonitoringMembershipHelpers]
@@ -60,6 +61,8 @@ class AttendanceMonitoringScheme extends GeneratedId {
 	@NotNull
 	@Column(name = "updated_date")
 	var updatedDate: DateTime = _
+
+	def permissionsParents = Option(department).toStream
 
 }
 

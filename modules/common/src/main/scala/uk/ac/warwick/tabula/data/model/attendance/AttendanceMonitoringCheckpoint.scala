@@ -6,6 +6,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.AttendanceMonitoringService
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
+import javax.validation.constraints.NotNull
 
 @Entity
 class AttendanceMonitoringCheckpoint extends GeneratedId {
