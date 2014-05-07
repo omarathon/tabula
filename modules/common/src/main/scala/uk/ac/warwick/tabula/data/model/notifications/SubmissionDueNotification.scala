@@ -99,5 +99,14 @@ class SubmissionDueWithExtensionNotification extends Notification[Extension, Uni
 	def deadline = extension.expiryDate
 	def assignment = extension.assignment
 
-	def recipients = Seq(userLookup.getUserByWarwickUniId(extension.universityId))
+	def recipients = {
+		val hasSubmitted = assignment.submissions.asScala.exists(_.universityId == extension.universityId)
+
+		if (hasSubmitted) {
+			Nil
+		} else {
+			Seq(userLookup.getUserByWarwickUniId(extension.universityId))
+		}
+	}
+
 }
