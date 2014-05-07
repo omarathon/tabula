@@ -11,8 +11,10 @@ import uk.ac.warwick.tabula.services.{UserLookupService, UserLookupComponent}
 class ListMarkerFeedbackTest extends AppContextTestBase with MarkingWorkflowWorld with Mockito {
 
 	trait CommandTestSupport extends UserLookupComponent {
-		val userLookup = mock[UserLookupService]
+		val userLookup = mockUserLookup
 	}
+
+	assignment.markingWorkflow.userLookup = mockUserLookup
 
 	@Transactional @Test
 	def firstMarkerTest() {

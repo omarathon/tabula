@@ -6,14 +6,13 @@ import uk.ac.warwick.userlookup.User
 import javax.persistence.{Entity, DiscriminatorValue}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserSettingsService
-import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 
 @Entity
 @DiscriminatorValue("SubmissionReceived")
-class SubmissionReceivedNotification extends SubmissionNotification with PreSaveBehaviour {
+class SubmissionReceivedNotification extends SubmissionNotification {
 
-	override def preSave(isNew: Boolean) {
+	override def onPreSave(isNew: Boolean) {
 		// if this submission was noteworthy then the priority is higher
 		if (submission.isNoteworthy) {
 			priority = Warning

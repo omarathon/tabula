@@ -72,8 +72,8 @@ trait MarkerFeedbackStateCopy {
 	self: OnlineFeedbackState with OnlineFeedbackStudentState with CopyFromFormFields with WriteToFormFields
 		with FileAttachmentServiceComponent =>
 
-
 	var rejectionComments: String = _
+
 	/*
 		If there is a marker feedback then use the specified copy function to copy it's state to the form object
 		if not then set up blank field values
@@ -135,9 +135,7 @@ trait MarkerFeedbackStateCopy {
 			val filesToReplicate = (filesToKeep -- existingFiles).toSeq
 			fileAttachmentService.deleteAttachments(filesToRemove)
 			markerFeedback.attachments = JArrayList[FileAttachment](filesToKeep)
-			val replicatedFiles = filesToReplicate.map{ x => val newFile = new FileAttachment(x.getName)
-																									newFile.file = x.file
-																									newFile }
+			val replicatedFiles = filesToReplicate.map ( _.duplicate() )
 			replicatedFiles.foreach(markerFeedback.addAttachment(_))
 		}
 		markerFeedback.addAttachments(file.attached.asScala)

@@ -39,6 +39,10 @@ object ScalaRestriction {
 	
 	def is(property: String, value: Any, aliases: (String, String)*): Option[ScalaRestriction] = 
 		Some(addAliases(new ScalaRestriction(Daoisms.is(property, value)), aliases: _*))
+
+	def isIfTicked(property: String, value: Any, ticked: Boolean, aliases: (String, String)*): Option[ScalaRestriction] =
+		if (!ticked) None
+		else Some(addAliases(new ScalaRestriction(Daoisms.is(property, value)), aliases: _*))
 		
 	def inIfNotEmpty(property: String, collection: Iterable[Any], aliases: (String, String)*): Option[ScalaRestriction] =
 		if (collection.isEmpty) None
@@ -64,6 +68,7 @@ object ScalaRestriction {
 
 			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
 		}
+
 }
 
 trait Aliasable {

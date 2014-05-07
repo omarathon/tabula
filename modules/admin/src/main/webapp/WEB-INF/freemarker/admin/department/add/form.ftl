@@ -7,7 +7,7 @@
 <#assign commandName="addSubDepartmentCommand" />
 <#assign command=addSubDepartmentCommand />
 <#assign submitUrl><@routes.createsubdepartment department /></#assign>
-<@f.form method="post" action="${submitUrl}" commandName=commandName cssClass="form-horizontal">
+<@f.form method="post" action="${submitUrl}" commandName=commandName cssClass="form-horizontal double-submit-protection">
 <@f.errors cssClass="error form-errors" />
 	<@form.labelled_row "code" "Department code">
 		<@f.input path="code" cssClass="text" />

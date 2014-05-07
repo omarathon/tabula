@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
-import uk.ac.warwick.tabula.data.model.{Feedback, UserGroup, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{FirstMarkersMap, Feedback, UserGroup, Assignment, Module}
 import scala.collection.JavaConverters._
-import java.util
 import uk.ac.warwick.tabula.helpers.Tap.tap
 import uk.ac.warwick.tabula.services.{FeedbackServiceComponent, StateServiceComponent, AssignmentServiceComponent, AssignmentService, FeedbackService, StateService}
 
@@ -24,7 +23,6 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 
 			val assignment = new Assignment().tap {
 				a =>
-					a.markerMap = new util.HashMap[String, UserGroup]()
 					a.module = new Module().tap(_.id = "module_id")
 			}
 
@@ -45,7 +43,7 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 
 			val assignment = new Assignment().tap {
 				a =>
-					a.markerMap = Map("marker1" -> ug1).asJava
+					a.firstMarkers = Seq(FirstMarkersMap(a, "marker1", ug1)).asJava
 					a.module = new Module().tap(_.id = "module_id")
 			}
 
@@ -65,7 +63,7 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 
 			val assignment = new Assignment().tap {
 				a =>
-					a.markerMap = Map("marker1" -> ug2).asJava
+					a.firstMarkers = Seq(FirstMarkersMap(a, "marker1", ug2)).asJava
 					a.module = new Module().tap(_.id = "module_id")
 			}
 
@@ -86,7 +84,7 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 
 			val assignment = new Assignment().tap {
 				a =>
-					a.markerMap = Map("marker1" -> ug1).asJava
+					a.firstMarkers = Seq(FirstMarkersMap(a, "marker1", ug1)).asJava
 					a.module = new Module().tap(_.id = "module_id")
 			}
 

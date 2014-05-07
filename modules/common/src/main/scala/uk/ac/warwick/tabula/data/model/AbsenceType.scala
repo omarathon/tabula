@@ -19,6 +19,8 @@ object AbsenceType {
 		case Medical.dbValue => Medical
 		case Personal.dbValue => Personal
 		case ChangeOfStudyLocation.dbValue => ChangeOfStudyLocation
+		case SelfCertification.dbValue => SelfCertification
+		case Cancelled.dbValue => Cancelled
 		case Other.dbValue => Other
 		case null => null
 		case _ => throw new IllegalArgumentException()

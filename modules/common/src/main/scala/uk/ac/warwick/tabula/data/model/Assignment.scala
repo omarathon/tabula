@@ -215,11 +215,25 @@ class Assignment
 	@JoinColumn(name = "markscheme_id")
 	var markingWorkflow: MarkingWorkflow = _
 
-	/** Map between markers and the students assigned to them */
-	@OneToMany
-	@JoinTable(name = "marker_usergroup")
-	@MapKeyColumn(name = "marker_uni_id")
-	var markerMap: JMap[String, UserGroup] = JMap[String, UserGroup]()
+	//var markerMap: JMap[String, UserGroup] = JMap[String, UserGroup]()
+
+	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
+	@BatchSize(size = 200)
+	var firstMarkers: JList[FirstMarkersMap] = JArrayList()
+
+	/** Map between first markers and the students assigned to them */
+	def firstMarkerMap: Map[String, UserGroup] = Option(firstMarkers).map { markers => markers.asScala.map {
+		markerMap => markerMap.marker_id -> markerMap.students
+	}.toMap }.getOrElse(Map())
+
+	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
+	@BatchSize(size = 200)
+	var secondMarkers: JList[SecondMarkersMap] = JArrayList()
+
+	/** Map between second markers and the students assigned to them */
+	def secondMarkerMap: Map[String, UserGroup] = Option(secondMarkers).map { markers => markers.asScala.map {
+		markerMap => markerMap.marker_id -> markerMap.students
+	}.toMap }.getOrElse(Map())
 
 	def setAllFileTypesAllowed() {
 		fileExtensions = Nil

@@ -349,11 +349,14 @@ $(function(){
  */
 $(function() {
 	// this has to descend from #main-content, as the content container is appended there, outside the table
-	$('#main-content').on('tabula.expandingTable.contentChanged', '.content-container', function(e) {
+	$('#main-content').on('tabula.expandingTable.contentChanged', '.content-container', function() {
 		var $container = $(this);
 		var $form = $container.find('form');
 
-		$form.find('details').details(); // re-apply the details/summary tag fix for Firefox & IE post ajax insert
+		// re-apply the details/summary tag fix for Firefox & IE post ajax insert
+		$form.find('details').details().on('DOMSubtreeModified', function() {
+			$('.expanding-table').trigger('tabula.expandingTable.repositionContent');
+		});
 
 		var contentId = $container.attr('data-contentid');
 		var $row = $('tr.itemContainer[data-contentid='+contentId+']');
@@ -404,7 +407,7 @@ $(function() {
 										"<a class='confirm btn'>Yes, discard</a>" +
 										"<a data-dismiss='modal' class='btn btn-primary'>No, go back to editing</a>" +
 									"</div>" +
-								"</div>"
+								"</div>";
 				var $modal = $(modalHtml);
 				$modal.modal();
 				$('a.confirm', $modal).on('click', function(){
@@ -416,7 +419,9 @@ $(function() {
 			}
 		});
 
-		$('.feedback-comments').off('click').collapsible();
+		$('.feedback-comments:not(.collapsible)').off('click').on('open.collapsible close.collapsible', function(){
+			$('.expanding-table').trigger('tabula.expandingTable.repositionContent');
+		}).collapsible();
 
 		$(".copyFeedback").off("click").on("click", function(){
 
@@ -424,8 +429,8 @@ $(function() {
 			var feedbackHeading = $button.closest(".well").find("h3").text();
 			var $summaryFeeback = $button.closest(".well");
 			var $feedbackForm = $button.closest(".content-container").find("form");
-			var attachments = ""
-			var $targetFormSection = $form.find(".attachments")
+			var attachments = "";
+			var $targetFormSection = $form.find(".attachments");
 
 			var bigTextArea = $feedbackForm.find(".big-textarea");
 
@@ -433,28 +438,30 @@ $(function() {
 				bigTextArea.val(bigTextArea.val() + '\n')
 			}
 
-			bigTextArea.val(bigTextArea.val() + $.trim($summaryFeeback.find(".feedback-comments").contents(':not(h5)').text()))
+			bigTextArea.val(bigTextArea.val() + $.trim($summaryFeeback.find(".feedback-comments").contents(':not(h5)').text()));
 
 			$(".copyFeedback").find("i").css("color", "#ffffff");
 			$button.find("i").css("color","#7DDB6B");
 			var $copyAlert = $feedbackForm.find(".alert-success");
-			$copyAlert.text("Feedback copied from "+feedbackHeading.charAt(0).toLowerCase() + feedbackHeading.substr(1)).show();
+			$copyAlert.text("Feedback copied from "+feedbackHeading.charAt(0).toLowerCase() + feedbackHeading.substr(1)).show(0, function(){
+				$('.expanding-table').trigger('tabula.expandingTable.repositionContent');
+			});
 
 			var $summaryAttachments = $summaryFeeback.find('input[type="hidden"]');
 			if($summaryAttachments.length > 0) {
 				$summaryAttachments.each(function(){
-					var $this = $(this)
+					var $this = $(this);
 					attachments += 	'<li id="attachment-' + $this.val() +'" class="attachment"><i class="icon-file-alt"></i>' +
 						'<span>' + $this.attr("name") +' </span>&nbsp;<i class="icon-remove-sign remove-attachment"></i>' +
 						'<input id="attachedFiles" name="attachedFiles" value="'+  $this.val() +'" type="hidden"></li>'
-				})
-				$targetFormSection.html(attachments)
+				});
+				$targetFormSection.html(attachments);
 				$feedbackForm.find('.feedbackAttachments').slideDown();
 			} else {
-				attachments = '<input name="attachedFiles" type="hidden" />'
+				attachments = '<input name="attachedFiles" type="hidden" />';
 				$feedbackForm.find('.feedbackAttachments').slideUp(function(){ $targetFormSection.html(attachments) })
 			}
-		})
+		});
 
 		/**
 		 * Helper for ajaxified forms in tabula expanding tables
@@ -498,7 +505,7 @@ $(function() {
 				},
 				error: function(){alert("There has been an error. Please reload and try again.");}
 			});
-		}
+		};
 
 		if ($form.parents('.online-feedback').length) prepareAjaxForm($form, function(resp) {
 			var $resp = $(resp);

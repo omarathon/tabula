@@ -99,7 +99,7 @@
 		<script type="text/javascript">
 		(function($) {
 			$('.expanding-table').expandingTable({
-				contentUrl: '${url(detailUrl!"")}',
+				contentUrlFunction: function(){ return '${url(detailUrl!"")}'; },
 				useIframe: true,
 				tableSorterOptions: {
 					sortList: [<#if department.showStudentName>[2, 0], </#if>[1, 0], [0, 0]],

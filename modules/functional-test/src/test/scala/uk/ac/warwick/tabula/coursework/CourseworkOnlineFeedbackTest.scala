@@ -23,10 +23,10 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 					go to Path("/coursework/admin/module/" + moduleCode.toLowerCase + "/assignments/" + assignmentId + "/feedback/online")
 
 					Then("I see the table of students")
-					pageSource contains (s"Online marking for ${assignmentName}") should be(true)
+					pageSource contains s"Online marking for $assignmentName" should be(true)
 					findAll(cssSelector(".content-container")).size should be(2)
-					pageSource contains (P.Student1.usercode) should be(true)
-					pageSource contains (P.Student2.usercode) should be(true)
+					pageSource contains P.Student1.usercode should be(true)
+					pageSource contains P.Student2.usercode should be(true)
 				}
 		}
 	}
@@ -39,9 +39,9 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 				go to Path("/coursework/admin/module/" + moduleCode.toLowerCase + "/assignments/" + assignmentId + "/feedback/online")
 
 				Then("I see the table of students")
-				pageSource contains (s"Online marking for ${assignmentName}") should be(true)
+				pageSource contains s"Online marking for $assignmentName" should be(true)
 				findAll(cssSelector(".content-container")).size should be(1)
-				pageSource contains (P.Student3.usercode) should be(true)
+				pageSource contains P.Student3.usercode should be(true)
 			}
 		}
 	}
@@ -83,13 +83,13 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 
 				When("I log in as student1 and go to the feedback page")
 			  as(P.Student1){
-					go to Path(s"/coursework/module/${moduleCode.toLowerCase}/${assignmentId}")
+					go to Path(s"/coursework/module/${moduleCode.toLowerCase}/$assignmentId")
 					Then("I see the feedback")
 					pageSource should include("That was RUBBISH")
 				}
 				And("I can download the results as a PDF")
 
-				val pdfDownload = Download(Path(s"/coursework/module/${moduleCode.toLowerCase}/${assignmentId}/feedback.pdf")).as(P.Student1)
+				val pdfDownload = Download(Path(s"/coursework/module/${moduleCode.toLowerCase}/$assignmentId/feedback.pdf")).as(P.Student1)
 				pdfDownload should be ('successful)
 				pdfDownload.contentAsString should include("PDF")
 
@@ -107,7 +107,7 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 
 				When("I log back in as student1 and go to the feedback page")
 				as(P.Student1){
-					go to Path(s"/coursework/module/${moduleCode.toLowerCase}/${assignmentId}")
+					go to Path(s"/coursework/module/${moduleCode.toLowerCase}/$assignmentId")
 					Then("I still see the feedback, even though the assignmnet has now been archived")
 					pageSource should include("That was RUBBISH")
 				}

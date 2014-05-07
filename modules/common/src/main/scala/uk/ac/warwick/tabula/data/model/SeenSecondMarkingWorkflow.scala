@@ -2,8 +2,6 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.tabula.data.model.MarkingMethod.SeenSecondMarking
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.web.Routes
 
 @Entity
 @DiscriminatorValue(value="SeenSecondMarkingNew")
@@ -16,8 +14,6 @@ class SeenSecondMarkingWorkflow extends MarkingWorkflow with AssignmentMarkerMap
 
 	def markingMethod = SeenSecondMarking
 
-	def onlineMarkingUrl(assignment: Assignment, marker: User) = Routes.coursework.admin.assignment.onlineMarkerFeedback(assignment)
-
 	override def firstMarkerRoleName: String = "First marker"
 	def hasSecondMarker = true
 	def secondMarkerRoleName = Some("Second marker")
@@ -27,4 +23,7 @@ class SeenSecondMarkingWorkflow extends MarkingWorkflow with AssignmentMarkerMap
 	def thirdMarkerVerb = Some("mark")
 
 	override def thirdMarkers = this.firstMarkers
+
+	def getStudentsThirdMarker(assignment: Assignment, universityId: UniversityId): Option[String] =
+		MarkingWorkflow.getMarkerFromAssignmentMap(userLookup, universityId, assignment.firstMarkerMap)
 }

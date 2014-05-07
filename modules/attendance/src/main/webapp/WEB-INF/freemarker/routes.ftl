@@ -20,11 +20,14 @@
 		<@_u page="/view/${department.code}/points/?academicYear=${academicYear.toString}${queryString}" />
 	</#macro>
 	<#macro viewDepartmentStudents department><@_u page="/view/${department.code}/students/" /></#macro>
-	<#macro viewDepartmentStudentsWithAcademicYear department academicYear queryString="">
+	<#macro viewDepartmentStudentsWithAcademicYear department academicYear queryString="" page="">
 		<#if queryString?has_content>
 			<#local queryString = "&" + queryString />
 		</#if>
-		<@_u page="/view/${department.code}/students/?academicYear=${academicYear.toString}${queryString}" />
+		<#if page?has_content>
+			<#local page = "&page=" + page />
+		</#if>
+		<@_u page="/view/${department.code}/students/?academicYear=${academicYear.toString}${queryString}${page}" />
 	</#macro>
 	<#macro viewStudent department student academicYear><@_u page="/view/${department.code}/students/${student.universityId}?academicYear=${academicYear.toString}" /></#macro>
 	<#macro viewDepartmentAgents department relationshipType><@_u page="/view/${department.code}/agents/${relationshipType.urlPart}" /></#macro>

@@ -1,6 +1,3 @@
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
-
 <#macro student_item student bindpath="">
 <li class="student">
 	<i class="icon-white icon-user"></i> ${student.displayValue}
@@ -8,7 +5,7 @@
 </li>
 </#macro>
 
-<#macro assignStudents studentList markerList class name>
+<#macro assignStudents studentList markerList class name markerMapName>
 <div class="tabula-dnd" data-scroll="true">
 	<div class="fix-header pad-when-fixed">
 		<div class="btn-toolbar">
@@ -46,17 +43,17 @@
 			<div class="agentslist ${class} fix-on-scroll">
 				<#list markerList as marker>
 					<#local existingStudents = marker.students />
-					<div class="marker drag-target agent-${marker.userCode}">
+					<div class="marker drag-target agent-${markerMapName}-${marker.userCode}">
 						<span class="name">${marker.fullName}</span>
 						<span class="drag-count badge badge-info">${existingStudents?size}</span>
 
-						<ul class="drag-list hide" data-bindpath="markerMapping[${marker.userCode}]">
+						<ul class="drag-list hide" data-bindpath="${markerMapName}[${marker.userCode}]">
 							<#list existingStudents as student>
-								<@student_item student "markerMapping[${marker.userCode}][${student_index}]" />
+								<@student_item student "${markerMapName}[${marker.userCode}][${student_index}]" />
 							</#list>
 						</ul>
 
-						<a href="#" class="btn show-list" data-container=".agent-${marker.userCode}" data-title="Students to be marked by ${marker.fullName}"><i class="icon-list"></i> List</a>
+						<a href="#" class="btn show-list" data-container=".agent-${markerMapName}-${marker.userCode}" data-title="Students to be marked by ${marker.fullName}"><i class="icon-list"></i> List</a>
 
 					</div>
 				</#list>
@@ -75,7 +72,7 @@
 
 	<p>Drag students by their <i class="icon-reorder"></i> onto a marker.</p>
 
-		<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/assign-markers')}" commandName="assignMarkersCommand">
+		<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/assign-markers')}" commandName="command">
 		<div class="fix-area">
 			<div id="assign-markers">
 				<ul class="nav nav-tabs">
@@ -96,19 +93,21 @@
 				<div class="tab-content">
 					<div class="tab-pane active" id="first-markers">
 						<@assignStudents
-							assignMarkersCommand.firstMarkerUnassignedStudents
-							assignMarkersCommand.firstMarkers
+							firstMarkerUnassignedStudents
+							firstMarkers
 							"first-markers"
 							firstMarkerRoleName
+							"firstMarkerMapping"
 						/>
 					</div>
 					<#if hasSecondMarker>
 						<div class="tab-pane" id="second-markers">
 							<@assignStudents
-								assignMarkersCommand.secondMarkerUnassignedStudents
-								assignMarkersCommand.secondMarkers
+								secondMarkerUnassignedStudents
+								secondMarkers
 								"second-markers"
 								secondMarkerRoleName
+								"secondMarkerMapping"
 							/>
 						</div>
 					</#if>

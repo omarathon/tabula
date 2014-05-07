@@ -10,10 +10,11 @@ import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.services.UserLookupComponent
 import org.springframework.util.Assert
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{BatchSize, Type}
 import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import org.hibernate.ObjectNotFoundException
 
 object Notification {
 	/**
@@ -88,7 +89,7 @@ object Notification {
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="notification_type")
 abstract class Notification[A >: Null <: ToEntityReference, B]
-	extends GeneratedId with Serializable with HasSettings with PermissionsTarget {
+	extends GeneratedId with Serializable with HasSettings with PermissionsTarget with PreSaveBehaviour with NotificationPreSaveBehaviour {
 
 	def permissionsParents = Stream.empty
 
@@ -100,6 +101,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	final var agent: User = null // the actor in open social activity speak
 
 	@OneToMany(mappedBy="notification", fetch=FetchType.LAZY, targetEntity=classOf[EntityReference[_]], cascade=Array(CascadeType.ALL))
+	@BatchSize(size = 1)
 	var items: JList[EntityReference[A]] = JArrayList()
 
 	def entities = items.asScala.map { _.entity }.toSeq
@@ -163,7 +165,15 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 		this
 	}
 
-	override def toString = List(agent.getFullName, verb, items.getClass.getSimpleName).mkString("notification{", ", ", "}")
+	final override def preSave(newRecord: Boolean) {
+		onPreSave(newRecord)
+
+		// Generate recipientNotificationInfos
+		recipients.foreach(getRecipientNotificationInfo)
+	}
+	def onPreSave(newRecord: Boolean) {}
+
+	override def toString = s"Notification[${(if (id != null) id else "transient " + hashCode)}]{${agent.getFullName}, ${verb}, ${items.getClass.getSimpleName}}"
 }
 
 /**
@@ -190,31 +200,39 @@ case class FreemarkerModel(template:String, model:Map[String,Any], contentType: 
 trait SingleItemNotification[A >: Null <: ToEntityReference] {
 	self: Notification[A, _] =>
 
-	def item: EntityReference[A] = items.get(0)
+	def item: EntityReference[A] =
+		try {
+			items.get(0)
+		} catch {
+			case e: IndexOutOfBoundsException => throw new ObjectNotFoundException("", "")
+		}
 }
 
 /** Stores a single recipient as a User ID in the Notification table. */
-trait UserIdRecipientNotification extends SingleRecipientNotification with PreSaveBehaviour {
+trait UserIdRecipientNotification extends SingleRecipientNotification with NotificationPreSaveBehaviour {
 
 	this : UserLookupComponent =>
 
 	var recipientUserId: String = null
 	def recipient = userLookup.getUserByUserId(recipientUserId)
 
-	override def preSave(newRecord: Boolean) {
+	override def onPreSave(newRecord: Boolean) {
 		Assert.notNull(recipientUserId, "recipientUserId must be set")
 	}
 }
 
-/** Stores a single recipient as a University ID in the Notification table. */
-trait UniversityIdRecipientNotification extends SingleRecipientNotification with PreSaveBehaviour {
+trait NotificationPreSaveBehaviour {
+	def onPreSave(newRecord: Boolean)
+}
 
+/** Stores a single recipient as a University ID in the Notification table. */
+trait UniversityIdRecipientNotification extends SingleRecipientNotification with NotificationPreSaveBehaviour {
 	this : UserLookupComponent =>
 
 	var recipientUniversityId: String = null
 	def recipient = userLookup.getUserByWarwickUniId(recipientUniversityId)
 
-	override def preSave(newRecord: Boolean) {
+	override def onPreSave(newRecord: Boolean) {
 		Assert.notNull(recipientUniversityId, "recipientUniversityId must be set")
 	}
 }

@@ -26,12 +26,17 @@ class ReleaseToMarkerNotification
 		whichMarker.value = markerNumber
 	}
 
-	def workflowVerb: String = whichMarker.value match {
-		case 1 => assignment.markingWorkflow.firstMarkerVerb
-		case 2 => assignment.markingWorkflow.secondMarkerVerb.getOrElse{
-			logger.warn("Attempted to read secondMarkerVerb for workflow without second marker")
-			""
+	def workflowVerb: String = Option(assignment.markingWorkflow).map { markingWorkflow =>
+		whichMarker.value match {
+			case 1 => assignment.markingWorkflow.firstMarkerVerb
+			case 2 => assignment.markingWorkflow.secondMarkerVerb.getOrElse {
+				logger.warn("Attempted to read secondMarkerVerb for workflow without second marker")
+				""
+			}
 		}
+	}.getOrElse {
+		logger.warn("Attempted to read workflowVerb for assignment without workflow")
+		""
 	}
 
 	@transient val whichMarker = IntSetting("marker", 1)

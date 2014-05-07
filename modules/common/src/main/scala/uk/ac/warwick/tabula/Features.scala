@@ -89,8 +89,22 @@ abstract class Features {
 	@Value("${features.xSendfile:true}") var xSendfile = defaults.xSendfile
 	@Value("${features.newSeenSecondMarkingWorkflows:true}") var newSeenSecondMarkingWorkflows = defaults.newSeenSecondMarkingWorkflows
 	@Value("${features.activityStreams:true}") var activityStreams = defaults.activityStreams
-	@Value("${features.profiles.showModuleResults:false}") var showModuleResults = defaults.showModuleResults
-	@Value("${features.profiles.showAccreditedPriorLearning:false}") var showAccreditedPriorLearning = defaults.showAccreditedPriorLearning
+	@Value("${features.profiles.showModuleResults:true}") var showModuleResults = defaults.showModuleResults
+	@Value("${features.profiles.showAccreditedPriorLearning:true}") var showAccreditedPriorLearning = defaults.showAccreditedPriorLearning
+	@Value("${features.scheduling.academicInformationImport:true}") var schedulingAcademicInformationImport = defaults.schedulingAcademicInformationImport
+	@Value("${features.scheduling.profilesImport:true}") var schedulingProfilesImport = defaults.schedulingProfilesImport
+	@Value("${features.scheduling.assignmentsImport:true}") var schedulingAssignmentsImport = defaults.schedulingAssignmentsImport
+	@Value("${features.scheduling.cleanupTemporaryFiles:true}") var schedulingCleanupTemporaryFiles = defaults.schedulingCleanupTemporaryFiles
+	@Value("${features.scheduling.auditIndex:true}") var schedulingAuditIndex = defaults.schedulingAuditIndex
+	@Value("${features.scheduling.profilesIndex:true}") var schedulingProfilesIndex = defaults.schedulingProfilesIndex
+	@Value("${features.scheduling.notificationsIndex:true}") var schedulingNotificationsIndex = defaults.schedulingNotificationsIndex
+	@Value("${features.scheduling.processScheduledNotifications:true}") var schedulingProcessScheduledNotifications = defaults.schedulingProcessScheduledNotifications
+	@Value("${features.scheduling.notificationEmails:true}") var schedulingNotificationEmails = defaults.schedulingNotificationEmails
+	@Value("${features.scheduling.jobService:true}") var schedulingJobService = defaults.schedulingJobService
+	@Value("${features.scheduling.fileSync:true}") var schedulingFileSync = defaults.schedulingFileSync
+	@Value("${features.scheduling.cleanupUnreferencedFiles:true}") var schedulingCleanupUnreferencedFiles = defaults.schedulingCleanupUnreferencedFiles
+	@Value("${features.scheduling.sanityCheckFilesystem:true}") var schedulingSanityCheckFilesystem = defaults.schedulingSanityCheckFilesystem
+	@Value("${features.scheduling.exportAttendanceToSits:true}") var schedulingExportAttendanceToSits = defaults.schedulingExportAttendanceToSits
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -166,8 +180,22 @@ class FeaturesMessage {
 	@BeanProperty var xSendfile = true
 	@BeanProperty var newSeenSecondMarkingWorkflows = true
 	@BeanProperty var activityStreams = true
-	@BeanProperty var showModuleResults = false
-	@BeanProperty var showAccreditedPriorLearning = false
+	@BeanProperty var showModuleResults = true
+	@BeanProperty var showAccreditedPriorLearning = true
+	@BeanProperty var schedulingAcademicInformationImport = true
+	@BeanProperty var schedulingProfilesImport = true
+	@BeanProperty var schedulingAssignmentsImport = true
+	@BeanProperty var schedulingCleanupTemporaryFiles = true
+	@BeanProperty var schedulingAuditIndex = true
+	@BeanProperty var schedulingProfilesIndex = true
+	@BeanProperty var schedulingNotificationsIndex = true
+	@BeanProperty var schedulingProcessScheduledNotifications = true
+	@BeanProperty var schedulingNotificationEmails = true
+	@BeanProperty var schedulingJobService = true
+	@BeanProperty var schedulingFileSync = true
+	@BeanProperty var schedulingCleanupUnreferencedFiles = true
+	@BeanProperty var schedulingSanityCheckFilesystem = true
+	@BeanProperty var schedulingExportAttendanceToSits = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

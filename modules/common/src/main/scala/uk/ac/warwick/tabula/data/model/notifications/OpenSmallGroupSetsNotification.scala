@@ -4,7 +4,6 @@ import uk.ac.warwick.tabula.data.model.{UserIdRecipientNotification, FreemarkerM
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import javax.persistence.{Entity, DiscriminatorValue}
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
-import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.StudentSignUp
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 
@@ -17,10 +16,9 @@ object OpenSmallGroupSetsNotification {
 class OpenSmallGroupSetsNotification
 	extends Notification[SmallGroupSet, Unit]
 	with UserIdRecipientNotification
-	with AutowiringUserLookupComponent
-	with PreSaveBehaviour {
+	with AutowiringUserLookupComponent {
 
-	override def preSave(isNew: Boolean) {
+	override def onPreSave(isNew: Boolean) {
 		// if any of the groups require the student to sign up then the priority should be higher
 		if (entities.exists(_.allocationMethod == StudentSignUp)) {
 			 priority = Warning
