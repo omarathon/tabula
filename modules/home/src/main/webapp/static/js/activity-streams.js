@@ -129,7 +129,7 @@ jQuery(function($) {
 				});
 
 				$container.append($moreLink);
-				if (data.pagination && data.pagination.token) {
+				if (data.pagination && data.pagination.token && data.items.length == data.max) {
 					if (data.items.length) {
 						$moreLink.off('click');
 						$moreLink.on('click', 'a', function() {
@@ -143,7 +143,7 @@ jQuery(function($) {
 						loadPage(data.pagination, first);
 					}
 				} else {
-					var noMoreMsg = first ? '<span class="hint">No recent activity to display.</span>' : '<span class="hint">No more activity to display.</span>';
+					var noMoreMsg = first && !(data.pagination && data.pagination.token) ? '<span class="hint">No recent activity to display.</span>' : '<span class="hint">No more activity to display.</span>';
 					$moreLink.after(noMoreMsg);
 					$moreLink.remove(); // il n'y a pas de items
 				}
