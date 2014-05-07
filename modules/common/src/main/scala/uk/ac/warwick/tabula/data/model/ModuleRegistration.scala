@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.helpers.Logging
  * a unique constraint on the combination of those three.
  */
 
+
 @Entity
 @AccessType("field")
 class ModuleRegistration() extends GeneratedId	with PermissionsTarget {
