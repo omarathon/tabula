@@ -57,27 +57,4 @@
 		</tbody>
 	</table>
 
-	<#if features.showAccreditedPriorLearning>
-		<div id="accredited-prior-learning">
-			<#if can.do("AccreditedPriorLearning.Read", studentCourseDetails) && studentCourseYearDetails.hasAccreditedPriorLearning>
-				<h5>Accredited Prior Learning</h5>
-				<table id="accredited-prior-learning-table">
-					<#list studentCourseYearDetails.accreditedPriorLearning as apl>
-						<tr>
-							<th>Credit</th>
-							<td>${apl.cats}</td>
-						</tr>
-						<tr>
-							<th>Level</th>
-							<td>${apl.level.name}</td>
-						</tr>
-						<tr>
-							<th>Reason</th>
-							<td>${apl.reason}</td>
-						</tr>
-					</#list>
-				</table>
-			</#if>
-		</div>
-	</#if>
 </section>
