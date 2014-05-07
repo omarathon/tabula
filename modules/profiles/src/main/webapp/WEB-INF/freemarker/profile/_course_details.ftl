@@ -9,33 +9,32 @@
 	</h3>
 
 	<!-- drop-down to choose other courses: -->
-<#if (profile.freshStudentCourseDetails)?? && (profile.freshStudentCourseDetails?size > 1)>
-	<div class="dropdown">
-		<a id="course-dropdown" class="dropdown-toggle pull-right" data-toggle="dropdown" role="button" href="#">
-			Other courses
-			<b class="caret"></b>
-		</a>
-		<ul class="dropdown-menu pull-right" aria-labelledby="course-dropdown" role="menu">
-			<#list profile.freshStudentCourseDetails as scd>
-				<#if scd.scjCode != studentCourseDetails.scjCode>
-					<li role="presentation">
-						<a href="/profiles/view/course/${scd.urlSafeId}" role="menuitem"
-							<#if scd.scjCode == profile.mostSignificantCourse.scjCode>
-						   id="most-significant"
-							</#if>
-								>
-						<#-- when choosing from the "Other courses" drop-down, make the most signicant course
-						  -- bold to assist with navigating back if you have previously gone into a different course -->
-								${(scd.course.code)!}
-								<@fmt.course_year_span scd /> ${scd.scjCode}
-						</a>
-					</li>
-				</#if>
-			</#list>
-		</ul>
-	</div>
-</#if>
-
+	<#if (profile.freshStudentCourseDetails)?? && (profile.freshStudentCourseDetails?size > 1)>
+		<div class="dropdown">
+			<a id="course-dropdown" class="dropdown-toggle pull-right" data-toggle="dropdown" role="button" href="#">
+				Other courses
+				<b class="caret"></b>
+			</a>
+			<ul class="dropdown-menu pull-right" aria-labelledby="course-dropdown" role="menu">
+				<#list profile.freshStudentCourseDetails as scd>
+					<#if scd.scjCode != studentCourseDetails.scjCode>
+						<li role="presentation">
+							<a href="/profiles/view/course/${scd.urlSafeId}" role="menuitem"
+								<#if scd.scjCode == profile.mostSignificantCourse.scjCode>
+							   id="most-significant"
+								</#if>
+									>
+							<#-- when choosing from the "Other courses" drop-down, make the most signicant course
+							  -- bold to assist with navigating back if you have previously gone into a different course -->
+									${(scd.course.code)!}
+									<@fmt.course_year_span scd /> ${scd.scjCode}
+							</a>
+						</li>
+					</#if>
+				</#list>
+			</ul>
+		</div>
+	</#if>
 
 	<!-- basic course details across years -->
 	<div class="data clearfix col1">
@@ -74,7 +73,6 @@
 	</div>
 
 	<!-- expandable course details -->
-
 	<div class="col2">
 		<details>
 			<summary class="collapsible large-chevron">
@@ -139,4 +137,30 @@
 			</div>
 		</details>
 	</div>
+
+
 </section>
+
+<#if features.showAccreditedPriorLearning>
+	<div id="accredited-prior-learning">
+		<#if can.do("AccreditedPriorLearning.Read", studentCourseDetails) && studentCourseDetails.hasAccreditedPriorLearning>
+			<h5>Accredited Prior Learning</h5>
+				<table>
+					<tr>
+						<th>Level</th>
+						<th>Credit</th>
+						<th>Year</th>
+						<th>Reason</th>
+					</tr>
+					<#list studentCourseDetails.accreditedPriorLearning as apl>
+						<tr>
+							<td>${apl.level.name}</td>
+							<td align="center">${apl.cats}</td>
+							<td>${apl.academicYear.toString}</td>
+							<td>${apl.reason}</td>
+						</tr>
+					</#list>
+				</table>
+		</#if>
+	</div>
+</#if>
