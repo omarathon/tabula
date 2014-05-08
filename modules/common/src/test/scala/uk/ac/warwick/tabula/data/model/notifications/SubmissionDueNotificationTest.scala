@@ -2,22 +2,18 @@ package uk.ac.warwick.tabula.data.model.notifications
 
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.{Submission, Assignment}
-import uk.ac.warwick.tabula.services.{UserLookupService, IncludeType, MembershipItem, AssignmentMembershipInfo}
+import uk.ac.warwick.tabula.services.{AssignmentMembershipService, UserLookupService, IncludeType, MembershipItem, AssignmentMembershipInfo}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.forms.Extension
 
 class SubmissionDueNotificationTest extends TestBase with Mockito {
 
-	val memberInfo = new AssignmentMembershipInfo(Seq(
-		membershipItem(uniId="0123456", usercode="cusaaa"),
-		membershipItem(uniId="0133454", usercode="cusaab")
-	))
+	val users = Seq(
+		Fixtures.user(universityId="0123456", userId="cusaaa"),
+		Fixtures.user(universityId="0133454", userId="cusaab")
+	)
 
-	val assignment = new Assignment {
-		override def membershipInfo = memberInfo
-	}
-
-	val users = assignment.membershipInfo.items.map { _.user }
+	val assignment = new Assignment
 
 	@Test
 	def generalRecipients() {
@@ -25,7 +21,9 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 			override def assignment = SubmissionDueNotificationTest.this.assignment
 		}
 
-		val users = assignment.membershipInfo.items.map { _.user }
+		val membershipService = smartMock[AssignmentMembershipService]
+		membershipService.determineMembershipUsers(assignment) returns(users)
+		notification.membershipService = membershipService
 
 		notification.recipients should be (users)
 

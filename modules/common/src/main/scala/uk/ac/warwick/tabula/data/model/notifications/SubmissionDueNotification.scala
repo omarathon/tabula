@@ -7,7 +7,8 @@ import org.joda.time.{Days, DateTime}
 import uk.ac.warwick.tabula.data.model.NotificationPriority._
 import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
+import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AutowiringUserLookupComponent}
+import uk.ac.warwick.spring.Wire
 
 trait SubmissionReminder {
 	self : Notification[_, Unit] with NotificationPreSaveBehaviour =>
@@ -75,13 +76,15 @@ trait SubmissionReminder {
 class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] with SingleItemNotification[Assignment]
 	with SubmissionReminder {
 
+	var membershipService = Wire[AssignmentMembershipService]
+
 	def deadline = assignment.closeDate
 	def assignment = item.entity
 
 	def recipients = {
 		val submissions = assignment.submissions.asScala
 		val extensions = assignment.extensions.asScala
-		val allStudents = assignment.membershipInfo.items.map(_.user)
+		val allStudents = membershipService.determineMembershipUsers(assignment)
 		// fist filter out students that have submitted already
 		val withoutSubmission = allStudents.filterNot(user => submissions.exists(_.universityId == user.getWarwickId))
 		// finally filter students that have an extension
