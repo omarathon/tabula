@@ -76,7 +76,7 @@ trait SubmissionReminder {
 class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] with SingleItemNotification[Assignment]
 	with SubmissionReminder {
 
-	var membershipService = Wire[AssignmentMembershipService]
+	@transient var membershipService = Wire[AssignmentMembershipService]
 
 	def deadline = assignment.closeDate
 	def assignment = item.entity
