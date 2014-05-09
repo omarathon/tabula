@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import org.hibernate.`type`.StandardBasicTypes
-import java.sql.Types
-import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
+import uk.ac.warwick.tabula.data.model.AbstractStringUserType
 
 sealed abstract class AttendanceMonitoringPointStyle(val dbValue: String, val description: String)
 
@@ -18,13 +16,7 @@ object AttendanceMonitoringPointStyle {
 	}
 }
 
-class AttendanceMonitoringPointStyleUserType extends AbstractBasicUserType[AttendanceMonitoringPointStyle, String] {
-
-	val basicType = StandardBasicTypes.STRING
-	override def sqlTypes = Array(Types.VARCHAR)
-
-	val nullValue = null
-	val nullObject = null
+class AttendanceMonitoringPointStyleUserType extends AbstractStringUserType[AttendanceMonitoringPointStyle] {
 
 	override def convertToObject(string: String) = AttendanceMonitoringPointStyle.fromCode(string)
 
