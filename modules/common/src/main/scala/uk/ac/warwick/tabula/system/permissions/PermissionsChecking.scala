@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.permissions.Permission
 import scala.reflect.ClassTag
 import uk.ac.warwick.tabula.services.SecurityService
 import scala.collection.mutable
+import uk.ac.warwick.tabula.data.model.permissions.{RoleOverride, CustomRoleDefinition}
 
 /**
  * Trait that allows classes to call ActionCheck() in their inline definitions
@@ -100,6 +101,18 @@ trait PermissionsCheckingMethods extends Logging {
 		if (mandatory(memberNote).member.id != mandatory(member).id) {
 			logger.info("Not displaying member note as it doesn't belong to specified member")
 			throw new ItemNotFoundException(memberNote)
+		}
+
+	def mustBeLinked(customRoleDefinition: CustomRoleDefinition, department: Department) =
+		if (mandatory(customRoleDefinition).department.id != mandatory(department).id) {
+			logger.info("Not displaying custom role definition as it doesn't belong to specified department")
+			throw new ItemNotFoundException(customRoleDefinition)
+		}
+
+	def mustBeLinked(roleOverride: RoleOverride, customRoleDefinition: CustomRoleDefinition) =
+		if (mandatory(roleOverride).customRoleDefinition.id != mandatory(customRoleDefinition).id) {
+			logger.info("Not displaying role override as it doesn't belong to specified role definition")
+			throw new ItemNotFoundException(roleOverride)
 		}
 
 	/**

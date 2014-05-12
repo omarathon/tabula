@@ -72,6 +72,7 @@ class SmallGroup
 	var events: JList[SmallGroupEvent] = JArrayList()
 	
 	def permissionsParents = Option(groupSet).toStream
+	override def humanReadableId = name
 
 	/**
 	 * Direct access to the underlying UserGroup. Most of the time you don't want to us this; unless you're setting

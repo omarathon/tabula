@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.data.model.UnspecifiedTypeUserGroup
+import uk.ac.warwick.tabula.data.model.{Department, UnspecifiedTypeUserGroup}
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
@@ -34,6 +34,8 @@ trait PermissionsService {
 	def saveOrUpdate(permission: GrantedPermission[_])
 	def saveOrUpdate(role: GrantedRole[_])
 
+	def delete(roleDefinition: CustomRoleDefinition)
+
 	def getCustomRoleDefinitionById(id: String): Option[CustomRoleDefinition]
 	
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): Option[GrantedRole[A]]
@@ -47,6 +49,8 @@ trait PermissionsService {
 
 	def getAllGrantedRolesFor[A <: PermissionsTarget: ClassTag](scope: A): Seq[GrantedRole[A]]
 	def getAllGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](scope: A): Seq[GrantedPermission[A]]
+
+	def getAllGrantedRolesForDefinition(roleDefinition: RoleDefinition): Seq[GrantedRole[_]]
 	
 	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedRole[A]]
 	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedPermission[A]]
@@ -55,7 +59,8 @@ trait PermissionsService {
 	
 	def ensureUserGroupFor[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): UnspecifiedTypeUserGroup
 
-	def getCustomRoleDefinitionsBasedOn(roleDefinition:BuiltInRoleDefinition):Seq[CustomRoleDefinition]
+	def getCustomRoleDefinitionsBasedOn(roleDefinition: RoleDefinition):Seq[CustomRoleDefinition]
+	def getCustomRoleDefinitionsFor(department: Department): Seq[CustomRoleDefinition]
 
 	def clearCachesForUser(cacheKey: (String, ClassTag[_ <: PermissionsTarget]), propagate: Boolean = true)
 	def clearCachesForWebgroups(cacheKey: (Seq[String], ClassTag[_ <: PermissionsTarget]), propagate: Boolean = true)
@@ -151,6 +156,11 @@ abstract class AbstractPermissionsService extends PermissionsService {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition) = permissionsDao.saveOrUpdate(roleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_]) = permissionsDao.saveOrUpdate(permission)
 	def saveOrUpdate(role: GrantedRole[_]) = permissionsDao.saveOrUpdate(role)
+
+	def delete(roleDefinition: CustomRoleDefinition) = {
+		roleDefinition.department.customRoleDefinitions.remove(roleDefinition)
+		permissionsDao.delete(roleDefinition)
+	}
 	
 	def getCustomRoleDefinitionById(id: String) = permissionsDao.getCustomRoleDefinitionById(id)
 	
@@ -195,6 +205,8 @@ abstract class AbstractPermissionsService extends PermissionsService {
 
 	def getAllGrantedRolesFor[A <: PermissionsTarget: ClassTag](scope: A): Seq[GrantedRole[A]] = permissionsDao.getGrantedRolesFor(scope)
 	def getAllGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](scope: A): Seq[GrantedPermission[A]] = permissionsDao.getGrantedPermissionsFor(scope)
+
+	def getAllGrantedRolesForDefinition(roleDefinition: RoleDefinition): Seq[GrantedRole[_]] = permissionsDao.getGrantedRolesForDefinition(roleDefinition)
 	
 	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedRole[A]] =
 		ensureFoundUserStream(user)(transactional(readOnly = true) {
@@ -254,8 +266,17 @@ abstract class AbstractPermissionsService extends PermissionsService {
 		}
 	}
 
-	def getCustomRoleDefinitionsBasedOn(roleDefinition: BuiltInRoleDefinition): Seq[CustomRoleDefinition] = {
+	def getCustomRoleDefinitionsBasedOn(roleDefinition: RoleDefinition): Seq[CustomRoleDefinition] = {
 		permissionsDao.getCustomRoleDefinitionsBasedOn(roleDefinition)
+	}
+
+	def getCustomRoleDefinitionsFor(department: Department): Seq[CustomRoleDefinition] = {
+		def departmentPlusParents(department: Department): Seq[Department] = {
+			if (department.hasParent) departmentPlusParents(department.parent) ++ Seq(department)
+			else Seq(department)
+		}
+
+		permissionsDao.getCustomRoleDefinitionsFor(departmentPlusParents(department))
 	}
 }
 

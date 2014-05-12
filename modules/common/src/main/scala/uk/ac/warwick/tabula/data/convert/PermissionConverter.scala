@@ -3,13 +3,22 @@ package uk.ac.warwick.tabula.data.convert
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.TwoWayConverter
+import uk.ac.warwick.tabula.services.RelationshipService
+import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.data.model.permissions.PermissionUserType
 
 class PermissionConverter extends TwoWayConverter[String, Permission] {
+
+	val userType = new PermissionUserType
 	
-	override def convertLeft(permission: Permission) = (Option(permission) map { _.getName }).orNull
+	override def convertLeft(permission: Permission) = Option(permission).map(userType.convertToValue).orNull
   
-	override def convertRight(name: String) = 
+	override def convertRight(name: String) = {
 		if (!name.hasText) null
-		else try { Permissions.of(name) } catch { case e: IllegalArgumentException => null }
+		else {
+			println(userType.convertToObject(name))
+			userType.convertToObject(name)
+		}
+	}
 
 }

@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.helpers.Promises
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointTemplate, MonitoringPointSetTemplate, MonitoringPoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -387,6 +388,11 @@ abstract class Description {
 
 	def notifications(notifications: Seq[Notification[_,_]]) = {
 		property("notifications" -> notifications.map(_.id))
+	}
+
+	def customRoleDefinition(customRoleDefinition: CustomRoleDefinition) = {
+		if (customRoleDefinition.department != null) department(customRoleDefinition.department)
+		property("customRoleDefinition", customRoleDefinition.id)
 	}
 
 	// delegate equality to the underlying map

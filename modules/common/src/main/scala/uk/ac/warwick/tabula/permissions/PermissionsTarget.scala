@@ -27,8 +27,20 @@ trait PermissionsTarget {
 	 * exists in multiple departments) where it will return more than one.
 	 */
 	def permissionsParents: Stream[PermissionsTarget]
-	
+
+	/**
+	 * A unique identifier. If we were to pass this in as a PathVariable, we'd expect to be
+	 * able to get the object back out.
+	 */
 	def id: String
+
+	/**
+	 * A human-readable identifier, for a module this may be EC205 and for a Member it may be Mathew Mannion.
+	 */
+	def humanReadableId: String = toString()
+
+	def urlCategory: String = getClass.getSimpleName.toLowerCase()
+	def urlSlug: String = id
 
 }
 
@@ -36,5 +48,7 @@ object PermissionsTarget {
 	final val Global = new PermissionsTarget {
 		override def permissionsParents = Stream.empty
 		override def id = null
+		override def humanReadableId = null
+		override def urlCategory = null
 	}
 }

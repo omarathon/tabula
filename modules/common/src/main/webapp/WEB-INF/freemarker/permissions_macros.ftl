@@ -139,4 +139,33 @@
 </script>
 </#macro>
 
+<#macro debugPermission permission scope={} showScopes=true>
+	<#local isTarget=permissionsHelperCommand?? && permissionsHelperCommand.permission?? && (permission.name == permissionsHelperCommand.permission.name && (scope?size == 0 || (scope.id == results.resolvedScope.id)))>
+
+	<#if isTarget><strong class="text-success"></#if>
+
+	<span class="permission"><i class="icon-lock use-tooltip" title="${permission.name}"></i> ${permission.description}</span>
+	<#if showScopes && scope?? && scope?size != 0>
+		on <span class="scope"><i class="icon-bookmark"></i> ${scope.toString}</span>
+	<#elseif showScopes && permission.scoped>
+		<i class="icon-globe use-tooltip" title="Granted against any scope" data-placement="right"></i>
+	</#if>
+
+	<#if isTarget></strong></#if>
+</#macro>
+
+<#macro debugRole role showScopes=true>
+<span class="role"><i class="icon-user"></i> ${role.definition.description}</span><#if showScopes && role.scope??> on <span class="scope"><i class="icon-bookmark"></i> ${role.scope.toString}</span></#if>
+	<#if role.explicitPermissions?size gt 0 || role.subRoles?size gt 0>
+	<ul>
+		<#list role.subRoles as subRole>
+			<li><@debugRole role=subRole showScopes=showScopes /></li>
+		</#list>
+		<#list role.explicitPermissionsAsList as permission>
+			<li><@debugPermission permission=permission._1() scope=permission._2() showScopes=showScopes /></li>
+		</#list>
+	</ul>
+	</#if>
+</#macro>
+
 </#escape>

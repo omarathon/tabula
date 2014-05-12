@@ -11,11 +11,14 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
 import org.hibernate.criterion.Restrictions._
+import uk.ac.warwick.tabula.data.model.Department
 
 trait PermissionsDao {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_])
 	def saveOrUpdate(role: GrantedRole[_])
+
+	def delete(roleDefinition: CustomRoleDefinition)
 	
 	def getCustomRoleDefinitionById(id: String): Option[CustomRoleDefinition]
 	
@@ -38,8 +41,11 @@ trait PermissionsDao {
 	
 	def getGrantedPermissionsForUser[A <: PermissionsTarget: ClassTag](user: User): Seq[GrantedPermission[A]]
 	def getGrantedPermissionsForWebgroups[A <: PermissionsTarget: ClassTag](groupNames: Seq[String]): Seq[GrantedPermission[A]]
-	def getCustomRoleDefinitionsBasedOn(baseDef:BuiltInRoleDefinition):Seq[CustomRoleDefinition]
 
+	def getGrantedRolesForDefinition(roleDefinition: RoleDefinition): Seq[GrantedRole[_]]
+
+	def getCustomRoleDefinitionsBasedOn(baseDef: RoleDefinition): Seq[CustomRoleDefinition]
+	def getCustomRoleDefinitionsFor(departments: Seq[Department]): Seq[CustomRoleDefinition]
 }
 
 @Repository
@@ -50,6 +56,8 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition) = session.saveOrUpdate(roleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_]) = session.saveOrUpdate(permission)
 	def saveOrUpdate(role: GrantedRole[_]) = session.saveOrUpdate(role)
+
+	def delete(roleDefinition: CustomRoleDefinition) = session.delete(roleDefinition)
 	
 	def getCustomRoleDefinitionById(id: String) = getById[CustomRoleDefinition](id)
 	
@@ -195,10 +203,32 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 		}
 	}
 
-	def getCustomRoleDefinitionsBasedOn(baseDef: BuiltInRoleDefinition): Seq[CustomRoleDefinition] = {
+	def getCustomRoleDefinitionsBasedOn(roleDefinition: RoleDefinition): Seq[CustomRoleDefinition] = {
+		val criteria = session.newCriteria[CustomRoleDefinition]
+
+		roleDefinition match {
+			case builtIn: BuiltInRoleDefinition => criteria.add(is("builtInBaseRoleDefinition", builtIn))
+			case custom: CustomRoleDefinition   => criteria.add(is("customBaseRoleDefinition", custom))
+		}
+
+		criteria.seq
+	}
+
+	def getCustomRoleDefinitionsFor(departments: Seq[Department]): Seq[CustomRoleDefinition] = {
 		session.newCriteria[CustomRoleDefinition]
-		.add(is("builtInBaseRoleDefinition", baseDef))
-		.seq
+			.add(in("department", departments.asJavaCollection))
+			.seq
+	}
+
+	def getGrantedRolesForDefinition(roleDefinition: RoleDefinition) = {
+		val criteria = session.newCriteria[GrantedRole[_]]
+
+		roleDefinition match {
+			case builtIn: BuiltInRoleDefinition => criteria.add(is("builtInRoleDefinition", builtIn))
+			case custom: CustomRoleDefinition   => criteria.add(is("customRoleDefinition", custom))
+		}
+
+		criteria.seq
 	}
 }
 

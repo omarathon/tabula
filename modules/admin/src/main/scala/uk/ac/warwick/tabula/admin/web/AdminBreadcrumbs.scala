@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.admin.web
 
 import uk.ac.warwick.tabula.web.BreadCrumb
 import uk.ac.warwick.tabula.data.model
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 trait AdminBreadcrumbs {
 	val Breadcrumbs = AdminBreadcrumbs
@@ -37,6 +38,14 @@ object AdminBreadcrumbs {
 		val title = route.code.toUpperCase
 		val url = Some(Routes.route(route))
 		override val tooltip = route.name
+	}
+
+	/**
+	 * Special case breadcrumb for the permissions page
+	 */
+	case class Permissions[A <: PermissionsTarget](val target: A) extends Abstract {
+		val title = target.humanReadableId
+		val url = Some(Routes.permissions(target))
 	}
 
 	/**
