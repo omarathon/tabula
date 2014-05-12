@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.admin.commands.department
 import uk.ac.warwick.tabula.commands.{ComposableCommand, ReadOnly, Unaudited, CommandInternal}
 import uk.ac.warwick.tabula.data.model.permissions.{RoleOverride, CustomRoleDefinition}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import ListCustomRoleOverridesCommand._
 import uk.ac.warwick.tabula.roles.{Role, RoleBuilder}
@@ -25,7 +25,7 @@ trait ListCustomRoleOverridesCommandState {
 }
 
 class ListCustomRoleOverridesCommandInternal(val department: Department, val customRoleDefinition: CustomRoleDefinition) extends CommandInternal[CustomRoleOverridesInfo] with ListCustomRoleOverridesCommandState {
-	def applyInternal = {
+	override def applyInternal() = {
 		// Use Some(null) instead of None so we show scoped permissions too
 		val role = RoleBuilder.build(customRoleDefinition, Some(null), customRoleDefinition.name)
 		val overrides = customRoleDefinition.overrides.asScala
@@ -34,11 +34,11 @@ class ListCustomRoleOverridesCommandInternal(val department: Department, val cus
 	}
 }
 
-trait ListCustomRoleOverridesCommandPermissions extends RequiresPermissionsChecking {
+trait ListCustomRoleOverridesCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: ListCustomRoleOverridesCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(customRoleDefinition, department)
+		p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
 		p.PermissionCheck(Permissions.RolesAndPermissions.Read, customRoleDefinition)
 	}
 }

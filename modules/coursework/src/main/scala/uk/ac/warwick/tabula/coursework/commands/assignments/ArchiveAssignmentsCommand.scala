@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.{AssignmentServiceComponent, AutowiringAssignmentServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Department
@@ -37,12 +37,12 @@ with Appliable[Seq[Assignment]] with ArchiveAssignmentsState {
 
 }
 
-trait ArchiveAssignmentsPermissions extends RequiresPermissionsChecking {
+trait ArchiveAssignmentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: ArchiveAssignmentsState =>
 	def permissionsCheck(p: PermissionsChecking) {
-		if (modules.isEmpty) p.PermissionCheck(Permissions.Assignment.Archive, p.mandatory(department))
+		if (modules.isEmpty) p.PermissionCheck(Permissions.Assignment.Archive, mandatory(department))
 		else for (module <- modules) {
-			p.mustBeLinked(p.mandatory(module), p.mandatory(department))
+			p.mustBeLinked(p.mandatory(module), mandatory(department))
 			p.PermissionCheck(Permissions.Assignment.Archive, module)
 		}
 	}

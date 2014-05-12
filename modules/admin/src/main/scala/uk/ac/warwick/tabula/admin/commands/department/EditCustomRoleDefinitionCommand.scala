@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.admin.commands.department
 import uk.ac.warwick.tabula.commands.{Description, Describable, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
@@ -38,11 +38,11 @@ class EditCustomRoleDefinitionCommandInternal(val department: Department, val cu
 	}
 }
 
-trait EditCustomRoleDefinitionCommandPermissions extends RequiresPermissionsChecking {
+trait EditCustomRoleDefinitionCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: EditCustomRoleDefinitionCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(customRoleDefinition, department)
+		p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
 		p.PermissionCheck(Permissions.RolesAndPermissions.Update, customRoleDefinition)
 	}
 }

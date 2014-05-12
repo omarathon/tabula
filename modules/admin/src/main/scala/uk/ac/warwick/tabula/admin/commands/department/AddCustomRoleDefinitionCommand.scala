@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.admin.commands.department
 import uk.ac.warwick.tabula.commands.{Description, Describable, SelfValidating, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import uk.ac.warwick.tabula.data.model.Department
@@ -43,11 +43,11 @@ class AddCustomRoleDefinitionCommandInternal(val department: Department) extends
 	}
 }
 
-trait AddCustomRoleDefinitionCommandPermissions extends RequiresPermissionsChecking {
+trait AddCustomRoleDefinitionCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: AddCustomRoleDefinitionCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.RolesAndPermissions.Create, p.mandatory(department))
+		p.PermissionCheck(Permissions.RolesAndPermissions.Create, mandatory(department))
 	}
 }
 
@@ -57,10 +57,12 @@ trait AddCustomRoleDefinitionCommandValidation extends SelfValidating {
 	override def validate(errors: Errors) {
 		// name must be non-empty
 		if (!name.hasText) {
-			errors.rejectValue("code", "customRoleDefinition.name.empty")
+			errors.rejectValue("name", "customRoleDefinition.name.empty")
 		} else if (name.length > 200) {
-			errors.rejectValue("code", "customRoleDefinition.name.tooLong", Array(200: java.lang.Integer), "Name must be 200 characters or fewer")
+			errors.rejectValue("name", "customRoleDefinition.name.tooLong", Array(200: java.lang.Integer), "Name must be 200 characters or fewer")
 		}
+
+		if (baseDefinition == null) errors.rejectValue("baseDefinition", "NotEmpty")
 	}
 }
 
