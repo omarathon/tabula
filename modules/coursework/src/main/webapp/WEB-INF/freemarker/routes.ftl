@@ -72,8 +72,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro markstemplate assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marks-template" /></#macro>
 <#macro markermarkstemplate assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/marks-template" /></#macro>
 <#macro extensions assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions" /></#macro>
-<#macro extensionreviewattachment assignment userid filename><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/review-request/${userid}/supporting-file/${filename}" /></#macro>
-<#macro extensionrequestattachment assignment filename><@_u page="/module/${assignment.module.code}/${assignment.id}/extension/supporting-file/${filename}" /></#macro>
+<#macro extensionreviewattachment assignment userid filename><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/review-request/${userid}/supporting-file/${filename?url}" /></#macro>
+<#macro extensionrequestattachment assignment filename><@_u page="/module/${assignment.module.code}/${assignment.id}/extension/supporting-file/${filename?url}" /></#macro>
 
 <#macro extensionsettings department><@_u page="/admin/department/${department.code}/settings/extensions" /></#macro>
 <#macro extensionreviewrequest assignment uniId><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/review-request/${uniId}" /></#macro>
