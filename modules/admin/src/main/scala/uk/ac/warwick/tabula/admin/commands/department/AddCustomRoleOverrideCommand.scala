@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.admin.commands.department
 import uk.ac.warwick.tabula.commands.{Description, Describable, SelfValidating, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.data.model.permissions.{RoleOverride, CustomRoleDefinition}
 import uk.ac.warwick.tabula.data.model.Department
@@ -44,11 +44,11 @@ class AddCustomRoleOverrideCommandInternal(val department: Department, val custo
 	}
 }
 
-trait AddCustomRoleOverrideCommandPermissions extends RequiresPermissionsChecking {
+trait AddCustomRoleOverrideCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: AddCustomRoleOverrideCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(p.mandatory(customRoleDefinition), p.mandatory(department))
+		p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
 		p.PermissionCheck(Permissions.RolesAndPermissions.Create, customRoleDefinition)
 	}
 }
@@ -59,7 +59,7 @@ trait AddCustomRoleOverrideCommandValidation extends SelfValidating {
 
 	override def validate(errors: Errors) {
 		// permission must be non empty
-		if (permission == null) errors.rejectValue("permission", "NonEmpty")
+		if (permission == null) errors.rejectValue("permission", "NotEmpty")
 		else {
 			val allRolePermissions = customRoleDefinition.permissions(Some(null))
 

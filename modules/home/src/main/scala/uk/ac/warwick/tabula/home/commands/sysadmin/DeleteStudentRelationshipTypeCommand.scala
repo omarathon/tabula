@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.home.commands.sysadmin
 import uk.ac.warwick.tabula.services.RelationshipServiceComponent
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands.CommandInternal
-import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, RequiresPermissionsChecking, PermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.services.AutowiringRelationshipServiceComponent
@@ -45,11 +44,11 @@ class DeleteStudentRelationshipTypeCommandInternal(val relationshipType: Student
 	}
 }
 
-trait DeleteStudentRelationshipTypeCommandPermissions extends RequiresPermissionsChecking {
+trait DeleteStudentRelationshipTypeCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	this: HasExistingStudentRelationshipType =>
 	
 	def permissionsCheck(p: PermissionsChecking) {
-		p.mandatory(relationshipType)
+		mandatory(relationshipType)
 		p.PermissionCheck(Permissions.StudentRelationshipType.Delete)
 	}
 }

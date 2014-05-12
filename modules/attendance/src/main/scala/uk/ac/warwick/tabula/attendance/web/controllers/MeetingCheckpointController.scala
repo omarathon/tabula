@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.{RequestParam, PathVariable, Mode
 import uk.ac.warwick.tabula.data.model.{Member, StudentMember, MeetingFormat, StudentRelationshipType}
 import org.joda.time.{LocalDate, DateTime}
 import uk.ac.warwick.tabula.commands.{Appliable, Unaudited, ReadOnly, CommandInternal, ComposableCommand}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointMeetingRelationshipTermServiceComponent, MonitoringPointMeetingRelationshipTermServiceComponent}
 import uk.ac.warwick.tabula.web.views.JSONView
@@ -32,11 +32,11 @@ class MeetingCheckpointCommand(
 
 }
 
-trait MeetingCheckpointCommandPermissions extends RequiresPermissionsChecking {
+trait MeetingCheckpointCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	this: MeetingCheckpointCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.MeetingRecord.Read(p.mandatory(relationshipType)), student)
+		p.PermissionCheck(Permissions.Profiles.MeetingRecord.Read(mandatory(relationshipType)), student)
 	}
 }
 

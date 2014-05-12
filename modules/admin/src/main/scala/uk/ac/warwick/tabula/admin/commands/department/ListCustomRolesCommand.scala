@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands.{CommandInternal, ReadOnly, Unaudited, Comp
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import ListCustomRolesCommand._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 
@@ -22,7 +22,7 @@ object ListCustomRolesCommand {
 class ListCustomRolesCommandInternal(val department: Department) extends CommandInternal[Seq[CustomRoleInfo]] with ListCustomRolesCommandState {
 	self: PermissionsServiceComponent =>
 
-	def applyInternal = {
+	override def applyInternal() = {
 		permissionsService.getCustomRoleDefinitionsFor(department).map { defn =>
 			val granted = permissionsService.getAllGrantedRolesForDefinition(defn)
 			val derived = permissionsService.getCustomRoleDefinitionsBasedOn(defn)
@@ -33,11 +33,11 @@ class ListCustomRolesCommandInternal(val department: Department) extends Command
 
 }
 
-trait ListCustomRolesCommandPermissions extends RequiresPermissionsChecking {
+trait ListCustomRolesCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: ListCustomRolesCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.RolesAndPermissions.Create, department)
+		p.PermissionCheck(Permissions.RolesAndPermissions.Create, mandatory(department))
 	}
 }
 

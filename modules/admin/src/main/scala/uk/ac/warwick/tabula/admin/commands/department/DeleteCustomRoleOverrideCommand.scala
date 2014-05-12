@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.admin.commands.department
 import uk.ac.warwick.tabula.commands.{Description, Describable, SelfValidating, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.permissions.{RoleOverride, CustomRoleDefinition}
 import uk.ac.warwick.tabula.data.model.Department
@@ -36,12 +36,12 @@ class DeleteCustomRoleOverrideCommandInternal(val department: Department, val cu
 	}
 }
 
-trait DeleteCustomRoleOverrideCommandPermissions extends RequiresPermissionsChecking {
+trait DeleteCustomRoleOverrideCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: DeleteCustomRoleOverrideCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(p.mandatory(customRoleDefinition), p.mandatory(department))
-		p.mustBeLinked(p.mandatory(roleOverride), p.mandatory(customRoleDefinition))
+		p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
+		p.mustBeLinked(mandatory(roleOverride), mandatory(customRoleDefinition))
 		p.PermissionCheck(Permissions.RolesAndPermissions.Delete, roleOverride)
 	}
 }
