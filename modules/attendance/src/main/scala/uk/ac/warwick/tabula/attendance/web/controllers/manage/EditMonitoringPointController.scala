@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.attendance.commands.manage.{EditMonitoringPointState, EditMonitoringPointCommand}
 
 @Controller
-@RequestMapping(Array("/manage/{dept}/sets/add/points/edit/{pointIndex}"))
+@RequestMapping(Array("/manage/{dept}/2013/sets/add/points/edit/{pointIndex}"))
 class EditMonitoringPointController extends AbstractManageMonitoringPointController {
 
 	@ModelAttribute("command")

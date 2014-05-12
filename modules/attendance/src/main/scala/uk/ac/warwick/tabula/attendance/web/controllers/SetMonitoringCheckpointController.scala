@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.model.{Route, Department}
 import uk.ac.warwick.tabula.JavaImports._
 
-@RequestMapping(Array("/view/{department}/{monitoringPoint}/record"))
+@RequestMapping(Array("/view/{department}/2013/{monitoringPoint}/record"))
 @Controller
 class SetMonitoringCheckpointController extends AttendanceController {
 

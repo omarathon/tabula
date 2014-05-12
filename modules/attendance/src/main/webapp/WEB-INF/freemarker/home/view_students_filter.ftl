@@ -3,6 +3,14 @@
 
 <@fmt.deptheader "View students" "in" command.department routes "viewDepartmentStudents" />
 
+<#assign filterQuery = command.serializeFilter />
+<#if features.attendanceMonitoringReport && can.do("MonitoringPoints.Report", command.department) >
+<div class="pull-right send-to-sits">
+	<a href="<@routes.report command.department command.academicYear filterQuery />" class="btn btn-primary">Upload to SITS:eVision</a>
+</div>
+<div class="clearfix"></div>
+</#if>
+
 <#if updatedStudent??>
 	<div class="alert alert-success">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -17,15 +25,7 @@
 	</div>
 </#if>
 
-<#assign filterQuery = command.serializeFilter />
-<#if features.attendanceMonitoringReport && can.do("MonitoringPoints.Report", command.department) >
-	<div class="pull-right send-to-sits">
-		<a href="<@routes.report command.department command.academicYear filterQuery />" class="btn btn-primary">Upload to SITS:eVision</a>
-	</div>
-</#if>
-
 <#assign submitUrl><@routes.viewDepartmentStudents command.department /></#assign>
-<@attendance_macros.academicYearSwitcher submitUrl command.academicYear command.thisAcademicYear />
 
 <#assign filterCommand = command />
 <#assign filterCommandName = "command" />

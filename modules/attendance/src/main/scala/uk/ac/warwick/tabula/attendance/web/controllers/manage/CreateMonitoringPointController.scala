@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
 @Controller
-@RequestMapping(Array("/manage/{dept}/sets/{set}/edit/points/add"))
+@RequestMapping(Array("/manage/{dept}/2013/sets/{set}/edit/points/add"))
 class CreateMonitoringPointController extends AbstractManageMonitoringPointController {
 
 	@ModelAttribute("command")

@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.attendance.web
 
-import java.net.URLEncoder
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, StudentMember, Department}
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
@@ -18,13 +16,13 @@ object Routes {
 
 	object department {
 		def view(department: Department) = context + "/%s" format encoded(department.code)
-		def viewPoints(department: Department) = context + "/view/%s/points" format encoded(department.code)
-		def viewStudents(department: Department) = context + "/view/%s/students" format encoded(department.code)
+		def viewPoints(department: Department) = context + "/view/%s/2013/points" format encoded(department.code)
+		def viewStudents(department: Department) = context + "/view/%s/2013/students" format encoded(department.code)
 		def viewStudent(department: Department, student: StudentMember) =
-			context + "/view/%s/students/%s" format(encoded(department.code), encoded(student.universityId))
+			context + "/view/%s/2013/students/%s" format(encoded(department.code), encoded(student.universityId))
 		def viewAgents(department: Department, relationshipType: StudentRelationshipType) =
-			context + "/view/%s/agents/%s" format(encoded(department.code), encoded(relationshipType.urlPart))
-		def manage(department: Department) = context + "/manage/%s" format encoded(department.code)
+			context + "/view/%s/2013/agents/%s" format(encoded(department.code), encoded(relationshipType.urlPart))
+		def manage(department: Department) = context + "/manage/%s/2013" format encoded(department.code)
 	}
 
 	object admin {
@@ -34,13 +32,13 @@ object Routes {
 	object profile {
 		def apply() = context + "/profile"
 
-		def apply(student: StudentMember, academicYear: AcademicYear) =
-			context + "/profile/%s/%s" format(encoded(student.universityId), encoded(academicYear.startYear.toString))
+		def apply(student: StudentMember) =
+			context + "/profile/%s/2013" format encoded(student.universityId)
 	}
 
 	object agent {
-		def view(relationshipType: StudentRelationshipType) = context + "/agent/%s" format encoded(relationshipType.urlPart)
+		def view(relationshipType: StudentRelationshipType) = context + "/agent/%s/2013" format encoded(relationshipType.urlPart)
 		def student(student: StudentMember, relationshipType: StudentRelationshipType) =
-			context + "/agent/%s/%s" format(encoded(relationshipType.urlPart), encoded(student.universityId))
+			context + "/agent/%s/2013/%s" format(encoded(relationshipType.urlPart), encoded(student.universityId))
 	}
 }

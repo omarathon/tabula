@@ -13,11 +13,11 @@ class AttendanceAgentRecordStudentTest extends AttendanceFixture with GivenWhenT
 		 And("Marker 1 is tutor to Student 1")
 		 createStudentRelationship(P.Student1,P.Marker1)
 
-		 When(s"I go to /attendance/agent/tutor/${P.Student1.warwickId}/record")
-		 go to Path(s"/attendance/agent/tutor/${P.Student1.warwickId}/record")
+		 When(s"I go to /attendance/agent/tutor/2013/${P.Student1.warwickId}/record")
+		 go to Path(s"/attendance/agent/tutor/2013/${P.Student1.warwickId}/record")
 
 		 Then("I see the tutee's attendance")
-		 eventually(currentUrl should include(s"/attendance/agent/tutor/${P.Student1.warwickId}/record"))
+		 eventually(currentUrl should include(s"/attendance/agent/tutor/2013/${P.Student1.warwickId}/record"))
 		 pageSource should include("Record attendance")
 		 // usercode is set at student's name
 		 pageSource should include(s"${P.Student1.usercode}")
@@ -28,7 +28,7 @@ class AttendanceAgentRecordStudentTest extends AttendanceFixture with GivenWhenT
 			 .webElement.findElement(By.cssSelector("input[type=submit]"))
 
 		 Then("I am redirected to the student's attendance view")
-		 eventually(currentUrl should include(s"/attendance/agent/tutor/${P.Student1.warwickId}"))
+		 eventually(currentUrl should include(s"/attendance/agent/tutor/2013/${P.Student1.warwickId}"))
 
 	 }
 

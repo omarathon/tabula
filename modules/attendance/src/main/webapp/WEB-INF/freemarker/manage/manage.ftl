@@ -39,7 +39,6 @@
 </#if>
 
 <#assign thisPath><@routes.manageDepartment command.dept /></#assign>
-<@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
 
 <form id="chooseCreateType" class="form-inline" action="<@routes.createSet command.dept command.academicYear />">
 	<h2>Create monitoring schemes</h2>

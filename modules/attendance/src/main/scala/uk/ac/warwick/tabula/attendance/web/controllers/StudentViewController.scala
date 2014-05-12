@@ -48,15 +48,12 @@ trait StudentViewCommandState {
 }
 
 @Controller
-@RequestMapping(Array("/view/{department}/students/{student}"))
+@RequestMapping(Array("/view/{department}/2013/students/{student}"))
 class StudentViewController extends AttendanceController {
 
 	@ModelAttribute("command")
-	def command(
-		@PathVariable student: StudentMember,
-		@RequestParam(value="academicYear", required = false) academicYear: AcademicYear
-	) = {
-		StudentViewCommand(student, Option(academicYear))
+	def command(@PathVariable student: StudentMember) = {
+		StudentViewCommand(student, Option(AcademicYear(2013)))
 	}
 
 	@RequestMapping

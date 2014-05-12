@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.attendance.commands.manage.DeleteMonitoringPointCommand
 
 @Controller
-@RequestMapping(Array("/manage/{dept}/sets/add/points/delete/{pointIndex}"))
+@RequestMapping(Array("/manage/{dept}/2013/sets/add/points/delete/{pointIndex}"))
 class DeleteMonitoringPointController extends AbstractManageMonitoringPointController {
 
 	@ModelAttribute("command")

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import scala.Array
 
 @Controller
-@RequestMapping(Array("/manage/{dept}/sets/{set}/edit/points/{point}/delete"))
+@RequestMapping(Array("/manage/{dept}/2013/sets/{set}/edit/points/{point}/delete"))
 class RemoveMonitoringPointController extends AttendanceController {
 
 	validatesSelf[SelfValidating]

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import scala.Array
 
 @Controller
-@RequestMapping(value=Array("/manage/{dept}/sets/{set}/edit"))
+@RequestMapping(value=Array("/manage/{dept}/2013/sets/{set}/edit"))
 class EditMonitoringPointSetController extends AttendanceController {
 
 	validatesSelf[SelfValidating]

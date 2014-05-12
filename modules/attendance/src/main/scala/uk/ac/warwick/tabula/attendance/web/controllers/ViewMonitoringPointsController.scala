@@ -12,14 +12,14 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 
 @Controller
-@RequestMapping(value=Array("/view/{department}/points"))
+@RequestMapping(value=Array("/view/{department}/2013/points"))
 class ViewMonitoringPointsController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @RequestParam(value="academicYear", required = false) academicYear: AcademicYear) =
-		ViewMonitoringPointsCommand(department, Option(academicYear), user)
+	def command(@PathVariable department: Department) =
+		ViewMonitoringPointsCommand(department, Option(AcademicYear(2013)), user)
 
 	@RequestMapping
 	def filter(

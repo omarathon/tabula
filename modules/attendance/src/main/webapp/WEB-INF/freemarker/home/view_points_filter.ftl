@@ -11,7 +11,6 @@
 </#if>
 
 <#assign submitUrl><@routes.viewDepartmentPoints command.department /></#assign>
-<@attendance_macros.academicYearSwitcher submitUrl command.academicYear command.thisAcademicYear />
 
 <#assign filterCommand = command />
 <#assign filterCommandName = "command" />
