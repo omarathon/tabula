@@ -3,7 +3,7 @@
 <#import "/WEB-INF/freemarker/permissions_macros.ftl" as pm />
 <#assign deptperms_url><@url page="/sysadmin/departments/${department.code}/permissions" /></#assign>
 
-<div id="department-permissions-page">
+<div class="permissions-page">
 	<h1>Departmental permissions</h1>
 	<h5><span class="muted">for</span> ${department.name}</h5>
 

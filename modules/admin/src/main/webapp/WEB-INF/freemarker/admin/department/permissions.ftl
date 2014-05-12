@@ -3,7 +3,7 @@
 <#import "*/permissions_macros.ftl" as pm />
 <#assign perms_url><@routes.deptperms department/></#assign>
 
-<div id="department-permissions-page">
+<div class="permissions-page">
 	<div class="pull-right">
 		<a class="btn" href="<@routes.permissions department />"><i class="icon-lock"></i> Advanced</a>
 	</div>
