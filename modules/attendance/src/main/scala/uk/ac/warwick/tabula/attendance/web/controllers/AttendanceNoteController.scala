@@ -102,7 +102,7 @@ class EditAttendanceNoteController extends AttendanceController {
 	) = {
 		val mav = Mav("home/edit_note",
 			"allAbsenceTypes" -> AbsenceType.values,
-			"returnTo" -> getReturnTo(Routes.department.viewStudent(currentMember.homeDepartment, student)),
+			"returnTo" -> getReturnTo(Routes.old.department.viewStudent(currentMember.homeDepartment, student)),
 			"isModal" -> ajax,
 			"isIframe" -> isIframe
 		)
@@ -138,7 +138,7 @@ class EditAttendanceNoteController extends AttendanceController {
 			form(cmd, student)
 		} else {
 			cmd.apply()
-			Redirect(Routes.department.viewStudent(currentMember.homeDepartment, student))
+			Redirect(Routes.old.department.viewStudent(currentMember.homeDepartment, student))
 		}
 	}
 

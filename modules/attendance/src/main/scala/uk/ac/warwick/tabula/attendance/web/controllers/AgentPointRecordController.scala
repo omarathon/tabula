@@ -37,8 +37,8 @@ class AgentPointRecordController extends AttendanceController {
 	def form(@ModelAttribute command: Appliable[Seq[MonitoringCheckpoint]] with PopulateOnForm, relationshipType: StudentRelationshipType): Mav = {
 		Mav("home/record_point",
 			"allCheckpointStates" -> AttendanceState.values,
-			"returnTo" -> getReturnTo(Routes.agent.view(relationshipType))
-		).crumbs(Breadcrumbs.Agent(relationshipType))
+			"returnTo" -> getReturnTo(Routes.old.agent.view(relationshipType))
+		).crumbs(Breadcrumbs.Old.Agent(relationshipType))
 	}
 
 
@@ -52,7 +52,7 @@ class AgentPointRecordController extends AttendanceController {
 			form(command, relationshipType)
 		} else {
 			command.apply()
-			Redirect(Routes.agent.view(relationshipType))
+			Redirect(Routes.old.agent.view(relationshipType))
 		}
 	}
 

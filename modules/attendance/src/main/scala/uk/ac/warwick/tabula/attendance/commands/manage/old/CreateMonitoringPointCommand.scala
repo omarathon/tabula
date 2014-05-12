@@ -1,58 +1,49 @@
-package uk.ac.warwick.tabula.attendance.commands.manage
+package uk.ac.warwick.tabula.attendance.commands.manage.old
 
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, MonitoringPointSet, MonitoringPoint}
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, AutowiringTermServiceComponent}
 
 
-object UpdateMonitoringPointCommand {
-	def apply(set: MonitoringPointSet, point: MonitoringPoint) =
-		new UpdateMonitoringPointCommand(set, point)
+object CreateMonitoringPointCommand {
+	def apply(set: MonitoringPointSet) =
+		new CreateMonitoringPointCommand(set)
 		with ComposableCommand[MonitoringPoint]
-		with AutowiringMonitoringPointServiceComponent
+		with CreateMonitoringPointValidation
+		with CreateMonitoringPointDescription
+		with CreateMonitoringPointPermission
 		with AutowiringTermServiceComponent
+		with AutowiringMonitoringPointServiceComponent
 		with AutowiringSmallGroupServiceComponent
 		with AutowiringModuleAndDepartmentServiceComponent
-		with UpdateMonitoringPointValidation
-		with UpdateMonitoringPointDescription
-		with UpdateMonitoringPointPermission
 }
 
 /**
- * Update a monitoring point
+ * Create a new monitoring point for the given set.
  */
-abstract class UpdateMonitoringPointCommand(val set: MonitoringPointSet, val point: MonitoringPoint)
-	extends CommandInternal[MonitoringPoint] with UpdateMonitoringPointState {
-
-	self: MonitoringPointServiceComponent =>
-
-	copyFrom(point)
+abstract class CreateMonitoringPointCommand(val set: MonitoringPointSet) extends CommandInternal[MonitoringPoint] with CreateMonitoringPointState {
 
 	override def applyInternal() = {
+		val point = new MonitoringPoint
 		copyTo(point)
+		point.createdDate = new DateTime()
 		point.updatedDate = new DateTime()
-		monitoringPointService.saveOrUpdate(point)
+		set.add(point)
+		monitoringPoints.add(point)
 		point
 	}
 }
 
-trait UpdateMonitoringPointValidation extends SelfValidating with MonitoringPointValidation {
-	self: UpdateMonitoringPointState with MonitoringPointServiceComponent =>
+trait CreateMonitoringPointValidation extends SelfValidating with MonitoringPointValidation {
+	self: CreateMonitoringPointState =>
 
 	override def validate(errors: Errors) {
-		if (anyStudentsReportedForRelatedPointsThisTerm(point)) {
-			errors.reject("monitoringPoint.hasReportedCheckpoints.update")
-		} else if (monitoringPointService.countCheckpointsForPoint(point) > 0 && validFromWeek > point.validFromWeek) {
-			// TAB-1537
-			errors.rejectValue("validFromWeek", "monitoringPoint.hasCheckpoints.update.validFromLater")
-		}
-
 		validateWeek(errors, validFromWeek, "validFromWeek")
 		validateWeek(errors, requiredFromWeek, "requiredFromWeek")
 		validateWeeks(errors, validFromWeek, requiredFromWeek, "validFromWeek")
@@ -84,41 +75,43 @@ trait UpdateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 			case _ =>
 		}
 
-		if (set.points.asScala.count(p =>
-			p.name == name && p.validFromWeek == validFromWeek && p.requiredFromWeek == requiredFromWeek && p.id != point.id
+		if (anyStudentsReportedForThisTerm(set, validFromWeek, academicYear)) {
+			errors.rejectValue("validFromWeek", "monitoringPoint.hasReportedCheckpoints.add")
+		} else if (set.points.asScala.count(p =>
+			p.name == name && p.validFromWeek == validFromWeek && p.requiredFromWeek == requiredFromWeek
 		) > 0) {
 			errors.rejectValue("name", "monitoringPoint.name.exists")
 			errors.rejectValue("validFromWeek", "monitoringPoint.name.exists")
 		}
-
 	}
 
 }
 
-trait UpdateMonitoringPointPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: UpdateMonitoringPointState =>
+trait CreateMonitoringPointPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: CreateMonitoringPointState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.MonitoringPoints.Manage, mandatory(set))
 	}
 }
 
-trait UpdateMonitoringPointDescription extends Describable[MonitoringPoint] {
-	self: UpdateMonitoringPointState =>
+trait CreateMonitoringPointDescription extends Describable[MonitoringPoint] {
+	self: CreateMonitoringPointState =>
 
-	override lazy val eventName = "UpdateMonitoringPoint"
+	override lazy val eventName = "CreateMonitoringPoint"
 
 	override def describe(d: Description) {
 		d.monitoringPointSet(set)
-		d.monitoringPoint(point)
+		d.property("name", name)
+		d.property("validFromWeek", validFromWeek)
+		d.property("requiredFromWeek", requiredFromWeek)
+		d.property("pointType", pointType)
 	}
 }
 
-trait UpdateMonitoringPointState extends MonitoringPointState with CanPointBeChanged {
+trait CreateMonitoringPointState extends MonitoringPointState with CanPointBeChanged {
 	def set: MonitoringPointSet
-	def point: MonitoringPoint
 	val dept = set.route.department
 	monitoringPoints.addAll(set.points)
-
-	def hasCheckpoints = monitoringPointService.countCheckpointsForPoint(point) > 0
 }
+

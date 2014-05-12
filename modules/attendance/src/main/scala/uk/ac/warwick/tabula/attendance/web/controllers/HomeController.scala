@@ -34,11 +34,11 @@ class HomeController extends AttendanceController {
 
 		if (!features.attendanceMonitoringAcademicYear2014) {
 			if (info.hasProfile && info.managePermissions.size == 0 && info.viewPermissions.size == 0 && !hasAnyRelationships)
-				Redirect(Routes.profile())
+				Redirect(Routes.old.profile())
 			else if (!info.hasProfile && info.managePermissions.size == 0 && info.viewPermissions.size == 1 && !hasAnyRelationships)
-				Redirect(Routes.department.view(info.viewPermissions.head))
+				Redirect(Routes.old.department.view(info.viewPermissions.head))
 			else if (!info.hasProfile && info.managePermissions.size == 1 && info.viewPermissions.size == 0 && !hasAnyRelationships)
-				Redirect(Routes.department.manage(info.managePermissions.head))
+				Redirect(Routes.old.department.manage(info.managePermissions.head))
 			else
 				Mav("home",
 					"hasProfile" -> info.hasProfile,

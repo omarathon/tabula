@@ -6,8 +6,8 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSetTemplate
-import uk.ac.warwick.tabula.attendance.commands.manage.ManageMonitoringPointSetCommand
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
+import uk.ac.warwick.tabula.attendance.commands.manage.old.ManageMonitoringPointSetCommand
 
 /**
  * Displays the screen for creating and editing monitoring point sets

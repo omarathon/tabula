@@ -17,7 +17,7 @@ class ProfileHomeController extends AttendanceController {
 
 	@RequestMapping
 	def render() = user.profile match {
-		case Some(student: StudentMember) => Redirect(Routes.profile(student))
+		case Some(student: StudentMember) => Redirect(Routes.old.profile(student))
 		case _ if user.isStaff => Mav("profile/profile_staff").noLayoutIf(ajax)
 		case _ => Mav("profile/profile_unknown").noLayoutIf(ajax)
 	}

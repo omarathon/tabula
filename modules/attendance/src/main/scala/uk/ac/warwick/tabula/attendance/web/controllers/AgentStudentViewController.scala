@@ -65,7 +65,7 @@ class AgentStudentViewController extends AttendanceController {
 			"student" -> student,
 			"relationshipType" -> relationshipType,
 			"pointsByTerm" -> cmd.apply().pointsByTerm
-		).crumbs(Breadcrumbs.Agent(relationshipType))
+		).crumbs(Breadcrumbs.Old.Agent(relationshipType))
 	}
 
 }

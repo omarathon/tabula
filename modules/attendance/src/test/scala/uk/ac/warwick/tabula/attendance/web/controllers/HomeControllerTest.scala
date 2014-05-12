@@ -31,6 +31,9 @@ class HomeControllerTest extends TestBase with Mockito{
 		}
 		val departmentCode = "xx"
 		val relationshipType = mock[StudentRelationshipType]
+
+		val controller = new HomeController
+		controller.features = emptyFeatures
 	}
 
 
@@ -44,7 +47,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = new HomeController().home(command)
+		val mav = controller.home(command)
 		mav.viewName should be("redirect:/attendance/profile")
 
 	}}
@@ -59,7 +62,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = new HomeController().home(command)
+		val mav = controller.home(command)
 		mav.viewName should be(s"redirect:/attendance/$departmentCode")
 
 	}}
@@ -74,7 +77,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = new HomeController().home(command)
+		val mav = controller.home(command)
 		mav.viewName should be(s"redirect:/attendance/manage/$departmentCode/2013")
 
 	}}
@@ -89,7 +92,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = new HomeController().home(command)
+		val mav = controller.home(command)
 		mav.viewName should be("home")
 
 	}}
@@ -104,7 +107,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = new HomeController().home(command)
+		val mav = controller.home(command)
 		mav.viewName should be("home")
 
 	}}
@@ -119,7 +122,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = new HomeController().home(command)
+		val mav = controller.home(command)
 		mav.viewName should be("home")
 
 	}}
@@ -134,7 +137,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map(relationshipType -> true)
 		)
 
-		val mav = new HomeController().home(command)
+		val mav = controller.home(command)
 		mav.viewName should be("home")
 
 	}}

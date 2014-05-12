@@ -6,8 +6,8 @@ import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPo
 import uk.ac.warwick.tabula.commands.Appliable
 import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.attendance.commands.manage.CreateMonitoringPointCommand
 import scala.Array
+import uk.ac.warwick.tabula.attendance.commands.manage.old.CreateMonitoringPointCommand
 
 @Controller
 @RequestMapping(Array("/manage/{dept}/2013/sets/{set}/edit/points/add"))

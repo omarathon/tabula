@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.commands.manage
+package uk.ac.warwick.tabula.attendance.commands.manage.old
 
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, MeetingFormat, StudentRelationshipType, Department}
 import org.springframework.util.AutoPopulatingList

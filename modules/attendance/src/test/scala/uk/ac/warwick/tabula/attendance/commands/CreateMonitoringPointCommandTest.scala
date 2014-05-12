@@ -7,7 +7,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Department, StudentRelationshipType, Route}
-import uk.ac.warwick.tabula.attendance.commands.manage.{CreateMonitoringPointState, CreateMonitoringPointValidation, CreateMonitoringPointCommand}
+import uk.ac.warwick.tabula.attendance.commands.manage.old.{CreateMonitoringPointState, CreateMonitoringPointValidation, CreateMonitoringPointCommand}
 
 class CreateMonitoringPointCommandTest extends TestBase with Mockito {
 

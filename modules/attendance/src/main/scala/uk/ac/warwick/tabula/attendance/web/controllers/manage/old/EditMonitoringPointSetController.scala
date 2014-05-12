@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
-import uk.ac.warwick.tabula.attendance.commands.manage.EditMonitoringPointSetCommand
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import scala.Array
+import uk.ac.warwick.tabula.attendance.commands.manage.old.EditMonitoringPointSetCommand
 
 @Controller
 @RequestMapping(value=Array("/manage/{dept}/2013/sets/{set}/edit"))
@@ -23,7 +23,7 @@ class EditMonitoringPointSetController extends AttendanceController {
 	@RequestMapping(method=Array(GET,HEAD))
 	def form(@PathVariable dept: Department, @ModelAttribute("command") cmd: Appliable[MonitoringPointSet]) = {
 		cmd.apply()
-		Mav("manage/set/edit_form").crumbs(Breadcrumbs.ManagingDepartment(dept))
+		Mav("manage/set/edit_form").crumbs(Breadcrumbs.Old.ManagingDepartment(dept))
 	}
 
 }

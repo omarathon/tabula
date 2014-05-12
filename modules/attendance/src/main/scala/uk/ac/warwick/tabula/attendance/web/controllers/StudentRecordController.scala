@@ -35,8 +35,8 @@ class StudentRecordController extends AttendanceController {
 
 	def form(cmd: Appliable[Seq[MonitoringCheckpoint]] with StudentRecordCommandState) = {
 		Mav("home/record_student",
-			"returnTo" -> getReturnTo(Routes.department.viewStudents(cmd.department))
-		).crumbs(Breadcrumbs.ViewDepartment(cmd.department), Breadcrumbs.ViewDepartmentStudents(cmd.department))
+			"returnTo" -> getReturnTo(Routes.old.department.viewStudents(cmd.department))
+		).crumbs(Breadcrumbs.Old.ViewDepartment(cmd.department), Breadcrumbs.Old.ViewDepartmentStudents(cmd.department))
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -45,7 +45,7 @@ class StudentRecordController extends AttendanceController {
 			form(cmd)
 		} else {
 			cmd.apply()
-			Redirect(Routes.department.viewStudents(cmd.department))
+			Redirect(Routes.old.department.viewStudents(cmd.department))
 		}
 	}
 

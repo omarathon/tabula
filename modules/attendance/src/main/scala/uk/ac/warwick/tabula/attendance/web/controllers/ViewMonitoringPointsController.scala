@@ -31,7 +31,7 @@ class ViewMonitoringPointsController extends AttendanceController {
 			if (ajax)
 				Mav("home/view_points_results").noLayout()
 			else
-				Mav("home/view_points_filter", "updatedMonitoringPoint" -> updatedMonitoringPoint).crumbs(Breadcrumbs.ViewDepartment(cmd.department))
+				Mav("home/view_points_filter", "updatedMonitoringPoint" -> updatedMonitoringPoint).crumbs(Breadcrumbs.Old.ViewDepartment(cmd.department))
 		} else {
 			val results = cmd.apply()
 
@@ -41,7 +41,7 @@ class ViewMonitoringPointsController extends AttendanceController {
 				Mav("home/view_points_filter",
 					"pointsMap" -> results,
 					"updatedMonitoringPoint" -> updatedMonitoringPoint
-				).crumbs(Breadcrumbs.ViewDepartment(cmd.department))
+				).crumbs(Breadcrumbs.Old.ViewDepartment(cmd.department))
 		}
 	}
 

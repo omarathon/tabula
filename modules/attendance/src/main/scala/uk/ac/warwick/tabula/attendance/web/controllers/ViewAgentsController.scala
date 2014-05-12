@@ -20,7 +20,7 @@ class ViewAgentsController extends AttendanceController {
 
 	@RequestMapping
 	def home(@ModelAttribute("command") cmd: Appliable[Seq[ViewAgentsResult]], @PathVariable department: Department) = {
-		Mav("home/agents", "agents" -> cmd.apply()).crumbs(Breadcrumbs.ViewDepartment(department))
+		Mav("home/agents", "agents" -> cmd.apply()).crumbs(Breadcrumbs.Old.ViewDepartment(department))
 	}
 
 }

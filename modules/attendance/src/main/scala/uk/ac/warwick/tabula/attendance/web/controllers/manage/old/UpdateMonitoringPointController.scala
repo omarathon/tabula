@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.attendance.commands.manage.UpdateMonitoringPointCommand
+import uk.ac.warwick.tabula.attendance.commands.manage.old.UpdateMonitoringPointCommand
 
 @Controller
 @RequestMapping(Array("/manage/{dept}/2013/sets/{set}/edit/points/{point}/edit"))

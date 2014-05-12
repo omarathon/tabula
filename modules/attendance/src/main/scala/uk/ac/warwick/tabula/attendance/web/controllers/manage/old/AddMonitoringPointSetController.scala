@@ -8,9 +8,9 @@ import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.attendance.commands.manage.AddMonitoringPointSetCommand
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.attendance.commands.manage.old.AddMonitoringPointSetCommand
 
 @Controller
 @RequestMapping(value=Array("/manage/{dept}/2013/sets/add/{academicYear}"))
@@ -33,7 +33,7 @@ class AddMonitoringPointSetController extends AttendanceController {
 
 	@RequestMapping(method=Array(GET,HEAD))
 	def form(@PathVariable dept: Department, @ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointSet]], @RequestParam createType: String) = {
-		Mav("manage/set/add_form", "createType" -> createType).crumbs(Breadcrumbs.ManagingDepartment(dept))
+		Mav("manage/set/add_form", "createType" -> createType).crumbs(Breadcrumbs.Old.ManagingDepartment(dept))
 	}
 
 	@RequestMapping(method=Array(POST))
@@ -47,7 +47,7 @@ class AddMonitoringPointSetController extends AttendanceController {
 			form(dept, cmd, createType)
 		} else {
 			val sets = cmd.apply()
-			Redirect(Routes.attendance.department.manage(dept), "created" -> sets.map{s => s.route.code}.distinct.size)
+			Redirect(Routes.attendance.old.department.manage(dept), "created" -> sets.map{s => s.route.code}.distinct.size)
 		}
 	}
 

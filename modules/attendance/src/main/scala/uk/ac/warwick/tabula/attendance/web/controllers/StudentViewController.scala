@@ -65,7 +65,7 @@ class StudentViewController extends AttendanceController {
 			"student" -> cmd.student,
 			"pointsByTerm" -> cmd.apply().pointsByTerm,
 			"department" ->  department
-		).crumbs(Breadcrumbs.ViewDepartmentStudents(department))
+		).crumbs(Breadcrumbs.Old.ViewDepartmentStudents(department))
 	}
 
 }

@@ -7,7 +7,7 @@ import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
-import uk.ac.warwick.tabula.attendance.commands.manage.{EditMonitoringPointState, EditMonitoringPointCommand}
+import uk.ac.warwick.tabula.attendance.commands.manage.old.{EditMonitoringPointState, EditMonitoringPointCommand}
 
 @Controller
 @RequestMapping(Array("/manage/{dept}/2013/sets/add/points/edit/{pointIndex}"))

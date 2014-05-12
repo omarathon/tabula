@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.commands.manage
+package uk.ac.warwick.tabula.attendance.commands.manage.old
 
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.attendance.commands.GroupMonitoringPointsByTerm

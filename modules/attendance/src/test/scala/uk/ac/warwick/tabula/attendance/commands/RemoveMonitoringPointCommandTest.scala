@@ -6,9 +6,9 @@ import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointReport, Monito
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.attendance.commands.manage.{RemoveMonitoringPointState, RemoveMonitoringPointValidation, RemoveMonitoringPointCommand}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.tabula.attendance.commands.manage.old.{RemoveMonitoringPointState, RemoveMonitoringPointValidation, RemoveMonitoringPointCommand}
 
 class RemoveMonitoringPointCommandTest extends TestBase with Mockito {
 

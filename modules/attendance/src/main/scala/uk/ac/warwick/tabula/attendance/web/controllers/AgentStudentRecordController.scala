@@ -31,8 +31,8 @@ class AgentStudentRecordController extends AttendanceController {
 
 	def form(cmd: Appliable[Seq[MonitoringCheckpoint]] with AgentStudentRecordCommandState) = {
 		Mav("home/record_student",
-			"returnTo" -> getReturnTo(Routes.agent.student(cmd.student, cmd.relationshipType))
-		).crumbs(Breadcrumbs.Agent(cmd.relationshipType), Breadcrumbs.AgentStudent(cmd.student, cmd.relationshipType))
+			"returnTo" -> getReturnTo(Routes.old.agent.student(cmd.student, cmd.relationshipType))
+		).crumbs(Breadcrumbs.Old.Agent(cmd.relationshipType), Breadcrumbs.Old.AgentStudent(cmd.student, cmd.relationshipType))
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -41,7 +41,7 @@ class AgentStudentRecordController extends AttendanceController {
 			form(cmd)
 		} else {
 			cmd.apply()
-			Redirect(Routes.agent.student(cmd.student, cmd.relationshipType))
+			Redirect(Routes.old.agent.student(cmd.student, cmd.relationshipType))
 		}
 	}
 

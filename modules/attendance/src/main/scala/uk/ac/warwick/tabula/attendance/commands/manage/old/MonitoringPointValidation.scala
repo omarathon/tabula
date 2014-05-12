@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.commands.manage
+package uk.ac.warwick.tabula.attendance.commands.manage.old
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils._

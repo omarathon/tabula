@@ -65,7 +65,7 @@ class ReportStudentsConfirmController extends AttendanceController {
 		} else {
 			val reports = cmd.apply()
 			val redirectObjects = Map("reports" -> reports.size, "monitoringPeriod" -> cmd.period, "academicYear" -> cmd.academicYear) ++ cmd.filterMap
-			Redirect(Routes.department.viewStudents(department), redirectObjects)
+			Redirect(Routes.old.department.viewStudents(department), redirectObjects)
 		}
 	}
 

@@ -37,7 +37,7 @@ class ViewStudentsController extends AttendanceController {
 					"updatedStudent" -> updatedStudent,
 					"reports" -> reports,
 					"monitoringPeriod" -> monitoringPeriod
-				).crumbs(Breadcrumbs.ViewDepartment(cmd.department))
+				).crumbs(Breadcrumbs.Old.ViewDepartment(cmd.department))
 		} else {
 			val results = cmd.apply()
 
@@ -55,7 +55,7 @@ class ViewStudentsController extends AttendanceController {
 					"reports" -> reports,
 					"monitoringPeriod" -> monitoringPeriod,
 					"necessaryTerms" -> results.students.flatMap{ data => data.pointsByTerm.keySet }.distinct
-				).crumbs(Breadcrumbs.ViewDepartment(cmd.department))
+				).crumbs(Breadcrumbs.Old.ViewDepartment(cmd.department))
 		}
 	}
 
