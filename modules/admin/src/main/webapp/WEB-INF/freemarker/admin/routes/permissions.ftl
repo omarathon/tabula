@@ -6,7 +6,11 @@
 <#assign route_name><@fmt.route_name route /></#assign>
 
 <div id="route-permissions-page">
-	<h1>Route permissions</h1>
+	<div class="pull-right">
+		<a class="btn" href="<@routes.permissions route />"><i class="icon-lock"></i> Advanced</a>
+	</div>
+
+	<h1 class="with-settings">Route permissions</h1>
 	<h5><span class="muted">for</span> <#noescape>${route_name}</#noescape></h5>
 
 	<@pm.alerts "addCommand" route_name users role />

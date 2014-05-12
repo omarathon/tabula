@@ -46,12 +46,12 @@ abstract class StudentRelationshipChangeNotification
 trait RelationshipChangeAgent {
 	this : StudentRelationshipChangeNotification =>
 
-	private def name = relationship.studentMember match {
+	private def profileName = relationship.studentMember match {
 		case Some(sm) => " for " + sm.fullName
 		case None => ""
 	}
 
-	def urlTitle = s"view the student profile$name"
+	def urlTitle = s"view the student profile$profileName"
 }
 
 @Entity

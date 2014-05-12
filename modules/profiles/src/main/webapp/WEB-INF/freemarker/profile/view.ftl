@@ -7,6 +7,21 @@
 	<hr class="full-width" />
 </#if>
 
+<#if can.do("RolesAndPermissions.Create", profile)>
+	<div class="pull-right">
+		<#assign permissions_url><@routes.permissions profile /></#assign>
+		<@fmt.permission_button
+			permission='RolesAndPermissions.Create'
+			scope=profile
+			action_descr='modify permissions'
+			classes='btn'
+			href=permissions_url
+			tooltip='Permissions'>
+			<i class="icon-lock"></i> Permissions
+		</@fmt.permission_button>
+	</div>
+</#if>
+
 <article class="profile">
 	<#include "_personal_details.ftl" />
 

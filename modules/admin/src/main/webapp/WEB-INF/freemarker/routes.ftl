@@ -23,4 +23,14 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro sortmodules department><@_u page="/department/${department.code}/sort-modules" /></#macro>
 <#macro sortroutes department><@_u page="/department/${department.code}/sort-routes" /></#macro>
 
+<#macro permissions scope><@_u page="/permissions/${scope.urlCategory}/${scope.urlSlug}" /></#macro>
+
+<#macro customroles department><@_u page="/department/${department.code}/customroles/list" /></#macro>
+<#macro addcustomrole department><@_u page="/department/${department.code}/customroles/add" /></#macro>
+<#macro editcustomrole role><@_u page="/department/${role.department.code}/customroles/${role.id}/edit" /></#macro>
+<#macro deletecustomrole role><@_u page="/department/${role.department.code}/customroles/${role.id}/delete" /></#macro>
+<#macro customroleoverrides role><@_u page="/department/${role.department.code}/customroles/${role.id}/overrides/list" /></#macro>
+<#macro addcustomroleoverride role><@_u page="/department/${role.department.code}/customroles/${role.id}/overrides/add" /></#macro>
+<#macro deletecustomroleoverride override><@_u page="/department/${override.customRoleDefinition.department.code}/customroles/${override.customRoleDefinition.id}/overrides/${override.id}/delete" /></#macro>
+
 </#compress>

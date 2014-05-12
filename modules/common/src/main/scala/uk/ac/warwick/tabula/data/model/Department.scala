@@ -224,6 +224,8 @@ class Department extends GeneratedId
 	}
 
 	def permissionsParents = Option(parent).toStream
+	override def humanReadableId = name
+	override def urlSlug = code
 
 	/** The 'top' ancestor of this department, or itself if
 	  * it has no parent.

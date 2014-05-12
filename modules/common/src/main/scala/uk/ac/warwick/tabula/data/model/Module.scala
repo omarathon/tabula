@@ -46,6 +46,8 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 	var department: Department = _
 
 	def permissionsParents = Option(department).toStream
+	override def humanReadableId = code.toUpperCase() + " " + name
+	override def urlSlug = code
 
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@BatchSize(size=100)

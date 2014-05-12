@@ -12,7 +12,9 @@ case class StudentRelationshipAgent(student: model.Member, relationshipType: Stu
 case class StudentRelationshipAgentRoleDefinition(relationshipType: PermissionsSelector[StudentRelationshipType])
 	extends SelectorBuiltInRoleDefinition(relationshipType) {
 
-	override def description = relationshipType.description
+	override def description =
+		if (relationshipType.isWildcard) "Relationship agent (any relationship)"
+		else relationshipType.description
 
 	GrantsScopedPermission(
 		Profiles.Read.Core,

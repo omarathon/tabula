@@ -6,7 +6,11 @@
 <#assign module_name><@fmt.module_name module /></#assign>
 
 <div id="module-permissions-page">
-	<h1>Module permissions</h1>
+	<div class="pull-right">
+		<a class="btn" href="<@routes.permissions module />"><i class="icon-lock"></i> Advanced</a>
+	</div>
+
+	<h1 class="with-settings">Module permissions</h1>
 	<h5><span class="muted">for</span> <#noescape>${module_name}</#noescape></h5>
 
 	<@pm.alerts "addCommand" module_name users role />
