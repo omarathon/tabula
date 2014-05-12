@@ -90,7 +90,7 @@ class HomeControllerTest extends TestBase with Mockito{
 		)
 
 		val mav = new HomeController().home(command)
-		mav.viewName should be("home/home")
+		mav.viewName should be("home")
 
 	}}
 
@@ -105,7 +105,7 @@ class HomeControllerTest extends TestBase with Mockito{
 		)
 
 		val mav = new HomeController().home(command)
-		mav.viewName should be("home/home")
+		mav.viewName should be("home")
 
 	}}
 
@@ -120,7 +120,7 @@ class HomeControllerTest extends TestBase with Mockito{
 		)
 
 		val mav = new HomeController().home(command)
-		mav.viewName should be("home/home")
+		mav.viewName should be("home")
 
 	}}
 
@@ -135,7 +135,7 @@ class HomeControllerTest extends TestBase with Mockito{
 		)
 
 		val mav = new HomeController().home(command)
-		mav.viewName should be("home/home")
+		mav.viewName should be("home")
 
 	}}
 

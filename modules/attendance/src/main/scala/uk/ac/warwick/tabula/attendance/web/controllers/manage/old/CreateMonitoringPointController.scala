@@ -1,18 +1,13 @@
-package uk.ac.warwick.tabula.attendance.web.controllers.manage
+package uk.ac.warwick.tabula.attendance.web.controllers.manage.old
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{RequestMapping, PathVariable, ModelAttribute}
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
+import uk.ac.warwick.tabula.commands.Appliable
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.attendance.commands.manage.CreateMonitoringPointCommand
-import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import scala.Array
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.permissions.Permissions
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
 @Controller
 @RequestMapping(Array("/manage/{dept}/2013/sets/{set}/edit/points/add"))

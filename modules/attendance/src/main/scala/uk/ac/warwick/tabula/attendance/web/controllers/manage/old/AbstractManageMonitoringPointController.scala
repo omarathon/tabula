@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.web.controllers.manage
+package uk.ac.warwick.tabula.attendance.web.controllers.manage.old
 
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import uk.ac.warwick.tabula.commands.SelfValidating

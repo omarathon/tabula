@@ -1,6 +1,6 @@
-package uk.ac.warwick.tabula.attendance.web.controllers.manage
+package uk.ac.warwick.tabula.attendance.web.controllers.manage.old
 
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{RequestMapping, PathVariable, ModelAttribute}
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.commands.Appliable
 import javax.validation.Valid
