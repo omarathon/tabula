@@ -9,9 +9,9 @@ import uk.ac.warwick.tabula.services.{AttendanceMonitoringMembershipHelpers, Att
 import uk.ac.warwick.spring.Wire
 import org.hibernate.annotations.{Type, BatchSize}
 import uk.ac.warwick.tabula.JavaImports._
-import scala.Some
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Entity
 class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with Serializable {
@@ -21,8 +21,17 @@ class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with
 
 	var name: String = _
 
+	def displayName = {
+		if (name.hasText)
+			name
+		else
+		// TODO Could probably come up with something better here
+			"Untitled scheme"
+	}
+
 	@NotNull
 	@Column(name = "academicyear")
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	var academicYear: AcademicYear = _
 
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)

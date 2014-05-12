@@ -31,7 +31,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 			<#if department.parent?? || department.children?has_content>
 				<h4 class="with-related"><span class="muted">${preposition}</span> ${department.name}</h4>
 			<#else>
-				<h4><span class="muted">for</span> ${department.name}</h4>
+				<h4><span class="muted">${preposition}</span> ${department.name}</h4>
 			</#if>
 		<#-- <div> closed below -->
 	<#else>

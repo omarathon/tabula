@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringScheme}
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.{AutowiringAttendanceMonitoringDaoComponent, AttendanceMonitoringDaoComponent}
 
@@ -17,6 +17,7 @@ trait AutowiringAttendanceMonitoringServiceComponent extends AttendanceMonitorin
 }
 
 trait AttendanceMonitoringService {
+	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
 	def studentAlreadyReportedThisTerm(student: StudentMember, point: AttendanceMonitoringPoint): Boolean
 }
@@ -24,6 +25,9 @@ trait AttendanceMonitoringService {
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService {
 
 	self: AttendanceMonitoringDaoComponent with TermServiceComponent =>
+
+	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
+		attendanceMonitoringDao.listSchemes(department, academicYear)
 
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String] =
 		attendanceMonitoringDao.findNonReportedTerms(students, academicYear)
