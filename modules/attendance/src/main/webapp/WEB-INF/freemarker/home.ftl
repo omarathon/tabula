@@ -22,7 +22,10 @@
 		<ul>
 			<#list relationshipTypesMap?keys as relationshipType>
 				<#if relationshipTypesMapById[relationshipType.id]>
-					<li><h3><a id="relationship-${relationshipType.urlPart}" href="<@routes.agentView relationshipType />">${relationshipType.studentRole?cap_first}s</a></h3></li>
+					<li><h3><a id="relationship-${relationshipType.urlPart}" href="<@routes.agentView relationshipType />">${relationshipType.studentRole?cap_first}s 13/14</a></h3></li>
+					<#if features.attendanceMonitoringAcademicYear2014>
+						<li><h3><a id="relationship-${relationshipType.urlPart}" href="<@routes.agentHomeForYear relationshipType '2014'/>">${relationshipType.studentRole?cap_first}s 14/15</a></h3></li>
+					</#if>
 				</#if>
 			</#list>
 		</ul>
@@ -37,7 +40,10 @@
 			<ul class="unstyled">
 				<#list viewPermissions as department>
 					<li>
-						<h3><a id="view-department-${department.code}" href="<@routes.viewDepartment department />">${department.name}</a></h3>
+						<h3><a id="view-department-${department.code}" href="<@routes.viewDepartment department />">${department.name} 13/14</a></h3>
+						<#if features.attendanceMonitoringAcademicYear2014>
+							<h3><a id="view-department-${department.code}" href="<@routes.viewHomeForYear department '2014'/>">${department.name} 14/15</a></h3>
+						</#if>
 					</li>
 				</#list>
 			</ul>
@@ -48,7 +54,10 @@
 			<ul class="unstyled">
 				<#list managePermissions as department>
 					<li>
-						<h3><a id="manage-department-${department.code}" href="<@routes.manageDepartment department />">${department.name}</a></h3>
+						<h3><a id="manage-department-${department.code}" href="<@routes.manageDepartment department />">${department.name} 13/14</a></h3>
+						<#if features.attendanceMonitoringAcademicYear2014>
+							<h3><a id="manage-department-${department.code}" href="<@routes.manageHomeForYear department '2014'/>">${department.name} 14/15</a></h3>
+						</#if>
 					</li>
 				</#list>
 			</ul>
