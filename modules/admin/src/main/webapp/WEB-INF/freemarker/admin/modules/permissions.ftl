@@ -5,7 +5,7 @@
 <#assign perms_url><@routes.moduleperms module /></#assign>
 <#assign module_name><@fmt.module_name module /></#assign>
 
-<div id="module-permissions-page">
+<div class="permissions-page">
 	<div class="pull-right">
 		<a class="btn" href="<@routes.permissions module />"><i class="icon-lock"></i> Advanced</a>
 	</div>
