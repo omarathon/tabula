@@ -13,8 +13,8 @@ class AttendanceViewAgentsTest extends AttendanceFixture with GivenWhenThen{
 		And("Marker 1 is tutor to Student 1")
 		createStudentRelationship(P.Student1,P.Marker1)
 
-		When("I go to /attendance/view/xxx/agents/tutor")
-		go to Path("/attendance/view/xxx/agents/tutor")
+		When("I go to /attendance/view/xxx/2013/agents/tutor")
+		go to Path("/attendance/view/xxx/2013/agents/tutor")
 
 		Then("I see the list of tutors")
 		pageSource should include("Personal Tutors")
@@ -24,7 +24,7 @@ class AttendanceViewAgentsTest extends AttendanceFixture with GivenWhenThen{
 		And("There is an Attendance button")
 		click on cssSelector("table.agents td.button a")
 
-		eventually(currentUrl should include(s"/attendance/view/xxx/agents/tutor/${P.Marker1.warwickId}"))
+		eventually(currentUrl should include(s"/attendance/view/xxx/2013/agents/tutor/${P.Marker1.warwickId}"))
 	}
 
 }

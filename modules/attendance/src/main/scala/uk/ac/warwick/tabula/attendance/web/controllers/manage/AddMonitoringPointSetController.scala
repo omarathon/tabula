@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import uk.ac.warwick.tabula.web.Routes
 
 @Controller
-@RequestMapping(value=Array("/manage/{dept}/sets/add/{academicYear}"))
+@RequestMapping(value=Array("/manage/{dept}/2013/sets/add/{academicYear}"))
 class AddMonitoringPointSetController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
@@ -21,14 +21,13 @@ class AddMonitoringPointSetController extends AttendanceController {
 	@ModelAttribute("command")
 	def createCommand(
 		@PathVariable dept: Department,
-		@PathVariable academicYear: AcademicYear,
 		@RequestParam createType: String,
 		@RequestParam(value="existingSet",required=false) existingSet: MonitoringPointSet,
 		@RequestParam(value="template",required=false) template: MonitoringPointSetTemplate
 	) = createType match {
-		case "blank" => AddMonitoringPointSetCommand(user, dept, academicYear, None, None)
-		case "template" => AddMonitoringPointSetCommand(user, dept, academicYear, None, Option(template))
-		case "copy" => AddMonitoringPointSetCommand(user, dept, academicYear, Option(existingSet), None)
+		case "blank" => AddMonitoringPointSetCommand(user, dept, AcademicYear(2013), None, None)
+		case "template" => AddMonitoringPointSetCommand(user, dept, AcademicYear(2013), None, Option(template))
+		case "copy" => AddMonitoringPointSetCommand(user, dept, AcademicYear(2013), Option(existingSet), None)
 		case _ => throw new IllegalArgumentException
 	}
 

@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.attendance.commands.{HomeCommandState, HomeCommand}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, ModuleAndDepartmentService, RelationshipServiceComponent, ModuleAndDepartmentServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.attendance.commands.HomeInformation
-import uk.ac.warwick.tabula.attendance.commands.HomeInformation
 
 class HomeControllerTest extends TestBase with Mockito{
 
@@ -76,7 +75,7 @@ class HomeControllerTest extends TestBase with Mockito{
 		)
 
 		val mav = new HomeController().home(command)
-		mav.viewName should be(s"redirect:/attendance/manage/$departmentCode")
+		mav.viewName should be(s"redirect:/attendance/manage/$departmentCode/2013")
 
 	}}
 

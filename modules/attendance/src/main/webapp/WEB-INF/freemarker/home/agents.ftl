@@ -4,7 +4,6 @@
 <h1>${command.relationshipType.agentRole?capitalize}s</h1>
 
 <#assign thisPath><@routes.viewDepartmentAgents command.department command.relationshipType /></#assign>
-<@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
 
 <div class="agent-search" style="display: none;">
 	<div class="input-append">

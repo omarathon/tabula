@@ -1,5 +1,3 @@
-<@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
-
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <div id="profile-modal" class="modal fade profile-subset"></div>
 

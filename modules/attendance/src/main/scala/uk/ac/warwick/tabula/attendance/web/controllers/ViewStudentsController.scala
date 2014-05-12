@@ -12,14 +12,14 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 
 @Controller
-@RequestMapping(value=Array("/view/{department}/students"))
+@RequestMapping(value=Array("/view/{department}/2013/students"))
 class ViewStudentsController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @RequestParam(value="academicYear", required = false) academicYear: AcademicYear) =
-		ViewStudentsCommand(department, Option(academicYear), user)
+	def command(@PathVariable department: Department) =
+		ViewStudentsCommand(department, Option(AcademicYear(2013)), user)
 
 	@RequestMapping
 	def filter(

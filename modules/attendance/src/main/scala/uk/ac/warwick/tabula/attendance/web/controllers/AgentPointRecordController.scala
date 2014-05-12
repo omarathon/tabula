@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
-@RequestMapping(Array("/agent/{relationshipType}/point/{point}/record"))
+@RequestMapping(Array("/agent/{relationshipType}/2013/point/{point}/record"))
 @Controller
 class AgentPointRecordController extends AttendanceController {
 

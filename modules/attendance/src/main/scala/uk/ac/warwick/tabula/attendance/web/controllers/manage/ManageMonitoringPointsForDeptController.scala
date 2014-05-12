@@ -13,12 +13,12 @@ import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
  * Displays the screen for creating and editing monitoring point sets
  */
 @Controller
-@RequestMapping(Array("/manage/{dept}"))
+@RequestMapping(Array("/manage/{dept}/2013"))
 class ManageMonitoringPointsForDeptController extends AttendanceController {
 
 	@ModelAttribute("command")
-	def createCommand(@PathVariable dept: Department, @RequestParam(value="academicYear", required = false) academicYear: AcademicYear) =
-			ManageMonitoringPointSetCommand(user, dept, Option(academicYear))
+	def createCommand(@PathVariable dept: Department) =
+			ManageMonitoringPointSetCommand(user, dept, Option(AcademicYear(2013)))
 
 	@RequestMapping
 	def home(
