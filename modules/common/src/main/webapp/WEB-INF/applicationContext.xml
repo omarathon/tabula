@@ -153,6 +153,7 @@
 				<bean class="uk.ac.warwick.tabula.data.model.DepartmentFilterRuleConverter" />
 				<bean class="uk.ac.warwick.tabula.data.convert.AbsenceTypeConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.NotificationIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointStyleConverter"/>
 	        </list>
 	    </property>
 	    <property name="formatters">

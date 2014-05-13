@@ -17,6 +17,7 @@ trait AutowiringAttendanceMonitoringDaoComponent extends AttendanceMonitoringDao
 }
 
 trait AttendanceMonitoringDao {
+	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
 }
@@ -24,6 +25,9 @@ trait AttendanceMonitoringDao {
 
 @Repository
 class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
+
+	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit =
+		session.saveOrUpdate(scheme)
 
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
 		session.newCriteria[AttendanceMonitoringScheme]
