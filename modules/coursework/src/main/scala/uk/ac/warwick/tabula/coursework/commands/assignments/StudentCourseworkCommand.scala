@@ -94,7 +94,10 @@ trait StudentCourseworkCommandHelper
 
 	private def enhanced(assignment: Assignment, user: User, universityId: String) = {
 		val extension = assignment.extensions.asScala.find(e => e.isForUser(user))
+		// isExtended: is within an approved extension
 		val isExtended = assignment.isWithinExtension(user)
+		// hasActiveExtension: active = approved
+		val hasActiveExtension = extension.exists(_.approved)
 		val extensionRequested = extension.isDefined && !extension.get.isManual
 		val submission = assignment.submissions.asScala.find(_.universityId == universityId)
 		val feedback = assignment.feedbacks.asScala.filter(_.released).find(_.universityId == universityId)
@@ -105,6 +108,7 @@ trait StudentCourseworkCommandHelper
 			"feedback" -> feedback,
 			"hasFeedback" -> feedback.isDefined,
 			"hasExtension" -> extension.isDefined,
+			"hasActiveExtension" -> hasActiveExtension,
 			"extension" -> extension,
 			"isExtended" -> isExtended,
 			"extensionRequested" -> extensionRequested,
