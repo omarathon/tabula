@@ -46,7 +46,7 @@ trait WebsignonMethods extends ShouldMatchers  with Eventually{
 						if (linkText("Sign in").findElement.isDefined) {
 							click on linkText("Sign in")
 						} else if (linkText("Sign out").findElement.isDefined) {
-							val SignedInAs = "(Signed in as [a-zA-Z0-9\\s]+)".r
+							val SignedInAs = ".+(Signed in as [a-zA-Z0-9\\s]+?).+".r
 							val detail = pageSource match {
 								case SignedInAs(line) => line
 								case _ => "couldn't parse anything useful from the HTML"
