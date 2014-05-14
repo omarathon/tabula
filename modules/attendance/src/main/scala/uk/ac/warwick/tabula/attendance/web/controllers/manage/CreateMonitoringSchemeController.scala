@@ -25,8 +25,13 @@ class CreateMonitoringSchemeController extends AttendanceController {
 		CreateMonitoringSchemeCommand(department, academicYear)
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def form = {
+	def form(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
 		Mav("manage/new", "createAndAddStudentsString" -> createAndAddStudentsString)
+			.crumbs(
+				Breadcrumbs.Manage.Home,
+				Breadcrumbs.Manage.Department(department),
+				Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
+			)
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -37,7 +42,7 @@ class CreateMonitoringSchemeController extends AttendanceController {
 		@PathVariable academicYear: AcademicYear
 	) = {
 		if (errors.hasErrors) {
-			form
+			form(department, academicYear)
 		} else {
 			cmd.apply()
 			Redirect(Routes.Manage.departmentForYear(department, academicYear))
@@ -52,7 +57,7 @@ class CreateMonitoringSchemeController extends AttendanceController {
 		@PathVariable academicYear: AcademicYear
 	) = {
 		if (errors.hasErrors) {
-			form
+			form(department, academicYear)
 		} else {
 			val scheme = cmd.apply()
 			Redirect(Routes.Manage.addStudentsToScheme(scheme))

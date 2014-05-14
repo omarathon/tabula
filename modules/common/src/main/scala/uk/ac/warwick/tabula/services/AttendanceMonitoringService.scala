@@ -17,6 +17,7 @@ trait AutowiringAttendanceMonitoringServiceComponent extends AttendanceMonitorin
 }
 
 trait AttendanceMonitoringService {
+	def getSchemeById(id: String): Option[AttendanceMonitoringScheme]
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
@@ -26,6 +27,9 @@ trait AttendanceMonitoringService {
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService {
 
 	self: AttendanceMonitoringDaoComponent with TermServiceComponent =>
+
+	def getSchemeById(id: String): Option[AttendanceMonitoringScheme] =
+		attendanceMonitoringDao.getSchemeById(id)
 
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit =
 		attendanceMonitoringDao.saveOrUpdate(scheme)

@@ -69,8 +69,12 @@ trait CreateMonitoringSchemeDescription extends Describable[AttendanceMonitoring
 
 	override lazy val eventName = "CreateMonitoringScheme"
 
-	override def describe(d: Description) {
+	override def describe(d: Description) = {
+		d.department(department)
+	}
 
+	override def describeResult(d: Description, result: AttendanceMonitoringScheme) = {
+		d.attendanceMonitoringScheme(result)
 	}
 }
 

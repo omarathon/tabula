@@ -940,6 +940,17 @@ table {
 			}
 		}
 
+		&.tabula-darkRed {
+			> thead > tr > th {
+				background-color: lighten(@tabulaRedDarkTint, 5%);
+
+				&.headerSortDown,
+				&.headerSortUp {
+					background-color: @tabulaRedDarkTint;
+				}
+			}
+		}
+
 		&.tabula-greenDark, &.tabula-turquoise {
 			> thead > tr > th {
 				background-color: lighten(@tabulaTurquoiseTint, 5%);

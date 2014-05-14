@@ -369,8 +369,53 @@ $(function(){
 
 	// END SCRIPTS FOR MANAGING MONITORING POINTS
 
+});
 
+// TAB-1974 scripts
 
+$(function(){
+
+	// Scripts for Add student during Create a scheme
+
+	$('#newSchemeAddStudents')
+		.find('a.mass-add-users-button').on('click', function(e){
+			e.stopPropagation();
+			e.preventDefault();
+			$(this).closest('form').find('.mass-add-users-modal').modal('show').on('shown', function(){
+				$(this).off('shown').find('textarea').focus();
+			});
+		}).end()
+		.find('.mass-add-users-modal textarea').on('keyup', function(){
+			var $this = $(this), $addButton = $this.closest('div.modal').find('div.modal-footer a.btn');
+			if ($this.val().length === 0) {
+				$addButton.addClass('disabled');
+			} else {
+				$addButton.removeClass('disabled');
+			}
+		}).end()
+		.find('div.mass-add-users-modal a.btn').on('click', function(){
+			var $this = $(this);
+			if ($this.hasClass('disabled'))
+				return;
+
+			$this.addClass('disabled');
+			var $form = $('#newSchemeAddStudents'), $modal = $form.find('.mass-add-users-modal');
+			$.ajax($modal.data('href'), {
+				type: 'POST',
+				data: $form.serialize(),
+				success: function(response){
+					var newCount = $form.find('div.membership').empty().html(response)
+						.find('.student-count').html();
+					$form.find('.student-count').html(newCount);
+					$modal.modal('hide').find('textarea').empty();
+				},
+				error: function(){
+					// Shrug
+					$this.addClass('disabled');
+				}
+			})
+		})
+	;
 });
 
 window.Attendance = jQuery.extend(window.Attendance, exports);
