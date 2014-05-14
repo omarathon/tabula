@@ -1,3 +1,5 @@
+<#if groups
+
 <section id="small-groups" class="clearfix" >
 	<script type="text/javascript">
 		jQuery(function($){

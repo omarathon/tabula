@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.{StaffAssistantsHelpers, UserGroupCacheManager, SmallGroupService, TermService, ProfileService, RelationshipService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
-import uk.ac.warwick.tabula.system.permissions.Restricted
+import uk.ac.warwick.tabula.system.permissions.{RestrictionProvider, Restricted, PermissionsChecking}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.AcademicYear
@@ -30,7 +30,6 @@ import org.hibernate.annotations.Type
 import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Filter
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 
 object Member {
@@ -397,7 +396,7 @@ class EmeritusMember extends Member with StaffProperties {
 
 @Entity
 @DiscriminatorValue("O")
-class OtherMember extends Member with AlumniProperties {
+class OtherMember extends Member with AlumniProperties with RestrictedPhoneNumber {
 	this.userType = MemberUserType.Other
 
 	def this(id: String) = {
@@ -406,7 +405,7 @@ class OtherMember extends Member with AlumniProperties {
 	}
 }
 
-class RuntimeMember(user: CurrentUser) extends Member(user) {
+class RuntimeMember(user: CurrentUser) extends Member(user) with RestrictedPhoneNumber {
 	override def permissionsParents = Stream.empty
 }
 
@@ -454,7 +453,8 @@ trait MemberProperties extends StringId {
 
 	var jobTitle: String = _
 
-	@Restricted(Array("Profiles.Read.TelephoneNumber"))
+//	@Restricted(Array("Profiles.Read.TelephoneNumber"))
+	@RestrictionProvider("phoneNumberPermissions")
 	var phoneNumber: String = _
 
 	@Restricted(Array("Profiles.Read.Nationality"))
@@ -466,9 +466,11 @@ trait MemberProperties extends StringId {
 	@Column(name = "timetable_hash")
 	var timetableHash: String = _
 
+	def phoneNumberPermissions: Seq[Permission]
+
 }
 
-trait StudentProperties {
+trait StudentProperties extends RestrictedPhoneNumber {
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name="HOME_ADDRESS_ID")
 	@Restricted(Array("Profiles.Read.HomeAddress"))
@@ -492,10 +494,18 @@ trait StudentProperties {
 	@Column(name="tier4_visa_requirement")
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	var tier4VisaRequirement: JBoolean = _
+
+}
+
+trait RestrictedPhoneNumber {
+	def phoneNumberPermissions = Seq(Permissions.Profiles.Read.TelephoneNumber)
 }
 
 trait StaffProperties {
-//	var teachingStaff: JBoolean = _
+	//	var teachingStaff: JBoolean = _
+
+	// Anyone can view staff phone number
+	def phoneNumberPermissions = Nil
 }
 
 trait AlumniProperties

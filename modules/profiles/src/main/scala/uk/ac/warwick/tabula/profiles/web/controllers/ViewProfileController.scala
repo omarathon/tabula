@@ -9,16 +9,16 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
-import uk.ac.warwick.tabula.commands.ViewViewableCommand
+import uk.ac.warwick.tabula.commands.{ViewViewableCommand, Command}
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
-import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.web.Mav
 
 
-class ViewProfileCommand(user: CurrentUser, profile: StudentMember)
+class ViewProfileCommand(user: CurrentUser, profile: Member)
 	extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
 
-	if (user.isStudent && user.universityId != profile.universityId) {
+	if ((user.isStudent && user.universityId != profile.universityId) ||
+			(user.isStaff && profile.isStaff && user.universityId != profile.universityId ) ) {
 		logger.info("Denying access for user " + user + " to view profile " + profile)
 		throw new PermissionDeniedException(user, Permissions.Profiles.Read.Core, profile)
 	}
@@ -112,6 +112,25 @@ abstract class ViewProfileController extends ProfilesController {
 			"studentCourseDetails" -> studentCourseDetails,
 			"studentCourseYearDetails" -> studentCourseYearDetails
 		).crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
+	}
+
+	def viewProfileForStaff(profiledMember: StaffMember): Mav = {
+
+		val isSelf = profiledMember.universityId == user.universityId
+
+		val relationshipTypes: Seq[StudentRelationshipType] =
+			relationshipService.listAllStudentRelationshipTypesWithMember(currentMember)
+
+		val smallGroups = smallGroupService.findSmallGroupsByTutor(user.apparentUser)
+
+		Mav("profile/view",
+			"viewerRelationshipTypes" -> relationshipTypes,
+			"profile" -> profiledMember,
+			"viewer" -> currentMember,
+			"isSelf" -> isSelf,
+			"isStaff" -> profiledMember.isStaff,
+			"smallGroups" -> smallGroups
+		).crumbs(Breadcrumbs.Profile(profiledMember, isSelf))
 	}
 
 	def studentCourseYearFromYear(studentCourseDetails: StudentCourseDetails, year: AcademicYear) =

@@ -34,6 +34,8 @@
 				</div>
 			
 				<#include "../profile/search/form.ftl" />
+
+				<h2><a href="<@routes.profile_by_id universityId />">My staff profile</a></h2>
 			</#if>
 
 			<#if isPGR>

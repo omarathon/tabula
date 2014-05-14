@@ -25,6 +25,10 @@
 <article class="profile">
 	<#include "_personal_details.ftl" />
 
+	<#if profile.isStaff()>
+		<#include "_staff_details.ftl" />
+	</#if>
+
 	<#if (features.profilesMemberNotes && can.do('MemberNotes.Read', profile)) >
 			<#include "_member_notes.ftl" />
 	</#if>

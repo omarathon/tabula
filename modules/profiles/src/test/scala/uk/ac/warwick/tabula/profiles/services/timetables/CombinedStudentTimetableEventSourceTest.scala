@@ -20,7 +20,7 @@ class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 	val source = new CombinedStudentTimetableEventSourceComponent
 		with TimetableFetchingServiceComponent
 		with SmallGroupEventTimetableEventSourceComponent{
-
+		val staffGroupEventSource = mock[StaffTimetableEventSource]
 		val studentGroupEventSource = mock[StudentTimetableEventSource]
 		val timetableFetchingService = mock[TimetableFetchingService]
 	}
