@@ -27,10 +27,10 @@
 ${feedback.assignment.genericFeedback!""}
 </div>
 </#if>
-<#if feedback.defaultFeedbackComments??>
+<#if feedback.comments??>
 <div class="feedback-notes">
 <h4>Feedback on your submission</h4>
-${feedback.defaultFeedbackComments!""}
+${feedback.comments!""}
 </div>
 </#if>
 

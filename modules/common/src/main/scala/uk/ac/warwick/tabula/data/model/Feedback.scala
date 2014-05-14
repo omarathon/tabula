@@ -144,13 +144,14 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	@OneToMany(mappedBy = "feedback", cascade = Array(ALL))
 	var customFormValues: JSet[SavedFormValue] = JHashSet()
 
-	def getValue(field: FormField): Option[SavedFormValue] = {
+	private def getValue(field: FormField): Option[SavedFormValue] = {
 		customFormValues.find( _.name == field.name )
 	}
 
-	def defaultFeedbackComments = customFormValues.find(_.name == Assignment.defaultFeedbackTextFieldName).map(_.value)
+	// FormValue containing the per-user online feedback comment
+	def commentsFormValue = customFormValues.find(_.name == Assignment.defaultFeedbackTextFieldName)
 
-	def onlineFeedbackComments: Option[SavedFormValue] = Option(assignment) flatMap ( _.feedbackCommentsField ) flatMap getValue
+	def comments: Option[String] = commentsFormValue.map(_.value)
 
 	// Getters for marker feedback either return the marker feedback or create a new empty one if none exist
 	def retrieveFirstMarkerFeedback:MarkerFeedback = {
@@ -179,17 +180,12 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 
 	def hasMarkOrGrade = hasMark || hasGrade
 
-	def hasMark: Boolean = actualMark match {
-		case Some(int) => true
-		case None => false
-	}
+	def hasMark: Boolean = actualMark.isDefined
 
-	def hasGrade: Boolean = actualGrade match {
-		case Some(string) => true
-		case None => false
-	}
+	def hasGrade: Boolean = actualGrade.isDefined
 
-	def hasOnlineFeedback: Boolean = onlineFeedbackComments.isDefined
+	// TODO in some other places we also check that the string value hasText. Be consistent?
+	def hasOnlineFeedback: Boolean = commentsFormValue.isDefined
 
 	def getAllMarkerFeedback: Seq[MarkerFeedback] = Seq(firstMarkerFeedback, secondMarkerFeedback, thirdMarkerFeedback)
 

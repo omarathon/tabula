@@ -63,7 +63,7 @@ class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module
 			{ <marking /> % markerData(item, assignment) % plagiarismData(item) }
 			{ 
 				<feedback>
-					{ item.coursework.enhancedFeedback.flatMap { _.feedback.defaultFeedbackComments }.getOrElse(null) }
+					{ item.coursework.enhancedFeedback.flatMap { _.feedback.comments }.orNull }
 				</feedback> % feedbackData(item) 
 			}
 		</student> % identityData(item)
