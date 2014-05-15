@@ -57,6 +57,7 @@ trait FeedbackAttachments {
 
 @Entity @AccessType("field")
 class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with ToEntityReference {
+
 	type Entity = Feedback
 
 	def this(universityId: String) {
@@ -142,10 +143,13 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	var releasedDate: DateTime = _
 
 	@OneToMany(mappedBy = "feedback", cascade = Array(ALL))
-	var customFormValues: JSet[SavedFormValue] = JHashSet()
+	val customFormValues: JSet[SavedFormValue] = JHashSet()
 
-	private def getValue(field: FormField): Option[SavedFormValue] = {
-		customFormValues.find( _.name == field.name )
+	def clearCustomFormValues(): Unit = {
+		customFormValues.foreach { v =>
+			v.feedback = null
+		}
+		customFormValues.clear()
 	}
 
 	// FormValue containing the per-user online feedback comment
