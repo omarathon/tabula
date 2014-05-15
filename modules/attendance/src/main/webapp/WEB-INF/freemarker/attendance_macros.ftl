@@ -196,3 +196,41 @@
 		</div>
 	</div>
 </#macro>
+
+<#macro manageStudentTable membershipItems>
+	<#if (membershipItems?size > 0)>
+		<table class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-darkRed tablesorter sb-no-wrapper-table-popout">
+			<thead>
+			<tr>
+				<th style="width: 20px;">&nbsp;</th>
+				<th style="width: 50px;">Source</th>
+				<th>First name</th>
+				<th>Last name</th>
+				<th>ID</th>
+				<th>User</th>
+			</tr>
+			</thead>
+			<tbody>
+				<#list membershipItems as item>
+					<tr>
+						<td>
+						</td>
+						<td>
+							<#if item.itemTypeString == "static">
+								<span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span>
+							<#elseif item.itemTypeString == "exclude">
+								<span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-ban-circle"></i></span>
+							<#else>
+								<span class="use-tooltip" title="Added manually" data-placement="right"><i class="icon-hand-up"></i></span>
+							</#if>
+						</td>
+						<td>${item.member.firstName}</td>
+						<td>${item.member.lastName}</td>
+						<td>${item.member.universityId}</td>
+						<td>${item.member.userId}</td>
+					</tr>
+				</#list>
+			</tbody>
+		</table>
+	</#if>
+</#macro>

@@ -87,8 +87,11 @@
 <#macro manageAddPoints department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/addpoints"/></#macro>
 <#macro manageEditPoints department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/editpoints"/></#macro>
 
-<#macro manageUpdateMembership scheme>
-	<@_u page="/manage/${scheme.department.code}/${scheme.academicYear.startYear?c}/${scheme.id}/students/membership"/>
+<#macro manageAddStudents scheme>
+	<@_u page="/manage/${scheme.department.code}/${scheme.academicYear.startYear?c}/new/${scheme.id}/students"/>
+</#macro>
+<#macro manageSelectStudents scheme>
+	<@_u page="/manage/${scheme.department.code}/${scheme.academicYear.startYear?c}/${scheme.id}/students/select"/>
 </#macro>
 
 <#macro viewHome><@_u page="/view"/></#macro>

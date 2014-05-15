@@ -1,5 +1,20 @@
 <#escape x as x?html>
-<#import "*/modal_macros.ftl" as modal />
+<#import "../attendance_macros.ftl" as attendance_macros />
+
+<#macro listStudentIdInputs>
+	<#list command.staticStudentIds as id>
+		<input type="hidden" name="staticStudentIds" value="${id}" />
+		<input type="hidden" name="updatedStaticStudentIds" value="${id}" />
+	</#list>
+	<#list command.includedStudentIds as id>
+		<input type="hidden" name="includedStudentIds" value="${id}" />
+		<input type="hidden" name="updatedIncludedStudentIds" value="${id}" />
+	</#list>
+	<#list command.excludedStudentIds as id>
+		<input type="hidden" name="excludedStudentIds" value="${id}" />
+		<input type="hidden" name="updatedExcludedStudentIds" value="${id}" />
+	</#list>
+</#macro>
 
 <h1>Create a scheme</h1>
 
@@ -9,15 +24,14 @@
 	<span class="arrow-right arrow-left">Points</span>
 </p>
 
-<@f.form id="newSchemeAddStudents" method="POST" commandName="command">
+	<#assign membershipItems = command.membershipItems />
 
-	<#if command.scheme.members.members?size == 0>
+	<#if membershipItems?size == 0>
 		<p>Select which students this scheme should apply to</p>
 
 		<p>
-			<span class="student-count">
-				<@fmt.p command.scheme.members.members?size "student" /> on this scheme
-			</span>
+			No students on this scheme
+
 			<#assign popoverContent><#noescape>
 				You can filter to select types of students (e.g. 1st year part-time UG)
 				and then either use these to populate a stati list (which will not then change),
@@ -29,73 +43,46 @@
 			<@fmt.help_popover id="student-count" content="${popoverContent}" />
 		</p>
 
-		<p>
+		<form method="POST" action="<@routes.manageSelectStudents command.scheme />">
+			<@listStudentIdInputs />
+			<input type="hidden" name="filterQueryString" value="${command.filterQueryString}"/>
 			<input
 				type="submit"
-				class="btn use-tooltip"
-				name="${chooseStudentsString}"
-				value="Add by type"
-				data-container="body"
-				title="Filter to select students by route, year of study etc"
+				class="btn"
+				value="Select students for scheme"
 			/>
+		</form>
 
-			<a
-				class="btn use-tooltip mass-add-users-button"
-				data-container="body"
-				title="Add a list of students by university ID or username"
-			>
-				Add manually
-			</a>
-		</p>
-
-		<div class="membership">
-			<#include "studentstable.ftl" />
-		</div>
-
+		<form id="newSchemeAddStudents" method="POST">
 	<#else>
-
 		<details>
 			<summary class="large-chevron collapsible">
 				<span class="legend">Students
 					<small>Select which students this scheme should apply to</small>
 				</span>
 
-				<p>
-					<span class="student-count">
-						<@fmt.p command.scheme.members.members?size "student" /> on this scheme
-					</span>
-				</p>
+				<p><@fmt.p membershipItems?size "student" /> on this scheme</p>
 
-				<p>
+				<form method="POST" action="<@routes.manageSelectStudents command.scheme />">
+					<@listStudentIdInputs />
+					<input type="hidden" name="filterQueryString" value="${command.filterQueryString}"/>
 					<input
-							type="submit"
-							class="btn use-tooltip"
-							name="${chooseStudentsString}"
-							value="Add by type"
-							data-container="body"
-							title="Filter to select students by route, year of study etc"
-							/>
-
-					<a
-							class="btn use-tooltip mass-add-users-button"
-							data-container="body"
-							title="Add a list of students by university ID or username"
-							>
-						Add manually
-					</a>
-				</p>
+						type="submit"
+						class="btn"
+						value="Select students for scheme"
+					/>
+				</form>
 			</summary>
 
-			<div class="membership">
-				<#include "studentstable.ftl" />
-			</div>
+			<@attendance_macros.manageStudentTable membershipItems />
 		</details>
 
 	</#if>
 
 	<p>&nbsp;</p>
 
-	<p>
+	<form id="newSchemeAddStudents" method="POST">
+		<@listStudentIdInputs />
 		<input
 				type="submit"
 				class="btn btn-success use-tooltip"
@@ -113,23 +100,6 @@
 				data-container="body"
 				/>
 		<a class="btn" href="<@routes.manageHomeForYear command.scheme.department command.scheme.academicYear.startYear?c />">Cancel</a>
-	</p>
-
-
-	<div class="mass-add-users-modal modal fade hide" data-href="<@routes.manageUpdateMembership command.scheme />">
-		<@modal.header>
-			<h6>Add students manually</h6>
-		</@modal.header>
-
-		<@modal.body>
-			<p>Type or paste in a list of usercodes or University numbers here, separated by white space, then click <code>Add</code>.</p>
-			<textarea rows="6" class="input-block-level" name="massAddUsers"></textarea>
-		</@modal.body>
-
-		<@modal.footer>
-			<a class="btn btn-success disabled spinnable spinner-auto add-students">Add</a>
-		</@modal.footer>
-	</div>
-</@f.form>
+	</form>
 
 </#escape>

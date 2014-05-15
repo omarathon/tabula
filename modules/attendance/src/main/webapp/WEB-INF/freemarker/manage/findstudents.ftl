@@ -3,35 +3,24 @@
 <h1>Add students</h1>
 <h4><span class="muted">to</span> ${command.scheme.displayName}</h4>
 
-<div class="fix-area">
-	<div class="fix-header pad-when-fixed">
-		<@f.form commandName="command" method="POST" cssClass="form-inline">
-			<@f.errors cssClass="error form-errors" />
-			<@f.hidden path="page" />
-			</#if>
-			<#if filterCommand.studentsPerPage??>
-				<@f.hidden path="studentsPerPage" />
-			</#if>
-			<#if filterCommand.sortOrder??>
-				<@f.hidden path="sortOrder" />
-			</#if>
-
-		<#-- cross-app singleton introductory text -->
-			<#if showIntro("tier4-filtering", "anywhere")>
-				<#assign introText>
-					<p>You can now filter to view only those students who may have Tier 4 monitoring/reporting requirements by checking 'Tier 4 only' under the 'Other' tab.</p>
-				</#assign>
-				<a href="#"
-				   id="tier4-intro"
-				   class="use-introductory auto"
-				   data-hash="${introHash("tier4-filtering", "anywhere")}"
-				   data-title="Tier 4 Filtering"
-				   data-placement="bottom"
-				   data-html="true"
-				   data-content="${introText}"><i class="icon-question-sign"></i></a>
-			</#if>
-
-
+<@f.form commandName="filterCommand" method="POST" cssClass="form-inline">
+<input type="hidden" name="${chooseStudentsString}" value="true" />
+<input type="hidden" name="filterQueryString" value="${filterCommand.serializeFilter}" />
+	<@f.errors cssClass="error form-errors" />
+	<#if filterCommand.hasBeenFiltered??>
+		<@f.hidden path="hasBeenFiltered" value="true"/>
+	</#if>
+	<#if filterCommand.page??>
+		<@f.hidden path="page" />
+	</#if>
+	<#if filterCommand.studentsPerPage??>
+		<@f.hidden path="studentsPerPage" />
+	</#if>
+	<#if filterCommand.sortOrder??>
+		<@f.hidden path="sortOrder" />
+	</#if>
+	<div class="fix-area">
+		<div class="fix-header pad-when-fixed">
 			<div class="student-filter btn-group-group well well-small">
 				<button type="button" class="clear-all-filters btn btn-link">
 					<span class="icon-stack">
@@ -80,7 +69,7 @@
 						<#if status.actualValue?has_content>
 							<#list status.actualValue as item><#nested item /><#if item_has_next>, </#if></#list>
 						<#else>
-						${placeholder}
+							${placeholder}
 						</#if>
 					</@spring.bind>
 				</#compress></#macro>
@@ -141,35 +130,21 @@
 					<@fmt.module_name module false />
 				</@filter>
 
-				<#if features.visaInStudentProfile>
-					<#assign placeholder = "Other" />
-					<#assign currentfilter>
-					<#-- The current_filter_value macro looks to see if a list variable called otherCriteria
-						- coming into the form has a value.  If it does, it lists the elements as "criterion" -->
-						<@current_filter_value "otherCriteria" placeholder; criterion>
-						${criterion}
-						</@current_filter_value>
-					</#assign>
-
-					<@filter "otherCriteria" placeholder currentfilter filterCommand.allOtherCriteria; criterion>
-						<input type="checkbox"
-							   name="${status.expression}"
-							   value="${criterion}"
-							   data-short-value="${criterion}"
-						${filterCommand.otherCriteria?seq_contains(criterion)?string('checked','')}
-								>
-					${criterion}
-					</@filter>
-				</#if>
-
 			</div>
-		</@f.form>
-	</div>
 
-	<div id="filter-results">
-		<#include filterResultsPath />
+		</div>
+
+		<div id="filter-results">
+			<#include "findstudentsresults.ftl" />
+		</div>
+
+		<div class="fix-footer">
+			<input type="submit" value="Link to SITS" class="btn btn-success" name="${linkToSitsString}">
+			<input type="submit" value="Import as list" class="btn btn-primary" name="${importAsListString}">
+			<a class="btn" href="">Cancel</a>
+		</div>
 	</div>
-</div>
+</@f.form>
 
 <script type="text/javascript">
 	jQuery(function($) {
@@ -181,22 +156,21 @@
 			} else {
 				if (!$list.find('.clear-this-filter').length) {
 					$list.find('> ul').prepend(
-							$('<li />').addClass('clear-this-filter')
-									.append(
-									$('<button />').attr('type', 'button')
-											.addClass('btn btn-link')
-											.html('<i class="icon-ban-circle"></i> Clear selected items')
-											.on('click', function(e) {
-												$list.find('input:checked').each(function() {
-													var $checkbox = $(this);
-													$checkbox.prop('checked', false);
-													updateFilter($checkbox);
-												});
+						$('<li />').addClass('clear-this-filter')
+							.append(
+								$('<button />').attr('type', 'button')
+									.addClass('btn btn-link')
+									.html('<i class="icon-ban-circle"></i> Clear selected items')
+									.on('click', function(e) {
+										$list.find('input:checked').each(function() {
+											var $checkbox = $(this);
+											$checkbox.prop('checked', false);
+											updateFilter($checkbox);
+										});
 
-												doRequest($list.closest('form'));
-											})
-							)
-									.append($('<hr />'))
+										doRequest($list.closest('form'));
+									})
+							).append($('<hr />'))
 					);
 				}
 			}
@@ -226,12 +200,9 @@
 			} else {
 				$('.clear-all-filters').removeAttr("disabled");
 			}
-		}
+		};
 
 		var doRequest = function($form, preventPageReset) {
-			if (typeof history.pushState !== 'undefined')
-				history.pushState(null, null, $form.attr('action') + '?' + $form.serialize());
-
 			if ($form.data('request')) {
 				$form.data('request').abort();
 				$form.data('request', null);
@@ -243,16 +214,11 @@
 
 			$('#filter-results').addClass('loading');
 			$form.data('request', $.post($form.attr('action'), $form.serialize(), function(data) {
-				$('#filter-results').html(data);
+				var $filterResults = $('#filter-results');
+				$filterResults.html(data);
 
 				$form.data('request', null);
-				$('#filter-results').removeClass('loading');
-
-				$('.use-wide-popover').tabulaPopover({
-					trigger: 'click',
-					container: '#container',
-					template: '<div class="popover wide"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
-				});
+				$filterResults.removeClass('loading');
 
 				$('.use-tooltip').tooltip();
 
@@ -262,7 +228,7 @@
 		};
 		window.doRequest = doRequest;
 
-		$('#${filterCommandName} input').on('change', function(e) {
+		$('#filterCommand').find('input').on('change', function() {
 			// Load the new results
 			var $checkbox = $(this);
 			var $form = $checkbox.closest('form');
@@ -309,7 +275,7 @@
 				prependClearLink($list);
 			});
 
-			doRequest($('#${filterCommandName}'));
+			doRequest($('#filterCommand'));
 		});
 	});
 </script>
