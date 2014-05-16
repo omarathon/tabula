@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.helpers.LazyMaps
 import org.hibernate.criterion.Order._
 import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.data.{AutowiringSitsStatusDaoComponent, AutowiringModeOfAttendanceDaoComponent}
 
 object SetMonitoringCheckpointCommand {
 	def apply(department: Department, templateMonitoringPoint: MonitoringPoint, user: CurrentUser, routes: JList[Route]) =
@@ -21,6 +22,10 @@ object SetMonitoringCheckpointCommand {
 			with AutowiringUserLookupComponent
 			with AutowiringProfileServiceComponent
 			with AutowiringSecurityServicePermissionsAwareRoutes
+			with AutowiringCourseAndRouteServiceComponent
+			with AutowiringModeOfAttendanceDaoComponent
+			with AutowiringModuleAndDepartmentServiceComponent
+			with AutowiringSitsStatusDaoComponent
 			with SetMonitoringCheckpointCommandPermissions
 			with ComposableCommand[Seq[MonitoringCheckpoint]]
 			with SetMonitoringCheckpointCommandValidation

@@ -4,23 +4,27 @@ import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
 import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.commands.{SelfValidating, Description, Describable, ComposableCommand, CommandInternal}
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringMonitoringPointServiceComponent}
-import uk.ac.warwick.tabula.services.{ProfileServiceComponent, AutowiringProfileServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringCourseAndRouteServiceComponent, AutowiringTermServiceComponent, AutowiringMonitoringPointServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.{Errors, BindingResult}
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.{AutowiringSitsStatusDaoComponent, AutowiringModeOfAttendanceDaoComponent}
 
 object ReportStudentsConfirmCommand {
 	def apply(department: Department, currentUser: CurrentUser) =
 		new ReportStudentsConfirmCommand(department, currentUser)
-		with ComposableCommand[Seq[MonitoringPointReport]]
-		with ReportStudentsPermissions
-		with ReportStudentsConfirmCommandDescription
-		with ReportStudentsConfirmState
-		with ReportStudentsConfirmCommandValidation
-		with AutowiringProfileServiceComponent
-		with AutowiringMonitoringPointServiceComponent
-		with AutowiringTermServiceComponent
+			with ComposableCommand[Seq[MonitoringPointReport]]
+			with ReportStudentsPermissions
+			with ReportStudentsConfirmCommandDescription
+			with ReportStudentsConfirmState
+			with ReportStudentsConfirmCommandValidation
+			with AutowiringProfileServiceComponent
+			with AutowiringMonitoringPointServiceComponent
+			with AutowiringTermServiceComponent
+			with AutowiringCourseAndRouteServiceComponent
+			with AutowiringModeOfAttendanceDaoComponent
+			with AutowiringModuleAndDepartmentServiceComponent
+			with AutowiringSitsStatusDaoComponent
 }
 
 

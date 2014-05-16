@@ -69,6 +69,7 @@ object ScalaRestriction {
 			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
 		}
 
+	//def or(restrictions: ScalaRestriction*)
 }
 
 trait Aliasable {

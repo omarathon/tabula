@@ -4,15 +4,12 @@
 <#macro listStudentIdInputs>
 	<#list command.staticStudentIds as id>
 		<input type="hidden" name="staticStudentIds" value="${id}" />
-		<input type="hidden" name="updatedStaticStudentIds" value="${id}" />
 	</#list>
 	<#list command.includedStudentIds as id>
 		<input type="hidden" name="includedStudentIds" value="${id}" />
-		<input type="hidden" name="updatedIncludedStudentIds" value="${id}" />
 	</#list>
 	<#list command.excludedStudentIds as id>
 		<input type="hidden" name="excludedStudentIds" value="${id}" />
-		<input type="hidden" name="updatedExcludedStudentIds" value="${id}" />
 	</#list>
 </#macro>
 
@@ -86,7 +83,7 @@
 		<input
 				type="submit"
 				class="btn btn-success use-tooltip"
-				name="${createAndAddPointsString}"
+				name="${CreateSchemeMappingParameters.createAndAddPoints}"
 				value="Add points"
 				title="Select which monitoring points this scheme should use"
 				data-container="body"

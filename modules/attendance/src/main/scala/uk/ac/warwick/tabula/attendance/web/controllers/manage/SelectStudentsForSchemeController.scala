@@ -4,8 +4,9 @@ import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
-import uk.ac.warwick.tabula.attendance.commands.manage.{FindStudentsForSchemeCommand, EditSchemeMembershipCommand}
+import uk.ac.warwick.tabula.attendance.commands.manage.{FindStudentsForSchemeCommandState, FindStudentsForSchemeCommandResult, EditSchemeMembershipCommandResult, FindStudentsForSchemeCommand, EditSchemeMembershipCommand}
 import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable}
+import uk.ac.warwick.tabula.JavaImports.JArrayList
 
 @Controller
 @RequestMapping(Array("/manage/{department}/{academicYear}/{scheme}/students/select"))
@@ -19,13 +20,20 @@ class SelectStudentsForSchemeController extends AttendanceController {
 	def editMembershipCommand(@PathVariable scheme: AttendanceMonitoringScheme) =
 		EditSchemeMembershipCommand(scheme)
 
-	private def render(scheme: AttendanceMonitoringScheme) = {
+	private def render(
+		scheme: AttendanceMonitoringScheme,
+		findStudentsForSchemeCommandResult: FindStudentsForSchemeCommandResult,
+		editMembershipCommandResult: EditSchemeMembershipCommandResult,
+		expandFind: Boolean = false,
+		expandManual: Boolean = false
+	) = {
 		Mav("manage/selectstudents",
 			"totalResults" -> 0,
-			"linkToSitsString" -> CreateSchemeMappingParameters.linkToSitsString,
-			"importAsListString" -> CreateSchemeMappingParameters.importAsListString,
-			"resetString" -> CreateSchemeMappingParameters.resetString,
-			"manuallyAddFormString" -> CreateSchemeMappingParameters.manuallyAddFormString
+			"findCommandResult" -> findStudentsForSchemeCommandResult,
+			"editMembershipCommandResult" -> editMembershipCommandResult,
+			"expandFind" -> expandFind,
+			"expandManual" -> expandManual,
+			"CreateSchemeMappingParameters" -> CreateSchemeMappingParameters
 		).crumbs(
 			Breadcrumbs.Manage.Home,
 			Breadcrumbs.Manage.Department(scheme.department),
@@ -35,19 +43,40 @@ class SelectStudentsForSchemeController extends AttendanceController {
 
 	@RequestMapping(method = Array(POST))
 	def form(
-		@ModelAttribute("findCommand") findCommand: PopulateOnForm,
-		@ModelAttribute("editMembershipCommand") editMembershipCommand: PopulateOnForm,
+		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with PopulateOnForm with FindStudentsForSchemeCommandState,
+		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult] with PopulateOnForm,
 		@PathVariable scheme: AttendanceMonitoringScheme
 	) = {
 		findCommand.populate()
 		editMembershipCommand.populate()
-		render(scheme)
+		val findStudentsForSchemeCommandResult =
+			if (findCommand.filterQueryString.length > 0)
+				findCommand.apply()
+			else
+				FindStudentsForSchemeCommandResult(JArrayList(), Seq())
+		val editMembershipCommandResult = editMembershipCommand.apply()
+		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.manuallyAddFormString))
-	def manuallyAddForm(@PathVariable scheme: AttendanceMonitoringScheme) = {
+	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.findStudents))
+	def findStudents(
+		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult],
+		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
+		@PathVariable scheme: AttendanceMonitoringScheme
+	) = {
+		val findStudentsForSchemeCommandResult = findCommand.apply()
+		val editMembershipCommandResult = editMembershipCommand.apply()
+		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult, expandFind = true)
+	}
+
+	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.manuallyAddForm))
+	def manuallyAddForm(
+		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult],
+		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
+		@PathVariable scheme: AttendanceMonitoringScheme
+	) = {
 		Mav("manage/manuallyaddstudents",
-			"manuallyAddSubmitString" -> CreateSchemeMappingParameters.manuallyAddSubmitString
+			"CreateSchemeMappingParameters" -> CreateSchemeMappingParameters
 		).crumbs(
 				Breadcrumbs.Manage.Home,
 				Breadcrumbs.Manage.Department(scheme.department),
@@ -55,10 +84,15 @@ class SelectStudentsForSchemeController extends AttendanceController {
 			)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.manuallyAddSubmitString))
-	def manuallyAddSubmit(@ModelAttribute("editMembershipCommand") cmd: Appliable[AttendanceMonitoringScheme]) = {
-		val scheme = cmd.apply()
-		render(scheme)
+	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.manuallyAddSubmit))
+	def manuallyAddSubmit(
+		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult],
+		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
+		@PathVariable scheme: AttendanceMonitoringScheme
+	) = {
+		val findStudentsForSchemeCommandResult = findCommand.apply()
+		val editMembershipCommandResult = editMembershipCommand.apply()
+		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult, expandManual = true)
 	}
 
 }

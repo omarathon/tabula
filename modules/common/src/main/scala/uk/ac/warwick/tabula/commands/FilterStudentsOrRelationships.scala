@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands
 
-import uk.ac.warwick.tabula.data.{ScalaRestriction, ScalaOrder}
-import uk.ac.warwick.tabula.services.ProfileServiceComponent
+import uk.ac.warwick.tabula.data.{SitsStatusDaoComponent, ModeOfAttendanceDaoComponent, ScalaRestriction, ScalaOrder}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, CourseAndRouteServiceComponent, ProfileServiceComponent}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
@@ -14,7 +14,10 @@ object FilterStudentsOrRelationships {
 
 }
 
-trait FilterStudentsOrRelationships extends FiltersStudentsBase with ProfileServiceComponent with PermissionsCheckingMethods {
+trait FilterStudentsOrRelationships extends FiltersStudentsBase with PermissionsCheckingMethods
+ with ProfileServiceComponent with CourseAndRouteServiceComponent with ModeOfAttendanceDaoComponent
+	with SitsStatusDaoComponent with ModuleAndDepartmentServiceComponent {
+
 	def getAliasPaths(sitsTable: String): Seq[(String, String)]
 
 	protected def buildOrders(): Seq[ScalaOrder] =

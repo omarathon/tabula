@@ -20,6 +20,7 @@ import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.{AutowiringSitsStatusDaoComponent, AutowiringModeOfAttendanceDaoComponent}
 
 case class ViewStudentsResults(
 	students: Seq[StudentPointsData],
@@ -35,6 +36,10 @@ object ViewStudentsCommand {
 			with AutowiringSecurityServicePermissionsAwareRoutes
 			with AutowiringMonitoringPointServiceComponent
 			with AutowiringTermServiceComponent
+			with AutowiringCourseAndRouteServiceComponent
+			with AutowiringModeOfAttendanceDaoComponent
+			with AutowiringModuleAndDepartmentServiceComponent
+			with AutowiringSitsStatusDaoComponent
 			with ComposableCommand[ViewStudentsResults]
 			with ViewStudentsState
 			with ReadOnly with Unaudited

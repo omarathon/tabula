@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.data.convert.{MonitoringPointIdConverter, MemberUniv
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.core.convert.support.GenericConversionService
 import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.tabula.data.{SitsStatusDao, ModeOfAttendanceDao}
 
 class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 
@@ -26,6 +27,10 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		val userLookup = thisUserLookup
 		val securityService = mock[SecurityService]
 		val termService = mock[TermService]
+		val courseAndRouteService = mock[CourseAndRouteService]
+		val modeOfAttendanceDao = mock[ModeOfAttendanceDao]
+		val sitsStatusDao = mock[SitsStatusDao]
+		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 		def routesForPermission(user: CurrentUser, p: Permission, dept: Department): Set[Route] = {
 			Set()
 		}

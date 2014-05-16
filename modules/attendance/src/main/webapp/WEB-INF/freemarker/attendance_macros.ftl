@@ -197,17 +197,36 @@
 	</div>
 </#macro>
 
-<#macro manageStudentTable membershipItems>
+<#function sortClass field command>
+	<#list command.sortOrder as order>
+		<#if order.propertyName == field>
+			<#if order.ascending>
+				<#return "headerSortDown" />
+			<#else>
+				<#return "headerSortUp" />
+			</#if>
+		</#if>
+	</#list>
+	<#return "" />
+</#function>
+
+<#macro manageStudentTable
+	membershipItems
+	doSorting=false
+	command=""
+>
+
 	<#if (membershipItems?size > 0)>
+
 		<table class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-darkRed tablesorter sb-no-wrapper-table-popout">
 			<thead>
 			<tr>
 				<th style="width: 20px;">&nbsp;</th>
-				<th style="width: 50px;">Source</th>
-				<th>First name</th>
-				<th>Last name</th>
-				<th>ID</th>
-				<th>User</th>
+				<th style="width: 50px;" <#if doSorting> class="${sortClass("source", command)} sortable" data-field="source"</#if>>Source</th>
+				<th <#if doSorting> class="${sortClass("firstName", command)} sortable" data-field="firstName"</#if>>First name</th>
+				<th <#if doSorting> class="${sortClass("lastName", command)} sortable" data-field="lastName"</#if>>Last name</th>
+				<th <#if doSorting> class="${sortClass("universityId", command)} sortable" data-field="universityId"</#if>>ID</th>
+				<th <#if doSorting> class="${sortClass("userId", command)} sortable" data-field="userId"</#if>>User</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -224,10 +243,10 @@
 								<span class="use-tooltip" title="Added manually" data-placement="right"><i class="icon-hand-up"></i></span>
 							</#if>
 						</td>
-						<td>${item.member.firstName}</td>
-						<td>${item.member.lastName}</td>
-						<td>${item.member.universityId}</td>
-						<td>${item.member.userId}</td>
+						<td>${item.firstName}</td>
+						<td>${item.lastName}</td>
+						<td>${item.universityId}</td>
+						<td>${item.userId}</td>
 					</tr>
 				</#list>
 			</tbody>

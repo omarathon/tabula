@@ -10,14 +10,14 @@ import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.attendance.commands.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes}
 import uk.ac.warwick.tabula.CurrentUser
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringCourseAndRouteServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.helpers.LazyLists
-import uk.ac.warwick.util.web.UriBuilder
+import collection.JavaConverters._
+import uk.ac.warwick.tabula.data.{AutowiringSitsStatusDaoComponent, AutowiringModeOfAttendanceDaoComponent, SchemeMembershipIncludeType, SchemeMembershipExcludeType, SchemeMembershipStaticType, SchemeMembershipItem}
 
 case class FindStudentsForSchemeCommandResult(
-	mebershipItems: Seq[SchemeMembershipItem],
-	totalResults: Int
+	updatedStaticStudentIds: JList[String],
+	membershipItems: Seq[SchemeMembershipItem]
 )
 
 object FindStudentsForSchemeCommand {
@@ -25,6 +25,11 @@ object FindStudentsForSchemeCommand {
 		new FindStudentsForSchemeCommandInternal(scheme, user)
 			with AutowiringSecurityServicePermissionsAwareRoutes
 			with AutowiringProfileServiceComponent
+			with AutowiringAttendanceMonitoringServiceComponent
+			with AutowiringCourseAndRouteServiceComponent
+			with AutowiringModeOfAttendanceDaoComponent
+			with AutowiringModuleAndDepartmentServiceComponent
+			with AutowiringSitsStatusDaoComponent
 			with ComposableCommand[FindStudentsForSchemeCommandResult]
 			with PopulateFindStudentsForSchemeCommand
 			with FindStudentsForSchemePermissions
@@ -34,44 +39,41 @@ object FindStudentsForSchemeCommand {
 
 
 class FindStudentsForSchemeCommandInternal(val scheme: AttendanceMonitoringScheme, val user: CurrentUser)
-	extends CommandInternal[FindStudentsForSchemeCommandResult] {
+	extends CommandInternal[FindStudentsForSchemeCommandResult] with TaskBenchmarking {
 
-	self: ProfileServiceComponent with FindStudentsForSchemeCommandState =>
-
-	protected def modulesForDepartmentAndSubDepartments(department: Department): Seq[Module] =
-		(department.modules.asScala ++ department.children.asScala.flatMap { modulesForDepartmentAndSubDepartments }).sorted
-
-	protected def routesForDepartmentAndSubDepartments(department: Department): Seq[Route] =
-		(department.routes.asScala ++ department.children.asScala.flatMap { routesForDepartmentAndSubDepartments }).sorted
-
-	lazy val allModules: Seq[Module] = modulesForDepartmentAndSubDepartments(scheme.department)
-	lazy val allCourseTypes: Seq[CourseType] = scheme.department.filterRule.courseTypes
-	lazy val allRoutes: Seq[Route] = routesForDepartmentAndSubDepartments(scheme.department) match {
-		case Nil => routesForDepartmentAndSubDepartments(scheme.department.rootDepartment).sorted(Route.DegreeTypeOrdering)
-		case r => r.sorted(Route.DegreeTypeOrdering)
-	}
-	lazy val allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(scheme.department.rootDepartment)
-	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = profileService.allModesOfAttendance(scheme.department.rootDepartment)
-	val allYearsOfStudy: Seq[Int] = 1 to 8
-
-	def serializeFilter = {
-		val result = new UriBuilder()
-		courseTypes.asScala.foreach(p => result.addQueryParameter("courseTypes", p.code))
-		routes.asScala.foreach(p => result.addQueryParameter("routes", p.code))
-		modesOfAttendance.asScala.foreach(p => result.addQueryParameter("modesOfAttendance", p.code))
-		yearsOfStudy.asScala.foreach(p => result.addQueryParameter("yearsOfStudy", p.toString))
-		sprStatuses.asScala.foreach(p => result.addQueryParameter("sprStatuses", p.code))
-		modules.asScala.foreach(p => result.addQueryParameter("modules", p.code))
-		if (result.getQuery == null)
-			""
-		else
-			result.getQuery
-	}
+	self: ProfileServiceComponent with FindStudentsForSchemeCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
+		if (serializeFilter.isEmpty) {
+			FindStudentsForSchemeCommandResult(updatedStaticStudentIds, Seq())
+		} else {
+			updatedStaticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments") {
+				profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
+					department = department,
+					restrictions = buildRestrictions(),
+					orders = buildOrders()
+				)
+			}.asJava
 
+			val startResult = studentsPerPage * (page-1)
+			val staticMembershipItemsToDisplay = attendanceMonitoringService.findSchemeMembershipItems(
+				updatedStaticStudentIds.asScala.slice(startResult, startResult + studentsPerPage),
+				SchemeMembershipStaticType
+			)
 
-		FindStudentsForSchemeCommandResult(Seq(), 0)
+			val membershipItems: Seq[SchemeMembershipItem] = {
+				staticMembershipItemsToDisplay.map{ item =>
+					if (updatedExcludedStudentIds.asScala.contains(item.universityId))
+						SchemeMembershipItem(SchemeMembershipExcludeType, item.firstName, item.lastName, item.universityId, item.userId)
+					else if (updatedIncludedStudentIds.asScala.contains(item.universityId))
+						SchemeMembershipItem(SchemeMembershipIncludeType, item.firstName, item.lastName, item.universityId, item.userId)
+					else
+						item
+				}
+			}
+
+			FindStudentsForSchemeCommandResult(updatedStaticStudentIds, membershipItems)
+		}
 	}
 
 }
@@ -81,7 +83,10 @@ trait PopulateFindStudentsForSchemeCommand extends PopulateOnForm {
 	self: FindStudentsForSchemeCommandState =>
 
 	override def populate() = {
+		updatedIncludedStudentIds = includedStudentIds
+		updatedExcludedStudentIds = excludedStudentIds
 		updatedStaticStudentIds = staticStudentIds
+		deserializeFilter(filterQueryString)
 	}
 
 }
@@ -96,22 +101,34 @@ trait FindStudentsForSchemePermissions extends RequiresPermissionsChecking with 
 
 }
 
-trait FindStudentsForSchemeCommandState extends PermissionsAwareRoutes {
+trait FindStudentsForSchemeCommandState extends PermissionsAwareRoutes with FiltersStudents {
 	def scheme: AttendanceMonitoringScheme
 	def user: CurrentUser
+
+	def department: Department = scheme.department
 
 	// Bind variables
 
 	// Store original students for reset
+	var includedStudentIds: JList[String] = LazyLists.create()
+	var excludedStudentIds: JList[String] = LazyLists.create()
 	var staticStudentIds: JList[String] = LazyLists.create()
 	var filterQueryString: String = ""
 
 	// Store updated students
+	var updatedIncludedStudentIds: JList[String] = LazyLists.create()
+	var updatedExcludedStudentIds: JList[String] = LazyLists.create()
 	var updatedStaticStudentIds: JList[String] = LazyLists.create()
+	var updatedFilterQueryString: String = ""
 
+	// Filter properties
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
 	var sortOrder: JList[Order] = JArrayList()
+	var page = 1
+	def totalResults = updatedStaticStudentIds.size
+	val studentsPerPage = FiltersStudents.DefaultStudentsPerPage
 
+	// Filter binds
 	var courseTypes: JList[CourseType] = JArrayList()
 	var routes: JList[Route] = JArrayList()
 	lazy val visibleRoutes = routesForPermission(user, Permissions.MonitoringPoints.Manage, scheme.department)

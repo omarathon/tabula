@@ -5,19 +5,27 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.UniversityId
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import scala.Some
 import uk.ac.warwick.tabula.helpers.LazyLists
+import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipExcludeType, SchemeMembershipItem}
+
+case class EditSchemeMembershipCommandResult(
+	updatedIncludedStudentIds: JList[String],
+	updatedExcludedStudentIds: JList[String],
+	membershipItems: Seq[SchemeMembershipItem]
+)
 
 object EditSchemeMembershipCommand {
 	def apply(AttendanceMonitoringScheme: AttendanceMonitoringScheme) =
 		new EditSchemeMembershipCommandInternal(AttendanceMonitoringScheme)
 			with AutowiringUserLookupComponent
 			with AutowiringProfileServiceComponent
-			with ComposableCommand[AttendanceMonitoringScheme]
+			with AutowiringAttendanceMonitoringServiceComponent
+			with ComposableCommand[EditSchemeMembershipCommandResult]
 			with PopulateEditSchemeMembershipCommand
 			with EditSchemeMembershipPermissions
 			with EditSchemeMembershipCommandState
@@ -28,9 +36,9 @@ object EditSchemeMembershipCommand {
  * Not persisted, just used to validate users entered and render student table
  */
 class EditSchemeMembershipCommandInternal(val scheme: AttendanceMonitoringScheme)
-	extends CommandInternal[AttendanceMonitoringScheme] {
+	extends CommandInternal[EditSchemeMembershipCommandResult] {
 
-	self: EditSchemeMembershipCommandState with UserLookupComponent with ProfileServiceComponent =>
+	self: EditSchemeMembershipCommandState with UserLookupComponent with ProfileServiceComponent with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
 		def getStudentMemberForString(entry: String): Option[StudentMember] = {
@@ -62,7 +70,16 @@ class EditSchemeMembershipCommandInternal(val scheme: AttendanceMonitoringScheme
 		updatedIncludedStudentIds = (updatedIncludedStudentIds.asScala.toSeq ++ validMembers.map(_.universityId)).asJava
 		updatedExcludedStudentIds = (updatedExcludedStudentIds.asScala.toSeq diff updatedIncludedStudentIds.asScala.toSeq).asJava
 
-		scheme
+		// Users processed, so reset fields
+		massAddUsers = ""
+
+		val membershipItems: Seq[SchemeMembershipItem] = {
+			val excludedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(updatedExcludedStudentIds.asScala, SchemeMembershipExcludeType)
+			val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(updatedIncludedStudentIds.asScala, SchemeMembershipIncludeType)
+			(excludedMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
+		}
+
+		EditSchemeMembershipCommandResult(updatedIncludedStudentIds, updatedExcludedStudentIds, membershipItems)
 	}
 
 }
@@ -94,19 +111,6 @@ trait EditSchemeMembershipCommandState {
 	self: ProfileServiceComponent =>
 
 	def scheme: AttendanceMonitoringScheme
-
-	def membershipItems: Seq[SchemeMembershipItem] = {
-		def getStudentMemberForUniversityId(entry: String): Option[StudentMember] =
-			profileService.getMemberByUniversityId(entry) match {
-				case Some(student: StudentMember) => Some(student)
-				case _ => None
-			}
-
-		val excludedMemberItems = updatedExcludedStudentIds.asScala.map(getStudentMemberForUniversityId).flatten.map(member => SchemeMembershipItem(member, ExcludeType))
-		val includedMemberItems = updatedIncludedStudentIds.asScala.map(getStudentMemberForUniversityId).flatten.map(member => SchemeMembershipItem(member, IncludeType))
-
-		(excludedMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.member.lastName, membershipItem.member.firstName))
-	}
 
 	// Bind variables
 

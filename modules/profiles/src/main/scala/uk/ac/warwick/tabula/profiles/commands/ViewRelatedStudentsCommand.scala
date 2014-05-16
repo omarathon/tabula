@@ -12,6 +12,7 @@ import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.data.{AutowiringSitsStatusDaoComponent, AutowiringModeOfAttendanceDaoComponent}
 
 
 // Don't need this, unless there is specific state on the command which the controller needs access to.
@@ -24,6 +25,10 @@ object ViewRelatedStudentsCommand{
 		new ViewRelatedStudentsCommandInternal(currentMember, relationshipType)
 			with ComposableCommand[Seq[StudentMember]]
 			with AutowiringProfileServiceComponent
+			with AutowiringCourseAndRouteServiceComponent
+			with AutowiringModeOfAttendanceDaoComponent
+			with AutowiringModuleAndDepartmentServiceComponent
+			with AutowiringSitsStatusDaoComponent
 			with ViewRelatedStudentsCommandPermissions
 			with Unaudited with ReadOnly
 	}

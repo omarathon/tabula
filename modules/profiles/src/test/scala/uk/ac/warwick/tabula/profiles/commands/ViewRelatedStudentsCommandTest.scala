@@ -1,11 +1,9 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.{TestBase, Mockito}
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, RelationshipServiceComponent, RelationshipService, ProfileServiceComponent, ProfileService}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.ScalaRestriction
+import uk.ac.warwick.tabula.data.{SitsStatusDao, ModeOfAttendanceDao, ScalaRestriction}
 
 
 class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
@@ -59,6 +57,10 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 
 		val command = new ViewRelatedStudentsCommandInternal(member, relationshipType) with ProfileServiceComponent {
 			var profileService = mockProfileService
+			val courseAndRouteService = mock[CourseAndRouteService]
+			val modeOfAttendanceDao = mock[ModeOfAttendanceDao]
+			val sitsStatusDao = mock[SitsStatusDao]
+			val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 		}
 
 		val result = command.applyInternal()
@@ -77,6 +79,10 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 
 		val command = new ViewRelatedStudentsCommandInternal(member, relationshipType) with ProfileServiceComponent {
 			var profileService = mockProfileService
+			val courseAndRouteService = mock[CourseAndRouteService]
+			val modeOfAttendanceDao = mock[ModeOfAttendanceDao]
+			val sitsStatusDao = mock[SitsStatusDao]
+			val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 		}
 
 		val result = command.applyInternal()
@@ -95,6 +101,10 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 		
 		val command = new ViewRelatedStudentsCommandInternal(member, relationshipType) with ProfileServiceComponent {
 			var profileService = mockProfileService
+			val courseAndRouteService = mock[CourseAndRouteService]
+			val modeOfAttendanceDao = mock[ModeOfAttendanceDao]
+			val sitsStatusDao = mock[SitsStatusDao]
+			val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 		}
 		
 		command.allCourses should be (Seq(courseDetails1, courseDetails1, courseDetails2))

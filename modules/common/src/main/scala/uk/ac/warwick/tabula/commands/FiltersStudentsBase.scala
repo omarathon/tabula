@@ -1,12 +1,20 @@
 package uk.ac.warwick.tabula.commands
 
-import uk.ac.warwick.tabula.data.model.{Module, SitsStatus, ModeOfAttendance, Route, CourseType, Department}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Order
 import scala.collection.JavaConverters._
 import uk.ac.warwick.util.web.UriBuilder
+import org.apache.http.client.utils.URLEncodedUtils
+import java.net.URI
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.data.convert.{ModuleCodeConverter, SitsStatusCodeConverter, ModeOfAttendanceCodeConverter, RouteCodeConverter}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, CourseAndRouteServiceComponent}
+import uk.ac.warwick.tabula.data.{SitsStatusDaoComponent, ModeOfAttendanceDaoComponent}
 
-trait FiltersStudentsBase {
+trait FiltersStudentsBase extends Logging {
+
+	self: CourseAndRouteServiceComponent with ModeOfAttendanceDaoComponent with SitsStatusDaoComponent with ModuleAndDepartmentServiceComponent =>
 
 	def courseTypes: JList[CourseType]
 	def routes: JList[Route]
@@ -37,6 +45,61 @@ trait FiltersStudentsBase {
 			""
 		else
 			result.getQuery
+	}
+
+	def deserializeFilter(filterString: String) = {
+		val params: Map[String, Seq[String]] = URLEncodedUtils.parse(new URI(null, null, null, filterString, null), "UTF-8").asScala.groupBy(_.getName).map{
+			case (name, nameValuePairs) => name -> nameValuePairs.map(_.getValue)
+		}
+		params.get("courseTypes").map{_.foreach{ item =>
+			try {
+				courseTypes.add(CourseType.fromCourseCode(item))
+			} catch {
+				case e: IllegalArgumentException =>
+					logger.warn(s"Could not deserialize filter with courseType $item")
+			}}
+		}
+		params.get("routes").map{_.foreach{ item =>
+			val routeCodeConverter = new RouteCodeConverter
+			routeCodeConverter.service = courseAndRouteService
+			routeCodeConverter.convertRight(item) match {
+				case route: Route => routes.add(route)
+				case _ => logger.warn(s"Could not deserialize filter with route $item")
+			}
+		}}
+		params.get("modesOfAttendance").map{_.foreach{ item =>
+			val modeOfAttendanceCodeConverter = new ModeOfAttendanceCodeConverter
+			modeOfAttendanceCodeConverter.dao = modeOfAttendanceDao
+			modeOfAttendanceCodeConverter.convertRight(item) match {
+				case moa: ModeOfAttendance => modesOfAttendance.add(moa)
+				case _ => logger.warn(s"Could not deserialize filter with modeOfAttendance $item")
+			}
+		}}
+		params.get("yearsOfStudy").map{_.foreach{ item =>
+			try {
+				item.toInt
+			} catch {
+				case e: NumberFormatException =>
+				logger.warn(s"Could not deserialize filter with yearOfStudy $item")
+			}}
+		}
+		params.get("sprStatuses").map{_.foreach{ item =>
+			val sitsStatusCodeConverter = new SitsStatusCodeConverter
+			sitsStatusCodeConverter.dao = sitsStatusDao
+			sitsStatusCodeConverter.convertRight(item) match {
+				case sprStatus: SitsStatus => sprStatuses.add(sprStatus)
+				case _ => logger.warn(s"Could not deserialize filter with sprStatus $item")
+			}
+		}}
+		params.get("modules").map{_.foreach{ item =>
+			val moduleCodeConverter = new ModuleCodeConverter
+			moduleCodeConverter.service = moduleAndDepartmentService
+			moduleCodeConverter.convertRight(item) match {
+				case module: Module => modules.add(module)
+				case _ => logger.warn(s"Could not deserialize filter with module $item")
+			}
+		}}
+		params.get("otherCriteria").map{_.foreach{ item => otherCriteria.add(item) }}
 	}
 
 	def filterMap = {

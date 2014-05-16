@@ -2,12 +2,13 @@ package uk.ac.warwick.tabula.attendance.web.controllers.manage
 
 object CreateSchemeMappingParameters {
 
-	final val createAndAddPointsString = "createAndAddPoints"
-	final val chooseStudentsString = "chooseStudentsString"
-	final val linkToSitsString = "linkToSits"
-	final val importAsListString = "importAsList"
-	final val resetString = "reset"
-	final val manuallyAddFormString = "manuallyAddForm"
-	final val manuallyAddSubmitString = "manuallyAddSubmit"
+	final val createAndAddPoints = "createAndAddPoints"
+	final val chooseStudents = "chooseStudents"
+	final val linkToSits = "linkToSits"
+	final val importAsList = "importAsList"
+	final val reset = "reset"
+	final val findStudents = "findStudents"
+	final val manuallyAddForm = "manuallyAddForm"
+	final val manuallyAddSubmit = "manuallyAddSubmit"
 
 }

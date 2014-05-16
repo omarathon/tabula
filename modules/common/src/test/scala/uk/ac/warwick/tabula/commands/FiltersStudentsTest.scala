@@ -2,9 +2,10 @@ package uk.ac.warwick.tabula.commands
 
 import uk.ac.warwick.tabula.{Mockito, TestBase, JavaImports, Fixtures}
 import uk.ac.warwick.tabula.data.model.{CourseType, ModeOfAttendance, Department, SitsStatus, Module, Route}
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, CourseAndRouteService, ProfileService}
 import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.data.{SitsStatusDao, ModeOfAttendanceDao}
 
 class FiltersStudentsTest extends TestBase with Mockito {
 
@@ -55,6 +56,11 @@ class FiltersStudentsTest extends TestBase with Mockito {
 			val yearsOfStudy: JavaImports.JList[JavaImports.JInteger] = JArrayList()
 			val modules: JavaImports.JList[Module] = JArrayList()
 			val routes: JavaImports.JList[Route] = JArrayList()
+
+			val courseAndRouteService = mock[CourseAndRouteService]
+			val modeOfAttendanceDao = mock[ModeOfAttendanceDao]
+			val sitsStatusDao = mock[SitsStatusDao]
+			val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 		}
 
 		filter.allCourseTypes should be (CourseType.all)
@@ -81,6 +87,11 @@ class FiltersStudentsTest extends TestBase with Mockito {
 			val yearsOfStudy: JavaImports.JList[JavaImports.JInteger] = JArrayList(1)
 			val modules: JavaImports.JList[Module] = JArrayList(mod1)
 			val routes: JavaImports.JList[Route] = JArrayList(route1, route2)
+
+			val courseAndRouteService = mock[CourseAndRouteService]
+			val modeOfAttendanceDao = mock[ModeOfAttendanceDao]
+			val sitsStatusDao = mock[SitsStatusDao]
+			val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 		}
 
 		val serialized = filter.serializeFilter
@@ -115,6 +126,11 @@ class FiltersStudentsTest extends TestBase with Mockito {
 			val yearsOfStudy: JavaImports.JList[JavaImports.JInteger] = JArrayList()
 			val modules: JavaImports.JList[Module] = JArrayList()
 			val routes: JavaImports.JList[Route] = JArrayList()
+
+			val courseAndRouteService = mock[CourseAndRouteService]
+			val modeOfAttendanceDao = mock[ModeOfAttendanceDao]
+			val sitsStatusDao = mock[SitsStatusDao]
+			val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 		}
 
 		val serialized = filter.serializeFilter

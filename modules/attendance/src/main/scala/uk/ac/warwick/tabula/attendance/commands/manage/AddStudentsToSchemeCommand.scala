@@ -11,6 +11,7 @@ import collection.JavaConverters._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipStaticType, SchemeMembershipItem}
 
 object AddStudentsToSchemeCommand {
 	def apply(scheme: AttendanceMonitoringScheme) =
@@ -117,10 +118,10 @@ trait AddStudentsToSchemeCommandState {
 			}
 
 		val staticMemberItems = (staticStudentIds.asScala diff excludedStudentIds.asScala diff includedStudentIds.asScala)
-			.map(getStudentMemberForUniversityId).flatten.map(member => SchemeMembershipItem(member, StaticType))
-		val includedMemberItems = includedStudentIds.asScala.map(getStudentMemberForUniversityId).flatten.map(member => SchemeMembershipItem(member, IncludeType))
+			.map(getStudentMemberForUniversityId).flatten.map(member => SchemeMembershipItem(SchemeMembershipStaticType, member.firstName, member.lastName, member.universityId, member.userId))
+		val includedMemberItems = includedStudentIds.asScala.map(getStudentMemberForUniversityId).flatten.map(member => SchemeMembershipItem(SchemeMembershipIncludeType, member.firstName, member.lastName, member.universityId, member.userId))
 
-		(staticMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.member.lastName, membershipItem.member.firstName))
+		(staticMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
 	}
 
 	// Bind variables
@@ -129,11 +130,11 @@ trait AddStudentsToSchemeCommandState {
 	var includedStudentIds: JList[String] = LazyLists.create()
 	var excludedStudentIds: JList[String] = LazyLists.create()
 	var staticStudentIds: JList[String] = LazyLists.create()
-	var filterQueryString: String = _
+	var filterQueryString: String = ""
 
 	// Students from Select page
 	var updatedIncludedStudentIds: JList[String] = LazyLists.create()
 	var updatedExcludedStudentIds: JList[String] = LazyLists.create()
 	var updatedStaticStudentIds: JList[String] = LazyLists.create()
-	var updatedFilterQueryString: String = _
+	var updatedFilterQueryString: String = ""
 }

@@ -26,8 +26,7 @@ class AddStudentsToSchemeController extends AttendanceController {
 
 	private def render(scheme: AttendanceMonitoringScheme) = {
 		Mav("manage/liststudents",
-			"createAndAddPointsString" -> CreateSchemeMappingParameters.createAndAddPointsString,
-			"chooseStudentsString" -> CreateSchemeMappingParameters.chooseStudentsString
+			"CreateSchemeMappingParameters" -> CreateSchemeMappingParameters
 		).crumbs(
 				Breadcrumbs.Manage.Home,
 				Breadcrumbs.Manage.Department(scheme.department),
@@ -40,7 +39,7 @@ class AddStudentsToSchemeController extends AttendanceController {
 		render(scheme)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.linkToSitsString))
+	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.linkToSits))
 	def linkToSits(
 		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme] with SetStudents,
 		@PathVariable scheme: AttendanceMonitoringScheme
@@ -49,7 +48,7 @@ class AddStudentsToSchemeController extends AttendanceController {
 		render(scheme)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.importAsListString))
+	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.importAsList))
 	def importAsList(
 		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme] with SetStudents,
 		@PathVariable scheme: AttendanceMonitoringScheme
@@ -58,7 +57,7 @@ class AddStudentsToSchemeController extends AttendanceController {
 		render(scheme)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.resetString))
+	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.reset))
 	def reset(@PathVariable scheme: AttendanceMonitoringScheme) = {
 		render(scheme)
 	}
@@ -77,7 +76,7 @@ class AddStudentsToSchemeController extends AttendanceController {
 		}
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.createAndAddPointsString))
+	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.createAndAddPoints))
 	def saveAndAddPoints(
 		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
 		errors: Errors,

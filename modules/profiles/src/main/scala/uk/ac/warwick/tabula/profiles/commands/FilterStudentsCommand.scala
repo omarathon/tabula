@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{ProfileServiceComponent, AutowiringProfileServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringCourseAndRouteServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent}
 import org.hibernate.criterion.Order._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Route
@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.BindingResult
 import org.hibernate.criterion.Order
+import uk.ac.warwick.tabula.data.{AutowiringSitsStatusDaoComponent, AutowiringModeOfAttendanceDaoComponent}
 
 case class FilterStudentsResults(
 	students: Seq[StudentMember],
@@ -30,6 +31,10 @@ object FilterStudentsCommand {
 			with ComposableCommand[FilterStudentsResults]
 			with FilterStudentsPermissions
 			with AutowiringProfileServiceComponent
+			with AutowiringCourseAndRouteServiceComponent
+			with AutowiringModeOfAttendanceDaoComponent
+			with AutowiringModuleAndDepartmentServiceComponent
+			with AutowiringSitsStatusDaoComponent
 			with ReadOnly with Unaudited
 }
 
