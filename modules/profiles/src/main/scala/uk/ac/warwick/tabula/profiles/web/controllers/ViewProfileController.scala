@@ -30,6 +30,7 @@ abstract class ViewProfileController extends ProfilesController {
 	var userLookup = Wire[UserLookupService]
 	var smallGroupService = Wire[SmallGroupService]
 	var memberNoteService = Wire[MemberNoteService]
+	var assignmentService = Wire[AssignmentService]
 	var monitoringPointMeetingRelationshipTermService = Wire[MonitoringPointMeetingRelationshipTermService]
 
 	@ModelAttribute("searchProfilesCommand")
@@ -123,13 +124,16 @@ abstract class ViewProfileController extends ProfilesController {
 
 		val smallGroups = smallGroupService.findSmallGroupsByTutor(user.apparentUser)
 
+		val marking = assignmentService.getAssignmentWhereMarker(user.apparentUser)
+
 		Mav("profile/view",
 			"viewerRelationshipTypes" -> relationshipTypes,
 			"profile" -> profiledMember,
 			"viewer" -> currentMember,
 			"isSelf" -> isSelf,
 			"isStaff" -> profiledMember.isStaff,
-			"smallGroups" -> smallGroups
+			"smallGroups" -> smallGroups,
+			"marking" -> marking
 		).crumbs(Breadcrumbs.Profile(profiledMember, isSelf))
 	}
 

@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.{StaffAssistantsHelpers, UserGroupCacheManager, SmallGroupService, TermService, ProfileService, RelationshipService}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
 import uk.ac.warwick.tabula.system.permissions.{RestrictionProvider, Restricted, PermissionsChecking}
@@ -31,6 +31,7 @@ import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Filter
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
+import scala.Some
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -69,6 +70,9 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	@transient
 	var relationshipService = Wire[RelationshipService]
+
+	@transient
+	var userLookupService = Wire[UserLookupService]
 
 	def this(user: CurrentUser) = {
 		this()
@@ -364,6 +368,8 @@ class StudentMember extends Member with StudentProperties {
 
 	def moduleRegistrationsByYear(year: Option[AcademicYear]): Set[ModuleRegistration] =
 		freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap(_.moduleRegistrationsByYear(year))
+
+	def isPGR = userLookupService.getUserByWarwickUniId(universityId).getExtraProperty("warwickitsclass") == "PG(R)"
 }
 
 @Entity
@@ -494,7 +500,6 @@ trait StudentProperties extends RestrictedPhoneNumber {
 	@Column(name="tier4_visa_requirement")
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	var tier4VisaRequirement: JBoolean = _
-
 }
 
 trait RestrictedPhoneNumber {
