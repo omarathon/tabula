@@ -34,7 +34,7 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 		userSettings.getByUserId(user.getUserId) match {
 			case Some(s) => s.alertsSubmission match {
 				case UserSettings.AlertsAllSubmissions => true
-				case UserSettings.AlertsLateSubmissions => submission.isLate || submission.isAuthorisedLate
+				case UserSettings.AlertsNoteworthySubmissions => submission.isNoteworthy
 				case _ => false
 			}
 			case None => false

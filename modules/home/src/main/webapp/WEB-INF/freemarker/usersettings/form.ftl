@@ -13,7 +13,7 @@
 			</@form.label>
 			<@form.label checkbox=true>
 				<@f.radiobutton path="alertsSubmission" value="lateSubmissions" />
-				Late submissions (includes authorised late)
+				Noteworthy submissions (late, late within extension, suspected plagiarism)
 			</@form.label>
 			<@form.label checkbox=true>
 				<@f.radiobutton path="alertsSubmission" value="none" />
