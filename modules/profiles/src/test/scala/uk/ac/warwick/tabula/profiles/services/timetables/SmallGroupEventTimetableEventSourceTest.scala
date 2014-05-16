@@ -44,6 +44,7 @@ class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 	@Test
 	def translatesFromSmallGroupEventToTimetableEvent(){
 		mockSmallGroupService.findSmallGroupsByStudent(any[User]) returns (Seq(group))
+		mockSmallGroupService.findSmallGroupEventsByTutor(any[User]) returns (Nil)
 	  val events = eventSource.eventsFor(student)
 		events.size should be (1)
 		val tte:TimetableEvent = events.head
