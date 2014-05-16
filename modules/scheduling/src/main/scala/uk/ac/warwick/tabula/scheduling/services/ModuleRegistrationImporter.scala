@@ -140,7 +140,7 @@ object ModuleRegistrationImporter {
 					
 					join $sitsSchema.cam_smo smo 
 						on smo.spr_code = spr.spr_code
-						and (smo_rtsc not like 'X%' and smo_rtsc != 'Z')
+						and (smo_rtsc is null or (smo_rtsc not like 'X%' and smo_rtsc != 'Z'))
 					
 					join $sitsSchema.srs_vco vco 
 						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
@@ -169,7 +169,7 @@ object ModuleRegistrationImporter {
 					
 					join $sitsSchema.cam_smo smo 
 						on smo.spr_code = spr.spr_code
-						and (smo_rtsc not like 'X%' and smo_rtsc != 'Z')
+						and (smo_rtsc is null or (smo_rtsc not like 'X%' and smo_rtsc != 'Z'))
 
 					join $sitsSchema.srs_vco vco 
 						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
