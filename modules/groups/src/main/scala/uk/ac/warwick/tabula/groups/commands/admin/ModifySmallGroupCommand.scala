@@ -65,13 +65,15 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
 		group.maxGroupSize = maxGroupSize
 
 		// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
-		group.events.clear()
-		for (event <- events.asScala.filter(!_.delete).map(_.apply())) {
+		// TAB-2304 Don't do a .clear() and .addAll() because that confuses Hibernate
+		val newEvents = events.asScala.filter(!_.delete).map(_.apply())
+		group.events.asScala.filterNot(newEvents.contains).foreach(group.events.remove)
+		newEvents.filterNot(group.events.contains).foreach { event =>
 			// make sure we set the back-reference from event->group here, else
-      // we won't be able to navigate back up the tree unless we reload the data from hiberate
-      event.group = group
-      group.events.add(event)
-    }
+			// we won't be able to navigate back up the tree unless we reload the data from hiberate
+			event.group = group
+			group.events.add(event)
+		}
 	}
 
 	override def onBind(result: BindingResult) {

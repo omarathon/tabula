@@ -38,9 +38,9 @@ class EditSmallGroupSetCommand(val set: SmallGroupSet, val apparentUser:User)
 		val newUsers = 
 			if (autoDeregister) membershipService.determineMembershipUsers(linkedUpstreamAssessmentGroups, Option(members)).toSet
 			else Set[User]()
-		
+
 		copyTo(set)
-			
+
 		// TAB-1561
 		if (autoDeregister) {
 			// Wrap removal in a sub-command so that we can do auditing			
