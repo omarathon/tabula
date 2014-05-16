@@ -161,9 +161,8 @@ class SmallGroupSet
 	}
 	
 	def unallocatedStudentsCount = {
-		val allocatedStudentsCount = groups.asScala.foldLeft(0) { (acc, grp) => acc + grp.students.size }
-		
-		allStudentsCount - allocatedStudentsCount
+		// TAB-2296 we can't rely just on counts here
+		unallocatedStudents.size
 	}
 	
 	def hasAllocated = groups.asScala exists { !_.students.isEmpty }
