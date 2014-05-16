@@ -38,6 +38,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 		withClue("Shouldn't notify user with extension") { // A different class handles individual extensions
 			val extension = new Extension
 			extension.universityId = "0123456"
+			extension.approve()
 			assignment.extensions.add(extension)
 			notification.recipients should be(Seq())
 		}
