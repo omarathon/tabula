@@ -26,7 +26,7 @@ trait AttendanceMonitoringService {
 
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService {
 
-	self: AttendanceMonitoringDaoComponent with TermServiceComponent =>
+	self: AttendanceMonitoringDaoComponent with TermServiceComponent with AttendanceMonitoringMembershipHelpers with UserLookupComponent =>
 
 	def getSchemeById(id: String): Option[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.getSchemeById(id)
@@ -46,7 +46,18 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		)
 
 	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem] = {
-		attendanceMonitoringDao.findSchemeMembershipItems(universityIds, itemType)
+		val items = attendanceMonitoringDao.findSchemeMembershipItems(universityIds, itemType)
+		items.map{ item => {
+			val user = userLookup.getUserByWarwickUniId(item.universityId)
+			SchemeMembershipItem(
+				item.itemType,
+				item.firstName,
+				item.lastName,
+				item.universityId,
+				item.userId,
+				membersHelper.findBy(user)
+			)
+		}}
 	}
 }
 
@@ -65,4 +76,5 @@ class AttendanceMonitoringServiceImpl
 	with AttendanceMonitoringMembershipHelpersImpl
 	with AutowiringTermServiceComponent
 	with AutowiringAttendanceMonitoringDaoComponent
+	with AutowiringUserLookupComponent
 

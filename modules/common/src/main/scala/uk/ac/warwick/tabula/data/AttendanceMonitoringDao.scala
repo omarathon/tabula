@@ -21,7 +21,8 @@ case class SchemeMembershipItem(
 	firstName: String,
 	lastName: String,
 	universityId: String,
-	userId: String
+	userId: String,
+	existingSchemes: Seq[AttendanceMonitoringScheme]
 ) {
 	def itemTypeString = itemType.value
 }
@@ -98,7 +99,8 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 					objArray(0).asInstanceOf[String],
 					objArray(1).asInstanceOf[String],
 					objArray(2).asInstanceOf[String],
-					objArray(3).asInstanceOf[String]
+					objArray(3).asInstanceOf[String],
+					Seq() // mixed in by the service
 				)
 			}
 

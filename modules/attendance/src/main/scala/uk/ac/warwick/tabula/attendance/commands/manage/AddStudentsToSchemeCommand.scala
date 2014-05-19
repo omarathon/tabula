@@ -9,16 +9,18 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyLists
 import collection.JavaConverters._
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipStaticType, SchemeMembershipItem}
+import uk.ac.warwick.tabula.CurrentUser
 
 object AddStudentsToSchemeCommand {
-	def apply(scheme: AttendanceMonitoringScheme) =
-		new AddStudentsToSchemeCommandInternal(scheme)
+	def apply(scheme: AttendanceMonitoringScheme, user: CurrentUser) =
+		new AddStudentsToSchemeCommandInternal(scheme, user)
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringProfileServiceComponent
+			with AutowiringSecurityServiceComponent
 			with ComposableCommand[AttendanceMonitoringScheme]
+			with PopulateAddStudentsToSchemeCommandInternal
 			with AddStudentsToSchemeValidation
 			with AddStudentsToSchemeDescription
 			with AddStudentsToSchemePermissions
@@ -27,14 +29,10 @@ object AddStudentsToSchemeCommand {
 }
 
 
-class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme)
+class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme, val user: CurrentUser)
 	extends CommandInternal[AttendanceMonitoringScheme] {
 
 	self: AddStudentsToSchemeCommandState with AttendanceMonitoringServiceComponent =>
-
-	staticStudentIds = scheme.members.staticUserIds.asJava
-	includedStudentIds = scheme.members.includedUserIds.asJava
-	excludedStudentIds = scheme.members.excludedUserIds.asJava
 
 	override def applyInternal() = {
 		scheme.members.staticUserIds = staticStudentIds.asScala
@@ -46,6 +44,17 @@ class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme)
 		scheme
 	}
 
+}
+
+trait PopulateAddStudentsToSchemeCommandInternal extends PopulateOnForm {
+
+	self: AddStudentsToSchemeCommandState =>
+
+	override def populate() = {
+		staticStudentIds = scheme.members.staticUserIds.asJava
+		includedStudentIds = scheme.members.includedUserIds.asJava
+		excludedStudentIds = scheme.members.excludedUserIds.asJava
+	}
 }
 
 trait SetStudents {
@@ -75,10 +84,21 @@ trait SetStudents {
 
 trait AddStudentsToSchemeValidation extends SelfValidating {
 
-	self: AddStudentsToSchemeCommandState =>
+	self: AddStudentsToSchemeCommandState with ProfileServiceComponent with SecurityServiceComponent =>
 
 	override def validate(errors: Errors) {
-
+		// In practice there should be no students that fail this validation
+		// but this protects against hand-rolled POSTs
+		val members = profileService.getAllMembersWithUniversityIds(
+			staticStudentIds.asScala
+				diff excludedStudentIds.asScala
+				diff includedStudentIds.asScala
+				++ includedStudentIds.asScala
+		)
+		val noPermissionMembers = members.filter(!securityService.can(user, Permissions.MonitoringPoints.Manage, _))
+		if (!noPermissionMembers.isEmpty) {
+			errors.reject("attendanceMonitoringScheme.student.noPermission", noPermissionMembers.map(_.universityId).mkString(", "))
+		}
 	}
 
 }
@@ -106,20 +126,17 @@ trait AddStudentsToSchemeDescription extends Describable[AttendanceMonitoringSch
 
 trait AddStudentsToSchemeCommandState {
 
-	self: ProfileServiceComponent =>
+	self: AttendanceMonitoringServiceComponent =>
 
 	def scheme: AttendanceMonitoringScheme
+	def user: CurrentUser
 
 	def membershipItems: Seq[SchemeMembershipItem] = {
-		def getStudentMemberForUniversityId(entry: String): Option[StudentMember] =
-			profileService.getMemberByUniversityId(entry) match {
-				case Some(student: StudentMember) => Some(student)
-				case _ => None
-			}
-
-		val staticMemberItems = (staticStudentIds.asScala diff excludedStudentIds.asScala diff includedStudentIds.asScala)
-			.map(getStudentMemberForUniversityId).flatten.map(member => SchemeMembershipItem(SchemeMembershipStaticType, member.firstName, member.lastName, member.universityId, member.userId))
-		val includedMemberItems = includedStudentIds.asScala.map(getStudentMemberForUniversityId).flatten.map(member => SchemeMembershipItem(SchemeMembershipIncludeType, member.firstName, member.lastName, member.universityId, member.userId))
+		val staticMemberItems = attendanceMonitoringService.findSchemeMembershipItems(
+			staticStudentIds.asScala diff excludedStudentIds.asScala diff includedStudentIds.asScala,
+			SchemeMembershipStaticType
+		)
+		val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(includedStudentIds.asScala, SchemeMembershipIncludeType)
 
 		(staticMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
 	}

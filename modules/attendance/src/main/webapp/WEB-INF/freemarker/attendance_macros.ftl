@@ -229,6 +229,7 @@
 				<th <#if doSorting> class="${sortClass("lastName", command)} sortable" data-field="lastName"</#if>>Last name</th>
 				<th <#if doSorting> class="${sortClass("universityId", command)} sortable" data-field="universityId"</#if>>ID</th>
 				<th <#if doSorting> class="${sortClass("userId", command)} sortable" data-field="userId"</#if>>User</th>
+				<th>Schemes</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -252,6 +253,29 @@
 						<td>${item.lastName}</td>
 						<td>${item.universityId}</td>
 						<td>${item.userId}</td>
+						<td>
+							<#if item.existingSchemes?size == 0>
+								0 schemes
+							<#else>
+								<#local popovercontent>
+									<ul>
+										<#list item.existingSchemes as scheme>
+											<li>${scheme.displayName}</li>
+										</#list>
+									<ul>
+								</#local>
+								<a
+									class="use-popover"
+									data-container="body"
+									data-html="true"
+									data-title="Existing schemes"
+									data-content="${popovercontent}"
+									data-placement="top"
+								>
+									<@fmt.p item.existingSchemes?size "scheme" />
+								</a>
+							</#if>
+						</td>
 					</tr>
 				</#list>
 			</tbody>

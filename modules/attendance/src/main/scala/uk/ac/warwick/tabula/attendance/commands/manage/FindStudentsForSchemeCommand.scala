@@ -65,9 +65,9 @@ class FindStudentsForSchemeCommandInternal(val scheme: AttendanceMonitoringSchem
 			val membershipItems: Seq[SchemeMembershipItem] = {
 				staticMembershipItemsToDisplay.map{ item =>
 					if (updatedExcludedStudentIds.asScala.contains(item.universityId))
-						SchemeMembershipItem(SchemeMembershipExcludeType, item.firstName, item.lastName, item.universityId, item.userId)
+						SchemeMembershipItem(SchemeMembershipExcludeType, item.firstName, item.lastName, item.universityId, item.userId, item.existingSchemes)
 					else if (updatedIncludedStudentIds.asScala.contains(item.universityId))
-						SchemeMembershipItem(SchemeMembershipIncludeType, item.firstName, item.lastName, item.universityId, item.userId)
+						SchemeMembershipItem(SchemeMembershipIncludeType, item.firstName, item.lastName, item.universityId, item.userId, item.existingSchemes)
 					else
 						item
 				}

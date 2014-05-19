@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable, SelfValidating}
 import uk.ac.warwick.tabula.attendance.commands.manage._
 import javax.validation.Valid
 import org.springframework.validation.Errors
@@ -22,7 +22,7 @@ class AddStudentsToSchemeController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable scheme: AttendanceMonitoringScheme) =
-		AddStudentsToSchemeCommand(scheme)
+		AddStudentsToSchemeCommand(scheme, user)
 
 	private def render(scheme: AttendanceMonitoringScheme) = {
 		Mav("manage/liststudents",
@@ -35,7 +35,11 @@ class AddStudentsToSchemeController extends AttendanceController {
 	}
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def form(@PathVariable scheme: AttendanceMonitoringScheme) = {
+	def form(
+		@PathVariable scheme: AttendanceMonitoringScheme,
+		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme] with PopulateOnForm
+	) = {
+		cmd.populate()
 		render(scheme)
 	}
 
@@ -69,7 +73,7 @@ class AddStudentsToSchemeController extends AttendanceController {
 		@PathVariable scheme: AttendanceMonitoringScheme
 	) = {
 		if (errors.hasErrors) {
-			form(scheme)
+			render(scheme)
 		} else {
 			val scheme = cmd.apply()
 			Redirect(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear))
@@ -83,7 +87,7 @@ class AddStudentsToSchemeController extends AttendanceController {
 		@PathVariable scheme: AttendanceMonitoringScheme
 	) = {
 		if (errors.hasErrors) {
-			form(scheme)
+			render(scheme)
 		} else {
 			val scheme = cmd.apply()
 			// TODO change to wherever the add points path is
