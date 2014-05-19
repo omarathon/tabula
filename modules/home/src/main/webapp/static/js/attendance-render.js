@@ -386,45 +386,21 @@ $(function(){
 			}
 		}).end()
 	;
-//	$('#newSchemeAddStudents')
-//		.find('a.mass-add-users-button').on('click', function(e){
-//			e.stopPropagation();
-//			e.preventDefault();
-//			$(this).closest('form').find('.mass-add-users-modal').modal('show').on('shown', function(){
-//				$(this).off('shown').find('textarea').focus();
-//			});
-//		}).end()
-//		.find('.mass-add-users-modal textarea').on('keyup', function(){
-//			var $this = $(this), $addButton = $this.closest('div.modal').find('div.modal-footer a.btn');
-//			if ($this.val().length === 0) {
-//				$addButton.addClass('disabled');
-//			} else {
-//				$addButton.removeClass('disabled');
-//			}
-//		}).end()
-//		.find('div.mass-add-users-modal a.btn').on('click', function(){
-//			var $this = $(this);
-//			if ($this.hasClass('disabled'))
-//				return;
-//
-//			$this.addClass('disabled');
-//			var $form = $('#newSchemeAddStudents'), $modal = $form.find('.mass-add-users-modal');
-//			$.ajax($modal.data('href'), {
-//				type: 'POST',
-//				data: $form.serialize(),
-//				success: function(response){
-//					var newCount = $form.find('div.membership').empty().html(response)
-//						.find('.student-count').html();
-//					$form.find('.student-count').html(newCount);
-//					$modal.modal('hide').find('textarea').empty();
-//				},
-//				error: function(){
-//					// Shrug
-//					$this.addClass('disabled');
-//				}
-//			})
-//		})
-//	;
+	var checkAndUpdateButton = function(detailsClass, inputName){
+		if($('details.' + detailsClass + ' table input[type="checkbox"]:checked').length === 0) {
+			$('details.' + detailsClass + ' input[name="' + inputName + '"]').attr('disabled', true);
+		} else {
+			$('details.' + detailsClass + ' input[name="' + inputName + '"]').attr('disabled', false);
+		}
+	};
+	$('details.manually-added').on('click', 'input[type="checkbox"]', function(){
+		checkAndUpdateButton('manually-added', 'resetMembership');
+	});
+	checkAndUpdateButton('manually-added', 'resetMembership');
+	$('details.find-students').on('click', 'input[type="checkbox"]', function(){
+		checkAndUpdateButton('find-students', 'manuallyExclude');
+	});
+	checkAndUpdateButton('find-students', 'manuallyExclude');
 });
 
 window.Attendance = jQuery.extend(window.Attendance, exports);

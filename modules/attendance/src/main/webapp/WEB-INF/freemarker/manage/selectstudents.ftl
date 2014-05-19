@@ -47,7 +47,7 @@
 		</#list>
 		<input type="hidden" name="filterQueryString" value="${findCommand.filterQueryString}" />
 
-		<details <#if expandFind>open</#if> data-submitparam="${CreateSchemeMappingParameters.findStudents}">
+		<details class="find-students" <#if expandFind>open</#if> data-submitparam="${CreateSchemeMappingParameters.findStudents}">
 			<summary class="large-chevron collapsible">
 				<span class="legend">Find students
 					<small>Select students by route, year of study etc.</small>
@@ -194,18 +194,28 @@
 
 				<#assign startIndex = ((findCommand.page - 1) * findCommand.studentsPerPage) />
 				<#assign endIndex = startIndex + findCommandResult.membershipItems?size />
-				<p>Results ${startIndex + 1} - ${endIndex} of ${findCommand.totalResults}</p>
+				<p>
+					Results ${startIndex + 1} - ${endIndex} of ${findCommand.totalResults}
+					<input class="btn btn-danger hideOnClosed btn-small"
+						<#if findCommandResult.membershipItems?size == 0>disabled</#if>
+						type="submit"
+						name="${CreateSchemeMappingParameters.manuallyExclude}"
+						value="Exclude selected"
+					/>
+				</p>
 
 				<@attendance_macros.manageStudentTable
 					membershipItems=findCommandResult.membershipItems
 					doSorting=true
 					command=findCommand
+					checkboxName="excludeIds"
+					onlyShowCheckboxForStatic=true
 				/>
 			</#if>
 		</details>
 
 
-		<details <#if expandManual>open</#if>>
+		<details class="manually-added" <#if expandManual>open</#if>>
 			<summary class="large-chevron collapsible">
 				<span class="legend">Manually added and removed students
 					<small>Add a list of students by university ID or username</small>
@@ -220,23 +230,42 @@
 
 				<p>
 					<input class="btn" type="submit" name="${CreateSchemeMappingParameters.manuallyAddForm}" value="Add students manually" />
+					<#if (editMembershipCommandResult.updatedIncludedStudentIds?size > 0 || editMembershipCommandResult.updatedExcludedStudentIds?size > 0)>
+						<input class="btn btn-warning hideOnClosed"
+							type="submit"
+							name="${CreateSchemeMappingParameters.resetMembership}"
+							value="Reset"
+						/>
+						<input class="btn btn-danger hideOnClosed"
+							<#if editMembershipCommandResult.updatedIncludedStudentIds?size == 0>disabled</#if>
+							type="submit"
+							name="${CreateSchemeMappingParameters.resetAllIncluded}"
+							value="Reset all included"
+						/>
+						<input class="btn btn-danger hideOnClosed"
+							<#if editMembershipCommandResult.updatedExcludedStudentIds?size == 0>disabled</#if>
+							type="submit"
+							name="${CreateSchemeMappingParameters.resetAllExcluded}"
+							value="Reset all excluded"
+						/>
+					</#if>
 				</p>
 			</summary>
 
-			<#if (editMembershipCommandResult.missingMembers?size > 0 || editMembershipCommandResult.noPermissionMembers?size > 0)>
+			<#if (addUsersResult.missingMembers?size > 0 || addUsersResult.noPermissionMembers?size > 0)>
 				<div class="alert alert-warning">
-					<#if (editMembershipCommandResult.missingMembers?size > 0)>
+					<#if (addUsersResult.missingMembers?size > 0)>
 						The following students could not be added as they were not found:
 						<ul>
-							<#list editMembershipCommandResult.missingMembers as member>
+							<#list addUsersResult.missingMembers as member>
 								<li>${member}</li>
 							</#list>
 						</ul>
 					</#if>
-					<#if (editMembershipCommandResult.noPermissionMembers?size > 0)>
+					<#if (addUsersResult.noPermissionMembers?size > 0)>
 						The following students could not be added as you do not have permission to manage their attendance:
 						<ul>
-							<#list editMembershipCommandResult.noPermissionMembers as member>
+							<#list addUsersResult.noPermissionMembers as member>
 								<li>${member.fullName} (${member.universityId})</li>
 							</#list>
 						</ul>
@@ -244,7 +273,10 @@
 				</div>
 			</#if>
 
-			<@attendance_macros.manageStudentTable editMembershipCommandResult.membershipItems />
+			<@attendance_macros.manageStudentTable
+				membershipItems=editMembershipCommandResult.membershipItems
+				checkboxName="resetStudentIds"
+			/>
 
 			<#list editMembershipCommandResult.updatedIncludedStudentIds as id>
 				<input type="hidden" name="updatedIncludedStudentIds" value="${id}" />
@@ -278,6 +310,9 @@
 			<#list editMembershipCommandResult.updatedExcludedStudentIds as id>
 				<input type="hidden" name="updatedExcludedStudentIds" value="${id}" />
 			</#list>
+			<#if summaryString?has_content>
+				<p>${summaryString}</p>
+			</#if>
 			<input type="submit" value="Link to SITS" class="btn btn-success" name="${CreateSchemeMappingParameters.linkToSits}">
 			<input type="submit" value="Import as list" class="btn btn-primary" name="${CreateSchemeMappingParameters.importAsList}">
 			<input type="submit" value="Cancel" class="btn" name="${CreateSchemeMappingParameters.reset}">

@@ -66,6 +66,7 @@ trait DeserializesFilter extends Logging with FiltersStudentsBase with CourseAnd
 		val params: Map[String, Seq[String]] = URLEncodedUtils.parse(new URI(null, null, null, filterString, null), "UTF-8").asScala.groupBy(_.getName).map{
 			case (name, nameValuePairs) => name -> nameValuePairs.map(_.getValue)
 		}
+		courseTypes.clear()
 		params.get("courseTypes").map{_.foreach{ item =>
 			try {
 				courseTypes.add(CourseType.fromCourseCode(item))
@@ -74,6 +75,7 @@ trait DeserializesFilter extends Logging with FiltersStudentsBase with CourseAnd
 					logger.warn(s"Could not deserialize filter with courseType $item")
 			}}
 		}
+		routes.clear()
 		params.get("routes").map{_.foreach{ item =>
 			val routeCodeConverter = new RouteCodeConverter
 			routeCodeConverter.service = courseAndRouteService
@@ -82,6 +84,7 @@ trait DeserializesFilter extends Logging with FiltersStudentsBase with CourseAnd
 				case _ => logger.warn(s"Could not deserialize filter with route $item")
 			}
 		}}
+		modesOfAttendance.clear()
 		params.get("modesOfAttendance").map{_.foreach{ item =>
 			val modeOfAttendanceCodeConverter = new ModeOfAttendanceCodeConverter
 			modeOfAttendanceCodeConverter.dao = modeOfAttendanceDao
@@ -90,6 +93,7 @@ trait DeserializesFilter extends Logging with FiltersStudentsBase with CourseAnd
 				case _ => logger.warn(s"Could not deserialize filter with modeOfAttendance $item")
 			}
 		}}
+		yearsOfStudy.clear()
 		params.get("yearsOfStudy").map{_.foreach{ item =>
 			try {
 				item.toInt
@@ -98,6 +102,7 @@ trait DeserializesFilter extends Logging with FiltersStudentsBase with CourseAnd
 					logger.warn(s"Could not deserialize filter with yearOfStudy $item")
 			}}
 		}
+		sprStatuses.clear()
 		params.get("sprStatuses").map{_.foreach{ item =>
 			val sitsStatusCodeConverter = new SitsStatusCodeConverter
 			sitsStatusCodeConverter.dao = sitsStatusDao
@@ -106,6 +111,7 @@ trait DeserializesFilter extends Logging with FiltersStudentsBase with CourseAnd
 				case _ => logger.warn(s"Could not deserialize filter with sprStatus $item")
 			}
 		}}
+		modules.clear()
 		params.get("modules").map{_.foreach{ item =>
 			val moduleCodeConverter = new ModuleCodeConverter
 			moduleCodeConverter.service = moduleAndDepartmentService
@@ -114,6 +120,7 @@ trait DeserializesFilter extends Logging with FiltersStudentsBase with CourseAnd
 				case _ => logger.warn(s"Could not deserialize filter with module $item")
 			}
 		}}
+		otherCriteria.clear()
 		params.get("otherCriteria").map{_.foreach{ item => otherCriteria.add(item) }}
 	}
 

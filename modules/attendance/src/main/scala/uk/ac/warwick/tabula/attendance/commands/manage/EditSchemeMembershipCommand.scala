@@ -9,16 +9,18 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.StudentMember
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
-import scala.Some
 import uk.ac.warwick.tabula.helpers.LazyLists
-import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipExcludeType, SchemeMembershipItem}
+import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipExcludeType}
 import uk.ac.warwick.tabula.data.SchemeMembershipItem
 import scala.Some
 
 case class EditSchemeMembershipCommandResult(
 	updatedIncludedStudentIds: JList[String],
 	updatedExcludedStudentIds: JList[String],
-	membershipItems: Seq[SchemeMembershipItem],
+	membershipItems: Seq[SchemeMembershipItem]
+)
+
+case class AddUsersToEditSchemeMembershipCommandResult(
 	missingMembers: Seq[String],
 	noPermissionMembers: Seq[StudentMember]
 )
@@ -32,6 +34,9 @@ object EditSchemeMembershipCommand {
 			with AutowiringSecurityServiceComponent
 			with ComposableCommand[EditSchemeMembershipCommandResult]
 			with PopulateEditSchemeMembershipCommand
+			with AddsUsersToEditSchemeMembershipCommand
+			with RemovesUsersFromEditSchemeMembershipCommand
+			with ResetsMembershipInEditSchemeMembershipCommand
 			with EditSchemeMembershipPermissions
 			with EditSchemeMembershipCommandState
 			with Unaudited with ReadOnly
@@ -47,6 +52,37 @@ class EditSchemeMembershipCommandInternal(val scheme: AttendanceMonitoringScheme
 		with AttendanceMonitoringServiceComponent with SecurityServiceComponent =>
 
 	override def applyInternal() = {
+		val membershipItems: Seq[SchemeMembershipItem] = {
+			val excludedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(updatedExcludedStudentIds.asScala, SchemeMembershipExcludeType)
+			val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(updatedIncludedStudentIds.asScala, SchemeMembershipIncludeType)
+			(excludedMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
+		}
+
+		EditSchemeMembershipCommandResult(
+			updatedIncludedStudentIds,
+			updatedExcludedStudentIds,
+			membershipItems
+		)
+	}
+
+}
+
+trait PopulateEditSchemeMembershipCommand extends PopulateOnForm {
+
+	self: EditSchemeMembershipCommandState =>
+
+	override def populate() = {
+		updatedIncludedStudentIds = includedStudentIds
+		updatedExcludedStudentIds = excludedStudentIds
+	}
+
+}
+
+trait AddsUsersToEditSchemeMembershipCommand {
+
+	self: EditSchemeMembershipCommandState with ProfileServiceComponent with UserLookupComponent with SecurityServiceComponent =>
+
+	def addUsers(): AddUsersToEditSchemeMembershipCommandResult = {
 		def getStudentMemberForString(entry: String): Option[StudentMember] = {
 			if (UniversityId.isValid(entry)) {
 				profileService.getMemberByUniversityId(entry) match {
@@ -82,32 +118,36 @@ class EditSchemeMembershipCommandInternal(val scheme: AttendanceMonitoringScheme
 		// Users processed, so reset fields
 		massAddUsers = ""
 
-		val membershipItems: Seq[SchemeMembershipItem] = {
-			val excludedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(updatedExcludedStudentIds.asScala, SchemeMembershipExcludeType)
-			val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(updatedIncludedStudentIds.asScala, SchemeMembershipIncludeType)
-			(excludedMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
-		}
-
-		EditSchemeMembershipCommandResult(
-			updatedIncludedStudentIds,
-			updatedExcludedStudentIds,
-			membershipItems,
-			missingMembers,
-			noPermissionsMembers
-		)
+		AddUsersToEditSchemeMembershipCommandResult(missingMembers, noPermissionsMembers)
 	}
 
 }
 
-trait PopulateEditSchemeMembershipCommand extends PopulateOnForm {
+trait RemovesUsersFromEditSchemeMembershipCommand {
 
 	self: EditSchemeMembershipCommandState =>
 
-	override def populate() = {
-		updatedIncludedStudentIds = includedStudentIds
-		updatedExcludedStudentIds = excludedStudentIds
+	def removeUsers() = {
+		updatedExcludedStudentIds = (updatedExcludedStudentIds.asScala ++ excludeIds.asScala).distinct.asJava
+	}
+}
+
+trait ResetsMembershipInEditSchemeMembershipCommand {
+
+	self: EditSchemeMembershipCommandState =>
+
+	def resetMembership() = {
+		updatedIncludedStudentIds = (updatedIncludedStudentIds.asScala diff resetStudentIds.asScala).asJava
+		updatedExcludedStudentIds = (updatedExcludedStudentIds.asScala diff resetStudentIds.asScala).asJava
 	}
 
+	def resetAllIncluded() = {
+		updatedIncludedStudentIds.clear()
+	}
+
+	def resetAllExcluded() = {
+		updatedExcludedStudentIds.clear()
+	}
 }
 
 
@@ -145,4 +185,6 @@ trait EditSchemeMembershipCommandState {
 		if (massAddUsers == null) Nil
 		else massAddUsers split "(\\s|[^A-Za-z\\d\\-_\\.])+" map (_.trim) filterNot (_.isEmpty)
 
+	var excludeIds: JList[String] = LazyLists.create()
+	var resetStudentIds: JList[String] = LazyLists.create()
 }

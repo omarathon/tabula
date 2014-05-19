@@ -214,6 +214,8 @@
 	membershipItems
 	doSorting=false
 	command=""
+	checkboxName=""
+	onlyShowCheckboxForStatic=false
 >
 
 	<#if (membershipItems?size > 0)>
@@ -233,6 +235,9 @@
 				<#list membershipItems as item>
 					<tr>
 						<td>
+							<#if checkboxName?has_content && (!onlyShowCheckboxForStatic || item.itemTypeString == "static")>
+								<input type="checkbox" name="${checkboxName}" value="${item.universityId}" />
+							</#if>
 						</td>
 						<td>
 							<#if item.itemTypeString == "static">
