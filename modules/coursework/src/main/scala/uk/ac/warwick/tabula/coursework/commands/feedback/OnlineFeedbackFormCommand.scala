@@ -98,7 +98,8 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 
 	def copyTo(feedback: Feedback) {
 		// save custom fields
-		feedback.customFormValues = fields.asScala.map {
+		feedback.clearCustomFormValues()
+		feedback.customFormValues.addAll(fields.asScala.map {
 			case (_, formValue) => {
 
 				def newValue = {
@@ -118,7 +119,7 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 				formValue.persist(savedFormValue)
 				savedFormValue
 			}
-		}.toSet[SavedFormValue].asJava
+		}.toSet[SavedFormValue].asJava)
 
 		// save mark and grade
 		if (assignment.collectMarks) {

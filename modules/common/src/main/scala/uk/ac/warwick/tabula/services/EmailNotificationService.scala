@@ -13,14 +13,20 @@ class EmailNotificationService extends Logging with Daoisms {
 	val RunBatchSize = 100
 
 	var dao = Wire[NotificationDao]
-	var listener = Wire[EmailNotificationListener]
+	var listener: RecipientNotificationListener = Wire[EmailNotificationListener]
 
 	def processNotifications() = transactional() {
 		dao.unemailedRecipients.take(RunBatchSize).foreach { recipient =>
-			logger.info("Emailing recipient - " + recipient)
-
-			listener.listen(recipient)
-			session.flush()
+			try {
+				logger.info("Emailing recipient - " + recipient)
+				listener.listen(recipient)
+				session.flush()
+			} catch {
+				case throwable: Throwable => {
+					// TAB-2238 Catch and log, so that the overall transaction can still commit
+					logger.error("Exception handling email:", throwable)
+				}
+			}
 		}
 	}
 

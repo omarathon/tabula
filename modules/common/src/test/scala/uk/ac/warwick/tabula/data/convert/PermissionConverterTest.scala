@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.data.convert
 
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{PermissionsSelector, Permissions}
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 class PermissionConverterTest extends TestBase {
 	
@@ -19,6 +20,11 @@ class PermissionConverterTest extends TestBase {
 	@Test def formatting {
 		converter.convertLeft(Permissions.Module.Create) should be ("Module.Create")
 		converter.convertLeft(null) should be (null)
+	}
+
+	@Test def selector {
+		converter.convertRight("Profiles.StudentRelationship.Create(*)") should be (Permissions.Profiles.StudentRelationship.Create(PermissionsSelector.Any[StudentRelationshipType]))
+		converter.convertLeft(Permissions.Profiles.StudentRelationship.Create(PermissionsSelector.Any[StudentRelationshipType])) should be ("Profiles.StudentRelationship.Create(*)")
 	}
 
 }

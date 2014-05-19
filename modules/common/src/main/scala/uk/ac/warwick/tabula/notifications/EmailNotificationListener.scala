@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import java.util.concurrent.{ExecutionException, TimeoutException, TimeUnit}
 import org.hibernate.ObjectNotFoundException
 import javax.mail.internet.MimeMessage
+import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
 
 @Component
 class EmailNotificationListener extends RecipientNotificationListener with UnicodeEmails with AutowiredTextRendererComponent with Logging {
@@ -35,7 +36,9 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 	}
 
 	// add an isEmail property for the model for emails
-	def render(model: FreemarkerModel) = textRenderer.renderTemplate(model.template, model.model + ("isEmail" -> true))
+	def render(model: FreemarkerModel) = {
+		textRenderer.renderTemplate(model.template, model.model + ("isEmail" -> true))
+	}
 
 	private def generateMessage(recipientInfo: RecipientNotificationInfo): Option[MimeMessage] = {
 		try {
@@ -48,9 +51,22 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 				message.setTo(recipient.getEmail)
 				message.setSubject(notification.title)
 
+				val content: String = {
+					// Access to restricted properties requires user inside RequestInfo
+					val currentUser = new CurrentUser(recipient, recipient)
+					val info = new RequestInfo(
+						user = currentUser,
+						requestedUri = null,
+						requestParameters = Map()
+					)
+					RequestInfo.use(info) {
+						render(notification.content)
+					}
+				}
+
 				val body = new StringBuilder("")
 				body.append(mailHeader.format(recipient.getFirstName))
-				body.append(render(notification.content))
+				body.append(content)
 				body.append(link(notification))
 				body.append(mailFooter)
 				body.append(replyWarning)

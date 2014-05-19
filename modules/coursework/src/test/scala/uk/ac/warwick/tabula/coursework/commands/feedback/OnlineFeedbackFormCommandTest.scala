@@ -96,7 +96,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 			existingFeedback.actualMark = Some(55)
 			existingFeedback.id = "existingFeedback"
 			savedFormValue.feedback = existingFeedback
-			existingFeedback.customFormValues = JSet(savedFormValue)
+			existingFeedback.customFormValues.add(savedFormValue)
 
 			assignment.feedbacks = Seq(existingFeedback)
 

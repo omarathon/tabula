@@ -21,9 +21,9 @@
 <h3>General feedback on the assignment:</h3> ${assignment.genericFeedback!""}
 </div>
 </#if>
-<#if feedback.defaultFeedbackComments??>
+<#if feedback.comments??>
 <div class="feedback-notes">
-<h3>Feedback on your submission</h3> ${feedback.defaultFeedbackComments!""}
+<h3>Feedback on your submission</h3> ${feedback.comments!""}
 </div>
 </#if>
 
@@ -56,7 +56,7 @@
 
 </p>
 
-<#if feedback.hasOnlineFeedback || feedback.hasMarkOrGrade || feedback.defaultFeedbackComments?? || assignment.genericFeedback??>
+<#if feedback.hasOnlineFeedback || feedback.hasMarkOrGrade || feedback.comments?? || assignment.genericFeedback??>
 	<a href="<@routes.feedbackPdf assignment=assignment />"> Download<#if feedback.attachments?has_content> additional</#if> feedback as a PDF file</a>
 </#if>
 

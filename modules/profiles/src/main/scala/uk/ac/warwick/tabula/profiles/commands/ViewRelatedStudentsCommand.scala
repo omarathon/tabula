@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.profiles.commands
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.commands.{FiltersRelationships, CommandInternal, ReadOnly, Unaudited, ComposableCommand}
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.hibernate.criterion.Order._
@@ -73,10 +73,10 @@ abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val
 	}
 }
 
-trait ViewRelatedStudentsCommandPermissions extends RequiresPermissionsChecking {
+trait ViewRelatedStudentsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self:ViewRelatedStudentsCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(p.mandatory(relationshipType)), currentMember)
+		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), currentMember)
 	}
 }

@@ -17,9 +17,9 @@ class AttendanceHomeTest extends AttendanceFixture with GivenWhenThen{
 		When("I go to /attendance")
 		go to Path("/attendance")
 
-		Then("I am redirected to /attendance/{P.Student1.warwickId}/{current-year}")
-		eventually(currentUrl should include(s"/attendance/profile/${P.Student1.warwickId}/$year"))
-		pageSource should include("My Attendance Monitoring")
+		Then("I am redirected to /attendance/{P.Student1.warwickId}/2013")
+		eventually(currentUrl should include(s"/attendance/profile/${P.Student1.warwickId}/2013"))
+		pageSource should include("My Monitoring Points")
 	}
 
 	"A Member of staff" should "see the monitoring points home page" in {

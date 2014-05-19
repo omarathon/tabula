@@ -17,19 +17,19 @@ class ProfileHomeController extends AttendanceController {
 
 	@RequestMapping
 	def render() = user.profile match {
-		case Some(student: StudentMember) => Redirect(Routes.profile(student, AcademicYear.guessByDate(DateTime.now)))
+		case Some(student: StudentMember) => Redirect(Routes.old.profile(student))
 		case _ if user.isStaff => Mav("profile/profile_staff").noLayoutIf(ajax)
 		case _ => Mav("profile/profile_unknown").noLayoutIf(ajax)
 	}
 }
 
 @Controller
-@RequestMapping(value = Array("/profile/{student}/{academicYear}"))
+@RequestMapping(value = Array("/profile/{student}/2013"))
 class ProfileController extends AttendanceController {
 
 	@ModelAttribute("command")
-	def createCommand(@PathVariable student: StudentMember, @PathVariable academicYear: AcademicYear)
-		= ProfileCommand(student, academicYear)
+	def createCommand(@PathVariable student: StudentMember)
+		= ProfileCommand(student, AcademicYear(2013))
 
 	@RequestMapping
 	def render(

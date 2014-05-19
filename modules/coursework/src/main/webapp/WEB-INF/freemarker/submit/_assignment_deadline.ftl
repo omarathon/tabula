@@ -22,7 +22,7 @@
 
 	<#assign time_remaining = durationFormatter(assignment.closeDate) />
 	<#assign showIconsAndButtons = (!textOnly)!true />
-	<#if hasExtension && isExtended>
+	<#if hasActiveExtension>
 		<#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
 	</#if>
 
@@ -36,7 +36,7 @@
 	<#elseif assignment.closed>
 		<p class="late deadline">
 			<#if showIconsAndButtons><i class="icon-calendar icon-3x pull-left"></i></#if>
-			<#if hasExtension && isExtended>
+			<#if hasActiveExtension>
 				<span class="time-remaining">${extension_time_remaining} <span class="label label-important use-tooltip" title="<@sd.lateness submission />" data-container="body">Late</span></span>
 				Extension deadline was <@fmt.date date=extension.expiryDate />
 			<#else>

@@ -12,8 +12,8 @@ class AttendanceViewStudentsTest extends AttendanceFixture with GivenWhenThen{
 		Given("I am logged in as Admin1")
 		signIn as P.Admin1 to Path("/")
 
-		When("I go to /attendance/view/xxx/students")
-		go to Path("/attendance/view/xxx/students")
+		When("I go to /attendance/view/xxx/2013/students")
+		go to Path("/attendance/view/xxx/2013/students")
 
 		Then("I see some students")
 		pageSource should include("First name")

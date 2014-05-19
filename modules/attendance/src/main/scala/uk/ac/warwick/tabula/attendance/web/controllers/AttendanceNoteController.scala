@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.helpers.DateBuilder
 import javax.validation.Valid
 
 @Controller
-@RequestMapping(Array("/note/{student}/{monitoringPoint}"))
+@RequestMapping(Array("/note/2013/{student}/{monitoringPoint}"))
 class AttendanceNoteController extends AttendanceController with CheckpointUpdatedDescription {
 
 	@Autowired var monitoringPointService: MonitoringPointService = _
@@ -44,7 +44,7 @@ class AttendanceNoteController extends AttendanceController with CheckpointUpdat
 }
 
 @Controller
-@RequestMapping(Array("/note/{student}/{monitoringPoint}/attachment/{fileName}"))
+@RequestMapping(Array("/note/2013/{student}/{monitoringPoint}/attachment/{fileName}"))
 class AttendanceNoteAttachmentController extends AttendanceController {
 
 	@Autowired var fileServer: FileServer = _
@@ -64,7 +64,7 @@ class AttendanceNoteAttachmentController extends AttendanceController {
 }
 
 @Controller
-@RequestMapping(Array("/note/{student}/{monitoringPoint}/edit"))
+@RequestMapping(Array("/note/2013/{student}/{monitoringPoint}/edit"))
 class EditAttendanceNoteController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
@@ -102,7 +102,7 @@ class EditAttendanceNoteController extends AttendanceController {
 	) = {
 		val mav = Mav("home/edit_note",
 			"allAbsenceTypes" -> AbsenceType.values,
-			"returnTo" -> getReturnTo(Routes.department.viewStudent(currentMember.homeDepartment, student)),
+			"returnTo" -> getReturnTo(Routes.old.department.viewStudent(currentMember.homeDepartment, student)),
 			"isModal" -> ajax,
 			"isIframe" -> isIframe
 		)
@@ -138,7 +138,7 @@ class EditAttendanceNoteController extends AttendanceController {
 			form(cmd, student)
 		} else {
 			cmd.apply()
-			Redirect(Routes.department.viewStudent(currentMember.homeDepartment, student))
+			Redirect(Routes.old.department.viewStudent(currentMember.homeDepartment, student))
 		}
 	}
 

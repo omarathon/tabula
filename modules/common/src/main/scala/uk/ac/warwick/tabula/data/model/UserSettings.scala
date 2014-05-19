@@ -14,7 +14,7 @@ class UserSettings extends GeneratedId with SettingsMap with PermissionsTarget {
 	@Column(unique = true)
 	var userId: String = _
 	
-	def alertsSubmission = getStringSetting(Settings.AlertsSubmission).orNull
+	def alertsSubmission = getStringSetting(Settings.AlertsSubmission) getOrElse(AlertsNoteworthySubmissions)
 	def alertsSubmission_= (alert: String) = settings += (Settings.AlertsSubmission -> alert)
 	
 	def hiddenIntros = getStringSeqSetting(Settings.HiddenIntros) getOrElse(Nil)
@@ -41,7 +41,7 @@ class UserSettings extends GeneratedId with SettingsMap with PermissionsTarget {
 
 object UserSettings {
 	val AlertsAllSubmissions = "allSubmissions"
-	val AlertsLateSubmissions = "lateSubmissions"
+	val AlertsNoteworthySubmissions = "lateSubmissions"
 	val AlertsNoSubmissions = "none"
 		
 	val DefaultBulkEmailSeparator = ";"

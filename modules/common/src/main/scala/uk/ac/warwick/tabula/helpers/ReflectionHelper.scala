@@ -19,6 +19,8 @@ import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTar
 import uk.ac.warwick.tabula.permissions.PermissionsSelector
 import uk.ac.warwick.tabula.data.model.{ToEntityReference, Notification, StudentRelationshipType}
 import javax.persistence.DiscriminatorValue
+import uk.ac.warwick.tabula.roles.{RoleDefinition, SelectorBuiltInRoleDefinition, BuiltInRoleDefinition}
+import java.lang.reflect.Modifier
 
 object ReflectionHelper {
 	
@@ -66,6 +68,32 @@ object ReflectionHelper {
 				
 				if (params.length == 0) constructor.newInstance().asInstanceOf[Permission]
 				else constructor.newInstance(params: _*).asInstanceOf[Permission]
+			}
+	}
+
+	lazy val allBuiltInRoleDefinitions = {
+		val selectorDefinitions = subtypesOf[SelectorBuiltInRoleDefinition[_]]
+
+		subtypesOf[BuiltInRoleDefinition]
+			.filterNot { clz => Modifier.isAbstract(clz.getModifiers) }
+			.filterNot { clz => selectorDefinitions.contains(clz) }
+			.sortBy(_.getSimpleName)
+			.map { clz =>
+				val name =
+					if (clz.getSimpleName.endsWith("$")) clz.getSimpleName.substring(0, clz.getSimpleName.length - 1)
+					else clz.getSimpleName
+
+				RoleDefinition.of(name)
+			}
+	}
+
+	lazy val allSelectorBuiltInRoleDefinitionNames = {
+		subtypesOf[SelectorBuiltInRoleDefinition[_]]
+			.filterNot { clz => Modifier.isAbstract(clz.getModifiers) }
+			.sortBy(_.getSimpleName)
+			.map { clz =>
+				if (clz.getSimpleName.endsWith("$")) clz.getSimpleName.substring(0, clz.getSimpleName.length - 1)
+				else clz.getSimpleName
 			}
 	}
 	

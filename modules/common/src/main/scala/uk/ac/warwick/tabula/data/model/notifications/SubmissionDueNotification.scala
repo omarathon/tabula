@@ -7,7 +7,8 @@ import org.joda.time.{Days, DateTime}
 import uk.ac.warwick.tabula.data.model.NotificationPriority._
 import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
+import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AutowiringUserLookupComponent}
+import uk.ac.warwick.spring.Wire
 
 trait SubmissionReminder {
 	self : Notification[_, Unit] with NotificationPreSaveBehaviour =>
@@ -75,16 +76,18 @@ trait SubmissionReminder {
 class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] with SingleItemNotification[Assignment]
 	with SubmissionReminder {
 
+	@transient var membershipService = Wire[AssignmentMembershipService]
+
 	def deadline = assignment.closeDate
 	def assignment = item.entity
 
 	def recipients = {
 		val submissions = assignment.submissions.asScala
-		val extensions = assignment.extensions.asScala
-		val allStudents = assignment.membershipInfo.items.map(_.user)
+		val extensions = assignment.extensions.asScala.filter(_.approved) // TAB-2303
+		val allStudents = membershipService.determineMembershipUsers(assignment)
 		// fist filter out students that have submitted already
 		val withoutSubmission = allStudents.filterNot(user => submissions.exists(_.universityId == user.getWarwickId))
-		// finally filter students that have an extension
+		// finally filter students that have an approved extension
 		withoutSubmission.filterNot(user => extensions.exists(_.universityId == user.getWarwickId))
 	}
 }
@@ -99,5 +102,14 @@ class SubmissionDueWithExtensionNotification extends Notification[Extension, Uni
 	def deadline = extension.expiryDate
 	def assignment = extension.assignment
 
-	def recipients = Seq(userLookup.getUserByWarwickUniId(extension.universityId))
+	def recipients = {
+		val hasSubmitted = assignment.submissions.asScala.exists(_.universityId == extension.universityId)
+
+		if (hasSubmitted) {
+			Nil
+		} else {
+			Seq(userLookup.getUserByWarwickUniId(extension.universityId))
+		}
+	}
+
 }

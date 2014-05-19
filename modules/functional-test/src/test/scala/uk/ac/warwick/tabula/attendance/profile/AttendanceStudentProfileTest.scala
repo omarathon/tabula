@@ -16,7 +16,7 @@ class AttendanceStudentProfileTest extends AttendanceFixture with GivenWhenThen 
 
 		Then("I am redirected to my profile")
 		eventually(currentUrl should include("/attendance/profile"))
-		pageSource should include("My Attendance Monitoring")
+		pageSource should include("My Monitoring Points")
 		And("I see my monitoring points")
 		className("monitoring-points-profile").webElement.findElements(By.cssSelector("tr.point")).size() should be (3)
 	}

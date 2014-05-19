@@ -7,7 +7,18 @@ import org.openqa.selenium.WebDriver
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.SpanSugar._
 
+import WebsignonMethods._
+import scala.util.matching.Regex
 
+object WebsignonMethods {
+	def parseSignedInDetail(html: String) = {
+		val SignedInAs = new Regex("""(?s).+(Signed in as [\-_\w0-9 ]+).+""")
+		html match {
+			case SignedInAs(line) => line.trim
+			case _ => "couldn't parse anything useful from the HTML"
+		}
+	}
+}
 
 trait WebsignonMethods extends ShouldMatchers  with Eventually{
 	import WebBrowser._ // include methods like "go to"
@@ -23,7 +34,8 @@ trait WebsignonMethods extends ShouldMatchers  with Eventually{
 		}
 
     case class SigningInPhase(details: LoginDetails) {
-      def to(url: String) {
+
+			def to(url: String) {
         go to (url)
         // FIXME doesn't handle being signed in as another user
         // TODO doesn't check that SSO sends you back to the right page
@@ -46,7 +58,8 @@ trait WebsignonMethods extends ShouldMatchers  with Eventually{
 						if (linkText("Sign in").findElement.isDefined) {
 							click on linkText("Sign in")
 						} else if (linkText("Sign out").findElement.isDefined) {
-							fail("Expected Sign in link but there was a Sign out link!"+pageSource)
+							val detail = parseSignedInDetail(pageSource)
+							fail(s"Tried to sign out to sign in as ${details.usercode}, but still appear to be signed in! (${detail})")
 						} else {
 							fail("No Sign in or out links! URL:"+currentUrl)
 						}

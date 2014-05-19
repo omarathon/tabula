@@ -6,9 +6,9 @@ import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointReport, Monito
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, StudentRelationshipType, Department, Route}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.attendance.commands.manage.{UpdateMonitoringPointState, UpdateMonitoringPointValidation, UpdateMonitoringPointCommand}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.tabula.attendance.commands.manage.old.{UpdateMonitoringPointState, UpdateMonitoringPointValidation, UpdateMonitoringPointCommand}
 
 class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 

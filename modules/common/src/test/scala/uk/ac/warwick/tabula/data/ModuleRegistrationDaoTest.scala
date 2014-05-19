@@ -1,13 +1,7 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.annotations.AccessType
 import org.junit.Before
-import org.junit.runner.RunWith
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 
-import javax.persistence.Entity
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.data.model.Module

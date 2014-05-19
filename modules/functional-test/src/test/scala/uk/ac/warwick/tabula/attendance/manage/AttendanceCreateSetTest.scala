@@ -15,8 +15,8 @@ class AttendanceCreateSetTest extends AttendanceFixture with GivenWhenThen{
 		Given("I am logged in as Admin1")
 		signIn as P.Admin1 to Path("/")
 
-		When("I go to /attendance/manage/xxx/sets/add/2013?createType=blank")
-		go to Path("/attendance/manage/xxx/sets/add/2013?createType=blank")
+		When("I go to /attendance/manage/xxx/2013/sets/add/2013?createType=blank")
+		go to Path("/attendance/manage/xxx/2013/sets/add/2013?createType=blank")
 
 		Then("I can open the routes drop-down")
 		click on className("routeAndYearPicker").webElement.findElement(By.className("expand-button"))

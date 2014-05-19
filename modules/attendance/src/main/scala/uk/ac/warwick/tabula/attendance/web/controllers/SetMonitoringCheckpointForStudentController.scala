@@ -44,7 +44,7 @@ class SetMonitoringCheckpointForStudentController extends AttendanceController w
 		Mav("home/record_point",
 				"command" -> command,
 				"allCheckpointStates" -> AttendanceState.values,
-				"returnTo" -> getReturnTo(Routes.department.view(department)))
+				"returnTo" -> getReturnTo(Routes.old.department.view(department)))
 	}
 
 
@@ -59,7 +59,7 @@ class SetMonitoringCheckpointForStudentController extends AttendanceController w
 			form(command, department)
 		} else {
 			command.apply()
-			Redirect(Routes.department.view(department), "updatedMonitoringPoint" -> monitoringPoint.id)
+			Redirect(Routes.old.department.view(department), "updatedMonitoringPoint" -> monitoringPoint.id)
 		}
 	}
 

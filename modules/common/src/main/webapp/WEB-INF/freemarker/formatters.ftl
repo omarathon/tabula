@@ -31,7 +31,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 			<#if department.parent?? || department.children?has_content>
 				<h4 class="with-related"><span class="muted">${preposition}</span> ${department.name}</h4>
 			<#else>
-				<h4><span class="muted">for</span> ${department.name}</h4>
+				<h4><span class="muted">${preposition}</span> ${department.name}</h4>
 			</#if>
 		<#-- <div> closed below -->
 	<#else>
@@ -400,7 +400,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	<${type} ${href} ${id_attr} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
 </#macro>
 
-<#macro bulk_email emails title subject limit=50>
+<#macro bulk_email emails title subject limit=500>
 	<#local separator = ";" />
 	<#if user?? && userSetting('bulkEmailSeparator')?has_content>
 		<#assign separator = userSetting('bulkEmailSeparator') />

@@ -1,33 +1,6 @@
+<#import "*/permissions_macros.ftl" as pm />
+
 <h1>Permissions helper - results</h1>
-
-<#macro debugPermission permission scope={}>
-	<#local isTarget=permissionsHelperCommand.permission?? && (permission.name == permissionsHelperCommand.permission.name && (scope?size == 0 || (scope.id == results.resolvedScope.id)))>
-
-	<#if isTarget><strong class="text-success"></#if>
-
-	<span class="permission"><i class="icon-lock use-tooltip" title="${permission.name}"></i> ${permission.description}</span>
-	<#if scope?? && scope?size != 0>
-		on <span class="scope"><i class="icon-bookmark"></i> ${scope.toString}</span>
-	<#elseif permission.scoped>
-		<i class="icon-globe use-tooltip" title="Granted against any scope" data-placement="right"></i>
-	</#if>
-
-	<#if isTarget></strong></#if>
-</#macro>
-
-<#macro debugRole role>
-	<span class="role"><i class="icon-user"></i> ${role.definition.description}</span><#if role.scope??> on <span class="scope"><i class="icon-bookmark"></i> ${role.scope.toString}</span></#if>
-	<#if role.explicitPermissions?size gt 0 || role.subRoles?size gt 0>
-		<ul>
-			<#list role.subRoles as subRole>
-				<li><@debugRole role=subRole /></li>
-			</#list>
-			<#list role.explicitPermissionsAsList as permission>
-				<li><@debugPermission permission=permission._1() scope=permission._2() /></li>
-			</#list>
-		</ul>
-	</#if>
-</#macro>
 
 <#if results.scopeMismatch>
 	<div class="alert <#if permissionsHelperCommand.permission.scoped>alert-block<#else>alert-error</#if>">
@@ -86,7 +59,7 @@
 					<#if results.roles?size gt 0>
 						<ul>
 							<#list results.roles as role>
-								<li><@debugRole role=role /></li>
+								<li><@pm.debugRole role=role /></li>
 							</#list>
 						</ul>
 					<#else>
@@ -100,7 +73,7 @@
 					<#if results.permissions?size gt 0>
 						<ul>
 							<#list results.permissions as permission>
-								<li><#if permission.permissionType>[ALLOW]<#else>[DENY]</#if> <@debugPermission permission=permission.permission scope=permission.scope /></li>
+								<li><#if permission.permissionType>[ALLOW]<#else>[DENY]</#if> <@pm.debugPermission permission=permission.permission scope=permission.scope /></li>
 							</#list>
 						</ul>
 					<#else>

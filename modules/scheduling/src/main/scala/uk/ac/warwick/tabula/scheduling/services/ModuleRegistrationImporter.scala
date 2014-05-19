@@ -126,7 +126,8 @@ object ModuleRegistrationImporter {
 					join $sitsSchema.cam_ssn ssn 
 						on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON'
 				where stu.stu_code = :universityId"""
-					
+
+	// The check on SMO_RTSC excludes WMG cancelled modules or module registrations
 	val ConfirmedModuleRegistrations = f"""
 			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
 			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence, smr_agrm, smr_agrg
@@ -139,6 +140,7 @@ object ModuleRegistrationImporter {
 					
 					join $sitsSchema.cam_smo smo 
 						on smo.spr_code = spr.spr_code
+						and (smo_rtsc is null or (smo_rtsc not like 'X%' and smo_rtsc != 'Z'))
 					
 					join $sitsSchema.srs_vco vco 
 						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
@@ -167,7 +169,8 @@ object ModuleRegistrationImporter {
 					
 					join $sitsSchema.cam_smo smo 
 						on smo.spr_code = spr.spr_code
-					
+						and (smo_rtsc is null or (smo_rtsc not like 'X%' and smo_rtsc != 'Z'))
+
 					join $sitsSchema.srs_vco vco 
 						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
 

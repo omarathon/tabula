@@ -8,12 +8,12 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.commands.{GroupedMonitoringPoint, StudentPointsData, AgentViewCommand}
 
 @Controller
-@RequestMapping(Array("/agent/{relationshipType}"))
+@RequestMapping(Array("/agent/{relationshipType}/2013"))
 class AgentViewController extends AttendanceController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable relationshipType: StudentRelationshipType, @RequestParam(value="academicYear", required = false) academicYear: AcademicYear) =
-		AgentViewCommand(currentMember, relationshipType, Option(academicYear))
+	def command(@PathVariable relationshipType: StudentRelationshipType) =
+		AgentViewCommand(currentMember, relationshipType, Option(AcademicYear(2013)))
 
 	@RequestMapping
 	def home(@ModelAttribute("command") cmd: Appliable[(Seq[StudentPointsData], Map[String, Seq[GroupedMonitoringPoint]])]) = {

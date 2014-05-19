@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
-@RequestMapping(Array("/agent/{relationshipType}/point/{point}/record"))
+@RequestMapping(Array("/agent/{relationshipType}/2013/point/{point}/record"))
 @Controller
 class AgentPointRecordController extends AttendanceController {
 
@@ -37,8 +37,8 @@ class AgentPointRecordController extends AttendanceController {
 	def form(@ModelAttribute command: Appliable[Seq[MonitoringCheckpoint]] with PopulateOnForm, relationshipType: StudentRelationshipType): Mav = {
 		Mav("home/record_point",
 			"allCheckpointStates" -> AttendanceState.values,
-			"returnTo" -> getReturnTo(Routes.agent.view(relationshipType))
-		).crumbs(Breadcrumbs.Agent(relationshipType))
+			"returnTo" -> getReturnTo(Routes.old.agent.view(relationshipType))
+		).crumbs(Breadcrumbs.Old.Agent(relationshipType))
 	}
 
 
@@ -52,7 +52,7 @@ class AgentPointRecordController extends AttendanceController {
 			form(command, relationshipType)
 		} else {
 			command.apply()
-			Redirect(Routes.agent.view(relationshipType))
+			Redirect(Routes.old.agent.view(relationshipType))
 		}
 	}
 

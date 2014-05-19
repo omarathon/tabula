@@ -24,6 +24,7 @@
 					<#local assignment = info.assignment />
 					<#local extension = info.extension!false />
 					<#local hasExtension = info.hasExtension />
+					<#local hasActiveExtension = info.hasActiveExtension />
 					<#local isExtended = info.isExtended!false />
 					<#local extensionRequested = info.extensionRequested!false />
 

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.commands.{PopulateOnForm, SelfValidating, Appliable}
 import uk.ac.warwick.tabula.AcademicYear
@@ -12,7 +12,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.attendance.web.Routes
 
 @Controller
-@RequestMapping(Array("/agent/{relationshipType}/{student}/record"))
+@RequestMapping(Array("/agent/{relationshipType}/2013/{student}/record"))
 class AgentStudentRecordController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
@@ -20,9 +20,8 @@ class AgentStudentRecordController extends AttendanceController {
 	@ModelAttribute("command")
 	def command(
 		@PathVariable relationshipType: StudentRelationshipType,
-		@PathVariable student: StudentMember,
-		@RequestParam(value="academicYear", required = false) academicYear: AcademicYear
-	) = AgentStudentRecordCommand(currentMember, relationshipType, student, Option(academicYear))
+		@PathVariable student: StudentMember
+	) = AgentStudentRecordCommand(currentMember, relationshipType, student, Option(AcademicYear(2013)))
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def list(@ModelAttribute("command") cmd: Appliable[Seq[MonitoringCheckpoint]] with AgentStudentRecordCommandState with PopulateOnForm) = {
@@ -32,8 +31,8 @@ class AgentStudentRecordController extends AttendanceController {
 
 	def form(cmd: Appliable[Seq[MonitoringCheckpoint]] with AgentStudentRecordCommandState) = {
 		Mav("home/record_student",
-			"returnTo" -> getReturnTo(Routes.agent.student(cmd.student, cmd.relationshipType))
-		).crumbs(Breadcrumbs.Agent(cmd.relationshipType), Breadcrumbs.AgentStudent(cmd.student, cmd.relationshipType))
+			"returnTo" -> getReturnTo(Routes.old.agent.student(cmd.student, cmd.relationshipType))
+		).crumbs(Breadcrumbs.Old.Agent(cmd.relationshipType), Breadcrumbs.Old.AgentStudent(cmd.student, cmd.relationshipType))
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -42,7 +41,7 @@ class AgentStudentRecordController extends AttendanceController {
 			form(cmd)
 		} else {
 			cmd.apply()
-			Redirect(Routes.agent.student(cmd.student, cmd.relationshipType))
+			Redirect(Routes.old.agent.student(cmd.student, cmd.relationshipType))
 		}
 	}
 

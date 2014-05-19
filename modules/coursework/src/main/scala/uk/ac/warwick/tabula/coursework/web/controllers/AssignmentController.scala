@@ -104,6 +104,7 @@ class AssignmentController extends CourseworkController {
 				"canSubmit" -> canSubmit,
 				"canReSubmit" -> canReSubmit,
 				"hasExtension" -> extension.isDefined,
+				"hasActiveExtension" -> extension.exists(_.approved), // active = has been approved
 				"extension" -> extension,
 				"isExtended" -> isExtended,
 				"extensionRequested" -> extensionRequested)

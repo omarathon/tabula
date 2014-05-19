@@ -48,14 +48,12 @@ trait AgentStudentViewCommandState {
 }
 
 @Controller
-@RequestMapping(Array("/agent/{relationshipType}/{student}"))
+@RequestMapping(Array("/agent/{relationshipType}/2013/{student}"))
 class AgentStudentViewController extends AttendanceController {
 
 	@ModelAttribute("command")
-	def command(
-		@PathVariable student: StudentMember,
-		@RequestParam(value="academicYear", required = false) academicYear: AcademicYear
-	) = AgentStudentViewCommand(student, Option(academicYear))
+	def command(@PathVariable student: StudentMember) =
+		AgentStudentViewCommand(student, Option(AcademicYear(2013)))
 
 	@RequestMapping
 	def home(
@@ -67,7 +65,7 @@ class AgentStudentViewController extends AttendanceController {
 			"student" -> student,
 			"relationshipType" -> relationshipType,
 			"pointsByTerm" -> cmd.apply().pointsByTerm
-		).crumbs(Breadcrumbs.Agent(relationshipType))
+		).crumbs(Breadcrumbs.Old.Agent(relationshipType))
 	}
 
 }

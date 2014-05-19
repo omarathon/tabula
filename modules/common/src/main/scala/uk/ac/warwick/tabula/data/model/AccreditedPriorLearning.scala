@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.{ToString, AcademicYear}
 import uk.ac.warwick.tabula.system.permissions._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.JavaImports._
+import org.apache.commons.lang3.builder.CompareToBuilder
 
 /*
  * scj code, award code and sequence number together make up the key in SITS, and form a unique index in Tabula.
@@ -16,7 +17,7 @@ import uk.ac.warwick.tabula.JavaImports._
 
 @Entity
 @AccessType("field")
-class AccreditedPriorLearning() extends GeneratedId	with PermissionsTarget with ToString{
+class AccreditedPriorLearning() extends GeneratedId	with PermissionsTarget with ToString with Ordered[AccreditedPriorLearning] {
 	def this(studentCourseDetails: StudentCourseDetails,
 		award: Award,
 		sequenceNumber: Int,
@@ -70,5 +71,14 @@ class AccreditedPriorLearning() extends GeneratedId	with PermissionsTarget with 
 		"sequenceNumber" -> sequenceNumber)
 
 	def permissionsParents = Stream(Option(studentCourseDetails)).flatten
+
+	override def compare(that: AccreditedPriorLearning): Int = {
+		new CompareToBuilder()
+		.append(studentCourseDetails, that.studentCourseDetails)
+		.append(academicYear, that.academicYear)
+		.append(award, that.award)
+		.append(cats, that.cats)
+		.build()
+	}
 
 }

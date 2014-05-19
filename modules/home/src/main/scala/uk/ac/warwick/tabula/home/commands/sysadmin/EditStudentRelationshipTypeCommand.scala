@@ -7,8 +7,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.AutowiringRelationshipServiceComponent
 
 import uk.ac.warwick.tabula.services.RelationshipServiceComponent
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
+import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
 
 object EditStudentRelationshipTypeCommand {
 	def apply(tpe: StudentRelationshipType) =
@@ -32,11 +31,11 @@ class EditStudentRelationshipTypeCommandInternal(val relationshipType: StudentRe
 	}
 }
 
-trait EditStudentRelationshipTypeCommandPermissions extends RequiresPermissionsChecking {
+trait EditStudentRelationshipTypeCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	this: HasExistingStudentRelationshipType =>
 	
 	def permissionsCheck(p: PermissionsChecking) {
-		p.mandatory(relationshipType)
+		mandatory(relationshipType)
 		p.PermissionCheck(Permissions.StudentRelationshipType.Update)
 	}
 }

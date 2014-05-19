@@ -124,10 +124,12 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 		set.studentsCanSeeTutorName = studentsCanSeeTutorName
 		set.defaultMaxGroupSizeEnabled = defaultMaxGroupSizeEnabled
 		set.defaultMaxGroupSize = defaultMaxGroupSize
-		
+
 		// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
-		set.groups.clear()
-		set.groups.addAll(groups.asScala.filter(!_.delete).map(_.apply()).asJava)
+		// TAB-2304 Don't do a .clear() and .addAll() because that confuses Hibernate
+		val newGroups = groups.asScala.filter(!_.delete).map(_.apply())
+		set.groups.asScala.filterNot(newGroups.contains).foreach(set.groups.remove)
+		newGroups.filterNot(set.groups.contains).foreach(set.groups.add)
 		
 		if (set.members == null) set.members = UserGroup.ofUniversityIds
 		set.members.copyFrom(members)

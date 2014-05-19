@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Department
@@ -19,8 +19,8 @@ class ReportStudentsChoosePeriodController extends AttendanceController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @RequestParam academicYear: AcademicYear) =
-		ReportStudentsChoosePeriodCommand(department, mandatory(academicYear))
+	def command(@PathVariable department: Department) =
+		ReportStudentsChoosePeriodCommand(department, mandatory(AcademicYear(2013)))
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[Seq[StudentReportStatus]]) = {
@@ -65,7 +65,7 @@ class ReportStudentsConfirmController extends AttendanceController {
 		} else {
 			val reports = cmd.apply()
 			val redirectObjects = Map("reports" -> reports.size, "monitoringPeriod" -> cmd.period, "academicYear" -> cmd.academicYear) ++ cmd.filterMap
-			Redirect(Routes.department.viewStudents(department), redirectObjects)
+			Redirect(Routes.old.department.viewStudents(department), redirectObjects)
 		}
 	}
 

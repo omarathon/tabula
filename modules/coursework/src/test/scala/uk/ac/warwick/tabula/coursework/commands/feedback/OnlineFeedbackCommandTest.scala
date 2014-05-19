@@ -1,43 +1,21 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
-import org.mockito.Mockito._
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase, MockUserLookup}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{Feedback, Submission, Assignment, Module}
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.services.MembershipItem
-import uk.ac.warwick.tabula.MockUserLookup
 
 
 class OnlineFeedbackCommandTest extends TestBase with Mockito {
 
-
-
 	trait Fixture {
-		def fakeUser(id:String) = {
-			val newUser = new User(id)
-			newUser.setWarwickId(id)
-			newUser.setFoundUser(true)
-			newUser
-		}
 
-		val user1 = fakeUser("user1")
-		val user2 = fakeUser("user2")
-		val user3 = fakeUser("user3")
+		// user1 and user3 deliberately have same uniId, to test members with multiple logins.
+		val user1 = Fixtures.user(universityId="user1", userId="user1")
+		val user2 = Fixtures.user(universityId="user2", userId="user2")
+		val user3 = Fixtures.user(universityId="user1", userId="user3")
 
-		user3.setWarwickId("user1")  //case where two usercodes are linked to the same university id
-
-		val membership1 = new MembershipItem(user1, Some("user1"), Some("user1"), IncludeType, false)
-		val membership2 = new MembershipItem(user2, Some("user2"), Some("user2"), IncludeType, false)
-		val membership3 = new MembershipItem(user3,Some("user1"),Some("user3"),IncludeType,false)
-		val membershipInfo = new AssignmentMembershipInfo(Seq(membership1, membership2, membership3))
 		val assignment = new Assignment
 		val module = new Module
-		val assignmentMembershipService = mock[AssignmentMembershipService]
-		assignment.assignmentMembershipService = assignmentMembershipService
-
-		assignmentMembershipService.determineMembership(assignment.upstreamAssessmentGroups, Option(assignment.members)) returns (membershipInfo)
-
 		assignment.module = module
 
 		val submission1 = new Submission("user1")
@@ -51,13 +29,15 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 
 		val command = new OnlineFeedbackCommand(module, assignment) with OnlineFeedbackCommandTestSupport
 
+		command.assignmentMembershipService.determineMembershipUsers(assignment) returns Seq(user1, user2, user3)
+
 		command.userLookup.registerUserObjects(user1,user2)
 
-		when (command.submissionService.getSubmissionByUniId(assignment, "user1")) thenReturn(Some(submission1))
-		when (command.submissionService.getSubmissionByUniId(assignment, "user2")) thenReturn(None)
+		command.submissionService.getSubmissionByUniId(assignment, "user1") returns Some(submission1)
+		command.submissionService.getSubmissionByUniId(assignment, "user2") returns None
 
-		when (command.feedbackService.getFeedbackByUniId(assignment, "user1")) thenReturn(Some(feedback1))
-		when (command.feedbackService.getFeedbackByUniId(assignment, "user2")) thenReturn(Some(feedback2))
+		command.feedbackService.getFeedbackByUniId(assignment, "user1") returns Some(feedback1)
+		command.feedbackService.getFeedbackByUniId(assignment, "user2") returns Some(feedback2)
 
 	}
 
@@ -93,9 +73,10 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 }
 
 // Implements the dependencies declared by the command
-trait OnlineFeedbackCommandTestSupport extends SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with Mockito {
+trait OnlineFeedbackCommandTestSupport extends SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with AssignmentMembershipServiceComponent with Mockito {
 	val userLookup = new MockUserLookup
 	val submissionService = mock[SubmissionService]
 	val feedbackService = mock[FeedbackService]
+	var assignmentMembershipService = mock[AssignmentMembershipService]
 	def apply(): Seq[StudentFeedbackGraph] = Seq()
 }

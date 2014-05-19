@@ -71,7 +71,7 @@
 							<#else>
 								<#local editUrl><@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting /></#local>
 							</#if>
-							<#if ((meeting.scheduled && can_update_scheduled_meeting) || (!meeting.scheduled && viewer.universityId == meeting.creator.universityId && !meeting.approved))>
+							<#if ((meeting.scheduled && can_update_scheduled_meeting) || (!meeting.scheduled && viewer.universityId! == meeting.creator.universityId && !meeting.approved))>
 								<div class="meeting-record-toolbar">
 									<a href="${editUrl}" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
 									<a href="<@routes.delete_meeting_record meeting />" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>

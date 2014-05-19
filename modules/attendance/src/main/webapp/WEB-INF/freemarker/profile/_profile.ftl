@@ -6,7 +6,7 @@
 <#else>
 
 <#assign can_record=can.do("MonitoringPoints.Record", command.student) />
-<#assign is_the_student=currentUser.apparentUser.warwickId==command.student.universityId />
+<#assign is_the_student=currentUser.apparentUser.warwickId! == command.student.universityId />
 
 <#macro pointsInATerm term>
 	<#local hasReported = !nonReportedTerms?seq_contains(term) />

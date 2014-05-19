@@ -1,3 +1,3 @@
-<h1>My Attendance Monitoring</h1>
+<h1>My Monitoring Points</h1>
 
 <#include "_profile.ftl" />

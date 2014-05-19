@@ -36,6 +36,8 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 	override def toString = "Route[" + code + "]"
 	
 	def permissionsParents = Stream(department)
+	override def humanReadableId = code.toUpperCase() + " " + name
+	override def urlSlug = code
 
 	@OneToMany(mappedBy="route", fetch = FetchType.LAZY)
 	@BatchSize(size=100)

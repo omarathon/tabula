@@ -49,7 +49,7 @@ trait AgentViewPermissions extends RequiresPermissionsChecking with PermissionsC
 	self: AgentViewState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(p.mandatory(relationshipType)), agent)
+		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), agent)
 	}
 }
 

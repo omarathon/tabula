@@ -131,7 +131,6 @@
 </article>
 
 <#assign thisPath><@routes.agentStudentView student relationshipType command.academicYear /></#assign>
-<@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
 
 <#macro pointsInATerm term>
 	<div class="striped-section end-floats">

@@ -12,14 +12,14 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 
 @Controller
-@RequestMapping(value=Array("/view/{department}/points"))
+@RequestMapping(value=Array("/view/{department}/2013/points"))
 class ViewMonitoringPointsController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @RequestParam(value="academicYear", required = false) academicYear: AcademicYear) =
-		ViewMonitoringPointsCommand(department, Option(academicYear), user)
+	def command(@PathVariable department: Department) =
+		ViewMonitoringPointsCommand(department, Option(AcademicYear(2013)), user)
 
 	@RequestMapping
 	def filter(
@@ -31,7 +31,7 @@ class ViewMonitoringPointsController extends AttendanceController {
 			if (ajax)
 				Mav("home/view_points_results").noLayout()
 			else
-				Mav("home/view_points_filter", "updatedMonitoringPoint" -> updatedMonitoringPoint).crumbs(Breadcrumbs.ViewDepartment(cmd.department))
+				Mav("home/view_points_filter", "updatedMonitoringPoint" -> updatedMonitoringPoint).crumbs(Breadcrumbs.Old.ViewDepartment(cmd.department))
 		} else {
 			val results = cmd.apply()
 
@@ -41,7 +41,7 @@ class ViewMonitoringPointsController extends AttendanceController {
 				Mav("home/view_points_filter",
 					"pointsMap" -> results,
 					"updatedMonitoringPoint" -> updatedMonitoringPoint
-				).crumbs(Breadcrumbs.ViewDepartment(cmd.department))
+				).crumbs(Breadcrumbs.Old.ViewDepartment(cmd.department))
 		}
 	}
 
