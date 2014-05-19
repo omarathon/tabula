@@ -88,7 +88,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 				item.submissionExists = true
 				checkForDuplicateFiles(item, markerFeedback)
 			case Some(markerFeedback) =>
-			case _ => errors.reject("No more feedback can be added")
+			case _ => errors.reject("markingWorkflow.feedback.finalised", "No more feedback can be added")
 		}
 	}
 
