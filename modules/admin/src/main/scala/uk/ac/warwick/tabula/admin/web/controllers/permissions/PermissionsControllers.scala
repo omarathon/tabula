@@ -44,8 +44,11 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 
 	def form(target: A): Mav = {
 		Mav("admin/permissions/permissions",
-			"target" -> target)
-			.crumbs(Breadcrumbs.Permissions(target))
+			"target" -> target,
+			"existingRoleDefinitions" -> existingRoleDefinitions(target),
+			"grantableRoleDefinitions" -> grantableRoleDefinitions(target, user),
+			"existingPermissions" -> existingPermissions(target)
+		).crumbs(Breadcrumbs.Permissions(target))
 	}
 
 	def form(target: A, usercodes: Seq[String], role: Option[RoleDefinition], action: String): Mav = {
@@ -54,8 +57,11 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 			"target" -> target,
 			"users" -> users,
 			"role" -> role,
-			"action" -> action)
-			.crumbs(Breadcrumbs.Permissions(target))
+			"action" -> action,
+		  "existingRoleDefinitions" -> existingRoleDefinitions(target),
+			"grantableRoleDefinitions" -> grantableRoleDefinitions(target, user),
+			"existingPermissions" -> existingPermissions(target)
+		).crumbs(Breadcrumbs.Permissions(target))
 	}
 
 	@RequestMapping
@@ -116,7 +122,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 
 	implicit val defaultOrderingForRoleDefinition = Ordering.by[RoleDefinition, String] ( _.getName )
 
-	@ModelAttribute("existingRoleDefinitions")
+//	@ModelAttribute("existingRoleDefinitions") // Not a ModelAttribute because this changes after a change
 	def existingRoleDefinitions(@PathVariable("target") target: A) = {
 		SortedMap(permissionsService.getAllGrantedRolesFor(target).groupBy { _.roleDefinition }.map { case (defn, roles) =>
 			(defn -> roles.head.build())
@@ -128,7 +134,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 		case _ => permissionsTarget.permissionsParents.flatMap(parentDepartments)
 	}
 
-	@ModelAttribute("grantableRoleDefinitions")
+//	@ModelAttribute("grantableRoleDefinitions") // Not a ModelAttribute because this changes after a change
 	def grantableRoleDefinitions(@PathVariable("target") target: A, user: CurrentUser) = transactional(readOnly = true) {
 		val builtInRoleDefinitions = ReflectionHelper.allBuiltInRoleDefinitions
 
@@ -164,7 +170,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 		)
 	}
 
-	@ModelAttribute("existingPermissions")
+//	@ModelAttribute("existingPermissions") // Not a ModelAttribute because this changes after a change
 	def existingPermissions(@PathVariable("target") target: A) = {
 		permissionsService.getAllGrantedPermissionsFor(target)
 	}
