@@ -3,11 +3,11 @@ package uk.ac.warwick.tabula.profiles.commands
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, CourseAndRouteService, ProfileService, ProfileServiceComponent}
+import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent}
 import uk.ac.warwick.tabula.data.model.{StudentMember, CourseType}
 import scala.collection.JavaConverters._
 import org.hibernate.criterion.Order
-import uk.ac.warwick.tabula.data.{SitsStatusDao, ModeOfAttendanceDao, ScalaRestriction, ScalaOrder}
+import uk.ac.warwick.tabula.data.{ScalaRestriction, ScalaOrder}
 import org.mockito.ArgumentMatcher
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Restrictions
@@ -19,10 +19,6 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends ProfileServiceComponent {
 		val profileService = mock[ProfileService]
-		val courseAndRouteService = mock[CourseAndRouteService]
-		val modeOfAttendanceDao = mock[ModeOfAttendanceDao]
-		val sitsStatusDao = mock[SitsStatusDao]
-		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 
 		// this seems to need the 'argThat(anything)' matcher to correctly set up a catch-all mocked method, 'any' just isn't good enough
 		profileService.findStudentsByRestrictions(argThat(anything), argThat(anything), argThat(anything), argThat(anything), argThat(anything)) returns ((0, Seq(new StudentMember)))

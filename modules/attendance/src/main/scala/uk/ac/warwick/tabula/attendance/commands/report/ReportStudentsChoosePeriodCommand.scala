@@ -13,8 +13,6 @@ import uk.ac.warwick.tabula.attendance.commands.GroupMonitoringPointsByTerm
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.{Errors, BindingResult}
 import uk.ac.warwick.tabula.attendance.commands.report.ReportStudentsChoosePeriodCommand.StudentReportStatus
-import uk.ac.warwick.tabula.data.{AutowiringSitsStatusDaoComponent, AutowiringModeOfAttendanceDaoComponent}
-import uk.ac.warwick.tabula.attendance.commands.report.ReportStudentsChoosePeriodCommand.StudentReportStatus
 
 object ReportStudentsChoosePeriodCommand {
 	def apply(department: Department, academicYear: AcademicYear) =
@@ -26,10 +24,6 @@ object ReportStudentsChoosePeriodCommand {
 			with AutowiringProfileServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringMonitoringPointServiceComponent
-			with AutowiringCourseAndRouteServiceComponent
-			with AutowiringModeOfAttendanceDaoComponent
-			with AutowiringModuleAndDepartmentServiceComponent
-			with AutowiringSitsStatusDaoComponent
 			with ReadOnly with Unaudited
 
 	case class StudentReportStatus(student: StudentMember, unreported: Int, unrecorded: Int)

@@ -44,6 +44,7 @@ class FindStudentsForSchemeCommandInternal(val scheme: AttendanceMonitoringSchem
 	self: ProfileServiceComponent with FindStudentsForSchemeCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
+		deserializeFilter(updatedFilterQueryString)
 		if (serializeFilter.isEmpty) {
 			FindStudentsForSchemeCommandResult(updatedStaticStudentIds, Seq())
 		} else {
@@ -101,7 +102,7 @@ trait FindStudentsForSchemePermissions extends RequiresPermissionsChecking with 
 
 }
 
-trait FindStudentsForSchemeCommandState extends PermissionsAwareRoutes with FiltersStudents {
+trait FindStudentsForSchemeCommandState extends PermissionsAwareRoutes with FiltersStudents with DeserializesFilter {
 	def scheme: AttendanceMonitoringScheme
 	def user: CurrentUser
 

@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.data.model.{Route, Department}
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.{SitsStatusDao, ModeOfAttendanceDao, ScalaOrder, ScalaRestriction}
+import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
 import org.mockito.Matchers
 
 class ViewMonitoringPointsCommandTest extends TestBase with Mockito {
@@ -15,10 +15,6 @@ class ViewMonitoringPointsCommandTest extends TestBase with Mockito {
 		val termService = mock[TermService]
 		val profileService = mock[ProfileService]
 		val monitoringPointService = mock[MonitoringPointService]
-		val courseAndRouteService = mock[CourseAndRouteService]
-		val modeOfAttendanceDao = mock[ModeOfAttendanceDao]
-		val sitsStatusDao = mock[SitsStatusDao]
-		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 	}
 	
 	trait Fixture {

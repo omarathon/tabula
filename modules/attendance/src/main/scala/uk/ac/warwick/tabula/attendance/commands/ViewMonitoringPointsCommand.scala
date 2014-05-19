@@ -15,7 +15,6 @@ import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.{AutowiringSitsStatusDaoComponent, AutowiringModeOfAttendanceDaoComponent}
 
 object ViewMonitoringPointsCommand {
 	def apply(department: Department, academicYearOption: Option[AcademicYear], user: CurrentUser) =
@@ -25,10 +24,6 @@ object ViewMonitoringPointsCommand {
 			with AutowiringSecurityServicePermissionsAwareRoutes
 			with AutowiringMonitoringPointServiceComponent
 			with AutowiringTermServiceComponent
-			with AutowiringCourseAndRouteServiceComponent
-			with AutowiringModeOfAttendanceDaoComponent
-			with AutowiringModuleAndDepartmentServiceComponent
-			with AutowiringSitsStatusDaoComponent
 			with ComposableCommand[Map[String, Seq[GroupedMonitoringPoint]]]
 			with ReadOnly with Unaudited
 }

@@ -12,9 +12,7 @@ import uk.ac.warwick.tabula.data.convert.{ModuleCodeConverter, SitsStatusCodeCon
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, CourseAndRouteServiceComponent}
 import uk.ac.warwick.tabula.data.{SitsStatusDaoComponent, ModeOfAttendanceDaoComponent}
 
-trait FiltersStudentsBase extends Logging {
-
-	self: CourseAndRouteServiceComponent with ModeOfAttendanceDaoComponent with SitsStatusDaoComponent with ModuleAndDepartmentServiceComponent =>
+trait FiltersStudentsBase {
 
 	def courseTypes: JList[CourseType]
 	def routes: JList[Route]
@@ -46,6 +44,23 @@ trait FiltersStudentsBase extends Logging {
 		else
 			result.getQuery
 	}
+
+	def filterMap = {
+		Map(
+			"courseTypes" -> courseTypes.asScala.map{_.code}.mkString(","),
+			"routes" -> routes.asScala.map{_.code}.mkString(","),
+			"modesOfAttendance" -> modesOfAttendance.asScala.map{_.code}.mkString(","),
+			"yearsOfStudy" -> yearsOfStudy.asScala.mkString(","),
+			"sprStatuses" -> sprStatuses.asScala.map{_.code}.mkString(","),
+			"modules" -> modules.asScala.map{_.code}.mkString(","),
+			"otherCriteria" -> otherCriteria.asScala.mkString(",")
+		)
+	}
+
+}
+
+trait DeserializesFilter extends Logging with FiltersStudentsBase with CourseAndRouteServiceComponent with ModeOfAttendanceDaoComponent
+	with SitsStatusDaoComponent with ModuleAndDepartmentServiceComponent {
 
 	def deserializeFilter(filterString: String) = {
 		val params: Map[String, Seq[String]] = URLEncodedUtils.parse(new URI(null, null, null, filterString, null), "UTF-8").asScala.groupBy(_.getName).map{
@@ -80,7 +95,7 @@ trait FiltersStudentsBase extends Logging {
 				item.toInt
 			} catch {
 				case e: NumberFormatException =>
-				logger.warn(s"Could not deserialize filter with yearOfStudy $item")
+					logger.warn(s"Could not deserialize filter with yearOfStudy $item")
 			}}
 		}
 		params.get("sprStatuses").map{_.foreach{ item =>
@@ -100,18 +115,6 @@ trait FiltersStudentsBase extends Logging {
 			}
 		}}
 		params.get("otherCriteria").map{_.foreach{ item => otherCriteria.add(item) }}
-	}
-
-	def filterMap = {
-		Map(
-			"courseTypes" -> courseTypes.asScala.map{_.code}.mkString(","),
-			"routes" -> routes.asScala.map{_.code}.mkString(","),
-			"modesOfAttendance" -> modesOfAttendance.asScala.map{_.code}.mkString(","),
-			"yearsOfStudy" -> yearsOfStudy.asScala.mkString(","),
-			"sprStatuses" -> sprStatuses.asScala.map{_.code}.mkString(","),
-			"modules" -> modules.asScala.map{_.code}.mkString(","),
-			"otherCriteria" -> otherCriteria.asScala.mkString(",")
-		)
 	}
 
 }

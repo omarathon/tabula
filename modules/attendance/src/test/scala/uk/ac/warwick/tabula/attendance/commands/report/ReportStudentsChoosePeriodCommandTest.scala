@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.attendance.commands.report
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, CourseAndRouteService, ProfileService, MonitoringPointService, TermService}
-import uk.ac.warwick.tabula.data.{SitsStatusDao, ModeOfAttendanceDao}
+import uk.ac.warwick.tabula.services.{ProfileService, MonitoringPointService, TermService}
 
 class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 
@@ -12,10 +11,6 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		val termService = mock[TermService]
 		val monitoringPointService = mock[MonitoringPointService]
 		val profileService = mock[ProfileService]
-		val courseAndRouteService = mock[CourseAndRouteService]
-		val modeOfAttendanceDao = mock[ModeOfAttendanceDao]
-		val sitsStatusDao = mock[SitsStatusDao]
-		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 	}
 
 	trait Fixture {
