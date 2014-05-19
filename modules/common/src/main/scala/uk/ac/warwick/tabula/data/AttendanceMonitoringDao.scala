@@ -84,7 +84,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 		if (universityIds.isEmpty)
 			return Seq()
 
-		session.newCriteria[StudentMember]
+		val items = session.newCriteria[StudentMember]
 			.add(safeIn("universityId", universityIds))
 			.project[Array[java.lang.Object]](
 				Projections.projectionList()
@@ -101,6 +101,9 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 					objArray(3).asInstanceOf[String]
 				)
 			}
+
+		// keep the same order
+		universityIds.map(uniId => items.find(_.universityId == uniId)).flatten
 	}
 
 }

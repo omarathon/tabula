@@ -4,27 +4,32 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
-import uk.ac.warwick.tabula.UniversityId
-import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.{CurrentUser, UniversityId}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.StudentMember
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import scala.Some
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipExcludeType, SchemeMembershipItem}
+import uk.ac.warwick.tabula.data.SchemeMembershipItem
+import scala.Some
 
 case class EditSchemeMembershipCommandResult(
 	updatedIncludedStudentIds: JList[String],
 	updatedExcludedStudentIds: JList[String],
-	membershipItems: Seq[SchemeMembershipItem]
+	membershipItems: Seq[SchemeMembershipItem],
+	missingMembers: Seq[String],
+	noPermissionMembers: Seq[StudentMember]
 )
 
 object EditSchemeMembershipCommand {
-	def apply(AttendanceMonitoringScheme: AttendanceMonitoringScheme) =
-		new EditSchemeMembershipCommandInternal(AttendanceMonitoringScheme)
+	def apply(scheme: AttendanceMonitoringScheme, user: CurrentUser) =
+		new EditSchemeMembershipCommandInternal(scheme, user)
 			with AutowiringUserLookupComponent
 			with AutowiringProfileServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
+			with AutowiringSecurityServiceComponent
 			with ComposableCommand[EditSchemeMembershipCommandResult]
 			with PopulateEditSchemeMembershipCommand
 			with EditSchemeMembershipPermissions
@@ -35,10 +40,11 @@ object EditSchemeMembershipCommand {
 /**
  * Not persisted, just used to validate users entered and render student table
  */
-class EditSchemeMembershipCommandInternal(val scheme: AttendanceMonitoringScheme)
+class EditSchemeMembershipCommandInternal(val scheme: AttendanceMonitoringScheme, val user: CurrentUser)
 	extends CommandInternal[EditSchemeMembershipCommandResult] {
 
-	self: EditSchemeMembershipCommandState with UserLookupComponent with ProfileServiceComponent with AttendanceMonitoringServiceComponent =>
+	self: EditSchemeMembershipCommandState with UserLookupComponent with ProfileServiceComponent
+		with AttendanceMonitoringServiceComponent with SecurityServiceComponent =>
 
 	override def applyInternal() = {
 		def getStudentMemberForString(entry: String): Option[StudentMember] = {
@@ -64,10 +70,13 @@ class EditSchemeMembershipCommandInternal(val scheme: AttendanceMonitoringScheme
 			entry -> getStudentMemberForString(entry)
 		}.toMap
 
-		missingMembers = massAddedUserMap.filter(!_._2.isDefined).keys.toSeq
-
+		val missingMembers = massAddedUserMap.filter(!_._2.isDefined).keys.toSeq
 		val validMembers = massAddedUserMap.filter(_._2.isDefined).values.flatten.toSeq
-		updatedIncludedStudentIds = (updatedIncludedStudentIds.asScala.toSeq ++ validMembers.map(_.universityId)).asJava
+		val permissionsMap = validMembers.map{member => member -> securityService.can(user, Permissions.MonitoringPoints.Manage, member)}
+		val noPermissionsMembers = permissionsMap.filter(!_._2).toMap.keySet.toSeq
+		val validPermissionMembers = permissionsMap.filter(_._2).toMap.keySet
+
+		updatedIncludedStudentIds = (updatedIncludedStudentIds.asScala.toSeq ++ validPermissionMembers.map(_.universityId)).asJava
 		updatedExcludedStudentIds = (updatedExcludedStudentIds.asScala.toSeq diff updatedIncludedStudentIds.asScala.toSeq).asJava
 
 		// Users processed, so reset fields
@@ -79,7 +88,13 @@ class EditSchemeMembershipCommandInternal(val scheme: AttendanceMonitoringScheme
 			(excludedMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
 		}
 
-		EditSchemeMembershipCommandResult(updatedIncludedStudentIds, updatedExcludedStudentIds, membershipItems)
+		EditSchemeMembershipCommandResult(
+			updatedIncludedStudentIds,
+			updatedExcludedStudentIds,
+			membershipItems,
+			missingMembers,
+			noPermissionsMembers
+		)
 	}
 
 }
@@ -111,6 +126,7 @@ trait EditSchemeMembershipCommandState {
 	self: ProfileServiceComponent =>
 
 	def scheme: AttendanceMonitoringScheme
+	def user: CurrentUser
 
 	// Bind variables
 
@@ -128,8 +144,5 @@ trait EditSchemeMembershipCommandState {
 	def massAddUsersEntries: Seq[String] =
 		if (massAddUsers == null) Nil
 		else massAddUsers split "(\\s|[^A-Za-z\\d\\-_\\.])+" map (_.trim) filterNot (_.isEmpty)
-
-	// Not bound
-	var missingMembers: Seq[String] = _
 
 }

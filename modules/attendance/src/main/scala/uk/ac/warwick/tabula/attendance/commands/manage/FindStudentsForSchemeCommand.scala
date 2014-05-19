@@ -32,6 +32,7 @@ object FindStudentsForSchemeCommand {
 			with AutowiringSitsStatusDaoComponent
 			with ComposableCommand[FindStudentsForSchemeCommandResult]
 			with PopulateFindStudentsForSchemeCommand
+			with UpdatesFindStudentsForSchemeCommand
 			with FindStudentsForSchemePermissions
 			with FindStudentsForSchemeCommandState
 			with Unaudited with ReadOnly
@@ -44,7 +45,6 @@ class FindStudentsForSchemeCommandInternal(val scheme: AttendanceMonitoringSchem
 	self: ProfileServiceComponent with FindStudentsForSchemeCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
-		deserializeFilter(updatedFilterQueryString)
 		if (serializeFilter.isEmpty) {
 			FindStudentsForSchemeCommandResult(updatedStaticStudentIds, Seq())
 		} else {
@@ -88,6 +88,18 @@ trait PopulateFindStudentsForSchemeCommand extends PopulateOnForm {
 		updatedExcludedStudentIds = excludedStudentIds
 		updatedStaticStudentIds = staticStudentIds
 		deserializeFilter(filterQueryString)
+	}
+
+}
+
+trait UpdatesFindStudentsForSchemeCommand {
+
+	self: FindStudentsForSchemeCommandState =>
+
+	def update(editSchemeMembershipCommandResult: EditSchemeMembershipCommandResult) = {
+		updatedIncludedStudentIds = editSchemeMembershipCommandResult.updatedIncludedStudentIds
+		updatedExcludedStudentIds = editSchemeMembershipCommandResult.updatedExcludedStudentIds
+		deserializeFilter(updatedFilterQueryString)
 	}
 
 }

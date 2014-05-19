@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
-import uk.ac.warwick.tabula.attendance.commands.manage.{FindStudentsForSchemeCommandState, FindStudentsForSchemeCommandResult, EditSchemeMembershipCommandResult, FindStudentsForSchemeCommand, EditSchemeMembershipCommand}
+import uk.ac.warwick.tabula.attendance.commands.manage.{UpdatesFindStudentsForSchemeCommand, FindStudentsForSchemeCommandState, FindStudentsForSchemeCommandResult, EditSchemeMembershipCommandResult, FindStudentsForSchemeCommand, EditSchemeMembershipCommand}
 import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable}
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 
@@ -18,7 +18,7 @@ class SelectStudentsForSchemeController extends AttendanceController {
 
 	@ModelAttribute("editMembershipCommand")
 	def editMembershipCommand(@PathVariable scheme: AttendanceMonitoringScheme) =
-		EditSchemeMembershipCommand(scheme)
+		EditSchemeMembershipCommand(scheme, user)
 
 	private def render(
 		scheme: AttendanceMonitoringScheme,
@@ -86,12 +86,13 @@ class SelectStudentsForSchemeController extends AttendanceController {
 
 	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.manuallyAddSubmit))
 	def manuallyAddSubmit(
-		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult],
+		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with UpdatesFindStudentsForSchemeCommand,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
 		@PathVariable scheme: AttendanceMonitoringScheme
 	) = {
-		val findStudentsForSchemeCommandResult = findCommand.apply()
 		val editMembershipCommandResult = editMembershipCommand.apply()
+		findCommand.update(editMembershipCommandResult)
+		val findStudentsForSchemeCommandResult = findCommand.apply()
 		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult, expandManual = true)
 	}
 

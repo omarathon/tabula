@@ -223,6 +223,27 @@
 				</p>
 			</summary>
 
+			<#if (editMembershipCommandResult.missingMembers?size > 0 || editMembershipCommandResult.noPermissionMembers?size > 0)>
+				<div class="alert alert-warning">
+					<#if (editMembershipCommandResult.missingMembers?size > 0)>
+						The following students could not be added as they were not found:
+						<ul>
+							<#list editMembershipCommandResult.missingMembers as member>
+								<li>${member}</li>
+							</#list>
+						</ul>
+					</#if>
+					<#if (editMembershipCommandResult.noPermissionMembers?size > 0)>
+						The following students could not be added as you do not have permission to manage their attendance:
+						<ul>
+							<#list editMembershipCommandResult.noPermissionMembers as member>
+								<li>${member.fullName} (${member.universityId})</li>
+							</#list>
+						</ul>
+					</#if>
+				</div>
+			</#if>
+
 			<@attendance_macros.manageStudentTable editMembershipCommandResult.membershipItems />
 
 			<#list editMembershipCommandResult.updatedIncludedStudentIds as id>
