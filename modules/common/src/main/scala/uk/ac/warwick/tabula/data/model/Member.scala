@@ -134,6 +134,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	def permissionsParents: Stream[PermissionsTarget] = touchedDepartments
 	override def humanReadableId = fullName.getOrElse(toString())
+	override final def urlCategory = "member"
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
