@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.data.model.{CourseType, ModeOfAttendance, Department
 import uk.ac.warwick.tabula.services.ProfileService
 import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.data.ModeOfAttendanceDao
 
 class FiltersStudentsTest extends TestBase with Mockito {
 
