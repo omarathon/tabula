@@ -179,6 +179,9 @@ trait EditSchemeMembershipCommandState {
 	var updatedIncludedStudentIds: JList[String] = LazyLists.create()
 	var updatedExcludedStudentIds: JList[String] = LazyLists.create()
 
+	// Store return form
+	var manageSchemeUrl: String = _
+
 	var massAddUsers: String = _
 	// parse massAddUsers into a collection of individual tokens
 	def massAddUsersEntries: Seq[String] =

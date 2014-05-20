@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance.web.controllers.manage
 
-object CreateSchemeMappingParameters {
+object ManageSchemeMappingParameters {
 
 	final val createAndAddPoints = "createAndAddPoints"
 	final val chooseStudents = "chooseStudents"

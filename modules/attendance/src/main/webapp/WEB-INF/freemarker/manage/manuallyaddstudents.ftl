@@ -4,7 +4,7 @@
 
 <form action="" method="POST" class="mass-add-users">
 
-	<input type="hidden" name="filterQueryString" value="${findCommand.filterQueryString}">
+	<input type="hidden" name="filterQueryString" value="${findCommand.filterQueryString!""}">
 	<input type="hidden" name="updatedFilterQueryString" value="${findCommand.serializeFilter}">
 	<#list findCommand.staticStudentIds as id>
 		<input type="hidden" name="staticStudentIds" value="${id}" />
@@ -24,6 +24,7 @@
 	<#list editMembershipCommand.updatedExcludedStudentIds as id>
 		<input type="hidden" name="updatedExcludedStudentIds" value="${id}" />
 	</#list>
+	<input type="hidden" name="manageSchemeUrl" value="${editMembershipCommand.manageSchemeUrl}">
 
 	<p>Type or paste in a list of usercodes or University numbers here, separated by white space, then click <code>Add</code>.</p>
 
@@ -32,7 +33,7 @@
 	<input
 		type="submit"
 		class="btn btn-success disabled spinnable spinner-auto add-students"
-		name="${CreateSchemeMappingParameters.manuallyAddSubmit}"
+		name="${ManageSchemeMappingParameters.manuallyAddSubmit}"
 		value="Add"
 	/>
 

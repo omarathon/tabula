@@ -58,7 +58,7 @@ class SelectStudentsForSchemeController extends AttendanceController {
 			"summaryString" -> summaryString(findStudentsForSchemeCommandResult, editMembershipCommandResult),
 			"expandFind" -> expandFind,
 			"expandManual" -> expandManual,
-			"CreateSchemeMappingParameters" -> CreateSchemeMappingParameters
+			"ManageSchemeMappingParameters" -> ManageSchemeMappingParameters
 		).crumbs(
 			Breadcrumbs.Manage.Home,
 			Breadcrumbs.Manage.Department(scheme.department),
@@ -83,7 +83,7 @@ class SelectStudentsForSchemeController extends AttendanceController {
 		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.findStudents))
+	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.findStudents))
 	def findStudents(
 		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult],
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
@@ -94,14 +94,14 @@ class SelectStudentsForSchemeController extends AttendanceController {
 		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult, expandFind = true)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.manuallyAddForm))
+	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.manuallyAddForm))
 	def manuallyAddForm(
 		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult],
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
 		@PathVariable scheme: AttendanceMonitoringScheme
 	) = {
 		Mav("manage/manuallyaddstudents",
-			"CreateSchemeMappingParameters" -> CreateSchemeMappingParameters
+			"ManageSchemeMappingParameters" -> ManageSchemeMappingParameters
 		).crumbs(
 				Breadcrumbs.Manage.Home,
 				Breadcrumbs.Manage.Department(scheme.department),
@@ -109,7 +109,7 @@ class SelectStudentsForSchemeController extends AttendanceController {
 			)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.manuallyAddSubmit))
+	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.manuallyAddSubmit))
 	def manuallyAddSubmit(
 		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with UpdatesFindStudentsForSchemeCommand,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult] with AddsUsersToEditSchemeMembershipCommand,
@@ -122,7 +122,7 @@ class SelectStudentsForSchemeController extends AttendanceController {
 		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult, addUsersResult = addUsersResult, expandManual = true)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.manuallyExclude))
+	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.manuallyExclude))
 	def manuallyExclude(
 		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with UpdatesFindStudentsForSchemeCommand,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult] with RemovesUsersFromEditSchemeMembershipCommand,
@@ -135,7 +135,7 @@ class SelectStudentsForSchemeController extends AttendanceController {
 		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult, expandManual = true)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.resetMembership))
+	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.resetMembership))
 	def resetMembership(
 		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with UpdatesFindStudentsForSchemeCommand,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult] with ResetsMembershipInEditSchemeMembershipCommand,
@@ -148,7 +148,7 @@ class SelectStudentsForSchemeController extends AttendanceController {
 		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult, expandManual = true)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.resetAllIncluded))
+	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.resetAllIncluded))
 	def resetAllIncluded(
 		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with UpdatesFindStudentsForSchemeCommand,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult] with ResetsMembershipInEditSchemeMembershipCommand,
@@ -161,7 +161,7 @@ class SelectStudentsForSchemeController extends AttendanceController {
 		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult, expandManual = true)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(CreateSchemeMappingParameters.resetAllExcluded))
+	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.resetAllExcluded))
 	def resetAllExcluded(
 		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with UpdatesFindStudentsForSchemeCommand,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult] with ResetsMembershipInEditSchemeMembershipCommand,
