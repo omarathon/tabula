@@ -261,7 +261,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	) = transactional(readOnly = true) {
 		val queryDepartment = {
 			if (department.hasParent)
-				department.parent
+				department.rootDepartment
 			else
 				department
 		}
@@ -282,12 +282,13 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 		val allRestrictions = Seq(departmentRestriction) ++ restrictions
 
-		val results = memberDao.findUniversityIdsByRestrictions(allRestrictions, orders)
-
-		if (department.hasParent) // FIXME think about this
-			results
-		else
-			results
+		if (department.hasParent) {
+			// TODO this sucks. Would be better if you could get ScalaRestrictions from a filter rule and add them to allRestrictions
+			memberDao.findStudentsByRestrictions(allRestrictions, orders, Int.MaxValue, 0)
+				.filter(studentDepartmentFilterMatches(department)).map(_.universityId)
+		}	else {
+			memberDao.findUniversityIdsByRestrictions(allRestrictions, orders)
+		}
 	}
 
 	def countStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Int = transactional(readOnly = true) {
