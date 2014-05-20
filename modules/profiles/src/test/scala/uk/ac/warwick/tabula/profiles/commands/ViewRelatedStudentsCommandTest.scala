@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.{TestBase, Mockito}
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, RelationshipServiceComponent, RelationshipService, ProfileServiceComponent, ProfileService}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.ScalaRestriction
 
 

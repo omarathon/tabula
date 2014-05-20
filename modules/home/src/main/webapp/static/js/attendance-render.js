@@ -369,8 +369,38 @@ $(function(){
 
 	// END SCRIPTS FOR MANAGING MONITORING POINTS
 
+});
 
+// TAB-1974 scripts
 
+$(function(){
+
+	// Scripts for Add student during Create a scheme
+	$('.mass-add-users')
+		.find('textarea').on('keyup', function(){
+			var $this = $(this), $addButton = $this.closest('.mass-add-users').find('input.btn.add-students');
+			if ($this.val().length === 0) {
+				$addButton.addClass('disabled');
+			} else {
+				$addButton.removeClass('disabled');
+			}
+		}).end()
+	;
+	var checkAndUpdateButton = function(detailsClass, inputName){
+		if($('details.' + detailsClass + ' table input[type="checkbox"]:checked').length === 0) {
+			$('details.' + detailsClass + ' input[name="' + inputName + '"]').attr('disabled', true);
+		} else {
+			$('details.' + detailsClass + ' input[name="' + inputName + '"]').attr('disabled', false);
+		}
+	};
+	$('details.manually-added').on('click', 'input[type="checkbox"]', function(){
+		checkAndUpdateButton('manually-added', 'resetMembership');
+	});
+	checkAndUpdateButton('manually-added', 'resetMembership');
+	$('details.find-students').on('click', 'input[type="checkbox"]', function(){
+		checkAndUpdateButton('find-students', 'manuallyExclude');
+	});
+	checkAndUpdateButton('find-students', 'manuallyExclude');
 });
 
 window.Attendance = jQuery.extend(window.Attendance, exports);

@@ -8,6 +8,25 @@ import org.hibernate.criterion.Projections
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.services.TermService
 
+abstract class SchemeMembershipItemType(val value: String)
+case object SchemeMembershipStaticType extends SchemeMembershipItemType("static")
+case object SchemeMembershipIncludeType extends SchemeMembershipItemType("include")
+case object SchemeMembershipExcludeType extends SchemeMembershipItemType("exclude")
+
+/**
+ * Item in list of members for displaying in view.
+ */
+case class SchemeMembershipItem(
+	itemType: SchemeMembershipItemType, // static, include or exclude
+	firstName: String,
+	lastName: String,
+	universityId: String,
+	userId: String,
+	existingSchemes: Seq[AttendanceMonitoringScheme]
+) {
+	def itemTypeString = itemType.value
+}
+
 trait AttendanceMonitoringDaoComponent {
 	val attendanceMonitoringDao: AttendanceMonitoringDao
 }
@@ -17,13 +36,22 @@ trait AutowiringAttendanceMonitoringDaoComponent extends AttendanceMonitoringDao
 }
 
 trait AttendanceMonitoringDao {
+	def getSchemeById(id: String): Option[AttendanceMonitoringScheme]
+	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
+	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem]
 }
 
 
 @Repository
 class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
+
+	def getSchemeById(id: String): Option[AttendanceMonitoringScheme] =
+		getById[AttendanceMonitoringScheme](id)
+
+	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit =
+		session.saveOrUpdate(scheme)
 
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
 		session.newCriteria[AttendanceMonitoringScheme]
@@ -51,6 +79,33 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 			}
 
 		TermService.orderedTermNames.diff(termCounts.filter{case(term, count) => count.intValue() == students.size}.map { _._1})
+	}
+
+	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem] = {
+		if (universityIds.isEmpty)
+			return Seq()
+
+		val items = session.newCriteria[StudentMember]
+			.add(safeIn("universityId", universityIds))
+			.project[Array[java.lang.Object]](
+				Projections.projectionList()
+					.add(Projections.property("firstName"))
+					.add(Projections.property("lastName"))
+					.add(Projections.property("universityId"))
+					.add(Projections.property("userId"))
+			).seq.map { objArray =>
+				SchemeMembershipItem(
+					itemType,
+					objArray(0).asInstanceOf[String],
+					objArray(1).asInstanceOf[String],
+					objArray(2).asInstanceOf[String],
+					objArray(3).asInstanceOf[String],
+					Seq() // mixed in by the service
+				)
+			}
+
+		// keep the same order
+		universityIds.map(uniId => items.find(_.universityId == uniId)).flatten
 	}
 
 }

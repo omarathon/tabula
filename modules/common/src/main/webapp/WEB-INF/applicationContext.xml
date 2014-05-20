@@ -153,6 +153,8 @@
 				<bean class="uk.ac.warwick.tabula.data.model.DepartmentFilterRuleConverter" />
 				<bean class="uk.ac.warwick.tabula.data.convert.AbsenceTypeConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.NotificationIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointStyleConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringSchemeIdConverter"/>
 	        </list>
 	    </property>
 	    <property name="formatters">
@@ -535,6 +537,9 @@
 		<bean id="SmallGroupEvent-_tutors" parent="userGroupCacheBean"
 			  p:runtimeClass="uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent"
 			  p:path="_tutors" />
+		<bean id="AttendanceMonitoringScheme-_members" parent="userGroupCacheBean"
+			  p:runtimeClass="uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme"
+			  p:path="_members" />
 
 			<!-- JMX -->
 

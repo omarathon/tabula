@@ -2,6 +2,8 @@ package uk.ac.warwick.tabula.attendance.web
 
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, StudentMember, Department}
 import uk.ac.warwick.tabula.web.RoutesUtils
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs
@@ -55,6 +57,13 @@ object Routes {
 	object Manage {
 		def home = context + "/manage"
 		def department(department: Department) = context + "/manage/%s" format encoded(department.code)
+		def departmentForYear(department: Department, academicYear: AcademicYear) =
+			context + "/manage/%s/%s" format(encoded(department.code), encoded(academicYear.startYear.toString))
+
+		def addStudentsToScheme(scheme: AttendanceMonitoringScheme) =
+			context + "/manage/%s/%s/new/%s/students" format(
+				encoded(scheme.department.code), encoded(scheme.academicYear.startYear.toString), encoded(scheme.id)
+			)
 
 	}
 }
