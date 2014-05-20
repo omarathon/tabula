@@ -422,6 +422,7 @@
 		};
 
 		var updateFilter = function($el) {
+			// Add in route search
 			// Update the filter content
 			var $list = $el.closest('ul');
 			var shortValues = $list.find(':checked').map(function() { return $(this).data('short-value'); }).get();

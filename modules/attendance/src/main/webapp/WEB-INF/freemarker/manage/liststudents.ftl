@@ -31,7 +31,7 @@
 
 			<#assign popoverContent><#noescape>
 				You can filter to select types of students (e.g. 1st year part-time UG)
-				and then either use these to populate a stati list (which will not then change),
+				and then either use these to populate a static list (which will not then change),
 				or link this group to SITS so that the list of students will be updated automatically from there.
 				You can also manually add students by ITS usercode or university number.
 

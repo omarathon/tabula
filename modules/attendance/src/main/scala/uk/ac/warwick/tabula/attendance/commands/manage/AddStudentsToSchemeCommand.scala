@@ -90,9 +90,9 @@ trait AddStudentsToSchemeValidation extends SelfValidating {
 		// In practice there should be no students that fail this validation
 		// but this protects against hand-rolled POSTs
 		val members = profileService.getAllMembersWithUniversityIds(
-			staticStudentIds.asScala
-				diff excludedStudentIds.asScala
-				diff includedStudentIds.asScala
+			((staticStudentIds.asScala
+				diff excludedStudentIds.asScala)
+				diff includedStudentIds.asScala)
 				++ includedStudentIds.asScala
 		)
 		val noPermissionMembers = members.filter(!securityService.can(user, Permissions.MonitoringPoints.Manage, _))
@@ -133,7 +133,7 @@ trait AddStudentsToSchemeCommandState {
 
 	def membershipItems: Seq[SchemeMembershipItem] = {
 		val staticMemberItems = attendanceMonitoringService.findSchemeMembershipItems(
-			staticStudentIds.asScala diff excludedStudentIds.asScala diff includedStudentIds.asScala,
+			(staticStudentIds.asScala diff excludedStudentIds.asScala) diff includedStudentIds.asScala,
 			SchemeMembershipStaticType
 		)
 		val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(includedStudentIds.asScala, SchemeMembershipIncludeType)
