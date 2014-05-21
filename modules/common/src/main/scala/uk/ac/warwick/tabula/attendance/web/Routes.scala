@@ -65,5 +65,10 @@ object Routes {
 				encoded(scheme.department.code), encoded(scheme.academicYear.startYear.toString), encoded(scheme.id)
 			)
 
+		def addPointsToNewScheme(scheme: AttendanceMonitoringScheme) =
+			context + "/manage/%s/%s/new/%s/points" format(
+				encoded(scheme.department.code), encoded(scheme.academicYear.startYear.toString), encoded(scheme.id)
+			)
+
 	}
 }

@@ -26,7 +26,7 @@
 		</#if>
 	</p>
 
-	<#list schemes as scheme>
+	<#list schemes?sort_by("displayName") as scheme>
 		<div class="row-fluid">
 			<div class="span12">
 				<span class="lead">${scheme.displayName}</span>

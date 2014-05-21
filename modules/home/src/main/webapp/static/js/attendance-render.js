@@ -401,6 +401,43 @@ $(function(){
 		checkAndUpdateButton('find-students', 'manuallyExclude');
 	});
 	checkAndUpdateButton('find-students', 'manuallyExclude');
+
+	// Add points
+	(function(){
+		var updateButtons = function(){
+			var checkboxes = $('.add-points-to-schemes tbody input');
+			if (checkboxes.length == 0 || checkboxes.is(':checked') > 0) {
+				$('.add-points-to-schemes p button').attr('disabled', false);
+			} else {
+				$('.add-points-to-schemes p button').attr('disabled', true);
+			}
+		};
+		updateButtons();
+		$('.add-points-to-schemes')
+			.find('.for-check-all').append(
+				$('<input/>').addClass('check-all use-tooltip').attr({
+					type: 'checkbox',
+					title: 'Select all/none'
+				}).on('click', function(){
+					$(this).closest('table').find('tbody input').prop('checked', this.checked);
+					updateButtons();
+				})
+			).end()
+			.find('tbody tr').on('click', function(){
+				var $input = $(this).find('input');
+				$input.prop('checked', !$input.is(':checked'));
+				updateButtons();
+			}).end()
+			.find('table tbody input').on('click', function(e){
+				e.stopPropagation();
+				updateButtons();
+			}).end()
+			.find('button').on('click', function(){
+				var $this = $(this), $form = $this.closest('form');
+				$form.attr('action', $this.data('href')).submit();
+			})
+		;
+	})();
 });
 
 window.Attendance = jQuery.extend(window.Attendance, exports);

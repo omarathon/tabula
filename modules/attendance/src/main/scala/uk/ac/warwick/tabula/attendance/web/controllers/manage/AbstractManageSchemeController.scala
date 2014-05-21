@@ -69,21 +69,5 @@ abstract class AbstractManageSchemeController extends AttendanceController {
 		}
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.createAndAddPoints))
-	def saveAndAddPoints(
-		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
-		errors: Errors,
-		@PathVariable scheme: AttendanceMonitoringScheme
-	) = {
-		if (errors.hasErrors) {
-			render(scheme)
-		} else {
-			val scheme = cmd.apply()
-			// TODO change to wherever the add points path is
-			Redirect(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear))
-		}
-
-	}
-
 
 }
