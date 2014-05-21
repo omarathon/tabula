@@ -165,6 +165,14 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 		this
 	}
 
+	def safeTitle = try {
+		Some(title)
+	} catch {
+		// Can happen if reference to an entity has since been deleted, e.g.
+		// a submission is resubmitted and the old submission is removed.
+		case onf: ObjectNotFoundException => None
+	}
+
 	final override def preSave(newRecord: Boolean) {
 		onPreSave(newRecord)
 
