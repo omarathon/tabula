@@ -107,6 +107,6 @@
 <form id="selectStudents" method="POST" action="<@routes.manageSelectStudents command.scheme />">
 	<@listStudentIdInputs />
 	<input type="hidden" name="filterQueryString" value="${command.filterQueryString!""}"/>
-	<input type="hidden" name="manageSchemeUrl" value="<@routes.manageEditScheme command.scheme.department command.scheme.academicYear.startYear?c command.scheme/>">
+	<input type="hidden" name="returnTo" value="<@routes.manageEditScheme command.scheme.department command.scheme.academicYear.startYear?c command.scheme/>">
 </form>
 </#escape>

@@ -24,7 +24,7 @@
 	<#list editMembershipCommand.updatedExcludedStudentIds as id>
 		<input type="hidden" name="updatedExcludedStudentIds" value="${id}" />
 	</#list>
-	<input type="hidden" name="manageSchemeUrl" value="${editMembershipCommand.manageSchemeUrl}">
+	<input type="hidden" name="returnTo" value="${returnTo}">
 
 	<p>Type or paste in a list of usercodes or University numbers here, separated by white space, then click <code>Add</code>.</p>
 

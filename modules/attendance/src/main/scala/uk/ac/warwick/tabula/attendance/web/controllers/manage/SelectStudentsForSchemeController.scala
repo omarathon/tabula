@@ -58,7 +58,8 @@ class SelectStudentsForSchemeController extends AttendanceController {
 			"summaryString" -> summaryString(findStudentsForSchemeCommandResult, editMembershipCommandResult),
 			"expandFind" -> expandFind,
 			"expandManual" -> expandManual,
-			"ManageSchemeMappingParameters" -> ManageSchemeMappingParameters
+			"ManageSchemeMappingParameters" -> ManageSchemeMappingParameters,
+			"returnTo" -> getReturnTo("")
 		).crumbs(
 			Breadcrumbs.Manage.Home,
 			Breadcrumbs.Manage.Department(scheme.department),
@@ -101,7 +102,8 @@ class SelectStudentsForSchemeController extends AttendanceController {
 		@PathVariable scheme: AttendanceMonitoringScheme
 	) = {
 		Mav("manage/manuallyaddstudents",
-			"ManageSchemeMappingParameters" -> ManageSchemeMappingParameters
+			"ManageSchemeMappingParameters" -> ManageSchemeMappingParameters,
+			"returnTo" -> getReturnTo("")
 		).crumbs(
 				Breadcrumbs.Manage.Home,
 				Breadcrumbs.Manage.Department(scheme.department),

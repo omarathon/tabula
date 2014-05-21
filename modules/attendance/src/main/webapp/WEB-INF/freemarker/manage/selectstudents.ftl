@@ -286,12 +286,12 @@
 			</#list>
 		</details>
 
-		<input type="hidden" name="manageSchemeUrl" value="${editMembershipCommand.manageSchemeUrl}">
+		<input type="hidden" name="returnTo" value="${returnTo}">
 	</form>
 
 
 	<div class="fix-footer submit-buttons">
-		<form action="${editMembershipCommand.manageSchemeUrl}" method="POST">
+		<form action="${returnTo}" method="POST">
 			<input type="hidden" name="filterQueryString" value="${findCommand.filterQueryString!""}">
 			<input type="hidden" name="updatedFilterQueryString" value="${findCommand.serializeFilter}">
 			<#list findCommand.staticStudentIds as id>
