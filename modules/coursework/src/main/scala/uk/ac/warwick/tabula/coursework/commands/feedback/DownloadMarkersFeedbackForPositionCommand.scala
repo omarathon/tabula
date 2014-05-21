@@ -30,10 +30,10 @@ class DownloadMarkersFeedbackForPositionCommand(val module: Module, val assignme
 	override def applyInternal() = {
 		val markersSubs = assignment.getMarkersSubmissions(currentUser.apparentUser)
 		val feedbacks = assignment.feedbacks.filter(f => markersSubs.exists(_.universityId == f.universityId))
-		val releasedMarkerFeedbacks = feedbacks.map(f => position match {
-			case FirstFeedback => f.firstMarkerFeedback
-			case SecondFeedback => f.secondMarkerFeedback
-			case ThirdFeedback => f.thirdMarkerFeedback
+		val releasedMarkerFeedbacks = feedbacks.flatMap(f => position match {
+			case FirstFeedback => Option(f.firstMarkerFeedback)
+			case SecondFeedback => Option(f.secondMarkerFeedback)
+			case ThirdFeedback => Option(f.thirdMarkerFeedback)
 		}).filter(_.state == MarkingState.MarkingCompleted)
 		val zip = zipService.getSomeMarkerFeedbacksZip(releasedMarkerFeedbacks)
 		val renderable = new RenderableZip(zip)
