@@ -42,7 +42,8 @@
 
 		<form method="POST" action="<@routes.manageSelectStudents command.scheme />">
 			<@listStudentIdInputs />
-			<input type="hidden" name="filterQueryString" value="${command.filterQueryString}"/>
+			<input type="hidden" name="filterQueryString" value="${command.filterQueryString!""}"/>
+			<input type="hidden" name="returnTo" value="<@routes.manageAddStudents scheme />">
 			<input
 				type="submit"
 				class="btn"
@@ -50,7 +51,7 @@
 			/>
 		</form>
 
-		<form id="newSchemeAddStudents" method="POST">
+		<form method="POST">
 	<#else>
 		<details>
 			<summary class="large-chevron collapsible">
@@ -62,7 +63,8 @@
 
 				<form method="POST" action="<@routes.manageSelectStudents command.scheme />">
 					<@listStudentIdInputs />
-					<input type="hidden" name="filterQueryString" value="${command.filterQueryString}"/>
+					<input type="hidden" name="filterQueryString" value="${command.filterQueryString!""}"/>
+					<input type="hidden" name="returnTo" value="<@routes.manageAddStudents scheme />">
 					<input
 						type="submit"
 						class="btn"
@@ -78,12 +80,13 @@
 
 	<p>&nbsp;</p>
 
-	<form id="newSchemeAddStudents" method="POST">
+	<form method="POST">
+		<input type="hidden" name="filterQueryString" value="${command.filterQueryString!""}" />
 		<@listStudentIdInputs />
 		<input
 				type="submit"
 				class="btn btn-success use-tooltip"
-				name="${CreateSchemeMappingParameters.createAndAddPoints}"
+				name="${ManageSchemeMappingParameters.createAndAddPoints}"
 				value="Add points"
 				title="Select which monitoring points this scheme should use"
 				data-container="body"

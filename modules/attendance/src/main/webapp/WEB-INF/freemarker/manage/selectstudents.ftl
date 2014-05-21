@@ -45,9 +45,9 @@
 		<#list editMembershipCommand.excludedStudentIds as id>
 			<input type="hidden" name="excludedStudentIds" value="${id}" />
 		</#list>
-		<input type="hidden" name="filterQueryString" value="${findCommand.filterQueryString}" />
+		<input type="hidden" name="filterQueryString" value="${findCommand.filterQueryString!""}" />
 
-		<details class="find-students" <#if expandFind>open</#if> data-submitparam="${CreateSchemeMappingParameters.findStudents}">
+		<details class="find-students" <#if expandFind>open</#if> data-submitparam="${ManageSchemeMappingParameters.findStudents}">
 			<summary class="large-chevron collapsible">
 				<span class="legend">Find students
 					<small>Select students by route, year of study etc.</small>
@@ -175,7 +175,7 @@
 				</@filter>
 
 				<div class="btn-group">
-					<button disabled class="btn btn-mini btn-primary search" type="submit" name="${CreateSchemeMappingParameters.findStudents}">
+					<button disabled class="btn btn-mini btn-primary search" type="submit" name="${ManageSchemeMappingParameters.findStudents}">
 						<i class="icon-search"></i> Search
 					</button>
 				</div>
@@ -199,7 +199,7 @@
 					<input class="btn btn-danger hideOnClosed btn-small"
 						<#if findCommandResult.membershipItems?size == 0>disabled</#if>
 						type="submit"
-						name="${CreateSchemeMappingParameters.manuallyExclude}"
+						name="${ManageSchemeMappingParameters.manuallyExclude}"
 						value="Exclude selected"
 					/>
 				</p>
@@ -229,23 +229,23 @@
 				</p>
 
 				<p>
-					<input class="btn" type="submit" name="${CreateSchemeMappingParameters.manuallyAddForm}" value="Add students manually" />
+					<input class="btn" type="submit" name="${ManageSchemeMappingParameters.manuallyAddForm}" value="Add students manually" />
 					<#if (editMembershipCommandResult.updatedIncludedStudentIds?size > 0 || editMembershipCommandResult.updatedExcludedStudentIds?size > 0)>
 						<input class="btn btn-warning hideOnClosed"
 							type="submit"
-							name="${CreateSchemeMappingParameters.resetMembership}"
+							name="${ManageSchemeMappingParameters.resetMembership}"
 							value="Reset"
 						/>
 						<input class="btn btn-danger hideOnClosed"
 							<#if editMembershipCommandResult.updatedIncludedStudentIds?size == 0>disabled</#if>
 							type="submit"
-							name="${CreateSchemeMappingParameters.resetAllIncluded}"
+							name="${ManageSchemeMappingParameters.resetAllIncluded}"
 							value="Reset all included"
 						/>
 						<input class="btn btn-danger hideOnClosed"
 							<#if editMembershipCommandResult.updatedExcludedStudentIds?size == 0>disabled</#if>
 							type="submit"
-							name="${CreateSchemeMappingParameters.resetAllExcluded}"
+							name="${ManageSchemeMappingParameters.resetAllExcluded}"
 							value="Reset all excluded"
 						/>
 					</#if>
@@ -285,12 +285,14 @@
 				<input type="hidden" name="updatedExcludedStudentIds" value="${id}" />
 			</#list>
 		</details>
+
+		<input type="hidden" name="returnTo" value="${returnTo}">
 	</form>
 
 
 	<div class="fix-footer submit-buttons">
-		<form action="<@routes.manageAddStudents scheme />" method="POST">
-			<input type="hidden" name="filterQueryString" value="${findCommand.filterQueryString}">
+		<form action="${returnTo}" method="POST">
+			<input type="hidden" name="filterQueryString" value="${findCommand.filterQueryString!""}">
 			<input type="hidden" name="updatedFilterQueryString" value="${findCommand.serializeFilter}">
 			<#list findCommand.staticStudentIds as id>
 				<input type="hidden" name="staticStudentIds" value="${id}" />
@@ -313,9 +315,9 @@
 			<#if summaryString?has_content>
 				<p>${summaryString}</p>
 			</#if>
-			<input type="submit" value="Link to SITS" class="btn btn-success" name="${CreateSchemeMappingParameters.linkToSits}">
-			<input type="submit" value="Import as list" class="btn btn-primary" name="${CreateSchemeMappingParameters.importAsList}">
-			<input type="submit" value="Cancel" class="btn" name="${CreateSchemeMappingParameters.reset}">
+			<input type="submit" value="Link to SITS" class="btn btn-success" name="${ManageSchemeMappingParameters.linkToSits}">
+			<input type="submit" value="Import as list" class="btn btn-primary" name="${ManageSchemeMappingParameters.importAsList}">
+			<input type="submit" value="Cancel" class="btn" name="${ManageSchemeMappingParameters.reset}">
 		</form>
 	</div>
 </div>

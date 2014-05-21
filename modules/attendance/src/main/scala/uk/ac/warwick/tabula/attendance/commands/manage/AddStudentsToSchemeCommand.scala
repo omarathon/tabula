@@ -97,7 +97,12 @@ trait AddStudentsToSchemeValidation extends SelfValidating {
 		)
 		val noPermissionMembers = members.filter(!securityService.can(user, Permissions.MonitoringPoints.Manage, _))
 		if (!noPermissionMembers.isEmpty) {
-			errors.reject("attendanceMonitoringScheme.student.noPermission", noPermissionMembers.map(_.universityId).mkString(", "))
+			errors.rejectValue(
+				"staticStudentIds",
+				"attendanceMonitoringScheme.student.noPermission",
+				Array(noPermissionMembers.map(_.universityId).mkString(", ")),
+				"You do not have permission to manage these students' attendance"
+			)
 		}
 	}
 
