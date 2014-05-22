@@ -18,6 +18,7 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		val command = new CreateAttendancePointCommandState with TermServiceComponent {
 			val department = null
 			val academicYear = null
+			val schemes = null
 			val termService = thisTermService
 		}
 		val validator = new AttendanceMonitoringPointValidation with TermServiceComponent with AttendanceMonitoringServiceComponent {

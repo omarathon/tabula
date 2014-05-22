@@ -29,6 +29,8 @@ class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with
 			"Untitled scheme"
 	}
 
+	def shortDisplayName = displayName
+
 	@NotNull
 	@Column(name = "academicyear")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")

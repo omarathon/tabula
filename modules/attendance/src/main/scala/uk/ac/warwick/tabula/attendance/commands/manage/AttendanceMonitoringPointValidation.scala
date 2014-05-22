@@ -9,13 +9,19 @@ import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.services.{AttendanceMonitoringServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringScheme}
 import collection.JavaConverters._
 import uk.ac.warwick.util.termdates.Term
 
 trait AttendanceMonitoringPointValidation {
 
 	self: TermServiceComponent with AttendanceMonitoringServiceComponent =>
+
+	def validateSchemePointStyles(errors: Errors, style: AttendanceMonitoringPointStyle, schemes: Seq[AttendanceMonitoringScheme]) = {
+		if (schemes.exists(_.pointStyle != style)) {
+			errors.reject("attendanceMonitoringPoint.pointStyle.mixed")
+		}
+	}
 
 	def validateName(errors: Errors, name: String) {
 		if (!name.hasText) {

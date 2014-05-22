@@ -155,6 +155,7 @@
 				<bean class="uk.ac.warwick.tabula.data.convert.NotificationIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointStyleConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringSchemeIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointTypeConverter"/>
 	        </list>
 	    </property>
 	    <property name="formatters">

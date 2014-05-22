@@ -7,16 +7,15 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, MeetingFormat, StudentRelationshipType, Department}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringPoint, MonitoringPointType, AttendanceMonitoringScheme}
-import uk.ac.warwick.tabula.helpers.LazyLists
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, AttendanceMonitoringPointStyle, AttendanceMonitoringPoint, MonitoringPointType, AttendanceMonitoringScheme}
 import org.joda.time.{DateTime, LocalDate}
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 
 object CreateAttendancePointCommand {
-	def apply(department: Department, academicYear: AcademicYear) =
-		new CreateAttendancePointCommandInternal(department, academicYear)
+	def apply(department: Department, academicYear: AcademicYear, schemes: Seq[AttendanceMonitoringScheme]) =
+		new CreateAttendancePointCommandInternal(department, academicYear, schemes)
 			with ComposableCommand[Seq[AttendanceMonitoringPoint]]
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringTermServiceComponent
@@ -27,13 +26,13 @@ object CreateAttendancePointCommand {
 }
 
 
-class CreateAttendancePointCommandInternal(val department: Department, val academicYear: AcademicYear) 
+class CreateAttendancePointCommandInternal(val department: Department, val academicYear: AcademicYear, val schemes: Seq[AttendanceMonitoringScheme])
 	extends CommandInternal[Seq[AttendanceMonitoringPoint]] {
 
 	self: CreateAttendancePointCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent =>
 
 	override def applyInternal() = {
-		schemes.asScala.map(scheme => {
+		schemes.map(scheme => {
 			val point = new AttendanceMonitoringPoint
 			point.scheme = scheme
 			point.createdDate = DateTime.now
@@ -51,6 +50,8 @@ trait CreateAttendancePointValidation extends SelfValidating with AttendanceMoni
 	self: CreateAttendancePointCommandState with TermServiceComponent with AttendanceMonitoringServiceComponent =>
 
 	override def validate(errors: Errors) {
+		validateSchemePointStyles(errors, pointStyle, schemes.toSeq)
+
 		validateName(errors, name)
 
 		pointStyle match {
@@ -59,19 +60,19 @@ trait CreateAttendancePointValidation extends SelfValidating with AttendanceMoni
 				validateDate(errors, endDate, academicYear, "endDate")
 				if (startDate != null && endDate != null) {
 					validateDates(errors, startDate, endDate)
-					validateCanPointBeEditedByDate(errors, startDate, schemes.asScala.map{_.members.members}.flatten, academicYear)
-					validateDuplicateForDate(errors, null, name, startDate, endDate, schemes.asScala)
+					validateCanPointBeEditedByDate(errors, startDate, schemes.map{_.members.members}.flatten, academicYear)
+					validateDuplicateForDate(errors, null, name, startDate, endDate, schemes)
 				}
 			case AttendanceMonitoringPointStyle.Week =>
 				validateWeek(errors, startWeek, "startWeek")
 				validateWeek(errors, endWeek, "endWeek")
 				validateWeeks(errors, startWeek, endWeek)
-				validateCanPointBeEditedByWeek(errors, startWeek, schemes.asScala.map{_.members.members}.flatten, academicYear)
-				validateDuplicateForWeek(errors, null, name, startWeek, endWeek, schemes.asScala)
+				validateCanPointBeEditedByWeek(errors, startWeek, schemes.map{_.members.members}.flatten, academicYear)
+				validateDuplicateForWeek(errors, null, name, startWeek, endWeek, schemes)
 		}
 
 		pointType match {
-			case MonitoringPointType.Meeting =>
+			case AttendanceMonitoringPointType.Meeting =>
 				validateTypeMeeting(
 					errors,
 					meetingRelationships.asScala,
@@ -79,14 +80,14 @@ trait CreateAttendancePointValidation extends SelfValidating with AttendanceMoni
 					meetingQuantity,
 					department
 				)
-			case MonitoringPointType.SmallGroup =>
+			case AttendanceMonitoringPointType.SmallGroup =>
 				validateTypeSmallGroup(
 					errors,
 					smallGroupEventModules,
 					isAnySmallGroupEventModules,
 					smallGroupEventQuantity
 				)
-			case MonitoringPointType.AssignmentSubmission =>
+			case AttendanceMonitoringPointType.AssignmentSubmission =>
 				validateTypeAssignmentSubmission(
 					errors,
 					isSpecificAssignments,
@@ -117,7 +118,7 @@ trait CreateAttendancePointDescription extends Describable[Seq[AttendanceMonitor
 	override lazy val eventName = "CreateAttendancePoint"
 
 	override def describe(d: Description) {
-		d.attendanceMonitoringSchemes(schemes.asScala)
+		d.attendanceMonitoringSchemes(schemes)
 	}
 }
 
@@ -127,12 +128,10 @@ trait CreateAttendancePointCommandState {
 
 	def department: Department
 	def academicYear: AcademicYear
+	def schemes: Seq[AttendanceMonitoringScheme]
+	lazy val pointStyle: AttendanceMonitoringPointStyle = schemes.head.pointStyle
 
 	// Bind variables
-
-	// Which schemes to add the point to
-	var schemes: JList[AttendanceMonitoringScheme] = LazyLists.create()
-	lazy val pointStyle: AttendanceMonitoringPointStyle = schemes.asScala.head.pointStyle
 
 	// The point's properties
 	var name: String = _
@@ -141,7 +140,7 @@ trait CreateAttendancePointCommandState {
 	var startDate: LocalDate = _
 	var endDate: LocalDate = _
 
-	var pointType: MonitoringPointType = _
+	var pointType: AttendanceMonitoringPointType = _
 
 	var meetingRelationships: JSet[StudentRelationshipType] = JHashSet()
 	var meetingFormats: JSet[MeetingFormat] = JHashSet()
@@ -174,11 +173,11 @@ trait CreateAttendancePointCommandState {
 		}
 		point.pointType = pointType
 		pointType match {
-			case MonitoringPointType.Meeting =>
+			case AttendanceMonitoringPointType.Meeting =>
 				point.meetingRelationships = meetingRelationships.asScala.toSeq
 				point.meetingFormats = meetingFormats.asScala.toSeq
 				point.meetingQuantity = meetingQuantity
-			case MonitoringPointType.SmallGroup =>
+			case AttendanceMonitoringPointType.SmallGroup =>
 				point.smallGroupEventQuantity = smallGroupEventQuantityAll match {
 					case true => 0
 					case _ => smallGroupEventQuantity.toInt
@@ -190,7 +189,7 @@ trait CreateAttendancePointCommandState {
 						case _ => Seq()
 					}
 				}
-			case MonitoringPointType.AssignmentSubmission =>
+			case AttendanceMonitoringPointType.AssignmentSubmission =>
 				point.assignmentSubmissionIsSpecificAssignments = isSpecificAssignments
 				point.assignmentSubmissionQuantity = assignmentSubmissionQuantity.toInt
 				point.assignmentSubmissionModules = assignmentSubmissionModules match {
