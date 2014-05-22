@@ -13,10 +13,7 @@ class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 
 	val student = new StudentMember
 	student.universityId = "university ID"
-	student.userLookupService = mock[UserLookupService]
 	val user = new User()
-	user.setExtraProperties(JHashMap("warwickitsclass" -> "UG"))
-	student.userLookupService.getUserByWarwickUniId(student.universityId) returns (user)
 
 	val ttEvent= TimetableEvent("From Timetable","",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,None,Nil,AcademicYear(2013))
 	val timetableEvents = Seq(ttEvent)

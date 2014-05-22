@@ -70,9 +70,6 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	@transient
 	var relationshipService = Wire[RelationshipService]
 
-	@transient
-	var userLookupService = Wire[UserLookupService]
-
 	def this(user: CurrentUser) = {
 		this()
 
