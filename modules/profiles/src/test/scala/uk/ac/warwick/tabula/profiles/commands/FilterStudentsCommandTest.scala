@@ -3,16 +3,14 @@ package uk.ac.warwick.tabula.profiles.commands
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.services.ProfileServiceComponent
+import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent}
 import uk.ac.warwick.tabula.data.model.{StudentMember, CourseType}
 import scala.collection.JavaConverters._
 import org.hibernate.criterion.Order
-import uk.ac.warwick.tabula.data.ScalaRestriction
+import uk.ac.warwick.tabula.data.{ScalaRestriction, ScalaOrder}
 import org.mockito.ArgumentMatcher
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Restrictions
-import uk.ac.warwick.tabula.data.ScalaOrder
 import org.hamcrest.Description
 import org.hamcrest.Matchers._
 
@@ -59,7 +57,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 	def bindLoadsNonWithdrawnStatuses() { new Fixture {
 		val command = new FilterStudentsCommand(department) with CommandTestSupport
 
-		command.profileService.allSprStatuses(department) returns (Seq(sprF, sprP))
+		command.profileService.allSprStatuses(department) returns Seq(sprF, sprP)
 
 		command.sprStatuses.asScala should be ('empty)
 
@@ -174,11 +172,11 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 	def seqToStringMatches[A](o: Seq[A]) = new ArgumentMatcher[Seq[A]] {
 		def matches(that: Any) = that match {
-			case s: Seq[_] => s.length == o.length && (o, s).zipped.forall { case (a, b) => a.toString == b.toString }
+			case s: Seq[_] => s.length == o.length && (o, s).zipped.forall { case (l, r) => l.toString == r.toString }
 			case _ => false
 		}
 
-		override def describeTo(description: Description) = description.appendText(o.toString)
+		override def describeTo(description: Description) = description.appendText(o.toString())
 	}
 
 }

@@ -35,7 +35,7 @@ trait MemberDao {
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
 	def getStaffByDepartment(department: Department): Seq[StaffMember]
 	
-	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[String]
+	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
 	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember]
 	def getStudentsByAgentRelationshipAndRestrictions(
 		relationshipType: StudentRelationshipType,
@@ -69,11 +69,10 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 	def delete(member: Member) = member match {
 		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
-		case _ => {
+		case _ =>
 			session.delete(member)
 			// Immediately flush delete
 			session.flush()
-		}
 	}
 
 	def getByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false) = {
@@ -247,11 +246,16 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				.seq
 		}
 
-	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[String] = {
+	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String] = {
 		val idCriteria = session.newCriteria[StudentMember]
 		restrictions.foreach { _.apply(idCriteria) }
 
-		idCriteria.project[String](distinct(property("universityId"))).seq
+		if (orders.size > 0) {
+			orders.foreach { idCriteria.addOrder }
+			idCriteria.project[String](property("universityId")).seq.distinct
+		} else {
+			idCriteria.project[String](distinct(property("universityId"))).seq
+		}
 	}
 
 	def findStudentsByRestrictions(

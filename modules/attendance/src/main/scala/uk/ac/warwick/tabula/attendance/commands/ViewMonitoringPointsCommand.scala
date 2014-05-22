@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent}
+import uk.ac.warwick.tabula.services._
 import org.hibernate.criterion.Order._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.JavaImports._

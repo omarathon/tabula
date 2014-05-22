@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.{ToEntityReference, Notification}
 import uk.ac.warwick.tabula.helpers.FunctionConversions.asGoogleFunction
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
+import org.hibernate.FetchMode
 
 trait NotificationDao {
 	def save(notification: Notification[_,_])
@@ -17,7 +18,9 @@ trait NotificationDao {
 	def getById(id: String): Option[Notification[_  >: Null <: ToEntityReference, _]]
 
 	def recent(start: DateTime): Scrollable[Notification[_,_]]
+	def unemailedRecipientCount: Number
 	def unemailedRecipients: Scrollable[RecipientNotificationInfo]
+	def recentRecipients(start: Int, count: Int): Seq[RecipientNotificationInfo]
 }
 
 @Repository
@@ -35,14 +38,30 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 		new Scrollable(scrollable, session)
 	}
 
-	def unemailedRecipients: Scrollable[RecipientNotificationInfo] = {
-		val scrollable = session.newCriteria[RecipientNotificationInfo]
+	private def unemailedRecipientCriteria =
+		session.newCriteria[RecipientNotificationInfo]
 			.createAlias("notification", "notification")
 			.add(is("emailSent", false))
+
+	def unemailedRecipientCount =
+		unemailedRecipientCriteria.count
+
+	def unemailedRecipients: Scrollable[RecipientNotificationInfo] = {
+		val scrollable = unemailedRecipientCriteria
 			.addOrder(Order.asc("notification.created"))
 			.scroll()
 		new Scrollable(scrollable, session)
 	}
+
+	def recentRecipients(start: Int, count: Int): Seq[RecipientNotificationInfo] =
+		session.newCriteria[RecipientNotificationInfo]
+			.createAlias("notification", "notification")
+			.setFetchMode("notification", FetchMode.JOIN)
+			.addOrder(Order.asc("emailSent"))
+			.addOrder(Order.desc("notification.created"))
+			.setFirstResult(start)
+			.setMaxResults(count)
+			.seq
 
 	def save(notification: Notification[_,_]) {
 		/**

@@ -26,11 +26,11 @@
 		</#if>
 	</p>
 
-	<#list schemes as scheme>
+	<#list schemes?sort_by("displayName") as scheme>
 		<div class="row-fluid">
 			<div class="span12">
 				<span class="lead">${scheme.displayName}</span>
-				<span class="muted">(<@fmt.p scheme.members?size "student" />, <@fmt.p scheme.points?size "point" />)</span>
+				<span class="muted">(<@fmt.p scheme.members.members?size "student" />, <@fmt.p scheme.points?size "point" />)</span>
 				<a class="btn btn-primary btn-small" href="<@routes.manageEditScheme command.department command.academicYear.startYear?c scheme/>">Edit</a>
 				<a class="btn btn-danger btn-small" href="<@routes.manageDeleteScheme command.department command.academicYear.startYear?c scheme/>"><i class="icon-remove"></i></a>
 			</div>

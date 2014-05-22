@@ -155,19 +155,29 @@ import uk.ac.warwick.tabula.services.AssignmentService
 	}
 
 	override def scheduledNotifications(assignment: Assignment) = {
-		val dayOfDeadline = assignment.closeDate.withTime(0,0,0,0)
+		// if the assignment is open ended then don't schedule any notifications about deadlines
+		if(assignment.openEnded) {
+			Seq()
+		} else {
+			val dayOfDeadline = assignment.closeDate.withTime(0, 0, 0, 0)
 
-		// skip the week late notification if late submission isn't possible
-		val daysToSend = if(assignment.allowLateSubmissions) { Seq(-7, -1, 1, 7) } else { Seq(-7, -1, 1) }
+			// skip the week late notification if late submission isn't possible
+			val daysToSend = if (assignment.allowLateSubmissions) {
+				Seq(-7, -1, 1, 7)
+			} else {
+				Seq(-7, -1, 1)
+			}
 
-		val surroundingTimes = for (day <- daysToSend) yield assignment.closeDate.plusDays(day)
-		val proposedTimes = Seq(dayOfDeadline) ++ surroundingTimes
+			val surroundingTimes = for (day <- daysToSend) yield assignment.closeDate.plusDays(day)
+			val proposedTimes = Seq(dayOfDeadline) ++ surroundingTimes
 
-		// Filter out all times that are in the past. This should only generate ScheduledNotifications for the future.
-		val allTimes = proposedTimes.filter(_.isAfterNow)
+			// Filter out all times that are in the past. This should only generate ScheduledNotifications for the future.
+			val allTimes = proposedTimes.filter(_.isAfterNow)
 
-		allTimes.map { when =>
-			new ScheduledNotification[Assignment]("SubmissionDueGeneral", assignment, when)
+			allTimes.map {
+				when =>
+					new ScheduledNotification[Assignment]("SubmissionDueGeneral", assignment, when)
+			}
 		}
 	}
 

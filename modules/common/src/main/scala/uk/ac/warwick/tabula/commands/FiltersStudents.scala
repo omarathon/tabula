@@ -1,13 +1,10 @@
 package uk.ac.warwick.tabula.commands
 
 import uk.ac.warwick.tabula.data.model.{Module, SitsStatus, ModeOfAttendance, Route, CourseType, Department}
-import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
+import uk.ac.warwick.tabula.data.ScalaRestriction
 import uk.ac.warwick.tabula.data.ScalaRestriction._
-import uk.ac.warwick.tabula.services.ProfileServiceComponent
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 
 object FiltersStudents {
 	val AliasPaths = Seq(

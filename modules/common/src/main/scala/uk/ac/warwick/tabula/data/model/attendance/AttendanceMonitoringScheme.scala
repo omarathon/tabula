@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import javax.validation.constraints.NotNull
 import javax.persistence._
 import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.data.model.{GeneratedId, Department, UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model.{KnownTypeUserGroup, GeneratedId, Department, UserGroup}
 import uk.ac.warwick.tabula.services.{AttendanceMonitoringMembershipHelpers, AttendanceMonitoringService, UserGroupCacheManager}
 import uk.ac.warwick.spring.Wire
 import org.hibernate.annotations.{Type, BatchSize}
@@ -37,7 +37,7 @@ class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "membersgroup_id")
 	private var _members: UserGroup = UserGroup.ofUniversityIds
-	def members: UnspecifiedTypeUserGroup = {
+	def members: KnownTypeUserGroup = {
 		attendanceMonitoringService match {
 			case Some(service) =>
 				new UserGroupCacheManager(_members, service.membersHelper)

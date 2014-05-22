@@ -79,10 +79,26 @@
 <#macro manageHome><@_u page="/manage"/></#macro>
 <#macro manageHomeYears department><@_u page="/manage/${department.code}"/></#macro>
 <#macro manageHomeForYear department academicYearString><@_u page="/manage/${department.code}/${academicYearString}"/></#macro>
+
 <#macro manageNewScheme department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/new"/></#macro>
+<#macro manageAddStudents scheme>
+	<@_u page="/manage/${scheme.department.code}/${scheme.academicYear.startYear?c}/new/${scheme.id}/students"/>
+</#macro>
+<#macro manageNewSchemeAddPoints scheme>
+	<@_u page="/manage/${scheme.department.code}/${scheme.academicYear.startYear?c}/new/${scheme.id}/points"/>
+</#macro>
+
 <#macro manageEditScheme department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/edit"/></#macro>
 <#macro manageDeleteScheme department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/delete"/></#macro>
+
+<#macro manageSelectStudents scheme>
+	<@_u page="/manage/${scheme.department.code}/${scheme.academicYear.startYear?c}/${scheme.id}/students/select"/>
+</#macro>
+
 <#macro manageAddPoints department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/addpoints"/></#macro>
+<#macro manageAddPointsBlank department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/addpoints/new"/></#macro>
+<#macro manageAddPointsCopy department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/addpoints/copy"/></#macro>
+<#macro manageAddPointsTemplate department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/addpoints/template"/></#macro>
 <#macro manageEditPoints department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/editpoints"/></#macro>
 
 <#macro viewHome><@_u page="/view"/></#macro>

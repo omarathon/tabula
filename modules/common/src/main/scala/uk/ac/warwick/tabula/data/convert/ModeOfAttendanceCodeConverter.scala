@@ -11,7 +11,7 @@ class ModeOfAttendanceCodeConverter extends TwoWayConverter[String, ModeOfAttend
 
 	@Autowired var dao: ModeOfAttendanceDao = _
 
-	override def convertRight(code: String) = (Option(code) flatMap { dao.getByCode(_) }).orNull
+	override def convertRight(code: String) = (Option(code) flatMap { dao.getByCode }).orNull
 	override def convertLeft(moa: ModeOfAttendance) = (Option(moa) map {_.code}).orNull
 	
 }

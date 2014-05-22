@@ -196,3 +196,89 @@
 		</div>
 	</div>
 </#macro>
+
+<#function sortClass field command>
+	<#list command.sortOrder as order>
+		<#if order.propertyName == field>
+			<#if order.ascending>
+				<#return "headerSortDown" />
+			<#else>
+				<#return "headerSortUp" />
+			</#if>
+		</#if>
+	</#list>
+	<#return "" />
+</#function>
+
+<#macro manageStudentTable
+	membershipItems
+	doSorting=false
+	command=""
+	checkboxName=""
+	onlyShowCheckboxForStatic=false
+>
+
+	<#if (membershipItems?size > 0)>
+
+		<table class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-darkRed tablesorter sb-no-wrapper-table-popout">
+			<thead>
+			<tr>
+				<th style="width: 20px;">&nbsp;</th>
+				<th style="width: 50px;" <#if doSorting> class="${sortClass("source", command)} sortable" data-field="source"</#if>>Source</th>
+				<th <#if doSorting> class="${sortClass("firstName", command)} sortable" data-field="firstName"</#if>>First name</th>
+				<th <#if doSorting> class="${sortClass("lastName", command)} sortable" data-field="lastName"</#if>>Last name</th>
+				<th <#if doSorting> class="${sortClass("universityId", command)} sortable" data-field="universityId"</#if>>ID</th>
+				<th <#if doSorting> class="${sortClass("userId", command)} sortable" data-field="userId"</#if>>User</th>
+				<th>Schemes</th>
+			</tr>
+			</thead>
+			<tbody>
+				<#list membershipItems as item>
+					<tr>
+						<td>
+							<#if checkboxName?has_content && (!onlyShowCheckboxForStatic || item.itemTypeString == "static")>
+								<input type="checkbox" name="${checkboxName}" value="${item.universityId}" />
+							</#if>
+						</td>
+						<td>
+							<#if item.itemTypeString == "static">
+								<span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span>
+							<#elseif item.itemTypeString == "exclude">
+								<span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-ban-circle"></i></span>
+							<#else>
+								<span class="use-tooltip" title="Added manually" data-placement="right"><i class="icon-hand-up"></i></span>
+							</#if>
+						</td>
+						<td>${item.firstName}</td>
+						<td>${item.lastName}</td>
+						<td>${item.universityId}</td>
+						<td>${item.userId}</td>
+						<td>
+							<#if item.existingSchemes?size == 0>
+								0 schemes
+							<#else>
+								<#local popovercontent>
+									<ul>
+										<#list item.existingSchemes as scheme>
+											<li>${scheme.displayName}</li>
+										</#list>
+									<ul>
+								</#local>
+								<a
+									class="use-popover"
+									data-container="body"
+									data-html="true"
+									data-title="Existing schemes"
+									data-content="${popovercontent}"
+									data-placement="top"
+								>
+									<@fmt.p item.existingSchemes?size "scheme" />
+								</a>
+							</#if>
+						</td>
+					</tr>
+				</#list>
+			</tbody>
+		</table>
+	</#if>
+</#macro>

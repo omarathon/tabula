@@ -24,7 +24,8 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 
 	def templateLocation = "/WEB-INF/freemarker/emails/submissionnotify.ftl"
 	def submissionTitle =
-		if(submission.isAuthorisedLate) "Authorised Late Submission"
+		if (submission == null) "Submission"
+		else if (submission.isAuthorisedLate) "Authorised Late Submission"
 		else if(submission.isLate) "Late Submission"
 		else "Submission"
 

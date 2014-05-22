@@ -5,8 +5,7 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, At
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.{AutowiringAttendanceMonitoringDaoComponent, AttendanceMonitoringDaoComponent}
-
+import uk.ac.warwick.tabula.data.{SchemeMembershipItemType, SchemeMembershipItem, AutowiringAttendanceMonitoringDaoComponent, AttendanceMonitoringDaoComponent}
 
 trait AttendanceMonitoringServiceComponent {
 	def attendanceMonitoringService: AttendanceMonitoringService
@@ -17,14 +16,23 @@ trait AutowiringAttendanceMonitoringServiceComponent extends AttendanceMonitorin
 }
 
 trait AttendanceMonitoringService {
+	def getSchemeById(id: String): Option[AttendanceMonitoringScheme]
+	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
 	def studentAlreadyReportedThisTerm(student: StudentMember, point: AttendanceMonitoringPoint): Boolean
+	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem]
 }
 
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService {
 
-	self: AttendanceMonitoringDaoComponent with TermServiceComponent =>
+	self: AttendanceMonitoringDaoComponent with TermServiceComponent with AttendanceMonitoringMembershipHelpers with UserLookupComponent =>
+
+	def getSchemeById(id: String): Option[AttendanceMonitoringScheme] =
+		attendanceMonitoringDao.getSchemeById(id)
+
+	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit =
+		attendanceMonitoringDao.saveOrUpdate(scheme)
 
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.listSchemes(department, academicYear)
@@ -37,6 +45,20 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 			termService.getTermFromDateIncludingVacations(point.startDate.toDateTimeAtStartOfDay).getTermTypeAsString
 		)
 
+	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem] = {
+		val items = attendanceMonitoringDao.findSchemeMembershipItems(universityIds, itemType)
+		items.map{ item => {
+			val user = userLookup.getUserByWarwickUniId(item.universityId)
+			SchemeMembershipItem(
+				item.itemType,
+				item.firstName,
+				item.lastName,
+				item.universityId,
+				item.userId,
+				membersHelper.findBy(user)
+			)
+		}}
+	}
 }
 
 trait AttendanceMonitoringMembershipHelpers {
@@ -54,4 +76,5 @@ class AttendanceMonitoringServiceImpl
 	with AttendanceMonitoringMembershipHelpersImpl
 	with AutowiringTermServiceComponent
 	with AutowiringAttendanceMonitoringDaoComponent
+	with AutowiringUserLookupComponent
 

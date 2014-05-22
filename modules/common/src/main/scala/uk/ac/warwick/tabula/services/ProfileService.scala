@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.commands.FiltersStudents
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import java.util.UUID
+import uk.ac.warwick.tabula.JavaImports._
 
 /**
  * Service providing access to members and profiles.
@@ -44,6 +45,7 @@ trait ProfileService {
 		startResult: Int = 0
 	): (Int, Seq[StudentMember])
 	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[StudentMember]
+	def findAllUniversityIdsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
 	def getStudentsByAgentRelationshipAndRestrictions(
 		relationshipType: StudentRelationshipType,
 		agent: Member,
@@ -92,7 +94,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	def getMemberByUser(user: User, disableFilter: Boolean = false, eagerLoad: Boolean = false) = {
 		val allMembers = getAllMembersWithUserId(user.getUserId, disableFilter, eagerLoad)
 		val usercodeMatch =
-			allMembers.filter(_.universityId == user.getWarwickId).headOption
+			allMembers.find(_.universityId == user.getWarwickId)
 								.orElse(allMembers.headOption) // TAB-1716
 
 		if (usercodeMatch.isDefined || !user.getWarwickId.hasText) {
@@ -133,14 +135,14 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	def getStudentsByRoute(route: Route): Seq[StudentMember] = transactional(readOnly = true) {
 		studentCourseDetailsDao.getByRoute(route)
 			.filter{s => s.statusOnRoute!= null && !s.statusOnRoute.code.startsWith("P")}
-			.filter(s => s.mostSignificant == true)
+			.filter(s => s.mostSignificant == JBoolean(Option(true)))
 			.map(_.student)
 	}
 
 	def getStudentsByRoute(route: Route, academicYear: AcademicYear): Seq[StudentMember] = transactional(readOnly = true) {
 		studentCourseDetailsDao.getByRoute(route)
 			.filter{s => s.statusOnRoute!= null && !s.statusOnRoute.code.startsWith("P")}
-			.filter(s => s.mostSignificant == true)
+			.filter(s => s.mostSignificant == JBoolean(Option(true)))
 			.filter(_.freshStudentCourseYearDetails.exists(s => s.academicYear == academicYear))
 			.map(_.student)
 	}
@@ -252,6 +254,43 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		memberDao.findUniversityIdsByRestrictions(allRestrictions)
 	}
 
+	def findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
+		department: Department,
+		restrictions: Seq[ScalaRestriction],
+		orders: Seq[ScalaOrder] = Seq()
+	) = transactional(readOnly = true) {
+		val queryDepartment = {
+			if (department.hasParent)
+				department.rootDepartment
+			else
+				department
+		}
+
+		val departmentRestriction = Aliasable.addAliases(
+			new ScalaRestriction(
+				org.hibernate.criterion.Restrictions.or(
+					Daoisms.is("studentCourseYearDetails.enrolmentDepartment", queryDepartment),
+					Daoisms.is("route.department", queryDepartment),
+					Daoisms.is("homeDepartment", queryDepartment)
+				)
+			),
+			Seq(
+				FiltersStudents.AliasPaths("studentCourseYearDetails"),
+				FiltersStudents.AliasPaths("route")
+			).flatten : _*
+		)
+
+		val allRestrictions = Seq(departmentRestriction) ++ restrictions
+
+		if (department.hasParent) {
+			// TODO this sucks. Would be better if you could get ScalaRestrictions from a filter rule and add them to allRestrictions
+			memberDao.findStudentsByRestrictions(allRestrictions, orders, Int.MaxValue, 0)
+				.filter(studentDepartmentFilterMatches(department)).map(_.universityId)
+		}	else {
+			memberDao.findUniversityIdsByRestrictions(allRestrictions, orders)
+		}
+	}
+
 	def countStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Int = transactional(readOnly = true) {
 		// Because of the implementation of sub-departments, unfortunately we can't get optimisations here.
 		if (department.hasParent) findAllStudentsByRestrictions(department, restrictions).size
@@ -277,7 +316,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	def getDisability(code: String): Option[Disability] = transactional(readOnly=true) {
 		// lookup disability iff a non-null code is passed, otherwise fallback to None - I <3 scala options and flatMap
-		Option(code).flatMap(memberDao.getDisability(_))
+		Option(code).flatMap(memberDao.getDisability)
 	}
 }
 
