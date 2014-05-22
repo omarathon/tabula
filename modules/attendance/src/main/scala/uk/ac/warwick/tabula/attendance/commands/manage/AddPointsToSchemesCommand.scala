@@ -7,8 +7,6 @@ import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.LazyLists
 
 object AddPointsToSchemesCommand {
 	def apply(department: Department, academicYear: AcademicYear) =
@@ -28,7 +26,7 @@ class AddPointsToSchemesCommandInternal(val department: Department, val academic
 
 	override def applyInternal() = {
 		attendanceMonitoringService.listSchemes(department, academicYear).map{
-			scheme => scheme -> schemes.contains(scheme)
+			scheme => scheme -> Option(schemes).getOrElse("").contains(scheme.id)
 		}.toMap
 	}
 
@@ -48,5 +46,5 @@ trait AddPointsToSchemesCommandState {
 	def department: Department
 	def academicYear: AcademicYear
 
-	var schemes: JList[AttendanceMonitoringScheme] = LazyLists.create()
+	var schemes: String = ""
 }

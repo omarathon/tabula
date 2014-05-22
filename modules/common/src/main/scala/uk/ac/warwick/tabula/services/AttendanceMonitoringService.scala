@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringScheme}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointReport, AttendanceMonitoringPoint, AttendanceMonitoringScheme}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.AcademicYear
@@ -18,9 +18,11 @@ trait AutowiringAttendanceMonitoringServiceComponent extends AttendanceMonitorin
 trait AttendanceMonitoringService {
 	def getSchemeById(id: String): Option[AttendanceMonitoringScheme]
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
+	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
 	def studentAlreadyReportedThisTerm(student: StudentMember, point: AttendanceMonitoringPoint): Boolean
+	def findReports(studentIds: Seq[String], year: AcademicYear, period: String): Seq[MonitoringPointReport]
 	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem]
 }
 
@@ -34,6 +36,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit =
 		attendanceMonitoringDao.saveOrUpdate(scheme)
 
+	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit =
+		attendanceMonitoringDao.saveOrUpdate(point)
+
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.listSchemes(department, academicYear)
 
@@ -44,6 +49,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		findNonReportedTerms(Seq(student), point.scheme.academicYear).contains(
 			termService.getTermFromDateIncludingVacations(point.startDate.toDateTimeAtStartOfDay).getTermTypeAsString
 		)
+
+	def findReports(studentIds: Seq[String], year: AcademicYear, period: String): Seq[MonitoringPointReport] =
+		attendanceMonitoringDao.findReports(studentIds, year, period)
 
 	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem] = {
 		val items = attendanceMonitoringDao.findSchemeMembershipItems(universityIds, itemType)
