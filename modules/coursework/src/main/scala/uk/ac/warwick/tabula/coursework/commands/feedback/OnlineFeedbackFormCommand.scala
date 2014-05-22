@@ -98,7 +98,6 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 
 	def copyTo(feedback: Feedback) {
 		// save custom fields
-		feedback.clearCustomFormValues()
 		feedback.customFormValues.addAll(fields.asScala.map {
 			case (_, formValue) => {
 
