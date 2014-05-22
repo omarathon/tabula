@@ -27,7 +27,7 @@ trait ProfileService {
 	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Seq[Member]
 	def getMemberByUser(user: User, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member]
 	def getStudentBySprCode(sprCode: String): Option[StudentMember]
-	def getStudentMemberByTimetableHash(timetableHash: String): Option[StudentMember]
+	def getMemberByTimetableHash(timetableHash: String): Option[Member]
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member]
 	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member]
 	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
@@ -110,8 +110,8 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		studentCourseDetailsDao.getStudentBySprCode(sprCode)
 	}
 
-	def getStudentMemberByTimetableHash(timetableHash: String): Option[StudentMember] = {
-		memberDao.getStudentMemberByTimetableHash(timetableHash)
+	def getMemberByTimetableHash(timetableHash: String): Option[Member] = {
+		memberDao.getMemberByTimetableHash(timetableHash)
 	}
 
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean) = transactional(readOnly = true) {

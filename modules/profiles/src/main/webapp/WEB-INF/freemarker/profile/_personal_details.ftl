@@ -20,6 +20,14 @@
 						<td>${profile.fullName}</td>
 					</tr>
 
+					<#if !profile.student>
+						<tr>
+							<th>Job title</th>
+							<td>${profile.jobTitle}</td>
+						</tr>
+					</#if>
+
+
 					<#if profile.gender??>
 						<tr>
 							<th>Gender</th>

@@ -23,6 +23,8 @@ trait TimetableFetchingService {
 	def getTimetableForCourse(courseCode: String): Seq[TimetableEvent]
 	def getTimetableForRoom(roomName: String): Seq[TimetableEvent]
 	def getTimetableForStaff(universityId: String): Seq[TimetableEvent]
+
+
 }
 
 trait TimetableFetchingServiceComponent {

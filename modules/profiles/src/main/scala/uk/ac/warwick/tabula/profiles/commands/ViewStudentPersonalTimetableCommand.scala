@@ -15,10 +15,13 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 import uk.ac.warwick.tabula.CurrentUser
 
-trait ViewStudentPersonalTimetableCommandState {
-	val student: StudentMember
+trait PersonalTimetableCommandState {
 	var start: LocalDate = LocalDate.now.minusMonths(12)
 	var end: LocalDate = start.plusMonths(13)
+}
+
+trait ViewStudentPersonalTimetableCommandState extends PersonalTimetableCommandState {
+	val student: StudentMember
 }
 
 /*
@@ -82,7 +85,7 @@ object ViewStudentPersonalTimetableCommand {
 		scheduledMeetingEventSource: ScheduledMeetingEventSource,
 		student: StudentMember,
 		currentUser: CurrentUser
-	): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState =
+	): Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState =
 		new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource, scheduledMeetingEventSource, student, currentUser)
 			with ComposableCommand[Seq[EventOccurrence]]
 			with ViewStudentTimetablePermissions
@@ -91,6 +94,7 @@ object ViewStudentPersonalTimetableCommand {
 			with TermAwareWeekToDateConverterComponent
 			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
+			with ViewStudentPersonalTimetableCommandState
 }
 
 object PublicStudentPersonalTimetableCommand {
@@ -100,7 +104,7 @@ object PublicStudentPersonalTimetableCommand {
 		scheduledMeetingEventSource: ScheduledMeetingEventSource,
 		student: StudentMember,
 		currentUser: CurrentUser
-	): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState =
+	): Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState =
 		new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource, scheduledMeetingEventSource, student, currentUser)
 			with Command[Seq[EventOccurrence]]
 			with Public
@@ -109,7 +113,7 @@ object PublicStudentPersonalTimetableCommand {
 			with TermAwareWeekToDateConverterComponent
 			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
-
+			with ViewStudentPersonalTimetableCommandState
 }
 
 

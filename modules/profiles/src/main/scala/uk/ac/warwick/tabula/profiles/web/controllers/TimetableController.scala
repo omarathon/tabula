@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.profiles.commands.{PublicStudentPersonalTimetableCommand, ViewStudentPersonalTimetableCommandState, ViewStudentPersonalTimetableCommand}
-import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
+import uk.ac.warwick.tabula.profiles.commands.{PublicStaffPersonalTimetableCommand, PersonalTimetableCommandState, ViewStaffPersonalTimetableCommand, PublicStudentPersonalTimetableCommand, ViewStudentPersonalTimetableCommandState, ViewStudentPersonalTimetableCommand}
+import uk.ac.warwick.tabula.data.model.{StaffMember, Member, StudentMember}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.IcalView
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestParam, RequestMapping}
@@ -29,7 +29,7 @@ with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponen
 	var userLookup = Wire[UserLookupService]
 
 	// re-use the event source, so it can cache lookups between requests
-	val timetableEventSource = (new CombinedStudentTimetableEventSourceComponent
+	val studentTimetableEventSource = (new CombinedStudentTimetableEventSourceComponent
 		with SmallGroupEventTimetableEventSourceComponentImpl
 		with ScientiaHttpTimetableFetchingServiceComponent
 		with AutowiringSmallGroupServiceComponent
@@ -37,6 +37,15 @@ with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponen
 		with AutowiringScientiaConfigurationComponent
 		with SystemClockComponent
 		).studentTimetableEventSource
+
+	val staffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
+		with SmallGroupEventTimetableEventSourceComponentImpl
+		with ScientiaHttpTimetableFetchingServiceComponent
+		with AutowiringSmallGroupServiceComponent
+		with AutowiringUserLookupComponent
+		with AutowiringScientiaConfigurationComponent
+		with SystemClockComponent
+		).staffTimetableEventSource
 
 	val scheduledMeetingEventSource = (new MeetingRecordServiceScheduledMeetingEventSourceComponent
 		with AutowiringRelationshipServiceComponent
@@ -50,13 +59,17 @@ with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponen
 	  @RequestParam(value="timetableHash", required=false) timetableHash:String
    	) = {
 	  if (timetableHash.hasText) {
-		  profileService.getStudentMemberByTimetableHash(timetableHash).map {
-			  member => PublicStudentPersonalTimetableCommand(timetableEventSource, scheduledMeetingEventSource, member, user)
+		  profileService.getMemberByTimetableHash(timetableHash).map {
+			  member => member match {
+					case student: StudentMember => PublicStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
+					case staff: StaffMember => PublicStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, user)
+				}
 		  }.getOrElse(throw new ItemNotFoundException)
 	  } else {
 		  whoFor match {
-				case student: StudentMember => ViewStudentPersonalTimetableCommand(timetableEventSource, scheduledMeetingEventSource, student, user)
-				case _ => throw new RuntimeException("Don't know how to render timetables for non-student users")
+				case student: StudentMember => ViewStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
+				case staff: StaffMember => ViewStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, user)
+				case _ => throw new RuntimeException("Don't know how to render timetables for non-student or non-staff users")
 			}
 	  }
 	}
@@ -94,7 +107,7 @@ with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponen
 	def getEvents(
 		@RequestParam from: Long,
 		@RequestParam to: Long,
-		@ModelAttribute("command") command:Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState
+		@ModelAttribute("command") command:Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState
 	): Mav = {
 		// from and to are seconds since the epoch, because that's what FullCalendar likes to send.
 		// This conversion could move onto the command, if anyone felt strongly that it was a concern of the command
