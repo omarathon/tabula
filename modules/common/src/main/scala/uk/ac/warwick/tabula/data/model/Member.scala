@@ -31,7 +31,6 @@ import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Filter
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import scala.Some
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -369,7 +368,7 @@ class StudentMember extends Member with StudentProperties {
 	def moduleRegistrationsByYear(year: Option[AcademicYear]): Set[ModuleRegistration] =
 		freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap(_.moduleRegistrationsByYear(year))
 
-	def isPGR = userLookupService.getUserByWarwickUniId(universityId).getExtraProperty("warwickitsclass") == "PG(R)"
+	def isPGR = groupName == "Postgraduate (research) FT" || groupName == "Postgraduate (research) PT"
 }
 
 @Entity
@@ -416,6 +415,7 @@ class RuntimeMember(user: CurrentUser) extends Member(user) with RestrictedPhone
 }
 
 trait MemberProperties extends StringId {
+
 	@Id var universityId: String = _
 	def id = universityId
 
@@ -459,7 +459,6 @@ trait MemberProperties extends StringId {
 
 	var jobTitle: String = _
 
-//	@Restricted(Array("Profiles.Read.TelephoneNumber"))
 	@RestrictionProvider("phoneNumberPermissions")
 	var phoneNumber: String = _
 
@@ -507,8 +506,6 @@ trait RestrictedPhoneNumber {
 }
 
 trait StaffProperties {
-	//	var teachingStaff: JBoolean = _
-
 	// Anyone can view staff phone number
 	def phoneNumberPermissions = Nil
 }

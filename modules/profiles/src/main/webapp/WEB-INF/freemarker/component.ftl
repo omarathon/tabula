@@ -1,8 +1,8 @@
 <#ftl strip_text=true />
 
 <#assign bodyClass="profiles-page" />
-<#assign siteHeader="Student Profiles" />
+<#assign siteHeader="Profiles" />
 <#assign subsite=true />
-<#assign title="Student Profiles" />
+<#assign title="Profiles" />
 <#assign name="profiles" />
 <#assign nonav=false />

@@ -24,9 +24,11 @@ trait MeetingRecordServiceScheduledMeetingEventSourceComponent extends Scheduled
 			def canReadMeeting(meeting: AbstractMeetingRecord) =
 				securityService.can(currentUser, Permissions.Profiles.MeetingRecord.Read(meeting.relationship.relationshipType), member)
 
+			//Students can also be agents in relationships
+			val agentRelationships = relationshipService.listAllStudentRelationshipsWithMember(member).toSet
 			val relationships = member match {
-				case student: StudentMember => relationshipService.getAllPastAndPresentRelationships (student).toSet
-				case staff: StaffMember => relationshipService.listAllStudentRelationshipsWithMember(staff).toSet
+				case student: StudentMember => relationshipService.getAllPastAndPresentRelationships(student).toSet ++ agentRelationships
+				case _ => agentRelationships
 			}
 
 			val meetings = meetingRecordService.listAll(relationships, currentUser.profile)

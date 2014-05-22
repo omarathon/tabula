@@ -51,7 +51,7 @@ trait MemberDao {
 	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime)
 	def getDisability(code: String): Option[Disability]
 
-	def getStudentMemberByTimetableHash(timetableHash: String): Option[StudentMember]
+	def getMemberByTimetableHash(timetableHash: String): Option[Member]
 
 }
 
@@ -351,8 +351,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.uniqueResult
 	}
 
-	def getStudentMemberByTimetableHash(timetableHash: String): Option[StudentMember] = {
-		session.newCriteria[StudentMember]
+	def getMemberByTimetableHash(timetableHash: String): Option[Member] = {
+		session.newCriteria[Member]
 		.add(is("timetableHash", timetableHash))
 		.uniqueResult
 	}

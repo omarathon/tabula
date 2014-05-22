@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.profiles.commands.{PersonalTimetableCommandState, ViewStaffPersonalTimetableCommand, PublicStudentPersonalTimetableCommand, ViewStudentPersonalTimetableCommandState, ViewStudentPersonalTimetableCommand}
+import uk.ac.warwick.tabula.profiles.commands.{PublicStaffPersonalTimetableCommand, PersonalTimetableCommandState, ViewStaffPersonalTimetableCommand, PublicStudentPersonalTimetableCommand, ViewStudentPersonalTimetableCommandState, ViewStudentPersonalTimetableCommand}
 import uk.ac.warwick.tabula.data.model.{StaffMember, Member, StudentMember}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.IcalView
@@ -59,8 +59,11 @@ with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponen
 	  @RequestParam(value="timetableHash", required=false) timetableHash:String
    	) = {
 	  if (timetableHash.hasText) {
-		  profileService.getStudentMemberByTimetableHash(timetableHash).map {
-			  member => PublicStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, member, user)
+		  profileService.getMemberByTimetableHash(timetableHash).map {
+			  member => member match {
+					case student: StudentMember => PublicStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
+					case staff: StaffMember => PublicStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, user)
+				}
 		  }.getOrElse(throw new ItemNotFoundException)
 	  } else {
 		  whoFor match {

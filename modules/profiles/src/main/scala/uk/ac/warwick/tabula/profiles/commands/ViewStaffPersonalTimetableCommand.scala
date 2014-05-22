@@ -4,10 +4,10 @@ import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember}
 import org.joda.time.{Interval, LocalDate}
 import uk.ac.warwick.tabula.profiles.services.timetables.{TermBasedEventOccurrenceComponent, StaffTimetableEventSource, EventOccurrenceServiceComponent, ScheduledMeetingEventSource, StudentTimetableEventSource}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.{Unaudited, ReadOnly, ComposableCommand, Appliable, CommandInternal}
+import uk.ac.warwick.tabula.commands.{Command, Unaudited, ReadOnly, ComposableCommand, Appliable, CommandInternal}
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringTermServiceComponent, TermAwareWeekToDateConverterComponent}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{Public, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 
 trait ViewStaffPersonalTimetableCommandState extends PersonalTimetableCommandState {
@@ -79,6 +79,25 @@ object ViewStaffPersonalTimetableCommand {
 		new ViewStaffPersonalTimetableCommandImpl(staffTimetableEventSource, scheduledMeetingEventSource, staff, currentUser)
 			with ComposableCommand[Seq[EventOccurrence]]
 			with ViewStaffTimetablePermissions
+			with ReadOnly with Unaudited
+			with TermBasedEventOccurrenceComponent
+			with TermAwareWeekToDateConverterComponent
+			with AutowiringTermServiceComponent
+			with AutowiringProfileServiceComponent
+			with ViewStaffPersonalTimetableCommandState
+}
+
+object PublicStaffPersonalTimetableCommand {
+
+	def apply(
+						 staffTimetableEventSource: StaffTimetableEventSource,
+						 scheduledMeetingEventSource: ScheduledMeetingEventSource,
+						 staff: StaffMember,
+						 currentUser: CurrentUser
+						 ): Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState =
+		new ViewStaffPersonalTimetableCommandImpl(staffTimetableEventSource, scheduledMeetingEventSource, staff, currentUser)
+			with Command[Seq[EventOccurrence]]
+			with Public
 			with ReadOnly with Unaudited
 			with TermBasedEventOccurrenceComponent
 			with TermAwareWeekToDateConverterComponent
