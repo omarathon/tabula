@@ -404,9 +404,21 @@ $(function(){
 
 	// Add points
 	(function(){
+		var uniqueCollection = function(collection){
+			var $collection = $(collection);
+			return $.makeArray($collection.filter(function(i, item){
+				return i == $.inArray(item, $collection);
+			}));
+		};
 		var updateButtons = function(){
-			var checkboxes = $('.add-points-to-schemes tbody input');
-			if (checkboxes.length == 0 || checkboxes.is(':checked') > 0) {
+			var checkboxes = $('.add-points-to-schemes tbody input')
+				, checkedBoxes = checkboxes.filter(function(){ return $(this).is(':checked'); });
+			if (checkboxes.length == 0) {
+				$('.add-points-to-schemes p button').attr('disabled', false);
+			} else if ( checkedBoxes.length > 0
+				// check all schemes have same point style
+				&& uniqueCollection(checkedBoxes.map(function(){ return $(this).data('pointstyle'); }).get()).length === 1
+			) {
 				$('.add-points-to-schemes p button').attr('disabled', false);
 			} else {
 				$('.add-points-to-schemes p button').attr('disabled', true);

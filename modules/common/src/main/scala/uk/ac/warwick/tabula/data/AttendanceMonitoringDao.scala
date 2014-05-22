@@ -38,8 +38,10 @@ trait AutowiringAttendanceMonitoringDaoComponent extends AttendanceMonitoringDao
 trait AttendanceMonitoringDao {
 	def getSchemeById(id: String): Option[AttendanceMonitoringScheme]
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
+	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
+	def findReports(studentIds: Seq[String], year: AcademicYear, period: String): Seq[MonitoringPointReport]
 	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem]
 }
 
@@ -52,6 +54,9 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit =
 		session.saveOrUpdate(scheme)
+
+	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit =
+		session.saveOrUpdate(point)
 
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
 		session.newCriteria[AttendanceMonitoringScheme]
@@ -79,6 +84,17 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 			}
 
 		TermService.orderedTermNames.diff(termCounts.filter{case(term, count) => count.intValue() == students.size}.map { _._1})
+	}
+
+	def findReports(studentsIds: Seq[String], academicYear: AcademicYear, period: String): Seq[MonitoringPointReport] = {
+		if (studentsIds.isEmpty)
+			return Seq()
+
+		session.newCriteria[MonitoringPointReport]
+			.add(is("academicYear", academicYear))
+			.add(is("monitoringPeriod", period))
+			.add(safeIn("student.universityId", studentsIds))
+			.seq
 	}
 
 	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem] = {

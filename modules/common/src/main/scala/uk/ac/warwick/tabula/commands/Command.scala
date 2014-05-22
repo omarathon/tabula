@@ -390,6 +390,10 @@ abstract class Description {
 		property("attendanceMonitoringScheme", scheme.id)
 	}
 
+	def attendanceMonitoringSchemes(schemes: Seq[AttendanceMonitoringScheme]) = {
+		property("attendanceMonitoringSchemes", schemes.map(_.id))
+	}
+
 	def notifications(notifications: Seq[Notification[_,_]]) = {
 		property("notifications" -> notifications.map(_.id))
 	}
