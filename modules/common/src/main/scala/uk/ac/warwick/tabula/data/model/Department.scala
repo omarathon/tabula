@@ -140,10 +140,7 @@ class Department extends GeneratedId
 	// FIXME belongs in Freemarker
 	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary).fold("")({ raw =>
 		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
-		val nodes = Splitter.split(raw).map { p => <p>
-			{p}
-		</p>
-		}
+		val nodes = Splitter.split(raw).map { p => <p>{p}</p>	}
 		(NodeSeq fromSeq nodes).toString()
 	})
 
