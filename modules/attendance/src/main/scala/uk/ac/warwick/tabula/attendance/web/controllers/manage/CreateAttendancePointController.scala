@@ -20,8 +20,12 @@ class CreateAttendancePointController extends AttendanceController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-			CreateAttendancePointCommand(department, academicYear)
+	def command(
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam schemes: JList[AttendanceMonitoringScheme]
+	) =
+			CreateAttendancePointCommand(department, academicYear, schemes.asScala.toSeq)
 
 	@RequestMapping(method = Array(POST))
 	def form(
@@ -59,12 +63,7 @@ class CreateAttendancePointController extends AttendanceController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("cancel"))
-	def cancel(
-		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]],
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@RequestParam schemes: JList[AttendanceMonitoringScheme]
-	) = {
+	def cancel(@RequestParam schemes: JList[AttendanceMonitoringScheme]) = {
 		Redirect(
 			getReturnTo(""),
 			"schemes" -> schemes.asScala.map(_.id).mkString(",")

@@ -73,7 +73,7 @@
 
 	<@form.labelled_row "pointType" "Type">
 		<@form.label clazz="radio" checkbox=true>
-			<input id="pointType1" name="pointType" type="radio" value="" <#if !command.pointType??>checked</#if>>
+			<@f.radiobutton path="pointType" value="standard" />
 			Standard
 		</@form.label>
 		<@form.label clazz="radio" checkbox=true>
