@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceCompo
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyLists
 import collection.JavaConverters._
+import uk.ac.warwick.util.web.UriBuilder
 
 case class FindPointsResult(
 	termGroupedPoints: Map[String, Seq[GroupedPoint]],
@@ -74,5 +75,17 @@ trait FindPointsCommandState {
 	}
 	var styles: JList[AttendanceMonitoringPointStyle] = LazyLists.create {
 		() => null
+	}
+
+	def serializeFilter = {
+		val result = new UriBuilder()
+		findSchemes.asScala.foreach(scheme => result.addQueryParameter("findSchemes", scheme.id))
+		sets.asScala.foreach(set => result.addQueryParameter("sets", set.id))
+		types.asScala.foreach(t => result.addQueryParameter("types", t.dbValue))
+		styles.asScala.foreach(style => result.addQueryParameter("styles", style.dbValue))
+		if (result.getQuery == null)
+			""
+		else
+			result.getQuery
 	}
 }

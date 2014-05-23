@@ -152,7 +152,7 @@
 					</div>
 				</#if>
 
-				<div class="student-filter btn-group-group well well-small">
+				<div class="student-filter points-filter btn-group-group well well-small">
 
 					<button type="button" class="clear-all-filters btn btn-link">
 						<span class="icon-stack">
@@ -165,7 +165,7 @@
 						<@spring.bind path=path>
 							<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
 								<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
-									<span style="width: 180px;" class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
+									<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
 									<span class="caret"></span>
 								</a>
 								<div class="dropdown-menu filter-list">
@@ -242,7 +242,7 @@
 
 					<div class="btn-group empty-filter">
 						<a class="btn btn-mini">
-							<span style="width: 180px;" class="filter-short-values">
+							<span class="filter-short-values">
 								<#if findCommand.restrictedStyle.dbValue == "week">
 									Term week points only
 								<#else>
@@ -331,8 +331,6 @@
 													$checkbox.prop('checked', false);
 													updateFilter($checkbox);
 												});
-
-												doRequest($list.closest('form'));
 											})
 							)
 									.append($('<hr />'))
