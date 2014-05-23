@@ -14,6 +14,8 @@ object AttendanceMonitoringPointStyle {
 		case null => null
 		case _ => throw new IllegalArgumentException()
 	}
+
+	val values: Seq[AttendanceMonitoringPointStyle] = Seq(Week, Date)
 }
 
 class AttendanceMonitoringPointStyleUserType extends AbstractStringUserType[AttendanceMonitoringPointStyle] {
