@@ -16,7 +16,7 @@ class EmailQueueController extends BaseController {
 
 	@ModelAttribute("emails")
 	def emails(@RequestParam(value = "page", defaultValue = "1") page: Int) = {
-		val start = (page * pageSize) + 1
+		val start = ((page - 1) * pageSize)
 		val max = pageSize
 
 		emailNotificationService.recentRecipients(start, max)
