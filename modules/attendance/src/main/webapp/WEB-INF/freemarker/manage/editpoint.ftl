@@ -1,18 +1,19 @@
 <#escape x as x?html>
 
-<h1>Add monitoring point</h1>
+<h1>Edit monitoring point</h1>
 
 <#assign popoverContent><#noescape>
-	<ul>
-		<#list command.schemes?sort_by("displayName") as scheme>
-			<li>${scheme.displayName}</li>
-		</#list>
-	</ul>
+<ul>
+	<#list command.schemesToEdit?sort_by("displayName") as scheme>
+		<li>${scheme.displayName}</li>
+	</#list>
+</ul>
 </#noescape></#assign>
+
 <p>
-	You are adding this point to
+	You are editing this point on
 	<a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="top">
-		<@fmt.p command.schemes?size "scheme" />
+		<@fmt.p command.schemesToEdit?size "scheme" />
 	</a>
 </p>
 
@@ -26,18 +27,15 @@
 
 <@f.form action="" method="POST" commandName="command" class="form-horizontal">
 
-	<#list command.schemes as scheme>
-		<input name="schemes" value="${scheme.id}" type="hidden" />
-	</#list>
 	<input name="returnTo" value="${returnTo}" type="hidden" />
 
 	<#include "_managepoint.ftl" />
 
 	<div class="form-actions">
-		<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Adding&hellip;">
-			Add
+		<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Saving&hellip;">
+			Save
 		</button>
-		<button class="btn" type="submit" name="cancel">Cancel</button>
+		<a href="${returnTo}" class="btn">Cancel</a>
 	</div>
 </@f.form>
 

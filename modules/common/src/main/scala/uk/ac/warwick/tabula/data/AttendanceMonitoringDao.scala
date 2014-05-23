@@ -38,6 +38,7 @@ trait AutowiringAttendanceMonitoringDaoComponent extends AttendanceMonitoringDao
 
 trait AttendanceMonitoringDao {
 	def getSchemeById(id: String): Option[AttendanceMonitoringScheme]
+	def getPointById(id: String): Option[AttendanceMonitoringPoint]
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
@@ -66,6 +67,9 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 
 	def getSchemeById(id: String): Option[AttendanceMonitoringScheme] =
 		getById[AttendanceMonitoringScheme](id)
+
+	def getPointById(id: String): Option[AttendanceMonitoringPoint] =
+		getById[AttendanceMonitoringPoint](id)
 
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit =
 		session.saveOrUpdate(scheme)

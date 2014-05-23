@@ -9,7 +9,8 @@ import uk.ac.warwick.tabula.AcademicYear
 
 case class GroupedPoint(
 	templatePoint: AttendanceMonitoringPoint,
-	schemes: Seq[AttendanceMonitoringScheme]
+	schemes: Seq[AttendanceMonitoringScheme],
+	points: Seq[AttendanceMonitoringPoint]
 )
 
 case class GroupedOldPoint(
@@ -35,7 +36,7 @@ trait GroupsPoints {
 			}
 			// transform similar points into 1 grouped point
 			.map{ case (term, groupedPoints) => term ->
-				groupedPoints.map{ case(_, pointGroup) => GroupedPoint(pointGroup.head, pointGroup.map(_.scheme))}
+				groupedPoints.map{ case(_, pointGroup) => GroupedPoint(pointGroup.head, pointGroup.map(_.scheme), pointGroup)}
 					.toSeq.sortBy(p => (p.templatePoint.startWeek, p.templatePoint.endWeek))
 			}
 	}
@@ -53,7 +54,7 @@ trait GroupsPoints {
 			// transform similar points into 1 grouped point
 			.map{ case (monthYearPair, groupedPoints) =>
 				new DateFormatSymbols().getMonths.array(monthYearPair._1.get - 1) + " " + monthYearPair._2.get ->
-					groupedPoints.map{ case(_, pointGroup) => GroupedPoint(pointGroup.head, pointGroup.map(_.scheme))}
+					groupedPoints.map{ case(_, pointGroup) => GroupedPoint(pointGroup.head, pointGroup.map(_.scheme), pointGroup)}
 						.toSeq.sortBy(p => (p.templatePoint.startWeek, p.templatePoint.endWeek))
 			}
 	}

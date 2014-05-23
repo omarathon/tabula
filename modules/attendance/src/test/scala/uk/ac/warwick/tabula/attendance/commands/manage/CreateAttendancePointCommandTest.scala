@@ -209,12 +209,12 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		val schemeWithDupPoint = new AttendanceMonitoringScheme
 		schemeWithDupPoint.points.add(dupPoint)
 		new Fixture {
-			validator.validateDuplicateForWeek(errors, null, "Name", 1, 1, Seq(schemeWithNonDupPoint))
+			validator.validateDuplicateForWeek(errors, "Name", 1, 1, Seq(schemeWithNonDupPoint))
 			errors.hasFieldErrors("name") should be (false)
 			errors.hasFieldErrors("startWeek") should be (false)
 		}
 		new Fixture {
-			validator.validateDuplicateForWeek(errors, null, "Name", 1, 1, Seq(schemeWithNonDupPoint, schemeWithDupPoint))
+			validator.validateDuplicateForWeek(errors, "Name", 1, 1, Seq(schemeWithNonDupPoint, schemeWithDupPoint))
 			errors.hasFieldErrors("name") should be (true)
 			errors.hasFieldErrors("startWeek") should be (true)
 		}
@@ -238,12 +238,12 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		val schemeWithDupPoint = new AttendanceMonitoringScheme
 		schemeWithDupPoint.points.add(dupPoint)
 		new Fixture {
-			validator.validateDuplicateForDate(errors, null, "Name", baseDate, baseDate.plusDays(1), Seq(schemeWithNonDupPoint))
+			validator.validateDuplicateForDate(errors, "Name", baseDate, baseDate.plusDays(1), Seq(schemeWithNonDupPoint))
 			errors.hasFieldErrors("name") should be (false)
 			errors.hasFieldErrors("startDate") should be (false)
 		}
 		new Fixture {
-			validator.validateDuplicateForDate(errors, null, "Name", baseDate, baseDate.plusDays(1), Seq(schemeWithNonDupPoint, schemeWithDupPoint))
+			validator.validateDuplicateForDate(errors, "Name", baseDate, baseDate.plusDays(1), Seq(schemeWithNonDupPoint, schemeWithDupPoint))
 			errors.hasFieldErrors("name") should be (true)
 			errors.hasFieldErrors("startDate") should be (true)
 		}
