@@ -7,7 +7,8 @@ import uk.ac.warwick.tabula.data.model.forms.FormField
 import org.joda.time.DateTime
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.AcademicYear
-import org.hibernate.criterion.{Order, Restrictions}
+import org.hibernate.criterion.Restrictions._
+import org.hibernate.criterion.Order._
 
 trait AssignmentDaoComponent {
 	val assignmentDao: AssignmentDao
@@ -37,6 +38,8 @@ trait AssignmentDao {
 	def getAssignmentsByName(partialName: String, department: Department): Seq[Assignment]
 
 	def findAssignmentsByNameOrModule(query: String): Seq[Assignment]
+
+	def getAssignmentsClosingBetween(startInclusive: DateTime, endExclusive: DateTime): Seq[Assignment]
 }
 
 @Repository
@@ -68,8 +71,8 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 		session.newCriteria[Submission]
 			.createAlias("assignment", "assignment")
 			.add(is("universityId", universityId))
-			.add(Restrictions.ge("assignment.closeDate", startInclusive))
-			.add(Restrictions.lt("assignment.closeDate", endExclusive))
+			.add(ge("assignment.closeDate", startInclusive))
+			.add(lt("assignment.closeDate", endExclusive))
 			.seq
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment] =
@@ -91,8 +94,8 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 		session.newCriteria[Assignment]
 			.createAlias("module", "m")
 			.add(is("m.department", department))
-			.add(Restrictions.isNotNull("createdDate"))
-			.addOrder(Order.desc("createdDate"))
+			.add(isNotNull("createdDate"))
+			.addOrder(desc("createdDate"))
 			.setMaxResults(1)
 			.uniqueResult
 	}
@@ -118,5 +121,13 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 			.setString("nameLike", "%" + query + "%")
 			.setMaxResults(MaxAssignmentsByName).seq
 	}
+
+	def getAssignmentsClosingBetween(startInclusive: DateTime, endExclusive: DateTime) =
+		session.newCriteria[Assignment]
+			.add(is("openEnded", false))
+			.add(ge("closeDate", startInclusive))
+			.add(lt("closeDate", endExclusive))
+			.addOrder(asc("closeDate"))
+			.seq
 
 }
