@@ -5,7 +5,7 @@ import org.junit.{After, Before}
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.{PackageScanner, Mockito, Fixtures, PersistenceTestBase}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{SecurityService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 import javax.persistence.DiscriminatorValue
 import org.joda.time.{DateTimeUtils, DateTime}
@@ -13,6 +13,8 @@ import uk.ac.warwick.tabula.data.model.notifications.{ScheduledMeetingRecordInvi
 import org.hibernate.ObjectNotFoundException
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
+import uk.ac.warwick.tabula.data.model.permissions.RoleOverride
+import uk.ac.warwick.tabula.permissions.Permissions
 
 @Transactional
 class NotificationDaoTest extends PersistenceTestBase with Mockito {
@@ -102,8 +104,17 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		permissionsService.ensureUserGroupFor(module, ModuleManagerRoleDefinition) returns (UserGroup.ofUniversityIds)
 		permissionsService.ensureUserGroupFor(department, DepartmentalAdministratorRoleDefinition) returns (UserGroup.ofUniversityIds)
+		permissionsService.getAllGrantedRolesFor(assignment) returns (Nil)
+		permissionsService.getAllGrantedRolesFor(module) returns (Nil)
+		permissionsService.getAllGrantedRolesFor(department) returns (Nil)
+		permissionsService.getGrantedPermission(assignment, Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
+		permissionsService.getGrantedPermission(module, Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
+		permissionsService.getGrantedPermission(department, Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
 
 		val notification = Notification.init(new SubmissionReceivedNotification, agent, submission, assignment)
+
+		notification.securityService = mock[SecurityService]
+		notification.permissionsService = permissionsService
 
 		notificationDao.save(notification)
 		notification.target.id should not be (null)
