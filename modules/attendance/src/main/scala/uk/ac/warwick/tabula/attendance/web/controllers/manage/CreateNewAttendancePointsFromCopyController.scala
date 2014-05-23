@@ -141,6 +141,7 @@ class CreateNewAttendancePointsFromCopyController extends AttendanceController {
 				"allSchemes" -> allSchemes,
 				"isSchemes" -> !searchResult.schemes.isEmpty,
 				"allTypes" -> AttendanceMonitoringPointType.values,
+				"errors" -> errors,
 				"returnTo" -> getReturnTo("")
 			).crumbs(
 				Breadcrumbs.Manage.Home,

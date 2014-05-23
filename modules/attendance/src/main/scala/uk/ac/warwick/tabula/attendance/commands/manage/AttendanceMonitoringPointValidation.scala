@@ -137,7 +137,10 @@ trait AttendanceMonitoringPointValidation {
 	) = {
 		val pointTerm = termService.getTermFromDateIncludingVacations(startDate.toDateTimeAtStartOfDay)
 		if (attendanceMonitoringService.findReports(studentIds, academicYear, pointTerm.getTermTypeAsString).size > 0) {
-			errors.rejectValue(bindPoint, "attendanceMonitoringPoint.hasReportedCheckpoints.add")
+			if (bindPoint.isEmpty)
+				errors.reject("attendanceMonitoringPoint.hasReportedCheckpoints.add")
+			else
+				errors.rejectValue(bindPoint, "attendanceMonitoringPoint.hasReportedCheckpoints.add")
 		}
 	}
 
@@ -145,11 +148,12 @@ trait AttendanceMonitoringPointValidation {
 		errors: Errors,
 		startWeek: Int,
 		studentIds: Seq[String],
-		academicYear: AcademicYear
+		academicYear: AcademicYear,
+		bindPoint: String = "startWeek"
 	) = {
 		val weeksForYear = termService.getAcademicWeeksForYear(academicYear.dateInTermOne).toMap
 		val startDate = weeksForYear(startWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
-		validateCanPointBeEditedByDate(errors, startDate, studentIds, academicYear, "startWeek")
+		validateCanPointBeEditedByDate(errors, startDate, studentIds, academicYear, bindPoint)
 	}
 
 	def validateDuplicateForWeek(
@@ -158,12 +162,17 @@ trait AttendanceMonitoringPointValidation {
 		name: String,
 		startWeek: Int,
 		endWeek: Int,
-		schemes: Seq[AttendanceMonitoringScheme]
+		schemes: Seq[AttendanceMonitoringScheme],
+		global: Boolean = false
 	) = {
 		val allPoints = schemes.map(_.points.asScala).flatten
 		if (allPoints.exists(point => point.id != id && point.name == name && point.startWeek == startWeek && point.endWeek == endWeek)) {
-			errors.rejectValue("name", "attendanceMonitoringPoint.name.weeks.exists")
-			errors.rejectValue("startWeek", "attendanceMonitoringPoint.name.weeks.exists")
+			if (global) {
+				errors.reject("attendanceMonitoringPoint.name.weeks.exists.global", Array(name, startWeek.toString, endWeek.toString), null)
+			} else {
+				errors.rejectValue("name", "attendanceMonitoringPoint.name.weeks.exists")
+				errors.rejectValue("startWeek", "attendanceMonitoringPoint.name.weeks.exists")
+			}
 		}
 	}
 
@@ -173,12 +182,17 @@ trait AttendanceMonitoringPointValidation {
 		name: String,
 		startDate: LocalDate,
 		endDate: LocalDate,
-		schemes: Seq[AttendanceMonitoringScheme]
+		schemes: Seq[AttendanceMonitoringScheme],
+		global: Boolean = false
 	) = {
 		val allPoints = schemes.map(_.points.asScala).flatten
 		if (allPoints.exists(point => point.id != id && point.name == name && point.startDate == startDate && point.endDate == endDate)) {
-			errors.rejectValue("name", "attendanceMonitoringPoint.name.dates.exists")
-			errors.rejectValue("startDate", "attendanceMonitoringPoint.name.dates.exists")
+			if (global) {
+				errors.reject("attendanceMonitoringPoint.name.dates.exists.global", Array(name, startDate, endDate), null)
+			} else {
+				errors.rejectValue("name", "attendanceMonitoringPoint.name.dates.exists")
+				errors.rejectValue("startDate", "attendanceMonitoringPoint.name.dates.exists")
+			}
 		}
 	}
 }

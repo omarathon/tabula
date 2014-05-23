@@ -45,15 +45,16 @@ trait GroupsPoints {
 			// only date points group by month
 			.filter(_.scheme.pointStyle == AttendanceMonitoringPointStyle.Date)
 			// group by month
-			.groupBy{ point => point.startDate.monthOfYear }
+			.groupBy{ point => (point.startDate.monthOfYear, point.startDate.year) }
 			// group each month's similar points (by name and weeks)
-			.map{ case (month, nonGroupedPoints) => month ->
+			.map{ case (monthYearPair, nonGroupedPoints) => monthYearPair ->
 				nonGroupedPoints.groupBy{ point => (point.name.toLowerCase, point.startWeek, point.endWeek)}
 			}
 			// transform similar points into 1 grouped point
-			.map{ case (month, groupedPoints) => new DateFormatSymbols().getMonths.array(month.get) ->
-				groupedPoints.map{ case(_, pointGroup) => GroupedPoint(pointGroup.head, pointGroup.map(_.scheme))}
-					.toSeq.sortBy(p => (p.templatePoint.startWeek, p.templatePoint.endWeek))
+			.map{ case (monthYearPair, groupedPoints) =>
+				new DateFormatSymbols().getMonths.array(monthYearPair._1.get - 1) + " " + monthYearPair._2.get ->
+					groupedPoints.map{ case(_, pointGroup) => GroupedPoint(pointGroup.head, pointGroup.map(_.scheme))}
+						.toSeq.sortBy(p => (p.templatePoint.startWeek, p.templatePoint.endWeek))
 			}
 	}
 

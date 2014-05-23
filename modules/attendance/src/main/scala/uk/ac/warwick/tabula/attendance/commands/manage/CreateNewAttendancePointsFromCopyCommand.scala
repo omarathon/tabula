@@ -30,11 +30,49 @@ object CreateNewAttendancePointsFromCopyCommand {
 
 
 class CreateNewAttendancePointsFromCopyCommandInternal(val department: Department, val academicYear: AcademicYear, val schemes: Seq[AttendanceMonitoringScheme])
-	extends CommandInternal[Seq[AttendanceMonitoringPoint]] {
+	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with GetsPointsToCreate {
 
 	self: CreateNewAttendancePointsFromCopyCommandState with TermServiceComponent with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
+		val points = getPoints(findPointsResult, schemes, pointStyle)
+		points.foreach(attendanceMonitoringService.saveOrUpdate)
+		points
+	}
+
+}
+
+trait CreateNewAttendancePointsFromCopyValidation extends SelfValidating with GetsPointsToCreate with AttendanceMonitoringPointValidation {
+
+	self: CreateNewAttendancePointsFromCopyCommandState with TermServiceComponent with AttendanceMonitoringServiceComponent =>
+
+	override def validate(errors: Errors) {
+		val points = getPoints(findPointsResult, schemes, pointStyle)
+		points.foreach(point => {
+			validateSchemePointStyles(errors, pointStyle, schemes.toSeq)
+
+			pointStyle match {
+				case AttendanceMonitoringPointStyle.Date =>
+					validateCanPointBeEditedByDate(errors, point.startDate, schemes.map{_.members.members}.flatten, academicYear, "")
+					validateDuplicateForDate(errors, null, point.name, point.startDate, point.endDate, schemes, global = true)
+				case AttendanceMonitoringPointStyle.Week =>
+					validateCanPointBeEditedByWeek(errors, point.startWeek, schemes.map{_.members.members}.flatten, academicYear, "")
+					validateDuplicateForWeek(errors, null, point.name, point.startWeek, point.endWeek, schemes, global = true)
+			}
+		})
+	}
+
+}
+
+trait GetsPointsToCreate {
+
+	self: TermServiceComponent =>
+
+	def getPoints(
+		findPointsResult: FindPointsResult,
+		schemes: Seq[AttendanceMonitoringScheme],
+		pointStyle: AttendanceMonitoringPointStyle
+	): Seq[AttendanceMonitoringPoint] = {
 		val oldPoints = findPointsResult.termGroupedOldPoints.flatMap(_._2).map(_.templatePoint).toSeq
 		val weekPoints = findPointsResult.termGroupedPoints.flatMap(_._2).map(_.templatePoint).toSeq
 		val datePoints = findPointsResult.monthGroupedPoints.flatMap(_._2).map(_.templatePoint).toSeq
@@ -47,7 +85,6 @@ class CreateNewAttendancePointsFromCopyCommandInternal(val department: Departmen
 					newPoint.createdDate = DateTime.now
 					newPoint.updatedDate = DateTime.now
 					copyFromOldPoint(oldPoint, newPoint)
-					attendanceMonitoringService.saveOrUpdate(newPoint)
 					newPoint
 				}
 			}
@@ -58,7 +95,6 @@ class CreateNewAttendancePointsFromCopyCommandInternal(val department: Departmen
 					val newPoint = weekPoint.cloneTo(scheme)
 					newPoint.createdDate = DateTime.now
 					newPoint.updatedDate = DateTime.now
-					attendanceMonitoringService.saveOrUpdate(newPoint)
 					newPoint
 				}
 			}
@@ -69,7 +105,6 @@ class CreateNewAttendancePointsFromCopyCommandInternal(val department: Departmen
 					val newPoint = datePoint.cloneTo(scheme)
 					newPoint.createdDate = DateTime.now
 					newPoint.updatedDate = DateTime.now
-					attendanceMonitoringService.saveOrUpdate(newPoint)
 					newPoint
 				}
 			}
@@ -77,7 +112,7 @@ class CreateNewAttendancePointsFromCopyCommandInternal(val department: Departmen
 	}
 
 	private def copyFromOldPoint(oldPoint: MonitoringPoint, newPoint: AttendanceMonitoringPoint): AttendanceMonitoringPoint = {
-		oldPoint.name = oldPoint.name
+		newPoint.name = oldPoint.name
 		val weeksForYear = termService.getAcademicWeeksForYear(newPoint.scheme.academicYear.dateInTermOne).toMap
 		newPoint.startWeek = oldPoint.validFromWeek
 		newPoint.endWeek = oldPoint.requiredFromWeek
@@ -107,17 +142,6 @@ class CreateNewAttendancePointsFromCopyCommandInternal(val department: Departmen
 		}
 		newPoint
 	}
-
-}
-
-trait CreateNewAttendancePointsFromCopyValidation extends SelfValidating {
-
-	self: CreateNewAttendancePointsFromCopyCommandState =>
-
-	override def validate(errors: Errors) {
-		// TODO some validation
-	}
-
 }
 
 trait SetsFindResultOnCreateNewAttendancePointsFromCopyCommand {

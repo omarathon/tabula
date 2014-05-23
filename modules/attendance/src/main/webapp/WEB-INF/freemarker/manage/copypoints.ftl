@@ -1,6 +1,106 @@
 <#escape x as x?html>
 <#import "../attendance_variables.ftl" as attendance_variables />
 
+<#macro oldPointsByTerm pointsMap term>
+	<div class="striped-section">
+		<h2 class="section-title">${term}</h2>
+		<div class="striped-section-contents">
+			<#list pointsMap[term] as groupedPoint>
+				<div class="item-info row-fluid point">
+					<div class="span12">
+						${groupedPoint.templatePoint.name}
+						(<a class="use-tooltip" data-html="true" title="
+							<@fmt.wholeWeekDateFormat
+								groupedPoint.templatePoint.validFromWeek
+								groupedPoint.templatePoint.requiredFromWeek
+								groupedPoint.templatePoint.pointSet.academicYear
+							/>
+						"><@fmt.monitoringPointWeeksFormat
+							groupedPoint.templatePoint.validFromWeek
+							groupedPoint.templatePoint.requiredFromWeek
+							groupedPoint.templatePoint.pointSet.academicYear
+							command.department
+						/></a>)
+						<#local popoverContent>
+							<ul>
+								<#list groupedPoint.sets?sort_by("displayName") as set>
+									<li>${set.displayName}</li>
+								</#list>
+							</ul>
+						</#local>
+						<a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
+							<@fmt.p groupedPoint.sets?size "scheme" />
+						</a>
+					</div>
+				</div>
+			</#list>
+		</div>
+	</div>
+</#macro>
+
+<#macro pointsByTerm pointsMap term>
+	<div class="striped-section">
+		<h2 class="section-title">${term}</h2>
+		<div class="striped-section-contents">
+			<#list pointsMap[term] as groupedPoint>
+				<div class="item-info row-fluid point">
+					<div class="span12">
+						${groupedPoint.templatePoint.name}
+						(<a class="use-tooltip" data-html="true" title="
+							<@fmt.wholeWeekDateFormat
+								groupedPoint.templatePoint.startWeek
+								groupedPoint.templatePoint.endWeek
+								groupedPoint.templatePoint.scheme.academicYear
+							/>
+						"><@fmt.monitoringPointWeeksFormat
+							groupedPoint.templatePoint.startWeek
+							groupedPoint.templatePoint.endWeek
+							groupedPoint.templatePoint.scheme.academicYear
+							command.department
+						/></a>)
+						<#local popoverContent>
+							<ul>
+								<#list groupedPoint.schemes?sort_by("displayName") as scheme>
+									<li>${scheme.displayName}</li>
+								</#list>
+							</ul>
+						</#local>
+						<a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
+							<@fmt.p groupedPoint.schemes?size "scheme" />
+						</a>
+					</div>
+				</div>
+			</#list>
+		</div>
+	</div>
+</#macro>
+
+<#macro pointsByMonth pointsMap month>
+	<div class="striped-section">
+		<h2 class="section-title">${month}</h2>
+		<div class="striped-section-contents">
+			<#list pointsMap[month] as groupedPoint>
+				<div class="item-info row-fluid point">
+					<div class="span12">
+						${groupedPoint.templatePoint.name}
+						(<@fmt.interval groupedPoint.templatePoint.startDate groupedPoint.templatePoint.endDate />)
+						<#local popoverContent>
+							<ul>
+								<#list groupedPoint.schemes?sort_by("displayName") as scheme>
+									<li>${scheme.displayName}</li>
+								</#list>
+							</ul>
+						</#local>
+						<a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
+							<@fmt.p groupedPoint.schemes?size "scheme" />
+						</a>
+					</div>
+				</div>
+			</#list>
+		</div>
+	</div>
+</#macro>
+
 <h1>Copy points</h1>
 
 <div class="fix-area">
@@ -43,6 +143,14 @@
 
 				<button class="btn" type="submit" name="cancel">Cancel</button>
 			<#else>
+
+				<#if errors??>
+					<div class="alert alert-error">
+						<#list errors.allErrors as error>
+							<p><@spring.message code=error.code arguments=error.arguments/></p>
+						</#list>
+					</div>
+				</#if>
 
 				<div class="student-filter btn-group-group well well-small">
 
@@ -132,6 +240,18 @@
 						${type.description}
 					</@filter>
 
+					<div class="btn-group empty-filter">
+						<a class="btn btn-mini">
+							<span style="width: 180px;" class="filter-short-values">
+								<#if findCommand.restrictedStyle.dbValue == "week">
+									Term week points only
+								<#else>
+									Calendar date points only
+								</#if>
+							</span>
+						</a>
+					</div>
+
 					<div class="btn-group">
 						<button class="btn btn-mini btn-primary search" type="submit" name="search">
 							<i class="icon-search"></i> Filter
@@ -139,43 +259,6 @@
 					</div>
 
 				</div>
-
-				<#macro oldPointsByTerm pointsMap term>
-					<div class="striped-section">
-						<h2 class="section-title">${term}</h2>
-						<div class="striped-section-contents">
-							<#list pointsMap[term] as groupedPoint>
-								<div class="item-info row-fluid point">
-									<div class="span12">
-										${groupedPoint.templatePoint.name}
-										(<a class="use-tooltip" data-html="true" title="
-											<@fmt.wholeWeekDateFormat
-												groupedPoint.templatePoint.validFromWeek
-												groupedPoint.templatePoint.requiredFromWeek
-												groupedPoint.templatePoint.pointSet.academicYear
-											/>
-										"><@fmt.monitoringPointWeeksFormat
-											groupedPoint.templatePoint.validFromWeek
-											groupedPoint.templatePoint.requiredFromWeek
-											groupedPoint.templatePoint.pointSet.academicYear
-											command.department
-										/></a>)
-										<#local popoverContent>
-											<ul>
-												<#list groupedPoint.sets?sort_by("displayName") as set>
-													<li>${set.displayName}</li>
-												</#list>
-											</ul>
-										</#local>
-										<a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
-											<@fmt.p groupedPoint.sets?size "scheme" />
-										</a>
-									</div>
-								</div>
-							</#list>
-						</div>
-					</div>
-				</#macro>
 
 				<#if findResult.termGroupedOldPoints?keys?has_content>
 					<#list attendance_variables.monitoringPointTermNames as term>
@@ -185,12 +268,40 @@
 					</#list>
 				</#if>
 
-				<div class="submit-buttons fix-footer save-row">
-					<button class="btn btn-primary spinnable spinner-auto" type="submit" name="copy" data-loading-text="Copying&hellip;">
-						Copy
-					</button>
+				<#if findResult.termGroupedPoints?keys?has_content>
+					<#list attendance_variables.monitoringPointTermNames as term>
+						<#if findResult.termGroupedPoints[term]??>
+							<@pointsByTerm findResult.termGroupedPoints term />
+						</#if>
+					</#list>
+				</#if>
+
+				<#if findResult.monthGroupedPoints?keys?has_content>
+					<#list findResult.monthGroupedPoints?keys as month>
+						<#if findResult.monthGroupedPoints[month]??>
+							<@pointsByMonth findResult.monthGroupedPoints month />
+						</#if>
+					</#list>
+				</#if>
+
+				<#if !findResult.termGroupedOldPoints?keys?has_content
+					&& !findResult.termGroupedPoints?keys?has_content
+					&& !findResult.monthGroupedPoints?keys?has_content >
+					<div class="alert alert-info">
+						No points found for the specified filter
+					</div>
+
 					<button class="btn" type="submit" name="cancel">Cancel</button>
-				</div>
+				<#else>
+
+					<div class="submit-buttons fix-footer save-row">
+						<button class="btn btn-primary spinnable spinner-auto" type="submit" name="copy" data-loading-text="Copying&hellip;">
+							Copy
+						</button>
+						<button class="btn" type="submit" name="cancel">Cancel</button>
+					</div>
+
+				</#if>
 
 			</#if>
 
