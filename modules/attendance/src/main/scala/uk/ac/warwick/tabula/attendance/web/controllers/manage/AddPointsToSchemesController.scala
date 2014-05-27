@@ -29,6 +29,7 @@ class AddPointsToSchemesController extends AttendanceController {
 		Mav("manage/addpoints",
 			"schemeMap" -> schemeMap,
 			"changedSchemes" -> schemeMap.count(_._2),
+			"schemesParam" -> schemeMap.filter(_._2).keys.map(s => s"findSchemes=${s.id}").mkString("&"),
 			"newPoints" -> Option(points).getOrElse(0)
 		).crumbs(
 			Breadcrumbs.Manage.Home,

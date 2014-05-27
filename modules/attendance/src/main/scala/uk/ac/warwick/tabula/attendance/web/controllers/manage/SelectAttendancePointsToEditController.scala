@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringPointType}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.attendance.commands.manage.{FindPointsResult, FindPointsCommand}
+import uk.ac.warwick.tabula.attendance.commands.manage.FindPointsCommand
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.AttendanceMonitoringService
 import uk.ac.warwick.tabula.JavaImports._
