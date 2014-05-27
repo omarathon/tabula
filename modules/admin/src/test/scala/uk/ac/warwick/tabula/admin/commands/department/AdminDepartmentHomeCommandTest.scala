@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.admin.commands.department
 
-import uk.ac.warwick.tabula.{FunctionalContext, FunctionalContextTesting, CurrentUser, Fixtures, TestBase, Mockito}
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -163,6 +163,7 @@ object AdminDepartmentHomeCommandTest {
 		bean(){mock[ScheduledNotificationService]}
 		bean(){mock[EventListener]}
 		bean(){mock[MaintenanceModeService]}
+		bean(){mock[Features]}
 		bean(){
 			val service = mock[ModuleAndDepartmentService]
 			service.modulesWithPermission(any[CurrentUser], any[Permission], any[Department]) returns (Set.empty)
