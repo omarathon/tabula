@@ -96,4 +96,23 @@ object AttendanceBreadcrumbs {
 		}
 
 	}
+
+	object View {
+
+		case object Home extends Abstract {
+			val title = "View and record"
+			val url = Some(Routes.View.home)
+		}
+
+		case class Department(department: model.Department) extends Abstract {
+			val title = department.name
+			val url = Some(Routes.View.department(department))
+		}
+
+		case class DepartmentForYear(department: model.Department, academicYear: AcademicYear) extends Abstract {
+			val title = academicYear.startYear.toString
+			val url = Some(Routes.View.departmentForYear(department, academicYear))
+		}
+
+	}
 }

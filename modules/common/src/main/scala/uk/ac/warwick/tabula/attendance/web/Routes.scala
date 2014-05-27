@@ -76,4 +76,11 @@ object Routes {
 			)
 
 	}
+
+	object View {
+		def home = context + "/view"
+		def department(department: Department) = context + "/view/%s" format encoded(department.code)
+		def departmentForYear(department: Department, academicYear: AcademicYear) =
+			context + "/view/%s/%s" format(encoded(department.code), encoded(academicYear.startYear.toString))
+	}
 }
