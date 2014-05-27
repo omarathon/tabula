@@ -204,7 +204,7 @@ trait AttendanceMonitoringPointValidation {
 		val allPoints = point.scheme.points.asScala
 		if (allPoints.exists(p => point.id != p.id && p.name == name && p.startWeek == startWeek && p.endWeek == endWeek)) {
 			errors.rejectValue("name", "attendanceMonitoringPoint.name.weeks.exists")
-			errors.rejectValue("startDate", "attendanceMonitoringPoint.name.weeks.exists")
+			errors.rejectValue("startWeek", "attendanceMonitoringPoint.name.weeks.exists")
 			true
 		} else {
 			false
