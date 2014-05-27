@@ -101,9 +101,7 @@
 <#macro manageAddPointsTemplate department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/addpoints/template"/></#macro>
 
 <#macro manageEditPoints department academicYearString schemesParam="">
-	<#if schemesParam?has_content>
-		<#local schemesParam = "?" + schemesParam />
-	</#if>
+	<#if schemesParam?has_content><#local schemesParam = "?" + schemesParam /></#if>
 	<@_u page="/manage/${department.code}/${academicYearString}/editpoints${schemesParam}"/></#macro>
 <#macro manageEditPoint point filterQuery returnTo><@_u page="/manage/${point.scheme.department.code}/${point.scheme.academicYear.startYear?c}/editpoints/${point.id}/edit?returnTo=${returnTo}&${filterQuery}"/></#macro>
 <#macro manageDeletePoint point filterQuery returnTo><@_u page="/manage/${point.scheme.department.code}/${point.scheme.academicYear.startYear?c}/editpoints/${point.id}/delete?returnTo=${returnTo}&${filterQuery}"/></#macro>
@@ -111,3 +109,7 @@
 <#macro viewHome><@_u page="/view"/></#macro>
 <#macro viewHomeYears department><@_u page="/view/${department.code}"/></#macro>
 <#macro viewHomeForYear department academicYearString><@_u page="/view/${department.code}/${academicYearString}"/></#macro>
+
+<#macro viewStudents department academicYearString><@_u page="/view/${department.code}/${academicYearString}/students"/></#macro>
+<#macro viewPoints department academicYearString><@_u page="/view/${department.code}/${academicYearString}/points"/></#macro>
+<#macro viewAgents department academicYearString relationshipType><@_u page="/view/${department.code}/${academicYearString}/agents/${relationshipType.urlPart}"/></#macro>
