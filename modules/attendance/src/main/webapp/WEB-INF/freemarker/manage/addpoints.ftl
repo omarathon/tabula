@@ -11,7 +11,7 @@
 		<#else>
 			<div class="alert alert-success">
 				<strong><@fmt.p newPoints "point" /></strong> added to <strong><@fmt.p changedSchemes "scheme"/></strong>
-				<#-- TODO add Edit points button -->
+				<a class="btn" href="<@routes.manageEditPoints command.department command.academicYear.startYear?c schemesParam />">Edit points</a>
 			</div>
 		</#if>
 		<p>

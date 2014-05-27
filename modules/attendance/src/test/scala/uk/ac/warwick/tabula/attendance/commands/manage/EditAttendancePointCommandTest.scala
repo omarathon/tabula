@@ -11,14 +11,15 @@ import uk.ac.warwick.tabula.JavaImports.JHashSet
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceMonitoringPoint, MonitoringPointReport}
 
-class CreateAttendancePointCommandTest extends TestBase with Mockito {
+class EditAttendancePointCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val thisTermService = smartMock[TermService]
-		val command = new CreateAttendancePointCommandState with TermServiceComponent {
+		val command = new EditAttendancePointCommandState with TermServiceComponent {
+			val templatePoint = null
 			val department = null
 			val academicYear = null
-			val schemes = null
+			val findPointsResult = null
 			val termService = thisTermService
 		}
 		val validator = new AttendanceMonitoringPointValidation with TermServiceComponent with AttendanceMonitoringServiceComponent {
@@ -193,57 +194,75 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def validateDuplicateForWeek() {
+	def validateDuplicateForWeekForEdit() {
+		val scheme = new AttendanceMonitoringScheme
 		val nonDupPoint = new AttendanceMonitoringPoint
 		nonDupPoint.id = "1"
 		nonDupPoint.name = "Name2"
 		nonDupPoint.startWeek = 1
 		nonDupPoint.endWeek = 1
-		val dupPoint = new AttendanceMonitoringPoint
-		dupPoint.id = "2"
-		dupPoint.name = "Name"
-		dupPoint.startWeek = 1
-		dupPoint.endWeek = 1
-		val schemeWithNonDupPoint = new AttendanceMonitoringScheme
-		schemeWithNonDupPoint.points.add(nonDupPoint)
-		val schemeWithDupPoint = new AttendanceMonitoringScheme
-		schemeWithDupPoint.points.add(dupPoint)
+		nonDupPoint.scheme = scheme
+		scheme.points.add(nonDupPoint)
+		val editingPoint = new AttendanceMonitoringPoint
+		editingPoint.id = "3"
+		editingPoint.name = "Name"
+		editingPoint.startWeek = 1
+		editingPoint.endWeek = 1
+		scheme.points.add(editingPoint)
+		editingPoint.scheme = scheme
+
 		new Fixture {
-			validator.validateDuplicateForWeek(errors, "Name", 1, 1, Seq(schemeWithNonDupPoint))
+			validator.validateDuplicateForWeekForEdit(errors, "Name", 1, 1, editingPoint)
 			errors.hasFieldErrors("name") should be (false)
 			errors.hasFieldErrors("startWeek") should be (false)
 		}
 		new Fixture {
-			validator.validateDuplicateForWeek(errors, "Name", 1, 1, Seq(schemeWithNonDupPoint, schemeWithDupPoint))
+			val dupPoint = new AttendanceMonitoringPoint
+			dupPoint.id = "2"
+			dupPoint.name = "Name"
+			dupPoint.startWeek = 1
+			dupPoint.endWeek = 1
+			scheme.points.add(dupPoint)
+			dupPoint.scheme = scheme
+			validator.validateDuplicateForWeekForEdit(errors, "Name", 1, 1, editingPoint)
 			errors.hasFieldErrors("name") should be (true)
 			errors.hasFieldErrors("startWeek") should be (true)
 		}
 	}
 
 	@Test
-	def validateDuplicateForDate() {
+	def validateDuplicateForDateForEdit() {
+		val scheme = new AttendanceMonitoringScheme
 		val baseDate = DateTime.now.toLocalDate
 		val nonDupPoint = new AttendanceMonitoringPoint
 		nonDupPoint.id = "1"
 		nonDupPoint.name = "Name2"
 		nonDupPoint.startDate = baseDate
 		nonDupPoint.endDate = baseDate.plusDays(1)
-		val dupPoint = new AttendanceMonitoringPoint
-		dupPoint.id = "2"
-		dupPoint.name = "Name"
-		dupPoint.startDate = baseDate
-		dupPoint.endDate = baseDate.plusDays(1)
-		val schemeWithNonDupPoint = new AttendanceMonitoringScheme
-		schemeWithNonDupPoint.points.add(nonDupPoint)
-		val schemeWithDupPoint = new AttendanceMonitoringScheme
-		schemeWithDupPoint.points.add(dupPoint)
+		nonDupPoint.scheme = scheme
+		scheme.points.add(nonDupPoint)
+		val editingPoint = new AttendanceMonitoringPoint
+		editingPoint.id = "3"
+		editingPoint.name = "Name"
+		editingPoint.startDate = baseDate
+		editingPoint.endDate = baseDate.plusDays(1)
+		scheme.points.add(editingPoint)
+		editingPoint.scheme = scheme
+
 		new Fixture {
-			validator.validateDuplicateForDate(errors, "Name", baseDate, baseDate.plusDays(1), Seq(schemeWithNonDupPoint))
+			validator.validateDuplicateForDateForEdit(errors, "Name", baseDate, baseDate.plusDays(1), editingPoint)
 			errors.hasFieldErrors("name") should be (false)
 			errors.hasFieldErrors("startDate") should be (false)
 		}
 		new Fixture {
-			validator.validateDuplicateForDate(errors, "Name", baseDate, baseDate.plusDays(1), Seq(schemeWithNonDupPoint, schemeWithDupPoint))
+			val dupPoint = new AttendanceMonitoringPoint
+			dupPoint.id = "2"
+			dupPoint.name = "Name"
+			dupPoint.startDate = baseDate
+			dupPoint.endDate = baseDate.plusDays(1)
+			scheme.points.add(dupPoint)
+			dupPoint.scheme = scheme
+			validator.validateDuplicateForDateForEdit(errors, "Name", baseDate, baseDate.plusDays(1), editingPoint)
 			errors.hasFieldErrors("name") should be (true)
 			errors.hasFieldErrors("startDate") should be (true)
 		}

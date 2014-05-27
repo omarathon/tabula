@@ -54,10 +54,10 @@ trait CreateNewAttendancePointsFromCopyValidation extends SelfValidating with Ge
 			pointStyle match {
 				case AttendanceMonitoringPointStyle.Date =>
 					validateCanPointBeEditedByDate(errors, point.startDate, schemes.map{_.members.members}.flatten, academicYear, "")
-					validateDuplicateForDate(errors, null, point.name, point.startDate, point.endDate, schemes, global = true)
+					validateDuplicateForDate(errors, point.name, point.startDate, point.endDate, schemes, global = true)
 				case AttendanceMonitoringPointStyle.Week =>
 					validateCanPointBeEditedByWeek(errors, point.startWeek, schemes.map{_.members.members}.flatten, academicYear, "")
-					validateDuplicateForWeek(errors, null, point.name, point.startWeek, point.endWeek, schemes, global = true)
+					validateDuplicateForWeek(errors, point.name, point.startWeek, point.endWeek, schemes, global = true)
 			}
 		})
 	}

@@ -19,6 +19,7 @@ trait AutowiringAttendanceMonitoringServiceComponent extends AttendanceMonitorin
 
 trait AttendanceMonitoringService {
 	def getSchemeById(id: String): Option[AttendanceMonitoringScheme]
+	def getPointById(id: String): Option[AttendanceMonitoringPoint]
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
@@ -48,6 +49,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def getSchemeById(id: String): Option[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.getSchemeById(id)
+
+	def getPointById(id: String): Option[AttendanceMonitoringPoint] =
+		attendanceMonitoringDao.getPointById(id)
 
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit =
 		attendanceMonitoringDao.saveOrUpdate(scheme)

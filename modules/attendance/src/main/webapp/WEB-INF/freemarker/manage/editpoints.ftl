@@ -77,7 +77,13 @@
 
 <h1>Edit points</h1>
 
-<p>Which points do you want to edit?</p>
+<#if newPoints == 0>
+	<p>Which points do you want to edit?</p>
+<#else>
+	<div class="alert alert-success">
+		<strong><@fmt.p newPoints "point" /></strong> edited on <strong><@fmt.p newPoints "point" /></strong>
+	</div>
+</#if>
 
 <div class="fix-area">
 

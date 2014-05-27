@@ -9,7 +9,7 @@ import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.services.{AttendanceMonitoringServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringScheme}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme}
 import collection.JavaConverters._
 import uk.ac.warwick.util.termdates.Term
 
@@ -158,7 +158,6 @@ trait AttendanceMonitoringPointValidation {
 
 	def validateDuplicateForWeek(
 		errors: Errors,
-		id: String,
 		name: String,
 		startWeek: Int,
 		endWeek: Int,
@@ -166,7 +165,7 @@ trait AttendanceMonitoringPointValidation {
 		global: Boolean = false
 	) = {
 		val allPoints = schemes.map(_.points.asScala).flatten
-		if (allPoints.exists(point => point.id != id && point.name == name && point.startWeek == startWeek && point.endWeek == endWeek)) {
+		if (allPoints.exists(point => point.name == name && point.startWeek == startWeek && point.endWeek == endWeek)) {
 			if (global) {
 				errors.reject("attendanceMonitoringPoint.name.weeks.exists.global", Array(name, startWeek.toString, endWeek.toString), null)
 			} else {
@@ -178,7 +177,6 @@ trait AttendanceMonitoringPointValidation {
 
 	def validateDuplicateForDate(
 		errors: Errors,
-		id: String,
 		name: String,
 		startDate: LocalDate,
 		endDate: LocalDate,
@@ -186,13 +184,47 @@ trait AttendanceMonitoringPointValidation {
 		global: Boolean = false
 	) = {
 		val allPoints = schemes.map(_.points.asScala).flatten
-		if (allPoints.exists(point => point.id != id && point.name == name && point.startDate == startDate && point.endDate == endDate)) {
+		if (allPoints.exists(point => point.name == name && point.startDate == startDate && point.endDate == endDate)) {
 			if (global) {
 				errors.reject("attendanceMonitoringPoint.name.dates.exists.global", Array(name, startDate, endDate), null)
 			} else {
 				errors.rejectValue("name", "attendanceMonitoringPoint.name.dates.exists")
 				errors.rejectValue("startDate", "attendanceMonitoringPoint.name.dates.exists")
 			}
+		}
+	}
+
+	def validateDuplicateForWeekForEdit(
+		errors: Errors,
+		name: String,
+		startWeek: Int,
+		endWeek: Int,
+		point: AttendanceMonitoringPoint
+	): Boolean = {
+		val allPoints = point.scheme.points.asScala
+		if (allPoints.exists(p => point.id != p.id && p.name == name && p.startWeek == startWeek && p.endWeek == endWeek)) {
+			errors.rejectValue("name", "attendanceMonitoringPoint.name.weeks.exists")
+			errors.rejectValue("startWeek", "attendanceMonitoringPoint.name.weeks.exists")
+			true
+		} else {
+			false
+		}
+	}
+
+	def validateDuplicateForDateForEdit(
+		errors: Errors,
+		name: String,
+		startDate: LocalDate,
+		endDate: LocalDate,
+		point: AttendanceMonitoringPoint
+	): Boolean = {
+		val allPoints = point.scheme.points.asScala
+		if (allPoints.exists(p => point.id != p.id && p.name == name && p.startDate == startDate && p.endDate == endDate)) {
+			errors.rejectValue("name", "attendanceMonitoringPoint.name.dates.exists")
+			errors.rejectValue("startDate", "attendanceMonitoringPoint.name.dates.exists")
+			true
+		} else {
+			false
 		}
 	}
 }
