@@ -2,10 +2,7 @@ package uk.ac.warwick.tabula.events
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.services.AuditEventService
-import uk.ac.warwick.tabula.services.MaintenanceModeEnabledException
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import org.springframework.beans.factory.annotation.Value
 import java.io.File
@@ -17,7 +14,6 @@ import java.io.FileInputStream
 import java.util.UUID
 import java.io.ObjectOutputStream
 import java.io.FileOutputStream
-import uk.ac.warwick.tabula.Reactor
 
 class DatabaseEventListener extends EventListener with InitializingBean with Logging {
 

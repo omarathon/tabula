@@ -29,7 +29,6 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	var userLookup = Wire.auto[UserLookupService]
 	var moduleRegistrationImporter = Wire.auto[ModuleRegistrationImporter]
 	var accreditedPriorLearningImporter = Wire.auto[AccreditedPriorLearningImporter]
-	var features = Wire.auto[Features]
 	var moduleRegistrationDao = Wire.auto[ModuleRegistrationDaoImpl]
 	var smallGroupService = Wire.auto[SmallGroupService]
 	var profileIndexService = Wire.auto[ProfileIndexService]

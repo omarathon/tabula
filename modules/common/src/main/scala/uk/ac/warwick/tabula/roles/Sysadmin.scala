@@ -15,7 +15,6 @@ case object SysadminRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	 */
 	
 	GrantsScopelessPermission(
-		Masquerade,
 		GodMode,
 		ManageMaintenanceMode,
 		ImportSystemData,
@@ -31,6 +30,7 @@ case object SysadminRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	)
 
 	GrantsGlobalPermission(
+		Masquerade,
 		Department.Create,
 		Module.Create,
 		// We don't give Read here, god up for that

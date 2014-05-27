@@ -106,6 +106,7 @@ abstract class Features {
 	@Value("${features.scheduling.sanityCheckFilesystem:true}") var schedulingSanityCheckFilesystem = defaults.schedulingSanityCheckFilesystem
 	@Value("${features.scheduling.exportAttendanceToSits:true}") var schedulingExportAttendanceToSits = defaults.schedulingExportAttendanceToSits
 	@Value("${features.attendanceMonitoring.academicYear2014:false}")	var attendanceMonitoringAcademicYear2014 = defaults.attendanceMonitoringAcademicYear2014
+	@Value("${features.masqueradersCanWrite:false}") var masqueradersCanWrite = defaults.masqueradersCanWrite
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -198,6 +199,7 @@ class FeaturesMessage {
 	@BeanProperty var schedulingSanityCheckFilesystem = true
 	@BeanProperty var schedulingExportAttendanceToSits = true
 	@BeanProperty var attendanceMonitoringAcademicYear2014 = false
+	@BeanProperty var masqueradersCanWrite = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

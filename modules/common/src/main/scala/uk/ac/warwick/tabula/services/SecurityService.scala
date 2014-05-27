@@ -61,7 +61,7 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 	
 	private def checkScopedPermission(
 		allPermissions: Map[Permission, Option[PermissionsTarget]], 
-		user: CurrentUser, 
+		user: CurrentUser,
 		permission: Permission, 
 		scope: PermissionsTarget
 	): Response = {
@@ -147,7 +147,15 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 			checksToRun.view.flatMap { _(user, permission, scope.orNull ) }.headOption
 		}
 
-		result.map { canDo =>
+		// FIXME Hardcoded ignorance for Submission.Create (so you don't get not enrolled messages as the dept admin)
+		val combinedResult = if (result.getOrElse(false) && user.masquerading && !user.sysadmin && permission != Permissions.Submission.Create) {
+			val realUser = new CurrentUser(user.realUser, user.realUser)
+			cachedBy((realUser, permission, scope.orNull)) {
+				checksToRun.view.flatMap { _(realUser, permission, scope.orNull ) }.headOption
+			}
+		} else result
+
+		combinedResult.map { canDo =>
 			if (debugEnabled) logger.debug("can " + user + " do " + permission + " on " + scope + "? " + (if (canDo) "Yes" else "NO"))
 			canDo
 		} getOrElse {

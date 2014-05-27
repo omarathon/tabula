@@ -227,28 +227,34 @@
 
 		          			<div id="app-feedback-link"><a href="/app/tell-us<#if info??>?currentPage=${info.requestedUri}&componentName=${componentName}</#if>">Give feedback</a></div>
 
-									<#if user?? && (user.sysadmin || user.masquerader)>
-									<div id="sysadmin-link">
-									<div class="btn-group">
-										<a id="sysadmin-button" class="btn btn-inverse dropdown-toggle dropup" data-toggle="dropdown" href="<@url page="/sysadmin/" context="/" />"><i class="icon-cog icon-white"></i> System <span class="caret"></span></a>
-										<ul class="dropdown-menu pull-right">
-											<#if user.sysadmin>
-											<li><a href="<@url page="/sysadmin/" context="/" />">Sysadmin home</a></li>
-											</#if>
-											<#if user.masquerader || user.sysadmin>
-											<li><a href="<@url page="/masquerade" context="/admin" />">Masquerade</a></li>
-											</#if>
-											<li><a href="#" id="hide-sysadmin-only-content">Hide sysadmin content</a></li>
-										</ul>
-									</div>
-									</div>
-									<script type="text/javascript">
-									jQuery('#hide-sysadmin-only-content').on('click', function(){
-									  jQuery('#sysadmin-link').fadeOut('slow')
-									  jQuery('.sysadmin-only-content').hide('slow');
-									  return false;
-									});
-									</script>
+									<#if user?? && user.sysadmin>
+										<div id="sysadmin-link">
+											<div class="btn-group">
+												<a id="sysadmin-button" class="btn btn-inverse dropdown-toggle dropup" data-toggle="dropdown" href="<@url page="/sysadmin/" context="/" />"><i class="icon-cog icon-white"></i> System <span class="caret"></span></a>
+												<ul class="dropdown-menu pull-right">
+													<#if user.sysadmin>
+														<li><a href="<@url page="/sysadmin/" context="/" />">Sysadmin home</a></li>
+													</#if>
+													<#if user.sysadmin>
+														<li><a href="<@url page="/masquerade" context="/admin" />">Masquerade</a></li>
+													</#if>
+													<#if user.sysadmin>
+														<li><a href="#" id="hide-sysadmin-only-content">Hide sysadmin content</a></li>
+													</#if>
+												</ul>
+											</div>
+										</div>
+										<script type="text/javascript">
+											jQuery('#hide-sysadmin-only-content').on('click', function(){
+											  jQuery('#sysadmin-link').fadeOut('slow')
+											  jQuery('.sysadmin-only-content').hide('slow');
+											  return false;
+											});
+										</script>
+									<#elseif user?? && user.masquerader>
+										<div id="sysadmin-link">
+											<a id="sysadmin-button" class="btn btn-inverse" href="<@url page="/masquerade" context="/admin" />"><i class="icon-user icon-white"></i> Masquerade</a>
+										</div>
 									</#if>
 
 	      					<div style="clear:both;"></div>

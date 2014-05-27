@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.SelfValidating
 
 
-class ExtensionSettingsCommand (val department:Department, val features:Features) extends Command[Unit] with SelfValidating {
+class ExtensionSettingsCommand (val department:Department) extends Command[Unit] with SelfValidating {
 	
 	PermissionCheck(Permissions.Department.ManageExtensionSettings, department)
 

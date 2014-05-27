@@ -12,14 +12,16 @@ actions, both your masquerade identity and your true identity will be stored.</p
 </#if>
 
 <div>
-<@f.form method="post" action="${url('/admin/masquerade')}" command="" cssClass="form-vertical">
+<@f.form method="post" action="${url('/admin/masquerade')}" commandName="masqueradeCommand" cssClass="form-vertical">
 	<fieldset>
-	<@form.row>
-		<@form.field>
-		<@form.flexipicker name="usercode" placeholder="Type a name or usercode" cssClass="input-append" />
-		<button class="btn" style="margin-top: -10px"><i class="icon-eye-open"></i> Mask</button>
-		</@form.field>
-	</@form.row>
+		<@f.errors cssClass="error form-errors" />
+		<@form.row>
+			<@form.field>
+				<@form.flexipicker name="usercode" placeholder="Type a name or usercode" cssClass="input-append" />
+				<button class="btn" style="margin-top: -10px"><i class="icon-eye-open"></i> Mask</button>
+				<@f.errors path="usercode" cssClass="error" />
+			</@form.field>
+		</@form.row>
 	</fieldset>
 </@f.form>
 </div>

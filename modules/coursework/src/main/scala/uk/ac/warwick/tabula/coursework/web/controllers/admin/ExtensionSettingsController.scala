@@ -20,8 +20,8 @@ import javax.validation.Valid
 class ExtensionSettingsController extends CourseworkController {
 
 	@Autowired var moduleService: ModuleAndDepartmentService = _
-	@Autowired var features: Features = _
-	@ModelAttribute def extensionSettingsCommand(@PathVariable("dept") dept:Department) = new ExtensionSettingsCommand(dept, features)
+
+	@ModelAttribute def extensionSettingsCommand(@PathVariable("dept") dept:Department) = new ExtensionSettingsCommand(dept)
 	
 	validatesSelf[ExtensionSettingsCommand]
 

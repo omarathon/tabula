@@ -13,8 +13,9 @@ import uk.ac.warwick.tabula.roles.Sysadmin
 import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService}
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.permissions.Permission
 
 class CurrentUserInterceptorTest extends TestBase with Mockito {
 	
@@ -22,11 +23,15 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 	
 	val roleService = mock[RoleService]
 	val profileService = mock[ProfileService]
+	val departmentService = mock[ModuleAndDepartmentService]
 	val userLookup = new MockUserLookup
 	
 	interceptor.roleService = roleService
 	interceptor.userLookup = userLookup
 	interceptor.profileService = profileService
+	interceptor.departmentService = departmentService
+
+	departmentService.departmentsWithPermission(any[CurrentUser], any[Permission]) returns (Set())
 	
 	@Test def foundUser {
 		val user = new User("cuscav")
@@ -184,7 +189,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		currentUser.realUser should be (user)
 		currentUser.apparentUser should be (user)
 		currentUser.god should be (false)
-		currentUser.masquerader should be (false)
+		currentUser.masquerader should be (true)
 		currentUser.sysadmin should be (true)
 		currentUser.profile should be ('empty)
 	}
@@ -211,7 +216,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		currentUser.realUser should be (user)
 		currentUser.apparentUser should be (user)
 		currentUser.god should be (true)
-		currentUser.masquerader should be (false)
+		currentUser.masquerader should be (true)
 		currentUser.sysadmin should be (true)
 		currentUser.profile should be ('empty)
 	}

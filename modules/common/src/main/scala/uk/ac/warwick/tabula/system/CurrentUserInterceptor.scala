@@ -14,20 +14,25 @@ import uk.ac.warwick.tabula.web.Cookies._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.roles.Masquerader
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.RuntimeMember
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.data.Transactions._
 
 class CurrentUserInterceptor extends HandlerInterceptorAdapter {
-	var roleService = Wire.auto[RoleService]
-	var userLookup = Wire.auto[UserLookupInterface]
-	var profileService = Wire.auto[ProfileService]
+	var roleService = Wire[RoleService]
+	var userLookup = Wire[UserLookupInterface]
+	var profileService = Wire[ProfileService]
+	var departmentService = Wire[ModuleAndDepartmentService]
 
 	type MasqueradeUserCheck = (User, Boolean) => User
 
-	def resolveCurrentUser(user: User, masqueradeUser: MasqueradeUserCheck, godModeEnabled: => Boolean) = {
+	def resolveCurrentUser(user: User, masqueradeUser: MasqueradeUserCheck, godModeEnabled: => Boolean) = transactional(readOnly = true) {
 		val sysadmin = roleService.hasRole(new CurrentUser(user, user), Sysadmin())
 		val god = sysadmin && godModeEnabled
-		val masquerader = roleService.hasRole(new CurrentUser(user, user), Masquerader())
+		val masquerader =
+			sysadmin ||
+			roleService.hasRole(new CurrentUser(user, user), Masquerader()) ||
+			!departmentService.departmentsWithPermission(new CurrentUser(user, user), Permissions.Masquerade).isEmpty
 		val canMasquerade =  sysadmin || masquerader
 		val apparentUser = masqueradeUser(user, canMasquerade)
 
