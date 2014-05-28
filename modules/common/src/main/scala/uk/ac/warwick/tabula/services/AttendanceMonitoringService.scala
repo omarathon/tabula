@@ -24,6 +24,7 @@ trait AttendanceMonitoringService {
 	def getPointById(id: String): Option[AttendanceMonitoringPoint]
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
+	def deleteScheme(scheme: AttendanceMonitoringScheme)
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
@@ -46,6 +47,7 @@ trait AttendanceMonitoringService {
 	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
+	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
 }
 
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService {
@@ -63,6 +65,10 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit =
 		attendanceMonitoringDao.saveOrUpdate(point)
+
+	def deleteScheme(scheme: AttendanceMonitoringScheme) = {
+		attendanceMonitoringDao.delete(scheme)
+	}
 
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.listSchemes(department, academicYear)
@@ -140,6 +146,10 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote] = {
 		attendanceMonitoringDao.getAttendanceNote(student, point)
 	}
+
+	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int =
+		attendanceMonitoringDao.countCheckpointsForPoint(point)
+
 }
 
 trait AttendanceMonitoringMembershipHelpers {
