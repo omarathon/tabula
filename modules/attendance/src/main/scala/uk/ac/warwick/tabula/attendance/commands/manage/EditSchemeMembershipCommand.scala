@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipExcludeType}
 import uk.ac.warwick.tabula.data.SchemeMembershipItem
-import scala.Some
 
 case class EditSchemeMembershipCommandResult(
 	updatedIncludedStudentIds: JList[String],

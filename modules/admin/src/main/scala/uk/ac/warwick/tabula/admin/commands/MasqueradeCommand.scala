@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.system.permissions.{PubliclyVisiblePermissions, PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.services._
 import org.springframework.validation.Errors
-import scala.Some
 
 object MasqueradeCommand {
 	def apply(user: CurrentUser) =

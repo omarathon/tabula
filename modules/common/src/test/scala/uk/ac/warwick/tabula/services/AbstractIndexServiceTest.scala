@@ -11,7 +11,6 @@ import scala.util.Random
 import org.apache.lucene.search._
 import org.apache.lucene.index.Term
 import org.apache.lucene.search.SearcherLifetimeManager.Pruner
-import scala.Some
 
 /** Overrides the default file-based directory with an in-memory one.
 	* Faster than the disk one, plus data is entirely scoped to the instance of
