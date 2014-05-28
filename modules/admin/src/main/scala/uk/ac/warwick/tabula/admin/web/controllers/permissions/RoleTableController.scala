@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.admin.web.controllers.permissions
 
 import uk.ac.warwick.tabula.admin.web.controllers.AdminController
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.roles.{SelectorBuiltInRoleDefinition, RoleDefinition}
 import uk.ac.warwick.tabula.permissions.{SelectorPermission, Permissions, PermissionsSelector, Permission}
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Department}
@@ -9,11 +9,13 @@ import uk.ac.warwick.tabula.helpers.ReflectionHelper
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import org.springframework.stereotype.Controller
+import uk.ac.warwick.tabula.services.RelationshipService
 
 @Controller
 class RoleTableController extends AdminController {
 
 	var permissionsService = Wire[PermissionsService]
+	var relationshipService = Wire[RelationshipService]
 
 	type Response = Option[Boolean]
 	val Allow: Response = Some(true)
@@ -32,9 +34,8 @@ class RoleTableController extends AdminController {
 		val allDepartments = department.toSeq.flatMap(parentDepartments)
 
 		val relationshipTypes =
-			allDepartments
-				.flatMap { _.displayedStudentRelationshipTypes }
-				.distinct
+			if (allDepartments.isEmpty) relationshipService.allStudentRelationshipTypes.filter { _.defaultDisplay }
+			else allDepartments.flatMap { _.displayedStudentRelationshipTypes }.distinct
 
 		val selectorBuiltInRoleDefinitions =
 			ReflectionHelper.allSelectorBuiltInRoleDefinitionNames.flatMap { name =>
