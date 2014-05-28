@@ -1,18 +1,8 @@
 <#compress><#escape x as x?html>
 	<style type="text/css">
-		.roles-table th {
-			vertical-align: middle !important;
-		}
-
-		.rotate {
-			float: left; 
-			position: relative;
+		.roles-table td:first-child {
+			text-align: right !important;
 			white-space: nowrap;
-			-moz-transform: rotate(270deg);  /* FF3.5+ */        
-			-o-transform: rotate(270deg);  /* Opera 10.5 */   
-			-webkit-transform: rotate(270deg);  /* Saf3.1+, Chrome */              
-			filter:  progid:DXImageTransform.Microsoft.BasicImage(rotation=3);  /* IE6,IE7 */          
-			-ms-filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3); /* IE8 */
 		}
 	</style>
 
@@ -22,13 +12,13 @@
 		<thead>
 			<th></th>
 			<#list (rolesTable?first)._2() as roles>
-				<th><div class="rotate">${roles._1().description}</div></th>
+				<th>${roles._1().description}</th>
 			</#list>
 		</thead>
 		<tbody>
 			<#list rolesTable as permission>
 				<tr>
-					<td>${permission._1().description}</td>
+					<td><abbr title="${permission._1().description}">${permission._1().name}</abbr></td>
 					<#list permission._2() as roles>
 						<td>
 							<#if roles._2()?has_content>
