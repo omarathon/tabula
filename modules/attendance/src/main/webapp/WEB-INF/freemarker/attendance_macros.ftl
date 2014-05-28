@@ -282,3 +282,31 @@
 		</table>
 	</#if>
 </#macro>
+
+<#macro groupedPointsBySection pointsMap sectionName>
+<div class="striped-section">
+	<h2 class="section-title">${sectionName}</h2>
+	<div class="striped-section-contents">
+		<#list pointsMap[sectionName] as groupedPoint>
+			<div class="item-info row-fluid point">
+				<#nested groupedPoint />
+			</div>
+		</#list>
+	</div>
+</div>
+</#macro>
+
+<#macro checkpointLabel department="" checkpoint="" point="" student="">
+	<#if checkpoint?has_content>
+		<#local formatResult = attendanceMonitoringCheckpointFormatter(department, checkpoint) />
+	<#else>
+		<#local formatResult = attendanceMonitoringCheckpointFormatter(department, point, student) />
+	</#if>
+	<#local popoverContent>
+		<#if formatResult.status?has_content><p>${formatResult.status}</p></#if>
+		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
+		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
+		<#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}'>View attendance note</a></p></#if>
+	</#local>
+	<span class="use-popover label ${formatResult.labelClass}" data-content="${popoverContent}" data-html="true" data-placement="left">${formatResult.labelText}</span>
+</#macro>

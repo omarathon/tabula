@@ -8,6 +8,7 @@ import freemarker.template.utility.DeepUnwrap
 import freemarker.template.TemplateModel
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter._
+import java.util.Date
 
 /**
 Formats an Interval (which is a start and an end date together)
@@ -51,12 +52,15 @@ class IntervalFormatter extends TemplateMethodModelEx {
 	/** Two-argument method taking a start and end date. */
 	override def exec(list: JList[_]) = {
 		val args = list.toSeq.map {
-			model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel])
+			model => {
+				DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel])
+			}
 		}
 		args match {
 			case Seq(start: DateTime) => format(start)
 			case Seq(start: DateTime, end: DateTime) => format(start, end)
 			case Seq(start: LocalDate, end: LocalDate) => format(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay, includeTime = false)
+			case Seq(start: Date, end: Date) => format(new LocalDate(start).toDateTimeAtStartOfDay, new LocalDate(end).toDateTimeAtStartOfDay, includeTime = false)
 			case _ => throw new IllegalArgumentException("Bad args")
 		}
 	}

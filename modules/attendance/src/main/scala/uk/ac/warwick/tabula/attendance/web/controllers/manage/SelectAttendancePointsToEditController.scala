@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.attendance.web.controllers.manage
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
+import uk.ac.warwick.tabula.attendance.web.controllers.{HasMonthNames, AttendanceController}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringPointType}
 import uk.ac.warwick.tabula.commands.Appliable
@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.attendance.commands.manage.FindPointsResult
 
 @Controller
 @RequestMapping(Array("/manage/{department}/{academicYear}/editpoints"))
-class SelectAttendancePointsToEditController extends AttendanceController {
+class SelectAttendancePointsToEditController extends AttendanceController with HasMonthNames {
 
 	@Autowired var attendanceMonitoringService: AttendanceMonitoringService = _
 

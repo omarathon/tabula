@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyLists
 import collection.JavaConverters._
 import uk.ac.warwick.util.web.UriBuilder
+import uk.ac.warwick.tabula.attendance.commands.{GroupedOldPoint, GroupedPoint, GroupsPoints}
 
 case class FindPointsResult(
 	termGroupedPoints: Map[String, Seq[GroupedPoint]],
