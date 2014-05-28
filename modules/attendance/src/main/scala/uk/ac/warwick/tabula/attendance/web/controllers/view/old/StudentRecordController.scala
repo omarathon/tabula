@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.web.controllers
+package uk.ac.warwick.tabula.attendance.web.controllers.view.old
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
@@ -12,6 +12,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.attendance.commands.StudentRecordCommandState
 import uk.ac.warwick.tabula.commands.PopulateOnForm
+import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 
 @Controller
 @RequestMapping(Array("/view/{department}/2013/students/{student}/record"))

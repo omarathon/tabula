@@ -310,3 +310,26 @@
 	</#local>
 	<span class="use-popover label ${formatResult.labelClass}" data-content="${popoverContent}" data-html="true" data-placement="left">${formatResult.labelText}</span>
 </#macro>
+
+<#macro checkpointSelect department="" checkpoint="" point="" student="">
+	<#if checkpoint?has_content>
+		<#local formatResult = attendanceMonitoringCheckpointFormatter(department, checkpoint) />
+	<#else>
+		<#local formatResult = attendanceMonitoringCheckpointFormatter(department, point, student) />
+	</#if>
+	<#local tooltipContent>
+		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
+		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
+	</#local>
+	<select
+		id="checkpointMap-${point.id}"
+		name="checkpointMap[${point.id}]"
+		title="${tooltipContent}"
+	>
+		<#local hasState = mapGet(command.checkpointMap, point)?? />
+		<option value="" <#if !hasState >selected</#if>>Not recorded</option>
+		<option value="unauthorised" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
+		<option value="authorised" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "authorised">selected</#if>>Missed (authorised)</option>
+		<option value="attended" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "attended">selected</#if>>Attended</option>
+	</select>
+</#macro>

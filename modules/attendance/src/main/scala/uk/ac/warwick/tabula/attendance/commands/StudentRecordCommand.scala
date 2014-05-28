@@ -125,7 +125,7 @@ trait StudentRecordCommandState extends GroupMonitoringPointsByTerm with Monitor
 	val academicYear = academicYearOption.getOrElse(thisAcademicYear)
 	lazy val pointSet = monitoringPointService.getPointSetForStudent(student, academicYear).getOrElse(throw new ItemNotFoundException)
 
-	var checkpointMap: JMap[MonitoringPoint, AttendanceState] =  JHashMap()
+	var checkpointMap: JMap[MonitoringPoint, AttendanceState] = JHashMap()
 	var checkpointDescriptions: Map[MonitoringPoint, String] = _
 	var attendanceNotes: Map[MonitoringPoint, AttendanceNote] = _
 
