@@ -48,7 +48,9 @@ class RoleTableController extends AdminController {
 			allDepartments
 				.flatMap { department => permissionsService.getCustomRoleDefinitionsFor(department) }
 
-		val allDefinitions = (builtInRoleDefinitions ++ selectorBuiltInRoleDefinitions ++ customRoleDefinitions)
+		val allDefinitions =
+			(builtInRoleDefinitions ++ selectorBuiltInRoleDefinitions ++ customRoleDefinitions)
+				.filter { _.isAssignable }
 
 		def groupFn(p: Permission) = {
 			val simpleName = Permissions.shortName(p.getClass)
