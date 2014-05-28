@@ -20,6 +20,7 @@ import uk.ac.warwick.sso.client.SSOConfiguration
 import uk.ac.warwick.sso.client.tags.SSOLoginLinkGenerator
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait ControllerMethods extends PermissionsCheckingMethods with Logging {
 	def user: CurrentUser
@@ -41,13 +42,19 @@ trait ControllerMethods extends PermissionsCheckingMethods with Logging {
 trait ControllerViews extends Logging {
 	val Mav = uk.ac.warwick.tabula.web.Mav
 
-	def getReturnTo(defaultUrl:String) = requestInfo.flatMap { _.requestParameters.get("returnTo") } match {
-		case Some(returnTo :: tail) => returnTo
-		case _ =>
-			if (defaultUrl.isEmpty)
-				logger.warn("Empty defaultUrl when using returnTo")
-			defaultUrl
-	}
+	def getReturnTo(defaultUrl:String) =
+		requestInfo.flatMap { _.requestParameters.get("returnTo") }
+			.flatMap { _.headOption }
+			.filter { _.hasText }
+			.map { url =>
+				// Prevent returnTo rabbit hole by stripping other returnTos from the URL
+				url.replaceAll("[&?]returnTo=[^&]*", "")
+			}
+			.getOrElse {
+				if (defaultUrl.isEmpty)
+					logger.warn("Empty defaultUrl when using returnTo")
+				defaultUrl
+			}
 
 	def Redirect(path: String, objects: Pair[String, _]*) = Mav("redirect:" + getReturnTo(path), objects: _*)
 	def Redirect(path: String, objects: Map[String, _]) = Mav("redirect:" + getReturnTo(path), objects)

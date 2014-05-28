@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.helpers.NoUser
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.system.permissions.{PubliclyVisiblePermissions, PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.services._
 import org.springframework.validation.Errors
 
@@ -55,9 +55,11 @@ trait MasqueradeCommandValidation extends SelfValidating {
 		if (action != "remove") {
 			userLookup.getUserByUserId(usercode) match {
 				case FoundUser(u) => {
-					if (!securityService.can(user, Permissions.Masquerade, PermissionsTarget.Global)) {
+					val realUser = new CurrentUser(user.realUser, user.realUser)
+
+					if (!securityService.can(realUser, Permissions.Masquerade, PermissionsTarget.Global)) {
 						profileService.getMemberByUser(u, true, false) match {
-							case Some(profile) if securityService.can(user, Permissions.Masquerade, profile) =>
+							case Some(profile) if securityService.can(realUser, Permissions.Masquerade, profile) =>
 							case _ => errors.rejectValue("usercode", "masquerade.noPermission")
 						}
 					}
