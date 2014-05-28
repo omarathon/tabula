@@ -13,7 +13,7 @@ class MasqueradeControllerTest extends TestBase with Mockito {
 	
 	val controller = new MasqueradeController
 
-	@Test def createCommand {
+	@Test def createCommand = withUser("cuscav") {
 		val command = controller.command()
 
 		command should be (anInstanceOf[Appliable[Option[Cookie]]])
