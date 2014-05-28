@@ -59,6 +59,8 @@ trait AttendanceMonitoringDao {
 		sets: Seq[MonitoringPointSet],
 		types: Seq[MonitoringPointType]
 	): Seq[MonitoringPoint]
+	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
+	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 }
 
 
@@ -196,6 +198,22 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 		}
 
 		query.seq
+	}
+
+	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint] = {
+		val checkpoints = session.newCriteria[AttendanceMonitoringCheckpoint]
+			.add(is("student", student))
+			.add(safeIn("point", points))
+			.seq
+
+		checkpoints.map{ c => c.point -> c}.toMap
+	}
+
+	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote] = {
+		session.newCriteria[AttendanceMonitoringNote]
+			.add(is("student", student))
+			.add(is("point", point))
+			.uniqueResult
 	}
 
 }

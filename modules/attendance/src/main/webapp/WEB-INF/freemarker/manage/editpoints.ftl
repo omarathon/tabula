@@ -1,79 +1,9 @@
 <#escape x as x?html>
 <#import "../attendance_variables.ftl" as attendance_variables />
+<#import "../attendance_macros.ftl" as attendance_macros />
 
 <#assign filterQuery = findCommand.serializeFilter />
 <#assign returnTo = (info.requestedUri!"")?url />
-
-<#macro pointsByTerm pointsMap term>
-	<div class="striped-section">
-		<h2 class="section-title">${term}</h2>
-		<div class="striped-section-contents">
-			<#list pointsMap[term] as groupedPoint>
-				<div class="item-info row-fluid point">
-					<div class="span12">
-						<div class="pull-right">
-							<a class="btn btn-primary" href="<@routes.manageEditPoint groupedPoint.templatePoint filterQuery returnTo />">Edit</a>
-							<a class="btn btn-danger" href="<@routes.manageDeletePoint groupedPoint.templatePoint filterQuery returnTo />"><i class="icon-remove"></i></a>
-						</div>
-						${groupedPoint.templatePoint.name}
-						(<a class="use-tooltip" data-html="true" title="
-							<@fmt.wholeWeekDateFormat
-								groupedPoint.templatePoint.startWeek
-								groupedPoint.templatePoint.endWeek
-								groupedPoint.templatePoint.scheme.academicYear
-							/>
-						"><@fmt.monitoringPointWeeksFormat
-							groupedPoint.templatePoint.startWeek
-							groupedPoint.templatePoint.endWeek
-							groupedPoint.templatePoint.scheme.academicYear
-							findCommand.department
-						/></a>)
-						<#local popoverContent>
-							<ul>
-								<#list groupedPoint.schemes?sort_by("displayName") as scheme>
-									<li>${scheme.displayName}</li>
-								</#list>
-							</ul>
-						</#local>
-						<a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
-							<@fmt.p groupedPoint.schemes?size "scheme" />
-						</a>
-					</div>
-				</div>
-			</#list>
-		</div>
-	</div>
-</#macro>
-
-<#macro pointsByMonth pointsMap month>
-	<div class="striped-section">
-		<h2 class="section-title">${month}</h2>
-		<div class="striped-section-contents">
-			<#list pointsMap[month] as groupedPoint>
-				<div class="item-info row-fluid point">
-					<div class="span12">
-						<div class="pull-right">
-							<a class="btn btn-primary" href="<@routes.manageEditPoint groupedPoint.templatePoint filterQuery returnTo />">Edit</a>
-							<a class="btn btn-danger" href="<@routes.manageDeletePoint groupedPoint.templatePoint filterQuery returnTo />"><i class="icon-remove"></i></a>
-						</div>
-						${groupedPoint.templatePoint.name}
-						(<@fmt.interval groupedPoint.templatePoint.startDate groupedPoint.templatePoint.endDate />)
-						<#local popoverContent>
-							<ul>
-								<#list groupedPoint.schemes?sort_by("displayName") as scheme>
-									<li>${scheme.displayName}</li>
-								</#list>
-							</ul>
-						</#local>
-						<a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
-							<@fmt.p groupedPoint.schemes?size "scheme" />
-						</a>
-					</div>
-				</div>
-			</#list>
-		</div>
-	</div>
-</#macro>
 
 <h1>Edit points</h1>
 
@@ -190,15 +120,64 @@
 		<#if findResult.termGroupedPoints?keys?has_content>
 			<#list attendance_variables.monitoringPointTermNames as term>
 				<#if findResult.termGroupedPoints[term]??>
-					<@pointsByTerm findResult.termGroupedPoints term />
+					<@attendance_macros.groupedPointsBySection findResult.termGroupedPoints term; groupedPoint>
+						<div class="span12">
+							<div class="pull-right">
+								<a class="btn btn-primary" href="<@routes.manageEditPoint groupedPoint.templatePoint filterQuery returnTo />">Edit</a>
+								<a class="btn btn-danger" href="<@routes.manageDeletePoint groupedPoint.templatePoint filterQuery returnTo />"><i class="icon-remove"></i></a>
+							</div>
+							${groupedPoint.templatePoint.name}
+							(<a class="use-tooltip" data-html="true" title="
+								<@fmt.wholeWeekDateFormat
+								groupedPoint.templatePoint.startWeek
+								groupedPoint.templatePoint.endWeek
+								groupedPoint.templatePoint.scheme.academicYear
+								/>
+							"><@fmt.monitoringPointWeeksFormat
+								groupedPoint.templatePoint.startWeek
+								groupedPoint.templatePoint.endWeek
+								groupedPoint.templatePoint.scheme.academicYear
+								findCommand.department
+							/></a>)
+							<#assign popoverContent>
+								<ul>
+									<#list groupedPoint.schemes?sort_by("displayName") as scheme>
+										<li>${scheme.displayName}</li>
+									</#list>
+								</ul>
+							</#assign>
+							<a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
+								<@fmt.p groupedPoint.schemes?size "scheme" />
+							</a>
+						</div>
+					</@attendance_macros.groupedPointsBySection>
 				</#if>
 			</#list>
 		</#if>
 
 		<#if findResult.monthGroupedPoints?keys?has_content>
-			<#list findResult.monthGroupedPoints?keys as month>
+			<#list monthNames as month>
 				<#if findResult.monthGroupedPoints[month]??>
-					<@pointsByMonth findResult.monthGroupedPoints month />
+					<@attendance_macros.groupedPointsBySection findResult.monthGroupedPoints month; groupedPoint>
+						<div class="span12">
+							<div class="pull-right">
+								<a class="btn btn-primary" href="<@routes.manageEditPoint groupedPoint.templatePoint filterQuery returnTo />">Edit</a>
+								<a class="btn btn-danger" href="<@routes.manageDeletePoint groupedPoint.templatePoint filterQuery returnTo />"><i class="icon-remove"></i></a>
+							</div>
+							${groupedPoint.templatePoint.name}
+							(<@fmt.interval groupedPoint.templatePoint.startDate groupedPoint.templatePoint.endDate />)
+							<#assign popoverContent>
+								<ul>
+									<#list groupedPoint.schemes?sort_by("displayName") as scheme>
+										<li>${scheme.displayName}</li>
+									</#list>
+								</ul>
+							</#assign>
+							<a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
+								<@fmt.p groupedPoint.schemes?size "scheme" />
+							</a>
+						</div>
+					</@attendance_macros.groupedPointsBySection>
 				</#if>
 			</#list>
 		</#if>

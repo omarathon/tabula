@@ -8,6 +8,8 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.{SchemeMembershipItemType, AutowiringAttendanceMonitoringDaoComponent, AttendanceMonitoringDaoComponent}
 import uk.ac.warwick.tabula.data.SchemeMembershipItem
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointType
+import uk.ac.warwick.tabula.commands.MemberOrUser
+import collection.JavaConverters._
 
 trait AttendanceMonitoringServiceComponent {
 	def attendanceMonitoringService: AttendanceMonitoringService
@@ -41,6 +43,9 @@ trait AttendanceMonitoringService {
 		sets: Seq[MonitoringPointSet],
 		types: Seq[AttendanceMonitoringPointType]
 	): Seq[MonitoringPoint]
+	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
+	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
+	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 }
 
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService {
@@ -113,6 +118,27 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 			case AttendanceMonitoringPointType.SmallGroup => MonitoringPointType.SmallGroup
 			case AttendanceMonitoringPointType.AssignmentSubmission => MonitoringPointType.AssignmentSubmission
 		})
+	}
+
+	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
+		student.mostSignificantCourseDetails.fold(Seq[AttendanceMonitoringPoint]())(scd => {
+			val currentCourseStartDate = scd.beginDate
+			val schemes = findSchemesForStudent(student, department, academicYear)
+			schemes.flatMap(_.points.asScala).filter(p =>
+				p.startDate.isAfter(currentCourseStartDate) || p.startDate.isEqual(currentCourseStartDate)
+			)
+		})
+	}
+
+	private def findSchemesForStudent(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
+		membersHelper.findBy(MemberOrUser(student).asUser).filter(s => s.department == department && s.academicYear == academicYear)
+
+	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint] = {
+		attendanceMonitoringDao.getCheckpoints(points, student)
+	}
+
+	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote] = {
+		attendanceMonitoringDao.getAttendanceNote(student, point)
 	}
 }
 

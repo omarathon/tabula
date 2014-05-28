@@ -111,5 +111,6 @@
 <#macro viewHomeForYear department academicYearString><@_u page="/view/${department.code}/${academicYearString}"/></#macro>
 
 <#macro viewStudents department academicYearString><@_u page="/view/${department.code}/${academicYearString}/students"/></#macro>
+<#macro viewRecordStudent department academicYearString student><@_u page="/view/${department.code}/${academicYearString}/students/${student.universityId}/record"/></#macro>
 <#macro viewPoints department academicYearString><@_u page="/view/${department.code}/${academicYearString}/points"/></#macro>
 <#macro viewAgents department academicYearString relationshipType><@_u page="/view/${department.code}/${academicYearString}/agents/${relationshipType.urlPart}"/></#macro>
