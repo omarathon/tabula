@@ -25,7 +25,7 @@ class RoleTableController extends AdminController {
 	type RolesTable = Seq[(Permission, Seq[(RoleDefinition, Response)])]
 
 	private def parentDepartments(department: Department): Seq[Department] =
-		if (department.hasParent) department +: parentDepartments(department.parent)
+		if (mandatory(department).hasParent) department +: parentDepartments(department.parent)
 		else Seq(department)
 
 	private def rolesTable(department: Option[Department]): RolesTable = {
@@ -52,6 +52,7 @@ class RoleTableController extends AdminController {
 		val allDefinitions =
 			(builtInRoleDefinitions ++ selectorBuiltInRoleDefinitions ++ customRoleDefinitions)
 				.filter { _.isAssignable }
+				.sortBy { _.allPermissions(Some(null)).size }
 
 		def groupFn(p: Permission) = {
 			val simpleName = Permissions.shortName(p.getClass)
@@ -65,7 +66,6 @@ class RoleTableController extends AdminController {
 
 		ReflectionHelper.allPermissions
 			.filter { p => groupFn(p).hasText }
-			.sortBy { p => groupFn(p) }
 			.flatMap { p =>
 				if (p.isInstanceOf[SelectorPermission[_]]) {
 					p +: relationshipTypes.map { relationshipType =>
@@ -80,6 +80,7 @@ class RoleTableController extends AdminController {
 					(definition, Some(definition.mayGrant(permission)))
 				})
 			}
+			.sortBy { case (p, _) => groupFn(p) }
 	}
 
 	@RequestMapping(Array("/roles")) def generic =

@@ -18,9 +18,17 @@
 		<tbody>
 			<#list rolesTable as permission>
 				<tr>
-					<td><abbr title="${permission._1().description}">${permission._1().name}</abbr></td>
+					<#assign permissionName><#compress>
+						<#if permission._1().selector??>
+							${permission._1().name}(${permission._1().selector.id})
+						<#else>
+							${permission._1().name}
+						</#if>
+					</#compress></#assign>
+
+					<td><abbr title="${permission._1().description}">${permissionName}</abbr></td>
 					<#list permission._2() as roles>
-						<td>
+						<td title="${permissionName}">
 							<#if roles._2()?has_content>
 								<#if roles._2()>
 									<i class="icon-ok attended"></i>
