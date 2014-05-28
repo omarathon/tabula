@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.admin.web.controllers.permissions
 
 import uk.ac.warwick.tabula.admin.web.controllers.AdminController
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import org.springframework.web.servlet.mvc.Controller
 import uk.ac.warwick.tabula.roles.{SelectorBuiltInRoleDefinition, RoleDefinition}
 import uk.ac.warwick.tabula.permissions.{SelectorPermission, Permissions, PermissionsSelector, Permission}
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Department}
 import uk.ac.warwick.tabula.helpers.ReflectionHelper
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import org.springframework.web.servlet.mvc.Controller
 
 @Controller @RequestMapping(Array("/roles", "/department/{department}/roles"))
 class RoleTableController extends AdminController {
