@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Department}
 import uk.ac.warwick.tabula.helpers.ReflectionHelper
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import org.springframework.web.servlet.mvc.Controller
+import org.springframework.stereotype.Controller
 
 @Controller @RequestMapping(Array("/roles", "/department/{department}/roles"))
 class RoleTableController extends AdminController {
