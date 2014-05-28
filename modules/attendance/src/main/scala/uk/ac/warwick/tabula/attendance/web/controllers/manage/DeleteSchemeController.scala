@@ -8,8 +8,6 @@ import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import javax.validation.Valid
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.web.Routes
 
 @Controller
@@ -25,17 +23,13 @@ class DeleteSchemeController extends AttendanceController {
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme]) = {
 		Mav("manage/delete", "ManageSchemeMappingParameters" -> ManageSchemeMappingParameters)
-			.crumbs(
-			Breadcrumbs.Manage.Home
-		)
+			.crumbs(Breadcrumbs.Manage.Home)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("submit"))
 	def submit(
 		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
-		errors: Errors,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		errors: Errors
 		) = {
 			if (errors.hasErrors) {
 				form(cmd)

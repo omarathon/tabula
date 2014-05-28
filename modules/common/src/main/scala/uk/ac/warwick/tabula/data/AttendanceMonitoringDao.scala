@@ -226,5 +226,4 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 			.add(is("point", point))
 			.project[Number](Projections.rowCount())
 			.uniqueResult.get.intValue()
-
-}
+	}

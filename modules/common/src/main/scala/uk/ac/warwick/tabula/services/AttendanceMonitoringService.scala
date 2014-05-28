@@ -149,8 +149,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int =
 		attendanceMonitoringDao.countCheckpointsForPoint(point)
-
-}
+	}
 
 trait AttendanceMonitoringMembershipHelpers {
 	val membersHelper: UserGroupMembershipHelper[AttendanceMonitoringScheme]
