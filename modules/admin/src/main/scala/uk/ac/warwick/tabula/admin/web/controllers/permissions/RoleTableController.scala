@@ -10,7 +10,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import org.springframework.stereotype.Controller
 
-@Controller @RequestMapping(Array("/roles", "/department/{department}/roles"))
+@Controller
 class RoleTableController extends AdminController {
 
 	var permissionsService = Wire[PermissionsService]
@@ -23,14 +23,13 @@ class RoleTableController extends AdminController {
 	type RolesTable = Seq[(Permission, Seq[(RoleDefinition, Response)])]
 
 	private def parentDepartments(department: Department): Seq[Department] =
-		if (department == null) Nil
-		else if (department.hasParent) department +: parentDepartments(department.parent)
+		if (department.hasParent) department +: parentDepartments(department.parent)
 		else Seq(department)
 
-	@ModelAttribute("rolesTable") def rolesTable(@PathVariable department: Department): RolesTable = {
+	private def rolesTable(department: Option[Department]): RolesTable = {
 		val builtInRoleDefinitions = ReflectionHelper.allBuiltInRoleDefinitions
 
-		val allDepartments = parentDepartments(department)
+		val allDepartments = department.toSeq.flatMap(parentDepartments)
 
 		val relationshipTypes =
 			allDepartments
@@ -80,6 +79,10 @@ class RoleTableController extends AdminController {
 			}
 	}
 
-	@RequestMapping def page = "admin/permissions/role_table"
+	@RequestMapping(Array("/roles")) def generic =
+		Mav("admin/permissions/role_table", "rolesTable" -> rolesTable(None))
+
+	@RequestMapping(Array("/department/{department}/roles")) def forDepartment(@PathVariable department: Department) =
+		Mav("admin/permissions/role_table", "rolesTable" -> rolesTable(Some(department)))
 
 }
