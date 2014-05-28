@@ -5,8 +5,8 @@ import uk.ac.warwick.tabula.data.model.AbstractStringUserType
 sealed abstract class AttendanceMonitoringPointStyle(val dbValue: String, val description: String)
 
 object AttendanceMonitoringPointStyle {
-	case object Week extends AttendanceMonitoringPointStyle("week", "Week")
-	case object Date extends AttendanceMonitoringPointStyle("date", "Date")
+	case object Week extends AttendanceMonitoringPointStyle("week", "Term Week")
+	case object Date extends AttendanceMonitoringPointStyle("date", "Calendar Date")
 
 	def fromCode(code: String) = code match {
 		case Week.dbValue => Week
@@ -14,6 +14,8 @@ object AttendanceMonitoringPointStyle {
 		case null => null
 		case _ => throw new IllegalArgumentException()
 	}
+
+	val values: Seq[AttendanceMonitoringPointStyle] = Seq(Week, Date)
 }
 
 class AttendanceMonitoringPointStyleUserType extends AbstractStringUserType[AttendanceMonitoringPointStyle] {

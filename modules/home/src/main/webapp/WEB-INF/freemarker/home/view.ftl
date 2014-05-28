@@ -33,8 +33,8 @@
 		</#if>
 	
 		<#if user.staff>
-			<li><h2><a href="<@url page="/" context="/profiles" />">Student Profiles</a></h2>
-				<span class="hint">View student information and edit personal tutors</span>
+			<li><h2><a href="<@url page="/" context="/profiles" />">Profiles</a></h2>
+				<span class="hint">View staff and student information and edit personal tutors</span>
 			</li>
 		<#elseif user.student>
 			<li><h2><a href="<@url page="/" context="/profiles" />">My Student Profile</a></h2>

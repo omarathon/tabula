@@ -79,12 +79,37 @@
 <#macro manageHome><@_u page="/manage"/></#macro>
 <#macro manageHomeYears department><@_u page="/manage/${department.code}"/></#macro>
 <#macro manageHomeForYear department academicYearString><@_u page="/manage/${department.code}/${academicYearString}"/></#macro>
+
 <#macro manageNewScheme department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/new"/></#macro>
+<#macro manageAddStudents scheme>
+	<@_u page="/manage/${scheme.department.code}/${scheme.academicYear.startYear?c}/new/${scheme.id}/students"/>
+</#macro>
+<#macro manageNewSchemeAddPoints scheme>
+	<@_u page="/manage/${scheme.department.code}/${scheme.academicYear.startYear?c}/new/${scheme.id}/points"/>
+</#macro>
+
 <#macro manageEditScheme department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/edit"/></#macro>
 <#macro manageDeleteScheme department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/delete"/></#macro>
+
+<#macro manageSelectStudents scheme>
+	<@_u page="/manage/${scheme.department.code}/${scheme.academicYear.startYear?c}/${scheme.id}/students/select"/>
+</#macro>
+
 <#macro manageAddPoints department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/addpoints"/></#macro>
-<#macro manageEditPoints department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/editpoints"/></#macro>
+<#macro manageAddPointsBlank department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/addpoints/new"/></#macro>
+<#macro manageAddPointsCopy department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/addpoints/copy"/></#macro>
+<#macro manageAddPointsTemplate department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/addpoints/template"/></#macro>
+
+<#macro manageEditPoints department academicYearString schemesParam="">
+	<#if schemesParam?has_content><#local schemesParam = "?" + schemesParam /></#if>
+	<@_u page="/manage/${department.code}/${academicYearString}/editpoints${schemesParam}"/></#macro>
+<#macro manageEditPoint point filterQuery returnTo><@_u page="/manage/${point.scheme.department.code}/${point.scheme.academicYear.startYear?c}/editpoints/${point.id}/edit?returnTo=${returnTo}&${filterQuery}"/></#macro>
+<#macro manageDeletePoint point filterQuery returnTo><@_u page="/manage/${point.scheme.department.code}/${point.scheme.academicYear.startYear?c}/editpoints/${point.id}/delete?returnTo=${returnTo}&${filterQuery}"/></#macro>
 
 <#macro viewHome><@_u page="/view"/></#macro>
 <#macro viewHomeYears department><@_u page="/view/${department.code}"/></#macro>
 <#macro viewHomeForYear department academicYearString><@_u page="/view/${department.code}/${academicYearString}"/></#macro>
+
+<#macro viewStudents department academicYearString><@_u page="/view/${department.code}/${academicYearString}/students"/></#macro>
+<#macro viewPoints department academicYearString><@_u page="/view/${department.code}/${academicYearString}/points"/></#macro>
+<#macro viewAgents department academicYearString relationshipType><@_u page="/view/${department.code}/${academicYearString}/agents/${relationshipType.urlPart}"/></#macro>

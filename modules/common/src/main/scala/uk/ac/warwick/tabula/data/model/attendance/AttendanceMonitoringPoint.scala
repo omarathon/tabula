@@ -47,8 +47,9 @@ class AttendanceMonitoringPoint extends GeneratedId with HasSettings with PostLo
 	var endDate: LocalDate = _
 
 	@Column(name="point_type")
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.MonitoringPointTypeUserType")
-	var pointType: MonitoringPointType = _
+	@NotNull
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointTypeUserType")
+	var pointType: AttendanceMonitoringPointType = _
 
 	@NotNull
 	@Column(name = "created_date")
@@ -133,6 +134,34 @@ class AttendanceMonitoringPoint extends GeneratedId with HasSettings with PostLo
 
 	def assignmentSubmissionIsDisjunction = getBooleanSetting(Settings.AssignmentSubmissionIsDisjunction) getOrElse false
 	def assignmentSubmissionIsDisjunction_= (allow: Boolean) = settings += (Settings.AssignmentSubmissionIsDisjunction -> allow)
+
+	def cloneTo(scheme: AttendanceMonitoringScheme): AttendanceMonitoringPoint = {
+		val newPoint = new AttendanceMonitoringPoint
+		newPoint.scheme = scheme
+		newPoint.name = this.name
+		newPoint.startWeek = startWeek
+		newPoint.endWeek = endWeek
+		newPoint.startDate = startDate
+		newPoint.endDate = endDate
+		newPoint.pointType = pointType
+		pointType match {
+			case AttendanceMonitoringPointType.Meeting =>
+				newPoint.meetingRelationships = meetingRelationships.toSeq
+				newPoint.meetingFormats = meetingFormats.toSeq
+				newPoint.meetingQuantity = meetingQuantity
+			case AttendanceMonitoringPointType.SmallGroup =>
+				newPoint.smallGroupEventQuantity = smallGroupEventQuantity
+				newPoint.smallGroupEventModules = smallGroupEventModules
+			case AttendanceMonitoringPointType.AssignmentSubmission =>
+				newPoint.assignmentSubmissionIsSpecificAssignments = assignmentSubmissionIsSpecificAssignments
+				newPoint.assignmentSubmissionQuantity = assignmentSubmissionQuantity
+				newPoint.assignmentSubmissionModules = assignmentSubmissionModules
+				newPoint.assignmentSubmissionAssignments = assignmentSubmissionAssignments
+				newPoint.assignmentSubmissionIsDisjunction = assignmentSubmissionIsDisjunction
+			case _ =>
+		}
+		newPoint
+	}
 }
 
 object AttendanceMonitoringPoint {

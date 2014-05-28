@@ -14,7 +14,8 @@ object FilterStudentsOrRelationships {
 
 }
 
-trait FilterStudentsOrRelationships extends FiltersStudentsBase with ProfileServiceComponent with PermissionsCheckingMethods {
+trait FilterStudentsOrRelationships extends FiltersStudentsBase with PermissionsCheckingMethods with ProfileServiceComponent {
+
 	def getAliasPaths(sitsTable: String): Seq[(String, String)]
 
 	protected def buildOrders(): Seq[ScalaOrder] =

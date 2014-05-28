@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{MonitoringPointService, ProfileService, TermService, MonitoringPointServiceComponent, ProfileServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.data.model.{Route, Department}
 import scala.collection.JavaConverters._

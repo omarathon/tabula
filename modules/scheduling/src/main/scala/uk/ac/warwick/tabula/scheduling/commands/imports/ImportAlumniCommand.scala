@@ -33,12 +33,11 @@ import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.OtherMember
+import uk.ac.warwick.tabula.permissions.Permission
 
 class ImportAlumniCommand(member: MembershipInformation, ssoUser: User, rs: ResultSet)
 	extends ImportMemberCommand(member, ssoUser, Some(rs))
 	with Logging with Daoisms with AlumniProperties with Unaudited {
-
-	import ImportMemberHelpers._
 
 	// any initialisation code specific to alumni (e.g. setting alumni properties) can go here
 
@@ -74,5 +73,5 @@ class ImportAlumniCommand(member: MembershipInformation, ssoUser: User, rs: Resu
 
 	override def describe(d: Description) = d.property("universityId" -> universityId).property("category" -> "alumni")
 
-
+	override def phoneNumberPermissions: Seq[Permission] = Nil
 }

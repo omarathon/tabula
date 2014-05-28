@@ -112,12 +112,10 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self: UserLookupAdapter with CacheStrategyComponent =>
 	final val UserByWarwickIdCacheName = "UserByWarwickIdCache"
 	final val UserByWarwickIdCacheMaxAgeSecs = 60 * 60 * 24 // 1 day
-	final val UserByWarwickIdCacheMaxSize = 100000
 
 	final lazy val UserByWarwickIdCache = {
 		val cache = Caches.newCache(UserByWarwickIdCacheName, this, UserByWarwickIdCacheMaxAgeSecs, cacheStrategy)
 		cache.setAsynchronousUpdateEnabled(true)
-		cache.setMaxSize(UserByWarwickIdCacheMaxSize)
 		cache
 	}
 	

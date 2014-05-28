@@ -18,8 +18,10 @@ trait SubmissionReminder {
 	def module = assignment.module
 	def moduleCode = module.code.toUpperCase
 
+	def referenceDate = created
+
 	def daysLeft = {
-		val now = DateTime.now.withTimeAtStartOfDay()
+		val now = referenceDate.withTimeAtStartOfDay()
 		val closeDate = deadline.withTimeAtStartOfDay()
 		Days.daysBetween(now, closeDate).getDays
 	}
@@ -40,7 +42,7 @@ trait SubmissionReminder {
 
 	def urlTitle = "upload your submission"
 
-	def titleEnding = if(daysLeft < 0) { "is late" } else { "due" }
+	def titleEnding = if (daysLeft < 0) { "is late" } else { "due" }
 
 	def title = s"$moduleCode assignment $titleEnding"
 

@@ -8,17 +8,18 @@
 
 <div class="span8">
 <h2>Normal regular stuff</h2>
-<p><a class="btn" href="<@url page="/sysadmin/permissions-helper" />"><i class="icon-lock"></i> Permissions helper</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/departments/" />">List all departments in the system</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/relationships" />">Student relationship types</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/pointsettemplates" />">Monitoring point set templates</a></p>
-<p><a class="btn" href="<@url page="/masquerade" context="/admin" />"><i class="icon-eye-open"></i> Masquerade</a></p>
-<#--<p><a class="btn" href="<@url page="/sysadmin/audit/list" />">List audit events</a></p>-->
-<p><a class="btn" href="<@url page="/sysadmin/audit/search" />">List audit events (Index version)</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/jobs/list" context="/scheduling" />">Background jobs</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/features" />">Set feature flags</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/statistics" />">Internal statistics</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/complete-scheduled-notification" context="/scheduling" />">Complete scheduled notifications</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/permissions-helper" />"><i class="icon-fixed-width icon-lock"></i> Permissions helper</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/departments/" />"><i class="icon-fixed-width icon-sitemap"></i> List all departments in the system</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/relationships" />"><i class="icon-fixed-width icon-heart-empty"></i> Student relationship types</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/pointsettemplates" />"><i class="icon-fixed-width icon-copy"></i> Monitoring point set templates</a></p>
+<p><a class="btn" href="<@url page="/masquerade" context="/admin" />"><i class="icon-fixed-width icon-eye-open"></i> Masquerade</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/audit/search" />"><i class="icon-fixed-width icon-list-alt"></i> List audit events (Index version)</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/jobs/list" context="/scheduling" />"><i class="icon-fixed-width icon-refresh"></i> Background jobs</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/emails/list" context="/scheduling" />"><i class="icon-fixed-width icon-envelope-alt"></i> Email queue</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/features" />"><i class="icon-fixed-width icon-flag-alt"></i> Set feature flags</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/statistics" />"><i class="icon-fixed-width icon-bar-chart"></i> Internal statistics</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/complete-scheduled-notification" context="/scheduling" />"><i class="icon-fixed-width icon-time"></i> Complete scheduled notifications</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/event-calendar" />"><i class="icon-fixed-width icon-calendar"></i> Upcoming event calendar</a></p>
 
 <h2>File syncing</h2>
 <p><a class="btn" href="<@url page="/sysadmin/sync" context="/scheduling" />">Run file syncing</a></p>

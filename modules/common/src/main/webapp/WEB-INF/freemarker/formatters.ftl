@@ -158,9 +158,9 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	--></#noescape><#--
 --></#macro>
 
-<#macro monitoringPointWeeksFormat validFromWeek requiredFromWeek academicYear dept stripHtml=false><#--
+<#macro monitoringPointWeeksFormat startWeek endWeek academicYear dept stripHtml=false><#--
 	--><#noescape><#--
-		--><#local result = wholeWeekFormatter(validFromWeek, requiredFromWeek, academicYear, dept, false) /><#--
+		--><#local result = wholeWeekFormatter(startWeek, endWeek, academicYear, dept, false) /><#--
 		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
 	--></#noescape><#--
 --></#macro>

@@ -369,8 +369,87 @@ $(function(){
 
 	// END SCRIPTS FOR MANAGING MONITORING POINTS
 
+});
 
+// TAB-1974 scripts
 
+$(function(){
+
+	// Scripts for Add student during Create a scheme
+	$('.mass-add-users')
+		.find('textarea').on('keyup', function(){
+			var $this = $(this), $addButton = $this.closest('.mass-add-users').find('input.btn.add-students');
+			if ($this.val().length === 0) {
+				$addButton.addClass('disabled');
+			} else {
+				$addButton.removeClass('disabled');
+			}
+		}).end()
+	;
+	var checkAndUpdateButton = function(detailsClass, inputName){
+		if($('details.' + detailsClass + ' table input[type="checkbox"]:checked').length === 0) {
+			$('details.' + detailsClass + ' input[name="' + inputName + '"]').attr('disabled', true);
+		} else {
+			$('details.' + detailsClass + ' input[name="' + inputName + '"]').attr('disabled', false);
+		}
+	};
+	$('details.manually-added').on('click', 'input[type="checkbox"]', function(){
+		checkAndUpdateButton('manually-added', 'resetMembership');
+	});
+	checkAndUpdateButton('manually-added', 'resetMembership');
+	$('details.find-students').on('click', 'input[type="checkbox"]', function(){
+		checkAndUpdateButton('find-students', 'manuallyExclude');
+	});
+	checkAndUpdateButton('find-students', 'manuallyExclude');
+
+	// Add points
+	(function(){
+		var uniqueCollection = function(collection){
+			var $collection = $(collection);
+			return $.makeArray($collection.filter(function(i, item){
+				return i == $.inArray(item, $collection);
+			}));
+		};
+		var updateButtons = function(){
+			var checkboxes = $('.add-points-to-schemes tbody input')
+				, checkedBoxes = checkboxes.filter(function(){ return $(this).is(':checked'); });
+			if (checkboxes.length == 0) {
+				$('.add-points-to-schemes p button').attr('disabled', false);
+			} else if ( checkedBoxes.length > 0
+				// check all schemes have same point style
+				&& uniqueCollection(checkedBoxes.map(function(){ return $(this).data('pointstyle'); }).get()).length === 1
+			) {
+				$('.add-points-to-schemes p button').attr('disabled', false);
+			} else {
+				$('.add-points-to-schemes p button').attr('disabled', true);
+			}
+		};
+		updateButtons();
+		$('.add-points-to-schemes')
+			.find('.for-check-all').append(
+				$('<input/>').addClass('check-all use-tooltip').attr({
+					type: 'checkbox',
+					title: 'Select all/none'
+				}).on('click', function(){
+					$(this).closest('table').find('tbody input').prop('checked', this.checked);
+					updateButtons();
+				})
+			).end()
+			.find('tbody tr').on('click', function(){
+				var $input = $(this).find('input');
+				$input.prop('checked', !$input.is(':checked'));
+				updateButtons();
+			}).end()
+			.find('table tbody input').on('click', function(e){
+				e.stopPropagation();
+				updateButtons();
+			}).end()
+			.find('button').on('click', function(){
+				var $this = $(this), $form = $this.closest('form');
+				$form.attr('action', $this.data('href')).submit();
+			})
+		;
+	})();
 });
 
 window.Attendance = jQuery.extend(window.Attendance, exports);

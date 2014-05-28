@@ -326,7 +326,11 @@ object TurnitinResponse {
 		2319 -> "There was an error processing your request",
 		2320 -> "There was an error processing your request",
 		2321 -> "When excluding small matches by word, you must enter a positive number",
-		2324 -> "When excluding small matches by percentage, you must enter a number between 1 and 100")
+		2324 -> "When excluding small matches by percentage, you must enter a number between 1 and 100",
+
+		// Custom Tabula errors 9000+
+		9000 -> "Turnitin server unavailable"
+	)
 		
 
 }

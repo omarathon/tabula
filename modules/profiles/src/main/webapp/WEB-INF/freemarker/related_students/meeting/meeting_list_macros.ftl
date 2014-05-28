@@ -115,8 +115,7 @@
 	<#elseif meeting.pendingApprovalBy(viewer)>
 	<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
 	<div class="pending-action alert alert-warning">
-		This record needs your approval. Please review, then approve or reject it.
-		If you reject it, please explain why.
+		This record needs your approval. Please review, then approve or return it with comments.
 		<#if meetingApprovalWillCreateCheckpoint[meeting.id]>
 			<br />
 			Approving this meeting record will mark a monitoring point as attended.
@@ -132,7 +131,7 @@
 				</label>
 				<label class="radio inline">
 					<input class="reject" type="radio" name="approved" value="false">
-					Reject
+					Return with comments
 				</label>
 			</@form.field>
 		</@form.row>
@@ -149,7 +148,7 @@
 	<small class="muted">Pending revision. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
 	<div class="alert alert-error">
 		<div class="rejection">
-			<p>You rejected this record. The other party will review the record and submit it for approval again.</p>
+			<p>You sent this record back to the other party, who will review the record and submit it for approval again.</p>
 		</div>
 	</div>
 	<#elseif meeting.pendingRevisionBy(viewer)>
@@ -157,7 +156,7 @@
 	<div class="pending-action alert alert-error">
 		<#list meeting.rejectedApprovals as rejectedApproval>
 			<div class="rejection">
-				<p>This record has been rejected by ${rejectedApproval.approver.fullName} because:</p>
+				<p>This record has not been approved by ${rejectedApproval.approver.fullName} because:</p>
 				<blockquote class="reason">${rejectedApproval.comments}</blockquote>
 				<p>Please edit the record and submit it for approval again.</p>
 			</div>

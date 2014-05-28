@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.transform.DistinctRootEntityResultTransformer
 import collection.mutable
 import org.hibernate.transform.ResultTransformer
-import org.hibernate.Criteria
 import org.hibernate.FetchMode
 
 /**
@@ -39,6 +38,7 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
 		}
 	}
 	def distinct = chainable { c.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE) }
+	def count = project[Number](Projections.rowCount()).uniqueResult.get
 
 	// Helper to neaten up the above chainable methods - returns this instead of plain Criteria
 	@inline private def chainable(fn: => Unit) = { fn; this }

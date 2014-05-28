@@ -62,4 +62,26 @@
 
 </#macro>
 
+<#macro myStudents viewerRelationshipTypes smallGroups="">
+<section id="relationship-details" class="clearfix" >
+	<h4>My students</h4>
+	<ul>
+		<#list viewerRelationshipTypes as relationshipType>
+			<li><h5><a id="relationship-${relationshipType.urlPart}" href="<@routes.relationship_students relationshipType />">${relationshipType.studentRole?cap_first}s</a></h5></li>
+		</#list>
+		<#if smallGroups?has_content>
+			<#list smallGroups as smallGroup>
+				<#assign _groupSet=smallGroup.groupSet />
+				<#assign _module=smallGroup.groupSet.module />
+				<li><a href="<@routes.smallgroup smallGroup />">
+					${_module.code?upper_case} (${_module.name}) ${_groupSet.name}, ${smallGroup.name}
+				</a></li>
+			</#list>
+		</#if>
+	</ul>
+</section>
+
+
+</#macro>
+
 </#escape>

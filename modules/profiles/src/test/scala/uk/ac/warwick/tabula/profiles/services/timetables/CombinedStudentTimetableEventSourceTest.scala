@@ -5,11 +5,15 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.JavaImports._
 
 class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 
 	val student = new StudentMember
 	student.universityId = "university ID"
+	val user = new User()
 
 	val ttEvent= TimetableEvent("From Timetable","",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,None,Nil,AcademicYear(2013))
 	val timetableEvents = Seq(ttEvent)
@@ -20,7 +24,7 @@ class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 	val source = new CombinedStudentTimetableEventSourceComponent
 		with TimetableFetchingServiceComponent
 		with SmallGroupEventTimetableEventSourceComponent{
-
+		val staffGroupEventSource = mock[StaffTimetableEventSource]
 		val studentGroupEventSource = mock[StudentTimetableEventSource]
 		val timetableFetchingService = mock[TimetableFetchingService]
 	}

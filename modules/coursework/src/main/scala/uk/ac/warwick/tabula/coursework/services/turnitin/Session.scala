@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.services.turnitin
 
 import dispatch.classic._
 import dispatch.classic.mime.Mime._
-import java.io.FileInputStream
+import java.io.{IOException, FileInputStream}
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.entity.mime.content.FileBody
 import uk.ac.warwick.tabula.helpers.Logging
@@ -62,9 +62,17 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 				else if (turnitin.diagnostic) req >- { (text) => TurnitinResponse.fromDiagnostic(text) }
 				else req <> { (node) => TurnitinResponse.fromXml(node) }
 			}
-		val response = http.x(request)
-		logger.debug("Response: " + response)
-		response
+
+		try {
+			val response = http.x(request)
+			logger.debug("Response: " + response)
+			response
+		} catch {
+			case e: IOException => {
+				logger.error("Exception contacting Turnitin", e)
+				new TurnitinResponse(code = 9000, diagnostic = Some(e.getMessage))
+			}
+		}
 	}
 	
 	def getRequest(

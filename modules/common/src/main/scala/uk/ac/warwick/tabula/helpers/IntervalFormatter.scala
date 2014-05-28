@@ -25,9 +25,9 @@ object IntervalFormatter {
 	}
 
 	/** Useful sometimes if you have an "endless" interval like an open-ended Assignment. */
-	def format(start: DateTime): String = doFormat(start, true)
+	def format(start: DateTime): String = doFormat(start, includeYear = true)
 
-	def format(start: DateTime, includeTime: Boolean): String = doFormat(start, true, includeTime)
+	def format(start: DateTime, includeTime: Boolean): String = doFormat(start, includeYear = true, includeTime = includeTime)
 
 	/** @see #format(DateTime, DateTime, Boolean) */
 	def format(interval: Interval): String = format(interval.getStart, interval.getEnd)
@@ -56,6 +56,7 @@ class IntervalFormatter extends TemplateMethodModelEx {
 		args match {
 			case Seq(start: DateTime) => format(start)
 			case Seq(start: DateTime, end: DateTime) => format(start, end)
+			case Seq(start: LocalDate, end: LocalDate) => format(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay, includeTime = false)
 			case _ => throw new IllegalArgumentException("Bad args")
 		}
 	}
@@ -143,7 +144,7 @@ object ConfigurableIntervalFormatter {
 		}
 
 		def formatTimes(interval: Interval): Option[(String, String)] = {
-			def format(date:DateTime) = (if(date.getMinuteOfHour == 0)hourOnlyFormat else hourMinuteFormat).print(date).toLowerCase()
+			def format(date:DateTime) = (if(date.getMinuteOfHour == 0)hourOnlyFormat else hourMinuteFormat).print(date).toLowerCase
 			Some(format(interval.getStart), format(interval.getEnd))
 		}
 	}
