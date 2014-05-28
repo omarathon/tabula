@@ -5,10 +5,8 @@ import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.Features
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMethod, RequestMapping, PathVariable}
 import uk.ac.warwick.tabula.data.model.Department
-import scala.Array
 import uk.ac.warwick.tabula.coursework.commands.departments.ExtensionSettingsCommand
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav

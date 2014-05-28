@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPo
 import uk.ac.warwick.tabula.commands.Appliable
 import javax.validation.Valid
 import org.springframework.validation.Errors
-import scala.Array
 import uk.ac.warwick.tabula.attendance.commands.manage.old.CreateMonitoringPointCommand
 
 @Controller

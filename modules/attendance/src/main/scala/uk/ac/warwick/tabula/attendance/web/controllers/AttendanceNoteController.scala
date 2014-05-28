@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.commands.{SelfValidating, ApplyWithCallback, Populat
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.attendance.commands.{CheckpointUpdatedDescription, AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
 import uk.ac.warwick.tabula.attendance.web.Routes
-import scala.Array
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.services.fileserver.{FileServer, RenderableFile}

@@ -1,11 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import scala.Option.option2Iterable
-import org.apache.lucene.search.ScoreDoc
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
-import javax.persistence.Entity
-import javax.persistence.NamedQueries
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.Activity

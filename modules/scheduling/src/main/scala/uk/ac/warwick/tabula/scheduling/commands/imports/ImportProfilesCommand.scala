@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import scala.Option.option2Iterable
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.commands.{Command, Description}
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, ModuleRegistrationDaoImpl, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
 import uk.ac.warwick.tabula.data.Transactions.transactional

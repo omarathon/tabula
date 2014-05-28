@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestMethod, PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{FeedbackTemplate, Department}
 import uk.ac.warwick.tabula.coursework.commands.departments.{DeleteFeedbackTemplateCommand, EditFeedbackTemplateCommand, BulkFeedbackTemplateCommand}
 import uk.ac.warwick.tabula.web.Mav
-import scala.Array
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes
 

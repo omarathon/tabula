@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 import org.hibernate.`type`.StandardBasicTypes
-import scala.Array
 import java.sql.Types
-
 
 sealed abstract class NotificationPriority (val dbValue: String) {
 	// When transforming notifications to activity streams priority is represented by a numerical value between 0 and 1
