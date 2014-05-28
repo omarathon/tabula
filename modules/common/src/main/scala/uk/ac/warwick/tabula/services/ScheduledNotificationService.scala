@@ -8,9 +8,6 @@ import uk.ac.warwick.tabula.helpers.{Logging, ReflectionHelper}
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.data.Transactions._
 import org.hibernate.ObjectNotFoundException
-import org.springframework.transaction.annotation.Propagation._
-import scala.Some
-
 
 trait ScheduledNotificationService {
 	def removeInvalidNotifications(target: Any)

@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.{RequestParam, PathVariable, Mode
 import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
 import uk.ac.warwick.tabula.commands.{SelfValidating, ApplyWithCallback, PopulateOnForm, Appliable}
 import org.springframework.validation.Errors
-import scala.Array
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.services.fileserver.{FileServer, RenderableFile}

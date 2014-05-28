@@ -10,26 +10,30 @@ import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.admin.commands.MasqueradeCommand
 import uk.ac.warwick.tabula.web.Cookies._
 import uk.ac.warwick.tabula.web.{Routes, Cookie, Mav}
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.events.EventHandling
+import org.springframework.validation.Errors
 
 @Controller
 @RequestMapping(Array("/masquerade"))
 class MasqueradeController extends AdminController {
 
-	EventHandling.enabled = false
+	validatesSelf[SelfValidating]
 
 	type MasqueradeCommand = Appliable[Option[Cookie]]
 
-	@ModelAttribute("masqueradeCommand") def command(): MasqueradeCommand = MasqueradeCommand()
+	@ModelAttribute("masqueradeCommand") def command(): MasqueradeCommand = MasqueradeCommand(user)
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def form(@ModelAttribute("masqueradeCommand") cmd: MasqueradeCommand): Mav = Mav("masquerade/form").crumbs(Breadcrumbs.Current("Masquerade"))
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("masqueradeCommand") cmd: MasqueradeCommand, response: HttpServletResponse): Mav = {
-		for (cookie <- cmd.apply()) response.addCookie(cookie)
-		Redirect(Routes.admin.masquerade)
+	def submit(@Valid @ModelAttribute("masqueradeCommand") cmd: MasqueradeCommand, errors: Errors, response: HttpServletResponse): Mav = {
+		if (errors.hasErrors()) form(cmd)
+		else {
+			for (cookie <- cmd.apply()) response.addCookie(cookie)
+			Redirect(Routes.admin.masquerade)
+		}
 	}
 
 }

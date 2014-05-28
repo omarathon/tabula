@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.{DateFormats, CurrentUser}
 import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, RequestMapping, PathVariable}
 import uk.ac.warwick.tabula.data.model.Department
-import scala.Array
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.coursework.commands.departments.FeedbackReportCommand

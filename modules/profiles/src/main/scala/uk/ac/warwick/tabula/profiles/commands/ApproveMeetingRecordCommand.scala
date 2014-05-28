@@ -25,7 +25,6 @@ object ApproveMeetingRecordCommand {
 		with ApproveMeetingRecordNotification
 		with AutowiringMeetingRecordDaoComponent
 		with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
-		with AutowiringFeaturesComponent
 
 }
 

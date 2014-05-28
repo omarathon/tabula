@@ -134,12 +134,14 @@ object Permissions {
 	/* ScopelessPermissions are Permissions that can be resolved without having to worry about scope */
 	case object UserPicker extends ScopelessPermission("Use the user picker")
 
-	case object Masquerade extends ScopelessPermission("Masquerade as other users")
 	case object GodMode extends ScopelessPermission("Enable god mode")
 	case object ManageMaintenanceMode extends ScopelessPermission("Manage maintenance mode settings")
 	case object ImportSystemData extends ScopelessPermission("Import data from other systems")
 	case object ReplicaSyncing extends ScopelessPermission("Manually run replica syncing")
 	case object ViewAuditLog extends ScopelessPermission("View and search the audit log")
+
+	// Masquerade no longer scopeless, can only masquerade as users who have a Member record against scope
+	case object Masquerade extends Permission("Masquerade as other users")
 
 	object RolesAndPermissions {
 		case object Create extends Permission("Add roles and permissions")

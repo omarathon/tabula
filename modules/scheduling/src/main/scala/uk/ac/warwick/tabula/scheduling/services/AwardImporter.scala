@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.ResultSet
-import scala.Option.option2Iterable
 import scala.collection.JavaConversions.asScalaBuffer
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery

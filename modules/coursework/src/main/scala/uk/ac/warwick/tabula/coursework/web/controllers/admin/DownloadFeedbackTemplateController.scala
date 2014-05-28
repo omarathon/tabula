@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.fileserver.FileServer
-import scala.Array
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.coursework.commands.departments.DownloadFeedbackTemplateCommand

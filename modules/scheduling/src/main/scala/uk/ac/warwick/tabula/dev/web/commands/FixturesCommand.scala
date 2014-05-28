@@ -18,7 +18,6 @@ import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 import org.hibernate.criterion.Restrictions
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import scala.Some
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
 import uk.ac.warwick.tabula.permissions.PermissionsTarget

@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import org.hibernate.`type`.StandardBasicTypes
-import scala.Array
 import java.sql.Types
 import scala.reflect.ClassTag
 

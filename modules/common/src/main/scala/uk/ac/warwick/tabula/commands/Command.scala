@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.commands
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.{NotificationHandling, EventHandling, Event, EventDescription}
-import uk.ac.warwick.tabula.JavaImports
-import uk.ac.warwick.tabula.services.MaintenanceModeService
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent, Features, RequestInfo, JavaImports}
+import uk.ac.warwick.tabula.services.{CannotPerformWriteOperationException, MaintenanceModeService}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, RequiresPermissionsChecking, PermissionsChecking}
 import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
@@ -72,16 +72,27 @@ trait Appliable[A]{
  * change name too. Careful now!
  */
 trait Command[A] extends Describable[A] with Appliable[A]
-		with JavaImports with EventHandling with NotificationHandling with PermissionsChecking with TaskBenchmarking {
+		with JavaImports with EventHandling with NotificationHandling with PermissionsChecking with TaskBenchmarking with AutowiringFeaturesComponent {
+
 	var maintenanceMode = Wire[MaintenanceModeService]
 	
 	import uk.ac.warwick.tabula.system.NoBind
 
 	final def apply(): A = {
 		if (EventHandling.enabled) {
-			if (maintenanceCheck(this))
-				recordEvent(this) { notify(this) { benchmark() { applyInternal() } } }
-			else throw maintenanceMode.exception(this)
+			if (readOnlyCheck(this)) {
+				recordEvent(this) {
+					notify(this) {
+						benchmark() {
+							applyInternal()
+						}
+					}
+				}
+			} else if (maintenanceMode.enabled) {
+				throw maintenanceMode.exception(this)
+			} else {
+				throw new CannotPerformWriteOperationException(this)
+			}
 		} else {
 			notify(this) { benchmark() { applyInternal() } }
 		}
@@ -114,8 +125,13 @@ trait Command[A] extends Describable[A] with Appliable[A]
 		name
 	}
 
-	private def maintenanceCheck(callee: Describable[_]) = {
-		callee.isInstanceOf[ReadOnly] || !maintenanceMode.enabled
+	private def isReadOnlyMasquerade =
+		RequestInfo.fromThread.filter { info =>
+			info.user.masquerading && !info.user.sysadmin && !features.masqueradersCanWrite
+		}.isDefined
+
+	private def readOnlyCheck(callee: Describable[_]) = {
+		callee.isInstanceOf[ReadOnly] || (!maintenanceMode.enabled && !isReadOnlyMasquerade)
 	}
 }
 

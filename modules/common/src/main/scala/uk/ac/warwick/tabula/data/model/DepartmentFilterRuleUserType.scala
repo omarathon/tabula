@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data.model
 
 import org.hibernate.`type`.{StandardBasicTypes}
 import uk.ac.warwick.tabula.data.model.Department.{CompositeFilterRule, AllMembersFilterRule, FilterRule}
-import scala.Array
 import java.sql.Types
 
 class DepartmentFilterRuleUserType extends AbstractBasicUserType[FilterRule, String] {

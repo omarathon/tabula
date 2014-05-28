@@ -1,25 +1,29 @@
 package uk.ac.warwick.tabula.admin.commands
 
 import uk.ac.warwick.tabula.web.Cookie
-import uk.ac.warwick.tabula.commands.{CommandInternal, Describable, ComposableCommand, ReadOnly, Description}
+import uk.ac.warwick.tabula.commands.{SelfValidating, CommandInternal, Describable, ComposableCommand, ReadOnly, Description}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.helpers.NoUser
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.system.permissions.{PubliclyVisiblePermissions, PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.services._
+import org.springframework.validation.Errors
 
 object MasqueradeCommand {
-	def apply() =
-		new MasqueradeCommandInternal()
-				with ComposableCommand[Option[Cookie]]
-				with MasqueradeCommandPermissions
+	def apply(user: CurrentUser) =
+		new MasqueradeCommandInternal(user)
 				with MasqueradeCommandDescription
-				with ReadOnly
+				with MasqueradeCommandValidation
 				with AutowiringUserLookupComponent
+				with AutowiringSecurityServiceComponent
+				with AutowiringProfileServiceComponent
+				with ComposableCommand[Option[Cookie]]
+				with ReadOnly
+				with PubliclyVisiblePermissions // Public because we always want to be able to remove the cookie, and we validate our own perms
 }
 
-class MasqueradeCommandInternal extends CommandInternal[Option[Cookie]] with MasqueradeCommandState {
+class MasqueradeCommandInternal(val user: CurrentUser) extends CommandInternal[Option[Cookie]] with MasqueradeCommandState {
 	self: UserLookupComponent =>
 
 	def applyInternal() = {
@@ -38,13 +42,29 @@ class MasqueradeCommandInternal extends CommandInternal[Option[Cookie]] with Mas
 }
 
 trait MasqueradeCommandState {
+	def user: CurrentUser
+
 	var usercode: String = _
 	var action: String = _
 }
 
-trait MasqueradeCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Masquerade)
+trait MasqueradeCommandValidation extends SelfValidating {
+	self: MasqueradeCommandState with UserLookupComponent with ProfileServiceComponent with SecurityServiceComponent =>
+
+	def validate(errors: Errors) {
+		if (action != "remove") {
+			userLookup.getUserByUserId(usercode) match {
+				case FoundUser(u) => {
+					if (!securityService.can(user, Permissions.Masquerade, PermissionsTarget.Global)) {
+						profileService.getMemberByUser(u, true, false) match {
+							case Some(profile) if securityService.can(user, Permissions.Masquerade, profile) =>
+							case _ => errors.rejectValue("usercode", "masquerade.noPermission")
+						}
+					}
+				}
+				case NoUser(user) => errors.rejectValue("usercode", "userId.notfound")
+			}
+		}
 	}
 }
 

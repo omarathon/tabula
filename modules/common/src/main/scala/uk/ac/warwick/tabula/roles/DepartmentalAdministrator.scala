@@ -22,6 +22,8 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 	GeneratesSubRole(RouteManagerRoleDefinition)
 
 	GrantsScopedPermission(
+		Masquerade,
+
 		Department.ManageExtensionSettings,
 		Department.ManageDisplaySettings,
 		Department.DownloadFeedbackReport,
@@ -48,11 +50,9 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Profiles.ScheduledMeetingRecord.Update,
 		Profiles.ScheduledMeetingRecord.Delete,
 
-
 		// TAB-1878
 		Profiles.Read.TelephoneNumber,
 		Profiles.Read.MobileNumber,
-
 
 		SmallGroups.Read
 	)

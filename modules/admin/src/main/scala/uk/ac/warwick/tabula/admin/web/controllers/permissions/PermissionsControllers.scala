@@ -97,7 +97,6 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 	@RequestMapping(method = Array(POST), params = Array("_command=addSingle"))
 	def addPermission(@Valid @ModelAttribute("addSingleCommand") command: GrantPermissionsCommand, errors: Errors) : Mav =  {
 		val target = command.scope
-		println(errors)
 		if (errors.hasErrors()) {
 			form(target)
 		} else {

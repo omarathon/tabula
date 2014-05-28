@@ -12,7 +12,7 @@ class CustomRoleDefinitionTest extends TestBase {
 		
 		override def description = "Test"
 		
-		GrantsScopelessPermission(Masquerade)
+		GrantsScopelessPermission(ImportSystemData)
 		GrantsScopedPermission(Department.ManageExtensionSettings)
 		GrantsGlobalPermission(Module.Create)
 		def canDelegateThisRolesPermissions:JBoolean = false
@@ -44,7 +44,7 @@ class CustomRoleDefinitionTest extends TestBase {
 		crd.permissions(Some(dept)) should be (Map(
 			Permissions.Department.ManageExtensionSettings -> Some(dept),
 			Permissions.Module.Create -> None,
-			Permissions.Masquerade -> None
+			Permissions.ImportSystemData -> None
 		))
 		
 		val ro1 = new RoleOverride
@@ -57,7 +57,7 @@ class CustomRoleDefinitionTest extends TestBase {
 			Permissions.Department.ManageExtensionSettings -> Some(dept),
 			Permissions.Module.Create -> None,
 			Permissions.Module.ManageAssignments -> Some(dept),
-			Permissions.Masquerade -> None
+			Permissions.ImportSystemData -> None
 		))
 		
 		val ro2 = new RoleOverride
@@ -69,7 +69,7 @@ class CustomRoleDefinitionTest extends TestBase {
 		crd.permissions(Some(dept)) should be (Map(
 			Permissions.Module.Create -> None,
 			Permissions.Module.ManageAssignments -> Some(dept),
-			Permissions.Masquerade -> None
+			Permissions.ImportSystemData -> None
 		))
 		
 		val crd2 = new CustomRoleDefinition
@@ -85,7 +85,7 @@ class CustomRoleDefinitionTest extends TestBase {
 			Permissions.Department.ManageExtensionSettings -> Some(dept),
 			Permissions.Module.Create -> None,
 			Permissions.Module.ManageAssignments -> Some(dept),
-			Permissions.Masquerade -> None
+			Permissions.ImportSystemData -> None
 		))
 	}
 

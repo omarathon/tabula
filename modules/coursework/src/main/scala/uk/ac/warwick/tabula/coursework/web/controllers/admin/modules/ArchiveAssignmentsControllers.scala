@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.coursework.commands.assignments.ArchiveAssignmentsCommand
-import scala.Array
 import uk.ac.warwick.tabula.coursework.web.Routes
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser

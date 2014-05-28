@@ -2,9 +2,18 @@
 <h1>Sorry</h1>
 
 <#if (user.loggedIn)!false>
-<p>Sorry<#if user??> ${user.firstName?default('')}</#if>, you don't have permission to see that.</p>
+<p>Sorry<#if user??> ${user.firstName?default('')}<#if user.masquerading> (really ${user.realUser.firstName})</#if></#if>, you don't have permission to see that.</p>
 
-<#if user.sysadmin>
+<#if !((user.sysadmin)!false) && (user.masquerading)!false>
+	<div class="alert alert-warning">
+		<h2>Masquerading</h2>
+
+		<p>When you are masquerading as another user, you can only see things in Tabula that <strong>both</strong>
+		you <strong>and</strong> the user you're masquerading as are able to see.</p>
+	</div>
+</#if>
+
+<#if (user.sysadmin)!false>
 	<div class="alert alert-info sysadmin-only-content" style="margin-top: 2em;">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
 
