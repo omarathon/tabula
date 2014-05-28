@@ -13,7 +13,6 @@ Are you sure you want to delete scheme: ${command.scheme.name}?
 	</#if>
 
 <p>&nbsp;</p>
-	<input type="hidden" name="filterQueryString" value="${command.filterQueryString!""}" />
 	<input
 		type="submit"
 		class="btn btn-primary"

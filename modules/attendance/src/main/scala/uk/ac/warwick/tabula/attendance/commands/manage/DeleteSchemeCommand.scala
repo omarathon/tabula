@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{SelfValidating, Description, Describable, ComposableCommand, CommandInternal}
 import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -10,8 +9,8 @@ import scala.collection.JavaConverters._
 import org.springframework.validation.Errors
 
 object DeleteSchemeCommand {
-	def apply(scheme: AttendanceMonitoringScheme, user: CurrentUser) =
-		new DeleteSchemeCommandInternal(scheme, user)
+	def apply(scheme: AttendanceMonitoringScheme) =
+		new DeleteSchemeCommandInternal(scheme)
 			with AutowiringAttendanceMonitoringServiceComponent
 			with ComposableCommand[AttendanceMonitoringScheme]
 			with DeleteSchemeCommandState
@@ -21,7 +20,7 @@ object DeleteSchemeCommand {
 
 }
 
-class DeleteSchemeCommandInternal(val scheme: AttendanceMonitoringScheme, val user: CurrentUser)
+class DeleteSchemeCommandInternal(val scheme: AttendanceMonitoringScheme)
 	extends CommandInternal[AttendanceMonitoringScheme] {
 
 	self: AttendanceMonitoringServiceComponent =>
@@ -44,12 +43,7 @@ trait DeleteSchemeDescription extends Describable[AttendanceMonitoringScheme] {
 }
 
 trait DeleteSchemeCommandState  {
-
-	self: AttendanceMonitoringServiceComponent =>
-
 	def scheme: AttendanceMonitoringScheme
-	def user: CurrentUser
-
 }
 
 
