@@ -43,6 +43,7 @@ trait AttendanceMonitoringDao {
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
 	def saveOrUpdate(total: AttendanceMonitoringCheckpointTotal): Unit
 	def delete(scheme: AttendanceMonitoringScheme)
+	def delete(point: AttendanceMonitoringPoint)
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
@@ -92,6 +93,9 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 
 	def delete(scheme: AttendanceMonitoringScheme) =
 		session.delete(scheme)
+
+	def delete(point: AttendanceMonitoringPoint) =
+		session.delete(point)
 
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
 		session.newCriteria[AttendanceMonitoringScheme]
