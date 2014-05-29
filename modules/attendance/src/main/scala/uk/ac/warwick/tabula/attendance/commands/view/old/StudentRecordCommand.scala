@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.view.old
 
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, Department, StudentMember}
 import uk.ac.warwick.tabula.commands._
@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.validation.{BindingResult, Errors}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.attendance.commands.{GroupMonitoringPointsByTerm, CheckpointUpdatedDescription}
 
 object StudentRecordCommand {
 	def apply(department: Department, student: StudentMember, user: CurrentUser, academicYearOption: Option[AcademicYear]) =
