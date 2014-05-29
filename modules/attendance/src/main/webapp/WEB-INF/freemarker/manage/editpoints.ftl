@@ -11,7 +11,7 @@
 	<p>Which points do you want to edit?</p>
 <#else>
 	<div class="alert alert-success">
-		<strong><@fmt.p newPoints "point" /></strong> edited on <strong><@fmt.p newPoints "point" /></strong>
+		<strong><@fmt.p newPoints "point" /></strong> ${actionCompleted!"edited"} on <strong><@fmt.p newPoints "scheme" /></strong>
 	</div>
 </#if>
 

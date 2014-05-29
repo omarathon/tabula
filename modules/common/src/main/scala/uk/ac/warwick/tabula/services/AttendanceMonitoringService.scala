@@ -26,6 +26,7 @@ trait AttendanceMonitoringService {
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
 	def deleteScheme(scheme: AttendanceMonitoringScheme)
+	def deletePoint(point: AttendanceMonitoringPoint)
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
@@ -69,9 +70,11 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit =
 		attendanceMonitoringDao.saveOrUpdate(point)
 
-	def deleteScheme(scheme: AttendanceMonitoringScheme) = {
+	def deleteScheme(scheme: AttendanceMonitoringScheme) =
 		attendanceMonitoringDao.delete(scheme)
-	}
+
+	def deletePoint(point: AttendanceMonitoringPoint) =
+		attendanceMonitoringDao.delete(point)
 
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.listSchemes(department, academicYear)
