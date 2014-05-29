@@ -41,6 +41,7 @@ trait AttendanceMonitoringDao {
 	def getPointById(id: String): Option[AttendanceMonitoringPoint]
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
+	def saveOrUpdate(total: AttendanceMonitoringCheckpointTotal): Unit
 	def delete(scheme: AttendanceMonitoringScheme)
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
@@ -60,9 +61,14 @@ trait AttendanceMonitoringDao {
 		sets: Seq[MonitoringPointSet],
 		types: Seq[MonitoringPointType]
 	): Seq[MonitoringPoint]
-	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
-	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
+	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
+	def removeCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit
+	def saveOrUpdateCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit
+	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
+	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
+	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): Option[AttendanceMonitoringCheckpointTotal]
+	
 }
 
 
@@ -80,6 +86,9 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit =
 		session.saveOrUpdate(point)
+
+	def saveOrUpdate(total: AttendanceMonitoringCheckpointTotal): Unit =
+		session.saveOrUpdate(total)
 
 	def delete(scheme: AttendanceMonitoringScheme) =
 		session.delete(scheme)
@@ -117,7 +126,9 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 				objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
 			}
 
-		TermService.orderedTermNames.diff(termCounts.filter{case(term, count) => count.intValue() == students.size}.map { _._1})
+		TermService.orderedTermNames.diff(termCounts.filter { case (term, count) => count.intValue() == students.size}.map {
+			_._1
+		})
 	}
 
 	def findReports(studentsIds: Seq[String], academicYear: AcademicYear, period: String): Seq[MonitoringPointReport] = {
@@ -144,27 +155,27 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 					.add(Projections.property("universityId"))
 					.add(Projections.property("userId"))
 			).seq.map { objArray =>
-				SchemeMembershipItem(
-					itemType,
-					objArray(0).asInstanceOf[String],
-					objArray(1).asInstanceOf[String],
-					objArray(2).asInstanceOf[String],
-					objArray(3).asInstanceOf[String],
-					Seq() // mixed in by the service
-				)
-			}
+			SchemeMembershipItem(
+				itemType,
+				objArray(0).asInstanceOf[String],
+				objArray(1).asInstanceOf[String],
+				objArray(2).asInstanceOf[String],
+				objArray(3).asInstanceOf[String],
+				Seq() // mixed in by the service
+			)
+		}
 
 		// keep the same order
 		universityIds.map(uniId => items.find(_.universityId == uniId)).flatten
 	}
 
 	def findPoints(
-		department: Department,
-		academicYear: AcademicYear,
-		schemes: Seq[AttendanceMonitoringScheme],
-		types: Seq[AttendanceMonitoringPointType],
-		styles: Seq[AttendanceMonitoringPointStyle]
-	): Seq[AttendanceMonitoringPoint] = {
+									department: Department,
+									academicYear: AcademicYear,
+									schemes: Seq[AttendanceMonitoringScheme],
+									types: Seq[AttendanceMonitoringPointType],
+									styles: Seq[AttendanceMonitoringPointStyle]
+									): Seq[AttendanceMonitoringPoint] = {
 		val query = session.newCriteria[AttendanceMonitoringPoint]
 			.createAlias("scheme", "scheme")
 			.add(is("scheme.department", department))
@@ -181,18 +192,18 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 	}
 
 	def findOldPoints(
-		department: Department,
-		academicYear: AcademicYear,
-		sets: Seq[MonitoringPointSet],
-		types: Seq[MonitoringPointType]
-	): Seq[MonitoringPoint] = {
+										 department: Department,
+										 academicYear: AcademicYear,
+										 sets: Seq[MonitoringPointSet],
+										 types: Seq[MonitoringPointType]
+										 ): Seq[MonitoringPoint] = {
 		val query = session.newCriteria[MonitoringPoint]
 			.createAlias("pointSet", "pointSet")
 			.createAlias("pointSet.route", "route")
 			.add(is("route.department", department))
 			.add(is("pointSet.academicYear", academicYear))
 
-		if(!sets.isEmpty)
+		if (!sets.isEmpty)
 			query.add(safeIn("pointSet", sets))
 		if (!types.isEmpty) {
 			if (types.contains(null)) {
@@ -205,14 +216,29 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 		query.seq
 	}
 
-	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint] = {
+	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint] = {
+		if (withFlush)
+			session.flush()
+
 		val checkpoints = session.newCriteria[AttendanceMonitoringCheckpoint]
 			.add(is("student", student))
 			.add(safeIn("point", points))
 			.seq
 
-		checkpoints.map{ c => c.point -> c}.toMap
+		checkpoints.map { c => c.point -> c}.toMap
 	}
+
+	def countCheckpointsForPoint(point: AttendanceMonitoringPoint) =
+		session.newCriteria[AttendanceMonitoringCheckpoint]
+			.add(is("point", point))
+			.project[Number](Projections.rowCount())
+			.uniqueResult.get.intValue()
+
+	def removeCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit =
+		checkpoints.foreach(session.delete)
+
+	def saveOrUpdateCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit =
+		checkpoints.foreach(session.saveOrUpdate)
 
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote] = {
 		session.newCriteria[AttendanceMonitoringNote]
@@ -221,9 +247,24 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 			.uniqueResult
 	}
 
-	def countCheckpointsForPoint(point: AttendanceMonitoringPoint) =
-		session.newCriteria[AttendanceMonitoringCheckpoint]
-			.add(is("point", point))
-			.project[Number](Projections.rowCount())
-			.uniqueResult.get.intValue()
+	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote] = {
+		val notes = session.newCriteria[AttendanceMonitoringNote]
+			.add(is("student", student))
+			.seq
+
+		notes.map { n => n.point -> n}.toMap
+
 	}
+
+	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): Option[AttendanceMonitoringCheckpointTotal] = {
+		// make sure totals are up-to-date
+		session.flush()
+		session.newCriteria[AttendanceMonitoringCheckpointTotal]
+			.add(is("student", student))
+			.add(is("department", department))
+			.add(is("academicYear", academicYear))
+			.uniqueResult
+	}
+}
+
+	

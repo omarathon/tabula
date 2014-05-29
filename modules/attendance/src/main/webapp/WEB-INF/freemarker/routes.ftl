@@ -106,6 +106,10 @@
 <#macro manageEditPoint point filterQuery returnTo><@_u page="/manage/${point.scheme.department.code}/${point.scheme.academicYear.startYear?c}/editpoints/${point.id}/edit?returnTo=${returnTo}&${filterQuery}"/></#macro>
 <#macro manageDeletePoint point filterQuery returnTo><@_u page="/manage/${point.scheme.department.code}/${point.scheme.academicYear.startYear?c}/editpoints/${point.id}/delete?returnTo=${returnTo}&${filterQuery}"/></#macro>
 
+<#macro noteEdit academicYearString student point><@_u page="/note/${academicYearString}/${student.universityId}/${point.id}/edit"/></#macro>
+
+<#macro profileMeetings student academicYearString point><@_u page="/profile/${student.universityId}/${academicYearString}/${point.id}/meetings"/></#macro>
+
 <#macro viewHome><@_u page="/view"/></#macro>
 <#macro viewHomeYears department><@_u page="/view/${department.code}"/></#macro>
 <#macro viewHomeForYear department academicYearString><@_u page="/view/${department.code}/${academicYearString}"/></#macro>

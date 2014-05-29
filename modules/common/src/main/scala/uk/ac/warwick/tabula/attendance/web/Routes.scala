@@ -90,5 +90,11 @@ object Routes {
 			context + "/view/%s/%s" format(encoded(department.code), encoded(academicYear.startYear.toString))
 		def students(department: Department, academicYear: AcademicYear) =
 			context + "/view/%s/%s/students" format(encoded(department.code), encoded(academicYear.startYear.toString))
+		def student(department: Department, academicYear: AcademicYear, student: StudentMember) =
+			context + "/view/%s/%s/students/%s" format(
+				encoded(department.code),
+				encoded(academicYear.startYear.toString),
+				encoded(student.universityId)
+			)
 	}
 }

@@ -4,9 +4,9 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, AttendanceState, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, MonitoringCheckpoint, AttendanceState, MonitoringPoint}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.MonitoringPointService
+import uk.ac.warwick.tabula.services.{AttendanceMonitoringService, MonitoringPointService}
 import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
@@ -287,6 +287,33 @@ object Fixtures extends Mockito {
 	def notification(agent:User, recipient: User) = {
 		val heron = new Heron(recipient)
 		Notification.init(new HeronWarningNotification, agent, heron)
+	}
+
+	def attendanceMonitoringPoint(
+		scheme: AttendanceMonitoringScheme,
+		name: String = "name",
+		startWeek: Int = 0,
+		endWeek: Int = 0
+	) = {
+		val point = new AttendanceMonitoringPoint
+		point.scheme = scheme
+		point.name = name
+		point.startWeek = startWeek
+		point.endWeek = endWeek
+		point.startDate = AcademicYear(2014).dateInTermOne.toLocalDate
+		point.endDate = point.startDate.plusWeeks(endWeek - startWeek).plusDays(6)
+		point
+	}
+
+	def attendanceMonitoringCheckpoint(point: AttendanceMonitoringPoint, student: StudentMember, state: AttendanceState) = {
+		val checkpoint = new AttendanceMonitoringCheckpoint
+		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		attendanceMonitoringService.studentAlreadyReportedThisTerm(student, point) returns false
+		checkpoint.attendanceMonitoringService = attendanceMonitoringService
+		checkpoint.point = point
+		checkpoint.student = student
+		checkpoint.state = state
+		checkpoint
 	}
 
 }
