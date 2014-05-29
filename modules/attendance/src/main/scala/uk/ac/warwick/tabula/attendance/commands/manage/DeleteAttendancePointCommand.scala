@@ -29,7 +29,7 @@ class DeleteAttendancePointCommandInternal(
 	self: DeleteAttendancePointCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
-		pointsToDelete.foreach(attendanceMonitoringService.deletePoint(_))
+		pointsToDelete.foreach(attendanceMonitoringService.deletePoint)
 		pointsToDelete
 	}
 
