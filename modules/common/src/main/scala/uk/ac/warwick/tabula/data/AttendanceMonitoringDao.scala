@@ -41,6 +41,7 @@ trait AttendanceMonitoringDao {
 	def getPointById(id: String): Option[AttendanceMonitoringPoint]
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
+	def delete(scheme: AttendanceMonitoringScheme)
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
@@ -61,6 +62,7 @@ trait AttendanceMonitoringDao {
 	): Seq[MonitoringPoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
+	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
 }
 
 
@@ -78,6 +80,9 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit =
 		session.saveOrUpdate(point)
+
+	def delete(scheme: AttendanceMonitoringScheme) =
+		session.delete(scheme)
 
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
 		session.newCriteria[AttendanceMonitoringScheme]
@@ -216,4 +221,9 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 			.uniqueResult
 	}
 
-}
+	def countCheckpointsForPoint(point: AttendanceMonitoringPoint) =
+		session.newCriteria[AttendanceMonitoringCheckpoint]
+			.add(is("point", point))
+			.project[Number](Projections.rowCount())
+			.uniqueResult.get.intValue()
+	}
