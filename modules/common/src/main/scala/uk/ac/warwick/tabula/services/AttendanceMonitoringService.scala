@@ -25,6 +25,7 @@ trait AttendanceMonitoringService {
 	def getPointById(id: String): Option[AttendanceMonitoringPoint]
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
+	def deleteScheme(scheme: AttendanceMonitoringScheme)
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
@@ -46,6 +47,7 @@ trait AttendanceMonitoringService {
 	): Seq[MonitoringPoint]
 	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
+	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
 	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint]
@@ -66,6 +68,10 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit =
 		attendanceMonitoringDao.saveOrUpdate(point)
+
+	def deleteScheme(scheme: AttendanceMonitoringScheme) = {
+		attendanceMonitoringDao.delete(scheme)
+	}
 
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.listSchemes(department, academicYear)
@@ -139,6 +145,10 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint] = {
 		attendanceMonitoringDao.getCheckpoints(points, student, withFlush)
 	}
+
+	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int =
+		attendanceMonitoringDao.countCheckpointsForPoint(point)
+	
 
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote] = {
 		attendanceMonitoringDao.getAttendanceNote(student, point)

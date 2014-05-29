@@ -253,7 +253,7 @@
 										</script>
 									<#elseif user?? && user.masquerader>
 										<div id="sysadmin-link">
-											<a id="sysadmin-button" class="btn btn-inverse" href="<@url page="/masquerade" context="/admin" />"><i class="icon-user icon-white"></i> Masquerade</a>
+											<a id="sysadmin-button" class="btn btn-inverse" href="<@url page="/masquerade" context="/admin" />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-user icon-white"></i> Masquerade</a>
 										</div>
 									</#if>
 

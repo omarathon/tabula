@@ -51,8 +51,8 @@ class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with
 	@Column(name = "member_query")
 	var memberQuery: String = _
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
-	@JoinColumn(name = "scheme_id")
+
+	@OneToMany(mappedBy = "scheme", fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
 	@BatchSize(size=200)
 	var points: JList[AttendanceMonitoringPoint] = JArrayList()
 
