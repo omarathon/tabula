@@ -20,6 +20,7 @@ case class GroupedOldPoint(
 
 trait GroupsPoints {
 
+
 	self: TermServiceComponent =>
 
 	def groupByTerm(points: Seq[AttendanceMonitoringPoint], groupSimilar: Boolean = true): Map[String, Seq[GroupedPoint]] = {
@@ -49,6 +50,11 @@ trait GroupsPoints {
 	}
 
 	def groupByMonth(points: Seq[AttendanceMonitoringPoint], groupSimilar: Boolean = true): Map[String, Seq[GroupedPoint]] = {
+
+		// do not remove; import needed for sorting
+		// should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+
 		val ungroupedPoints =
 			// only date points group by month
 			points.filter(_.scheme.pointStyle == AttendanceMonitoringPointStyle.Date)
@@ -57,23 +63,24 @@ trait GroupsPoints {
 		if (groupSimilar)
 			// group each month's similar points (by name and weeks)
 			ungroupedPoints.map{ case (monthYearPair, nonGroupedPoints) => monthYearPair ->
-				nonGroupedPoints.groupBy{ point => (point.name.toLowerCase, point.startWeek, point.endWeek)}
+				nonGroupedPoints.groupBy{ point => (point.name.toLowerCase, point.startDate, point.endDate)}
 			}
 			// transform similar points into 1 grouped point
 			.map{ case (monthYearPair, groupedPoints) =>
 				new DateFormatSymbols().getMonths.array(monthYearPair._1.get - 1) + " " + monthYearPair._2.get ->
 					groupedPoints.map{ case(_, pointGroup) => GroupedPoint(pointGroup.head, pointGroup.map(_.scheme), pointGroup)}
-						.toSeq.sortBy(p => (p.templatePoint.startWeek, p.templatePoint.endWeek))
+						.toSeq.sortBy(p => (p.templatePoint.startDate, p.templatePoint.endDate))
 			}
 		else
 			ungroupedPoints.map{ case (monthYearPair, nonGroupedPoints) =>
 				new DateFormatSymbols().getMonths.array(monthYearPair._1.get - 1) + " " + monthYearPair._2.get ->
 					nonGroupedPoints.map{ p => GroupedPoint(p, Seq(p.scheme), Seq(p))}
-						.toSeq.sortBy(p => (p.templatePoint.startWeek, p.templatePoint.endWeek))
+						.toSeq.sortBy(p => (p.templatePoint.startDate, p.templatePoint.endDate))
 			}
 	}
 
 	def groupOldByTerm(points: Seq[MonitoringPoint], academicYear: AcademicYear): Map[String, Seq[GroupedOldPoint]] = {
+
 		val approxStartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
 		val day = DayOfWeek.Thursday
 		lazy val weeksForYear = termService.getAcademicWeeksForYear(approxStartDate).toMap
