@@ -84,19 +84,17 @@ class RoleTableController extends AdminController {
 		ReflectionHelper.allPermissions
 			.filter { p => groupFn(p).hasText }
 			.map { permission =>
-				(permission, allDefinitions.map { definition =>
-					definition match {
-						case definition: SelectorBuiltInRoleDefinition[StudentRelationshipType @unchecked] => {
-							permission match {
-								case permission if definition.mayGrant(permission) => (definition, Some(true))
-								case permission: SelectorPermission[StudentRelationshipType @unchecked]
-									if definition.allPermissions(Some(null)).exists { case (p, _) => p.getName == permission.getName } &&
-										 definition.selector <= permission.selector => (definition, None)
-								case _ => (definition, Some(false))
-							}
+				(permission, allDefinitions.map {
+					case definition: SelectorBuiltInRoleDefinition[StudentRelationshipType @unchecked] => {
+						permission match {
+							case _ if definition.mayGrant(permission) => (definition, Some(true))
+							case selectorPermission: SelectorPermission[StudentRelationshipType @unchecked]
+								if definition.allPermissions(Some(null)).exists { case (p, _) => p.getName == selectorPermission.getName } &&
+									 definition.selector <= selectorPermission.selector => (definition, None)
+							case _ => (definition, Some(false))
 						}
-						case _ => (definition, Some(definition.mayGrant(permission)))
 					}
+					case definition: _ => (definition, Some(definition.mayGrant(permission)))
 				})
 			}
 			.filter { case (p, defs) => defs.exists { case (_, result) => !result.isDefined || result.exists { b => b } } }
