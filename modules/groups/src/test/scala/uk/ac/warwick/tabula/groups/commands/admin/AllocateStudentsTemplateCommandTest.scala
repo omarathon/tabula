@@ -1,21 +1,25 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
 import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.services.SmallGroupService
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, SmallGroupService, AssignmentMembershipService}
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.MockUserLookup
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.userlookup.User
 import org.junit.Before
 import org.apache.poi.xssf.usermodel.XSSFSheet
-import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
 
 class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 
 	val service = mock[SmallGroupService]
 	val membershipService = mock[AssignmentMembershipService]
 	val userLookup = new MockUserLookup
+
+	def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
+		case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
+		case ug: UserGroup => ug.userLookup = userLookup
+	}
 
 	val module = Fixtures.module("in101", "Introduction to Scala")
 	val set = Fixtures.smallGroupSet("My small groups")
@@ -81,10 +85,10 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		group2.groupSet = set
 		group3.groupSet = set
 		group4.groupSet = set
-		group1.students.asInstanceOf[UserGroup].userLookup = userLookup
-		group2.students.asInstanceOf[UserGroup].userLookup = userLookup
-		group3.students.asInstanceOf[UserGroup].userLookup = userLookup
-		group4.students.asInstanceOf[UserGroup].userLookup = userLookup
+		wireUserLookup(group1.students)
+		wireUserLookup(group2.students)
+		wireUserLookup(group3.students)
+		wireUserLookup(group4.students)
 
 		set.members.add(user1)
 		set.members.add(user2)
@@ -94,7 +98,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		
 		set.membershipService = membershipService
 		set.module = module
-		set.members.asInstanceOf[UserGroup].userLookup = userLookup
+		wireUserLookup(set.members)
 		
 		membershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Some(set.members)) returns (set.members.users)
 	}

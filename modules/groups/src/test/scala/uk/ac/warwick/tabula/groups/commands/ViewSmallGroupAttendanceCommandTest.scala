@@ -2,10 +2,7 @@ package uk.ac.warwick.tabula.groups.commands
 
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.services.SmallGroupService
-import uk.ac.warwick.tabula.services.TermServiceComponent
-import uk.ac.warwick.tabula.services.SmallGroupServiceComponent
-import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, SmallGroupService, TermServiceComponent, SmallGroupServiceComponent, TermService, UserLookupComponent}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
@@ -17,16 +14,20 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import SmallGroupAttendanceState._
-import uk.ac.warwick.tabula.services.UserLookupComponent
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventAttendance
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
 
 class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 	
 	trait BaseFixture {
 		val mockUserLookup = new MockUserLookup
+
+		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
+			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
+			case ug: UserGroup => ug.userLookup = mockUserLookup
+		}
 		
 		trait CommandTestSupport extends SmallGroupServiceComponent with TermServiceComponent with UserLookupComponent {
 			val smallGroupService = mock[SmallGroupService]
@@ -40,7 +41,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		set.academicYear = AcademicYear.guessByDate(DateTime.now)
 		
 		val group = new SmallGroup(set)
-		group.students.asInstanceOf[UserGroup].userLookup = mockUserLookup
+		wireUserLookup(group.students)
 		
 		// The group has two events. Event 1 runs at Monday 11am on week 2, 3 and 4; Event 2 runs at Monday 3pm on weeks 1, 3 and 7
 		val event1 = new SmallGroupEvent(group)
@@ -207,7 +208,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		set.academicYear = AcademicYear.guessByDate(DateTime.now)
 		
 		val group = new SmallGroup(set)
-		group.students.asInstanceOf[UserGroup].userLookup = mockUserLookup
+		wireUserLookup(group.students)
 		
 		val event = new SmallGroupEvent(group)
 		event.day = DayOfWeek.Monday
