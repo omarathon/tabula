@@ -1,9 +1,9 @@
 <#compress>
 
 <#assign bodyClass="attendance-page" />
-<#assign siteHeader="Attendance Monitoring" />
+<#assign siteHeader="Monitoring Points" />
 <#assign subsite=true />
-<#assign title="Attendance Monitoring" />
+<#assign title="Monitoring Points" />
 <#assign name="attendance" />
 <#assign nonav=false />
 
