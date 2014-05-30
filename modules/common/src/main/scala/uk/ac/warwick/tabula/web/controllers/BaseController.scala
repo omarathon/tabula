@@ -43,18 +43,20 @@ trait ControllerViews extends Logging {
 	val Mav = uk.ac.warwick.tabula.web.Mav
 
 	def getReturnTo(defaultUrl:String) =
-		requestInfo.flatMap { _.requestParameters.get("returnTo") }
-			.flatMap { _.headOption }
-			.filter { _.hasText }
-			.map { url =>
-				// Prevent returnTo rabbit hole by stripping other returnTos from the URL
-				url.replaceAll("[&?]returnTo=[^&]*", "")
-			}
-			.getOrElse {
-				if (defaultUrl.isEmpty)
-					logger.warn("Empty defaultUrl when using returnTo")
-				defaultUrl
-			}
+		requestInfo.flatMap {
+			_.requestParameters.get("returnTo")
+		}.flatMap {
+			_.headOption
+		}.filter {
+			_.hasText
+		}.fold({
+			if (defaultUrl.isEmpty)
+				logger.warn("Empty defaultUrl when using returnTo")
+			defaultUrl
+		})(url =>
+			// Prevent returnTo rabbit hole by stripping other returnTos from the URL
+			url.replaceAll("[&?]returnTo=[^&]*", "")
+		)
 
 	def Redirect(path: String, objects: Pair[String, _]*) = Mav("redirect:" + getReturnTo(path), objects: _*)
 	def Redirect(path: String, objects: Map[String, _]) = Mav("redirect:" + getReturnTo(path), objects)

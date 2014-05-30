@@ -114,7 +114,14 @@
 <#macro viewHomeYears department><@_u page="/view/${department.code}"/></#macro>
 <#macro viewHomeForYear department academicYearString><@_u page="/view/${department.code}/${academicYearString}"/></#macro>
 
-<#macro viewStudents department academicYearString><@_u page="/view/${department.code}/${academicYearString}/students"/></#macro>
-<#macro viewRecordStudent department academicYearString student><@_u page="/view/${department.code}/${academicYearString}/students/${student.universityId}/record"/></#macro>
+
+<#macro viewReport department academicYearString queryString><@_u page="/view/${department.code}/${academicYearString}/report?${queryString}"/></#macro>
+<#macro viewReportConfirm department academicYearString><@_u page="/view/${department.code}/${academicYearString}/report/confirm"/></#macro>
+<#macro viewStudents department academicYearString queryString="" page="" sortOrder=""><@_u page="/view/${department.code}/${academicYearString}/students?page=${page}&sortOrder=${sortOrder}&${queryString}"/></#macro>
+<#macro viewSingleStudent department academicYearString student><@_u page="/view/${department.code}/${academicYearString}/students/${student.universityId}" /></#macro>
+<#macro viewRecordStudent department academicYearString student returnTo="">
+	<#local returnTo><#if returnTo?has_content>?returnTo=${returnTo}</#if></#local>
+	<@_u page="/view/${department.code}/${academicYearString}/students/${student.universityId}/record${returnTo}"/>
+</#macro>
 <#macro viewPoints department academicYearString><@_u page="/view/${department.code}/${academicYearString}/points"/></#macro>
 <#macro viewAgents department academicYearString relationshipType><@_u page="/view/${department.code}/${academicYearString}/agents/${relationshipType.urlPart}"/></#macro>

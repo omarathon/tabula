@@ -9,6 +9,7 @@ import collection.JavaConverters._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.model.StudentMember
 
 object EditSchemeCommand {
 	def apply(scheme: AttendanceMonitoringScheme, user: CurrentUser) =
@@ -29,7 +30,7 @@ object EditSchemeCommand {
 class EditSchemeCommandInternal(val scheme: AttendanceMonitoringScheme, val user: CurrentUser)
 	extends CommandInternal[AttendanceMonitoringScheme] {
 
-	self: EditSchemeCommandState with AttendanceMonitoringServiceComponent =>
+	self: EditSchemeCommandState with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal() = {
 		scheme.name = name
@@ -40,6 +41,10 @@ class EditSchemeCommandInternal(val scheme: AttendanceMonitoringScheme, val user
 		scheme.memberQuery = filterQueryString
 		scheme.updatedDate = DateTime.now
 		attendanceMonitoringService.saveOrUpdate(scheme)
+		profileService.getAllMembersWithUniversityIds(scheme.members.members).map {
+			case student: StudentMember => attendanceMonitoringService.updateCheckpointTotal(student, scheme.department, scheme.academicYear)
+			case _ =>
+		}
 		scheme
 	}
 
