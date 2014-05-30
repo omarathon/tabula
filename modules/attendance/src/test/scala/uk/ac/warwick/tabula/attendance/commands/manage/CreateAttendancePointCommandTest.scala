@@ -205,6 +205,7 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		dupPoint.startWeek = 1
 		dupPoint.endWeek = 1
 		val schemeWithNonDupPoint = new AttendanceMonitoringScheme
+		dupPoint.scheme = schemeWithNonDupPoint
 		schemeWithNonDupPoint.points.add(nonDupPoint)
 		val schemeWithDupPoint = new AttendanceMonitoringScheme
 		schemeWithDupPoint.points.add(dupPoint)
