@@ -9,7 +9,7 @@ import scala.collection.mutable
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Department}
 import uk.ac.warwick.tabula.JavaImports.JHashSet
 import uk.ac.warwick.util.termdates.Term.TermType
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceMonitoringPoint, MonitoringPointReport}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceMonitoringPoint, MonitoringPointReport}
 
 class CreateAttendancePointCommandTest extends TestBase with Mockito {
 
@@ -204,7 +204,6 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		dupPoint.name = "Name"
 		dupPoint.startWeek = 1
 		dupPoint.endWeek = 1
-
 		val schemeWithNonDupPoint = new AttendanceMonitoringScheme
 		dupPoint.scheme = schemeWithNonDupPoint
 		schemeWithNonDupPoint.points.add(nonDupPoint)

@@ -20,7 +20,6 @@ case class GroupedOldPoint(
 
 trait GroupsPoints {
 
-
 	self: TermServiceComponent =>
 
 	def groupByTerm(points: Seq[AttendanceMonitoringPoint], groupSimilar: Boolean = true): Map[String, Seq[GroupedPoint]] = {
@@ -80,7 +79,6 @@ trait GroupsPoints {
 	}
 
 	def groupOldByTerm(points: Seq[MonitoringPoint], academicYear: AcademicYear): Map[String, Seq[GroupedOldPoint]] = {
-
 		val approxStartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
 		val day = DayOfWeek.Thursday
 		lazy val weeksForYear = termService.getAcademicWeeksForYear(approxStartDate).toMap
