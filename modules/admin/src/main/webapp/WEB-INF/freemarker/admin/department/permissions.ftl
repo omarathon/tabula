@@ -5,17 +5,18 @@
 
 <div class="permissions-page">
 	<div class="pull-right">
-		<a class="btn" href="<@routes.permissions department />"><i class="icon-lock"></i> Advanced</a>
+		<div><a class="btn" href="<@routes.permissions department />"><i class="icon-lock"></i> Advanced</a></div>
+		<br>
+		<div class="pull-right"><a href="<@routes.rolesDepartment department />"><strong>About roles</strong></a></div>
 	</div>
 
-	<h1 class="with-settings">Departmental permissions</h1>
-	<h5><span class="muted">for</span> ${department.name}</h5>
+	<@fmt.deptheader "Departmental permissions" "for" department routes "deptperms" "with-settings" />
 
 	<@pm.alerts "addCommand" department.name users role />
 
 	<div class="row-fluid" id="tutors-supervisors-row">
 		<div class="span6">
-			<h3 class="permissionTitle">Senior tutors</h3> <a class="use-popover" id="popover-seniortutors" data-html="true"
+			<h3 class="permissionTitle">Senior tutors</h3> <a class="use-popover colour-h3" id="popover-seniortutors" data-html="true"
 			   data-original-title="Senior tutors"
 			   data-content="A senior tutor can see everything that a personal tutor can, for every student in the department."><i class="icon-question-sign"></i></a>
 
@@ -23,7 +24,7 @@
 		</div>
 
 		<div class="span6">
-			<h3 class="permissionTitle">Senior supervisors</h3> <a class="use-popover" id="popover-seniorsupervisors" data-html="true"
+			<h3 class="permissionTitle">Senior supervisors</h3> <a class="use-popover colour-h3" id="popover-seniorsupervisors" data-html="true"
 			   data-original-title="Senior supervisors"
 			   data-content="A senior supervisor can see everything that a supervisor can, for every student in the department."><i class="icon-question-sign"></i></a>
 
@@ -32,7 +33,7 @@
 	</div>
 	<div class="row-fluid">
 		<div class="span6">
-			<h3 class="permissionTitle">Departmental administrators</h3> <a class="use-popover" id="popover-deptadmins" data-html="true"
+			<h3 class="permissionTitle">Departmental administrators</h3> <a class="use-popover colour-h3" id="popover-deptadmins" data-html="true"
 			   data-original-title="Departmental Administrators"
 			   data-content="A departmental administrator can manage Modules, Marking Workflows and Extension settings; and can assign tutors and supervisors."><i class="icon-question-sign"></i></a>
 

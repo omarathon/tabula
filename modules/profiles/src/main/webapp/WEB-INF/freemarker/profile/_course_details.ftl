@@ -143,7 +143,7 @@
 
 <#if features.showAccreditedPriorLearning>
 	<div id="accredited-prior-learning">
-		<#if can.do("AccreditedPriorLearning.Read", studentCourseDetails) && studentCourseDetails.hasAccreditedPriorLearning>
+		<#if can.do("Profiles.Read.AccreditedPriorLearning", studentCourseDetails) && studentCourseDetails.hasAccreditedPriorLearning>
 			<h5>Accredited Prior Learning</h5>
 				<table>
 					<tr>

@@ -34,16 +34,15 @@ case object RouteAuditorRoleDefinition extends BuiltInRoleDefinition {
 		
 		Profiles.Read.SmallGroups,
 		Profiles.Read.Coursework,
+		Profiles.Read.AccreditedPriorLearning,
 		
 		// Can read Coursework info for any student on this Route
 		Submission.Read,
 		Feedback.Read,
 		Extension.Read,
 
-		ModuleRegistration.Core,
-		ModuleRegistration.Results,
-
-		AccreditedPriorLearning.Read
+		Profiles.Read.ModuleRegistration.Core,
+		Profiles.Read.ModuleRegistration.Results
 	)
 
 	def canDelegateThisRolesPermissions: JavaImports.JBoolean = false

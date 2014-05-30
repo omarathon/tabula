@@ -10,6 +10,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 
 @Controller
 class RoleTableController extends AdminController {
@@ -27,6 +28,11 @@ class RoleTableController extends AdminController {
 	private def parentDepartments(department: Department): Seq[Department] =
 		if (mandatory(department).hasParent) department +: parentDepartments(department.parent)
 		else Seq(department)
+
+	private def baseName(roleDefinition: RoleDefinition): String = roleDefinition match {
+		case custom: CustomRoleDefinition => baseName(custom.baseRoleDefinition)
+		case _ => roleDefinition.getName.substring(0, 5)
+	}
 
 	private def rolesTable(department: Option[Department]): RolesTable = {
 		val builtInRoleDefinitions = ReflectionHelper.allBuiltInRoleDefinitions
@@ -53,6 +59,17 @@ class RoleTableController extends AdminController {
 			(builtInRoleDefinitions ++ selectorBuiltInRoleDefinitions ++ customRoleDefinitions)
 				.filter { _.isAssignable }
 				.sortBy { _.allPermissions(Some(null)).size }
+				.groupBy(baseName)
+				.toSeq.sortBy { case (substr, defs) =>
+					// Show selector ones first
+					val selectorSort = defs.head match {
+						case _: SelectorBuiltInRoleDefinition[_] => 0
+						case _ => 1
+					}
+
+					(selectorSort, defs.map { _.allPermissions(Some(null)).size }.max, substr)
+				}
+				.flatMap { case (_, defs) => defs }
 
 		def groupFn(p: Permission) = {
 			val simpleName = Permissions.shortName(p.getClass)
@@ -66,20 +83,23 @@ class RoleTableController extends AdminController {
 
 		ReflectionHelper.allPermissions
 			.filter { p => groupFn(p).hasText }
-			.flatMap { p =>
-				if (p.isInstanceOf[SelectorPermission[_]]) {
-					p +: relationshipTypes.map { relationshipType =>
-						SelectorPermission.of(p.getName, relationshipType)
-					}
-				} else {
-					Seq(p)
-				}
-			}
 			.map { permission =>
 				(permission, allDefinitions.map { definition =>
-					(definition, Some(definition.mayGrant(permission)))
+					definition match {
+						case definition: SelectorBuiltInRoleDefinition[StudentRelationshipType @unchecked] => {
+							permission match {
+								case permission if definition.mayGrant(permission) => (definition, Some(true))
+								case permission: SelectorPermission[StudentRelationshipType @unchecked]
+									if definition.allPermissions(Some(null)).exists { case (p, _) => p.getName == permission.getName } &&
+										 definition.selector <= permission.selector => (definition, None)
+								case _ => (definition, Some(false))
+							}
+						}
+						case _ => (definition, Some(definition.mayGrant(permission)))
+					}
 				})
 			}
+			.filter { case (p, defs) => defs.exists { case (_, result) => !result.isDefined || result.exists { b => b } } }
 			.sortBy { case (p, _) => groupFn(p) }
 	}
 
