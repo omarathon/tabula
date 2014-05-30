@@ -94,7 +94,7 @@ class RoleTableController extends AdminController {
 							case _ => (definition, Some(false))
 						}
 					}
-					case definition: _ => (definition, Some(definition.mayGrant(permission)))
+					case definition => (definition, Some(definition.mayGrant(permission)))
 				})
 			}
 			.filter { case (p, defs) => defs.exists { case (_, result) => !result.isDefined || result.exists { b => b } } }
