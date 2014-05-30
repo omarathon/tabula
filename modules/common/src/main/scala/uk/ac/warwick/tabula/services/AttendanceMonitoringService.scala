@@ -51,6 +51,8 @@ trait AttendanceMonitoringService {
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
 	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint]
+	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
+	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
 }
 
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService {
@@ -194,7 +196,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		val checkpointMap = getCheckpoints(points, student, withFlush = true)
 		val allCheckpoints = checkpointMap.map(_._2)
 
-		val unrecorded = points.diff(checkpointMap.keys.toSeq).size
+		val unrecorded = points.diff(checkpointMap.keys.toSeq).count(_.startDate.isBefore(DateTime.now.toLocalDate))
 		val missedUnauthorised = allCheckpoints.count(_.state == AttendanceState.MissedUnauthorised)
 		val missedAuthorised = allCheckpoints.count(_.state == AttendanceState.MissedAuthorised)
 		val attended = allCheckpoints.count(_.state == AttendanceState.Attended)
@@ -208,12 +210,22 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		}
 
 		totals.unrecorded = unrecorded
-		totals.unauthorized = missedUnauthorised
-		totals.authorized = missedAuthorised
+		totals.unauthorised = missedUnauthorised
+		totals.authorised = missedAuthorised
 		totals.attended = attended
 		totals.updatedDate = DateTime.now
 		attendanceMonitoringDao.saveOrUpdate(totals)
 		totals
+	}
+
+	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal = {
+		attendanceMonitoringDao.getCheckpointTotal(student, department, academicYear).getOrElse {
+			val total = new AttendanceMonitoringCheckpointTotal
+			total.student = student
+			total.department = department
+			total.academicYear = academicYear
+			total
+		}
 	}
 }
 

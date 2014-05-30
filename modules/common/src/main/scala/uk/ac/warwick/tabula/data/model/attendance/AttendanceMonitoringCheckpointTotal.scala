@@ -25,16 +25,18 @@ class AttendanceMonitoringCheckpointTotal extends GeneratedId {
 	var academicYear: AcademicYear = _
 
 	@NotNull
-	var unrecorded: Int = _
+	var unrecorded: Int = 0
 
 	@NotNull
-	var authorized: Int = _
+	@Column(name = "authorized")
+	var authorised: Int = 0
 
 	@NotNull
-	var unauthorized: Int = _
+	@Column(name = "unauthorized")
+	var unauthorised: Int = 0
 
 	@NotNull
-	var attended: Int = _
+	var attended: Int = 0
 
 	@NotNull
 	@Column(name = "updated_date")

@@ -84,8 +84,8 @@ class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 		)
 		there was one (service.attendanceMonitoringDao).saveOrUpdate(result)
 		result.attended should be (1)
-		result.unauthorized should be (1)
-		result.authorized should be (1)
+		result.unauthorised should be (1)
+		result.authorised should be (1)
 		result.unrecorded should be (0)
 	}}}
 

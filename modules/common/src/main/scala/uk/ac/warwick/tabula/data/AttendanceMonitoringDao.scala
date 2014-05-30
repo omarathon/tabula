@@ -67,7 +67,7 @@ trait AttendanceMonitoringDao {
 	def saveOrUpdateCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
-	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): Option[AttendanceMonitoringCheckpointTotal]
+	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear, withFlush: Boolean = false): Option[AttendanceMonitoringCheckpointTotal]
 	
 }
 
@@ -170,12 +170,12 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 	}
 
 	def findPoints(
-									department: Department,
-									academicYear: AcademicYear,
-									schemes: Seq[AttendanceMonitoringScheme],
-									types: Seq[AttendanceMonitoringPointType],
-									styles: Seq[AttendanceMonitoringPointStyle]
-									): Seq[AttendanceMonitoringPoint] = {
+		department: Department,
+		academicYear: AcademicYear,
+		schemes: Seq[AttendanceMonitoringScheme],
+		types: Seq[AttendanceMonitoringPointType],
+		styles: Seq[AttendanceMonitoringPointStyle]
+	): Seq[AttendanceMonitoringPoint] = {
 		val query = session.newCriteria[AttendanceMonitoringPoint]
 			.createAlias("scheme", "scheme")
 			.add(is("scheme.department", department))
@@ -192,11 +192,11 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 	}
 
 	def findOldPoints(
-										 department: Department,
-										 academicYear: AcademicYear,
-										 sets: Seq[MonitoringPointSet],
-										 types: Seq[MonitoringPointType]
-										 ): Seq[MonitoringPoint] = {
+		department: Department,
+		academicYear: AcademicYear,
+		sets: Seq[MonitoringPointSet],
+		types: Seq[MonitoringPointType]
+	): Seq[MonitoringPoint] = {
 		val query = session.newCriteria[MonitoringPoint]
 			.createAlias("pointSet", "pointSet")
 			.createAlias("pointSet.route", "route")
@@ -256,9 +256,11 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 
 	}
 
-	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): Option[AttendanceMonitoringCheckpointTotal] = {
-		// make sure totals are up-to-date
-		session.flush()
+	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear, withFlush: Boolean = false): Option[AttendanceMonitoringCheckpointTotal] = {
+		if (withFlush)
+			// make sure totals are up-to-date
+			session.flush()
+
 		session.newCriteria[AttendanceMonitoringCheckpointTotal]
 			.add(is("student", student))
 			.add(is("department", department))
