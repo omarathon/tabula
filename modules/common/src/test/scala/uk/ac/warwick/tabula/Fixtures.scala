@@ -81,12 +81,14 @@ object Fixtures extends Mockito {
 
 	def smallGroupSet(name:String) = {
 		val s = new SmallGroupSet
+		s.smallGroupService = None
 		s.name = name
 		s
 	}
 
 	def smallGroup(name:String) = {
 		val s = new SmallGroup
+		s.smallGroupService = None
 		s.name = name
 		s
 	}
