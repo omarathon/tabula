@@ -7,24 +7,28 @@
 	<#-- Permissions parents -->
 	<#if target.permissionsParents?size gt 0 || target.customRoleDefinitions??>
 		<div class="pull-right">
-			<#if target.customRoleDefinitions??>
-				<a class="btn" href="<@routes.customroles target />">
-					<i class="icon-user"></i> Custom roles
-				</a>
-			</#if>
+			<div>
+				<#if target.customRoleDefinitions??>
+					<a class="btn" href="<@routes.customroles target />">
+						<i class="icon-user"></i> Custom roles
+					</a>
+				</#if>
 
-			<#if target.permissionsParents?size gt 0>
-				<div class="btn-group">
-					<button class="btn dropdown-toggle" data-toggle="dropdown">
-						Permissions parents <span class="caret"></span>
-					</button>
-					<ul class="dropdown-menu">
-						<#list target.permissionsParents as parent>
-							<li><a href="<@routes.permissions parent />"><i class="icon-lock"></i> ${parent.humanReadableId}</a></li>
-						</#list>
-					</ul>
-				</div>
-			</#if>
+				<#if target.permissionsParents?size gt 0>
+					<div class="btn-group">
+						<button class="btn dropdown-toggle" data-toggle="dropdown">
+							Permissions parents <span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu">
+							<#list target.permissionsParents as parent>
+								<li><a href="<@routes.permissions parent />"><i class="icon-lock"></i> ${parent.humanReadableId}</a></li>
+							</#list>
+						</ul>
+					</div>
+				</#if>
+			</div>
+			<br>
+			<div class="pull-right"><a href="<@routes.roles />"><strong>About roles</strong></a></div>
 		</div>
 	</#if>
 
@@ -55,7 +59,7 @@
 						<div class="span6">
 							<h3 class="permissionTitle">${roleDefinition.description}</h3>
 							<#assign roleDescription><@pm.debugRole role=mapGet(existingRoleDefinitions, roleDefinition) showScopes=false /></#assign>
-							<a class="use-popover"
+							<a class="use-popover colour-h3"
 							   id="popover-${roleDefinition.name}"
 							   data-html="true"
 							   data-original-title="${roleDefinition.description}"
@@ -92,7 +96,7 @@
 						<div class="span6">
 							<h3 class="permissionTitle">${roleDefinition.description}</h3>
 							<#assign roleDescription><@pm.debugRole role=mapGet(grantableRoleDefinitions, roleDefinition) showScopes=false /></#assign>
-							<a class="use-popover"
+							<a class="use-popover colour-h3"
 							   id="popover-${roleDefinition.name}"
 							   data-html="true"
 							   data-original-title="${roleDefinition.description}"

@@ -30,12 +30,7 @@ case object ModuleAuditorRoleDefinition extends BuiltInRoleDefinition {
 		
 		SmallGroups.Read,
 		SmallGroups.ReadMembership,
-		SmallGroupEvents.ViewRegister,
-
-		ModuleRegistration.Core,
-		ModuleRegistration.Results,
-
-		AccreditedPriorLearning.Read
+		SmallGroupEvents.ViewRegister
 	)
 
 	def canDelegateThisRolesPermissions: JavaImports.JBoolean = false

@@ -32,39 +32,39 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="moduleCode", referencedColumnName="code")
-	@Restricted(Array("ModuleRegistration.Core"))
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var module: Module = null
 
-	@Restricted(Array("ModuleRegistration.Core"))
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var cats: java.math.BigDecimal = null
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	@Restricted(Array("ModuleRegistration.Core"))
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var academicYear: AcademicYear = null
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="scjCode", referencedColumnName="scjCode")
-	@Restricted(Array("ModuleRegistration.Core"))
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var studentCourseDetails: StudentCourseDetails = _
 
-	@Restricted(Array("ModuleRegistration.Core"))
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var assessmentGroup: String = null
 
-	@Restricted(Array("ModuleRegistration.Core"))
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var occurrence: String = null
 
-	@Restricted(Array("ModuleRegistration.Results"))
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
 	var agreedMark: java.math.BigDecimal = null
 
-	@Restricted(Array("ModuleRegistration.Results"))
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
 	var agreedGrade: String = null
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleSelectionStatusUserType")
 	@Column(name="selectionstatuscode")
-	@Restricted(Array("ModuleRegistration.Core"))
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var selectionStatus: ModuleSelectionStatus = null // core, option or optional core
 
-	@Restricted(Array("ModuleRegistration.Core"))
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var lastUpdatedDate = DateTime.now
 
 	override def toString = studentCourseDetails.scjCode + "-" + module.code + "-" + cats + "-" + AcademicYear.toString

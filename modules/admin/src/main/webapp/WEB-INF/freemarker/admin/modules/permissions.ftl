@@ -7,7 +7,9 @@
 
 <div class="permissions-page">
 	<div class="pull-right">
-		<a class="btn" href="<@routes.permissions module />"><i class="icon-lock"></i> Advanced</a>
+		<div><a class="btn" href="<@routes.permissions module />"><i class="icon-lock"></i> Advanced</a></div>
+		<br>
+		<div class="pull-right"><a href="<@routes.rolesDepartment department />"><strong>About roles</strong></a></div>
 	</div>
 
 	<h1 class="with-settings">Module permissions</h1>
