@@ -38,6 +38,8 @@ class EditAttendancePointCommandInternal(
 		pointsToEdit.map(point => {
 			val point = new AttendanceMonitoringPoint
 			point.updatedDate = DateTime.now
+			point.createdDate = templatePoint.createdDate
+			point.scheme = templatePoint.scheme
 			copyTo(point)
 			attendanceMonitoringService.saveOrUpdate(point)
 			point
