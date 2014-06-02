@@ -9,11 +9,10 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
-import uk.ac.warwick.tabula.system.permissions.{RestrictionProvider, Restricted, PermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{RestrictionProvider, Restricted}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.AcademicYear
@@ -31,6 +30,7 @@ import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Filter
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringCheckpointTotal
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -108,7 +108,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 			if (userType == MemberUserType.Staff && Option(jobTitle).isDefined) jobTitle
 			else Option(groupName).getOrElse("")
 
-		val deptName = Option(homeDepartment).map(", " + _.name).getOrElse("")
+		val deptName = Option(homeDepartment).fold("")(", " + _.name)
 
 		userTypeString + routeName + deptName
 	}
@@ -158,18 +158,15 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 		u.setLoginDisabled(!(inUseFlag.hasText && (inUseFlag == "Active" || inUseFlag.startsWith("Inactive - Starts "))))
 		userType match {
-			case MemberUserType.Staff => {
+			case MemberUserType.Staff =>
 				u.setStaff(true)
 				u.setUserType("Staff")
-			}
-			case MemberUserType.Emeritus => {
+			case MemberUserType.Emeritus =>
 				u.setStaff(true)
 				u.setUserType("Staff")
-			}
-			case MemberUserType.Student => {
+			case MemberUserType.Student =>
 				u.setStudent(true)
 				u.setUserType("Student")
-			}
 			case _ => u.setUserType("External")
 		}
 
@@ -190,8 +187,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 		"name" -> (firstName + " " + lastName),
 		"email" -> email)
 
-	def isStaff = (userType == MemberUserType.Staff)
-	def isStudent = (userType == MemberUserType.Student)
+	def isStaff = userType == MemberUserType.Staff
+	def isStudent = userType == MemberUserType.Student
 	def isRelationshipAgent(relationshipType: StudentRelationshipType) = {
 		!relationshipService.listStudentRelationshipsWithMember(relationshipType, this).isEmpty
 	}
@@ -199,7 +196,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	// Overridden in StudentMember
 	def hasRelationship(relationshipType: StudentRelationshipType) = false
 
-	def isFresh = (missingFromImportSince == null)
+	def isFresh = missingFromImportSince == null
 
 	override final def equals(other: Any): Boolean = other match {
 		case that: Member =>
@@ -261,6 +258,11 @@ class StudentMember extends Member with StudentProperties {
 		})
 	}
 
+	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@Restricted(Array("MonitoringPoints.View"))
+	@BatchSize(size=200)
+	var attendanceCheckpointTotals: JSet[AttendanceMonitoringCheckpointTotal] = JHashSet()
+
 	def this(id: String) = {
 		this()
 		this.universityId = id
@@ -321,13 +323,12 @@ class StudentMember extends Member with StudentProperties {
 	// there are no fresh studentCourseDetails with a non-null route status that's not P
 	def permanentlyWithdrawn: Boolean = {
 		inUseFlag.matches("Inactive.*") ||
-			(freshStudentCourseDetails.filter(_.statusOnRoute == null).size == 0 && // if they have a course details with null status they may be active
+			(freshStudentCourseDetails.count(_.statusOnRoute == null) == 0 && // if they have a course details with null status they may be active
 				freshStudentCourseDetails
-				 .filter(_.statusOnRoute != null)
-				 .map(_.statusOnRoute)
-				 .filter(_.code != null)
-				 .filter(!_.code.startsWith("P"))
-				 .size == 0
+					.filter(_.statusOnRoute != null)
+					.map(_.statusOnRoute)
+					.filter(_.code != null)
+					.count(!_.code.startsWith("P")) == 0
 			)
 	}
 

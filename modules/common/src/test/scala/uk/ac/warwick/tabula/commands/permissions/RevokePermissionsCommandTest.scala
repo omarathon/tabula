@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.services.{UserLookupComponent, SecurityServiceCompon
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.{Describable, SelfValidating, Appliable, DescriptionImpl}
 import scala.reflect._
-import scala.Some
 
 class RevokePermissionsCommandTest extends TestBase with Mockito {
 

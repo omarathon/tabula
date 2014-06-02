@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.criterion.Criterion
+import org.hibernate.criterion.{Restrictions, Criterion}
 import org.hibernate.criterion.Restrictions._
 import scala.collection.mutable
 import scala.collection.JavaConverters._
@@ -68,6 +68,12 @@ object ScalaRestriction {
 
 			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
 		}
+
+	def gt(property: String, value: Any, aliases: (String, String)*): Option[ScalaRestriction] =
+		Some(addAliases(new ScalaRestriction(Restrictions.gt(property, value)), aliases: _*))
+
+	def lt(property: String, value: Any, aliases: (String, String)*): Option[ScalaRestriction] =
+		Some(addAliases(new ScalaRestriction(Restrictions.lt(property, value)), aliases: _*))
 }
 
 trait Aliasable {

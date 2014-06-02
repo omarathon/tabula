@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.{RequestMapping, PathVariable, Mo
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.coursework.commands.feedback.GenericFeedbackCommand
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
-import scala.Array
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
 import javax.validation.Valid

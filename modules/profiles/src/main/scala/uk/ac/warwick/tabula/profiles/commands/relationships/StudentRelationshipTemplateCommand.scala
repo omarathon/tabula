@@ -18,7 +18,6 @@ import org.apache.poi.ss.util.CellRangeAddressList
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper
 import org.apache.poi.xssf.usermodel.XSSFDataValidationConstraint
 import org.apache.poi.xssf.usermodel.XSSFDataValidation
-import scala.Option.option2Iterable
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 class StudentRelationshipTemplateCommand(val department: Department, val relationshipType: StudentRelationshipType)

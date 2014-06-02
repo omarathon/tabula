@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.{RequestParam, PathVariable, Mode
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointTemplate, MonitoringPointSetTemplate}
 import uk.ac.warwick.tabula.home.commands.sysadmin.pointsettemplates._
-import scala.Array
 import javax.validation.Valid
 import org.springframework.validation.Errors
 

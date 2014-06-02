@@ -14,7 +14,6 @@ import org.springframework.validation.BindingResult
 import javax.persistence.{JoinColumn, ManyToOne, OneToMany, Entity}
 import org.hibernate.annotations.AccessType
 import javax.persistence.FetchType._
-import scala.Array
 import javax.persistence.CascadeType._
 
 /**

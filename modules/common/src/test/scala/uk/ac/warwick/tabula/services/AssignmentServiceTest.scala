@@ -557,10 +557,15 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 		val year = AcademicYear.guessByDate(DateTime.now)
 
+		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
+			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
+			case ug: UserGroup => ug.userLookup = userLookup
+		}
+
 		val assignment1 = newDeepAssignment("ch101")
 		assignment1.academicYear = year
 		assignment1.assignmentMembershipService = assignmentMembershipService
-		assignment1.members.asInstanceOf[UserGroupCacheManager].underlying.asInstanceOf[UserGroup].userLookup = userLookup
+		wireUserLookup(assignment1.members)
 
 		val department1 = assignment1.module.department
 
@@ -572,7 +577,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignment2.module = assignment1.module
 		assignment2.academicYear = year
 		assignment2.assignmentMembershipService = assignmentMembershipService
-		assignment2.members.asInstanceOf[UserGroupCacheManager].underlying.asInstanceOf[UserGroup].userLookup = userLookup
+		wireUserLookup(assignment2.members)
 
 		val department2 = assignment2.module.department
 

@@ -4,7 +4,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMethod, RequestMapping, PathVariable}
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.fileserver.FileServer
-import scala.Array
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadSupportingFilesCommand
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException

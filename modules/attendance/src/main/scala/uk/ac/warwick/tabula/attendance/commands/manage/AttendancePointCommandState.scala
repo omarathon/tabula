@@ -52,7 +52,7 @@ trait AttendancePointCommandState {
 				point.startWeek = startWeek
 				point.endWeek = endWeek
 				point.startDate = weeksForYear(startWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
-				point.endDate = weeksForYear(endWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
+				point.endDate = weeksForYear(endWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate.plusDays(6)
 		}
 		point.pointType = pointType
 		pointType match {

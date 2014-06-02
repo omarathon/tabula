@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceCo
 import uk.ac.warwick.tabula.RequestInfo
 import scala.reflect._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import scala.Some
 
 object RevokeRoleCommand {
 	def apply[A <: PermissionsTarget : ClassTag](scope: A): Appliable[GrantedRole[A]] with RevokeRoleCommandState[A] =

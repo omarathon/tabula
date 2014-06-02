@@ -52,8 +52,5 @@ object Event {
 			description.allProperties.toMap)
 	}
 
-	private def getUser = RequestInfo.fromThread match {
-		case Some(info) => Some(info.user)
-		case None => None
-	}
+	private def getUser = RequestInfo.fromThread.map { _.user }
 }

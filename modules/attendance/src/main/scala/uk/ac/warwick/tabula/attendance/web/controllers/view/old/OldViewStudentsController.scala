@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.web.controllers
+package uk.ac.warwick.tabula.attendance.web.controllers.view.old
 
 import org.springframework.web.bind.annotation.{RequestParam, RequestMapping, PathVariable, ModelAttribute}
 import org.springframework.stereotype.Controller
@@ -10,10 +10,11 @@ import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
 import uk.ac.warwick.tabula.attendance.commands.{ViewStudentsState, ViewStudentsResults, ViewStudentsCommand}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 
 @Controller
 @RequestMapping(value=Array("/view/{department}/2013/students"))
-class ViewStudentsController extends AttendanceController {
+class OldViewStudentsController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
 

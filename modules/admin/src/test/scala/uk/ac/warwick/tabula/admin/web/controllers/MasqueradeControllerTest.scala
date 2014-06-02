@@ -1,23 +1,23 @@
 package uk.ac.warwick.tabula.admin.web.controllers
 
 import uk.ac.warwick.tabula.{Mockito, TestBase}
-import uk.ac.warwick.tabula.admin.commands.{MasqueradeCommandPermissions, MasqueradeCommandState}
+import uk.ac.warwick.tabula.admin.commands.MasqueradeCommandState
 import uk.ac.warwick.tabula.commands.{Describable, Appliable}
 import uk.ac.warwick.tabula.web.Cookie
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.web.Cookies._
 import uk.ac.warwick.tabula.web.Routes
+import org.springframework.validation.BindException
 
 class MasqueradeControllerTest extends TestBase with Mockito {
 	
 	val controller = new MasqueradeController
 
-	@Test def createCommand {
+	@Test def createCommand = withUser("cuscav") {
 		val command = controller.command()
 
 		command should be (anInstanceOf[Appliable[Option[Cookie]]])
 		command should be (anInstanceOf[MasqueradeCommandState])
-		command should be (anInstanceOf[MasqueradeCommandPermissions])
 		command should be (anInstanceOf[Describable[Option[Cookie]]])
 	}
 
@@ -32,7 +32,7 @@ class MasqueradeControllerTest extends TestBase with Mockito {
 
 		val response = mock[HttpServletResponse]
 
-		controller.submit(command, response).viewName should be (s"redirect:${Routes.admin.masquerade}")
+		controller.submit(command, new BindException(command, "command"), response).viewName should be (s"redirect:${Routes.admin.masquerade}")
 		there was one (response).addCookie(cookie)
 	}
 

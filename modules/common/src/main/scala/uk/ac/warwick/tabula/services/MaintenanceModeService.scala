@@ -116,6 +116,9 @@ class MaintenanceModeEnabledException(val until: Option[DateTime], val message: 
 
 }
 
+class CannotPerformWriteOperationException(callee: Describable[_])
+	extends RuntimeException with HandledException
+
 @ItemType("MaintenanceMode")
 @JsonAutoDetect
 class MaintenanceModeMessage {

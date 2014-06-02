@@ -62,7 +62,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
 		filter.allModules should be (Seq(mod1, mod2, mod3)) // Order should be right through implicit ordering
 		filter.allRoutes should be (Seq(route1, route2, route3)) // Order should be right through implicit ordering
 		filter.allSprStatuses should be (Seq(sprF, sprP))
-		filter.allYearsOfStudy should be (1 to 8)
+		filter.allYearsOfStudy should be (1 to FilterStudentsOrRelationships.MaxYearsOfStudy)
 	}}
 
 	@Test

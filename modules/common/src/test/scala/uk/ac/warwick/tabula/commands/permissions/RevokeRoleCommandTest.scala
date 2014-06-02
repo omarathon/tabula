@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.{Describable, SelfValidating, Appliable, DescriptionImpl}
 import scala.reflect._
-import scala.Some
 
 class RevokeRoleCommandTest extends TestBase with Mockito {
 

@@ -4,10 +4,13 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.attendance._
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import uk.ac.warwick.tabula.data.{SchemeMembershipItemType, AutowiringAttendanceMonitoringDaoComponent, AttendanceMonitoringDaoComponent}
 import uk.ac.warwick.tabula.data.SchemeMembershipItem
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointType
+import uk.ac.warwick.tabula.commands.MemberOrUser
+import collection.JavaConverters._
+import org.joda.time.DateTime
 
 trait AttendanceMonitoringServiceComponent {
 	def attendanceMonitoringService: AttendanceMonitoringService
@@ -22,6 +25,8 @@ trait AttendanceMonitoringService {
 	def getPointById(id: String): Option[AttendanceMonitoringPoint]
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
+	def deleteScheme(scheme: AttendanceMonitoringScheme)
+	def deletePoint(point: AttendanceMonitoringPoint)
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
@@ -41,6 +46,14 @@ trait AttendanceMonitoringService {
 		sets: Seq[MonitoringPointSet],
 		types: Seq[AttendanceMonitoringPointType]
 	): Seq[MonitoringPoint]
+	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
+	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
+	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
+	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
+	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
+	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint]
+	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
+	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
 }
 
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService {
@@ -59,6 +72,12 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit =
 		attendanceMonitoringDao.saveOrUpdate(point)
 
+	def deleteScheme(scheme: AttendanceMonitoringScheme) =
+		attendanceMonitoringDao.delete(scheme)
+
+	def deletePoint(point: AttendanceMonitoringPoint) =
+		attendanceMonitoringDao.delete(point)
+
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.listSchemes(department, academicYear)
 
@@ -69,7 +88,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		attendanceMonitoringDao.findNonReportedTerms(students, academicYear)
 
 	def studentAlreadyReportedThisTerm(student: StudentMember, point: AttendanceMonitoringPoint): Boolean =
-		findNonReportedTerms(Seq(student), point.scheme.academicYear).contains(
+		!findNonReportedTerms(Seq(student), point.scheme.academicYear).contains(
 			termService.getTermFromDateIncludingVacations(point.startDate.toDateTimeAtStartOfDay).getTermTypeAsString
 		)
 
@@ -113,6 +132,103 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 			case AttendanceMonitoringPointType.SmallGroup => MonitoringPointType.SmallGroup
 			case AttendanceMonitoringPointType.AssignmentSubmission => MonitoringPointType.AssignmentSubmission
 		})
+	}
+
+	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
+		student.mostSignificantCourseDetails.fold(Seq[AttendanceMonitoringPoint]())(scd => {
+			val currentCourseStartDate = scd.beginDate
+			val schemes = findSchemesForStudent(student, department, academicYear)
+			schemes.flatMap(_.points.asScala).filter(p =>
+				p.startDate.isAfter(currentCourseStartDate) || p.startDate.isEqual(currentCourseStartDate)
+			)
+		})
+	}
+
+	private def findSchemesForStudent(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
+		membersHelper.findBy(MemberOrUser(student).asUser).filter(s => s.department == department && s.academicYear == academicYear)
+
+	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint] = {
+		attendanceMonitoringDao.getCheckpoints(points, student, withFlush)
+	}
+
+	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int =
+		attendanceMonitoringDao.countCheckpointsForPoint(point)
+	
+
+	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote] = {
+		attendanceMonitoringDao.getAttendanceNote(student, point)
+	}
+
+	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote] = {
+		attendanceMonitoringDao.getAttendanceNoteMap(student)
+	}
+
+	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint] = {
+		val existingCheckpoints = getCheckpoints(attendanceMap.keys.toSeq, student)
+		val checkpointsToDelete: Seq[AttendanceMonitoringCheckpoint] = attendanceMap.filter(_._2 == null).map(_._1).map(existingCheckpoints.get).flatten.toSeq
+		val checkpointsToUpdate: Seq[AttendanceMonitoringCheckpoint] = attendanceMap.filter(_._2 != null).flatMap{case(point, state) =>
+			val checkpoint = existingCheckpoints.getOrElse(point, {
+				val checkpoint = new AttendanceMonitoringCheckpoint
+				checkpoint.student = student
+				checkpoint.point = point
+				checkpoint.autoCreated = false
+				checkpoint
+			})
+			if (checkpoint.state != state) {
+				checkpoint.state = state
+				checkpoint.updatedBy = user.apparentId
+				checkpoint.updatedDate = DateTime.now
+				Option(checkpoint)
+			} else {
+				None
+			}
+		}.toSeq
+		attendanceMonitoringDao.removeCheckpoints(checkpointsToDelete)
+		attendanceMonitoringDao.saveOrUpdateCheckpoints(checkpointsToUpdate)
+
+		if (!attendanceMap.keys.isEmpty) {
+			val scheme = attendanceMap.keys.head.scheme
+			updateCheckpointTotal(student, scheme.department, scheme.academicYear)
+		}
+
+		checkpointsToUpdate
+	}
+
+	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal = {
+		val points = listStudentsPoints(student, department, academicYear)
+		val checkpointMap = getCheckpoints(points, student, withFlush = true)
+		val allCheckpoints = checkpointMap.map(_._2)
+
+		val unrecorded = points.diff(checkpointMap.keys.toSeq).count(_.startDate.isBefore(DateTime.now.toLocalDate))
+		val missedUnauthorised = allCheckpoints.count(_.state == AttendanceState.MissedUnauthorised)
+		val missedAuthorised = allCheckpoints.count(_.state == AttendanceState.MissedAuthorised)
+		val attended = allCheckpoints.count(_.state == AttendanceState.Attended)
+
+		val totals = attendanceMonitoringDao.getCheckpointTotal(student, department, academicYear).getOrElse {
+			val total = new AttendanceMonitoringCheckpointTotal
+			total.student = student
+			total.department = department
+			total.academicYear = academicYear
+			total
+		}
+
+		totals.unrecorded = unrecorded
+		totals.unauthorised = missedUnauthorised
+		totals.authorised = missedAuthorised
+		totals.attended = attended
+		totals.updatedDate = DateTime.now
+		attendanceMonitoringDao.saveOrUpdate(totals)
+		totals
+	}
+
+	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal = {
+		attendanceMonitoringDao.getCheckpointTotal(student, department, academicYear).getOrElse {
+			val total = new AttendanceMonitoringCheckpointTotal
+			total.student = student
+			total.department = department
+			total.academicYear = academicYear
+			total
+		}
 	}
 }
 

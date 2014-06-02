@@ -12,6 +12,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipStaticType, SchemeMembershipItem}
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.model.StudentMember
 
 object AddStudentsToSchemeCommand {
 	def apply(scheme: AttendanceMonitoringScheme, user: CurrentUser) =
@@ -32,7 +33,7 @@ object AddStudentsToSchemeCommand {
 class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme, val user: CurrentUser)
 	extends CommandInternal[AttendanceMonitoringScheme] {
 
-	self: AddStudentsToSchemeCommandState with AttendanceMonitoringServiceComponent =>
+	self: AddStudentsToSchemeCommandState with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal() = {
 		scheme.members.staticUserIds = staticStudentIds.asScala
@@ -41,6 +42,10 @@ class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme,
 		scheme.memberQuery = filterQueryString
 		scheme.updatedDate = DateTime.now
 		attendanceMonitoringService.saveOrUpdate(scheme)
+		profileService.getAllMembersWithUniversityIds(scheme.members.members).map {
+			case student: StudentMember => attendanceMonitoringService.updateCheckpointTotal(student, scheme.department, scheme.academicYear)
+			case _ =>
+		}
 		scheme
 	}
 

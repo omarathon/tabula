@@ -117,7 +117,7 @@ trait GetsPointsToCreate {
 		newPoint.startWeek = oldPoint.validFromWeek
 		newPoint.endWeek = oldPoint.requiredFromWeek
 		newPoint.startDate = weeksForYear(oldPoint.validFromWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
-		newPoint.endDate = weeksForYear(oldPoint.requiredFromWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
+		newPoint.endDate = weeksForYear(oldPoint.requiredFromWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate.plusDays(6)
 		newPoint.pointType = oldPoint.pointType match {
 			case null => AttendanceMonitoringPointType.Standard
 			case MonitoringPointType.Meeting => AttendanceMonitoringPointType.Meeting

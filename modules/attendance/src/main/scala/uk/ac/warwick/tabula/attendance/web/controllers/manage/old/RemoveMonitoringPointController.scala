@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
-import scala.Array
 import uk.ac.warwick.tabula.attendance.commands.manage.old.RemoveMonitoringPointCommand
 
 @Controller

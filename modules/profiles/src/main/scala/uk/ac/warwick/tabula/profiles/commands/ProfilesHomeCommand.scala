@@ -31,8 +31,7 @@ object ProfilesHomeCommand {
 	def apply(user: CurrentUser, currentMember: Option[Member]) =
 		new ProfilesHomeCommand(user, currentMember) 
 			with Command[ProfilesHomeInformation] 
-			with AutowiringFeaturesComponent 
-			with AutowiringSmallGroupServiceComponent 
+			with AutowiringSmallGroupServiceComponent
 			with AutowiringRelationshipServiceComponent 
 			with AutowiringModuleAndDepartmentServiceComponent 
 			with Public with ReadOnly with Unaudited

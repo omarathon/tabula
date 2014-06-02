@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.attendance.web
 
 import uk.ac.warwick.tabula.web.BreadCrumb
 import uk.ac.warwick.tabula.data.model
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.AcademicYear
 
 trait AttendanceBreadcrumbs {
@@ -112,6 +112,16 @@ object AttendanceBreadcrumbs {
 		case class DepartmentForYear(department: model.Department, academicYear: AcademicYear) extends Abstract {
 			val title = academicYear.startYear.toString
 			val url = Some(Routes.View.departmentForYear(department, academicYear))
+		}
+
+		case class Students(department: model.Department, academicYear: AcademicYear) extends Abstract {
+			val title = "Students"
+			val url = Some(Routes.View.students(department, academicYear))
+		}
+
+		case class Student(department: model.Department, academicYear: AcademicYear, student: StudentMember) extends Abstract {
+			val title = student.fullName.getOrElse("")
+			val url = Some(Routes.View.student(department, academicYear, student))
 		}
 
 	}

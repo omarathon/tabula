@@ -8,9 +8,6 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.services.AttendanceMonitoringService
 import org.springframework.beans.factory.annotation.Autowired
 
-/**
- * Displays the view home screen, allowing users to choose the academic year to view.
- */
 @Controller
 @RequestMapping(Array("/view/{department}/{academicYear}"))
 class ViewMethodController extends AttendanceController {

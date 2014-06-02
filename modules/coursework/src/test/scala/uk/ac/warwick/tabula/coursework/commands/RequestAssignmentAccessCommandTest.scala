@@ -39,6 +39,7 @@ object RequestAssignmentAccessCommandTest {
 		bean(){mock[ScheduledNotificationService]}
 		bean(){mock[UserLookupService]}
 		bean(){mock[Configuration]}
+		bean(){mock[Features]}
 	}
 }
 

@@ -38,7 +38,7 @@
 
 <#macro roleTable permsUrl cssClass scope roleDefinition roleNamePlural>
 <@manageRole scope=scope roleName=roleDefinition>
-	<table class="table table-bordered table-condensed permission-list ${cssClass}">
+	<table class="table table-bordered table-subtle table-condensed permission-list ${cssClass}">
 		<tbody>
 			<tr>
 				<td>
@@ -108,7 +108,7 @@
 			<#else>
 				<tr>
 					<td colspan="2" class="empty-list">
-						<i class="icon-info-sign"></i> There are no ${roleNamePlural} yet.
+						There are no ${roleNamePlural} yet.
 					</td>
 				</tr>
 			</#if>
