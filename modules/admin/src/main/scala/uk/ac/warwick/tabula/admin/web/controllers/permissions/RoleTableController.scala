@@ -55,7 +55,7 @@ class RoleTableController extends AdminController {
 			allDepartments
 				.flatMap { department => permissionsService.getCustomRoleDefinitionsFor(department) }
 
-		val allDefinitions =
+		val allDefinitionIncludingReplacements =
 			(builtInRoleDefinitions ++ selectorBuiltInRoleDefinitions ++ customRoleDefinitions)
 				.filter { _.isAssignable }
 				.sortBy { _.allPermissions(Some(null)).size }
@@ -70,6 +70,15 @@ class RoleTableController extends AdminController {
 					(selectorSort, defs.map { _.allPermissions(Some(null)).size }.max, substr)
 				}
 				.flatMap { case (_, defs) => defs }
+
+		val replacements = allDefinitionIncludingReplacements.flatMap {
+			case custom: CustomRoleDefinition if custom.replacesBaseDefinition => Some(custom)
+			case _ => None
+		}
+
+		val allDefinitions =
+			allDefinitionIncludingReplacements
+				.filterNot { defn => replacements.exists { _.baseRoleDefinition == defn } }
 
 		def groupFn(p: Permission) = {
 			val simpleName = Permissions.shortName(p.getClass)

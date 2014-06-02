@@ -52,8 +52,12 @@
 
 	<#function roleDescription definition>
 		<#if definition.baseRoleDefinition??>
-			<#local result><span title="Derived from ${definition.baseRoleDefinition.description}">${definition.name}</span></#local>
-			<#return result />
+			<#if definition.replacesBaseDefinition>
+				<#return roleDescription(definition.baseRoleDefinition) />
+			<#else>
+				<#local result><span title="Derived from ${definition.baseRoleDefinition.description}">${definition.name}</span></#local>
+				<#return result />
+			</#if>
 		<#else>
 			<#return definition.description />
 		</#if>

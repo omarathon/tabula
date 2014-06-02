@@ -92,8 +92,12 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] =
 		permissions(scope)
 
-	def mayGrant(target: Permission) =
-		baseRoleDefinition.mayGrant(target) ||
-		(overrides exists { o => o.overrideType == RoleOverride.Allow && o.permission == target })
+	def mayGrant(target: Permission) = {
+		val baseGrants = baseRoleDefinition.mayGrant(target)
+		val explicitDeny = (overrides.exists { o => o.overrideType == RoleOverride.Deny && o.permission == target})
+		val explicitGrant = (overrides.exists { o => o.overrideType == RoleOverride.Allow && o.permission == target})
+
+		(baseGrants || explicitGrant) && !explicitDeny
+	}
 
 }
