@@ -1,15 +1,15 @@
-package uk.ac.warwick.tabula.groups
+package uk.ac.warwick.tabula.attendance
 
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula._
 
 class ApplicationTest extends AppContextTestBase {
-    
-    @Autowired var annotationMapper:RequestMappingHandlerMapping =_
-       
-    @Test def itWorks = {
-    	assert(beans.containsBean("userLookup"))
-    }
+
+	@Autowired var annotationMapper:RequestMappingHandlerMapping =_
+
+	@Test def itWorks = {
+		assert(beans.containsBean("userLookup"))
+	}
 
 }

@@ -92,7 +92,7 @@ trait ReportStudentsPermissions extends RequiresPermissionsChecking {
 	this: ReportStudentsState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Report, department)
+		p.PermissionCheck(Permissions.MonitoringPoints.Report, mandatory(department))
 	}
 }
 
