@@ -55,13 +55,13 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 			override def pointsToEdit = Seq(templatePoint)
 			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
 			val termService = thisTermService
+			startWeek = 5
+			endWeek = 15
 		}
 	}
 
 	@Test
 	def testApply() { new CommandFixture {
-		command.startWeek = 5
-		command.endWeek = 15
 		val points = command.applyInternal()
 		points.head.createdDate should be (originalCreatedDate)
 		points.head.scheme should be (scheme)
