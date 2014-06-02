@@ -28,7 +28,7 @@ class PermissionDeniedException(
 	val user: CurrentUser,
 	val permission: Permission,
 	val scope: Any,
-	cause: Throwable = null) extends RuntimeException(cause) with UserError with PermissionsError {
+	cause: Throwable = null) extends RuntimeException(s"${user} can't perform ${permission} on ${scope}", cause) with UserError with PermissionsError {
 	override val statusCode = HttpStatus.SC_FORBIDDEN
 }
 	
