@@ -83,7 +83,7 @@ class AssignmentController extends CourseworkController {
 		if (!user.loggedIn) {
 			RedirectToSignin()
 		} else {
-		    val feedback = getFeedback(assignment, user.universityId)
+		  val feedback = getFeedback(assignment, user.universityId)
 
 			val submission = submissionService.getSubmissionByUniId(assignment, user.universityId).filter { _.submitted }
 
@@ -108,52 +108,6 @@ class AssignmentController extends CourseworkController {
 				"extension" -> extension,
 				"isExtended" -> isExtended,
 				"extensionRequested" -> extensionRequested)
-				.withTitle(module.name + " (" + module.code.toUpperCase + ")" + " - " + assignment.name)
-
-		}
-	}
-
-	@RequestMapping(Array("/module/{module}/{assignment}/{studentMember}"))
-	def assignmentGadgetInStudentProfile(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment: Assignment,
-		@PathVariable("studentMember") studentMember: Member,
-		user: CurrentUser) = {
-
-		val studentUser = studentMember.asSsoUser
-
-		if (!user.loggedIn) {
-			RedirectToSignin()
-		} else {
-			val feedback = getFeedback(assignment, studentMember.universityId)
-
-			val submission = submissionService.getSubmissionByUniId(assignment, studentMember.universityId).filter { _.submitted }
-
-			val extension = assignment.extensions.find(_.isForUser(studentUser))
-			val isExtended = assignment.isWithinExtension(studentUser)
-			val extensionRequested = extension.isDefined && !extension.get.isManual
-
-			val canSubmit = assignment.submittable(studentUser)
-			val canReSubmit = assignment.resubmittable(studentUser)
-
-			val isSelf = (user.universityId == studentMember.universityId)
-
-			Mav(
-				"submit/assignment",
-				"module" -> module,
-				"assignment" -> assignment,
-				"feedback" -> feedback,
-				"submission" -> submission,
-				"justSubmitted" -> false,
-				"canSubmit" -> canSubmit,
-				"canReSubmit" -> canReSubmit,
-				"hasExtension" -> extension.isDefined,
-				"hasActiveExtension" -> extension.exists(_.approved), // active = has been approved
-				"extension" -> extension,
-				"isExtended" -> isExtended,
-				"extensionRequested" -> extensionRequested,
-				"studentMember" -> studentMember,
-				"isSelf" -> isSelf)
 				.withTitle(module.name + " (" + module.code.toUpperCase + ")" + " - " + assignment.name)
 
 		}
