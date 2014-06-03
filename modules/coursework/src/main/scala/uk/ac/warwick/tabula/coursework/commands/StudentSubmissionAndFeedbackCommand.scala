@@ -6,7 +6,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.CurrentUser
 import StudentSubmissionAndFeedbackCommand._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, SubmissionServiceComponent, AutowiringFeedbackServiceComponent, FeedbackServiceComponent}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.forms.Extension
@@ -32,6 +32,17 @@ object StudentSubmissionAndFeedbackCommand {
 			with Unaudited with ReadOnly {
 			def studentMember = member
 		}
+
+	def apply(module: Module, assignment: Assignment, user: CurrentUser) =
+		new StudentSubmissionAndFeedbackCommandInternal(module, assignment)
+			with CurrentUserSubmissionAndFeedbackCommandState
+			with CurrentUserSubmissionAndFeedbackCommandPermissions
+			with AutowiringFeedbackServiceComponent
+			with AutowiringSubmissionServiceComponent
+			with ComposableCommand[StudentSubmissionInformation]
+			with Unaudited with ReadOnly {
+			def currentUser = user
+		}
 }
 
 trait StudentSubmissionAndFeedbackCommandState {
@@ -39,10 +50,10 @@ trait StudentSubmissionAndFeedbackCommandState {
 
 	def module: Module
 	def assignment: Assignment
-	def user: User
+	def studentUser: User
 
-	def feedback = feedbackService.getFeedbackByUniId(assignment, user.getWarwickId).filter(_.released)
-	def submission = submissionService.getSubmissionByUniId(assignment, user.getWarwickId).filter { _.submitted }
+	def feedback = feedbackService.getFeedbackByUniId(assignment, studentUser.getWarwickId).filter(_.released)
+	def submission = submissionService.getSubmissionByUniId(assignment, studentUser.getWarwickId).filter { _.submitted }
 }
 
 trait StudentMemberSubmissionAndFeedbackCommandState extends StudentSubmissionAndFeedbackCommandState {
@@ -50,7 +61,7 @@ trait StudentMemberSubmissionAndFeedbackCommandState extends StudentSubmissionAn
 
 	def studentMember: Member
 
-	final def user = studentMember.asSsoUser
+	final def studentUser = studentMember.asSsoUser
 }
 
 trait CurrentUserSubmissionAndFeedbackCommandState extends StudentSubmissionAndFeedbackCommandState {
@@ -58,7 +69,7 @@ trait CurrentUserSubmissionAndFeedbackCommandState extends StudentSubmissionAndF
 
 	def currentUser: CurrentUser
 
-	final def user = currentUser.apparentUser
+	final def studentUser = currentUser.apparentUser
 }
 
 abstract class StudentSubmissionAndFeedbackCommandInternal(val module: Module, val assignment: Assignment)
@@ -66,18 +77,18 @@ abstract class StudentSubmissionAndFeedbackCommandInternal(val module: Module, v
 	self: FeedbackServiceComponent with SubmissionServiceComponent =>
 
 	def applyInternal() = {
-		val extension = assignment.extensions.asScala.find(_.isForUser(user))
+		val extension = assignment.extensions.asScala.find(_.isForUser(studentUser))
 
 		StudentSubmissionInformation(
 			submission = submission,
 			feedback = feedback,
 			extension = extension,
 
-			isExtended = assignment.isWithinExtension(user),
+			isExtended = assignment.isWithinExtension(studentUser),
 			extensionRequested = extension.isDefined && !extension.get.isManual,
 
-			canSubmit = assignment.submittable(user),
-			canReSubmit = assignment.resubmittable(user)
+			canSubmit = assignment.submittable(studentUser),
+			canReSubmit = assignment.resubmittable(studentUser)
 		)
 	}
 
@@ -91,5 +102,22 @@ trait StudentMemberSubmissionAndFeedbackCommandPermissions extends RequiresPermi
 
 		p.PermissionCheck(Permissions.Submission.Read, mandatory(studentMember))
 		p.PermissionCheck(Permissions.Feedback.Read, mandatory(studentMember))
+	}
+}
+
+trait CurrentUserSubmissionAndFeedbackCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: CurrentUserSubmissionAndFeedbackCommandState =>
+
+	def permissionsCheck(p: PermissionsChecking) {
+		mustBeLinked(mandatory(assignment), mandatory(module))
+
+		var perms = collection.mutable.MutableList[CheckablePermission]()
+
+		submission.foreach { submission => perms += CheckablePermission(Permissions.Submission.Read, Some(submission)) }
+		feedback.foreach { feedback => perms += CheckablePermission(Permissions.Feedback.Read, Some(feedback)) }
+
+		perms += CheckablePermission(Permissions.Submission.Create, Some(assignment))
+
+		p.PermissionCheckAny(perms)
 	}
 }

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.system.permissions
 
 import org.springframework.util.Assert
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException, ItemNotFoundException}
+import uk.ac.warwick.tabula.{SubmitPermissionDeniedException, CurrentUser, PermissionDeniedException, ItemNotFoundException}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
@@ -164,7 +164,19 @@ trait PermissionsCheckingMethods extends Logging {
 				logger.warn("Permissions check throwing item not found - this should be caught in command (" + target + ")")
 				throw new ItemNotFoundException()
 			}
-		}}}) throw new PermissionDeniedException(user, target.permissionsAnyChecks.head._1, target.permissionsAnyChecks.head._2)
+		}}}) {
+			val exception =
+				target.permissionsAnyChecks
+					.find { case (permission, _) => permission == Permissions.Submission.Create }
+					.map { case (permission, scopes) => (permission, scopes.head) }
+					.collect { case (_, Some(assignment: Assignment)) => assignment }
+					.map { new SubmitPermissionDeniedException(_) }
+					.getOrElse {
+						new PermissionDeniedException(user, target.permissionsAnyChecks.head._1, target.permissionsAnyChecks.head._2)
+					}
+
+			throw exception
+		}
 	}
 }
 trait RequiresPermissionsChecking{
