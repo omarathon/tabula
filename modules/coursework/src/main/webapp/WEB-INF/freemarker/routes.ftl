@@ -99,6 +99,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro displaysettings department><@_u page="/department/${department.code}/settings/display" context="/admin" /></#macro>
 
+<#macro assignment_in_profile assignment student><@_u page="/module/${assignment.module.code}/${assignment.id}/${student.universityId}"/></#macro>
+
 <#-- non admin -->
 <#macro assignment assignment><@_u page="/module/${assignment.module.code}/${assignment.id}"/></#macro>
 <#macro extensionRequest assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/extension"/></#macro>

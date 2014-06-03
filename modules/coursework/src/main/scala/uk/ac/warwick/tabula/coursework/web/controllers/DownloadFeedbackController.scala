@@ -13,8 +13,7 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 import org.springframework.web.bind.annotation.RequestMethod
 import javax.servlet.http.HttpServletRequest
 import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{Member, Module, Assignment}
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.spring.Wire
 

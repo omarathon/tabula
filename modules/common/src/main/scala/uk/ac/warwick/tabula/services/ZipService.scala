@@ -79,9 +79,10 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	 * A zip of feedback with a folder for each student.
 	 */
 	def getAllFeedbackZips(assignment: Assignment): File = {
-		getZip(resolvePathForFeedback(assignment),
+		val ret = getZip(resolvePathForFeedback(assignment),
 			assignment.feedbacks.asScala flatMap getFeedbackZipItems //flatmap - take the lists of items, and flattens them to one single list
 			)
+		ret
 	}
 
 	/**

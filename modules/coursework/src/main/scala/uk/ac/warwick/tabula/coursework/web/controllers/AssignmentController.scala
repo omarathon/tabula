@@ -7,7 +7,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import javax.validation.Valid
 import uk.ac.warwick.tabula.coursework.commands.assignments.{ViewOnlineFeedbackCommand, SubmitAssignmentCommand}
-import uk.ac.warwick.tabula.data.model.{Submission, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{Member, Submission, Assignment, Module}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.SubmitPermissionDeniedException
@@ -16,10 +16,10 @@ import uk.ac.warwick.tabula.services.{MonitoringPointProfileTermAssignmentServic
 import org.joda.time.DateTime
 
 /**
- * This is the main student-facing controller for handling esubmission and return of feedback.
+ * This is the main student-facing and non-student-facing controller for handling esubmission and return of feedback.
+ * If the studentMember is not specified it works for the current user, whether they are a member of not.
  */
 @Controller
-@RequestMapping(Array("/module/{module}/{assignment}"))
 class AssignmentController extends CourseworkController {
 
 	var submissionService = Wire[SubmissionService]
@@ -30,8 +30,8 @@ class AssignmentController extends CourseworkController {
 
 	validatesSelf[SubmitAssignmentCommand]
 
-	private def getFeedback(assignment: Assignment, user: CurrentUser) =
-		feedbackService.getFeedbackByUniId(assignment, user.universityId).filter(_.released)
+	private def getFeedback(assignment: Assignment, universityId: String) =
+		feedbackService.getFeedbackByUniId(assignment, universityId).filter(_.released)
 
 	@ModelAttribute def formOrNull(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
 		val cmd = new ViewOnlineFeedbackCommand(assignment, user)
@@ -60,7 +60,7 @@ class AssignmentController extends CourseworkController {
 	/**
 	 * Sitebuilder-embeddable view.
 	 */
-	@RequestMapping(method = Array(HEAD, GET), params = Array("embedded"))
+	@RequestMapping(value = Array("/module/{module}/{assignment}"), method = Array(HEAD, GET), params = Array("embedded"))
 	def embeddedView(
 			@PathVariable("module") module: Module,
 			@PathVariable("assignment") assignment: Assignment,
@@ -70,7 +70,7 @@ class AssignmentController extends CourseworkController {
 		view(module, assignment, user, formOrNull, errors).embedded
 	}
 
-	@RequestMapping(method = Array(HEAD, GET), params = Array("!embedded"))
+	@RequestMapping(value = Array("/module/{module}/{assignment}"), method = Array(HEAD, GET), params = Array("!embedded"))
 	def view(
 			@PathVariable("module") module: Module,
 			@PathVariable("assignment") assignment: Assignment,
@@ -83,7 +83,7 @@ class AssignmentController extends CourseworkController {
 		if (!user.loggedIn) {
 			RedirectToSignin()
 		} else {
-		    val feedback = getFeedback(assignment, user)
+		    val feedback = getFeedback(assignment, user.universityId)
 
 			val submission = submissionService.getSubmissionByUniId(assignment, user.universityId).filter { _.submitted }
 
@@ -113,7 +113,53 @@ class AssignmentController extends CourseworkController {
 		}
 	}
 
-	@RequestMapping(method = Array(POST))
+	@RequestMapping(Array("/module/{module}/{assignment}/{studentMember}"))
+	def assignmentGadgetInStudentProfile(
+		@PathVariable("module") module: Module,
+		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable("studentMember") studentMember: Member,
+		user: CurrentUser) = {
+
+		val studentUser = studentMember.asSsoUser
+
+		if (!user.loggedIn) {
+			RedirectToSignin()
+		} else {
+			val feedback = getFeedback(assignment, studentMember.universityId)
+
+			val submission = submissionService.getSubmissionByUniId(assignment, studentMember.universityId).filter { _.submitted }
+
+			val extension = assignment.extensions.find(_.isForUser(studentUser))
+			val isExtended = assignment.isWithinExtension(studentUser)
+			val extensionRequested = extension.isDefined && !extension.get.isManual
+
+			val canSubmit = assignment.submittable(studentUser)
+			val canReSubmit = assignment.resubmittable(studentUser)
+
+			val isSelf = (user.universityId == studentMember.universityId)
+
+			Mav(
+				"submit/assignment",
+				"module" -> module,
+				"assignment" -> assignment,
+				"feedback" -> feedback,
+				"submission" -> submission,
+				"justSubmitted" -> false,
+				"canSubmit" -> canSubmit,
+				"canReSubmit" -> canReSubmit,
+				"hasExtension" -> extension.isDefined,
+				"hasActiveExtension" -> extension.exists(_.approved), // active = has been approved
+				"extension" -> extension,
+				"isExtended" -> isExtended,
+				"extensionRequested" -> extensionRequested,
+				"studentMember" -> studentMember,
+				"isSelf" -> isSelf)
+				.withTitle(module.name + " (" + module.code.toUpperCase + ")" + " - " + assignment.name)
+
+		}
+	}
+
+	@RequestMapping(value = Array("/module/{module}/{assignment}"), method = Array(POST))
 	def submit(
 			@PathVariable("module") module: Module,
 			@PathVariable("assignment") assignment: Assignment,
