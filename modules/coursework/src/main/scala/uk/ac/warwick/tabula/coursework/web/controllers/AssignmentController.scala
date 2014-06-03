@@ -1,35 +1,31 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
-import scala.collection.JavaConversions._
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import javax.validation.Valid
 import uk.ac.warwick.tabula.coursework.commands.assignments.{ViewOnlineFeedbackCommand, SubmitAssignmentCommand}
-import uk.ac.warwick.tabula.data.model.{Member, Submission, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{Submission, Assignment, Module}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.SubmitPermissionDeniedException
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{MonitoringPointProfileTermAssignmentService, SubmissionService, FeedbackService}
+import uk.ac.warwick.tabula.services.MonitoringPointProfileTermAssignmentService
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.coursework.commands.{StudentSubmissionAndFeedbackCommand, CurrentUserSubmissionAndFeedbackCommandState}
 import uk.ac.warwick.tabula.coursework.commands.StudentSubmissionAndFeedbackCommand._
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.StudentSubmissionAndFeedbackCommand.StudentSubmissionInformation
 
 /**
  * This is the main student-facing and non-student-facing controller for handling esubmission and return of feedback.
  * If the studentMember is not specified it works for the current user, whether they are a member of not.
  */
 @Controller
+@RequestMapping(value = Array("/module/{module}/{assignment}")
 class AssignmentController extends CourseworkController {
 
 	type StudentSubmissionAndFeedbackCommand = Appliable[StudentSubmissionInformation] with CurrentUserSubmissionAndFeedbackCommandState
 
-	var submissionService = Wire[SubmissionService]
-	var feedbackService = Wire[FeedbackService]
 	var monitoringPointProfileTermAssignmentService = Wire[MonitoringPointProfileTermAssignmentService]
 
 	hideDeletedItems
@@ -65,7 +61,7 @@ class AssignmentController extends CourseworkController {
 	/**
 	 * Sitebuilder-embeddable view.
 	 */
-	@RequestMapping(value = Array("/module/{module}/{assignment}"), method = Array(HEAD, GET), params = Array("embedded"))
+	@RequestMapping(method = Array(HEAD, GET), params = Array("embedded"))
 	def embeddedView(
 			@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
 			@ModelAttribute("submitAssignmentCommand") formOrNull: SubmitAssignmentCommand,
@@ -73,7 +69,7 @@ class AssignmentController extends CourseworkController {
 		view(infoCommand, formOrNull, errors).embedded
 	}
 
-	@RequestMapping(value = Array("/module/{module}/{assignment}"), method = Array(HEAD, GET), params = Array("!embedded"))
+	@RequestMapping(method = Array(HEAD, GET), params = Array("!embedded"))
 	def view(
 			@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
 			@ModelAttribute("submitAssignmentCommand") formOrNull: SubmitAssignmentCommand,
@@ -97,16 +93,13 @@ class AssignmentController extends CourseworkController {
 			.withTitle(infoCommand.module.name + " (" + infoCommand.module.code.toUpperCase + ")" + " - " + infoCommand.assignment.name)
 	}
 
-	@RequestMapping(value = Array("/module/{module}/{assignment}"), method = Array(POST))
+	@RequestMapping(method = Array(POST))
 	def submit(
 			@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
-			@Valid @ModelAttribute("submitAssignmentCommand") formOrNull: SubmitAssignmentCommand,
+			@Valid @ModelAttribute("submitAssignmentCommand") form: SubmitAssignmentCommand,
 			errors: Errors) = {
-		val form: SubmitAssignmentCommand = Option(formOrNull).getOrElse {
-			throw new SubmitPermissionDeniedException(infoCommand.assignment)
-		}
-
-		if (errors.hasErrors || !user.loggedIn) {
+		// We know form isn't null here because of permissions checks on the info command
+		if (errors.hasErrors) {
 			view(infoCommand, form, errors)
 		} else {
 			transactional() { form.apply() }
