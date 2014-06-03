@@ -155,6 +155,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 		val customRoleDefinitions =
 			allDepartments
 				.flatMap { department => permissionsService.getCustomRoleDefinitionsFor(department) }
+				.filterNot { _.replacesBaseDefinition }
 
 		val allDefinitions = (builtInRoleDefinitions ++ selectorBuiltInRoleDefinitions ++ customRoleDefinitions).filter { roleDefinition =>
 			roleDefinition.isAssignable &&

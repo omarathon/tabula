@@ -117,7 +117,15 @@
 
 <#macro viewReport department academicYearString queryString><@_u page="/view/${department.code}/${academicYearString}/report?${queryString}"/></#macro>
 <#macro viewReportConfirm department academicYearString><@_u page="/view/${department.code}/${academicYearString}/report/confirm"/></#macro>
-<#macro viewStudents department academicYearString queryString="" page="" sortOrder=""><@_u page="/view/${department.code}/${academicYearString}/students?page=${page}&sortOrder=${sortOrder}&${queryString}"/></#macro>
+<#macro viewStudents department academicYearString queryString="" page="" sortOrder="">
+	<#if page?has_content>
+		<#local page = "&page=" + page />
+	</#if>
+	<#if sortOrder?has_content>
+		<#local page = "&sortOrder=" + sortOrder />
+	</#if>
+	<@_u page="/view/${department.code}/${academicYearString}/students${queryString}${page}${sortOrder}"/>
+</#macro>
 <#macro viewSingleStudent department academicYearString student><@_u page="/view/${department.code}/${academicYearString}/students/${student.universityId}" /></#macro>
 <#macro viewRecordStudent department academicYearString student returnTo="">
 	<#local returnTo><#if returnTo?has_content>?returnTo=${returnTo}</#if></#local>

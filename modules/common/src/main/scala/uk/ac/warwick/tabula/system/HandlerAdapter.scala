@@ -2,12 +2,12 @@ package uk.ac.warwick.tabula.system
 
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler
 import collection.JavaConverters._
-import collection.JavaConversions._
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite
 import org.springframework.web.method.support.InvocableHandlerMethod
 import org.springframework.web.servlet.mvc.method.annotation.ServletRequestDataBinderFactory
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 
 /**
  * Extension of RequestMappingHandlerAdapter that allows you to place
@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ServletRequestDataB
  * to replace them entirely.
  */
 class HandlerAdapter extends org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter {
-	var customPreReturnValueHandlers: JList[HandlerMethodReturnValueHandler] = Nil
+	var customPreReturnValueHandlers: JList[HandlerMethodReturnValueHandler] = JArrayList()
 
 	/*
 	 * There used to be a protected method we could override but now it's all private, so
@@ -34,9 +34,10 @@ class HandlerAdapter extends org.springframework.web.servlet.mvc.method.annotati
 		composite.addHandlers(customPreReturnValueHandlers)
 		composite.addHandler(defaultHandlers)
 		returnValueHandlersField.set(this, composite)
+		getMessageConverters.add(new MappingJackson2HttpMessageConverter())
 	}
 	
 	override def createDataBinderFactory(binderMethods: JList[InvocableHandlerMethod]): ServletRequestDataBinderFactory = 
-		new CustomDataBinderFactory(binderMethods.toList, getWebBindingInitializer())
+		new CustomDataBinderFactory(binderMethods.asScala.toList, getWebBindingInitializer())
 
 }

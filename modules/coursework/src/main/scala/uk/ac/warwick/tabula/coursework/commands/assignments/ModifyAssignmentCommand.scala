@@ -155,8 +155,8 @@ import uk.ac.warwick.tabula.services.AssignmentService
 	}
 
 	override def scheduledNotifications(assignment: Assignment) = {
-		// if the assignment is open ended then don't schedule any notifications about deadlines
-		if(assignment.openEnded) {
+		// if the assignment doesn't collect submissions or is open ended then don't schedule any notifications about deadlines
+		if (!assignment.collectSubmissions || assignment.openEnded) {
 			Seq()
 		} else {
 			val dayOfDeadline = assignment.closeDate.withTime(0, 0, 0, 0)

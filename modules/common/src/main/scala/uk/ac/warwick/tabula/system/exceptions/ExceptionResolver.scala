@@ -28,6 +28,10 @@ import org.apache.http.HttpStatus
 import org.springframework.web.bind.MissingServletRequestParameterException
 import uk.ac.warwick.tabula.ParameterMissingException
 import uk.ac.warwick.tabula.ParameterMissingException
+import org.springframework.web.HttpRequestMethodNotSupportedException
+import org.springframework.web.servlet.mvc.condition.{ConsumesRequestCondition, ProducesRequestCondition}
+import org.springframework.http.MediaType
+import uk.ac.warwick.tabula.web.views.JSONView
 
 /**
  * Implements the Spring HandlerExceptionResolver SPI to catch all errors.
@@ -81,6 +85,9 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 			// Handle unresolvable @PathVariables as a page not found (404). HFC-408
 			case typeMismatch: TypeMismatchException => handle(new ItemNotFoundException(typeMismatch), request, response)
 
+			// Handle request method not supported as a 404
+			case methodNotSupported: HttpRequestMethodNotSupportedException => handle(new ItemNotFoundException(methodNotSupported), request, response)
+
 			// Handle missing servlet param exceptions as 400
 			case missingParam: MissingServletRequestParameterException => handle(new ParameterMissingException(missingParam), request, response)
 
@@ -129,9 +136,29 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 			case null => //keep defaultView
 		}
 
-		interestingException match {
-			case error: UserError => response map { _.setStatus(error.statusCode) }
-			case _ => response map { _.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR) }
+		val statusCode = interestingException match {
+			case error: UserError => error.statusCode
+			case _ => HttpStatus.SC_INTERNAL_SERVER_ERROR
+		}
+
+		response.foreach { _.setStatus(statusCode) }
+
+		request.foreach { request =>
+			def convertToJSON() {
+				mav.viewName == null
+				mav.view = new JSONView(Map(
+					"success" -> false,
+					"status" -> statusCode,
+					"errors" -> Array(interestingException.getMessage)
+				))
+			}
+
+			if (new ConsumesRequestCondition("application/json").getMatchingCondition(request) != null) convertToJSON()
+			else new ProducesRequestCondition("text/html", "application/json", "text/json").getMatchingCondition(request) match {
+				case null => // None matching
+				case condition if condition.getExpressions.exists(_.getMediaType == MediaType.TEXT_HTML) => // Want HTML
+				case _ => convertToJSON()
+			}
 		}
 
 		mav
