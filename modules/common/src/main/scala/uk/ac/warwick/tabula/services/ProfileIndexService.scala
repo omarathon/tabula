@@ -167,7 +167,14 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 	override val UpdatedDateField = "lastUpdatedDate"
 	override def getUpdatedDate(item: Member) = item.lastUpdatedDate
 
-	override def listNewerThan(startDate: DateTime, batchSize: Int) = dao.listUpdatedSince(startDate, batchSize)
+	override def listNewerThan(startDate: DateTime, batchSize: Int) = {
+		logger.info(s"${dao.countUpdatedSince(startDate)} profiles updated since $startDate")
+		val toUpdate = dao.listUpdatedSince(startDate, batchSize)
+		logger.info(s"${toUpdate.size} profiles will be indexed")
+		if (!toUpdate.isEmpty)
+			logger.info(s"${toUpdate.head.universityId} earliest since $startDate")
+		toUpdate
+	}
 
 	protected def toItems(docs: Seq[Document]) =
 		docs.flatMap { doc => documentValue(doc, IdField).flatMap { id => dao.getByUniversityId(id) } }
