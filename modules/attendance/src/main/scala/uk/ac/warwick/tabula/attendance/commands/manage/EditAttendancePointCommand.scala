@@ -36,11 +36,8 @@ class EditAttendancePointCommandInternal(
 
 	override def applyInternal() = {
 		pointsToEdit.map(point => {
-			val point = new AttendanceMonitoringPoint
-			point.updatedDate = DateTime.now
-			point.createdDate = templatePoint.createdDate
-			point.scheme = templatePoint.scheme
 			copyTo(point)
+			point.updatedDate = DateTime.now
 			attendanceMonitoringService.saveOrUpdate(point)
 			point
 		})

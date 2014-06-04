@@ -47,11 +47,20 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 		scheme.academicYear = academicYear2013
 		scheme.pointStyle = AttendanceMonitoringPointStyle.Week
 		val templatePoint = Fixtures.attendanceMonitoringPoint(scheme, "name1", 0, 1)
+		templatePoint.id = "123"
 		val originalCreatedDate = new DateTime().minusDays(2)
 		templatePoint.createdDate = originalCreatedDate
+		scheme.points.add(templatePoint)
+		val scheme2 = new AttendanceMonitoringScheme
+		scheme2.academicYear = academicYear2013
+		scheme2.pointStyle = AttendanceMonitoringPointStyle.Week
+		val secondPoint = Fixtures.attendanceMonitoringPoint(scheme2, templatePoint.name, templatePoint.startWeek, templatePoint.endWeek)
+		secondPoint.id = "234"
+		secondPoint.createdDate = originalCreatedDate
+		scheme2.points.add(secondPoint)
 
 		val command = new EditAttendancePointCommandInternal(null, null, templatePoint) with AttendanceMonitoringServiceComponent with EditAttendancePointCommandState with TermServiceComponent{
-			override def pointsToEdit = Seq(templatePoint)
+			override def pointsToEdit = Seq(templatePoint, secondPoint)
 			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
 			val termService = thisTermService
 			startWeek = 5
@@ -62,8 +71,13 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 	@Test
 	def testApply() { new CommandFixture {
 		val points = command.applyInternal()
-		points.head.createdDate should be (originalCreatedDate)
-		points.head.scheme should be (scheme)
+		points.foreach(_.createdDate should be (originalCreatedDate))
+		points.foreach(_.updatedDate.isAfter(originalCreatedDate) should be (true))
+		points.find(_.id == templatePoint.id).get.scheme should be (scheme)
+		points.find(_.id == secondPoint.id).get.scheme should be (scheme2)
+		points.size should be (command.pointsToEdit.size)
+		scheme.points.size should be (1)
+		scheme2.points.size should be (1)
 	}}
 
 	@Test
