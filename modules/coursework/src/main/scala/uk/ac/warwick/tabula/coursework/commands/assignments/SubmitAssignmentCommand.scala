@@ -165,17 +165,3 @@ class SubmitAssignmentCommand(
 	}
 
 }
-
-class ViewOnlineFeedbackCommand(val assignment: Assignment, val user: CurrentUser) extends Command[Option[Feedback]] {
-	
-	var service = Wire[FeedbackService]
-	
-	private val feedback = service.getFeedbackByUniId(assignment, user.universityId).filter(_.released)
-	
-	def hasFeedback = feedback.isDefined
-
-	override def applyInternal() = feedback
-
-	override def describe(d: Description) =	d.assignment(assignment).properties("student" -> user.universityId)
-
-}

@@ -1,50 +1,43 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
-import scala.collection.JavaConversions._
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import javax.validation.Valid
-import uk.ac.warwick.tabula.coursework.commands.assignments.{ViewOnlineFeedbackCommand, SubmitAssignmentCommand}
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmitAssignmentCommand
 import uk.ac.warwick.tabula.data.model.{Submission, Assignment, Module}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.SubmitPermissionDeniedException
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{MonitoringPointProfileTermAssignmentService, SubmissionService, FeedbackService}
+import uk.ac.warwick.tabula.services.MonitoringPointProfileTermAssignmentService
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.coursework.commands.{StudentSubmissionAndFeedbackCommand, CurrentUserSubmissionAndFeedbackCommandState}
+import uk.ac.warwick.tabula.coursework.commands.StudentSubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.commands.Appliable
 
 /**
- * This is the main student-facing controller for handling esubmission and return of feedback.
+ * This is the main student-facing and non-student-facing controller for handling esubmission and return of feedback.
+ * If the studentMember is not specified it works for the current user, whether they are a member of not.
  */
 @Controller
-@RequestMapping(Array("/module/{module}/{assignment}"))
+@RequestMapping(value = Array("/module/{module}/{assignment}"))
 class AssignmentController extends CourseworkController {
 
-	var submissionService = Wire[SubmissionService]
-	var feedbackService = Wire[FeedbackService]
+	type StudentSubmissionAndFeedbackCommand = Appliable[StudentSubmissionInformation] with CurrentUserSubmissionAndFeedbackCommandState
+
 	var monitoringPointProfileTermAssignmentService = Wire[MonitoringPointProfileTermAssignmentService]
 
 	hideDeletedItems
 
 	validatesSelf[SubmitAssignmentCommand]
 
-	private def getFeedback(assignment: Assignment, user: CurrentUser) =
-		feedbackService.getFeedbackByUniId(assignment, user.universityId).filter(_.released)
-
-	@ModelAttribute def formOrNull(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
-		val cmd = new ViewOnlineFeedbackCommand(assignment, user)
-		
-		val feedback =
-			if (cmd.hasFeedback) cmd.apply() // Log audit event
-			else None
-
-		restrictedBy {
-			feedback.isDefined
-		} (new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user)).orNull
-
+	@ModelAttribute("submitAssignmentCommand") def formOrNull(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
+		restricted(new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user)).orNull
 	}
+
+	@ModelAttribute("studentSubmissionAndFeedbackCommand") def studentSubmissionAndFeedbackCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
+		StudentSubmissionAndFeedbackCommand(module, assignment, user)
 
 	@ModelAttribute("willCheckpointBeCreated") def willCheckpointBeCreated(
 		@PathVariable module: Module,
@@ -62,70 +55,45 @@ class AssignmentController extends CourseworkController {
 	 */
 	@RequestMapping(method = Array(HEAD, GET), params = Array("embedded"))
 	def embeddedView(
-			@PathVariable("module") module: Module,
-			@PathVariable("assignment") assignment: Assignment,
-			user: CurrentUser,
-			formOrNull: SubmitAssignmentCommand,
+			@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
+			@ModelAttribute("submitAssignmentCommand") formOrNull: SubmitAssignmentCommand,
 			errors: Errors) = {
-		view(module, assignment, user, formOrNull, errors).embedded
+		view(infoCommand, formOrNull, errors).embedded
 	}
 
 	@RequestMapping(method = Array(HEAD, GET), params = Array("!embedded"))
 	def view(
-			@PathVariable("module") module: Module,
-			@PathVariable("assignment") assignment: Assignment,
-			user: CurrentUser,
-			formOrNull: SubmitAssignmentCommand,
+			@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
+			@ModelAttribute("submitAssignmentCommand") formOrNull: SubmitAssignmentCommand,
 			errors: Errors) = {
 		val form = Option(formOrNull)
+		val info = infoCommand.apply()
 
 		// If the user has feedback but doesn't have permission to submit, form will be null here, so we can't just get module/assignment from that
-		if (!user.loggedIn) {
-			RedirectToSignin()
-		} else {
-		    val feedback = getFeedback(assignment, user)
-
-			val submission = submissionService.getSubmissionByUniId(assignment, user.universityId).filter { _.submitted }
-
-			val extension = assignment.extensions.find(_.isForUser(user.apparentUser))
-			val isExtended = assignment.isWithinExtension(user.apparentUser)
-			val extensionRequested = extension.isDefined && !extension.get.isManual
-
-			val canSubmit = assignment.submittable(user.apparentUser)
-			val canReSubmit = assignment.resubmittable(user.apparentUser)
-
-			Mav(
-				"submit/assignment",
-				"module" -> module,
-				"assignment" -> assignment,
-				"feedback" -> feedback,
-				"submission" -> submission,
-				"justSubmitted" -> ( form exists { _.justSubmitted } ),
-				"canSubmit" -> canSubmit,
-				"canReSubmit" -> canReSubmit,
-				"hasExtension" -> extension.isDefined,
-				"hasActiveExtension" -> extension.exists(_.approved), // active = has been approved
-				"extension" -> extension,
-				"isExtended" -> isExtended,
-				"extensionRequested" -> extensionRequested)
-				.withTitle(module.name + " (" + module.code.toUpperCase + ")" + " - " + assignment.name)
-
-		}
+		Mav(
+			"submit/assignment",
+			"feedback" -> info.feedback,
+			"submission" -> info.submission,
+			"justSubmitted" -> form.exists { _.justSubmitted },
+			"canSubmit" -> info.canSubmit,
+			"canReSubmit" -> info.canReSubmit,
+			"hasExtension" -> info.extension.isDefined,
+			"hasActiveExtension" -> info.extension.exists(_.approved), // active = has been approved
+			"extension" -> info.extension,
+			"isExtended" -> info.isExtended,
+			"extensionRequested" -> info.extensionRequested,
+			"isSelf" -> true)
+			.withTitle(infoCommand.module.name + " (" + infoCommand.module.code.toUpperCase + ")" + " - " + infoCommand.assignment.name)
 	}
 
 	@RequestMapping(method = Array(POST))
 	def submit(
-			@PathVariable("module") module: Module,
-			@PathVariable("assignment") assignment: Assignment,
-			user: CurrentUser,
-			@Valid formOrNull: SubmitAssignmentCommand,
+			@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
+			@Valid @ModelAttribute("submitAssignmentCommand") form: SubmitAssignmentCommand,
 			errors: Errors) = {
-		val form: SubmitAssignmentCommand = Option(formOrNull) getOrElse {
-			throw new SubmitPermissionDeniedException(assignment)
-		}
-
-		if (errors.hasErrors || !user.loggedIn) {
-			view(form.module, form.assignment, user, form, errors)
+		// We know form isn't null here because of permissions checks on the info command
+		if (errors.hasErrors) {
+			view(infoCommand, form, errors)
 		} else {
 			transactional() { form.apply() }
 

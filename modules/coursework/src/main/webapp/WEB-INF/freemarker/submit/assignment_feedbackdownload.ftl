@@ -1,6 +1,6 @@
-<h2>Feedback for ${user.universityId}</h2>
+<h2>Feedback for ${feedback.universityId}</h2>
 	
-<#if features.collectRatings && feedback.collectRatings>
+<#if features.collectRatings && feedback.collectRatings && isSelf>
 	<div id="feedback-rating-container" class="is-stackable">
 		<!-- fallback for noscript -->
 		<div style="padding:0.5em">
@@ -16,14 +16,20 @@
 	</div>
 </#if>
 
-<#if  assignment.genericFeedback??>
+<#if assignment.genericFeedback??>
 <div class="feedback-notes">
 <h3>General feedback on the assignment:</h3> ${assignment.genericFeedback!""}
 </div>
 </#if>
 <#if feedback.comments??>
 <div class="feedback-notes">
-<h3>Feedback on your submission</h3> ${feedback.comments!""}
+	<h3>Feedback on
+	<#if isSelf>
+		your
+	<#else>
+		the student's
+	</#if>
+	 submission</h3> ${feedback.comments!""}
 </div>
 </#if>
 
@@ -31,24 +37,52 @@
 	<#assign feedbackcount=feedback.attachments?size>
 	<#-- Only offer a Zip if there's more than one file. -->
 	<#if feedbackcount gt 1>
-		<p>Your feedback consists of ${feedback.attachments?size} files.</p>
 		<p>
-			<a class="btn btn-success" href="<@url context='/coursework' page="/module/${module.code}/${assignment.id}/all/feedback.zip"/>"><i class="icon-gift"></i>
+			<#if isSelf>
+				Your
+			<#else>
+				The student's
+			</#if>
+			 feedback consists of ${feedback.attachments?size} files.</p>
+		<p>
+			<#assign zipDownloadUrl><#compress>
+				<#if isSelf>
+					<@routes.feedbackZip feedback />
+				<#else>
+					<@routes.feedbackZip_in_profile feedback />
+				</#if>
+			</#compress></#assign>
+
+			<a class="btn btn-success" href="${zipDownloadUrl}"><i class="icon-gift"></i>
 				Download all as a Zip file
 			</a>
 		</p>
 		<p>Or download the attachments individually below.</p>
 	<#elseif feedbackcount gt 0>
-		<p>Your feedback file is available to download below.</p>
+		<p>
+			<#if isSelf>
+				Your
+			<#else>
+				The student's
+			</#if>
+			 feedback file is available to download below.</p>
 	</#if>
 
 	<#if feedback.attachments?has_content>
 		<ul class="file-list">
 		<#list feedback.attachments as attachment>
 			<li>
-			<a class="btn<#if feedbackcount=1> btn-success</#if>" href="<@url context='/coursework' page="/module/${module.code}/${assignment.id}/get/${attachment.name?url}"/>"><i class="icon-file"></i>
-				${attachment.name}
-			</a>
+				<#assign attachmentDownloadUrl><#compress>
+					<#if isSelf>
+						<@routes.feedbackAttachment feedback attachment />
+					<#else>
+						<@routes.feedbackAttachment_in_profile feedback attachment />
+					</#if>
+				</#compress></#assign>
+
+				<a class="btn<#if feedbackcount=1> btn-success</#if>" href="${attachmentDownloadUrl}"><i class="icon-file"></i>
+					${attachment.name}
+				</a>
 			</li>
 		</#list>
 		</ul>
