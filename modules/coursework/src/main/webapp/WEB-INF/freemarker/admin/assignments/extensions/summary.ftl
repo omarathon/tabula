@@ -53,7 +53,7 @@
 			<#if assignment.closed>
 				<p class="late deadline">
 					<i class="icon-calendar icon-3x pull-left"></i>
-					<span class="time-remaining">Closed ${time_remaining} ago</span>
+					<span class="time-remaining">Closed ${time_remaining}</span>
 					Deadline was <@fmt.date date=assignment.closeDate />
 				</p>
 			<#else>

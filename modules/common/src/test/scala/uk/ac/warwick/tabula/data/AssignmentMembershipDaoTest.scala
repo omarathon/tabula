@@ -163,7 +163,7 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 	@Test def getAssignmentUserGroups() {
 		transactional { tx =>
 			new Fixture {
-				val users = assignmentMembershipService.determineAssignmentUsers(dept)
+				//val users = assignmentMembershipService.determineAssignmentUsers(dept)
 			}
 
 		}

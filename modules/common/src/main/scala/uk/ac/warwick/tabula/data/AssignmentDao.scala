@@ -32,7 +32,7 @@ trait AssignmentDao {
 	def getAssignmentWhereMarker(user: User): Seq[Assignment]
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
 
-	def getAssignmentsByYearDepartment(year: AcademicYear, department: Department): Seq[Assignment]
+	def getAssignments(department: Department, year: AcademicYear): Seq[Assignment]
 
 	def recentAssignment(department: Department): Option[Assignment]
 
@@ -93,7 +93,7 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 			.setEntity("module", module)
 			.seq
 
-	def getAssignmentsByYearDepartment(year: AcademicYear, department: Department): Seq[Assignment] =
+	def getAssignments(department: Department, year: AcademicYear): Seq[Assignment] =
 		session.newCriteria[Assignment]
 			.createAlias("module", "m")
 			.add(is("m.department", department))

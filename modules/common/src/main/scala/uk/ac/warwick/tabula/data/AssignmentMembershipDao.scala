@@ -7,9 +7,6 @@ import uk.ac.warwick.tabula.AcademicYear
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.userlookup.User
-import org.joda.time.DateTime
-import org.hibernate.criterion.Restrictions._
 
 trait AssignmentMembershipDaoComponent {
 	val membershipDao: AssignmentMembershipDao
@@ -65,28 +62,26 @@ trait AssignmentMembershipDao {
 	 */
 	def getSITSEnrolledAssignments(user: User): Seq[Assignment]
 	def getSITSEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet]
-
-	def getAssignments(department: Department): Seq[Assignment]
 }
 
 @Repository
 class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
-	
+
 	def getSITSEnrolledAssignments(user: User): Seq[Assignment] =
 		session.newQuery[Assignment]("""select a
-			from 
+			from
 				Assignment a
 					join a.assessmentGroups ag
 					join ag.assessmentComponent.upstreamAssessmentGroups uag
 					join uag.members autoMembership
 					join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId = :universityId
-			where 
+			where
 					uag.academicYear = a.academicYear and
 					uag.occurrence = ag.occurrence and
 					a.deleted = false and a.archived = false""")
 			.setString("universityId", user.getWarwickId)
 			.distinct.seq
-			
+
 	def getSITSEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet] =
 		session.newQuery[SmallGroupSet]("""select sgs
 			from SmallGroupSet sgs
@@ -94,7 +89,7 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 				join ag.assessmentComponent.upstreamAssessmentGroups uag
 				join uag.members autoMembership
 				join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId = :universityId
-			where 
+			where
 				uag.academicYear = sgs.academicYear and
 				uag.occurrence = ag.occurrence and
 				sgs.deleted = false and sgs.archived = false""")
@@ -121,15 +116,15 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 		if (group.assignment == null && group.smallGroupSet == null) None
 		else {
 			val criteria = session.newCriteria[AssessmentGroup]
-			.add(is("assessmentComponent", group.assessmentComponent))
-			.add(is("occurrence", group.occurrence))
-	
+				.add(is("assessmentComponent", group.assessmentComponent))
+				.add(is("occurrence", group.occurrence))
+
 			if (group.assignment != null) {
 				criteria.add(is("assignment", group.assignment))
 			} else {
 				criteria.add(is("smallGroupSet", group.smallGroupSet))
 			}
-	
+
 			criteria.uniqueResult
 		}
 	}
@@ -139,13 +134,13 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 	def save(assignment: AssessmentComponent): AssessmentComponent =
 		find(assignment)
 			.map { existing =>
-				if (existing needsUpdatingFrom assignment) {
-					existing.copyFrom(assignment)
-					session.update(existing)
-				}
-
-				existing
+			if (existing needsUpdatingFrom assignment) {
+				existing.copyFrom(assignment)
+				session.update(existing)
 			}
+
+			existing
+		}
 			.getOrElse { session.save(assignment); assignment }
 
 	def save(group: UpstreamAssessmentGroup) =
@@ -215,16 +210,4 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 			.add(is("assessmentGroup", component.assessmentGroup))
 			.seq
 	}
-
-	// return all user groups for assignments for modules in the department
-	def getAssignments(department: Department): Seq[Assignment] = {
-		session.newCriteria[Assignment]
-			.createAlias("department", "department")
-			.createAlias("module", "module")
-
-			.add(is("module.department", department)) // join department to module
-			.add(is("assignment.module", "module")) // join assignment to module
-			.seq
-	}
-
 }

@@ -27,10 +27,6 @@ abstract class ExtensionController extends CourseworkController {
 	var relationshipService = Wire[RelationshipService]
 	var profileService = Wire[ProfileService]
 
-	// Add the common breadcrumbs to the model
-	def crumbed(mav: Mav, module: Module)
-		= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
-
 	class ExtensionMap(extension: Extension) {
 		def asMap: Map[String, String] = {
 
@@ -66,6 +62,10 @@ abstract class ExtensionController extends CourseworkController {
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions"))
 class ListExtensionsForAssignmentController extends ExtensionController {
 
+	// Add the common breadcrumbs to the model
+	def crumbed(mav: Mav, module: Module)
+	= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+
 	@ModelAttribute
 	def listCommand(
 									 @PathVariable("module") module:Module,
@@ -93,6 +93,10 @@ class ListExtensionsForAssignmentController extends ExtensionController {
 @RequestMapping(Array("/admin//{department}/manage/extensions"))
 class ListAllExtensionsController extends ExtensionController {
 
+	// Add the common breadcrumbs to the model
+	def crumbed(mav: Mav, department: Department)
+	= mav.crumbs(Breadcrumbs.Department(department))
+
 	@ModelAttribute
 	def listCommand(
 									 @PathVariable("department") department:Department
@@ -103,7 +107,6 @@ class ListAllExtensionsController extends ExtensionController {
 		val extensionGraphs = cmd.apply()
 
 		val model = Mav("admin/assignments/extensions/summary",
-			"detailUrl" -> Routes.admin.assignment.extension.detail(cmd.assignment),
 			"extensionToOpen" -> universityId,
 			"extensionGraphs" -> extensionGraphs,
 			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar

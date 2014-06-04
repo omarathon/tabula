@@ -55,7 +55,6 @@ trait AssignmentMembershipService {
 	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): AssignmentMembershipInfo
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User]
 	def determineMembershipUsers(assignment: Assignment): Seq[User]
-	def determineAssignmentUsers(department: Department): Seq[User]
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean
 }
@@ -137,16 +136,6 @@ class AssignmentMembershipServiceImpl
 
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] =
 		dao.getUpstreamAssessmentGroups(component, academicYear)
-
-	/**
-	 * Returns a list of Users for students who are enrolled on assignments in modules in this department.
-	 */
-	def determineAssignmentUsers(department: Department): Seq[User] = {
-		val assignments =dao.getAssignments(department)
-		(for (assignment <- assignments) yield (
-			determineMembershipUsers(assignment)
-		)).flatten
-	}
 
 }
 
