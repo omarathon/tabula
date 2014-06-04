@@ -25,7 +25,7 @@ object CreateNewAttendancePointsFromCopyCommand {
 			with CreateNewAttendancePointsFromCopyDescription
 			with CreateNewAttendancePointsFromCopyPermissions
 			with CreateNewAttendancePointsFromCopyCommandState
-			with SetsFindResultOnCreateNewAttendancePointsFromCopyCommand
+			with SetsFindPointsResultOnCommandState
 }
 
 
@@ -144,16 +144,6 @@ trait GetsPointsToCreate {
 	}
 }
 
-trait SetsFindResultOnCreateNewAttendancePointsFromCopyCommand {
-
-	self: CreateNewAttendancePointsFromCopyCommandState =>
-
-	def setFindResult(result: FindPointsResult) {
-		findPointsResult = result
-	}
-
-}
-
 trait CreateNewAttendancePointsFromCopyPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
 	self: CreateNewAttendancePointsFromCopyCommandState =>
@@ -175,11 +165,9 @@ trait CreateNewAttendancePointsFromCopyDescription extends Describable[Seq[Atten
 	}
 }
 
-trait CreateNewAttendancePointsFromCopyCommandState {
+trait CreateNewAttendancePointsFromCopyCommandState extends FindPointsResultCommandState {
 	def department: Department
 	def academicYear: AcademicYear
 	def schemes: Seq[AttendanceMonitoringScheme]
 	lazy val pointStyle: AttendanceMonitoringPointStyle = schemes.head.pointStyle
-
-	var findPointsResult: FindPointsResult = _
 }

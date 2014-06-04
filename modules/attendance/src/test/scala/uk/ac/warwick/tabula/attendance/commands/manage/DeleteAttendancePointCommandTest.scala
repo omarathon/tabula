@@ -14,7 +14,6 @@ class DeleteAttendancePointCommandTest extends TestBase with Mockito {
 			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
 			def department = null
 			def templatePoint = null
-			def findPointsResult = null
 			override def pointsToDelete = Seq(point)
 		}
 		val errors = new BindException(validator, "errors")
