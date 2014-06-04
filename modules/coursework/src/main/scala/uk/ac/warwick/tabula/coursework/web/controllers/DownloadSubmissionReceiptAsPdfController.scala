@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{Submission, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{Member, Submission, Assignment, Module}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.{PermissionDeniedException, CurrentUser}
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, PDFView}
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
 import uk.ac.warwick.tabula.services.{SubmissionServiceComponent, AutowiringSubmissionServiceComponent}
+import uk.ac.warwick.userlookup.User
 
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}/submission-receipt.pdf"))
@@ -32,8 +33,36 @@ class DownloadSubmissionReceiptAsPdfController extends CourseworkController {
 			"submission-receipt.pdf",
 			"/WEB-INF/freemarker/submit/submission-receipt.ftl",
 			Map(
-				"submission" -> command.apply(),
-				"user" -> user
+				"submission" -> command.apply()
+			)
+		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent
+	}
+
+}
+
+@Controller
+@RequestMapping(value = Array("/module/{module}/{assignment}/{studentMember}/submission-receipt.pdf"))
+class DownloadSubmissionReceiptForStudentAsPdfController extends CourseworkController {
+
+	hideDeletedItems
+
+	type DownloadSubmissionReceiptAsPdfCommand = Appliable[Submission] with DownloadSubmissionReceiptAsPdfState
+
+	@ModelAttribute
+	def command(
+		 @PathVariable("module") module: Module,
+		 @PathVariable("assignment") assignment: Assignment,
+		 @PathVariable("studentMember") studentMember: Member,
+		 user: CurrentUser
+	 ): DownloadSubmissionReceiptAsPdfCommand = DownloadSubmissionReceiptAsPdfCommand(module, assignment, user, studentMember)
+
+	@RequestMapping
+	def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser) = {
+		new PDFView(
+			"submission-receipt.pdf",
+			"/WEB-INF/freemarker/submit/submission-receipt.ftl",
+			Map(
+				"submission" -> command.apply()
 			)
 		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent
 	}
@@ -44,14 +73,21 @@ object DownloadSubmissionReceiptAsPdfCommand {
 	val RequiredPermission = Permissions.Submission.Read
 
 	def apply(module: Module, assignment: Assignment, user: CurrentUser) =
-		new DownloadSubmissionReceiptAsPdfCommandInternal(module, assignment, user)
+		new DownloadSubmissionReceiptAsPdfCommandInternal(module, assignment, user, user.apparentUser)
+			with AutowiringSubmissionServiceComponent
+			with DownloadSubmissionReceiptAsPdfPermissions
+			with ComposableCommand[Submission]
+			with ReadOnly with Unaudited
+
+	def apply(module: Module, assignment: Assignment, user: CurrentUser, studentMember: Member) =
+		new DownloadSubmissionReceiptAsPdfCommandInternal(module, assignment, user, studentMember.asSsoUser)
 			with AutowiringSubmissionServiceComponent
 			with DownloadSubmissionReceiptAsPdfPermissions
 			with ComposableCommand[Submission]
 			with ReadOnly with Unaudited
 }
 
-class DownloadSubmissionReceiptAsPdfCommandInternal(val module: Module, val assignment: Assignment, val user: CurrentUser)
+class DownloadSubmissionReceiptAsPdfCommandInternal(val module: Module, val assignment: Assignment, val viewer: CurrentUser, val student: User)
 	extends CommandInternal[Submission]
 		with DownloadSubmissionReceiptAsPdfState {
 	self: SubmissionServiceComponent =>
@@ -64,8 +100,8 @@ trait DownloadSubmissionReceiptAsPdfPermissions extends RequiresPermissionsCheck
 
 	def permissionsCheck(p: PermissionsChecking) {
 		// We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
-		if (!user.loggedIn) {
-			throw new PermissionDeniedException(user, DownloadSubmissionReceiptAsPdfCommand.RequiredPermission, assignment)
+		if (!viewer.loggedIn) {
+			throw new PermissionDeniedException(viewer, DownloadSubmissionReceiptAsPdfCommand.RequiredPermission, assignment)
 		}
 
 		notDeleted(mandatory(assignment))
@@ -83,7 +119,8 @@ trait DownloadSubmissionReceiptAsPdfState {
 
 	def module: Module
 	def assignment: Assignment
-	def user: CurrentUser
+	def viewer: CurrentUser
+	def student: User
 
-	lazy val submissionOption = submissionService.getSubmissionByUniId(assignment, user.universityId).filter(_.submitted)
+	lazy val submissionOption = submissionService.getSubmissionByUniId(assignment, student.getWarwickId).filter(_.submitted)
 }

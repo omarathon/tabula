@@ -151,17 +151,15 @@
 									<a class="btn btn-block btn-success" href="${assignmentLink}"
 										<i class="icon-check icon-white"></i> View feedback
 									</a>
-								<#elseif info.resubmittable>
-									<#if isSelf>
-										<#-- Resubmission allowed -->
-										<a class="btn btn-block btn-primary" href="${assignmentLink}"
-											<i class="icon-folder-close icon-white"></i> Resubmit
-										</a>
-									</#if>
+								<#elseif info.resubmittable && isSelf>
+									<#-- Resubmission allowed -->
+									<a class="btn btn-block btn-primary" href="${assignmentLink}"
+										<i class="icon-folder-close icon-white"></i> Resubmit
+									</a>
 								<#elseif hasSubmission>
-										<#-- View receipt -->
+									<#-- View receipt -->
 									<a class="btn btn-block" href="${assignmentLink}"
-										<i class="icon-list-alt"></i> View receipt
+										<i class="icon-list-alt"></i> View <#if isSelf>receipt<#else>submission</#if>
 									</a>
 								<#elseif info.submittable>
 									<#if isSelf>
