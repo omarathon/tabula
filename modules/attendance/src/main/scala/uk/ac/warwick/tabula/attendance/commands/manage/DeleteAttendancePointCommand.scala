@@ -9,22 +9,20 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, A
 import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 
 object DeleteAttendancePointCommand {
-	def apply(department: Department, templatePoint: AttendanceMonitoringPoint, findPointsResult: FindPointsResult) =
-		new DeleteAttendancePointCommandInternal(department, templatePoint, findPointsResult)
+	def apply(department: Department, templatePoint: AttendanceMonitoringPoint) =
+		new DeleteAttendancePointCommandInternal(department, templatePoint)
 			with ComposableCommand[Seq[AttendanceMonitoringPoint]]
 			with AutowiringAttendanceMonitoringServiceComponent
 			with DeleteAttendancePointValidation
 			with DeleteAttendancePointDescription
 			with DeleteAttendancePointPermissions
 			with DeleteAttendancePointCommandState
+			with SetsFindPointsResultOnCommandState
 }
 
 
-class DeleteAttendancePointCommandInternal(
-	val department: Department,
-	val templatePoint: AttendanceMonitoringPoint,
-	val findPointsResult: FindPointsResult
-) extends CommandInternal[Seq[AttendanceMonitoringPoint]] {
+class DeleteAttendancePointCommandInternal(val department: Department, val templatePoint: AttendanceMonitoringPoint)
+	extends CommandInternal[Seq[AttendanceMonitoringPoint]] {
 
 	self: DeleteAttendancePointCommandState with AttendanceMonitoringServiceComponent =>
 
@@ -74,11 +72,10 @@ trait DeleteAttendancePointDescription extends Describable[Seq[AttendanceMonitor
 	}
 }
 
-trait DeleteAttendancePointCommandState {
+trait DeleteAttendancePointCommandState extends FindPointsResultCommandState {
 
 	def department: Department
 	def templatePoint: AttendanceMonitoringPoint
-	def findPointsResult: FindPointsResult
 	lazy val pointStyle: AttendanceMonitoringPointStyle = templatePoint.scheme.pointStyle
 
 	def pointsToDelete: Seq[AttendanceMonitoringPoint] = (pointStyle match {

@@ -6,8 +6,8 @@
 <#import "../admin/assignments/submissionsandfeedback/_submission_details.ftl" as sd />
 <#assign assignment=submission.assignment />
 <#assign module=assignment.module />
-<#if assignment.findExtension(user.universityId)??>
-	<#assign extension=assignment.findExtension(user.universityId) />
+<#if assignment.findExtension(submission.universityId)??>
+	<#assign extension=assignment.findExtension(submission.universityId) />
 </#if>
 
 <head>
@@ -69,7 +69,7 @@
 		</#if>
 	</div>
 
-	<h2>Submission receipt for ${user.universityId}</h2>
+	<h2>Submission receipt for ${submission.universityId}</h2>
 
 	<div class="submission-receipt">
 		<p>Submission received <@fmt.date date=submission.submittedDate at=true seconds=true relative=false /> (<#compress>

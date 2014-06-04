@@ -5,7 +5,7 @@
 
 <@f.form id="deleteScheme" method="POST" commandName="command" class="form-horizontal">
 
-Are you sure you want to delete scheme: ${command.scheme.name}?
+Are you sure you want to delete scheme: ${command.scheme.displayName}?
 
 	<#if command.scheme.points?size == 0>
 		There are no points
