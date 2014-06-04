@@ -15,8 +15,6 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.attendance.commands.manage.CreateNewAttendancePointsFromCopySearchCommandResult
-import uk.ac.warwick.tabula.attendance.commands.manage.FindPointsResult
 
 @Controller
 @RequestMapping(Array("/manage/{department}/{academicYear}/addpoints/copy"))
