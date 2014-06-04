@@ -177,45 +177,43 @@
 					</div>
 				</#if>
 
-				<#if (features.submissions && assignment.collectSubmissions) || has_feedback>
-					<div class="submission-and-feedback-count">
-						<i class="icon-file"></i>
-						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />">
-							<span class="use-tooltip" title="View all submissions and feedback">
-							<@fmt.p assignment.submissions?size "submission" /><#--
-							--><#if has_feedback> and ${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> of feedback</#if><#--
-						--></span></a>
+				<div class="submission-and-feedback-count">
+					<i class="icon-file"></i>
+					<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />">
+						<span class="use-tooltip" title="View all submissions and feedback">
+						<@fmt.p assignment.submissions?size "submission" /><#--
+						--><#if has_feedback> and ${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> of feedback</#if><#--
+					--></span></a>
 
-						<#assign numUnapprovedExtensions = assignment.countUnapprovedExtensions />
-						<#if numUnapprovedExtensions gt 0>
-							<span class="has-unapproved-extensions">
-								<i class="icon-info-sign"></i>
-								<a href="<@routes.extensions assignment=assignment />" title="Manage extensions" class="use-tooltip">
-									<#if numUnapprovedExtensions gt 1>
-										${numUnapprovedExtensions} extensions need granting
-									<#else>
-										1 extension needs granting
-									</#if>
-								</a>
-							</span>
-						</#if>
-
-						<#assign countUnreleasedFeedback = assignment.countUnreleasedFeedback />
-						<#if countUnreleasedFeedback gt 0>
-							<span class="has-unreleased-feedback">
-								<i class="icon-info-sign"></i>
-								${countUnreleasedFeedback}
-								<#if countUnreleasedFeedback gt 1>
-									items of feedback need publishing
+					<#assign numUnapprovedExtensions = assignment.countUnapprovedExtensions />
+					<#if numUnapprovedExtensions gt 0>
+						<span class="has-unapproved-extensions">
+							<i class="icon-info-sign"></i>
+							<a href="<@routes.extensions assignment=assignment />" title="Manage extensions" class="use-tooltip">
+								<#if numUnapprovedExtensions gt 1>
+									${numUnapprovedExtensions} extensions need granting
 								<#else>
-									item of feedback needs publishing
+									1 extension needs granting
 								</#if>
-							</span>
-						</#if>
+							</a>
+						</span>
+					</#if>
 
-						<#noescape>${feedbackDeadline!""}</#noescape>
-					</div>
-				</#if>
+					<#assign countUnreleasedFeedback = assignment.countUnreleasedFeedback />
+					<#if countUnreleasedFeedback gt 0>
+						<span class="has-unreleased-feedback">
+							<i class="icon-info-sign"></i>
+							${countUnreleasedFeedback}
+							<#if countUnreleasedFeedback gt 1>
+								items of feedback need publishing
+							<#else>
+								item of feedback needs publishing
+							</#if>
+						</span>
+					</#if>
+
+					<#noescape>${feedbackDeadline!""}</#noescape>
+				</div>
 
 
 			</div>
