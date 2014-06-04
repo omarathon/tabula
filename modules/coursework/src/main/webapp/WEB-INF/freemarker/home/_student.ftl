@@ -129,8 +129,9 @@
 							<div class="span4">
 								<div class="module-title"><@fmt.module_name assignment.module /></div>
 								<h4 class="name">
-									<a href="${assignmentLink}" />
-									<span class="ass-name">${assignment.name}</span></a>
+									<a href="${assignmentLink}">
+										<span class="ass-name">${assignment.name}</span>
+									</a>
 								</h4>
 							</div>
 							<div class="span5">
@@ -148,29 +149,29 @@
 							<div class="span3 button-list">
 								<#if hasFeedback>
 									<#-- View feedback -->
-									<a class="btn btn-block btn-success" href="${assignmentLink}"
+									<a class="btn btn-block btn-success" href="${assignmentLink}">
 										<i class="icon-check icon-white"></i> View feedback
 									</a>
 								<#elseif info.resubmittable && isSelf>
 									<#-- Resubmission allowed -->
-									<a class="btn btn-block btn-primary" href="${assignmentLink}"
+									<a class="btn btn-block btn-primary" href="${assignmentLink}">
 										<i class="icon-folder-close icon-white"></i> Resubmit
 									</a>
 								<#elseif hasSubmission>
 									<#-- View receipt -->
-									<a class="btn btn-block" href="${assignmentLink}"
+									<a class="btn btn-block" href="${assignmentLink}">
 										<i class="icon-list-alt"></i> View <#if isSelf>receipt<#else>submission</#if>
 									</a>
 								<#elseif info.submittable>
 									<#if isSelf>
 										<#-- First submission still allowed -->
-										<a class="btn btn-block btn-primary" href="${assignmentLink}"
+										<a class="btn btn-block btn-primary" href="${assignmentLink}">
 											<i class="icon-folder-close icon-white"></i> Submit
 										</a>
 									</#if>
 								<#else>
 									<#-- Assume formative, so just show info -->
-									<a class="btn btn-block" href="${assignmentLink}"
+									<a class="btn btn-block" href="${assignmentLink}">
 										<i class="icon-list-alt"></i> View details
 									</a>
 								</#if>
