@@ -7,16 +7,13 @@ import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPoint
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.AcademicYear
-import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.attendance.commands.manage.{DeleteAttendancePointCommand, FindPointsCommand, FindPointsResult}
+import uk.ac.warwick.tabula.attendance.commands.manage.{SetsFindPointsResultOnCommandState, DeleteAttendancePointCommand, FindPointsCommand, FindPointsResult}
 import uk.ac.warwick.tabula.attendance.web.Routes
 
 @Controller
 @RequestMapping(Array("/manage/{department}/{academicYear}/editpoints/{templatePoint}/delete"))
 class DeleteAttendancePointController extends AttendanceController {
-
-	validatesSelf[SelfValidating]
 
 	@ModelAttribute("findCommand")
 	def findCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
@@ -24,12 +21,11 @@ class DeleteAttendancePointController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(
-		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable templatePoint: AttendanceMonitoringPoint
 	) = {
-		DeleteAttendancePointCommand(department, templatePoint, findCommand.apply())
+		DeleteAttendancePointCommand(department, templatePoint)
 	}
 
 	private def render(department: Department, academicYear: AcademicYear) = {
@@ -45,20 +41,28 @@ class DeleteAttendancePointController extends AttendanceController {
 
 	@RequestMapping(method = Array(GET))
 	def form(
-		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]] ,
+		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]] with SetsFindPointsResultOnCommandState,
+		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {
+		val findCommandResult = findCommand.apply()
+		cmd.setFindPointsResult(findCommandResult)
 		render(department, academicYear)
 	}
 
 	@RequestMapping(method = Array(POST))
 	def submit(
-		@Valid @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]],
+		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]]
+			with SetsFindPointsResultOnCommandState with SelfValidating,
 		errors: Errors,
+		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {
+		val findCommandResult = findCommand.apply()
+		cmd.setFindPointsResult(findCommandResult)
+		cmd.validate(errors)
 		if (errors.hasErrors) {
 			render(department, academicYear)
 		} else {

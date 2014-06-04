@@ -12,8 +12,8 @@ import collection.JavaConverters._
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 
 object EditAttendancePointCommand {
-	def apply(department: Department, academicYear: AcademicYear, templatePoint: AttendanceMonitoringPoint, findPointsResult: FindPointsResult) =
-		new EditAttendancePointCommandInternal(department, academicYear, templatePoint, findPointsResult)
+	def apply(department: Department, academicYear: AcademicYear, templatePoint: AttendanceMonitoringPoint) =
+		new EditAttendancePointCommandInternal(department, academicYear, templatePoint)
 			with ComposableCommand[Seq[AttendanceMonitoringPoint]]
 			with PopulatesEditAttendancePointCommand
 			with AutowiringAttendanceMonitoringServiceComponent
@@ -22,14 +22,14 @@ object EditAttendancePointCommand {
 			with EditAttendancePointDescription
 			with EditAttendancePointPermissions
 			with EditAttendancePointCommandState
+			with SetsFindPointsResultOnCommandState
 }
 
 
 class EditAttendancePointCommandInternal(
 	val department: Department,
 	val academicYear: AcademicYear,
-	val templatePoint: AttendanceMonitoringPoint,
-	val findPointsResult: FindPointsResult
+	val templatePoint: AttendanceMonitoringPoint
 ) extends CommandInternal[Seq[AttendanceMonitoringPoint]] {
 
 	self: EditAttendancePointCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent =>
@@ -136,14 +136,13 @@ trait EditAttendancePointDescription extends Describable[Seq[AttendanceMonitorin
 	}
 }
 
-trait EditAttendancePointCommandState extends AttendancePointCommandState {
+trait EditAttendancePointCommandState extends AttendancePointCommandState with FindPointsResultCommandState {
 
 	self: TermServiceComponent =>
 
 	def department: Department
 	def academicYear: AcademicYear
 	def templatePoint: AttendanceMonitoringPoint
-	def findPointsResult: FindPointsResult
 	lazy val pointStyle: AttendanceMonitoringPointStyle = templatePoint.scheme.pointStyle
 
 	def pointsToEdit: Seq[AttendanceMonitoringPoint] = (pointStyle match {

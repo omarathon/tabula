@@ -20,7 +20,6 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 			val templatePoint = null
 			val department = null
 			val academicYear = null
-			val findPointsResult = null
 			val termService = thisTermService
 		}
 		val validator = new AttendanceMonitoringPointValidation with TermServiceComponent with AttendanceMonitoringServiceComponent {
@@ -51,7 +50,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 		val originalCreatedDate = new DateTime().minusDays(2)
 		templatePoint.createdDate = originalCreatedDate
 
-		val command = new EditAttendancePointCommandInternal(null, null, templatePoint, null) with AttendanceMonitoringServiceComponent with EditAttendancePointCommandState with TermServiceComponent{
+		val command = new EditAttendancePointCommandInternal(null, null, templatePoint) with AttendanceMonitoringServiceComponent with EditAttendancePointCommandState with TermServiceComponent{
 			override def pointsToEdit = Seq(templatePoint)
 			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
 			val termService = thisTermService
