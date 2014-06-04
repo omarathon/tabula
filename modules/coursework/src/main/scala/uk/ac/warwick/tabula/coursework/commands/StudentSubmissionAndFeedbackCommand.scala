@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands
 
 import uk.ac.warwick.tabula.data.model.{Submission, Feedback, Member, Assignment, Module}
-import uk.ac.warwick.tabula.commands.{Describable, Description, CommandInternal, ComposableCommand, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, Unaudited}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.CurrentUser
 import StudentSubmissionAndFeedbackCommand._
@@ -30,8 +30,8 @@ object StudentSubmissionAndFeedbackCommand {
 			with AutowiringSubmissionServiceComponent
 			with ComposableCommand[StudentSubmissionInformation]
 			with Unaudited with ReadOnly {
-			def studentMember = member
-			def currentUser = viewingUser
+			val studentMember = member
+			val currentUser = viewingUser
 		}
 
 	def apply(module: Module, assignment: Assignment, user: CurrentUser) =
@@ -42,7 +42,7 @@ object StudentSubmissionAndFeedbackCommand {
 			with AutowiringSubmissionServiceComponent
 			with ComposableCommand[StudentSubmissionInformation]
 			with Unaudited with ReadOnly {
-			def currentUser = user
+			val currentUser = user
 		}
 }
 
@@ -54,8 +54,8 @@ trait StudentSubmissionAndFeedbackCommandState {
 	def studentUser: User
 	def viewer: User
 
-	def feedback = feedbackService.getFeedbackByUniId(assignment, studentUser.getWarwickId).filter(_.released)
-	def submission = submissionService.getSubmissionByUniId(assignment, studentUser.getWarwickId).filter { _.submitted }
+	lazy val feedback = feedbackService.getFeedbackByUniId(assignment, studentUser.getWarwickId).filter(_.released)
+	lazy val submission = submissionService.getSubmissionByUniId(assignment, studentUser.getWarwickId).filter { _.submitted }
 }
 
 trait StudentMemberSubmissionAndFeedbackCommandState extends StudentSubmissionAndFeedbackCommandState {
@@ -64,8 +64,8 @@ trait StudentMemberSubmissionAndFeedbackCommandState extends StudentSubmissionAn
 	def studentMember: Member
 	def currentUser: CurrentUser
 
-	final def studentUser = studentMember.asSsoUser
-	final def viewer = currentUser.apparentUser
+	final lazy val studentUser = studentMember.asSsoUser
+	final lazy val viewer = currentUser.apparentUser
 }
 
 trait CurrentUserSubmissionAndFeedbackCommandState extends StudentSubmissionAndFeedbackCommandState {
@@ -73,8 +73,8 @@ trait CurrentUserSubmissionAndFeedbackCommandState extends StudentSubmissionAndF
 
 	def currentUser: CurrentUser
 
-	final def studentUser = currentUser.apparentUser
-	final def viewer = currentUser.apparentUser
+	final lazy val studentUser = currentUser.apparentUser
+	final lazy val viewer = currentUser.apparentUser
 }
 
 abstract class StudentSubmissionAndFeedbackCommandInternal(val module: Module, val assignment: Assignment)
@@ -129,37 +129,5 @@ trait CurrentUserSubmissionAndFeedbackCommandPermissions extends RequiresPermiss
 		perms += CheckablePermission(Permissions.Submission.Create, Some(assignment))
 
 		p.PermissionCheckAny(perms)
-	}
-}
-
-object ViewOnlineFeedbackCommand {
-	def apply(feedback: Feedback) =
-		new ViewOnlineFeedbackCommandInternal(feedback)
-			with ComposableCommand[Feedback]
-			with ViewOnlineFeedbackCommandDescription
-			with ViewOnlineFeedbackCommandPermissions
-}
-
-trait ViewOnlineFeedbackCommandState {
-	def feedback: Feedback
-}
-
-class ViewOnlineFeedbackCommandInternal(val feedback: Feedback) extends CommandInternal[Feedback] with ViewOnlineFeedbackCommandState {
-	def applyInternal() = feedback
-}
-
-trait ViewOnlineFeedbackCommandDescription extends Describable[Feedback] {
-	self: ViewOnlineFeedbackCommandState =>
-
-	override lazy val eventName = "ViewOnlineFeedback"
-
-	def describe(d: Description) = d.assignment(feedback.assignment).properties("student" -> feedback.universityId)
-}
-
-trait ViewOnlineFeedbackCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ViewOnlineFeedbackCommandState =>
-
-	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.Read, mandatory(feedback))
 	}
 }
