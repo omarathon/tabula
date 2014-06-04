@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 import org.joda.time.{Days, DateTime}
 import uk.ac.warwick.tabula.coursework.web.Routes.admin.assignment.extension
 
-class ListExtensionsCommand(val module: Module, val assignment: Assignment, val user: CurrentUser)
+class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Assignment, val user: CurrentUser)
 	extends Command[Seq[ExtensionGraph]] with ReadOnly with Unaudited {
 
 	mustBeLinked(mandatory(assignment), mandatory(module))

@@ -4,7 +4,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.data.model.{StudentMember, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember, Assignment, Module}
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions._
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
@@ -64,16 +64,16 @@ abstract class ExtensionController extends CourseworkController {
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions"))
-class ListExtensionsController extends ExtensionController {
+class ListExtensionsForAssignmentController extends ExtensionController {
 
 	@ModelAttribute
 	def listCommand(
 									 @PathVariable("module") module:Module,
 									 @PathVariable("assignment") assignment:Assignment
-									 ) = new ListExtensionsCommand(module, assignment, user)
+									 ) = new ListExtensionsForAssignmentCommand(module, assignment, user)
 
 	@RequestMapping(method=Array(HEAD,GET))
-	def listExtensions(cmd: ListExtensionsCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
+	def listExtensions(cmd: ListExtensionsForAssignmentCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
 		val extensionGraphs = cmd.apply()
 
 		val model = Mav("admin/assignments/extensions/summary",
@@ -86,6 +86,30 @@ class ListExtensionsController extends ExtensionController {
 		)
 
 		crumbed(model, cmd.module)
+	}
+}
+
+@Controller
+@RequestMapping(Array("/admin//{department}/manage/extensions"))
+class ListAllExtensionsController extends ExtensionController {
+
+	@ModelAttribute
+	def listCommand(
+									 @PathVariable("department") department:Department
+									 ) = new ListAllExtensionsCommand(department, user)
+
+	@RequestMapping(method=Array(HEAD,GET))
+	def listExtensions(cmd: ListAllExtensionsCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
+		val extensionGraphs = cmd.apply()
+
+		val model = Mav("admin/assignments/extensions/summary",
+			"detailUrl" -> Routes.admin.assignment.extension.detail(cmd.assignment),
+			"extensionToOpen" -> universityId,
+			"extensionGraphs" -> extensionGraphs,
+			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar
+		)
+
+		crumbed(model, cmd.department)
 	}
 }
 

@@ -31,6 +31,9 @@ trait AssignmentDao {
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment]
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
+
+	def getAssignmentsByYearDepartment(year: AcademicYear, department: Department): Seq[Assignment]
+
 	def recentAssignment(department: Department): Option[Assignment]
 
 	val MaxAssignmentsByName = 15
@@ -88,6 +91,14 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 			.setString("name", name)
 			.setParameter("year", year)
 			.setEntity("module", module)
+			.seq
+
+	def getAssignmentsByYearDepartment(year: AcademicYear, department: Department): Seq[Assignment] =
+		session.newCriteria[Assignment]
+			.createAlias("module", "m")
+			.add(is("m.department", department))
+			.add(is("year", year))
+			.add(is("deleted", false))
 			.seq
 
 	def recentAssignment(department: Department) = {

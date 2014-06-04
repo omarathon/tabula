@@ -31,12 +31,19 @@
 				<ul class="dropdown-menu pull-right">
 
 				<#if features.extensions>
-				<li>
-					<#assign extensions_url><@routes.extensionsettings department /></#assign>
-					<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
-						<i class="icon-calendar"></i> Extensions
-					</@fmt.permission_button>
-			   </li>
+					<li>
+						<#assign extensions_url><@routes.extensionsettings department /></#assign>
+						<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
+							<i class="icon-calendar"></i> Extension Settings
+						</@fmt.permission_button>
+				   </li>
+
+					<li>
+						<#assign extensions_url><@routes.manage_extensions department /></#assign>
+						<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
+							<i class="icon-calendar"></i> Manage Extensions
+						</@fmt.permission_button>
+					</li>
 			   </#if>
 
 				<#if features.feedbackTemplates>

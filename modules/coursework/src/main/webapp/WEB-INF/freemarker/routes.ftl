@@ -76,6 +76,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro extensionrequestattachment assignment filename><@_u page="/module/${assignment.module.code}/${assignment.id}/extension/supporting-file/${filename?url}" /></#macro>
 
 <#macro extensionsettings department><@_u page="/admin/department/${department.code}/settings/extensions" /></#macro>
+<#macro manage_extensions department><@_u page="/admin/department/${department.code}/manage/extensions" /></#macro>
 <#macro extensionreviewrequest assignment uniId><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/review-request/${uniId}" /></#macro>
 <#macro extensionadd assignment uniId><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/add?universityId=${uniId}" /></#macro>
 <#macro extensionedit assignment uniId><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/edit/${uniId}" /></#macro>
