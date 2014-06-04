@@ -452,7 +452,7 @@ $(function() {
 				$summaryAttachments.each(function(){
 					var $this = $(this);
 					attachments += 	'<li id="attachment-' + $this.val() +'" class="attachment"><i class="icon-file-alt"></i>' +
-						'<span>' + $this.attr("name") +' </span>&nbsp;<i class="icon-remove-sign remove-attachment"></i>' +
+						' <span>' + $this.attr("name") +' </span>&nbsp;<i class="icon-remove-sign remove-attachment"></i>' +
 						'<input id="attachedFiles" name="attachedFiles" value="'+  $this.val() +'" type="hidden"></li>'
 				});
 				$targetFormSection.html(attachments);
