@@ -215,10 +215,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			}
 		}
 
-		val ret = query.seq.map{ objArray =>
+		query.seq.map{ objArray =>
 			objArray(0).asInstanceOf[StudentMember] -> objArray(1).asInstanceOf[MonitoringPointSet]
 		}.toMap
-		ret
 	}
 
 	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet] = {
