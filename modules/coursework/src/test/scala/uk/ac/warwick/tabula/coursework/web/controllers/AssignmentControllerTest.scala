@@ -31,7 +31,6 @@ class AssignmentControllerTest extends TestBase with Mockito {
 		val feedback = new Feedback()
 		val m = new org.mockito.MockitoMocker
 		feedbackService.getFeedbackByUniId(assignment, "0123456") returns Some(feedback) thenThrows new Error("I TOLD YOU ABOUT STAIRS BRO")
-		controller.feedbackService = feedbackService
 
 		val submissionService = smartMock[SubmissionService]
 

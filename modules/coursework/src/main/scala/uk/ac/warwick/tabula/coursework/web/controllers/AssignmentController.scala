@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import javax.validation.Valid
-import uk.ac.warwick.tabula.coursework.commands.assignments.{ViewOnlineFeedbackCommand, SubmitAssignmentCommand}
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmitAssignmentCommand
 import uk.ac.warwick.tabula.data.model.{Submission, Assignment, Module}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.CurrentUser
@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.commands.Appliable
  * If the studentMember is not specified it works for the current user, whether they are a member of not.
  */
 @Controller
-@RequestMapping(value = Array("/module/{module}/{assignment}")
+@RequestMapping(value = Array("/module/{module}/{assignment}"))
 class AssignmentController extends CourseworkController {
 
 	type StudentSubmissionAndFeedbackCommand = Appliable[StudentSubmissionInformation] with CurrentUserSubmissionAndFeedbackCommandState
@@ -33,15 +33,7 @@ class AssignmentController extends CourseworkController {
 	validatesSelf[SubmitAssignmentCommand]
 
 	@ModelAttribute("submitAssignmentCommand") def formOrNull(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
-		val cmd = new ViewOnlineFeedbackCommand(assignment, user)
-		
-		val feedback =
-			if (cmd.hasFeedback) cmd.apply() // Log audit event
-			else None
-
-		restrictedBy {
-			feedback.isDefined
-		} (new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user)).orNull
+		restricted(new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user)).orNull
 	}
 
 	@ModelAttribute("studentSubmissionAndFeedbackCommand") def studentSubmissionAndFeedbackCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
@@ -89,7 +81,8 @@ class AssignmentController extends CourseworkController {
 			"hasActiveExtension" -> info.extension.exists(_.approved), // active = has been approved
 			"extension" -> info.extension,
 			"isExtended" -> info.isExtended,
-			"extensionRequested" -> info.extensionRequested)
+			"extensionRequested" -> info.extensionRequested,
+			"isSelf" -> true)
 			.withTitle(infoCommand.module.name + " (" + infoCommand.module.code.toUpperCase + ")" + " - " + infoCommand.assignment.name)
 	}
 

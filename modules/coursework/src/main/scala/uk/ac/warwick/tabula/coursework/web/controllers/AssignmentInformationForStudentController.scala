@@ -17,7 +17,7 @@ class AssignmentInformationForStudentController extends CourseworkController {
 	def command(@PathVariable("module") module: Module,
 							@PathVariable("assignment") assignment: Assignment,
 							@PathVariable("studentMember") studentMember: Member): StudentSubmissionAndFeedbackCommand =
-		StudentSubmissionAndFeedbackCommand(module, assignment, studentMember)
+		StudentSubmissionAndFeedbackCommand(module, assignment, studentMember, user)
 
 	@RequestMapping
 	def assignmentGadgetInStudentProfile(@ModelAttribute("command") command: StudentSubmissionAndFeedbackCommand) = {

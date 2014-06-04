@@ -29,6 +29,7 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 	private trait CommandFixture extends Fixture {
 		val command = new StudentSubmissionAndFeedbackCommandInternal(module, assignment) with CommandTestSupport {
 			val studentUser = user
+			val viewer = user
 		}
 	}
 
@@ -85,6 +86,7 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 			assignment.module = module
 
 			val studentMember = m
+			val currentUser = smartMock[CurrentUser]
 		}
 
 		val checking = mock[PermissionsChecking]

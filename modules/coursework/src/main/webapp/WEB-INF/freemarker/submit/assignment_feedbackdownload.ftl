@@ -1,4 +1,4 @@
-<h2>Feedback for ${studentMember.universityId}</h2>
+<h2>Feedback for ${feedback.universityId}</h2>
 	
 <#if features.collectRatings && feedback.collectRatings && isSelf>
 	<div id="feedback-rating-container" class="is-stackable">
@@ -16,7 +16,7 @@
 	</div>
 </#if>
 
-<#if  assignment.genericFeedback??>
+<#if assignment.genericFeedback??>
 <div class="feedback-notes">
 <h3>General feedback on the assignment:</h3> ${assignment.genericFeedback!""}
 </div>
@@ -45,7 +45,15 @@
 			</#if>
 			 feedback consists of ${feedback.attachments?size} files.</p>
 		<p>
-			<a class="btn btn-success" href="<@url context='/coursework' page="/module/${module.code}/${assignment.id}/${studentMember.universityId}/all/feedback.zip"/>"><i class="icon-gift"></i>
+			<#assign zipDownloadUrl><#compress>
+				<#if isSelf>
+					<@routes.feedbackZip feedback />
+				<#else>
+					<@routes.feedbackZip_in_profile feedback />
+				</#if>
+			</#compress></#assign>
+
+			<a class="btn btn-success" href="${zipDownloadUrl}"><i class="icon-gift"></i>
 				Download all as a Zip file
 			</a>
 		</p>
@@ -64,9 +72,17 @@
 		<ul class="file-list">
 		<#list feedback.attachments as attachment>
 			<li>
-			<a class="btn<#if feedbackcount=1> btn-success</#if>" href="<@url context='/coursework' page="/module/${module.code}/${assignment.id}/${studentMember.universityId}/get/${attachment.name?url}"/>"><i class="icon-file"></i>
-				${attachment.name}
-			</a>
+				<#assign attachmentDownloadUrl><#compress>
+					<#if isSelf>
+						<@routes.feedbackAttachment feedback attachment />
+					<#else>
+						<@routes.feedbackAttachment_in_profile feedback attachment />
+					</#if>
+				</#compress></#assign>
+
+				<a class="btn<#if feedbackcount=1> btn-success</#if>" href="${attachmentDownloadUrl}"><i class="icon-file"></i>
+					${attachment.name}
+				</a>
 			</li>
 		</#list>
 		</ul>

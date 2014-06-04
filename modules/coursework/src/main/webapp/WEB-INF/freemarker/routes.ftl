@@ -108,3 +108,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentrequestaccess assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/request-access"/></#macro>
 <#macro feedbackPdf assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/feedback.pdf"/></#macro>
 <#macro submissionReceiptPdf assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/submission-receipt.pdf"/></#macro>
+
+<#macro feedbackZip feedback><@_u page="/module/${feedback.assignment.module.code}/${feedback.assignment.id}/all/feedback.zip" /></#macro>
+<#macro feedbackZip_in_profile feedback><@_u page="/module/${feedback.assignment.module.code}/${feedback.assignment.id}/${feedback.universityId}/all/feedback.zip" /></#macro>
+<#macro feedbackAttachment feedback attachment><@_u page="/module/${feedback.assignment.module.code}/${feedback.assignment.id}/get/${attachment.name?url}"/></#macro>
+<#macro feedbackAttachment_in_profile feedback attachment><@_u page="/module/${feedback.assignment.module.code}/${feedback.assignment.id}/${feedback.universityId}/get/${attachment.name?url}"/></#macro>
