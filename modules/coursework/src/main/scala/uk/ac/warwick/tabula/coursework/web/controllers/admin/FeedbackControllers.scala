@@ -16,8 +16,6 @@ import uk.ac.warwick.tabula.commands.{ApplyWithCallback, Appliable}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import org.springframework.beans.factory.annotation.Autowired
-import scala.Some
-
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}.zip"))

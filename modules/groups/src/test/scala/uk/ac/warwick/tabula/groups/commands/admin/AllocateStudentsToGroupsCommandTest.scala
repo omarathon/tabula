@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.groups.commands.admin
 
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.services.{ProfileService, SmallGroupService, AssignmentMembershipService}
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, ProfileService, SmallGroupService, AssignmentMembershipService}
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.MockUserLookup
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.{SitsStatus, UserGroup}
+import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, SitsStatus, UserGroup}
 
 class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 
@@ -18,11 +18,16 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		val userLookup = new MockUserLookup
 		val profileService = smartMock[ProfileService]
 
+		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
+			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
+			case ug: UserGroup => ug.userLookup = userLookup
+		}
+
 		val module = Fixtures.module("in101", "Introduction to Scala")
 		val set = Fixtures.smallGroupSet("My small groups")
 		set.module = module
 		set.membershipService = membershipService
-		set.members.asInstanceOf[UserGroup].userLookup = userLookup
+		wireUserLookup(set.members)
 
 		val user1 = new User("cuscav")
 		user1.setFoundUser(true)
@@ -92,8 +97,8 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		set.groups.add(group2)
 		group1.groupSet = set
 		group2.groupSet = set
-		group1.students.asInstanceOf[UserGroup].userLookup = userLookup
-		group2.students.asInstanceOf[UserGroup].userLookup = userLookup
+		wireUserLookup(group1.students)
+		wireUserLookup(group2.students)
 
 		set.members.add(user1)
 		set.members.add(user2)

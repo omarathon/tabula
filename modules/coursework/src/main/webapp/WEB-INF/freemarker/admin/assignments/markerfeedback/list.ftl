@@ -177,6 +177,15 @@
 						<i class="icon-ok"></i> Marking completed
 					</a>
 				</li>
+				<li>
+					<a class="use-tooltip form-post"
+					   title="Unfinalise marks and feedback. Note that this can only be done if feedback has not been released for this student."
+					   data-container="body"
+					   href="<@routes.markingUncompleted assignment />"
+					   id="marking-uncomplete-button">
+						<i class="icon-remove"></i> Marking uncompleted
+					</a>
+				</li>
 			</ul>
 		</div>
 	</div>

@@ -253,7 +253,10 @@ abstract class AbstractIndexService[A]
 	 * so we know where to start from next time.
 	 */
 	private def doUpdateMostRecent(item: A) {
-		val shouldUpdate = mostRecentIndexedItem.map { _ isBefore getUpdatedDate(item) }.getOrElse { true }
+		val shouldUpdate = mostRecentIndexedItem match {
+			case Some(date) => getUpdatedDate(item).isAfter(date)
+			case _ => true
+		}
 		if (shouldUpdate)
 			mostRecentIndexedItem = Some(getUpdatedDate(item))
 	}
@@ -267,15 +270,13 @@ abstract class AbstractIndexService[A]
 	 * from the past year.
 	 */
 	def latestIndexItem: DateTime = {
-		mostRecentIndexedItem.map { _.minusMinutes(1) }.getOrElse {
+		mostRecentIndexedItem.fold{
 			// extract possible list of UpdatedDateField values from possible newest item and get possible first value as a Long.
-			documentValue(newest(), UpdatedDateField)
-				.map { v => new DateTime(v.toLong).minusMinutes(10) }
-				.getOrElse {
-					logger.info("No recent document found, indexing since Tabula year zero")
-					new DateTime(yearZero,1,1,0,0)
-				}
-		}
+			documentValue(newest(), UpdatedDateField).fold{
+				logger.info("No recent document found, indexing since Tabula year zero")
+				new DateTime(yearZero, 1, 1, 0, 0)
+			}(v => new DateTime(v.toLong).minusMinutes(10))
+		}(_.minusSeconds(30))
 	}
 
 	/**
@@ -311,9 +312,8 @@ case class PagingSearchResultItems[A](items: Seq[A], lastscore: Option[ScoreDoc]
 		case _ => throw new ClassCastException("Lucene did not return an Option[FieldDoc] as expected")
 	}
 
-	def getTokens: String = last.map { lastscore =>
-		lastscore.doc + "/" + lastscore.fields(0) + "/" + token
-	}.getOrElse("empty")
+	def getTokens: String = last.fold("empty")(lastscore =>
+		lastscore.doc + "/" + lastscore.fields(0) + "/" + token)
 }
 
 case class PagingSearchResult(results: RichSearchResults, last: Option[ScoreDoc], token: Long, total: Int) {
@@ -485,7 +485,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 			}
 		}
 
-		token.map(existingSearcher).getOrElse(newSearcher())
+		token.fold(newSearcher())(existingSearcher)
 	}
 }
 

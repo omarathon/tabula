@@ -124,7 +124,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 	final override val MaxBatchSize = 100000
 
 	// largest batch of items we'll load in at once during scheduled incremental index.
-	final override val IncrementalBatchSize = 1000
+	final override val IncrementalBatchSize = 1500
 
 	var dao = Wire.auto[MemberDao]
 
@@ -167,7 +167,11 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 	override val UpdatedDateField = "lastUpdatedDate"
 	override def getUpdatedDate(item: Member) = item.lastUpdatedDate
 
-	override def listNewerThan(startDate: DateTime, batchSize: Int) = dao.listUpdatedSince(startDate, batchSize)
+	override def listNewerThan(startDate: DateTime, batchSize: Int) = {
+		val toUpdate = dao.listUpdatedSince(startDate, batchSize)
+		logger.info(s"${toUpdate.size} profiles will be indexed from $startDate, ${dao.countUpdatedSince(startDate)} in total")
+		toUpdate
+	}
 
 	protected def toItems(docs: Seq[Document]) =
 		docs.flatMap { doc => documentValue(doc, IdField).flatMap { id => dao.getByUniversityId(id) } }

@@ -26,10 +26,8 @@ class AwardDaoImpl extends AwardDao with Daoisms {
 
 	def saveOrUpdate(award: Award) = session.saveOrUpdate(award)
 
-	def getByCode(code: String) = {
-		val ret = session.newQuery[Award]("from Award award where code = :code").setString("code", code).uniqueResult
-		ret
-	}
+	def getByCode(code: String) =
+		session.newQuery[Award]("from Award award where code = :code").setString("code", code).uniqueResult
 
 	def getAllAwardCodes: Seq[String] =
 		session.newQuery[String]("select distinct code from Award").seq

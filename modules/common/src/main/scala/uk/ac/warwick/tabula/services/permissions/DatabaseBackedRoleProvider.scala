@@ -13,7 +13,7 @@ class DatabaseBackedRoleProvider extends ScopelessRoleProvider {
 	var service = Wire[PermissionsService]
 	
 	def getRolesFor(user: CurrentUser): Stream[Role] =
-		service.getGrantedRolesFor[PermissionsTarget](user) map { _.build() }
+		service.getGrantedRolesFor[PermissionsTarget](user).map { _.build() }
 	
 	def rolesProvided = Set(classOf[RoleBuilder.GeneratedRole])
 	

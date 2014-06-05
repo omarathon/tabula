@@ -6,11 +6,10 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.commands.{Notifies, Appliable, UserAware, Description}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, UserLookupService, AssignmentMembershipService}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
-import uk.ac.warwick.tabula.data.model.{UserGroup, Department}
+import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup, Department}
 import uk.ac.warwick.tabula.data.model.notifications.OpenSmallGroupSetsNotification
 
 class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
@@ -121,6 +120,11 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
 		val userLookup = mock[UserLookupService]
 
+		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
+			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
+			case ug: UserGroup => ug.userLookup = userLookup
+		}
+
 		userLookup.getUserByUserId(any[String]) answers{id=>
 			students.find(_.getUserId == id).getOrElse(new AnonymousUser)
 		}
@@ -141,8 +145,10 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val dept = new Department
 		
 		val set1 = new SmallGroupSet()
+		set1.smallGroupService = None
+
 		set1.members.knownType.includedUserIds = Seq(student1.getWarwickId,student2.getWarwickId)
-		set1.members.asInstanceOf[UserGroup].userLookup = userLookup
+		wireUserLookup(set1.members)
 		
 		set1.membershipService = membershipService
 		membershipService.determineMembershipUsers(set1.upstreamAssessmentGroups, Some(set1.members)) returns (set1.members.users)
@@ -150,8 +156,10 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val s1 = set1.members.users
 
 		val set2 = new SmallGroupSet()
+		set2.smallGroupService = None
+
 		set2.members.knownType.includedUserIds = Seq(student2.getWarwickId,student3.getWarwickId)
-		set2.members.asInstanceOf[UserGroup].userLookup = userLookup
+		wireUserLookup(set2.members)
 		
 		set2.membershipService = membershipService
 		membershipService.determineMembershipUsers(set2.upstreamAssessmentGroups, Some(set2.members)) returns (set2.members.users)

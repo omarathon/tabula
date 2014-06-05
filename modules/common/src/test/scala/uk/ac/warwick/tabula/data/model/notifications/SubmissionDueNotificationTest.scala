@@ -14,6 +14,8 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 	)
 
 	val assignment = new Assignment
+	assignment.collectSubmissions = true
+	assignment.openEnded = false
 
 	@Test
 	def generalRecipients() {

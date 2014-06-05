@@ -240,6 +240,15 @@ object Feedback {
 	val PublishDeadlineInWorkingDays = 20
 }
 
+object FeedbackPosition {
+	def getPreviousPosition(position: Option[FeedbackPosition]): Option[FeedbackPosition] = position match {
+		case Some(FirstFeedback) => None
+		case Some(SecondFeedback) => Some(FirstFeedback)
+		case Some(ThirdFeedback) => Some(SecondFeedback)
+		case None => Some(ThirdFeedback)
+	}
+}
+
 sealed trait FeedbackPosition
 case object  FirstFeedback extends FeedbackPosition { val description = "First marker's feedback" }
 case object  SecondFeedback extends FeedbackPosition { val description = "Second marker's feedback" }

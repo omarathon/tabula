@@ -577,6 +577,8 @@
 			font-size: @searchFontSize;
 			line-height: @searchLineHeight;
 			#grid .fluid .span(10);
+
+			&::-ms-clear { display: none; }
 		}
 
 		.btn {
@@ -743,4 +745,18 @@
 	.rendered-timestamp {
 		display: block;
 	}
+}
+
+.marking-detail {
+	.alert {
+		> div {	float: left; }
+		.marking-detail-name {
+			width: 100%;
+			float: left;
+			> div { padding-right: 68px; }
+		}
+
+		div + div { margin-left: -66px; }
+	}
+
 }

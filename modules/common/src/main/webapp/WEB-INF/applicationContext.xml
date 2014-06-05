@@ -49,6 +49,7 @@
 
 	<bean id="json" class="uk.ac.warwick.tabula.JsonObjectMapperFactory" />
 
+
 	<!-- Catches all exceptions that go through Spring.
 		If an exception escapes Spring, it will go to the handler in web.xml,
 		which is served by the ErrorController at /error/, which delegates to this.
@@ -63,6 +64,7 @@
 				<entry key="uk.ac.warwick.tabula.services.MaintenanceModeEnabledException" value="errors/maintenance" />
 				<entry key="uk.ac.warwick.tabula.system.exceptions.FileUploadException" value="errors/fileUpload" />
 				<entry key="uk.ac.warwick.tabula.ParameterMissingException" value="errors/parameterMissing" />
+				<entry key="uk.ac.warwick.tabula.services.CannotPerformWriteOperationException" value="errors/readOnlyMasquerade" />
 			</map>
 		</property>
 	</bean>
@@ -155,6 +157,8 @@
 				<bean class="uk.ac.warwick.tabula.data.convert.NotificationIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointStyleConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringSchemeIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointTypeConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointIdConverter"/>
 	        </list>
 	    </property>
 	    <property name="formatters">
@@ -364,6 +368,7 @@
 				<entry key="mapGet"><bean class="uk.ac.warwick.tabula.helpers.FreemarkerMapHelper" /></entry>
 				<entry key="wholeWeekFormatter"><bean class="uk.ac.warwick.tabula.helpers.WholeWeekFormatterTag" /></entry>
 				<entry key="userSetting"><bean class="uk.ac.warwick.tabula.web.views.UserSettingFunction" /></entry>
+				<entry key="attendanceMonitoringCheckpointFormatter"><bean class="uk.ac.warwick.tabula.helpers.AttendanceMonitoringCheckpointFormatter" /></entry>
 				<entry key="googleAnalyticsCode" value="${tabula.analytics.code}" />
 			</map>
 		</property>

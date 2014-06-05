@@ -21,7 +21,6 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 	extends Command[MeetingRecord] with Notifies[MeetingRecord, MeetingRecord] with SelfValidating with FormattedHtml
 	with BindListener with Daoisms {
 
-	var features = Wire.auto[Features]
 	var meetingRecordDao = Wire.auto[MeetingRecordDao]
 	var fileDao = Wire.auto[FileDao]
 	var monitoringPointMeetingRelationshipTermService = Wire.auto[MonitoringPointMeetingRelationshipTermService]

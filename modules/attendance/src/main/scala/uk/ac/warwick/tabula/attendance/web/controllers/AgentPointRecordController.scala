@@ -2,8 +2,7 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import scala.Array
-import uk.ac.warwick.tabula.attendance.commands.{AgentPointRecordCommand, SetMonitoringCheckpointCommand}
+import uk.ac.warwick.tabula.attendance.commands.AgentPointRecordCommand
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, AttendanceState, MonitoringPoint}
 import uk.ac.warwick.tabula.web.Mav
 import javax.validation.Valid

@@ -30,7 +30,7 @@ class TutorHomeController extends GroupsController {
 		Mav("groups/tutor_home",
 			"data" -> data,
 			"updatedOccurrence" -> occurrence
-		)
+		).noLayoutIf(ajax)
 	}
 
 }

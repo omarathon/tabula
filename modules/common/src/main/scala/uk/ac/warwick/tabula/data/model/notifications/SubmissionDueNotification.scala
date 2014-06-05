@@ -18,8 +18,10 @@ trait SubmissionReminder {
 	def module = assignment.module
 	def moduleCode = module.code.toUpperCase
 
+	def referenceDate = created
+
 	def daysLeft = {
-		val now = DateTime.now.withTimeAtStartOfDay()
+		val now = referenceDate.withTimeAtStartOfDay()
 		val closeDate = deadline.withTimeAtStartOfDay()
 		Days.daysBetween(now, closeDate).getDays
 	}
@@ -40,7 +42,7 @@ trait SubmissionReminder {
 
 	def urlTitle = "upload your submission"
 
-	def titleEnding = if(daysLeft < 0) { "is late" } else { "due" }
+	def titleEnding = if (daysLeft < 0) { "is late" } else { "due" }
 
 	def title = s"$moduleCode assignment $titleEnding"
 
@@ -82,13 +84,16 @@ class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] wi
 	def assignment = item.entity
 
 	def recipients = {
-		val submissions = assignment.submissions.asScala
-		val extensions = assignment.extensions.asScala.filter(_.approved) // TAB-2303
-		val allStudents = membershipService.determineMembershipUsers(assignment)
-		// fist filter out students that have submitted already
-		val withoutSubmission = allStudents.filterNot(user => submissions.exists(_.universityId == user.getWarwickId))
-		// finally filter students that have an approved extension
-		withoutSubmission.filterNot(user => extensions.exists(_.universityId == user.getWarwickId))
+		if (!assignment.collectSubmissions || assignment.openEnded) Nil
+		else {
+			val submissions = assignment.submissions.asScala
+			val extensions = assignment.extensions.asScala.filter(_.approved) // TAB-2303
+			val allStudents = membershipService.determineMembershipUsers(assignment)
+			// fist filter out students that have submitted already
+			val withoutSubmission = allStudents.filterNot(user => submissions.exists(_.universityId == user.getWarwickId))
+			// finally filter students that have an approved extension
+			withoutSubmission.filterNot(user => extensions.exists(_.universityId == user.getWarwickId))
+		}
 	}
 }
 
@@ -105,7 +110,7 @@ class SubmissionDueWithExtensionNotification extends Notification[Extension, Uni
 	def recipients = {
 		val hasSubmitted = assignment.submissions.asScala.exists(_.universityId == extension.universityId)
 
-		if (hasSubmitted) {
+		if (hasSubmitted || !assignment.collectSubmissions || assignment.openEnded) {
 			Nil
 		} else {
 			Seq(userLookup.getUserByWarwickUniId(extension.universityId))

@@ -93,3 +93,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 </#macro>
 
 <#macro permissions scope><@_u page="/permissions/${scope.urlCategory}/${scope.urlSlug}" context="/admin" /></#macro>
+
+<#macro agentHomeForYear relationshipType academicYearString><@_u page="/agent/${relationshipType.urlPart}/${academicYearString}" context="/attendance" /></#macro>
+<#macro listmarkersubmissions assignment><@_u context="/coursework" page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/list"/></#macro>

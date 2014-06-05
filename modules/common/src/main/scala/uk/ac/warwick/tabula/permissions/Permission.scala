@@ -134,12 +134,14 @@ object Permissions {
 	/* ScopelessPermissions are Permissions that can be resolved without having to worry about scope */
 	case object UserPicker extends ScopelessPermission("Use the user picker")
 
-	case object Masquerade extends ScopelessPermission("Masquerade as other users")
 	case object GodMode extends ScopelessPermission("Enable god mode")
 	case object ManageMaintenanceMode extends ScopelessPermission("Manage maintenance mode settings")
 	case object ImportSystemData extends ScopelessPermission("Import data from other systems")
 	case object ReplicaSyncing extends ScopelessPermission("Manually run replica syncing")
 	case object ViewAuditLog extends ScopelessPermission("View and search the audit log")
+
+	// Masquerade no longer scopeless, can only masquerade as users who have a Member record against scope
+	case object Masquerade extends Permission("Masquerade as other users")
 
 	object RolesAndPermissions {
 		case object Create extends Permission("Add roles and permissions")
@@ -188,16 +190,16 @@ object Permissions {
 	}
 
 	object Submission {
-		case object ViewPlagiarismStatus extends Permission("View plagiarism status for a submission")
-		case object ManagePlagiarismStatus extends Permission("Manage a submission's plagiarism status")
-		case object CheckForPlagiarism extends Permission("Check a submission for plagiarism")
-		case object SendReceipt extends Permission("Send a receipt for a submission")
-		case object ReleaseForMarking extends Permission("Release a submission for marking")
+		case object ViewPlagiarismStatus extends Permission("View plagiarism status for a coursework submission")
+		case object ManagePlagiarismStatus extends Permission("Manage a coursework submission's plagiarism status")
+		case object CheckForPlagiarism extends Permission("Check a coursework submission for plagiarism")
+		case object SendReceipt extends Permission("Send a receipt for a coursework submission")
+		case object ReleaseForMarking extends Permission("Release a coursework submission for marking")
 
-		case object Create extends Permission("Add a submission")
-		case object Read extends Permission("View a submission")
-		case object Update extends Permission("Edit a submission")
-		case object Delete extends Permission("Remove a submission")
+		case object Create extends Permission("Add a coursework submission")
+		case object Read extends Permission("View a coursework submission")
+		case object Update extends Permission("Edit a coursework submission")
+		case object Delete extends Permission("Remove a coursework submission")
 	}
 
 	object Feedback {
@@ -263,6 +265,7 @@ object Permissions {
 			case object Tier4VisaRequirement extends Permission("View a member's tier 4 visa requirement")
 			case object CasUsed extends Permission("View whether a CAS has been used by a student to obtain a visa")
 			case object Disability extends Permission("View a student member's reported disability")
+			case object AccreditedPriorLearning extends Permission("View a student's accredited prior learning")
 
 			object StudentCourseDetails {
 				case object Core extends Permission("View a student's basic course, route and department details")
@@ -271,6 +274,11 @@ object Permissions {
 
 			case class RelationshipStudents(relationshipType: PermissionsSelector[StudentRelationshipType])
 				extends SelectorPermission(relationshipType, "View a member's students")
+
+			object ModuleRegistration {
+				case object Core extends Permission("View a student's module registrations")
+				case object Results extends Permission( "View a student's module results")
+			}
 		}
 
 		object StudentRelationship {
@@ -358,15 +366,5 @@ object Permissions {
 
 	object Notification {
 		case object Dismiss extends Permission("Dismiss and restore notifications")
-	}
-
-
-	object ModuleRegistration {
-		case object Core extends Permission("View a student's module registrations")
-		case object Results extends Permission( "View a student's module results")
-	}
-
-	object AccreditedPriorLearning {
-		case object Read extends Permission("View a student's accredited prior learning")
 	}
 }

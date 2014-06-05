@@ -1,11 +1,9 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConverters._
-import reflect.BeanProperty
 import javax.persistence._
 import javax.persistence.CascadeType._
 import org.hibernate.annotations.{BatchSize, AccessType}
-import scala.Array
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 

@@ -2,7 +2,8 @@
 	<div class="fix-header pad-when-fixed">
 		<@f.form commandName=filterCommandName action=submitUrl method="GET" cssClass="form-inline">
 			<@f.errors cssClass="error form-errors" />
-			<#if filterCommand.academicYear??>
+			<#--Don't send academic year if it's a path variable (therefore global in the model)-->
+			<#if filterCommand.academicYear?? && !academicYear??>
 				<@f.hidden path="academicYear"/>
 			</#if>
 			<#if filterCommand.hasBeenFiltered??>

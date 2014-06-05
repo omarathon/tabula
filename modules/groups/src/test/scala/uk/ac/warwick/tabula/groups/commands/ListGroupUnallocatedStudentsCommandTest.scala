@@ -2,10 +2,10 @@ package uk.ac.warwick.tabula.groups.commands
 
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.{CurrentUser, MockUserLookup, TestBase, Mockito}
-import uk.ac.warwick.tabula.services.{AssignmentMembershipService, ProfileServiceComponent, ProfileService}
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, AssignmentMembershipService, ProfileServiceComponent, ProfileService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup}
-import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
 
 class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 
@@ -28,6 +28,11 @@ class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 		val membershipService = mock[AssignmentMembershipService]
 		val profileService = mock[ProfileService]
 		val set = new SmallGroupSet
+
+		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
+			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
+			case ug: UserGroup => ug.userLookup = userLookup
+		}
 
 		val user1 = createUser("cuscav", "Mathew", "Mannion", "0672089")
 		val user2 = createUser("cusebr", "Nick", "Howes", "0672088")
@@ -60,7 +65,7 @@ class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 		  	group.id = "abcdefgh" + index
 				set.groups.add(group)
 				group.groupSet = set
-				group.students.asInstanceOf[UserGroup].userLookup = userLookup
+				wireUserLookup(group.students)
 		}
 
 		val student1 = Fixtures.student(user1.getWarwickId, user1.getUserId, department)
@@ -86,7 +91,7 @@ class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 												)
 
 		set.membershipService = membershipService
-		set.members.asInstanceOf[UserGroup].userLookup = userLookup
+		wireUserLookup(set.members)
 		membershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Some(set.members)) returns (set.members.users)
 
 		allUsers.foreach {

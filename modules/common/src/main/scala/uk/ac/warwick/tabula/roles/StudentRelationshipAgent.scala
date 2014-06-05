@@ -42,6 +42,10 @@ case class StudentRelationshipAgentRoleDefinition(relationshipType: PermissionsS
 		Profiles.Read.SmallGroups,
 		SmallGroupEvents.ViewRegister,
 		Profiles.Read.Coursework,
+		Profiles.Read.AccreditedPriorLearning,
+
+		Profiles.Read.ModuleRegistration.Core,
+		Profiles.Read.ModuleRegistration.Results,
 		
 		MemberNotes.Create,
 		MemberNotes.Read,
@@ -53,12 +57,7 @@ case class StudentRelationshipAgentRoleDefinition(relationshipType: PermissionsS
 		// Can read Coursework info for student
 		Submission.Read,
 		Feedback.Read,
-		Extension.Read,
-
-		ModuleRegistration.Core,
-		ModuleRegistration.Results,
-
-		AccreditedPriorLearning.Read
+		Extension.Read
 	)
 	final def canDelegateThisRolesPermissions: JavaImports.JBoolean = true
 

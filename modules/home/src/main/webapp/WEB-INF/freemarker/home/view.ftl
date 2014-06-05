@@ -33,8 +33,8 @@
 		</#if>
 	
 		<#if user.staff>
-			<li><h2><a href="<@url page="/" context="/profiles" />">Student Profiles</a></h2>
-				<span class="hint">View student information and edit personal tutors</span>
+			<li><h2><a href="<@url page="/" context="/profiles" />">Profiles</a></h2>
+				<span class="hint">View staff and student information and edit personal tutors</span>
 			</li>
 		<#elseif user.student>
 			<li><h2><a href="<@url page="/" context="/profiles" />">My Student Profile</a></h2>
@@ -45,12 +45,12 @@
 		<#if features.attendanceMonitoring>
 			<#if user.staff>
 				<li>
-					<h2><a href="<@url page="/" context="/attendance" />">Attendance Monitoring</a></h2>
+					<h2><a href="<@url page="/" context="/attendance" />">Monitoring Points</a></h2>
 					<span class="hint">View and record attendance at specified monitoring points</span>
 				</li>
 			<#elseif user.student>
 				<li>
-					<h2><a href="<@url page="/profile" context="/attendance" />">My Attendance</a></h2>
+					<h2><a href="<@url page="/profile" context="/attendance" />">My Monitoring Points</a></h2>
 					<span class="hint">View your attendance at specified monitoring points</span>
 				</li>
 			</#if>

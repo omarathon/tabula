@@ -58,11 +58,11 @@ class Department extends GeneratedId
 	@BatchSize(size=200)
 	var routes:JList[Route] = JArrayList()
 
-	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse(false)
+	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse false
 	def collectFeedbackRatings_= (collect: Boolean) = settings += (Settings.CollectFeedbackRatings -> collect)
 
 	// settings for extension requests
-	def allowExtensionRequests = getBooleanSetting(Settings.AllowExtensionRequests) getOrElse(false)
+	def allowExtensionRequests = getBooleanSetting(Settings.AllowExtensionRequests) getOrElse false
 	def allowExtensionRequests_= (allow: Boolean) = settings += (Settings.AllowExtensionRequests -> allow)
 
 	def extensionGuidelineSummary = getStringSetting(Settings.ExtensionGuidelineSummary).orNull
@@ -71,16 +71,16 @@ class Department extends GeneratedId
 	def extensionGuidelineLink = getStringSetting(Settings.ExtensionGuidelineLink).orNull
 	def extensionGuidelineLink_= (link: String) = settings += (Settings.ExtensionGuidelineLink -> link)
 
-	def showStudentName = getBooleanSetting(Settings.ShowStudentName) getOrElse(false)
+	def showStudentName = getBooleanSetting(Settings.ShowStudentName) getOrElse false
 	def showStudentName_= (showName: Boolean) = settings += (Settings.ShowStudentName -> showName)
 
-	def plagiarismDetectionEnabled = getBooleanSetting(Settings.PlagiarismDetection, true)
+	def plagiarismDetectionEnabled = getBooleanSetting(Settings.PlagiarismDetection, default = true)
 	def plagiarismDetectionEnabled_= (enabled: Boolean) = settings += (Settings.PlagiarismDetection -> enabled)
 
-	def turnitinExcludeBibliography = getBooleanSetting(Settings.TurnitinExcludeBibliography, true)
+	def turnitinExcludeBibliography = getBooleanSetting(Settings.TurnitinExcludeBibliography, default = true)
 	def turnitinExcludeBibliography_= (exclude: Boolean) = settings += (Settings.TurnitinExcludeBibliography -> exclude)
 
-	def turnitinExcludeQuotations = getBooleanSetting(Settings.TurnitinExcludeQuotations, true)
+	def turnitinExcludeQuotations = getBooleanSetting(Settings.TurnitinExcludeQuotations, default = true)
 	def turnitinExcludeQuotations_= (exclude: Boolean) = settings += (Settings.TurnitinExcludeQuotations -> exclude)
 
 	def turnitinSmallMatchWordLimit = getIntSetting(Settings.TurnitinSmallMatchWordLimit, 0)
@@ -89,50 +89,48 @@ class Department extends GeneratedId
 	def turnitinSmallMatchPercentageLimit = getIntSetting(Settings.TurnitinSmallMatchPercentageLimit, 0)
 	def turnitinSmallMatchPercentageLimit_= (limit: Int) = settings += (Settings.TurnitinSmallMatchPercentageLimit -> limit)
 
-	def assignmentInfoView = getStringSetting(Settings.AssignmentInfoView) getOrElse(Assignment.Settings.InfoViewType.Default)
+	def assignmentInfoView = getStringSetting(Settings.AssignmentInfoView) getOrElse Assignment.Settings.InfoViewType.Default
 	def assignmentInfoView_= (setting: String) = settings += (Settings.AssignmentInfoView -> setting)
 
-	def autoGroupDeregistration = getBooleanSetting(Settings.AutoGroupDeregistration, true)
+	def autoGroupDeregistration = getBooleanSetting(Settings.AutoGroupDeregistration, default = true)
 	def autoGroupDeregistration_=(dereg: Boolean) { settings += (Settings.AutoGroupDeregistration -> dereg) }
 
 	def getStudentRelationshipSource(relationshipType: StudentRelationshipType) =
 		getStringMapSetting(Settings.StudentRelationshipSource)
-			.flatMap { _.get(relationshipType.id) }
-			.map { StudentRelationshipSource.fromCode(_) }
-			.getOrElse(relationshipType.defaultSource)
+			.flatMap {
+			_.get(relationshipType.id)
+		}.fold(relationshipType.defaultSource)(StudentRelationshipSource.fromCode)
 
 	def setStudentRelationshipSource (relationshipType: StudentRelationshipType, source: StudentRelationshipSource) = {
 		val map = getStringMapSetting(Settings.StudentRelationshipSource, Map())
-		val newMap = (map + (relationshipType.id -> source.dbValue))
+		val newMap = map + (relationshipType.id -> source.dbValue)
 
 		settings += (Settings.StudentRelationshipSource -> newMap)
 	}
 
-	def studentRelationshipSource = getStringMapSetting(Settings.StudentRelationshipSource) getOrElse(Map())
+	def studentRelationshipSource = getStringMapSetting(Settings.StudentRelationshipSource) getOrElse Map()
 	def studentRelationshipSource_= (setting: Map[String, String]) = settings += (Settings.StudentRelationshipSource -> setting)
 
-	def studentRelationshipDisplayed = getStringMapSetting(Settings.StudentRelationshipDisplayed) getOrElse(Map())
+	def studentRelationshipDisplayed = getStringMapSetting(Settings.StudentRelationshipDisplayed) getOrElse Map()
 	def studentRelationshipDisplayed_= (setting: Map[String, String]) = settings += (Settings.StudentRelationshipDisplayed -> setting)
 
 	def getStudentRelationshipDisplayed(relationshipType: StudentRelationshipType): Boolean =
 		studentRelationshipDisplayed
-			.get(relationshipType.id)
-			.map { _.toBoolean }
-			.getOrElse(relationshipType.defaultDisplay)
+			.get(relationshipType.id).fold(relationshipType.defaultDisplay)(_.toBoolean)
 
 	def setStudentRelationshipDisplayed(relationshipType: StudentRelationshipType, isDisplayed: Boolean) = {
-		studentRelationshipDisplayed = (studentRelationshipDisplayed + (relationshipType.id -> isDisplayed.toString))
+		studentRelationshipDisplayed = studentRelationshipDisplayed + (relationshipType.id -> isDisplayed.toString)
 	}
 
 	@transient
 	var relationshipService = Wire[RelationshipService]
 
 	def displayedStudentRelationshipTypes =
-		relationshipService.allStudentRelationshipTypes.filter { getStudentRelationshipDisplayed(_) }
+		relationshipService.allStudentRelationshipTypes.filter { getStudentRelationshipDisplayed }
 
 	def isStudentRelationshipTypeForDisplay(relationshipType: StudentRelationshipType) = displayedStudentRelationshipTypes.contains(relationshipType)
 
-	def weekNumberingSystem = getStringSetting(Settings.WeekNumberingSystem) getOrElse(WeekRange.NumberingSystem.Default)
+	def weekNumberingSystem = getStringSetting(Settings.WeekNumberingSystem) getOrElse WeekRange.NumberingSystem.Default
 	def weekNumberingSystem_= (wnSystem: String) = settings += (Settings.WeekNumberingSystem -> wnSystem)
 
   def defaultGroupAllocationMethod =
@@ -140,11 +138,11 @@ class Department extends GeneratedId
   def defaultGroupAllocationMethod_= (method:SmallGroupAllocationMethod) =  settings += (Settings.DefaultGroupAllocationMethod->method.dbValue)
 
 	// FIXME belongs in Freemarker
-	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary) map { raw =>
+	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary).fold("")({ raw =>
 		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
-		val nodes = Splitter.split(raw).map{ p => <p>{p}</p> }
+		val nodes = Splitter.split(raw).map { p => <p>{p}</p>	}
 		(NodeSeq fromSeq nodes).toString()
-	} getOrElse("")
+	})
 
 	@transient
 	var permissionsService = Wire[PermissionsService]
@@ -206,14 +204,13 @@ class Department extends GeneratedId
 	def replacedRoleDefinitionFor(roleDefinition: RoleDefinition) = {
 		def matches(customRoleDefinition: CustomRoleDefinition) = {
 			roleDefinition match {
-				case roleDefinition: SelectorBuiltInRoleDefinition[_] => {
+				case roleDefinition: SelectorBuiltInRoleDefinition[_] =>
 					customRoleDefinition.baseRoleDefinition match {
 						case customRoleDefinition: SelectorBuiltInRoleDefinition[_]
 							if (customRoleDefinition.getClass == roleDefinition.getClass) &&
 								(roleDefinition <= customRoleDefinition) => true
 						case _ => false
 					}
-				}
 				case _ => roleDefinition == customRoleDefinition.baseRoleDefinition
 			}
 		}
@@ -235,7 +232,7 @@ class Department extends GeneratedId
 		if (parent == null) this
 		else parent.rootDepartment
 
-	def hasParent = (parent != null)
+	def hasParent = parent != null
 
 	def hasChildren = !children.isEmpty
 
@@ -252,8 +249,8 @@ object Department {
 		implicit val factory = { name: String => withName(name) }
 
 		val allFilterRules: Seq[FilterRule] = {
-			val inYearRules = (1 until 9).map(InYearFilterRule(_))
-			(Seq(AllMembersFilterRule, UndergraduateFilterRule, PostgraduateFilterRule) ++ inYearRules)
+			val inYearRules = (1 until 9).map(InYearFilterRule)
+			Seq(AllMembersFilterRule, UndergraduateFilterRule, PostgraduateFilterRule) ++ inYearRules
 		}
 
 		def withName(name: String): FilterRule = {
@@ -304,9 +301,7 @@ object Department {
 		val name=s"Y$year"
 		val courseTypes = CourseType.all
 		def matches(member: Member) = member match{
-			case s:StudentMember => s.mostSignificantCourseDetails.map(
-				_.latestStudentCourseYearDetails.yearOfStudy == year)
-				.getOrElse(false)
+			case s:StudentMember => s.mostSignificantCourseDetails.exists(_.latestStudentCourseYearDetails.yearOfStudy == year)
 			case _=>false
 		}
 	}

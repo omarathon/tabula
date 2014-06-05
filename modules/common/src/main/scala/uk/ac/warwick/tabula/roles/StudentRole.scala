@@ -20,7 +20,7 @@ case object StudentRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
 	GrantsScopedPermission(
 		MemberNotes.Read,
-		ModuleRegistration.Core,
-		ModuleRegistration.Results
+		Profiles.Read.ModuleRegistration.Core,
+		Profiles.Read.ModuleRegistration.Results
 	)
 }

@@ -4,15 +4,14 @@ import uk.ac.warwick.tabula.{Mockito, CurrentUser, TestBase}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.roles.SmallGroupSetMember
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, UserLookupService, AssignmentMembershipService}
 import javax.persistence.Entity
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Filter
 import org.hibernate.annotations.FilterDef
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
 
 class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
 
@@ -21,8 +20,13 @@ class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
 		val groupSet = new SmallGroupSet
 		groupSet.module = Fixtures.module("in101")
 		groupSet.module.department = Fixtures.department("in")
-		
-		groupSet.members.asInstanceOf[UserGroup].userLookup = mock[UserLookupService]
+
+		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
+			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
+			case ug: UserGroup => ug.userLookup = userLookup
+		}
+
+		wireUserLookup(groupSet.members)
 		groupSet.id= "test"
 			
 		val membershipService = mock[AssignmentMembershipService]

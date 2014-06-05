@@ -308,11 +308,9 @@ class GrantedRoleByIdCache(dao: PermissionsDao) extends RequestLevelCaching[Stri
 trait GrantedRolesForUserCache { self: PermissionsDaoComponent with CacheStrategyComponent with UserLookupComponent =>
 	final val GrantedRolesForUserCacheName = "GrantedRolesForUser"
 	final val GrantedRolesForUserCacheMaxAgeSecs = 60 * 60 // 1 hour
-	final val GrantedRolesForUserCacheMaxSize = 1000
 
 	final lazy val GrantedRolesForUserCache = {
 		val cache = Caches.newCache(GrantedRolesForUserCacheName, new GrantedRolesForUserCacheFactory, GrantedRolesForUserCacheMaxAgeSecs, cacheStrategy)
-		cache.setMaxSize(GrantedRolesForUserCacheMaxSize)
 		cache
 	}
 	
@@ -332,11 +330,9 @@ trait GrantedRolesForUserCache { self: PermissionsDaoComponent with CacheStrateg
 trait GrantedRolesForGroupCache { self: PermissionsDaoComponent with CacheStrategyComponent =>
 	final val GrantedRolesForGroupCacheName = "GrantedRolesForGroup"
 	final val GrantedRolesForGroupCacheMaxAgeSecs = 60 * 60 // 1 hour
-	final val GrantedRolesForGroupCacheMaxSize = 1000
 
 	final lazy val GrantedRolesForGroupCache = {
 		val cache = Caches.newCache(GrantedRolesForGroupCacheName, new GrantedRolesForGroupCacheFactory, GrantedRolesForGroupCacheMaxAgeSecs, cacheStrategy)
-		cache.setMaxSize(GrantedRolesForGroupCacheMaxSize)
 		cache
 	}
 
@@ -351,7 +347,6 @@ trait GrantedRolesForGroupCache { self: PermissionsDaoComponent with CacheStrate
 trait GrantedPermissionsForUserCache { self: PermissionsDaoComponent with CacheStrategyComponent with UserLookupComponent =>
 	final val GrantedPermissionsForUserCacheName = "GrantedPermissionsForUser"
 	final val GrantedPermissionsForUserCacheMaxAgeSecs = 60 * 60 // 1 hour
-	final val GrantedPermissionsForUserCacheMaxSize = 1000
 
 	final lazy val GrantedPermissionsForUserCache = {
 		val cache = Caches.newCache(
@@ -359,7 +354,6 @@ trait GrantedPermissionsForUserCache { self: PermissionsDaoComponent with CacheS
 			new GrantedPermissionsForUserCacheFactory,
 			GrantedPermissionsForUserCacheMaxAgeSecs, cacheStrategy
 		)
-		cache.setMaxSize(GrantedPermissionsForUserCacheMaxSize)
 		cache
 	}
 
@@ -374,7 +368,6 @@ trait GrantedPermissionsForUserCache { self: PermissionsDaoComponent with CacheS
 trait GrantedPermissionsForGroupCache { self: PermissionsDaoComponent with CacheStrategyComponent =>
 	final val GrantedPermissionsForGroupCacheName = "GrantedPermissionsForGroup"
 	final val GrantedPermissionsForGroupCacheMaxAgeSecs = 60 * 60 // 1 hour
-	final val GrantedPermissionsForGroupCacheMaxSize = 1000
 
 	final lazy val GrantedPermissionsForGroupCache = {
 		val cache = Caches.newCache(
@@ -383,7 +376,6 @@ trait GrantedPermissionsForGroupCache { self: PermissionsDaoComponent with Cache
 			GrantedPermissionsForGroupCacheMaxAgeSecs,
 			cacheStrategy
 		)
-		cache.setMaxSize(GrantedPermissionsForGroupCacheMaxSize)
 		cache
 	}
 

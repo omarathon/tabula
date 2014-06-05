@@ -4,7 +4,6 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Module, MeetingFormat, Stude
 import javax.persistence._
 import javax.validation.constraints.NotNull
 import org.joda.time.DateTime
-import scala.Array
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.annotations.{Type, BatchSize}
 import uk.ac.warwick.spring.Wire

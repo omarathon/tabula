@@ -2,10 +2,7 @@ package uk.ac.warwick.tabula.groups.commands
 
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.services.SmallGroupService
-import uk.ac.warwick.tabula.services.TermServiceComponent
-import uk.ac.warwick.tabula.services.SmallGroupServiceComponent
-import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, SmallGroupService, TermServiceComponent, SmallGroupServiceComponent, TermService}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
@@ -18,7 +15,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import SmallGroupAttendanceState._
 import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.data.model.{UserGroup, MemberUserType}
+import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup, MemberUserType}
 import org.joda.time.DateMidnight
 import org.joda.time.DateTimeConstants
 import org.joda.time.Interval
@@ -37,6 +34,11 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 	
 	trait Fixture {
 		val userLookup = new MockUserLookup
+
+		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
+			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
+			case ug: UserGroup => ug.userLookup = userLookup
+		}
 		
 		val now = DateTime.now
 		val academicYear = AcademicYear.guessByDate(now)
@@ -46,7 +48,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		set.releasedToStudents = true
 		
 		val group = new SmallGroup(set)
-		group.students.asInstanceOf[UserGroup].userLookup = userLookup
+		wireUserLookup(group.students)
 		
 		// The group has two events. Event 1 runs at Monday 11am on week 2, 3 and 4; Event 2 runs at Monday 3pm on weeks 1, 3 and 7
 		val event1 = new SmallGroupEvent(group)

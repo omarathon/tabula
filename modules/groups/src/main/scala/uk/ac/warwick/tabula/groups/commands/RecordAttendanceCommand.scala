@@ -16,7 +16,6 @@ import uk.ac.warwick.tabula.CurrentUser
 import org.joda.time.DateTime
 import RecordAttendanceCommand._
 import uk.ac.warwick.tabula.ItemNotFoundException
-import scala.Some
 
 object RecordAttendanceCommand {
 	type UniversityId = String

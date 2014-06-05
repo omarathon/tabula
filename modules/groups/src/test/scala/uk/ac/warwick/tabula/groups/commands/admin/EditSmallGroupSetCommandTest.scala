@@ -4,15 +4,11 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, Department, Module, UserGroup}
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, AssignmentMembershipService, MaintenanceModeServiceImpl, SmallGroupService}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.services.MaintenanceModeServiceImpl
 import uk.ac.warwick.tabula.events.EventHandling
-import uk.ac.warwick.tabula.services.SmallGroupService
-import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.MockUserLookup
 
 class EditSmallGroupSetCommandTest extends TestBase with Mockito {
@@ -23,6 +19,11 @@ class EditSmallGroupSetCommandTest extends TestBase with Mockito {
 		
 		val mockUserLookup = new MockUserLookup
 		mockUserLookup.registerUserObjects(user1, user2, user3, user4, user5)
+
+		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
+			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
+			case ug: UserGroup => ug.userLookup = mockUserLookup
+		}
 		
 		val dept = new Department()
 		val module = new Module()
@@ -53,10 +54,10 @@ class EditSmallGroupSetCommandTest extends TestBase with Mockito {
 		
 		set.groups.add(group1)
 		set.groups.add(group2)
-		
-		set.members.asInstanceOf[UserGroup].userLookup = mockUserLookup
-		group1.students.asInstanceOf[UserGroup].userLookup = mockUserLookup
-		group2.students.asInstanceOf[UserGroup].userLookup = mockUserLookup
+
+		wireUserLookup(set.members)
+		wireUserLookup(group1.students)
+		wireUserLookup(group2.students)
 		
 		EventHandling.enabled = false
 		

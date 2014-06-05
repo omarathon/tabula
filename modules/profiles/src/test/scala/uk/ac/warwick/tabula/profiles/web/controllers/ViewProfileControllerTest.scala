@@ -22,11 +22,11 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 	member.mostSignificantCourse = courseDetails
 
 	@Test(expected=classOf[ItemNotFoundException])
-	def throwsNonStudent() {
+	def throwsNonStudentStaff() {
 		withUser("test") {
 			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
-			val staffMember = new StaffMember()
-			val cmd = controller.viewProfileCommand(staffMember)
+			val emeritusMember = new EmeritusMember()
+			val cmd = controller.viewProfileCommand(emeritusMember)
 		}
 	}
 

@@ -37,32 +37,32 @@ class AccreditedPriorLearning() extends GeneratedId	with PermissionsTarget with 
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="scjCode", referencedColumnName="scjCode")
-	@Restricted(Array("AccreditedPriorLearning.Read"))
+	@Restricted(Array("Profiles.Read.AccreditedPriorLearning"))
 	var studentCourseDetails: StudentCourseDetails = _
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="awardCode", referencedColumnName="code")
-	@Restricted(Array("AccreditedPriorLearning.Read"))
+	@Restricted(Array("Profiles.Read.AccreditedPriorLearning"))
 	var award: Award = null
 
 	var sequenceNumber: JInteger = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	@Restricted(Array("AccreditedPriorLearning.Read"))
+	@Restricted(Array("Profiles.Read.AccreditedPriorLearning"))
 	var academicYear: AcademicYear = null
 
-	@Restricted(Array("AccreditedPriorLearning.Read"))
+	@Restricted(Array("Profiles.Read.AccreditedPriorLearning"))
 	var cats: java.math.BigDecimal = null
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="levelCode", referencedColumnName="code")
-	@Restricted(Array("AccreditedPriorLearning.Read"))
+	@Restricted(Array("Profiles.Read.AccreditedPriorLearning"))
 	var level: Level = _
 
-	@Restricted(Array("AccreditedPriorLearning.Read"))
+	@Restricted(Array("Profiles.Read.AccreditedPriorLearning"))
 	var reason: String = null
 
-	@Restricted(Array("ModuleRegistration.Core"))
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var lastUpdatedDate = DateTime.now
 
 	def toStringProps = Seq(

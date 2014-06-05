@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.groups
 
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.{Department, UserGroup, Module}
+import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, Department, UserGroup, Module}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
 import org.joda.time.LocalTime
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.{Mockito}
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, UserLookupService}
 import org.mockito.Mockito.when
 import java.util.UUID
 import uk.ac.warwick.userlookup.AnonymousUser
@@ -172,7 +172,12 @@ class SmallGroupBuilder(val template:SmallGroup = new SmallGroup){
     this
   }
 	def withUserLookup(userLookup:UserLookupService)={
-		template.students.asInstanceOf[UserGroup].userLookup = userLookup
+		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
+			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
+			case ug: UserGroup => ug.userLookup = userLookup
+		}
+
+		wireUserLookup(template.students)
 		this
 	}
   def withGroupName(s: String) = {

@@ -90,8 +90,8 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		val timetableHash = "abc"
 		student.timetableHash = timetableHash
 		memberDao.saveOrUpdate(student)
-		memberDao.getStudentMemberByTimetableHash(timetableHash) should be (Some(student))
-		memberDao.getStudentMemberByTimetableHash("anotherhash") should be (None)
+		memberDao.getMemberByTimetableHash(timetableHash) should be (Some(student))
+		memberDao.getMemberByTimetableHash("anotherhash") should be (None)
 	}
 
 	@Test

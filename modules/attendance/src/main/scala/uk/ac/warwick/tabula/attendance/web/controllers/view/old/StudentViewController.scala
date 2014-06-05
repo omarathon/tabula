@@ -1,15 +1,16 @@
-package uk.ac.warwick.tabula.attendance.web.controllers
+package uk.ac.warwick.tabula.attendance.web.controllers.view.old
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.commands.{TaskBenchmarking, Appliable, CommandInternal, Unaudited, ReadOnly, ComposableCommand}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.commands.{BuildStudentPointsData, StudentPointsData, GroupMonitoringPointsByTerm}
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, AutowiringProfileServiceComponent, AutowiringMonitoringPointServiceComponent, AutowiringTermServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, AutowiringMonitoringPointServiceComponent, AutowiringTermServiceComponent}
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 
 object StudentViewCommand {
 	def apply(student: StudentMember, academicYearOption: Option[AcademicYear]) =

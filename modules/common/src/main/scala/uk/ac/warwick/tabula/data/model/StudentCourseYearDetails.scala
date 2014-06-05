@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.Option.option2Iterable
 import org.joda.time.DateTime
 import javax.persistence.Basic
 import javax.persistence.Entity
@@ -10,7 +9,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.system.permissions.Restricted
-import reflect.BeanProperty
+import scala.beans.BeanProperty
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.EqualsBuilder
 import org.hibernate.annotations.{Filter, Filters, FilterDef, FilterDefs, Type}

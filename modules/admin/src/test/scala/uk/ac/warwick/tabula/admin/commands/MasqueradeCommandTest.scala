@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.services.UserLookupComponent
 import uk.ac.warwick.tabula.commands.{Describable, Appliable}
 import uk.ac.warwick.tabula.data.model.{Route, Module}
 import uk.ac.warwick.tabula.web.Cookie
+import uk.ac.warwick.userlookup.User
 
 class MasqueradeCommandTest extends TestBase {
 
@@ -14,7 +15,9 @@ class MasqueradeCommandTest extends TestBase {
 	}
 
 	trait Fixture {
-		val command = new MasqueradeCommandInternal with CommandTestSupport
+		val user = new CurrentUser(new User("cuscav"), new User("cuscav"))
+
+		val command = new MasqueradeCommandInternal(user) with CommandTestSupport
 	}
 	
 	@Test def set { new Fixture {
@@ -49,12 +52,11 @@ class MasqueradeCommandTest extends TestBase {
 	}}
 
 	@Test
-	def glueEverythingTogether() {
-		val command = MasqueradeCommand()
+	def glueEverythingTogether() = withUser("cuscav") {
+		val command = MasqueradeCommand(currentUser)
 
 		command should be (anInstanceOf[Appliable[Option[Cookie]]])
 		command should be (anInstanceOf[MasqueradeCommandState])
-		command should be (anInstanceOf[MasqueradeCommandPermissions])
 		command should be (anInstanceOf[Describable[Option[Cookie]]])
 	}
 

@@ -36,9 +36,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro markerFeedbackFiles assignment markerFeedback><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${markerFeedback.id}/feedback-${markerFeedback.feedback.universityId}.zip"/></#macro>
 <#macro markerFeedbackFilesDownload markerFeedback><@_u page="/admin/module/${markerFeedback.feedback.assignment.module.code}/assignments/${markerFeedback.feedback.assignment.id}/marker/feedback/download/${markerFeedback.id}/" /></#macro>
 
-<#macro feedbackZip assignment feedback attachmentExtension><@_u page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.universityId}.${attachmentExtension}'/></#macro>
+<#macro adminFeedbackZip assignment feedback attachmentExtension><@_u page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.universityId}.${attachmentExtension}'/></#macro>
 
 <#macro markingCompleted assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/marking-completed" /></#macro>
+<#macro markingUncompleted assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/marking-uncompleted" /></#macro>
 
 <#macro enrolment module><@_u page="/admin/module/${module.code}/assignments/enrolment"/></#macro>
 
@@ -99,10 +100,21 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro displaysettings department><@_u page="/department/${department.code}/settings/display" context="/admin" /></#macro>
 
+<#macro assignment_in_profile assignment student><@_u page="/module/${assignment.module.code}/${assignment.id}/${student.universityId}"/></#macro>
+
 <#-- non admin -->
 <#macro assignment assignment><@_u page="/module/${assignment.module.code}/${assignment.id}"/></#macro>
 <#macro extensionRequest assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/extension"/></#macro>
 <#macro assignmentreceipt assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/resend-receipt"/></#macro>
 <#macro assignmentrequestaccess assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/request-access"/></#macro>
 <#macro feedbackPdf assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/feedback.pdf"/></#macro>
-<#macro submissionReceiptPdf assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/submission-receipt.pdf"/></#macro>
+<#macro submissionReceiptPdf submission><@_u page="/module/${submission.assignment.module.code}/${submission.assignment.id}/submission-receipt.pdf"/></#macro>
+<#macro submissionReceiptPdf_in_profile assignment><@_u page="/module/${submission.assignment.module.code}/${submission.assignment.id}/${submission.universityId}/submission-receipt.pdf"/></#macro>
+
+<#macro feedbackZip feedback><@_u page="/module/${feedback.assignment.module.code}/${feedback.assignment.id}/all/feedback.zip" /></#macro>
+<#macro feedbackZip_in_profile feedback><@_u page="/module/${feedback.assignment.module.code}/${feedback.assignment.id}/${feedback.universityId}/all/feedback.zip" /></#macro>
+<#macro feedbackAttachment feedback attachment><@_u page="/module/${feedback.assignment.module.code}/${feedback.assignment.id}/get/${attachment.name?url}"/></#macro>
+<#macro feedbackAttachment_in_profile feedback attachment><@_u page="/module/${feedback.assignment.module.code}/${feedback.assignment.id}/${feedback.universityId}/get/${attachment.name?url}"/></#macro>
+
+<#macro submissionAttachment submission attachment><@_u page="/module/${submission.assignment.module.code}/${submission.assignment.id}/attachment/${attachment.name?url}" /></#macro>
+<#macro submissionAttachment_in_profile submission attachment><@_u page="/module/${submission.assignment.module.code}/${submission.assignment.id}/${submission.universityId}/attachment/${attachment.name?url}" /></#macro>

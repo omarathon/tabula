@@ -33,4 +33,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro addcustomroleoverride role><@_u page="/department/${role.department.code}/customroles/${role.id}/overrides/add" /></#macro>
 <#macro deletecustomroleoverride override><@_u page="/department/${override.customRoleDefinition.department.code}/customroles/${override.customRoleDefinition.id}/overrides/${override.id}/delete" /></#macro>
 
+<#macro roles><@_u page="/roles" /></#macro>
+<#macro rolesDepartment department><@_u page="/department/${department.code}/roles" /></#macro>
+
 </#compress>

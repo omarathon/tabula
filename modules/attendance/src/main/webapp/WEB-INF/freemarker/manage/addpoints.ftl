@@ -5,7 +5,15 @@
 <div class="add-points-to-schemes">
 	<form method="POST">
 		<input name="returnTo" value="<@routes.manageAddPoints command.department command.academicYear.startYear?c />" type="hidden" />
-		<p>Choose scheme/s to add points</p>
+
+		<#if newPoints == 0>
+			<p>Choose scheme/s to add points</p>
+		<#else>
+			<div class="alert alert-success">
+				<strong><@fmt.p newPoints "point" /></strong> added to <strong><@fmt.p changedSchemes "scheme"/></strong>
+				<a class="btn" href="<@routes.manageEditPoints command.department command.academicYear.startYear?c schemesParam />">Edit points</a>
+			</div>
+		</#if>
 		<p>
 			<button type="button" class="btn add-blank-point" data-href="<@routes.manageAddPointsBlank command.department command.academicYear.startYear?c/>">Add a point</button>
 			<button type="button" class="btn copy-points" data-href="<@routes.manageAddPointsCopy command.department command.academicYear.startYear?c/>">Copy points</button>
@@ -23,10 +31,11 @@
 				<#list schemeMap?keys?sort_by("displayName") as scheme>
 					<tr>
 						<td>
-							<input name="schemes" value="${scheme.id}" type="checkbox" <#if mapGet(schemeMap, scheme)>checked</#if>/>
+							<input name="schemes" value="${scheme.id}" type="checkbox" data-pointstyle="${scheme.pointStyle.dbValue}" <#if mapGet(schemeMap, scheme)>checked</#if>/>
 						</td>
 						<td>
 							${scheme.displayName}
+							<span class="muted">(<@fmt.p scheme.members.members?size "student" />, <@fmt.p scheme.points?size "${scheme.pointStyle.description?lower_case} point" />)</span>
 						</td>
 					</tr>
 				</#list>

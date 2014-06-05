@@ -36,6 +36,7 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 	}
 
 	source.relationshipService.getAllPastAndPresentRelationships(student) returns relationships
+	source.relationshipService.listAllStudentRelationshipsWithMember(student) returns Nil
 	source.securityService.can(user, Permissions.Profiles.MeetingRecord.Read(relationshipType), student) returns (true)
 	source.meetingRecordService.listAll(relationships.toSet, Some(student)) returns meetings
 

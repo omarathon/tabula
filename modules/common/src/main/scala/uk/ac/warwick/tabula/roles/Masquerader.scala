@@ -6,11 +6,10 @@ case class Masquerader() extends BuiltInRole(MasqueraderRoleDefinition, None)
 
 case object MasqueraderRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	
-	override def description = "Tabula Masquerader"
+	override def description = "Tabula Masquerader (Global)"
 	
-	GrantsScopelessPermission(
+	GrantsGlobalPermission(
 		Masquerade
 	)
-
 
 }

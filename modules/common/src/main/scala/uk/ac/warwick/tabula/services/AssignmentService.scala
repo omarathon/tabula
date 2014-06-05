@@ -49,6 +49,8 @@ trait AssignmentService {
 
 	def filterAssignmentsByCourseAndYear(assignments: Seq[Assignment], studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
 
+	def getAssignmentsClosingBetween(startInclusive: DateTime, endExclusive: DateTime): Seq[Assignment]
+
 }
 
 abstract class AbstractAssignmentService extends AssignmentService {
@@ -102,6 +104,8 @@ abstract class AbstractAssignmentService extends AssignmentService {
 			}
 		)
 	}
+
+	def getAssignmentsClosingBetween(start: DateTime, end: DateTime) = assignmentDao.getAssignmentsClosingBetween(start, end)
 }
 
 @Service(value = "assignmentService")

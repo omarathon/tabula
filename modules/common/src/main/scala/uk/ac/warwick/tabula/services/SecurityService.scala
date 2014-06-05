@@ -5,13 +5,11 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model._
 import forms.Extension
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.PermissionDeniedException
+import uk.ac.warwick.tabula.{Features, CurrentUser, PermissionDeniedException, SubmitPermissionDeniedException}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.SubmitPermissionDeniedException
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -36,7 +34,8 @@ trait AutowiringSecurityServiceComponent extends SecurityServiceComponent {
 @Service
 class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Permission, PermissionsTarget), Option[Boolean]] {
 
-	var roleService = Wire.auto[RoleService]
+	var roleService = Wire[RoleService]
+	var features = Wire[Features]
 
 	type Response = Option[Boolean]
 	type PermissionChecker = (CurrentUser, Permission, PermissionsTarget) => Response
@@ -61,7 +60,7 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 	
 	private def checkScopedPermission(
 		allPermissions: Map[Permission, Option[PermissionsTarget]], 
-		user: CurrentUser, 
+		user: CurrentUser,
 		permission: Permission, 
 		scope: PermissionsTarget
 	): Response = {
@@ -147,7 +146,22 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 			checksToRun.view.flatMap { _(user, permission, scope.orNull ) }.headOption
 		}
 
-		result.map { canDo =>
+		/*
+		 * If you are masquerading, we only show you the intersection of
+		 * both yours and the target user's permissions, unless:
+		 *
+		 * - You're a sysadmin
+		 * - The permission is Submission.Create (so you don't get not enrolled messages when trying to submit) FIXME Hardcoded ignorance
+		 * - The feature flag is set to allow permission elevation (only for sandbox)
+		 */
+		val combinedResult = if (result.getOrElse(false) && user.masquerading && !user.sysadmin && permission != Permissions.Submission.Create && !features.masqueradeElevatedPermissions) {
+			val realUser = new CurrentUser(user.realUser, user.realUser)
+			cachedBy((realUser, permission, scope.orNull)) {
+				checksToRun.view.flatMap { _(realUser, permission, scope.orNull ) }.headOption
+			}
+		} else result
+
+		combinedResult.map { canDo =>
 			if (debugEnabled) logger.debug("can " + user + " do " + permission + " on " + scope + "? " + (if (canDo) "Yes" else "NO"))
 			canDo
 		} getOrElse {

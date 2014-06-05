@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.attendance.web
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, StudentMember, Department}
 import uk.ac.warwick.tabula.web.RoutesUtils
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringScheme}
 
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs
@@ -70,5 +70,31 @@ object Routes {
 				encoded(scheme.department.code), encoded(scheme.academicYear.startYear.toString), encoded(scheme.id)
 			)
 
+		def editPoints(department: Department, academicYear: AcademicYear) =
+			context + "/manage/%s/%s/editpoints" format(
+				encoded(department.code), encoded(academicYear.startYear.toString)
+			)
+
+	}
+
+	object Note {
+		def view(academicYear: AcademicYear, student: StudentMember, point: AttendanceMonitoringPoint) =
+			context + "/note/%s/%s/%s" format(encoded(academicYear.startYear.toString), encoded(student.universityId), encoded(point.id))
+
+	}
+
+	object View {
+		def home = context + "/view"
+		def department(department: Department) = context + "/view/%s" format encoded(department.code)
+		def departmentForYear(department: Department, academicYear: AcademicYear) =
+			context + "/view/%s/%s" format(encoded(department.code), encoded(academicYear.startYear.toString))
+		def students(department: Department, academicYear: AcademicYear) =
+			context + "/view/%s/%s/students" format(encoded(department.code), encoded(academicYear.startYear.toString))
+		def student(department: Department, academicYear: AcademicYear, student: StudentMember) =
+			context + "/view/%s/%s/students/%s" format(
+				encoded(department.code),
+				encoded(academicYear.startYear.toString),
+				encoded(student.universityId)
+			)
 	}
 }

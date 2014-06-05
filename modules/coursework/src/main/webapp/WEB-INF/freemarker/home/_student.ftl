@@ -116,15 +116,22 @@
 					<#local isExtended = info.isExtended!false />
 					<#local extensionRequested = info.extensionRequested!false />
 					<#local isFormative = !info.summative!false />
+					<#local assignmentLink><#compress>
+						<#if isSelf>
+							<@routes.assignment assignment />
+						<#else>
+							<@routes.assignment_in_profile assignment student/>
+						</#if>
+					</#compress></#local>
 
 					<div class="item-info clearfix marked">
 						<div class="row-fluid">
 							<div class="span4">
 								<div class="module-title"><@fmt.module_name assignment.module /></div>
 								<h4 class="name">
-									<#if isSelf><a href="<@url context='/coursework' page='/module/${assignment.module.code}/${assignment.id}/' />"></#if>
+									<a href="${assignmentLink}">
 										<span class="ass-name">${assignment.name}</span>
-									<#if isSelf></a></#if>
+									</a>
 								</h4>
 							</div>
 							<div class="span5">
@@ -140,33 +147,33 @@
 								</#if>
 							</div>
 							<div class="span3 button-list">
-								<#if isSelf>
-									<#if hasFeedback>
-										<#-- View feedback -->
-										<a class="btn btn-block btn-success" href="<@url context='/coursework' page='/module/${assignment.module.code}/${assignment.id}/' />">
-											<i class="icon-check icon-white"></i> View feedback
-										</a>
-									<#elseif info.resubmittable>
-										<#-- Resubmission allowed -->
-										<a class="btn btn-block btn-primary" href="<@url context='/coursework' page='/module/${assignment.module.code}/${assignment.id}/' />">
-											<i class="icon-folder-close icon-white"></i> Resubmit
-										</a>
-									<#elseif hasSubmission>
-										<#-- View receipt -->
-										<a class="btn btn-block" href="<@url context='/coursework' page='/module/${assignment.module.code}/${assignment.id}/' />">
-											<i class="icon-list-alt"></i> View receipt
-										</a>
-									<#elseif info.submittable>
+								<#if hasFeedback>
+									<#-- View feedback -->
+									<a class="btn btn-block btn-success" href="${assignmentLink}">
+										<i class="icon-check icon-white"></i> View feedback
+									</a>
+								<#elseif info.resubmittable && isSelf>
+									<#-- Resubmission allowed -->
+									<a class="btn btn-block btn-primary" href="${assignmentLink}">
+										<i class="icon-folder-close icon-white"></i> Resubmit
+									</a>
+								<#elseif hasSubmission>
+									<#-- View receipt -->
+									<a class="btn btn-block" href="${assignmentLink}">
+										<i class="icon-list-alt"></i> View <#if isSelf>receipt<#else>submission</#if>
+									</a>
+								<#elseif info.submittable>
+									<#if isSelf>
 										<#-- First submission still allowed -->
-										<a class="btn btn-block btn-primary" href="<@url context='/coursework' page='/module/${assignment.module.code}/${assignment.id}/' />">
+										<a class="btn btn-block btn-primary" href="${assignmentLink}">
 											<i class="icon-folder-close icon-white"></i> Submit
 										</a>
-									<#else>
-										<#-- Assume formative, so just show info -->
-										<a class="btn btn-block" href="<@url context='/coursework' page='/module/${assignment.module.code}/${assignment.id}/' />">
-											<i class="icon-list-alt"></i> View details
-										</a>
 									</#if>
+								<#else>
+									<#-- Assume formative, so just show info -->
+									<a class="btn btn-block" href="${assignmentLink}">
+										<i class="icon-list-alt"></i> View details
+									</a>
 								</#if>
 							</div>
 						</div>

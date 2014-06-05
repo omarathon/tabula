@@ -12,7 +12,16 @@
 
 	<p>Add points to this monitoring scheme</p>
 
-	<p><@fmt.p scheme.points?size "point" /> on this scheme</p>
+	<#if newPoints == 0>
+		<p><@fmt.p scheme.points?size "point" /> on this scheme</p>
+	<#else>
+		<div class="alert alert-success">
+			<strong><@fmt.p newPoints "point" /></strong> added to this scheme
+			<a class="btn" href="<@routes.manageEditPoints command.department command.academicYear.startYear?c schemesParam />">Edit points</a>
+		</div>
+
+		<p><@fmt.p scheme.points?size "point" /> on this scheme</p>
+	</#if>
 
 	<form method="POST">
 		<input name="schemes" value="${scheme.id}" type="hidden" />

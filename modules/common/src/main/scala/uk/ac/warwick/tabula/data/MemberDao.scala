@@ -31,6 +31,7 @@ trait MemberDao {
 	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
+	def countUpdatedSince(startDate: DateTime): Int
 	
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
 	def getStaffByDepartment(department: Department): Seq[StaffMember]
@@ -51,7 +52,7 @@ trait MemberDao {
 	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime)
 	def getDisability(code: String): Option[Disability]
 
-	def getStudentMemberByTimetableHash(timetableHash: String): Option[StudentMember]
+	def getMemberByTimetableHash(timetableHash: String): Option[Member]
 
 }
 
@@ -204,6 +205,12 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setParameter("lastUpdated", startDate)
 			.setMaxResults(max).seq
 
+	def countUpdatedSince(startDate: DateTime): Int =
+		session.newCriteria[Member]
+			.add(gt("lastUpdatedDate", startDate))
+			.project[Number](count("universityId")).uniqueResult.get.intValue()
+
+
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
 					.createAlias("studentCourseDetails", "scd")
@@ -355,8 +362,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.uniqueResult
 	}
 
-	def getStudentMemberByTimetableHash(timetableHash: String): Option[StudentMember] = {
-		session.newCriteria[StudentMember]
+	def getMemberByTimetableHash(timetableHash: String): Option[Member] = {
+		session.newCriteria[Member]
 		.add(is("timetableHash", timetableHash))
 		.uniqueResult
 	}

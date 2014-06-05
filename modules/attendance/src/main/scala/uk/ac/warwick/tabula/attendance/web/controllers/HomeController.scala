@@ -32,10 +32,10 @@ class HomeController extends AttendanceController {
 
 		val hasAnyRelationships = info.relationshipTypesMap.exists{ case (_, b) => b}
 
-		if (!features.attendanceMonitoringAcademicYear2014) {
-			if (info.hasProfile && info.managePermissions.size == 0 && info.viewPermissions.size == 0 && !hasAnyRelationships)
-				Redirect(Routes.old.profile())
-			else if (!info.hasProfile && info.managePermissions.size == 0 && info.viewPermissions.size == 1 && !hasAnyRelationships)
+		if (info.hasProfile && info.managePermissions.size == 0 && info.viewPermissions.size == 0 && !hasAnyRelationships)
+			Redirect(Routes.old.profile()) // TODO FIXME
+		else if (!features.attendanceMonitoringAcademicYear2014) {
+			if (!info.hasProfile && info.managePermissions.size == 0 && info.viewPermissions.size == 1 && !hasAnyRelationships)
 				Redirect(Routes.old.department.view(info.viewPermissions.head))
 			else if (!info.hasProfile && info.managePermissions.size == 1 && info.viewPermissions.size == 0 && !hasAnyRelationships)
 				Redirect(Routes.old.department.manage(info.managePermissions.head))

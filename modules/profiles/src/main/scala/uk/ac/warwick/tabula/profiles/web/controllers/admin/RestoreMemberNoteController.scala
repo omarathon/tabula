@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.profiles.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.data.model.{MemberNote, Member}
-import scala.Array
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.profiles.commands.RestoreMemberNoteCommand

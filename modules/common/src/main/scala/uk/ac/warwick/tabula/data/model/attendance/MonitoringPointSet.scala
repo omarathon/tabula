@@ -12,6 +12,24 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 @Table(name = "monitoringpointset")
 class MonitoringPointSet extends GeneratedId with PermissionsTarget {
 
+	def displayName = {
+		s"${route.code.toUpperCase} ${route.name} ${
+			if (year == null)
+				"All years"
+			else
+				s"Year $year"
+		}"
+	}
+
+	def shortDisplayName = {
+		s"${route.code.toUpperCase} ${
+			if (year == null)
+				"All years"
+			else
+				s"Year $year"
+		}"
+	}
+
 	@OneToMany(mappedBy = "pointSet", cascade=Array(CascadeType.ALL), orphanRemoval = true)
 	@OrderBy("week")
 	@BatchSize(size=100)

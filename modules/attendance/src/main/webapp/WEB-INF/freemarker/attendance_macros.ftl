@@ -1,3 +1,5 @@
+<#import "attendance_variables.ftl" as attendance_variables />
+
 <#macro attendanceIcon pointMap point>
 	<#local checkpointData = mapGet(pointMap, point) />
 
@@ -210,6 +212,33 @@
 	<#return "" />
 </#function>
 
+<#macro pagination currentPage totalResults resultsPerPage extra_classes="">
+	<#local totalPages = (totalResults / resultsPerPage)?ceiling />
+	<div class="pagination pagination-right ${extra_classes}">
+		<ul>
+			<#if currentPage lte 1>
+				<li class="disabled"><span>&laquo;</span></li>
+			<#else>
+				<li><a href="?page=${currentPage - 1}" data-page="${currentPage - 1}">&laquo;</a></li>
+			</#if>
+
+			<#list 1..totalPages as page>
+				<#if page == currentPage>
+					<li class="active"><span>${page}</span></li>
+				<#else>
+					<li><a href="?page=${page}" data-page="${page}">${page}</a></li>
+				</#if>
+			</#list>
+
+			<#if currentPage gte totalPages>
+				<li class="disabled"><span>&raquo;</span></li>
+			<#else>
+				<li><a href="?page=${currentPage + 1}" data-page="${currentPage + 1}">&raquo;</a></li>
+			</#if>
+		</ul>
+	</div>
+</#macro>
+
 <#macro manageStudentTable
 	membershipItems
 	doSorting=false
@@ -281,4 +310,135 @@
 			</tbody>
 		</table>
 	</#if>
+</#macro>
+
+<#macro groupedPointsBySection pointsMap sectionName>
+<div class="striped-section">
+	<h2 class="section-title">${sectionName}</h2>
+	<div class="striped-section-contents">
+		<#list pointsMap[sectionName] as groupedPoint>
+			<div class="item-info row-fluid point">
+				<#nested groupedPoint />
+			</div>
+		</#list>
+	</div>
+</div>
+</#macro>
+
+<#function formatResult department checkpoint="" point="" student="" note="">
+	<#if checkpoint?has_content>
+		<#if note?has_content>
+			<#return attendanceMonitoringCheckpointFormatter(department, checkpoint, note) />
+		<#else>
+			<#return attendanceMonitoringCheckpointFormatter(department, checkpoint) />
+		</#if>
+	<#else>
+		<#if note?has_content>
+			<#return attendanceMonitoringCheckpointFormatter(department, point, student, note) />
+		<#else>
+			<#return attendanceMonitoringCheckpointFormatter(department, point, student) />
+		</#if>
+	</#if>
+</#function>
+
+<#macro checkpointLabel department checkpoint="" point="" student="" note="">
+	<#local formatResult = formatResult(department, checkpoint, point, student, note) />
+	<#local popoverContent>
+		<#if formatResult.status?has_content><p>${formatResult.status}</p></#if>
+		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
+		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
+		<#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}'>View attendance note</a></p></#if>
+	</#local>
+	<span class="use-popover label ${formatResult.labelClass}" data-content="${popoverContent}" data-html="true" data-placement="left">${formatResult.labelText}</span>
+</#macro>
+
+<#macro checkpointSelect department checkpoint="" point="" student="" note="">
+	<#local formatResult = formatResult(department, checkpoint, point, student, note) />
+	<#local tooltipContent>
+		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
+		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
+	</#local>
+	<select
+		id="checkpointMap-${point.id}"
+		name="checkpointMap[${point.id}]"
+		title="${tooltipContent}"
+	>
+		<#local hasState = mapGet(command.checkpointMap, point)?? />
+		<option value="" <#if !hasState >selected</#if>>Not recorded</option>
+		<option value="unauthorised" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
+		<option value="authorised" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "authorised">selected</#if>>Missed (authorised)</option>
+		<option value="attended" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "attended">selected</#if>>Attended</option>
+	</select>
+</#macro>
+
+<#macro checkpointIcon department checkpoint="" point="" student="" note="">
+	<#local formatResult = formatResult(department, checkpoint, point, student, note) />
+	<#local popoverContent>
+		<#if formatResult.status?has_content><p>${formatResult.status}</p></#if>
+		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
+		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
+		<#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}'>View attendance note</a></p></#if>
+	</#local>
+	<i class="use-popover icon-fixed-width ${formatResult.iconClass}" data-content="${popoverContent}" data-html="true"></i>
+</#macro>
+
+<#macro checkpointIconForPointCheckpointPair department student pointCheckpointPair attendanceNotesMap>
+	<#if pointCheckpointPair._2()??>
+		<#if mapGet(attendanceNotesMap, pointCheckpointPair._1())??>
+			<@checkpointIcon
+				department=department
+				checkpoint=pointCheckpointPair._2()
+				note=mapGet(attendanceNotesMap, pointCheckpointPair._1())
+			/>
+		<#else>
+			<@checkpointIcon
+				department=department
+				checkpoint=pointCheckpointPair._2()
+			/>
+		</#if>
+	<#else>
+		<#if mapGet(attendanceNotesMap, pointCheckpointPair._1())??>
+			<@checkpointIcon
+				department=department
+				point=pointCheckpointPair._1()
+				student=student
+				note=mapGet(attendanceNotesMap, pointCheckpointPair._1())
+			/>
+		<#else>
+			<@checkpointIcon
+				department=department
+				point=pointCheckpointPair._1()
+				student=student
+			/>
+		</#if>
+	</#if>
+</#macro>
+
+<#macro listCheckpointIcons department visiblePeriods monthNames result>
+	<#list attendance_variables.monitoringPointTermNames as term>
+		<#if visiblePeriods?seq_contains(term)>
+			<td>
+				<#if result.groupedPointCheckpointPairs[term]??>
+					<#list result.groupedPointCheckpointPairs[term] as pointCheckpointPair>
+						<@checkpointIconForPointCheckpointPair department result.student pointCheckpointPair result.attendanceNotes />
+					</#list>
+				<#else>
+					<i class="icon-fixed-width"></i>
+				</#if>
+			</td>
+		</#if>
+	</#list>
+	<#list monthNames as month>
+		<#if visiblePeriods?seq_contains(month)>
+		<td>
+			<#if result.groupedPointCheckpointPairs[month]??>
+				<#list result.groupedPointCheckpointPairs[month] as pointCheckpointPair>
+					<@checkpointIconForPointCheckpointPair department result.student pointCheckpointPair result.attendanceNotes />
+				</#list>
+			<#else>
+				<i class="icon-fixed-width"></i>
+			</#if>
+		</td>
+		</#if>
+	</#list>
 </#macro>

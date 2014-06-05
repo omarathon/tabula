@@ -98,13 +98,6 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	</#if>
 </#compress></#macro>
 
-<#macro assignment_link assignment>
-	<@module_name assignment.module />
-	<a href="<@url context='/coursework' page='/module/${assignment.module.code}/${assignment.id}/' />">
-		<span class="ass-name">${assignment.name}</span>
-	</a>
-</#macro>
-
 <#macro admin_assignment_link assignment>
 	<@module_name assignment.module />
 	<a href="<@url context='/coursework' page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/list' />">
@@ -158,9 +151,9 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	--></#noescape><#--
 --></#macro>
 
-<#macro monitoringPointWeeksFormat validFromWeek requiredFromWeek academicYear dept stripHtml=false><#--
+<#macro monitoringPointWeeksFormat startWeek endWeek academicYear dept stripHtml=false><#--
 	--><#noescape><#--
-		--><#local result = wholeWeekFormatter(validFromWeek, requiredFromWeek, academicYear, dept, false) /><#--
+		--><#local result = wholeWeekFormatter(startWeek, endWeek, academicYear, dept, false) /><#--
 		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
 	--></#noescape><#--
 --></#macro>

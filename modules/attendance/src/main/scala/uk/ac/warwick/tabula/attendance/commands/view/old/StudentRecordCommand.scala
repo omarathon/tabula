@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.view.old
 
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, Department, StudentMember}
 import uk.ac.warwick.tabula.commands._
@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.validation.{BindingResult, Errors}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.attendance.commands.{GroupMonitoringPointsByTerm, CheckpointUpdatedDescription}
 
 object StudentRecordCommand {
 	def apply(department: Department, student: StudentMember, user: CurrentUser, academicYearOption: Option[AcademicYear]) =
@@ -125,7 +126,7 @@ trait StudentRecordCommandState extends GroupMonitoringPointsByTerm with Monitor
 	val academicYear = academicYearOption.getOrElse(thisAcademicYear)
 	lazy val pointSet = monitoringPointService.getPointSetForStudent(student, academicYear).getOrElse(throw new ItemNotFoundException)
 
-	var checkpointMap: JMap[MonitoringPoint, AttendanceState] =  JHashMap()
+	var checkpointMap: JMap[MonitoringPoint, AttendanceState] = JHashMap()
 	var checkpointDescriptions: Map[MonitoringPoint, String] = _
 	var attendanceNotes: Map[MonitoringPoint, AttendanceNote] = _
 

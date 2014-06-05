@@ -4,7 +4,6 @@ import scala.collection.JavaConverters._
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
-import scala.Array
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes

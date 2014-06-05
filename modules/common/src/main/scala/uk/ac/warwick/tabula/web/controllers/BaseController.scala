@@ -7,12 +7,9 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Validator
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.InitBinder
-import org.springframework.web.bind.annotation.RequestMethod
 import javax.annotation.Resource
 import uk.ac.warwick.tabula.{PermissionDeniedException, CurrentUser, ItemNotFoundException, RequestInfo}
-import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils
@@ -21,11 +18,11 @@ import uk.ac.warwick.tabula.validators.CompositeValidator
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.sso.client.SSOConfiguration
 import uk.ac.warwick.sso.client.tags.SSOLoginLinkGenerator
-import org.springframework.web.servlet.view.RedirectView
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
-abstract trait ControllerMethods extends PermissionsCheckingMethods with Logging {
+trait ControllerMethods extends PermissionsCheckingMethods with Logging {
 	def user: CurrentUser
 	var securityService: SecurityService
 
@@ -42,13 +39,24 @@ abstract trait ControllerMethods extends PermissionsCheckingMethods with Logging
 		else Some(something)
 }
 
-trait ControllerViews {
+trait ControllerViews extends Logging {
 	val Mav = uk.ac.warwick.tabula.web.Mav
 
-	def getReturnTo(defaultUrl:String) = requestInfo.flatMap { _.requestParameters.get("returnTo") } match {
-		case Some(returnTo :: tail) => returnTo
-		case _ => defaultUrl
-	}
+	def getReturnTo(defaultUrl:String) =
+		requestInfo.flatMap {
+			_.requestParameters.get("returnTo")
+		}.flatMap {
+			_.headOption
+		}.filter {
+			_.hasText
+		}.fold({
+			if (defaultUrl.isEmpty)
+				logger.warn("Empty defaultUrl when using returnTo")
+			defaultUrl
+		})(url =>
+			// Prevent returnTo rabbit hole by stripping other returnTos from the URL
+			url.replaceAll("[&?]returnTo=[^&]*", "")
+		)
 
 	def Redirect(path: String, objects: Pair[String, _]*) = Mav("redirect:" + getReturnTo(path), objects: _*)
 	def Redirect(path: String, objects: Map[String, _]) = Mav("redirect:" + getReturnTo(path), objects)
@@ -112,7 +120,7 @@ abstract class BaseController extends ControllerMethods
 
 	def requestInfo = RequestInfo.fromThread
 	def user = requestInfo.get.user
-	def ajax = requestInfo.map { _.ajax }.getOrElse(false)
+	def ajax = requestInfo.exists(_.ajax)
 
 	/**
 	 * Enables the Hibernate filter for this session to exclude
