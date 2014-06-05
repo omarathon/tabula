@@ -157,7 +157,7 @@
 							<td>${apl.level.name}</td>
 							<td align="center">${apl.cats}</td>
 							<td>${apl.academicYear.toString}</td>
-							<td>${apl.reason}</td>
+							<td>${apl.reason!}</td>
 						</tr>
 					</#list>
 				</table>
