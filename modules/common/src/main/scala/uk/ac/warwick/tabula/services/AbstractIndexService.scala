@@ -276,7 +276,7 @@ abstract class AbstractIndexService[A]
 				logger.info("No recent document found, indexing since Tabula year zero")
 				new DateTime(yearZero, 1, 1, 0, 0)
 			}(v => new DateTime(v.toLong).minusMinutes(10))
-		}(_.minusMinutes(1))
+		}(_.minusSeconds(30))
 	}
 
 	/**
