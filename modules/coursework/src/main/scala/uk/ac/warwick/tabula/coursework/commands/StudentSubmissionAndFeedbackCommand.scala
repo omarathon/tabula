@@ -23,27 +23,20 @@ object StudentSubmissionAndFeedbackCommand {
   )
 
 	def apply(module: Module, assignment: Assignment, member: Member, viewingUser: CurrentUser) =
-		new StudentSubmissionAndFeedbackCommandInternal(module, assignment)
-			with StudentMemberSubmissionAndFeedbackCommandState
+		new StudentMemberSubmissionAndFeedbackCommandInternal(module, assignment, member, viewingUser)
 			with StudentMemberSubmissionAndFeedbackCommandPermissions
 			with AutowiringFeedbackServiceComponent
 			with AutowiringSubmissionServiceComponent
 			with ComposableCommand[StudentSubmissionInformation]
-			with Unaudited with ReadOnly {
-			val studentMember = member
-			val currentUser = viewingUser
-		}
+			with Unaudited with ReadOnly
 
 	def apply(module: Module, assignment: Assignment, user: CurrentUser) =
-		new StudentSubmissionAndFeedbackCommandInternal(module, assignment)
-			with CurrentUserSubmissionAndFeedbackCommandState
+		new CurrentUserSubmissionAndFeedbackCommandInternal(module, assignment, user)
 			with CurrentUserSubmissionAndFeedbackCommandPermissions
 			with AutowiringFeedbackServiceComponent
 			with AutowiringSubmissionServiceComponent
 			with ComposableCommand[StudentSubmissionInformation]
-			with Unaudited with ReadOnly {
-			val currentUser = user
-		}
+			with Unaudited with ReadOnly
 }
 
 trait StudentSubmissionAndFeedbackCommandState {
@@ -75,6 +68,16 @@ trait CurrentUserSubmissionAndFeedbackCommandState extends StudentSubmissionAndF
 
 	final lazy val studentUser = currentUser.apparentUser
 	final lazy val viewer = currentUser.apparentUser
+}
+
+abstract class StudentMemberSubmissionAndFeedbackCommandInternal(module: Module, assignment: Assignment, val studentMember: Member, val currentUser: CurrentUser)
+	extends StudentSubmissionAndFeedbackCommandInternal(module, assignment) with StudentMemberSubmissionAndFeedbackCommandState {
+	self: FeedbackServiceComponent with SubmissionServiceComponent =>
+}
+
+abstract class CurrentUserSubmissionAndFeedbackCommandInternal(module: Module, assignment: Assignment, val currentUser: CurrentUser)
+	extends StudentSubmissionAndFeedbackCommandInternal(module, assignment) with CurrentUserSubmissionAndFeedbackCommandState {
+	self: FeedbackServiceComponent with SubmissionServiceComponent =>
 }
 
 abstract class StudentSubmissionAndFeedbackCommandInternal(val module: Module, val assignment: Assignment)
