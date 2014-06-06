@@ -93,13 +93,15 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 			.setEntity("module", module)
 			.seq
 
-	def getAssignments(department: Department, year: AcademicYear): Seq[Assignment] =
-		session.newCriteria[Assignment]
+	def getAssignments(department: Department, year: AcademicYear): Seq[Assignment] = {
+		val assignments = session.newCriteria[Assignment]
 			.createAlias("module", "m")
 			.add(is("m.department", department))
-			.add(is("year", year))
+			.add(is("academicYear", year))
 			.add(is("deleted", false))
 			.seq
+		assignments
+	}
 
 	def recentAssignment(department: Department) = {
 		session.newCriteria[Assignment]

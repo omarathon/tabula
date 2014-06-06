@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
@@ -18,8 +17,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import com.fasterxml.jackson.databind.ObjectMapper
-
-
 
 abstract class ExtensionController extends CourseworkController {
 	var json = Wire[ObjectMapper]
@@ -90,7 +87,7 @@ class ListExtensionsForAssignmentController extends ExtensionController {
 }
 
 @Controller
-@RequestMapping(Array("/admin//{department}/manage/extensions"))
+@RequestMapping(Array("/admin/department/{department}/manage/extensions"))
 class ListAllExtensionsController extends ExtensionController {
 
 	// Add the common breadcrumbs to the model
@@ -106,7 +103,7 @@ class ListAllExtensionsController extends ExtensionController {
 	def listExtensions(cmd: ListAllExtensionsCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
 		val extensionGraphs = cmd.apply()
 
-		val model = Mav("admin/assignments/extensions/summary",
+		val model = Mav("admin/assignments/extensions/departmentSummary",
 			"extensionToOpen" -> universityId,
 			"extensionGraphs" -> extensionGraphs,
 			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar

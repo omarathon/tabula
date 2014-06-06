@@ -102,7 +102,7 @@
 				contentUrlFunction: function(){ return '${url(detailUrl!"")}'; },
 				useIframe: true,
 				tableSorterOptions: {
-					sortList: [<#if department.showStudentName>[2, 0], </#if>[1, 0], [0, 0]],
+					sortList: [[1, 0], [0, 0]],
 					headers: {
 						3: { sorter: false }
 					}
