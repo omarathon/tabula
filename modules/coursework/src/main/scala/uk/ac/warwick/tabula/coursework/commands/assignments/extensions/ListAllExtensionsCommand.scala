@@ -23,7 +23,6 @@ class ListAllExtensionsCommand(val department: Department)
 	// Extension.Read permission, we would need to make this less strict.
 	PermissionCheck(Permissions.Extension.Read, department)
 
-	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 	var assignmentDao = Wire.auto[AssignmentDao]
 
 	def applyInternal(): Seq[ExtensionGraph] = {
