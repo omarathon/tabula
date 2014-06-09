@@ -5,6 +5,7 @@ import org.hibernate.{ScrollableResults, Session}
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
+import uk.ac.warwick.tabula.data.Scrollable
 
 object Closeables {
 	def ensureClose[T, C <: Closeable](c: C)(fn: => T): T = try fn finally c.close

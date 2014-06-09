@@ -46,6 +46,6 @@ class ScheduledNotificationDaoImpl extends ScheduledNotificationDao with Daoisms
 			.add(Restrictions.le("scheduledDate", DateTime.now))
 			.addOrder(Order.asc("scheduledDate"))
 			.scroll()
-		new Scrollable(scrollable, session)
+		Scrollable(scrollable, session)
 	}
 }

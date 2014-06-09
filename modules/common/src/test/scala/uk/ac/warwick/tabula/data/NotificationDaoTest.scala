@@ -169,7 +169,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		session.flush()
 
-		val everything = notificationDao.recent(now.minusMonths(10)).takeWhile(n => true).toSeq
+		val everything = notificationDao.recent(now.minusMonths(10)).all.toSeq
 		everything.size should be (1000)
 
 		val oneHundred = notificationDao.recent(now.minusMonths(10)).take(100).toSeq

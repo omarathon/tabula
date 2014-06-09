@@ -1,8 +1,21 @@
 package uk.ac.warwick.tabula.data
 
-import collection.mutable
 import org.hibernate.{Session, ScrollableResults}
 import uk.ac.warwick.tabula.helpers.Closeables
+import java.io.Closeable
+
+object Scrollable {
+	def apply[A](results: ScrollableResults, session: Session) =
+		new ScrollableImpl(results, session, { a: Array[AnyRef] => a(0).asInstanceOf[A] })
+}
+
+trait Scrollable[A] {
+	def take(count: Int): Iterator[A] with Closeable
+	def takeWhile(f: (A) => Boolean): Iterator[A] with Closeable
+	def all: Iterator[A] with Closeable
+
+	def map[B](f: Array[AnyRef] => B): Scrollable[B]
+}
 
 /**
  * Wrapper for ScrollableResults. The Scrollable class does not have
@@ -15,48 +28,91 @@ import uk.ac.warwick.tabula.helpers.Closeables
  *
  * You MUST call map or foreach exactly, to ensure the results are closed.
  */
-class Scrollable[A](results: ScrollableResults, session: Session) {
+class ScrollableImpl[A](results: ScrollableResults, session: Session, mappingFunction: (Array[AnyRef] => A)) extends Scrollable[A] {
 	/**
 	 * Return a result that only returns this number of results as a maximum.
 	 * If there's always a maximum then it might be more efficient to set max
 	 * results on the query itself. But this is useful if you want a DAO method
 	 * to return a large set that can be limited later by the calling code.
 	 */
-	def take(count: Int): LimitedScrollable = new CountLimitedScrollable(count)
-	def takeWhile(f: (A) => Boolean): LimitedScrollable = new WhileLimitedScrollable(f)
+	def take(count: Int): Iterator[A] with Closeable = new CountLimitedScrollable(count)
+	def takeWhile(f: (A) => Boolean): Iterator[A] with Closeable = new WhileLimitedScrollable(f)
+	def all: Iterator[A] with Closeable = new UnlimitedScrollable()
 
-	trait LimitedScrollable extends Traversable[A] {
-		def map[B](f: (A) => B): Seq[B]
-		def foreach[U](f: (A) => U) = map(f)
+	def map[B](f: Array[AnyRef] => B): Scrollable[B] = new ScrollableImpl(results, session, f)
+
+	trait ScrollableIterator extends Iterator[A] with Closeable {
+		private var _nextChecked = false
+		private var _next = false
+
+		def hasNext = {
+			if (!_nextChecked) {
+				_nextChecked = true
+				_next = results.next()
+			}
+
+			_next
+		}
+		def next(): A = {
+			if (!_nextChecked) _next = results.next()
+
+			if (_next) {
+				_nextChecked = false
+				mappingFunction(results.get())
+			} else throw new NoSuchElementException
+		}
+
+		override def foreach[U](f: A => U) = Closeables.closeThis(results) { r =>
+			super.foreach { entity: A =>
+				f(entity)
+				safeEvict(entity)
+			}
+		}
+
+		def close() = results.close()
 	}
 
-	class CountLimitedScrollable(count: Int) extends LimitedScrollable {
-		override def map[B](f: (A) => B) = Closeables.closeThis(results) { r =>
-			var i = 0
-			val result = mutable.ListBuffer[B]()
-			while (i < count && results.next()) {
-				val entity: A = results.get(0).asInstanceOf[A]
-				result += f(entity)
-				session.evict(entity)
-				i += 1
-			}
-			result.toSeq
+	private def safeEvict(entity: A) =
+		try { session.evict(entity) }
+		catch { case e: IllegalArgumentException => /* Do nothing */ }
+
+	class CountLimitedScrollable(count: Int) extends ScrollableIterator {
+		private var _i = 0
+		override def hasNext = _i < count && super.hasNext
+		override def next() = {
+			val ret = super.next()
+			_i += 1
+			ret
 		}
 	}
 
-	class WhileLimitedScrollable(when: (A) => Boolean) extends LimitedScrollable {
-		def map[B](f: (A) => B): Seq[B] = Closeables.closeThis(results) { r =>
-			var shouldContinue = true
-			val result = mutable.ListBuffer[B]()
-			while (shouldContinue && results.next()) {
-				val entity: A = results.get(0).asInstanceOf[A]
-				shouldContinue = when(entity)
-				if (shouldContinue) {
-					result += f(entity)
-					session.evict(entity)
+	class WhileLimitedScrollable(f: (A) => Boolean) extends ScrollableIterator {
+		private var _nextChecked = false
+		private var _next = false
+		private var _nextEntity: A = _
+
+		override def hasNext = {
+			if (!_nextChecked) {
+				_nextChecked = true
+				_next = results.next()
+
+				if (_next) {
+					_nextEntity = mappingFunction(results.get())
+					_next = f(_nextEntity)
 				}
 			}
-			result.toSeq
+
+			_next
+		}
+		override def next(): A = {
+			if (!_nextChecked) _next = results.next()
+
+			if (_next) {
+				_nextChecked = false
+				_nextEntity
+			} else throw new NoSuchElementException
 		}
 	}
+
+	class UnlimitedScrollable extends ScrollableIterator
 }
