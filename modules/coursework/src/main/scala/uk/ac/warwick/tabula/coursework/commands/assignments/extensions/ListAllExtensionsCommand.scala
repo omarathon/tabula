@@ -1,16 +1,12 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.{Department, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
-import uk.ac.warwick.tabula.services.{AssignmentService, UserLookupService, AssignmentMembershipService}
-import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
-import uk.ac.warwick.userlookup.User
-import org.joda.time.{Days, DateTime}
-import uk.ac.warwick.tabula.coursework.web.Routes.admin.assignment.extension
+import uk.ac.warwick.tabula.AcademicYear
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.AssignmentDao
 import uk.ac.warwick.tabula.coursework.helpers.ExtensionGraph
 
