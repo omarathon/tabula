@@ -25,7 +25,6 @@ class ViewMonitoringPointsController extends AttendanceController with HasMonthN
 			val filterResult = filterCommand.apply()
 			if (ajax) {
 				Mav("view/_points_results",
-				// could need updatedMonitoringPoint too - when recorded one
 					"filterResult" -> filterResult
 				).noLayout()
 			} else {

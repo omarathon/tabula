@@ -40,8 +40,6 @@ class FilterMonitoringPointsCommandInternal(val department: Department, val acad
 			attendanceMonitoringService.listStudentsPoints(student, department, academicYear)
 		}.distinct
 
-		//val groupedPoints = groupByMonth(points, groupSimilar = true) ++ groupByTerm(points, groupSimilar = true)
-		//FilterMonitoringPointsCommandResult(groupedPoints, students)
 		groupByMonth(points, groupSimilar = true) ++ groupByTerm(points, groupSimilar = true)
 
 	}
