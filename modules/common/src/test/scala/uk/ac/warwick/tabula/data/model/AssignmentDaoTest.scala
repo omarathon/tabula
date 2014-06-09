@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.{MockUserLookup, PersistenceTestBase, Fixtures, AcademicYear}
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.services.AssignmentMembershipServiceImpl
+import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures, AcademicYear}
 import org.junit.Before
 import uk.ac.warwick.tabula.data.AssignmentDaoImpl
 import org.joda.time.DateTime
