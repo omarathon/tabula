@@ -5,9 +5,14 @@
 
 <#if validationError?has_content>
 	<#noescape>${validationError}</#noescape>
+<#elseif !filterCommand.hasBeenFiltered>
+<p class="alert alert-info"><i class="icon-lightbulb"></i> Find points for students using the filter options above.</p>
+<#elseif filterCommand.hasBeenFiltered && filterCommand.filterTooVague>
+<p class="alert"><i class="icon-warning-sign"></i> The filter you have chosen includes too many students.</p>
 <#elseif filterResult?size == 0>
 	<p class="alert"><i class="icon-warning-sign"></i> No points exist for the selected options.</p>
 <#else>
+
 	<#assign filterQuery = filterCommand.serializeFilter />
 	<#assign returnTo><@routes.viewDepartmentPointsWithAcademicYear filterCommand.department filterCommand.academicYear filterQuery/></#assign>
 	<#function permission_button_function groupedPoint>

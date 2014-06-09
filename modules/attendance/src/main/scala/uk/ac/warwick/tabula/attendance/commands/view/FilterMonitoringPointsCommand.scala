@@ -30,18 +30,27 @@ class FilterMonitoringPointsCommandInternal(val department: Department, val acad
 
 	override def applyInternal() = {
 
-		val students = profileService.findAllStudentsByRestrictions (
-			department = department,
-			restrictions = buildRestrictions(),
-			orders = buildOrders()
-		)
 
-		val points = students.flatMap { student =>
-			attendanceMonitoringService.listStudentsPoints(student, department, academicYear)
-		}.distinct
+		if (serializeFilter.isEmpty) {
+			hasBeenFiltered = false
+			Map()
+		} else {
+			val students = profileService.findAllStudentsByRestrictions (
+				department = department,
+				restrictions = buildRestrictions(),
+				orders = buildOrders()
+			)
 
-		groupByMonth(points, groupSimilar = true) ++ groupByTerm(points, groupSimilar = true)
-
+			if (students.size > FiltersStudents.MaxStudentsPerPage ) {
+					filterTooVague = true
+					Map()
+			} else {
+				val points = students.flatMap { student =>
+					attendanceMonitoringService.listStudentsPoints(student, department, academicYear)
+				}.distinct
+				groupByMonth(points, groupSimilar = true) ++ groupByTerm(points, groupSimilar = true)
+			}
+		}
 	}
 }
 
@@ -55,7 +64,7 @@ trait FilterMonitoringPointsPermissions extends RequiresPermissionsChecking with
 
 }
 
-trait FilterMonitoringPointsCommandState extends FiltersStudents {
+trait FilterMonitoringPointsCommandState extends AttendanceFilterExtras {
 	def department: Department
 	def academicYear: AcademicYear
 
@@ -69,9 +78,10 @@ trait FilterMonitoringPointsCommandState extends FiltersStudents {
 	var sprStatuses: JList[SitsStatus] = JArrayList()
 	var modules: JList[Module] = JArrayList()
 
-	var period: String = _
-
-	var availablePeriods: Seq[(String, Boolean)] = _
 	var allStudents: Seq[StudentMember] = _
+
+	var filterTooVague = false
+	var hasBeenFiltered = false
+
 }
 
