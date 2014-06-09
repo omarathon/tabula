@@ -41,7 +41,7 @@
 			</dd>
 		</dl>
 	</td>
-	<td class="duration-col-department-wide toggle-cell">
+	<td class="duration-col duration-col-department-wide toggle-cell">
 	</td>
 </tr>
 </#macro>
@@ -74,7 +74,7 @@
 			<th>Module</th>
 			<th>Assignment</th>
 			<th class="status-col">Status</th>
-			<th class="duration-col">Length of extension</th>
+			<th class="duration-col duration-col-department-wide">Length of extension</th>
 		</tr>
 		</thead>
 
