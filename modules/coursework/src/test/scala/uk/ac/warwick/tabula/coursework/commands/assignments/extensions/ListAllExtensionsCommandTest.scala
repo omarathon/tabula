@@ -1,0 +1,45 @@
+package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
+
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.data.AssignmentDao
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.services.UserLookupService
+
+class ListAllExtensionsCommandTest extends TestBase with Mockito {
+
+	trait Environment {
+		val dept = Fixtures.department("fi", "Film")
+		val year = AcademicYear.guessByDate(new DateTime())
+
+		val user1 = Fixtures.user("0123456")
+		val userLookup = smartMock[UserLookupService]
+		userLookup.getUserByWarwickUniId("0123456") returns (user1)
+
+		val extension1 = Fixtures.extension("0123456", "user1")
+		extension1.userLookup = userLookup
+
+		val assignment1 = Fixtures.assignment("assignment 1")
+		assignment1.extensions.add(extension1)
+
+		val assignmentDao = smartMock[AssignmentDao]
+		assignmentDao.getAssignments(dept, year) returns (Seq(assignment1))
+
+	}
+
+	@Test
+	def testApply() {
+		new Environment {
+			val command = new ListAllExtensionsCommand(dept)
+			command.assignmentDao = assignmentDao
+			val graph = command.apply().head
+			graph.universityId should be ("0123456")
+			graph.user should be (extension1.getUserForUniversityId)
+			graph.isAwaitingReview should be (extension1.awaitingReview)
+			graph.hasApprovedExtension should be (extension1.approved)
+			graph.hasRejectedExtension should be (extension1.rejected)
+			graph.duration should be (extension1.duration)
+			graph.requestedExtraDuration should be (extension1.requestedExtraDuration)
+			graph.extension should be (Some(extension1))
+		}
+	}
+}
