@@ -70,24 +70,7 @@
 								<i class="icon-list-alt"></i> Extension settings
 							</@fmt.permission_button>
 					   </li>
-
-						<li>
-							<#assign extensions_url><@routes.manage_extensions department /></#assign>
-							<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
-								<i class="icon-calendar"></i> Extension requests
-							</@fmt.permission_button>
-						</li>
 				   </#if>
-
-					<#if features.feedbackTemplates>
-						<li>
-							<#assign feedback_url><@routes.feedbacktemplates department /></#assign>
-							<@fmt.permission_button permission='FeedbackTemplate.Create' scope=department action_descr='create feedback template' href=feedback_url>
-								<i class="icon-comment"></i> Feedback templates
-							</@fmt.permission_button>
-					   </li>
-				   </#if>
-
 
 					<li<#if !modules?has_content> class="disabled"</#if> id="feedback-report-button">
 						<#assign feedbackrep_url><@routes.feedbackreport department /></#assign>
@@ -109,6 +92,24 @@
 							})(jQuery);
 						</script>
 					</li>
+
+					<#if features.feedbackTemplates>
+						<li>
+							<#assign feedback_url><@routes.feedbacktemplates department /></#assign>
+							<@fmt.permission_button permission='FeedbackTemplate.Create' scope=department action_descr='create feedback template' href=feedback_url>
+								<i class="icon-comment"></i> Feedback templates
+							</@fmt.permission_button>
+						</li>
+					</#if>
+
+					<#if features.extensions>
+						<li>
+							<#assign extensions_url><@routes.manage_extensions department /></#assign>
+							<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
+								<i class="icon-calendar"></i> Manage extensions
+							</@fmt.permission_button>
+						</li>
+					</#if>
 
 					<#if features.markingWorkflows>
 						<li>

@@ -9,8 +9,6 @@
 </#assign>
 
 <#escape x as x?html>
-	<h5>Module: ${module.code}, Assignment: ${assignment.name}, student: ${student.lastName}</h5>
-
 	<div class="content extension-detail">
 		<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/extensions/detail/${universityId}')}" commandName="modifyExtensionCommand" cssClass="form-horizontal double-submit-protection">
 			<@f.input type="hidden" path="universityId" value="${universityId}" />

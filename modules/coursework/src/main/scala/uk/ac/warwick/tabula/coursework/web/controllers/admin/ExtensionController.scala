@@ -65,9 +65,9 @@ class ListExtensionsForAssignmentController extends ExtensionController {
 
 	@ModelAttribute
 	def listCommand(
-									 @PathVariable("module") module:Module,
-									 @PathVariable("assignment") assignment:Assignment
-									 ) = new ListExtensionsForAssignmentCommand(module, assignment, user)
+		@PathVariable("module") module:Module,
+		@PathVariable("assignment") assignment:Assignment
+		) = new ListExtensionsForAssignmentCommand(module, assignment, user)
 
 	@RequestMapping(method=Array(HEAD,GET))
 	def listExtensions(cmd: ListExtensionsForAssignmentCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
@@ -96,8 +96,8 @@ class ListAllExtensionsController extends ExtensionController {
 
 	@ModelAttribute
 	def listCommand(
-									 @PathVariable("department") department:Department
-									 ) = new ListAllExtensionsCommand(department, user)
+		@PathVariable("department") department:Department
+		) = new ListAllExtensionsCommand(department, user)
 
 	@RequestMapping(method=Array(HEAD,GET))
 	def listExtensions(cmd: ListAllExtensionsCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {

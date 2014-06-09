@@ -10,8 +10,6 @@
 	data-detailurl = <@routes.extensiondetail assignment />
 >
 
-<#--	data-detailurl="/coursework/admin/module/${graph.extension.assignment.module.code}/assignments/${graph.extension.assignment.id}/extensions/detail" -->
-
 <#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
 	<td class="student-col toggle-cell"><h6 class="toggle-icon">${graph.user.firstName}</h6></td>
 	<td class="student-col toggle-cell"><h6>${graph.user.lastName}&nbsp;<@pl.profile_link graph.universityId /></h6></td>
@@ -54,7 +52,7 @@
 			<h5><span class="muted">for</span> ${department.name} (${department.code?upper_case})</h5>
 		</div>
 		<div class="span5">
-			<p class="alert alert-info">
+			<p class="alert alert-info extension-alert-info">
 				<i class="icon-envelope-alt"></i> Students will automatically be notified by email when you grant, modify or revoke an extension.
 			</p>
 		</div>
@@ -80,8 +78,7 @@
 
 		<tbody>
 			<#list extensionGraphs as extensionGraph>
-				<#-- as this is a *management* screen, only show rows we can actually do something with -->
-
+				<#-- only show rows the user can do something with -->
 				<#if (extensionGraph.extension?has_content && can.do("Extension.Update", department)) || can.do("Extension.Create", department)>
 					<@row extensionGraph />
 				</#if>
