@@ -97,7 +97,7 @@ class ListAllExtensionsController extends ExtensionController {
 	@ModelAttribute
 	def listCommand(
 		@PathVariable("department") department:Department
-		) = new ListAllExtensionsCommand(department, user)
+		) = new ListAllExtensionsCommand(department)
 
 	@RequestMapping(method=Array(HEAD,GET))
 	def listExtensions(cmd: ListAllExtensionsCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {

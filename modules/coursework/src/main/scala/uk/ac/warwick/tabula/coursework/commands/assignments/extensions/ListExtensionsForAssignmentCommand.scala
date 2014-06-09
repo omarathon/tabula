@@ -13,6 +13,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.ItemNotFoundException
 import org.joda.time.{Days, DateTime}
 import uk.ac.warwick.tabula.coursework.web.Routes.admin.assignment.extension
+import uk.ac.warwick.tabula.coursework.helpers.ExtensionGraph
 
 class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Assignment, val user: CurrentUser)
 	extends Command[Seq[ExtensionGraph]] with ReadOnly with Unaudited {
@@ -64,13 +65,3 @@ class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Ass
 		}).toSeq
 	}
 }
-
-case class ExtensionGraph(
-	universityId: String,
-	user: User,
-	isAwaitingReview: Boolean,
-	hasApprovedExtension: Boolean,
-	hasRejectedExtension: Boolean,
-	duration: Int,
-	requestedExtraDuration: Int,
-	extension: Option[Extension])

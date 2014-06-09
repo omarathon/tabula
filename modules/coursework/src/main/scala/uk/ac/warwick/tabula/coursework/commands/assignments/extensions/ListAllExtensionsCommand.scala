@@ -12,8 +12,9 @@ import uk.ac.warwick.userlookup.User
 import org.joda.time.{Days, DateTime}
 import uk.ac.warwick.tabula.coursework.web.Routes.admin.assignment.extension
 import uk.ac.warwick.tabula.data.AssignmentDao
+import uk.ac.warwick.tabula.coursework.helpers.ExtensionGraph
 
-class ListAllExtensionsCommand(val department: Department, val user: CurrentUser)
+class ListAllExtensionsCommand(val department: Department)
 	extends Command[Seq[ExtensionGraph]] with ReadOnly with Unaudited {
 
 	// This permissions check limits this to anyone who has extension read permission over the whole department.
@@ -22,7 +23,6 @@ class ListAllExtensionsCommand(val department: Department, val user: CurrentUser
 	// Extension.Read permission, we would need to make this less strict.
 	PermissionCheck(Permissions.Extension.Read, department)
 
-	var userLookup = Wire.auto[UserLookupService]
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 	var assignmentDao = Wire.auto[AssignmentDao]
 
@@ -31,27 +31,9 @@ class ListAllExtensionsCommand(val department: Department, val user: CurrentUser
 		val year = AcademicYear.guessByDate(new DateTime())
 
 		// get all extensions for assignments in modules in the department for the current year
-
-		val allExtensions = (for (assignment <- assignmentDao.getAssignments(department, year)) yield {
-			assignment.extensions.asScala
-		}).flatten
-
-		val extensions = for (extension <- allExtensions) yield {
-			getExtensionGraphFromExtension(extension)
-		}
-		extensions
-	}
-
-	def getExtensionGraphFromExtension(extension: Extension): ExtensionGraph = {
-		new ExtensionGraph(
-			extension.universityId,
-			userLookup.getUserByWarwickUniId(extension.universityId),
-			extension.awaitingReview,
-			extension.approved,
-			extension.rejected,
-			extension.duration,
-			extension.requestedExtraDuration,
-			Some(extension))
+		assignmentDao.getAssignments(department, year)
+			.flatMap { _.extensions.asScala }
+			.map(ExtensionGraph(_))
 	}
 
 }

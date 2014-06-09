@@ -16,12 +16,17 @@ import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 import uk.ac.warwick.tabula.DateFormats
 import org.springframework.format.annotation.DateTimeFormat
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.UserLookupService
 
 
 @Entity @AccessType("field")
 class Extension extends GeneratedId with PermissionsTarget with ToEntityReference {
 
 	type Entity = Extension
+
+	@transient
+	var userLookup = Wire[UserLookupService]
 
 	def this(universityId:String=null) {
 		this()
@@ -42,6 +47,8 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 
 	def isForUser(user: User): Boolean = isForUser(user.getWarwickId, user.getUserId)
 	def isForUser(theUniversityId: String, theUsercode: String): Boolean = universityId == theUniversityId || userId == theUsercode
+
+	def getUserForUniversityId = userLookup.getUserByWarwickUniId(universityId)
 
 	// TODO should there be a single def that returns the expiry date for approved/manual extensions, and requested expiry date otherwise?
 	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")

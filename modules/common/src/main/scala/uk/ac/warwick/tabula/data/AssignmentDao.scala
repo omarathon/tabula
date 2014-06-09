@@ -99,6 +99,7 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 			.add(is("m.department", department))
 			.add(is("academicYear", year))
 			.add(is("deleted", false))
+			.add(is("archived", false))
 			.seq
 		assignments
 	}
