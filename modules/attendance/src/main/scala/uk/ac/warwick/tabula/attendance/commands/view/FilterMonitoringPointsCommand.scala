@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.attendance.commands.view
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, TermServiceComponent, AttendanceMonitoringServiceComponent, AutowiringTermServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.commands.{FiltersStudents, TaskBenchmarking, CommandInternal, Unaudited, ReadOnly, ComposableCommand}
+import uk.ac.warwick.tabula.commands.{TaskBenchmarking, CommandInternal, Unaudited, ReadOnly, ComposableCommand}
 import uk.ac.warwick.tabula.attendance.commands.{GroupsPoints, GroupedPoint}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -41,7 +41,7 @@ class FilterMonitoringPointsCommandInternal(val department: Department, val acad
 				orders = buildOrders()
 			)
 
-			if (students.size > FiltersStudents.MaxStudentsPerPage ) {
+			if (students.size > MaxStudentsFromFilter ) {
 					filterTooVague = true
 					Map()
 			} else {
@@ -65,6 +65,9 @@ trait FilterMonitoringPointsPermissions extends RequiresPermissionsChecking with
 }
 
 trait FilterMonitoringPointsCommandState extends AttendanceFilterExtras {
+
+	final val MaxStudentsFromFilter = 600
+
 	def department: Department
 	def academicYear: AcademicYear
 
