@@ -15,7 +15,7 @@
 <#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
 	<td class="student-col toggle-cell"><h6 class="toggle-icon">${graph.user.firstName}</h6></td>
 	<td class="student-col toggle-cell"><h6>${graph.user.lastName}&nbsp;<@pl.profile_link graph.universityId /></h6></td>
-	<td class="toggle-cell"> ${graph.extension.assignment.module.code}</td>
+	<td class="toggle-cell"> ${graph.extension.assignment.module.code?upper_case}</td>
 	<td class="toggle-cell"> ${graph.extension.assignment.name}</td>
 	<td class="status-col toggle-cell content-cell">
 		<dl style="margin: 0; border-bottom: 0;">
