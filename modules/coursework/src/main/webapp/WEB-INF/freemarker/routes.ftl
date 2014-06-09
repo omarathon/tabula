@@ -36,9 +36,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro markerFeedbackFiles assignment markerFeedback><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${markerFeedback.id}/feedback-${markerFeedback.feedback.universityId}.zip"/></#macro>
 <#macro markerFeedbackFilesDownload markerFeedback><@_u page="/admin/module/${markerFeedback.feedback.assignment.module.code}/assignments/${markerFeedback.feedback.assignment.id}/marker/feedback/download/${markerFeedback.id}/" /></#macro>
 
-<#macro feedbackZip assignment feedback attachmentExtension><@_u page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.universityId}.${attachmentExtension}'/></#macro>
+<#macro adminFeedbackZip assignment feedback attachmentExtension><@_u page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.universityId}.${attachmentExtension}'/></#macro>
 
 <#macro markingCompleted assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/marking-completed" /></#macro>
+<#macro markingUncompleted assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/marking-uncompleted" /></#macro>
 
 <#macro enrolment module><@_u page="/admin/module/${module.code}/assignments/enrolment"/></#macro>
 
