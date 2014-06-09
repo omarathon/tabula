@@ -115,7 +115,7 @@ class ListAllExtensionsController extends ExtensionController {
 
 
 @Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions/detail/{universityId}"))
+@RequestMapping(Array("/admin/module/{module}/assignments/extensions/detail/{assignment}/{universityId}"))
 class EditExtensionController extends ExtensionController {
 
 	@ModelAttribute("modifyExtensionCommand")

@@ -81,7 +81,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro extensionadd assignment uniId><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/add?universityId=${uniId}" /></#macro>
 <#macro extensionedit assignment uniId><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/edit/${uniId}" /></#macro>
 <#macro extensiondelete assignment uniId><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/delete/${uniId}" /></#macro>
-<#macro extensiondetail assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/detail" /></#macro>
+<#macro extensiondetail assignment><@_u page="/admin/module/${assignment.module.code}/assignments/extensions/detail" /></#macro>
 
 <#macro feedbacktemplates department><@_u page="/admin/department/${department.code}/settings/feedback-templates" /></#macro>
 <#macro feedbacktemplateedit department feedbacktemplate><@_u page="/admin/department/${department.code}/settings/feedback-templates/edit/${feedbacktemplate.id}" /></#macro>

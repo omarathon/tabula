@@ -8,7 +8,7 @@
 
 <#macro row graph>
 	<#assign state = (graph.extension.state.description)!"None" />
-	<tr class="itemContainer" data-contentid="${graph.universityId}">
+	<tr class="itemContainer" data-contentid="${assignment.id}_${graph.universityId}">
 
 		<#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
 		<td class="student-col toggle-cell"><h6 class="toggle-icon">${graph.user.firstName}</h6></td>
@@ -31,8 +31,8 @@
 						<span class="label no-extension">No extension</span>
 					</#if>
 				</dt>
-				<dd style="display: none;" class="table-content-container" data-contentid="${graph.universityId}">
-					<div id="content-${graph.universityId}" class="content-container" data-contentid="${graph.universityId}">
+				<dd style="display: none;" class="table-content-container" data-contentid="${assignment.id}_${graph.universityId}">
+					<div id="content-${assignment.id}_${graph.universityId}" class="content-container" data-contentid="${assignment.id}_${graph.universityId}">
 						<p>No extension data is currently available.</p>
 					</div>
 				</dd>

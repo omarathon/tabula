@@ -6,7 +6,7 @@
 	<#assign state = (graph.extension.state.description)!"None" />
 	<#assign assignment = graph.extension.assignment />
 <tr class="itemContainer"
-	data-contentid="${graph.universityId}"
+	data-contentid="${assignment.id}_${graph.universityId}"
 	data-detailurl = <@routes.extensiondetail assignment />
 >
 
@@ -34,14 +34,14 @@
 					<span class="label no-extension">No extension</span>
 				</#if>
 			</dt>
-			<dd style="display: none;" class="table-content-container" data-contentid="${graph.universityId}">
-				<div id="content-${graph.universityId}" class="content-container" data-contentid="${graph.universityId}">
+			<dd style="display: none;" class="table-content-container" data-contentid="${assignment.id}_${graph.universityId}">
+				<div id="content-${assignment.id}_${graph.universityId}" class="content-container" data-contentid="${assignment.id}_${graph.universityId}">
 					<p>No extension data is currently available.</p>
 				</div>
 			</dd>
 		</dl>
 	</td>
-	<td class="duration-col toggle-cell">
+	<td class="duration-col-department-wide toggle-cell">
 	</td>
 </tr>
 </#macro>
