@@ -549,6 +549,15 @@ class Assignment
 		}
 	}
 
+	def getMarkerFeedbackForPreviousPosition(uniId: String, user: User): Option[MarkerFeedback] = {
+		val parentFeedback = feedbacks.find(_.universityId == uniId)
+		parentFeedback.flatMap {
+			f => FeedbackPosition.getPreviousPosition(f.getCurrentWorkflowFeedbackPosition).flatMap {
+				p => getMarkerFeedbackForPositionInFeedback(uniId, user, p, f)
+			}
+		}
+	}
+
 	def getAllMarkerFeedbacks(uniId: String, user: User): Seq[MarkerFeedback] = {
 		feedbacks.find(_.universityId == uniId).map {
 			feedback =>

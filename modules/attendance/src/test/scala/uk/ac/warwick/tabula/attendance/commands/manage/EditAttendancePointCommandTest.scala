@@ -3,31 +3,82 @@ package uk.ac.warwick.tabula.attendance.commands.manage
 import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.tabula.services.{RelationshipService, TermService, AttendanceMonitoringService, AttendanceMonitoringServiceComponent, TermServiceComponent}
 import org.springframework.validation.BindException
-import org.joda.time.DateTime
+import org.joda.time.{DateTimeConstants, DateMidnight, Interval, DateTime}
 import uk.ac.warwick.util.termdates.{TermImpl, Term}
 import scala.collection.mutable
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Department}
 import uk.ac.warwick.tabula.JavaImports.JHashSet
 import uk.ac.warwick.util.termdates.Term.TermType
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceMonitoringPoint, MonitoringPointReport}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceMonitoringPoint, MonitoringPointReport}
 
 class EditAttendancePointCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
+
 		val thisTermService = smartMock[TermService]
-		val command = new EditAttendancePointCommandState with TermServiceComponent {
+		val commandState = new EditAttendancePointCommandState with TermServiceComponent {
 			val templatePoint = null
 			val department = null
 			val academicYear = null
-			val findPointsResult = null
 			val termService = thisTermService
 		}
 		val validator = new AttendanceMonitoringPointValidation with TermServiceComponent with AttendanceMonitoringServiceComponent {
 			val termService = thisTermService
 			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
 		}
-		val errors = new BindException(command, "command")
+		val errors = new BindException(commandState, "command")
 	}
+
+	trait CommandFixture extends Fixture {
+
+		val academicYear2013 = AcademicYear(2013)
+
+		val week5StartDate = new DateMidnight(academicYear2013.startYear, DateTimeConstants.NOVEMBER, 1)
+		val week5EndDate = new DateMidnight(academicYear2013.startYear, DateTimeConstants.NOVEMBER, 8)
+		val week15StartDate = new DateMidnight(academicYear2013.startYear, DateTimeConstants.DECEMBER, 1)
+		val week15EndDate = new DateMidnight(academicYear2013.startYear, DateTimeConstants.DECEMBER, 8)
+
+		val week5pair = (new Integer(5), new Interval(week5StartDate, week5EndDate))
+		val week15pair = (new Integer(15), new Interval(week15StartDate, week15EndDate))
+		val weeksForYear = Seq(week5pair, week15pair)
+		thisTermService.getAcademicWeeksForYear(new DateMidnight(academicYear2013.startYear, DateTimeConstants.NOVEMBER, 1))	returns weeksForYear
+
+		val scheme = new AttendanceMonitoringScheme
+		scheme.academicYear = academicYear2013
+		scheme.pointStyle = AttendanceMonitoringPointStyle.Week
+		val templatePoint = Fixtures.attendanceMonitoringPoint(scheme, "name1", 0, 1)
+		templatePoint.id = "123"
+		val originalCreatedDate = new DateTime().minusDays(2)
+		templatePoint.createdDate = originalCreatedDate
+		scheme.points.add(templatePoint)
+		val scheme2 = new AttendanceMonitoringScheme
+		scheme2.academicYear = academicYear2013
+		scheme2.pointStyle = AttendanceMonitoringPointStyle.Week
+		val secondPoint = Fixtures.attendanceMonitoringPoint(scheme2, templatePoint.name, templatePoint.startWeek, templatePoint.endWeek)
+		secondPoint.id = "234"
+		secondPoint.createdDate = originalCreatedDate
+		scheme2.points.add(secondPoint)
+
+		val command = new EditAttendancePointCommandInternal(null, null, templatePoint) with AttendanceMonitoringServiceComponent with EditAttendancePointCommandState with TermServiceComponent{
+			override def pointsToEdit = Seq(templatePoint, secondPoint)
+			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
+			val termService = thisTermService
+			startWeek = 5
+			endWeek = 15
+		}
+	}
+
+	@Test
+	def testApply() { new CommandFixture {
+		val points = command.applyInternal()
+		points.foreach(_.createdDate should be (originalCreatedDate))
+		points.foreach(_.updatedDate.isAfter(originalCreatedDate) should be (true))
+		points.find(_.id == templatePoint.id).get.scheme should be (scheme)
+		points.find(_.id == secondPoint.id).get.scheme should be (scheme2)
+		points.size should be (command.pointsToEdit.size)
+		scheme.points.size should be (1)
+		scheme2.points.size should be (1)
+	}}
 
 	@Test
 	def validateName() { new Fixture {

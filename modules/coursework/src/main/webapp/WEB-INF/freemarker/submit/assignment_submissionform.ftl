@@ -2,7 +2,7 @@
 	<#include "_assignment_deadline.ftl" />
 </#if>
 
-<#if (canSubmit && !submission??) || canReSubmit>
+<#if ((canSubmit && !submission??) || canReSubmit) && submitAssignmentCommand??>
 
 	<#if submission??>
 	<hr>

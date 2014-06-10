@@ -143,7 +143,7 @@
 
 <#if features.showAccreditedPriorLearning>
 	<div id="accredited-prior-learning">
-		<#if can.do("AccreditedPriorLearning.Read", studentCourseDetails) && studentCourseDetails.hasAccreditedPriorLearning>
+		<#if can.do("Profiles.Read.AccreditedPriorLearning", studentCourseDetails) && studentCourseDetails.hasAccreditedPriorLearning>
 			<h5>Accredited Prior Learning</h5>
 				<table>
 					<tr>
@@ -157,7 +157,7 @@
 							<td>${apl.level.name}</td>
 							<td align="center">${apl.cats}</td>
 							<td>${apl.academicYear.toString}</td>
-							<td>${apl.reason}</td>
+							<td>${apl.reason!}</td>
 						</tr>
 					</#list>
 				</table>

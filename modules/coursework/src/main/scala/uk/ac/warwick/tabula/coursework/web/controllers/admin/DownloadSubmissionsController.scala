@@ -32,7 +32,7 @@ class DownloadSubmissionsController extends CourseworkController {
 		new DownloadSubmissionsCommand(module, assignment)
 
 	@RequestMapping
-	def download(command: DownloadSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {		
+	def download(command: DownloadSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
@@ -55,7 +55,7 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 
 	@RequestMapping
 	def downloadMarkersSubmissions(@ModelAttribute("command") command: ApplyWithCallback[RenderableZip])
-		(implicit request: HttpServletRequest, response: HttpServletResponse) = {
+		(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
@@ -76,7 +76,7 @@ class DownloadAllSubmissionsController extends CourseworkController {
 		new DownloadAllSubmissionsCommand(module, assignment, filename)
 
 	@RequestMapping
-	def downloadAll(command: DownloadAllSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+	def downloadAll(command: DownloadAllSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
@@ -101,7 +101,7 @@ class DownloadSingleSubmissionController extends CourseworkController {
 	@RequestMapping
 	def downloadSingle(
 			cmd: AdminGetSingleSubmissionCommand, 
-			@PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+			@PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		val moduleCode = cmd.assignment.module.code
 		val user = userLookup.getUserByUserId(cmd.submission.userId)
 
@@ -136,7 +136,7 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 			cmd: DownloadAttachmentCommand, 
 			@PathVariable("filename") filename: String,
 			request: HttpServletRequest, 
-		response: HttpServletResponse) {
+		response: HttpServletResponse): Unit = {
 		val moduleCode = cmd.assignment.module.code
 		val user = userLookup.getUserByUserId(cmd.submission.userId)
 
@@ -166,14 +166,14 @@ class DownloadFeedbackSheetsController extends CourseworkController {
 		new DownloadFeedbackSheetsCommand(module, assignment)
 
 	@RequestMapping(value = Array("/feedback-templates.zip"))
-	def downloadFeedbackTemplatesOnly(command: DownloadFeedbackSheetsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+	def downloadFeedbackTemplatesOnly(command: DownloadFeedbackSheetsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
 	}
 
 	@RequestMapping(value = Array("/marker-templates.zip"))
-	def downloadMarkerFeedbackTemplates(command: DownloadFeedbackSheetsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+	def downloadMarkerFeedbackTemplates(command: DownloadFeedbackSheetsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		val assignment = command.assignment
 
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser)

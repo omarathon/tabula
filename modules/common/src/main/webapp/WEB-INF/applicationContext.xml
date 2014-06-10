@@ -49,6 +49,7 @@
 
 	<bean id="json" class="uk.ac.warwick.tabula.JsonObjectMapperFactory" />
 
+
 	<!-- Catches all exceptions that go through Spring.
 		If an exception escapes Spring, it will go to the handler in web.xml,
 		which is served by the ErrorController at /error/, which delegates to this.

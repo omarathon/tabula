@@ -48,7 +48,7 @@ class ScheduledNotificationServiceTest extends TestBase with Mockito {
 
 	val scrollingScheduledNotifications = new MockScrollableResults(scheduledNotifications)
 
-	when (dao.notificationsToComplete) thenReturn (new Scrollable[ScheduledNotification[_  >: Null <: ToEntityReference]](scrollingScheduledNotifications, session))
+	when (dao.notificationsToComplete) thenReturn (Scrollable[ScheduledNotification[_  >: Null <: ToEntityReference]](scrollingScheduledNotifications, session))
 
 	@Test
 	def generateNotifications() {

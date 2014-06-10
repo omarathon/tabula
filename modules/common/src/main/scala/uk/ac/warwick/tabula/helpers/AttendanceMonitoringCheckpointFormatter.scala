@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import freemarker.template.utility.DeepUnwrap
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceState, AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint}
 import freemarker.core.Environment
-import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
+import uk.ac.warwick.tabula.data.model.{AttendanceNote, StudentMember, Department}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.{AttendanceMonitoringService, UserLookupService}
 import uk.ac.warwick.tabula.attendance.web.Routes
@@ -36,8 +36,14 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 			model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel])
 		}
 		args match {
-			case Seq(department: Department, checkpoint: AttendanceMonitoringCheckpoint, _*) => result(department, checkpoint)
-			case Seq(department: Department, point: AttendanceMonitoringPoint, student: StudentMember, _*) => result(department, point, student)
+			case Seq(department: Department, checkpoint: AttendanceMonitoringCheckpoint, _*) =>
+				result(department, checkpoint, None)
+			case Seq(department: Department, checkpoint: AttendanceMonitoringCheckpoint, note: AttendanceNote, _*) =>
+				result(department, checkpoint, Option(note))
+			case Seq(department: Department, point: AttendanceMonitoringPoint, student: StudentMember, _*) =>
+				result(department, point, student, None)
+			case Seq(department: Department, point: AttendanceMonitoringPoint, student: StudentMember, note: AttendanceNote, _*) =>
+				result(department, point, student, Option(note))
 			case _ => throw new IllegalArgumentException("Bad args")
 		}
 	}
@@ -72,9 +78,12 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 		}
 	}
 
-	private def result(department: Department, checkpoint: AttendanceMonitoringCheckpoint): AttendanceMonitoringCheckpointFormatterResult = {
+	private def result(department: Department, checkpoint: AttendanceMonitoringCheckpoint, noteOption: Option[AttendanceNote]): AttendanceMonitoringCheckpointFormatterResult = {
 		val point = checkpoint.point
-		val (noteText, noteUrl) = attendanceMonitoringService.getAttendanceNote(checkpoint.student, point).fold(("", ""))(note =>
+		val (noteText, noteUrl) = (noteOption match {
+			case None => attendanceMonitoringService.getAttendanceNote(checkpoint.student, point)
+			case Some(note) => Option(note)
+		}).fold(("", ""))(note =>
 			(note.truncatedNote, Routes.Note.view(point.scheme.academicYear, checkpoint.student, point))
 		)
 
@@ -112,8 +121,11 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 		}
 	}
 
-	private def result(department: Department, point: AttendanceMonitoringPoint, student: StudentMember): AttendanceMonitoringCheckpointFormatterResult = {
-		val (noteText, noteUrl) = attendanceMonitoringService.getAttendanceNote(student, point).fold(("", ""))(note =>
+	private def result(department: Department, point: AttendanceMonitoringPoint, student: StudentMember, noteOption: Option[AttendanceNote]): AttendanceMonitoringCheckpointFormatterResult = {
+		val (noteText, noteUrl) = (noteOption match {
+			case None => attendanceMonitoringService.getAttendanceNote(student, point)
+			case Some(note) => Option(note)
+		}).fold(("", ""))(note =>
 			(note.truncatedNote, Routes.Note.view(point.scheme.academicYear, student, point))
 		)
 

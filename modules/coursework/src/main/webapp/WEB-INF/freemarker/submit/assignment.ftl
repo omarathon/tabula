@@ -40,23 +40,19 @@
 		<#-- At some point, also check if resubmission is allowed for this assignment -->
 		<#include "assignment_submissionform.ftl" />
 
-		<#if submission?? && !canReSubmit>
+		<#if isSelf && submission?? && !canReSubmit>
 			<#if assignment.allowResubmission>
 				<p>It is not possible to resubmit your assignment because the deadline has passed.</p>
 			<#else>
 				<p>This assignment does not allow you to resubmit.</p>
 			</#if>
 		</#if>
-
-
-	<#else>
-
+	<#elseif isSelf>
 		<h2>${user.fullName} (${user.universityId})</h2>
 		<p>
 			If you've submitted your assignment, you should be able to access your
 			feedback here once it's ready.
 		</p>
-
 	</#if>
 
 </#if>

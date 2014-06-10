@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, AttendanceMonitoringScheme, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
-import uk.ac.warwick.tabula.attendance.commands.manage.{FindPointsResult, SetsFindResultOnCreateNewAttendancePointsFromCopyCommand, FindPointsCommand, CreateNewAttendancePointsFromCopySearchCommandResult, CreateNewAttendancePointsFromCopyCommand, CreateNewAttendancePointsFromCopySearchCommand}
+import uk.ac.warwick.tabula.attendance.commands.manage._
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConverters._
@@ -113,7 +113,7 @@ class CreateNewAttendancePointsFromCopyController extends AttendanceController {
 	@RequestMapping(method = Array(POST), params = Array("copy"))
 	def copy(
 		@ModelAttribute("searchCommand") searchCommand: Appliable[CreateNewAttendancePointsFromCopySearchCommandResult],
-		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]] with SetsFindResultOnCreateNewAttendancePointsFromCopyCommand with SelfValidating,
+		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]] with SetsFindPointsResultOnCommandState with SelfValidating,
 		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
@@ -129,7 +129,7 @@ class CreateNewAttendancePointsFromCopyController extends AttendanceController {
 				searchResult.schemes
 		}
 		val findCommandResult = findCommand.apply()
-		cmd.setFindResult(findCommandResult)
+		cmd.setFindPointsResult(findCommandResult)
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
 		if (errors.hasErrors) {

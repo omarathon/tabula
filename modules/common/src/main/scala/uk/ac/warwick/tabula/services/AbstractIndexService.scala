@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import java.io.File
-import java.io.FileNotFoundException
+import java.io.{Closeable, File, FileNotFoundException}
 import org.apache.lucene.analysis._
 import org.apache.lucene.document.Field._
 import org.apache.lucene.document._
@@ -206,33 +205,39 @@ abstract class AbstractIndexService[A]
 		}
 	}
 
-	protected def listNewerThan(startDate: DateTime, batchSize: Int): Traversable[A]
+	protected def listNewerThan(startDate: DateTime, batchSize: Int): TraversableOnce[A]
 
 	def indexFrom(startDate: DateTime) = transactional(readOnly = true) {
 		ifNotIndexing {
-			doIndexItems(listNewerThan(startDate, MaxBatchSize), isIncremental = true)
+			val newer = listNewerThan(startDate, MaxBatchSize)
+			doIndexItems(newer, isIncremental = true)
+			newer match {
+				case c: Closeable => c.close()
+				case _ =>
+			}
 		}
 	}
 
 	/**
 	 * Indexes a specific given list of items.
 	 */
-	def indexItems(items: Traversable[A]) = transactional(readOnly = true) {
+	def indexItems(items: TraversableOnce[A]) = transactional(readOnly = true) {
 		ifNotIndexing { doIndexItems(items, isIncremental = false) }
 	}
 
-	def indexItemsWithoutNewTransaction(items: Traversable[A]) = {
+	def indexItemsWithoutNewTransaction(items: TraversableOnce[A]) = {
 		ifNotIndexing { doIndexItems(items, isIncremental = false) }
 	}
 
 	// Overridable - configure index writer
 	def configureIndexWriter(config: IndexWriterConfig): Unit = {}
 
-	private def doIndexItems(items: Traversable[A], isIncremental: Boolean) {
+	private def doIndexItems(items: TraversableOnce[A], isIncremental: Boolean) {
 		logger.debug("Writing to the index at " + indexPath + " with analyzer " + indexAnalyzer)
 		val writerConfig = new IndexWriterConfig(IndexService.TabulaLuceneVersion, indexAnalyzer)
 		configureIndexWriter(writerConfig)
 		closeThis(new IndexWriter(openDirectory(), writerConfig)) { writer =>
+			var i = 0
 			for (item <- items) {
 				tryDescribe(s"indexing $item") {
 					if (isIncremental) {
@@ -241,9 +246,11 @@ abstract class AbstractIndexService[A]
 					toDocuments(item).foreach { doc =>
 						writer.updateDocument(uniqueTerm(item), doc)
 					}
+
+					i += 1
 				}
 			}
-			if (debugEnabled) logger.debug("Indexed " + items.size + " items")
+			if (debugEnabled) logger.debug("Indexed " + i + " items") // Don't use .size, it goes through Scrollables again
 		}
 		reopen // not really necessary as we reopen periodically anyway
 	}
@@ -253,7 +260,10 @@ abstract class AbstractIndexService[A]
 	 * so we know where to start from next time.
 	 */
 	private def doUpdateMostRecent(item: A) {
-		val shouldUpdate = mostRecentIndexedItem.map { _ isBefore getUpdatedDate(item) }.getOrElse { true }
+		val shouldUpdate = mostRecentIndexedItem match {
+			case Some(date) => getUpdatedDate(item).isAfter(date)
+			case _ => true
+		}
 		if (shouldUpdate)
 			mostRecentIndexedItem = Some(getUpdatedDate(item))
 	}
@@ -267,15 +277,13 @@ abstract class AbstractIndexService[A]
 	 * from the past year.
 	 */
 	def latestIndexItem: DateTime = {
-		mostRecentIndexedItem.map { _.minusMinutes(1) }.getOrElse {
+		mostRecentIndexedItem.fold{
 			// extract possible list of UpdatedDateField values from possible newest item and get possible first value as a Long.
-			documentValue(newest(), UpdatedDateField)
-				.map { v => new DateTime(v.toLong).minusMinutes(10) }
-				.getOrElse {
-					logger.info("No recent document found, indexing since Tabula year zero")
-					new DateTime(yearZero,1,1,0,0)
-				}
-		}
+			documentValue(newest(), UpdatedDateField).fold{
+				logger.info("No recent document found, indexing since Tabula year zero")
+				new DateTime(yearZero, 1, 1, 0, 0)
+			}(v => new DateTime(v.toLong).minusMinutes(10))
+		}(_.minusSeconds(30))
 	}
 
 	/**
@@ -311,9 +319,8 @@ case class PagingSearchResultItems[A](items: Seq[A], lastscore: Option[ScoreDoc]
 		case _ => throw new ClassCastException("Lucene did not return an Option[FieldDoc] as expected")
 	}
 
-	def getTokens: String = last.map { lastscore =>
-		lastscore.doc + "/" + lastscore.fields(0) + "/" + token
-	}.getOrElse("empty")
+	def getTokens: String = last.fold("empty")(lastscore =>
+		lastscore.doc + "/" + lastscore.fields(0) + "/" + token)
 }
 
 case class PagingSearchResult(results: RichSearchResults, last: Option[ScoreDoc], token: Long, total: Int) {
@@ -485,7 +492,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 			}
 		}
 
-		token.map(existingSearcher).getOrElse(newSearcher())
+		token.fold(newSearcher())(existingSearcher)
 	}
 }
 

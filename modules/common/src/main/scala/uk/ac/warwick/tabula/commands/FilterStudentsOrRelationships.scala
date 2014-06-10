@@ -11,6 +11,7 @@ object FilterStudentsOrRelationships {
 
 	val MaxStudentsPerPage = 100
 	val DefaultStudentsPerPage = 50
+	val MaxYearsOfStudy = 12
 
 }
 
@@ -81,6 +82,6 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 		).flatten
 	}
 
-	lazy val allYearsOfStudy: Seq[Int] = 1 to 8
+	lazy val allYearsOfStudy: Seq[Int] = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
 	lazy val allOtherCriteria: Seq[String] = Seq("Tier 4 only", "Visiting")
 }

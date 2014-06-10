@@ -1904,7 +1904,7 @@ input.flexi-picker {
 // Icon colours for attendance-style data
 .icon-ok.attended { color: @successText; }
 .icon-remove.unauthorised { color: @errorText; }
-.icon-remove-circle.authorised { color: @infoText; }
+.icon-remove-circle.authorised, .icon-ok-circle.authorised { color: @infoText; }
 .icon-warning-sign.late { color: @warningText; }
 
 th.nowrap, td.nowrap { white-space: nowrap; }
@@ -2106,6 +2106,18 @@ ul.nav-pills {
 
 			&::before {
 				content: @detailsDownArrow;
+			}
+		}
+	}
+}
+
+.tabula-page, #container {
+	.table.table-subtle {
+		th, td {
+			border-top-color: #eeeeee;
+
+			+ th, + td {
+				border-left-color: #eeeeee;
 			}
 		}
 	}

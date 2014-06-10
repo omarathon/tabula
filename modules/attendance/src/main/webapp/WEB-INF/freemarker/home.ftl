@@ -24,7 +24,7 @@
 				<#if relationshipTypesMapById[relationshipType.id]>
 					<li><h3><a id="relationship-${relationshipType.urlPart}" href="<@routes.agentView relationshipType />">${relationshipType.studentRole?cap_first}s 13/14</a></h3></li>
 					<#if features.attendanceMonitoringAcademicYear2014>
-						<li><h3><a id="relationship-${relationshipType.urlPart}" href="<@routes.agentHomeForYear relationshipType '2014'/>">${relationshipType.studentRole?cap_first}s 14/15</a></h3></li>
+						<li><h3><a id="relationship-${relationshipType.urlPart}-2014" href="<@routes.agentHomeForYear relationshipType '2014'/>">${relationshipType.studentRole?cap_first}s 14/15</a></h3></li>
 					</#if>
 				</#if>
 			</#list>
@@ -42,7 +42,7 @@
 					<li>
 						<h3><a id="view-department-${department.code}" href="<@routes.viewDepartment department />">${department.name} 13/14</a></h3>
 						<#if features.attendanceMonitoringAcademicYear2014>
-							<h3><a id="view-department-${department.code}" href="<@routes.viewHomeForYear department '2014'/>">${department.name} 14/15</a></h3>
+							<h3><a id="view-department-${department.code}-2014" href="<@routes.viewHomeForYear department '2014'/>">${department.name} 14/15</a></h3>
 						</#if>
 					</li>
 				</#list>
@@ -56,7 +56,7 @@
 					<li>
 						<h3><a id="manage-department-${department.code}" href="<@routes.manageDepartment department />">${department.name} 13/14</a></h3>
 						<#if features.attendanceMonitoringAcademicYear2014>
-							<h3><a id="manage-department-${department.code}" href="<@routes.manageHomeForYear department '2014'/>">${department.name} 14/15</a></h3>
+							<h3><a id="manage-department-${department.code}-2014" href="<@routes.manageHomeForYear department '2014'/>">${department.name} 14/15</a></h3>
 						</#if>
 					</li>
 				</#list>

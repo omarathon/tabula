@@ -93,7 +93,10 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 			logger.info(s"Fetching photo for $universityId")
 			Option(membershipInterface.getPhotoById(universityId))
 		} catch {
-			case e: MembershipInterfaceException => None
+			case e: MembershipInterfaceException => {
+				logger.info(s"MembershipInterfaceException fetching photo for ${universityId}: ${e.getMessage}")
+				None
+			}
 		}
 
 		photo

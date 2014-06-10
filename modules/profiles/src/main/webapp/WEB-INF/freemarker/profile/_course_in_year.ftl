@@ -64,13 +64,18 @@
 			<li id="timetable-pane" data-title="Timetable">
 				<section id="timetable-details" class="clearfix" >
 					<h4>
-						Timetable
+						Timetable 
 						<#if studentCourseDetails.student.timetableHash?has_content>
-							<a href="<@routes.timetable_ical studentCourseDetails.student />" title="Subscribe to timetable">
-								<i class="icon-calendar"></i>
-							</a>
+							<a href="<@routes.timetable_ical studentCourseDetails.student />" title="Subscribe to timetable"><i class="icon-calendar"></i></a>
+						
+							<span class="subscribe">
+								<a href="<@routes.timetable_ical studentCourseDetails.student />" title="Subscribe to timetable">
+									Subscribe
+								</a>
+							</span>
 						</#if>
 					</h4>
+					
 					<div class='fullCalendar' data-viewname='agendaWeek' data-studentid='${studentCourseDetails.student.universityId}'>
 					</div>
 				</section>
@@ -124,7 +129,7 @@
 
 		<#if studentCourseYearDetails??
 			&& studentCourseYearDetails.hasModuleRegistrations
-			&& can.do("ModuleRegistration.Core", studentCourseDetails) >
+			&& can.do("Profiles.Read.ModuleRegistration.Core", studentCourseDetails) >
 			<li id="module-registration-pane" data-title="Modules">
 				<#include "_module_registrations.ftl" />
 			</li>

@@ -31,6 +31,9 @@ trait MemberDao {
 	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
+	def listUpdatedSince(startDate: DateTime): Scrollable[Member]
+	def listUpdatedSince(startDate: DateTime, department: Department): Scrollable[Member]
+	def countUpdatedSince(startDate: DateTime): Int
 	
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
 	def getStaffByDepartment(department: Department): Seq[StaffMember]
@@ -203,6 +206,39 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		""")
 			.setParameter("lastUpdated", startDate)
 			.setMaxResults(max).seq
+
+	def listUpdatedSince(startDate: DateTime) = {
+		val scrollable = session.newCriteria[Member]
+			.add(gt("lastUpdatedDate", startDate))
+			.addOrder(asc("lastUpdatedDate"))
+			.scroll()
+		Scrollable(scrollable, session)
+	}
+
+	def listUpdatedSince(startDate: DateTime, department: Department) = {
+		val scrollable = session.newCriteria[Member]
+			.createAlias("studentCourseDetails", "scd")
+			.add(gt("lastUpdatedDate", startDate))
+			.add(
+				disjunction()
+					.add(is("homeDepartment", department))
+					.add(
+						conjunction()
+							.add(is("scd.department", department))
+							.add(not(like("scd.statusOnRoute.code", "P%")))
+					)
+			)
+			.addOrder(asc("lastUpdatedDate"))
+			.scroll()
+
+		Scrollable(scrollable, session)
+	}
+
+	def countUpdatedSince(startDate: DateTime): Int =
+		session.newCriteria[Member]
+			.add(gt("lastUpdatedDate", startDate))
+			.project[Number](count("universityId")).uniqueResult.get.intValue()
+
 
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]

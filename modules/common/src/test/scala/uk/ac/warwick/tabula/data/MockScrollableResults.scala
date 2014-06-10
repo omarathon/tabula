@@ -11,6 +11,7 @@ class MockScrollableResults(seq: Seq[_ <: AnyRef]) extends ScrollableResults {
 
 	def next(): Boolean = itr.hasNext
 	def get(i: Int): AnyRef = if (i == 0) itr.next() else ???
+	def get() = Array(itr.next())
 	def close(): Unit = {}
 
 	def getType(i: Int) = ???
@@ -20,7 +21,6 @@ class MockScrollableResults(seq: Seq[_ <: AnyRef]) extends ScrollableResults {
 	def getLocale(col: Int) = ???
 	def beforeFirst() = ???
 	def getTimeZone(col: Int) = ???
-	def get() = ???
 	def last() = ???
 	def isLast = ???
 	def getBinary(col: Int) = Array()

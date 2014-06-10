@@ -32,14 +32,16 @@ class SelectAttendancePointsToEditController extends AttendanceController with H
 		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
-		@RequestParam(required = false) points: JInteger
+		@RequestParam(required = false) points: JInteger,
+		@RequestParam(required = false) actionCompleted: String
 	) = {
 		val findCommandResult = findCommand.apply()
 		Mav("manage/editpoints",
 			"findResult" -> findCommandResult,
 			"allTypes" -> AttendanceMonitoringPointType.values,
 			"allStyles" -> AttendanceMonitoringPointStyle.values,
-			"newPoints" -> Option(points).getOrElse(0)
+			"newPoints" -> Option(points).getOrElse(0),
+			"actionCompleted" -> actionCompleted
 		).crumbs(
 			Breadcrumbs.Manage.Home,
 			Breadcrumbs.Manage.Department(department),

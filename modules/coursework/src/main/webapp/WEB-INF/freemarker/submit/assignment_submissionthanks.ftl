@@ -19,7 +19,14 @@
 			Uploaded attachments:
 			<ul>
 				<#list submission.allAttachments as attachment>
-					<li><a href="${url('/coursework/module/${module.code}/${assignment.id}/attachment/${attachment.name?url}')}">${attachment.name}</a></li>
+					<#assign attachmentUrl><#compress>
+						<#if isSelf>
+							<@routes.submissionAttachment submission attachment />
+						<#else>
+							<@routes.submissionAttachment_in_profile submission attachment />
+						</#if>
+					</#compress></#assign>
+					<li><a href="${attachmentUrl}">${attachment.name}</a></li>
 				</#list>
 			</ul>
 		</p>
@@ -27,19 +34,29 @@
 	</div>
 	</div>
 
-	<p><a href="<@routes.submissionReceiptPdf assignment=assignment />">Download submission receipt as a PDF file</a></p>
+	<#assign receiptPdfUrl><#compress>
+		<#if isSelf>
+			<@routes.submissionReceiptPdf submission />
+		<#else>
+			<@routes.submissionReceiptPdf_in_profile submission />
+		</#if>
+	</#compress></#assign>
 
-	<#if !feedback??>
-	<p>You should have been sent an email confirming the submission. Check your spam folders if it doesn't show up in your inbox. 
-	If it's been a few minutes and it still hasn't reached you, click the button below to send a fresh copy.</p>
+	<p><a href="${receiptPdfUrl}">Download submission receipt as a PDF file</a></p>
+
+	<#if isSelf>
+		<#if !feedback??>
+		<p>You should have been sent an email confirming the submission. Check your spam folders if it doesn't show up in your inbox.
+		If it's been a few minutes and it still hasn't reached you, click the button below to send a fresh copy.</p>
+		</#if>
+
+		<#assign receiptFormUrl><@routes.assignmentreceipt assignment=assignment /></#assign>
+		<form action="${receiptFormUrl}" method="POST">
+			<div class="submit-buttons">
+			<button class="btn" name="resend" value=""><i class="icon-envelope-alt"></i> Re-send email receipt</button>
+			</div>
+		</form>
 	</#if>
-	
-	<#assign receiptFormUrl><@routes.assignmentreceipt assignment=assignment /></#assign>
-	<form action="${receiptFormUrl}" method="POST">
-		<div class="submit-buttons">
-		<button class="btn" name="resend" value=""><i class="icon-envelope-alt"></i> Re-send email receipt</button>
-		</div>
-	</form> 
 	
 	<#if assignment.hasReleasedFeedback && !feedback??>
 		<h3>Expecting your feedback?</h3>

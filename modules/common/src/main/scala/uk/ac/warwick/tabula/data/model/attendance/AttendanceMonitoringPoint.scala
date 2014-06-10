@@ -22,10 +22,30 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 	var name: String = _
 
 	@Column(name = "start_week")
-	var startWeek: Int = _
+	private var _startWeek: Int = _
+
+	def startWeek = {
+		if (scheme.pointStyle == AttendanceMonitoringPointStyle.Date) {
+			throw new IllegalArgumentException
+		}
+		_startWeek
+	}
+	def startWeek_= (startWeek: Int) {
+		_startWeek = startWeek
+	}
 
 	@Column(name = "end_week")
-	var endWeek: Int = _
+	private var _endWeek: Int = _
+
+	def endWeek = {
+		if (scheme.pointStyle == AttendanceMonitoringPointStyle.Date) {
+			throw new IllegalArgumentException
+		}
+		_endWeek
+	}
+	def endWeek_= (endWeek: Int) {
+		_endWeek = endWeek
+	}
 
 	@NotNull
 	@Column(name = "start_date")

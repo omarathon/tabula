@@ -190,16 +190,16 @@ object Permissions {
 	}
 
 	object Submission {
-		case object ViewPlagiarismStatus extends Permission("View plagiarism status for a submission")
-		case object ManagePlagiarismStatus extends Permission("Manage a submission's plagiarism status")
-		case object CheckForPlagiarism extends Permission("Check a submission for plagiarism")
-		case object SendReceipt extends Permission("Send a receipt for a submission")
-		case object ReleaseForMarking extends Permission("Release a submission for marking")
+		case object ViewPlagiarismStatus extends Permission("View plagiarism status for a coursework submission")
+		case object ManagePlagiarismStatus extends Permission("Manage a coursework submission's plagiarism status")
+		case object CheckForPlagiarism extends Permission("Check a coursework submission for plagiarism")
+		case object SendReceipt extends Permission("Send a receipt for a coursework submission")
+		case object ReleaseForMarking extends Permission("Release a coursework submission for marking")
 
-		case object Create extends Permission("Add a submission")
-		case object Read extends Permission("View a submission")
-		case object Update extends Permission("Edit a submission")
-		case object Delete extends Permission("Remove a submission")
+		case object Create extends Permission("Add a coursework submission")
+		case object Read extends Permission("View a coursework submission")
+		case object Update extends Permission("Edit a coursework submission")
+		case object Delete extends Permission("Remove a coursework submission")
 	}
 
 	object Feedback {
@@ -265,6 +265,7 @@ object Permissions {
 			case object Tier4VisaRequirement extends Permission("View a member's tier 4 visa requirement")
 			case object CasUsed extends Permission("View whether a CAS has been used by a student to obtain a visa")
 			case object Disability extends Permission("View a student member's reported disability")
+			case object AccreditedPriorLearning extends Permission("View a student's accredited prior learning")
 
 			object StudentCourseDetails {
 				case object Core extends Permission("View a student's basic course, route and department details")
@@ -273,6 +274,11 @@ object Permissions {
 
 			case class RelationshipStudents(relationshipType: PermissionsSelector[StudentRelationshipType])
 				extends SelectorPermission(relationshipType, "View a member's students")
+
+			object ModuleRegistration {
+				case object Core extends Permission("View a student's module registrations")
+				case object Results extends Permission( "View a student's module results")
+			}
 		}
 
 		object StudentRelationship {
@@ -360,15 +366,5 @@ object Permissions {
 
 	object Notification {
 		case object Dismiss extends Permission("Dismiss and restore notifications")
-	}
-
-
-	object ModuleRegistration {
-		case object Core extends Permission("View a student's module registrations")
-		case object Results extends Permission( "View a student's module results")
-	}
-
-	object AccreditedPriorLearning {
-		case object Read extends Permission("View a student's accredited prior learning")
 	}
 }

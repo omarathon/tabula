@@ -63,7 +63,7 @@
 							<#assign attachmentExtension = "zip">
 						</#if>
 
-						<a class="long-running" href="<@routes.feedbackZip assignment feedback attachmentExtension />">
+						<a class="long-running" href="<@routes.adminFeedbackZip assignment feedback attachmentExtension />">
 							<i class="icon-download"></i>
 							<@fmt.p number=feedback.attachments?size singular="file" />
 						</a>

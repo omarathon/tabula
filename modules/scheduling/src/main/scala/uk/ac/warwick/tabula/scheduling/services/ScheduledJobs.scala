@@ -74,7 +74,7 @@ class ScheduledJobs {
 		if (features.schedulingAuditIndex)
 			exceptionResolver.reportExceptions { auditIndexingService.incrementalIndex() }
 
-	@Scheduled(fixedRate = 300 * 1000) // every 5 minutes
+	@Scheduled(cron = "0 0-59/5 3-23 * * *") // every 5 minutes, except between midnight and 3am (when the member import happens)
 	def indexProfiles: Unit =
 		if (features.schedulingProfilesIndex)
 			exceptionResolver.reportExceptions { profileIndexingService.incrementalIndex() }

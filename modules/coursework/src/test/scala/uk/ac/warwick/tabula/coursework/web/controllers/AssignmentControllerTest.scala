@@ -10,7 +10,11 @@ import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.web.controllers.TestControllerOverrides
 import org.junit.Ignore
-import uk.ac.warwick.tabula.services.FeedbackService
+import uk.ac.warwick.tabula.services.{SubmissionService, SubmissionServiceComponent, FeedbackServiceComponent, FeedbackService}
+import uk.ac.warwick.tabula.coursework.commands.{CurrentUserSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommandInternal}
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.coursework.commands.StudentSubmissionAndFeedbackCommand._
 
 class AssignmentControllerTest extends TestBase with Mockito {
 
@@ -27,7 +31,16 @@ class AssignmentControllerTest extends TestBase with Mockito {
 		val feedback = new Feedback()
 		val m = new org.mockito.MockitoMocker
 		feedbackService.getFeedbackByUniId(assignment, "0123456") returns Some(feedback) thenThrows new Error("I TOLD YOU ABOUT STAIRS BRO")
-		controller.feedbackService = feedbackService
+
+		val submissionService = smartMock[SubmissionService]
+
+		val infoCommand = new StudentSubmissionAndFeedbackCommandInternal(module, assignment) with CurrentUserSubmissionAndFeedbackCommandState with FeedbackServiceComponent with SubmissionServiceComponent with Appliable[StudentSubmissionInformation] {
+			def currentUser = user
+			def feedbackService = Fixtures.this.feedbackService
+			def submissionService = Fixtures.this.submissionService
+
+			def apply() = applyInternal()
+		}
 	}
 	
 	@Ignore
@@ -36,7 +49,7 @@ class AssignmentControllerTest extends TestBase with Mockito {
 		withUser("cusebr", "0123456") {
 			new Fixtures {
 				val user = currentUser
-				val mav = controller.view(form.module, form.assignment, currentUser, form, errors)
+				val mav = controller.view(infoCommand, form, errors)
 				withClue(mav) { mav.map should contain key ("feedback") }
 			}
 		}
