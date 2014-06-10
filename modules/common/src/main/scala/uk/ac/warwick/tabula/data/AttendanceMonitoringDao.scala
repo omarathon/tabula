@@ -43,11 +43,8 @@ trait AttendanceMonitoringDao {
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
 	def saveOrUpdate(total: AttendanceMonitoringCheckpointTotal): Unit
 	def delete(scheme: AttendanceMonitoringScheme)
-<<<<<<< HEAD
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate]
-=======
 	def delete(point: AttendanceMonitoringPoint)
->>>>>>> develop
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate]
