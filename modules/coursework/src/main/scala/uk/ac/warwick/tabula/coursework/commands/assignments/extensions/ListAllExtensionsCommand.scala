@@ -17,7 +17,7 @@ class ListAllExtensionsCommand(val department: Department)
 	// Since extension manager is only available as a departmental role ATOW, that's OK for now.
 	// If extension manager were to become more fine-grained in future and used for people who don't have
 	// Extension.Read permission, we would need to make this less strict.
-	PermissionCheck(Permissions.Extension.Read, department)
+	PermissionCheck(Permissions.Extension.Read, mandatory(department))
 
 	var assignmentDao = Wire.auto[AssignmentDao]
 
