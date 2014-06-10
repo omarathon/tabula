@@ -25,7 +25,10 @@ trait AttendanceMonitoringService {
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
 	def deleteScheme(scheme: AttendanceMonitoringScheme)
+	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate]
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
+	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate]
+	def listTemplateSchemesByStyle(style: AttendanceMonitoringPointStyle): Seq[AttendanceMonitoringTemplate]
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
 	def studentAlreadyReportedThisTerm(student: StudentMember, point: AttendanceMonitoringPoint): Boolean
@@ -68,6 +71,10 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def deleteScheme(scheme: AttendanceMonitoringScheme) = {
 		attendanceMonitoringDao.delete(scheme)
+	}
+
+	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate] = {
+		attendanceMonitoringDao.getTemplateSchemeById(id)
 	}
 
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
@@ -124,6 +131,14 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 			case AttendanceMonitoringPointType.SmallGroup => MonitoringPointType.SmallGroup
 			case AttendanceMonitoringPointType.AssignmentSubmission => MonitoringPointType.AssignmentSubmission
 		})
+	}
+
+	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate] = {
+		attendanceMonitoringDao.listAllTemplateSchemes
+	}
+
+	def listTemplateSchemesByStyle(style: AttendanceMonitoringPointStyle): Seq[AttendanceMonitoringTemplate] = {
+		attendanceMonitoringDao.listTemplateSchemesByStyle(style)
 	}
 
 	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {

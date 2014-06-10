@@ -12,18 +12,7 @@ import javax.persistence.{Entity, JoinColumn, FetchType, ManyToOne, Column}
 import org.hibernate.annotations.Type
 
 @Entity
-class AttendanceMonitoringPoint extends GeneratedId with HasSettings with PostLoadBehaviour {
-
-	import AttendanceMonitoringPoint._
-
-	@transient
-	var relationshipService = Wire[RelationshipService]
-
-	@transient
-	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
-
-	@transient
-	var assignmentService = Wire[AssignmentService]
+class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPointSettings {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "scheme_id")
@@ -59,9 +48,47 @@ class AttendanceMonitoringPoint extends GeneratedId with HasSettings with PostLo
 	@Column(name = "updated_date")
 	var updatedDate: DateTime = _
 
-	override def postLoad() {
-		ensureSettings
+	def cloneTo(scheme: AttendanceMonitoringScheme): AttendanceMonitoringPoint = {
+		val newPoint = new AttendanceMonitoringPoint
+		newPoint.scheme = scheme
+		newPoint.name = this.name
+		newPoint.startWeek = startWeek
+		newPoint.endWeek = endWeek
+		newPoint.startDate = startDate
+		newPoint.endDate = endDate
+		newPoint.pointType = pointType
+		pointType match {
+			case AttendanceMonitoringPointType.Meeting =>
+				newPoint.meetingRelationships = meetingRelationships.toSeq
+				newPoint.meetingFormats = meetingFormats.toSeq
+				newPoint.meetingQuantity = meetingQuantity
+			case AttendanceMonitoringPointType.SmallGroup =>
+				newPoint.smallGroupEventQuantity = smallGroupEventQuantity
+				newPoint.smallGroupEventModules = smallGroupEventModules
+			case AttendanceMonitoringPointType.AssignmentSubmission =>
+				newPoint.assignmentSubmissionIsSpecificAssignments = assignmentSubmissionIsSpecificAssignments
+				newPoint.assignmentSubmissionQuantity = assignmentSubmissionQuantity
+				newPoint.assignmentSubmissionModules = assignmentSubmissionModules
+				newPoint.assignmentSubmissionAssignments = assignmentSubmissionAssignments
+				newPoint.assignmentSubmissionIsDisjunction = assignmentSubmissionIsDisjunction
+			case _ =>
+		}
+		newPoint
 	}
+}
+
+trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehaviour {
+
+	import AttendanceMonitoringPoint._
+
+	@transient
+	var relationshipService = Wire[RelationshipService]
+
+	@transient
+	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+
+	@transient
+	var assignmentService = Wire[AssignmentService]
 
 	// Setting for MonitoringPointType.Meeting
 	def meetingRelationships = getStringSeqSetting(Settings.MeetingRelationships, Seq())
@@ -135,32 +162,8 @@ class AttendanceMonitoringPoint extends GeneratedId with HasSettings with PostLo
 	def assignmentSubmissionIsDisjunction = getBooleanSetting(Settings.AssignmentSubmissionIsDisjunction) getOrElse false
 	def assignmentSubmissionIsDisjunction_= (allow: Boolean) = settings += (Settings.AssignmentSubmissionIsDisjunction -> allow)
 
-	def cloneTo(scheme: AttendanceMonitoringScheme): AttendanceMonitoringPoint = {
-		val newPoint = new AttendanceMonitoringPoint
-		newPoint.scheme = scheme
-		newPoint.name = this.name
-		newPoint.startWeek = startWeek
-		newPoint.endWeek = endWeek
-		newPoint.startDate = startDate
-		newPoint.endDate = endDate
-		newPoint.pointType = pointType
-		pointType match {
-			case AttendanceMonitoringPointType.Meeting =>
-				newPoint.meetingRelationships = meetingRelationships.toSeq
-				newPoint.meetingFormats = meetingFormats.toSeq
-				newPoint.meetingQuantity = meetingQuantity
-			case AttendanceMonitoringPointType.SmallGroup =>
-				newPoint.smallGroupEventQuantity = smallGroupEventQuantity
-				newPoint.smallGroupEventModules = smallGroupEventModules
-			case AttendanceMonitoringPointType.AssignmentSubmission =>
-				newPoint.assignmentSubmissionIsSpecificAssignments = assignmentSubmissionIsSpecificAssignments
-				newPoint.assignmentSubmissionQuantity = assignmentSubmissionQuantity
-				newPoint.assignmentSubmissionModules = assignmentSubmissionModules
-				newPoint.assignmentSubmissionAssignments = assignmentSubmissionAssignments
-				newPoint.assignmentSubmissionIsDisjunction = assignmentSubmissionIsDisjunction
-			case _ =>
-		}
-		newPoint
+	override def postLoad() {
+		ensureSettings
 	}
 }
 
