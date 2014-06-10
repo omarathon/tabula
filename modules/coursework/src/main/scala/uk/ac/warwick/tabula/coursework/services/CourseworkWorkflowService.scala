@@ -217,11 +217,23 @@ object WorkflowStages {
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
 			val hasSubmission = coursework.enhancedSubmission.exists(_.submission.isReleasedToSecondMarker)
 			coursework.enhancedFeedback match {
-				case Some(item) if hasSubmission &&  item.feedback.retrieveSecondMarkerFeedback.state != Rejected =>
+				case Some(item) if hasSubmission && item.feedback.retrieveSecondMarkerFeedback.state != Rejected =>
 					if (item.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted)
-						StageProgress(SecondMarking, started = true, messageCode = "workflow.SecondMarking.marked", health = Good, completed = true)
+						StageProgress(
+							SecondMarking,
+							started = true,
+							messageCode = "workflow.SecondMarking.marked",
+							health = Good,
+							completed = true
+						)
 					else
-						StageProgress(SecondMarking, started = true, messageCode = "workflow.SecondMarking.notMarked", health = Warning, completed = false)
+						StageProgress(
+							SecondMarking,
+							started = item.feedback.retrieveFirstMarkerFeedback.state == MarkingCompleted,
+							messageCode = "workflow.SecondMarking.notMarked",
+							health = Warning,
+							completed = false
+						)
 				case _ => StageProgress(SecondMarking, started = false, messageCode = "workflow.SecondMarking.notMarked")
 			}
 		}
@@ -245,7 +257,7 @@ object WorkflowStages {
 					else
 						StageProgress(
 							FinaliseSeenSecondMarking,
-							started = true,
+							started = item.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted,
 							messageCode = "workflow.FinaliseSeenSecondMarking.notFinalised",
 							health = Warning,
 							completed = false

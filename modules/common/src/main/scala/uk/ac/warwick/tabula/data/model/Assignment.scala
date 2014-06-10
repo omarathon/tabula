@@ -322,7 +322,7 @@ class Assignment
 	 */
 	def submissionDeadline(submission: Submission) =
 		if (openEnded) null
-		else extensions.find(e => e.isForUser(submission.universityId, submission.userId) && e.approved).map(_.expiryDate).getOrElse(closeDate)
+		else extensions.find(e => e.isForUser(submission.universityId, submission.userId) && e.approved).fold(closeDate)(_.expiryDate)
 
 	def workingDaysLate(submission: Submission) =
 		if (isLate(submission)) {
@@ -549,29 +549,25 @@ class Assignment
 		}
 	}
 
-	def getMarkerFeedbackForPreviousPosition(uniId: String, user: User): Option[MarkerFeedback] = {
+	def getLatestCompletedMarkerFeedback(uniId: String, user: User): Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.universityId == uniId)
 		parentFeedback.flatMap {
-			f => FeedbackPosition.getPreviousPosition(f.getCurrentWorkflowFeedbackPosition).flatMap {
-				p => getMarkerFeedbackForPositionInFeedback(uniId, user, p, f)
-			}
+			f => getUpToThirdFeedbacks(user, f).find(_.state == MarkingState.MarkingCompleted)
 		}
 	}
 
 	def getAllMarkerFeedbacks(uniId: String, user: User): Seq[MarkerFeedback] = {
-		feedbacks.find(_.universityId == uniId).map {
-			feedback =>
-				feedback.getCurrentWorkflowFeedbackPosition match {
-					case None => getUpToThirdFeedbacks(user, feedback)
-					case Some(ThirdFeedback) =>	getUpToThirdFeedbacks(user, feedback)
-					case Some(SecondFeedback) => getUpToSecondFeedbacks(user, feedback)
-					case Some(FirstFeedback) => getUpToFirstFeedbacks(user, feedback)
-				}
-		}.getOrElse(Seq())
+		feedbacks.find(_.universityId == uniId).fold(Seq[MarkerFeedback]())(feedback =>
+			feedback.getCurrentWorkflowFeedbackPosition match {
+				case None => getUpToThirdFeedbacks(user, feedback)
+				case Some(ThirdFeedback) => getUpToThirdFeedbacks(user, feedback)
+				case Some(SecondFeedback) => getUpToSecondFeedbacks(user, feedback)
+				case Some(FirstFeedback) => getUpToFirstFeedbacks(user, feedback)
+			})
 	}
 
 	private def getUpToThirdFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
-		if (this.markingWorkflow.hasThirdMarker && this.isThirdMarker(user)) {
+		if (this.markingWorkflow.hasThirdMarker && this.markingWorkflow.getStudentsThirdMarker(this, feedback.universityId).exists(_ == user.getUserId)) {
 			Seq(feedback.retrieveThirdMarkerFeedback, feedback.retrieveSecondMarkerFeedback, feedback.retrieveFirstMarkerFeedback)
 		} else {
 			getUpToSecondFeedbacks(user, feedback)
@@ -579,7 +575,7 @@ class Assignment
 	}
 
 	private def getUpToSecondFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
-		if (this.markingWorkflow.hasSecondMarker && this.isSecondMarker(user)) {
+		if (this.markingWorkflow.hasSecondMarker && this.markingWorkflow.getStudentsSecondMarker(this, feedback.universityId).exists(_ == user.getUserId)) {
 			Seq(feedback.retrieveSecondMarkerFeedback, feedback.retrieveFirstMarkerFeedback)
 		} else {
 			getUpToFirstFeedbacks(user, feedback)
@@ -587,7 +583,7 @@ class Assignment
 	}
 
 	private def getUpToFirstFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
-		if (this.isFirstMarker(user)) {
+		if (this.markingWorkflow.getStudentsFirstMarker(this, feedback.universityId).exists(_ == user.getUserId)) {
 			Seq(feedback.retrieveFirstMarkerFeedback)
 		} else {
 			Seq()
