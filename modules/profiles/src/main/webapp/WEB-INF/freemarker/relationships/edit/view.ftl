@@ -49,7 +49,7 @@
 		<#if pageAction!="add">
 			<div id="removeAgentMessage" style="display: none" class="alert clearfix">
 				<p>Are you sure you want to remove <strong>${agentToDisplay.fullName}</strong> as ${student.firstName}'s ${relationshipType.agentRole}?</p>
-				<button id="cancel-remove-agent" class="btn pull-right" type="button">Cancel</button>
+				<button id="cancel-remove-agent" class="btn pull-right" data-dismiss="modal" type="button">Cancel</button>
 				<button id="confirm-remove-agent" class="btn btn-primary pull-right" type="button">Confirm</button>
 			</div>
 		</#if>
@@ -82,7 +82,8 @@
 	</@f.form>
 	</div>
 	<div class="modal-footer">
-			<div type="button" class="btn disabled" id="save-agent">Save</div>
+		<button id="save-agent" class="btn disabled pull-right" type="button">Save</button>
+		<button id="cancel-save-agent" class="btn pull-right" data-dismiss="modal" type="button">Cancel</button>
 	</div>
 
 
@@ -169,10 +170,6 @@
 				$('.inline-search-button').addClass('disabled');
 				$('#notify-remove-agent').show();
 				$("#editStudentRelationshipCommand input[name='remove']").val('true');
-			});
-
-			$('#cancel-remove-agent').click(function() {
-				$('#removeAgentMessage').hide();
 			});
 
 			$('#agentSearchResults').on('click', 'li', function() {

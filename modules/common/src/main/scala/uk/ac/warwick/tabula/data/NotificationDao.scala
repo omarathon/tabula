@@ -77,6 +77,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 		notification.preSave(isNew)
 
 		session.save(notification)
+		session.flush() // TAB-2381
 	}
 
 	def save(recipientInfo: RecipientNotificationInfo) {
