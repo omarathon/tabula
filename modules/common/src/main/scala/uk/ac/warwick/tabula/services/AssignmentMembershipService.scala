@@ -70,18 +70,18 @@ class AssignmentMembershipServiceImpl
 
 	@Autowired var userLookup: UserLookupService = _
 	@Autowired var dao: AssignmentMembershipDao = _
-	
+
 	val assignmentManualMembershipHelper = new UserGroupMembershipHelper[Assignment]("_members")
 
 	def getEnrolledAssignments(user: User): Seq[Assignment] = {
-		val autoEnrolled = 
+		val autoEnrolled =
 			dao.getSITSEnrolledAssignments(user)
-				 .filterNot { _.members.excludesUser(user) }
+				.filterNot { _.members.excludesUser(user) }
 
-		val manuallyEnrolled = 
+		val manuallyEnrolled =
 			assignmentManualMembershipHelper.findBy(user)
 				.filterNot { assignment => assignment.deleted || assignment.archived }
-		
+
 		(autoEnrolled ++ manuallyEnrolled).distinct
 	}
 
@@ -279,15 +279,15 @@ case object ExcludeType extends MembershipItemType("exclude")
 /** Item in list of members for displaying in view.
 	*/
 case class MembershipItem(
-	 user: User,
-	 universityId: Option[String],
-	 userId: Option[String],
-	 itemType: MembershipItemType, // sits, include or exclude
-	 /**
-		* If include type, this item adds a user who's already in SITS.
-		* If exclude type, this item excludes a user who isn't in the list anyway.
-		*/
-	 extraneous: Boolean) {
+	user: User,
+	universityId: Option[String],
+	userId: Option[String],
+	itemType: MembershipItemType, // sits, include or exclude
+	/**
+	* If include type, this item adds a user who's already in SITS.
+	* If exclude type, this item excludes a user who isn't in the list anyway.
+	*/
+	extraneous: Boolean) {
 
 	def itemTypeString = itemType.value
 }
