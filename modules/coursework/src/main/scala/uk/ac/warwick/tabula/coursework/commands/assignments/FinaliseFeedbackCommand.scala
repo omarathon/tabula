@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.{FileDao, Daoisms}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
+import org.joda.time.DateTime
 
 /**
  * Copies the appropriate MarkerFeedback item to its parent Feedback ready for processing by administrators
@@ -47,6 +48,8 @@ class FinaliseFeedbackCommand(val assignment: Assignment, val markerFeedbacks:JL
 
 		parent.actualGrade = markerFeedback.grade
 		parent.actualMark = markerFeedback.mark
+
+		parent.uploadedDate = DateTime.now
 
 		// erase any existing attachments - these will be replaced
 		parent.clearAttachments()
