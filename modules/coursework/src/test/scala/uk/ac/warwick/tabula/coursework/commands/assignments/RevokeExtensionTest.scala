@@ -20,8 +20,16 @@ class RevokeExtensionTest extends AppContextTestBase with Mockito {
 			extension.assignment = assignment
 			extension.expiryDate =  new DateTime()
 			extension.reason = "I feel like it"
+			extension.userId = "cuslaj"
+
 			assignment.extensions add extension
 			assignment.extensions.size should be (1)
+
+			session.save(assignment.module.department)
+			session.save(assignment.module)
+			session.save(assignment)
+			session.save(extension)
+			session.flush()
 
 			val command = DeleteExtensionCommand(assignment.module, assignment, "0000001", currentUser)
 			command.apply()
