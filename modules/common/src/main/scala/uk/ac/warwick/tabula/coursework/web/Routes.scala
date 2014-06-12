@@ -78,7 +78,11 @@ object Routes {
 
 			object extension {
 				def expandrow (assignment: Assignment, universityId: String) = assignmentroot(assignment) + "/extensions?universityId=" + universityId
-				def detail (assignment: Assignment) = assignmentroot(assignment) + "/extensions/detail"
+
+				// def detail doesn't use assignmentroot since assignmentroot includes the assignment ID in the middle, but
+				// it needs to be on the end for managing extension requests across department so that
+				// it can be passed as a unique contentId when toggling rows (jquery-expandingTable.js)
+				def detail (assignment: Assignment) = context + "/admin/module/%s/assignments/extensions/detail" format (encoded(assignment.module.code))
 				def revoke (assignment: Assignment, universityId: String) = assignmentroot(assignment) + "/extensions/revoke/" + universityId
 			}
 		}

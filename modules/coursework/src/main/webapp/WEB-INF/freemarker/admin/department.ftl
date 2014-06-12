@@ -30,84 +30,96 @@
 				</a>
 				<ul class="dropdown-menu pull-right">
 
-				<#if features.extensions>
-				<li>
-					<#assign extensions_url><@routes.extensionsettings department /></#assign>
-					<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
-						<i class="icon-calendar"></i> Extensions
-					</@fmt.permission_button>
-			   </li>
-			   </#if>
-
-				<#if features.feedbackTemplates>
-				<li>
-					<#assign feedback_url><@routes.feedbacktemplates department /></#assign>
-					<@fmt.permission_button permission='FeedbackTemplate.Create' scope=department action_descr='create feedback template' href=feedback_url>
-						<i class="icon-comment"></i> Feedback templates
-					</@fmt.permission_button>
-			   </li>
-			   </#if>
-
-				<#if features.markingWorkflows>
-				<li>
-					<#assign markingflow_url><@routes.markingworkflowlist department /></#assign>
-					<@fmt.permission_button permission='MarkingWorkflow.Read' scope=department action_descr='manage marking workflows' href=markingflow_url>
-						<i class="icon-check"></i> Marking workflows
-					</@fmt.permission_button>
-				</li>
-				</#if>
-
-				<li<#if !modules?has_content> class="disabled"</#if> id="feedback-report-button">
-					<#assign feedbackrep_url><@routes.feedbackreport department /></#assign>
-					<@fmt.permission_button permission='Department.DownloadFeedbackReport' scope=department action_descr='generate a feedback report' href=feedbackrep_url
-											data_attr='data-container=body data-toggle=modal data-target=#feedback-report-modal'>
-						<i class="icon-book"></i> Feedback report
-					</@fmt.permission_button>
-
-					<#-- Run this script inline to allow us to build the modal and load the URL before the rest of the page has loaded -->
-					<script type="text/javascript">
-						(function($) {
-							$('#feedback-report-button').on('click', 'a[data-toggle=modal]', function(e){
-								e.preventDefault();
-								var $this = $(this);
-								var target = $this.attr('data-target');
-								var url = $this.attr('href');
-								$(target).load(url);
-							});
-						})(jQuery);
-					</script>
-				</li>
-
-				<li<#if !modules?has_content> class="disabled"</#if>>
-					<#assign copy_url><@routes.copyDepartmentsAssignments department /></#assign>
-					<@fmt.permission_button
-						permission='Assignment.Create'
-						scope=department
-						action_descr='copy existing assignments'
-						href=copy_url>
-						<i class="icon-share-alt"></i> Create assignments from previous
-					</@fmt.permission_button>
-				</li>
-				<li<#if !modules?has_content> class="disabled"</#if>>
-					<#assign archive_url><@routes.archiveDepartmentsAssignments department /></#assign>
-					<@fmt.permission_button
+					<li<#if !modules?has_content> class="disabled"</#if>>
+						<#assign archive_url><@routes.archiveDepartmentsAssignments department /></#assign>
+						<@fmt.permission_button
 						permission='Assignment.Archive'
 						scope=department
 						action_descr='archive existing assignments'
 						href=archive_url>
-						<i class="icon-folder-close"></i> Archive assignments
-					</@fmt.permission_button>
-				</li>
-				<li>
-					<#assign settings_url><@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}</#assign>
-					<@fmt.permission_button
+							<i class="icon-folder-close"></i> Archive assignments
+						</@fmt.permission_button>
+					</li>
+
+					<li<#if !modules?has_content> class="disabled"</#if>>
+						<#assign copy_url><@routes.copyDepartmentsAssignments department /></#assign>
+						<@fmt.permission_button
+						permission='Assignment.Create'
+						scope=department
+						action_descr='copy existing assignments'
+						href=copy_url>
+							<i class="icon-share-alt"></i> Create assignments from previous
+						</@fmt.permission_button>
+					</li>
+
+					<li>
+						<#assign settings_url><@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}</#assign>
+						<@fmt.permission_button
 						permission='Department.ManageDisplaySettings'
 						scope=department
 						action_descr='manage department settings'
 						href=settings_url>
-						<i class="icon-list-alt"></i> Settings
-					</@fmt.permission_button>
-				</li>
+							<i class="icon-list-alt"></i> Department settings
+						</@fmt.permission_button>
+					</li>
+
+					<#if features.extensions>
+						<li>
+							<#assign extensions_url><@routes.extensionsettings department /></#assign>
+							<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
+								<i class="icon-list-alt"></i> Extension settings
+							</@fmt.permission_button>
+					   </li>
+				   </#if>
+
+					<li<#if !modules?has_content> class="disabled"</#if> id="feedback-report-button">
+						<#assign feedbackrep_url><@routes.feedbackreport department /></#assign>
+						<@fmt.permission_button permission='Department.DownloadFeedbackReport' scope=department action_descr='generate a feedback report' href=feedbackrep_url
+						data_attr='data-container=body data-toggle=modal data-target=#feedback-report-modal'>
+							<i class="icon-book"></i> Feedback report
+						</@fmt.permission_button>
+
+					<#-- Run this script inline to allow us to build the modal and load the URL before the rest of the page has loaded -->
+						<script type="text/javascript">
+							(function($) {
+								$('#feedback-report-button').on('click', 'a[data-toggle=modal]', function(e){
+									e.preventDefault();
+									var $this = $(this);
+									var target = $this.attr('data-target');
+									var url = $this.attr('href');
+									$(target).load(url);
+								});
+							})(jQuery);
+						</script>
+					</li>
+
+					<#if features.feedbackTemplates>
+						<li>
+							<#assign feedback_url><@routes.feedbacktemplates department /></#assign>
+							<@fmt.permission_button permission='FeedbackTemplate.Create' scope=department action_descr='create feedback template' href=feedback_url>
+								<i class="icon-comment"></i> Feedback templates
+							</@fmt.permission_button>
+						</li>
+					</#if>
+
+					<#if features.extensions>
+						<li>
+							<#assign extensions_url><@routes.manage_extensions department /></#assign>
+							<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
+								<i class="icon-calendar"></i> Manage extensions
+							</@fmt.permission_button>
+						</li>
+					</#if>
+
+					<#if features.markingWorkflows>
+						<li>
+							<#assign markingflow_url><@routes.markingworkflowlist department /></#assign>
+							<@fmt.permission_button permission='MarkingWorkflow.Read' scope=department action_descr='manage marking workflows' href=markingflow_url>
+								<i class="icon-check"></i> Marking workflows
+							</@fmt.permission_button>
+						</li>
+					</#if>
+
 				</ul>
 			</div>
 		</#if>

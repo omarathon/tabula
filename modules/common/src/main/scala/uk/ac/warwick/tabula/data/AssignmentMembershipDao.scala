@@ -66,22 +66,22 @@ trait AssignmentMembershipDao {
 
 @Repository
 class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
-	
+
 	def getSITSEnrolledAssignments(user: User): Seq[Assignment] =
 		session.newQuery[Assignment]("""select a
-			from 
+			from
 				Assignment a
 					join a.assessmentGroups ag
 					join ag.assessmentComponent.upstreamAssessmentGroups uag
 					join uag.members autoMembership
 					join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId = :universityId
-			where 
+			where
 					uag.academicYear = a.academicYear and
 					uag.occurrence = ag.occurrence and
 					a.deleted = false and a.archived = false""")
 			.setString("universityId", user.getWarwickId)
 			.distinct.seq
-			
+
 	def getSITSEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet] =
 		session.newQuery[SmallGroupSet]("""select sgs
 			from SmallGroupSet sgs
@@ -89,7 +89,7 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 				join ag.assessmentComponent.upstreamAssessmentGroups uag
 				join uag.members autoMembership
 				join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId = :universityId
-			where 
+			where
 				uag.academicYear = sgs.academicYear and
 				uag.occurrence = ag.occurrence and
 				sgs.deleted = false and sgs.archived = false""")
@@ -116,15 +116,15 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 		if (group.assignment == null && group.smallGroupSet == null) None
 		else {
 			val criteria = session.newCriteria[AssessmentGroup]
-			.add(is("assessmentComponent", group.assessmentComponent))
-			.add(is("occurrence", group.occurrence))
-	
+				.add(is("assessmentComponent", group.assessmentComponent))
+				.add(is("occurrence", group.occurrence))
+
 			if (group.assignment != null) {
 				criteria.add(is("assignment", group.assignment))
 			} else {
 				criteria.add(is("smallGroupSet", group.smallGroupSet))
 			}
-	
+
 			criteria.uniqueResult
 		}
 	}

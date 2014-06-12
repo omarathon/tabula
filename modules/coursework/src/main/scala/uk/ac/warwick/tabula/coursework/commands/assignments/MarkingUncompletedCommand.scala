@@ -27,19 +27,29 @@ abstract class MarkingUncompletedCommand(val module: Module, val assignment: Ass
 	self: StateServiceComponent with FeedbackServiceComponent =>
 
 	override def onBind(result: BindingResult) {
-		releasedFeedback = students.asScala.flatMap(assignment.getMarkerFeedbackForPreviousPosition(_, user)).filter { mf => mf != null && mf.state == MarkingState.MarkingCompleted }.asJava
+		completedMarkerFeedback = students.asScala.flatMap(assignment.getLatestCompletedMarkerFeedback(_, user)).asJava
 	}
 
 	def validate(errors: Errors) {
 		if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
-		if (releasedFeedback.isEmpty) errors.rejectValue("students", "markers.finishMarking.noStudents")
+		if (completedMarkerFeedback.isEmpty) errors.rejectValue("students", "markers.finishMarking.noStudents")
 	}
 
 	def applyInternal() {
 		// do not update previously released feedback
-		val feedbackForRelease = releasedFeedback.asScala.filterNot { _.feedback.released }
+		val feedbackForRelease = completedMarkerFeedback.asScala.filterNot(_.feedback.released).flatMap(getMarkerFeedbackForRelease)
 
 		feedbackForRelease.foreach(stateService.updateStateUnsafe(_, MarkingState.ReleasedForMarking))
+	}
+
+	private def getMarkerFeedbackForRelease(markerFeedback: MarkerFeedback): Seq[MarkerFeedback] = {
+		val subsequentFeedbacks = markerFeedback.getFeedbackPosition match {
+			case ThirdFeedback => Seq()
+			case SecondFeedback => Seq(markerFeedback.feedback.thirdMarkerFeedback)
+			case FirstFeedback => Seq(markerFeedback.feedback.secondMarkerFeedback, markerFeedback.feedback.thirdMarkerFeedback)
+		}
+		val subsequentFeedbacksNotNull = subsequentFeedbacks.filterNot(_ == null)
+		Seq(markerFeedback) ++ subsequentFeedbacksNotNull
 	}
 }
 
@@ -61,7 +71,7 @@ trait MarkingUncompletedDescription extends Describable[Unit] {
 
 	override def describeResult(d: Description){
 		d.assignment(assignment)
-			.property("numFeedbackUpdated" -> releasedFeedback.size())
+			.property("numFeedbackUpdated" -> completedMarkerFeedback.size())
 	}
 }
 
@@ -72,7 +82,7 @@ trait MarkingUncompletedState {
 	val module: Module
 
 	var students: JList[String] = JArrayList()
-	var releasedFeedback: JList[MarkerFeedback] = JArrayList()
+	var completedMarkerFeedback: JList[MarkerFeedback] = JArrayList()
 
 	var onlineMarking: Boolean = false
 	var confirm: Boolean = false
