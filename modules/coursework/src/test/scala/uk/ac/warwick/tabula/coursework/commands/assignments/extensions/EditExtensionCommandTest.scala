@@ -11,7 +11,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.DeleteExtensionCommandNotification
 
 // scalastyle:off magic.number
-class EditExtensionCommandTest extends TestBase with ModifyExtensionCommandState   {
+class EditExtensionCommandTest extends TestBase {
 
 	EventHandling.enabled = false
 
@@ -53,7 +53,7 @@ class EditExtensionCommandTest extends TestBase with ModifyExtensionCommandState
 
 				val reviewerComments = "I've always thought that Tabula should have a photo sharing component"
 
-				val editCommand = new EditExtensionCommandInternal(assignment.module, assignment, targetUniversityId, currentUser, ApprovalAction) with EditExtensionCommandTestSupport
+				val editCommand = new EditExtensionCommandInternal(assignment.module, assignment, targetUniversityId, currentUser, "Grant") with EditExtensionCommandTestSupport
 				editCommand.reviewerComments = reviewerComments
 				val result = editCommand.apply()
 
@@ -85,7 +85,7 @@ class EditExtensionCommandTest extends TestBase with ModifyExtensionCommandState
 
 				val reviewerComments = "something something messaging service something something $17 billion cheers thanks"
 
-				val editCommand = new EditExtensionCommandInternal(assignment.module, assignment, targetUniversityId, currentUser, RejectionAction) with EditExtensionCommandTestSupport
+				val editCommand = new EditExtensionCommandInternal(assignment.module, assignment, targetUniversityId, currentUser, "Reject") with EditExtensionCommandTestSupport
 				editCommand.reviewerComments = reviewerComments
 				val result = editCommand.apply()
 
@@ -133,25 +133,22 @@ class EditExtensionCommandTest extends TestBase with ModifyExtensionCommandState
 	@Test
 	def revokeExtensionEmit() {
 		withUser("cuslat", "1171795") {
-			withFakeTime(dateTime(2014, 2, 11)) {
+
+			val deleteCommand = new DeleteExtensionCommandNotification with ModifyExtensionCommandState {
 				val currentUser = RequestInfo.fromThread.get.user
-				val assignment = createAssignment()
-				val targetUniversityId = "1234567"
-				val extension = createExtension(assignment, targetUniversityId)
+				submitter = currentUser
+				assignment = createAssignment()
 				assignment.extensions.add(extension)
-
-				val deleteCommand = DeleteExtensionCommand(assignment.module, assignment, targetUniversityId, currentUser)
-
-				val emitted = deleteCommand.emit(extension)
-				emitted.size should be (1)
-				emitted.head.recipientUniversityId should be ("1234567")
-				emitted.head.entities.head should be (assignment)
-
-
+				val targetUniversityId = "1234567"
+				extension = createExtension(assignment, targetUniversityId)
 			}
+
+			val emitted = deleteCommand.emit(deleteCommand.extension)
+			emitted.size should be (1)
+			emitted.head.recipientUniversityId should be ("1234567")
+			emitted.head.entities.head should be (deleteCommand.assignment)
 		}
 	}
-
 
 	def createAssignment(): Assignment = {
 		val assignment = newDeepAssignment()
