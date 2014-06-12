@@ -5,19 +5,19 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.commands.manage.{AddTemplatePointsToSchemesCommandState, AddTemplatePointsToSchemesCommand}
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringScheme}
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.AttendanceMonitoringService
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
+import uk.ac.warwick.tabula.attendance.commands.GroupsPoints
+import org.springframework.validation.{Errors, BindException}
 
 
 @Controller
 @RequestMapping(Array("/manage/{department}/{academicYear}/addpoints/template"))
-class AddPointsToSchemesFromTemplateController extends AttendanceController  {
-
-	@Autowired var service: AttendanceMonitoringService = _
+class AddPointsToSchemesFromTemplateController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
@@ -34,7 +34,9 @@ class AddPointsToSchemesFromTemplateController extends AttendanceController  {
 			"schemes" -> cmd.schemes,
 			"templates" -> cmd.templateSchemeItems,
 			"department" -> cmd.schemes.get(0).department,
-			"academicYear" -> cmd.academicYear.startYear.toString).crumbs(
+			"academicYear" -> cmd.academicYear.startYear.toString,
+			"returnTo" -> getReturnTo("")
+			).crumbs(
 			Breadcrumbs.Manage.Home,
 			Breadcrumbs.Manage.Department(department),
 			Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
@@ -43,16 +45,34 @@ class AddPointsToSchemesFromTemplateController extends AttendanceController  {
 
 	@RequestMapping(method = Array(POST), params = Array("templateScheme"))
 	def submit(
-		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringScheme]],
+		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]] with AddTemplatePointsToSchemesCommandState with SelfValidating,
+		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {
-		cmd.apply()
-		Redirect(Routes.Manage.departmentForYear(department, academicYear))
-	}
 
-	@RequestMapping(method = Array(GET))
-	def noSchemesSelected(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		Redirect(Routes.Manage.departmentForYear(department, academicYear))
+		cmd.validate(errors)
+
+		if(errors.hasErrors){
+			Mav("manage/templates",
+				"schemes" -> cmd.schemes,
+				"templates" -> cmd.templateSchemeItems,
+				"department" -> cmd.schemes.get(0).department,
+				"academicYear" -> cmd.academicYear.startYear.toString,
+				"returnTo" -> getReturnTo(""),
+				"errors" -> errors).crumbs(
+					Breadcrumbs.Manage.Home,
+					Breadcrumbs.Manage.Department(department),
+					Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
+				)
+		} else {
+			val points = cmd.apply()
+			Redirect(getReturnTo(""),
+				"points" -> points.size.toString,
+				"schemes" -> points.map(_.scheme.id).mkString(",")
+			)
+		}
+
+	}
 
 }

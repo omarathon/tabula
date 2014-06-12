@@ -1,5 +1,13 @@
 <h3>Use a template</h3>
 
+<#if errors?has_content>
+<div class="alert alert-error">
+	<#list errors.allErrors as error>
+		<p><@spring.message code=error.code arguments=error.arguments/></p>
+	</#list>
+</div>
+</#if>
+
 <p>Use an AQA-approved template to add points to
 	<a href="#" class="use-popover"
 	   data-content="
@@ -18,6 +26,8 @@
 	<#list schemes as scheme>
 		    <@f.hidden path="schemes"/>
 	</#list>
+
+	<input type="hidden" name="returnTo" value="${returnTo}" />
 
 	<@form.labelled_row "templateScheme" "Template:">
 		<@f.select path="templateScheme" id="templateSchemeSelect">
@@ -40,21 +50,29 @@
 <script>
 	//TODO make this better.
 	(function ($) {
+
+		loadTemplatePoints($("#templateSchemeSelect").val());
+
 		$('#templateSchemeSelect').change(function(){
 			var templateSchemeId = $(this).val();
 
 			$('.fix-footer').removeAttr('style').attr('class', 'submit-buttons fix-footer');
 			$('.footer-shadow').remove();
 
+			loadTemplatePoints(templateSchemeId);
+		})
+
+		function loadTemplatePoints(templateSchemeId) {
 			if(templateSchemeId != '') {
 				$.get(window.location.pathname + '/' + templateSchemeId,
-				function(data){
-					$("#templatePoints").html(data);
-					$('body').fixHeaderFooter();
-				})
+						function(data){
+							$("#templatePoints").html(data);
+							$('body').fixHeaderFooter();
+						})
 			} else {
 				$("#templatePoints").html("");
 			}
-		})
+		}
+
 	})(jQuery);
 </script>

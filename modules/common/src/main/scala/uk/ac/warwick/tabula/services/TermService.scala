@@ -6,7 +6,7 @@ import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.util.termdates.Term.TermType
 import scala.collection.JavaConverters._
-import org.joda.time.{DateTimeConstants, DateMidnight, Interval, DateTime}
+import org.joda.time.{LocalDate, DateTimeConstants, DateMidnight, Interval, DateTime}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 
@@ -22,6 +22,7 @@ trait TermService {
 	def getAcademicWeekForAcademicYear(date: BaseDateTime, academicYear: AcademicYear): Int
 	def getTermFromAcademicWeek(weekNumber: Int, academicYear: AcademicYear, includeVacations: Boolean = false): Term
 	def getTermFromAcademicWeekIncludingVacations(weekNumber: Int, academicYear: AcademicYear): Term
+	def getYearFromMonth(date: LocalDate, academicYear: AcademicYear): Int
 }
 
 object TermService {
@@ -121,6 +122,11 @@ class TermServiceImpl extends TermService {
 
 	def getTermFromAcademicWeekIncludingVacations(weekNumber: Int, academicYear: AcademicYear): Term =
 		getTermFromAcademicWeek(weekNumber, academicYear, includeVacations = true)
+
+	//For converting template points to attendance monitoring points
+	def getYearFromMonth(date: LocalDate, academicYear: AcademicYear): Int = {
+		if (date.getMonthOfYear < 10) academicYear.endYear else academicYear.startYear
+	}
 
 }
 

@@ -9,6 +9,7 @@
 		<#list command.schemes as scheme>
 			<input type="hidden" name="schemes" value="${scheme.id}" />
 		</#list>
+
 		<input type="hidden" name="returnTo" value="${returnTo}" />
 
 		<label>Which points do you want to copy?</label>

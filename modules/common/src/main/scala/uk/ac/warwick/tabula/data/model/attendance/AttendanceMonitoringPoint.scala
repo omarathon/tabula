@@ -72,8 +72,8 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 		val newPoint = new AttendanceMonitoringPoint
 		newPoint.scheme = scheme
 		newPoint.name = this.name
-		newPoint.startWeek = startWeek
-		newPoint.endWeek = endWeek
+		newPoint.startWeek = _startWeek
+		newPoint.endWeek = _endWeek
 		newPoint.startDate = startDate
 		newPoint.endDate = endDate
 		newPoint.pointType = pointType

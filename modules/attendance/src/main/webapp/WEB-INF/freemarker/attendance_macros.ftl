@@ -325,6 +325,19 @@
 </div>
 </#macro>
 
+<#macro groupedPointSchemePopover groupedPoint>
+	<#local popoverContent>
+		<ul>
+			<#list groupedPoint.schemes?sort_by("displayName") as scheme>
+				<li>${scheme.displayName}</li>
+			</#list>
+		</ul>
+	</#local>
+	<a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
+		<@fmt.p groupedPoint.schemes?size "scheme" />
+	</a>
+</#macro>
+
 <#function formatResult department checkpoint="" point="" student="" note="">
 	<#if checkpoint?has_content>
 		<#if note?has_content>
