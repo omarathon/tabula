@@ -12,6 +12,8 @@ import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import uk.ac.warwick.tabula.commands.{ViewViewableCommand, Command}
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.util.termdates.Term
+import org.joda.time.DateTime
 
 
 class ViewProfileCommand(user: CurrentUser, profile: Member)
@@ -31,6 +33,7 @@ abstract class ViewProfileController extends ProfilesController {
 	var smallGroupService = Wire[SmallGroupService]
 	var memberNoteService = Wire[MemberNoteService]
 	var assignmentService = Wire[AssignmentService]
+	var termService = Wire[TermService]
 	var monitoringPointMeetingRelationshipTermService = Wire[MonitoringPointMeetingRelationshipTermService]
 
 	@ModelAttribute("searchProfilesCommand")
@@ -57,12 +60,22 @@ abstract class ViewProfileController extends ProfilesController {
 
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 
-		// Get meetings for all relationship types (not just the enabled ones for that dept)
+		val filterYear = studentCourseYearDetails match {
+			case Some(scd: StudentCourseYearDetails) => scd.academicYear
+			case None => AcademicYear.guessByDate(DateTime.now); // default to this year
+		}
+		
+		// For the currently selected year, get meetings for all relationship types 
+		// (not just the enabled ones for that dept)
 		// because we show a relationship on the profile page if there is one
 		val relationshipMeetings =
 			allRelationshipTypes.flatMap { relationshipType =>
 				getViewMeetingRecordCommand(studentCourseDetails, relationshipType).map { cmd =>
-					(relationshipType, cmd.apply())
+					( relationshipType, 
+						cmd.apply().filterNot(
+							meeting => Seq(Term.WEEK_NUMBER_BEFORE_START, Term.WEEK_NUMBER_AFTER_END).contains(termService.getAcademicWeekForAcademicYear(meeting.meetingDate, filterYear))
+						)
+					)
 				}
 			}.toMap
 
