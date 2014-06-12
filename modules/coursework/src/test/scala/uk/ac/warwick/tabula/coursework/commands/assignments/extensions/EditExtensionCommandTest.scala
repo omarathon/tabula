@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
 import uk.ac.warwick.tabula.{RequestInfo, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.DeleteExtensionCommandNotification
 
 // scalastyle:off magic.number
 class EditExtensionCommandTest extends TestBase with ModifyExtensionCommandState   {
@@ -116,13 +117,37 @@ class EditExtensionCommandTest extends TestBase with ModifyExtensionCommandState
 
 				assignment.extensions.add(extension)
 
+				assignment.extensions.size should be (2)
 				val deleteCommand = new DeleteExtensionCommandInternal(assignment.module, assignment, targetUniversityId, currentUser) with DeleteExtensionCommandTestSupport
 				val result = deleteCommand.apply()
+				assignment.extensions.size should be (1)
 
 				result.approved should be (false)
 				result.rejected should be (false)
 				result.state should be (ExtensionState.Revoked)
 				deleteCommand.deleted should be (true)
+			}
+		}
+	}
+
+	@Test
+	def revokeExtensionEmit() {
+		withUser("cuslat", "1171795") {
+			withFakeTime(dateTime(2014, 2, 11)) {
+				val currentUser = RequestInfo.fromThread.get.user
+				val assignment = createAssignment()
+				val targetUniversityId = "1234567"
+				val extension = createExtension(assignment, targetUniversityId)
+				assignment.extensions.add(extension)
+
+				val deleteCommand = DeleteExtensionCommand(assignment.module, assignment, targetUniversityId, currentUser)
+
+				val emitted = deleteCommand.emit(extension)
+				emitted.size should be (1)
+				emitted.head.recipientUniversityId should be ("1234567")
+				emitted.head.entities.head should be (assignment)
+
+
 			}
 		}
 	}
