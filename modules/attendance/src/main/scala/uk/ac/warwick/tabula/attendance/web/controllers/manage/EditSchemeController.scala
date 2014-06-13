@@ -68,4 +68,18 @@ class EditSchemeController extends AttendanceController {
 			Redirect(Routes.Manage.editSchemeStudents(scheme))
 		}
 	}
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.createAndAddPoints))
+	def saveAndEditPoints(
+		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
+		errors: Errors,
+		@PathVariable("scheme") scheme: AttendanceMonitoringScheme
+	) = {
+		if (errors.hasErrors) {
+			render(scheme)
+		} else {
+			val scheme = cmd.apply()
+			Redirect(Routes.Manage.editSchemePoints(scheme))
+		}
+	}
 }

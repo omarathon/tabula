@@ -94,6 +94,7 @@
 
 <#macro manageEditScheme department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/edit"/></#macro>
 <#macro manageEditSchemeStudents department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/edit/students"/></#macro>
+<#macro manageEditSchemePoints department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/edit/points"/></#macro>
 <#macro manageDeleteScheme department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/delete"/></#macro>
 
 <#macro manageSelectStudents scheme>

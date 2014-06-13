@@ -20,9 +20,9 @@
 	<@f.form id="editScheme" method="POST" commandName="command" class="form-horizontal">
 
 		<p class="progress-arrows">
-			<span class="arrow-right">Properties</span>
+			<span class="arrow-right use-tooltip" title="Save and edit properties"><button type="submit" class="btn btn-link" name="${ManageSchemeMappingParameters.saveAndEditProperties}">Properties</button></span>
 			<span class="arrow-right arrow-left use-tooltip active">Students</span>
-			<span class="arrow-right arrow-left use-tooltip" title="Save and edit points"><button type="submit" class="btn btn-link">Points</button></span>
+			<span class="arrow-right arrow-left use-tooltip" title="Save and edit points"><button type="submit" class="btn btn-link" name="${ManageSchemeMappingParameters.createAndAddPoints}">Points</button></span>
 		</p>
 
 		<#assign membershipItems = command.membershipItems />

@@ -43,7 +43,7 @@
 					<#if scheme.points?size == 0>
 						0 points)
 					<#else>
-						<a href=""><@fmt.p scheme.points?size "point" /></a>)
+						<a href="<@routes.manageEditSchemePoints command.department command.academicYear.startYear?c scheme />"><@fmt.p scheme.points?size "point" /></a>)
 					</#if>
 				</span>
 			</div>

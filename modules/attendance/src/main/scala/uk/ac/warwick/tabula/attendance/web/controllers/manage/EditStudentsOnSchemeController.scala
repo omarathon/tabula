@@ -28,7 +28,7 @@ class EditStudentsOnSchemeController extends AbstractManageSchemeStudentsControl
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.createAndAddPoints))
-	def saveAndAddPoints(
+	def saveAndEditPoints(
 		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
 		errors: Errors,
 		@PathVariable scheme: AttendanceMonitoringScheme
@@ -37,7 +37,22 @@ class EditStudentsOnSchemeController extends AbstractManageSchemeStudentsControl
 			render(scheme)
 		} else {
 			val scheme = cmd.apply()
-			Redirect(Routes.Manage.addPointsToNewScheme(scheme))
+			Redirect(Routes.Manage.editSchemePoints(scheme))
+		}
+
+	}
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.saveAndEditProperties))
+	def saveAndEditProperties(
+		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
+		errors: Errors,
+		@PathVariable scheme: AttendanceMonitoringScheme
+	) = {
+		if (errors.hasErrors) {
+			render(scheme)
+		} else {
+			val scheme = cmd.apply()
+			Redirect(Routes.Manage.editScheme(scheme))
 		}
 
 	}
