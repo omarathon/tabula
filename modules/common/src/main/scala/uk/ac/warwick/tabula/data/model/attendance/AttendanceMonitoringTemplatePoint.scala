@@ -29,11 +29,6 @@ class AttendanceMonitoringTemplatePoint extends GeneratedId {
 	@Column(name = "end_date")
 	var endDate: LocalDate = _
 
-	@Column(name="point_type")
-	@NotNull
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointTypeUserType")
-	var pointType: AttendanceMonitoringPointType = _
-
 	@NotNull
 	@Column(name = "created_date")
 	var createdDate: DateTime = _
@@ -45,7 +40,6 @@ class AttendanceMonitoringTemplatePoint extends GeneratedId {
 	def toPoint: AttendanceMonitoringPoint = {
 		val point = new AttendanceMonitoringPoint
 		point.name = name
-		point.pointType = pointType
 		point.startWeek = startWeek
 		point.endWeek = endWeek
 		point.createdDate = new DateTime()
