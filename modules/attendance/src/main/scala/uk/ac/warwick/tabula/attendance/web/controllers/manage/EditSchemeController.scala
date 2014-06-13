@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.commands.{SelfValidating, PopulateOnForm, Appliable}
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.AcademicYear
 
 @Controller
 @RequestMapping(Array("/manage/{department}/{academicYear}/{scheme}/edit"))
@@ -50,6 +52,20 @@ class EditSchemeController extends AttendanceController {
 		} else {
 			val scheme = cmd.apply()
 			Redirect(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear))
+		}
+	}
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.createAndAddStudents))
+	def saveAndEditStudents(
+		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
+		errors: Errors,
+		@PathVariable("scheme") scheme: AttendanceMonitoringScheme
+	) = {
+		if (errors.hasErrors) {
+			render(scheme)
+		} else {
+			val scheme = cmd.apply()
+			Redirect(Routes.Manage.editSchemeStudents(scheme))
 		}
 	}
 }

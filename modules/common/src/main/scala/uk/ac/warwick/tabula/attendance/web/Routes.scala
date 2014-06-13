@@ -70,6 +70,11 @@ object Routes {
 				encoded(scheme.department.code), encoded(scheme.academicYear.startYear.toString), encoded(scheme.id)
 			)
 
+		def editSchemeStudents(scheme: AttendanceMonitoringScheme) =
+			context + "/manage/%s/%s/%s/edit/students" format(
+				encoded(scheme.department.code), encoded(scheme.academicYear.startYear.toString), encoded(scheme.id)
+			)
+
 		def editPoints(department: Department, academicYear: AcademicYear) =
 			context + "/manage/%s/%s/editpoints" format(
 				encoded(department.code), encoded(academicYear.startYear.toString)

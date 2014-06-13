@@ -3,13 +3,13 @@
 
 <h1>Edit ${scheme.displayName}</h1>
 
-<p class="progress-arrows">
-	<span class="arrow-right active">Properties</span>
-	<span class="arrow-right arrow-left">Students</span>
-	<span class="arrow-right arrow-left">Points</span>
-</p>
-
 <@f.form id="editScheme" method="POST" commandName="command" class="form-horizontal">
+
+	<p class="progress-arrows">
+		<span class="arrow-right active">Properties</span>
+		<span class="arrow-right arrow-left use-tooltip" title="Save and edit students"><button type="submit" class="btn btn-link" name="${ManageSchemeMappingParameters.createAndAddStudents}">Students</button></span>
+		<span class="arrow-right arrow-left use-tooltip" title="Save and edit points"><button type="submit" class="btn btn-link">Points</button></span>
+	</p>
 
 	<@form.labelled_row "name" "Name">
 		<@f.input path="name" />

@@ -38,7 +38,7 @@
 					<#if scheme.members.members?size == 0>
 						(0 students,
 					<#else>
-						(<a href=""><@fmt.p scheme.members.members?size "student" /></a>,
+						(<a href="<@routes.manageEditSchemeStudents command.department command.academicYear.startYear?c scheme />"><@fmt.p scheme.members.members?size "student" /></a>,
 					</#if>
 					<#if scheme.points?size == 0>
 						0 points)
