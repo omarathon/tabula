@@ -98,9 +98,13 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		val permissionsService = mock[PermissionsService]
 		module.permissionsService = permissionsService
-		department.permissionsService = permissionsService
+		session.save(module)
 
+		department.permissionsService = permissionsService
+		session.save(department)
+		
 		assignment.module = module
+		session.save(assignment)
 
 		permissionsService.ensureUserGroupFor(module, ModuleManagerRoleDefinition) returns (UserGroup.ofUniversityIds)
 		permissionsService.ensureUserGroupFor(department, DepartmentalAdministratorRoleDefinition) returns (UserGroup.ofUniversityIds)
