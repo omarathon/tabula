@@ -47,6 +47,15 @@
 </@f.form>
 </p>
 
+
+<p>
+<@f.form method="post" action="${url('/sysadmin/import-department', '/scheduling')}" commandName="blankForm">
+	<div class="input-append">
+		<@f.input id="import-modules-dept" path="deptCode" cssClass="span8" placeholder="deptCodes" /><input class="btn btn-danger" type="submit" value="Modules" onclick="return confirm('Really? Could take a minute.')">
+	</div>
+</@f.form>
+</p>
+
 <p>
 <@f.form method="post" action="${url('/sysadmin/import-sits', '/scheduling')}">
   <input class="btn btn-danger" type="submit" value="SITS assignments" onclick="return confirm('Really? Could take a minute.')">
