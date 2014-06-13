@@ -4,16 +4,23 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.attendance.commands.manage.EditSchemeCommand
+import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
+import uk.ac.warwick.tabula.commands.{SelfValidating, PopulateOnForm, Appliable}
+import javax.validation.Valid
+import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.attendance.web.Routes
 
 @Controller
 @RequestMapping(Array("/manage/{department}/{academicYear}/{scheme}/edit"))
-class EditSchemeController extends AbstractManageSchemeController {
+class EditSchemeController extends AttendanceController {
+
+	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	override def command(@PathVariable("scheme") scheme: AttendanceMonitoringScheme) =
+	def command(@PathVariable("scheme") scheme: AttendanceMonitoringScheme) =
 		EditSchemeCommand(scheme, user)
 
-	override protected def render(scheme: AttendanceMonitoringScheme) = {
+	private def render(scheme: AttendanceMonitoringScheme) = {
 		Mav("manage/edit",
 			"ManageSchemeMappingParameters" -> ManageSchemeMappingParameters
 		).crumbs(
@@ -21,5 +28,28 @@ class EditSchemeController extends AbstractManageSchemeController {
 			Breadcrumbs.Manage.Department(scheme.department),
 			Breadcrumbs.Manage.DepartmentForYear(scheme.department, scheme.academicYear)
 		)
+	}
+
+	@RequestMapping(method = Array(GET, HEAD))
+	def form(
+		@PathVariable scheme: AttendanceMonitoringScheme,
+		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme] with PopulateOnForm
+	) = {
+		cmd.populate()
+		render(scheme)
+	}
+
+	@RequestMapping(method = Array(POST))
+	def save(
+		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
+		errors: Errors,
+		@PathVariable scheme: AttendanceMonitoringScheme
+	) = {
+		if (errors.hasErrors) {
+			render(scheme)
+		} else {
+			val scheme = cmd.apply()
+			Redirect(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear))
+		}
 	}
 }

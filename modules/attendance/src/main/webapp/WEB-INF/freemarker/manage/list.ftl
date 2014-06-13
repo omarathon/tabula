@@ -28,11 +28,24 @@
 
 	<#list schemes?sort_by("displayName") as scheme>
 		<div class="row-fluid">
-			<div class="span12">
+			<div class="span9 hover-highlight">
+				<div class="pull-right" style="line-height:30px">
+					<a class="btn btn-primary btn-mini" href="<@routes.manageEditScheme command.department command.academicYear.startYear?c scheme/>">Edit</a>
+					<a class="btn btn-danger btn-mini" href="<@routes.manageDeleteScheme command.department command.academicYear.startYear?c scheme/>"><i class="icon-remove"></i></a>
+				</div>
 				<span class="lead">${scheme.displayName}</span>
-				<span class="muted">(<@fmt.p scheme.members.members?size "student" />, <@fmt.p scheme.points?size "${scheme.pointStyle.description?lower_case} point" />)</span>
-				<a class="btn btn-primary btn-small" href="<@routes.manageEditScheme command.department command.academicYear.startYear?c scheme/>">Edit</a>
-				<a class="btn btn-danger btn-small" href="<@routes.manageDeleteScheme command.department command.academicYear.startYear?c scheme/>"><i class="icon-remove"></i></a>
+				<span class="muted">
+					<#if scheme.members.members?size == 0>
+						(0 students,
+					<#else>
+						(<a href=""><@fmt.p scheme.members.members?size "student" /></a>,
+					</#if>
+					<#if scheme.points?size == 0>
+						0 points)
+					<#else>
+						<a href=""><@fmt.p scheme.points?size "point" /></a>)
+					</#if>
+				</span>
 			</div>
 		</div>
 	</#list>
