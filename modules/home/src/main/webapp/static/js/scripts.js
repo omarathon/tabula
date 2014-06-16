@@ -32,7 +32,7 @@
 
 	// Tabula-specific rendition of date and date-time pickers
 	jQuery.fn.tabulaDateTimePicker = function() {
-		var $this = $(this)
+		var $this = $(this);
 		// if there is no datepicker bound to this input then add one
 		if(!$this.data("datepicker")){
 			$this.datetimepicker({
@@ -96,7 +96,7 @@
 	};
 
 	jQuery.fn.tabulaDatePicker = function() {
-		var $this = $(this)
+		var $this = $(this);
 		// if there is no datepicker bound to this input then add one
 		if(!$this.data("datepicker")){
 			$this.datepicker({
@@ -107,7 +107,7 @@
 			}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
 		}
 
-        $(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
+        $(this).on('changeDate', function(){ offsetEndDate($(this)); });
 	};
 
 	jQuery.fn.tabulaTimePicker = function() {
@@ -148,16 +148,14 @@
 
             $(this).on('click', function () {
                 var indexValue = $(this).children(':selected').prop('value');
-                $(this).closest('.dateTimePair').find('.endDateTime').prop('value', indexValue);
+                $(this).closest('.dateTimePair').find('.endDateTime').prop('value', indexValue).closest('.control-group').addClass('warning');
             });
 
         }
     };
 
 
-    function offsetEndDateTime($element, currentDateTime) {
-
-
+    function offsetEndDateTime($element) {
          if($element.hasClass('startDateTime')) {
 
             var endDate = $element.data('datetimepicker').getDate().getTime() + parseInt($element.next('.endoffset').data('end-offset'));
@@ -185,7 +183,32 @@
              }
          }
 
-    };
+    }
+
+	function offsetEndDate($element) {
+		if($element.hasClass('startDateTime')) {
+			var endDate = $element.data('datepicker').getDate().getTime() + parseInt($element.next('.endoffset').data('end-offset'));
+			var $endDateInput =  $element.closest('.dateTimePair').find('.endDateTime');
+			var endDatePicker = $endDateInput.data('datepicker');
+
+			if ($endDateInput.length > 0) {
+				endDatePicker.setDate(new Date(endDate));
+				endDatePicker.setValue();
+				$endDateInput.closest('.control-group').addClass('warning').removeClass('error');
+			}
+		} else if ($element.hasClass('endDateTime')){
+			$element.closest('.control-group').removeClass('warning');
+
+			var $startDateInput = $element.closest('.dateTimePair').find('.startDateTime');
+
+			//Check end time is later than start time
+			if ($element.data('datepicker').getDate().getTime() < $startDateInput.data('datepicker').getDate().getTime()) {
+				$element.closest('.control-group').addClass('error');
+			} else {
+				$element.closest('.control-group').removeClass('error');
+			}
+		}
+	}
 
 	/* apply to a checkbox or radio button. When the target is selected a div containing further related form elements
 	   is revealed.

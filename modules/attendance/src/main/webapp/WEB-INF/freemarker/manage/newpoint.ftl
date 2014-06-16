@@ -33,7 +33,7 @@
 
 	<#include "_managepoint.ftl" />
 
-	<div class="form-actions">
+	<div>
 		<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Adding&hellip;">
 			Add
 		</button>
