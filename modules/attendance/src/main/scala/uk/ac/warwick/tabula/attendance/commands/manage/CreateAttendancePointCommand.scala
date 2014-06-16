@@ -4,12 +4,12 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, AttendanceMonitoringPointStyle, AttendanceMonitoringPoint, AttendanceMonitoringScheme}
 import org.joda.time.DateTime
 import collection.JavaConverters._
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringTermServiceComponent, TermServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 
 object CreateAttendancePointCommand {
 	def apply(department: Department, academicYear: AcademicYear, schemes: Seq[AttendanceMonitoringScheme]) =
@@ -17,6 +17,7 @@ object CreateAttendancePointCommand {
 			with ComposableCommand[Seq[AttendanceMonitoringPoint]]
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringTermServiceComponent
+			with AutowiringProfileServiceComponent
 			with CreateAttendancePointValidation
 			with CreateAttendancePointDescription
 			with CreateAttendancePointPermissions
@@ -25,12 +26,12 @@ object CreateAttendancePointCommand {
 
 
 class CreateAttendancePointCommandInternal(val department: Department, val academicYear: AcademicYear, val schemes: Seq[AttendanceMonitoringScheme])
-	extends CommandInternal[Seq[AttendanceMonitoringPoint]] {
+	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with TaskBenchmarking {
 
-	self: CreateAttendancePointCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent =>
+	self: CreateAttendancePointCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal() = {
-		schemes.map(scheme => {
+		val points = schemes.map(scheme => {
 			val point = new AttendanceMonitoringPoint
 			point.scheme = scheme
 			point.createdDate = DateTime.now
@@ -39,6 +40,13 @@ class CreateAttendancePointCommandInternal(val department: Department, val acade
 			attendanceMonitoringService.saveOrUpdate(point)
 			point
 		})
+		benchmark("updateCheckpointTotals") {
+			profileService.getAllMembersWithUniversityIds(schemes.flatMap(_.members.members).distinct).map {
+				case student: StudentMember => attendanceMonitoringService.updateCheckpointTotal(student, department, academicYear)
+				case _ =>
+			}
+		}
+		points
 	}
 
 }

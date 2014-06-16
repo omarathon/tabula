@@ -5,11 +5,11 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, MonitoringPointType, MonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceMonitoringPoint}
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringTermServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent, TermServiceComponent}
 
 object CreateNewAttendancePointsFromCopyCommand {
 	def apply(
@@ -21,6 +21,7 @@ object CreateNewAttendancePointsFromCopyCommand {
 			with ComposableCommand[Seq[AttendanceMonitoringPoint]]
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringTermServiceComponent
+			with AutowiringProfileServiceComponent
 			with CreateNewAttendancePointsFromCopyValidation
 			with CreateNewAttendancePointsFromCopyDescription
 			with CreateNewAttendancePointsFromCopyPermissions
@@ -30,13 +31,19 @@ object CreateNewAttendancePointsFromCopyCommand {
 
 
 class CreateNewAttendancePointsFromCopyCommandInternal(val department: Department, val academicYear: AcademicYear, val schemes: Seq[AttendanceMonitoringScheme])
-	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with GetsPointsToCreate {
+	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with GetsPointsToCreate with TaskBenchmarking {
 
-	self: CreateNewAttendancePointsFromCopyCommandState with TermServiceComponent with AttendanceMonitoringServiceComponent =>
+	self: CreateNewAttendancePointsFromCopyCommandState with TermServiceComponent with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal() = {
 		val points = getPoints(findPointsResult, schemes, pointStyle)
 		points.foreach(attendanceMonitoringService.saveOrUpdate)
+		benchmark("updateCheckpointTotals") {
+			profileService.getAllMembersWithUniversityIds(schemes.flatMap(_.members.members).distinct).map {
+				case student: StudentMember => attendanceMonitoringService.updateCheckpointTotal(student, department, academicYear)
+				case _ =>
+			}
+		}
 		points
 	}
 
