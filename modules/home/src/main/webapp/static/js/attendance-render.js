@@ -422,24 +422,21 @@ $(function(){
 
 	// Add points
 	(function(){
-		var uniqueCollection = function(collection){
-			var $collection = $(collection);
-			return $.makeArray($collection.filter(function(i, item){
-				return i == $.inArray(item, $collection);
-			}));
-		};
 		var updateButtons = function(){
-			var checkboxes = $('.add-points-to-schemes tbody input')
-				, checkedBoxes = checkboxes.filter(function(){ return $(this).is(':checked'); });
-			if (checkboxes.length == 0) {
-				$('.add-points-to-schemes p button').attr('disabled', false);
-			} else if ( checkedBoxes.length > 0
-				// check all schemes have same point style
-				&& uniqueCollection(checkedBoxes.map(function(){ return $(this).data('pointstyle'); }).get()).length === 1
-			) {
-				$('.add-points-to-schemes p button').attr('disabled', false);
-			} else {
+			var weekCheckboxes = $('.add-points-to-schemes table.week tbody input')
+				, weekCheckedBoxes = weekCheckboxes.filter(function(){ return $(this).is(':checked'); })
+				, dateCheckboxes = $('.add-points-to-schemes table.date tbody input')
+				, dateCheckedBoxes = dateCheckboxes.filter(function(){ return $(this).is(':checked'); })
+				;
+			if (weekCheckedBoxes.length === 0 && dateCheckedBoxes.length === 0) {
 				$('.add-points-to-schemes p button').attr('disabled', true);
+				$('.add-points-to-schemes span.alert').hide();
+			} else if (weekCheckedBoxes.length > 0 && dateCheckedBoxes.length > 0) {
+				$('.add-points-to-schemes p button').attr('disabled', true);
+				$('.add-points-to-schemes span.alert').show();
+			} else {
+				$('.add-points-to-schemes p button').attr('disabled', false);
+				$('.add-points-to-schemes span.alert').hide();
 			}
 		};
 		updateButtons();

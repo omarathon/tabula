@@ -1,14 +1,11 @@
 package uk.ac.warwick.tabula.attendance.web.controllers.manage
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.attendance.web.controllers.{HasMonthNames, AttendanceController}
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.{JavaImports, AcademicYear}
-import uk.ac.warwick.tabula.attendance.commands.manage.{FindPointsResult, AddPointsToSchemesCommand}
-import uk.ac.warwick.tabula.commands.Appliable
+import org.springframework.web.bind.annotation.RequestMapping
+import uk.ac.warwick.tabula.attendance.web.controllers.HasMonthNames
+import uk.ac.warwick.tabula.JavaImports
+import uk.ac.warwick.tabula.attendance.commands.manage.FindPointsResult
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
-import uk.ac.warwick.tabula.JavaImports._
 
 @Controller
 @RequestMapping(Array("/manage/{department}/{academicYear}/new/{scheme}/points"))
