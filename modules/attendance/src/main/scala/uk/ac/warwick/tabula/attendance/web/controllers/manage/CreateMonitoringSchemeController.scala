@@ -16,8 +16,6 @@ import uk.ac.warwick.tabula.attendance.web.Routes
 @RequestMapping(Array("/manage/{department}/{academicYear}/new"))
 class CreateMonitoringSchemeController extends AttendanceController {
 
-	final val createAndAddStudentsString = "createAndAddStudents"
-
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
@@ -26,7 +24,7 @@ class CreateMonitoringSchemeController extends AttendanceController {
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
-		Mav("manage/new", "createAndAddStudentsString" -> createAndAddStudentsString)
+		Mav("manage/new", "createAndAddStudentsString" -> ManageSchemeMappingParameters.createAndAddStudents)
 			.crumbs(
 				Breadcrumbs.Manage.Home,
 				Breadcrumbs.Manage.Department(department),
@@ -49,7 +47,7 @@ class CreateMonitoringSchemeController extends AttendanceController {
 		}
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(createAndAddStudentsString))
+	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.createAndAddStudents))
 	def postAndAddStudents(
 		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
 		errors: Errors,
