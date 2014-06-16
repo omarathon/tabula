@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringPoint, AttendanceMonitoringTemplate, AttendanceMonitoringScheme}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, AttendanceMonitoringPointStyle, AttendanceMonitoringPoint, AttendanceMonitoringTemplate, AttendanceMonitoringScheme}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -33,15 +33,16 @@ class AddTemplatePointsToSchemesCommandInternal(val department: Department, val 
 
 		val attendanceMonitoringPoints = attendanceMonitoringService.generatePointsFromTemplateScheme(templateScheme, academicYear)
 
-		schemes.asScala.foreach { scheme =>
-				attendanceMonitoringPoints.foreach { point =>
+		schemes.asScala.flatMap { scheme =>
+				attendanceMonitoringPoints.map { point =>
 				val newPoint = point.cloneTo(scheme)
+				newPoint.pointType = AttendanceMonitoringPointType.Standard
 				newPoint.createdDate = new DateTime()
 				newPoint.updatedDate = new DateTime()
 				attendanceMonitoringService.saveOrUpdate(newPoint)
+				newPoint
 			}
 		}
-		schemes.asScala.flatMap(_.points.asScala)
 	}
 }
 
