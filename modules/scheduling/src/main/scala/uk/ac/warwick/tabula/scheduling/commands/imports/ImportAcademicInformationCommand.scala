@@ -121,6 +121,7 @@ trait ImportDepartments {
 
 	def importDepartments(): ImportResult = {
 		logger.info("Importing departments")
+
 		val results = for (dept <- moduleImporter.getDepartments()) yield {
 			moduleAndDepartmentService.getDepartmentByCode(dept.code) match {
 				case None => {
@@ -145,14 +146,25 @@ trait ImportModules {
 
 	def importModules(): ImportResult = {
 		logger.info("Importing modules")
+
+		// track the module codes imported - start with an empty sequence to hold the codes
+		var seenModuleCodes = Seq[String]()
+
 		val results = for (dept <- moduleAndDepartmentService.allDepartments) yield {
-			importModules(moduleImporter.getModules(dept.code), dept)
+			val (resultsForDepartment, seenModuleCodesForDepartment) = importModules(moduleImporter.getModules(dept.code), dept)
+			seenModuleCodes = seenModuleCodes ++ seenModuleCodesForDepartment
+			resultsForDepartment
 		}
+
+		moduleAndDepartmentService.stampMissingModules(seenModuleCodes)
 
 		combineResults(results)
 	}
 
-	def importModules(modules: Seq[ModuleInfo], dept: Department): ImportResult = {
+	def importModules(modules: Seq[ModuleInfo], dept: Department): (ImportResult, Seq[String]) = {
+
+		var seenModuleCodesForDepartment = Seq[String]()
+
 		val results = for (mod <- modules) yield {
 			moduleAndDepartmentService.getModuleByCode(mod.code) match {
 				case None => {
@@ -162,6 +174,9 @@ trait ImportModules {
 					ImportResult(added = 1)
 				}
 				case Some(module) => {
+
+					seenModuleCodesForDepartment = seenModuleCodesForDepartment :+ module.code
+
 					// HFC-354 Update module name if it changes.
 					if (mod.name != module.name) {
 						logger.info("Updating name of %s to %s".format(mod.code, mod.name))
@@ -180,10 +195,7 @@ trait ImportModules {
 			}
 		}
 
-		val seenCodes = modules.map { _.code }
-		moduleAndDepartmentService.stampMissingModules(dept, seenCodes)
-
-		combineResults(results)
+		(combineResults(results), seenModuleCodesForDepartment)
 	}
 }
 
