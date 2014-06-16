@@ -50,6 +50,34 @@ abstract class ViewProfileController extends ProfilesController {
 		}
 	}
 
+	
+	def getRelationshipMeetingsMapForYear(
+		studentCourseDetails: Option[StudentCourseDetails],
+		studentCourseYearDetails: Option[StudentCourseYearDetails], 
+		allRelationshipTypes: Seq[StudentRelationshipType]): Map[StudentRelationshipType, Seq[AbstractMeetingRecord]] = {
+
+		val filterYear = studentCourseYearDetails match {
+			case Some(scd: StudentCourseYearDetails) => scd.academicYear
+			case None => AcademicYear.guessByDate(DateTime.now); // default to this year
+		}
+	
+		allRelationshipTypes.flatMap { relationshipType =>
+			getViewMeetingRecordCommand(studentCourseDetails, relationshipType).map { cmd =>
+				( relationshipType,
+					filterMeetingsByYear(cmd.apply(), filterYear)
+				)
+			}
+		}.toMap
+	}
+	
+	def filterMeetingsByYear(meetings: Seq[AbstractMeetingRecord], filterYear: AcademicYear) : Seq[AbstractMeetingRecord] = {
+		meetings.filterNot(
+			meeting => Seq(Term.WEEK_NUMBER_BEFORE_START, Term.WEEK_NUMBER_AFTER_END).contains(termService.getAcademicWeekForAcademicYear(meeting.meetingDate, filterYear))
+		)
+	}
+	
+	
+	
 	def viewProfileForCourse(
 		studentCourseDetails: Option[StudentCourseDetails],
 		studentCourseYearDetails: Option[StudentCourseYearDetails],
@@ -60,24 +88,11 @@ abstract class ViewProfileController extends ProfilesController {
 
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 
-		val filterYear = studentCourseYearDetails match {
-			case Some(scd: StudentCourseYearDetails) => scd.academicYear
-			case None => AcademicYear.guessByDate(DateTime.now); // default to this year
-		}
 		
 		// For the currently selected year, get meetings for all relationship types 
 		// (not just the enabled ones for that dept)
 		// because we show a relationship on the profile page if there is one
-		val relationshipMeetings =
-			allRelationshipTypes.flatMap { relationshipType =>
-				getViewMeetingRecordCommand(studentCourseDetails, relationshipType).map { cmd =>
-					( relationshipType, 
-						cmd.apply().filterNot(
-							meeting => Seq(Term.WEEK_NUMBER_BEFORE_START, Term.WEEK_NUMBER_AFTER_END).contains(termService.getAcademicWeekForAcademicYear(meeting.meetingDate, filterYear))
-						)
-					)
-				}
-			}.toMap
+		val relationshipMeetings = getRelationshipMeetingsMapForYear(studentCourseDetails,	studentCourseYearDetails, allRelationshipTypes);
 
 		val relationshipTypes: List[String] =
 			if (currentMember.isStudent)
