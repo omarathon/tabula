@@ -11,6 +11,7 @@ import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
+import org.mockito.Mockito._
 
 class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 	
@@ -157,6 +158,27 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage, cs) should be (Set(g503))
 			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage, ch) should be (Set())
 		}
+	}
+
+	@Test
+	def testStampMissingModules {
+		// spurn persistence and everything that has gone before
+		val module1 = Fixtures.module("one", "my name is one")
+		val module2 = Fixtures.module("two", "my name is two")
+		val module3 = Fixtures.module("three", "my name is three")
+		val module4 = Fixtures.module("four", "my name is four")
+		val module5 = Fixtures.module("five", "my name is five")
+
+		val service = new ModuleAndDepartmentService
+		service.userLookup = userLookupService
+
+		val moduleDao = smartMock[ModuleDao]
+		moduleDao.allModules returns Seq(module1, module2, module3, module4, module5)
+		service.moduleDao = moduleDao
+
+		service.stampMissingModules(Seq("two", "four"))
+
+		verify(moduleDao).stampMissingFromImport(Seq("one", "three", "five"))
 	}
 
 }
