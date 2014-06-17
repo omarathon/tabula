@@ -471,7 +471,10 @@
 		});
 
 		// now that's all done, bind the popover
-		$items.popover(options).addClass(initClass);
+		$items.each(function() {
+			// allow each popover to override the container via a data attribute
+			$(this).popover($.extend({}, options, { container: $(this).data('container')})).addClass(initClass);
+		});
 
 		// ensure popovers/introductorys override title with data-title attribute where available
 		$items.each(function() {
