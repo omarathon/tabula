@@ -59,6 +59,7 @@ trait PopulateAddStudentsToSchemeCommandInternal extends PopulateOnForm {
 		staticStudentIds = scheme.members.staticUserIds.asJava
 		includedStudentIds = scheme.members.includedUserIds.asJava
 		excludedStudentIds = scheme.members.excludedUserIds.asJava
+		filterQueryString = scheme.memberQuery
 	}
 }
 

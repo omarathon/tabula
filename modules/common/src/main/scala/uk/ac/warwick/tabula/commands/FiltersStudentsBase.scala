@@ -96,7 +96,7 @@ trait DeserializesFilter extends Logging with FiltersStudentsBase with CourseAnd
 		yearsOfStudy.clear()
 		params.get("yearsOfStudy").map{_.foreach{ item =>
 			try {
-				item.toInt
+				yearsOfStudy.add(item.toInt)
 			} catch {
 				case e: NumberFormatException =>
 					logger.warn(s"Could not deserialize filter with yearOfStudy $item")
