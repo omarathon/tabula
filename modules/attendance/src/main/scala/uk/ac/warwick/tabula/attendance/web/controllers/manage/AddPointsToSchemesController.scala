@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
-import uk.ac.warwick.tabula.attendance.commands.manage.AddPointsToSchemesCommand
+import uk.ac.warwick.tabula.attendance.commands.manage.{AddPointsToSchemesCommandResult, AddPointsToSchemesCommand}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 
@@ -20,16 +20,17 @@ class AddPointsToSchemesController extends AttendanceController {
 
 	@RequestMapping
 	def home(
-		@ModelAttribute("command") cmd: Appliable[Map[AttendanceMonitoringScheme, Boolean]],
+		@ModelAttribute("command") cmd: Appliable[AddPointsToSchemesCommandResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam(required = false) points: JInteger
 	) = {
-		val schemeMap = cmd.apply()
+		val result = cmd.apply()
 		Mav("manage/addpoints",
-			"schemeMap" -> schemeMap,
-			"changedSchemes" -> schemeMap.count(_._2),
-			"schemesParam" -> schemeMap.filter(_._2).keys.map(s => s"findSchemes=${s.id}").mkString("&"),
+			"schemeMaps" -> result,
+			"changedSchemes" -> (result.weekSchemes.count(_._2) + result.dateSchemes.count(_._2)),
+			"schemesParam" -> (result.weekSchemes.filter(_._2).keys ++ result.dateSchemes.filter(_._2).keys)
+				.map(s => s"findSchemes=${s.id}").mkString("&"),
 			"newPoints" -> Option(points).getOrElse(0)
 		).crumbs(
 			Breadcrumbs.Manage.Home,

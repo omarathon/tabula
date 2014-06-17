@@ -23,7 +23,7 @@ trait AttendancePointCommandState {
 	var startDate: LocalDate = _
 	var endDate: LocalDate = _
 
-	var pointType: AttendanceMonitoringPointType = _
+	var pointType: AttendanceMonitoringPointType = AttendanceMonitoringPointType.Standard
 
 	var meetingRelationships: JSet[StudentRelationshipType] = JHashSet()
 	var meetingFormats: JSet[MeetingFormat] = JHashSet()
