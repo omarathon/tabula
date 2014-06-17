@@ -1,23 +1,24 @@
 <#escape x as x?html>
 
+<#assign filterQuery = findCommand.serializeFilter />
+<#assign returnTo = (info.requestedUri!"")?url />
+
 <h1>Create a scheme</h1>
 
-<p class="progress-arrows">
-	<span class="arrow-right">Properties</span>
-	<span class="arrow-right arrow-left">Students</span>
-	<span class="arrow-right arrow-left active">Points</span>
-</p>
+<div class="add-points-to-schemes fix-area">
 
-<div class="add-points-to-schemes">
-
-	<p>Add points to this monitoring scheme</p>
+	<p class="progress-arrows">
+		<span class="arrow-right use-tooltip" title="Edit properties">Properties</span>
+		<span class="arrow-right arrow-left use-tooltip" title="Edit students"><a href="<@routes.manageAddStudents scheme />">Students</a></span>
+		<span class="arrow-right arrow-left active">Points</span>
+	</p>
 
 	<#if newPoints == 0>
 		<p><@fmt.p scheme.points?size "point" /> on this scheme</p>
 	<#else>
 		<div class="alert alert-success">
 			<strong><@fmt.p newPoints "point" /></strong> added to this scheme
-			<a class="btn" href="<@routes.manageEditPoints command.department command.academicYear.startYear?c schemesParam />">Edit points</a>
+			<a class="btn" href="<@routes.manageEditPoints findCommand.department findCommand.academicYear.startYear?c schemesParam />">Edit points</a>
 		</div>
 
 		<p><@fmt.p scheme.points?size "point" /> on this scheme</p>
@@ -26,14 +27,16 @@
 	<form method="POST">
 		<input name="schemes" value="${scheme.id}" type="hidden" />
 		<input name="returnTo" value="<@routes.manageNewSchemeAddPoints scheme />" type="hidden" />
-		<button type="button" class="btn add-blank-point" data-href="<@routes.manageAddPointsBlank command.department command.academicYear.startYear?c/>">Add a point</button>
-		<button type="button" class="btn copy-points" data-href="<@routes.manageAddPointsCopy command.department command.academicYear.startYear?c/>">Copy points</button>
-		<button type="button" class="btn use-template" data-href="<@routes.manageAddPointsTemplate command.department command.academicYear.startYear?c/>">Use template</button>
+		<button type="button" class="btn add-blank-point" data-href="<@routes.manageAddPointsBlank findCommand.department findCommand.academicYear.startYear?c/>">Add a point</button>
+		<button type="button" class="btn copy-points" data-href="<@routes.manageAddPointsCopy findCommand.department findCommand.academicYear.startYear?c/>">Copy points</button>
+		<button type="button" class="btn use-template" data-href="<@routes.manageAddPointsTemplate findCommand.department findCommand.academicYear.startYear?c/>">Use template</button>
 	</form>
 
-	<p>
-		<a class="btn" href="<@routes.manageHomeForYear command.department command.academicYear.startYear?c />">Done</a>
-	</p>
+	<#include "_findpointsresult.ftl" />
+
+	<div class="fix-footer submit-buttons">
+		<a class="btn" href="<@routes.manageHomeForYear findCommand.department findCommand.academicYear.startYear?c />">Done</a>
+	</div>
 
 </div>
 </#escape>

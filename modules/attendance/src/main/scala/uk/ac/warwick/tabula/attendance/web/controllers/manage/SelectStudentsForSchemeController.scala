@@ -150,30 +150,4 @@ class SelectStudentsForSchemeController extends AttendanceController {
 		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult, expandManual = true)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.resetAllIncluded))
-	def resetAllIncluded(
-		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with UpdatesFindStudentsForSchemeCommand,
-		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult] with ResetsMembershipInEditSchemeMembershipCommand,
-		@PathVariable scheme: AttendanceMonitoringScheme
-	) = {
-		editMembershipCommand.resetAllIncluded()
-		val editMembershipCommandResult = editMembershipCommand.apply()
-		findCommand.update(editMembershipCommandResult)
-		val findStudentsForSchemeCommandResult = findCommand.apply()
-		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult, expandManual = true)
-	}
-
-	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.resetAllExcluded))
-	def resetAllExcluded(
-		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with UpdatesFindStudentsForSchemeCommand,
-		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult] with ResetsMembershipInEditSchemeMembershipCommand,
-		@PathVariable scheme: AttendanceMonitoringScheme
-	) = {
-		editMembershipCommand.resetAllExcluded()
-		val editMembershipCommandResult = editMembershipCommand.apply()
-		findCommand.update(editMembershipCommandResult)
-		val findStudentsForSchemeCommandResult = findCommand.apply()
-		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult, expandManual = true)
-	}
-
 }

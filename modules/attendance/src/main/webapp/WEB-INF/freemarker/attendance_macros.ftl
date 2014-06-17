@@ -245,15 +245,16 @@
 	command=""
 	checkboxName=""
 	onlyShowCheckboxForStatic=false
+	checkAll=false
 >
 
 	<#if (membershipItems?size > 0)>
 
-		<table class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-darkRed tablesorter sb-no-wrapper-table-popout">
+		<table class="manage-student-table table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-darkRed tablesorter sb-no-wrapper-table-popout">
 			<thead>
 			<tr>
 				<#if checkboxName?has_content>
-					<th style="width: 20px;">&nbsp;</th>
+					<th style="width: 20px;" <#if checkAll>class="for-check-all"</#if>></th>
 				</#if>
 				<th style="width: 50px;" <#if doSorting> class="${sortClass("source", command)} sortable" data-field="source"</#if>>Source</th>
 				<th <#if doSorting> class="${sortClass("firstName", command)} sortable" data-field="firstName"</#if>>First name</th>
@@ -265,11 +266,13 @@
 			</thead>
 			<tbody>
 				<#list membershipItems as item>
-					<tr>
+					<tr class="${item.itemTypeString}">
 
-						<#if checkboxName?has_content && (!onlyShowCheckboxForStatic || item.itemTypeString == "static")>
+						<#if checkboxName?has_content>
 							<td>
-								<input type="checkbox" name="${checkboxName}" value="${item.universityId}" />
+								<#if !onlyShowCheckboxForStatic || item.itemTypeString == "static">
+									<input type="checkbox" name="${checkboxName}" value="${item.universityId}" />
+								</#if>
 							</td>
 						</#if>
 
@@ -297,16 +300,22 @@
 										</#list>
 									<ul>
 								</#local>
-								<a
-									class="use-popover"
+
+								<span
+									class="use-tooltip"
 									data-container="body"
-									data-html="true"
-									data-title="Existing schemes"
-									data-content="${popovercontent}"
-									data-placement="top"
+									title="See which other schemes apply to this student"
 								>
-									<@fmt.p item.existingSchemes?size "scheme" />
-								</a>
+									<span
+										class="use-popover"
+										data-container="body"
+										data-html="true"
+										data-content="${popovercontent}"
+										data-placement="top"
+										>
+										<@fmt.p item.existingSchemes?size "scheme" />
+									</span>
+								</span>
 							</#if>
 						</td>
 					</tr>

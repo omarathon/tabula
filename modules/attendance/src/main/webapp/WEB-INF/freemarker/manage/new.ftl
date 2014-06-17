@@ -2,13 +2,13 @@
 
 <h1>Create a scheme</h1>
 
-<p class="progress-arrows">
-	<span class="arrow-right active">Properties</span>
-	<span class="arrow-right arrow-left">Students</span>
-	<span class="arrow-right arrow-left">Points</span>
-</p>
-
 <@f.form id="newScheme" method="POST" commandName="command" class="form-horizontal">
+
+	<p class="progress-arrows">
+		<span class="arrow-right active">Properties</span>
+		<span class="arrow-right arrow-left use-tooltip" title="Save and edit students"><button type="submit" class="btn btn-link" name="${ManageSchemeMappingParameters.createAndAddStudents}">Students</button></span>
+		<span class="arrow-right arrow-left use-tooltip" title="Save and edit points"><button type="submit" class="btn btn-link" name="${ManageSchemeMappingParameters.createAndAddPoints}">Points</button></span>
+	</p>
 
 	<@form.labelled_row "name" "Name">
 		<@f.input path="name" />
@@ -32,7 +32,7 @@
 	<input
 		type="submit"
 		class="btn btn-success use-tooltip"
-		name="${createAndAddStudentsString}"
+		name="${ManageSchemeMappingParameters.createAndAddStudents}"
 		value="Add students"
 		title="Select which students this scheme should apply to"
 		data-container="body"
