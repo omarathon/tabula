@@ -225,14 +225,15 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 			session.flush()
 
 		if (points.isEmpty)
-			return Map()
+			Map()
+		else {
+			val checkpoints = session.newCriteria[AttendanceMonitoringCheckpoint]
+				.add(is("student", student))
+				.add(safeIn("point", points))
+				.seq
 
-		val checkpoints = session.newCriteria[AttendanceMonitoringCheckpoint]
-			.add(is("student", student))
-			.add(safeIn("point", points))
-			.seq
-
-		checkpoints.map { c => c.point -> c}.toMap
+			checkpoints.map { c => c.point -> c}.toMap
+		}
 	}
 
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint) =
