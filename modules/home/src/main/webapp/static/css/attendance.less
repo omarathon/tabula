@@ -1,5 +1,6 @@
 @import "bootstrap/variables.less";
 @import "bootstrap/mixins.less";
+@import "id6-design.less";
 
 @header-colour: @tabulaRedDark;
 
@@ -272,7 +273,7 @@
 	&.assignmentSubmission .assignments-list ul li span { width: 244px; }
 }
 
-.progress-arrows {
+#container .progress-arrows {
 	span {
 		float: left;
 		padding: 5px 10px;
@@ -319,6 +320,17 @@
 				border-right-width: 0px;
 			}
 		}
+
+		button {
+			padding: 0px;
+			border: 0px;
+			margin: 0px;
+			text-decoration: underline;
+			color: @link-colour;
+			&:hover {
+				color: @link-hover;
+			}
+		}
 	}
 
 	height: 40px;
@@ -338,4 +350,8 @@ details[open] .hideOnClosed {
 	.dropdown-menu {
 		min-width: 200px;
 	}
+}
+
+.hover-highlight:hover {
+	background-color: @tableBackgroundHover;
 }

@@ -252,7 +252,9 @@
 		<table class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-darkRed tablesorter sb-no-wrapper-table-popout">
 			<thead>
 			<tr>
-				<th style="width: 20px;">&nbsp;</th>
+				<#if checkboxName?has_content>
+					<th style="width: 20px;">&nbsp;</th>
+				</#if>
 				<th style="width: 50px;" <#if doSorting> class="${sortClass("source", command)} sortable" data-field="source"</#if>>Source</th>
 				<th <#if doSorting> class="${sortClass("firstName", command)} sortable" data-field="firstName"</#if>>First name</th>
 				<th <#if doSorting> class="${sortClass("lastName", command)} sortable" data-field="lastName"</#if>>Last name</th>
@@ -264,11 +266,13 @@
 			<tbody>
 				<#list membershipItems as item>
 					<tr>
-						<td>
-							<#if checkboxName?has_content && (!onlyShowCheckboxForStatic || item.itemTypeString == "static")>
+
+						<#if checkboxName?has_content && (!onlyShowCheckboxForStatic || item.itemTypeString == "static")>
+							<td>
 								<input type="checkbox" name="${checkboxName}" value="${item.universityId}" />
-							</#if>
-						</td>
+							</td>
+						</#if>
+
 						<td>
 							<#if item.itemTypeString == "static">
 								<span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span>

@@ -161,6 +161,12 @@ trait ImportModules {
 		combineResults(results)
 	}
 
+	def importModules(dept: Department): ImportResult = {
+		val (importResult: ImportResult, seenModules: Seq[String]) = importModules(moduleImporter.getModules(dept.code), dept)
+		// don't stamp missing modules in this case since we we've only looked at one department and they could be in any
+		importResult
+	}
+
 	def importModules(modules: Seq[ModuleInfo], dept: Department): (ImportResult, Seq[String]) = {
 
 		var seenModuleCodesForDepartment = Seq[String]()
@@ -333,4 +339,39 @@ trait ImportAcademicInformationDescription extends Describable[ImportAcademicInf
 		importProperties(d, "disabilities", result.disabilities)
 		importProperties(d, "levels", result.levels)
 	}
+}
+
+object ImportDepartmentsModulesCommand {
+	def apply() =
+		new ImportDepartmentsModulesCommandInternal()
+			with ComposableCommand[Unit]
+			with ImportModules
+			with AutowiringModuleAndDepartmentServiceComponent
+			with AutowiringModuleImporterComponent
+			with ImportDepartmentsModulesDescription
+			with ImportDepartmentsModulesState
+			with ImportSystemDataPermissions
+			with Logging
+}
+
+class ImportDepartmentsModulesCommandInternal() extends CommandInternal[Unit]
+	with TaskBenchmarking {
+	self: ImportDepartmentsModulesState with ImportModules with ModuleAndDepartmentServiceComponent =>
+
+	def applyInternal() = transactional() {
+		benchmarkTask("Import modules") {
+			val codes = deptCode.split(",")
+			val departments = codes.flatMap(moduleAndDepartmentService.getDepartmentByCode(_))
+			departments.foreach(dept => importModules(dept))
+		}
+	}
+}
+
+trait ImportDepartmentsModulesState {
+	var deptCode: String = _
+}
+
+trait ImportDepartmentsModulesDescription extends Describable[Unit]{
+	self: ImportDepartmentsModulesState =>
+	def describe(d: Description) {d.property("deptCodes", deptCode)}
 }
