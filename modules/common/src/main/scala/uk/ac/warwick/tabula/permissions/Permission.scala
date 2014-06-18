@@ -47,7 +47,7 @@ trait PermissionsSelector[A <: PermissionsSelector[A]] {
 	def isWildcard = false
 	def <=(that: PermissionsSelector[A]) = that match {
 		case any if any.isWildcard => true
-		case _ => this == _
+		case any => this == any
 	}
 }
 
