@@ -90,6 +90,11 @@ object Routes {
 				encoded(department.code), encoded(academicYear.startYear.toString)
 			)
 
+		def addPointsToExistingSchemes(department: Department, academicYear: AcademicYear) =
+			context + "/manage/%s/%s/addpoints" format(
+				encoded(department.code), encoded(academicYear.startYear.toString)
+			)
+
 	}
 
 	object Note {

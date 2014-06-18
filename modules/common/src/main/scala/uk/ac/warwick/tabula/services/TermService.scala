@@ -6,7 +6,7 @@ import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.util.termdates.Term.TermType
 import scala.collection.JavaConverters._
-import org.joda.time.{DateTimeConstants, DateMidnight, Interval, DateTime}
+import org.joda.time.{LocalDate, DateTimeConstants, DateMidnight, Interval, DateTime}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 
