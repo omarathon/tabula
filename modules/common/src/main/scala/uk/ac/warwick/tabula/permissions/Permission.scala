@@ -24,12 +24,11 @@ sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val select
 	}
 
 	override def equals(other: Any) = other match {
-		case that: SelectorPermission[A] => {
+		case that: SelectorPermission[A] =>
 			new EqualsBuilder()
 			.append(getName, that.getName)
 			.append(selector, that.selector)
 			.build()
-		}
 		case _ => false
 	}
 
@@ -39,7 +38,7 @@ sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val select
 		.append(selector)
 		.build()
 
-	override def toString() = "%s(%s)".format(super.toString, selector)
+	override def toString() = "%s(%s)".format(super.toString(), selector)
 }
 
 trait PermissionsSelector[A <: PermissionsSelector[A]] {
@@ -48,7 +47,7 @@ trait PermissionsSelector[A <: PermissionsSelector[A]] {
 	def isWildcard = false
 	def <=(that: PermissionsSelector[A]) = that match {
 		case any if any.isWildcard => true
-		case that => this == that
+		case _ => this == _
 	}
 }
 
@@ -65,23 +64,22 @@ object PermissionsSelector {
 			that.isWildcard
 		}
 
-		override def toString() = "*"
+		override def toString = "*"
 
 		override def hashCode = id.hashCode
 
 		override def equals(other: Any) = other match {
-			case that: PermissionsSelector[A] => {
+			case that: PermissionsSelector[A] =>
 				new EqualsBuilder()
 					.append(id, that.id)
 					.build()
-			}
 			case _ => false
 		}
 
 	}
 }
 
-case class CheckablePermission(val permission: Permission, val scope: Option[PermissionsTarget])
+case class CheckablePermission(permission: Permission, scope: Option[PermissionsTarget])
 
 object CheckablePermission {
 	def apply(permission: ScopelessPermission): CheckablePermission = new CheckablePermission(permission, None)
@@ -342,6 +340,7 @@ object Permissions {
 		case object Record extends Permission("Record monitoring points")
 		case object Report extends Permission("Report monitoring points")
 		case object Export extends ScopelessPermission("Export monitoring points to SITS")
+		case object UpdateMembership extends ScopelessPermission("Update attendance montiroing scheme membership")
 	}
 
 	object MonitoringPointSetTemplates {

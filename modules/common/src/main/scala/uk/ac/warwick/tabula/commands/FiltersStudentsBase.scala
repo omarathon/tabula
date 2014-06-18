@@ -9,8 +9,8 @@ import org.apache.http.client.utils.URLEncodedUtils
 import java.net.URI
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.convert.{ModuleCodeConverter, SitsStatusCodeConverter, ModeOfAttendanceCodeConverter, RouteCodeConverter}
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, CourseAndRouteServiceComponent}
-import uk.ac.warwick.tabula.data.{SitsStatusDaoComponent, ModeOfAttendanceDaoComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringCourseAndRouteServiceComponent, ModuleAndDepartmentServiceComponent, CourseAndRouteServiceComponent}
+import uk.ac.warwick.tabula.data.{AutowiringSitsStatusDaoComponent, AutowiringModeOfAttendanceDaoComponent, SitsStatusDaoComponent, ModeOfAttendanceDaoComponent}
 
 trait FiltersStudentsBase {
 
@@ -59,10 +59,14 @@ trait FiltersStudentsBase {
 
 }
 
-trait DeserializesFilter extends Logging with FiltersStudentsBase with CourseAndRouteServiceComponent with ModeOfAttendanceDaoComponent
+trait DeserializesFilter {
+	def deserializeFilter(filterString: String): Unit
+}
+
+trait DeserializesFilterImpl extends Logging with FiltersStudentsBase with CourseAndRouteServiceComponent with ModeOfAttendanceDaoComponent
 	with SitsStatusDaoComponent with ModuleAndDepartmentServiceComponent {
 
-	def deserializeFilter(filterString: String) = {
+	def deserializeFilter(filterString: String): Unit = {
 		val params: Map[String, Seq[String]] = URLEncodedUtils.parse(new URI(null, null, null, filterString, null), "UTF-8").asScala.groupBy(_.getName).map{
 			case (name, nameValuePairs) => name -> nameValuePairs.map(_.getValue)
 		}
@@ -125,3 +129,9 @@ trait DeserializesFilter extends Logging with FiltersStudentsBase with CourseAnd
 	}
 
 }
+
+trait AutowiringDeserializesFilterImpl extends DeserializesFilterImpl
+	with AutowiringCourseAndRouteServiceComponent
+	with AutowiringModeOfAttendanceDaoComponent
+	with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringSitsStatusDaoComponent

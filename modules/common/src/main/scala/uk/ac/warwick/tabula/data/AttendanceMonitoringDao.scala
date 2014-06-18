@@ -46,6 +46,7 @@ trait AttendanceMonitoringDao {
 	def delete(point: AttendanceMonitoringPoint)
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
+	def listSchemesForMembershipUpdate: Seq[AttendanceMonitoringScheme]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
 	def findReports(studentIds: Seq[String], year: AcademicYear, period: String): Seq[MonitoringPointReport]
 	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem]
@@ -111,6 +112,14 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 			.add(is("route.department", department))
 			.seq
 	}
+
+	def listSchemesForMembershipUpdate: Seq[AttendanceMonitoringScheme] =
+		session.newQuery[AttendanceMonitoringScheme](
+			"""
+				select scheme from AttendanceMonitoringScheme scheme
+				where memberQuery is not null and length(memberQuery) > 0
+			"""
+			).seq
 
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String] = {
 		if (students.isEmpty)
