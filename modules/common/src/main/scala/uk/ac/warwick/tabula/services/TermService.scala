@@ -22,7 +22,6 @@ trait TermService {
 	def getAcademicWeekForAcademicYear(date: BaseDateTime, academicYear: AcademicYear): Int
 	def getTermFromAcademicWeek(weekNumber: Int, academicYear: AcademicYear, includeVacations: Boolean = false): Term
 	def getTermFromAcademicWeekIncludingVacations(weekNumber: Int, academicYear: AcademicYear): Term
-	def getYearFromMonth(date: LocalDate, academicYear: AcademicYear): Int
 }
 
 object TermService {
@@ -122,11 +121,6 @@ class TermServiceImpl extends TermService {
 
 	def getTermFromAcademicWeekIncludingVacations(weekNumber: Int, academicYear: AcademicYear): Term =
 		getTermFromAcademicWeek(weekNumber, academicYear, includeVacations = true)
-
-	//For converting template points to attendance monitoring points
-	def getYearFromMonth(date: LocalDate, academicYear: AcademicYear): Int = {
-		if (date.getMonthOfYear < 10) academicYear.endYear else academicYear.startYear
-	}
 
 }
 

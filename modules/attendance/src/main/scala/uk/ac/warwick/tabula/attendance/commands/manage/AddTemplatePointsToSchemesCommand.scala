@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, AttendanceMonitoringPointStyle, AttendanceMonitoringPoint, AttendanceMonitoringTemplate, AttendanceMonitoringScheme}
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConverters._
-import uk.ac.warwick.tabula.commands.{SelfValidating, Description, Describable, ComposableCommand, CommandInternal}
+import uk.ac.warwick.tabula.commands._
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
 
@@ -20,20 +20,21 @@ object AddTemplatePointsToSchemesCommand {
 		with AddTemplatePointsToSchemesCommandState
 		with AddTemplatePointsToSchemesPermissions
 		with AutowiringAttendanceMonitoringServiceComponent
+		with AutowiringProfileServiceComponent
 		with AutowiringTermServiceComponent
 		with AddTemplatePointsToSchemesDescription
 		with AddTemplatePointsToSchemesValidation
 }
 
 class AddTemplatePointsToSchemesCommandInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[Seq[AttendanceMonitoringPoint]] {
-	self: AddTemplatePointsToSchemesCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent =>
+	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with TaskBenchmarking {
+	self: AddTemplatePointsToSchemesCommandState with AttendanceMonitoringServiceComponent  with ProfileServiceComponent with TermServiceComponent =>
 
 	override def applyInternal(): Seq[AttendanceMonitoringPoint] = {
 
 		val attendanceMonitoringPoints = attendanceMonitoringService.generatePointsFromTemplateScheme(templateScheme, academicYear)
 
-		schemes.asScala.flatMap { scheme =>
+		val newPoints = schemes.asScala.flatMap { scheme =>
 				attendanceMonitoringPoints.map { point =>
 				val newPoint = point.cloneTo(scheme)
 				newPoint.pointType = AttendanceMonitoringPointType.Standard
@@ -43,6 +44,15 @@ class AddTemplatePointsToSchemesCommandInternal(val department: Department, val 
 				newPoint
 			}
 		}
+
+		benchmark("updateCheckpointTotals") {
+			profileService.getAllMembersWithUniversityIds(schemes.asScala.flatMap(_.members.members).distinct).map {
+				case student: StudentMember => attendanceMonitoringService.updateCheckpointTotal(student, department, academicYear)
+				case _ =>
+			}
+		}
+
+		newPoints
 	}
 }
 
@@ -83,7 +93,6 @@ trait AddTemplatePointsToSchemesValidation extends AttendanceMonitoringPointVali
 		if (templateScheme == null) {
 			errors.reject("attendanceMonitoringPoints.templateScheme.Empty")
 		} else {
-
 			validateSchemePointStyles(errors, templateScheme.pointStyle, schemes.asScala)
 
 			attendanceMonitoringService.generatePointsFromTemplateScheme(templateScheme, academicYear).foreach{ point =>

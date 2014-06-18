@@ -260,8 +260,8 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 				val point = templatePoint.toPoint
 				templateScheme.pointStyle match {
 					case AttendanceMonitoringPointStyle.Date =>
-						point.startDate = templatePoint.startDate.withYear(termService.getYearFromMonth(templatePoint.startDate, academicYear))
-						point.endDate = templatePoint.endDate.withYear(termService.getYearFromMonth(templatePoint.endDate, academicYear))
+						point.startDate = templatePoint.startDate.withYear(academicYear.getYear(templatePoint.startDate))
+						point.endDate = templatePoint.endDate.withYear(academicYear.getYear(templatePoint.endDate))
 					case AttendanceMonitoringPointStyle.Week =>
 						point.startWeek = templatePoint.startWeek
 						point.endWeek = templatePoint.endWeek
