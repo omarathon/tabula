@@ -21,7 +21,7 @@ class AddPointsToSchemesFromTemplateController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
-		AddTemplatePointsToSchemesCommand(department, academicYear)
+		AddTemplatePointsToSchemesCommand(mandatory(department), mandatory(academicYear))
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -35,7 +35,7 @@ class AddPointsToSchemesFromTemplateController extends AttendanceController {
 			"templates" -> cmd.templateSchemeItems,
 			"department" -> cmd.schemes.get(0).department,
 			"academicYear" -> cmd.academicYear.startYear.toString,
-			"returnTo" -> getReturnTo("")
+			"returnTo" -> getReturnTo(Routes.Manage.addPointsToExistingSchemes(department, academicYear))
 			).crumbs(
 			Breadcrumbs.Manage.Home,
 			Breadcrumbs.Manage.Department(department),
@@ -59,7 +59,7 @@ class AddPointsToSchemesFromTemplateController extends AttendanceController {
 				"templates" -> cmd.templateSchemeItems,
 				"department" -> cmd.schemes.get(0).department,
 				"academicYear" -> cmd.academicYear.startYear.toString,
-				"returnTo" -> getReturnTo(""),
+				"returnTo" -> getReturnTo(Routes.Manage.addPointsToExistingSchemes(department, academicYear)),
 				"errors" -> errors).crumbs(
 					Breadcrumbs.Manage.Home,
 					Breadcrumbs.Manage.Department(department),
@@ -67,7 +67,7 @@ class AddPointsToSchemesFromTemplateController extends AttendanceController {
 				)
 		} else {
 			val points = cmd.apply()
-			Redirect(getReturnTo(""),
+			Redirect(getReturnTo(Routes.Manage.addPointsToExistingSchemes(department, academicYear)),
 				"points" -> points.size.toString,
 				"schemes" -> points.map(_.scheme.id).mkString(",")
 			)
