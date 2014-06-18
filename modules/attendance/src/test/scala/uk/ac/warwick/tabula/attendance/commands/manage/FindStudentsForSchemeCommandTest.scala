@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.{Fixtures, CurrentUser, Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{AttendanceMonitoringService, ProfileService, ModuleAndDepartmentService, CourseAndRouteService, AttendanceMonitoringServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.services.{AttendanceMonitoringService, ProfileService, AttendanceMonitoringServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permission
@@ -13,14 +13,13 @@ class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
 	trait CommandTestSupport extends ProfileServiceComponent
 		with FindStudentsForSchemeCommandState with AttendanceMonitoringServiceComponent {
 
-		val courseAndRouteService = smartMock[CourseAndRouteService]
-		val moduleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 		val profileService = smartMock[ProfileService]
 		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
-		val sitsStatusDao = smartMock[SitsStatusDao]
-		val modeOfAttendanceDao = smartMock[ModeOfAttendanceDao]
 		def routesForPermission(user: CurrentUser, p: Permission, dept: Department): Set[Route] = {
 			Set()
+		}
+		def deserializeFilter(filter: String) = {
+
 		}
 
 	}

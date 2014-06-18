@@ -10,10 +10,10 @@ import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.attendance.commands.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringCourseAndRouteServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.{AutowiringSitsStatusDaoComponent, AutowiringModeOfAttendanceDaoComponent, SchemeMembershipIncludeType, SchemeMembershipExcludeType, SchemeMembershipStaticType, SchemeMembershipItem}
+import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipExcludeType, SchemeMembershipStaticType, SchemeMembershipItem}
 
 case class FindStudentsForSchemeCommandResult(
 	updatedStaticStudentIds: JList[String],
@@ -26,10 +26,7 @@ object FindStudentsForSchemeCommand {
 			with AutowiringSecurityServicePermissionsAwareRoutes
 			with AutowiringProfileServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringCourseAndRouteServiceComponent
-			with AutowiringModeOfAttendanceDaoComponent
-			with AutowiringModuleAndDepartmentServiceComponent
-			with AutowiringSitsStatusDaoComponent
+			with AutowiringDeserializesFilterImpl
 			with ComposableCommand[FindStudentsForSchemeCommandResult]
 			with PopulateFindStudentsForSchemeCommand
 			with UpdatesFindStudentsForSchemeCommand
