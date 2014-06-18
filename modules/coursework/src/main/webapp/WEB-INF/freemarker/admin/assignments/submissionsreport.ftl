@@ -13,7 +13,7 @@
 		
 		<ul class="user-list">
 		<#list submissionOnly as u>
-			<li>${u.warwickId}</li>
+			<li>${u.warwickId!}</li>
 		</#list>
 		</ul>
 	</div>
@@ -25,7 +25,7 @@
 		
 		<ul class="user-list">
 		<#list feedbackOnly as u>
-			<li>${u.warwickId}</li>
+			<li>${u.warwickId!}</li>
 		</#list>
 		</ul>
 	</div>
@@ -40,7 +40,7 @@
 			<p><i class="icon-remove"></i> Submissions received from the following students do not have any feedback.</p>
 			<ul class="user-list">
 			<#list hasNoAttachments as u>
-				<li>${u.warwickId}</li>
+				<li>${u.warwickId!}</li>
 			</#list>
 			</ul>
 		</div>	
@@ -55,7 +55,7 @@
 			<p><i class="icon-remove"></i> Submissions received from the following students do not have any marks assigned.</p>
 			<ul class="user-list">
 			<#list hasNoMarks as u>
-				<li>${u.warwickId}</li>
+				<li>${u.warwickId!}</li>
 			</#list>
 			</ul>
 		</div>	
@@ -76,7 +76,7 @@
 			</p>
 			<ul class="user-list">
 			<#list plagiarised as u>
-				<li>${u.warwickId}</li>
+				<li>${u.warwickId!}</li>
 			</#list>
 			</ul>
 		</div>	

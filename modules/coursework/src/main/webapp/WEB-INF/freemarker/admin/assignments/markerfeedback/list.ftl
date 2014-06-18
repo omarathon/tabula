@@ -3,13 +3,13 @@
 	<#list items as item>
 		<tr>
 			<td>
-				<@form.selector_check_row "students" item.student.warwickId />
+				<@form.selector_check_row "students" item.student.warwickId! />
 			</td>
 			<td>
 				<#if assignment.module.department.showStudentName>
-					${item.student.fullName} <@pl.profile_link item.student.warwickId />
+					${item.student.fullName} <@pl.profile_link item.student.warwickId! />
 				<#else>
-					${item.student.warwickId}
+					${item.student.warwickId!}
 				</#if>
 			</td>
 			<td>
