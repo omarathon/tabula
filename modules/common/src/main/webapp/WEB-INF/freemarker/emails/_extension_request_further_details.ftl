@@ -3,7 +3,7 @@ Further details related to this request:
 <#if moduleManagers?has_content >
 Module Manager<#if (moduleManagers?size > 1)>s</#if>
 <#list moduleManagers as manager>
-${manager.getFullName()} (${manager.getWarwickId()}) (${manager.getEmail()})
+${manager.fullName} (${manager.warwickId!}) (${manager.email})
 </#list>
 </#if>
 

@@ -36,7 +36,7 @@
 	<@form.row>
 	 <label class="control-label">Your University ID</label>
 	 <@form.field>
-	   <div class="uneditable-input">${user.apparentUser.warwickId}</div>
+	   <div class="uneditable-input">${user.apparentUser.warwickId!}</div>
 	 </@form.field>
     </@form.row>
 	

@@ -26,7 +26,7 @@
 					
 					<div>
 						<#if activity.entityType == "Submission">
-							<a href="<@admin_href activity.entity />"><b>${activity.title}</b> by ${activity.agent.warwickId}</a>
+							<a href="<@admin_href activity.entity />"><b>${activity.title}</b> by ${activity.agent.warwickId!}</a>
 		
 							<#if activity.entity.late>
 								<span class="label label-important use-tooltip" title="<@sd.lateness submission />" data-container="body">Late</span>
@@ -38,7 +38,7 @@
 							</#if>
 						<#else>
 							<#-- default -->
-							<b>${activity.title}</b> by ${activity.agent.warwickId}
+							<b>${activity.title}</b> by ${activity.agent.warwickId!}
 						</#if>
 					</div>
 					

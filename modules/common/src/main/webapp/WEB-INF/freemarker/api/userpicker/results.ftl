@@ -21,7 +21,7 @@
 		
 		<td class="user-id">
 			<#if RequestParameters.isUniId = "true">
-				${u.warwickId}
+				${u.warwickId!}
 			<#else>
 				${u.userId}
 			</#if>
