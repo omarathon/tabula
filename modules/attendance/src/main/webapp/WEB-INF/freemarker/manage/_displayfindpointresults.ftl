@@ -1,10 +1,10 @@
-<#import "../attendance_variables.ftl" as attendance_variables />
-<#include "../attendance_macros.ftl" />
+<#import "*/attendance_variables.ftl" as attendance_variables />
+<#import "*/attendance_macros.ftl" as attendance_macros />
 
 <#if findResult.termGroupedOldPoints?keys?has_content>
 	<#list attendance_variables.monitoringPointTermNames as term >
 		<#if findResult.termGroupedOldPoints[term]??>
-			<@groupedPointsBySection findResult.termGroupedOldPoints term ; groupedPoint >
+			<@attendance_macros.groupedPointsBySection findResult.termGroupedOldPoints term ; groupedPoint >
 				<div class="span12">
 				${groupedPoint.templatePoint.name}
 				(<a class="use-tooltip" data-html="true" title="
@@ -30,7 +30,7 @@
 					</a>
 				</#if>
 			</div>
-			</@groupedPointsBySection>
+			</@attendance_macros.groupedPointsBySection>
 		</#if>
 	</#list>
 </#if>
@@ -38,7 +38,7 @@
 <#if findResult.termGroupedPoints?keys?has_content >
 	<#list attendance_variables.monitoringPointTermNames as term>
 		<#if findResult.termGroupedPoints[term]??>
-			<@groupedPointsBySection findResult.termGroupedPoints term ; groupedPoint >
+			<@attendance_macros.groupedPointsBySection findResult.termGroupedPoints term ; groupedPoint >
 				<div class="span12">
 					${groupedPoint.templatePoint.name}
 						(<a class="use-tooltip" data-html="true" title="
@@ -54,7 +54,7 @@
 						</a>)
 					<#if !templateScheme??><@groupedPointSchemePopover groupedPoint /></#if>
 				</div>
-			</@groupedPointsBySection>
+			</@attendance_macros.groupedPointsBySection>
 		</#if>
 	</#list>
 </#if>
@@ -62,13 +62,13 @@
 <#if findResult.monthGroupedPoints?keys?has_content>
 	<#list monthNames as month>
 		<#if findResult.monthGroupedPoints[month]??>
-			<@groupedPointsBySection findResult.monthGroupedPoints month ; groupedPoint >
+			<@attendance_macros.groupedPointsBySection findResult.monthGroupedPoints month ; groupedPoint >
 				<div class="span12">
 					${groupedPoint.templatePoint.name}
 					(<@fmt.interval groupedPoint.templatePoint.startDate groupedPoint.templatePoint.endDate />)
 					<#if !templateScheme??><@groupedPointSchemePopover groupedPoint /></#if>
 				</div>
-			</@groupedPointsBySection>
+			</@attendance_macros.groupedPointsBySection>
 		</#if>
 	</#list>
 </#if>

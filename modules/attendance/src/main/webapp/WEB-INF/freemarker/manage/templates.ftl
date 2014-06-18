@@ -1,4 +1,4 @@
-<h3>Use a template</h3>
+<h1>Use a template</h1>
 
 <#if errors?has_content>
 <div class="alert alert-error">
