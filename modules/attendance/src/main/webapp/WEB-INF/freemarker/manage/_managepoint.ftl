@@ -26,12 +26,13 @@
 	<#else>
 
 		<@form.labelled_row "startDate" "Start">
-			<@f.input type="text" path="startDate" cssClass="input-medium date-picker" placeholder="Pick the start date" />
+			<@f.input type="text" path="startDate" cssClass="input-medium date-picker startDateTime" placeholder="Pick the start date" />
+			<input class="endoffset" type="hidden" data-end-offset="0" />
 			<@fmt.help_popover id="startDate" content="You cannot mark a point as attended or missed (unauthorised) before its start date" />
 		</@form.labelled_row>
 
 		<@form.labelled_row "endDate" "End">
-			<@f.input type="text" path="endDate" cssClass="input-medium date-picker" placeholder="Pick the end date" />
+			<@f.input type="text" path="endDate" cssClass="input-medium date-picker endDateTime" placeholder="Pick the end date" />
 			<@fmt.help_popover id="endDate" content="A warning will appear for unrecorded attendance after its end date" />
 		</@form.labelled_row>
 
@@ -234,7 +235,7 @@
 </div>
 
 <script>
-	(function($) {
+	jQuery(function($) {
 		// Show relavant extra options when changing assignment type
 		var $specificAssignmentInput = $('form input[name=isSpecificAssignments]');
 		if ($specificAssignmentInput.length > 0) {
@@ -268,7 +269,7 @@
 
 		Attendance.bindModulePickers();
 		Attendance.bindAssignmentPickers();
-	})(jQuery);
+	});
 </script>
 
 </#if>

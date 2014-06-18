@@ -185,7 +185,7 @@
 							<#if module.department.showStudentName>
 								${student.user.fullName} <@pl.profile_link student.user.warwickId />
 							<#else>
-								${student.user.warwickId}
+								${student.user.warwickId!}
 							</#if>
 							</td>
 

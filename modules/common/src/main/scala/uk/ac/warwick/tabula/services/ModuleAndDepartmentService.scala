@@ -169,8 +169,8 @@ class ModuleAndDepartmentService extends Logging {
 		moduleDao.saveOrUpdate(module)
 	}
 	
-	def stampMissingModules(dept: Department, seenCodes: Seq[String]) = transactional() {
-		moduleDao.stampMissingRows(dept, seenCodes)
+	def stampMissingModules(seenCodes: Seq[String]) = transactional() {
+		moduleDao.stampMissingFromImport(moduleDao.allModules.map(_.code) filterNot seenCodes.contains)
 	}
 	
 	def stampMissingRoutes(dept: Department, seenCodes: Seq[String]) = transactional() {

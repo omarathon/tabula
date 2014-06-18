@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.attendance.web.controllers.manage
 
+import uk.ac.warwick.tabula.JavaImports
+import uk.ac.warwick.tabula.attendance.commands.manage.FindPointsResult
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceMonitoringPointStyle, AttendanceMonitoringPointType}
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.attendance.web.controllers.HasMonthNames
-import uk.ac.warwick.tabula.JavaImports
-import uk.ac.warwick.tabula.attendance.commands.manage.FindPointsResult
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
 
 @Controller
-@RequestMapping(Array("/manage/{department}/{academicYear}/new/{scheme}/points"))
-class AddPointsToNewSchemeController extends AbstractManageSchemePointsController with HasMonthNames {
+@RequestMapping(Array("/manage/{department}/{academicYear}/{scheme}/edit/points"))
+class EditPointsOnSchemeController extends AbstractManageSchemePointsController with HasMonthNames {
 
 	override protected def render(
 		findCommandResult: FindPointsResult,
@@ -18,7 +18,7 @@ class AddPointsToNewSchemeController extends AbstractManageSchemePointsControlle
 		JavaImports.JInteger,
 		actionCompleted: String
 	) = {
-		Mav("manage/addpointsoncreate",
+		Mav("manage/editschemepoints",
 			"findResult" -> findCommandResult,
 			"allTypes" -> AttendanceMonitoringPointType.values,
 			"allStyles" -> AttendanceMonitoringPointStyle.values,
@@ -31,5 +31,4 @@ class AddPointsToNewSchemeController extends AbstractManageSchemePointsControlle
 			Breadcrumbs.Manage.DepartmentForYear(scheme.department, scheme.academicYear)
 		)
 	}
-
 }

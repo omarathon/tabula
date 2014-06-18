@@ -121,6 +121,7 @@ trait ImportDepartments {
 
 	def importDepartments(): ImportResult = {
 		logger.info("Importing departments")
+
 		val results = for (dept <- moduleImporter.getDepartments()) yield {
 			moduleAndDepartmentService.getDepartmentByCode(dept.code) match {
 				case None => {
@@ -145,14 +146,31 @@ trait ImportModules {
 
 	def importModules(): ImportResult = {
 		logger.info("Importing modules")
+
+		// track the module codes imported - start with an empty sequence to hold the codes
+		var seenModuleCodes = Seq[String]()
+
 		val results = for (dept <- moduleAndDepartmentService.allDepartments) yield {
-			importModules(moduleImporter.getModules(dept.code), dept)
+			val (resultsForDepartment, seenModuleCodesForDepartment) = importModules(moduleImporter.getModules(dept.code), dept)
+			seenModuleCodes = seenModuleCodes ++ seenModuleCodesForDepartment
+			resultsForDepartment
 		}
+
+		moduleAndDepartmentService.stampMissingModules(seenModuleCodes)
 
 		combineResults(results)
 	}
 
-	def importModules(modules: Seq[ModuleInfo], dept: Department): ImportResult = {
+	def importModules(dept: Department): ImportResult = {
+		val (importResult: ImportResult, seenModules: Seq[String]) = importModules(moduleImporter.getModules(dept.code), dept)
+		// don't stamp missing modules in this case since we we've only looked at one department and they could be in any
+		importResult
+	}
+
+	def importModules(modules: Seq[ModuleInfo], dept: Department): (ImportResult, Seq[String]) = {
+
+		var seenModuleCodesForDepartment = Seq[String]()
+
 		val results = for (mod <- modules) yield {
 			moduleAndDepartmentService.getModuleByCode(mod.code) match {
 				case None => {
@@ -162,6 +180,9 @@ trait ImportModules {
 					ImportResult(added = 1)
 				}
 				case Some(module) => {
+
+					seenModuleCodesForDepartment = seenModuleCodesForDepartment :+ module.code
+
 					// HFC-354 Update module name if it changes.
 					if (mod.name != module.name) {
 						logger.info("Updating name of %s to %s".format(mod.code, mod.name))
@@ -180,10 +201,7 @@ trait ImportModules {
 			}
 		}
 
-		val seenCodes = modules.map { _.code }
-		moduleAndDepartmentService.stampMissingModules(dept, seenCodes)
-
-		combineResults(results)
+		(combineResults(results), seenModuleCodesForDepartment)
 	}
 }
 
@@ -321,4 +339,39 @@ trait ImportAcademicInformationDescription extends Describable[ImportAcademicInf
 		importProperties(d, "disabilities", result.disabilities)
 		importProperties(d, "levels", result.levels)
 	}
+}
+
+object ImportDepartmentsModulesCommand {
+	def apply() =
+		new ImportDepartmentsModulesCommandInternal()
+			with ComposableCommand[Unit]
+			with ImportModules
+			with AutowiringModuleAndDepartmentServiceComponent
+			with AutowiringModuleImporterComponent
+			with ImportDepartmentsModulesDescription
+			with ImportDepartmentsModulesState
+			with ImportSystemDataPermissions
+			with Logging
+}
+
+class ImportDepartmentsModulesCommandInternal() extends CommandInternal[Unit]
+	with TaskBenchmarking {
+	self: ImportDepartmentsModulesState with ImportModules with ModuleAndDepartmentServiceComponent =>
+
+	def applyInternal() = transactional() {
+		benchmarkTask("Import modules") {
+			val codes = deptCode.split(",")
+			val departments = codes.flatMap(moduleAndDepartmentService.getDepartmentByCode(_))
+			departments.foreach(dept => importModules(dept))
+		}
+	}
+}
+
+trait ImportDepartmentsModulesState {
+	var deptCode: String = _
+}
+
+trait ImportDepartmentsModulesDescription extends Describable[Unit]{
+	self: ImportDepartmentsModulesState =>
+	def describe(d: Description) {d.property("deptCodes", deptCode)}
 }

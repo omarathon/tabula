@@ -375,53 +375,68 @@ $(function(){
 
 $(function(){
 
-	// Scripts for Add student during Create a scheme
-	$('.mass-add-users')
-		.find('textarea').on('keyup', function(){
-			var $this = $(this), $addButton = $this.closest('.mass-add-users').find('input.btn.add-students');
-			if ($this.val().length === 0) {
-				$addButton.addClass('disabled');
+	// Scripts for Add students
+	(function(){
+		$('.mass-add-users')
+			.find('textarea').on('keyup', function(){
+				var $this = $(this), $addButton = $this.closest('.mass-add-users').find('input.btn.add-students');
+				if ($this.val().length === 0) {
+					$addButton.addClass('disabled');
+				} else {
+					$addButton.removeClass('disabled');
+				}
+			}).end()
+		;
+
+		var updateButtons = function(){
+			var checkboxes = $('.manually-added tbody input')
+				, checkedBoxes = checkboxes.filter(function(){ return $(this).is(':checked'); });
+			if (checkedBoxes.length == 0) {
+				$('.manually-added summary input.btn-warning').attr('disabled', true);
 			} else {
-				$addButton.removeClass('disabled');
+				$('.manually-added summary input.btn-warning').attr('disabled', false);
 			}
-		}).end()
-	;
-	var checkAndUpdateButton = function(detailsClass, inputName){
-		if($('details.' + detailsClass + ' table input[type="checkbox"]:checked').length === 0) {
-			$('details.' + detailsClass + ' input[name="' + inputName + '"]').attr('disabled', true);
-		} else {
-			$('details.' + detailsClass + ' input[name="' + inputName + '"]').attr('disabled', false);
-		}
-	};
-	$('details.manually-added').on('click', 'input[type="checkbox"]', function(){
-		checkAndUpdateButton('manually-added', 'resetMembership');
-	});
-	checkAndUpdateButton('manually-added', 'resetMembership');
-	$('details.find-students').on('click', 'input[type="checkbox"]', function(){
-		checkAndUpdateButton('find-students', 'manuallyExclude');
-	});
-	checkAndUpdateButton('find-students', 'manuallyExclude');
+		};
+		updateButtons();
+		$('.manually-added')
+			.find('.for-check-all').append(
+			$('<input/>').addClass('check-all use-tooltip').attr({
+				type: 'checkbox',
+				title: 'Select all/none'
+			}).on('click', function(){
+				$(this).closest('table').find('tbody input').prop('checked', this.checked);
+				updateButtons();
+			})
+		).end()
+			.find('tbody tr').on('click', function(){
+				var $input = $(this).find('input');
+				$input.prop('checked', !$input.is(':checked'));
+				updateButtons();
+			}).end()
+			.find('table tbody input').on('click', function(e){
+				e.stopPropagation();
+				updateButtons();
+			}).end()
+		;
+	})();
 
 	// Add points
 	(function(){
-		var uniqueCollection = function(collection){
-			var $collection = $(collection);
-			return $.makeArray($collection.filter(function(i, item){
-				return i == $.inArray(item, $collection);
-			}));
-		};
 		var updateButtons = function(){
-			var checkboxes = $('.add-points-to-schemes tbody input')
-				, checkedBoxes = checkboxes.filter(function(){ return $(this).is(':checked'); });
-			if (checkboxes.length == 0) {
-				$('.add-points-to-schemes p button').attr('disabled', false);
-			} else if ( checkedBoxes.length > 0
-				// check all schemes have same point style
-				&& uniqueCollection(checkedBoxes.map(function(){ return $(this).data('pointstyle'); }).get()).length === 1
-			) {
-				$('.add-points-to-schemes p button').attr('disabled', false);
-			} else {
+			var weekCheckboxes = $('.add-points-to-schemes table.week tbody input')
+				, weekCheckedBoxes = weekCheckboxes.filter(function(){ return $(this).is(':checked'); })
+				, dateCheckboxes = $('.add-points-to-schemes table.date tbody input')
+				, dateCheckedBoxes = dateCheckboxes.filter(function(){ return $(this).is(':checked'); })
+				;
+			if (weekCheckedBoxes.length === 0 && dateCheckedBoxes.length === 0) {
 				$('.add-points-to-schemes p button').attr('disabled', true);
+				$('.add-points-to-schemes span.alert').hide();
+			} else if (weekCheckedBoxes.length > 0 && dateCheckedBoxes.length > 0) {
+				$('.add-points-to-schemes p button').attr('disabled', true);
+				$('.add-points-to-schemes span.alert').show();
+			} else {
+				$('.add-points-to-schemes p button').attr('disabled', false);
+				$('.add-points-to-schemes span.alert').hide();
 			}
 		};
 		updateButtons();

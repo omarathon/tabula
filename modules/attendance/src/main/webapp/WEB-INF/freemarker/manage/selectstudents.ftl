@@ -55,6 +55,8 @@
 
 			</summary>
 
+			<p>Use the filters to select which students this scheme should apply to:</p>
+
 			<#list findCommand.updatedStaticStudentIds as id>
 				<input type="hidden" name="updatedStaticStudentIds" value="${id}" />
 			</#list>
@@ -176,7 +178,7 @@
 
 				<div class="btn-group">
 					<button disabled class="btn btn-mini btn-primary search" type="submit" name="${ManageSchemeMappingParameters.findStudents}">
-						<i class="icon-search"></i> Search
+						<i class="icon-search"></i> Find
 					</button>
 				</div>
 
@@ -196,11 +198,13 @@
 				<#assign endIndex = startIndex + findCommandResult.membershipItems?size />
 				<p>
 					Results ${startIndex + 1} - ${endIndex} of ${findCommand.totalResults}
-					<input class="btn btn-danger hideOnClosed btn-small"
+					<input class="btn btn-warning hideOnClosed btn-small use-tooltip"
 						<#if findCommandResult.membershipItems?size == 0>disabled</#if>
 						type="submit"
 						name="${ManageSchemeMappingParameters.manuallyExclude}"
-						value="Exclude selected"
+						value="Remove selected"
+						title="Remove selected students from this scheme"
+						style="margin-left: 0.5em;"
 					/>
 				</p>
 
@@ -217,40 +221,30 @@
 
 		<details class="manually-added" <#if expandManual>open</#if>>
 			<summary class="large-chevron collapsible">
-				<span class="legend">Manually added and removed students
+				<span class="legend">Manually add students
 					<small>Add a list of students by university ID or username</small>
 				</span>
 
 				<p>
-					<@fmt.p editMembershipCommandResult.updatedIncludedStudentIds?size "student" />
-					added manually and
-					<@fmt.p editMembershipCommandResult.updatedExcludedStudentIds?size "student" />
-					removed manually
-				</p>
-
-				<p>
 					<input class="btn" type="submit" name="${ManageSchemeMappingParameters.manuallyAddForm}" value="Add students manually" />
 					<#if (editMembershipCommandResult.updatedIncludedStudentIds?size > 0 || editMembershipCommandResult.updatedExcludedStudentIds?size > 0)>
-						<input class="btn btn-warning hideOnClosed"
-							type="submit"
-							name="${ManageSchemeMappingParameters.resetMembership}"
-							value="Reset"
-						/>
-						<input class="btn btn-danger hideOnClosed"
-							<#if editMembershipCommandResult.updatedIncludedStudentIds?size == 0>disabled</#if>
-							type="submit"
-							name="${ManageSchemeMappingParameters.resetAllIncluded}"
-							value="Reset all included"
-						/>
-						<input class="btn btn-danger hideOnClosed"
-							<#if editMembershipCommandResult.updatedExcludedStudentIds?size == 0>disabled</#if>
-							type="submit"
-							name="${ManageSchemeMappingParameters.resetAllExcluded}"
-							value="Reset all excluded"
+						<input class="btn btn-warning hideOnClosed use-tooltip"
+						   type="submit"
+						   name="${ManageSchemeMappingParameters.resetMembership}"
+						   value="Reset"
+						   data-container="body"
+						   title="Restore the manually removed and remove the manually added students selected"
 						/>
 					</#if>
 				</p>
 			</summary>
+
+			<p>
+				<@fmt.p editMembershipCommandResult.updatedIncludedStudentIds?size "student" />
+				added manually and
+				<@fmt.p editMembershipCommandResult.updatedExcludedStudentIds?size "student" />
+				removed manually
+			</p>
 
 			<#if (addUsersResult.missingMembers?size > 0 || addUsersResult.noPermissionMembers?size > 0)>
 				<div class="alert alert-warning">
@@ -315,8 +309,23 @@
 			<#if summaryString?has_content>
 				<p>${summaryString}</p>
 			</#if>
-			<input type="submit" value="Link to SITS" class="btn btn-success" name="${ManageSchemeMappingParameters.linkToSits}">
-			<input type="submit" value="Import as list" class="btn btn-primary" name="${ManageSchemeMappingParameters.importAsList}">
+			<input
+				type="submit"
+				value="Link to SITS"
+				class="btn btn-success use-tooltip"
+				name="${ManageSchemeMappingParameters.linkToSits}"
+				data-container="body"
+				title="Link this filter so that this group of students will be automatically updated from SITS"
+			>
+			<input
+				type="submit"
+				value="Import as list"
+				class="btn btn-primary use-tooltip"
+				name="${ManageSchemeMappingParameters.importAsList}"
+				data-container="body"
+				data-html="true"
+				title="Import these students into a static list which will <strong>not</strong> be updated from SITS"
+			>
 			<input type="submit" value="Cancel" class="btn" name="${ManageSchemeMappingParameters.reset}">
 		</form>
 	</div>

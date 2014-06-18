@@ -4,13 +4,13 @@ import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable, SelfValidating}
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
-import uk.ac.warwick.tabula.attendance.commands.manage.{EditSchemeCommandState, SetStudents}
+import uk.ac.warwick.tabula.attendance.commands.manage.SetStudents
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 
-abstract class AbstractManageSchemeController extends AttendanceController {
+abstract class AbstractManageSchemeStudentsController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
 
@@ -47,11 +47,9 @@ abstract class AbstractManageSchemeController extends AttendanceController {
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.reset))
 	def reset(
-		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme] with EditSchemeCommandState,
+		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
 		@PathVariable scheme: AttendanceMonitoringScheme
 	) = {
-		cmd.name = scheme.name
-		cmd.pointStyle = scheme.pointStyle
 		render(scheme)
 	}
 

@@ -5,6 +5,20 @@
 
 <div class="fix-area">
 
+	<#assign popoverContent><#noescape>
+	<ul>
+		<#list command.schemes?sort_by("displayName") as scheme>
+			<li>${scheme.displayName}</li>
+		</#list>
+	</ul>
+	</#noescape></#assign>
+	<p>
+		You are copying these points to
+		<a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="top">
+			<@fmt.p command.schemes?size "scheme" />
+		</a>
+	</p>
+
 	<form action="<@routes.manageAddPointsCopy command.department command.academicYear.startYear?c />" method="post" class="form-inline">
 		<#list command.schemes as scheme>
 			<input type="hidden" name="schemes" value="${scheme.id}" />
@@ -12,29 +26,40 @@
 
 		<input type="hidden" name="returnTo" value="${returnTo}" />
 
-		<label>Which points do you want to copy?</label>
-		<label style="margin-left: 16px;">
-			Academic year
-			<select name="searchAcademicYear" class="input-small">
-				<#list allAcademicYears as academicYear>
-					<option value="${academicYear.toString}" <#if searchAcademicYear?? && searchAcademicYear.toString == academicYear.toString>selected</#if>>
-						${academicYear.toString}
-					</option>
-				</#list>
-			</select>
-		</label>
-		<label style="margin-left: 16px;">
-			Department
-			<select name="searchDepartment">
-				<#list allDepartments as department>
-					<option value="${department.code}" <#if searchDepartment?? && searchDepartment.name == department.name>selected</#if>>
-						${department.name}
-					</option>
-				</#list>
-			</select>
-		</label>
+		<p>
+			<label>Copy points from:</label>
+			<label style="margin-left: 16px;">
+				Academic year
+				<select name="searchAcademicYear" class="input-small">
+					<#list allAcademicYears as year>
+						<option
+							value="${year.toString}"
+							<#if searchAcademicYear??>
+								<#if searchAcademicYear.toString == year.toString>
+									selected
+								</#if>
+							<#elseif currentAcademicYear.toString == year.toString>
+								selected
+							</#if>
+						>
+							${year.toString}
+						</option>
+					</#list>
+				</select>
+			</label>
+			<label style="margin-left: 16px;">
+				Department
+				<select name="searchDepartment">
+					<#list allDepartments as department>
+						<option value="${department.code}" <#if searchDepartment?? && searchDepartment.name == department.name>selected</#if>>
+							${department.name}
+						</option>
+					</#list>
+				</select>
+			</label>
 
-		<input style="margin-left: 16px;" type="submit" class="btn btn-primary" name="search" value="Change"/>
+			<input style="margin-left: 16px;" type="submit" class="btn btn-primary" name="search" value="Change"/>
+		</p>
 
 		<#if allSchemes??>
 			<#if allSchemes?size == 0>
@@ -52,6 +77,8 @@
 						</#list>
 					</div>
 				</#if>
+
+				<p>Use the filters to choose which points to copy:</p>
 
 				<div class="student-filter points-filter btn-group-group well well-small">
 

@@ -31,7 +31,7 @@ object AddStudentsToSchemeCommand {
 
 
 class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme, val user: CurrentUser)
-	extends CommandInternal[AttendanceMonitoringScheme] {
+	extends CommandInternal[AttendanceMonitoringScheme] with TaskBenchmarking {
 
 	self: AddStudentsToSchemeCommandState with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
@@ -42,9 +42,11 @@ class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme,
 		scheme.memberQuery = filterQueryString
 		scheme.updatedDate = DateTime.now
 		attendanceMonitoringService.saveOrUpdate(scheme)
-		profileService.getAllMembersWithUniversityIds(scheme.members.members).map {
-			case student: StudentMember => attendanceMonitoringService.updateCheckpointTotal(student, scheme.department, scheme.academicYear)
-			case _ =>
+		benchmark("updateCheckpointTotals") {
+			profileService.getAllMembersWithUniversityIds(scheme.members.members).map {
+				case student: StudentMember => attendanceMonitoringService.updateCheckpointTotal(student, scheme.department, scheme.academicYear)
+				case _ =>
+			}
 		}
 		scheme
 	}
@@ -59,6 +61,7 @@ trait PopulateAddStudentsToSchemeCommandInternal extends PopulateOnForm {
 		staticStudentIds = scheme.members.staticUserIds.asJava
 		includedStudentIds = scheme.members.includedUserIds.asJava
 		excludedStudentIds = scheme.members.excludedUserIds.asJava
+		filterQueryString = scheme.memberQuery
 	}
 }
 
@@ -87,20 +90,24 @@ trait SetStudents {
 
 }
 
-trait AddStudentsToSchemeValidation extends SelfValidating {
+trait AddStudentsToSchemeValidation extends SelfValidating with TaskBenchmarking {
 
 	self: AddStudentsToSchemeCommandState with ProfileServiceComponent with SecurityServiceComponent =>
 
 	override def validate(errors: Errors) {
 		// In practice there should be no students that fail this validation
 		// but this protects against hand-rolled POSTs
-		val members = profileService.getAllMembersWithUniversityIds(
-			((staticStudentIds.asScala
-				diff excludedStudentIds.asScala)
-				diff includedStudentIds.asScala)
-				++ includedStudentIds.asScala
-		)
-		val noPermissionMembers = members.filter(!securityService.can(user, Permissions.MonitoringPoints.Manage, _))
+		val members = benchmark("profileService.getAllMembersWithUniversityIds") {
+			profileService.getAllMembersWithUniversityIds(
+				((staticStudentIds.asScala
+					diff excludedStudentIds.asScala)
+					diff includedStudentIds.asScala)
+					++ includedStudentIds.asScala
+			)
+		}
+		val noPermissionMembers = benchmark("noPermissionMembers") {
+			members.filter(!securityService.can(user, Permissions.MonitoringPoints.Manage, _))
+		}
 		if (!noPermissionMembers.isEmpty) {
 			errors.rejectValue(
 				"staticStudentIds",

@@ -88,7 +88,7 @@
 	<#if students?size gt 0>
 		<tbody>
 			<#macro action actionCode student>
-				<#local studentDetails><span data-profile="${student.user.warwickId}"><#if department.showStudentName>${student.user.fullName}<#else>${student.user.warwickId}</#if></span></#local>
+				<#local studentDetails><span data-profile="${student.user.warwickId!}"><#if department.showStudentName>${student.user.fullName}<#else>${student.user.warwickId!}</#if></span></#local>
 				<#local firstMarker="first marker" />
 				<#local secondMarker="second marker" />
 
@@ -346,21 +346,21 @@
 				</#macro>
 
 				<#macro row student>
-					<tr data-contentid="${student.user.warwickId}" class="itemContainer<#if !student.coursework.enhancedSubmission??> awaiting-submission</#if>"<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission.suspectPlagiarised> data-plagiarised="true"</#if>>
-						<td class="check-col"><#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??><input type="checkbox" class="collection-checkbox" name="students" value="${student.user.warwickId}"></#if></td>
+					<tr data-contentid="${student.user.warwickId!}" class="itemContainer<#if !student.coursework.enhancedSubmission??> awaiting-submission</#if>"<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission.suspectPlagiarised> data-plagiarised="true"</#if>>
+						<td class="check-col"><#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??><input type="checkbox" class="collection-checkbox" name="students" value="${student.user.warwickId!}"></#if></td>
 						<#if department.showStudentName>
 							<td class="student-col toggle-cell">
-								<h6 class="toggle-icon" data-profile="${student.user.warwickId}">${student.user.firstName}</h6>
+								<h6 class="toggle-icon" data-profile="${student.user.warwickId!}">${student.user.firstName}</h6>
 							</td>
 							<td class="student-col toggle-cell">
-								<h6 data-profile="${student.user.warwickId}">
-									${student.user.lastName}&nbsp;<@pl.profile_link student.user.warwickId />
+								<h6 data-profile="${student.user.warwickId!}">
+									${student.user.lastName}&nbsp;<@pl.profile_link student.user.warwickId! />
 								</h6>
 							</td>
 						<#else>
 							<td class="student-col toggle-cell">
-								<h6 class="toggle-icon" data-profile="${student.user.warwickId}">
-									${student.user.warwickId}
+								<h6 class="toggle-icon" data-profile="${student.user.warwickId!}">
+									${student.user.warwickId!}
 								</h6>
 							</td>
 						</#if>
@@ -373,8 +373,8 @@
 
 							<dl class="progress progress-${student.progress.t} use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;" data-container="body">
 								<dt class="bar" style="width: ${student.progress.percentage}%;"></dt>
-								<dd style="display: none;" class="table-content-container" data-contentid="${student.user.warwickId}">
-									<div id="content-${student.user.warwickId}" class="content-container">
+								<dd style="display: none;" class="table-content-container" data-contentid="${student.user.warwickId!}">
+									<div id="content-${student.user.warwickId!}" class="content-container">
 										<@workflow student />
 									</div>
 								</dd>

@@ -30,11 +30,16 @@ class StudentRelationshipAgentRoleProvider extends RoleProvider {
 					 * as that's what we're performing operations on.
 					 */
 					val studentDepartment = 
-						student.mostSignificantCourseDetails.flatMap { scd => Option(scd.latestStudentCourseYearDetails.enrolmentDepartment) }
-					
-					customRoleFor(studentDepartment)(StudentRelationshipAgentRoleDefinition(relationshipType), member).getOrElse {
-						StudentRelationshipAgent(member, relationshipType)
-					}
+						student.mostSignificantCourseDetails
+							.toSeq
+							.flatMap { scd =>
+								Option(scd.latestStudentCourseYearDetails.enrolmentDepartment).toSeq ++ Option(scd.route).flatMap { r => Option(r.department) }.toSeq
+							}
+
+					studentDepartment
+						.flatMap { customRoleFor(_)(StudentRelationshipAgentRoleDefinition(relationshipType), member) }
+						.headOption
+						.getOrElse { StudentRelationshipAgent(member, relationshipType) }
 				}
 		}
 
