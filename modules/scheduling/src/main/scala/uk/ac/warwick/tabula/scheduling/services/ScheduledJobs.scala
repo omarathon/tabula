@@ -38,7 +38,7 @@ class ScheduledJobs {
 	def syncGuard[A](fn: => A) = if (fileSyncEnabled) fn
 
 	@Scheduled(cron = "0 0 7,14 * * *")
-	def importData: Unit =
+	def importData(): Unit =
 		if (features.schedulingAcademicInformationImport) maintenanceGuard {
 			exceptionResolver.reportExceptions {
 				ImportAcademicInformationCommand().apply()
@@ -46,7 +46,7 @@ class ScheduledJobs {
 		}
 
 	@Scheduled(cron = "0 30 0 * * *")
-	def importMembers: Unit =
+	def importMembers(): Unit =
 		if (features.schedulingProfilesImport) maintenanceGuard {
 			exceptionResolver.reportExceptions {
 				new ImportProfilesCommand().apply()
@@ -54,7 +54,7 @@ class ScheduledJobs {
 		}
 
 	@Scheduled(cron = "0 0 7 * * *")
-	def importAssignments: Unit =
+	def importAssignments(): Unit =
 		if (features.schedulingAssignmentsImport) maintenanceGuard {
 			exceptionResolver.reportExceptions {
 				ImportAssignmentsCommand().apply()
@@ -62,7 +62,7 @@ class ScheduledJobs {
 		}
 
 	@Scheduled(cron = "0 0 2 * * *") // 2am
-	def cleanupTemporaryFiles: Unit =
+	def cleanupTemporaryFiles(): Unit =
 		if (features.schedulingCleanupTemporaryFiles) maintenanceGuard {
 			exceptionResolver.reportExceptions {
 				new CleanupTemporaryFilesCommand().apply()
@@ -70,22 +70,22 @@ class ScheduledJobs {
 		}
 
 	@Scheduled(fixedRate = 60 * 1000) // every minute
-	def indexAuditEvents: Unit =
+	def indexAuditEvents(): Unit =
 		if (features.schedulingAuditIndex)
 			exceptionResolver.reportExceptions { auditIndexingService.incrementalIndex() }
 
 	@Scheduled(cron = "0 0-59/5 3-23 * * *") // every 5 minutes, except between midnight and 3am (when the member import happens)
-	def indexProfiles: Unit =
+	def indexProfiles(): Unit =
 		if (features.schedulingProfilesIndex)
 			exceptionResolver.reportExceptions { profileIndexingService.incrementalIndex() }
 
 	@Scheduled(fixedRate = 60 * 1000) // every minute
-	def indexNotifications: Unit =
+	def indexNotifications(): Unit =
 		if (features.schedulingNotificationsIndex)
 			exceptionResolver.reportExceptions { notificationIndexService.incrementalIndex() }
 
 	@Scheduled(fixedRate = 60 * 1000) // every minute
-	def resolveScheduledNotifications: Unit =
+	def resolveScheduledNotifications(): Unit =
 		if (features.schedulingProcessScheduledNotifications) maintenanceGuard {
 			exceptionResolver.reportExceptions {
 				scheduledNotificationService.processNotifications()
@@ -93,7 +93,7 @@ class ScheduledJobs {
 		}
 
 	@Scheduled(fixedRate = 60 * 1000) // every minute
-	def processEmailQueue: Unit =
+	def processEmailQueue(): Unit =
 		if (features.schedulingNotificationEmails) maintenanceGuard {
 			exceptionResolver.reportExceptions {
 				notificationEmailService.processNotifications()
@@ -101,20 +101,20 @@ class ScheduledJobs {
 		}
 
 	@Scheduled(fixedDelay = 10 * 1000) // every 10 seconds, non-concurrent
-	def jobs: Unit =
+	def jobs(): Unit =
 		if (features.schedulingJobService) maintenanceGuard {
 			exceptionResolver.reportExceptions { jobService.run() }
 		}
 
 	@Scheduled(fixedDelay = 5 * 60 * 1000) // every 5 minutes, non-concurrent
-	def exportAttendanceToSits: Unit =
+	def exportAttendanceToSits(): Unit =
 		if (features.schedulingExportAttendanceToSits) maintenanceGuard {
 			exceptionResolver.reportExceptions { ExportAttendanceToSitsCommand().apply() }
 		}
 
 	/* Filesystem syncing jobs, should only run on standby */
 	@Scheduled(fixedRate = 300 * 1000) // every 5 minutes
-	def fileSync: Unit =
+	def fileSync(): Unit =
 		if (features.schedulingFileSync) syncGuard {
 			exceptionResolver.reportExceptions {
 				new SyncReplicaFilesystemCommand().apply()
@@ -122,10 +122,16 @@ class ScheduledJobs {
 		}
 
 	@Scheduled(cron = "0 0 19 * * *") // 7pm
-	def cleanupUnreferencedFilesAndSanityCheck: Unit =
+	def cleanupUnreferencedFilesAndSanityCheck(): Unit =
 		exceptionResolver.reportExceptions {
 			if (features.schedulingCleanupUnreferencedFiles) new CleanupUnreferencedFilesCommand().apply()
 			if (features.schedulingSanityCheckFilesystem) new SanityCheckFilesystemCommand().apply()
+		}
+
+	@Scheduled(cron = "0 0 4 * * *") // 4am
+	def updateAttendanceMonitoringSchemeMembership(): Unit =
+		if (features.attendanceMonitoringAcademicYear2014) maintenanceGuard {
+			exceptionResolver.reportExceptions { UpdateAttendanceMonitoringSchemeMembershipCommand().apply() }
 		}
 
 }

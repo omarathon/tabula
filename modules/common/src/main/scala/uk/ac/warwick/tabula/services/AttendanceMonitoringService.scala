@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import uk.ac.warwick.tabula.data.{SchemeMembershipItemType, AutowiringAttendanceMonitoringDaoComponent, AttendanceMonitoringDaoComponent}
 import uk.ac.warwick.tabula.data.SchemeMembershipItem
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointType
-import uk.ac.warwick.tabula.commands.MemberOrUser
+import uk.ac.warwick.tabula.commands.{TaskBenchmarking, MemberOrUser}
 import collection.JavaConverters._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
@@ -33,6 +33,7 @@ trait AttendanceMonitoringService {
 	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate]
 	def listTemplateSchemesByStyle(style: AttendanceMonitoringPointStyle): Seq[AttendanceMonitoringTemplate]
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
+	def listSchemesForMembershipUpdate: Seq[AttendanceMonitoringScheme]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
 	def studentAlreadyReportedThisTerm(student: StudentMember, point: AttendanceMonitoringPoint): Boolean
 	def findReports(studentIds: Seq[String], year: AcademicYear, period: String): Seq[MonitoringPointReport]
@@ -62,7 +63,7 @@ trait AttendanceMonitoringService {
 
 }
 
-abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService {
+abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService with TaskBenchmarking {
 
 	self: AttendanceMonitoringDaoComponent with TermServiceComponent with AttendanceMonitoringMembershipHelpers with UserLookupComponent =>
 
@@ -93,6 +94,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet] =
 		attendanceMonitoringDao.listOldSets(department, academicYear)
+
+	def listSchemesForMembershipUpdate: Seq[AttendanceMonitoringScheme] =
+		attendanceMonitoringDao.listSchemesForMembershipUpdate
 
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String] =
 		attendanceMonitoringDao.findNonReportedTerms(students, academicYear)
@@ -155,15 +159,29 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
 		student.mostSignificantCourseDetails.fold(Seq[AttendanceMonitoringPoint]())(scd => {
 			val currentCourseStartDate = scd.beginDate
-			val schemes = findSchemesForStudent(student, department, academicYear)
+			val schemes = benchmarkTask("findSchemesForStudent") {
+				findSchemesForStudent(student, department, academicYear)
+			}
 			schemes.flatMap(_.points.asScala).filter(p =>
 				p.startDate.isAfter(currentCourseStartDate) || p.startDate.isEqual(currentCourseStartDate)
 			)
 		})
 	}
 
-	private def findSchemesForStudent(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
-		membersHelper.findBy(MemberOrUser(student).asUser).filter(s => s.department == department && s.academicYear == academicYear)
+	private def findSchemesForStudent(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
+		val memberSchemes = benchmarkTask(s"membersHelper.findBy ${student.universityId}") {
+			membersHelper.findBy {
+				val mou = benchmarkTask(s"MemberOrUser ${student.universityId}") {
+					MemberOrUser(student)
+				}
+				benchmarkTask(s"asUser ${student.universityId}") {
+					mou.asUser
+				}
+			}
+		}
+		memberSchemes.filter(s => s.department == department && s.academicYear == academicYear)
+	}
+
 
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint] = {
 		attendanceMonitoringDao.getCheckpoints(points, student, withFlush)
@@ -213,7 +231,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	}
 
 	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal = {
-		val points = listStudentsPoints(student, department, academicYear)
+		val points = benchmarkTask("listStudentsPoints") {
+			listStudentsPoints(student, department, academicYear)
+		}
 		val checkpointMap = getCheckpoints(points, student, withFlush = true)
 		val allCheckpoints = checkpointMap.map(_._2)
 
