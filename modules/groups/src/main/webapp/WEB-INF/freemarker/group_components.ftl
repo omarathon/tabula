@@ -263,7 +263,7 @@
 												<li class="clearfix">
 													<#-- Tutor, weeks, day/time, location -->
 													<div class="eventWeeks">
-														<h5>${event.title}</h5>
+														<#if event.title??><h5>${event.title}</h5></#if>
 														<#if setItem.canViewTutors && event.tutors?? >
 															<h6>Tutor<#if (event.tutors.size > 1)>s</#if>:
 																<#if (event.tutors.size < 1)>[no tutor]</#if>

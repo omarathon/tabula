@@ -58,7 +58,7 @@
 												<@f.hidden path="delete" id="group${group_index}_event${event_index}_delete" />
 											
 												<#-- TODO display tutors -->
-												<h5>${event.title}</h5> 
+												<#if event.title??><h5>${event.title}</h5></#if>
 												<#-- TODO this should be a formatter, the current formatter expects a full fat event -->
 												<#if event.weekRanges?size gt 0 && event.day??>
 													<#noescape>${weekRangesFormatter(event.weekRanges, event.day, academicYear, module.department)}</#noescape>,
