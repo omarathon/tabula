@@ -86,7 +86,7 @@ trait RecordMonitoringPointPermissions extends RequiresPermissionsChecking with 
 	self: RecordMonitoringPointCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.View, department)
+		p.PermissionCheck(Permissions.MonitoringPoints.Record, department)
 	}
 
 }
