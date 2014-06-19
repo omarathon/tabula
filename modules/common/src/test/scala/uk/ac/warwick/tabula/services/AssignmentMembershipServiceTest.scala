@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UpstreamAssessmentGroup, UserGroup}
 import uk.ac.warwick.tabula.helpers.Tap._
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 class AssignmentMembershipServiceTest extends TestBase with Mockito {
 
@@ -33,6 +33,7 @@ class AssignmentMembershipServiceTest extends TestBase with Mockito {
 		uag.members.add(user3)
 		uag.members.add(user1)
 		uag.members.add(user2)
+		uag.members.add(new AnonymousUser)
 
 		val other = UserGroup.ofUsercodes
 		other.userLookup = userLookup
