@@ -55,7 +55,7 @@ class SubmissionPersistenceTest extends PersistenceTestBase {
         	// check that previous reports are removed, otherwise the @OneToOne will explode
         	attachment.originalityReport = null
         	session.delete(report2)
-        	session.flush // hmm, need to flush to delete.
+        	session.flush() // hmm, need to flush to delete.
 
         	val report3 = newReport
         	attachment.originalityReport = report3
@@ -63,8 +63,8 @@ class SubmissionPersistenceTest extends PersistenceTestBase {
         	session.update(attachment)
         	session.save(report3)
 
-            session.flush
-            session.clear
+            session.flush()
+            session.clear()
 
             // expecting: no exception from having >1 matching OriginalityReport
 //            val session2 = session.get(classOf[Submission], submission.id).asInstanceOf[Submission]

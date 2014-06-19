@@ -161,8 +161,8 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 			deleteOldModuleRegistrations(usercodesProcessed, newModuleRegistrations)
 		}
 
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 
 		newModuleRegistrations
 	}
@@ -198,8 +198,8 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 			}
 		}
 
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 	}
 
 	def refresh(member: Member) {
