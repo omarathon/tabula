@@ -134,7 +134,7 @@ trait RecordMonitoringPointCommandState {
 		}.toMap
 
 	lazy val studentPointCheckpointMap: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]] =
-		attendanceMonitoringService.getCheckpoints(pointsToRecord, studentMap.values.flatten.toSeq)
+		attendanceMonitoringService.getCheckpoints(pointsToRecord, studentMap.values.flatten.toSeq.distinct)
 
 	lazy val attendanceNoteMap: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]] =
 		studentMap.flatMap(_._2).map(student => student -> attendanceMonitoringService.getAttendanceNoteMap(student)).toMap
