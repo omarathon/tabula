@@ -77,6 +77,8 @@
 			<#assign submitUrl><@routes.relationship_allocate department relationshipType /></#assign>
 			<div class="fix-area">
 			<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToRelationshipCommand" cssClass="form-horizontal">
+			<input type="hidden" name="previouslyAllocatedMapping" value="${previouslyAllocatedMapping}" />
+
 			<div class="tabula-dnd"
 					 data-item-name="student"
 					 data-text-selector=".name h6"

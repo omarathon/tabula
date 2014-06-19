@@ -36,7 +36,7 @@ class AllocateStudentsToRelationshipController extends ProfilesController {
 	@RequestMapping(method=Array(POST), params=Array("action=refresh"))
 	def form(cmd: AllocateStudentsToRelationshipCommand) = {
 		cmd.sort()
-		Mav("relationships/allocate")
+		Mav("relationships/allocate", "previouslyAllocatedMapping" -> cmd.mapping)
 	}
 	
 	@RequestMapping(method = Array(POST), params = Array("isfile=true", "action!=refresh"))

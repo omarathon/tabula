@@ -55,30 +55,45 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 	var additionalAgents: JList[String] = JArrayList()
 
+	var previouslyAllocatedMapping: JMap[Member, JList[Member]] = _ // populated by hidden field in form
+	
 	override def onBind(result: BindingResult) {
 		super.onBind(result)
 
-		// Find all empty textboxes for agents and remove them - otherwise we end up with a never ending list of empties
-		val indexesToRemove = additionalAgents.asScala.zipWithIndex.flatMap { case (agent, index) =>
-			if (!agent.hasText) Some(index)
-			else None
-		}
+		removeBlankAgents()
 
-		// We reverse because removing from the back is better
-		indexesToRemove.reverse.foreach { additionalAgents.remove(_) }
-
+		// 'mapping' contains a map from agent to students, populated in the form.
+		// When new agents are added through the "Add <e.g. personal tutors>" modal, add them to mapping
 		additionalAgents.asScala
 			.flatMap { profileService.getAllMembersWithUserId(_) }
 			.foreach { member =>
 				if (!mapping.containsKey(member)) mapping.put(member, JArrayList())
 			}
+
+		def removeBlankAgents() {
+			// Find all empty textboxes for agents and remove them - otherwise we end up with a never ending list of empties
+			val indexesToRemove = additionalAgents.asScala.zipWithIndex.flatMap { case (agent, index) =>
+				if (!agent.hasText) Some(index)
+				else None
+			}
+
+			// We reverse because removing from the back is better
+			indexesToRemove.reverse.foreach {
+				additionalAgents.remove(_)
+			}
+		}
 	}
 
-	// Only called on initial form view
+	/**
+	 * populate - only called on initial form view
+	 *
+	 * Populate 'mapping' with existing relationships between agents and students, from the database.
+	 * Also set up unallocated as a list of all students in the department without this type of agent.
+	 *
+	 */
 	override def populate() {
-		// get all relationships by dept
 		service
-			.listStudentRelationshipsByDepartment(relationshipType, department)
+			.listStudentRelationshipsByDepartment(relationshipType, department) // get all relationships by dept
 			.groupBy(_.agent) // group into map by agent university id
 			.foreach { case (agent, students) =>
 				if (agent.forall(_.isDigit)) {
@@ -107,6 +122,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	// For use by Freemarker to get a simple map of university IDs to Member objects - permissions aware!
 	lazy val membersById = loadMembersById
 
+	// sets up 'members' - a map from uni ID to member object for both agents and students
 	def loadMembersById = {
 		val members =
 			(unallocated.asScala ++ (for ((agent, students) <- mapping.asScala) yield agent +: students.asScala).flatten)
@@ -134,36 +150,44 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		unallocated = JArrayList(unallocated.asScala.toList.sorted)
 	}
 
+
 	final def applyInternal() = transactional() {
-		val addCommands = (for ((agent, students) <- mapping.asScala; student <- students.asScala.collect { case student: StudentMember => student }) yield {
-			student.mostSignificantCourseDetails.map { studentCourseDetails =>
-				val currentAgent = service.findCurrentRelationships(relationshipType, student).headOption.flatMap { _.agentMember }.headOption
-				val cmd = new EditStudentRelationshipCommand(
-					studentCourseDetails,
-					relationshipType,
-					currentAgent, 
-					viewer, 
-					false
-				)
-				cmd.agent = agent
-				cmd
-			}
-		}).toSeq.flatten
+		val agentsBefore = previouslyAllocatedMapping.keySet.asScala
+		val agentsAfter = mapping.keySet.asScala
 
-		val removeCommands = unallocated.asScala.collect { case student: StudentMember => student }.flatMap { student =>
-			student.mostSignificantCourseDetails.map { studentCourseDetails =>
-				val rels = service.findCurrentRelationships(relationshipType, student)
-				val agents = rels.flatMap { _.agentMember }
+		val newAgents = agentsAfter.filterNot(agentsBefore.contains(_))
+		val droppedAgents = agentsBefore.filterNot(agentsAfter.contains(_))
+		val changedAgents = agentsAfter.intersect(agentsBefore).filterNot(agent => previouslyAllocatedMapping.get(agent).equals(mapping.get(agent)))
 
-				agents.map { agent =>
-					val cmd = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Some(agent), viewer, true)
-					cmd.agent = agent
-					cmd
+		// get the commands needed to remove the relationships of this type for dropped and changed agents:
+		val removeCommands = for (
+			agent <- droppedAgents ++ changedAgents;
+			relationship <- service.listStudentRelationshipsWithMember(relationshipType, agent)) yield {
+			new EndStudentRelationshipCommand(relationship, viewer)
+		}
+
+		val addCommands = for (agent <- newAgents ++ changedAgents) {
+			val studentSet = mapping.asScala.get(agent).flatMap(_.asScala)
+
+			val studentMembersForAgent = for (student <- studentSet) yield {
+				val studentMember: Option[StudentMember] = student match {
+					case stuMem: StudentMember => Some(stuMem)
+					case _ => None
 				}
 			}
-		}.toSeq.flatten
 
-		(addCommands ++ removeCommands).map { cmd =>
+			val addCommandsForAgent = (studentMembersForAgent.map {
+				stu => stu.mostSignificantCourseDetails.map {
+					new EditStudentRelationshipCommand(_, relationshipType, Some(agent), viewer, false)
+				}
+			}).flatten
+			addCommandsForAgent
+
+		}
+
+		addCommands.flatten
+
+		val result = (addCommands ++ removeCommands).map { cmd =>
 			/*
 			 * Defensively code against these defaults changing in future. We do NOT want the
 			 * sub-command to send notifications - we'll do that ourselves
@@ -172,8 +196,9 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 			cmd.notifyOldAgent = false
 			cmd.notifyNewAgent = false
 
-			cmd.apply().map { modifiedRelationship => StudentRelationshipChange(cmd.currentAgent, modifiedRelationship.asInstanceOf[StudentRelationship]) }
-		}.flatten
+			cmd.apply().map { modifiedRelationship => StudentRelationshipChange(cmd.oldAgent, modifiedRelationship.asInstanceOf[StudentRelationship]) }
+		}
+		result.flatten
 	}
 	
 	def validateUploadedFile(result: BindingResult) {

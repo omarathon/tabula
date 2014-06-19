@@ -43,7 +43,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 	override def applyInternal(): Option[ModuleRegistration] = transactional() ({
 		tabulaModule match {
 			case None => {
-				logger.warn("No stem module " + modRegRow.sitsModuleCode + " found in Tabula for " + scjCode + " - maybe it hasn't been imported yet?")
+				logger.warn("No stem module for " + modRegRow.sitsModuleCode + " found in Tabula for " + scjCode + " - maybe it hasn't been imported yet?")
 				None
 			}
 			case Some(module: Module) => {

@@ -33,9 +33,9 @@ class EditStudentRelationshipCommand(
 	val currentAgent: Option[Member],
 	val currentUser: CurrentUser,
 	val remove: Boolean
-) extends Command[Seq[StudentRelationship]] with Notifies[Seq[StudentRelationship], StudentRelationship] with SelfValidating {
+) extends AbstractEditStudentRelationshipCommand with SelfValidating {
 
-	var relationshipService = Wire[RelationshipService]
+	def oldAgent = currentAgent
 
 	var agent: Member = _
 
@@ -48,10 +48,6 @@ class EditStudentRelationshipCommand(
 	}
 
 	val newAgent = promise { agent }
-
-	var notifyStudent: Boolean = false
-	var notifyOldAgent: Boolean = false
-	var notifyNewAgent: Boolean = false
 
 	def validate(errors: Errors) {
 		if(agent == null){
