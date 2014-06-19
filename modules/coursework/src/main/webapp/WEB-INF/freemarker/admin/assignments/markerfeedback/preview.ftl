@@ -9,7 +9,7 @@
 <#assign hasGlobalErrors=status.errors.globalErrors?size gt 0 />
 </@spring.bind>
 
-<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/feedback')}" commandName=commandName>
+<@f.form method="post" class="double-submit-protection"  action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/feedback')}" commandName=commandName>
 <input type="hidden" name="batch" value="true">
 
 <h1>Submit feedback for ${assignment.name}</h1>
@@ -25,7 +25,7 @@
 <#assign itemsList=status.actualValue />
 <p>
 	<#if itemsList?size gt 0>
-		I've ${verbed_your_noun} and I found feedback for ${itemsList?size} students.
+		I've ${verbed_your_noun} and I found feedback for <@fmt.p number=itemsList?size singular="student" plural="students" shownumber=true />
 		<#if hasErrors>
 			<div class="alert alert-error">
 				However, there were some problems with its contents, which are shown below.

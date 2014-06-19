@@ -35,7 +35,7 @@ class AddMarkerFeedbackController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def doUpload(@ModelAttribute cmd: AddMarkerFeedbackCommand, @PathVariable assignment: Assignment, errors: Errors): Mav = {
+	def doUpload(@ModelAttribute cmd: AddMarkerFeedbackCommand, errors: Errors, @PathVariable assignment: Assignment): Mav = {
 
 		cmd.preExtractValidation(errors)
 		cmd.postExtractValidation(errors)
