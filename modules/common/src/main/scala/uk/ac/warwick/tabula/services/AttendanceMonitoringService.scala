@@ -5,12 +5,12 @@ import uk.ac.warwick.tabula.data.model.attendance._
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
-import uk.ac.warwick.tabula.data.{SchemeMembershipItemType, AutowiringAttendanceMonitoringDaoComponent, AttendanceMonitoringDaoComponent}
-import uk.ac.warwick.tabula.data.SchemeMembershipItem
+import uk.ac.warwick.tabula.data.{AttendanceMonitoringStudentData, SchemeMembershipItemType, AutowiringAttendanceMonitoringDaoComponent, AttendanceMonitoringDaoComponent, SchemeMembershipItem}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointType
 import uk.ac.warwick.tabula.commands.{TaskBenchmarking, MemberOrUser}
 import collection.JavaConverters._
-import org.joda.time.DateTime
+import org.joda.time.{LocalDate, DateTime}
+import uk.ac.warwick.userlookup.User
 
 trait AttendanceMonitoringServiceComponent {
 	def attendanceMonitoringService: AttendanceMonitoringService
@@ -48,6 +48,7 @@ trait AttendanceMonitoringService {
 		types: Seq[AttendanceMonitoringPointType]
 	): Seq[MonitoringPoint]
 	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
+	def listStudentsPoints(studentData: AttendanceMonitoringStudentData, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], students: Seq[StudentMember]): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]]
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
@@ -142,27 +143,26 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
 		student.mostSignificantCourseDetails.fold(Seq[AttendanceMonitoringPoint]())(scd => {
 			val currentCourseStartDate = scd.beginDate
-			val schemes = benchmarkTask("findSchemesForStudent") {
-				findSchemesForStudent(student, department, academicYear)
-			}
+			val schemes = findSchemesForStudent(student.universityId, student.userId, department, academicYear)
 			schemes.flatMap(_.points.asScala).filter(p =>
 				p.startDate.isAfter(currentCourseStartDate) || p.startDate.isEqual(currentCourseStartDate)
 			)
 		})
 	}
 
-	private def findSchemesForStudent(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
-		val memberSchemes = benchmarkTask(s"membersHelper.findBy ${student.universityId}") {
-			membersHelper.findBy {
-				val mou = benchmarkTask(s"MemberOrUser ${student.universityId}") {
-					MemberOrUser(student)
-				}
-				benchmarkTask(s"asUser ${student.universityId}") {
-					mou.asUser
-				}
-			}
-		}
-		memberSchemes.filter(s => s.department == department && s.academicYear == academicYear)
+	def listStudentsPoints(studentData: AttendanceMonitoringStudentData, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
+		val schemes = findSchemesForStudent(studentData.universityId, studentData.userId, department, academicYear)
+		schemes.flatMap(_.points.asScala).filter(p =>
+			p.startDate.isAfter(studentData.scdBeginDate) || p.startDate.isEqual(studentData.scdBeginDate)
+		)
+	}
+
+	private def findSchemesForStudent(universityId: String, userId: String, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
+		val user = new User(userId)
+		user.setWarwickId(universityId)
+		benchmarkTask(s"membersHelper.findBy $universityId") {
+			membersHelper.findBy(user)
+		}.filter(s => s.department == department && s.academicYear == academicYear)
 	}
 
 

@@ -54,6 +54,7 @@ trait ProfileService {
 	): (Int, Seq[StudentMember])
 	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[StudentMember]
 	def findAllUniversityIdsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
+	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction]): Seq[AttendanceMonitoringStudentData]
 	def getStudentsByAgentRelationshipAndRestrictions(
 		relationshipType: StudentRelationshipType,
 		agent: Member,
@@ -342,6 +343,20 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 				.filter(studentDepartmentFilterMatches(department)).map(_.universityId)
 		}	else {
 			memberDao.findUniversityIdsByRestrictions(allRestrictions, orders)
+		}
+	}
+
+	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction]): Seq[AttendanceMonitoringStudentData] = {
+		val allRestrictions = affiliatedDepartmentsRestriction(department, restrictions)
+
+		if (department.hasParent) {
+			// TODO this sucks. Would be better if you could get ScalaRestrictions from a filter rule and add them to allRestrictions
+			memberDao.findStudentsByRestrictions(allRestrictions, Seq(), Int.MaxValue, 0)
+				.filter(studentDepartmentFilterMatches(department))
+				.filter(_.mostSignificantCourseDetails.isDefined)
+				.map(student => AttendanceMonitoringStudentData(student.universityId, student.userId, student.mostSignificantCourse.beginDate))
+		}	else {
+			memberDao.findAllStudentDataByRestrictions(allRestrictions)
 		}
 	}
 
