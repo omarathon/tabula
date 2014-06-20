@@ -47,6 +47,7 @@ trait AttendanceMonitoringDao {
 	def delete(scheme: AttendanceMonitoringScheme)
 	def delete(point: AttendanceMonitoringPoint)
 	def delete(template: AttendanceMonitoringTemplate)
+	def delete(templatePoint: AttendanceMonitoringTemplatePoint)
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate]
 	def getTemplatePointById(id: String): Option[AttendanceMonitoringTemplatePoint]
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
@@ -114,6 +115,9 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 
 	def delete(template: AttendanceMonitoringTemplate) =
 		session.delete(template)
+
+	def delete(templatePoint: AttendanceMonitoringTemplatePoint) =
+		session.delete(templatePoint)
 
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate] =
 		getById[AttendanceMonitoringTemplate](id)

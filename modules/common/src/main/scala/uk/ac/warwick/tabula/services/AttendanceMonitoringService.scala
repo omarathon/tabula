@@ -31,6 +31,7 @@ trait AttendanceMonitoringService {
 	def deleteScheme(scheme: AttendanceMonitoringScheme)
 	def deletePoint(point: AttendanceMonitoringPoint)
 	def deleteTemplate(template: AttendanceMonitoringTemplate)
+	def deleteTemplatePoint(point: AttendanceMonitoringTemplatePoint)
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate]
 	def getTemplatePointById(id: String): Option[AttendanceMonitoringTemplatePoint]
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
@@ -99,6 +100,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def deleteTemplate(template: AttendanceMonitoringTemplate) =
 		attendanceMonitoringDao.delete(template)
+
+	def deleteTemplatePoint(point: AttendanceMonitoringTemplatePoint) =
+		attendanceMonitoringDao.delete(point)
 
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate] =
 		attendanceMonitoringDao.getTemplateSchemeById(id)
