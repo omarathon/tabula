@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.data.convert.{MonitoringPointIdConverter, MemberUniv
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.core.convert.support.GenericConversionService
 import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.tabula.attendance.commands.view.old.{SetMonitoringCheckpointState, SetMonitoringCheckpointCommandValidation, SetMonitoringCheckpointCommand}
 
 class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 

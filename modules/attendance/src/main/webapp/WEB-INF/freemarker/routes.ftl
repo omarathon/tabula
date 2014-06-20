@@ -137,5 +137,8 @@
 	<#local returnTo><#if returnTo?has_content>?returnTo=${returnTo}</#if></#local>
 	<@_u page="/view/${department.code}/${academicYearString}/students/${student.universityId}/record${returnTo}"/>
 </#macro>
-<#macro viewPoints department academicYearString><@_u page="/view/${department.code}/${academicYearString}/points"/></#macro>
+<#macro viewPoints department academicYearString filterQuery="">
+	<@_u page="/view/${department.code}/${academicYearString}/points?${filterQuery}"/>
+</#macro>
+<#macro viewRecordPoints department academicYearString point queryString returnTo><@_u page="/view/${department.code}/${academicYearString}/points/${point.id}/record?returnTo=${returnTo?url}&${queryString}"/></#macro>
 <#macro viewAgents department academicYearString relationshipType><@_u page="/view/${department.code}/${academicYearString}/agents/${relationshipType.urlPart}"/></#macro>

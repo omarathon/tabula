@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.attendance.commands.view.old.GroupedPointValidation
 
 object AgentPointRecordCommand {
 	def apply(agent: Member, user: CurrentUser, relationshipType: StudentRelationshipType, templateMonitoringPoint: MonitoringPoint) =

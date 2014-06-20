@@ -5,7 +5,6 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 
 import javax.validation.Valid
-import uk.ac.warwick.tabula.attendance.commands.SetMonitoringCheckpointForStudentCommand
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
@@ -13,6 +12,7 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPo
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringCheckpoint
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, AutowiringTermServiceComponent, AutowiringRelationshipServiceComponent}
+import uk.ac.warwick.tabula.attendance.commands.view.old.SetMonitoringCheckpointForStudentCommand
 
 @RequestMapping(Array("/{department}/{monitoringPoint}/record/{student}"))
 @Controller
