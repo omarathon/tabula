@@ -64,6 +64,7 @@ trait AttendanceMonitoringDao {
 		types: Seq[MonitoringPointType]
 	): Seq[MonitoringPoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
+	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], students: Seq[StudentMember]): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]]
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
 	def removeCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit
 	def saveOrUpdateCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit
@@ -242,6 +243,19 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 				.seq
 
 			checkpoints.map { c => c.point -> c}.toMap
+		}
+	}
+
+	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], students: Seq[StudentMember]): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]] = {
+		if (points.isEmpty || students.isEmpty)
+			Map()
+		else {
+			val checkpoints = session.newCriteria[AttendanceMonitoringCheckpoint]
+				.add(safeIn("student", students))
+				.add(safeIn("point", points))
+				.seq
+
+			checkpoints.groupBy(_.student).mapValues(_.groupBy(_.point).mapValues(_.head))
 		}
 	}
 

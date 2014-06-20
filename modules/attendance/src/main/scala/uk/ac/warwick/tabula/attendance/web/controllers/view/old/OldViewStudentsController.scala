@@ -7,10 +7,10 @@ import uk.ac.warwick.tabula.commands.Appliable
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
-import uk.ac.warwick.tabula.attendance.commands.{ViewStudentsState, ViewStudentsResults, ViewStudentsCommand}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
+import uk.ac.warwick.tabula.attendance.commands.view.old.{ViewStudentsState, ViewStudentsCommand, ViewStudentsResults}
 
 @Controller
 @RequestMapping(value=Array("/view/{department}/2013/students"))

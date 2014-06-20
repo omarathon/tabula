@@ -29,25 +29,26 @@ class FilterMonitoringPointsCommandInternal(val department: Department, val acad
 	self: ProfileServiceComponent with FilterMonitoringPointsCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent =>
 
 	override def applyInternal() = {
-
-
 		if (serializeFilter.isEmpty) {
-			hasBeenFiltered = false
 			Map()
 		} else {
-			val students = profileService.findAllStudentsByRestrictions (
-				department = department,
-				restrictions = buildRestrictions(),
-				orders = buildOrders()
-			)
+			val students = benchmarkTask("profileService.findAllStudentsByRestrictions") {
+				profileService.findAllStudentsByRestrictions (
+					department = department,
+					restrictions = buildRestrictions(),
+					orders = buildOrders()
+				)
+			}
 
-			if (students.size > MaxStudentsFromFilter ) {
+			if (students.size > MaxStudentsFromFilter) {
 					filterTooVague = true
 					Map()
 			} else {
-				val points = students.flatMap { student =>
-					attendanceMonitoringService.listStudentsPoints(student, department, academicYear)
-				}.distinct
+				val points = benchmarkTask("List all students points") {
+					students.flatMap { student =>
+						attendanceMonitoringService.listStudentsPoints(student, department, academicYear)
+					}.distinct
+				}
 				groupByMonth(points, groupSimilar = true) ++ groupByTerm(points, groupSimilar = true)
 			}
 		}
@@ -84,7 +85,6 @@ trait FilterMonitoringPointsCommandState extends AttendanceFilterExtras {
 	var allStudents: Seq[StudentMember] = _
 
 	var filterTooVague = false
-	var hasBeenFiltered = false
 
 }
 

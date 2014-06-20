@@ -111,5 +111,7 @@ object Routes {
 				encoded(academicYear.startYear.toString),
 				encoded(student.universityId)
 			)
+		def points(department: Department, academicYear: AcademicYear) =
+			context + "/view/%s/%s/points" format(encoded(department.code), encoded(academicYear.startYear.toString))
 	}
 }

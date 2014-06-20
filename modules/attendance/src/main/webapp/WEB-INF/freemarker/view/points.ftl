@@ -10,7 +10,7 @@
 	</div>
 	</#if>
 
-	<#assign submitUrl><@routes.viewDepartmentPointsWithAcademicYear filterCommand.department filterCommand.academicYear filterQuery/></#assign>
+	<#assign submitUrl><@routes.viewPoints filterCommand.department filterCommand.academicYear.startYear?c /></#assign>
 
 	<#assign filterCommand = filterCommand />
 	<#assign filterCommandName = "filterCommand" />
