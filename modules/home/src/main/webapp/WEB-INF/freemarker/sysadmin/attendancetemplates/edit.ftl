@@ -49,4 +49,41 @@
 	/>
 	<a class="btn" href="<@url page="/sysadmin/attendancetemplates" />">Cancel</a>
 </@f.form>
+
+<hr />
+
+<div class="monitoring-points">
+
+	<div class="striped-section">
+		<div class="pull-right">
+			<a href="<@url page="/sysadmin/attendancetemplates/${template.id}/points/add" />" class="btn btn-primary new-point"><i class="icon-plus"></i> Create new point</a>
+		</div>
+		<h2 class="section-title">Monitoring points</h2>
+		<div class="striped-section-contents">
+			<#if template.points?size == 0>
+				<div class="item-info">
+					<em>No points exist for this template</em>
+				</div>
+			<#else>
+				<#list template.points as point>
+					<div class="item-info row-fluid point">
+						<div class="span12">
+							<div class="pull-right">
+								<a class="btn btn-primary edit-point" href="<@url page="/sysadmin/attendancetemplates/${template.id}/points/${point.id}/edit"/>">Edit</a>
+								<a class="btn btn-danger delete-point" title="Delete" href="<@url page="/sysadmin/attendancetemplates/${template.id}/points/${point.id}/delete"/>"><i class="icon-remove"></i></a>
+							</div>
+							<#if template.pointStyle.dbValue == "week">
+								${point.name} (week ${point.startWeek} - ${point.endWeek})
+							<#else>
+								${point.name} ()
+							</#if>
+						</div>
+					</div>
+				</#list>
+			</#if>
+		</div>
+	</div>
+
+</div>
+
 </#escape>

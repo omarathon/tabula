@@ -1,17 +1,17 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.attendance._
-import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
-import uk.ac.warwick.tabula.data.{AttendanceMonitoringStudentData, SchemeMembershipItemType, AutowiringAttendanceMonitoringDaoComponent, AttendanceMonitoringDaoComponent, SchemeMembershipItem}
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointType
-import uk.ac.warwick.tabula.commands.{TaskBenchmarking, MemberOrUser}
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import org.joda.time.DateTime
+import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, _}
+import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.data.{AttendanceMonitoringDaoComponent, AttendanceMonitoringStudentData, AutowiringAttendanceMonitoringDaoComponent, SchemeMembershipItem, SchemeMembershipItemType}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 trait AttendanceMonitoringServiceComponent {
 	def attendanceMonitoringService: AttendanceMonitoringService
@@ -27,10 +27,12 @@ trait AttendanceMonitoringService {
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
 	def saveOrUpdate(template: AttendanceMonitoringTemplate): Unit
+	def saveOrUpdate(templatePoint: AttendanceMonitoringTemplatePoint): Unit
 	def deleteScheme(scheme: AttendanceMonitoringScheme)
 	def deletePoint(point: AttendanceMonitoringPoint)
 	def deleteTemplate(template: AttendanceMonitoringTemplate)
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate]
+	def getTemplatePointById(id: String): Option[AttendanceMonitoringTemplatePoint]
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate]
 	def listTemplateSchemesByStyle(style: AttendanceMonitoringPointStyle): Seq[AttendanceMonitoringTemplate]
@@ -86,6 +88,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def saveOrUpdate(template: AttendanceMonitoringTemplate): Unit =
 		attendanceMonitoringDao.saveOrUpdate(template)
 
+	def saveOrUpdate(templatePoint: AttendanceMonitoringTemplatePoint): Unit =
+		attendanceMonitoringDao.saveOrUpdate(templatePoint)
+
 	def deleteScheme(scheme: AttendanceMonitoringScheme) =
 		attendanceMonitoringDao.delete(scheme)
 
@@ -98,6 +103,8 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate] =
 		attendanceMonitoringDao.getTemplateSchemeById(id)
 
+	def getTemplatePointById(id: String): Option[AttendanceMonitoringTemplatePoint] =
+		attendanceMonitoringDao.getTemplatePointById(id)
 
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.listSchemes(department, academicYear)

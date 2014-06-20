@@ -43,10 +43,12 @@ trait AttendanceMonitoringDao {
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
 	def saveOrUpdate(total: AttendanceMonitoringCheckpointTotal): Unit
 	def saveOrUpdate(template: AttendanceMonitoringTemplate): Unit
+	def saveOrUpdate(templatePoint: AttendanceMonitoringTemplatePoint): Unit
 	def delete(scheme: AttendanceMonitoringScheme)
 	def delete(point: AttendanceMonitoringPoint)
 	def delete(template: AttendanceMonitoringTemplate)
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate]
+	def getTemplatePointById(id: String): Option[AttendanceMonitoringTemplatePoint]
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate]
@@ -99,7 +101,10 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 		session.saveOrUpdate(total)
 
 	def saveOrUpdate(template: AttendanceMonitoringTemplate): Unit =
-		session.saveOrUpdate(template)
+	session.saveOrUpdate(template)
+
+	def saveOrUpdate(templatePoint: AttendanceMonitoringTemplatePoint): Unit =
+		session.saveOrUpdate(templatePoint)
 
 	def delete(scheme: AttendanceMonitoringScheme) =
 		session.delete(scheme)
@@ -112,6 +117,9 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate] =
 		getById[AttendanceMonitoringTemplate](id)
+
+	def getTemplatePointById(id: String): Option[AttendanceMonitoringTemplatePoint] =
+		getById[AttendanceMonitoringTemplatePoint](id)
 
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
 		session.newCriteria[AttendanceMonitoringScheme]

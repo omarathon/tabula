@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.sysadmin.web
 
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplate
 import uk.ac.warwick.tabula.web.RoutesUtils
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 
@@ -20,5 +21,6 @@ object Routes {
 
 	object AttendanceTemplates {
 		def list = context + "/attendancetemplates"
+		def edit(template: AttendanceMonitoringTemplate) = context + "/attendancetemplates/%s/edit" format encoded(template.id)
 	}
 }

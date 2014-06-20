@@ -44,7 +44,7 @@ trait DeleteAttendanceTemplateDescription extends Describable[Unit] {
 	override lazy val eventName = "DeleteAttendanceTemplate"
 
 	override def describe(d: Description) {
-
+		d.attendanceMonitoringTemplate(template)
 	}
 }
 
