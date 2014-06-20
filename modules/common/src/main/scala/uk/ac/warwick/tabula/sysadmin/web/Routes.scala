@@ -15,6 +15,10 @@ object Routes {
 
 	object jobs {
 		def list = context + "/jobs/list"
-		def status(instance: JobInstance) = context + "/jobs/job-status?id=%s" format (encoded(instance.id))
+		def status(instance: JobInstance) = context + "/jobs/job-status?id=%s" format encoded(instance.id)
+	}
+
+	object AttendanceTemplates {
+		def list = context + "/attendancetemplates"
 	}
 }

@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 trait MonitoringPointSetTemplatesPermissions  extends RequiresPermissionsChecking {
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPointSetTemplates.Manage)
+		p.PermissionCheck(Permissions.MonitoringPointTemplates.Manage)
 	}
 
 }

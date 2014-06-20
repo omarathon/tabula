@@ -26,8 +26,10 @@ trait AttendanceMonitoringService {
 	def getPointById(id: String): Option[AttendanceMonitoringPoint]
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
+	def saveOrUpdate(template: AttendanceMonitoringTemplate): Unit
 	def deleteScheme(scheme: AttendanceMonitoringScheme)
 	def deletePoint(point: AttendanceMonitoringPoint)
+	def deleteTemplate(template: AttendanceMonitoringTemplate)
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate]
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate]
@@ -81,11 +83,17 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit =
 		attendanceMonitoringDao.saveOrUpdate(point)
 
+	def saveOrUpdate(template: AttendanceMonitoringTemplate): Unit =
+		attendanceMonitoringDao.saveOrUpdate(template)
+
 	def deleteScheme(scheme: AttendanceMonitoringScheme) =
 		attendanceMonitoringDao.delete(scheme)
 
 	def deletePoint(point: AttendanceMonitoringPoint) =
 		attendanceMonitoringDao.delete(point)
+
+	def deleteTemplate(template: AttendanceMonitoringTemplate) =
+		attendanceMonitoringDao.delete(template)
 
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate] =
 		attendanceMonitoringDao.getTemplateSchemeById(id)

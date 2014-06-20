@@ -11,7 +11,7 @@
 <p><a class="btn" href="<@url page="/sysadmin/permissions-helper" />"><i class="icon-fixed-width icon-lock"></i> Permissions helper</a></p>
 <p><a class="btn" href="<@url page="/sysadmin/departments/" />"><i class="icon-fixed-width icon-sitemap"></i> List all departments in the system</a></p>
 <p><a class="btn" href="<@url page="/sysadmin/relationships" />"><i class="icon-fixed-width icon-heart-empty"></i> Student relationship types</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/pointsettemplates" />"><i class="icon-fixed-width icon-copy"></i> Monitoring point set templates</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/attendancetemplates" />"><i class="icon-fixed-width icon-copy"></i> Attendance monitoring templates</a></p>
 <p><a class="btn" href="<@url page="/masquerade" context="/admin" />"><i class="icon-fixed-width icon-eye-open"></i> Masquerade</a></p>
 <p><a class="btn" href="<@url page="/sysadmin/audit/search" />"><i class="icon-fixed-width icon-list-alt"></i> List audit events (Index version)</a></p>
 <p><a class="btn" href="<@url page="/sysadmin/jobs/list" context="/scheduling" />"><i class="icon-fixed-width icon-refresh"></i> Background jobs</a></p>
