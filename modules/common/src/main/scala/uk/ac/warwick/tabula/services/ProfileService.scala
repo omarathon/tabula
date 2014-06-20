@@ -37,7 +37,15 @@ trait ProfileService {
 	def getStudentCourseDetailsByScjCode(scjCode: String): Option[StudentCourseDetails]
 	def getStudentCourseDetailsBySprCode(sprCode: String): Seq[StudentCourseDetails]
 	def countStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Int
+	def countStudentsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction]): Int
 	def findStudentsByRestrictions(
+		department: Department,
+		restrictions: Seq[ScalaRestriction],
+		orders: Seq[ScalaOrder] = Seq(),
+		maxResults: Int = 50,
+		startResult: Int = 0
+	): (Int, Seq[StudentMember])
+	def findStudentsByRestrictionsInAffiliatedDepartments(
 		department: Department,
 		restrictions: Seq[ScalaRestriction],
 		orders: Seq[ScalaOrder] = Seq(),
@@ -46,6 +54,7 @@ trait ProfileService {
 	): (Int, Seq[StudentMember])
 	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[StudentMember]
 	def findAllUniversityIdsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
+	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction]): Seq[AttendanceMonitoringStudentData]
 	def getStudentsByAgentRelationshipAndRestrictions(
 		relationshipType: StudentRelationshipType,
 		agent: Member,
@@ -204,6 +213,49 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 			}
 		}
 	}
+
+	/**
+	 * this returns a tuple of the startResult (offset into query) actually returned, with the resultset itself
+	 */
+	def findStudentsByRestrictionsInAffiliatedDepartments(
+		department: Department,
+		restrictions: Seq[ScalaRestriction],
+		orders: Seq[ScalaOrder] = Seq(),
+		maxResults: Int = 50,
+		startResult: Int = 0
+	): (Int, Seq[StudentMember]) = transactional(readOnly = true) {
+		val allRestrictions = affiliatedDepartmentsRestriction(department, restrictions)
+
+		// If we're a sub/parent department then we have to fetch everyone, boo! Otherwise, we can use nice things
+		if (department.hasParent || department.hasChildren) {
+			val filteredStudents = memberDao.findStudentsByRestrictions(allRestrictions, orders, Int.MaxValue, 0)
+				.filter(studentDepartmentFilterMatches(department))
+
+			if (filteredStudents.isEmpty)
+				(0, Seq())
+			else if (startResult > 0 && filteredStudents.size > maxResults) {
+				(startResult, filteredStudents.slice(startResult, startResult + maxResults))
+			} else {
+				// return the first page of results, notifying zero offset
+				(0, filteredStudents.take(maxResults))
+			}
+		}	else {
+			val offsetStudents = memberDao.findStudentsByRestrictions(allRestrictions, orders, maxResults, startResult)
+
+			if (offsetStudents.nonEmpty) {
+				(startResult, offsetStudents)
+			} else {
+				// meh, have to hit DAO twice if no results for this offset, but at least this should be a rare occurrence
+				val unoffsetStudents = memberDao.findStudentsByRestrictions(allRestrictions, orders, maxResults, 0)
+				if (unoffsetStudents.isEmpty) {
+					(0, Seq())
+				} else {
+					(0, unoffsetStudents)
+				}
+			}
+		}
+	}
+
 	def findAllStudentsByRestrictions(
 		department: Department,
 		restrictions: Seq[ScalaRestriction],
@@ -227,7 +279,6 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		}
 	}
 
-
 	def getStudentsByAgentRelationshipAndRestrictions(
 		relationshipType: StudentRelationshipType,
 		agent: Member,
@@ -236,6 +287,30 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		memberDao.getStudentsByAgentRelationshipAndRestrictions(relationshipType, agent.id, restrictions)
 	}
 
+	private def affiliatedDepartmentsRestriction(department: Department, restrictions: Seq[ScalaRestriction]) = {
+		val queryDepartment = {
+			if (department.hasParent)
+				department.rootDepartment
+			else
+				department
+		}
+
+		val departmentRestriction = Aliasable.addAliases(
+			new ScalaRestriction(
+				org.hibernate.criterion.Restrictions.or(
+					Daoisms.is("studentCourseYearDetails.enrolmentDepartment", queryDepartment),
+					Daoisms.is("route.department", queryDepartment),
+					Daoisms.is("homeDepartment", queryDepartment)
+				)
+			),
+			Seq(
+				FiltersStudents.AliasPaths("studentCourseYearDetails"),
+				FiltersStudents.AliasPaths("route")
+			).flatten : _*
+		)
+
+		Seq(departmentRestriction) ++ restrictions
+	}
 
 	def findAllUniversityIdsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]) = transactional(readOnly = true) {
 		val allRestrictions = {
@@ -259,28 +334,8 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		restrictions: Seq[ScalaRestriction],
 		orders: Seq[ScalaOrder] = Seq()
 	) = transactional(readOnly = true) {
-		val queryDepartment = {
-			if (department.hasParent)
-				department.rootDepartment
-			else
-				department
-		}
 
-		val departmentRestriction = Aliasable.addAliases(
-			new ScalaRestriction(
-				org.hibernate.criterion.Restrictions.or(
-					Daoisms.is("studentCourseYearDetails.enrolmentDepartment", queryDepartment),
-					Daoisms.is("route.department", queryDepartment),
-					Daoisms.is("homeDepartment", queryDepartment)
-				)
-			),
-			Seq(
-				FiltersStudents.AliasPaths("studentCourseYearDetails"),
-				FiltersStudents.AliasPaths("route")
-			).flatten : _*
-		)
-
-		val allRestrictions = Seq(departmentRestriction) ++ restrictions
+		val allRestrictions = affiliatedDepartmentsRestriction(department, restrictions)
 
 		if (department.hasParent) {
 			// TODO this sucks. Would be better if you could get ScalaRestrictions from a filter rule and add them to allRestrictions
@@ -288,6 +343,20 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 				.filter(studentDepartmentFilterMatches(department)).map(_.universityId)
 		}	else {
 			memberDao.findUniversityIdsByRestrictions(allRestrictions, orders)
+		}
+	}
+
+	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction]): Seq[AttendanceMonitoringStudentData] = {
+		val allRestrictions = affiliatedDepartmentsRestriction(department, restrictions)
+
+		if (department.hasParent) {
+			// TODO this sucks. Would be better if you could get ScalaRestrictions from a filter rule and add them to allRestrictions
+			memberDao.findStudentsByRestrictions(allRestrictions, Seq(), Int.MaxValue, 0)
+				.filter(studentDepartmentFilterMatches(department))
+				.filter(_.mostSignificantCourseDetails.isDefined)
+				.map(student => AttendanceMonitoringStudentData(student.universityId, student.userId, student.mostSignificantCourse.beginDate))
+		}	else {
+			memberDao.findAllStudentDataByRestrictions(allRestrictions)
 		}
 	}
 
@@ -300,6 +369,19 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 				FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
 			) ++ restrictions
 
+			memberDao.countStudentsByRestrictions(allRestrictions)
+		}
+	}
+
+	def countStudentsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction]): Int = transactional(readOnly = true) {
+		val allRestrictions = affiliatedDepartmentsRestriction(department, restrictions)
+
+		if (department.hasParent) {
+			// TODO this sucks. Would be better if you could get ScalaRestrictions from a filter rule and add them to allRestrictions
+			memberDao.findStudentsByRestrictions(allRestrictions, Seq(), Int.MaxValue, 0)
+				.filter(studentDepartmentFilterMatches(department)).map(_.universityId)
+				.size
+		}	else {
 			memberDao.countStudentsByRestrictions(allRestrictions)
 		}
 	}

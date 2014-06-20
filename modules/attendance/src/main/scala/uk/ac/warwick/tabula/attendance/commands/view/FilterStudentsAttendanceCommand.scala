@@ -48,15 +48,15 @@ class FilterStudentsAttendanceCommandInternal(val department: Department, val ac
 		with ProfileServiceComponent with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
-		val totalResults = benchmarkTask("profileService.countStudentsByRestrictions") {
-			profileService.countStudentsByRestrictions(
+		val totalResults = benchmarkTask("profileService.countStudentsByRestrictionsInAffiliatedDepartments") {
+			profileService.countStudentsByRestrictionsInAffiliatedDepartments(
 				department = department,
 				restrictions = buildRestrictions()
 			)
 		}
 
-		val (offset, students) = benchmarkTask("profileService.findStudentsByRestrictionss") {
-			profileService.findStudentsByRestrictions(
+		val (offset, students) = benchmarkTask("profileService.findStudentsByRestrictionsInAffiliatedDepartments") {
+			profileService.findStudentsByRestrictionsInAffiliatedDepartments(
 				department = department,
 				restrictions = buildRestrictions(),
 				orders = buildOrders(),
@@ -171,11 +171,16 @@ trait AttendanceFilterExtras extends FiltersStudents {
 		).flatten
 	}
 
-	def attendanceCheckpointTotalsRestriction: Option[ScalaRestriction] = ScalaRestriction.is(
-		"attendanceCheckpointTotals.department",
-		department,
-		getAliasPaths("attendanceCheckpointTotals"): _*
-	)
+	def attendanceCheckpointTotalsRestriction: Option[ScalaRestriction] =
+		// Only apply if required (otherwise only students with a checkpoint total are returned)
+		Seq(unrecordedAttendanceRestriction, authorisedAttendanceRestriction, unauthorisedAttendanceRestriction).flatten.isEmpty match {
+			case true => None
+			case false =>  ScalaRestriction.is(
+				"attendanceCheckpointTotals.department",
+				department,
+				getAliasPaths("attendanceCheckpointTotals"): _*
+			)
+		}
 
 	def unrecordedAttendanceRestriction: Option[ScalaRestriction] = otherCriteria.contains(UNRECORDED) match {
 		case false => None

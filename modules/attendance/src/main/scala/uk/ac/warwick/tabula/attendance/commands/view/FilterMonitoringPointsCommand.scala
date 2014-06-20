@@ -32,21 +32,20 @@ class FilterMonitoringPointsCommandInternal(val department: Department, val acad
 		if (serializeFilter.isEmpty) {
 			Map()
 		} else {
-			val students = benchmarkTask("profileService.findAllStudentsByRestrictions") {
-				profileService.findAllStudentsByRestrictions (
+			val studentDatas = benchmarkTask("profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments") {
+				profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments(
 					department = department,
-					restrictions = buildRestrictions(),
-					orders = buildOrders()
+					restrictions = buildRestrictions()
 				)
 			}
 
-			if (students.size > MaxStudentsFromFilter) {
-					filterTooVague = true
-					Map()
+			if (studentDatas.size > MaxStudentsFromFilter) {
+				filterTooVague = true
+				Map()
 			} else {
 				val points = benchmarkTask("List all students points") {
-					students.flatMap { student =>
-						attendanceMonitoringService.listStudentsPoints(student, department, academicYear)
+					studentDatas.flatMap { studentData =>
+						attendanceMonitoringService.listStudentsPoints(studentData, department, academicYear)
 					}.distinct
 				}
 				groupByMonth(points, groupSimilar = true) ++ groupByTerm(points, groupSimilar = true)
@@ -72,8 +71,8 @@ trait FilterMonitoringPointsCommandState extends AttendanceFilterExtras {
 	def department: Department
 	def academicYear: AcademicYear
 
-	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
-	var sortOrder: JList[Order] = JArrayList()
+	val defaultOrder = Seq(asc("lastName"), asc("firstName"))
+	var sortOrder: JList[Order] = null // No sorting in this command
 
 	var courseTypes: JList[CourseType] = JArrayList()
 	var routes: JList[Route] = JArrayList()
@@ -81,8 +80,6 @@ trait FilterMonitoringPointsCommandState extends AttendanceFilterExtras {
 	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()
 	var modules: JList[Module] = JArrayList()
-
-	var allStudents: Seq[StudentMember] = _
 
 	var filterTooVague = false
 
