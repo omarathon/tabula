@@ -15,22 +15,7 @@
 			</li>
 		</#if>
 
-		<li id="timetable-pane" data-title="Timetable">
-			<section id="timetable-details" class="clearfix" >
-				<h4>Timetable
-					<#if profile.timetableHash?has_content>
-						<a href="<@routes.timetable_ical profile />" title="Subscribe to timetable"><i class="icon-calendar"></i></a>
-	
-						<span class="subscribe">
-							<a href="<@routes.timetable_ical profile />" title="Subscribe to timetable">
-								Subscribe
-							</a>
-						</span>
-					</#if>
-				</h4>
-				<div class='fullCalendar' data-viewname='agendaWeek' data-studentid='${profile.universityId}'></div>
-			</section>
-		</li>
+		<@profile_macros.timetablePane profile />
 
 		<#if (viewerRelationshipTypes?size > 0)>
 			<li id="attendance-pane" data-title="Monitoring Points">
