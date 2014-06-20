@@ -13,6 +13,7 @@
 	<span class="badge badge-warning use-tooltip" data-toggle="tooltip" data-placement="bottom" data-title="This event has not yet been scheduled">Not scheduled</span>
 <#else>
 	<#-- Weeks, day/time, location -->
+	<#if event.title?has_content><span class="eventTitle">${event.title} - </span></#if>
 	<@fmt.weekRanges event />,
 	${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime /><#if event.location?has_content>,</#if>
 	${event.location!"[no location]"}
@@ -269,7 +270,6 @@
 															<#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>
 															</h6>
 														</#if>
-														<#if event.title?has_content><span class="eventTitle">${event.title} - </span></#if>
 														<@event_schedule_info event />
 													</div>
 												</li>

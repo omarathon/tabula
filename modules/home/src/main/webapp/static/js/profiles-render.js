@@ -448,6 +448,9 @@
                                         if (event.description && event.description.length > 0){
                                         	content = content + "<tr><th>What</th><td>" + event.description +"</td></tr>";
                                         }
+                                        if (event.title && event.title.length > 0) {
+                                            content = content + "<tr><th>Title</th><td>" + event.title + "</td></tr>";
+                                        }
                                         content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
                                         content = content + "<tr><th>Where</th><td>" + event.location + "</td></tr>";
                                         if (event.tutorNames.length > 0){

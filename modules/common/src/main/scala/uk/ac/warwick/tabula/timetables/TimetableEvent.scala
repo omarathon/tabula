@@ -21,7 +21,7 @@ case class TimetableEvent(
 object TimetableEvent {
 
 	def apply(sge: SmallGroupEvent): TimetableEvent = {
-		TimetableEvent(name = sge.group.name,
+		TimetableEvent(name = sge.group.name + Option(sge.title).map(" : " + _).getOrElse(""),
 			description = sge.group.groupSet.name,
 			eventType = smallGroupFormatToTimetableEventType(sge.group.groupSet.format),
 			weekRanges = sge.weekRanges,

@@ -34,9 +34,11 @@ object FullCalendarEvent {
 
 	def apply(source: EventOccurrence, userLookup: UserLookupService): FullCalendarEvent = {
 		val intervalFormatter = new ConfigurableIntervalFormatter(Hour12OptionalMins, IncludeDays)
+
+		
 		val shortTimeFormat = DateTimeFormat.shortTime()
 		FullCalendarEvent(
-			title = source.context.map { _ + " " }.getOrElse("") + source.eventType.displayName + source.location.map(l => s" ($l)").getOrElse(""),
+			title = source.context.map { _ + " " }.getOrElse("") + source.name + source.location.map(l => s" ($l)").getOrElse(""),
 			allDay = false,
 			start = source.start.toDateTime.getMillis / 1000,
 			end = source.end.toDateTime.getMillis / 1000,
