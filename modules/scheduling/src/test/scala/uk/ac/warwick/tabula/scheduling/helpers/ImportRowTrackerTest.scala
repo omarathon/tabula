@@ -30,8 +30,8 @@ class ImportRowTrackerTest extends PersistenceTestBase {
 		session.save(stu2)
 		session.save(stu3)
 
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 
 		val scyd = stu1.mostSignificantCourse.latestStudentCourseYearDetails
 		val key = new StudentCourseYearKey(scyd.studentCourseDetails.scjCode, scyd.sceSequenceNumber)

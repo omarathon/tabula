@@ -156,8 +156,8 @@ class MonitoringPointDaoTest extends PersistenceTestBase with Mockito {
 			val studentInRoute3Year1 = makeStudent("student4", route3, thisAcademicYear, 1)
 			val studentInDifferentAcademicYear = makeStudent("student5", route1, thisAcademicYear.previous, 1)
 
-			session.flush
-			session.clear
+			session.flush()
+			session.clear()
 
 			val result = monitoringPointDao.findPointSetsForStudents(Seq(
 				studentInRoute1Year1,

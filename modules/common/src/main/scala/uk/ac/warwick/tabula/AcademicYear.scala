@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula
 
 import scala.language.implicitConversions
-import org.joda.time.{DateTimeConstants, DateMidnight, DateTime}
+import org.joda.time.{LocalDate, DateTimeConstants, DateMidnight, DateTime}
 import org.joda.time.DateTimeConstants._
 import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.util.termdates.Term
@@ -59,6 +59,10 @@ case class AcademicYear(val startYear: Int) extends Ordered[AcademicYear] with C
 
 	def compare(that:AcademicYear): Int = {
 			this.startYear - that.startYear
+	}
+
+	def getYear(date: LocalDate): Int = {
+		if (date.getMonthOfYear < 10) endYear else startYear
 	}
 }
 

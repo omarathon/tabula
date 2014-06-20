@@ -44,7 +44,7 @@ class FeedbackDaoTest extends PersistenceTestBase {
 		session.saveOrUpdate(mf1)
 		session.saveOrUpdate(f2)
 		session.saveOrUpdate(mf2)
-		session.flush
+		session.flush()
 
 		val mf3 = Fixtures.markerFeedback(f3)
 
@@ -52,8 +52,8 @@ class FeedbackDaoTest extends PersistenceTestBase {
 
 		session.saveOrUpdate(f3)
 		session.saveOrUpdate(mf3)
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 
 		dao.getFeedback(f1.id) should be (Some(f1))
 		dao.getFeedback(f2.id) should be (Some(f2))
@@ -69,10 +69,10 @@ class FeedbackDaoTest extends PersistenceTestBase {
 		dao.getFeedbackByUniId(ass2, "0205225") should be (Some(f2))
 		dao.getFeedbackByUniId(ass1, "0205226") should be (Some(f3))
 		dao.getFeedbackByUniId(ass2, "0205226") should be (None)
-		session.flush
+		session.flush()
 
 		dao.delete(dao.getFeedback(f1.id).get)
-		session.flush
+		session.flush()
 
 		dao.getFeedbackByUniId(ass1, "0205225") should be (None)
 		dao.getFeedback(f1.id) should be (None)

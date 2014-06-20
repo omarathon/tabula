@@ -35,8 +35,8 @@ class SmallGroupPersistenceTest extends PersistenceTestBase with FieldAccessByRe
 
 			val id = set.id
 
-			session.flush
-			session.clear
+			session.flush()
+			session.clear()
 
 			session.load(classOf[SmallGroupSet], id) match {
 				case loadedSet:SmallGroupSet => (loadedSet.getV("settings") == null) should be(false)
@@ -94,8 +94,8 @@ class SmallGroupPersistenceTest extends PersistenceTestBase with FieldAccessByRe
 			session.saveOrUpdate(event1)
 			session.saveOrUpdate(event2)
 			
-			session.flush
-			session.clear
+			session.flush()
+			session.clear()
 		}
 		
 		val cs108 = service.getModuleByCode("cs108").get

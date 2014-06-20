@@ -314,8 +314,8 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 
 		val importStart = DateTime.now
 		memberDao.stampMissingFromImport(newStaleIds, importStart)
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 
 		memberDao.getByUniversityId("1000001").get.missingFromImportSince should be (null)
 		memberDao.getByUniversityId("1000003").get.missingFromImportSince should be (null)

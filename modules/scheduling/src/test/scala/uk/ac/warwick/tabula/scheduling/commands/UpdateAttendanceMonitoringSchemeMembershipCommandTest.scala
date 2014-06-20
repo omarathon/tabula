@@ -51,9 +51,12 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 	def sameStudentInMultipleSchemesInSameDept() { new FeatureEnabledFixture {
 		val dept = Fixtures.department("its")
 		val scheme1 = new AttendanceMonitoringScheme
+		scheme1.attendanceMonitoringService = None
 		scheme1.department = dept
 		scheme1.academicYear = AcademicYear(2014)
+
 		val scheme2 = new AttendanceMonitoringScheme
+		scheme2.attendanceMonitoringService = None
 		scheme2.department = dept
 		scheme2.academicYear = AcademicYear(2014)
 		cmd.attendanceMonitoringService.listSchemesForMembershipUpdate returns Seq(scheme1, scheme2)
@@ -76,11 +79,15 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 		val dept1 = Fixtures.department("its")
 		val dept2 = Fixtures.department("foo")
 		val scheme1 = new AttendanceMonitoringScheme
+		scheme1.attendanceMonitoringService = None
 		scheme1.department = dept1
 		scheme1.academicYear = AcademicYear(2014)
+
 		val scheme2 = new AttendanceMonitoringScheme
+		scheme2.attendanceMonitoringService = None
 		scheme2.department = dept2
 		scheme2.academicYear = AcademicYear(2014)
+
 		cmd.attendanceMonitoringService.listSchemesForMembershipUpdate returns Seq(scheme1, scheme2)
 
 		val student = Fixtures.student("1234")
