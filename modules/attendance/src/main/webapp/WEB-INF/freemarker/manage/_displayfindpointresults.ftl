@@ -52,7 +52,7 @@
 								groupedPoint.templatePoint.scheme.academicYear
 								command.department/>
 						</a>)
-					<#if !templateScheme??><@groupedPointSchemePopover groupedPoint /></#if>
+					<#if !templateScheme??><@attendance_macros.groupedPointSchemePopover groupedPoint /></#if>
 				</div>
 			</@attendance_macros.groupedPointsBySection>
 		</#if>
