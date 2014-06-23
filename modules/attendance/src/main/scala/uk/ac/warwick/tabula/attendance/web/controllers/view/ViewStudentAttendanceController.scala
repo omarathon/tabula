@@ -15,7 +15,7 @@ class ViewStudentAttendanceController extends AttendanceController with HasMonth
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember) =
-		ViewStudentAttendanceCommand(department, academicYear, student)
+		ViewStudentAttendanceCommand(mandatory(department), mandatory(academicYear), mandatory(student))
 
 	@RequestMapping
 	def home(

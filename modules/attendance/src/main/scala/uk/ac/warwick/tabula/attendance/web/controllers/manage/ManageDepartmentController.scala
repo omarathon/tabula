@@ -14,7 +14,7 @@ class ManageDepartmentController extends AttendanceController {
 
 	@RequestMapping
 	def home(@PathVariable department: Department) = {
-		Mav("manage/years", "department" -> department).crumbs(Breadcrumbs.Manage.Home)
+		Mav("manage/years", "department" -> mandatory(department)).crumbs(Breadcrumbs.Manage.Home)
 	}
 
 }

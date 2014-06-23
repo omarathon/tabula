@@ -18,7 +18,7 @@ class DeleteSchemeController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable("scheme") scheme: AttendanceMonitoringScheme) =
-		DeleteSchemeCommand(scheme)
+		DeleteSchemeCommand(mandatory(scheme))
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme] with DeleteSchemeCommandState ) = {

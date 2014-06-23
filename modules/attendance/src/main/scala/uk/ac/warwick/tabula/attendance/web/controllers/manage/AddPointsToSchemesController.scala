@@ -16,7 +16,7 @@ class AddPointsToSchemesController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		AddPointsToSchemesCommand(department, academicYear)
+		AddPointsToSchemesCommand(mandatory(department), mandatory(academicYear))
 
 	@RequestMapping
 	def home(

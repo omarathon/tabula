@@ -14,7 +14,7 @@ class ViewStudentsAttendanceController extends AttendanceController with HasMont
 
 	@ModelAttribute("filterCommand")
 	def filterCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		FilterStudentsAttendanceCommand(department, academicYear, user)
+		FilterStudentsAttendanceCommand(mandatory(department), mandatory(academicYear), user)
 
 	@RequestMapping
 	def home(

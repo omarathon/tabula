@@ -30,7 +30,7 @@ class CreateNewAttendancePointsFromCopyController extends AttendanceController {
 
 	@ModelAttribute("allDepartments")
 	def allDepartments(@PathVariable department: Department) = {
-		(Seq(department) ++ moduleAndDepartmentService.departmentsWithPermission(user, Permissions.MonitoringPoints.Manage))
+		(Seq(mandatory(department)) ++ moduleAndDepartmentService.departmentsWithPermission(user, Permissions.MonitoringPoints.Manage))
 			.sortBy(_.name).distinct
 	}
 

@@ -21,7 +21,7 @@ class SelectAttendancePointsToEditController extends AttendanceController with H
 
 	@ModelAttribute("findCommand")
 	def findCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		FindPointsCommand(department, academicYear, None)
+		FindPointsCommand(mandatory(department), mandatory(academicYear), None)
 
 	@ModelAttribute("allSchemes")
 	def allSchemes(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =

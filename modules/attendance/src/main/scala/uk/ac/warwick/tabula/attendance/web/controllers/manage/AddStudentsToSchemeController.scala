@@ -15,7 +15,7 @@ class AddStudentsToSchemeController extends AbstractManageSchemeStudentsControll
 
 	@ModelAttribute("command")
 	override def command(@PathVariable("scheme") scheme: AttendanceMonitoringScheme) =
-		AddStudentsToSchemeCommand(scheme, user)
+		AddStudentsToSchemeCommand(mandatory(scheme), user)
 
 	override protected def render(scheme: AttendanceMonitoringScheme) = {
 		Mav("manage/liststudents",

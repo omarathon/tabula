@@ -28,40 +28,32 @@ class RecordStudentAttendanceController extends AttendanceController
 
 	@InitBinder // do on each request
 	def populatePoints(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember) = {
-			points = attendanceMonitoringService.listStudentsPoints(student, department, academicYear)
+			points = attendanceMonitoringService.listStudentsPoints(mandatory(student), mandatory(department), mandatory(academicYear))
 	}
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember) =
-		RecordStudentAttendanceCommand(department, academicYear, student, user)
+		RecordStudentAttendanceCommand(mandatory(department), mandatory(academicYear), mandatory(student), user)
 
 	@ModelAttribute("attendanceNotes")
 	def attendanceNotes(@PathVariable student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote] =
-		attendanceMonitoringService.getAttendanceNoteMap(student)
+		attendanceMonitoringService.getAttendanceNoteMap(mandatory(student))
 
 	@ModelAttribute("groupedPointMap")
-	def groupedPointMap(
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@PathVariable student: StudentMember
-	): Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]] = {
-		val checkpointMap = attendanceMonitoringService.getCheckpoints(points, student)
+	def groupedPointMap(@PathVariable student: StudentMember): Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]] = {
+		val checkpointMap = attendanceMonitoringService.getCheckpoints(points, mandatory(student))
 		val groupedPoints = groupByTerm(points, groupSimilar = false) ++
 			groupByMonth(points, groupSimilar = false)
 		groupedPoints.map{case(period, thesePoints) =>
 			period -> thesePoints.map{ groupedPoint =>
-				groupedPoint.templatePoint -> checkpointMap.get(groupedPoint.templatePoint).getOrElse(null)
+				groupedPoint.templatePoint -> checkpointMap.getOrElse(groupedPoint.templatePoint, null)
 			}
 		}
 	}
 
 	@ModelAttribute("reportedPointMap")
-	def reportedPointMap(
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@PathVariable student: StudentMember
-	): Map[AttendanceMonitoringPoint, Boolean] = {
-		val nonReportedTerms = attendanceMonitoringService.findNonReportedTerms(Seq(student), academicYear)
+	def reportedPointMap(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Map[AttendanceMonitoringPoint, Boolean] = {
+		val nonReportedTerms = attendanceMonitoringService.findNonReportedTerms(Seq(mandatory(student)), mandatory(academicYear))
 		points.map{ point => point ->
 			!nonReportedTerms.contains(termService.getTermFromDateIncludingVacations(point.startDate.toDateTimeAtStartOfDay).getTermTypeAsString)
 		}.toMap

@@ -15,7 +15,7 @@ class ViewSchemesController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear)
-		= ViewSchemesCommand(department, academicYear, user)
+		= ViewSchemesCommand(mandatory(department), mandatory(academicYear), user)
 
 	@RequestMapping
 	def home(
