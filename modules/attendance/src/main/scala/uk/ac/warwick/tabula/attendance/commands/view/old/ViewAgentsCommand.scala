@@ -1,16 +1,15 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.view.old
 
-import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType, Department, Member}
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.{CommandInternal, Unaudited, ReadOnly, ComposableCommand}
-import uk.ac.warwick.tabula.services.{TermServiceComponent, MonitoringPointServiceComponent, RelationshipServiceComponent, AutowiringTermServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, AutowiringRelationshipServiceComponent}
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, TaskBenchmarking, Unaudited}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.data.model.{Department, Member, StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, AutowiringRelationshipServiceComponent, AutowiringTermServiceComponent, MonitoringPointServiceComponent, RelationshipServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 case class ViewAgentsResult(
 	agent: String,
