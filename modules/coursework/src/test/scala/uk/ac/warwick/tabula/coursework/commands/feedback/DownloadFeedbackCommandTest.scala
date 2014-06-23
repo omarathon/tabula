@@ -56,7 +56,7 @@ class DownloadFeedbackCommandTest extends AppContextTestBase {
 		session.save(department)
 		session.save(module)
 		session.save(assignment)
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 	}
 }

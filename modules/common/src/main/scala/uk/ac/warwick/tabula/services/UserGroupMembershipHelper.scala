@@ -61,13 +61,11 @@ private[services] class UserGroupMembershipHelper[A <: StringId with Serializabl
 
 	def findBy(user: User): Seq[A] = {
 		val ids = cache match {
-			case Some(cache) => {
-				cache.get(user.getUserId).toSeq
-			}
-			case None => {
+			case Some(c) =>
+				c.get(user.getUserId).toSeq
+			case None =>
 				logger.warn(s"Couldn't find a cache bean named $cacheName")
 				findByInternal(user)
-			}
 		}
 
 		if (ids.isEmpty) Nil
@@ -220,14 +218,12 @@ class UserGroupMembershipHelperCacheService extends QueueListener with Initializ
 	override def onReceive(item: Any) {
 		logger.debug(s"Synchronising item $item for $context")
 		item match {
-			case msg: UserGroupMembershipHelperCacheBusterMessage => {
+			case msg: UserGroupMembershipHelperCacheBusterMessage =>
 				Wire.optionNamed[Cache[String, Array[String]]](msg.cacheName) match {
-					case Some(cache) => {
+					case Some(cache) =>
 						cache.remove(msg.usercode)
-					}
 					case None => logger.warn(s"Couldn't find a cache bean named ${msg.cacheName}")
 				}
-			}
 			case _ =>
 		}
 	}

@@ -146,6 +146,7 @@ jQuery.fn.expandingTable = function(options) {
 				if(options.contentUrlFunction && !$content.data("loaded")) {
 					var contentId = $row.attr("data-contentid");
 					var dataUrl = options.contentUrlFunction($row) + '/' + contentId;
+					dataUrl = dataUrl.replace("_","/");
 
 					$icon.removeClass('icon-chevron-right').addClass('icon-spinner icon-spin');
 

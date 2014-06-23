@@ -108,9 +108,16 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 
 		logger.debug("doRequest: " + parameters)
 
-		http.x(
-			if (diagnostic) req >- { (text) => TurnitinResponse.fromDiagnostic(text) }
-			else transform(req))
+		try {
+			http.x(
+				if (diagnostic) req >- { (text) => TurnitinResponse.fromDiagnostic(text) }
+				else transform(req))
+		} catch {
+			case e: IOException => {
+				logger.error("Exception contacting Turnitin", e)
+				new TurnitinResponse(code = 9000, diagnostic = Some(e.getMessage))
+			}
+		}
 	}
 
 	/**

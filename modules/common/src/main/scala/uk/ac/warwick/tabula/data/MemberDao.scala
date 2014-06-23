@@ -2,16 +2,16 @@ package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConversions.{asScalaBuffer, seqAsJavaList}
 import org.hibernate.FetchMode
-import org.hibernate.criterion.{DetachedCriteria, Order}
-import org.hibernate.criterion.{Property, Restrictions}
-import org.hibernate.criterion.Projections
-import org.joda.time.DateTime
+import org.hibernate.criterion.{DetachedCriteria, Order, Property, Restrictions, Projections}
+import org.joda.time.{LocalDate, DateTime}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 import uk.ac.warwick.tabula.data.model.MemberStudentRelationship
+
+case class AttendanceMonitoringStudentData(universityId: String, userId: String, scdBeginDate: LocalDate)
 
 trait MemberDaoComponent {
 	val memberDao: MemberDao
@@ -31,12 +31,15 @@ trait MemberDao {
 	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
+	def listUpdatedSince(startDate: DateTime): Scrollable[Member]
+	def listUpdatedSince(startDate: DateTime, department: Department): Scrollable[Member]
 	def countUpdatedSince(startDate: DateTime): Int
 	
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
 	def getStaffByDepartment(department: Department): Seq[StaffMember]
 	
 	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
+	def findAllStudentDataByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[AttendanceMonitoringStudentData]
 	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember]
 	def getStudentsByAgentRelationshipAndRestrictions(
 		relationshipType: StudentRelationshipType,
@@ -205,6 +208,33 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setParameter("lastUpdated", startDate)
 			.setMaxResults(max).seq
 
+	def listUpdatedSince(startDate: DateTime) = {
+		val scrollable = session.newCriteria[Member]
+			.add(gt("lastUpdatedDate", startDate))
+			.addOrder(asc("lastUpdatedDate"))
+			.scroll()
+		Scrollable(scrollable, session)
+	}
+
+	def listUpdatedSince(startDate: DateTime, department: Department) = {
+		val scrollable = session.newCriteria[Member]
+			.createAlias("studentCourseDetails", "scd")
+			.add(gt("lastUpdatedDate", startDate))
+			.add(
+				disjunction()
+					.add(is("homeDepartment", department))
+					.add(
+						conjunction()
+							.add(is("scd.department", department))
+							.add(not(like("scd.statusOnRoute.code", "P%")))
+					)
+			)
+			.addOrder(asc("lastUpdatedDate"))
+			.scroll()
+
+		Scrollable(scrollable, session)
+	}
+
 	def countUpdatedSince(startDate: DateTime): Int =
 		session.newCriteria[Member]
 			.add(gt("lastUpdatedDate", startDate))
@@ -263,6 +293,18 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		} else {
 			idCriteria.project[String](distinct(property("universityId"))).seq
 		}
+	}
+
+	def findAllStudentDataByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[AttendanceMonitoringStudentData] = {
+		val idCriteria = session.newCriteria[StudentMember]
+		restrictions.foreach { _.apply(idCriteria) }
+		val projections = Projections.projectionList()
+		projections.add(property("universityId"))
+		projections.add(property("userId"))
+		projections.add(property("studentCourseDetails.beginDate"))
+		idCriteria.project[Array[java.lang.Object]](projections).seq.map(r => {
+			AttendanceMonitoringStudentData(r(0).asInstanceOf[String], r(1).asInstanceOf[String], r(2).asInstanceOf[LocalDate])
+		})
 	}
 
 	def findStudentsByRestrictions(

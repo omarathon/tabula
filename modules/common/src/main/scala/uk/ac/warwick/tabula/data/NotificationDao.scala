@@ -35,7 +35,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 			.add(Restrictions.ge("created", start))
 			.addOrder(Order.asc("created"))
 			.scroll()
-		new Scrollable(scrollable, session)
+		Scrollable(scrollable, session)
 	}
 
 	private def unemailedRecipientCriteria =
@@ -50,7 +50,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 		val scrollable = unemailedRecipientCriteria
 			.addOrder(Order.asc("notification.created"))
 			.scroll()
-		new Scrollable(scrollable, session)
+		Scrollable(scrollable, session)
 	}
 
 	def recentRecipients(start: Int, count: Int): Seq[RecipientNotificationInfo] =
@@ -77,6 +77,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 		notification.preSave(isNew)
 
 		session.save(notification)
+		session.flush() // TAB-2381
 	}
 
 	def save(recipientInfo: RecipientNotificationInfo) {

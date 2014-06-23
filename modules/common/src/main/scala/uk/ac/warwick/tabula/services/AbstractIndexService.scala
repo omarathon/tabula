@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import java.io.File
-import java.io.FileNotFoundException
+import java.io.{Closeable, File, FileNotFoundException}
 import org.apache.lucene.analysis._
 import org.apache.lucene.document.Field._
 import org.apache.lucene.document._
@@ -206,33 +205,39 @@ abstract class AbstractIndexService[A]
 		}
 	}
 
-	protected def listNewerThan(startDate: DateTime, batchSize: Int): Traversable[A]
+	protected def listNewerThan(startDate: DateTime, batchSize: Int): TraversableOnce[A]
 
 	def indexFrom(startDate: DateTime) = transactional(readOnly = true) {
 		ifNotIndexing {
-			doIndexItems(listNewerThan(startDate, MaxBatchSize), isIncremental = true)
+			val newer = listNewerThan(startDate, MaxBatchSize)
+			doIndexItems(newer, isIncremental = true)
+			newer match {
+				case c: Closeable => c.close()
+				case _ =>
+			}
 		}
 	}
 
 	/**
 	 * Indexes a specific given list of items.
 	 */
-	def indexItems(items: Traversable[A]) = transactional(readOnly = true) {
+	def indexItems(items: TraversableOnce[A]) = transactional(readOnly = true) {
 		ifNotIndexing { doIndexItems(items, isIncremental = false) }
 	}
 
-	def indexItemsWithoutNewTransaction(items: Traversable[A]) = {
+	def indexItemsWithoutNewTransaction(items: TraversableOnce[A]) = {
 		ifNotIndexing { doIndexItems(items, isIncremental = false) }
 	}
 
 	// Overridable - configure index writer
 	def configureIndexWriter(config: IndexWriterConfig): Unit = {}
 
-	private def doIndexItems(items: Traversable[A], isIncremental: Boolean) {
+	private def doIndexItems(items: TraversableOnce[A], isIncremental: Boolean) {
 		logger.debug("Writing to the index at " + indexPath + " with analyzer " + indexAnalyzer)
 		val writerConfig = new IndexWriterConfig(IndexService.TabulaLuceneVersion, indexAnalyzer)
 		configureIndexWriter(writerConfig)
 		closeThis(new IndexWriter(openDirectory(), writerConfig)) { writer =>
+			var i = 0
 			for (item <- items) {
 				tryDescribe(s"indexing $item") {
 					if (isIncremental) {
@@ -241,9 +246,11 @@ abstract class AbstractIndexService[A]
 					toDocuments(item).foreach { doc =>
 						writer.updateDocument(uniqueTerm(item), doc)
 					}
+
+					i += 1
 				}
 			}
-			if (debugEnabled) logger.debug("Indexed " + items.size + " items")
+			if (debugEnabled) logger.debug("Indexed " + i + " items") // Don't use .size, it goes through Scrollables again
 		}
 		reopen // not really necessary as we reopen periodically anyway
 	}

@@ -27,6 +27,7 @@ class EmailQueueStatusController extends BaseController {
 				.map { recipient: RecipientNotificationInfo =>
 					Minutes.minutesBetween(recipient.notification.created, DateTime.now).getMinutes
 				}
+				.toList
 				.headOption
 				.getOrElse(0)
 

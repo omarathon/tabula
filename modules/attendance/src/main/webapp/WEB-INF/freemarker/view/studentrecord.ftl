@@ -32,9 +32,21 @@
 			<#macro controls pointCheckpointPair>
 				<#local point = pointCheckpointPair._1() />
 				<#if pointCheckpointPair._2()??>
-					<@attendance_macros.checkpointSelect department=department student=student checkpoint=pointCheckpointPair._2() point=point />
+					<@attendance_macros.checkpointSelect
+						id="checkpointMap-${point.id}"
+						name="checkpointMap[${point.id}]"
+						department=department
+						student=student
+						checkpoint=pointCheckpointPair._2()
+						point=point
+					/>
 				<#else>
-					<@attendance_macros.checkpointSelect department=department student=student point=point />
+					<@attendance_macros.checkpointSelect
+						id="checkpointMap-${point.id}"
+						name="checkpointMap[${point.id}]"
+						department=department
+						student=student point=point
+					/>
 				</#if>
 				<#if mapGet(attendanceNotes, point)??>
 					<#assign note = mapGet(attendanceNotes, point) />

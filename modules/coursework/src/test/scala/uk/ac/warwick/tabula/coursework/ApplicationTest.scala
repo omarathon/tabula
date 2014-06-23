@@ -46,8 +46,8 @@ class ApplicationTest extends AppContextTestBase with FieldAccessByReflection{
 	  session.save(assignment)
 	  assignment.id should not be (null)
 
-	  session.flush
-	  session.clear
+	  session.flush()
+	  session.clear()
 
 	  val fetchedAssignment = session.get(classOf[Assignment], assignment.id).asInstanceOf[Assignment]
 	  fetchedAssignment.name should be("Cake Studies 1")
@@ -70,8 +70,8 @@ class ApplicationTest extends AppContextTestBase with FieldAccessByReflection{
 
       val id = dept.id
 
-      session.flush
-      session.clear
+      session.flush()
+      session.clear()
 
       session.load(classOf[Department], id) match {
         case loadedDepartment:Department => (loadedDepartment.getV("settings") == null) should be(false)

@@ -5,12 +5,13 @@ import uk.ac.warwick.tabula.data.model.attendance._
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
-import uk.ac.warwick.tabula.data.{SchemeMembershipItemType, AutowiringAttendanceMonitoringDaoComponent, AttendanceMonitoringDaoComponent}
-import uk.ac.warwick.tabula.data.SchemeMembershipItem
+import uk.ac.warwick.tabula.data.{AttendanceMonitoringStudentData, SchemeMembershipItemType, AutowiringAttendanceMonitoringDaoComponent, AttendanceMonitoringDaoComponent, SchemeMembershipItem}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointType
-import uk.ac.warwick.tabula.commands.MemberOrUser
+import uk.ac.warwick.tabula.commands.{TaskBenchmarking, MemberOrUser}
 import collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import org.joda.time.DateTime
+import uk.ac.warwick.userlookup.User
 
 trait AttendanceMonitoringServiceComponent {
 	def attendanceMonitoringService: AttendanceMonitoringService
@@ -27,8 +28,12 @@ trait AttendanceMonitoringService {
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
 	def deleteScheme(scheme: AttendanceMonitoringScheme)
 	def deletePoint(point: AttendanceMonitoringPoint)
+	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate]
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
+	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate]
+	def listTemplateSchemesByStyle(style: AttendanceMonitoringPointStyle): Seq[AttendanceMonitoringTemplate]
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
+	def listSchemesForMembershipUpdate: Seq[AttendanceMonitoringScheme]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
 	def studentAlreadyReportedThisTerm(student: StudentMember, point: AttendanceMonitoringPoint): Boolean
 	def findReports(studentIds: Seq[String], year: AcademicYear, period: String): Seq[MonitoringPointReport]
@@ -47,16 +52,20 @@ trait AttendanceMonitoringService {
 		types: Seq[AttendanceMonitoringPointType]
 	): Seq[MonitoringPoint]
 	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
+	def listStudentsPoints(studentData: AttendanceMonitoringStudentData, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
+	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], students: Seq[StudentMember]): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]]
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
 	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint]
 	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
 	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
+	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
+
 }
 
-abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService {
+abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService with TaskBenchmarking {
 
 	self: AttendanceMonitoringDaoComponent with TermServiceComponent with AttendanceMonitoringMembershipHelpers with UserLookupComponent =>
 
@@ -78,11 +87,18 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def deletePoint(point: AttendanceMonitoringPoint) =
 		attendanceMonitoringDao.delete(point)
 
+	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate] =
+		attendanceMonitoringDao.getTemplateSchemeById(id)
+
+
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.listSchemes(department, academicYear)
 
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet] =
 		attendanceMonitoringDao.listOldSets(department, academicYear)
+
+	def listSchemesForMembershipUpdate: Seq[AttendanceMonitoringScheme] =
+		attendanceMonitoringDao.listSchemesForMembershipUpdate
 
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String] =
 		attendanceMonitoringDao.findNonReportedTerms(students, academicYear)
@@ -134,22 +150,46 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		})
 	}
 
+	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate] = {
+		attendanceMonitoringDao.listAllTemplateSchemes
+	}
+
+	def listTemplateSchemesByStyle(style: AttendanceMonitoringPointStyle): Seq[AttendanceMonitoringTemplate] = {
+		attendanceMonitoringDao.listTemplateSchemesByStyle(style)
+	}
+
 	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
 		student.mostSignificantCourseDetails.fold(Seq[AttendanceMonitoringPoint]())(scd => {
 			val currentCourseStartDate = scd.beginDate
-			val schemes = findSchemesForStudent(student, department, academicYear)
+			val schemes = findSchemesForStudent(student.universityId, student.userId, department, academicYear)
 			schemes.flatMap(_.points.asScala).filter(p =>
 				p.startDate.isAfter(currentCourseStartDate) || p.startDate.isEqual(currentCourseStartDate)
 			)
 		})
 	}
 
-	private def findSchemesForStudent(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
-		membersHelper.findBy(MemberOrUser(student).asUser).filter(s => s.department == department && s.academicYear == academicYear)
+	def listStudentsPoints(studentData: AttendanceMonitoringStudentData, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
+		val schemes = findSchemesForStudent(studentData.universityId, studentData.userId, department, academicYear)
+		schemes.flatMap(_.points.asScala).filter(p =>
+			p.startDate.isAfter(studentData.scdBeginDate) || p.startDate.isEqual(studentData.scdBeginDate)
+		)
+	}
+
+	private def findSchemesForStudent(universityId: String, userId: String, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
+		val user = new User(userId)
+		user.setWarwickId(universityId)
+		benchmarkTask(s"membersHelper.findBy $universityId") {
+			membersHelper.findBy(user)
+		}.filter(s => s.department == department && s.academicYear == academicYear)
+	}
+
 
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint] = {
 		attendanceMonitoringDao.getCheckpoints(points, student, withFlush)
 	}
+
+	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], students: Seq[StudentMember]): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]] =
+		attendanceMonitoringDao.getCheckpoints(points, students)
 
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int =
 		attendanceMonitoringDao.countCheckpointsForPoint(point)
@@ -186,7 +226,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		attendanceMonitoringDao.removeCheckpoints(checkpointsToDelete)
 		attendanceMonitoringDao.saveOrUpdateCheckpoints(checkpointsToUpdate)
 
-		if (!attendanceMap.keys.isEmpty) {
+		if (attendanceMap.keys.nonEmpty) {
 			val scheme = attendanceMap.keys.head.scheme
 			updateCheckpointTotal(student, scheme.department, scheme.academicYear)
 		}
@@ -195,7 +235,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	}
 
 	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal = {
-		val points = listStudentsPoints(student, department, academicYear)
+		val points = benchmarkTask("listStudentsPoints") {
+			listStudentsPoints(student, department, academicYear)
+		}
 		val checkpointMap = getCheckpoints(points, student, withFlush = true)
 		val allCheckpoints = checkpointMap.map(_._2)
 
@@ -229,6 +271,31 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 			total.academicYear = academicYear
 			total
 		}
+	}
+
+	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
+		val weeksForYear = termService.getAcademicWeeksForYear(academicYear.dateInTermOne).toMap
+		val stubScheme = new AttendanceMonitoringScheme
+		stubScheme.pointStyle = templateScheme.pointStyle
+		stubScheme.academicYear = academicYear
+
+		val attendanceMonitoringPoints =
+			templateScheme.points.asScala.map { templatePoint =>
+				val point = templatePoint.toPoint
+				templateScheme.pointStyle match {
+					case AttendanceMonitoringPointStyle.Date =>
+						point.startDate = templatePoint.startDate.withYear(academicYear.getYear(templatePoint.startDate))
+						point.endDate = templatePoint.endDate.withYear(academicYear.getYear(templatePoint.endDate))
+					case AttendanceMonitoringPointStyle.Week =>
+						point.startWeek = templatePoint.startWeek
+						point.endWeek = templatePoint.endWeek
+						point.startDate = weeksForYear(templatePoint.startWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
+						point.endDate = weeksForYear(templatePoint.endWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate.plusDays(6)
+				}
+				point.scheme = stubScheme
+				point
+			}
+		attendanceMonitoringPoints
 	}
 }
 

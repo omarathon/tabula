@@ -23,9 +23,9 @@
 		</#if>
 		<#if department.showStudentName>
 			<td class="student-col toggle-cell"><h6 class="toggle-icon">${u.firstName}</h6></td>
-			<td class="student-col toggle-cell"><h6>${u.lastName}&nbsp;<@pl.profile_link u.warwickId /></h6></td>
+			<td class="student-col toggle-cell"><h6>${u.lastName}&nbsp;<@pl.profile_link u.warwickId! /></h6></td>
 		<#else>
-			<td class="student-col toggle-cell"><h6 class="toggle-icon">${u.warwickId}</h6></td>
+			<td class="student-col toggle-cell"><h6 class="toggle-icon">${u.warwickId!}</h6></td>
 		</#if>
 		<td class="status-col toggle-cell content-cell">
 			<dl style="margin: 0; border-bottom: 0;">

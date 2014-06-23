@@ -70,8 +70,28 @@ object Routes {
 				encoded(scheme.department.code), encoded(scheme.academicYear.startYear.toString), encoded(scheme.id)
 			)
 
+		def editScheme(scheme: AttendanceMonitoringScheme) =
+			context + "/manage/%s/%s/%s/edit" format(
+				encoded(scheme.department.code), encoded(scheme.academicYear.startYear.toString), encoded(scheme.id)
+		)
+
+		def editSchemeStudents(scheme: AttendanceMonitoringScheme) =
+			context + "/manage/%s/%s/%s/edit/students" format(
+				encoded(scheme.department.code), encoded(scheme.academicYear.startYear.toString), encoded(scheme.id)
+		)
+
+		def editSchemePoints(scheme: AttendanceMonitoringScheme) =
+			context + "/manage/%s/%s/%s/edit/points" format(
+				encoded(scheme.department.code), encoded(scheme.academicYear.startYear.toString), encoded(scheme.id)
+		)
+
 		def editPoints(department: Department, academicYear: AcademicYear) =
 			context + "/manage/%s/%s/editpoints" format(
+				encoded(department.code), encoded(academicYear.startYear.toString)
+			)
+
+		def addPointsToExistingSchemes(department: Department, academicYear: AcademicYear) =
+			context + "/manage/%s/%s/addpoints" format(
 				encoded(department.code), encoded(academicYear.startYear.toString)
 			)
 
@@ -96,5 +116,7 @@ object Routes {
 				encoded(academicYear.startYear.toString),
 				encoded(student.universityId)
 			)
+		def points(department: Department, academicYear: AcademicYear) =
+			context + "/view/%s/%s/points" format(encoded(department.code), encoded(academicYear.startYear.toString))
 	}
 }

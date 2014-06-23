@@ -121,8 +121,8 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 
 			attachment.id should not be (null)
 
-			session.flush
-			session.clear
+			session.flush()
+			session.clear()
 
 			dao.getFileById(attachment.id) match {
 				case Some(loadedAttachment:FileAttachment) => {

@@ -38,16 +38,21 @@ class FindPointsCommandInternal(val department: Department, val academicYear: Ac
 	self: AttendanceMonitoringServiceComponent with FindPointsCommandState with GroupsPoints =>
 
 	override def applyInternal() = {
-		if (academicYear.startYear < 2014) {
-			val points = attendanceMonitoringService.findOldPoints(department, academicYear, sets.asScala, types.asScala)
-			FindPointsResult(Map(), Map(), groupOldByTerm(points, academicYear))
-		} else {
-			val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala, types.asScala, styles.asScala)
-			restrictedStyle match {
-				case Some(AttendanceMonitoringPointStyle.Week) => FindPointsResult(groupByTerm(points), Map(), Map())
-				case Some(AttendanceMonitoringPointStyle.Date) => FindPointsResult(Map(), groupByMonth(points), Map())
-				case _ => FindPointsResult(groupByTerm(points), groupByMonth(points), Map())
-			}
+		restrictedStyle match {
+			case Some(AttendanceMonitoringPointStyle.Date) =>
+				val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala, types.asScala, styles.asScala)
+				FindPointsResult(Map(), groupByMonth(points), Map())
+			case Some(AttendanceMonitoringPointStyle.Week) =>
+				if (academicYear.startYear < 2014) {
+					val points = attendanceMonitoringService.findOldPoints(department, academicYear, sets.asScala, types.asScala)
+					FindPointsResult(Map(), Map(), groupOldByTerm(points, academicYear))
+				} else {
+					val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala, types.asScala, styles.asScala)
+					FindPointsResult(groupByTerm(points), Map(), Map())
+				}
+			case _ =>
+				val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala, types.asScala, styles.asScala)
+				FindPointsResult(groupByTerm(points), groupByMonth(points), Map())
 		}
 	}
 

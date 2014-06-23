@@ -17,7 +17,7 @@
 	<#macro viewDepartment department><@_u page="/${department.code}/" /></#macro>
 	<#macro viewDepartmentPoints department><@_u page="/view/${department.code}/2013/points/" /></#macro>
 	<#macro viewDepartmentPointsWithAcademicYear department academicYear queryString="">
-		<@_u page="/view/${department.code}/2013/points/?${queryString}" />
+		<@_u page="/view/${department.code}/${academicYear.startYear?c}/points/?${queryString}" />
 	</#macro>
 	<#macro viewDepartmentStudents department><@_u page="/view/${department.code}/2013/students/" /></#macro>
 	<#macro viewDepartmentStudentsWithAcademicYear department academicYear queryString="" page="">
@@ -36,6 +36,10 @@
 	<#macro manageDepartment department><@_u page="/manage/${department.code}/2013" /></#macro>
 
 	<#macro record department pointId queryString returnTo><@_u page="/view/${department.code}/2013/${pointId}/record?returnTo=${returnTo?url}&${queryString}"/></#macro>
+	<#macro recordWithAcademicYear department academicYear pointId queryString returnTo>
+		<@_u page="/view/${department.code}/${academicYear.startYear?c}/${pointId}/record?returnTo=${returnTo?url}&${queryString}"/>
+	</#macro>
+
 	<#macro recordStudent department student academicYear returnTo><@_u page="/view/${department.code}/2013/students/${student.universityId}/record?returnTo=${returnTo?url}" /></#macro>
 	<#macro recordStudentPoint point student returnTo><@_u page="/${point.pointSet.route.department.code}/${point.id}/record/${student.universityId}?returnTo=${returnTo?url}"/></#macro>
 
@@ -89,6 +93,8 @@
 </#macro>
 
 <#macro manageEditScheme department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/edit"/></#macro>
+<#macro manageEditSchemeStudents department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/edit/students"/></#macro>
+<#macro manageEditSchemePoints department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/edit/points"/></#macro>
 <#macro manageDeleteScheme department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/delete"/></#macro>
 
 <#macro manageSelectStudents scheme>
@@ -131,5 +137,9 @@
 	<#local returnTo><#if returnTo?has_content>?returnTo=${returnTo}</#if></#local>
 	<@_u page="/view/${department.code}/${academicYearString}/students/${student.universityId}/record${returnTo}"/>
 </#macro>
-<#macro viewPoints department academicYearString><@_u page="/view/${department.code}/${academicYearString}/points"/></#macro>
+<#macro viewPoints department academicYearString filterQuery="">
+	<#local filterQuery><#if filterQuery?has_content>?${filterQuery}</#if></#local>
+	<@_u page="/view/${department.code}/${academicYearString}/points${filterQuery}"/>
+</#macro>
+<#macro viewRecordPoints department academicYearString point queryString returnTo><@_u page="/view/${department.code}/${academicYearString}/points/${point.id}/record?returnTo=${returnTo?url}&${queryString}"/></#macro>
 <#macro viewAgents department academicYearString relationshipType><@_u page="/view/${department.code}/${academicYearString}/agents/${relationshipType.urlPart}"/></#macro>

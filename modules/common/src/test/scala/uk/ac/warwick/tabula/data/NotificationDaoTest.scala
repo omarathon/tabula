@@ -98,9 +98,13 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		val permissionsService = mock[PermissionsService]
 		module.permissionsService = permissionsService
-		department.permissionsService = permissionsService
+		session.save(module)
 
+		department.permissionsService = permissionsService
+		session.save(department)
+		
 		assignment.module = module
+		session.save(assignment)
 
 		permissionsService.ensureUserGroupFor(module, ModuleManagerRoleDefinition) returns (UserGroup.ofUniversityIds)
 		permissionsService.ensureUserGroupFor(department, DepartmentalAdministratorRoleDefinition) returns (UserGroup.ofUniversityIds)
@@ -169,7 +173,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		session.flush()
 
-		val everything = notificationDao.recent(now.minusMonths(10)).takeWhile(n => true).toSeq
+		val everything = notificationDao.recent(now.minusMonths(10)).all.toSeq
 		everything.size should be (1000)
 
 		val oneHundred = notificationDao.recent(now.minusMonths(10)).take(100).toSeq

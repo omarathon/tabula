@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.AssignmentMembershipDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 
@@ -70,18 +70,18 @@ class AssignmentMembershipServiceImpl
 
 	@Autowired var userLookup: UserLookupService = _
 	@Autowired var dao: AssignmentMembershipDao = _
-	
+
 	val assignmentManualMembershipHelper = new UserGroupMembershipHelper[Assignment]("_members")
 
 	def getEnrolledAssignments(user: User): Seq[Assignment] = {
-		val autoEnrolled = 
+		val autoEnrolled =
 			dao.getSITSEnrolledAssignments(user)
-				 .filterNot { _.members.excludesUser(user) }
+				.filterNot { _.members.excludesUser(user) }
 
-		val manuallyEnrolled = 
+		val manuallyEnrolled =
 			assignmentManualMembershipHelper.findBy(user)
 				.filterNot { assignment => assignment.deleted || assignment.archived }
-		
+
 		(autoEnrolled ++ manuallyEnrolled).distinct
 	}
 
@@ -185,7 +185,7 @@ trait AssignmentMembershipMethods extends Logging {
 	 * Returns just a list of User objects who are on this assessment group.
 	 */
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User] = {
-		determineMembership(upstream, others).items filter notExclude map toUser filter notNull
+		determineMembership(upstream, others).items filter notExclude map toUser filter notNull filter notAnonymous
 	}
 
 	/**
@@ -269,6 +269,7 @@ trait AssignmentMembershipMethods extends Logging {
 	private def toUser(item: MembershipItem) = item.user
 	private def notExclude(item: MembershipItem) = item.itemType != ExcludeType
 	private def notNull[A](any: A) = { any != null }
+	private def notAnonymous(user: User) = { !user.isInstanceOf[AnonymousUser] }
 }
 
 abstract class MembershipItemType(val value: String)
@@ -279,15 +280,15 @@ case object ExcludeType extends MembershipItemType("exclude")
 /** Item in list of members for displaying in view.
 	*/
 case class MembershipItem(
-	 user: User,
-	 universityId: Option[String],
-	 userId: Option[String],
-	 itemType: MembershipItemType, // sits, include or exclude
-	 /**
-		* If include type, this item adds a user who's already in SITS.
-		* If exclude type, this item excludes a user who isn't in the list anyway.
-		*/
-	 extraneous: Boolean) {
+	user: User,
+	universityId: Option[String],
+	userId: Option[String],
+	itemType: MembershipItemType, // sits, include or exclude
+	/**
+	* If include type, this item adds a user who's already in SITS.
+	* If exclude type, this item excludes a user who isn't in the list anyway.
+	*/
+	extraneous: Boolean) {
 
 	def itemTypeString = itemType.value
 }

@@ -8,17 +8,13 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.commands.{Appliable, Command, Description, ReadOnly}
+import uk.ac.warwick.tabula.data.model.{Department, Member, StudentMember}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.scheduling.commands.CleanupUnreferencedFilesCommand
 import uk.ac.warwick.tabula.scheduling.commands.SanityCheckFilesystemCommand
 import uk.ac.warwick.tabula.scheduling.commands.SyncReplicaFilesystemCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAssignmentsCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformationCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportProfilesCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportDepartmentsModulesCommand, ImportAssignmentsCommand, ImportAcademicInformationCommand, ImportProfilesCommand}
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
 import uk.ac.warwick.tabula.scheduling.services.ProfileImporter
 import uk.ac.warwick.tabula.services.{ScheduledNotificationService, NotificationIndexService, AuditEventIndexService, ModuleAndDepartmentService, ProfileIndexService}
@@ -26,7 +22,6 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.UrlMethodModel
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.validators.WithinYears
 
 /**
@@ -157,6 +152,19 @@ class SysadminController extends BaseSysadminController {
 		"sysadmin/importdone"
 	}
 
+}
+
+@Controller
+@RequestMapping(Array("/sysadmin/import-department"))
+class ImportDeptModulesController extends BaseSysadminController {
+
+	@ModelAttribute("importDeptModulesCommand") def importProfilesCommand = ImportDepartmentsModulesCommand()
+
+	@RequestMapping(method = Array(POST))
+	def importModules(@ModelAttribute("importDeptModulesCommand") command: Appliable[Unit]) = {
+		command.apply()
+		redirectToHome
+	}
 }
 
 @Controller

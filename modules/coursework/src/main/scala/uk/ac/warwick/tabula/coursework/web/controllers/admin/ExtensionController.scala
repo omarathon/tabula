@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.data.model.{StudentMember, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember, Assignment, Module}
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions._
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
@@ -19,17 +18,11 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import com.fasterxml.jackson.databind.ObjectMapper
 
-
-
 abstract class ExtensionController extends CourseworkController {
 	var json = Wire[ObjectMapper]
 	var userLookup = Wire[UserLookupService]
 	var relationshipService = Wire[RelationshipService]
 	var profileService = Wire[ProfileService]
-
-	// Add the common breadcrumbs to the model
-	def crumbed(mav: Mav, module: Module)
-		= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 
 	class ExtensionMap(extension: Extension) {
 		def asMap: Map[String, String] = {
@@ -64,16 +57,20 @@ abstract class ExtensionController extends CourseworkController {
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions"))
-class ListExtensionsController extends ExtensionController {
+class ListExtensionsForAssignmentController extends ExtensionController {
+
+	// Add the common breadcrumbs to the model
+	def crumbed(mav: Mav, module: Module)
+	= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 
 	@ModelAttribute
 	def listCommand(
-									 @PathVariable("module") module:Module,
-									 @PathVariable("assignment") assignment:Assignment
-									 ) = new ListExtensionsCommand(module, assignment, user)
+		@PathVariable("module") module:Module,
+		@PathVariable("assignment") assignment:Assignment
+		) = new ListExtensionsForAssignmentCommand(module, assignment, user)
 
 	@RequestMapping(method=Array(HEAD,GET))
-	def listExtensions(cmd: ListExtensionsCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
+	def listExtensions(cmd: ListExtensionsForAssignmentCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
 		val extensionGraphs = cmd.apply()
 
 		val model = Mav("admin/assignments/extensions/summary",
@@ -89,9 +86,36 @@ class ListExtensionsController extends ExtensionController {
 	}
 }
 
+@Controller
+@RequestMapping(Array("/admin/department/{department}/manage/extensions"))
+class ListAllExtensionsController extends ExtensionController {
+
+	// Add the common breadcrumbs to the model
+	def crumbed(mav: Mav, department: Department)
+	= mav.crumbs(Breadcrumbs.Department(department))
+
+	@ModelAttribute
+	def listCommand(
+		@PathVariable("department") department:Department
+		) = new ListAllExtensionsCommand(department)
+
+	@RequestMapping(method=Array(HEAD,GET))
+	def listExtensions(cmd: ListAllExtensionsCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
+		val extensionGraphs = cmd.apply()
+
+		val model = Mav("admin/assignments/extensions/departmentSummary",
+			"extensionToOpen" -> universityId,
+			"extensionGraphs" -> extensionGraphs,
+			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar
+		)
+
+		crumbed(model, cmd.department)
+	}
+}
+
 
 @Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions/detail/{universityId}"))
+@RequestMapping(Array("/admin/module/{module}/assignments/extensions/detail/{assignment}/{universityId}"))
 class EditExtensionController extends ExtensionController {
 
 	@ModelAttribute("modifyExtensionCommand")

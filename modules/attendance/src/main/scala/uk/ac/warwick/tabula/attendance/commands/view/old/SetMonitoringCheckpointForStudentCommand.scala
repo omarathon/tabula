@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.view.old
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}
@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.attendance.commands.{GroupMonitoringPointsByTerm, CheckpointUpdatedDescription}
 
 object SetMonitoringCheckpointForStudentCommand {
 	def apply(monitoringPoint: MonitoringPoint, student: StudentMember, user: CurrentUser) =

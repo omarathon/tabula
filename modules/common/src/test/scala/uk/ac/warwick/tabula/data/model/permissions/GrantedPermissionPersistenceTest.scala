@@ -15,14 +15,14 @@ class GrantedPermissionPersistenceTest extends PersistenceTestBase with Reflecti
 			department.name = "IT Services"
 				
 			session.save(department)
-			session.flush
+			session.flush()
 			
 			val permission = GrantedPermission(department, Permissions.Department.DownloadFeedbackReport, GrantedPermission.Allow)
 			permission.users.knownType.addUserId("cuscav")
 			
 			session.save(permission)
-			session.flush
-			session.clear
+			session.flush()
+			session.clear()
 			
 			session.load(classOf[GrantedPermission[_]], permission.id) match {
 				case permission: GrantedPermission[Department @unchecked] =>

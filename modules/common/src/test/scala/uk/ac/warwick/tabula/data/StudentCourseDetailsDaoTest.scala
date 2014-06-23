@@ -164,8 +164,8 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 		memberDao.saveOrUpdate(stu2)
 		memberDao.saveOrUpdate(stu3)
 		memberDao.saveOrUpdate(stu4)
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 
 		studentCourseDetailsDao.getByScjCode("1000001/1").get.missingFromImportSince should be (null)
 		studentCourseDetailsDao.getByScjCode("1000002/1").get.missingFromImportSince should be (null)
@@ -176,8 +176,8 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 
 		val importStart = DateTime.now
 		studentCourseDetailsDao.stampMissingFromImport(newStaleScjCodes, importStart)
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 
 		studentCourseDetailsDao.getByScjCode("1000001/1").get.missingFromImportSince should be (null)
 		studentCourseDetailsDao.getByScjCode("1000003/1").get.missingFromImportSince should be (null)

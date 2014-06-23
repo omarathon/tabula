@@ -89,7 +89,7 @@ object Notification {
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="notification_type")
 abstract class Notification[A >: Null <: ToEntityReference, B]
-	extends GeneratedId with Serializable with HasSettings with PermissionsTarget with PreSaveBehaviour with NotificationPreSaveBehaviour {
+	extends GeneratedId with Serializable with HasSettings with PermissionsTarget with NotificationPreSaveBehaviour {
 
 	def permissionsParents = Stream.empty
 
@@ -173,7 +173,10 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 		case onf: ObjectNotFoundException => None
 	}
 
-	final override def preSave(newRecord: Boolean) {
+	// This used to implement the trait that the Hibernate listener listens to.
+	// But we call this manually instead, so it doesn't have that trait and isn't
+	// called by Hibernate.
+	final def preSave(newRecord: Boolean) {
 		onPreSave(newRecord)
 
 		// Generate recipientNotificationInfos

@@ -85,8 +85,10 @@ trait Logging {
 		* of things.
 		*/
 	protected def tryDescribe[A](desc: => String)(op: => A): A = {
-		try { op }
-		catch {
+		try {
+			if (debugEnabled) logger.debug(desc)
+			op
+		} catch {
 			case e:Exception => {
 				logger.error(s"Exception while ${desc}")
 				throw e

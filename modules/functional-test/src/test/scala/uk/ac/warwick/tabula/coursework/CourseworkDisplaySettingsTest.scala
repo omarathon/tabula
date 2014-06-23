@@ -61,7 +61,7 @@ class CourseworkDisplaySettingsTest extends BrowserTest with CourseworkFixtures 
 			find(cssSelector(".dept-settings a.dropdown-toggle")) should be('defined)
 		}
 		click on (cssSelector(".dept-settings a.dropdown-toggle"))
-		val displayLink = cssSelector(".dept-settings .dropdown-menu").webElement.findElement(By.partialLinkText("Settings"))
+		val displayLink = cssSelector(".dept-settings .dropdown-menu").webElement.findElement(By.partialLinkText("Department settings"))
 		eventually {
 			displayLink.isDisplayed should be (true)
 		}

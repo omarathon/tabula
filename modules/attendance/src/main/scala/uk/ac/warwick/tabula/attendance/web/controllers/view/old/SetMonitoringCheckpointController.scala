@@ -1,8 +1,7 @@
-package uk.ac.warwick.tabula.attendance.web.controllers
+package uk.ac.warwick.tabula.attendance.web.controllers.view.old
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.attendance.commands.SetMonitoringCheckpointCommand
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPoint}
 import uk.ac.warwick.tabula.web.Mav
 import javax.validation.Valid
@@ -12,6 +11,8 @@ import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.model.{Route, Department}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
+import uk.ac.warwick.tabula.attendance.commands.view.old.SetMonitoringCheckpointCommand
 
 @RequestMapping(Array("/view/{department}/2013/{monitoringPoint}/record"))
 @Controller

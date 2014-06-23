@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.attendance.web.Routes
 
 @Controller
 @RequestMapping(Array("/manage/{department}/{academicYear}/new/{scheme}/students"))
-class AddStudentsToSchemeController extends AbstractManageSchemeController {
+class AddStudentsToSchemeController extends AbstractManageSchemeStudentsController {
 
 	@ModelAttribute("command")
 	override def command(@PathVariable("scheme") scheme: AttendanceMonitoringScheme) =

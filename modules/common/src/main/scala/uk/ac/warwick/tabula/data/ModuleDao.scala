@@ -2,15 +2,15 @@ package uk.ac.warwick.tabula.data
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Department}
 import org.hibernate.criterion.{Projections, Order}
-import org.joda.time.DateTime
 import org.hibernate.criterion.Restrictions._
+import org.joda.time.DateTime.now
 
 trait ModuleDao {
 	def allModules: Seq[Module]
 	def saveOrUpdate(module: Module)
 	def getByCode(code: String): Option[Module]
 	def getById(id: String): Option[Module]
-	def stampMissingRows(dept: Department, seenCodes: Seq[String]): Int
+	def stampMissingFromImport(newStaleModuleCodes: Seq[String])
 	def hasAssignments(module: Module): Boolean
 	def findModulesNamedLike(query: String): Seq[Module]
 
@@ -31,25 +31,25 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 		session.newQuery[Module]("from Module m where code = :code").setString("code", code).uniqueResult
 	
 	def getById(id: String) = getById[Module](id)
-	
-	def stampMissingRows(dept: Department, seenCodes: Seq[String]) = {
-		val hql = """
-				update Module m
+
+	def stampMissingFromImport(staleModuleCodes: Seq[String]) = {
+		staleModuleCodes.grouped(Daoisms.MaxInClauseCount).foreach { staleCodes =>
+			val sqlString = """
+				update
+					Module
 				set
-					m.missingFromImportSince = :now
+					missingFromImportSince = :now
 				where
-					m.department = :department and
-					m.missingFromImportSince is null
-		"""
-		
-		val query = 
-			if (seenCodes.isEmpty) session.newQuery(hql)
-			else session.newQuery(hql + " and m.code not in (:seenCodes)").setParameterList("seenCodes", seenCodes)
-		 
-		query
-			.setParameter("now", DateTime.now)
-			.setEntity("department", dept)
-			.executeUpdate()
+					code in (:staleModuleCodes)
+		 		and
+		 			missingFromImportSince is null
+			"""
+
+			session.newQuery(sqlString)
+				.setParameter("now", now)
+				.setParameterList("staleModuleCodes", staleCodes)
+				.executeUpdate()
+		}
 	}
 
 	def hasAssignments(module: Module): Boolean = {

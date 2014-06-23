@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, AttendanceMonitoringScheme, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.attendance.commands.manage._
-import org.springframework.validation.BindException
+import org.springframework.validation.{Errors, BindException}
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConverters._
 import org.joda.time.DateTime
@@ -69,6 +69,7 @@ class CreateNewAttendancePointsFromCopyController extends AttendanceController {
 		@PathVariable academicYear: AcademicYear
 	) = {
 		Mav("manage/copypoints",
+			"currentAcademicYear" -> AcademicYear.guessByDate(DateTime.now),
 			"returnTo" -> getReturnTo("")
 		).crumbs(
 			Breadcrumbs.Manage.Home,
@@ -102,6 +103,7 @@ class CreateNewAttendancePointsFromCopyController extends AttendanceController {
 			"isSchemes" -> !searchResult.schemes.isEmpty,
 			"allTypes" -> AttendanceMonitoringPointType.values,
 			"findResult" -> findCommand.apply(),
+			"currentAcademicYear" -> AcademicYear.guessByDate(DateTime.now),
 			"returnTo" -> getReturnTo("")
 		).crumbs(
 			Breadcrumbs.Manage.Home,
@@ -113,8 +115,9 @@ class CreateNewAttendancePointsFromCopyController extends AttendanceController {
 	@RequestMapping(method = Array(POST), params = Array("copy"))
 	def copy(
 		@ModelAttribute("searchCommand") searchCommand: Appliable[CreateNewAttendancePointsFromCopySearchCommandResult],
-		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]] with SetsFindPointsResultOnCommandState with SelfValidating,
 		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
+		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]] with SetsFindPointsResultOnCommandState with SelfValidating,
+		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam searchDepartment: Department,
@@ -130,18 +133,17 @@ class CreateNewAttendancePointsFromCopyController extends AttendanceController {
 		}
 		val findCommandResult = findCommand.apply()
 		cmd.setFindPointsResult(findCommandResult)
-		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
 		if (errors.hasErrors) {
 			Mav("manage/copypoints",
 				"searchDepartment" -> searchDepartment,
 				"searchAcademicYear" -> searchAcademicYear,
-				"findCommand" -> findCommand,
 				"findResult" -> findCommandResult,
 				"allSchemes" -> allSchemes,
 				"isSchemes" -> !searchResult.schemes.isEmpty,
 				"allTypes" -> AttendanceMonitoringPointType.values,
 				"errors" -> errors,
+				"currentAcademicYear" -> AcademicYear.guessByDate(DateTime.now),
 				"returnTo" -> getReturnTo("")
 			).crumbs(
 				Breadcrumbs.Manage.Home,

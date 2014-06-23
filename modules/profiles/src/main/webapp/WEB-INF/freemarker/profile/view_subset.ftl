@@ -108,7 +108,7 @@
 				<#if studentUser.warwickId??>
 					<tr>
 						<th>University number</th>
-						<td>${studentUser.warwickId}</td>
+						<td>${studentUser.warwickId!}</td>
 					</tr>
 				</#if>
 				<#if studentUser.userId??>

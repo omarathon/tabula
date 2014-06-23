@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.view.old
 
 import uk.ac.warwick.tabula.commands.{FiltersStudents, CommandInternal, ReadOnly, Unaudited, ComposableCommand}
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
@@ -20,6 +20,7 @@ import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.attendance.commands.{PermissionsAwareRoutes, StudentPointsData, AutowiringSecurityServicePermissionsAwareRoutes, BuildStudentPointsData}
 
 case class ViewStudentsResults(
 	students: Seq[StudentPointsData],

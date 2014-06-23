@@ -124,5 +124,10 @@ object AttendanceBreadcrumbs {
 			val url = Some(Routes.View.student(department, academicYear, student))
 		}
 
+		case class Points(department: model.Department, academicYear: AcademicYear) extends Abstract {
+			val title = "Points"
+			val url = Some(Routes.View.points(department, academicYear))
+		}
+
 	}
 }

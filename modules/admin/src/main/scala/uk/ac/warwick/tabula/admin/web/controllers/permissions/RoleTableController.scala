@@ -54,8 +54,9 @@ class RoleTableController extends AdminController {
 		val customRoleDefinitions =
 			allDepartments
 				.flatMap { department => permissionsService.getCustomRoleDefinitionsFor(department) }
+				.filterNot { _.replacesBaseDefinition }
 
-		val allDefinitionIncludingReplacements =
+		val allDefinitionsWithoutReplacements =
 			(builtInRoleDefinitions ++ selectorBuiltInRoleDefinitions ++ customRoleDefinitions)
 				.filter { _.isAssignable }
 				.sortBy { _.allPermissions(Some(null)).size }
@@ -71,14 +72,10 @@ class RoleTableController extends AdminController {
 				}
 				.flatMap { case (_, defs) => defs }
 
-		val replacements = allDefinitionIncludingReplacements.flatMap {
-			case custom: CustomRoleDefinition if custom.replacesBaseDefinition => Some(custom)
-			case _ => None
-		}
-
 		val allDefinitions =
-			allDefinitionIncludingReplacements
-				.filterNot { defn => replacements.exists { _.baseRoleDefinition == defn } }
+			allDefinitionsWithoutReplacements.map { definition =>
+				(definition, allDepartments.flatMap { _.replacedRoleDefinitionFor(definition) }.headOption.getOrElse(definition))
+			}
 
 		def groupFn(p: Permission) = {
 			val simpleName = Permissions.shortName(p.getClass)
@@ -94,16 +91,18 @@ class RoleTableController extends AdminController {
 			.filter { p => groupFn(p).hasText }
 			.map { permission =>
 				(permission, allDefinitions.map {
-					case definition: SelectorBuiltInRoleDefinition[StudentRelationshipType @unchecked] => {
-						permission match {
-							case _ if definition.mayGrant(permission) => (definition, Some(true))
-							case selectorPermission: SelectorPermission[StudentRelationshipType @unchecked]
-								if definition.allPermissions(Some(null)).exists { case (p, _) => p.getName == selectorPermission.getName } &&
-									 definition.selector <= selectorPermission.selector => (definition, None)
-							case _ => (definition, Some(false))
+					case (actualDefinition, permsDefinition) => (actualDefinition, permsDefinition match {
+						case definition: SelectorBuiltInRoleDefinition[StudentRelationshipType@unchecked] => {
+							permission match {
+								case _ if definition.mayGrant(permission) => Some(true)
+								case selectorPermission: SelectorPermission[StudentRelationshipType@unchecked]
+									if definition.allPermissions(Some(null)).exists { case (p, _) => p.getName == selectorPermission.getName} &&
+										definition.selector <= selectorPermission.selector => None
+								case _ => Some(false)
+							}
 						}
-					}
-					case definition => (definition, Some(definition.mayGrant(permission)))
+						case definition => Some(definition.mayGrant(permission))
+					})
 				})
 			}
 			.filter { case (p, defs) => defs.exists { case (_, result) => !result.isDefined || result.exists { b => b } } }

@@ -50,7 +50,8 @@ class Department extends GeneratedId
 	@BatchSize(size=200)
 	var markingWorkflows:JList[MarkingWorkflow] = JArrayList()
 
-	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	// TAB-2388 Disable orphanRemoval as Module Managers were unintentionally being removed in certain circumstances
+	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
 	@BatchSize(size=200)
 	var customRoleDefinitions:JList[CustomRoleDefinition] = JArrayList()
 
