@@ -65,7 +65,12 @@
 					<em>No points exist for this template</em>
 				</div>
 			<#else>
-				<#list template.points as point>
+				<#if template.pointStyle.dbValue == "week">
+					<#assign points = template.points?sort_by("startWeek") />
+				<#else>
+					<#assign points = template.points?sort_by("startDate") />
+				</#if>
+				<#list points as point>
 					<div class="item-info row-fluid point">
 						<div class="span12">
 							<div class="pull-right">
