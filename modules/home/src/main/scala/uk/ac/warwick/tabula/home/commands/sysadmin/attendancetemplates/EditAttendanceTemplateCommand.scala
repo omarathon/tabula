@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.home.commands.sysadmin.attendancetemplates
 
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.{LocalDate, DateTime}
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplate
@@ -51,7 +50,7 @@ trait EditAttendanceTemplateValidation extends CreateAttendanceTemplateValidatio
 
 	override def validate(errors: Errors) {
 		super.validate(errors)
-		if (template.points.size() > 0) {
+		if (template.points.size() > 0 && template.pointStyle != pointStyle) {
 			errors.rejectValue("pointStyle", "attendanceMonitoringScheme.pointStyle.pointsExist")
 		}
 	}
