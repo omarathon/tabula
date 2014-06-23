@@ -160,6 +160,7 @@
 				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointTypeConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringTemplateIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringTemplatePointIdConverter"/>
 	        </list>
 	    </property>
 	    <property name="formatters">
