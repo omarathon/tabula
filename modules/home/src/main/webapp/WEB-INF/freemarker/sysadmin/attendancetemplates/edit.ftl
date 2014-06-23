@@ -75,7 +75,7 @@
 							<#if template.pointStyle.dbValue == "week">
 								${point.name} (week ${point.startWeek} - ${point.endWeek})
 							<#else>
-								${point.name} ()
+								${point.name} (<#noescape>${command.dateString(point.startDate)} - ${command.dateString(point.endDate)}</#noescape>)
 							</#if>
 						</div>
 					</div>

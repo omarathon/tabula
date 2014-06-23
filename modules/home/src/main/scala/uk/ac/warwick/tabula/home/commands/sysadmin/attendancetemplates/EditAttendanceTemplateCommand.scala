@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.home.commands.sysadmin.attendancetemplates
 
-import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.{LocalDate, DateTime}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplate
+import uk.ac.warwick.tabula.helpers.DateBuilder
 import uk.ac.warwick.tabula.services.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 
 object EditAttendanceTemplateCommand {
@@ -69,4 +71,6 @@ trait EditAttendanceTemplateDescription extends Describable[AttendanceMonitoring
 
 trait EditAttendanceTemplateCommandState extends ManageAttendanceTemplateCommandState {
 	def template: AttendanceMonitoringTemplate
+
+	def dateString(date: LocalDate) = s"${date.getDayOfMonth}<sup>${DateBuilder.ordinal(date.getDayOfMonth)}</sup> ${date.toString("MMM")}"
 }
