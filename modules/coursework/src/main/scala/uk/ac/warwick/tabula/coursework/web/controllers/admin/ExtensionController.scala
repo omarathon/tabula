@@ -113,9 +113,15 @@ class ListAllExtensionsController extends ExtensionController {
 	}
 }
 
-
+/**
+ * FIXME TAB-2426 Is the second mapping here necessary? Is it referred to anywhere? If not, it should be removed.
+ * The first mapping is the one that should be used.
+ */
 @Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/extensions/detail/{assignment}/{universityId}"))
+@RequestMapping(Array(
+  "/admin/module/{module}/assignments/{assignment}/extensions/detail/{universityId}",
+	"/admin/module/{module}/assignments/extensions/detail/{assignment}/{universityId}"
+))
 class EditExtensionController extends ExtensionController {
 
 	@ModelAttribute("modifyExtensionCommand")
