@@ -45,12 +45,11 @@ class AddTemplatePointsToSchemesCommandInternal(val department: Department, val 
 			}
 		}
 
-		benchmark("updateCheckpointTotals") {
-			profileService.getAllMembersWithUniversityIds(schemes.asScala.flatMap(_.members.members).distinct).map {
-				case student: StudentMember => attendanceMonitoringService.updateCheckpointTotal(student, department, academicYear)
-				case _ =>
-			}
+		val students = profileService.getAllMembersWithUniversityIds(schemes.asScala.flatMap(_.members.members).distinct).flatMap {
+			case student: StudentMember => Option(student)
+			case _ => None
 		}
+		attendanceMonitoringService.updateCheckpointTotalsAsync(students, department, academicYear)
 
 		newPoints
 	}

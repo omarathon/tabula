@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceMonitoringPointType, AttendanceMonitoringPointStyle, AttendanceMonitoringPoint}
 import org.joda.time.DateTime
@@ -20,6 +20,7 @@ object EditAttendancePointCommand {
 			with AutowiringTermServiceComponent
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringModuleAndDepartmentServiceComponent
+			with AutowiringProfileServiceComponent
 			with EditAttendancePointValidation
 			with EditAttendancePointDescription
 			with EditAttendancePointPermissions
@@ -34,15 +35,23 @@ class EditAttendancePointCommandInternal(
 	val templatePoint: AttendanceMonitoringPoint
 ) extends CommandInternal[Seq[AttendanceMonitoringPoint]] {
 
-	self: EditAttendancePointCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent =>
+	self: EditAttendancePointCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal() = {
-		pointsToEdit.map(point => {
+		val editedPoints = pointsToEdit.map(point => {
 			copyTo(point)
 			point.updatedDate = DateTime.now
 			attendanceMonitoringService.saveOrUpdate(point)
 			point
 		})
+
+		val students = profileService.getAllMembersWithUniversityIds(schemesToEdit.flatMap(_.members.members).distinct).flatMap {
+			case student: StudentMember => Option(student)
+			case _ => None
+		}
+		attendanceMonitoringService.updateCheckpointTotalsAsync(students, department, academicYear)
+
+		editedPoints
 	}
 
 }

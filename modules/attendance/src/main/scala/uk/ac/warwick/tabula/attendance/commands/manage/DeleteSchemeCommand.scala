@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
+import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.commands.{SelfValidating, Description, Describable, ComposableCommand, CommandInternal}
-import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import scala.collection.JavaConverters._
@@ -12,6 +13,7 @@ object DeleteSchemeCommand {
 	def apply(scheme: AttendanceMonitoringScheme) =
 		new DeleteSchemeCommandInternal(scheme)
 			with AutowiringAttendanceMonitoringServiceComponent
+			with AutowiringProfileServiceComponent
 			with ComposableCommand[AttendanceMonitoringScheme]
 			with DeleteSchemeCommandState
 			with DeleteSchemeDescription
@@ -23,13 +25,20 @@ object DeleteSchemeCommand {
 class DeleteSchemeCommandInternal(val scheme: AttendanceMonitoringScheme)
 	extends CommandInternal[AttendanceMonitoringScheme] {
 
-	self: AttendanceMonitoringServiceComponent =>
+	self: AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
-		override def applyInternal() = {
-			attendanceMonitoringService.deleteScheme(scheme)
-			scheme
+	override def applyInternal() = {
+		attendanceMonitoringService.deleteScheme(scheme)
+
+		val students = profileService.getAllMembersWithUniversityIds(scheme.members.members).flatMap {
+			case student: StudentMember => Option(student)
+			case _ => None
 		}
+		attendanceMonitoringService.updateCheckpointTotalsAsync(students, scheme.department, scheme.academicYear)
+
+		scheme
 	}
+}
 
 trait DeleteSchemeDescription extends Describable[AttendanceMonitoringScheme] {
 
@@ -67,7 +76,7 @@ trait DeleteSchemeValidation extends SelfValidating {
 			point => attendanceMonitoringService.countCheckpointsForPoint(point) > 0
 		}
 
-		if (!pointsWithCheckpoints.isEmpty) {
+		if (pointsWithCheckpoints.nonEmpty) {
 			errors.reject("attendanceMonitoringScheme.hasCheckpoints.remove")
 		}
 

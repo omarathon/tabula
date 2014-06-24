@@ -62,7 +62,7 @@ trait PopulateRecordMonitoringPointCommand extends PopulateOnForm {
 					val pointMapOption = studentPointCheckpointMap.get(student)
 					val checkpointOption = pointMapOption.flatMap{ pointMap => pointMap.get(point) }
 					val stateOption = checkpointOption.map{ checkpoint => checkpoint.state }
-					stateOption.getOrElse(null)
+					stateOption.orNull
 				}))
 			}.toSeq
 		checkpointMap = studentPointStateTuples.groupBy(_._1).mapValues(

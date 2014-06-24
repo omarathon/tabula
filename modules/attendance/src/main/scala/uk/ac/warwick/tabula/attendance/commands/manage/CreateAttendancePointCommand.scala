@@ -1,15 +1,16 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, AttendanceMonitoringPointStyle, AttendanceMonitoringPoint, AttendanceMonitoringScheme}
 import org.joda.time.DateTime
-import collection.JavaConverters._
+import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
+import scala.collection.JavaConverters._
 
 object CreateAttendancePointCommand {
 	def apply(department: Department, academicYear: AcademicYear, schemes: Seq[AttendanceMonitoringScheme]) =
@@ -42,12 +43,12 @@ class CreateAttendancePointCommandInternal(val department: Department, val acade
 			attendanceMonitoringService.saveOrUpdate(point)
 			point
 		})
-		benchmark("updateCheckpointTotals") {
-			profileService.getAllMembersWithUniversityIds(schemes.flatMap(_.members.members).distinct).map {
-				case student: StudentMember => attendanceMonitoringService.updateCheckpointTotal(student, department, academicYear)
-				case _ =>
-			}
+
+		val students = profileService.getAllMembersWithUniversityIds(schemes.flatMap(_.members.members).distinct).flatMap {
+			case student: StudentMember => Option(student)
+			case _ => None
 		}
+		attendanceMonitoringService.updateCheckpointTotalsAsync(students, department, academicYear)
 		points
 	}
 
