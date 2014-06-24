@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceMonitoringPointType, AttendanceMonitoringPointStyle, AttendanceMonitoringPoint}
 import org.joda.time.DateTime
 import collection.JavaConverters._
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services._
 
 object EditAttendancePointCommand {
 	def apply(department: Department, academicYear: AcademicYear, templatePoint: AttendanceMonitoringPoint) =
@@ -18,6 +18,8 @@ object EditAttendancePointCommand {
 			with PopulatesEditAttendancePointCommand
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringTermServiceComponent
+			with AutowiringSmallGroupServiceComponent
+			with AutowiringModuleAndDepartmentServiceComponent
 			with EditAttendancePointValidation
 			with EditAttendancePointDescription
 			with EditAttendancePointPermissions
@@ -135,7 +137,7 @@ trait EditAttendancePointDescription extends Describable[Seq[AttendanceMonitorin
 
 trait EditAttendancePointCommandState extends AttendancePointCommandState with FindPointsResultCommandState {
 
-	self: TermServiceComponent =>
+	self: TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent =>
 
 	def department: Department
 	def academicYear: AcademicYear
