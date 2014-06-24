@@ -10,7 +10,8 @@
 
 <#escape x as x?html>
 	<div class="content extension-detail">
-		<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/extensions/detail/${universityId}')}" commandName="modifyExtensionCommand" cssClass="form-horizontal double-submit-protection">
+		<#assign actionUrl><@routes.extensiondetail assignment universityId /></#assign>
+		<@f.form method="post" enctype="multipart/form-data" action=actionUrl commandName="modifyExtensionCommand" cssClass="form-horizontal double-submit-protection">
 			<@f.input type="hidden" path="universityId" value="${universityId}" />
 			<input type="hidden" name="closeDate" class="startDateTime" value="${assignment.closeDate}" />
 

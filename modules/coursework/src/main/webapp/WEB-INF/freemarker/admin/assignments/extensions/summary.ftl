@@ -8,7 +8,9 @@
 
 <#macro row graph>
 	<#assign state = (graph.extension.state.description)!"None" />
-	<tr class="itemContainer" data-contentid="${assignment.id}_${graph.universityId}">
+	<tr class="itemContainer" data-contentid="${assignment.id}_${graph.universityId}"
+		data-detailurl = <@routes.extensiondetail assignment graph.universityId />
+	>
 
 		<#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
 		<td class="student-col toggle-cell"><h6 class="toggle-icon">${graph.user.firstName}</h6></td>
@@ -99,14 +101,15 @@
 		<script type="text/javascript">
 		(function($) {
 			$('.expanding-table').expandingTable({
-				contentUrlFunction: function(){ return '${url(detailUrl!"")}'; },
+				contentUrlFunction: function($row) { return $row.data('detailurl'); },
 				useIframe: true,
 				tableSorterOptions: {
 					sortList: [[1, 0], [0, 0]],
 					headers: {
 						3: { sorter: false }
 					}
-				}
+				},
+				preventContentIdInUrl: true
 			});
 		})(jQuery);
 		</script>

@@ -7,7 +7,7 @@
 	<#assign assignment = graph.extension.assignment />
 <tr class="itemContainer"
 	data-contentid="${assignment.id}_${graph.universityId}"
-	data-detailurl = <@routes.extensiondetail assignment />
+	data-detailurl = <@routes.extensiondetail assignment graph.universityId />
 >
 
 <#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
@@ -98,7 +98,8 @@
 					headers: {
 						5: { sorter: false }
 					}
-				}
+				},
+				preventContentIdInUrl: true
 			});
 		})(jQuery);
 	</script>
