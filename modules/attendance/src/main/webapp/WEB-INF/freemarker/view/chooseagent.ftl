@@ -1,6 +1,10 @@
 <#escape x as x?html>
 
-<@fmt.deptheader "View and record attendance for ${academicYear.toString}" "in" department routes "viewDepartment" />
+<#macro deptheaderroutemacro dept>
+	<@routes.viewAgentsHome dept academicYear.startYear?c />
+</#macro>
+<#assign deptheaderroute = deptheaderroutemacro in routes/>
+<@fmt.deptheader "View and record attendance for ${academicYear.toString}" "in" department routes "deptheaderroute" />
 
 <#if can.do("MonitoringPoints.View", department)>
 	<#list department.displayedStudentRelationshipTypes as relationshipType>

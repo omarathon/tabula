@@ -270,6 +270,7 @@
 			<@attendance_macros.manageStudentTable
 				membershipItems=editMembershipCommandResult.membershipItems
 				checkboxName="resetStudentIds"
+				checkAll=true
 			/>
 
 			<#list editMembershipCommandResult.updatedIncludedStudentIds as id>

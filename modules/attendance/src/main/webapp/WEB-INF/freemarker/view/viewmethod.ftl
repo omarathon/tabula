@@ -1,6 +1,10 @@
 <#escape x as x?html>
 
-<@fmt.deptheader "View and record attendance for ${academicYear.toString}" "in" department routes "viewDepartment" />
+<#macro deptheaderroutemacro dept>
+	<@routes.viewHomeForYear dept academicYear.startYear?c />
+</#macro>
+<#assign deptheaderroute = deptheaderroutemacro in routes/>
+<@fmt.deptheader "View and record attendance for ${academicYear.toString}" "in" department routes "deptheaderroute" />
 
 <#if hasSchemes>
 	<h3><a href="<@routes.viewStudents department academicYear.startYear?c />">View by student and report to SITS:eVision</a></h3>
