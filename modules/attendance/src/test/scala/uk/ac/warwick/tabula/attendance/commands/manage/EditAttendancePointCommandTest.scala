@@ -68,7 +68,8 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 			val termService = thisTermService
 			val smallGroupService = null
 			val moduleAndDepartmentService = null
-			val profileService = null
+			val profileService = smartMock[ProfileService]
+			profileService.getAllMembersWithUniversityIds(any[Seq[String]]) returns Seq()
 			startWeek = 5
 			endWeek = 15
 		}
