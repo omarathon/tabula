@@ -1,24 +1,25 @@
 package uk.ac.warwick.tabula.attendance.web.controllers.manage
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, AttendanceMonitoringScheme, AttendanceMonitoringPoint}
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
-import uk.ac.warwick.tabula.attendance.commands.manage._
-import org.springframework.validation.{Errors, BindException}
-import uk.ac.warwick.tabula.JavaImports._
-import collection.JavaConverters._
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Controller
+import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.attendance.commands.manage._
+import uk.ac.warwick.tabula.attendance.web.controllers.{AttendanceController, HasMonthNames}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+
+import scala.collection.JavaConverters._
 
 @Controller
 @RequestMapping(Array("/manage/{department}/{academicYear}/addpoints/copy"))
-class CreateNewAttendancePointsFromCopyController extends AttendanceController {
+class CreateAttendancePointsFromCopyController extends AttendanceController with HasMonthNames {
 
 	@Autowired var moduleAndDepartmentService: ModuleAndDepartmentService = _
 
@@ -100,7 +101,7 @@ class CreateNewAttendancePointsFromCopyController extends AttendanceController {
 			"searchDepartment" -> searchDepartment,
 			"searchAcademicYear" -> searchAcademicYear,
 			"allSchemes" -> allSchemes,
-			"isSchemes" -> !searchResult.schemes.isEmpty,
+			"isSchemes" -> searchResult.schemes.nonEmpty,
 			"allTypes" -> AttendanceMonitoringPointType.values,
 			"findResult" -> findCommand.apply(),
 			"currentAcademicYear" -> AcademicYear.guessByDate(DateTime.now),
@@ -140,7 +141,7 @@ class CreateNewAttendancePointsFromCopyController extends AttendanceController {
 				"searchAcademicYear" -> searchAcademicYear,
 				"findResult" -> findCommandResult,
 				"allSchemes" -> allSchemes,
-				"isSchemes" -> !searchResult.schemes.isEmpty,
+				"isSchemes" -> searchResult.schemes.nonEmpty,
 				"allTypes" -> AttendanceMonitoringPointType.values,
 				"errors" -> errors,
 				"currentAcademicYear" -> AcademicYear.guessByDate(DateTime.now),

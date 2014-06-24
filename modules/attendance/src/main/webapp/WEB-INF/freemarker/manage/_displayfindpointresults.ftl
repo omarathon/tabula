@@ -66,7 +66,7 @@
 				<div class="span12">
 					${groupedPoint.templatePoint.name}
 					(<@fmt.interval groupedPoint.templatePoint.startDate groupedPoint.templatePoint.endDate />)
-					<#if !templateScheme??><@groupedPointSchemePopover groupedPoint /></#if>
+					<#if !templateScheme??><@attendance_macros.groupedPointSchemePopover groupedPoint /></#if>
 				</div>
 			</@attendance_macros.groupedPointsBySection>
 		</#if>
