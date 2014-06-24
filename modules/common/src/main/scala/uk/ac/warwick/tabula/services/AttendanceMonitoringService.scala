@@ -3,6 +3,8 @@ package uk.ac.warwick.tabula.services
 import org.codehaus.jackson.annotate.JsonAutoDetect
 import org.joda.time.DateTime
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
@@ -11,7 +13,7 @@ import uk.ac.warwick.tabula.data.convert.{DepartmentCodeConverter, MemberUnivers
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.data.{Daoisms, AttendanceMonitoringDaoComponent, AttendanceMonitoringStudentData, AutowiringAttendanceMonitoringDaoComponent, SchemeMembershipItem, SchemeMembershipItemType}
+import uk.ac.warwick.tabula.data.{AttendanceMonitoringDaoComponent, AttendanceMonitoringStudentData, AutowiringAttendanceMonitoringDaoComponent, Daoisms, SchemeMembershipItem, SchemeMembershipItemType}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
@@ -361,6 +363,7 @@ class AttendanceMonitoringServiceListener extends QueueListener with Initializin
 	with AutowiringAttendanceMonitoringServiceComponent with AutowiringProfileServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
 
 	var queue = Wire.named[Queue]("settingsSyncTopic")
+	@Autowired var env: Environment = _
 
 	private def convertArgsAndUpdate(universityId: String, departmentCode: String, academicStartYear: String) = transactional() {
 		val memberConverter = new MemberUniversityIdConverter
@@ -397,7 +400,7 @@ class AttendanceMonitoringServiceListener extends QueueListener with Initializin
 		}
 	}
 
-	override def isListeningToQueue = true
+	override def isListeningToQueue = env.acceptsProfiles("dev", "scheduling")
 	override def onReceive(item: Any) {
 		logger.debug(s"Synchronising item $item")
 		item match {
