@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.timetables.EventOccurrence
  * Note: start and end are *Seconds* since the epoch, not milliseconds!
  */
 case class FullCalendarEvent(title: String,
+														 fullTitle: String,	
 														 allDay: Boolean,
 														 start: Long,
 														 end: Long,
@@ -38,7 +39,8 @@ object FullCalendarEvent {
 		
 		val shortTimeFormat = DateTimeFormat.shortTime()
 		FullCalendarEvent(
-			title = source.context.map { _ + " " }.getOrElse("") + source.name + source.location.map(l => s" ($l)").getOrElse(""),
+			title = source.context.map { _ + " " }.getOrElse("") + source.eventType.displayName + source.location.map(l => s" ($l)").getOrElse(""),
+			fullTitle = source.title,
 			allDay = false,
 			start = source.start.toDateTime.getMillis / 1000,
 			end = source.end.toDateTime.getMillis / 1000,

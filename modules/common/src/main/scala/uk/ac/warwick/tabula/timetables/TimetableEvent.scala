@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.AcademicYear
 
 case class TimetableEvent(
 	name: String,
+  title: String,
 	description: String,
 	eventType: TimetableEventType,
 	weekRanges: Seq[WeekRange],
@@ -21,7 +22,8 @@ case class TimetableEvent(
 object TimetableEvent {
 
 	def apply(sge: SmallGroupEvent): TimetableEvent = {
-		TimetableEvent(name = sge.group.name + Option(sge.title).map(" : " + _).getOrElse(""),
+		TimetableEvent(name = sge.group.name,
+			title =  Option(sge.title).getOrElse(""),
 			description = sge.group.groupSet.name,
 			eventType = smallGroupFormatToTimetableEventType(sge.group.groupSet.format),
 			weekRanges = sge.weekRanges,
@@ -77,6 +79,7 @@ object TimetableEventType {
 
 case class EventOccurrence(
 	name: String,
+	title: String,
 	description: String,
 	eventType: TimetableEventType,
 	start: LocalDateTime,
@@ -90,6 +93,7 @@ object EventOccurrence {
 	def apply(timetableEvent: TimetableEvent, start: LocalDateTime, end: LocalDateTime): EventOccurrence = {
 		EventOccurrence(
 			timetableEvent.name,
+			timetableEvent.title,
 			timetableEvent.description,
 			timetableEvent.eventType,
 			start,
@@ -102,6 +106,7 @@ object EventOccurrence {
 
 	def busy(occurrence: EventOccurrence): EventOccurrence = {
 		EventOccurrence(
+			"",
 			"",
 			"",
 			TimetableEventType.Other("Busy"),
