@@ -10,7 +10,7 @@ import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.attendance.commands.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipExcludeType, SchemeMembershipStaticType, SchemeMembershipItem}
@@ -27,6 +27,7 @@ object FindStudentsForSchemeCommand {
 			with AutowiringProfileServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringDeserializesFilterImpl
+			with AutowiringUserLookupComponent
 			with ComposableCommand[FindStudentsForSchemeCommandResult]
 			with PopulateFindStudentsForSchemeCommand
 			with UpdatesFindStudentsForSchemeCommand
@@ -39,7 +40,7 @@ object FindStudentsForSchemeCommand {
 class FindStudentsForSchemeCommandInternal(val scheme: AttendanceMonitoringScheme, val user: CurrentUser)
 	extends CommandInternal[FindStudentsForSchemeCommandResult] with TaskBenchmarking {
 
-	self: ProfileServiceComponent with FindStudentsForSchemeCommandState with AttendanceMonitoringServiceComponent =>
+	self: ProfileServiceComponent with FindStudentsForSchemeCommandState with AttendanceMonitoringServiceComponent with UserLookupComponent =>
 
 	override def applyInternal() = {
 		if (serializeFilter.isEmpty) {
@@ -50,7 +51,7 @@ class FindStudentsForSchemeCommandInternal(val scheme: AttendanceMonitoringSchem
 					department = department,
 					restrictions = buildRestrictions(),
 					orders = buildOrders()
-				)
+				).filter(userLookup.getUserByWarwickUniId(_).isFoundUser)
 			}.asJava
 
 			val startResult = studentsPerPage * (page-1)

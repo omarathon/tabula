@@ -108,7 +108,7 @@ trait AddStudentsToSchemeValidation extends SelfValidating with TaskBenchmarking
 		val noPermissionMembers = benchmark("noPermissionMembers") {
 			members.filter(!securityService.can(user, Permissions.MonitoringPoints.Manage, _))
 		}
-		if (!noPermissionMembers.isEmpty) {
+		if (noPermissionMembers.nonEmpty) {
 			errors.rejectValue(
 				"staticStudentIds",
 				"attendanceMonitoringScheme.student.noPermission",

@@ -37,7 +37,7 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 	}
 
 	override def getUserByUserId(theUserId: String) = {
-		users.get(theUserId).getOrElse {
+		users.getOrElse(theUserId, {
 			if (defaultFoundUser) {
 				val user = new User()
 				user.setUserId(theUserId)
@@ -46,11 +46,11 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 			} else {
 				new AnonymousUser
 			}
-		}
+		})
 	}
 
 	override def getUserByWarwickUniId(warwickId: String) =
-		users.values.find(_.getWarwickId() == warwickId).getOrElse {
+		users.values.find(_.getWarwickId == warwickId).getOrElse {
 			if (defaultFoundUser) {
 				val user = new User()
 				user.setWarwickId(warwickId)
@@ -85,7 +85,7 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 	override def findUsersWithFilter(filterValues: JMap[String, String], returnDisabledUsers: Boolean) = findUsersWithFilter(filterValues)
 
 	override def getUsersByUserIds(userIds: JList[String]): JMap[String, User] = {
-		val map: Map[String, User] = (userIds.asScala.map { id => (id -> getUserByUserId(id) )}).toMap
+		val map: Map[String, User] = userIds.asScala.map { id => id -> getUserByUserId(id)}.toMap
 
 		map.asJava
 	}
@@ -123,22 +123,20 @@ class MockCachingLookupService(var flavour: UserFlavour = Vanilla)
 		flavour match {
 			case Unverified => new UnverifiedUser(new UserLookupException)
 			case Anonymous => new AnonymousUser()
-			case Applicant => {
+			case Applicant =>
 				val user = new AnonymousUser()
 				user.setWarwickId(warwickId)
 				user
-			}
-			case Vanilla => {
+			case Vanilla =>
 				// hash WarwickId to a consistent 6 char 'usercode'. Tiny, but finite risk of collision/short usercodes.
 				val userId = Base64.encodeBase64String(DigestUtils.sha256(warwickId.getBytes)).filter(_.isLower).take(6)
 				val user = mockUser(userId)
 				user.setWarwickId(warwickId)
 				user
-			}
 		}
 	}
 
-	override def getUserByWarwickUniId(id: String) = getUserByWarwickUniId(id, true)
+	override def getUserByWarwickUniId(id: String) = getUserByWarwickUniId(id, ignored = true)
 
 	override def getUserByWarwickUniId(id: String, ignored: Boolean) = UserByWarwickIdCache.get(id)
 
@@ -154,12 +152,12 @@ trait MockUser {
 		val user = new User(id)
 		user.setFoundUser(true)
 		user.setVerified(true)
-		user.setFirstName(capitalize(id)+"y");
-		user.setLastName("Mc"+capitalize(id)+"erson");
-		user.setDepartment("Department of " + capitalize(id));
-		user.setShortDepartment("Dept of " + capitalize(id));
-		user.setDepartmentCode("D" + capitalize(id.substring(0, 1)));
-		user.setEmail(id + "@example.com");
+		user.setFirstName(capitalize(id)+"y")
+		user.setLastName("Mc"+capitalize(id)+"erson")
+		user.setDepartment("Department of " + capitalize(id))
+		user.setShortDepartment("Dept of " + capitalize(id))
+		user.setDepartmentCode("D" + capitalize(id.substring(0, 1)))
+		user.setEmail(id + "@example.com")
 		user.setWarwickId({
 			val universityId = Math.abs(id.hashCode()).toString
 			if (universityId.length > 7) universityId.substring(universityId.length - 7)
@@ -193,7 +191,7 @@ object UserFlavour {
 
 class MockGroupService extends GroupService {
 	var groupMap: Map[String, Group] = Map()
-	var usersInGroup: Map[(String, String), Boolean] = Map() withDefaultValue(false)
+	var usersInGroup: Map[(String, String), Boolean] = Map() withDefaultValue false
 	var groupNamesForUserMap: Map[String, Seq[String]] = Map()
 
 	override def getGroupByName(groupName: String) = groupMap.get(groupName).getOrElse {
@@ -216,7 +214,7 @@ class MockGroupService extends GroupService {
 
 	override def getUserCodesInGroup(groupName: String) = {
 		try {
-			getGroupByName(groupName).getUserCodes()
+			getGroupByName(groupName).getUserCodes
 		} catch {
 			case e: GroupNotFoundException => JList()
 		}
@@ -226,7 +224,7 @@ class MockGroupService extends GroupService {
 
 	override def setTimeoutConfig(config: WebServiceTimeoutConfig) {}
 
-	override def getGroupInfo(name: String) = new GroupInfo(getGroupByName(name).getUserCodes().size())
+	override def getGroupInfo(name: String) = new GroupInfo(getGroupByName(name).getUserCodes.size())
 
 	override def clearCaches() = ???
 	override def getCaches() = ???
