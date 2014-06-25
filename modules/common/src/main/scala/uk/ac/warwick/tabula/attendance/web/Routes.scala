@@ -125,4 +125,8 @@ object Routes {
 				encoded(relationshipType.urlPart)
 			)
 	}
+
+	object Agent {
+		def home = context + "/agent"
+	}
 }
