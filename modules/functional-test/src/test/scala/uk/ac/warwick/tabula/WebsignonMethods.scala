@@ -11,6 +11,9 @@ import org.scalatest.time.SpanSugar._
 
 import WebsignonMethods._
 import scala.util.matching.Regex
+import org.openqa.selenium.htmlunit.HtmlUnitDriver
+import com.gargoylesoftware.htmlunit
+import com.gargoylesoftware.htmlunit.WebClient
 
 object WebsignonMethods {
 	def parseSignedInDetail(html: String) = {
@@ -32,13 +35,39 @@ object WebsignonMethods {
  */
 class SessionCache {
 	private var map = Map[String, Set[Cookie]]()
+
+	// Get HTMLUnit WebClient if one is available.
+	def getWebClient(driver: WebDriver): Option[WebClient] = driver match {
+		case hud: HtmlUnitDriver =>
+			val getWebClient = hud.getClass.getDeclaredMethod("getWebClient")
+			getWebClient.setAccessible(true)
+			Some(getWebClient.invoke(hud).asInstanceOf[WebClient])
+//		case _ =>
+	}
+
+	/** If we have stored cookies and are using HtmlUnit, we can
+		* dig in to the cookie manager and reinsert those cookies
+		* without having to sign in again.
+		*/
 	def retrieve(usercode: String, webDriver: WebDriver) {
-		map.get(usercode).foreach { cookies =>
-			cookies.foreach { cookie =>
-				webDriver.manage().deleteCookieNamed(cookie.getName)
-				webDriver.manage().addCookie(cookie)
+		getWebClient(webDriver).foreach { wc =>
+			map.get(usercode).foreach { cookies =>
+				webDriver.manage().deleteAllCookies()
+				cookies.foreach { cookie =>
+					val cm = wc.getCookieManager()
+					cm.addCookie(new htmlunit.util.Cookie(
+						cookie.getDomain,
+						cookie.getName,
+						cookie.getValue,
+						cookie.getPath,
+						cookie.getExpiry,
+						false
+					))
+					//webDriver.manage().addCookie(cookie)
+				}
 			}
 		}
+
 	}
 
 	def store(usercode: String, webDriver: WebDriver) {

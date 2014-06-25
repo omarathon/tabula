@@ -88,7 +88,8 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 		updatedGroupsPage.isCurrentPage()
 
 		And("Both groups should be displayed, with radio buttons for selection")
-		val groupsetInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
+		val groupsetInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME)
+			.getOrElse(fail(s"No group set info found for $TEST_MODULE_CODE - $TEST_GROUPSET_NAME"))
 
 		val group1Checkbox = groupsetInfo.findSelectGroupCheckboxFor("Group 1")
 		group1Checkbox should be('enabled)

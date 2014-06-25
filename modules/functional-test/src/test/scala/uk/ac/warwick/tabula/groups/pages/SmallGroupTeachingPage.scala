@@ -143,7 +143,7 @@ trait ModuleAndGroupSetList {
 				click on module.findElement(By.className("section-title"))
 				
 				eventuallyAjax {
-					module.getAttribute("class").indexOf("expanded") should not be (-1)
+					module.getAttribute("class") should include ("expanded")
 				}
 			}
 			
