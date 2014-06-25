@@ -119,7 +119,7 @@ exports.bindAssignmentPickers = function(){
 				if ($(this).data('assignmentid') === undefined || $(this).data('assignmentid').length === 0)
 					return;
 
-				$this.closest('.assignment-choice').find('.assignments-list ul').append(
+				$this.closest('.assignment-choice').find('.assignments-list ol').append(
 					$('<li/>').append(
 						$('<input/>').attr({
 							'type':'hidden',
