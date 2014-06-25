@@ -10,6 +10,8 @@ import org.scalatest.exceptions.TestFailedException
 import org.scalatest.GivenWhenThen
 
 import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
 
 trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen {
 
@@ -36,7 +38,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		)
 
 		// Wait to complete
-		for { job <- concurrentJobs; nothing <- job } yield nothing
+		for { job <- concurrentJobs } Await.ready(job, Duration(60, duration.SECONDS))
 	}
 
 
