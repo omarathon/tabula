@@ -62,12 +62,14 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 		scheme2.points.add(secondPoint)
 
 		val command = new EditAttendancePointCommandInternal(null, null, templatePoint) with AttendanceMonitoringServiceComponent
-			with EditAttendancePointCommandState with TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent {
+			with EditAttendancePointCommandState with TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent with ProfileServiceComponent {
 			override def pointsToEdit = Seq(templatePoint, secondPoint)
 			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
 			val termService = thisTermService
 			val smallGroupService = null
 			val moduleAndDepartmentService = null
+			val profileService = smartMock[ProfileService]
+			profileService.getAllMembersWithUniversityIds(any[Seq[String]]) returns Seq()
 			startWeek = 5
 			endWeek = 15
 		}

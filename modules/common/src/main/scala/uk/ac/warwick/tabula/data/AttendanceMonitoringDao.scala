@@ -37,6 +37,7 @@ trait AutowiringAttendanceMonitoringDaoComponent extends AttendanceMonitoringDao
 }
 
 trait AttendanceMonitoringDao {
+	def flush(): Unit
 	def getSchemeById(id: String): Option[AttendanceMonitoringScheme]
 	def getPointById(id: String): Option[AttendanceMonitoringPoint]
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
@@ -86,6 +87,8 @@ trait AttendanceMonitoringDao {
 @Repository
 class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 
+	def flush() = session.flush()
+
 	def getSchemeById(id: String): Option[AttendanceMonitoringScheme] =
 		getById[AttendanceMonitoringScheme](id)
 
@@ -102,7 +105,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 		session.saveOrUpdate(total)
 
 	def saveOrUpdate(template: AttendanceMonitoringTemplate): Unit =
-	session.saveOrUpdate(template)
+		session.saveOrUpdate(template)
 
 	def saveOrUpdate(templatePoint: AttendanceMonitoringTemplatePoint): Unit =
 		session.saveOrUpdate(templatePoint)

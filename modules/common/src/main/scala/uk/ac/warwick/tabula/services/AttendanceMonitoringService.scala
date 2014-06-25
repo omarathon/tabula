@@ -1,16 +1,26 @@
 package uk.ac.warwick.tabula.services
 
+import org.codehaus.jackson.annotate.JsonAutoDetect
 import org.joda.time.DateTime
+import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, _}
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.convert.{DepartmentCodeConverter, MemberUniversityIdConverter}
+import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.data.{AttendanceMonitoringDaoComponent, AttendanceMonitoringStudentData, AutowiringAttendanceMonitoringDaoComponent, SchemeMembershipItem, SchemeMembershipItemType}
+import uk.ac.warwick.tabula.data.{AttendanceMonitoringDaoComponent, AttendanceMonitoringStudentData, AutowiringAttendanceMonitoringDaoComponent, Daoisms, SchemeMembershipItem, SchemeMembershipItemType}
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.queue.conversion.ItemType
+import uk.ac.warwick.util.queue.{Queue, QueueListener}
 
+import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
 
 trait AttendanceMonitoringServiceComponent {
@@ -64,6 +74,7 @@ trait AttendanceMonitoringService {
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
 	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint]
+	def updateCheckpointTotalsAsync(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit
 	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
 	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
 	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
@@ -73,6 +84,8 @@ trait AttendanceMonitoringService {
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService with TaskBenchmarking {
 
 	self: AttendanceMonitoringDaoComponent with TermServiceComponent with AttendanceMonitoringMembershipHelpers with UserLookupComponent =>
+
+	var queue = Wire.named[Queue]("settingsSyncTopic")
 
 	def getSchemeById(id: String): Option[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.getSchemeById(id)
@@ -253,6 +266,16 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		checkpointsToUpdate
 	}
 
+	def updateCheckpointTotalsAsync(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit = {
+		attendanceMonitoringDao.flush()
+		students.foreach(student =>
+			queue.send(new AttendanceMonitoringServiceUpdateCheckpointTotalMessage(
+				student.universityId,
+				department.code,
+				academicYear.startYear.toString
+		)))
+	}
+
 	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal = {
 		val points = benchmarkTask("listStudentsPoints") {
 			listStudentsPoints(student, department, academicYear)
@@ -335,3 +358,75 @@ class AttendanceMonitoringServiceImpl
 	with AutowiringAttendanceMonitoringDaoComponent
 	with AutowiringUserLookupComponent
 
+
+class AttendanceMonitoringServiceListener extends QueueListener with InitializingBean with Logging with Daoisms
+	with AutowiringAttendanceMonitoringServiceComponent with AutowiringProfileServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
+
+	var queue = Wire.named[Queue]("settingsSyncTopic")
+	@Autowired var env: Environment = _
+
+	private def convertArgsAndUpdate(universityId: String, departmentCode: String, academicStartYear: String) = transactional() {
+		val memberConverter = new MemberUniversityIdConverter
+		memberConverter.service = profileService
+		val studentOption = memberConverter.convertRight(universityId) match {
+			case student: StudentMember => Option(student)
+			case _ => None
+		}
+
+		val departmentConverter = new DepartmentCodeConverter
+		departmentConverter.service = moduleAndDepartmentService
+		val departmentOption = departmentConverter.convertRight(departmentCode) match {
+			case department: Department => Option(department)
+			case _ => None
+		}
+
+		val academicYearOption = {
+			try {
+				Option(AcademicYear(academicStartYear.toInt))
+			} catch {
+				case e: NumberFormatException =>
+					None
+			}
+		}
+		if (studentOption.isEmpty) {
+			logger.warn(s"Could not find student $universityId to update checkpoint total")
+		} else if (departmentOption.isEmpty) {
+			logger.warn(s"Could not find department $departmentCode to update checkpoint total")
+		} else if (academicYearOption.isEmpty) {
+			logger.warn(s"Could not find academic year $academicStartYear to update checkpoint total")
+		} else {
+			logger.debug(s"Updating checkpoint total from message for $universityId in $departmentCode for $academicStartYear")
+			attendanceMonitoringService.updateCheckpointTotal(studentOption.get, departmentOption.get, academicYearOption.get)
+		}
+	}
+
+	override def isListeningToQueue = env.acceptsProfiles("dev", "scheduling")
+	override def onReceive(item: Any) {
+		logger.debug(s"Synchronising item $item")
+		item match {
+			case msg: AttendanceMonitoringServiceUpdateCheckpointTotalMessage =>
+				convertArgsAndUpdate(msg.getUniversityId, msg.getDepartmentCode, msg.getAcademicStartYear)
+			case _ =>
+		}
+	}
+
+	override def afterPropertiesSet() {
+		queue.addListener(classOf[AttendanceMonitoringServiceUpdateCheckpointTotalMessage].getAnnotation(classOf[ItemType]).value, this)
+	}
+}
+
+@ItemType("AttendanceMonitoringServiceUpdateCheckpointTotal")
+@JsonAutoDetect
+class AttendanceMonitoringServiceUpdateCheckpointTotalMessage {
+
+	def this(thisUniversityId: String, thisDepartmentCode: String, thisAcademicStartYear: String) {
+		this()
+		universityId = thisUniversityId
+		departmentCode = thisDepartmentCode
+		academicStartYear = thisAcademicStartYear
+	}
+
+	@BeanProperty var universityId: String = _
+	@BeanProperty var departmentCode: String = _
+	@BeanProperty var academicStartYear: String = _
+}

@@ -42,12 +42,13 @@ class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme,
 		scheme.memberQuery = filterQueryString
 		scheme.updatedDate = DateTime.now
 		attendanceMonitoringService.saveOrUpdate(scheme)
-		benchmark("updateCheckpointTotals") {
-			profileService.getAllMembersWithUniversityIds(scheme.members.members).map {
-				case student: StudentMember => attendanceMonitoringService.updateCheckpointTotal(student, scheme.department, scheme.academicYear)
-				case _ =>
-			}
+
+		val students = profileService.getAllMembersWithUniversityIds(scheme.members.members).flatMap {
+			case student: StudentMember => Option(student)
+			case _ => None
 		}
+		attendanceMonitoringService.updateCheckpointTotalsAsync(students, scheme.department, scheme.academicYear)
+
 		scheme
 	}
 
