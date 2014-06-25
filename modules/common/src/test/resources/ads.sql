@@ -109,8 +109,14 @@ INSERT INTO MODULE_AVAILABILITY VALUES ('11/12', 'CH120-15', 'A');
 insert into STUDENT_CURRENT_STUDY_DETAILS (UNIVERSITY_ID, SPR_CODE, STUDENT_STATUS) values ('0123456', '0123456/1', 'C');
 insert into STUDENT_CURRENT_STUDY_DETAILS (UNIVERSITY_ID, SPR_CODE, STUDENT_STATUS) values ('0123457', '0123457/1', 'C');
 insert into STUDENT_CURRENT_STUDY_DETAILS (UNIVERSITY_ID, SPR_CODE, STUDENT_STATUS) values ('0123458', '0123458/1', 'C');
+insert into STUDENT_CURRENT_STUDY_DETAILS (UNIVERSITY_ID, SPR_CODE, STUDENT_STATUS) values ('0123459', '0123459/1', 'P');
 
 insert into module_registration values ('11/12','A',30,'A','CH115-30',1,1,'S','0123456/1');
-insert into module_registration values ('11/12','A',30,'A','CH120-15',1,1,'S','0123458/1');
 insert into module_registration values ('11/12','A',30,'A','CH115-30',1,1,'S','0123457/1');
 insert into module_registration values ('11/12','A',30,'A','CH115-30',1,1,'S','0123458/1');
+insert into module_registration values ('11/12',NULL,30,'A','CH115-30',1,1,'S','0123460/1');
+insert into module_registration values ('11/12','A',30,'A','CH120-15',1,1,'S','0123458/1');
+
+-- Some data from other years that the import should ignore
+
+insert into module_registration values ('10/11','A',30,'A','CH130-20',1,1,'S','0123458/1');
