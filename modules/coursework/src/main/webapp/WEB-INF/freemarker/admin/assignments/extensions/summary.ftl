@@ -8,8 +8,9 @@
 
 <#macro row graph>
 	<#assign state = (graph.extension.state.description)!"None" />
-	<tr class="itemContainer" data-contentid="${assignment.id}_${graph.universityId}"
-		data-detailurl = <@routes.extensiondetail assignment graph.universityId />
+	<tr class="itemContainer"
+		data-contentid ="${assignment.id}_${graph.universityId}"
+		data-detailurl ="<@routes.extensiondetail assignment graph.universityId />"
 	>
 
 		<#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
