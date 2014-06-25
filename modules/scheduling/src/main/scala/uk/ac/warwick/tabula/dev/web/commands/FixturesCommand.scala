@@ -185,8 +185,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 					}
 				}
 
-
-
 				for (scheme <- schemes) {
 					for (point <- scheme.points){
 						for (checkpoint <- attendanceMonitoringDao.getAllCheckpoints(point)){

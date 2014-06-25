@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.services
 
-
 import org.codehaus.jackson.annotate.JsonAutoDetect
 import org.joda.time.DateTime
 import org.springframework.beans.factory.InitializingBean
