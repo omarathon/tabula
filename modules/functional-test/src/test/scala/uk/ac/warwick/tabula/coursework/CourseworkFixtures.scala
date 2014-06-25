@@ -9,24 +9,36 @@ import uk.ac.warwick.tabula.home.{FixturesDriver, FeaturesDriver}
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.GivenWhenThen
 
+import scala.concurrent._
+
 trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen {
 
 	before {
 		Given("The test department exists")
 		go to Path("/scheduling/fixtures/setup")
 
-		And("There is an assessment component for module xxx101")
-		createAssessmentComponent("XXX", "XXX101-15", "Cool essay")
+		val assessmentFuture = future {
+			And("There is an assessment component for module xxx101")
+			createAssessmentComponent("XXX", "XXX101-15", "Cool essay")
 
-		And("There is an upstream assessment group for xxx101 with students1-4 in it")
-		createUpstreamAssessmentGroup("XXX101-15", Seq(P.Student1.warwickId, P.Student2.warwickId, P.Student3.warwickId, P.Student4.warwickId))
+			And("There is an upstream assessment group for xxx101 with students1-4 in it")
+			createUpstreamAssessmentGroup("XXX101-15", Seq(P.Student1.warwickId, P.Student2.warwickId, P.Student3.warwickId, P.Student4.warwickId))
+		}
 
 		And("student1-4 are members")
-		createStudentMember(P.Student1.usercode)
-		createStudentMember(P.Student2.usercode)
-		createStudentMember(P.Student3.usercode)
-		createStudentMember(P.Student4.usercode)
+		// Make them at the same time.
+		val concurrentJobs = Seq(
+			assessmentFuture,
+			future { createStudentMember(P.Student1.usercode) },
+			future { createStudentMember(P.Student2.usercode) },
+			future { createStudentMember(P.Student3.usercode) },
+			future { createStudentMember(P.Student4.usercode) }
+		)
+
+		// Wait to complete
+		for { job <- concurrentJobs; nothing <- job } yield nothing
 	}
+
 
 	def as[T](user: LoginDetails)(fn: => T) = {
 		currentUser = user
@@ -263,7 +275,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			click on module.findElement(By.className("section-title"))
 			
 			eventuallyAjax {
-				module.getAttribute("class").indexOf("expanded") should not be (-1)
+				module.getAttribute("class") should include ("expanded")
 			}
 		}
 		
