@@ -51,6 +51,7 @@ trait AttendanceMonitoringDao {
 	def delete(templatePoint: AttendanceMonitoringTemplatePoint)
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate]
 	def getTemplatePointById(id: String): Option[AttendanceMonitoringTemplatePoint]
+	def listAllSchemes(department: Department): Seq[AttendanceMonitoringScheme]
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate]
@@ -72,6 +73,7 @@ trait AttendanceMonitoringDao {
 		sets: Seq[MonitoringPointSet],
 		types: Seq[MonitoringPointType]
 	): Seq[MonitoringPoint]
+	def getAllCheckpoints(point: AttendanceMonitoringPoint): Seq[AttendanceMonitoringCheckpoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], students: Seq[StudentMember]): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]]
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
@@ -127,6 +129,12 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 
 	def getTemplatePointById(id: String): Option[AttendanceMonitoringTemplatePoint] =
 		getById[AttendanceMonitoringTemplatePoint](id)
+
+	def listAllSchemes(department: Department): Seq[AttendanceMonitoringScheme] = {
+		session.newCriteria[AttendanceMonitoringScheme]
+			.add(is("department", department))
+			.seq
+	}
 
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
 		session.newCriteria[AttendanceMonitoringScheme]
@@ -270,6 +278,12 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 		}
 
 		query.seq
+	}
+
+	def getAllCheckpoints(point: AttendanceMonitoringPoint): Seq[AttendanceMonitoringCheckpoint] = {
+		session.newCriteria[AttendanceMonitoringCheckpoint]
+			.add(is("point", point))
+			.seq
 	}
 
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint] = {

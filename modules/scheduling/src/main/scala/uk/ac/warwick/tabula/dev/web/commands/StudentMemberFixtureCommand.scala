@@ -9,7 +9,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{StudentCourseYearDetails, StudentCourseDetails, Gender, StudentMember}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.DateTime
+import org.joda.time.{LocalDate, DateTime}
 
 class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Logging {
 	this: UserLookupComponent =>
@@ -53,6 +53,7 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 			scd.mostSignificant = true
 			scd.sprCode = scd.scjCode
 			scd.statusOnRoute = currentStudentStatus
+			scd.beginDate = new LocalDate().minusYears(2)
 
 			if (route.isDefined) scd.route = route.get
 			if (course.isDefined) scd.course = course.get
