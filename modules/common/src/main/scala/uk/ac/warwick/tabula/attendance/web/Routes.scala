@@ -128,5 +128,8 @@ object Routes {
 
 	object Agent {
 		def home = context + "/agent"
+		def relationship(relationshipType: StudentRelationshipType) = context + "/agent/%s" format encoded(relationshipType.urlPart)
+		def relationshipForYear(relationshipType: StudentRelationshipType, academicYear: AcademicYear) =
+			context + "/agent/%s/%s" format(encoded(relationshipType.urlPart), encoded(academicYear.startYear.toString))
 	}
 }

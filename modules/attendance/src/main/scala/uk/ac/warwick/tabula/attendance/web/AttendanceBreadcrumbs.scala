@@ -135,4 +135,13 @@ object AttendanceBreadcrumbs {
 		}
 
 	}
+
+	object Agent {
+
+		case class Relationship(relationshipType: StudentRelationshipType) extends Abstract {
+			val title = relationshipType.studentRole.capitalize + "s"
+			val url = Some(Routes.Agent.relationship(relationshipType))
+		}
+
+	}
 }
