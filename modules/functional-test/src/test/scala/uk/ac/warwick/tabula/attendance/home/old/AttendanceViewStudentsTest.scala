@@ -1,10 +1,8 @@
-package uk.ac.warwick.tabula.attendance.home
+package uk.ac.warwick.tabula.attendance.home.old
 
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.FunctionalTestAcademicYear
 import org.openqa.selenium.By
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
-import org.scalatest.selenium.WebBrowser.go
 
 class AttendanceViewStudentsTest extends AttendanceFixture with GivenWhenThen{
 
@@ -12,8 +10,8 @@ class AttendanceViewStudentsTest extends AttendanceFixture with GivenWhenThen{
 		Given("I am logged in as Admin1")
 		signIn as P.Admin1 to Path("/")
 
-		When("I go to /attendance/view/xxx/2014/students")
-		go to Path("/attendance/view/xxx/2014/students")
+		When("I go to /attendance/view/xxx/2013/students")
+		go to Path("/attendance/view/xxx/2013/students")
 
 		Then("I see some students")
 		pageSource should include("First name")

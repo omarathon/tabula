@@ -34,6 +34,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	var scdDao = Wire[StudentCourseDetailsDao]
 	var memberDao = Wire[MemberDao]
 	var monitoringPointDao = Wire[MonitoringPointDao]
+	var attendanceMonitoringDao = Wire[AttendanceMonitoringDao]
 	var permissionsService = Wire[PermissionsService]
 
 	def applyInternal() {
@@ -101,6 +102,8 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 			moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code) map { dept =>
 				val routes: Seq[Route] = routeDao.findByDepartment(dept)
 
+				val schemes = attendanceMonitoringDao.listAllSchemes(dept)
+
 				val deptScds = scdDao.findByDepartment(dept)
 				val looseScds = 
 					session.newCriteria[StudentCourseDetails]
@@ -125,6 +128,16 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 						}
 						session.delete(set)
 					}
+				}
+
+				for (scheme <- schemes) {
+					for (point <- scheme.points){
+						for (checkpoint <- attendanceMonitoringDao.getAllCheckpoints(point)){
+							session.delete(checkpoint)
+						}
+					}
+					// the points will also be deleted by the cascade
+					session.delete(scheme)
 				}
 
 			  for (student <- scds.map{ _.student}.distinct) {
@@ -161,16 +174,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				for (markingWorkflow <- dept.markingWorkflows) session.delete(markingWorkflow)
 				dept.markingWorkflows.clear()
 
-				for (route <- routes) {
-					val sets = monitoringPointDao.findMonitoringPointSets(route)
-					for (set <- sets) {
-						for (point <- set.points) {
-							for (checkpoint <- point.checkpoints) session.delete(checkpoint)
-							session.delete(point)
-						}
-						session.delete(set)
-					}
-				}
 				routes.foreach(invalidateAndDeletePermissions[Route])
 				routes.foreach(session.delete)
 				dept.routes.clear()

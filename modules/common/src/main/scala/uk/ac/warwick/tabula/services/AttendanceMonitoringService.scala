@@ -44,6 +44,7 @@ trait AttendanceMonitoringService {
 	def deleteTemplatePoint(point: AttendanceMonitoringTemplatePoint)
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate]
 	def getTemplatePointById(id: String): Option[AttendanceMonitoringTemplatePoint]
+	def listAllSchemes(department: Department): Seq[AttendanceMonitoringScheme]
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate]
 	def listTemplateSchemesByStyle(style: AttendanceMonitoringPointStyle): Seq[AttendanceMonitoringTemplate]
@@ -68,6 +69,7 @@ trait AttendanceMonitoringService {
 	): Seq[MonitoringPoint]
 	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def listStudentsPoints(studentData: AttendanceMonitoringStudentData, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
+	def getAllCheckpoints(point: AttendanceMonitoringPoint): Seq[AttendanceMonitoringCheckpoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], students: Seq[StudentMember]): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]]
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
@@ -122,6 +124,8 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def getTemplatePointById(id: String): Option[AttendanceMonitoringTemplatePoint] =
 		attendanceMonitoringDao.getTemplatePointById(id)
+	def listAllSchemes(department: Department): Seq[AttendanceMonitoringScheme] =
+		attendanceMonitoringDao.listAllSchemes(department)
 
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.listSchemes(department, academicYear)
@@ -215,6 +219,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		}.filter(s => s.department == department && s.academicYear == academicYear)
 	}
 
+	def getAllCheckpoints(point: AttendanceMonitoringPoint): Seq[AttendanceMonitoringCheckpoint] = {
+		attendanceMonitoringDao.getAllCheckpoints(point)
+	}
 
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint] = {
 		attendanceMonitoringDao.getCheckpoints(points, student, withFlush)
