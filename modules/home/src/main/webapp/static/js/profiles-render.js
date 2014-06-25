@@ -445,7 +445,7 @@
 									},
                                     eventAfterRender: function(event, element, view){
 										var content = "<table class='event-info'>";
-										if (event.title && event.title.length > 0) {
+										if (event.fullTitle && event.fullTitle.length > 0) {
 											content = content + "<tr><th>Title</th><td>" + event.fullTitle + "</td></tr>";
 										}
                                         if (event.description && event.description.length > 0) {
