@@ -118,10 +118,7 @@ class ListAllExtensionsController extends ExtensionController {
  * The first mapping is the one that should be used.
  */
 @Controller
-@RequestMapping(Array(
-  "/admin/module/{module}/assignments/{assignment}/extensions/detail/{universityId}",
-	"/admin/module/{module}/assignments/extensions/detail/{assignment}/{universityId}"
-))
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions/detail/{universityId}"))
 class EditExtensionController extends ExtensionController {
 
 	@ModelAttribute("modifyExtensionCommand")

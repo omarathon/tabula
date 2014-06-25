@@ -37,6 +37,8 @@
 			An option map that will be passed to the tableSorter plugin
 		contentUrlFuction:
 			A function to return which URL we will use to load the content. Function's argument is the selected row.
+		preventContentIdInUrl:
+			An option to prevent appending the contentId to the dataUrl (TAB-2427)
 */
 jQuery.fn.expandingTable = function(options) {
 
@@ -48,6 +50,7 @@ jQuery.fn.expandingTable = function(options) {
 	var toggleCellSelector = options.toggleCellSelector || '.toggle-cell';
 	var allowTableSort = options.allowTableSort || true;
 	var tableSorterOptions = options.tableSorterOptions || {};
+	var preventContentIdInUrl = options.preventContentIdInUrl || false;
 
 	var iconMarkup = '<i class="row-icon icon-chevron-right icon-fixed-width"></i>';
 
@@ -144,9 +147,9 @@ jQuery.fn.expandingTable = function(options) {
 				hideContent($content, $row, $icon);
 			} else {
 				if(options.contentUrlFunction && !$content.data("loaded")) {
-					var contentId = $row.attr("data-contentid");
-					var dataUrl = options.contentUrlFunction($row) + '/' + contentId;
-					dataUrl = dataUrl.replace("_","/");
+					var contentId = ""
+					if(!preventContentIdInUrl) { contentId = '/' + ($row.attr("data-contentid")).replace("_","/"); }
+					var dataUrl = options.contentUrlFunction($row) + contentId;
 
 					$icon.removeClass('icon-chevron-right').addClass('icon-spinner icon-spin');
 
