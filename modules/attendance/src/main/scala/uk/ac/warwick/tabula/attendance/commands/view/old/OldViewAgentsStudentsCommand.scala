@@ -1,18 +1,17 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.view.old
 
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.attendance.commands.{BuildStudentPointsData, StudentPointsData}
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.commands.{CommandInternal, ReadOnly, Unaudited, ComposableCommand}
-import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
-import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.DateTime
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-object ViewAgentsStudentsCommand {
+object OldViewAgentsStudentsCommand {
 	def apply(department: Department, agent: Member, relationshipType: StudentRelationshipType, academicYearOption: Option[AcademicYear]) =
-		new ViewAgentsStudentsCommand(department, agent, relationshipType, academicYearOption)
+		new OldViewAgentsStudentsCommand(department, agent, relationshipType, academicYearOption)
 			with ViewAgentsStudentsPermissions
 			with AutowiringMonitoringPointServiceComponent
 			with AutowiringTermServiceComponent
@@ -23,7 +22,7 @@ object ViewAgentsStudentsCommand {
 			with ReadOnly with Unaudited
 }
 
-abstract class ViewAgentsStudentsCommand(
+abstract class OldViewAgentsStudentsCommand(
 	val department: Department,
 	val agent: Member,
 	val relationshipType: StudentRelationshipType,

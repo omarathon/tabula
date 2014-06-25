@@ -1,16 +1,17 @@
-package uk.ac.warwick.tabula.attendance.web.controllers
+package uk.ac.warwick.tabula.attendance.web.controllers.view.old
 
-import org.springframework.web.bind.annotation.{RequestParam, RequestMapping, PathVariable, ModelAttribute}
-import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.Appliable
 import javax.validation.Valid
+
+import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.attendance.commands.GroupedMonitoringPoint
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.attendance.commands.GroupedMonitoringPoint
+import uk.ac.warwick.tabula.attendance.commands.view.old.{ViewMonitoringPointsCommand, ViewMonitoringPointsState}
+import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
-import uk.ac.warwick.tabula.attendance.commands.view.old.{ViewMonitoringPointsState, ViewMonitoringPointsCommand}
 
 @Controller
 @RequestMapping(value=Array("/view/{department}/2013/points"))

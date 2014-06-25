@@ -129,5 +129,10 @@ object AttendanceBreadcrumbs {
 			val url = Some(Routes.View.points(department, academicYear))
 		}
 
+		case class Agents(department: model.Department, academicYear: AcademicYear, relationshipType: StudentRelationshipType) extends Abstract {
+			val title = relationshipType.agentRole.capitalize + "s"
+			val url = Some(Routes.View.agents(department, academicYear, relationshipType))
+		}
+
 	}
 }

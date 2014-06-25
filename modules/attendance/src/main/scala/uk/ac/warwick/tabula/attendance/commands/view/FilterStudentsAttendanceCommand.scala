@@ -1,31 +1,18 @@
 package uk.ac.warwick.tabula.attendance.commands.view
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
+import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order._
 import uk.ac.warwick.tabula.JavaImports._
-import org.hibernate.criterion.Order
-import uk.ac.warwick.tabula.attendance.commands.{GroupsPoints, AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes}
-import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceComponent, AutowiringTermServiceComponent, TermServiceComponent, AttendanceMonitoringServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent}
-import collection.JavaConverters._
+import uk.ac.warwick.tabula.attendance.commands.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.ScalaRestriction
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpointTotal, AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AutowiringProfileServiceComponent, AutowiringTermServiceComponent, ProfileServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-case class FilteredStudentResult(
-	student: StudentMember,
-	groupedPointCheckpointPairs: Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]],
-	attendanceNotes: Map[AttendanceMonitoringPoint, AttendanceNote],
-	checkpointTotal: AttendanceMonitoringCheckpointTotal
-)
-
-case class FilterStudentsAttendanceCommandResult(
-	totalResults: Int,
-	results: Seq[FilteredStudentResult],
-	students: Seq[StudentMember]
-)
+import scala.collection.JavaConverters._
 
 object FilterStudentsAttendanceCommand {
 	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
@@ -34,7 +21,7 @@ object FilterStudentsAttendanceCommand {
 			with AutowiringProfileServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
-			with ComposableCommand[FilterStudentsAttendanceCommandResult]
+			with ComposableCommand[FilteredStudentsAttendanceResult]
 			with FilterStudentsAttendancePermissions
 			with FilterStudentsAttendanceCommandState
 			with ReadOnly with Unaudited
@@ -42,7 +29,7 @@ object FilterStudentsAttendanceCommand {
 
 
 class FilterStudentsAttendanceCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser)
-	extends CommandInternal[FilterStudentsAttendanceCommandResult] with GroupsPoints with TaskBenchmarking {
+	extends CommandInternal[FilteredStudentsAttendanceResult] with BuildsFilteredStudentsAttendanceResult with TaskBenchmarking {
 
 	self: FilterStudentsAttendanceCommandState with TermServiceComponent
 		with ProfileServiceComponent with AttendanceMonitoringServiceComponent =>
@@ -67,32 +54,7 @@ class FilterStudentsAttendanceCommandInternal(val department: Department, val ac
 
 		if (offset == 0) page = 1
 
-		val results = benchmarkTask("Build FilteredStudentResults"){ students.map { student=>
-			val points = benchmarkTask("listStudentsPoints") {
-				attendanceMonitoringService.listStudentsPoints(student, department, academicYear)
-			}
-			val checkpointMap = benchmarkTask("getCheckpoints") {
-				attendanceMonitoringService.getCheckpoints(points, student)
-			}
-			val groupedPoints = benchmarkTask("groupedPoints") {
-				groupByTerm(points, groupSimilar = false) ++ groupByMonth(points, groupSimilar = false)
-			}
-			val groupedPointCheckpointPairs = benchmarkTask("groupedPointCheckpointPairs") {
-				groupedPoints.map { case (period, thesePoints) =>
-					period -> thesePoints.map { groupedPoint =>
-						groupedPoint.templatePoint -> checkpointMap.get(groupedPoint.templatePoint).getOrElse(null)
-					}
-				}
-			}
-			val attendanceNotes = benchmarkTask("attendanceNotes") {
-				attendanceMonitoringService.getAttendanceNoteMap(student)
-			}
-			val checkpointTotal = benchmarkTask("checkpointTotal") {
-				attendanceMonitoringService.getCheckpointTotal(student, department, academicYear)
-			}
-			FilteredStudentResult(student, groupedPointCheckpointPairs, attendanceNotes, checkpointTotal)
-		}}
-		FilterStudentsAttendanceCommandResult(totalResults, results, students)
+		buildAttendanceResult(totalResults, students, department, academicYear)
 	}
 
 }
