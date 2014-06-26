@@ -35,11 +35,15 @@
 			
 				<#include "../profile/search/form.ftl" />
 
-				<h2><a href="<@routes.profile_by_id universityId />">My staff profile</a></h2>
+				<#if universityId?has_content>
+					<h2><a href="<@routes.profile_by_id universityId />">My staff profile</a></h2>
+				</#if>
 			</#if>
 
 			<#if isPGR>
-				<h2><a href="<@routes.profile_by_id universityId />">My student profile</a></h2>
+				<#if universityId?has_content>
+					<h2><a href="<@routes.profile_by_id universityId />">My student profile</a></h2>
+				</#if>
 			</#if>
 	
 			<#if showMyStudents>

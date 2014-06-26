@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.{Route, Department}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
 import org.mockito.Matchers
+import uk.ac.warwick.tabula.attendance.commands.view.old.{ViewMonitoringPointsState, ViewMonitoringPointsCommand}
 
 class ViewMonitoringPointsCommandTest extends TestBase with Mockito {
 	

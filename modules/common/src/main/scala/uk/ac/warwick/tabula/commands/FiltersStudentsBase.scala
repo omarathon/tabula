@@ -6,7 +6,7 @@ import org.hibernate.criterion.Order
 import scala.collection.JavaConverters._
 import uk.ac.warwick.util.web.UriBuilder
 import org.apache.http.client.utils.URLEncodedUtils
-import java.net.URI
+import java.net.{URLDecoder, URI}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.convert.{ModuleCodeConverter, SitsStatusCodeConverter, ModeOfAttendanceCodeConverter, RouteCodeConverter}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringCourseAndRouteServiceComponent, ModuleAndDepartmentServiceComponent, CourseAndRouteServiceComponent}
@@ -67,13 +67,13 @@ trait DeserializesFilterImpl extends Logging with FiltersStudentsBase with Cours
 	with SitsStatusDaoComponent with ModuleAndDepartmentServiceComponent {
 
 	def deserializeFilter(filterString: String): Unit = {
-		val params: Map[String, Seq[String]] = URLEncodedUtils.parse(new URI(null, null, null, filterString, null), "UTF-8").asScala.groupBy(_.getName).map{
+		val params: Map[String, Seq[String]] = URLEncodedUtils.parse(new URI(null, null, null, URLDecoder.decode(filterString, "UTF-8"), null), "UTF-8").asScala.groupBy(_.getName).map{
 			case (name, nameValuePairs) => name -> nameValuePairs.map(_.getValue)
 		}
 		courseTypes.clear()
 		params.get("courseTypes").map{_.foreach{ item =>
 			try {
-				courseTypes.add(CourseType.fromCourseCode(item))
+				courseTypes.add(CourseType(item))
 			} catch {
 				case e: IllegalArgumentException =>
 					logger.warn(s"Could not deserialize filter with courseType $item")

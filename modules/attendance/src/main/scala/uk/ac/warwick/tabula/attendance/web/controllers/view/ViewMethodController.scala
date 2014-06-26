@@ -17,7 +17,7 @@ class ViewMethodController extends AttendanceController {
 	@RequestMapping
 	def home(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
 		Mav("view/viewmethod",
-			"hasSchemes" -> !attendanceMonitoringService.listSchemes(department, academicYear).isEmpty
+			"hasSchemes" -> attendanceMonitoringService.listSchemes(mandatory(department), mandatory(academicYear)).nonEmpty
 		).crumbs(
 			Breadcrumbs.View.Home,
 			Breadcrumbs.View.Department(department)

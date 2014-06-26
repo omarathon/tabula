@@ -116,5 +116,20 @@ object Routes {
 				encoded(academicYear.startYear.toString),
 				encoded(student.universityId)
 			)
+		def points(department: Department, academicYear: AcademicYear) =
+			context + "/view/%s/%s/points" format(encoded(department.code), encoded(academicYear.startYear.toString))
+		def agents(department: Department, academicYear: AcademicYear, relationshipType: StudentRelationshipType) =
+			context + "/view/%s/%s/agents/%s" format(
+				encoded(department.code),
+				encoded(academicYear.startYear.toString),
+				encoded(relationshipType.urlPart)
+			)
+	}
+
+	object Agent {
+		def home = context + "/agent"
+		def relationship(relationshipType: StudentRelationshipType) = context + "/agent/%s" format encoded(relationshipType.urlPart)
+		def relationshipForYear(relationshipType: StudentRelationshipType, academicYear: AcademicYear) =
+			context + "/agent/%s/%s" format(encoded(relationshipType.urlPart), encoded(academicYear.startYear.toString))
 	}
 }

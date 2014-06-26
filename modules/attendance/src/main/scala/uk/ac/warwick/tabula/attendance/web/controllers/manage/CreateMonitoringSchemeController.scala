@@ -20,7 +20,7 @@ class CreateMonitoringSchemeController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		CreateMonitoringSchemeCommand(department, academicYear)
+		CreateMonitoringSchemeCommand(mandatory(department), mandatory(academicYear))
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {

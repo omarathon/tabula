@@ -46,7 +46,7 @@ trait ViewMonitoringPointSetTemplatePermissions extends RequiresPermissionsCheck
 	self: ViewMonitoringPointSetTemplateState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPointSetTemplates.View)
+		p.PermissionCheck(Permissions.MonitoringPointTemplates.View)
 	}
 
 }

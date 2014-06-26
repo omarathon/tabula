@@ -1,7 +1,11 @@
 <#import "../attendance_macros.ftl" as attendance_macros />
 <#escape x as x?html>
 
-<@fmt.deptheader "Manage monitoring points for ${command.academicYear.toString}" "in" command.department routes "manageHomeForYear" "with-settings" />
+<#macro deptheaderroutemacro dept>
+	<@routes.manageHomeForYear dept command.academicYear.startYear?c />
+</#macro>
+<#assign deptheaderroute = deptheaderroutemacro in routes/>
+<@fmt.deptheader "Manage monitoring points for ${command.academicYear.toString}" "in" command.department routes "deptheaderroute" "with-settings" />
 
 <#if schemes?size == 0>
 

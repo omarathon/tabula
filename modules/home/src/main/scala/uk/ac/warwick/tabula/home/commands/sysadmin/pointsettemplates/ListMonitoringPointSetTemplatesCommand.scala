@@ -26,6 +26,6 @@ class ListMonitoringPointSetTemplatesCommandInternal extends CommandInternal[Seq
 
 trait ListMonitoringPointSetTemplatesCommandPermissions extends RequiresPermissionsChecking {
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPointSetTemplates.Manage)
+		p.PermissionCheck(Permissions.MonitoringPointTemplates.Manage)
 	}
 }

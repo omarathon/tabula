@@ -17,11 +17,11 @@ class SelectStudentsForSchemeController extends AttendanceController {
 
 	@ModelAttribute("findCommand")
 	def findCommand(@PathVariable scheme: AttendanceMonitoringScheme) =
-		FindStudentsForSchemeCommand(scheme, user)
+		FindStudentsForSchemeCommand(mandatory(scheme), user)
 
 	@ModelAttribute("editMembershipCommand")
 	def editMembershipCommand(@PathVariable scheme: AttendanceMonitoringScheme) =
-		EditSchemeMembershipCommand(scheme, user)
+		EditSchemeMembershipCommand(mandatory(scheme), user)
 
 	private def summaryString(
 		findStudentsForSchemeCommandResult: FindStudentsForSchemeCommandResult,

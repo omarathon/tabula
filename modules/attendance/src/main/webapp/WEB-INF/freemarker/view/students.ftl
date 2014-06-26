@@ -1,16 +1,20 @@
 <#escape x as x?html>
-	<#import "../attendance_macros.ftl" as attendance_macros />
+<#import "../attendance_macros.ftl" as attendance_macros />
 
-	<@fmt.deptheader "View students" "in" department routes "viewDepartmentStudents" />
+<#macro deptheaderroutemacro dept>
+	<@routes.viewStudents dept academicYear.startYear?c />
+</#macro>
+<#assign deptheaderroute = deptheaderroutemacro in routes/>
+<@fmt.deptheader "View students" "in" department routes "deptheaderroute" />
 
-	<#assign filterQuery = filterCommand.serializeFilter />
+<#assign filterQuery = filterCommand.serializeFilter />
 
-	<#assign submitUrl><@routes.viewStudents department academicYear.startYear?c /></#assign>
+<#assign submitUrl><@routes.viewStudents department academicYear.startYear?c /></#assign>
 
-	<#assign filterCommand = filterCommand />
-	<#assign filterCommandName = "filterCommand" />
-	<#assign filterResultsPath = "/WEB-INF/freemarker/view/_students_results.ftl" />
-	<#include "/WEB-INF/freemarker/filter_bar.ftl" />
+<#assign filterCommand = filterCommand />
+<#assign filterCommandName = "filterCommand" />
+<#assign filterResultsPath = "/WEB-INF/freemarker/view/_students_results.ftl" />
+<#include "/WEB-INF/freemarker/filter_bar.ftl" />
 
 <script type="text/javascript">
 	jQuery(function($) {

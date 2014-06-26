@@ -1,4 +1,5 @@
 <#import "attendance_variables.ftl" as attendance_variables />
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
 <#macro attendanceIcon pointMap point>
 	<#local checkpointData = mapGet(pointMap, point) />
@@ -378,22 +379,21 @@
 	<span class="use-popover label ${formatResult.labelClass}" data-content="${popoverContent}" data-html="true" data-placement="left">${formatResult.labelText}</span>
 </#macro>
 
-<#macro checkpointSelect department checkpoint="" point="" student="" note="">
+<#macro checkpointSelect department id name checkpoint="" point="" student="" note="">
 	<#local formatResult = formatResult(department, checkpoint, point, student, note) />
 	<#local tooltipContent>
 		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
 		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
 	</#local>
 	<select
-		id="checkpointMap-${point.id}"
-		name="checkpointMap[${point.id}]"
+		id="${id}"
+		name="${name}"
 		title="${tooltipContent}"
 	>
-		<#local hasState = mapGet(command.checkpointMap, point)?? />
-		<option value="" <#if !hasState >selected</#if>>Not recorded</option>
-		<option value="unauthorised" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
-		<option value="authorised" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "authorised">selected</#if>>Missed (authorised)</option>
-		<option value="attended" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "attended">selected</#if>>Attended</option>
+		<option value="" <#if !checkpoint?has_content >selected</#if>>Not recorded</option>
+		<option value="unauthorised" <#if checkpoint?has_content && checkpoint.state.dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
+		<option value="authorised" <#if checkpoint?has_content && checkpoint.state.dbValue == "authorised">selected</#if>>Missed (authorised)</option>
+		<option value="attended" <#if checkpoint?has_content && checkpoint.state.dbValue == "attended">selected</#if>>Attended</option>
 	</select>
 </#macro>
 
@@ -467,4 +467,114 @@
 		</td>
 		</#if>
 	</#list>
+</#macro>
+
+<#macro scrollablePointsTable command filterResult visiblePeriods monthNames department academicYear returnTo doCommandSorting=true>
+	<div class="scrollable-points-table">
+		<div class="row">
+			<div class="left">
+				<table class="students table table-bordered table-striped table-condensed">
+					<thead>
+					<tr>
+						<th class="profile_link-col"></th>
+						<th class="student-col <#if doCommandSorting>${sortClass("firstName", command)}</#if> sortable" data-field="firstName">First name</th>
+						<th class="student-col <#if doCommandSorting>${sortClass("lastName", command)}</#if> sortable" data-field="lastName">Last name</th>
+						<th class="id-col <#if doCommandSorting>${sortClass("universityId", command)}</#if> sortable" data-field="universityId">ID</th>
+					</tr>
+					</thead>
+
+					<tbody>
+						<#list filterResult.results as result>
+						<tr class="student">
+							<td class="profile_link"><@pl.profile_link result.student.universityId /></td>
+							<td class="fname" title="${result.student.firstName}">${result.student.firstName}</td>
+							<td class="lname" title="${result.student.lastName}">${result.student.lastName}</td>
+							<td class="id"><a class="profile-link" href="<@routes.profile result.student />">${result.student.universityId}</a></td>
+						</tr>
+						</#list>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="middle">
+				<table class="attendance table tablesorter table-bordered table-striped table-condensed sb-no-wrapper-table-popout">
+					<thead>
+					<tr>
+						<#list attendance_variables.monitoringPointTermNames as term>
+							<#if visiblePeriods?seq_contains(term)>
+								<th class="${term}-col">${term}</th>
+							</#if>
+						</#list>
+						<#list monthNames as month>
+							<#if visiblePeriods?seq_contains(month)>
+								<#assign monthMatch = month?matches("([a-zA-Z]{3})[a-zA-Z]*\\s(.*)")[0] />
+								<#assign shortMonth>${monthMatch?groups[1]} ${monthMatch?groups[2]}</#assign>
+								<th class="${shortMonth}-col">${shortMonth}</th>
+							</#if>
+						</#list>
+						<#if visiblePeriods?size == 0>
+							<th>&nbsp;</th>
+						</#if>
+					</tr>
+					</thead>
+
+					<tbody>
+						<#list filterResult.results as result>
+						<tr class="student">
+							<#if visiblePeriods?size == 0>
+								<td colspan="${visiblePeriods?size}"><span class="muted"><em>No monitoring points found</em></span></td>
+							<#else>
+								<@listCheckpointIcons department visiblePeriods monthNames result />
+							</#if>
+						</tr>
+						</#list>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="right">
+				<table class="counts table table-bordered table-striped table-condensed">
+					<thead>
+					<tr>
+						<th class="unrecorded-col <#if doCommandSorting>${sortClass("attendanceCheckpointTotals.unrecorded", command)}</#if> sortable" data-field="attendanceCheckpointTotals.unrecorded">
+							<i title="Unrecorded" class="icon-warning-sign icon-fixed-width late"></i>
+						</th>
+						<th class="missed-col <#if doCommandSorting>${sortClass("attendanceCheckpointTotals.unauthorised", command)}</#if> sortable" data-field="attendanceCheckpointTotals.unauthorised">
+							<i title="Missed monitoring points" class="icon-remove icon-fixed-width unauthorised"></i>
+						</th>
+						<th class="record-col"></th>
+					</tr>
+					</thead>
+
+					<tbody>
+						<#list filterResult.results as result>
+						<tr class="student">
+							<#if result.groupedPointCheckpointPairs?keys?size == 0>
+								<td colspan="3">&nbsp;</td>
+							<#else>
+								<td class="unrecorded">
+									<a href="<@routes.viewSingleStudent department academicYear.startYear?c result.student />">
+										<span class="badge badge-<#if (result.checkpointTotal.unrecorded > 2)>important<#elseif (result.checkpointTotal.unrecorded > 0)>warning<#else>success</#if>">
+										${result.checkpointTotal.unrecorded}
+										</span>
+									</a>
+								</td>
+								<td class="missed">
+									<a href="<@routes.viewSingleStudent department academicYear.startYear?c result.student />">
+										<span class="badge badge-<#if (result.checkpointTotal.unauthorised > 2)>important<#elseif (result.checkpointTotal.unauthorised > 0)>warning<#else>success</#if>">
+										${result.checkpointTotal.unauthorised}
+										</span>
+									</a>
+								</td>
+								<td class="record">
+									<#nested result.student />
+								</td>
+							</#if>
+						</tr>
+						</#list>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
 </#macro>

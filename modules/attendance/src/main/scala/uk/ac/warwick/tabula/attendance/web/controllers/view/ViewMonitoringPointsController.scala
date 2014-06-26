@@ -15,27 +15,28 @@ class ViewMonitoringPointsController extends AttendanceController with HasMonthN
 
 	@ModelAttribute("filterCommand")
 	def filterCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		FilterMonitoringPointsCommand(department, academicYear, user)
+		FilterMonitoringPointsCommand(mandatory(department), mandatory(academicYear), user)
 
 	@RequestMapping
 	def home(
 		@ModelAttribute("filterCommand") filterCommand: Appliable[Map[String, Seq[GroupedPoint]]],
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear) = {
-			val filterResult = filterCommand.apply()
-			if (ajax) {
-				Mav("view/_points_results",
-					"filterResult" -> filterResult
-				).noLayout()
-			} else {
-				Mav("view/points",
-					"filterResult" -> filterResult
-				).crumbs(
-						Breadcrumbs.View.Home,
-						Breadcrumbs.View.Department(department),
-						Breadcrumbs.View.DepartmentForYear(department, academicYear)
-					)
-			}
+		@PathVariable academicYear: AcademicYear
+	) = {
+		val filterResult = filterCommand.apply()
+		if (ajax) {
+			Mav("view/_points_results",
+				"filterResult" -> filterResult
+			).noLayout()
+		} else {
+			Mav("view/points",
+				"filterResult" -> filterResult
+			).crumbs(
+				Breadcrumbs.View.Home,
+				Breadcrumbs.View.Department(department),
+				Breadcrumbs.View.DepartmentForYear(department, academicYear)
+			)
 		}
+	}
 
 }

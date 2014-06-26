@@ -1,17 +1,27 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.attendance._
-import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
-import uk.ac.warwick.tabula.data.{SchemeMembershipItemType, AutowiringAttendanceMonitoringDaoComponent, AttendanceMonitoringDaoComponent}
-import uk.ac.warwick.tabula.data.SchemeMembershipItem
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointType
-import uk.ac.warwick.tabula.commands.{TaskBenchmarking, MemberOrUser}
-import collection.JavaConverters._
+import org.codehaus.jackson.annotate.JsonAutoDetect
 import org.joda.time.DateTime
+import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.env.Environment
+import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.convert.{DepartmentCodeConverter, MemberUniversityIdConverter}
+import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.data.{AttendanceMonitoringDaoComponent, AttendanceMonitoringStudentData, AutowiringAttendanceMonitoringDaoComponent, Daoisms, SchemeMembershipItem, SchemeMembershipItemType}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.queue.conversion.ItemType
+import uk.ac.warwick.util.queue.{Queue, QueueListener}
+
+import scala.beans.BeanProperty
+import scala.collection.JavaConverters._
 
 trait AttendanceMonitoringServiceComponent {
 	def attendanceMonitoringService: AttendanceMonitoringService
@@ -26,9 +36,15 @@ trait AttendanceMonitoringService {
 	def getPointById(id: String): Option[AttendanceMonitoringPoint]
 	def saveOrUpdate(scheme: AttendanceMonitoringScheme): Unit
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
+	def saveOrUpdate(template: AttendanceMonitoringTemplate): Unit
+	def saveOrUpdate(templatePoint: AttendanceMonitoringTemplatePoint): Unit
 	def deleteScheme(scheme: AttendanceMonitoringScheme)
 	def deletePoint(point: AttendanceMonitoringPoint)
+	def deleteTemplate(template: AttendanceMonitoringTemplate)
+	def deleteTemplatePoint(point: AttendanceMonitoringTemplatePoint)
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate]
+	def getTemplatePointById(id: String): Option[AttendanceMonitoringTemplatePoint]
+	def listAllSchemes(department: Department): Seq[AttendanceMonitoringScheme]
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate]
 	def listTemplateSchemesByStyle(style: AttendanceMonitoringPointStyle): Seq[AttendanceMonitoringTemplate]
@@ -52,11 +68,15 @@ trait AttendanceMonitoringService {
 		types: Seq[AttendanceMonitoringPointType]
 	): Seq[MonitoringPoint]
 	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
+	def listStudentsPoints(studentData: AttendanceMonitoringStudentData, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
+	def getAllCheckpoints(point: AttendanceMonitoringPoint): Seq[AttendanceMonitoringCheckpoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
+	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], students: Seq[StudentMember]): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]]
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
 	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint]
+	def updateCheckpointTotalsAsync(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit
 	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
 	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
 	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
@@ -66,6 +86,8 @@ trait AttendanceMonitoringService {
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService with TaskBenchmarking {
 
 	self: AttendanceMonitoringDaoComponent with TermServiceComponent with AttendanceMonitoringMembershipHelpers with UserLookupComponent =>
+
+	var queue = Wire.named[Queue]("settingsSyncTopic")
 
 	def getSchemeById(id: String): Option[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.getSchemeById(id)
@@ -79,15 +101,31 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit =
 		attendanceMonitoringDao.saveOrUpdate(point)
 
+	def saveOrUpdate(template: AttendanceMonitoringTemplate): Unit =
+		attendanceMonitoringDao.saveOrUpdate(template)
+
+	def saveOrUpdate(templatePoint: AttendanceMonitoringTemplatePoint): Unit =
+		attendanceMonitoringDao.saveOrUpdate(templatePoint)
+
 	def deleteScheme(scheme: AttendanceMonitoringScheme) =
 		attendanceMonitoringDao.delete(scheme)
 
 	def deletePoint(point: AttendanceMonitoringPoint) =
 		attendanceMonitoringDao.delete(point)
 
+	def deleteTemplate(template: AttendanceMonitoringTemplate) =
+		attendanceMonitoringDao.delete(template)
+
+	def deleteTemplatePoint(point: AttendanceMonitoringTemplatePoint) =
+		attendanceMonitoringDao.delete(point)
+
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate] =
 		attendanceMonitoringDao.getTemplateSchemeById(id)
 
+	def getTemplatePointById(id: String): Option[AttendanceMonitoringTemplatePoint] =
+		attendanceMonitoringDao.getTemplatePointById(id)
+	def listAllSchemes(department: Department): Seq[AttendanceMonitoringScheme] =
+		attendanceMonitoringDao.listAllSchemes(department)
 
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.listSchemes(department, academicYear)
@@ -159,33 +197,38 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
 		student.mostSignificantCourseDetails.fold(Seq[AttendanceMonitoringPoint]())(scd => {
 			val currentCourseStartDate = scd.beginDate
-			val schemes = benchmarkTask("findSchemesForStudent") {
-				findSchemesForStudent(student, department, academicYear)
-			}
+			val schemes = findSchemesForStudent(student.universityId, student.userId, department, academicYear)
 			schemes.flatMap(_.points.asScala).filter(p =>
 				p.startDate.isAfter(currentCourseStartDate) || p.startDate.isEqual(currentCourseStartDate)
 			)
 		})
 	}
 
-	private def findSchemesForStudent(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
-		val memberSchemes = benchmarkTask(s"membersHelper.findBy ${student.universityId}") {
-			membersHelper.findBy {
-				val mou = benchmarkTask(s"MemberOrUser ${student.universityId}") {
-					MemberOrUser(student)
-				}
-				benchmarkTask(s"asUser ${student.universityId}") {
-					mou.asUser
-				}
-			}
-		}
-		memberSchemes.filter(s => s.department == department && s.academicYear == academicYear)
+	def listStudentsPoints(studentData: AttendanceMonitoringStudentData, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
+		val schemes = findSchemesForStudent(studentData.universityId, studentData.userId, department, academicYear)
+		schemes.flatMap(_.points.asScala).filter(p =>
+			p.startDate.isAfter(studentData.scdBeginDate) || p.startDate.isEqual(studentData.scdBeginDate)
+		)
 	}
 
+	private def findSchemesForStudent(universityId: String, userId: String, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
+		val user = new User(userId)
+		user.setWarwickId(universityId)
+		benchmarkTask(s"membersHelper.findBy $universityId") {
+			membersHelper.findBy(user)
+		}.filter(s => s.department == department && s.academicYear == academicYear)
+	}
+
+	def getAllCheckpoints(point: AttendanceMonitoringPoint): Seq[AttendanceMonitoringCheckpoint] = {
+		attendanceMonitoringDao.getAllCheckpoints(point)
+	}
 
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint] = {
 		attendanceMonitoringDao.getCheckpoints(points, student, withFlush)
 	}
+
+	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], students: Seq[StudentMember]): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]] =
+		attendanceMonitoringDao.getCheckpoints(points, students)
 
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int =
 		attendanceMonitoringDao.countCheckpointsForPoint(point)
@@ -222,12 +265,22 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		attendanceMonitoringDao.removeCheckpoints(checkpointsToDelete)
 		attendanceMonitoringDao.saveOrUpdateCheckpoints(checkpointsToUpdate)
 
-		if (!attendanceMap.keys.isEmpty) {
+		if (attendanceMap.keys.nonEmpty) {
 			val scheme = attendanceMap.keys.head.scheme
 			updateCheckpointTotal(student, scheme.department, scheme.academicYear)
 		}
 
 		checkpointsToUpdate
+	}
+
+	def updateCheckpointTotalsAsync(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit = {
+		attendanceMonitoringDao.flush()
+		students.foreach(student =>
+			queue.send(new AttendanceMonitoringServiceUpdateCheckpointTotalMessage(
+				student.universityId,
+				department.code,
+				academicYear.startYear.toString
+		)))
 	}
 
 	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal = {
@@ -312,3 +365,75 @@ class AttendanceMonitoringServiceImpl
 	with AutowiringAttendanceMonitoringDaoComponent
 	with AutowiringUserLookupComponent
 
+
+class AttendanceMonitoringServiceListener extends QueueListener with InitializingBean with Logging with Daoisms
+	with AutowiringAttendanceMonitoringServiceComponent with AutowiringProfileServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
+
+	var queue = Wire.named[Queue]("settingsSyncTopic")
+	@Autowired var env: Environment = _
+
+	private def convertArgsAndUpdate(universityId: String, departmentCode: String, academicStartYear: String) = transactional() {
+		val memberConverter = new MemberUniversityIdConverter
+		memberConverter.service = profileService
+		val studentOption = memberConverter.convertRight(universityId) match {
+			case student: StudentMember => Option(student)
+			case _ => None
+		}
+
+		val departmentConverter = new DepartmentCodeConverter
+		departmentConverter.service = moduleAndDepartmentService
+		val departmentOption = departmentConverter.convertRight(departmentCode) match {
+			case department: Department => Option(department)
+			case _ => None
+		}
+
+		val academicYearOption = {
+			try {
+				Option(AcademicYear(academicStartYear.toInt))
+			} catch {
+				case e: NumberFormatException =>
+					None
+			}
+		}
+		if (studentOption.isEmpty) {
+			logger.warn(s"Could not find student $universityId to update checkpoint total")
+		} else if (departmentOption.isEmpty) {
+			logger.warn(s"Could not find department $departmentCode to update checkpoint total")
+		} else if (academicYearOption.isEmpty) {
+			logger.warn(s"Could not find academic year $academicStartYear to update checkpoint total")
+		} else {
+			logger.debug(s"Updating checkpoint total from message for $universityId in $departmentCode for $academicStartYear")
+			attendanceMonitoringService.updateCheckpointTotal(studentOption.get, departmentOption.get, academicYearOption.get)
+		}
+	}
+
+	override def isListeningToQueue = env.acceptsProfiles("dev", "scheduling")
+	override def onReceive(item: Any) {
+		logger.debug(s"Synchronising item $item")
+		item match {
+			case msg: AttendanceMonitoringServiceUpdateCheckpointTotalMessage =>
+				convertArgsAndUpdate(msg.getUniversityId, msg.getDepartmentCode, msg.getAcademicStartYear)
+			case _ =>
+		}
+	}
+
+	override def afterPropertiesSet() {
+		queue.addListener(classOf[AttendanceMonitoringServiceUpdateCheckpointTotalMessage].getAnnotation(classOf[ItemType]).value, this)
+	}
+}
+
+@ItemType("AttendanceMonitoringServiceUpdateCheckpointTotal")
+@JsonAutoDetect
+class AttendanceMonitoringServiceUpdateCheckpointTotalMessage {
+
+	def this(thisUniversityId: String, thisDepartmentCode: String, thisAcademicStartYear: String) {
+		this()
+		universityId = thisUniversityId
+		departmentCode = thisDepartmentCode
+		academicStartYear = thisAcademicStartYear
+	}
+
+	@BeanProperty var universityId: String = _
+	@BeanProperty var departmentCode: String = _
+	@BeanProperty var academicStartYear: String = _
+}

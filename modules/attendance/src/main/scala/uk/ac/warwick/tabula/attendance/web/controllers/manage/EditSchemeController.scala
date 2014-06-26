@@ -20,7 +20,7 @@ class EditSchemeController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable("scheme") scheme: AttendanceMonitoringScheme) =
-		EditSchemeCommand(scheme, user)
+		EditSchemeCommand(mandatory(scheme), user)
 
 	private def render(scheme: AttendanceMonitoringScheme) = {
 		Mav("manage/edit",

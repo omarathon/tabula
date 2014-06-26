@@ -18,14 +18,14 @@ class StudentRelationshipPersistenceTest extends PersistenceTestBase {
 		session.save(student)
 		session.save(memberAgent)
 		session.save(relType)
-		session.flush
+		session.flush()
 	}
 	
 	@Test def memberRelationship { transactional { tx => new Fixture { 
 		val rel = StudentRelationship(memberAgent, relType, student)
 		session.save(rel)
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 		
 		val loadedRel = session.get(classOf[StudentRelationship], rel.id).asInstanceOf[StudentRelationship]
 		loadedRel.isAgentMember should be (true)
@@ -41,8 +41,8 @@ class StudentRelationshipPersistenceTest extends PersistenceTestBase {
 	@Test def externalRelationship { transactional { tx => new Fixture {
 		val rel = ExternalStudentRelationship(externalAgent, relType, student)
 		session.save(rel)
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 		
 		val loadedRel = session.get(classOf[StudentRelationship], rel.id).asInstanceOf[StudentRelationship]
 		loadedRel.isAgentMember should be (false)

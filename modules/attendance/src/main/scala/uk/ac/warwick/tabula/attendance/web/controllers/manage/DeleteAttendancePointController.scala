@@ -22,10 +22,9 @@ class DeleteAttendancePointController extends AttendanceController {
 	@ModelAttribute("command")
 	def command(
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
 		@PathVariable templatePoint: AttendanceMonitoringPoint
 	) = {
-		DeleteAttendancePointCommand(department, templatePoint)
+		DeleteAttendancePointCommand(mandatory(department), mandatory(templatePoint))
 	}
 
 	private def render(department: Department, academicYear: AcademicYear) = {

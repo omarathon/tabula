@@ -14,7 +14,7 @@ class CourseworkExtensionsTest extends BrowserTest with CourseworkFixtures {
 		def openExtensionSettings() = {
 			click on (cssSelector(".dept-settings a.dropdown-toggle"))
 			
-			val extensionsLink = cssSelector(".dept-settings .dropdown-menu").webElement.findElement(By.partialLinkText("Extensions"))
+			val extensionsLink = cssSelector(".dept-settings .dropdown-menu").webElement.findElement(By.partialLinkText("Extension settings"))
 			eventually {
 				extensionsLink.isDisplayed should be (true)
 			}

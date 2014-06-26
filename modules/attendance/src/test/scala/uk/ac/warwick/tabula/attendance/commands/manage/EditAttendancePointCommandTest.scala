@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{RelationshipService, TermService, AttendanceMonitoringService, AttendanceMonitoringServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services._
 import org.springframework.validation.BindException
 import org.joda.time.{DateTimeConstants, DateMidnight, Interval, DateTime}
 import uk.ac.warwick.util.termdates.{TermImpl, Term}
@@ -16,11 +16,13 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 	trait Fixture {
 
 		val thisTermService = smartMock[TermService]
-		val commandState = new EditAttendancePointCommandState with TermServiceComponent {
+		val commandState = new EditAttendancePointCommandState with TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent {
 			val templatePoint = null
 			val department = null
 			val academicYear = null
 			val termService = thisTermService
+			val smallGroupService = null
+			val moduleAndDepartmentService = null
 		}
 		val validator = new AttendanceMonitoringPointValidation with TermServiceComponent with AttendanceMonitoringServiceComponent {
 			val termService = thisTermService
@@ -59,10 +61,15 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 		secondPoint.createdDate = originalCreatedDate
 		scheme2.points.add(secondPoint)
 
-		val command = new EditAttendancePointCommandInternal(null, null, templatePoint) with AttendanceMonitoringServiceComponent with EditAttendancePointCommandState with TermServiceComponent{
+		val command = new EditAttendancePointCommandInternal(null, null, templatePoint) with AttendanceMonitoringServiceComponent
+			with EditAttendancePointCommandState with TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent with ProfileServiceComponent {
 			override def pointsToEdit = Seq(templatePoint, secondPoint)
 			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
 			val termService = thisTermService
+			val smallGroupService = null
+			val moduleAndDepartmentService = null
+			val profileService = smartMock[ProfileService]
+			profileService.getAllMembersWithUniversityIds(any[Seq[String]]) returns Seq()
 			startWeek = 5
 			endWeek = 15
 		}

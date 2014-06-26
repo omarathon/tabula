@@ -27,7 +27,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 
 		var scd = stu.mostSignificantCourseDetails.get
 		session.saveOrUpdate(scd)
-		session.flush
+		session.flush()
 
 		var scyd = scd.freshStudentCourseYearDetails.head
 
@@ -38,27 +38,27 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 		val scd2 = stu2.mostSignificantCourseDetails.get
 		session.saveOrUpdate(scd2)
 
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 
 		var scyd2 = scd2.freshStudentCourseYearDetails.head
 
 		// create a module
 		val existingMod = Fixtures.module("ax101", "Pointless Deliberations")
 		session.saveOrUpdate(existingMod)
-		session.flush
+		session.flush()
 
 		// register the student on the module
 		val existingMr = new ModuleRegistration(scd, existingMod, new java.math.BigDecimal(30), new AcademicYear(2013), "A")
 		session.saveOrUpdate(existingMr)
 		scd.addModuleRegistration(existingMr)
 		session.saveOrUpdate(scd)
-		session.flush
+		session.flush()
 
 		// make another module
 		val newMod = Fixtures.module("zy909", "Meaningful Exchanges")
 		session.saveOrUpdate(newMod)
-		session.flush
+		session.flush()
 
 		// mock required services
 		val mrDao = smartMock[ModuleRegistrationDaoImpl]
@@ -100,17 +100,17 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			// check that if the new MR matches the old, it will not be deleted:
 			command.deleteOldModuleRegistrations(Seq("abcde"), Seq(existingMr))
 			scd.moduleRegistrations.contains(existingMr) should be (true)
-			session.flush
+			session.flush()
 
 			val newMr = new ModuleRegistration(scd, newMod, new java.math.BigDecimal(30), new AcademicYear(2013), "A")
 			session.saveOrUpdate(newMr)
-			session.flush
+			session.flush()
 			scd.addModuleRegistration(newMr)
-			session.flush
+			session.flush()
 
 			// now check that if the new MR does not match the old, the old will be deleted:
 			command.deleteOldModuleRegistrations(Seq("abcde"), Seq(newMr))
-			session.flush
+			session.flush()
 			scd.moduleRegistrations.contains(existingMr) should be (false)
 		}
 	}
@@ -130,8 +130,8 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			tracker.studentCourseYearDetailsSeen.add(key1)
 
 			command.stampMissingRows(tracker, DateTime.now)
-			session.flush
-			session.clear
+			session.flush()
+			session.clear()
 
 			stu.missingFromImportSince should be (null)
 			scd.missingFromImportSince should be (null)
@@ -140,8 +140,8 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			tracker.universityIdsSeen.remove(stu.universityId)
 
 			command.stampMissingRows(tracker, DateTime.now)
-			session.flush
-			session.clear
+			session.flush()
+			session.clear()
 
 			var stuMem = memberDao.getByUniversityIdStaleOrFresh("0000001").get
 
@@ -151,8 +151,8 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 
 			tracker.scjCodesSeen.remove(scd.scjCode)
 			command.stampMissingRows(tracker, DateTime.now)
-			session.flush
-			session.clear
+			session.flush()
+			session.clear()
 
 			stuMem = memberDao.getByUniversityIdStaleOrFresh("0000001").get
 			scd = scdDao.getByScjCodeStaleOrFresh("0000001/1").get
@@ -164,8 +164,8 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 
 			tracker.studentCourseYearDetailsSeen.remove(key1)
 			command.stampMissingRows(tracker, DateTime.now)
-			session.flush
-			session.clear
+			session.flush()
+			session.clear()
 
 			stuMem = memberDao.getByUniversityIdStaleOrFresh("0000001").get
 			scd = scdDao.getByScjCodeStaleOrFresh("0000001/1").get
@@ -189,8 +189,8 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			tracker.studentCourseYearDetailsSeen.add(key)
 
 			command.updateMissingForIndividual(stu, tracker)
-			session.flush
-			session.clear
+			session.flush()
+			session.clear()
 
 			var stuMem = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
 			scd = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get

@@ -10,15 +10,16 @@ class AttendanceViewPointsTest extends AttendanceFixture with GivenWhenThen{
 		 Given("I am logged in as Admin1")
 		 signIn as P.Admin1 to Path("/")
 
-		 When("I go to /attendance/view/xxx/2013/points")
-		 go to Path("/attendance/view/xxx/2013/points")
+		 When("I go to /attendance/view/xxx/2014/points")
+		 go to Path("/attendance/view/xxx/2014/points")
 
 		 Then("I see the page, but no points")
+
 		 pageSource should include("View monitoring points")
 		 className("monitoring-points").findElement should be (None)
 
 		 When("I filter only Undergraduate")
-		 click on id("command").webElement.findElement(By.className("filter-short-values"))
+		 click on id("filterCommand").webElement.findElement(By.className("filter-short-values"))
 		 cssSelector(".dropdown-menu.filter-list").findElement.get.isDisplayed should be (right = true)
 		 click on cssSelector("input[name=courseTypes][value=UG]")
 

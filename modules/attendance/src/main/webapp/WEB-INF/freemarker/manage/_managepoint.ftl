@@ -118,22 +118,21 @@
 				Specific
 			</@form.label>
 			<div class="module-search input-append">
-				<input class="module-search-query smallGroup" type="text" value=""/>
+				<input class="module-search-query smallGroup" type="text" value="" placeholder="Search for a module" />
 				<span class="add-on"><i class="icon-search"></i></span>
 			</div>
-			<button class="btn add-module"><i class="icon-plus"></i> </button>
 			<@fmt.help_popover id="isAnySmallGroupEventModules" content="Attendance at any of the specified modules recorded in Tabula will count towards this monitoring point" />
 			<div class="modules-list">
 				<input type="hidden" name="_smallGroupEventModules" value="false" />
-				<ul>
+				<ol>
 					<#list command.smallGroupEventModules![] as module>
 						<li>
 							<input type="hidden" name="smallGroupEventModules" value="${module.id}" />
-							<#if command.moduleHasSmallGroups(module)><i class="icon-fixed-width"></i><#else><i class="icon-fixed-width icon-exclamation-sign" title="This module has no small groups set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
+							<#if command.moduleHasSmallGroups(module)><i class="icon-fixed-width"></i><#else><i class="icon-fixed-width icon-exclamation-sign" title="This module has no small groups set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger btn-mini"><i class="icon-remove"></i></button>
 						</li>
 					</#list>
 
-				</ul>
+				</ol>
 
 			</div>
 
@@ -175,17 +174,16 @@
 					<input class="assignment-search-query" type="text" value="" placeholder="Search for an assignment"/>
 					<span class="add-on"><i class="icon-search"></i></span>
 				</div>
-				<button class="btn add-assignment"><i class="icon-plus"></i> </button>
 				<div class="assignments-list">
 					<input type="hidden" name="_assignmentSubmissionAssignments" value="false" />
-					<ul>
+					<ol>
 						<#list command.assignmentSubmissionAssignments![] as assignment>
 							<li>
 								<input type="hidden" name="assignmentSubmissionAssignments" value="${assignment.id}" />
-								<span title="<@fmt.assignment_name assignment false />"><@fmt.assignment_name assignment false /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
+								<span title="<@fmt.assignment_name assignment false />"><@fmt.assignment_name assignment false /></span><button class="btn btn-danger btn-mini"><i class="icon-remove"></i></button>
 							</li>
 						</#list>
-					</ul>
+					</ol>
 				</div>
 			</@form.labelled_row>
 
@@ -211,14 +209,13 @@
 					<input class="module-search-query assignment" type="text" value="" placeholder="Search for a module"/>
 					<span class="add-on"><i class="icon-search"></i></span>
 				</div>
-				<button class="btn add-module"><i class="icon-plus"></i> </button>
 				<div class="modules-list">
 					<input type="hidden" name="_assignmentSubmissionModules" value="false" />
 					<ul>
 						<#list command.assignmentSubmissionModules![] as module>
 							<li>
 								<input type="hidden" name="assignmentSubmissionModules" value="${module.id}" />
-								<#if command.moduleHasAssignments(module)><i class="icon-fixed-width"></i><#else><i class="icon-fixed-width icon-exclamation-sign" title="This module has no assignments set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
+								<#if command.moduleHasAssignments(module)><i class="icon-fixed-width"></i><#else><i class="icon-fixed-width icon-exclamation-sign" title="This module has no assignments set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger btn-mini"><i class="icon-remove"></i></button>
 							</li>
 						</#list>
 					</ul>

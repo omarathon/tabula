@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, MonitoringPointSet}
 
 @Controller
 @RequestMapping(Array("/fixtures/create/module"))
@@ -268,6 +268,21 @@ class CreateMonitoringPointSetFixturesController {
 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("createMonitoringPointSetFixtureCommand") cmd: Appliable[MonitoringPointSet]) {
+		cmd.apply()
+	}
+}
+
+@Controller
+@RequestMapping(Array("/fixtures/create/attendanceMonitoringScheme"))
+class CreateAttendanceMonitoringSchemeFixturesController {
+
+	@ModelAttribute("createAttendanceMonitoringSchemeFixtureCommand")
+	def getCreateAttendanceMonitoringSchemeFixtureCommand(): Appliable[AttendanceMonitoringScheme] = {
+		AttendanceMonitoringSchemeFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createAttendanceMonitoringSchemeFixtureCommand") cmd: Appliable[AttendanceMonitoringScheme]) {
 		cmd.apply()
 	}
 }

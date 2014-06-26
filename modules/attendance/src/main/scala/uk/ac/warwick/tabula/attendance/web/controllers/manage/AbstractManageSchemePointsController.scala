@@ -15,7 +15,7 @@ abstract class AbstractManageSchemePointsController extends AttendanceController
 
 	@ModelAttribute("findCommand")
 	def findCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		FindPointsCommand(department, academicYear, None)
+		FindPointsCommand(mandatory(department), mandatory(academicYear), None)
 
 	protected def render(
 		findCommandResult: FindPointsResult,
