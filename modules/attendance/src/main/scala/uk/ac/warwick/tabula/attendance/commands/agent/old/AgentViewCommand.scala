@@ -1,15 +1,13 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.agent.old
 
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.attendance.commands.{BuildStudentPointsData, GroupMonitoringPointsByTerm, GroupedMonitoringPoint, StudentPointsData}
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, TaskBenchmarking, Unaudited}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.commands.{CommandInternal, ReadOnly, Unaudited, ComposableCommand}
-import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
-import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object AgentViewCommand {
 	def apply(agent: Member, relationshipType: StudentRelationshipType, academicYearOption: Option[AcademicYear]) =

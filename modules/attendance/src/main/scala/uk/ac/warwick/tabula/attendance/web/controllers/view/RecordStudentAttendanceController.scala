@@ -28,7 +28,7 @@ class RecordStudentAttendanceController extends AttendanceController
 
 	@InitBinder // do on each request
 	def populatePoints(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember) = {
-			points = attendanceMonitoringService.listStudentsPoints(mandatory(student), mandatory(department), mandatory(academicYear))
+			points = attendanceMonitoringService.listStudentsPoints(mandatory(student), Option(mandatory(department)), mandatory(academicYear))
 	}
 
 	@ModelAttribute("command")

@@ -67,7 +67,7 @@ trait AttendanceMonitoringService {
 		sets: Seq[MonitoringPointSet],
 		types: Seq[AttendanceMonitoringPointType]
 	): Seq[MonitoringPoint]
-	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
+	def listStudentsPoints(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def listStudentsPoints(studentData: AttendanceMonitoringStudentData, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def getAllCheckpoints(point: AttendanceMonitoringPoint): Seq[AttendanceMonitoringCheckpoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
@@ -78,7 +78,7 @@ trait AttendanceMonitoringService {
 	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint]
 	def updateCheckpointTotalsAsync(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit
 	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
-	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
+	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
 	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 
 }
@@ -194,10 +194,10 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		attendanceMonitoringDao.listTemplateSchemesByStyle(style)
 	}
 
-	def listStudentsPoints(student: StudentMember, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
+	def listStudentsPoints(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
 		student.mostSignificantCourseDetails.fold(Seq[AttendanceMonitoringPoint]())(scd => {
 			val currentCourseStartDate = scd.beginDate
-			val schemes = findSchemesForStudent(student.universityId, student.userId, department, academicYear)
+			val schemes = findSchemesForStudent(student.universityId, student.userId, departmentOption, academicYear)
 			schemes.flatMap(_.points.asScala).filter(p =>
 				p.startDate.isAfter(currentCourseStartDate) || p.startDate.isEqual(currentCourseStartDate)
 			)
@@ -205,18 +205,22 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	}
 
 	def listStudentsPoints(studentData: AttendanceMonitoringStudentData, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
-		val schemes = findSchemesForStudent(studentData.universityId, studentData.userId, department, academicYear)
+		val schemes = findSchemesForStudent(studentData.universityId, studentData.userId, Option(department), academicYear)
 		schemes.flatMap(_.points.asScala).filter(p =>
 			p.startDate.isAfter(studentData.scdBeginDate) || p.startDate.isEqual(studentData.scdBeginDate)
 		)
 	}
 
-	private def findSchemesForStudent(universityId: String, userId: String, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
+	private def findSchemesForStudent(universityId: String, userId: String, departmentOption: Option[Department], academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
 		val user = new User(userId)
 		user.setWarwickId(universityId)
-		benchmarkTask(s"membersHelper.findBy $universityId") {
+		val schemes = benchmarkTask(s"membersHelper.findBy $universityId") {
 			membersHelper.findBy(user)
-		}.filter(s => s.department == department && s.academicYear == academicYear)
+		}
+		departmentOption match {
+			case Some(department) => schemes.filter(s => s.department == department && s.academicYear == academicYear)
+			case None => schemes.filter(_.academicYear == academicYear)
+		}
 	}
 
 	def getAllCheckpoints(point: AttendanceMonitoringPoint): Seq[AttendanceMonitoringCheckpoint] = {
@@ -285,7 +289,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal = {
 		val points = benchmarkTask("listStudentsPoints") {
-			listStudentsPoints(student, department, academicYear)
+			listStudentsPoints(student, Option(department), academicYear)
 		}
 		val checkpointMap = getCheckpoints(points, student, withFlush = true)
 		val allCheckpoints = checkpointMap.map(_._2)
@@ -295,7 +299,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		val missedAuthorised = allCheckpoints.count(_.state == AttendanceState.MissedAuthorised)
 		val attended = allCheckpoints.count(_.state == AttendanceState.Attended)
 
-		val totals = attendanceMonitoringDao.getCheckpointTotal(student, department, academicYear).getOrElse {
+		val totals = attendanceMonitoringDao.getCheckpointTotal(student, Option(department), academicYear).getOrElse {
 			val total = new AttendanceMonitoringCheckpointTotal
 			total.student = student
 			total.department = department
@@ -312,11 +316,11 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		totals
 	}
 
-	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal = {
-		attendanceMonitoringDao.getCheckpointTotal(student, department, academicYear).getOrElse {
+	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal = {
+		attendanceMonitoringDao.getCheckpointTotal(student, departmentOption, academicYear).getOrElse {
 			val total = new AttendanceMonitoringCheckpointTotal
 			total.student = student
-			total.department = department
+			total.department = departmentOption.orNull
 			total.academicYear = academicYear
 			total
 		}

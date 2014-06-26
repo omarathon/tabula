@@ -1,7 +1,7 @@
 <#escape x as x?html>
 
-<#import "../attendance_macros.ftl" as attendance_macros />
-<#import "../attendance_variables.ftl" as attendance_variables />
+<#import "../../attendance_macros.ftl" as attendance_macros />
+<#import "../../attendance_variables.ftl" as attendance_variables />
 
 <#assign thisPath><@routes.agentView command.relationshipType /></#assign>
 
@@ -25,7 +25,7 @@
 		<#return return/>
 	</#function>
 
-	<#include "../home/_points_table_js_sort.ftl" />
+	<#include "../../home/_points_table_js_sort.ftl" />
 
 	<#function permission_button_function groupedPoint>
 		<#local record_url><@routes.agentPointRecord groupedPoint.pointId command.relationshipType thisPath /></#local>

@@ -42,9 +42,9 @@ trait PopulatesRecordStudentAttendanceCommand extends PopulateOnForm {
 	self: RecordStudentAttendanceCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def populate() = {
-		val points = attendanceMonitoringService.listStudentsPoints(student, department, academicYear)
+		val points = attendanceMonitoringService.listStudentsPoints(student, Option(department), academicYear)
 		val checkpoints = attendanceMonitoringService.getCheckpoints(points, student)
-		points.foreach(p => checkpointMap.put(p, checkpoints.get(p).map(_.state).getOrElse(null)))
+		points.foreach(p => checkpointMap.put(p, checkpoints.get(p).map(_.state).orNull))
 	}
 }
 
@@ -53,7 +53,7 @@ trait RecordStudentAttendanceValidation extends SelfValidating {
 	self: RecordStudentAttendanceCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent =>
 
 	override def validate(errors: Errors) = {
-		val points = attendanceMonitoringService.listStudentsPoints(student, department, academicYear)
+		val points = attendanceMonitoringService.listStudentsPoints(student, Option(department), academicYear)
 		val nonReportedTerms = attendanceMonitoringService.findNonReportedTerms(Seq(student), academicYear)
 
 		checkpointMap.asScala.foreach { case (point, state) =>
