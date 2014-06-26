@@ -3,9 +3,7 @@ package uk.ac.warwick.tabula.attendance.manage
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.FunctionalTestAcademicYear
 import org.openqa.selenium.By
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
-import org.scalatest.selenium.WebBrowser.{click, go}
 
 class AttendanceCreateSetTest extends AttendanceFixture with GivenWhenThen{
 
@@ -23,7 +21,7 @@ class AttendanceCreateSetTest extends AttendanceFixture with GivenWhenThen{
 		className("routeAndYearPicker").webElement.findElement(By.className("collapsible-target")).isDisplayed should be (true)
 
 		And("I can choose a year of a route")
-				
+
 		click on cssSelector(".scroller table td.year_2 input[type=checkbox]")
 		className("routes-count").webElement.getText should be ("is 1 route")
 
@@ -40,7 +38,7 @@ class AttendanceCreateSetTest extends AttendanceFixture with GivenWhenThen{
 		pressKeys("Point 1")
 		singleSel("validFromWeek").value = "1"
 		singleSel("requiredFromWeek").value = "2"
-			
+
 		click on cssSelector(".modal-footer button.btn-primary")
 
 		eventuallyAjax {
