@@ -1,17 +1,15 @@
 package uk.ac.warwick.tabula.profiles.commands.relationships
 
 import org.joda.time.DateTime
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.commands.{SelfValidating, Command, Description, Notifies}
+import uk.ac.warwick.tabula.commands.{SelfValidating, Description}
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.notifications.{StudentRelationshipChangeToNewAgentNotification, StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToStudentNotification}
