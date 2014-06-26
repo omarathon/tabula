@@ -22,7 +22,7 @@ import javax.persistence.DiscriminatorValue
 import uk.ac.warwick.tabula.roles.{RoleDefinition, SelectorBuiltInRoleDefinition, BuiltInRoleDefinition}
 import java.lang.reflect.Modifier
 
-object ReflectionHelper {
+object ReflectionHelper extends Logging {
 	
 	Vfs.addDefaultURLTypes(new SillyJbossVfsUrlType)
 	lazy val reflections = new Reflections("uk.ac.warwick.tabula")
@@ -33,6 +33,9 @@ object ReflectionHelper {
 
 	lazy val allNotifications : Map[String, Class[_ <: Notification[ToEntityReference, Unit]]] = {
 		val notifications = subtypesOf[Notification[ToEntityReference, Unit]].filter(_.getAnnotation(classOf[DiscriminatorValue]) != null)
+		if (notifications.isEmpty) {
+			logger.error("Reflections found no Notification classes!")
+		}
 		notifications.map { n =>
 			val discriminator : DiscriminatorValue = n.getAnnotation(classOf[DiscriminatorValue])
 			discriminator.value -> n
