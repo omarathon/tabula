@@ -1,23 +1,24 @@
-package uk.ac.warwick.tabula.attendance.web.controllers.view
+package uk.ac.warwick.tabula.attendance.web.controllers.agent
 
-import uk.ac.warwick.tabula.attendance.web.controllers.{HasMonthNames, AttendanceController}
-import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.{SelfValidating, PopulateOnForm, Appliable}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint}
-import uk.ac.warwick.tabula.attendance.commands.view.RecordStudentAttendanceCommand
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AttendanceMonitoringService}
-import uk.ac.warwick.tabula.attendance.commands.GroupsPoints
-import uk.ac.warwick.tabula.attendance.web.Routes
-import org.springframework.stereotype.Controller
 import javax.validation.Valid
+
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.attendance.commands.GroupsPoints
+import uk.ac.warwick.tabula.attendance.commands.agent.AgentStudentRecordCommand
+import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.attendance.web.controllers.{AttendanceController, HasMonthNames}
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringNote, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType}
+import uk.ac.warwick.tabula.services.{AttendanceMonitoringService, AutowiringTermServiceComponent}
 
 @Controller
-@RequestMapping(Array("/view/{department}/{academicYear}/students/{student}/record"))
-class RecordStudentAttendanceController extends AttendanceController
+@RequestMapping(Array("/agent/{relationshipType}/{academicYear}/{student}/record"))
+class AgentStudentRecordController extends AttendanceController
 	with HasMonthNames with GroupsPoints with AutowiringTermServiceComponent {
 
 	@Autowired var attendanceMonitoringService: AttendanceMonitoringService = _
@@ -27,13 +28,17 @@ class RecordStudentAttendanceController extends AttendanceController
 	var points: Seq[AttendanceMonitoringPoint] = _
 
 	@InitBinder // do on each request
-	def populatePoints(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember) = {
-			points = attendanceMonitoringService.listStudentsPoints(mandatory(student), Option(mandatory(department)), mandatory(academicYear))
+	def populatePoints(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember) = {
+			points = attendanceMonitoringService.listStudentsPoints(mandatory(student), None, mandatory(academicYear))
 	}
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember) =
-		RecordStudentAttendanceCommand(mandatory(department), mandatory(academicYear), mandatory(student), user)
+	def command(
+		@PathVariable relationshipType: StudentRelationshipType,
+		@PathVariable academicYear: AcademicYear,
+		@PathVariable student: StudentMember
+	) =
+		AgentStudentRecordCommand(mandatory(relationshipType), mandatory(academicYear), mandatory(student), user)
 
 	@ModelAttribute("attendanceNotes")
 	def attendanceNotes(@PathVariable student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote] =
@@ -62,23 +67,22 @@ class RecordStudentAttendanceController extends AttendanceController
 	@RequestMapping(method = Array(GET))
 	def form(
 		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]] with PopulateOnForm,
-		@PathVariable department: Department,
+		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable student: StudentMember
 	) = {
 		cmd.populate()
-		render(department, academicYear, student)
+		render(relationshipType, academicYear, student)
 	}
 
-	private def render(department: Department, academicYear: AcademicYear, student: StudentMember) = {
-		Mav("view/studentrecord",
-			"returnTo" -> getReturnTo(Routes.View.student(department, academicYear, student))
+	private def render(relationshipType: StudentRelationshipType, academicYear: AcademicYear, student: StudentMember) = {
+		Mav("agent/studentrecord",
+			"department" -> currentMember.homeDepartment,
+			"returnTo" -> getReturnTo(Routes.Agent.student(relationshipType, academicYear, student))
 		).crumbs(
-			Breadcrumbs.View.Home,
-			Breadcrumbs.View.Department(department),
-			Breadcrumbs.View.DepartmentForYear(department, academicYear),
-			Breadcrumbs.View.Students(department, academicYear),
-			Breadcrumbs.View.Student(department, academicYear, student)
+			Breadcrumbs.Agent.Relationship(relationshipType),
+			Breadcrumbs.Agent.RelationshipForYear(relationshipType, academicYear),
+			Breadcrumbs.Agent.Student(relationshipType, academicYear, student)
 		)
 	}
 
@@ -86,15 +90,15 @@ class RecordStudentAttendanceController extends AttendanceController
 	def submit(
 		@Valid @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]] with PopulateOnForm,
 		errors: Errors,
-		@PathVariable department: Department,
+		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable student: StudentMember
 	) = {
 		if (errors.hasErrors) {
-			render(department, academicYear, student)
+			render(relationshipType, academicYear, student)
 		} else {
 			cmd.apply()
-			Redirect(Routes.View.student(department, academicYear, student))
+			Redirect(Routes.Agent.student(relationshipType, academicYear, student))
 		}
 	}
 
