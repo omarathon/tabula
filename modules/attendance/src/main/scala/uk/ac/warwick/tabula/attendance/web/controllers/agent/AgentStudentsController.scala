@@ -29,8 +29,7 @@ class AgentStudentsController extends AttendanceController with HasMonthNames {
 			"department" -> currentMember.homeDepartment,
 			"groupedPoints" -> result.groupedPoints
 		).crumbs(
-			Breadcrumbs.Agent.Relationship(relationshipType),
-			Breadcrumbs.Agent.RelationshipForYear(relationshipType, academicYear)
+			Breadcrumbs.Agent.Relationship(relationshipType)
 		)
 	}
 

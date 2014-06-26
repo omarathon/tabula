@@ -61,7 +61,7 @@ class AgentStudentViewController extends AttendanceController {
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable student: StudentMember
 	) = {
-		Mav("agent/student",
+		Mav("agent/old/student",
 			"student" -> student,
 			"relationshipType" -> relationshipType,
 			"pointsByTerm" -> cmd.apply().pointsByTerm
