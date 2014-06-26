@@ -27,7 +27,17 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
 
 		And("I can create the scheme")
 		click on cssSelector("#main-content form input.btn.btn-primary")
-		eventually { pageSource should include("Manage monitoring points for 14/15") }
+
+		Then("I am redirected to the manage home page")
+		eventually(currentUrl should endWith("/attendance/manage/xxx/2014"))
+		pageSource should include("Manage monitoring points for 14/15")
+		pageSource should include(schemeName)
+
+		When("The I click the 'Add points' link")
+		click on (linkText("Add points"))
+
+		Then("I am redirected to the add points page")
+		eventually(currentUrl should include("/attendance/manage/xxx/2014/addpoints"))
 		pageSource should include(schemeName)
 
 	}
