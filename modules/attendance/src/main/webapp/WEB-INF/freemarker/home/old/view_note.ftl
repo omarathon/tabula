@@ -16,16 +16,7 @@
 			<#else>
 				Not recorded:
 			</#if>
-			${attendanceNote.point.name}
-			<#if point.scheme.pointStyle.dbValue == "week">
-				(<@fmt.wholeWeekDateFormat
-				point.startWeek
-				point.endWeek
-				point.scheme.academicYear
-				/>)
-			<#else>
-				(<@fmt.interval point.startDate point.endDate />)
-			</#if>
+			${attendanceNote.point.name} (<@fmt.monitoringPointFormat attendanceNote.point />)
 		</p>
 		<#if checkpointDescription?has_content>
 			<p><#noescape>${checkpointDescription}</#noescape></p>
