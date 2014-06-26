@@ -54,7 +54,7 @@ class FilterStudentsAttendanceCommandInternal(val department: Department, val ac
 
 		if (offset == 0) page = 1
 
-		buildAttendanceResult(totalResults, students, department, academicYear)
+		buildAttendanceResult(totalResults, students, Option(department), academicYear)
 	}
 
 }

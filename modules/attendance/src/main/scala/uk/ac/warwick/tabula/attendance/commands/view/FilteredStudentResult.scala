@@ -24,11 +24,17 @@ trait BuildsFilteredStudentsAttendanceResult extends TaskBenchmarking with Group
 	
 	self: AttendanceMonitoringServiceComponent with TermServiceComponent =>
 	
-	def buildAttendanceResult(totalResults: Int, students: Seq[StudentMember], department: Department, academicYear: AcademicYear): FilteredStudentsAttendanceResult = {
-		val results = benchmarkTask("Build FilteredStudentResults"){ students.map { student=>
-			val points = benchmarkTask("listStudentsPoints") {
-				attendanceMonitoringService.listStudentsPoints(student, department, academicYear)
-			}
+	def buildAttendanceResult(
+		totalResults: Int,
+		students: Seq[StudentMember],
+		departmentOption: Option[Department],
+		academicYear: AcademicYear,
+		pointMap: Map[StudentMember, Seq[AttendanceMonitoringPoint]] = Map()
+	): FilteredStudentsAttendanceResult = {
+		val results = benchmarkTask("Build FilteredStudentResults"){ students.map { student =>
+			val points = pointMap.getOrElse(student, benchmarkTask("listStudentsPoints") {
+				attendanceMonitoringService.listStudentsPoints(student, departmentOption, academicYear)
+			})
 			val checkpointMap = benchmarkTask("getCheckpoints") {
 				attendanceMonitoringService.getCheckpoints(points, student)
 			}
@@ -46,7 +52,7 @@ trait BuildsFilteredStudentsAttendanceResult extends TaskBenchmarking with Group
 				attendanceMonitoringService.getAttendanceNoteMap(student)
 			}
 			val checkpointTotal = benchmarkTask("checkpointTotal") {
-				attendanceMonitoringService.getCheckpointTotal(student, department, academicYear)
+				attendanceMonitoringService.getCheckpointTotal(student, departmentOption, academicYear)
 			}
 			FilteredStudentResult(student, groupedPointCheckpointPairs, attendanceNotes, checkpointTotal)
 		}}

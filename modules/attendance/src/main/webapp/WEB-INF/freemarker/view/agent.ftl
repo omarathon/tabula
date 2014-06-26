@@ -18,21 +18,35 @@
 			visiblePeriods=visiblePeriods
 			monthNames=monthNames
 			department=department
-			academicYear=academicYear
-			returnTo=returnTo
 			doCommandSorting=false
-		; student>
-			<#assign record_url><@routes.viewRecordStudent department academicYear.startYear?c student returnTo /></#assign>
-			<@fmt.permission_button
-				permission='MonitoringPoints.Record'
-				scope=student
-				action_descr='record monitoring points'
-				classes='btn btn-primary btn-mini'
-				href=record_url
-				tooltip='Record'
-			>
-				<i class="icon-pencil icon-fixed-width late"></i>
-			</@fmt.permission_button>
+		; result>
+			<td class="unrecorded">
+				<a href="<@routes.viewSingleStudent department academicYear.startYear?c result.student />">
+					<span class="badge badge-<#if (result.checkpointTotal.unrecorded > 2)>important<#elseif (result.checkpointTotal.unrecorded > 0)>warning<#else>success</#if>">
+						${result.checkpointTotal.unrecorded}
+					</span>
+				</a>
+			</td>
+			<td class="missed">
+				<a href="<@routes.viewSingleStudent department academicYear.startYear?c result.student />">
+					<span class="badge badge-<#if (result.checkpointTotal.unauthorised > 2)>important<#elseif (result.checkpointTotal.unauthorised > 0)>warning<#else>success</#if>">
+						${result.checkpointTotal.unauthorised}
+					</span>
+				</a>
+			</td>
+			<td class="record">
+				<#assign record_url><@routes.viewRecordStudent department academicYear.startYear?c result.student returnTo /></#assign>
+				<@fmt.permission_button
+					permission='MonitoringPoints.Record'
+					scope=result.student
+					action_descr='record monitoring points'
+					classes='btn btn-primary btn-mini'
+					href=record_url
+					tooltip='Record'
+				>
+					<i class="icon-pencil icon-fixed-width late"></i>
+				</@fmt.permission_button>
+			</td>
 		</@attendance_macros.scrollablePointsTable>
 
 		<div class="clearfix">
