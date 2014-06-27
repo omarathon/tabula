@@ -136,6 +136,7 @@ object ScientiaHttpTimetableFetchingService {
 		xml \\ "Activity" map { activity => 
 			TimetableEvent(
 				name = (activity \\ "name").text,
+			  title = (activity \\ "title").text,
 				description = (activity \\ "description").text,
 				eventType = TimetableEventType((activity \\ "type").text),
 				weekRanges = new WeekRangeListUserType().convertToObject((activity \\ "weeks").text),

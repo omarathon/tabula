@@ -445,9 +445,12 @@
 									},
                                     eventAfterRender: function(event, element, view){
 										var content = "<table class='event-info'>";
-                                        if (event.description && event.description.length > 0){
-                                        	content = content + "<tr><th>What</th><td>" + event.description +"</td></tr>";
-                                        }
+										if (event.fullTitle && event.fullTitle.length > 0) {
+											content = content + "<tr><th>Title</th><td>" + event.fullTitle + "</td></tr>";
+										}
+                                        if (event.description && event.description.length > 0) {
+											content = content + "<tr><th>What</th><td>" + event.description + "</td></tr>";
+										}
                                         content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
                                         content = content + "<tr><th>Where</th><td>" + event.location + "</td></tr>";
                                         if (event.tutorNames.length > 0){
