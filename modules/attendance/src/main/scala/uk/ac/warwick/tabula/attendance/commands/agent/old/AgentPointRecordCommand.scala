@@ -1,18 +1,20 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.agent.old
 
-import uk.ac.warwick.tabula.data.model.{AttendanceNote, Route, StudentMember, StudentRelationshipType, Member}
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}
-import uk.ac.warwick.tabula.services._
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.helpers.LazyMaps
-import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.attendance.commands.{GroupMonitoringPointsByTerm, PopulateGroupedPoints}
 import uk.ac.warwick.tabula.attendance.commands.view.old.GroupedPointValidation
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.{AttendanceNote, Member, StudentMember, StudentRelationshipType}
+import uk.ac.warwick.tabula.helpers.LazyMaps
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
+import scala.collection.JavaConverters._
 
 object AgentPointRecordCommand {
 	def apply(agent: Member, user: CurrentUser, relationshipType: StudentRelationshipType, templateMonitoringPoint: MonitoringPoint) =

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands.view
 
 import uk.ac.warwick.tabula.{Fixtures, CurrentUser, AcademicYear, Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{TermService, ProfileService, AttendanceMonitoringService, TermServiceComponent, ProfileServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{UserGroup, Department}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, AttendanceMonitoringScheme, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.attendance.commands.GroupedPoint
@@ -19,11 +19,12 @@ import uk.ac.warwick.util.termdates.Term.TermType
 class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 	
 	trait CommandStateTestSupport extends AttendanceMonitoringServiceComponent 
-		with ProfileServiceComponent with TermServiceComponent {
+		with ProfileServiceComponent with TermServiceComponent with SecurityServiceComponent {
 
 		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
 		val profileService = smartMock[ProfileService]
 		val termService = smartMock[TermService]
+		val securityService = smartMock[SecurityService]
 	}
 	
 	trait Fixture {
