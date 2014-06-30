@@ -15,6 +15,11 @@
 			<h3 id="group${group_index}-event${event_index}-modal-label"><#nested/></h3>
 		</div>
 		<div class="modal-body dateTimePair">
+
+			<@form.labelled_row "title" "Title">
+				<@f.input path="title" />
+			</@form.labelled_row>
+			
 			<@form.labelled_row "tutors" "Tutors">
 				<@form.flexipicker path="tutors" placeholder="User name" htmlId="group${group_index}-event${event_index}-tutors" list=true multiple=true />
 			</@form.labelled_row>

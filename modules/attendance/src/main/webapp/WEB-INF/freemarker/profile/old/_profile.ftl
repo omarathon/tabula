@@ -1,5 +1,5 @@
 <#escape x as x?html>
-<#import "../attendance_macros.ftl" as attendance_macros />
+<#import "../../attendance_macros.ftl" as attendance_macros />
 
 <#if !pointsByTerm??>
 	<p><em>There are no monitoring points defined for this academic year.</em></p>

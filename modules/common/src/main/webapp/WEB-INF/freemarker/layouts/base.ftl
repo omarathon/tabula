@@ -236,7 +236,7 @@
 														<li><a href="<@url page="/sysadmin/" context="/" />">Sysadmin home</a></li>
 													</#if>
 													<#if user.sysadmin>
-														<li><a href="<@url page="/masquerade" context="/admin" />">Masquerade</a></li>
+														<li><a href="<@url page="/masquerade?returnTo=${info.requestedUri}" context="/admin" />">Masquerade</a></li>
 													</#if>
 													<#if user.sysadmin>
 														<li><a href="#" id="hide-sysadmin-only-content">Hide sysadmin content</a></li>

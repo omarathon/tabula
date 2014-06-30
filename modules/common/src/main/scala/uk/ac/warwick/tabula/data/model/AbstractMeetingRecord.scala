@@ -93,6 +93,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 	protected def asEventOccurrence: Option[EventOccurrence] = {
 		Some(EventOccurrence(
 			title,
+			title,
 			description,
 			TimetableEventType.Meeting,
 			meetingDate.toLocalDateTime,
