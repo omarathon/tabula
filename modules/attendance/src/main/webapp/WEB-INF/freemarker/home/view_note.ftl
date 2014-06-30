@@ -1,5 +1,5 @@
 <#escape x as x?html>
-<#import "*/modal_macros.ftl" as modal />
+<#import "../attendance_macros.ftl" as attendance_macros />
 
 	<#if isModal>
 		<@modal.header>
@@ -27,8 +27,9 @@
 				(<@fmt.interval point.startDate point.endDate />)
 			</#if>
 		</p>
-		<#if checkpointDescription?has_content>
-			<p><#noescape>${checkpointDescription}</#noescape></p>
+
+		<#if checkpoint??>
+			<@attendance_macros.checkpointLabel department=checkpoint.point.scheme.department checkpoint=checkpoint point=point student=attendanceNote.student/>
 		</#if>
 
 		<#if attendanceNote.note?has_content>
