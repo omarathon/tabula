@@ -26,6 +26,7 @@ object AgentPointRecordCommand {
 			with AutowiringRelationshipServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
+			with AutowiringSecurityServiceComponent
 			with ComposableCommand[Seq[AttendanceMonitoringCheckpoint]]
 			with AgentPointRecordValidation
 			with AgentPointRecordDescription
@@ -70,10 +71,10 @@ trait PopulateAgentPointRecordCommand extends PopulateOnForm {
 
 trait AgentPointRecordValidation extends SelfValidating with GroupedPointRecordValidation {
 
-	self: AgentPointRecordCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent =>
+	self: AgentPointRecordCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent with SecurityServiceComponent =>
 
 	override def validate(errors: Errors) {
-		validateGroupedPoint(errors, templatePoint, checkpointMap.asScala.mapValues(_.asScala.toMap).toMap)
+		validateGroupedPoint(errors, templatePoint, checkpointMap.asScala.mapValues(_.asScala.toMap).toMap, user)
 	}
 
 }

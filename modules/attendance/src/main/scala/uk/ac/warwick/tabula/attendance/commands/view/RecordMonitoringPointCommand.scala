@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.attendance.commands.GroupedPoint
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services._
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.LazyMaps
 
@@ -20,6 +20,7 @@ object RecordMonitoringPointCommand {
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringProfileServiceComponent
 			with AutowiringTermServiceComponent
+			with AutowiringSecurityServiceComponent
 			with RecordMonitoringPointValidation
 			with RecordMonitoringPointDescription
 			with RecordMonitoringPointPermissions
@@ -73,10 +74,10 @@ trait PopulateRecordMonitoringPointCommand extends PopulateOnForm {
 
 trait RecordMonitoringPointValidation extends SelfValidating with GroupedPointRecordValidation {
 
-	self: RecordMonitoringPointCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent =>
+	self: RecordMonitoringPointCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent with SecurityServiceComponent =>
 
 	override def validate(errors: Errors) {
-		validateGroupedPoint(errors, templatePoint, checkpointMap.asScala.mapValues(_.asScala.toMap).toMap)
+		validateGroupedPoint(errors, templatePoint, checkpointMap.asScala.mapValues(_.asScala.toMap).toMap, user)
 	}
 
 }
