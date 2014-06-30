@@ -28,7 +28,6 @@ class AttendanceNoteController extends AttendanceController with CheckpointUpdat
 		Mav("home/view_note",
 			"attendanceNote" -> attendanceNote,
 			"checkpoint" -> checkpoint,
-			"checkpointDescription" -> Option(checkpoint).map{ checkpoint => describeCheckpoint(checkpoint)}.getOrElse(""),
 			"updatedBy" -> userLookup.getUserByUserId(attendanceNote.updatedBy).getFullName,
 			"updatedDate" -> DateBuilder.format(attendanceNote.updatedDate),
 			"isModal" -> ajax
