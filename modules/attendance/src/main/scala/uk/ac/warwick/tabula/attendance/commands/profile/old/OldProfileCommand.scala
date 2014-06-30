@@ -1,25 +1,26 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.profile.old
 
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.commands.{TaskBenchmarking, ReadOnly, Unaudited, ComposableCommand, CommandInternal}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.beans.factory.annotation.Value
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.attendance.commands.{StudentPointsData, BuildStudentPointsData}
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, TaskBenchmarking, Unaudited}
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-case class AttendanceProfileInformation(
+case class OldAttendanceProfileInformation(
 	pointsData: StudentPointsData,
 	missedCountByTerm: Map[String, Int],
 	nonReportedTerms: Seq[String]
 )
 
-object ProfileCommand {
+object OldProfileCommand {
 	def apply(student: StudentMember, academicYear: AcademicYear) =
-		new ProfileCommand(student, academicYear)
-		with ComposableCommand[AttendanceProfileInformation]
+		new OldProfileCommand(student, academicYear)
+		with ComposableCommand[OldAttendanceProfileInformation]
 		with ProfilePermissions
 		with ProfileCommandState
 		with AutowiringTermServiceComponent
@@ -29,8 +30,8 @@ object ProfileCommand {
 }
 
 
-abstract class ProfileCommand(val student: StudentMember, val academicYear: AcademicYear)
-	extends CommandInternal[AttendanceProfileInformation] with TaskBenchmarking with BuildStudentPointsData with ProfileCommandState {
+abstract class OldProfileCommand(val student: StudentMember, val academicYear: AcademicYear)
+	extends CommandInternal[OldAttendanceProfileInformation] with TaskBenchmarking with BuildStudentPointsData with ProfileCommandState {
 
 	override def applyInternal() = {
 		val pointsData = benchmarkTask("Build data") { buildData(Seq(student), academicYear).head }
@@ -45,7 +46,7 @@ abstract class ProfileCommand(val student: StudentMember, val academicYear: Acad
 
 		val nonReportedTerms = monitoringPointService.findNonReportedTerms(Seq(student), academicYear)
 
-		AttendanceProfileInformation(pointsData, missedCountByTerm, nonReportedTerms)
+		OldAttendanceProfileInformation(pointsData, missedCountByTerm, nonReportedTerms)
 	}
 }
 

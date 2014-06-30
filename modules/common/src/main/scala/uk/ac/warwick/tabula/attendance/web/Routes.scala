@@ -134,4 +134,11 @@ object Routes {
 		def student(relationshipType: StudentRelationshipType, academicYear: AcademicYear, student: StudentMember) =
 			context + "/agent/%s/%s/%s" format(encoded(relationshipType.urlPart), encoded(academicYear.startYear.toString), encoded(student.universityId))
 	}
+
+	object Profile {
+		def home = context + "/profile"
+		def years(student: StudentMember) = context + "/profile/%s" format encoded(student.universityId)
+		def profileForYear(student: StudentMember, academicYear: AcademicYear) =
+			context + "/profile/%s/%s" format(encoded(student.universityId), encoded(academicYear.startYear.toString))
+	}
 }

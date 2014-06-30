@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.CurrentUser
 @RequestMapping(Array("/masquerade"))
 class MasqueradeController extends AdminController {
 
-	var sandbox = (Wire.property("${spring.profiles.active}") == "sandbox")
+	var sandbox = Wire.property("${spring.profiles.active}") == "sandbox"
 	var departmentService = Wire[ModuleAndDepartmentService]
 	var profileService = Wire[ProfileService]
 	var routeService = Wire[CourseAndRouteService]
@@ -39,7 +39,7 @@ class MasqueradeController extends AdminController {
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid @ModelAttribute("masqueradeCommand") cmd: MasqueradeCommand, errors: Errors, response: HttpServletResponse): Mav = {
-		if (errors.hasErrors()) form(cmd)
+		if (errors.hasErrors) form(cmd)
 		else {
 			for (cookie <- cmd.apply()) response.addCookie(cookie)
 			Redirect(Routes.admin.masquerade)
@@ -68,7 +68,7 @@ class MasqueradeController extends AdminController {
 			}
 		}
 
-	@ModelAttribute("returnTo") def returnTo = getReturnTo("")
+	@ModelAttribute("returnTo") def returnTo = getReturnTo("/")
 
 }
 

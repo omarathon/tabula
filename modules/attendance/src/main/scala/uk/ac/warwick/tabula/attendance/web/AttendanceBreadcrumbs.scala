@@ -152,4 +152,11 @@ object AttendanceBreadcrumbs {
 		}
 
 	}
+
+	object Profile {
+		case class Years(student: StudentMember) extends Abstract {
+			val title = "My Monitoring Points"
+			val url = Some(Routes.Profile.years(student))
+		}
+	}
 }
