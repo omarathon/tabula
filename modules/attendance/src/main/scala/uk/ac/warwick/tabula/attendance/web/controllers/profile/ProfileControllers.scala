@@ -4,11 +4,13 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.attendance.commands.profile.old.{OldAttendanceProfileInformation, OldProfileCommand}
+import uk.ac.warwick.tabula.attendance.commands.profile.AttendanceProfileCommand
 import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
+import uk.ac.warwick.tabula.attendance.web.controllers.{HasMonthNames, AttendanceController}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.JavaImports._
 
 @Controller
 @RequestMapping(value = Array("/profile"))
@@ -35,31 +37,35 @@ class ProfileChooseYearController extends AttendanceController {
 }
 
 @Controller
-@RequestMapping(value = Array("/profile/{student}/2013"))
-class OldProfileController extends AttendanceController {
+@RequestMapping(Array("/profile/{student}/{academicYear}"))
+class ProfileController extends AttendanceController with HasMonthNames {
 
 	@ModelAttribute("command")
-	def createCommand(@PathVariable student: StudentMember)
-		= OldProfileCommand(student, AcademicYear(2013))
+	def command(@PathVariable student: StudentMember, @PathVariable academicYear: AcademicYear) =
+		AttendanceProfileCommand(mandatory(student), mandatory(academicYear))
 
 	@RequestMapping
-	def render(
-		@ModelAttribute("command") cmd: Appliable[OldAttendanceProfileInformation],
+	def home(
+		@ModelAttribute("command") cmd: Appliable[Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]]],
 		@PathVariable student: StudentMember,
-		@RequestParam(value="expand", required=false) expand: Boolean
+		@RequestParam(value="expand", required=false) expand: JBoolean
 	) = {
-		val info = cmd.apply()
-		val baseMap = Map(
-			"currentUser" -> user,
-			"pointsByTerm" -> info.pointsData.pointsByTerm,
-			"missedCountByTerm" -> info.missedCountByTerm,
-			"nonReportedTerms" -> info.nonReportedTerms
+		val groupedPointMap = cmd.apply()
+		val missedPointCountByTerm = groupedPointMap.map{ case(period, pointCheckpointPairs) =>
+			period -> pointCheckpointPairs.count{ case(point, checkpoint) => checkpoint != null && checkpoint.state == AttendanceState.MissedUnauthorised}
+		}
+		val modelMap = Map(
+			"groupedPointMap" -> groupedPointMap,
+			"missedPointCountByTerm" -> missedPointCountByTerm,
+			"hasAnyMissed" -> missedPointCountByTerm.exists(_._2 > 0),
+			"department" -> currentMember.homeDepartment,
+			"is_the_student" -> (user.apparentId == student.userId),
+			"expand" -> expand
 		)
-
 		if (ajax)
-			Mav("profile/old/_profile", baseMap ++ Map("defaultExpand" -> expand)).noLayout()
+			Mav("profile/_profile", modelMap).noLayout()
 		else
-			Mav("profile/old/profile", baseMap ++ Map("defaultExpand" -> true)).crumbs(
+			Mav("profile/profile", modelMap).crumbs(
 				Breadcrumbs.Profile.Years(mandatory(student))
 			)
 	}

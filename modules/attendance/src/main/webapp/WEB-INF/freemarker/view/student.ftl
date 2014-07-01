@@ -1,6 +1,6 @@
 <#escape x as x?html>
-	<#import "../attendance_variables.ftl" as attendance_variables />
-	<#import "../attendance_macros.ftl" as attendance_macros />
+<#import "../attendance_variables.ftl" as attendance_variables />
+<#import "../attendance_macros.ftl" as attendance_macros />
 
 <article class="profile">
 	<section id="personal-details">

@@ -120,6 +120,7 @@
 <#macro profileHome><@_u page="/profile"/></#macro>
 <#macro profileYears student><@_u page="/profile/${student.universityId}"/></#macro>
 <#macro profileForYear student academicYearString><@_u page="/profile/${student.universityId}/${academicYearString}"/></#macro>
+<#macro profileRecord student academicYearString><@_u page="/profile/${student.universityId}/${academicYearString}/record"/></#macro>
 <#macro profileMeetings student academicYearString point><@_u page="/profile/${student.universityId}/${academicYearString}/${point.id}/meetings"/></#macro>
 
 <#macro viewHome><@_u page="/view"/></#macro>
