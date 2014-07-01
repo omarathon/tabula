@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.attendance.commands.view.old
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.attendance.commands.{BuildStudentPointsData, StudentPointsData}
+import uk.ac.warwick.tabula.attendance.commands.old.{BuildStudentPointsData, StudentPointsData}
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions

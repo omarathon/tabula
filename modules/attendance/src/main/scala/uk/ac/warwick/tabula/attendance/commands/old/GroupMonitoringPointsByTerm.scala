@@ -1,11 +1,11 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.old
 
-import uk.ac.warwick.tabula.services.TermServiceComponent
-import uk.ac.warwick.tabula.data.model.attendance.{CommonMonitoringPointProperties, MonitoringPointSet, MonitoringPoint}
+import org.joda.time.{DateMidnight, DateTimeConstants}
 import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.{DateTimeConstants, DateMidnight}
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.data.model.attendance.{CommonMonitoringPointProperties, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
+import uk.ac.warwick.tabula.services.TermServiceComponent
 
 case class GroupedMonitoringPoint(
 	name: String,

@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.commands.agent.old.AgentViewCommand
-import uk.ac.warwick.tabula.attendance.commands.{GroupedMonitoringPoint, StudentPointsData}
+import uk.ac.warwick.tabula.attendance.commands.old.{GroupedMonitoringPoint, StudentPointsData}
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType

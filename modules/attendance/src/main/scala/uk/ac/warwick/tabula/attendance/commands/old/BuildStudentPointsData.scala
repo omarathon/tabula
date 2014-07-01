@@ -1,12 +1,13 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.old
 
-import uk.ac.warwick.tabula.data.model.StudentMember
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.{UserLookupComponent, ProfileServiceComponent, TermServiceComponent, MonitoringPointServiceComponent}
 import uk.ac.warwick.tabula.AcademicYear
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointAttendanceNote, AttendanceState, MonitoringPoint}
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPoint, MonitoringPointAttendanceNote}
+import uk.ac.warwick.tabula.services.{MonitoringPointServiceComponent, TermServiceComponent, UserLookupComponent}
+
+import scala.collection.JavaConverters._
 
 case class CheckpointData(
 	state: String,

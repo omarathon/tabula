@@ -1,15 +1,15 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.old
+
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSetTemplate
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
-
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSetTemplate
-import uk.ac.warwick.tabula.commands.{Unaudited, ComposableCommand, CommandInternal}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, RequiresPermissionsChecking, PermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
-import uk.ac.warwick.tabula.data.model.Department
 
 object ViewMonitoringPointSetTemplateCommand {
 	def apply(set: MonitoringPointSetTemplate) = new ViewMonitoringPointSetTemplateCommand(set)

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.attendance.commands.profile.old
 
 import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.attendance.commands.{StudentPointsData, BuildStudentPointsData}
+import uk.ac.warwick.tabula.attendance.commands.old.{BuildStudentPointsData, StudentPointsData}
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, TaskBenchmarking, Unaudited}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState

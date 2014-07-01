@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.attendance.web.controllers.view.old
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.attendance.commands.StudentPointsData
+import uk.ac.warwick.tabula.attendance.commands.old.StudentPointsData
 import uk.ac.warwick.tabula.attendance.commands.view.old.OldViewAgentsStudentsCommand
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import uk.ac.warwick.tabula.commands.Appliable

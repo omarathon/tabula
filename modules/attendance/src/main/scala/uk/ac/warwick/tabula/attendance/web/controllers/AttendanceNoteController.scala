@@ -2,11 +2,12 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
+import uk.ac.warwick.tabula.attendance.commands.old.CheckpointUpdatedDescription
 import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointAttendanceNote, MonitoringPoint}
 import uk.ac.warwick.tabula.commands.{SelfValidating, ApplyWithCallback, PopulateOnForm, Appliable}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.attendance.commands.{CheckpointUpdatedDescription, AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
+import uk.ac.warwick.tabula.attendance.commands.{AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
 import uk.ac.warwick.tabula.attendance.web.Routes
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import uk.ac.warwick.tabula.ItemNotFoundException

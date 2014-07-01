@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.attendance.commands.report
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.attendance.commands.old.GroupMonitoringPointsByTerm
 import uk.ac.warwick.tabula.services.{MonitoringPointServiceComponent, TermService}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
-import uk.ac.warwick.tabula.attendance.commands.GroupMonitoringPointsByTerm
 import uk.ac.warwick.tabula.data.model.StudentMember
 import scala.collection.JavaConverters._
 

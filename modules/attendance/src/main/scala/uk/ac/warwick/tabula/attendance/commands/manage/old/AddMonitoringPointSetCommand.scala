@@ -1,21 +1,20 @@
 package uk.ac.warwick.tabula.attendance.commands.manage.old
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSetTemplate, MonitoringPointType, MonitoringPoint, MonitoringPointSet}
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{Route, Department}
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports.JHashMap
 import org.springframework.util.AutoPopulatingList
+import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.JavaImports.JHashMap
+import uk.ac.warwick.tabula.attendance.commands.old.{AutowiringSecurityServicePermissionsAwareRoutes, GroupMonitoringPointsByTerm, PermissionsAwareRoutes}
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet, MonitoringPointSetTemplate, MonitoringPointType}
+import uk.ac.warwick.tabula.data.model.{Department, Route}
+import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
+import scala.collection.JavaConverters._
 import scala.collection.mutable
-import uk.ac.warwick.tabula.permissions.CheckablePermission
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.attendance.commands.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes, GroupMonitoringPointsByTerm}
 
 object AddMonitoringPointSetCommand {
 	def apply(

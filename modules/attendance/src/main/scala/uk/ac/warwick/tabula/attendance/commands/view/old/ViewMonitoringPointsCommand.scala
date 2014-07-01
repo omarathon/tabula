@@ -1,21 +1,20 @@
 package uk.ac.warwick.tabula.attendance.commands.view.old
 
-import uk.ac.warwick.tabula.commands.{FiltersStudents, CommandInternal, ReadOnly, Unaudited, ComposableCommand}
-import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
-import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import org.hibernate.criterion.Order
+import org.hibernate.criterion.Order._
+import org.joda.time.DateTime
+import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.attendance.commands.old.{AutowiringSecurityServicePermissionsAwareRoutes, GroupMonitoringPointsByTerm, GroupedMonitoringPoint, PermissionsAwareRoutes}
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, FiltersStudents, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
-import org.hibernate.criterion.Order._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.system.BindListener
-import org.springframework.validation.BindingResult
-import org.hibernate.criterion.Order
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import org.joda.time.DateTime
+
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.attendance.commands.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes, GroupMonitoringPointsByTerm, GroupedMonitoringPoint}
 
 object ViewMonitoringPointsCommand {
 	def apply(department: Department, academicYearOption: Option[AcademicYear], user: CurrentUser) =

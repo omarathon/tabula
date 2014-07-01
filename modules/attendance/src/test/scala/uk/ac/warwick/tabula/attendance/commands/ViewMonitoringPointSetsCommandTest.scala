@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands
 
+import uk.ac.warwick.tabula.attendance.commands.old.ViewMonitoringPointSetState
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.tabula.services.TermService
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}

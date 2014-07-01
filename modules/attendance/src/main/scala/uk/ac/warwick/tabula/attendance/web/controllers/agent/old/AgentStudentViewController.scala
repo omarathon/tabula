@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.attendance.commands.{BuildStudentPointsData, GroupMonitoringPointsByTerm, StudentPointsData}
+import uk.ac.warwick.tabula.attendance.commands.old.{BuildStudentPointsData, GroupMonitoringPointsByTerm, StudentPointsData}
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand, ReadOnly, TaskBenchmarking, Unaudited}
 import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType}

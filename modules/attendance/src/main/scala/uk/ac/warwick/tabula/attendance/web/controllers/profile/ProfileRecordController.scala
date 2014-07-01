@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.web.controllers.agent
+package uk.ac.warwick.tabula.attendance.web.controllers.profile
 
 import javax.validation.Valid
 
@@ -7,17 +7,17 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.attendance.commands.{StudentRecordCommand, GroupsPoints}
+import uk.ac.warwick.tabula.attendance.commands.{GroupsPoints, StudentRecordCommand}
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.attendance.web.controllers.{AttendanceController, HasMonthNames}
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringNote, AttendanceMonitoringPoint}
-import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.services.{AttendanceMonitoringService, AutowiringTermServiceComponent}
 
 @Controller
-@RequestMapping(Array("/agent/{relationshipType}/{academicYear}/{student}/record"))
-class AgentStudentRecordController extends AttendanceController
+@RequestMapping(Array("/profile/{student}/{academicYear}/record"))
+class ProfileRecordController extends AttendanceController
 	with HasMonthNames with GroupsPoints with AutowiringTermServiceComponent {
 
 	@Autowired var attendanceMonitoringService: AttendanceMonitoringService = _
@@ -65,22 +65,20 @@ class AgentStudentRecordController extends AttendanceController
 	@RequestMapping(method = Array(GET))
 	def form(
 		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]] with PopulateOnForm,
-		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable student: StudentMember
 	) = {
 		cmd.populate()
-		render(relationshipType, academicYear, student)
+		render(academicYear, student)
 	}
 
-	private def render(relationshipType: StudentRelationshipType, academicYear: AcademicYear, student: StudentMember) = {
+	private def render(academicYear: AcademicYear, student: StudentMember) = {
 		Mav("record",
 			"department" -> currentMember.homeDepartment,
-			"returnTo" -> getReturnTo(Routes.Agent.student(relationshipType, academicYear, student))
+			"returnTo" -> getReturnTo(Routes.Profile.profileForYear(mandatory(student), mandatory(academicYear)))
 		).crumbs(
-			Breadcrumbs.Agent.Relationship(relationshipType),
-			Breadcrumbs.Agent.RelationshipForYear(relationshipType, academicYear),
-			Breadcrumbs.Agent.Student(relationshipType, academicYear, student)
+			Breadcrumbs.Profile.Years(mandatory(student), user.apparentId == student.userId),
+			Breadcrumbs.Profile.ProfileForYear(mandatory(student), mandatory(academicYear))
 		)
 	}
 
@@ -88,15 +86,14 @@ class AgentStudentRecordController extends AttendanceController
 	def submit(
 		@Valid @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]] with PopulateOnForm,
 		errors: Errors,
-		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable student: StudentMember
 	) = {
 		if (errors.hasErrors) {
-			render(relationshipType, academicYear, student)
+			render(academicYear, student)
 		} else {
 			cmd.apply()
-			Redirect(Routes.Agent.student(relationshipType, academicYear, student))
+			Redirect(Routes.Profile.profileForYear(mandatory(student), mandatory(academicYear)))
 		}
 	}
 

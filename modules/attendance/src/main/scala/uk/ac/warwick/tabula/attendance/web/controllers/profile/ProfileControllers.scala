@@ -48,6 +48,7 @@ class ProfileController extends AttendanceController with HasMonthNames {
 	def home(
 		@ModelAttribute("command") cmd: Appliable[Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]]],
 		@PathVariable student: StudentMember,
+		@PathVariable academicYear: AcademicYear,
 		@RequestParam(value="expand", required=false) expand: JBoolean
 	) = {
 		val groupedPointMap = cmd.apply()
@@ -60,13 +61,14 @@ class ProfileController extends AttendanceController with HasMonthNames {
 			"hasAnyMissed" -> missedPointCountByTerm.exists(_._2 > 0),
 			"department" -> currentMember.homeDepartment,
 			"is_the_student" -> (user.apparentId == student.userId),
-			"expand" -> expand
+			"expand" -> expand,
+			"returnTo" -> getReturnTo(Routes.Profile.profileForYear(mandatory(student), mandatory(academicYear)))
 		)
 		if (ajax)
 			Mav("profile/_profile", modelMap).noLayout()
 		else
 			Mav("profile/profile", modelMap).crumbs(
-				Breadcrumbs.Profile.Years(mandatory(student))
+				Breadcrumbs.Profile.Years(mandatory(student), user.apparentId == student.userId)
 			)
 	}
 }

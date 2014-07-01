@@ -6,7 +6,7 @@
 	<p><em>No monitoring points found for this academic year.</em></p>
 <#else>
 	<#if can.do("MonitoringPoints.Record", student)>
-		<a class="btn btn-primary" href="<@routes.profileRecord student academicYear.startYear?c />">Record attendance</a>
+		<a class="btn btn-primary" href="<@routes.profileRecord student academicYear.startYear?c returnTo />">Record attendance</a>
 	</#if>
 
 	<div class="monitoring-points-profile striped-section collapsible <#if expand!true>expanded</#if>">

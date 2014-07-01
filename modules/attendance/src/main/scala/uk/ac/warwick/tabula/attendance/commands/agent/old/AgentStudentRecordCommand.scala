@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.attendance.commands.agent.old
 import org.joda.time.DateTime
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.attendance.commands.{CheckpointUpdatedDescription, GroupMonitoringPointsByTerm}
+import uk.ac.warwick.tabula.attendance.commands.old.{CheckpointUpdatedDescription, GroupMonitoringPointsByTerm}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, Member, StudentMember, StudentRelationshipType}
