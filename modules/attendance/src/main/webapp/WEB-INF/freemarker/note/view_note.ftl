@@ -1,4 +1,5 @@
 <#escape x as x?html>
+<#import "*/modal_macros.ftl" as modal />
 <#import "../attendance_macros.ftl" as attendance_macros />
 
 	<#if isModal>
