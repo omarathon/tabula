@@ -31,7 +31,7 @@ class OldAttendanceNoteController extends AttendanceController with CheckpointUp
 	) = {
 		val attendanceNote = monitoringPointService.getAttendanceNote(student, monitoringPoint).getOrElse(throw new ItemNotFoundException())
 		val checkpoint = monitoringPointService.getCheckpoint(student, monitoringPoint).getOrElse(null)
-		Mav("home/old/view_note",
+		Mav("note/old/view_note",
 			"attendanceNote" -> attendanceNote,
 			"checkpoint" -> checkpoint,
 			"checkpointDescription" -> Option(checkpoint).map{ checkpoint => describeCheckpoint(checkpoint)}.getOrElse(""),
