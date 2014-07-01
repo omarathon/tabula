@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.attendance.commands.agent.old
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.attendance.commands.{GroupMonitoringPointsByTerm, PopulateGroupedPoints}
+import uk.ac.warwick.tabula.attendance.commands.old.{GroupMonitoringPointsByTerm, PopulateGroupedPoints}
 import uk.ac.warwick.tabula.attendance.commands.view.old.GroupedPointValidation
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}

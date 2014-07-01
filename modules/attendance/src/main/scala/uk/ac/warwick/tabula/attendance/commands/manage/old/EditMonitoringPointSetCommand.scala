@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.attendance.commands.manage.old
 
+import uk.ac.warwick.tabula.attendance.commands.old.GroupMonitoringPointsByTerm
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.attendance.commands.GroupMonitoringPointsByTerm
 
 object EditMonitoringPointSetCommand {
 	def apply(set: MonitoringPointSet) =

@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands.report
 
+import uk.ac.warwick.tabula.attendance.commands.old.GroupMonitoringPointsByTerm
 import uk.ac.warwick.tabula.commands.{SelfValidating, FiltersStudents, ReadOnly, Unaudited, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
@@ -9,7 +10,6 @@ import org.hibernate.criterion.Order._
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.attendance.commands.GroupMonitoringPointsByTerm
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.{Errors, BindingResult}
 import uk.ac.warwick.tabula.attendance.commands.report.ReportStudentsChoosePeriodCommand.StudentReportStatus

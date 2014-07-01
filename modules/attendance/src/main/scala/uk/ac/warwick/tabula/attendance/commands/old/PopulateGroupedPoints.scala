@@ -1,8 +1,9 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.old
 
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.services.{UserLookupComponent, TermServiceComponent, MonitoringPointServiceComponent}
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
+import uk.ac.warwick.tabula.services.{MonitoringPointServiceComponent, TermServiceComponent, UserLookupComponent}
+
 import scala.collection.JavaConverters._
 
 trait PopulateGroupedPoints extends CheckpointUpdatedDescription {

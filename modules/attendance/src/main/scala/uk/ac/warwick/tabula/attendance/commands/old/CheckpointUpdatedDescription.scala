@@ -1,8 +1,8 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.old
 
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringCheckpoint
+import uk.ac.warwick.tabula.helpers.{DateBuilder, FoundUser}
 import uk.ac.warwick.tabula.services.UserLookupComponent
-import uk.ac.warwick.tabula.helpers.{FoundUser, DateBuilder}
 
 trait CheckpointUpdatedDescription extends UserLookupComponent {
 

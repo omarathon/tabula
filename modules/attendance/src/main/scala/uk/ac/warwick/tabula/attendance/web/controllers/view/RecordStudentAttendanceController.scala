@@ -71,7 +71,7 @@ class RecordStudentAttendanceController extends AttendanceController
 	}
 
 	private def render(department: Department, academicYear: AcademicYear, student: StudentMember) = {
-		Mav("view/studentrecord",
+		Mav("record",
 			"returnTo" -> getReturnTo(Routes.View.student(department, academicYear, student))
 		).crumbs(
 			Breadcrumbs.View.Home,

@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
+import uk.ac.warwick.tabula.attendance.commands.old.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes}
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
-import uk.ac.warwick.tabula.commands.{ReadOnly, Unaudited, ComposableCommand, CommandInternal}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
+import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
+import uk.ac.warwick.tabula.services.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.attendance.commands.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes}
-import uk.ac.warwick.tabula.permissions.{Permissions, CheckablePermission}
-import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 object ViewSchemesCommand {
 	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =

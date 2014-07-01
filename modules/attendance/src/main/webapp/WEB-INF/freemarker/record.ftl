@@ -1,7 +1,7 @@
 <#escape x as x?html>
-	<#import "../attendance_variables.ftl" as attendance_variables />
-	<#import "../attendance_macros.ftl" as attendance_macros />
-	<#import "*/modal_macros.ftl" as modal />
+<#import "attendance_variables.ftl" as attendance_variables />
+<#import "attendance_macros.ftl" as attendance_macros />
+<#import "*/modal_macros.ftl" as modal />
 
 <script>
 	(function ($) {
@@ -45,7 +45,8 @@
 						id="checkpointMap-${point.id}"
 						name="checkpointMap[${point.id}]"
 						department=department
-						student=student point=point
+						student=student
+						point=point
 					/>
 				</#if>
 				<#if mapGet(attendanceNotes, point)??>

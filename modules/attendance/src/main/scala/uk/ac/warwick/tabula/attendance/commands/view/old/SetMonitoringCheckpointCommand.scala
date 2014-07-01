@@ -1,20 +1,21 @@
 package uk.ac.warwick.tabula.attendance.commands.view.old
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import org.hibernate.criterion.Order
+import org.hibernate.criterion.Order._
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.CurrentUser
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.attendance.commands.old.{AutowiringSecurityServicePermissionsAwareRoutes, GroupMonitoringPointsByTerm, PermissionsAwareRoutes, PopulateGroupedPoints}
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.helpers.LazyMaps
-import org.hibernate.criterion.Order._
-import org.hibernate.criterion.Order
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.attendance.commands.{GroupMonitoringPointsByTerm, PermissionsAwareRoutes, AutowiringSecurityServicePermissionsAwareRoutes, PopulateGroupedPoints}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+
+import scala.collection.JavaConverters._
 
 object SetMonitoringCheckpointCommand {
 	def apply(department: Department, templateMonitoringPoint: MonitoringPoint, user: CurrentUser, routes: JList[Route]) =
