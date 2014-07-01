@@ -16,6 +16,8 @@ import uk.ac.warwick.tabula.services.AutowiringMonitoringPointMeetingRelationshi
 @RequestMapping(value = Array("/{relationshipType}/meeting/{studentCourseDetails}/schedule/{meetingRecord}/confirm"))
 class ConvertScheduledMeetingRecordController extends ProfilesController with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent {
 
+	type PopulatableCommand = Appliable[MeetingRecord] with PopulateOnForm
+
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("viewMeetingRecordCommand")
@@ -27,9 +29,9 @@ class ConvertScheduledMeetingRecordController extends ProfilesController with Au
 	}
 
 	@ModelAttribute("convertCommand")
-	def getConvertCommand(@PathVariable meetingRecord: ScheduledMeetingRecord) =  {
-		ConvertScheduledMeetingRecordCommand(currentMember, meetingRecord)
-	}
+	def getConvertCommand(@PathVariable meetingRecord: ScheduledMeetingRecord) =  Option(meetingRecord).map(mr => {
+		ConvertScheduledMeetingRecordCommand(currentMember, mr)
+	})
 
 	@ModelAttribute("command")
 	def getCreateCommand(
@@ -41,22 +43,28 @@ class ConvertScheduledMeetingRecordController extends ProfilesController with Au
 
 	@RequestMapping(method=Array(GET, HEAD), params=Array("iframe"))
 	def getIframe(
-		@ModelAttribute("convertCommand") cmd: Appliable[MeetingRecord] with PopulateOnForm,
+		@ModelAttribute("convertCommand") cmd: Option[PopulatableCommand],
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable meetingRecord: ScheduledMeetingRecord
-	) = {
-		cmd.populate()
-		form(cmd, studentCourseDetails, meetingRecord, iframe = true)
+	) = cmd match {
+			case Some(cmd) => {
+				cmd.populate()
+				form(cmd, studentCourseDetails, meetingRecord, iframe = true)
+			}
+			case None => Mav("related_students/meeting/was_deleted")
 	}
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def get(
-		@ModelAttribute("convertCommand") cmd: Appliable[MeetingRecord] with PopulateOnForm,
+		@ModelAttribute("convertCommand") cmd: Option[PopulatableCommand],
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable meetingRecord: ScheduledMeetingRecord
-	) = {
-		cmd.populate()
-		form(cmd, studentCourseDetails, meetingRecord)
+	) = cmd match {
+		case Some(cmd: Appliable[MeetingRecord] with PopulateOnForm) => {
+			cmd.populate()
+			form(cmd, studentCourseDetails, meetingRecord)
+		}
+		case None => Mav("related_students/meeting/was_deleted")
 	}
 
 	private def form(
