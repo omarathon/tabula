@@ -368,6 +368,11 @@
 	</#if>
 </#function>
 
+<#macro checkpointDescription department checkpoint="" point="" student="" note="">
+	<#local formatResult = formatResult(department, checkpoint, point, student, note) />
+	<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
+</#macro>
+
 <#macro checkpointLabel department checkpoint="" point="" student="" note="">
 	<#local formatResult = formatResult(department, checkpoint, point, student, note) />
 	<#local popoverContent>
