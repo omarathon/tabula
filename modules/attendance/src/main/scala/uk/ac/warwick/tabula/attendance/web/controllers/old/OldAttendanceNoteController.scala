@@ -1,21 +1,23 @@
 package uk.ac.warwick.tabula.attendance.web.controllers.old
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointAttendanceNote, MonitoringPoint}
-import uk.ac.warwick.tabula.commands.{SelfValidating, ApplyWithCallback, PopulateOnForm, Appliable}
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.attendance.commands.{CheckpointUpdatedDescription, AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
-import uk.ac.warwick.tabula.attendance.web.Routes
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
-import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.services.fileserver.{FileServer, RenderableFile}
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.{UserLookupService, MonitoringPointService}
-import uk.ac.warwick.tabula.helpers.DateBuilder
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import javax.validation.Valid
+
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Controller
+import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
+import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.attendance.commands.old.CheckpointUpdatedDescription
+import uk.ac.warwick.tabula.attendance.commands.{AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
+import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
+import uk.ac.warwick.tabula.commands.{Appliable, ApplyWithCallback, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointAttendanceNote}
+import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
+import uk.ac.warwick.tabula.helpers.DateBuilder
+import uk.ac.warwick.tabula.services.fileserver.{FileServer, RenderableFile}
+import uk.ac.warwick.tabula.services.{MonitoringPointService, UserLookupService}
 
 @Controller
 @RequestMapping(Array("/note/2013/{student}/{monitoringPoint}"))
