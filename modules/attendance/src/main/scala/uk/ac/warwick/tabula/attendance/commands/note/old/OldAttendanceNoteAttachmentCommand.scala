@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.note.old
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.attendance.commands.note.old.AttendanceNoteCommandState
 
 object AttendanceNoteAttachmentCommand {
 	def apply(student: StudentMember, monitoringPoint: MonitoringPoint, user: CurrentUser) =
