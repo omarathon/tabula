@@ -45,6 +45,7 @@ trait AttendanceMonitoringDao {
 	def saveOrUpdate(total: AttendanceMonitoringCheckpointTotal): Unit
 	def saveOrUpdate(template: AttendanceMonitoringTemplate): Unit
 	def saveOrUpdate(templatePoint: AttendanceMonitoringTemplatePoint): Unit
+	def saveOrUpdate(note: AttendanceMonitoringNote): Unit
 	def delete(scheme: AttendanceMonitoringScheme)
 	def delete(point: AttendanceMonitoringPoint)
 	def delete(template: AttendanceMonitoringTemplate)
@@ -111,6 +112,9 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 
 	def saveOrUpdate(templatePoint: AttendanceMonitoringTemplatePoint): Unit =
 		session.saveOrUpdate(templatePoint)
+
+	def saveOrUpdate(note: AttendanceMonitoringNote): Unit =
+		session.saveOrUpdate(note)
 
 	def delete(scheme: AttendanceMonitoringScheme) =
 		session.delete(scheme)

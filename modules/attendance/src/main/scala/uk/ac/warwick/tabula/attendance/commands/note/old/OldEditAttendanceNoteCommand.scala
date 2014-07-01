@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.note.old
 
 import uk.ac.warwick.tabula.attendance.commands.old.CheckpointUpdatedDescription
 import uk.ac.warwick.tabula.data.model.{AbsenceType, FileAttachment, StudentMember}
@@ -12,6 +12,7 @@ import org.joda.time.DateTime
 import org.springframework.validation.{Errors, BindingResult}
 import uk.ac.warwick.tabula.system.BindListener
 import java.lang.IllegalArgumentException
+import uk.ac.warwick.tabula.attendance.commands.CheckpointUpdatedDescription
 
 object EditAttendanceNoteCommand {
 	def apply(student: StudentMember, monitoringPoint: MonitoringPoint, user: CurrentUser, customStateStringOption: Option[String]) =
@@ -83,6 +84,7 @@ abstract class EditAttendanceNoteCommand(
 		attendanceNote
 	}
 }
+
 
 trait AttendanceNoteValidation extends SelfValidating {
 	self: AttendanceNoteCommandState =>

@@ -6,12 +6,14 @@ import javax.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
+
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.attendance.commands.old.CheckpointUpdatedDescription
-import uk.ac.warwick.tabula.attendance.commands.{AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
+import uk.ac.warwick.tabula.attendance.commands.AttendanceNoteAttachmentCommand
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
+import uk.ac.warwick.tabula.attendance.commands.note.old.EditAttendanceNoteCommand
 import uk.ac.warwick.tabula.commands.{Appliable, ApplyWithCallback, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointAttendanceNote}
 import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
@@ -24,6 +26,7 @@ import uk.ac.warwick.tabula.services.{MonitoringPointService, UserLookupService}
 class OldAttendanceNoteController extends AttendanceController with CheckpointUpdatedDescription {
 
 	@Autowired var monitoringPointService: MonitoringPointService = _
+
 	@Autowired var userLookup: UserLookupService = _
 
 	@RequestMapping
@@ -102,7 +105,7 @@ class OldEditAttendanceNoteController extends AttendanceController {
 		student: StudentMember,
 		isIframe: Boolean = false
 	) = {
-		val mav = Mav("home/edit_note",
+		val mav = Mav("note/old/edit_note",
 			"allAbsenceTypes" -> AbsenceType.values,
 			"returnTo" -> getReturnTo(Routes.old.department.viewStudent(currentMember.homeDepartment, student)),
 			"isModal" -> ajax,
