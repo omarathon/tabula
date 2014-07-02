@@ -52,8 +52,6 @@ abstract class EditAttendanceNoteCommand(
 			})
 
 			checkpoint = attendanceMonitoringService.getCheckpoints(Seq(point), student).head._2
-//			checkpoint = attendanceMonitoringService.getCheckpoint(student, point).getOrElse(null)
-//			checkpointDescription = Option(checkpoint).map{ checkpoint => describeCheckpoint(checkpoint)}.getOrElse("")
 			customStateStringOption.map(stateString => {
 				try {
 					customState = AttendanceState.fromCode(stateString)

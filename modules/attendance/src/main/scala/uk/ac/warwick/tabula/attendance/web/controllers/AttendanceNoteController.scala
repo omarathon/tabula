@@ -48,36 +48,36 @@ class EditAttendanceNoteController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(
-							 @PathVariable student: StudentMember,
-							 @PathVariable point: AttendanceMonitoringPoint,
-							 @PathVariable academicYear: AcademicYear,
-							 @RequestParam(value="state", required=false) state: String
-							 ) =
+		@PathVariable student: StudentMember,
+		@PathVariable point: AttendanceMonitoringPoint,
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam(value="state", required=false) state: String
+	) =
 		EditAttendanceNoteCommand(student, point, user, Option(state))
 
 	@RequestMapping(method=Array(GET, HEAD), params=Array("isIframe"))
 	def getIframe(
-								 @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
-								 @PathVariable student: StudentMember
-								 ) = {
+		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
+		@PathVariable student: StudentMember
+	) = {
 		cmd.populate()
 		form(cmd, student, isIframe = true)
 	}
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def get(
-					 @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
-					 @PathVariable student: StudentMember
-					 ) = {
+		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
+		@PathVariable student: StudentMember
+	) = {
 		cmd.populate()
 		form(cmd, student)
 	}
 
 	private def form(
-										cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
-										student: StudentMember,
-										isIframe: Boolean = false
-										) = {
+		cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
+		student: StudentMember,
+		isIframe: Boolean = false
+	) = {
 		val mav = Mav("note/edit_note",
 			"allAbsenceTypes" -> AbsenceType.values,
 			"returnTo" -> getReturnTo(Routes.old.department.viewStudent(currentMember.homeDepartment, student)),
@@ -94,10 +94,10 @@ class EditAttendanceNoteController extends AttendanceController {
 
 	@RequestMapping(method=Array(POST), params=Array("isIframe"))
 	def submitIframe(
-										@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
-										errors: Errors,
-										@PathVariable student: StudentMember
-										) = {
+		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
+		errors: Errors,
+		@PathVariable student: StudentMember
+	) = {
 		if (errors.hasErrors) {
 			form(cmd, student, isIframe = true)
 		} else {
@@ -108,10 +108,10 @@ class EditAttendanceNoteController extends AttendanceController {
 
 	@RequestMapping(method=Array(POST))
 	def submit(
-							@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
-							errors: Errors,
-							@PathVariable student: StudentMember
-							) = {
+		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
+		errors: Errors,
+		@PathVariable student: StudentMember
+	) = {
 		if (errors.hasErrors) {
 			form(cmd, student)
 		} else {

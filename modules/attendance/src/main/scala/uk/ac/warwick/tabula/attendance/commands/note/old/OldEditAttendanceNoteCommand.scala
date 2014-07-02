@@ -84,7 +84,6 @@ abstract class EditAttendanceNoteCommand(
 	}
 }
 
-
 trait AttendanceNoteValidation extends SelfValidating {
 	self: AttendanceNoteCommandState =>
 
