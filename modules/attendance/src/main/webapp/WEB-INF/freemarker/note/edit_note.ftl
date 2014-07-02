@@ -102,8 +102,8 @@
 					<i class="icon-remove-sign remove-attachment"></i>
 
 					<small class="subtle help-block">
-						This is the file attachmented to this attendance note.
-						Click the remove link next to a document to delete it.
+						This is the file attached to this attendance note.
+						Click the remove link to delete it.
 					</small>
 
 				</@form.labelled_row>
