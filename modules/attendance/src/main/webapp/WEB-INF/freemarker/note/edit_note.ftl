@@ -55,10 +55,10 @@
 			${command.attendanceNote.point.name}
 			<#if point.scheme.pointStyle.dbValue == "week">
 				(<@fmt.wholeWeekDateFormat
-			point.startWeek
-			point.endWeek
-			point.scheme.academicYear
-			/>)
+					point.startWeek
+					point.endWeek
+					point.scheme.academicYear
+				/>)
 			<#else>
 				(<@fmt.interval point.startDate point.endDate />)
 			</#if>
