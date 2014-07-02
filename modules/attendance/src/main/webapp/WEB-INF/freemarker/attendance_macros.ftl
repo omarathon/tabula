@@ -368,6 +368,11 @@
 	</#if>
 </#function>
 
+<#macro checkpointDescription department checkpoint="" point="" student="" note="">
+	<#local formatResult = formatResult(department, checkpoint, point, student, note) />
+	<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
+</#macro>
+
 <#macro checkpointLabel department checkpoint="" point="" student="" note="">
 	<#local formatResult = formatResult(department, checkpoint, point, student, note) />
 	<#local popoverContent>
@@ -469,7 +474,7 @@
 	</#list>
 </#macro>
 
-<#macro scrollablePointsTable command filterResult visiblePeriods monthNames department academicYear returnTo doCommandSorting=true>
+<#macro scrollablePointsTable command department filterResult visiblePeriods monthNames  doCommandSorting=true>
 	<div class="scrollable-points-table">
 		<div class="row">
 			<div class="left">
@@ -552,23 +557,7 @@
 							<#if result.groupedPointCheckpointPairs?keys?size == 0>
 								<td colspan="3">&nbsp;</td>
 							<#else>
-								<td class="unrecorded">
-									<a href="<@routes.viewSingleStudent department academicYear.startYear?c result.student />">
-										<span class="badge badge-<#if (result.checkpointTotal.unrecorded > 2)>important<#elseif (result.checkpointTotal.unrecorded > 0)>warning<#else>success</#if>">
-										${result.checkpointTotal.unrecorded}
-										</span>
-									</a>
-								</td>
-								<td class="missed">
-									<a href="<@routes.viewSingleStudent department academicYear.startYear?c result.student />">
-										<span class="badge badge-<#if (result.checkpointTotal.unauthorised > 2)>important<#elseif (result.checkpointTotal.unauthorised > 0)>warning<#else>success</#if>">
-										${result.checkpointTotal.unauthorised}
-										</span>
-									</a>
-								</td>
-								<td class="record">
-									<#nested result.student />
-								</td>
+								<#nested result />
 							</#if>
 						</tr>
 						</#list>

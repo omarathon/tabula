@@ -14,6 +14,7 @@ class TimetableFetchingServiceTest extends TestBase {
 		events.size should be (10)
 		events(0) should be (TimetableEvent(
 			name="CS132L",
+			title="",
 			description="",
 			startTime=new LocalTime(12, 0),
 			endTime=new LocalTime(13, 0),

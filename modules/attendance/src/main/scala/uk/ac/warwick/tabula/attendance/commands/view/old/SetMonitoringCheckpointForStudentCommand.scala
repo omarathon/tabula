@@ -1,19 +1,20 @@
 package uk.ac.warwick.tabula.attendance.commands.view.old
 
+import org.joda.time.DateTime
+import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.attendance.commands.old.{CheckpointUpdatedDescription, GroupMonitoringPointsByTerm}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, StudentMember}
+import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException, CurrentUser}
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.LazyMaps
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.attendance.commands.{GroupMonitoringPointsByTerm, CheckpointUpdatedDescription}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
+
+import scala.collection.JavaConverters._
 
 object SetMonitoringCheckpointForStudentCommand {
 	def apply(monitoringPoint: MonitoringPoint, student: StudentMember, user: CurrentUser) =

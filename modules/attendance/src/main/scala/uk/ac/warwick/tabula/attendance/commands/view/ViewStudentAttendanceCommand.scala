@@ -29,13 +29,13 @@ class ViewStudentAttendanceCommandInternal(val department: Department, val acade
 
 	override def applyInternal() = {
 		val points = benchmarkTask("listStudentsPoints"){
-			attendanceMonitoringService.listStudentsPoints(student, department, academicYear)
+			attendanceMonitoringService.listStudentsPoints(student, Option(department), academicYear)
 		}
 		val checkpointMap = attendanceMonitoringService.getCheckpoints(points, student)
 		val groupedPoints = groupByTerm(points, groupSimilar = false) ++ groupByMonth(points, groupSimilar = false)
 		groupedPoints.map{case(period, thesePoints) =>
 			period -> thesePoints.map{ groupedPoint =>
-				groupedPoint.templatePoint -> checkpointMap.get(groupedPoint.templatePoint).getOrElse(null)
+				groupedPoint.templatePoint -> checkpointMap.getOrElse(groupedPoint.templatePoint, null)
 			}
 		}
 	}

@@ -13,6 +13,7 @@
 				$.get('/attendance/profile/${profile.universityId}/${year}'
 						+ '?dt=' + new Date().valueOf()
 						+ '&expand=' + (window.location.search.indexOf('updatedMonitoringPoint') >= 0)
+						+ '&returnTo=' + (encodeURIComponent(window.location.href))
 				, function(data) {
 					$('#attendance .monitoring-points').html(data);
 					var pane = $('#attendance-pane');

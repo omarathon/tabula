@@ -28,7 +28,7 @@ class RecordStudentAttendanceController extends AttendanceController
 
 	@InitBinder // do on each request
 	def populatePoints(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember) = {
-			points = attendanceMonitoringService.listStudentsPoints(mandatory(student), mandatory(department), mandatory(academicYear))
+			points = attendanceMonitoringService.listStudentsPoints(mandatory(student), Option(mandatory(department)), mandatory(academicYear))
 	}
 
 	@ModelAttribute("command")
@@ -67,7 +67,11 @@ class RecordStudentAttendanceController extends AttendanceController
 		@PathVariable student: StudentMember
 	) = {
 		cmd.populate()
-		Mav("view/studentrecord",
+		render(department, academicYear, student)
+	}
+
+	private def render(department: Department, academicYear: AcademicYear, student: StudentMember) = {
+		Mav("record",
 			"returnTo" -> getReturnTo(Routes.View.student(department, academicYear, student))
 		).crumbs(
 			Breadcrumbs.View.Home,
@@ -87,7 +91,7 @@ class RecordStudentAttendanceController extends AttendanceController
 		@PathVariable student: StudentMember
 	) = {
 		if (errors.hasErrors) {
-			form(cmd, department, academicYear, student)
+			render(department, academicYear, student)
 		} else {
 			cmd.apply()
 			Redirect(Routes.View.student(department, academicYear, student))

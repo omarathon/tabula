@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.attendance.commands.view
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.attendance.commands.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes}
+import uk.ac.warwick.tabula.attendance.commands.old.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.ScalaRestriction
 import uk.ac.warwick.tabula.data.model._
@@ -54,7 +54,7 @@ class FilterStudentsAttendanceCommandInternal(val department: Department, val ac
 
 		if (offset == 0) page = 1
 
-		buildAttendanceResult(totalResults, students, department, academicYear)
+		buildAttendanceResult(totalResults, students, Option(department), academicYear)
 	}
 
 }

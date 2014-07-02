@@ -1,18 +1,17 @@
 package uk.ac.warwick.tabula.attendance.commands.view
 
-import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{TermService, AttendanceMonitoringService, AttendanceMonitoringServiceComponent, TermServiceComponent}
-import org.springframework.validation.BindException
-import uk.ac.warwick.util.termdates.TermImpl
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, AttendanceMonitoringScheme}
-import uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointIdConverter
+import org.joda.time.DateTime
+import org.joda.time.base.BaseDateTime
 import org.springframework.core.convert.support.GenericConversionService
 import org.springframework.web.bind.WebDataBinder
-import org.joda.time.base.BaseDateTime
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointIdConverter
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceState}
+import uk.ac.warwick.tabula.services.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent, TermService, TermServiceComponent}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.util.termdates.Term.TermType
-import org.joda.time.DateTime
+import uk.ac.warwick.util.termdates.TermImpl
 
 class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 
@@ -58,7 +57,7 @@ class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 
 	@Test
 	def invalidPoint() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, thisDepartment, thisAcademicYear) returns Seq(point1, point2)
+		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, Option(thisDepartment), thisAcademicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
 		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 
@@ -66,13 +65,13 @@ class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 		validator.checkpointMap.put(notInSchemePoint, null)
 		validator.validate(errors)
 
-		errors.hasErrors should be (true)
-		errors.hasFieldErrors(s"checkpointMap[${notInSchemePoint.id}]") should be (true)
+		errors.hasErrors should be {true}
+		errors.hasFieldErrors(s"checkpointMap[${notInSchemePoint.id}]") should be {true}
 	}}
 
 	@Test
 	def alreadyReported() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, thisDepartment, thisAcademicYear) returns Seq(point1, point2)
+		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, Option(thisDepartment), thisAcademicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
 		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 
@@ -80,13 +79,13 @@ class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 		validator.checkpointMap.put(point1, null)
 		validator.validate(errors)
 
-		errors.hasErrors should be (true)
-		errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be (true)
+		errors.hasErrors should be {true}
+		errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {true}
 	}}
 
 	@Test
 	def tooSoon() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, thisDepartment, thisAcademicYear) returns Seq(point1, point2)
+		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, Option(thisDepartment), thisAcademicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
 		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 
@@ -95,13 +94,13 @@ class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 		validator.checkpointMap.put(point1, AttendanceState.Attended)
 		validator.validate(errors)
 
-		errors.hasErrors should be (true)
-		errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be (true)
+		errors.hasErrors should be {true}
+		errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {true}
 	}}
 
 	@Test
 	def beforeStartDateButNull() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, thisDepartment, thisAcademicYear) returns Seq(point1, point2)
+		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, Option(thisDepartment), thisAcademicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq(autumnTerm.getTermTypeAsString)
 		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 
@@ -110,13 +109,13 @@ class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 		validator.checkpointMap.put(point1, null)
 		validator.validate(errors)
 
-		errors.hasErrors should be (false)
-		errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be (false)
+		errors.hasErrors should be {false}
+		errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {false}
 	}}
 
 	@Test
 	def beforeStartDateButAuthorised() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, thisDepartment, thisAcademicYear) returns Seq(point1, point2)
+		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, Option(thisDepartment), thisAcademicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq(autumnTerm.getTermTypeAsString)
 		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 
@@ -125,8 +124,8 @@ class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 		validator.checkpointMap.put(point1, AttendanceState.MissedAuthorised)
 		validator.validate(errors)
 
-		errors.hasErrors should be (false)
-		errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be (false)
+		errors.hasErrors should be {false}
+		errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {false}
 	}}
 
 }

@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands
 
+import uk.ac.warwick.tabula.attendance.commands.agent.old.{AgentPointRecordCommandState, AgentPointRecordDescription, AgentPointRecordPermissions, AgentPointRecordValidation, AgentPointRecordCommand}
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.services._

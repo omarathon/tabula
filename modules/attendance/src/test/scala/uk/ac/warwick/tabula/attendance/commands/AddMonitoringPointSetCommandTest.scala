@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands
 
+import uk.ac.warwick.tabula.attendance.commands.old.PermissionsAwareRoutes
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}

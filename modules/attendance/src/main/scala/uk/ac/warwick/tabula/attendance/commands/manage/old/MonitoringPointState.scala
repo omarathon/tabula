@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands.manage.old
 
+import uk.ac.warwick.tabula.attendance.commands.old.GroupMonitoringPointsByTerm
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, MeetingFormat, StudentRelationshipType, Department}
 import org.springframework.util.AutoPopulatingList
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, MonitoringPoint}
@@ -7,7 +8,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.attendance.commands.GroupMonitoringPointsByTerm
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, SmallGroupServiceComponent}
 
 trait MonitoringPointState extends GroupMonitoringPointsByTerm with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent {

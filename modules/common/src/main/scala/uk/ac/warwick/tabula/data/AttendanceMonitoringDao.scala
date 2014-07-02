@@ -81,7 +81,7 @@ trait AttendanceMonitoringDao {
 	def saveOrUpdateCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
-	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear, withFlush: Boolean = false): Option[AttendanceMonitoringCheckpointTotal]
+	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear, withFlush: Boolean = false): Option[AttendanceMonitoringCheckpointTotal]
 	
 }
 
@@ -343,16 +343,36 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 
 	}
 
-	def getCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear, withFlush: Boolean = false): Option[AttendanceMonitoringCheckpointTotal] = {
+	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear, withFlush: Boolean = false): Option[AttendanceMonitoringCheckpointTotal] = {
 		if (withFlush)
 			// make sure totals are up-to-date
 			session.flush()
 
-		session.newCriteria[AttendanceMonitoringCheckpointTotal]
-			.add(is("student", student))
-			.add(is("department", department))
-			.add(is("academicYear", academicYear))
-			.uniqueResult
+		departmentOption match {
+			case Some(department) => session.newCriteria[AttendanceMonitoringCheckpointTotal]
+				.add(is("student", student))
+				.add(is("department", department))
+				.add(is("academicYear", academicYear))
+				.uniqueResult
+			case None =>
+				val totals = session.newCriteria[AttendanceMonitoringCheckpointTotal]
+					.add(is("student", student))
+					.add(is("academicYear", academicYear))
+					.seq
+				if (totals.isEmpty) {
+					None
+				} else {
+					val result = new AttendanceMonitoringCheckpointTotal
+					result.student = student
+					result.academicYear = academicYear
+					result.unrecorded = totals.map(_.unrecorded).sum
+					result.authorised = totals.map(_.authorised).sum
+					result.unauthorised = totals.map(_.unauthorised).sum
+					result.attended = totals.map(_.attended).sum
+					Option(result)
+				}
+		}
+
 	}
 }
 

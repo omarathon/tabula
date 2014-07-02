@@ -92,7 +92,7 @@ trait WebsignonMethods extends ShouldMatchers  with Eventually{
 
 			def to(url: String) {
 				// Sets session cookies if this user's logged in once before.
-				WebsignonMethods.sessions.retrieve(details.usercode, webDriver)
+				//WebsignonMethods.sessions.retrieve(details.usercode, webDriver)
 
         go to (url)
 

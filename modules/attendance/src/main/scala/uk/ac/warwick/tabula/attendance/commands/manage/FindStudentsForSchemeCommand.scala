@@ -1,19 +1,20 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
-import org.hibernate.criterion.Order._
-import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Order
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.attendance.commands.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes}
+import org.hibernate.criterion.Order._
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.attendance.commands.old.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes}
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
+import uk.ac.warwick.tabula.data.{SchemeMembershipExcludeType, SchemeMembershipIncludeType, SchemeMembershipItem, SchemeMembershipStaticType}
 import uk.ac.warwick.tabula.helpers.LazyLists
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipExcludeType, SchemeMembershipStaticType, SchemeMembershipItem}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AutowiringProfileServiceComponent, AutowiringUserLookupComponent, ProfileServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
+import scala.collection.JavaConverters._
 
 case class FindStudentsForSchemeCommandResult(
 	updatedStaticStudentIds: JList[String],

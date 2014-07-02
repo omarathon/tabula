@@ -1,3 +1,3 @@
-<h1>My Monitoring Points</h1>
+<h1>My Monitoring Points for ${academicYear.toString}</h1>
 
 <#include "_profile.ftl" />

@@ -31,6 +31,7 @@
 		<div class="alert alert-success hide"></div>
 		<#list assignment.feedbackFields as field>
 			<div class="feedback-field">
+				<#assign showHelpText = true>
 				<#include "/WEB-INF/freemarker/submit/formfields/${field.template}.ftl">
 			</div>
 		</#list>
