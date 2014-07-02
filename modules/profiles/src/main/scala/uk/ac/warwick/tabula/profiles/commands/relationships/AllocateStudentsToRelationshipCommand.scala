@@ -99,13 +99,13 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 			.listStudentRelationshipsByDepartment(relationshipType, department) // get all relationships by dept
 			.groupBy(_.agent) // group into map by agent university id
 			.foreach { case (agent, students) =>
-			if (agent.forall(_.isDigit)) {
-				profileService.getMemberByUniversityId(agent) match {
-					case Some(member) =>
-						mapping.put(member, JArrayList(students.flatMap(_.studentMember).toList))
-					case _ => // do nothing
+				if (agent.forall(_.isDigit)) {
+					profileService.getMemberByUniversityId(agent) match {
+						case Some(member) =>
+							mapping.put(member, JArrayList(students.flatMap(_.studentMember).toList))
+						case _ => // do nothing
+					}
 				}
-			}
 		}
 	}
 
@@ -184,8 +184,8 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		val memberAgentsAfter = mapping.keySet.asScala.toSet // .toSet to make it immutable and avoid type issues
 
 
-		val newMemberAgents = memberAgentsAfter.filterNot(memberAgentsBefore.contains(_))
-		val droppedMemberAgents = memberAgentsBefore.filterNot(memberAgentsAfter.contains(_))
+		val newMemberAgents = memberAgentsAfter.filterNot(memberAgentsBefore)
+		val droppedMemberAgents = memberAgentsBefore.filterNot(memberAgentsAfter)
 		val changedMemberAgents = memberAgentsAfter.intersect(memberAgentsBefore).filterNot(agent => memberAgentMappingsBefore.get(agent).equals(memberAgentMappingsAfter.get(agent)))
 
 		val removeCommands = getRemoveCommands(droppedMemberAgents)
@@ -253,24 +253,20 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 				case _ => Set[StudentMember]()
 			}
 
-			newStudentMembersForAgent.map {
-				stu => {
-					stu.mostSignificantCourseDetails.map {
-						scd => {
-							val possibleExistingAgentForStudent = service.findCurrentRelationships(relationshipType, scd).map {
-								_.agentMember
-							}.flatten.headOption
+			newStudentMembersForAgent.flatMap (	stu => {
+				stu.mostSignificantCourseDetails.map ( scd => {
+					val possibleExistingAgentForStudent = service.findCurrentRelationships(relationshipType, scd).flatMap {
+						_.agentMember
+					}.headOption
 
-							val cmd = new EditStudentRelationshipCommand(scd, relationshipType, possibleExistingAgentForStudent, viewer, false)
-							cmd.agent = agentToEdit
-							cmd.maintenanceMode = this.maintenanceMode
-							cmd.relationshipService = service
-							cmd
-						}
-					}
-				}
-			}
-		}).flatten.flatten
+					val cmd = new EditStudentRelationshipCommand(scd, relationshipType, possibleExistingAgentForStudent, viewer, false)
+					cmd.agent = agentToEdit
+					cmd.maintenanceMode = this.maintenanceMode
+					cmd.relationshipService = service
+					cmd
+				})
+			})
+		}).flatten
 	}
 
 	def validateUploadedFile(result: BindingResult) {

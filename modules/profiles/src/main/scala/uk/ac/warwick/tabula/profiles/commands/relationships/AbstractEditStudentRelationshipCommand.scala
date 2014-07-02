@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands.relationships
 
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{SelfValidating, Command,  Notifies}
+import uk.ac.warwick.tabula.commands.{Command,  Notifies}
 import uk.ac.warwick.tabula.data.model.{Member, StudentRelationship}
 import uk.ac.warwick.tabula.services.RelationshipService
 

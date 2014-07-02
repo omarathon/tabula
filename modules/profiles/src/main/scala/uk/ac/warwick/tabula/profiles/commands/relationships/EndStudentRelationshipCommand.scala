@@ -44,21 +44,22 @@ class EndStudentRelationshipCommand(
 		d.property("student SPR code" -> studentCourseDetails.sprCode)
 
 	def emit(relationships: Seq[StudentRelationship]): Seq[uk.ac.warwick.tabula.data.model.Notification[StudentRelationship,Unit]] = {
-		val notifications = (relationships.map (relationship =>
-		{
-			val studentNotification: Option[Notification[StudentRelationship, Unit]] =
-				if (notifyStudent)
-					Some(Notification.init(new StudentRelationshipChangeToStudentNotification, currentUser.apparentUser, Seq(relationship)))
-				else None
+		val notifications = relationships.flatMap {
+			relationship => {
+				val studentNotification: Option[Notification[StudentRelationship, Unit]] =
+					if (notifyStudent)
+						Some(Notification.init(new StudentRelationshipChangeToStudentNotification, currentUser.apparentUser, Seq(relationship)))
+					else None
 
-			val oldAgentNotification: Option[Notification[StudentRelationship, Unit]] =
-				if (notifyOldAgent)
-					Some(Notification.init(new StudentRelationshipChangeToOldAgentNotification, currentUser.apparentUser, Seq(relationship)))
-				else
-					None
+				val oldAgentNotification: Option[Notification[StudentRelationship, Unit]] =
+					if (notifyOldAgent)
+						Some(Notification.init(new StudentRelationshipChangeToOldAgentNotification, currentUser.apparentUser, Seq(relationship)))
+					else
+						None
 
-			(studentNotification ++ oldAgentNotification).toSeq
-		})).flatten
+				(studentNotification ++ oldAgentNotification).toSeq
+			}
+		}
 		notifications
 	}
 
