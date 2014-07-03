@@ -63,7 +63,6 @@ class AttendanceNoteAttachmentController extends AttendanceController {
 
 }
 
-
 @Controller
 @RequestMapping(Array("/note/{academicYear}/{student}/{point}/edit"))
 class EditAttendanceNoteController extends AttendanceController {
