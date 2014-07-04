@@ -28,6 +28,9 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Department.ManageDisplaySettings,
 		Department.DownloadFeedbackReport,
 
+		Department.ArrangeModules,
+		Department.ArrangeRoutes,
+
 		Assignment.ImportFromExternalSystem,
 
 		FeedbackTemplate.Create,
