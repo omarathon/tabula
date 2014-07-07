@@ -25,9 +25,7 @@ case object RouteAssistantRoleDefinition extends BuiltInRoleDefinition {
 
 		Profiles.Read.Tier4VisaRequirement,
 
-		MemberNotes.Create,
-		MemberNotes.Update,
-		MemberNotes.Delete
+		MemberNotes.Create
 	)
 
 	def canDelegateThisRolesPermissions: JavaImports.JBoolean = true

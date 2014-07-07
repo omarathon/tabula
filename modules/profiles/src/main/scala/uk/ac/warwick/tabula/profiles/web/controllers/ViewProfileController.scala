@@ -123,9 +123,9 @@ abstract class ViewProfileController extends ProfilesController {
 				smallGroupService.findSmallGroupsByStudent(profiledStudentMember.asSsoUser).size
 			else 0
 
-		//Get all membernotes for student
+		// Get all membernotes for student
 		val memberNotes =
-			if (securityService.can(user, Permissions.MemberNotes.Update, profiledStudentMember)) memberNoteService.list(profiledStudentMember)
+			if (securityService.can(user, Permissions.MemberNotes.Delete, profiledStudentMember)) memberNoteService.list(profiledStudentMember)
 			else if (securityService.can(user, Permissions.MemberNotes.Read, profiledStudentMember)) memberNoteService.listNonDeleted(profiledStudentMember)
 			else null
 

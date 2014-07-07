@@ -47,6 +47,8 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 
 		MonitoringPoints.Report,
 
+		MemberNotes.Delete,
+
 		Profiles.MeetingRecord.ReadDetails(PermissionsSelector.Any[StudentRelationshipType]),
 
 		Profiles.ScheduledMeetingRecord.Create(PermissionsSelector.Any[StudentRelationshipType]),
