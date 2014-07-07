@@ -419,6 +419,26 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		createdCheckpoints.head.updatedBy should be (agentMember.userId)
 	}}
 
+	@Test
+	def willBeCreatedValidPointValidMeetingsAlreadyReported() { new ValidPointValidMeetings {
+		service.monitoringPointService.studentAlreadyReportedThisTerm(student, meetingThisYearPoint) returns (true)
+
+		// the current meeting is pending, but if it were approved it should create the checkpoint
+		meeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Pending))
+		service.willCheckpointBeCreated(meeting) should be (right = false)
+	}}
+
+	@Test
+	def updateValidPointValidMeetingsAlreadyReported() { new ValidPointValidMeetings {
+		service.monitoringPointService.studentAlreadyReportedThisTerm(student, meetingThisYearPoint) returns (true)
+
+		meeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Approved))
+		service.updateCheckpointsForMeeting(meeting)
+		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, student)
+		there was one (service.termService).getAcademicWeekForAcademicYear(meetingDate, year2PointSet.academicYear)
+		there was no (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
+	}}
+
 	trait ValidPointMeetingNotApprovedButCreatedByAgent extends ValidYear2PointFixture {
 		// needs 2 meetings
 		meetingThisYearPoint.meetingQuantity = 2
