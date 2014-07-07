@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import uk.ac.warwick.tabula.commands.{ViewViewableCommand, Command}
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.util.termdates.{TermNotFoundException, Term}
 import org.joda.time.DateTime
 
 
@@ -71,12 +71,18 @@ abstract class ViewProfileController extends ProfilesController {
 	}
 	
 	def filterMeetingsByYear(meetings: Seq[AbstractMeetingRecord], filterYear: AcademicYear) : Seq[AbstractMeetingRecord] = {
-		meetings.filterNot(
-			meeting => Seq(Term.WEEK_NUMBER_BEFORE_START, Term.WEEK_NUMBER_AFTER_END).contains(termService.getAcademicWeekForAcademicYear(meeting.meetingDate, filterYear))
-		)
+		meetings.filterNot { meeting =>
+			try {
+				Seq(Term.WEEK_NUMBER_BEFORE_START, Term.WEEK_NUMBER_AFTER_END).contains(
+					termService.getAcademicWeekForAcademicYear(meeting.meetingDate, filterYear)
+				)
+			} catch {
+				case e: TermNotFoundException =>
+					// TAB-2465 Don't include this meeting - this happens if you are looking at a year before we recorded term dates
+					true
+			}
+		}
 	}
-	
-	
 	
 	def viewProfileForCourse(
 		studentCourseDetails: Option[StudentCourseDetails],

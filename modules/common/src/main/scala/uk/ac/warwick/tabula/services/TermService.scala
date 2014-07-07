@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
-import uk.ac.warwick.util.termdates.{Term, TermFactoryImpl}
+import uk.ac.warwick.util.termdates.{TermNotFoundException, Term, TermFactoryImpl}
 import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.util.termdates.Term.TermType
@@ -19,7 +19,10 @@ trait TermService {
 	def getAcademicWeeksBetween(start:DateTime, end:DateTime): Seq[(AcademicYear,Int,Interval)]
 	def getTermFromDateIncludingVacations(date: BaseDateTime): Term
 	def getTermsBetween(start: BaseDateTime, end: BaseDateTime): Seq[Term]
+
+	@throws[TermNotFoundException]
 	def getAcademicWeekForAcademicYear(date: BaseDateTime, academicYear: AcademicYear): Int
+
 	def getTermFromAcademicWeek(weekNumber: Int, academicYear: AcademicYear, includeVacations: Boolean = false): Term
 	def getTermFromAcademicWeekIncludingVacations(weekNumber: Int, academicYear: AcademicYear): Term
 }

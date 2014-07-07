@@ -5,7 +5,7 @@ import org.mockito.Matchers
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{TermService, SmallGroupService, ProfileService, SecurityService}
-import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.util.termdates.{TermNotFoundException, Term}
 
 class ViewProfileControllerTest extends TestBase with Mockito{
 
@@ -60,6 +60,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 			controller.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2012))) returns 5
 			controller.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2011))) returns Term.WEEK_NUMBER_BEFORE_START
 			controller.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns Term.WEEK_NUMBER_AFTER_END
+			controller.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2001))) throws new TermNotFoundException("")
 			
 			val meeting1 = new MeetingRecord
 			meeting1.meetingDate = dateTime(2012, 1, 7)
@@ -76,6 +77,10 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 			filteredMeetings.length should be (0)
 
 			filteredMeetings = controller.filterMeetingsByYear(Seq(), new AcademicYear(2013))
+			filteredMeetings.length should be (0)
+
+			// TAB-2465 go back in time to before term dates started and make sure it doesn't blow up
+			filteredMeetings = controller.filterMeetingsByYear(allMeetings, new AcademicYear(2001))
 			filteredMeetings.length should be (0)
 		}
 	}
