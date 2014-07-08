@@ -55,7 +55,7 @@
 
 			</summary>
 
-			<p>Use the filters to select which students this scheme should apply to:</p>
+			<p>Use the filters to add students to this scheme:</p>
 
 			<#list findCommand.updatedStaticStudentIds as id>
 				<input type="hidden" name="updatedStaticStudentIds" value="${id}" />

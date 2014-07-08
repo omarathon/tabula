@@ -305,7 +305,7 @@
 								<span
 									class="use-tooltip"
 									data-container="body"
-									title="See which other schemes apply to this student"
+									title="See which schemes apply to this student"
 								>
 									<span
 										class="use-popover"
