@@ -24,7 +24,8 @@ object WebsignonMethods {
 		}
 	}
 
-	val sessions = new SessionCache
+	// Doesn't work yet.
+	//val sessions = new SessionCache
 }
 
 /**
@@ -98,7 +99,7 @@ trait WebsignonMethods extends ShouldMatchers  with Eventually{
 
 			def to(url: String) {
 				// Sets session cookies if this user's logged in once before.
-				WebsignonMethods.sessions.retrieve(details.usercode, webDriver)
+				//WebsignonMethods.sessions.retrieve(details.usercode, webDriver)
 
         go to (url)
 
@@ -110,9 +111,8 @@ trait WebsignonMethods extends ShouldMatchers  with Eventually{
         } else {
 
           if (pageSource contains ("Signed in as ")) {
-						// signed in as someone else; clear cookies (but don't sign that user out, we might use them later)
-						WebsignonMethods.sessions.clearCookies(webDriver)
-						reloadPage()
+						// signed in as someone else; sign out first
+						click on linkText("Sign out")
 					}else if (pageTitle startsWith("Sign in - Access refused")){
 						//signed in as someone else who doesn't have permissions to view the page
 						//  - follow the "sign in as another user" link
@@ -144,8 +144,7 @@ trait WebsignonMethods extends ShouldMatchers  with Eventually{
 						go to url
 					}
           if (pageSource contains ("Signed in as " + details.usercode)) {
-            // NOW we're done. Store cookies for quick retrieval in other tests
-						WebsignonMethods.sessions.store(details.usercode, webDriver)
+            // NOW we're done
           } else if (pageSource contains ("Access refused")) {
             Assertions.fail("Signed in as " + details.description + " but access refused to " + url)
           } else {
