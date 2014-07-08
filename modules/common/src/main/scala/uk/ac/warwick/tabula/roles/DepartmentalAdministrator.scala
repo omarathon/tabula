@@ -28,6 +28,9 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Department.ManageDisplaySettings,
 		Department.DownloadFeedbackReport,
 
+		Department.ArrangeModules,
+		Department.ArrangeRoutes,
+
 		Assignment.ImportFromExternalSystem,
 
 		FeedbackTemplate.Create,
@@ -43,6 +46,8 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Department.ManageProfiles,
 
 		MonitoringPoints.Report,
+
+		MemberNotes.Delete,
 
 		Profiles.MeetingRecord.ReadDetails(PermissionsSelector.Any[StudentRelationshipType]),
 

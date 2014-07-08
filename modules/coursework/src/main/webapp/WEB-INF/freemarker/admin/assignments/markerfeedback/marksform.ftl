@@ -75,7 +75,7 @@
 				<br /><button class="add-additional-marks btn"><i class="icon-plus"></i> Add</button>
 				<div class="submit-buttons">
 					<input type="submit" class="btn btn-primary" value="Save">
-					or <a href="<@routes.depthome module=assignment.module />" class="btn">Cancel</a>
+					or <a href="<@routes.listmarkersubmissions assignment />" class="btn">Cancel</a>
 				</div>
 			</@f.form>
 		</div>

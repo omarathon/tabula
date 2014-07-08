@@ -28,26 +28,6 @@ class ReflectionHelperTest extends TestBase with ReflectionsSetup {
 	@Test def groupedPermissions = {
 		ReflectionHelper.groupedPermissions("Module").contains(("Module.Create", "Module.Create")) should be (true) 
 	}
-	
-	@Test def sillyJbossVfsUrlType {
-		URL.setURLStreamHandlerFactory(new CatchAllUrlStreamHandlerFactory)
-		val urlType = new SillyJbossVfsUrlType
-		
-		val warFile = getClass().getResource("/silly-jboss-vfs.war").getFile()
-		val pathInWarFile = "WEB-INF/lib/embedded-jar.jar"
-		
-		val zipUrl = new URL(null, "vfszip:" + warFile + "/" + pathInWarFile + "/")
-		
-		urlType.matches(zipUrl) should be (true)
-		urlType.adaptUrl(zipUrl).toExternalForm should be ("zip:" + warFile + "!" + pathInWarFile + "!")
-		
-		val dir = urlType.createDir(zipUrl)
-		val itr = dir.getFiles().iterator()
-		val (manifest, txtFile) = (itr.next(), itr.next())
-		itr.hasNext() should be (false)
-		
-		FileCopyUtils.copyToString(new InputStreamReader(txtFile.openInputStream())).trim should be ("yes!")
-	}
 
 }
 

@@ -45,6 +45,13 @@ class SessionCache {
 //		case _ =>
 	}
 
+	// Clears ALL cookies, not just the current page's.
+	def clearCookies(webDriver: WebDriver) {
+		getWebClient(webDriver).foreach { wc =>
+			wc.getCookieManager().clearCookies()
+		}
+	}
+
 	/** If we have stored cookies and are using HtmlUnit, we can
 		* dig in to the cookie manager and reinsert those cookies
 		* without having to sign in again.
@@ -52,9 +59,9 @@ class SessionCache {
 	def retrieve(usercode: String, webDriver: WebDriver) {
 		getWebClient(webDriver).foreach { wc =>
 			map.get(usercode).foreach { cookies =>
-				webDriver.manage().deleteAllCookies()
+				val cm = wc.getCookieManager()
+				cm.clearCookies()
 				cookies.foreach { cookie =>
-					val cm = wc.getCookieManager()
 					cm.addCookie(new htmlunit.util.Cookie(
 						cookie.getDomain,
 						cookie.getName,
@@ -63,7 +70,6 @@ class SessionCache {
 						cookie.getExpiry,
 						false
 					))
-					//webDriver.manage().addCookie(cookie)
 				}
 			}
 		}
@@ -92,7 +98,7 @@ trait WebsignonMethods extends ShouldMatchers  with Eventually{
 
 			def to(url: String) {
 				// Sets session cookies if this user's logged in once before.
-				//WebsignonMethods.sessions.retrieve(details.usercode, webDriver)
+				WebsignonMethods.sessions.retrieve(details.usercode, webDriver)
 
         go to (url)
 
@@ -105,7 +111,7 @@ trait WebsignonMethods extends ShouldMatchers  with Eventually{
 
           if (pageSource contains ("Signed in as ")) {
 						// signed in as someone else; clear cookies (but don't sign that user out, we might use them later)
-						webDriver.manage().deleteAllCookies()
+						WebsignonMethods.sessions.clearCookies(webDriver)
 						reloadPage()
 					}else if (pageTitle startsWith("Sign in - Access refused")){
 						//signed in as someone else who doesn't have permissions to view the page

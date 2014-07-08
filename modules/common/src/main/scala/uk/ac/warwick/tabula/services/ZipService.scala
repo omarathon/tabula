@@ -71,7 +71,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 		}
 	
 	private def getMarkerFeedbackZipItems(markerFeedback: MarkerFeedback): Seq[ZipItem] =
-		markerFeedback.attachments.asScala.map { (attachment) =>
+		markerFeedback.attachments.asScala.filter { _.hasData }.map { attachment =>
 			new ZipFileItem(markerFeedback.feedback.universityId + " - " + attachment.name, attachment.dataStream)
 		}
 

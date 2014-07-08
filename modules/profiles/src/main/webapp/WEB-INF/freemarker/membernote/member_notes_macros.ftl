@@ -1,7 +1,5 @@
 <#escape x as x?html>
 	<#macro member_note_list memberNotes>
-		<#local canDeletePurgeMemberNote = can.do("MemberNotes.Delete", profile) />
-		<#local canEditMemberNote = can.do("MemberNotes.Update", profile) />
 		<#local canCreateMemberNote = can.do("MemberNotes.Create", profile) />
 
 		<div class="list-controls">
@@ -23,6 +21,8 @@
 
 
 		<#list memberNotes as note>
+			<#local canDeletePurgeMemberNote = can.do("MemberNotes.Delete", note) />
+			<#local canEditMemberNote = can.do("MemberNotes.Update", note) />
 
 			<#local deleteTools =" disabled" />
 			<#local deleted ="" />

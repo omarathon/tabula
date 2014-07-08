@@ -49,7 +49,6 @@ case class StudentRelationshipAgentRoleDefinition(relationshipType: PermissionsS
 		
 		MemberNotes.Create,
 		MemberNotes.Read,
-		MemberNotes.Update,
 
 		MonitoringPoints.Record,
 		MonitoringPoints.View,

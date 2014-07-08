@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles._
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.{Notification, ScheduledMeetingRecord, Submission, Feedback, Member, UserSettings}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.roles.FeedbackRecipient
@@ -66,6 +66,12 @@ class OwnDataRoleProvider extends RoleProvider {
 			case meeting: ScheduledMeetingRecord =>
 				if (user.apparentId.hasText && meeting.creator.userId == user.apparentId)
 					Stream(customRoleFor(department)(ScheduledMeetingRecordCreatorRoleDefinition, meeting).getOrElse(ScheduledMeetingRecordCreator(meeting)))
+				else Stream.empty
+
+			// TAB-2122
+			case note: MemberNote =>
+				if (user.apparentId.hasText && note.creator.getUserId == user.apparentId)
+					Stream(customRoleFor(department)(MemberNoteCreatorRoleDefinition, note).getOrElse(MemberNoteCreator(note)))
 				else Stream.empty
 
 			case _ => Stream.empty

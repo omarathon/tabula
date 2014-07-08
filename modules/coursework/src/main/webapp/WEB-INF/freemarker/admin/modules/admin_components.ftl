@@ -87,7 +87,7 @@
 </#macro>
 
 <#macro admin_assignments module>
-	<#list module.assignments?sort_by("closeDate") as assignment>
+	<#list module.assignments as assignment>
 		<#if !assignment.deleted>
 		<#assign has_feedback = assignment.hasFullFeedback />
 

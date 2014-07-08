@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.note.old
 
 import uk.ac.warwick.tabula.attendance.commands.old.CheckpointUpdatedDescription
 import uk.ac.warwick.tabula.data.model.{AbsenceType, FileAttachment, StudentMember}
