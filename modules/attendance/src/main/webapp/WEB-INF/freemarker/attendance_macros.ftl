@@ -247,6 +247,8 @@
 	checkboxName=""
 	onlyShowCheckboxForStatic=false
 	checkAll=false
+	showRemoveButton=false
+	showResetButton=false
 >
 
 	<#if (membershipItems?size > 0)>
@@ -254,29 +256,41 @@
 		<table class="manage-student-table table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-darkRed tablesorter sb-no-wrapper-table-popout">
 			<thead>
 			<tr>
-				<#if checkboxName?has_content>
-					<th style="width: 20px;" <#if checkAll>class="for-check-all"</#if>></th>
-				</#if>
 				<th style="width: 50px;" <#if doSorting> class="${sortClass("source", command)} sortable" data-field="source"</#if>>Source</th>
 				<th <#if doSorting> class="${sortClass("firstName", command)} sortable" data-field="firstName"</#if>>First name</th>
 				<th <#if doSorting> class="${sortClass("lastName", command)} sortable" data-field="lastName"</#if>>Last name</th>
 				<th <#if doSorting> class="${sortClass("universityId", command)} sortable" data-field="universityId"</#if>>ID</th>
 				<th <#if doSorting> class="${sortClass("userId", command)} sortable" data-field="userId"</#if>>User</th>
 				<th>Schemes</th>
+				<#if checkboxName?has_content>
+					<th style="width: 65px; padding-right: 5px;" <#if checkAll>class="for-check-all"</#if>>
+						<#if showRemoveButton>
+							<input class="btn btn-warning hideOnClosed btn-small use-tooltip"
+							  <#if findCommandResult.membershipItems?size == 0>disabled</#if>
+							  type="submit"
+							  name="${ManageSchemeMappingParameters.manuallyExclude}"
+							  value="Remove"
+							  title="Remove selected students from this scheme"
+							  style="margin-left: 0.5em;"
+							/>
+						</#if>
+						<#if (showResetButton && (editMembershipCommandResult.updatedIncludedStudentIds?size > 0 || editMembershipCommandResult.updatedExcludedStudentIds?size > 0))>
+							<input class="btn btn-warning hideOnClosed btn-small use-tooltip"
+								   type="submit"
+								   style="float: right; padding-left: 5px; padding-right: 5px; margin-left: 5px;"
+								   name="${ManageSchemeMappingParameters.resetMembership}"
+								   value="Reset"
+								   data-container="body"
+								   title="Restore the manually removed and remove the manually added students selected"
+							/>
+						</#if>
+					</th>
+				</#if>
 			</tr>
 			</thead>
 			<tbody>
 				<#list membershipItems as item>
 					<tr class="${item.itemTypeString}">
-
-						<#if checkboxName?has_content>
-							<td>
-								<#if !onlyShowCheckboxForStatic || item.itemTypeString == "static">
-									<input type="checkbox" name="${checkboxName}" value="${item.universityId}" />
-								</#if>
-							</td>
-						</#if>
-
 						<td>
 							<#if item.itemTypeString == "static">
 								<span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span>
@@ -319,6 +333,13 @@
 								</span>
 							</#if>
 						</td>
+						<#if checkboxName?has_content>
+							<td>
+								<#if !onlyShowCheckboxForStatic || item.itemTypeString == "static">
+									<input type="checkbox" name="${checkboxName}" value="${item.universityId}" />
+								</#if>
+							</td>
+						</#if>
 					</tr>
 				</#list>
 			</tbody>
