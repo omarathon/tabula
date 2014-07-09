@@ -66,7 +66,10 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 	): Response = {
 		def scopeMatches(permissionScope: PermissionsTarget, targetScope: PermissionsTarget): Boolean =
 			// The ID matches, or there exists a parent that matches (recursive)
-			permissionScope == targetScope || targetScope.permissionsParents.exists(scopeMatches(permissionScope, _))
+			permissionScope == targetScope ||
+				(targetScope != null &&
+					targetScope.permissionsParents != null &&
+					targetScope.permissionsParents.exists(scopeMatches(permissionScope, _)))
 			
 		val matchingPermission = permission match {
 			case selectorPerm: SelectorPermission[_] => allPermissions.find {

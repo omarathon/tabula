@@ -3,7 +3,7 @@
 
 <#macro student_item profile bindpath="">
 	<#local mostSignificantCourseDetails = profile.mostSignificantCourseDetails />
-	<#if mostSignificantCourseDetails??>
+	<#if mostSignificantCourseDetails?? && mostSignificantCourseDetails.route?? >
 		<#local route = mostSignificantCourseDetails.route />
 	</#if>
 	<li class="student well well-small"
