@@ -188,12 +188,12 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		val droppedMemberAgents = memberAgentsBefore.filterNot(memberAgentsAfter)
 		val changedMemberAgents = memberAgentsAfter.intersect(memberAgentsBefore).filterNot(agent => memberAgentMappingsBefore.get(agent).equals(memberAgentMappingsAfter.get(agent)))
 
-		val removeCommands = getRemoveCommandsForDroppedAgents(droppedMemberAgents) ++
-			getRemoveCommandsForChangedAgents(memberAgentMappingsBefore, memberAgentMappingsAfter, changedMemberAgents)
+		val removeCommandsForDroppedAgents = getRemoveCommandsForDroppedAgents(droppedMemberAgents)
+		val removeCommandsForChangedAgents = getRemoveCommandsForChangedAgents(memberAgentMappingsBefore, memberAgentMappingsAfter, changedMemberAgents)
 
 		val editCommands = getEditStudentCommands(memberAgentMappingsAfter, newMemberAgents ++ changedMemberAgents)
 
-		val commandResults = (editCommands ++ removeCommands).map { cmd =>
+		val commandResults = (editCommands ++ removeCommandsForChangedAgents ++ removeCommandsForDroppedAgents).map { cmd =>
 			/*
 			 * Defensively code against these defaults changing in future. We do NOT want the
 			 * sub-command to send notifications - we'll do that ourselves

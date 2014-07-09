@@ -193,25 +193,20 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 			val rel14 = StudentRelationship(staff1, relationshipType, student4)
 			service.saveStudentRelationships(relationshipType, student4.mostSignificantCourseDetails.head, Seq(staff1)) returns (Seq(rel14))
 
-			service.findCurrentRelationships(relationshipType, student4.mostSignificantCourseDetails.get)	returns (Seq(rel14))
-
-			service.listStudentRelationshipsWithMember(relationshipType, staff1) returns (Seq(rel1))
-
 			// set up 'mapping' in the command as if from the db
 			cmd.populate()
 			cmd.sort()
 
 			cmd.onBind(new BindException(cmd, "cmd"))
 
-			// already got relationships staff 1 -> student 1, staff2 -> student 1, staff 3 -> student 2
+			// pre-existing relationships are staff 1 -> student 1, staff2 -> student 1, staff 3 -> student 2
 			// now change staff 1 to map to student 4 instead of student 1:
-			cmd.mapping.remove(staff1)
 			cmd.mapping.get(staff1).addAll(Seq(student4).asJavaCollection)
 			cmd.mapping.get(staff1).removeAll(Seq(student1).asJavaCollection)
 
 			val commandResults = cmd.applyInternal()
 			commandResults.size should be (2) // one to remove, one to add
-			commandResults.map(_.modifiedRelationship).toSet should be (Set(rel1))
+			commandResults.map(_.modifiedRelationship).toSet should be (Set(rel1, rel14))
 		}
 	}
 
