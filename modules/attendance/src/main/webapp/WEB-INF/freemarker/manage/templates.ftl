@@ -1,4 +1,3 @@
-
 <h1>Use a template</h1>
 
 <#if errors?has_content>
