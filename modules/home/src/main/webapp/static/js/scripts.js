@@ -954,7 +954,7 @@
 				$t.append($cols);
 				$panes.children('li').each(function(idx) {
 					var $gadget = $(this).addClass('gadget');
-					var title = $(this).find('h4').first().text();
+					var title = $(this).attr('data-title') || $(this).find('h4').first().text();
 					var link = '#' + $(this).attr('id');
 					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '" title="Click and drag to move"><span class="title">' + title + '</span> <i class="icon-minus-sign-alt" title="Hide ' + title + '"></i></a></li>');
 					var $gadgetHeaderTab = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
