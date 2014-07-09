@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
+import uk.ac.warwick.tabula.services.UserLookupService
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands._
@@ -20,15 +22,15 @@ class ListAllExtensionsCommand(val department: Department)
 	PermissionCheck(Permissions.Extension.Read, mandatory(department))
 
 	var assignmentDao = Wire.auto[AssignmentDao]
+	var userLookup = Wire[UserLookupService]
 
 	def applyInternal(): Seq[ExtensionGraph] = {
-
 		val year = AcademicYear.guessByDate(new DateTime())
 
 		// get all extensions for assignments in modules in the department for the current year
 		assignmentDao.getAssignments(department, year)
 			.flatMap { _.extensions.asScala }
-			.map(ExtensionGraph(_))
+			.map { extension => ExtensionGraph(extension, userLookup.getUserByUserId(extension.userId)) }
 	}
 
 }

@@ -38,10 +38,8 @@ class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Ass
 		// build lookup of names from non members of the assignment that have submitted work plus members
 		val students = nonMembers ++ assignmentMembership
 
-		(for (student <- students) yield {
+		(for ((universityId, user) <- students) yield {
 			// deconstruct the map, bleh
-			val universityId = student._1
-			val user = student._2
 			val extension = assignment.extensions.find(_.universityId == universityId)
 			val isAwaitingReview = extension exists (_.awaitingReview)
 			val hasApprovedExtension = extension exists (_.approved)
@@ -58,7 +56,7 @@ class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Ass
 				case _ => 0
 			}
 
-			new ExtensionGraph(universityId, user, isAwaitingReview, hasApprovedExtension, hasRejectedExtension, duration, requestedExtraDuration, extension)
+			new ExtensionGraph(universityId, user, assignment.submissionDeadline(user), isAwaitingReview, hasApprovedExtension, hasRejectedExtension, duration, requestedExtraDuration, extension)
 		}).toSeq
 	}
 }
