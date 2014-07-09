@@ -188,9 +188,10 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		val droppedMemberAgents = memberAgentsBefore.filterNot(memberAgentsAfter)
 		val changedMemberAgents = memberAgentsAfter.intersect(memberAgentsBefore).filterNot(agent => memberAgentMappingsBefore.get(agent).equals(memberAgentMappingsAfter.get(agent)))
 
-		val removeCommands = getRemoveCommands(droppedMemberAgents)
+		val removeCommands = getRemoveCommandsForDroppedAgents(droppedMemberAgents) ++
+			getRemoveCommandsForChangedAgents(memberAgentMappingsBefore, memberAgentMappingsAfter, changedMemberAgents)
 
-		val editCommands = getEditCommands(memberAgentMappingsAfter, newMemberAgents ++ changedMemberAgents)
+		val editCommands = getEditStudentCommands(memberAgentMappingsAfter, newMemberAgents ++ changedMemberAgents)
 
 		val commandResults = (editCommands ++ removeCommands).map { cmd =>
 			/*
@@ -229,7 +230,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	}
 
 	// get the commands needed to remove the relationships of this type for dropped agents:
-	def getRemoveCommands(droppedAgents: Set[Member]): Set[EndStudentRelationshipCommand] = {
+	def getRemoveCommandsForDroppedAgents(droppedAgents: Set[Member]): Set[EndStudentRelationshipCommand] = {
 		for (
 			agent <- droppedAgents;
 			relationship <- service.listStudentRelationshipsWithMember(relationshipType, agent)
@@ -241,18 +242,20 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		}
 	}
 
-		/**
-		 * 	getEditCommands: get the commands needed to edit existing relationships and add new ones
-		 */
-	def getEditCommands(newAgentMappings: Map[Member, Set[StudentMember]], agentsToEdit: Set[Member]): Set[EditStudentRelationshipCommand] = {
+	/**
+	 * 	getEditStudentCommands: get the commands needed to edit the relationship for each of the students
+	 * 	who is now attached to a tutor
+	 */
+	def getEditStudentCommands(memberAgentMappingsAfter: Map[Member, Set[StudentMember]], agentsToEdit: Set[Member]): Set[EditStudentRelationshipCommand] = {
 		(for (agentToEdit <- agentsToEdit) yield {
 
 			// get the new student set for each agent
-			val newStudentMembersForAgent = newAgentMappings.get(agentToEdit) match {
+			val newStudentMembersForAgent = memberAgentMappingsAfter.get(agentToEdit) match {
 				case Some(students: Set[StudentMember]) => students
 				case _ => Set[StudentMember]()
 			}
 
+			// and for each, get a command to edit the relationship for that student to change it to the agent
 			newStudentMembersForAgent.flatMap (	stu => {
 				stu.mostSignificantCourseDetails.map ( scd => {
 					val possibleExistingAgentForStudent = service.findCurrentRelationships(relationshipType, scd).flatMap {
@@ -267,6 +270,36 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 				})
 			})
 		}).flatten
+	}
+
+	/**
+	 * getRemoveCommandsForChangedAgents: get the commands needed to remove the relationships for students who
+	 * are no longer attached to tutors with changed tutee sets
+	 */
+	def getRemoveCommandsForChangedAgents(memberAgentMappingsBefore: Map[Member, Set[StudentMember]],
+																				memberAgentMappingsAfter: Map[Member, Set[StudentMember]],
+																				changedMemberAgents: Set[Member]): Set[EndStudentRelationshipCommand] = {
+		val commands = for (agent <- changedMemberAgents) yield {
+			val studentsForAgentBefore = memberAgentMappingsBefore.get(agent).getOrElse(Set[StudentMember]())
+			val studentsForAgentAfter = memberAgentMappingsAfter.get(agent).getOrElse(Set[StudentMember]())
+			val studentsToDrop = studentsForAgentBefore.filterNot(studentsForAgentAfter)
+
+			studentsToDrop.flatMap ( stu => {
+				stu.mostSignificantCourseDetails.map (scd => {
+
+					// The next line assumes that there is a relationship for this scd and agent and that the agent is a member.
+					// These are fair assumptions since the data is derived from 'mapping' which is the current state of the db
+					// and which stores agents as staff members.
+					val rel = service.findCurrentRelationships(relationshipType, scd).filter(_.agentMember.getOrElse(throw new ItemNotFoundException).equals(agent)).head
+
+					val cmd = new EndStudentRelationshipCommand(rel, viewer)
+					cmd.maintenanceMode = this.maintenanceMode
+					cmd.relationshipService = service
+					cmd
+				})
+			})
+		}
+		commands.flatten
 	}
 
 	def validateUploadedFile(result: BindingResult) {
