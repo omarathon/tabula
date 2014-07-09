@@ -31,7 +31,7 @@
 
 	<@form.labelled_row "templateScheme" "Template:">
 		<@f.select path="templateScheme" id="templateSchemeSelect">
-			<@f.option value="" label="No template"/>
+			<option value="">&hellip;</option>
 			<#list templates as template>
 				<@f.option value="${template.id}" label="${template.templateName}"/>
 			</#list>
