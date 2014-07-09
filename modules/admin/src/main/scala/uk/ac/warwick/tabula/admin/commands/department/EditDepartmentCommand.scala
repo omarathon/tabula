@@ -60,7 +60,7 @@ trait EditDepartmentCommandValidation extends SelfValidating {
 		if (department.hasParent) {
 			if (!code.hasText) {
 				errors.rejectValue("code", "department.code.empty")
-			} else {
+			} else if (code != department.code) {
 				if (code.endsWith("-")) {
 					errors.rejectValue("code", "department.code.mustNotEndWithHypen")
 				} else if (!code.startsWith(department.parent.code + "-")) {
@@ -87,7 +87,7 @@ trait EditDepartmentCommandValidation extends SelfValidating {
 		// Name must be non-empty and start with parent name
 		if (!fullName.hasText) {
 			errors.rejectValue("fullName", "department.name.empty")
-		} else {
+		} else if (fullName != department.fullName) {
 			if (department.hasParent) {
 				if (fullName == (department.parent.fullName)) {
 					errors.rejectValue("fullName", "department.name.mustDifferFromParent", Array(department.parent.fullName), "")
@@ -104,7 +104,7 @@ trait EditDepartmentCommandValidation extends SelfValidating {
 			}
 		}
 
-		if (shortName.hasText) {
+		if (shortName.hasText && shortName != department.shortName) {
 			if (department.hasParent) {
 				if (shortName == (department.parent.name)) {
 					errors.rejectValue("shortName", "department.name.mustDifferFromParent", Array(department.parent.name), "")
@@ -125,7 +125,7 @@ trait EditDepartmentCommandValidation extends SelfValidating {
 		if (department.hasParent) {
 			if (filterRule == null) {
 				errors.rejectValue("filterRule", "department.filterRule.empty")
-			} else if (department.parent.filterRule != null) {
+			} else if (filterRule != department.filterRule && department.parent.filterRule != null) {
 				// Filter rule must not contradict parent rule
 				if (filterRule == AllMembersFilterRule && department.parent.filterRule != AllMembersFilterRule) {
 					errors.rejectValue("filterRule", "department.filterRule.contradictory")

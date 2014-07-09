@@ -2,10 +2,13 @@
 
 <h1>${department.name}</h1>
 
+<p><a href="<@url page="/department/${department.code}/edit" context="/admin" />">Edit name / short name</a></p>
+
 <p><a href="permissions/">View department admins</a></p>
 
 <#if department.children?size gt 0>
 <p><a href="<@url page="/department/${department.code}/sort-modules" context="/admin" />">Arrange modules among sub-departments</a></p>
+<p><a href="<@url page="/department/${department.code}/sort-routes" context="/admin" />">Arrange routes among sub-departments</a></p>
 
 <p><strong>Sub-departments:</strong></p>
 <ul>
