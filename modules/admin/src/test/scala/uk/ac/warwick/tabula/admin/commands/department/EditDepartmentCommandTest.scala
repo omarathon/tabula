@@ -8,11 +8,11 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import org.hamcrest.Matchers._
 import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
 
-class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTesting with Mockito {
+class EditDepartmentCommandTest extends TestBase  with FunctionalContextTesting with Mockito {
 
-	import AddSubDepartmentCommandTest.MinimalCommandContext
+	import EditDepartmentCommandTest.MinimalCommandContext
 
-	trait CommandTestSupport extends AddSubDepartmentCommandState with ModuleAndDepartmentServiceComponent {
+	trait CommandTestSupport extends EditDepartmentCommandState with ModuleAndDepartmentServiceComponent {
 		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 
 		moduleAndDepartmentService.getDepartmentByCode("in-pg") returns (Some(Fixtures.department("in-pg", "IT Services Postgraduate")))
@@ -20,9 +20,9 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 	}
 
 	trait Fixture {
-
-		val parent = Fixtures.department("in", "IT Services")
-		parent.id = "in-test"
+		val parent = Fixtures.department("in", "Information Technology Services")
+		parent.shortName = "IT Services"
+		parent.id = "in"
 		parent.allowExtensionRequests = true
 		parent.autoGroupDeregistration = false
 
@@ -33,36 +33,43 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 		permissionsService.ensureUserGroupFor(parent, ExtensionManagerRoleDefinition) returns ug
 		parent.permissionsService = permissionsService
 
-		val command = new AddSubDepartmentCommandInternal(parent) with CommandTestSupport with AddSubDepartmentCommandValidation
+		val department = Fixtures.department("in-ug", "IT Services Undergraduate")
+		department.id = "in-ug"
+		department.allowExtensionRequests = false
+		department.autoGroupDeregistration = true
+		department.filterRule = Department.UndergraduateFilterRule
+		department.parent = parent
+
+		val command = new EditDepartmentCommandInternal(department) with CommandTestSupport with EditDepartmentCommandValidation
 	}
 
-
 	@Test def init() { new Fixture {
-		command.code should startWith("in-")
-		command.name should startWith("IT Services ")
-		command.filterRule should be(Department.AllMembersFilterRule)
+		command.code should be("in-ug")
+		command.fullName should be("IT Services Undergraduate")
+		command.filterRule should be(Department.UndergraduateFilterRule)
 	}}
 
 	@Test def apply() { inContext[MinimalCommandContext] { new Fixture {
-		command.code = "in-ug"
-		command.name = "IT Services Undergraduate"
-		command.filterRule = Department.UndergraduateFilterRule
+		command.code = "in-ugs"
+		command.fullName = "IT Services Undergraduates"
+		command.shortName = "ITS UG"
+		command.filterRule = Department.InYearFilterRule(1)
 
 		val dept = command.applyInternal()
-		dept.code should be ("in-ug")
-		dept.name should be ("IT Services Undergraduate")
-		dept.filterRule should be (Department.UndergraduateFilterRule)
+		dept.code should be ("in-ugs")
+		dept.name should be ("ITS UG")
+		dept.fullName should be ("IT Services Undergraduates")
+		dept.filterRule should be (Department.InYearFilterRule(1))
 		dept.parent should be (parent)
-		dept.allowExtensionRequests should be (true)
-		dept.autoGroupDeregistration should be (false)
-		dept.extensionManagers.knownType.includedUserIds should contain("cuslaj")
+		dept.allowExtensionRequests should be (false)
+		dept.autoGroupDeregistration should be (true)
 
-		there was two(command.moduleAndDepartmentService).save(dept)
+		there was one(command.moduleAndDepartmentService).save(dept)
 	}}}
 
 	@Test def validateNoErrors() { new Fixture {
 		command.code = "in-ug"
-		command.name = "IT Services Undergraduate"
+		command.fullName = "Information Technology Services Undergraduate"
 		command.filterRule = Department.UndergraduateFilterRule
 
 		val errors = new BindException(command, "command")
@@ -73,7 +80,7 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 
 	@Test def validateEmptyCode() { new Fixture {
 		command.code = ""
-		command.name = "IT Services Undergraduate"
+		command.fullName = "Information Technology Services Undergraduate"
 		command.filterRule = Department.UndergraduateFilterRule
 
 		val errors = new BindException(command, "command")
@@ -87,7 +94,7 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 
 	@Test def validateCodeDoesntStartWithParent() { new Fixture {
 		command.code = "itservices-ug"
-		command.name = "IT Services Undergraduate"
+		command.fullName = "Information Technology Services Undergraduate"
 		command.filterRule = Department.UndergraduateFilterRule
 
 		val errors = new BindException(command, "command")
@@ -101,7 +108,7 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 
 	@Test def validateCodeTooLong() { new Fixture {
 		command.code = "in-an-incredibly-long-code-this-is-silly-now"
-		command.name = "IT Services Undergraduate"
+		command.fullName = "Information Technology Services Undergraduate"
 		command.filterRule = Department.UndergraduateFilterRule
 
 		val errors = new BindException(command, "command")
@@ -115,7 +122,7 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 
 	@Test def validateCodeBadFormat() { new Fixture {
 		command.code = "in-UG Students"
-		command.name = "IT Services Undergraduate"
+		command.fullName = "Information Technology Services Undergraduate"
 		command.filterRule = Department.UndergraduateFilterRule
 
 		val errors = new BindException(command, "command")
@@ -129,7 +136,7 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 
 	@Test def validateExistingCode() { new Fixture {
 		command.code = "in-pg"
-		command.name = "IT Services Postgraduate"
+		command.fullName = "Information Technology Services Postgraduate"
 		command.filterRule = Department.PostgraduateFilterRule
 
 		val errors = new BindException(command, "command")
@@ -143,7 +150,7 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 
 	@Test def validateEmptyName() { new Fixture {
 		command.code = "in-ug"
-		command.name = "  "
+		command.fullName = "  "
 		command.filterRule = Department.UndergraduateFilterRule
 
 		val errors = new BindException(command, "command")
@@ -151,13 +158,13 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 
 		errors.hasErrors should be (true)
 		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("name")
+		errors.getFieldError.getField should be ("fullName")
 		errors.getFieldError.getCodes should contain ("department.name.empty")
 	}}
 
 	@Test def validateNameDoesntStartWithParent() { new Fixture {
 		command.code = "in-ug"
-		command.name = "ITS Undergraduates"
+		command.fullName = "ITS Undergraduates"
 		command.filterRule = Department.UndergraduateFilterRule
 
 		val errors = new BindException(command, "command")
@@ -165,13 +172,13 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 
 		errors.hasErrors should be (true)
 		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("name")
+		errors.getFieldError.getField should be ("fullName")
 		errors.getFieldError.getCodes should contain ("department.name.mustStartWithParent")
 	}}
 
 	@Test def validateNameTooLong() { new Fixture {
 		command.code = "in-ug"
-		command.name = "IT Services Undergraduate Students Who Have Come To Study Computers And Programming And Things, What A Wonderful Sight This Is"
+		command.fullName = "Information Technology Services Undergraduate Students Who Have Come To Study Computers And Programming And Things, What A Wonderful Sight This Is"
 		command.filterRule = Department.UndergraduateFilterRule
 
 		val errors = new BindException(command, "command")
@@ -179,13 +186,28 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 
 		errors.hasErrors should be (true)
 		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("name")
+		errors.getFieldError.getField should be ("fullName")
+		errors.getFieldError.getCodes should contain ("department.name.tooLong")
+	}}
+
+	@Test def validateShortNameTooLong() { new Fixture {
+		command.code = "in-ug"
+		command.fullName = "Information Technology Services Undergraduates"
+		command.shortName = "IT Services Undergraduate Students Who Have Come To Study Computers And Programming And Things, What A Wonderful Sight This Is"
+		command.filterRule = Department.UndergraduateFilterRule
+
+		val errors = new BindException(command, "command")
+		command.validate(errors)
+
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getFieldError.getField should be ("shortName")
 		errors.getFieldError.getCodes should contain ("department.name.tooLong")
 	}}
 
 	@Test def validateEmptyFilterRule() { new Fixture {
 		command.code = "in-ug"
-		command.name = "IT Services Undergraduates"
+		command.fullName = "Information Technology Services Undergraduates"
 		command.filterRule = null
 
 		val errors = new BindException(command, "command")
@@ -199,7 +221,7 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 
 	@Test def validateLessSpecificFilterRule() { new Fixture {
 		command.code = "in-ug"
-		command.name = "IT Services Undergraduates"
+		command.fullName = "Information Technology Services Undergraduates"
 
 		parent.filterRule = Department.UndergraduateFilterRule
 		command.filterRule = Department.AllMembersFilterRule
@@ -215,7 +237,7 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 
 	@Test def validateContradictoryFilterRule() { new Fixture {
 		command.code = "in-ug"
-		command.name = "IT Services Undergraduates"
+		command.fullName = "Information Technology Services Undergraduates"
 
 		parent.filterRule = Department.UndergraduateFilterRule
 		command.filterRule = Department.PostgraduateFilterRule
@@ -231,7 +253,7 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 
 }
 
-object AddSubDepartmentCommandTest {
+object EditDepartmentCommandTest {
 	class MinimalCommandContext extends FunctionalContext with Mockito {
 
 		bean() {

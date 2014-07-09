@@ -12,7 +12,7 @@ class GrantedPermissionPersistenceTest extends PersistenceTestBase with Reflecti
 		transactional { t =>
 			val department = new Department
 			department.code = "IN"
-			department.name = "IT Services"
+			department.fullName = "IT Services"
 				
 			session.save(department)
 			session.flush()

@@ -17,7 +17,7 @@ class ImportModulesCommandTest extends TestBase with MockitoSugar {
 		// Test data
 		val department = new Department {
 			code = "cs"
-			name = "Computer Science"
+			fullName = "Computer Science"
 		}
 		val moduleInfos = Seq(
             ModuleInfo("Science for Computers", "CS101", null),

@@ -32,6 +32,7 @@ case object SysadminRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	GrantsGlobalPermission(
 		Masquerade,
 		Department.Create,
+		Department.Update,
 		Module.Create,
 		// We don't give Read here, god up for that
 		Module.Update,
