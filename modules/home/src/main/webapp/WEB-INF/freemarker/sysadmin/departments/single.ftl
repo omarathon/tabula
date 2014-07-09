@@ -17,31 +17,27 @@
 
 
 <#if department.hasParent>
-<p>Parent department: <a href='<@url page="/sysadmin/departments/${department.parent.code}/" />'>${department.parent.name}</a></p>
-<#--
-<div class="btn-group">
-	<a href="edit/" class="btn ">Edit details</a>
-</div>
--->
-<#else>
-<#--
-<div class="btn-group">
-	<a href="#" class="btn "><i class="icon-plus"></i> New child department</a>
-	<#if department.children?has_content>
-	<a href="#" class="btn use-tooltip" title="Move modules into child departments"><i class="icon-list"></i> Arrange modules</a>
-	</#if>
-</div>
--->
+	<p>Parent department: <a href='<@url page="/sysadmin/departments/${department.parent.code}/" />'>${department.parent.name}</a></p>
 </#if>
 
 <p>
-${department.modules?size} modules
+	${department.modules?size} modules
 </p>
 
 <ul>
-<#list department.modules as module>
-<li>${module.code} - ${module.name!"Unknown"}</li>
-</#list>
+	<#list department.modules as module>
+		<li>${module.code} - ${module.name!"Unknown"}</li>
+	</#list>
+</ul>
+
+<p>
+	${department.routes?size} routes
+</p>
+
+<ul>
+	<#list department.routes as route>
+		<li>${route.code} - ${route.name!"Unknown"}</li>
+	</#list>
 </ul>
 
 </#escape>
