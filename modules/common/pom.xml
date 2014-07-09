@@ -454,17 +454,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tiles</groupId>
-			<artifactId>tiles-extras</artifactId>
-			<version>${org.apache.tiles.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.tiles</groupId>
-					<artifactId>tiles-ognl</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tiles</groupId>
 			<artifactId>tiles-freemarker</artifactId>
 			<version>${org.apache.tiles.version}</version>
 		</dependency>
