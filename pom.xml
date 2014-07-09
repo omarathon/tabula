@@ -543,6 +543,8 @@
 					<args>
 						<arg>-deprecation</arg>
 						<arg>-feature</arg>
+						<arg>-Xmax-classfile-name</arg>
+						<arg>130</arg>
 					</args>
           <source>1.6</source>
           <target>1.6</target>

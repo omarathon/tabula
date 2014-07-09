@@ -38,6 +38,7 @@ trait AttendanceMonitoringService {
 	def saveOrUpdate(point: AttendanceMonitoringPoint): Unit
 	def saveOrUpdate(template: AttendanceMonitoringTemplate): Unit
 	def saveOrUpdate(templatePoint: AttendanceMonitoringTemplatePoint): Unit
+	def saveOrUpdate(note: AttendanceMonitoringNote): Unit
 	def deleteScheme(scheme: AttendanceMonitoringScheme)
 	def deletePoint(point: AttendanceMonitoringPoint)
 	def deleteTemplate(template: AttendanceMonitoringTemplate)
@@ -106,6 +107,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def saveOrUpdate(templatePoint: AttendanceMonitoringTemplatePoint): Unit =
 		attendanceMonitoringDao.saveOrUpdate(templatePoint)
+
+	def saveOrUpdate(note: AttendanceMonitoringNote): Unit =
+		attendanceMonitoringDao.saveOrUpdate(note)
 
 	def deleteScheme(scheme: AttendanceMonitoringScheme) =
 		attendanceMonitoringDao.delete(scheme)

@@ -85,8 +85,4 @@ class ApplicationTest extends AppContextTestBase with FieldAccessByReflection{
       modules(0).asInstanceOf[Module].department.name should be ("Computer Science")
     }
 
-    @Ignore @Test def getAllCommands {
-    	allCommandsInSystem("uk.ac.warwick.tabula.coursework").map {clz => println(clz.getName.substring("uk.ac.warwick.tabula.coursework".length))}
-    }
-
 }

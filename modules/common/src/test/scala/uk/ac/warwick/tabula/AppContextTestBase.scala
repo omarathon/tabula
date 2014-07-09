@@ -11,9 +11,7 @@ import org.springframework.transaction.support._
 import org.junit.Before
 import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory
 import javax.sql.DataSource
-import org.reflections.Reflections
 import uk.ac.warwick.tabula.commands.Command
-import scala.collection.JavaConverters._
 import java.lang.reflect.Modifier
 import scala.language.implicitConversions
 import uk.ac.warwick.tabula.data.Transactions
@@ -21,19 +19,7 @@ import uk.ac.warwick.tabula.data.Transactions
 @RunWith(classOf[SpringJUnit4ClassRunner])
 @ContextConfiguration(locations=Array("/WEB-INF/applicationContext-lazyinit.xml"))
 @ActiveProfiles(Array("test"))
-abstract class AppContextTestBase extends TestBase with ContextSetup with TransactionalTesting {
-	
-	protected def allCommandsInSystem(packageBase: String) = {
-		val reflections = new Reflections(packageBase)
-
-		reflections
-			.getSubTypesOf(classOf[Command[_]])
-			.asScala.toList
-			.filter { clz => !Modifier.isAbstract(clz.getModifiers) }
-			.sortBy { _.getPackage.getName }
-	}
-
-}
+abstract class AppContextTestBase extends TestBase with ContextSetup with TransactionalTesting
 
 trait FieldAccessByReflection{
 	// see http://stackoverflow.com/questions/1589603/scala-set-a-field-value-reflectively-from-field-name

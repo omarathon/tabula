@@ -105,7 +105,7 @@ abstract class Features {
 	@Value("${features.scheduling.cleanupUnreferencedFiles:true}") var schedulingCleanupUnreferencedFiles = defaults.schedulingCleanupUnreferencedFiles
 	@Value("${features.scheduling.sanityCheckFilesystem:true}") var schedulingSanityCheckFilesystem = defaults.schedulingSanityCheckFilesystem
 	@Value("${features.scheduling.exportAttendanceToSits:true}") var schedulingExportAttendanceToSits = defaults.schedulingExportAttendanceToSits
-	@Value("${features.attendanceMonitoring.academicYear2014:false}")	var attendanceMonitoringAcademicYear2014 = defaults.attendanceMonitoringAcademicYear2014
+	@Value("${features.attendanceMonitoring.academicYear2014:true}")	var attendanceMonitoringAcademicYear2014 = defaults.attendanceMonitoringAcademicYear2014
 	@Value("${features.masqueradersCanWrite:false}") var masqueradersCanWrite = defaults.masqueradersCanWrite
 	@Value("${features.masqueradeElevatedPermissions:false}") var masqueradeElevatedPermissions = defaults.masqueradeElevatedPermissions
 
@@ -199,7 +199,7 @@ class FeaturesMessage {
 	@BeanProperty var schedulingCleanupUnreferencedFiles = true
 	@BeanProperty var schedulingSanityCheckFilesystem = true
 	@BeanProperty var schedulingExportAttendanceToSits = true
-	@BeanProperty var attendanceMonitoringAcademicYear2014 = false
+	@BeanProperty var attendanceMonitoringAcademicYear2014 = true
 	@BeanProperty var masqueradersCanWrite = false
 	@BeanProperty var masqueradeElevatedPermissions = false
 }

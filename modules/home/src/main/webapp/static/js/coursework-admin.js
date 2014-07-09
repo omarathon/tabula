@@ -455,11 +455,8 @@ $(function() {
 						' <span>' + $this.attr("name") +' </span>&nbsp;<i class="icon-remove-sign remove-attachment"></i>' +
 						'<input id="attachedFiles" name="attachedFiles" value="'+  $this.val() +'" type="hidden"></li>'
 				});
-				$targetFormSection.html(attachments);
+				$targetFormSection.append(attachments);
 				$feedbackForm.find('.feedbackAttachments').slideDown();
-			} else {
-				attachments = '<input name="attachedFiles" type="hidden" />';
-				$feedbackForm.find('.feedbackAttachments').slideUp(function(){ $targetFormSection.html(attachments) })
 			}
 		});
 

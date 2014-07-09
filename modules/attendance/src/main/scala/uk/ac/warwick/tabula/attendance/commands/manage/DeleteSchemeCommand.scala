@@ -71,15 +71,9 @@ trait DeleteSchemeValidation extends SelfValidating {
 	self: DeleteSchemeCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def validate(errors: Errors) {
-
-		val pointsWithCheckpoints = scheme.points.asScala.filter {
-			point => attendanceMonitoringService.countCheckpointsForPoint(point) > 0
-		}
-
-		if (pointsWithCheckpoints.nonEmpty) {
+		if (scheme.points.asScala.exists { point => attendanceMonitoringService.countCheckpointsForPoint(point) > 0 }) {
 			errors.reject("attendanceMonitoringScheme.hasCheckpoints.remove")
 		}
-
 	}
 
 }

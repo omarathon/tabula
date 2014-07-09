@@ -35,7 +35,7 @@
 			<div class="span9 hover-highlight">
 				<div class="pull-right" style="line-height:30px">
 					<a class="btn btn-primary btn-mini" href="<@routes.manageEditScheme command.department command.academicYear.startYear?c scheme/>">Edit</a>
-					<a class="btn btn-danger btn-mini" href="<@routes.manageDeleteScheme command.department command.academicYear.startYear?c scheme/>"><i class="icon-remove"></i></a>
+					<a class="btn btn-danger btn-mini<#if scheme.hasRecordedCheckpoints> disabled use-tooltip</#if>" <#if scheme.hasRecordedCheckpoints>title="This scheme cannot be removed as it has attendance marks against some of its points."</#if> href="<@routes.manageDeleteScheme command.department command.academicYear.startYear?c scheme/>"><i class="icon-remove"></i></a>
 				</div>
 				<span class="lead">${scheme.displayName}</span>
 				<span class="muted">
