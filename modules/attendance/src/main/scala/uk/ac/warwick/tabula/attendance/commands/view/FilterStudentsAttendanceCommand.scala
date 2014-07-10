@@ -2,21 +2,21 @@ package uk.ac.warwick.tabula.attendance.commands.view
 
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order._
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.attendance.commands.old.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes}
+import uk.ac.warwick.tabula.attendance.commands.old.AutowiringSecurityServicePermissionsAwareRoutes
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.ScalaRestriction
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AutowiringProfileServiceComponent, AutowiringTermServiceComponent, ProfileServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.collection.JavaConverters._
 
 object FilterStudentsAttendanceCommand {
-	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
-		new FilterStudentsAttendanceCommandInternal(department, academicYear, user)
+	def apply(department: Department, academicYear: AcademicYear) =
+		new FilterStudentsAttendanceCommandInternal(department, academicYear)
 			with AutowiringSecurityServicePermissionsAwareRoutes
 			with AutowiringProfileServiceComponent
 			with AutowiringTermServiceComponent
@@ -28,7 +28,7 @@ object FilterStudentsAttendanceCommand {
 }
 
 
-class FilterStudentsAttendanceCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser)
+class FilterStudentsAttendanceCommandInternal(val department: Department, val academicYear: AcademicYear)
 	extends CommandInternal[FilteredStudentsAttendanceResult] with BuildsFilteredStudentsAttendanceResult with TaskBenchmarking {
 
 	self: FilterStudentsAttendanceCommandState with TermServiceComponent
@@ -69,10 +69,9 @@ trait FilterStudentsAttendancePermissions extends RequiresPermissionsChecking wi
 
 }
 
-trait FilterStudentsAttendanceCommandState extends AttendanceFilterExtras with PermissionsAwareRoutes {
+trait FilterStudentsAttendanceCommandState extends AttendanceFilterExtras {
 	def department: Department
 	def academicYear: AcademicYear
-	def user: CurrentUser
 
 	var studentsPerPage = FiltersStudents.DefaultStudentsPerPage
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
@@ -84,10 +83,6 @@ trait FilterStudentsAttendanceCommandState extends AttendanceFilterExtras with P
 
 	var courseTypes: JList[CourseType] = JArrayList()
 	var routes: JList[Route] = JArrayList()
-	lazy val visibleRoutes =
-		if (department.routes.isEmpty) {
-			routesForPermission(user, Permissions.MonitoringPoints.View, department.rootDepartment)
-		} else routesForPermission(user, Permissions.MonitoringPoints.View, department)
 	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
 	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()

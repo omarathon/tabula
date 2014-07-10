@@ -5,7 +5,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.services.{ProfileService, MonitoringPointService, TermService}
 
-class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
+class OldReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends ReportStudentsChoosePeriodCommandValidation with ReportStudentsState {
 		val termService = mock[TermService]
@@ -14,7 +14,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 	}
 
 	trait Fixture {
-		val cmd = new ReportStudentsChoosePeriodCommand(new Department(), new AcademicYear(2009) ) with CommandTestSupport
+		val cmd = new OldReportStudentsChoosePeriodCommand(new Department(), new AcademicYear(2009) ) with CommandTestSupport
 		val availablePeriod = "Autumnal Term"
 		val unavailablePeriod = "Spring"
 		val unspecifiedPeriod = "Summer!"
