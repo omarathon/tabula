@@ -114,8 +114,11 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 			val assignmentsForMarkingInfo = benchmarkTask("Get markers submissions") { 
 				for (assignment <- assignmentsForMarking) yield {
 					val submissions = assignment.getMarkersSubmissions(user.apparentUser)
+					val markerFeedbacks = submissions.flatMap( submission => assignment.getAllMarkerFeedbacks(submission.universityId, user.apparentUser))
+			
 					Map(
 						"assignment" -> assignment,
+						"isFeedbacksToManage" -> !markerFeedbacks.isEmpty,
 						"numSubmissions" -> submissions.size,
 						"isAdmin" -> securityService.can(user, Permissions.Module.ManageAssignments, assignment)
 					)

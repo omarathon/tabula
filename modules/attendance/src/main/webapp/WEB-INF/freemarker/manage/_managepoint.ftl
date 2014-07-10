@@ -43,6 +43,7 @@
 	<@form.label clazz="radio" checkbox=true>
 		<@f.radiobutton path="pointType" value="standard" />
 		Standard
+		<@fmt.help_popover id="pointType-standard" content="This is a basic monitoring point which will create a register for you to mark monitored attendance" />
 	</@form.label>
 	<@form.label clazz="radio" checkbox=true>
 		<@f.radiobutton path="pointType" value="meeting" />

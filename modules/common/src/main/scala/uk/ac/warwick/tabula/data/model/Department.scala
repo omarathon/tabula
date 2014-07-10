@@ -19,16 +19,22 @@ import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.roles.SelectorBuiltInRoleDefinition
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Entity @AccessType("field")
 class Department extends GeneratedId
 	with PostLoadBehaviour with HasSettings with PermissionsTarget with Serializable{
 	import Department._
 
-	@Column(unique=true)
-	var code:String = null
+	@Column(unique = true)
+	var code: String = null
 
-	var name:String = null
+	@Column(name = "name")
+	var fullName: String = null
+
+	def name = shortName.maybeText.getOrElse(fullName)
+
+	var shortName: String = null
 
 	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY)
 	@BatchSize(size=200)

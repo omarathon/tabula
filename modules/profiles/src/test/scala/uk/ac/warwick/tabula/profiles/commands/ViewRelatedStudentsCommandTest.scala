@@ -12,7 +12,7 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val testDepartment = new Department
-		testDepartment.name = "Department of Architecture and Explosions"
+		testDepartment.fullName = "Department of Architecture and Explosions"
 		testDepartment.code = "DA"
 
 		val course = new Course

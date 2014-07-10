@@ -24,23 +24,27 @@
 	<div id="course-in-year-info">
 		<table class="profile-or-course-info">
 			<tbody>
-				<#if !isSelf>
+				<#if !isSelf && studentCourseYearDetails.enrolmentStatus??>
 					<tr>
 						<th>Enrolment status</th>
 						<td><@fmt.enrolment_status studentCourseYearDetails />
 						</td>
 					</tr>
 				</#if>
-				<tr>
-					<th>Attendance</th>
-					<td>${(studentCourseYearDetails.modeOfAttendance.fullNameAliased)!}
-					</td>
-				</tr>
-				<tr>
-					<th>Year of study</th>
-					<td>${(studentCourseYearDetails.yearOfStudy)!}
-					</td>
-				</tr>
+				<#if studentCourseYearDetails.modeOfAttendance??>
+					<tr>
+						<th>Attendance</th>
+						<td>${(studentCourseYearDetails.modeOfAttendance.fullNameAliased)!}
+						</td>
+					</tr>
+				</#if>
+				<#if studentCourseYearDetails.yearOfStudy??>
+					<tr>
+						<th>Year of study</th>
+						<td>${(studentCourseYearDetails.yearOfStudy)!}
+						</td>
+					</tr>
+				</#if>
 			</tbody>
 		</table>
 	</div>

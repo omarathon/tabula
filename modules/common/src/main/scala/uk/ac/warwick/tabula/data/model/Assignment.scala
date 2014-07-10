@@ -317,6 +317,10 @@ class Assignment
 	def isLate(submission: Submission) =
 		!openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.universityId, submission.userId, submission.submittedDate)
 
+	def submissionDeadline(user: User) =
+		if (openEnded) null
+		else extensions.find(e => e.isForUser(user) && e.approved).fold(closeDate)(_.expiryDate)
+
 	/**
 	 * Deadline taking into account any approved extension
 	 */

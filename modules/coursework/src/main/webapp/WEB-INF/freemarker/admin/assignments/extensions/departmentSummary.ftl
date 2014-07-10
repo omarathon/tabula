@@ -21,7 +21,8 @@
 				data-requested-extra-duration="${graph.requestedExtraDuration}"
 				data-awaiting-review="${graph.awaitingReview?string}"
 				data-approved="${graph.hasApprovedExtension?string}"
-				data-rejected="${graph.hasRejectedExtension?string}">
+				data-rejected="${graph.hasRejectedExtension?string}"
+				data-deadline="<#if graph.deadline?has_content><@fmt.date date=graph.deadline /></#if>">
 				<#if graph.awaitingReview>
 					<span class="label label-warning">Awaiting review</span>
 				<#elseif graph.hasApprovedExtension>
@@ -41,6 +42,7 @@
 	</td>
 	<td class="duration-col duration-col-department-wide toggle-cell">
 	</td>
+	<td class="deadline-col <#if graph.hasApprovedExtension>approved<#else>very-subtle</#if>"><#if graph.deadline?has_content><@fmt.date date=graph.deadline /></#if></td>
 </tr>
 </#macro>
 
@@ -73,6 +75,7 @@
 			<th>Assignment</th>
 			<th class="status-col">Status</th>
 			<th class="duration-col duration-col-department-wide">Length of extension</th>
+			<th class="deadline-col">Submission Deadline</th>
 		</tr>
 		</thead>
 

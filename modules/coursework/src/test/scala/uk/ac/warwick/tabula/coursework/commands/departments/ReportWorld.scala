@@ -32,7 +32,7 @@ trait ReportWorld extends TestBase with Mockito {
 
 	val department = new Department
 	department.code = "IN"
-	department.name = "Test Department"
+	department.fullName = "Test Department"
 
 	val moduleOne = new Module("IN101", department)
 	moduleOne.name = "Module One"

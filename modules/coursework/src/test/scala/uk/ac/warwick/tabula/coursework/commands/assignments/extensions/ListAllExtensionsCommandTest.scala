@@ -11,15 +11,15 @@ class ListAllExtensionsCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("fi", "Film")
 		val year = AcademicYear.guessByDate(new DateTime())
 
-		val user1 = Fixtures.user("0123456")
+		val user1 = Fixtures.user("0123456", "cuspxp")
 		val userLookup = smartMock[UserLookupService]
-		userLookup.getUserByWarwickUniId("0123456") returns (user1)
+		userLookup.getUserByUserId("cuspxp") returns (user1)
 
-		val extension1 = Fixtures.extension("0123456", "user1")
-		extension1.userLookup = userLookup
+		val extension1 = Fixtures.extension("0123456", "cuspxp")
 
 		val assignment1 = Fixtures.assignment("assignment 1")
 		assignment1.extensions.add(extension1)
+		extension1.assignment = assignment1
 
 		val assignmentDao = smartMock[AssignmentDao]
 		assignmentDao.getAssignments(dept, year) returns (Seq(assignment1))
@@ -31,9 +31,11 @@ class ListAllExtensionsCommandTest extends TestBase with Mockito {
 		new Environment {
 			val command = new ListAllExtensionsCommand(dept)
 			command.assignmentDao = assignmentDao
+			command.userLookup = userLookup
+
 			val graph = command.apply().head
 			graph.universityId should be ("0123456")
-			graph.user should be (extension1.getUserForUniversityId)
+			graph.user should be (user1)
 			graph.isAwaitingReview should be (extension1.awaitingReview)
 			graph.hasApprovedExtension should be (extension1.approved)
 			graph.hasRejectedExtension should be (extension1.rejected)

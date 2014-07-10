@@ -41,32 +41,34 @@
 		<div class="col1 basic-course-details">
 			<table class="profile-or-course-info">
 				<tbody>
-				<#if (studentCourseDetails.route)??>
-				<tr>
-					<th>Route</th>
-					<td>${(studentCourseDetails.route.name)!} (${(studentCourseDetails.route.code?upper_case)!})
-					</td>
-				</tr>
+				<#if studentCourseDetails.route??>
+					<tr>
+						<th>Route</th>
+						<td>${(studentCourseDetails.route.name)!} (${(studentCourseDetails.route.code?upper_case)!})
+						</td>
+					</tr>
 				</#if>
-				<#if (studentCourseDetails.department)??>
-				<tr>
-					<th>Department</th>
-					<td>${(studentCourseDetails.department.name)!} (${((studentCourseDetails.department.code)!)?upper_case})
-					</td>
-				</tr>
+				<#if studentCourseDetails.department??>
+					<tr>
+						<th>Department</th>
+						<td>${(studentCourseDetails.department.name)!} (${((studentCourseDetails.department.code)!)?upper_case})
+						</td>
+					</tr>
 				</#if>
-				<#if !isSelf>
-				<tr>
-					<th>Status on Route</th>
-					<td><@fmt.status_on_route studentCourseDetails />
-					</td>
-				</tr>
+				<#if !isSelf && studentCourseDetails.statusOnRoute??>
+					<tr>
+						<th>Status on Route</th>
+						<td><@fmt.status_on_route studentCourseDetails />
+						</td>
+					</tr>
 				</#if>
-				<tr>
-					<th>UG/PG</th>
-					<td>${(studentCourseDetails.route.degreeType.toString)!}
-					</td>
-				</tr>
+				<#if studentCourseDetails.route?? && studentCourseDetails.route.degreeType??>
+					<tr>
+						<th>UG/PG</th>
+						<td>${(studentCourseDetails.route.degreeType.toString)!}
+						</td>
+					</tr>
+				</#if>
 				</tbody>
 			</table>
 		</div>
@@ -79,59 +81,70 @@
 				<span>More details</span>
 			</summary>
 			<div class="course-info">
-				<table class="profile-or-course-info">
+				<table class="profile-or-course-info sb-no-wrapper-table-popout">
 					<tbody>
-					<tr>
-						<th>Intended award</th>
-						<td>${(studentCourseDetails.award.name)!}</td>
-					</tr>
-					<tr>
-						<th>Length of course</th>
-						<td>
-						<#if studentCourseDetails.courseYearLength??>
-							${studentCourseDetails.courseYearLength} years
-						</#if>
-						<#if studentCourseDetails.modeOfAttendance??>
-							<#if studentCourseYearDetails.modeOfAttendance.code != "F">
-								(full-time equivalent)
-							</#if>
-						</#if>
-						</td>
-					</tr>
-					<#if !isSelf>
-					<tr>
-						<th>Status on Course</th>
-						<td><@fmt.status_on_course studentCourseDetails />
-						</td>
-					</tr>
+					<#if studentCourseDetails.award??>
+						<tr>
+							<th>Intended award</th>
+							<td>${(studentCourseDetails.award.name)!}</td>
+						</tr>
 					</#if>
-					<tr>
-						<th>Start date</th>
-						<td>
-							<#if studentCourseDetails.beginDate??>
-								<@fmt.date date=studentCourseDetails.beginDate includeTime=false />
+					<#if studentCourseDetails.courseYearLength??>
+						<tr>
+							<th>Length of course</th>
+							<td>
+							<#if studentCourseDetails.courseYearLength??>
+								${studentCourseDetails.courseYearLength} years
 							</#if>
-						</td>
-					</tr>
-					<tr>
-					<#if studentCourseDetails.endDate??>
-						<th>End date</th>
-						<td><@fmt.date date=studentCourseDetails.endDate includeTime=false /></td>
-					<#elseif studentCourseDetails.expectedEndDate?? >
-						<th>Expected end date</th>
-						<td><@fmt.date date=studentCourseDetails.expectedEndDate includeTime=false/></td>
+							<#if studentCourseDetails.modeOfAttendance??>
+								<#if studentCourseYearDetails.modeOfAttendance.code != "F">
+									(full-time equivalent)
+								</#if>
+							</#if>
+							</td>
+						</tr>
 					</#if>
-					</tr>
-					<tr>
-						<th>Programme route code</th>
-						<td>${studentCourseDetails.sprCode}
-						</td>
-					</tr>
-					<tr>
-						<th>Course join code</th>
-						<td>${studentCourseDetails.scjCode}
-						</td>
-					</tr>
+					<#if !isSelf && studentCourseDetails.statusOnCourse??>
+						<tr>
+							<th>Status on Course</th>
+							<td><@fmt.status_on_course studentCourseDetails /></td>
+						</tr>
+					</#if>
+					<#if studentCourseDetails.beginDate??>
+						<tr>
+							<th>Start date</th>
+							<td>
+								<#if studentCourseDetails.beginDate??>
+									<@fmt.date date=studentCourseDetails.beginDate includeTime=false />
+								</#if>
+							</td>
+						</tr>
+					</#if>
+					<#if studentCourseDetails.endDate?? || studentCourseDetails.expectedEndDate??>
+						<tr>
+							<#if studentCourseDetails.endDate??>
+								<th>End date</th>
+								<td><@fmt.date date=studentCourseDetails.endDate includeTime=false /></td>
+							<#elseif studentCourseDetails.expectedEndDate??>
+								<th>Expected end date</th>
+								<td><@fmt.date date=studentCourseDetails.expectedEndDate includeTime=false/></td>
+							</#if>
+						</tr>
+					</#if>
+					<#if studentCourseDetails.sprCode??>
+						<tr>
+							<th>Programme route code</th>
+							<td>${studentCourseDetails.sprCode}
+							</td>
+						</tr>
+					</#if>
+					<#if studentCourseDetails.scjCode??>
+						<tr>
+							<th>Course join code</th>
+							<td>${studentCourseDetails.scjCode}
+							</td>
+						</tr>
+					</#if>
 					</tbody>
 				</table>
 			</div>
@@ -141,7 +154,7 @@
 
 </section>
 
-<#if features.showAccreditedPriorLearning>
+<#if features.showAccreditedPriorLearning && studentCourseDetails.accreditedPriorLearning??>
 	<div id="accredited-prior-learning">
 		<#if can.do("Profiles.Read.AccreditedPriorLearning", studentCourseDetails) && studentCourseDetails.hasAccreditedPriorLearning>
 			<h5>Accredited Prior Learning</h5>

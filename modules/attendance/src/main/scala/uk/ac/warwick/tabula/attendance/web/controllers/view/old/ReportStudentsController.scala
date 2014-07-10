@@ -1,26 +1,28 @@
-package uk.ac.warwick.tabula.attendance.web.controllers
+package uk.ac.warwick.tabula.attendance.web.controllers.view.old
+
+import javax.validation.Valid
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.attendance.commands.report.{ReportStudentsState, ReportStudentsConfirmCommand, ReportStudentsChoosePeriodCommand}
-import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.attendance.commands.report.OldReportStudentsChoosePeriodCommand.StudentReportStatus
+import uk.ac.warwick.tabula.attendance.commands.report.{OldReportStudentsChoosePeriodCommand, ReportStudentsConfirmCommand, ReportStudentsState}
 import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.attendance.commands.report.ReportStudentsChoosePeriodCommand.StudentReportStatus
+import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
 
 @Controller
 @RequestMapping(Array("/report/{department}"))
-class ReportStudentsChoosePeriodController extends AttendanceController {
+class OldReportStudentsChoosePeriodController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department) =
-		ReportStudentsChoosePeriodCommand(department, mandatory(AcademicYear(2013)))
+		OldReportStudentsChoosePeriodCommand(department, mandatory(AcademicYear(2013)))
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[Seq[StudentReportStatus]]) = {
@@ -41,7 +43,7 @@ class ReportStudentsChoosePeriodController extends AttendanceController {
 
 @Controller
 @RequestMapping(Array("/report/{department}/confirm"))
-class ReportStudentsConfirmController extends AttendanceController {
+class OldReportStudentsConfirmController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
 
