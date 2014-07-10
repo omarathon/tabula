@@ -111,12 +111,12 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 
 			val droppedAgents = Set(staff1.asInstanceOf[Member], staff2.asInstanceOf[Member])
 
-			var removeCommands = cmd.getRemoveCommands(droppedAgents)
+			var removeCommands = cmd.getRemoveCommandsForDroppedAgents(droppedAgents)
 			removeCommands.size should be (3)
 			removeCommands.map(_.relationship).toSet should be (Set(rel1, rel2, rel3))
 			removeCommands.head.relationshipType should be (relationshipType)
 
-			removeCommands = cmd.getRemoveCommands(Set(staff2.asInstanceOf[Member]))
+			removeCommands = cmd.getRemoveCommandsForDroppedAgents(Set(staff2.asInstanceOf[Member]))
 			removeCommands.size should be (1)
 			removeCommands.map(_.relationship).toSeq should be (Seq(rel3))
 
@@ -140,7 +140,7 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 			val mappings = newAgentMappings.toMap
 
 			// now with that set of mappings and the unconnected agents, we should see no commands coming back:
-			var editCommands = cmd.getEditCommands(mappings, agentsToEdit)
+			var editCommands = cmd.getEditStudentCommands(mappings, agentsToEdit)
 			editCommands.size should be (0)
 
 			// now, more sensibly, get the edit commands for staff 4 which should return commands we can inspect:
@@ -148,7 +148,7 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 			service.findCurrentRelationships(relationshipType, student6.mostSignificantCourseDetails.head) returns Seq()
 			service.findCurrentRelationships(relationshipType, student7.mostSignificantCourseDetails.head) returns Seq()
 
-			editCommands = cmd.getEditCommands(mappings, Set(staff4.asInstanceOf[Member]))
+			editCommands = cmd.getEditStudentCommands(mappings, Set(staff4.asInstanceOf[Member]))
 
 			editCommands.size should be (3)
 			editCommands.map(_.oldAgent).head should be (None)
@@ -184,6 +184,29 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 			val commandResults = cmd.applyInternal()
 			commandResults.size should be (3)
 			commandResults.map(_.modifiedRelationship).toSet should be (Set(rel41, rel35, rel37))
+		}
+	}
+
+	@Test def testChangeStudentsForAgent = withUser("boombastic") {
+		new Environment {
+			// set up a new relationship to add
+			val rel14 = StudentRelationship(staff1, relationshipType, student4)
+			service.saveStudentRelationships(relationshipType, student4.mostSignificantCourseDetails.head, Seq(staff1)) returns (Seq(rel14))
+
+			// set up 'mapping' in the command as if from the db
+			cmd.populate()
+			cmd.sort()
+
+			cmd.onBind(new BindException(cmd, "cmd"))
+
+			// pre-existing relationships are staff 1 -> student 1, staff2 -> student 1, staff 3 -> student 2
+			// now change staff 1 to map to student 4 instead of student 1:
+			cmd.mapping.get(staff1).addAll(Seq(student4).asJavaCollection)
+			cmd.mapping.get(staff1).removeAll(Seq(student1).asJavaCollection)
+
+			val commandResults = cmd.applyInternal()
+			commandResults.size should be (2) // one to remove, one to add
+			commandResults.map(_.modifiedRelationship).toSet should be (Set(rel1, rel14))
 		}
 	}
 
