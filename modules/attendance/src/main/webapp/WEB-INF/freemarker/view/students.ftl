@@ -1,19 +1,26 @@
 <#escape x as x?html>
 <#import "../attendance_macros.ftl" as attendance_macros />
 
+<#assign filterQuery = filterCommand.serializeFilter />
+
+<#if features.attendanceMonitoringReport && can.do("MonitoringPoints.Report", department) >
+	<div class="pull-right send-to-sits">
+		<a href="<@routes.viewReport department academicYear.startYear?c filterQuery />" class="btn btn-primary">Upload to SITS:eVision</a>
+	</div>
+</#if>
+
+
 <#macro deptheaderroutemacro dept>
 	<@routes.viewStudents dept academicYear.startYear?c />
 </#macro>
 <#assign deptheaderroute = deptheaderroutemacro in routes/>
 <@fmt.deptheader "View students" "in" department routes "deptheaderroute" />
 
-<#assign filterQuery = filterCommand.serializeFilter />
-
 <#assign submitUrl><@routes.viewStudents department academicYear.startYear?c /></#assign>
-
 <#assign filterCommand = filterCommand />
 <#assign filterCommandName = "filterCommand" />
 <#assign filterResultsPath = "/WEB-INF/freemarker/view/_students_results.ftl" />
+
 <#include "/WEB-INF/freemarker/filter_bar.ftl" />
 
 <script type="text/javascript">

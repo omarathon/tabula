@@ -83,6 +83,7 @@ trait AttendanceMonitoringDao {
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
 	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear, withFlush: Boolean = false): Option[AttendanceMonitoringCheckpointTotal]
+	def getCheckpointTotals(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal]
 	
 }
 
@@ -377,6 +378,14 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 				}
 		}
 
+	}
+
+	def getCheckpointTotals(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal] = {
+		session.newCriteria[AttendanceMonitoringCheckpointTotal]
+				.add(safeIn("student", students))
+				.add(is("department", department))
+				.add(is("academicYear", academicYear))
+				.seq
 	}
 }
 

@@ -12,11 +12,11 @@ import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.{Errors, BindingResult}
-import uk.ac.warwick.tabula.attendance.commands.report.ReportStudentsChoosePeriodCommand.StudentReportStatus
+import uk.ac.warwick.tabula.attendance.commands.report.OldReportStudentsChoosePeriodCommand.StudentReportStatus
 
-object ReportStudentsChoosePeriodCommand {
+object OldReportStudentsChoosePeriodCommand {
 	def apply(department: Department, academicYear: AcademicYear) =
-		new ReportStudentsChoosePeriodCommand(department, academicYear)
+		new OldReportStudentsChoosePeriodCommand(department, academicYear)
 			with ComposableCommand[Seq[StudentReportStatus]]
 			with ReportStudentsPermissions
 			with ReportStudentsState
@@ -29,7 +29,7 @@ object ReportStudentsChoosePeriodCommand {
 	case class StudentReportStatus(student: StudentMember, unreported: Int, unrecorded: Int)
 }
 
-abstract class ReportStudentsChoosePeriodCommand(val department: Department, val academicYear: AcademicYear)
+abstract class OldReportStudentsChoosePeriodCommand(val department: Department, val academicYear: AcademicYear)
 	extends CommandInternal[Seq[StudentReportStatus]] with ReportStudentsState with GroupMonitoringPointsByTerm
 	with BindListener with AvailablePeriods with FindTermForPeriod {
 
