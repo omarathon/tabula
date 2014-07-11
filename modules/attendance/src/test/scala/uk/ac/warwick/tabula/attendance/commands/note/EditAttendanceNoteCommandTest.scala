@@ -14,7 +14,7 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
 		val anAbsenceType = AbsenceType.Cancelled
 		val theNote = "a note!"
 
-		val command = new EditAttendanceNoteCommand(null, null, null, null)
+		val command = new EditAttendanceNoteCommand(null, null, null, Option(""))
 			with AttendanceMonitoringServiceComponent
 			with FileAttachmentServiceComponent
 			with UserLookupComponent
@@ -37,6 +37,13 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
 			val point = null
 		}
 	}
+
+	@Test
+	def onBindNoExistingCheckpoints() { new Fixture {
+		command.attendanceMonitoringService.getAttendanceNote(command.student, command.point) returns (Option(command.attendanceNote))
+		command.attendanceMonitoringService.getCheckpoints(Seq(command.point), command.student) returns Map()
+		command.onBind(errors)
+	}}
 
 	@Test
 	def testApply() { new Fixture {

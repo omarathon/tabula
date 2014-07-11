@@ -51,7 +51,9 @@ abstract class EditAttendanceNoteCommand(
 				newNote
 			})
 
-			checkpoint = attendanceMonitoringService.getCheckpoints(Seq(point), student).head._2
+			val pointsCheckpointsMap = attendanceMonitoringService.getCheckpoints(Seq(point), student)
+			if (!pointsCheckpointsMap.isEmpty) checkpoint = pointsCheckpointsMap.head._2
+
 			customStateStringOption.map(stateString => {
 				try {
 					customState = AttendanceState.fromCode(stateString)
