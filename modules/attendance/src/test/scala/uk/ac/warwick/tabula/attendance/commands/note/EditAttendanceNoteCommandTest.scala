@@ -43,6 +43,16 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
 		command.attendanceMonitoringService.getAttendanceNote(command.student, command.point) returns (Option(command.attendanceNote))
 		command.attendanceMonitoringService.getCheckpoints(Seq(command.point), command.student) returns Map()
 		command.onBind(errors)
+		command.checkpoint should be (null)
+	}}
+
+	@Test
+	def onBindExistingCheckpoints() { new Fixture {
+		val aCheckpoint = new AttendanceMonitoringCheckpoint
+		command.attendanceMonitoringService.getAttendanceNote(command.student, command.point) returns (Option(command.attendanceNote))
+		command.attendanceMonitoringService.getCheckpoints(Seq(command.point), command.student) returns (Map(command.point -> aCheckpoint))
+		command.onBind(errors)
+		command.checkpoint should be (aCheckpoint)
 	}}
 
 	@Test
