@@ -9,9 +9,9 @@ import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.{Errors, BindingResult}
 import org.joda.time.DateTime
 
-object ReportStudentsConfirmCommand {
+object OldReportStudentsConfirmCommand {
 	def apply(department: Department, currentUser: CurrentUser) =
-		new ReportStudentsConfirmCommand(department, currentUser)
+		new OldReportStudentsConfirmCommand(department, currentUser)
 			with ComposableCommand[Seq[MonitoringPointReport]]
 			with ReportStudentsPermissions
 			with ReportStudentsConfirmCommandDescription
@@ -23,7 +23,7 @@ object ReportStudentsConfirmCommand {
 }
 
 
-abstract class ReportStudentsConfirmCommand(val department: Department, val currentUser: CurrentUser)
+abstract class OldReportStudentsConfirmCommand(val department: Department, val currentUser: CurrentUser)
 	extends CommandInternal[Seq[MonitoringPointReport]] with BindListener with AvailablePeriods with ReportStudentsConfirmState with FindTermForPeriod {
 
 	self: ProfileServiceComponent =>

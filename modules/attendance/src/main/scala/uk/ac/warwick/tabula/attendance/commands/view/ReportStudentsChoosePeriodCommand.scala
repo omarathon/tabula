@@ -32,19 +32,7 @@ class ReportStudentsChoosePeriodCommandInternal(val department: Department, val 
 	self: TermServiceComponent with ReportStudentsChoosePeriodCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
-		val relevantPoints = termPoints(period).intersect(studentPointMap.values.flatten.toSeq)
-		val checkpoints = attendanceMonitoringService.getCheckpoints(relevantPoints, allStudents)
-		allStudents.map{student => {
-			// Points the student is taking that are in the given period
-			val studentPoints = termPoints(period).intersect(studentPointMap(student))
-			val unrecorded = studentPoints.count(point =>
-				checkpoints.get(student).flatMap(_.get(point)).isEmpty
-			)
-			val missed = studentPoints.count(point =>
-				checkpoints.get(student).flatMap(_.get(point)).exists(_.state == AttendanceState.MissedUnauthorised)
-			)
-			StudentReportCount(student, missed, unrecorded)
-		}}.filter(_.missed > 0)
+		studentReportCounts
 	}
 
 }
@@ -109,6 +97,22 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
 		// Visible terms as those that are this term or before
 		// Terms that can be selected are those that no selected student has been reported for
 		termsToShow.map(term => term -> nonReportedTerms.contains(term))
+	}
+
+	lazy val studentReportCounts = {
+		val relevantPoints = termPoints(period).intersect(studentPointMap.values.flatten.toSeq)
+		val checkpoints = attendanceMonitoringService.getCheckpoints(relevantPoints, allStudents)
+		allStudents.map { student => {
+			// Points the student is taking that are in the given period
+			val studentPoints = termPoints(period).intersect(studentPointMap(student))
+			val unrecorded = studentPoints.count(point =>
+				checkpoints.get(student).flatMap(_.get(point)).isEmpty
+			)
+			val missed = studentPoints.count(point =>
+				checkpoints.get(student).flatMap(_.get(point)).exists(_.state == AttendanceState.MissedUnauthorised)
+			)
+			StudentReportCount(student, missed, unrecorded)
+		}}.filter(_.missed > 0)
 	}
 
 	// Bind variables
