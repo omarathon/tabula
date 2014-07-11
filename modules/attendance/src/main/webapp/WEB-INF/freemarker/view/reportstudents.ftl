@@ -6,6 +6,7 @@
 <@f.form commandName="command" action="${confirmPath}" method="POST" cssClass="form-horizontal">
 
 	<input type="hidden" name="period" value="${command.period}" />
+	<input type="hidden" name="filterString" value="${command.serializeFilter}" />
 
 	<#if studentReportCounts?size == 0>
 		<div class="alert alert-info">

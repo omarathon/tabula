@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
 import uk.ac.warwick.tabula.NoCurrentUser
 import uk.ac.warwick.tabula.services.{ProfileService, MonitoringPointService, TermService}
 
-class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
+class OldReportStudentsConfirmCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends ReportStudentsConfirmState	with ReportStudentsConfirmCommandValidation  {
 		val termService = mock[TermService]
@@ -15,7 +15,7 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
 	}
 
 	trait Fixture {
-		val cmd = new ReportStudentsConfirmCommand(new Department(), NoCurrentUser()) with CommandTestSupport
+		val cmd = new OldReportStudentsConfirmCommand(new Department(), NoCurrentUser()) with CommandTestSupport
 		val availablePeriod = "Autumn"
 		val unavailablePeriod = "Springtime"
 		val unspecifiedPeriod = "Summertime"
