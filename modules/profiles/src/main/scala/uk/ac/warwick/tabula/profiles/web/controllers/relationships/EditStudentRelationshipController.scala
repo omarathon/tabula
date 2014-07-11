@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.profiles.commands.relationships.EditStudentRelationshipCommand
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{MaintenanceModeService, RelationshipService, ProfileService}
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import javax.validation.Valid
 import org.springframework.validation.Errors
@@ -24,6 +24,8 @@ class EditStudentRelationshipController extends BaseController {
 	validatesSelf[EditStudentRelationshipCommand]
 
 	var profileService = Wire.auto[ProfileService]
+	var relationshipService = Wire.auto[RelationshipService]
+	var maintenanceMode = Wire[MaintenanceModeService]
 
 	@ModelAttribute("editStudentRelationshipCommand")
 	def editStudentRelationshipCommand(
@@ -32,8 +34,12 @@ class EditStudentRelationshipController extends BaseController {
 			@RequestParam(value="currentAgent", required=false) currentAgent: Member,
 			@RequestParam(value="remove", required=false) remove: Boolean,
 			user: CurrentUser
-			) =
-		new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Option(currentAgent), user, Option(remove).getOrElse(false))
+			) = {
+		val cmd = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Option(currentAgent), user, Option(remove).getOrElse(false))
+		cmd.relationshipService = relationshipService
+		cmd.maintenanceMode = this.maintenanceMode
+		cmd
+	}
 
 	// initial form display
 	@RequestMapping(value = Array("/edit","/add"),method=Array(GET))
