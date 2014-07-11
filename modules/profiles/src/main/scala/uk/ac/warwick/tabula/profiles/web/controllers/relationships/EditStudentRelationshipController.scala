@@ -36,8 +36,6 @@ class EditStudentRelationshipController extends BaseController {
 			user: CurrentUser
 			) = {
 		val cmd = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Option(currentAgent), user, Option(remove).getOrElse(false))
-		cmd.relationshipService = relationshipService
-		cmd.maintenanceMode = this.maintenanceMode
 		cmd
 	}
 

@@ -264,8 +264,8 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 					val cmd = new EditStudentRelationshipCommand(scd, relationshipType, possibleExistingAgentForStudent, viewer, false)
 					cmd.agent = agentToEdit
-					cmd.maintenanceMode = this.maintenanceMode
-					cmd.relationshipService = service
+					cmd.maintenanceMode = this.maintenanceMode // override default in case this is being called in a test
+					cmd.relationshipService = service // override default in case this is being called in a test
 					cmd
 				})
 			})
