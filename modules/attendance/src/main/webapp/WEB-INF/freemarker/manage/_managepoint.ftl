@@ -212,14 +212,14 @@
 				</div>
 				<div class="modules-list">
 					<input type="hidden" name="_assignmentSubmissionModules" value="false" />
-					<ul>
+					<ol>
 						<#list command.assignmentSubmissionModules![] as module>
 							<li>
 								<input type="hidden" name="assignmentSubmissionModules" value="${module.id}" />
 								<#if command.moduleHasAssignments(module)><i class="icon-fixed-width"></i><#else><i class="icon-fixed-width icon-exclamation-sign" title="This module has no assignments set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger btn-mini"><i class="icon-remove"></i></button>
 							</li>
 						</#list>
-					</ul>
+					</ol>
 				</div>
 			</@form.labelled_row>
 		</div>
