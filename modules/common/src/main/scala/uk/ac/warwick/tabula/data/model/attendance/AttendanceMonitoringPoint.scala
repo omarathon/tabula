@@ -55,6 +55,9 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 	@Column(name = "end_date")
 	var endDate: LocalDate = _
 
+	def isDateValidForPoint(date: LocalDate): Boolean =
+		date == startDate || date == endDate || (startDate.isBefore(date) && endDate.isAfter(date))
+
 	@Column(name="point_type")
 	@NotNull
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointTypeUserType")
