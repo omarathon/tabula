@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
-import uk.ac.warwick.tabula.{Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPoint
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.{Mockito, TestBase}
 
 class DeleteAttendancePointCommandTest extends TestBase with Mockito {
 

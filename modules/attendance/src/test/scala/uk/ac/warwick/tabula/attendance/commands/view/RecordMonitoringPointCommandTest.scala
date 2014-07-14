@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands.view
 
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
 import uk.ac.warwick.tabula.{Fixtures, CurrentUser, AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{UserGroup, Department}

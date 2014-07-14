@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import org.springframework.core.env.Environment
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceUpdateCheckpointTotalMessage, AttendanceMonitoringServiceListener, AttendanceMonitoringService}
 import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.util.queue.Queue
 

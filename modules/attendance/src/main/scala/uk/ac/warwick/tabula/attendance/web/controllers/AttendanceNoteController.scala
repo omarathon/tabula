@@ -4,9 +4,10 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.{AttendanceMonitoringService, UserLookupService}
+import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.helpers.DateBuilder
 import uk.ac.warwick.tabula.commands.{ApplyWithCallback, PopulateOnForm, Appliable, SelfValidating}
 import uk.ac.warwick.tabula.attendance.web.Routes

@@ -5,7 +5,8 @@ import javax.validation.constraints.NotNull
 import javax.persistence._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.data.model.{KnownTypeUserGroup, GeneratedId, Department, UserGroup}
-import uk.ac.warwick.tabula.services.{AttendanceMonitoringMembershipHelpers, AttendanceMonitoringService, UserGroupCacheManager}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMembershipHelpers, AttendanceMonitoringService}
+import uk.ac.warwick.tabula.services.UserGroupCacheManager
 import uk.ac.warwick.spring.Wire
 import org.hibernate.annotations.{Type, BatchSize}
 import uk.ac.warwick.tabula.JavaImports._

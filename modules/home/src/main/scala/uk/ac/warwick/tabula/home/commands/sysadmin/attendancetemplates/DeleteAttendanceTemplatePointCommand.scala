@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.home.commands.sysadmin.attendancetemplates
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplatePoint
-import uk.ac.warwick.tabula.services.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 
 object DeleteAttendanceTemplatePointCommand {
 	def apply(point: AttendanceMonitoringTemplatePoint) =

@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, At
 import uk.ac.warwick.tabula.data.model.{UserGroup, MemberStudentRelationship, StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.termdates.Term.TermType

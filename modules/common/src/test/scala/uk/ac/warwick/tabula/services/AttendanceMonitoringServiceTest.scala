@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.data.{AttendanceMonitoringDao, AttendanceMonitoringDaoComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMembershipHelpers, AbstractAttendanceMonitoringService}
 import uk.ac.warwick.tabula.{AcademicYear, MockUserLookup, TestBase, Fixtures, Mockito}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpointTotal, AttendanceMonitoringScheme, AttendanceState}
 import uk.ac.warwick.tabula.JavaImports.JArrayList

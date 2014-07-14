@@ -13,7 +13,8 @@ import uk.ac.warwick.tabula.attendance.web.controllers.{AttendanceController, Ha
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringNote, AttendanceMonitoringPoint}
-import uk.ac.warwick.tabula.services.{AttendanceMonitoringService, AutowiringTermServiceComponent}
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 
 @Controller
 @RequestMapping(Array("/profile/{student}/{academicYear}/record"))

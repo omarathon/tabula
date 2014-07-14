@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.attendance.commands.view
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
 
 class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
 

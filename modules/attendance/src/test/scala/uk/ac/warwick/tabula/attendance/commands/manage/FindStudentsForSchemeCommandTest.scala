@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.commands.MemberOrUser
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
 import uk.ac.warwick.tabula.{MockUserLookup, Fixtures, CurrentUser, Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{UserLookupComponent, AttendanceMonitoringService, ProfileService, AttendanceMonitoringServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.services.{UserLookupComponent, ProfileService, ProfileServiceComponent}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permission

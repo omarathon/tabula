@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.services.attendancemonitoring
 
 import org.codehaus.jackson.annotate.JsonAutoDetect
 import org.joda.time.DateTime
@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.data.{AttendanceMonitoringDaoComponent, AttendanceMonitoringStudentData, AutowiringAttendanceMonitoringDaoComponent, Daoisms, SchemeMembershipItem, SchemeMembershipItemType}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.queue.conversion.ItemType

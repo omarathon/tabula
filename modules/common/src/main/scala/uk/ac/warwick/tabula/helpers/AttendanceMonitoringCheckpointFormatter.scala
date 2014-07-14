@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.helpers
 import org.springframework.beans.factory.annotation.Autowired
 
 import freemarker.template._
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import freemarker.template.utility.DeepUnwrap
@@ -10,7 +11,7 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyl
 import freemarker.core.Environment
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, StudentMember, Department}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.{AttendanceMonitoringService, UserLookupService}
+import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.attendance.web.Routes
 
 case class AttendanceMonitoringCheckpointFormatterResult(

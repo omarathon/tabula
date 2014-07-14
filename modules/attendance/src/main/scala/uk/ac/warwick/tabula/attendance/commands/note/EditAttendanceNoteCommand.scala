@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.attendance.commands.note
 import uk.ac.warwick.tabula.data.model.{AbsenceType, FileAttachment, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState, AttendanceMonitoringCheckpoint, AttendanceMonitoringNote}
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._

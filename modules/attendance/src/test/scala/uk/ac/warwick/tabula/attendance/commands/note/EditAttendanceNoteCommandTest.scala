@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.services._
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.AbsenceType
 import uk.ac.warwick.tabula.data.model.attendance._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
 import uk.ac.warwick.userlookup.User
 
 class EditAttendanceNoteCommandTest extends TestBase with Mockito {
