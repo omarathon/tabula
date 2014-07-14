@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventOccurrence, SmallG
 import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.helpers.Promises
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringScheme, MonitoringPointTemplate, MonitoringPointSetTemplate, MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 
@@ -413,6 +413,15 @@ abstract class Description {
 	def attendanceMonitoringPoints(points: Seq[AttendanceMonitoringPoint]) = {
 		property("attendanceMonitoringPoint", points.map(_.id))
 		attendanceMonitoringSchemes(points.map(_.scheme))
+	}
+
+	def attendanceMonitoringTemplate(template: AttendanceMonitoringTemplate) = {
+		property("attendanceMonitoringTemplate", template.id)
+	}
+
+	def attendanceMonitoringTemplatePoint(templatePoint: AttendanceMonitoringTemplatePoint) = {
+		property("attendanceMonitoringTemplatePoint", templatePoint)
+		attendanceMonitoringTemplate(templatePoint.scheme)
 	}
 
 	def notifications(notifications: Seq[Notification[_,_]]) = {

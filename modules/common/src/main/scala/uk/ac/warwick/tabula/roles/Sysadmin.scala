@@ -26,12 +26,13 @@ case object SysadminRoleDefinition extends UnassignableBuiltInRoleDefinition {
 		StudentRelationshipType.Update,
 		StudentRelationshipType.Delete,
 
-		MonitoringPointSetTemplates.Manage
+		MonitoringPointTemplates.Manage
 	)
 
 	GrantsGlobalPermission(
 		Masquerade,
 		Department.Create,
+		Department.Update,
 		Module.Create,
 		// We don't give Read here, god up for that
 		Module.Update,

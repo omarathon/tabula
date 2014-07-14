@@ -38,12 +38,13 @@ class CreateNewAttendancePointsFromCopyCommandInternal(val department: Departmen
 	override def applyInternal() = {
 		val points = getPoints(findPointsResult, schemes, pointStyle)
 		points.foreach(attendanceMonitoringService.saveOrUpdate)
-		benchmark("updateCheckpointTotals") {
-			profileService.getAllMembersWithUniversityIds(schemes.flatMap(_.members.members).distinct).map {
-				case student: StudentMember => attendanceMonitoringService.updateCheckpointTotal(student, department, academicYear)
-				case _ =>
-			}
+
+		val students = profileService.getAllMembersWithUniversityIds(schemes.flatMap(_.members.members).distinct).flatMap {
+			case student: StudentMember => Option(student)
+			case _ => None
 		}
+		attendanceMonitoringService.updateCheckpointTotalsAsync(students, department, academicYear)
+
 		points
 	}
 

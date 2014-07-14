@@ -3,7 +3,7 @@
 
 <#macro student_item profile bindpath="">
 	<#local mostSignificantCourseDetails = profile.mostSignificantCourseDetails />
-	<#if mostSignificantCourseDetails??>
+	<#if mostSignificantCourseDetails?? && mostSignificantCourseDetails.route?? >
 		<#local route = mostSignificantCourseDetails.route />
 	</#if>
 	<li class="student well well-small"
@@ -77,6 +77,7 @@
 			<#assign submitUrl><@routes.relationship_allocate department relationshipType /></#assign>
 			<div class="fix-area">
 			<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToRelationshipCommand" cssClass="form-horizontal">
+
 			<div class="tabula-dnd"
 					 data-item-name="student"
 					 data-text-selector=".name h6"

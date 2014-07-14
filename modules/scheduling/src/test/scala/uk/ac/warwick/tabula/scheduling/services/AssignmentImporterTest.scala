@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.{TestBase, Mockito, PersistenceTestBase}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.model.AssessmentComponent
+import scala.collection.mutable.ArrayBuffer
 
 trait EmbeddedAds {
 	val ads = new EmbeddedDatabaseBuilder().addScript("ads.sql").build()
@@ -50,23 +51,33 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedAds {
 	}
 	
 	@Test def importMembers { withFakeTime(dateTime(2012, 5)) {
-		var count = 0
+		var members = ArrayBuffer[UpstreamModuleRegistration]()
 		assignmentImporter.allMembers { mr =>
-			count += 1
+			members += mr
 		}
-		count should be (4)	
+		members.size should be (5)
 	}}
 
 	@Test def emptyAssessmentGroups { withFakeTime(dateTime(2012, 5)) {
 		val emptyGroups = assignmentImporter.getEmptyAssessmentGroups
-		emptyGroups.size should be (2)
-		emptyGroups should containMatching[UpstreamAssessmentGroup] ( _.moduleCode == "CH130-15" )
-		emptyGroups should containMatching[UpstreamAssessmentGroup] ( _.moduleCode == "CH130-20" )
+		val tuples = emptyGroups.map(asTuple)
+
+		tuples should be (Seq(
+			("CH115-30", NONE, NONE),
+			("CH120-15", NONE, NONE),
+			// Strictly these ought to appear, but if a module has _no_ registrations at all,
+			// the query won't return any "NONE" entries. Not really bothered; if nobody's registered
+			// on the module, who cares if the NONE group is stale.
+			//("CH130-15", NONE, NONE),
+			//("CH130-20", NONE, NONE),
+			("CH130-15", "A", "A"),
+			("CH130-20", "A", "A")
+		))
 	}}
 
 	@Test def getAllAssessmentGroups { withFakeTime(dateTime(2012, 5)) {
 		val allGroups = sorted(assignmentImporter.getAllAssessmentGroups)
-		val tuples = allGroups map asTuple
+		val tuples = allGroups.map(asTuple)
 
 		/* We currently get the NONE assessmentgroups even for groups
 		   that aren't empty. We do only generate AssessmentComponents
@@ -91,9 +102,10 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedAds {
 		val tuples = components map asTuple
 		
 		tuples should be (Seq(
-			("CH115-30","A","Chemicals Essay"), 
-			("CH120-15","A","Chemistry Dissertation"), 
-			("CH130-15","A","Chem 130 A01"), 
+			("CH115-30","A","Chemicals Essay"),
+			("CH115-30","NONE","Students not registered for assessment"),
+			("CH120-15","A","Chemistry Dissertation"),
+			("CH130-15","A","Chem 130 A01"),
 			("CH130-20","A","Chem 130 A01 (20 CATS)")
 		))
 

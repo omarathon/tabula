@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.sysadmin.web
 
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplate
 import uk.ac.warwick.tabula.web.RoutesUtils
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 
@@ -15,6 +16,11 @@ object Routes {
 
 	object jobs {
 		def list = context + "/jobs/list"
-		def status(instance: JobInstance) = context + "/jobs/job-status?id=%s" format (encoded(instance.id))
+		def status(instance: JobInstance) = context + "/jobs/job-status?id=%s" format encoded(instance.id)
+	}
+
+	object AttendanceTemplates {
+		def list = context + "/attendancetemplates"
+		def edit(template: AttendanceMonitoringTemplate) = context + "/attendancetemplates/%s/edit" format encoded(template.id)
 	}
 }

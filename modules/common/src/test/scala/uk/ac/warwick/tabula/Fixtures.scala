@@ -39,14 +39,14 @@ object Fixtures extends Mockito {
 	def department(code:String, name:String = null) = {
 		val d = new Department
 		d.code = code
-		d.name = Option(name).getOrElse("Department " + code)
+		d.fullName = Option(name).getOrElse("Department " + code)
 		d
 	}
 
 	def departmentWithId(code:String, name:String = null, id: String) = {
 		val d = new Department
 		d.code = code
-		d.name = Option(name).getOrElse("Department " + code)
+		d.fullName = Option(name).getOrElse("Department " + code)
 		d.id = id
 		d
 	}

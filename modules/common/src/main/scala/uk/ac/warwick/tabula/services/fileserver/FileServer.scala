@@ -43,7 +43,7 @@ class FileServer {
 		 * is to put it as the last part of the URL path.
 		 */
 		val dispositionHeader = fileName match {
-			case Some(fileName) => s"attachment;filename=${fileName}"
+			case Some(fileName) => "attachment;filename=\"" + fileName + "\""
 			case _ => "attachment"
 		}
 

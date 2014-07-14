@@ -322,10 +322,10 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 		meetingToSkipApproval: Option[MeetingRecord]
 	): Boolean = {
 		getRelevantPoints(student, relationshipType, meetingFormat, meetingDate).exists(point => {
-			meetingToSkipApproval match {
+			!monitoringPointService.studentAlreadyReportedThisTerm(student, point) && (meetingToSkipApproval match {
 				case Some(meeting) => countRelevantMeetings(student, point, meetingToSkipApproval) >= point.meetingQuantity
 				case None => countRelevantMeetings(student, point, None) >= point.meetingQuantity - 1
-			}
+			})
 		})
 	}
 
@@ -350,26 +350,25 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 		meeting.relationship.studentMember.map(student => {
 				val relevantMeetingPoints = getRelevantPoints(student, meeting.relationship.relationshipType, meeting.format, meeting.meetingDate)
 				// check the required quantity and create a checkpoint if there are sufficient meetings
-				val checkpointOptions = for (point <- relevantMeetingPoints) yield {
-					if (countRelevantMeetings(student, point, None) >= point.meetingQuantity) {
-						val checkpoint = new MonitoringCheckpoint
-						checkpoint.point = point
-						checkpoint.monitoringPointService = monitoringPointService
-						checkpoint.student = student
-						checkpoint.state = AttendanceState.Attended
-						checkpoint.autoCreated = true
-						checkpoint.updatedDate = DateTime.now
-						checkpoint.updatedBy = meeting.relationship.agentMember match {
-							case Some(agent: uk.ac.warwick.tabula.data.model.Member) => agent.universityId
-							case _ => meeting.relationship.agent
-						}
-						monitoringPointDao.saveOrUpdate(checkpoint)
-						Option(checkpoint)
+				for {
+					point <- relevantMeetingPoints
+					if !monitoringPointService.studentAlreadyReportedThisTerm(student, point)
+					if countRelevantMeetings(student, point, None) >= point.meetingQuantity
+				} yield {
+					val checkpoint = new MonitoringCheckpoint
+					checkpoint.point = point
+					checkpoint.monitoringPointService = monitoringPointService
+					checkpoint.student = student
+					checkpoint.state = AttendanceState.Attended
+					checkpoint.autoCreated = true
+					checkpoint.updatedDate = DateTime.now
+					checkpoint.updatedBy = meeting.relationship.agentMember match {
+						case Some(agent: uk.ac.warwick.tabula.data.model.Member) => agent.universityId
+						case _ => meeting.relationship.agent
 					}
-					else
-						None
+					monitoringPointDao.saveOrUpdate(checkpoint)
+					checkpoint
 				}
-				checkpointOptions.flatten.toSeq
 			}).getOrElse(Seq())
 	}
 

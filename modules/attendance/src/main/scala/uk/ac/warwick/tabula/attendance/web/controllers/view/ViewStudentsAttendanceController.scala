@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.attendance.web.controllers.{HasMonthNames, Attendanc
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.attendance.commands.view.{FilterStudentsAttendanceCommandResult, FilterStudentsAttendanceCommand}
+import uk.ac.warwick.tabula.attendance.commands.view.{FilteredStudentsAttendanceResult, FilterStudentsAttendanceCommand}
 
 @Controller
 @RequestMapping(Array("/view/{department}/{academicYear}/students"))
@@ -14,11 +14,11 @@ class ViewStudentsAttendanceController extends AttendanceController with HasMont
 
 	@ModelAttribute("filterCommand")
 	def filterCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		FilterStudentsAttendanceCommand(department, academicYear, user)
+		FilterStudentsAttendanceCommand(mandatory(department), mandatory(academicYear))
 
 	@RequestMapping
 	def home(
-		@ModelAttribute("filterCommand") filterCommand: Appliable[FilterStudentsAttendanceCommandResult],
+		@ModelAttribute("filterCommand") filterCommand: Appliable[FilteredStudentsAttendanceResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {

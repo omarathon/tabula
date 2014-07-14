@@ -89,7 +89,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro timetable_ical_regenerate><@_u page="/timetable/regeneratehash" /></#macro>
 
 <#macro mrm_link studentCourseDetails studentCourseYearDetails>
-	<a href="https://mrm.warwick.ac.uk/mrm/student/student.htm?sprCode=${((studentCourseDetails.sprCode)!)?url}&acYear=${((studentCourseYearDetails.academicYear.toString)!)?url}">
+	<a href="https://mrm.warwick.ac.uk/mrm/student/student.htm?sprCode=${((studentCourseDetails.sprCode)!)?url}&acYear=${((studentCourseYearDetails.academicYear.toString)!)?url}" target="_blank">
 </#macro>
 
 <#macro permissions scope><@_u page="/permissions/${scope.urlCategory}/${scope.urlSlug}" context="/admin" /></#macro>

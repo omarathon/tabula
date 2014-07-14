@@ -35,6 +35,11 @@
 						<i class="icon-plus"></i> Create sub-department</a>
 					</li>
 				</#if>
+				<#if can.do("Department.Update", department)>
+					<li><a href="<@routes.editdepartment department />">
+						<i class="icon-plus"></i> Edit department</a>
+					</li>
+				</#if>
 				<#if can.do("Module.Create", department)>
 					<li><a href="<@routes.createmodule department />">
 						<i class="icon-plus"></i> Create module</a>

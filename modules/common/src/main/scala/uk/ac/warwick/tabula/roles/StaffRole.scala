@@ -32,7 +32,7 @@ case object SSOStaffRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
 	GrantsScopelessPermission(
 		UserPicker,
-		MonitoringPointSetTemplates.View
+		MonitoringPointTemplates.View
 	)
 
 	GrantsGlobalPermission(

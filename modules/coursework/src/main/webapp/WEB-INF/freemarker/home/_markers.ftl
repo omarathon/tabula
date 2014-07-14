@@ -4,7 +4,8 @@
 	<#local assignment = info.assignment />
 	<#local numSubmissions = info.numSubmissions!0 />
 	<#assign time_remaining=durationFormatter(assignment.closeDate) />
-	<#if numSubmissions==0>
+	
+	<#if numSubmissions==0 || !info.isFeedbacksToManage>
 		<#local class="disabled use-tooltip" />
 		<#local href="" />
 		<#local title>

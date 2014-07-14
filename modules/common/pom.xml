@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>71</version>
+		<version>72</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -206,7 +206,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>uk.ac.warwick.sso</groupId>
 			<artifactId>sso-client</artifactId>
@@ -218,13 +218,13 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>uk.ac.warwick</groupId>
 			<artifactId>spring-scala-glue_${scala.major.version}</artifactId>
 			<version>1.5</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-core</artifactId>
@@ -444,22 +444,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tiles</groupId>
-			<artifactId>tiles-compat</artifactId>
-			<version>${org.apache.tiles.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tiles</groupId>
 			<artifactId>tiles-core</artifactId>
 			<version>${org.apache.tiles.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tiles</groupId>
 			<artifactId>tiles-el</artifactId>
-			<version>${org.apache.tiles.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tiles</groupId>
-			<artifactId>tiles-extras</artifactId>
 			<version>${org.apache.tiles.version}</version>
 		</dependency>
 		<dependency>
@@ -501,12 +491,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.reflections</groupId>
-			<artifactId>reflections</artifactId>
-			<version>0.9.9-RC1</version>
-		</dependency>
-
-		<dependency>
 			<groupId>uk.ac.warwick.membership</groupId>
 			<artifactId>membership-rmi</artifactId>
 			<version>2.7</version>
@@ -522,7 +506,7 @@
 			<artifactId>flying-saucer-pdf-itext5</artifactId>
 			<version>9.0.4</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>uk.co.halfninja</groupId>
 			<artifactId>random-name-generator_${scala.major.version}</artifactId>

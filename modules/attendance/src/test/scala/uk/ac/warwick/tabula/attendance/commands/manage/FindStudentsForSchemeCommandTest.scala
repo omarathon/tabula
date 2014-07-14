@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
-import uk.ac.warwick.tabula.{Fixtures, CurrentUser, Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{AttendanceMonitoringService, ProfileService, AttendanceMonitoringServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.commands.MemberOrUser
+import uk.ac.warwick.tabula.{MockUserLookup, Fixtures, CurrentUser, Mockito, TestBase}
+import uk.ac.warwick.tabula.services.{UserLookupComponent, AttendanceMonitoringService, ProfileService, AttendanceMonitoringServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permission
@@ -11,10 +12,11 @@ import uk.ac.warwick.tabula.data.SchemeMembershipItem
 class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends ProfileServiceComponent
-		with FindStudentsForSchemeCommandState with AttendanceMonitoringServiceComponent {
+		with FindStudentsForSchemeCommandState with AttendanceMonitoringServiceComponent with UserLookupComponent {
 
 		val profileService = smartMock[ProfileService]
 		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		val userLookup = new MockUserLookup
 		def routesForPermission(user: CurrentUser, p: Permission, dept: Department): Set[Route] = {
 			Set()
 		}
@@ -27,9 +29,9 @@ class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
 	trait Fixture {
 		val scheme = new AttendanceMonitoringScheme
 		scheme.department = new Department
-		val student1 = Fixtures.student("1234")
-		val student2 = Fixtures.student("2345")
-		val student3 = Fixtures.student("3456")
+		val student1 = Fixtures.student(universityId = "1234", userId = "1234")
+		val student2 = Fixtures.student(universityId = "2345", userId = "2345")
+		val student3 = Fixtures.student(universityId = "3456", userId = "3456")
 	}
 
 	@Test
@@ -47,6 +49,12 @@ class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
 		) returns Seq(
 			SchemeMembershipItem(SchemeMembershipStaticType, student1.firstName, student1.lastName, student1.universityId, student1.userId, Seq()),
 			SchemeMembershipItem(SchemeMembershipStaticType, student2.firstName, student2.lastName, student2.universityId, student2.userId, Seq())
+		)
+
+		command.userLookup.registerUserObjects(
+			MemberOrUser(student1).asUser,
+			MemberOrUser(student2).asUser,
+			MemberOrUser(student3).asUser
 		)
 
 		command.updatedIncludedStudentIds.add(student3.universityId)

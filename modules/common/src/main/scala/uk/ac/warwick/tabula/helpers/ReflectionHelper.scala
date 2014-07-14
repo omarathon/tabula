@@ -6,13 +6,11 @@ import java.io.FileOutputStream
 import java.net.URL
 import java.util.regex.Pattern
 import java.util.jar.JarFile
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider
+import org.springframework.core.`type`.filter.AssignableTypeFilter
+
 import scala.collection.JavaConverters._
 import scala.reflect._
-import org.reflections.ReflectionsException
-import org.reflections.Reflections
-import org.reflections.vfs.Vfs
-import org.reflections.vfs.SystemDir
-import org.reflections.vfs.ZipDir
 import org.springframework.util.FileCopyUtils
 import com.google.common.base.Predicate
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
@@ -22,17 +20,20 @@ import javax.persistence.DiscriminatorValue
 import uk.ac.warwick.tabula.roles.{RoleDefinition, SelectorBuiltInRoleDefinition, BuiltInRoleDefinition}
 import java.lang.reflect.Modifier
 
-object ReflectionHelper {
+object ReflectionHelper extends Logging {
 	
-	Vfs.addDefaultURLTypes(new SillyJbossVfsUrlType)
-	lazy val reflections = new Reflections("uk.ac.warwick.tabula")
-	
-	private def subtypesOf[A : ClassTag] = reflections
-			.getSubTypesOf(classTag[A].runtimeClass.asInstanceOf[Class[A]])
-			.asScala.toList
+	private def subtypesOf[A : ClassTag] = {
+		val scanner = new ClassPathScanningCandidateComponentProvider(false)
+		scanner.addIncludeFilter(new AssignableTypeFilter(classTag[A].runtimeClass))
+		val components = scanner.findCandidateComponents("uk.ac.warwick.tabula")
+		components.asScala.map { _.getBeanClassName }.toSeq.sorted.map(Class.forName).map { _.asInstanceOf[Class[A]] }
+	}
 
 	lazy val allNotifications : Map[String, Class[_ <: Notification[ToEntityReference, Unit]]] = {
 		val notifications = subtypesOf[Notification[ToEntityReference, Unit]].filter(_.getAnnotation(classOf[DiscriminatorValue]) != null)
+		if (notifications.isEmpty) {
+			logger.error("Reflections found no Notification classes!")
+		}
 		notifications.map { n =>
 			val discriminator : DiscriminatorValue = n.getAnnotation(classOf[DiscriminatorValue])
 			discriminator.value -> n
@@ -54,7 +55,7 @@ object ReflectionHelper {
 			if (dots1 != dots2) (dots1 < dots2)
 			else shortName1 < shortName2
 		}
-		
+
 		subtypesOf[Permission]
 			.filter {_.getName.substring(Permissions.getClass.getName.length).contains('$')}
 			.sortWith(sortFn)
@@ -115,112 +116,4 @@ object ReflectionHelper {
 			})}		
 	}
 	
-}
-
-/**
- * From http://code.google.com/p/reflections/issues/detail?id=27
- */
-class SillyJbossVfsUrlType extends Vfs.UrlType with Logging {
-	val ReplaceExtension = Set(".ear/", ".jar/", ".war/", ".sar/", ".har/", ".par/")
-
-	val VfsZipProtocol = "vfszip"
-	val VfsFileProtocol = "vfsfile"
-		
-	def matches(url: URL) = VfsZipProtocol.equals(url.getProtocol) || VfsFileProtocol.equals(url.getProtocol)
-	
-	def getJar(file: String) = {
-		def toJar(pieces: List[String], jarFile: JarFile = null): JarFile = {
-			pieces match {
-				case Nil => jarFile
-				case head :: tail => 
-					if (jarFile == null) toJar(tail, new JarFile(head))
-					else {
-						// Extract the current head to a temporary location
-						val tempFile = File.createTempFile("embedded-jar", ".tmp")
-						tempFile.deleteOnExit()
-						
-						// Get the entry in the current jar file, and write it out to the temporary file
-						FileCopyUtils.copy(jarFile.getInputStream(jarFile.getEntry(head)), new FileOutputStream(tempFile))
-						
-						toJar(tail, new JarFile(tempFile))
-					}
-			} 
-		}
-		
-		toJar(file.split('!').toList.filterNot(_ == "/"))
-	}
-		
-	def createDir(url: URL) = {
-		try {
-			val adaptedUrl = adaptUrl(url)
-			
-			val file = adaptedUrl.getFile()
-			new ZipDir(getJar(file))
-		} catch {
-			case e: Exception => try {
-				new ZipDir(new JarFile(url.getFile))
-			} catch {
-				case e: IOException => null
-			}
-		}
-	}
-	
-	private def createDir(file: File) = try {
-		if (file.exists && file.canRead) {
-			if (file.isDirectory) new SystemDir(file)
-			else new ZipDir(new JarFile(file))
-		} else null
-	} catch {
-		case e: IOException => null
-	}
-	
-	def adaptUrl(url: URL) = 
-		if (VfsZipProtocol.equals(url.getProtocol)) replaceZipSeparators(url.getPath, new RealFilePredicate)
-		else if (VfsFileProtocol.equals(url.getProtocol)) new URL(url.toString.replace(VfsFileProtocol, "file"))
-		else url
-		
-	def replaceZipSeparators(path: String, predicate: Predicate[File]): URL = {
-		var pos = 0
-		while (pos != -1) {
-			pos = findFirstMatchOfDeployableExtention(path, pos)
-			
-			if (pos > 0) {
-				val file = new File(path.substring(0, pos - 1))
-				if (predicate.apply(file))
-					return replaceZipSeparatorStartingFrom(path, pos)
-			}
-		}
-		
-		throw new ReflectionsException("Unable to identify the real zip file in path '" + path + "'.")
-	}
-	
-	val ExtensionLength = 4
-
-	private def findFirstMatchOfDeployableExtention(path: String, pos: Int) = {
-		val p = Pattern.compile("\\.[ejprw]ar/")
-		val m = p.matcher(path)
-		if (m.find(pos)) m.end()
-		else -1
-	}
-
-	private def replaceZipSeparatorStartingFrom(path: String, pos: Int) = {
-		val zipFile = path.substring(0, pos - 1)
-		var zipPath = path.substring(pos)
-
-		var numSubs = 0
-		for (ext <- ReplaceExtension) {
-			while (zipPath.contains(ext)) {
-				zipPath = zipPath.replace(ext, ext.substring(0, ExtensionLength) + "!")
-				numSubs += 1
-			}
-		}
-
-		val prefix = "zip:" * numSubs
-		new URL(prefix + zipFile + "!" + zipPath)
-	}
-
-}
-
-class RealFilePredicate extends Predicate[File] {
-	def apply(file: File) = file.exists && file.isFile
 }

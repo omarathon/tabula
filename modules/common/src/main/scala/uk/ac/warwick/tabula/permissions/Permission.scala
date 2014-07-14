@@ -156,6 +156,7 @@ object Permissions {
 		case object DownloadFeedbackReport extends Permission("Generate a feedback report")
 		case object ManageProfiles extends Permission("Manage student profiles")
 		case object Create extends Permission("Add a sub-department")
+		case object Update extends Permission("Edit a department")
 	}
 
 	object Module {
@@ -343,9 +344,9 @@ object Permissions {
 		case object UpdateMembership extends ScopelessPermission("Update attendance monitoring scheme membership")
 	}
 
-	object MonitoringPointSetTemplates {
-		case object View extends ScopelessPermission("View monitoring point set templates")
-		case object Manage extends ScopelessPermission("Manage monitoring point set templates")
+	object MonitoringPointTemplates {
+		case object View extends ScopelessPermission("View monitoring point templates")
+		case object Manage extends ScopelessPermission("Manage monitoring point templates")
 	}
 
 	object StudentRelationshipType {

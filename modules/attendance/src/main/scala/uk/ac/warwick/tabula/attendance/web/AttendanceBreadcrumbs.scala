@@ -129,5 +129,41 @@ object AttendanceBreadcrumbs {
 			val url = Some(Routes.View.points(department, academicYear))
 		}
 
+		case class Agents(department: model.Department, academicYear: AcademicYear, relationshipType: StudentRelationshipType) extends Abstract {
+			val title = relationshipType.agentRole.capitalize + "s"
+			val url = Some(Routes.View.agents(department, academicYear, relationshipType))
+		}
+
+	}
+
+	object Agent {
+
+		case class Relationship(relationshipType: StudentRelationshipType) extends Abstract {
+			val title = relationshipType.studentRole.capitalize + "s"
+			val url = Some(Routes.Agent.relationship(relationshipType))
+		}
+		case class RelationshipForYear(relationshipType: StudentRelationshipType, academicYear: AcademicYear) extends Abstract {
+			val title = academicYear.startYear.toString
+			val url = Some(Routes.Agent.relationshipForYear(relationshipType, academicYear))
+		}
+		case class Student(relationshipType: StudentRelationshipType, academicYear: AcademicYear, student: StudentMember) extends Abstract {
+			val title = student.fullName.getOrElse("")
+			val url = Some(Routes.Agent.student(relationshipType, academicYear, student))
+		}
+
+	}
+
+	object Profile {
+		case class Years(student: StudentMember, isStudent: Boolean) extends Abstract {
+			val title = isStudent match {
+				case true => "My Monitoring Points"
+				case false => student.fullName.getOrElse("")
+			}
+			val url = Some(Routes.Profile.years(student))
+		}
+		case class ProfileForYear(student: StudentMember, academicYear: AcademicYear) extends Abstract {
+			val title = academicYear.startYear.toString
+			val url = Some(Routes.Profile.profileForYear(student, academicYear))
+		}
 	}
 }

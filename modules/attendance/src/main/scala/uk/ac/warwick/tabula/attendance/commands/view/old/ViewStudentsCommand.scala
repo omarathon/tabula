@@ -1,26 +1,20 @@
 package uk.ac.warwick.tabula.attendance.commands.view.old
 
-import uk.ac.warwick.tabula.commands.{FiltersStudents, CommandInternal, ReadOnly, Unaudited, ComposableCommand}
-import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
-import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import org.hibernate.criterion.Order
+import org.hibernate.criterion.Order._
+import org.joda.time.DateTime
+import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.attendance.commands.old.{AutowiringSecurityServicePermissionsAwareRoutes, BuildStudentPointsData, PermissionsAwareRoutes, StudentPointsData}
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, FiltersStudents, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.data.model.{CourseType, Department, ModeOfAttendance, Module, Route, SitsStatus}
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
-import org.hibernate.criterion.Order._
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.SitsStatus
-import uk.ac.warwick.tabula.data.model.CourseType
-import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.system.BindListener
-import org.springframework.validation.BindingResult
-import org.hibernate.criterion.Order
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
-import org.joda.time.DateTime
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.attendance.commands.{PermissionsAwareRoutes, StudentPointsData, AutowiringSecurityServicePermissionsAwareRoutes, BuildStudentPointsData}
 
 case class ViewStudentsResults(
 	students: Seq[StudentPointsData],

@@ -23,6 +23,7 @@ object Routes {
 
 		def permissions(department: Department) = context + "/department/%s/permissions" format (encoded(department.code))
 
+		def edit(department: Department) = context + "/department/%s/edit" format (encoded(department.code))
 		def createSubDepartment(department: Department) = context + "/department/%s/subdepartment/new" format (encoded(department.code))
 		def createModule(department: Department) = context + "/department/%s/module/new" format (encoded(department.code))
 

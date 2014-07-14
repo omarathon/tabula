@@ -18,6 +18,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro displaysettings department><@_u page="/department/${department.code}/settings/display" /></#macro>
 
+<#macro editdepartment department><@_u page="/department/${department.code}/edit" /></#macro>
 <#macro createsubdepartment department><@_u page="/department/${department.code}/subdepartment/new" /></#macro>
 <#macro createmodule department><@_u page="/department/${department.code}/module/new" /></#macro>
 <#macro sortmodules department><@_u page="/department/${department.code}/sort-modules" /></#macro>

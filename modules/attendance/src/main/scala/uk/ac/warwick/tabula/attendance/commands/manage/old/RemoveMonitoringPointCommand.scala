@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands.manage.old
 
+import uk.ac.warwick.tabula.attendance.commands.old.GroupMonitoringPointsByTerm
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
-import uk.ac.warwick.tabula.attendance.commands.GroupMonitoringPointsByTerm
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}

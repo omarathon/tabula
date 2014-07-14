@@ -8,7 +8,10 @@
 
 <#macro row graph>
 	<#assign state = (graph.extension.state.description)!"None" />
-	<tr class="itemContainer" data-contentid="${assignment.id}_${graph.universityId}">
+	<tr class="itemContainer"
+		data-contentid ="${assignment.id}_${graph.universityId}"
+		data-detailurl ="<@routes.extensiondetail assignment graph.universityId />"
+	>
 
 		<#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
 		<td class="student-col toggle-cell"><h6 class="toggle-icon">${graph.user.firstName}</h6></td>
@@ -20,7 +23,8 @@
 					data-requested-extra-duration="${graph.requestedExtraDuration}"
 					data-awaiting-review="${graph.awaitingReview?string}"
 					data-approved="${graph.hasApprovedExtension?string}"
-					data-rejected="${graph.hasRejectedExtension?string}">
+					data-rejected="${graph.hasRejectedExtension?string}"
+					data-deadline="<#if graph.deadline?has_content><@fmt.date date=graph.deadline /></#if>">
 					<#if graph.awaitingReview>
 						<span class="label label-warning">Awaiting review</span>
 					<#elseif graph.hasApprovedExtension>
@@ -40,6 +44,7 @@
 		</td>
 		<td class="duration-col toggle-cell">
 		</td>
+		<td class="deadline-col <#if graph.hasApprovedExtension>approved<#else>very-subtle</#if>"><#if graph.deadline?has_content><@fmt.date date=graph.deadline /></#if></td>
 	</tr>
 </#macro>
 
@@ -83,6 +88,7 @@
 
 					<th class="status-col">Status</th>
 					<th class="duration-col">Length of extension</th>
+					<th class="deadline-col">Submission Deadline</th>
 				</tr>
 			</thead>
 
@@ -99,14 +105,15 @@
 		<script type="text/javascript">
 		(function($) {
 			$('.expanding-table').expandingTable({
-				contentUrlFunction: function(){ return '${url(detailUrl!"")}'; },
+				contentUrlFunction: function($row) { return $row.data('detailurl'); },
 				useIframe: true,
 				tableSorterOptions: {
 					sortList: [[1, 0], [0, 0]],
 					headers: {
 						3: { sorter: false }
 					}
-				}
+				},
+				preventContentIdInUrl: true
 			});
 		})(jQuery);
 		</script>

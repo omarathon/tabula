@@ -1,14 +1,19 @@
 package uk.ac.warwick.tabula
 
+import collection.JavaConverters._
+
 import org.scalatest.selenium.WebBrowser
 import org.scalatest.Assertions
 import org.scalatest.matchers.ShouldMatchers
-import org.openqa.selenium.WebDriver
+import org.openqa.selenium.{Cookie, WebDriver}
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.SpanSugar._
 
 import WebsignonMethods._
 import scala.util.matching.Regex
+import org.openqa.selenium.htmlunit.HtmlUnitDriver
+import com.gargoylesoftware.htmlunit
+import com.gargoylesoftware.htmlunit.WebClient
 
 object WebsignonMethods {
 	def parseSignedInDetail(html: String) = {
@@ -18,13 +23,70 @@ object WebsignonMethods {
 			case _ => "couldn't parse anything useful from the HTML"
 		}
 	}
+
+	// Doesn't work yet.
+	//val sessions = new SessionCache
+}
+
+/**
+ * Maintains a JVM-level cache of each user's cookies, so signing in
+ * as a user should be faster after the first time in a run - we can
+ * just switch their cookies back in, simulating each user being online
+ * at the same time in different browsers.
+ */
+class SessionCache {
+	private var map = Map[String, Set[Cookie]]()
+
+	// Get HTMLUnit WebClient if one is available.
+	def getWebClient(driver: WebDriver): Option[WebClient] = driver match {
+		case hud: HtmlUnitDriver =>
+			val getWebClient = hud.getClass.getDeclaredMethod("getWebClient")
+			getWebClient.setAccessible(true)
+			Some(getWebClient.invoke(hud).asInstanceOf[WebClient])
+//		case _ =>
+	}
+
+	// Clears ALL cookies, not just the current page's.
+	def clearCookies(webDriver: WebDriver) {
+		getWebClient(webDriver).foreach { wc =>
+			wc.getCookieManager().clearCookies()
+		}
+	}
+
+	/** If we have stored cookies and are using HtmlUnit, we can
+		* dig in to the cookie manager and reinsert those cookies
+		* without having to sign in again.
+		*/
+	def retrieve(usercode: String, webDriver: WebDriver) {
+		getWebClient(webDriver).foreach { wc =>
+			map.get(usercode).foreach { cookies =>
+				val cm = wc.getCookieManager()
+				cm.clearCookies()
+				cookies.foreach { cookie =>
+					cm.addCookie(new htmlunit.util.Cookie(
+						cookie.getDomain,
+						cookie.getName,
+						cookie.getValue,
+						cookie.getPath,
+						cookie.getExpiry,
+						false
+					))
+				}
+			}
+		}
+
+	}
+
+	def store(usercode: String, webDriver: WebDriver) {
+		map += (usercode -> webDriver.manage().getCookies.asScala.toSet)
+	}
 }
 
 trait WebsignonMethods extends ShouldMatchers  with Eventually{
 	import WebBrowser._ // include methods like "go to"
 	implicit val webDriver: WebDriver // let the trait know this will be implemented
 	
-	// nested objects so we can say "signIn.as(user) to (url)".
+	// nested objects so we can say "signIn as(user) to (url)".
 	// with Java punctuation it would be "(signIn.as(user)).to(url)". 
 	//
 	// (currently requires that the user's first name is the usercode, to check signed-in-ness)
@@ -36,7 +98,11 @@ trait WebsignonMethods extends ShouldMatchers  with Eventually{
     case class SigningInPhase(details: LoginDetails) {
 
 			def to(url: String) {
+				// Sets session cookies if this user's logged in once before.
+				//WebsignonMethods.sessions.retrieve(details.usercode, webDriver)
+
         go to (url)
+
         // FIXME doesn't handle being signed in as another user
         // TODO doesn't check that SSO sends you back to the right page
         // FIXME requires firstName==usercode

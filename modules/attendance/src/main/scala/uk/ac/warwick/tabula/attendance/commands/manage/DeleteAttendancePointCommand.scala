@@ -4,15 +4,16 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceMonitoringPointStyle, AttendanceMonitoringPoint}
-import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 
 object DeleteAttendancePointCommand {
 	def apply(department: Department, templatePoint: AttendanceMonitoringPoint) =
 		new DeleteAttendancePointCommandInternal(department, templatePoint)
 			with ComposableCommand[Seq[AttendanceMonitoringPoint]]
 			with AutowiringAttendanceMonitoringServiceComponent
+			with AutowiringProfileServiceComponent
 			with DeleteAttendancePointValidation
 			with DeleteAttendancePointDescription
 			with DeleteAttendancePointPermissions
@@ -24,10 +25,17 @@ object DeleteAttendancePointCommand {
 class DeleteAttendancePointCommandInternal(val department: Department, val templatePoint: AttendanceMonitoringPoint)
 	extends CommandInternal[Seq[AttendanceMonitoringPoint]] {
 
-	self: DeleteAttendancePointCommandState with AttendanceMonitoringServiceComponent =>
+	self: DeleteAttendancePointCommandState with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal() = {
 		pointsToDelete.foreach(attendanceMonitoringService.deletePoint)
+
+		val students = profileService.getAllMembersWithUniversityIds(schemesToEdit.flatMap(_.members.members).distinct).flatMap {
+			case student: StudentMember => Option(student)
+			case _ => None
+		}
+		attendanceMonitoringService.updateCheckpointTotalsAsync(students, department, schemesToEdit.head.academicYear)
+
 		pointsToDelete
 	}
 
@@ -44,7 +52,7 @@ trait DeleteAttendancePointValidation extends SelfValidating {
 			point => attendanceMonitoringService.countCheckpointsForPoint(point) > 0
 		}
 
-		if (!pointsWithCheckpoints.isEmpty) {
+		if (pointsWithCheckpoints.nonEmpty) {
 			errors.reject("attendanceMonitoringPoints.hasCheckpoints.remove")
 		}
 	}

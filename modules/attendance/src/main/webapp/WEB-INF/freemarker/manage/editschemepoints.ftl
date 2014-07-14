@@ -4,7 +4,7 @@
 <#assign filterQuery = findCommand.serializeFilter />
 <#assign returnTo = (info.requestedUri!"")?url />
 
-<h1>Edit ${scheme.displayName}</h1>
+<h1>Edit scheme: ${scheme.displayName}</h1>
 
 <div class="add-points-to-schemes fix-area">
 

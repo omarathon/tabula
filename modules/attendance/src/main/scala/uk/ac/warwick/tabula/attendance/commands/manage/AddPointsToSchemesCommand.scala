@@ -31,7 +31,7 @@ class AddPointsToSchemesCommandInternal(val department: Department, val academic
 	override def applyInternal() = {
 		val groupedSchemeMap = attendanceMonitoringService.listSchemes(department, academicYear).map{
 			scheme => scheme -> Option(schemes).getOrElse("").contains(scheme.id)
-		}.groupBy(_._1.pointStyle)
+		}.groupBy(_._1.pointStyle).withDefaultValue(Seq())
 		AddPointsToSchemesCommandResult(
 			groupedSchemeMap(AttendanceMonitoringPointStyle.Week).toMap,
 			groupedSchemeMap(AttendanceMonitoringPointStyle.Date).toMap

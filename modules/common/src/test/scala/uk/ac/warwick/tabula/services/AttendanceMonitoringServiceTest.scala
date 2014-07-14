@@ -53,7 +53,7 @@ class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 			Map(point1 -> passedCheckpoint, point2 -> missedCheckpoint, point3 -> authorisedCheckpoint)
 		service.attendanceMonitoringDao.getCheckpoints(Seq(point1, point2, point3), member1, withFlush = true) returns
 			Map(point1 -> passedCheckpoint, point2 -> missedCheckpoint, point3 -> authorisedCheckpoint)
-		service.attendanceMonitoringDao.getCheckpointTotal(member1, department, AcademicYear(2014)) returns None
+		service.attendanceMonitoringDao.getCheckpointTotal(member1, Option(department), AcademicYear(2014)) returns None
 
 		val result = service.setAttendance(
 			member1,
@@ -75,7 +75,7 @@ class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 			Map(point1 -> passedCheckpoint, point2 -> missedCheckpoint, point3 -> authorisedCheckpoint)
 		service.attendanceMonitoringDao.getCheckpoints(Seq(point1, point2, point3), member1, withFlush = true) returns
 			Map(point1 -> passedCheckpoint, point2 -> missedCheckpoint, point3 -> authorisedCheckpoint)
-		service.attendanceMonitoringDao.getCheckpointTotal(member1, department, AcademicYear(2014)) returns None
+		service.attendanceMonitoringDao.getCheckpointTotal(member1, Option(department), AcademicYear(2014)) returns None
 
 		val result = service.updateCheckpointTotal(
 			member1,

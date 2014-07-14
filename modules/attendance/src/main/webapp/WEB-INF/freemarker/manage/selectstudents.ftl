@@ -55,7 +55,7 @@
 
 			</summary>
 
-			<p>Use the filters to select which students this scheme should apply to:</p>
+			<p>Use the filters to add students to this scheme:</p>
 
 			<#list findCommand.updatedStaticStudentIds as id>
 				<input type="hidden" name="updatedStaticStudentIds" value="${id}" />
@@ -198,14 +198,6 @@
 				<#assign endIndex = startIndex + findCommandResult.membershipItems?size />
 				<p>
 					Results ${startIndex + 1} - ${endIndex} of ${findCommand.totalResults}
-					<input class="btn btn-warning hideOnClosed btn-small use-tooltip"
-						<#if findCommandResult.membershipItems?size == 0>disabled</#if>
-						type="submit"
-						name="${ManageSchemeMappingParameters.manuallyExclude}"
-						value="Remove selected"
-						title="Remove selected students from this scheme"
-						style="margin-left: 0.5em;"
-					/>
 				</p>
 
 				<@attendance_macros.manageStudentTable
@@ -214,6 +206,7 @@
 					command=findCommand
 					checkboxName="excludeIds"
 					onlyShowCheckboxForStatic=true
+					showRemoveButton=true
 				/>
 			</#if>
 		</details>
@@ -227,15 +220,6 @@
 
 				<p>
 					<input class="btn" type="submit" name="${ManageSchemeMappingParameters.manuallyAddForm}" value="Add students manually" />
-					<#if (editMembershipCommandResult.updatedIncludedStudentIds?size > 0 || editMembershipCommandResult.updatedExcludedStudentIds?size > 0)>
-						<input class="btn btn-warning hideOnClosed use-tooltip"
-						   type="submit"
-						   name="${ManageSchemeMappingParameters.resetMembership}"
-						   value="Reset"
-						   data-container="body"
-						   title="Restore the manually removed and remove the manually added students selected"
-						/>
-					</#if>
 				</p>
 			</summary>
 
@@ -270,6 +254,8 @@
 			<@attendance_macros.manageStudentTable
 				membershipItems=editMembershipCommandResult.membershipItems
 				checkboxName="resetStudentIds"
+				checkAll=true
+				showResetButton=true
 			/>
 
 			<#list editMembershipCommandResult.updatedIncludedStudentIds as id>

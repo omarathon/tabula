@@ -52,7 +52,6 @@ exports.tableSortMatching = function(tableArray) {
 exports.bindModulePickers = function(){
 	$('.module-search-query')
 		.closest('.module-choice')
-			.find('button.add-module').attr('disabled', true).end()
 			.find('.modules-list').on('click', 'button.btn.btn-danger', function(){
 				$(this).closest('li').remove();
 			}).end()
@@ -60,17 +59,11 @@ exports.bindModulePickers = function(){
 		.each(function(){
 			var $this = $(this),
 				$parent = $this.closest('.module-choice'),
-				$addButton = $parent.find('button.add-module'),
 				$hiddenInput = $parent.find('input[type=hidden]:first');
 			$this.on('change', function(){
-				if ($(this).data('moduleid') != undefined && $(this).data('moduleid').length === 0) {
-					$addButton.attr('disabled', true);
-				} else {
-					$addButton.attr('disabled', false);
-				}
-			});
+				if ($(this).data('moduleid') === undefined || $(this).data('moduleid').length === 0)
+					return;
 
-			$addButton.on('click', function(){
 				$this.closest('.module-choice').find('input.specific[name=isAnySmallGroupEventModules]').attr('checked', true);
 				var icon = $('<i/>').addClass('icon-fixed-width');
 				if ($this.hasClass('smallGroup') && $this.data('hasgroups') != true) {
@@ -83,24 +76,24 @@ exports.bindModulePickers = function(){
 						'title':'This module has no assignments set up in Tabula'
 					});
 				}
-				$this.closest('.module-choice').find('.modules-list ul').append(
+				$this.closest('.module-choice').find('.modules-list ol').append(
 					$('<li/>').append(
-							$('<input/>').attr({
-								'type':'hidden',
-								'name':$hiddenInput.attr('name').replace('_',''),
-								'value':$this.data('moduleid')
-							})
-						).append(
-							icon
-						).append(
-							$('<span/>').attr('title', $this.val()).html($this.val())
-						).append(
-							$('<button/>').addClass('btn btn-danger').append(
-								$('<i/>').addClass('icon-remove')
-							)
+						$('<input/>').attr({
+							'type':'hidden',
+							'name':$hiddenInput.attr('name').replace('_',''),
+							'value':$this.data('moduleid')
+						})
+					).append(
+						icon
+					).append(
+						$('<span/>').attr('title', $this.val()).html($this.val())
+					).append(
+						$('<button/>').addClass('btn btn-danger btn-mini').append(
+							$('<i/>').addClass('icon-remove')
 						)
+					)
 				);
-				$this.data('moduleid','').val('').trigger('change');
+				$this.data('moduleid','').val('');
 			});
 	});
 	$('.pointTypeOption.smallGroup .module-search-query').modulePicker({
@@ -114,7 +107,6 @@ exports.bindModulePickers = function(){
 exports.bindAssignmentPickers = function(){
 	$('.assignment-search-query')
 		.closest('.assignment-choice')
-			.find('button.add-assignment').attr('disabled', true).end()
 			.find('.assignments-list').on('click', 'button.btn.btn-danger', function(){
 				$(this).closest('li').remove();
 			}).end()
@@ -122,33 +114,27 @@ exports.bindAssignmentPickers = function(){
 		.each(function(){
 			var $this = $(this),
 				$parent = $this.closest('.assignment-choice'),
-				$addButton = $parent.find('button.add-assignment'),
 				$hiddenInput = $parent.find('input[type=hidden]:first');
 			$this.on('change', function(){
-				if ($(this).data('assignmentid') != undefined && $(this).data('assignmentid').length === 0) {
-					$addButton.attr('disabled', true);
-				} else {
-					$addButton.attr('disabled', false);
-				}
-			});
+				if ($(this).data('assignmentid') === undefined || $(this).data('assignmentid').length === 0)
+					return;
 
-			$addButton.on('click', function(){
-				$this.closest('.assignment-choice').find('.assignments-list ul').append(
+				$this.closest('.assignment-choice').find('.assignments-list ol').append(
 					$('<li/>').append(
-							$('<input/>').attr({
-								'type':'hidden',
-								'name':$hiddenInput.attr('name').replace('_',''),
-								'value':$this.data('assignmentid')
-							})
-						).append(
-							$('<span/>').attr('title', $this.val()).html($this.val())
-						).append(
-							$('<button/>').addClass('btn btn-danger').append(
-								$('<i/>').addClass('icon-remove')
-							)
+						$('<input/>').attr({
+							'type':'hidden',
+							'name':$hiddenInput.attr('name').replace('_',''),
+							'value':$this.data('assignmentid')
+						})
+					).append(
+						$('<span/>').attr('title', $this.val()).html($this.val())
+					).append(
+						$('<button/>').addClass('btn btn-danger btn-mini').append(
+							$('<i/>').addClass('icon-remove')
 						)
+					)
 				);
-				$this.data('assignmentid','').val('').trigger('change');
+				$this.data('assignmentid','').val('');
 			});
 		});
 

@@ -51,6 +51,7 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@BatchSize(size=100)
+	@OrderBy("closeDate")
 	var assignments: JList[Assignment] = JArrayList()
 
 	def hasLiveAssignments = Option(assignments) match {

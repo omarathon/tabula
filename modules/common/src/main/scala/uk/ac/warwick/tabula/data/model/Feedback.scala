@@ -10,7 +10,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
+import uk.ac.warwick.tabula.data.model.forms.{FormattedHtml, FormField, SavedFormValue}
 
 
 trait FeedbackAttachments {
@@ -56,7 +56,7 @@ trait FeedbackAttachments {
 }
 
 @Entity @AccessType("field")
-class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with ToEntityReference {
+class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with ToEntityReference with FormattedHtml {
 
 	type Entity = Feedback
 
@@ -157,6 +157,9 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 
 	def comments: Option[String] = commentsFormValue.map(_.value)
 
+	def commentsFormattedHtml: String = formattedHtml(comments)
+	
+	
 	// Getters for marker feedback either return the marker feedback or create a new empty one if none exist
 	def retrieveFirstMarkerFeedback:MarkerFeedback = {
 		Option(firstMarkerFeedback).getOrElse({

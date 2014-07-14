@@ -13,7 +13,7 @@
 	</#list>
 </#macro>
 
-<h1>Edit ${scheme.displayName}</h1>
+<h1>Edit scheme: ${scheme.displayName}</h1>
 
 <div class="fix-area">
 
@@ -30,7 +30,7 @@
 		<#if membershipItems?size == 0>
 
 			<p>
-				No students on this scheme
+				No students on the "${command.scheme.displayName}" scheme
 
 				<#assign popoverContent><#noescape>
 					You can filter to select types of students (e.g. 1st year part-time UG)
@@ -46,7 +46,7 @@
 			<button type="button" class="btn" onclick="document.forms.selectStudents.submit()">Select students for scheme</button>
 		<#else>
 
-			<p><@fmt.p membershipItems?size "student" /> on this scheme</p>
+			<p><@fmt.p membershipItems?size "student" /> on the "${command.scheme.name}" scheme</p>
 
 			<p><button type="button" class="btn" onclick="document.forms.selectStudents.submit()">Select students for scheme</button></p>
 

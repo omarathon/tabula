@@ -24,7 +24,7 @@ class ViewTemplateSchemePointsController extends AttendanceController with HasMo
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable department: Department
 	) = {
-		DepartmentFindPointsResult(department, getGroupedPointsFromTemplate(templateScheme, academicYear))
+		DepartmentFindPointsResult(mandatory(department), getGroupedPointsFromTemplate(mandatory(templateScheme), mandatory(academicYear)))
 	}
 
 	@RequestMapping

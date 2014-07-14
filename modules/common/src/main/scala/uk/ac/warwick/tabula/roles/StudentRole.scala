@@ -15,7 +15,7 @@ case object StudentRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	
 	GrantsScopelessPermission(
 		UserPicker,
-		MonitoringPointSetTemplates.View
+		MonitoringPointTemplates.View
 	)
 
 	GrantsScopedPermission(

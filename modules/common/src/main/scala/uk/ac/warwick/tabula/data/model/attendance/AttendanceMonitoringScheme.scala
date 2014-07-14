@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import scala.collection.JavaConverters._
 
 @Entity
 class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with Serializable {
@@ -74,6 +75,11 @@ class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with
 	var updatedDate: DateTime = _
 
 	def permissionsParents = Option(department).toStream
+
+	def hasRecordedCheckpoints =
+		attendanceMonitoringService.exists { service =>
+			points.asScala.exists { point => service.countCheckpointsForPoint(point) > 0}
+		}
 
 }
 

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{RelationshipService, TermService, AttendanceMonitoringService, AttendanceMonitoringServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services._
 import org.springframework.validation.BindException
 import org.joda.time.DateTime
 import uk.ac.warwick.util.termdates.{TermImpl, Term}
@@ -15,11 +15,13 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val thisTermService = smartMock[TermService]
-		val command = new CreateAttendancePointCommandState with TermServiceComponent {
+		val command = new CreateAttendancePointCommandState with TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent {
 			val department = null
 			val academicYear = null
 			val schemes = null
 			val termService = thisTermService
+			val smallGroupService = null
+			val moduleAndDepartmentService = null
 		}
 		val validator = new AttendanceMonitoringPointValidation with TermServiceComponent with AttendanceMonitoringServiceComponent {
 			val termService = thisTermService

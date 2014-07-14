@@ -1,39 +1,40 @@
 package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointAttendanceNote, MonitoringPoint}
-import uk.ac.warwick.tabula.commands.{SelfValidating, ApplyWithCallback, PopulateOnForm, Appliable}
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.attendance.commands.{CheckpointUpdatedDescription, AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
-import uk.ac.warwick.tabula.attendance.web.Routes
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
-import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.services.fileserver.{FileServer, RenderableFile}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.{UserLookupService, MonitoringPointService}
+import uk.ac.warwick.tabula.services.{AttendanceMonitoringService, UserLookupService}
 import uk.ac.warwick.tabula.helpers.DateBuilder
+import uk.ac.warwick.tabula.commands.{ApplyWithCallback, PopulateOnForm, Appliable, SelfValidating}
+import uk.ac.warwick.tabula.attendance.web.Routes
 import javax.validation.Valid
+import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.attendance.commands.note.{AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
+import uk.ac.warwick.tabula.services.fileserver.{RenderableFile, FileServer}
+import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 
 @Controller
-@RequestMapping(Array("/note/2013/{student}/{monitoringPoint}"))
-class AttendanceNoteController extends AttendanceController with CheckpointUpdatedDescription {
+@RequestMapping(Array("/note/{academicYear}/{student}/{point}"))
+class AttendanceNoteController extends AttendanceController {
 
-	@Autowired var monitoringPointService: MonitoringPointService = _
+	@Autowired var monitoringPointService: AttendanceMonitoringService = _
 	@Autowired var userLookup: UserLookupService = _
 
 	@RequestMapping
 	def home(
 		@PathVariable student: StudentMember,
-		@PathVariable monitoringPoint: MonitoringPoint
+		@PathVariable point: AttendanceMonitoringPoint,
+		@PathVariable academicYear: AcademicYear
 	) = {
-		val attendanceNote = monitoringPointService.getAttendanceNote(student, monitoringPoint).getOrElse(throw new ItemNotFoundException())
-		val checkpoint = monitoringPointService.getCheckpoint(student, monitoringPoint).getOrElse(null)
-		Mav("home/view_note",
+		val attendanceNote = monitoringPointService.getAttendanceNote(student, point).getOrElse(throw new ItemNotFoundException())
+		val checkpoint = monitoringPointService.getCheckpoints(Seq(point), student).head._2
+		Mav("note/view_note",
 			"attendanceNote" -> attendanceNote,
+			"academicYear" -> academicYear.startYear.toString,
 			"checkpoint" -> checkpoint,
-			"checkpointDescription" -> Option(checkpoint).map{ checkpoint => describeCheckpoint(checkpoint)}.getOrElse(""),
 			"updatedBy" -> userLookup.getUserByUserId(attendanceNote.updatedBy).getFullName,
 			"updatedDate" -> DateBuilder.format(attendanceNote.updatedDate),
 			"isModal" -> ajax
@@ -43,14 +44,14 @@ class AttendanceNoteController extends AttendanceController with CheckpointUpdat
 }
 
 @Controller
-@RequestMapping(Array("/note/2013/{student}/{monitoringPoint}/attachment/{fileName}"))
+@RequestMapping(Array("/note/{academicYear}/{student}/{point}/attachment/{fileName}"))
 class AttendanceNoteAttachmentController extends AttendanceController {
 
 	@Autowired var fileServer: FileServer = _
 
 	@ModelAttribute("command")
-	def command(@PathVariable student: StudentMember, @PathVariable monitoringPoint: MonitoringPoint) =
-		AttendanceNoteAttachmentCommand(student, monitoringPoint, user)
+	def command(@PathVariable student: StudentMember, @PathVariable point: AttendanceMonitoringPoint) =
+		AttendanceNoteAttachmentCommand(student, point, user)
 
 	@RequestMapping
 	def get(@ModelAttribute("command") cmd: ApplyWithCallback[Option[RenderableFile]])
@@ -63,7 +64,7 @@ class AttendanceNoteAttachmentController extends AttendanceController {
 }
 
 @Controller
-@RequestMapping(Array("/note/2013/{student}/{monitoringPoint}/edit"))
+@RequestMapping(Array("/note/{academicYear}/{student}/{point}/edit"))
 class EditAttendanceNoteController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
@@ -71,14 +72,15 @@ class EditAttendanceNoteController extends AttendanceController {
 	@ModelAttribute("command")
 	def command(
 		@PathVariable student: StudentMember,
-		@PathVariable monitoringPoint: MonitoringPoint,
+		@PathVariable point: AttendanceMonitoringPoint,
+		@PathVariable academicYear: AcademicYear,
 		@RequestParam(value="state", required=false) state: String
 	) =
-		EditAttendanceNoteCommand(student, monitoringPoint, user, Option(state))
+		EditAttendanceNoteCommand(student, point, user, Option(state))
 
 	@RequestMapping(method=Array(GET, HEAD), params=Array("isIframe"))
 	def getIframe(
-		@ModelAttribute("command") cmd: Appliable[MonitoringPointAttendanceNote] with PopulateOnForm,
+		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
 		@PathVariable student: StudentMember
 	) = {
 		cmd.populate()
@@ -87,7 +89,7 @@ class EditAttendanceNoteController extends AttendanceController {
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def get(
-		@ModelAttribute("command") cmd: Appliable[MonitoringPointAttendanceNote] with PopulateOnForm,
+		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
 		@PathVariable student: StudentMember
 	) = {
 		cmd.populate()
@@ -95,11 +97,11 @@ class EditAttendanceNoteController extends AttendanceController {
 	}
 
 	private def form(
-		cmd: Appliable[MonitoringPointAttendanceNote] with PopulateOnForm,
+		cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
 		student: StudentMember,
 		isIframe: Boolean = false
 	) = {
-		val mav = Mav("home/edit_note",
+		val mav = Mav("note/edit_note",
 			"allAbsenceTypes" -> AbsenceType.values,
 			"returnTo" -> getReturnTo(Routes.old.department.viewStudent(currentMember.homeDepartment, student)),
 			"isModal" -> ajax,
@@ -115,7 +117,7 @@ class EditAttendanceNoteController extends AttendanceController {
 
 	@RequestMapping(method=Array(POST), params=Array("isIframe"))
 	def submitIframe(
-		@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPointAttendanceNote] with PopulateOnForm,
+		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
 		errors: Errors,
 		@PathVariable student: StudentMember
 	) = {
@@ -123,13 +125,13 @@ class EditAttendanceNoteController extends AttendanceController {
 			form(cmd, student, isIframe = true)
 		} else {
 			cmd.apply()
-			Mav("home/edit_note", "success" -> true, "isIframe" -> true, "allAbsenceTypes" -> AbsenceType.values)
+			Mav("note/edit_note", "success" -> true, "isIframe" -> true, "allAbsenceTypes" -> AbsenceType.values)
 		}
 	}
 
 	@RequestMapping(method=Array(POST))
 	def submit(
-		@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPointAttendanceNote] with PopulateOnForm,
+		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
 		errors: Errors,
 		@PathVariable student: StudentMember
 	) = {

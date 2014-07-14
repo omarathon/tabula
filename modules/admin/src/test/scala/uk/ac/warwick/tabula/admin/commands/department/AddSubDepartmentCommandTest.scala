@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.{FunctionalContextTesting, FunctionalContext, TestBa
 import uk.ac.warwick.tabula.data.model.{UserGroup, Department}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import org.mockito.Mockito._
 import org.hamcrest.Matchers._
 import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
 

@@ -31,6 +31,9 @@ trait AssignmentImporter {
 	/**
 	 * The UpstreamAssessmentGroups that don't have any module registrations
 	 * against them.
+	 *
+	 * Also includes fake "NONE" groups for the cases where everybody has been
+	 * allocated an assessment group (TAB-2416 remove stale old NONE groups)
 	 */
 	def getEmptyAssessmentGroups: Seq[UpstreamAssessmentGroup]
 	
@@ -252,9 +255,9 @@ object AssignmentImporter {
 		order by mr.academic_year_code, mr.module_code, mr.mav_occurrence, mr.assessment_group
 																		 """
 
-	/** AssessmentGroups without a cause */
-	val GetEmptyAssessmentGroups = """
-		select distinct
+	/** AssessmentGroups with no registrations, and virtual NONE groups that should be empty */
+	val GetEmptyAssessmentGroups = s"""
+		(select distinct
 		  mav.module_code,
 		  mav.academic_year_code,
 		  mav.mav_occurrence,
@@ -271,7 +274,27 @@ object AssignmentImporter {
 		    and mav.mav_occurrence = mr.mav_occurrence
 		where mav.academic_year_code in (:academic_year_code)
 		  and mr.module_code is null
-		  order by mav.module_code"""
+		  order by mav.module_code)
+		union
+		(select distinct
+			  mav.module_code,
+			  mav.academic_year_code,
+			  '${AssessmentComponent.NoneAssessmentGroup}' as mav_occurrence,
+			  '${AssessmentComponent.NoneAssessmentGroup}' as assessment_group
+			  from module_availability mav
+			  join module_assessment_details mad
+			    on mad.module_code = mav.module_code
+			  join module m
+			    on mav.module_code = m.module_code
+			    and m.in_use = 'Y'
+			  left join module_registration mr
+			    on mav.module_code = mr.module_code
+			    and mav.academic_year_code = mr.academic_year_code
+			    and mav.mav_occurrence = mr.mav_occurrence
+			where mav.academic_year_code in (:academic_year_code)
+			  and mad.assessment_group is not null
+			  and mr.module_code is not null
+			  order by mav.module_code)"""
 
 	class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
 		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))

@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>71</version>
+	<version>72</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
@@ -543,6 +543,8 @@
 					<args>
 						<arg>-deprecation</arg>
 						<arg>-feature</arg>
+						<arg>-Xmax-classfile-name</arg>
+						<arg>130</arg>
 					</args>
           <source>1.6</source>
           <target>1.6</target>

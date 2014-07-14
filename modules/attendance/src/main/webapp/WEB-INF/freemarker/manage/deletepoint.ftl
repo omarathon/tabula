@@ -24,6 +24,8 @@
 
 <@f.form action="" method="POST" commandName="command" class="form-horizontal">
 
+	<@f.errors cssClass="error form-errors" />
+
 	<input name="returnTo" value="${returnTo}" type="hidden" />
 
 	<div class="form-actions">

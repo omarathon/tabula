@@ -76,7 +76,7 @@ trait PropertyCopyingSetup extends ImportCommandFactoryForTesting {
 
 	val department = new Department
 	department.code = "ph"
-	department.name = "Philosophy"
+	department.fullName = "Philosophy"
 
 	val modAndDeptService = smartMock[ModuleAndDepartmentService]
 	modAndDeptService.getDepartmentByCode("ph") returns (Some(department))

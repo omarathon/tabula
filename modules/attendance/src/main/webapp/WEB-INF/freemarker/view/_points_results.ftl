@@ -34,42 +34,42 @@
 
 
 	<div class="monitoring-points">
-			<#list attendance_variables.monitoringPointTermNames as term>
-				<#if filterResult[term]??>
-					<@attendance_macros.groupedPointsBySection filterResult term; groupedPoint>
-						<div class="span12">
-							<div class="pull-right">
-								<#noescape>
-										${permission_button_function(groupedPoint.templatePoint)}
-								</#noescape>
-							</div>
-						${groupedPoint.templatePoint.name}
-							(<a class="use-tooltip" data-html="true" title="
-								<@fmt.wholeWeekDateFormat
-						groupedPoint.templatePoint.startWeek
-						groupedPoint.templatePoint.endWeek
-						groupedPoint.templatePoint.scheme.academicYear
-						/>
-							"><@fmt.monitoringPointWeeksFormat
-								groupedPoint.templatePoint.startWeek
-						groupedPoint.templatePoint.endWeek
-						groupedPoint.templatePoint.scheme.academicYear
-						filterCommand.department
-							/></a>)
-							<#assign popoverContent>
-								<ul>
-									<#list groupedPoint.schemes?sort_by("displayName") as scheme>
-										<li>${scheme.displayName}</li>
-									</#list>
-								</ul>
-							</#assign>
-							<a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
-								<@fmt.p groupedPoint.schemes?size "scheme" />
-							</a>
+		<#list attendance_variables.monitoringPointTermNames as term>
+			<#if filterResult[term]??>
+				<@attendance_macros.groupedPointsBySection filterResult term; groupedPoint>
+					<div class="span12">
+						<div class="pull-right">
+							<#noescape>
+								${permission_button_function(groupedPoint.templatePoint)}
+							</#noescape>
 						</div>
-					</@attendance_macros.groupedPointsBySection>
-				</#if>
-			</#list>
+						${groupedPoint.templatePoint.name}
+						(<a class="use-tooltip" data-html="true" title="
+							<@fmt.wholeWeekDateFormat
+								groupedPoint.templatePoint.startWeek
+								groupedPoint.templatePoint.endWeek
+								groupedPoint.templatePoint.scheme.academicYear
+							/>
+						"><@fmt.monitoringPointWeeksFormat
+							groupedPoint.templatePoint.startWeek
+							groupedPoint.templatePoint.endWeek
+							groupedPoint.templatePoint.scheme.academicYear
+							filterCommand.department
+						/></a>)
+						<#assign popoverContent>
+							<ul>
+								<#list groupedPoint.schemes?sort_by("displayName") as scheme>
+									<li>${scheme.displayName}</li>
+								</#list>
+							</ul>
+						</#assign>
+						<a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
+							<@fmt.p groupedPoint.schemes?size "scheme" />
+						</a>
+					</div>
+				</@attendance_macros.groupedPointsBySection>
+			</#if>
+		</#list>
 
 		<#list monthNames as month>
 			<#if filterResult[month]??>
@@ -80,7 +80,7 @@
 								${permission_button_function(groupedPoint.templatePoint)}
 							</#noescape>
 						</div>
-					${groupedPoint.templatePoint.name}
+						${groupedPoint.templatePoint.name}
 						(<@fmt.interval groupedPoint.templatePoint.startDate groupedPoint.templatePoint.endDate />)
 						<#assign popoverContent>
 							<ul>

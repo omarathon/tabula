@@ -1,18 +1,19 @@
 package uk.ac.warwick.tabula.attendance.commands.view.old
 
-import uk.ac.warwick.tabula.data.model.{AttendanceNote, Department, StudentMember}
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException, AcademicYear}
-import uk.ac.warwick.tabula.data.model.attendance._
-import uk.ac.warwick.tabula.services._
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports._
-import org.springframework.validation.{BindingResult, Errors}
 import org.joda.time.DateTime
+import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.attendance.commands.old.{CheckpointUpdatedDescription, GroupMonitoringPointsByTerm}
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.attendance._
+import uk.ac.warwick.tabula.data.model.{AttendanceNote, Department, StudentMember}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.attendance.commands.{GroupMonitoringPointsByTerm, CheckpointUpdatedDescription}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
+
+import scala.collection.JavaConverters._
 
 object StudentRecordCommand {
 	def apply(department: Department, student: StudentMember, user: CurrentUser, academicYearOption: Option[AcademicYear]) =

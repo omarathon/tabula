@@ -79,34 +79,42 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 	}
 
 	def listen(recipientInfo: RecipientNotificationInfo) = {
-		if (!recipientInfo.emailSent && recipientInfo.recipient.getEmail.hasText) {
-			generateMessage(recipientInfo) match {
-				case Some(message) => {
-					val future = mailSender.send(message)
-					try {
-						val successful = future.get(30, TimeUnit.SECONDS)
+		if (!recipientInfo.emailSent) {
+			if (recipientInfo.recipient.getEmail.hasText) {
+				generateMessage(recipientInfo) match {
+					case Some(message) => {
+						val future = mailSender.send(message)
+						try {
+							val successful = future.get(30, TimeUnit.SECONDS)
 
-						if (successful) {
-							recipientInfo.emailSent = true
-							service.save(recipientInfo)
-						}
-					} catch {
-						case e: TimeoutException => {
-							logger.info(s"Timeout waiting for message ${message} to be sent; cancelling to try again later", e)
-							future.cancel(true)
-						}
-						case e @ (_: ExecutionException | _: InterruptedException) => {
-							logger.warn("Could not send email ${message}, will try later", e)
+							if (successful) {
+								recipientInfo.emailSent = true
+								service.save(recipientInfo)
+							}
+						} catch {
+							case e: TimeoutException => {
+								logger.info(s"Timeout waiting for message ${message} to be sent; cancelling to try again later", e)
+								future.cancel(true)
+							}
+							case e@(_: ExecutionException | _: InterruptedException) => {
+								logger.warn("Could not send email ${message}, will try later", e)
+							}
 						}
 					}
-				}
-				case None => {
-					logger.warn(s"Couldn't send email for Notification because object no longer exists: ${recipientInfo}")
+					case None => {
+						logger.warn(s"Couldn't send email for Notification because object no longer exists: ${recipientInfo}")
 
-					// TODO This is incorrect, really - we're not sending the email, we're cancelling the sending of the email
-					recipientInfo.emailSent = true
-					service.save(recipientInfo)
+						// TODO This is incorrect, really - we're not sending the email, we're cancelling the sending of the email
+						recipientInfo.emailSent = true
+						service.save(recipientInfo)
+					}
 				}
+			} else {
+				logger.warn(s"Couldn't send email for Notification because recipient has no email address: ${recipientInfo}")
+
+				// TODO This is incorrect, really - we're not sending the email, we're cancelling the sending of the email
+				recipientInfo.emailSent = true
+				service.save(recipientInfo)
 			}
 		}
 	}

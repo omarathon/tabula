@@ -38,7 +38,7 @@ class StudentCourseworkFullScreenController extends StudentCourseworkController 
 class StudentCourseworkGadgetController extends StudentCourseworkController {
 
 	@ModelAttribute("command") def command(@PathVariable studentCourseYearDetails: StudentCourseYearDetails) =
-		StudentCourseworkGadgetCommand(studentCourseYearDetails)
+		StudentCourseworkGadgetCommand(mandatory(studentCourseYearDetails))
 
 	@RequestMapping
 	def listAssignments(

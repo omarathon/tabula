@@ -6,9 +6,9 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
 
-class EditMemberNoteCommand(note: MemberNote, currentUser: CurrentUser ) extends ModifyMemberNoteCommand(note.member, currentUser) {
+class EditMemberNoteCommand(note: MemberNote, currentUser: CurrentUser) extends ModifyMemberNoteCommand(note.member, currentUser) {
 
-	PermissionCheck(Permissions.MemberNotes.Update, member)
+	PermissionCheck(Permissions.MemberNotes.Update, note)
 
 	val memberNote = note
 

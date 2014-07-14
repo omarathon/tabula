@@ -40,16 +40,20 @@ class AssignmentDaoTest extends PersistenceTestBase {
 		val assignment2 = Fixtures.assignment("assignment 2")
 		assignment2.module = module2InDept
 		assignment2.academicYear = thisYear
+		// TAB-2459 - ensure assignment1 is the most recent assignment
+		assignment2.createdDate = new DateTime().minusMinutes(1)
 
 		// assignment in wrong dept
 		val assignment3 = Fixtures.assignment("assignment 3")
 		assignment3.module = moduleNotInDept
 		assignment3.academicYear = thisYear
+		assignment3.createdDate = new DateTime().minusMinutes(1)
 
 		// assignment in wrong year
 		val assignment4 = Fixtures.assignment("assignment 4")
 		module1InDept.assignments.add(assignment4)
 		assignment4.academicYear = previousYear
+		assignment3.createdDate = new DateTime().minusMinutes(1)
 
 		session.save(assignment1)
 		session.save(assignment2)

@@ -5,12 +5,12 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyl
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, MeetingFormat, StudentRelationshipType}
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-import uk.ac.warwick.tabula.services.TermServiceComponent
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, SmallGroupServiceComponent, TermServiceComponent}
 import collection.JavaConverters._
 
 trait AttendancePointCommandState {
 
-	self: TermServiceComponent =>
+	self: TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent =>
 
 	def pointStyle: AttendanceMonitoringPointStyle
 
@@ -125,5 +125,8 @@ trait AttendancePointCommandState {
 		}
 		point
 	}
+
+	def moduleHasSmallGroups(module: Module) = smallGroupService.hasSmallGroups(module)
+	def moduleHasAssignments(module: Module) = moduleAndDepartmentService.hasAssignments(module)
 
 }

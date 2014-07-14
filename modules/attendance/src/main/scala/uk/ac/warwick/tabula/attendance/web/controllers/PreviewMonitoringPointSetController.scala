@@ -2,9 +2,9 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
-import uk.ac.warwick.tabula.attendance.commands.{ViewMonitoringPointSetTemplateCommand, ViewMonitoringPointSetCommand}
+import uk.ac.warwick.tabula.attendance.commands.old.{ViewMonitoringPointSetCommand, ViewMonitoringPointSetTemplateCommand}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSetTemplate, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPointSetTemplate}
 
 /**
  * Render a view of a monitoring point set [template] for displaying

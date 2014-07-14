@@ -144,7 +144,7 @@
 			</a>
 		</#if>
 		<div class="btn-group">
-			<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+			<a class="btn dropdown-toggle ${disabledClass}" data-toggle="dropdown" href="#">
 				<i class="icon-upload"></i> Upload feedback
 				<span class="caret"></span>
 			</a>

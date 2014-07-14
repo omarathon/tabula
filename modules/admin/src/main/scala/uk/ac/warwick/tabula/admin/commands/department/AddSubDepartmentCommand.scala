@@ -33,7 +33,7 @@ class AddSubDepartmentCommandInternal(val parent: Department) extends CommandInt
 	def applyInternal() = transactional() {
 		val d = new Department
 		d.code = code
-		d.name = name
+		d.fullName = name
 		d.filterRule = filterRule
 		d.parent = parent
 
@@ -76,7 +76,8 @@ trait AddSubDepartmentCommandValidation extends SelfValidating {
 			if (moduleAndDepartmentService.getDepartmentByCode(code).isDefined) {
 				errors.rejectValue("code", "department.code.exists")
 			}
-		
+		}
+
 		// Name must be non-empty and start with parent name
 		if (!name.hasText) {
 			errors.rejectValue("name", "department.name.empty")
@@ -84,12 +85,11 @@ trait AddSubDepartmentCommandValidation extends SelfValidating {
 			if (name == (parent.name)){
 				errors.rejectValue("name", "department.name.mustDifferFromParent", Array(parent.name), "")
 			}
+
 			if (!name.startsWith(parent.name)) {
 				errors.rejectValue("name", "department.name.mustStartWithParent", Array(parent.name), "")
 			}
-		}
 
-		
 			// Name must not exceed 100 characters
 			if (name.length > 100) {
 				errors.rejectValue("name", "department.name.tooLong", Array(100: java.lang.Integer), "")

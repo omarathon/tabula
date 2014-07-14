@@ -29,7 +29,11 @@
 	<#else>
 		the student's
 	</#if>
-	 submission</h3> ${feedback.comments!""}
+	 submission</h3> 
+
+	<div class="feedback-notes-content">
+		${feedback.commentsFormattedHtml!""}
+	</div>
 </div>
 </#if>
 
