@@ -37,7 +37,7 @@ trait RemoveMeetingRecordValidation {
 		if (!meetingRecord.isScheduled && meetingRecord.asInstanceOf[MeetingRecord].isApproved) {
 			errors.reject("meetingRecord.delete.approved")
 		}
-		else if (user.universityId != meetingRecord.creator.universityId) {
+		else if (!meetingRecord.isScheduled && user.universityId != meetingRecord.creator.universityId) {
 			errors.reject("meetingRecord.delete.notOwner")
 		}
 	}
