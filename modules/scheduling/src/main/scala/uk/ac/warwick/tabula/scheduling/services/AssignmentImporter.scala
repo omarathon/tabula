@@ -293,7 +293,7 @@ object AssignmentImporter {
 			where mav.academic_year_code in (:academic_year_code)
 			  and mad.assessment_group is not null
 			  and mr.module_code is not null)
-			  order by module_code)"""
+			  order by module_code"""
 
 	class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
 		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
