@@ -1,20 +1,22 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
+import javax.validation.Valid
+
+import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
-import javax.validation.Valid
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmitAssignmentCommand
-import uk.ac.warwick.tabula.data.model.{Submission, Assignment, Module}
-import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.MonitoringPointProfileTermAssignmentService
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.coursework.commands.{StudentSubmissionAndFeedbackCommand, CurrentUserSubmissionAndFeedbackCommandState}
-import uk.ac.warwick.tabula.coursework.commands.StudentSubmissionAndFeedbackCommand._
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.coursework.commands.StudentSubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmitAssignmentCommand
+import uk.ac.warwick.tabula.coursework.commands.{CurrentUserSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommand}
+import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
+import uk.ac.warwick.tabula.services.MonitoringPointProfileTermAssignmentService
+import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
 
 /**
  * This is the main student-facing and non-student-facing controller for handling esubmission and return of feedback.
@@ -22,7 +24,8 @@ import uk.ac.warwick.tabula.commands.Appliable
  */
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}"))
-class AssignmentController extends CourseworkController {
+class AssignmentController extends CourseworkController
+	with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent with AutowiringFeaturesComponent {
 
 	type StudentSubmissionAndFeedbackCommand = Appliable[StudentSubmissionInformation] with CurrentUserSubmissionAndFeedbackCommandState
 
@@ -39,15 +42,19 @@ class AssignmentController extends CourseworkController {
 	@ModelAttribute("studentSubmissionAndFeedbackCommand") def studentSubmissionAndFeedbackCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
 		StudentSubmissionAndFeedbackCommand(module, assignment, user)
 
-	@ModelAttribute("willCheckpointBeCreated") def willCheckpointBeCreated(
+	@ModelAttribute("willCheckpointBeCreated")
+	def willCheckpointBeCreated(
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
-		user: CurrentUser) = {
+		user: CurrentUser
+	) = {
 			val submission = new Submission(user.universityId)
 			submission.assignment = assignment
 			submission.submittedDate = DateTime.now
 			submission.userId = user.userId
-			!monitoringPointProfileTermAssignmentService.getCheckpointsForSubmission(submission).isEmpty
+			monitoringPointProfileTermAssignmentService.getCheckpointsForSubmission(submission).nonEmpty || (
+				features.attendanceMonitoringAcademicYear2014 && attendanceMonitoringCourseworkSubmissionService.getCheckpoints(submission).nonEmpty
+			)
 	}
 
 	/**

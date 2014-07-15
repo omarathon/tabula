@@ -79,6 +79,7 @@ trait AttendanceMonitoringService {
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
 	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint]
+	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], usercode: String, autocreated: Boolean = false): Seq[AttendanceMonitoringCheckpoint]
 	def updateCheckpointTotalsAsync(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit
 	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
 	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
@@ -257,6 +258,10 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	}
 
 	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint] = {
+		setAttendance(student, attendanceMap, user.apparentId)
+	}
+
+	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], usercode: String, autocreated: Boolean = false): Seq[AttendanceMonitoringCheckpoint] = {
 		val existingCheckpoints = getCheckpoints(attendanceMap.keys.toSeq, student)
 		val checkpointsToDelete: Seq[AttendanceMonitoringCheckpoint] = attendanceMap.filter(_._2 == null).map(_._1).map(existingCheckpoints.get).flatten.toSeq
 		val checkpointsToUpdate: Seq[AttendanceMonitoringCheckpoint] = attendanceMap.filter(_._2 != null).flatMap{case(point, state) =>
@@ -264,12 +269,12 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 				val checkpoint = new AttendanceMonitoringCheckpoint
 				checkpoint.student = student
 				checkpoint.point = point
-				checkpoint.autoCreated = false
+				checkpoint.autoCreated = autocreated
 				checkpoint
 			})
 			if (checkpoint.state != state) {
 				checkpoint.state = state
-				checkpoint.updatedBy = user.apparentId
+				checkpoint.updatedBy = usercode
 				checkpoint.updatedDate = DateTime.now
 				Option(checkpoint)
 			} else {

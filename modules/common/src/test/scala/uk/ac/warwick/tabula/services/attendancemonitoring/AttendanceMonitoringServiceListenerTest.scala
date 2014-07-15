@@ -1,9 +1,9 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.services.attendancemonitoring
 
 import org.springframework.core.env.Environment
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceUpdateCheckpointTotalMessage, AttendanceMonitoringServiceListener, AttendanceMonitoringService}
-import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.util.queue.Queue
 
 class AttendanceMonitoringServiceListenerTest extends TestBase with Mockito {

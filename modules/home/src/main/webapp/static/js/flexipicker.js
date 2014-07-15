@@ -444,7 +444,7 @@ var ModulePicker = function (options) {
 	$typeahead.select = function () {
 		this.$element.data('moduleid', this.$menu.find('.active').data('moduleid'));
 		this.$element.data('hasgroups', this.$menu.find('.active').data('hasgroups'));
-		this.$element.data('hasgroups', this.$menu.find('.active').data('hasassignments'));
+		this.$element.data('hasassignments', this.$menu.find('.active').data('hasassignments'));
 		return oldSelect.call($typeahead);
 	};
 
