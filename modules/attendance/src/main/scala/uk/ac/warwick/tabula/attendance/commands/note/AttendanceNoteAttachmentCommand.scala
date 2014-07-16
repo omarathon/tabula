@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.attendance.commands.note
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
-import uk.ac.warwick.tabula.services.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPoint
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object AttendanceNoteAttachmentCommand {
 	def apply(student: StudentMember, point: AttendanceMonitoringPoint, user: CurrentUser) =

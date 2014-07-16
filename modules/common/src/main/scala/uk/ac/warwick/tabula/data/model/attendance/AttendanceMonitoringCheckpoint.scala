@@ -3,10 +3,11 @@ package uk.ac.warwick.tabula.data.model.attendance
 import javax.persistence.{Column, JoinColumn, FetchType, ManyToOne, Entity}
 import uk.ac.warwick.tabula.data.model.{StudentMember, GeneratedId}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.AttendanceMonitoringService
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import javax.validation.constraints.NotNull
+
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 
 @Entity
 class AttendanceMonitoringCheckpoint extends GeneratedId {

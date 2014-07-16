@@ -273,8 +273,7 @@ object AssignmentImporter {
 		    and mav.academic_year_code = mr.academic_year_code
 		    and mav.mav_occurrence = mr.mav_occurrence
 		where mav.academic_year_code in (:academic_year_code)
-		  and mr.module_code is null
-		  order by mav.module_code)
+		  and mr.module_code is null)
 		union
 		(select distinct
 			  mav.module_code,
@@ -293,8 +292,8 @@ object AssignmentImporter {
 			    and mav.mav_occurrence = mr.mav_occurrence
 			where mav.academic_year_code in (:academic_year_code)
 			  and mad.assessment_group is not null
-			  and mr.module_code is not null
-			  order by mav.module_code)"""
+			  and mr.module_code is not null)
+			  order by module_code"""
 
 	class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
 		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))

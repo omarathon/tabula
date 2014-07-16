@@ -4,9 +4,10 @@ import org.joda.time.{DateTime, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringTemplate, AttendanceMonitoringTemplatePoint}
-import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import collection.JavaConverters._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+
+import scala.collection.JavaConverters._
 
 object CreateAttendanceTemplatePointCommand {
 	def apply(template: AttendanceMonitoringTemplate) =

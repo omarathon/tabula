@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.groups.commands
 
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringEventAttendanceServiceComponent, AutowiringAttendanceMonitoringEventAttendanceServiceComponent}
+
 import scala.collection.JavaConverters._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
@@ -12,10 +14,9 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{FeaturesComponent, AutowiringFeaturesComponent, CurrentUser, ItemNotFoundException}
 import org.joda.time.DateTime
 import RecordAttendanceCommand._
-import uk.ac.warwick.tabula.ItemNotFoundException
 
 object RecordAttendanceCommand {
 	type UniversityId = String
@@ -31,7 +32,9 @@ object RecordAttendanceCommand {
 			with AutowiringUserLookupComponent
 			with AutowiringProfileServiceComponent
 			with AutowiringTermServiceComponent
-			with AutowiringMonitoringPointGroupProfileServiceComponent {
+			with AutowiringMonitoringPointGroupProfileServiceComponent
+			with AutowiringAttendanceMonitoringEventAttendanceServiceComponent
+			with AutowiringFeaturesComponent {
 		override lazy val eventName = "RecordAttendance"
 	}
 }
@@ -42,7 +45,8 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 		with PopulateOnForm
 		with TaskBenchmarking {
 
-	self: SmallGroupServiceComponent with UserLookupComponent with ProfileServiceComponent with MonitoringPointGroupProfileServiceComponent =>
+	self: SmallGroupServiceComponent with UserLookupComponent with ProfileServiceComponent with FeaturesComponent
+		with MonitoringPointGroupProfileServiceComponent with AttendanceMonitoringEventAttendanceServiceComponent =>
 		
 	if (!event.group.groupSet.collectAttendance) throw new ItemNotFoundException
 		
@@ -74,8 +78,10 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 		studentsState = members.map { member =>
 			member.universityId -> 
 				occurrence.attendance.asScala
-							.find { _.universityId == member.universityId }
-							.flatMap { a => Option(a.state) }.getOrElse(null)
+					.find {
+					_.universityId == member.universityId
+				}
+					.flatMap { a => Option(a.state)}.orNull
 		}.toMap.asJava
 	}
 
@@ -92,6 +98,8 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 		}.toSeq
 
 		monitoringPointGroupProfileService.updateCheckpointsForAttendance(attendances)
+		if (features.attendanceMonitoringAcademicYear2014)
+			attendanceMonitoringEventAttendanceService.updateCheckpoints(attendances)
 
 		(occurrence, attendances)
 	}

@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringCourseworkSubmissionService
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, FormValue}
 import uk.ac.warwick.tabula.services.{MonitoringPointProfileTermAssignmentService, ZipService, SubmissionService, FeedbackService}
@@ -30,6 +31,7 @@ class SubmitAssignmentCommand(
 	var service = Wire.auto[SubmissionService]
 	var zipService = Wire.auto[ZipService]
 	var monitoringPointProfileTermAssignmentService = Wire.auto[MonitoringPointProfileTermAssignmentService]
+	var attendanceMonitoringCourseworkSubmissionService = Wire.auto[AttendanceMonitoringCourseworkSubmissionService]
 
 	var fields = buildEmptyFields
 
@@ -137,6 +139,8 @@ class SubmitAssignmentCommand(
 		zipService.invalidateSubmissionZip(assignment)
 		service.saveSubmission(submission)
 		monitoringPointProfileTermAssignmentService.updateCheckpointsForSubmission(submission)
+		if (features.attendanceMonitoringAcademicYear2014)
+			attendanceMonitoringCourseworkSubmissionService.updateCheckpoints(submission)
 		submission
 	}
 

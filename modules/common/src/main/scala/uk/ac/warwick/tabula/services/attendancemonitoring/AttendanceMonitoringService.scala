@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.services.attendancemonitoring
 
 import org.codehaus.jackson.annotate.JsonAutoDetect
 import org.joda.time.DateTime
@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.data.{AttendanceMonitoringDaoComponent, AttendanceMonitoringStudentData, AutowiringAttendanceMonitoringDaoComponent, Daoisms, SchemeMembershipItem, SchemeMembershipItemType}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.queue.conversion.ItemType
@@ -39,6 +40,7 @@ trait AttendanceMonitoringService {
 	def saveOrUpdate(template: AttendanceMonitoringTemplate): Unit
 	def saveOrUpdate(templatePoint: AttendanceMonitoringTemplatePoint): Unit
 	def saveOrUpdate(note: AttendanceMonitoringNote): Unit
+	def saveOrUpdate(report: MonitoringPointReport): Unit
 	def deleteScheme(scheme: AttendanceMonitoringScheme)
 	def deletePoint(point: AttendanceMonitoringPoint)
 	def deleteTemplate(template: AttendanceMonitoringTemplate)
@@ -77,6 +79,7 @@ trait AttendanceMonitoringService {
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
 	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint]
+	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], usercode: String, autocreated: Boolean = false): Seq[AttendanceMonitoringCheckpoint]
 	def updateCheckpointTotalsAsync(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit
 	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
 	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
@@ -111,6 +114,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def saveOrUpdate(note: AttendanceMonitoringNote): Unit =
 		attendanceMonitoringDao.saveOrUpdate(note)
+
+	def saveOrUpdate(report: MonitoringPointReport): Unit =
+		attendanceMonitoringDao.saveOrUpdate(report)
 
 	def deleteScheme(scheme: AttendanceMonitoringScheme) =
 		attendanceMonitoringDao.delete(scheme)
@@ -252,6 +258,10 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	}
 
 	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint] = {
+		setAttendance(student, attendanceMap, user.apparentId)
+	}
+
+	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], usercode: String, autocreated: Boolean = false): Seq[AttendanceMonitoringCheckpoint] = {
 		val existingCheckpoints = getCheckpoints(attendanceMap.keys.toSeq, student)
 		val checkpointsToDelete: Seq[AttendanceMonitoringCheckpoint] = attendanceMap.filter(_._2 == null).map(_._1).map(existingCheckpoints.get).flatten.toSeq
 		val checkpointsToUpdate: Seq[AttendanceMonitoringCheckpoint] = attendanceMap.filter(_._2 != null).flatMap{case(point, state) =>
@@ -259,12 +269,12 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 				val checkpoint = new AttendanceMonitoringCheckpoint
 				checkpoint.student = student
 				checkpoint.point = point
-				checkpoint.autoCreated = false
+				checkpoint.autoCreated = autocreated
 				checkpoint
 			})
 			if (checkpoint.state != state) {
 				checkpoint.state = state
-				checkpoint.updatedBy = user.apparentId
+				checkpoint.updatedBy = usercode
 				checkpoint.updatedDate = DateTime.now
 				Option(checkpoint)
 			} else {

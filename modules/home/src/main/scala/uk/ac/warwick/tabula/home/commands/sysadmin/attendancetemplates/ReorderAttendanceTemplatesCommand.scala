@@ -4,8 +4,9 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplate
 import uk.ac.warwick.tabula.helpers.LazyLists
-import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
-import collection.JavaConverters._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+
+import scala.collection.JavaConverters._
 
 object ReorderAttendanceTemplatesCommand {
 	def apply() =

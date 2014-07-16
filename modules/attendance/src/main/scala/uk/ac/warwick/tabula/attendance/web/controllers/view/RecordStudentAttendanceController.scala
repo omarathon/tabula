@@ -8,12 +8,13 @@ import uk.ac.warwick.tabula.commands.{SelfValidating, PopulateOnForm, Appliable}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint}
 import uk.ac.warwick.tabula.attendance.commands.view.RecordStudentAttendanceCommand
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AttendanceMonitoringService}
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.attendance.commands.GroupsPoints
 import uk.ac.warwick.tabula.attendance.web.Routes
 import org.springframework.stereotype.Controller
 import javax.validation.Valid
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 
 @Controller
 @RequestMapping(Array("/view/{department}/{academicYear}/students/{student}/record"))

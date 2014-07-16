@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.scheduling.commands
 
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{StudentMember, Module, SitsStatus, ModeOfAttendance, Route, CourseType}
 import org.hibernate.criterion.Order._

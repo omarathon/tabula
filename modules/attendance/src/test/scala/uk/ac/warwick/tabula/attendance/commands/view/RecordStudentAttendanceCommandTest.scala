@@ -8,7 +8,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointIdConverter
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceState}
-import uk.ac.warwick.tabula.services.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent, TermService, TermServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
+import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.util.termdates.TermImpl

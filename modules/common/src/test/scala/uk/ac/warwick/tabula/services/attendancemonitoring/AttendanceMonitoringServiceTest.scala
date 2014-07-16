@@ -1,14 +1,11 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.services.attendancemonitoring
 
-import uk.ac.warwick.tabula.data.{AttendanceMonitoringDao, AttendanceMonitoringDaoComponent}
-import uk.ac.warwick.tabula.{AcademicYear, MockUserLookup, TestBase, Fixtures, Mockito}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpointTotal, AttendanceMonitoringScheme, AttendanceState}
-import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.data.model.Department
-import org.joda.time.DateTime
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.MemberOrUser
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpointTotal, AttendanceMonitoringScheme, AttendanceState}
+import uk.ac.warwick.tabula.data.{AttendanceMonitoringDao, AttendanceMonitoringDaoComponent}
+import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent, UserGroupMembershipHelper, UserLookupComponent}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, MockUserLookup, Mockito, TestBase}
 
 class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 

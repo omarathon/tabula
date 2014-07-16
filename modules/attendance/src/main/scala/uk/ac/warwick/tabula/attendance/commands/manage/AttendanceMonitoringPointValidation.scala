@@ -2,11 +2,12 @@ package uk.ac.warwick.tabula.attendance.commands.manage
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceComponent
 import scala.collection.mutable
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Department, MeetingFormat, StudentRelationshipType}
 import uk.ac.warwick.tabula.JavaImports._
 import org.joda.time.LocalDate
-import uk.ac.warwick.tabula.services.{AttendanceMonitoringServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.TermServiceComponent
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme}

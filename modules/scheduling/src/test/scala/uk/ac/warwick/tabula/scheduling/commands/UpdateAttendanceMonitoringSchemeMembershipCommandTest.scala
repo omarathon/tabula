@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.scheduling.commands
 
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, FeaturesComponent, Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{ProfileService, AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.commands.{DeserializesFilter, TaskBenchmarking}
 import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme

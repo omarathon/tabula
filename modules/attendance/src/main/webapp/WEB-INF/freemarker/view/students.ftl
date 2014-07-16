@@ -16,6 +16,13 @@
 <#assign deptheaderroute = deptheaderroutemacro in routes/>
 <@fmt.deptheader "View students" "in" department routes "deptheaderroute" />
 
+<#if reports?? && monitoringPeriod??>
+	<div class="alert alert-success">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+		Missed points for <@fmt.p reports "student" /> in the ${monitoringPeriod} monitoring period have been uploaded to SITS:eVision.
+	</div>
+</#if>
+
 <#assign submitUrl><@routes.viewStudents department academicYear.startYear?c /></#assign>
 <#assign filterCommand = filterCommand />
 <#assign filterCommandName = "filterCommand" />

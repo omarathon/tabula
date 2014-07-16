@@ -8,8 +8,9 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.attendance.web.controllers.{HasMonthNames, AttendanceController}
 import uk.ac.warwick.tabula.attendance.commands.GroupsPoints
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AttendanceMonitoringService}
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 
 
 @Controller

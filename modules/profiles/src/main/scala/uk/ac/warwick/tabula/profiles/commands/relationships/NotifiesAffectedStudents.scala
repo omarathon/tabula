@@ -27,10 +27,11 @@ trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], 
 
 	def emit(relationshipChanges: Seq[StudentRelationshipChange]): Seq[Notification[StudentRelationship, Unit]] = {
 		val studentNotifications = if (notifyStudent) {
-			relationshipChanges.flatMap { change =>
-				change.modifiedRelationship.studentMember.map { student => 
-					Notification.init(new BulkStudentRelationshipNotification, apparentUser, Seq(change.modifiedRelationship))
-				}
+			relationshipChanges.filter(_.modifiedRelationship.endDate == null).flatMap { // TAB-2486
+				change =>
+					change.modifiedRelationship.studentMember.map { student =>
+						Notification.init(new BulkStudentRelationshipNotification, apparentUser, Seq(change.modifiedRelationship))
+					}
 			}
 		} else Nil
 		
@@ -49,8 +50,8 @@ trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], 
 				.groupBy(_.modifiedRelationship.agent)
 				.filter { case (agent, changes) => agent.forall(_.isDigit) }
 				.flatMap { case (agent, changes) => profileService.getMemberByUniversityId(agent) map { (_, changes) } }
-				.map { case (newAgent, changes) =>
-					val relationships = changes.map { _.modifiedRelationship }
+				.map { case (agent, changes) =>
+					val relationships = changes.map { _.modifiedRelationship }.filter(_.endDate == null) // TAB-2486
 					Notification.init(new BulkNewAgentRelationshipNotification, apparentUser, relationships)
 				}
 		} else Nil

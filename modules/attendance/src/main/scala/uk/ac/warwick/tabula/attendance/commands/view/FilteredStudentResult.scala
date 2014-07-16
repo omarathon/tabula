@@ -5,7 +5,8 @@ import uk.ac.warwick.tabula.attendance.commands.GroupsPoints
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.{Department, AttendanceNote, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpointTotal, AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint}
-import uk.ac.warwick.tabula.services.{TermServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.TermServiceComponent
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceComponent
 
 case class FilteredStudentResult(
 	student: StudentMember,
