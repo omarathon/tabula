@@ -46,7 +46,7 @@
 			<button type="button" class="btn" onclick="document.forms.selectStudents.submit()">Select students for scheme</button>
 		<#else>
 
-			<p><@fmt.p membershipItems?size "student" /> on the "${command.scheme.name}" scheme</p>
+			<p><@fmt.p membershipItems?size "student" /> on the "${command.scheme.displayName}" scheme</p>
 
 			<p><button type="button" class="btn" onclick="document.forms.selectStudents.submit()">Select students for scheme</button></p>
 
