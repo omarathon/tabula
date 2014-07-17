@@ -154,4 +154,24 @@ input.deleted {
 	}
 }
 
+#container .progress-arrows {
+	span {
+		background: @tabulaGreenLightTint;
+
+		&.active {
+			background: @tabulaGreenDark;
+		}
+
+		&.arrow-right {
+			&:after {
+				border-left-color: @tabulaGreenLightTint;
+			}
+
+			&.active:after {
+				border-left-color: @tabulaGreenDark;
+			}
+		}
+	}
+}
+
 @import "record-attendance.less";

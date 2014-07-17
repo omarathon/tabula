@@ -35,10 +35,6 @@ class AssessmentGroup extends GeneratedId {
 	var smallGroupSet: SmallGroupSet = _
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "department_group_set_id")
-	var departmentSmallGroupSet: DepartmentSmallGroupSet = _
-
-	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "upstream_id")
 	var assessmentComponent: AssessmentComponent = _
 

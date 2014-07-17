@@ -107,13 +107,13 @@ class DepartmentSmallGroupSet
 	}
 	def members_=(group: UserGroup) { _membersGroup = group }
 
-	def isStudentMember(user: User): Boolean = {
-		groups.asScala.exists(_.students.includesUser(user)) ||
-			membershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
-	}
+	@Column(name = "member_query")
+	var memberQuery: String = _
 
-	def allStudents = membershipService.determineMembershipUsers(upstreamAssessmentGroups, Some(members))
-	def allStudentsCount = membershipService.countMembershipWithUniversityIdGroup(upstreamAssessmentGroups, Some(members))
+	def isStudentMember(user: User) = members.includesUser(user)
+
+	def allStudents = members.users
+	def allStudentsCount = members.size
 
 	def unallocatedStudents = {
 		val allocatedStudents = groups.asScala.flatMap { _.students.users }
@@ -148,7 +148,7 @@ class DepartmentSmallGroupSet
 		newSet.allocationMethod = allocationMethod
 		newSet.allowSelfGroupSwitching = allowSelfGroupSwitching
 		newSet.archived = archived
-		newSet.assessmentGroups = assessmentGroups
+		newSet.memberQuery = memberQuery
 		newSet.groups = groups.asScala.map(_.duplicateTo(newSet)).asJava
 		newSet._membersGroup = _membersGroup.duplicate()
 		newSet.membershipService= membershipService

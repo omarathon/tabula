@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.data.model.groups
 
 import javax.persistence.CascadeType._
-import javax.persistence.{OneToOne, JoinColumn, FetchType, ManyToOne}
+import javax.persistence._
 import javax.validation.constraints.NotNull
 
+import org.hibernate.annotations.{AccessType, Filter, FilterDef}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
@@ -27,6 +28,10 @@ object DepartmentSmallGroup {
 	implicit val defaultOrdering = NameOrdering
 }
 
+@FilterDef(name = SmallGroup.NotDeletedFilter, defaultCondition = "deleted = 0")
+@Filter(name = SmallGroup.NotDeletedFilter)
+@Entity
+@AccessType("field")
 class DepartmentSmallGroup
 	extends GeneratedId
 	with CanBeDeleted

@@ -1,19 +1,15 @@
-package uk.ac.warwick.tabula.groups.commands.admin
+package uk.ac.warwick.tabula.groups.commands.admin.reusable
 
-import org.springframework.validation.{BindingResult, Errors}
+import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.helpers.LazyLists
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
-import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.userlookup.User
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object ModifyDepartmentSmallGroupSetCommand {
 	def create(department: Department) =
@@ -41,12 +37,6 @@ trait ModifyDepartmentSmallGroupSetState extends CurrentAcademicYear {
 	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
 
 	var allowSelfGroupSwitching: Boolean = true
-	var defaultMaxGroupSizeEnabled: Boolean = false
-	var defaultMaxGroupSize: Int = SmallGroup.DefaultGroupSize
-
-	var groups: JList[Appliable[DepartmentSmallGroup] with ModifyDepartmentSmallGroupState with SelfValidating] = LazyLists.create { () =>
-		ModifyDepartmentSmallGroupCommand.create(existingSet)
-	}
 }
 
 trait CreateDepartmentSmallGroupSetCommandState extends ModifyDepartmentSmallGroupSetState {
@@ -60,6 +50,7 @@ class CreateDepartmentSmallGroupSetCommandInternal(val department: Department) e
 	def applyInternal() = transactional() {
 		val set = new DepartmentSmallGroupSet(department)
 		copyTo(set)
+
 		smallGroupService.saveOrUpdate(set)
 		set
 	}
@@ -77,29 +68,7 @@ class EditDepartmentSmallGroupSetCommandInternal(val smallGroupSet: DepartmentSm
 	copyFrom(smallGroupSet)
 
 	def applyInternal() = transactional() {
-		val autoDeregister = smallGroupSet.department.autoGroupDeregistration
-
-		val oldUsers = Set[User]()
-		// TODO FIXME
-//			if (autoDeregister) membershipService.determineMembershipUsers(smallGroupSet.upstreamAssessmentGroups, Option(smallGroupSet.members)).toSet
-//			else Set[User]()
-
-		val newUsers = Set[User]()
-		// TODO FIXME
-//			if (autoDeregister) membershipService.determineMembershipUsers(linkedUpstreamAssessmentGroups, Option(members)).toSet
-//			else Set[User]()
-
 		copyTo(smallGroupSet)
-
-		// TAB-1561
-		if (autoDeregister) {
-			// Wrap removal in a sub-command so that we can do auditing
-			for {
-				user <- oldUsers -- newUsers
-				group <- smallGroupSet.groups.asScala
-				if (group.students.includesUser(user))
-			} null // TODO FIXME removeFromGroupCommand(user, group).apply()
-		}
 
 		smallGroupService.saveOrUpdate(smallGroupSet)
 		smallGroupSet
@@ -108,21 +77,13 @@ class EditDepartmentSmallGroupSetCommandInternal(val smallGroupSet: DepartmentSm
 }
 
 abstract class ModifyDepartmentSmallGroupSetCommandInternal
-	extends CommandInternal[DepartmentSmallGroupSet] with ModifyDepartmentSmallGroupSetState with BindListener {
-
-	// start complicated membership stuff
-	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = existingSet.map(_.members)
+	extends CommandInternal[DepartmentSmallGroupSet] with ModifyDepartmentSmallGroupSetState {
 
 	def copyFrom(set: DepartmentSmallGroupSet) {
 		name = set.name
 		academicYear = set.academicYear
 		allocationMethod = set.allocationMethod
 		allowSelfGroupSwitching = set.allowSelfGroupSwitching
-		defaultMaxGroupSizeEnabled = set.defaultMaxGroupSizeEnabled
-		defaultMaxGroupSize = set.defaultMaxGroupSize
-
-		groups.clear()
-		groups.addAll(set.groups.asScala.map(ModifyDepartmentSmallGroupCommand.edit).asJava)
 	}
 
 	def copyTo(set: DepartmentSmallGroupSet) {
@@ -131,30 +92,9 @@ abstract class ModifyDepartmentSmallGroupSetCommandInternal
 		set.allocationMethod = allocationMethod
 
 		set.allowSelfGroupSwitching = allowSelfGroupSwitching
-		set.defaultMaxGroupSizeEnabled = defaultMaxGroupSizeEnabled
-		set.defaultMaxGroupSize = defaultMaxGroupSize
-
-		// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
-		// TAB-2304 Don't do a .clear() and .addAll() because that confuses Hibernate
-		val newGroups = groups.asScala.filter(!_.delete).map(_.apply())
-		set.groups.asScala.filterNot(newGroups.contains).foreach(set.groups.remove)
-		newGroups.filterNot(set.groups.contains).foreach(set.groups.add)
 
 		if (set.members == null) set.members = UserGroup.ofUniversityIds
-// TODO FIXME		set.members.copyFrom(members)
 	}
-
-	override def onBind(result: BindingResult) {
-		// If the last element of groups is both a Creation and is empty, disregard it
-		def isEmpty(cmd: ModifyDepartmentSmallGroupState) = cmd match {
-			case cmd: CreateDepartmentSmallGroupCommandState if !cmd.name.hasText => true
-			case _ => false
-		}
-
-		while (!groups.isEmpty() && isEmpty(groups.asScala.last))
-			groups.remove(groups.asScala.last)
-	}
-
 }
 
 trait ModifyDepartmentSmallGroupSetCommandValidation extends SelfValidating {
@@ -165,12 +105,6 @@ trait ModifyDepartmentSmallGroupSetCommandValidation extends SelfValidating {
 		else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroupSet.name.Length", Array[Object](200: JInteger), "")
 
 		if (allocationMethod == null) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.NotEmpty")
-
-		groups.asScala.zipWithIndex foreach { case (cmd, index) =>
-			errors.pushNestedPath("groups[" + index + "]")
-			cmd.validate(errors)
-			errors.popNestedPath()
-		}
 	}
 }
 

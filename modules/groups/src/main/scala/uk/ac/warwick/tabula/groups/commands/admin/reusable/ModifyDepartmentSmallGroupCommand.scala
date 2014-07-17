@@ -1,13 +1,13 @@
-package uk.ac.warwick.tabula.groups.commands.admin
+package uk.ac.warwick.tabula.groups.commands.admin.reusable
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroup, SmallGroupSet, DepartmentSmallGroup}
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet, SmallGroup}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{SmallGroupServiceComponent, AutowiringSmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object ModifyDepartmentSmallGroupCommand {
@@ -41,7 +41,7 @@ trait ModifyDepartmentSmallGroupState {
 
 trait CreateDepartmentSmallGroupCommandState extends ModifyDepartmentSmallGroupState
 
-class CreateDepartmentSmallGroupCommandInternal(val smallGroupSet: => DepartmentSmallGroupSet) extends ModifyDepartmentSmallGroupCommandInternal with CreateDepartmentSmallGroupCommandState {
+class CreateDepartmentSmallGroupCommandInternal(val smallGroupSet: DepartmentSmallGroupSet) extends ModifyDepartmentSmallGroupCommandInternal with CreateDepartmentSmallGroupCommandState {
 	self: SmallGroupServiceComponent =>
 
 	def applyInternal() = transactional() {

@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.{AssignmentMembershipDao, AssignmentMembershipDaoComponent, AutowiringAssignmentMembershipDaoComponent, AutowiringSmallGroupDaoComponent, AutowiringUserGroupDaoComponent, SmallGroupDaoComponent, UserGroupDaoComponent}
-import uk.ac.warwick.tabula.data.model.{Module, StudentMember, ModuleRegistration, UserGroup, UnspecifiedTypeUserGroup}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
@@ -53,6 +53,8 @@ trait SmallGroupService {
 
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
 	def hasSmallGroups(module: Module): Boolean
+
+	def getDepartmentSmallGroupSets(department: Department): Seq[DepartmentSmallGroupSet]
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -172,6 +174,8 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		smallGroupDao.findAttendanceForStudentInModulesInWeeks(student, startWeek, endWeek, modules)
 
 	def hasSmallGroups(module: Module): Boolean = smallGroupDao.hasSmallGroups(module)
+
+	def getDepartmentSmallGroupSets(department: Department) = smallGroupDao.getDepartmentSmallGroupSets(department)
 }
 
 trait SmallGroupMembershipHelpers {

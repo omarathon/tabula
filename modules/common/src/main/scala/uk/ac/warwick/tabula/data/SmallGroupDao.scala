@@ -6,7 +6,7 @@ import org.hibernate.criterion.{Projections, Order}
 import org.hibernate.criterion.Restrictions._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{StudentMember, Module}
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember, Module}
 import scala.collection.JavaConverters._
 
 trait SmallGroupDaoComponent {
@@ -47,6 +47,8 @@ trait SmallGroupDao {
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
 
 	def hasSmallGroups(module: Module): Boolean
+
+	def getDepartmentSmallGroupSets(department: Department): Seq[DepartmentSmallGroupSet]
 }
 
 @Repository
@@ -142,5 +144,14 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 			.add(is("module", module))
 			.project[Number](Projections.rowCount())
 			.uniqueResult.get.intValue() > 0
+	}
+
+	def getDepartmentSmallGroupSets(department: Department) = {
+		session.newCriteria[DepartmentSmallGroupSet]
+			.add(is("department", department))
+			.add(is("deleted", false))
+			.add(is("archived", false))
+			.addOrder(asc("name"))
+			.seq
 	}
 }
