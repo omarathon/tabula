@@ -11,10 +11,12 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.services.AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
+import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 
 @Controller
 @RequestMapping(value = Array("/{relationshipType}/meeting/{studentCourseDetails}/schedule/{meetingRecord}/confirm"))
-class ConvertScheduledMeetingRecordController extends ProfilesController with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent {
+class ConvertScheduledMeetingRecordController extends ProfilesController
+	with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent with AutowiringAttendanceMonitoringMeetingRecordServiceComponent {
 
 	type PopulatableCommand = Appliable[MeetingRecord] with PopulateOnForm
 
@@ -47,10 +49,9 @@ class ConvertScheduledMeetingRecordController extends ProfilesController with Au
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable meetingRecord: ScheduledMeetingRecord
 	) = cmd match {
-			case Some(cmd) => {
-				cmd.populate()
-				form(cmd, studentCourseDetails, meetingRecord, iframe = true)
-			}
+			case Some(command) =>
+				command.populate()
+				form(command, studentCourseDetails, meetingRecord, iframe = true)
 			case None => Mav("related_students/meeting/was_deleted")
 	}
 
@@ -60,10 +61,9 @@ class ConvertScheduledMeetingRecordController extends ProfilesController with Au
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable meetingRecord: ScheduledMeetingRecord
 	) = cmd match {
-		case Some(cmd: Appliable[MeetingRecord] with PopulateOnForm) => {
+		case Some(cmd: Appliable[MeetingRecord] with PopulateOnForm) =>
 			cmd.populate()
 			form(cmd, studentCourseDetails, meetingRecord)
-		}
 		case None => Mav("related_students/meeting/was_deleted")
 	}
 
@@ -101,7 +101,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController with Au
 		@PathVariable meetingRecord: ScheduledMeetingRecord,
 		@ModelAttribute("viewMeetingRecordCommand") viewCommand: Option[Appliable[Seq[AbstractMeetingRecord]]]
 	) = command match {
-			case Some(cmd) => {
+			case Some(cmd) =>
 				if (createErrors.hasErrors || convertErrors.hasErrors) {
 					form(cmd, studentCourseDetails, meetingRecord, iframe = true)
 				} else {
@@ -117,13 +117,15 @@ class ConvertScheduledMeetingRecordController extends ProfilesController with Au
 						"role" -> modifiedMeeting.relationship.relationshipType,
 						"meetings" -> meetingList,
 						"meetingApprovalWillCreateCheckpoint" -> meetingList.map {
-							case (meeting: MeetingRecord) => meeting.id -> monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
+							case (meeting: MeetingRecord) => meeting.id -> (
+								monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
+									|| attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
+								)
 							case (meeting: ScheduledMeetingRecord) => meeting.id -> false
 						}.toMap,
 						"viewer" -> currentMember,
 						"openMeeting" -> modifiedMeeting).noLayout()
 				}
-			}
 			case None => Mav("related_students/meeting/was_deleted")
 	}
 
@@ -137,7 +139,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController with Au
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable meetingRecord: ScheduledMeetingRecord
 	) = command match {
-		case Some(cmd) => {
+		case Some(cmd) =>
 			if (createErrors.hasErrors || convertErrors.hasErrors) {
 				form(cmd, studentCourseDetails, meetingRecord, iframe = false)
 			} else {
@@ -146,7 +148,6 @@ class ConvertScheduledMeetingRecordController extends ProfilesController with Au
 
 				Redirect(Routes.profile.view(studentCourseDetails.student))
 			}
-		}
 		case None => Mav("related_students/meeting/was_deleted")
 	}
 }

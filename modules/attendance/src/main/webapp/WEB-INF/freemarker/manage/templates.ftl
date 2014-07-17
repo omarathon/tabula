@@ -13,7 +13,7 @@
 	   data-content="
 		<ul>
 			<#list schemes as scheme>
-				<li>${scheme.name}</li>
+				<li>${scheme.displayName}</li>
 			</#list>
 		</ul>"
 	   data-html="true"

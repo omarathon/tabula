@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.convert
 
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplatePoint
-import uk.ac.warwick.tabula.services.AttendanceMonitoringService
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.tabula.system.TwoWayConverter
 
 

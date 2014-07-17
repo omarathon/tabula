@@ -6,7 +6,8 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, At
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{SecurityServiceComponent, AttendanceMonitoringServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceComponent
+import uk.ac.warwick.tabula.services.{SecurityServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.commands.MemberOrUser
 
 trait GroupedPointRecordValidation {

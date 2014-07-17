@@ -47,7 +47,7 @@ exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
 		$('form#recordAttendance').find('select').each(function(){
 			attendanceData[$(this).data('universityid')] = $(this).val();
 		});
-		$.post('/attendance/smallgroupcheckpoints', {
+		$.post('/attendance/check/smallgroup', {
 			'occurrence' : $('form#recordAttendance').data('occurrence'),
 			'attendances' : attendanceData
 		}, function(data){

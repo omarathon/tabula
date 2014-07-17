@@ -8,11 +8,13 @@ import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.services.AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
+import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 
 @Controller
 @RequestMapping(value = Array("/{relationshipType}/meeting/{studentCourseDetails}/create"))
 class CreateMeetingRecordController extends ProfilesController
-	with MeetingRecordModal with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent {
+	with MeetingRecordModal with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
+	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent {
 
 	validatesSelf[CreateMeetingRecordCommand]
 

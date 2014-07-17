@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.home.commands.sysadmin.attendancetemplates
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplate
-import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 
 object DeleteAttendanceTemplateCommand {
 	def apply(template: AttendanceMonitoringTemplate) =

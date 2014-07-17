@@ -165,6 +165,10 @@
 					$.post(url, function(data) {
 						if (data.status == "successful") {
 							$details.addClass("deleted muted");
+						} else if (data.status == "error") {
+							// TAB-2487 was hard to spot because nothing is done with failed ajax
+							// TODO - come up with a better way of reporting JSONErrorView failures app wide
+							alert(data.errors[0]); // alert the first error.
 						}
 						$details.removeClass("processing");
 					}, "json");

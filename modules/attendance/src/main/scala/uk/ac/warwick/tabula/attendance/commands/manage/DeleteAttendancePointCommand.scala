@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceMonitoringPointStyle, AttendanceMonitoringPoint}
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 
 object DeleteAttendancePointCommand {
 	def apply(department: Department, templatePoint: AttendanceMonitoringPoint) =

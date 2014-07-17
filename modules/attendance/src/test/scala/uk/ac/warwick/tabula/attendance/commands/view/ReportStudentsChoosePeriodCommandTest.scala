@@ -6,6 +6,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.util.termdates.TermImpl

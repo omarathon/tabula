@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.services._
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.AbsenceType
 import uk.ac.warwick.tabula.data.model.attendance._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
 import uk.ac.warwick.userlookup.User
 
 class EditAttendanceNoteCommandTest extends TestBase with Mockito {
@@ -14,7 +15,7 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
 		val anAbsenceType = AbsenceType.Cancelled
 		val theNote = "a note!"
 
-		val command = new EditAttendanceNoteCommand(null, null, null, null)
+		val command = new EditAttendanceNoteCommand(null, null, null, Option(""))
 			with AttendanceMonitoringServiceComponent
 			with FileAttachmentServiceComponent
 			with UserLookupComponent
@@ -37,6 +38,23 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
 			val point = null
 		}
 	}
+
+	@Test
+	def onBindNoExistingCheckpoints() { new Fixture {
+		command.attendanceMonitoringService.getAttendanceNote(command.student, command.point) returns (Option(command.attendanceNote))
+		command.attendanceMonitoringService.getCheckpoints(Seq(command.point), command.student) returns Map()
+		command.onBind(errors)
+		command.checkpoint should be (null)
+	}}
+
+	@Test
+	def onBindExistingCheckpoints() { new Fixture {
+		val aCheckpoint = new AttendanceMonitoringCheckpoint
+		command.attendanceMonitoringService.getAttendanceNote(command.student, command.point) returns (Option(command.attendanceNote))
+		command.attendanceMonitoringService.getCheckpoints(Seq(command.point), command.student) returns (Map(command.point -> aCheckpoint))
+		command.onBind(errors)
+		command.checkpoint should be (aCheckpoint)
+	}}
 
 	@Test
 	def testApply() { new Fixture {

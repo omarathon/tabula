@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.{PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.services.AttendanceMonitoringService
 import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 
 @Controller
 @RequestMapping(Array("/view/{department}/{academicYear}"))

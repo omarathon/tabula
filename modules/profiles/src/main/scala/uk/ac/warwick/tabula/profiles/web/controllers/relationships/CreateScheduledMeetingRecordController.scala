@@ -12,10 +12,12 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.services.AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
+import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 
 @Controller
 @RequestMapping(value = Array("/{relationshipType}/meeting/{studentCourseDetails}/schedule/create"))
-class CreateScheduledMeetingRecordController extends ProfilesController with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent {
+class CreateScheduledMeetingRecordController extends ProfilesController with
+	AutowiringMonitoringPointMeetingRelationshipTermServiceComponent with AutowiringAttendanceMonitoringMeetingRecordServiceComponent {
 
 	validatesSelf[SelfValidating]
 
@@ -109,7 +111,10 @@ class CreateScheduledMeetingRecordController extends ProfilesController with Aut
 				"role" -> relationshipType,
 				"meetings" -> meetingList,
 				"meetingApprovalWillCreateCheckpoint" -> meetingList.map {
-					case (meeting: MeetingRecord) => meeting.id -> monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
+					case (meeting: MeetingRecord) => meeting.id -> (
+						monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
+							|| attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
+						)
 					case (meeting: ScheduledMeetingRecord) => meeting.id -> false
 				}.toMap,
 				"viewer" -> currentMember,

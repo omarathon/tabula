@@ -105,11 +105,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				val schemes = attendanceMonitoringDao.listAllSchemes(dept)
 
 				val deptScds = scdDao.findByDepartment(dept)
-				val looseScds = 
-					session.newCriteria[StudentCourseDetails]
-						   .add(Restrictions.isNull("department"))
-						   .seq
-				val scds = (deptScds ++ looseScds).distinct
+				val scds = deptScds.distinct
 
 				for (scd <- scds) {
 					for (mr <- scd.moduleRegistrations) {

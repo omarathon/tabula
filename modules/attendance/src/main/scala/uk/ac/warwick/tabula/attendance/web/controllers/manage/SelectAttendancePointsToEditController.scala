@@ -9,9 +9,9 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyl
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.attendance.commands.manage.FindPointsCommand
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.AttendanceMonitoringService
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.attendance.commands.manage.FindPointsResult
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 
 @Controller
 @RequestMapping(Array("/manage/{department}/{academicYear}/editpoints"))

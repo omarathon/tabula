@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, MonitoringPointSet, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.services.{AutowiringAttendanceMonitoringServiceComponent, AutowiringTermServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyLists
 import collection.JavaConverters._

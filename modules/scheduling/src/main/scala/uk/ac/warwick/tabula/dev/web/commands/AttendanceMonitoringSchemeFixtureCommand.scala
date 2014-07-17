@@ -2,7 +2,8 @@ package uk.ac.warwick.tabula.dev.web.commands
 
 import uk.ac.warwick.tabula.commands.{CommandInternal, Unaudited, ComposableCommand}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, AttendanceMonitoringPointStyle, AttendanceMonitoringPoint, AttendanceMonitoringScheme}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringAttendanceMonitoringServiceComponent, ModuleAndDepartmentServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.data.{TransactionalComponent, SessionComponent, Daoisms, AutowiringTransactionalComponent}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.AcademicYear

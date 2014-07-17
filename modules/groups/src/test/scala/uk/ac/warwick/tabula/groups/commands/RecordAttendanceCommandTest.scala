@@ -1,20 +1,17 @@
 package uk.ac.warwick.tabula.groups.commands
 
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.{TestBase, Mockito}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence
-import uk.ac.warwick.tabula.JavaImports._
-import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.UserGroup
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
+import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupSet}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringEventAttendanceService, AttendanceMonitoringEventAttendanceServiceComponent}
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 class RecordAttendanceCommandTest extends TestBase with Mockito {
 	
@@ -23,12 +20,15 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 
 	// Implements the dependencies declared by the command
 	trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent
-	with ProfileServiceComponent with TermServiceComponent with MonitoringPointGroupProfileServiceComponent{
+	with ProfileServiceComponent with TermServiceComponent with MonitoringPointGroupProfileServiceComponent
+	with FeaturesComponent with AttendanceMonitoringEventAttendanceServiceComponent {
 		val smallGroupService = mock[SmallGroupService]
 		val userLookup = mock[UserLookupService]
 		val profileService = mock[ProfileService]
 		val termService = mock[TermService]
 		val monitoringPointGroupProfileService = mock[MonitoringPointGroupProfileService]
+		val attendanceMonitoringEventAttendanceService = smartMock[AttendanceMonitoringEventAttendanceService]
+		val features = emptyFeatures
 		
 		def apply(): SmallGroupEventOccurrence = {
 			smallGroupEventOccurrence
@@ -83,15 +83,15 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		val command = new RecordAttendanceCommand(event, week, currentUser) with CommandTestSupport with RecordAttendanceCommandValidation with SmallGroupEventInFutureCheck 
 		
 		// Current week is 1, so allowed to record
-		command.termService.getAcademicWeekForAcademicYear(isA[DateTime], isEq(set.academicYear)) returns (1)
+		command.termService.getAcademicWeekForAcademicYear(isA[DateTime], isEq(set.academicYear)) returns 1
 		
-		command.userLookup.getUserByWarwickUniId(invalidUser.getWarwickId()) returns (invalidUser)
-		command.userLookup.getUserByWarwickUniId(missingUser.getWarwickId()) returns (missingUser)
-		command.userLookup.getUserByWarwickUniId(validUser.getWarwickId()) returns (validUser)
+		command.userLookup.getUserByWarwickUniId(invalidUser.getWarwickId) returns invalidUser
+		command.userLookup.getUserByWarwickUniId(missingUser.getWarwickId) returns missingUser
+		command.userLookup.getUserByWarwickUniId(validUser.getWarwickId) returns validUser
 		students.userLookup = command.userLookup
-		students.userLookup.getUsersByUserIds(JArrayList(validUser.getUserId())) returns JMap(validUser.getUserId() -> validUser)
+		students.userLookup.getUsersByUserIds(JArrayList(validUser.getUserId)) returns JMap(validUser.getUserId -> validUser)
 		
-		students.addUserId(validUser.getUserId())
+		students.addUserId(validUser.getUserId)
 	}
 	
 	@Test
@@ -103,8 +103,8 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 			
 			val errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors() should be (true)
-			errors.getFieldError("studentsState").getArguments() should have size (1) 
+			errors.hasFieldErrors should be {true}
+			errors.getFieldError("studentsState").getArguments should have size 1
 		}
 	}
 	
@@ -117,7 +117,7 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 			
 			val errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors() should be (false) // TAB-1791 
+			errors.hasFieldErrors should be {false} // TAB-1791
 		}
 	}
 	
@@ -129,7 +129,7 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 			
 			val errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors() should be (false)
+			errors.hasFieldErrors should be {false}
 		}
 	}
 

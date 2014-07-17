@@ -7,7 +7,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.commands.report.OldReportStudentsChoosePeriodCommand.StudentReportStatus
-import uk.ac.warwick.tabula.attendance.commands.report.{OldReportStudentsChoosePeriodCommand, ReportStudentsConfirmCommand, ReportStudentsState}
+import uk.ac.warwick.tabula.attendance.commands.report.{OldReportStudentsChoosePeriodCommand, OldReportStudentsConfirmCommand, ReportStudentsState}
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
@@ -49,7 +49,7 @@ class OldReportStudentsConfirmController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department) =
-		ReportStudentsConfirmCommand(department, user)
+		OldReportStudentsConfirmCommand(department, user)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointReport]]) = {
