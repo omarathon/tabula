@@ -3,7 +3,7 @@
 <#assign filterQuery = findCommand.serializeFilter />
 <#assign returnTo = (info.requestedUri!"")?url />
 
-<h1>Create a scheme</h1>
+<h1>Create scheme: ${scheme.displayName}</h1>
 
 <div class="add-points-to-schemes fix-area">
 

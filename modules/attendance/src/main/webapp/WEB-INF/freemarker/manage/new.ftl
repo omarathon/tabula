@@ -10,7 +10,7 @@
 		<span class="arrow-right arrow-left use-tooltip" title="Save and edit points"><button type="submit" class="btn btn-link" name="${ManageSchemeMappingParameters.createAndAddPoints}">Points</button></span>
 	</p>
 
-	<@form.labelled_row "name" "Name">
+	<@form.labelled_row "name" "Scheme name">
 		<@f.input path="name" />
 		<@fmt.help_popover id="name" content="Give the scheme an optional name to distinguish it from other schemes in your department e.g. 1st Year Undergrads (part-time)" />
 	</@form.labelled_row>

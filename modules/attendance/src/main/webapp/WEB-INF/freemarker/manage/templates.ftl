@@ -31,11 +31,12 @@
 
 	<@form.labelled_row "templateScheme" "Template:">
 		<@f.select path="templateScheme" id="templateSchemeSelect">
-			<option value="">&hellip;</option>
+			<option value="" style="display: none;">Please select one&hellip;</option>
 			<#list templates as template>
 				<@f.option value="${template.id}" label="${template.templateName}"/>
 			</#list>
 		</@f.select>
+		<@fmt.help_popover id="templateScheme" content="The list of templates available to select from depends on whether this scheme is using term weeks or calendar dates" />
 	</@form.labelled_row>
 
 	<div id="templatePoints"></div>

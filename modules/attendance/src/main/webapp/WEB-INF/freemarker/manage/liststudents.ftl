@@ -13,7 +13,7 @@
 	</#list>
 </#macro>
 
-<h1>Create a scheme</h1>
+<h1>Create scheme: ${scheme.displayName}</h1>
 
 <form method="POST">
 	<input type="hidden" name="filterQueryString" value="${command.filterQueryString!""}" />

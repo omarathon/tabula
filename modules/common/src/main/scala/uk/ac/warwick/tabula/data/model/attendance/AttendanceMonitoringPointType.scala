@@ -7,8 +7,8 @@ sealed abstract class AttendanceMonitoringPointType(val dbValue: String, val des
 object AttendanceMonitoringPointType {
 	case object Standard extends AttendanceMonitoringPointType("standard", "Standard")
 	case object Meeting extends AttendanceMonitoringPointType("meeting", "Meeting")
-	case object SmallGroup extends AttendanceMonitoringPointType("smallGroup", "Small Group")
-	case object AssignmentSubmission extends AttendanceMonitoringPointType("assignmentSubmission", "Assignment Submission")
+	case object SmallGroup extends AttendanceMonitoringPointType("smallGroup", "Teaching event")
+	case object AssignmentSubmission extends AttendanceMonitoringPointType("assignmentSubmission", "Coursework")
 
 	def fromCode(code: String) = code match {
 		case Standard.dbValue => Standard
