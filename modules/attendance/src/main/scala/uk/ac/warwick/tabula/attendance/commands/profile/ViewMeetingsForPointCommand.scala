@@ -1,33 +1,29 @@
-package uk.ac.warwick.tabula.attendance.web.controllers
+package uk.ac.warwick.tabula.attendance.commands.profile
 
-import uk.ac.warwick.tabula.data.model.{MeetingFormat, MeetingRecord, StudentMember}
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.{MeetingRecord, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPoint
-import org.springframework.web.bind.annotation.{PathVariable, RequestMapping, ModelAttribute}
-import uk.ac.warwick.tabula.commands.{Unaudited, ReadOnly, CommandInternal, ComposableCommand, Appliable}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, RelationshipServiceComponent}
-import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
+import uk.ac.warwick.tabula.services.{RelationshipServiceComponent, AutowiringRelationshipServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.data.{MeetingRecordDaoComponent, AutowiringMeetingRecordDaoComponent}
 import scala.collection.mutable
-import org.springframework.stereotype.Controller
 
 object ViewMeetingsForPointCommand {
 	def apply(student: StudentMember, point: AttendanceMonitoringPoint) =
 		new ViewMeetingsForPointCommand(student, point)
-		with ComposableCommand[Seq[Pair[MeetingRecord, Seq[String]]]]
-		with ViewMeetingsForPointPermission
-		with ViewMeetingsForPointCommandState
-		with AutowiringRelationshipServiceComponent
-		with AutowiringMeetingRecordDaoComponent
-		with AutowiringTermServiceComponent
-		with ReadOnly with Unaudited
+			with ComposableCommand[Seq[Pair[MeetingRecord, Seq[String]]]]
+			with ViewMeetingsForPointPermission
+			with ViewMeetingsForPointCommandState
+			with AutowiringRelationshipServiceComponent
+			with AutowiringMeetingRecordDaoComponent
+			with ReadOnly with Unaudited
 }
 
 class ViewMeetingsForPointCommand(val student: StudentMember, val point: AttendanceMonitoringPoint)
 	extends CommandInternal[Seq[Pair[MeetingRecord, Seq[String]]]] with ViewMeetingsForPointCommandState {
 
-	self: RelationshipServiceComponent with MeetingRecordDaoComponent with TermServiceComponent =>
+	self: RelationshipServiceComponent with MeetingRecordDaoComponent =>
 
 	override def applyInternal() = {
 		// Get all the enabled relationship types for a department
@@ -38,7 +34,6 @@ class ViewMeetingsForPointCommand(val student: StudentMember, val point: Attenda
 		}
 
 		allMeetings.map{meeting => meeting -> {
-			val meetingTermWeek = termService.getAcademicWeekForAcademicYear(meeting.meetingDate, point.scheme.academicYear)
 			val reasons: mutable.Buffer[String] = mutable.Buffer()
 			if (!point.meetingRelationships.contains(meeting.relationship.relationshipType))
 				reasons += s"Meeting was not with ${point.meetingRelationships.map{_.agentRole}.mkString(" or ")}"
@@ -74,22 +69,4 @@ trait ViewMeetingsForPointPermission extends RequiresPermissionsChecking with Pe
 trait ViewMeetingsForPointCommandState {
 	def student: StudentMember
 	def point: AttendanceMonitoringPoint
-}
-
-@Controller
-@RequestMapping(Array("/profile/{student}/{academicYear}/{point}/meetings"))
-class ViewMeetingsForPointController extends AttendanceController {
-
-	@ModelAttribute("command")
-	def createCommand(@PathVariable student: StudentMember,	@PathVariable point: AttendanceMonitoringPoint) =
-		ViewMeetingsForPointCommand(student, point)
-
-	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[Seq[Pair[MeetingRecord, Seq[String]]]]) = {
-		val meetingsStatuses = cmd.apply()
-		Mav("home/meetings",
-			"meetingsStatuses" -> meetingsStatuses,
-			"allMeetingFormats" -> MeetingFormat.members
-		).noLayoutIf(ajax)
-	}
 }
