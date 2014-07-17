@@ -5,7 +5,7 @@ import javax.persistence.{DiscriminatorValue, Entity, NamedQueries}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.{AutowiringAssignmentMembershipDaoComponent, SmallGroupDao, SmallGroupDaoComponent, UserGroupDao, UserGroupDaoComponent}
 import uk.ac.warwick.tabula.data.model.{Department, Module, ModuleRegistration}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.events.EventHandling
@@ -55,6 +55,8 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 			with Logging {
 				val eventTutorsHelper: UserGroupMembershipHelper[SmallGroupEvent] = null
 				val groupSetManualMembersHelper: UserGroupMembershipHelper[SmallGroupSet] = null
+				val departmentStudentGroupHelper: UserGroupMembershipHelper[DepartmentSmallGroup] = null
+				val departmentGroupSetManualMembersHelper: UserGroupMembershipHelper[DepartmentSmallGroupSet] = null
 				val studentGroupHelper: UserGroupMembershipHelper[SmallGroup] = studentGroupMembershipHelper
 
 				val smallGroupDao: SmallGroupDao = smartMock[SmallGroupDao]

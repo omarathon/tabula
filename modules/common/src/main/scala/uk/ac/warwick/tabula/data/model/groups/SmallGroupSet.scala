@@ -205,6 +205,7 @@ class SmallGroupSet
     newSet.permissionsService = permissionsService
     newSet.releasedToStudents = releasedToStudents
     newSet.releasedToTutors = releasedToTutors
+		newSet.openForSignups = openForSignups
 		newSet.settings = Map() ++ settings
     newSet
   }

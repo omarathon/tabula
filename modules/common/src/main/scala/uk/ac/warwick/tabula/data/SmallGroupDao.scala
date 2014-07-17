@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEventOccurrence, SmallGroupEvent, SmallGroup, SmallGroupSet, SmallGroupEventAttendance}
+import uk.ac.warwick.tabula.data.model.groups._
 import org.hibernate.criterion.{Projections, Order}
 import org.hibernate.criterion.Restrictions._
 import org.springframework.stereotype.Repository
@@ -22,6 +22,8 @@ trait SmallGroupDao {
 	def getSmallGroupById(id: String): Option[SmallGroup]
 	def getSmallGroupEventById(id: String): Option[SmallGroupEvent]
 	def getSmallGroupEventOccurrenceById(id: String): Option[SmallGroupEventOccurrence]
+	def getDepartmentSmallGroupSetById(id: String): Option[DepartmentSmallGroupSet]
+	def getDepartmentSmallGroupById(id: String): Option[DepartmentSmallGroup]
 	
 	def saveOrUpdate(smallGroupSet: SmallGroupSet)
 	def saveOrUpdate(smallGroup: SmallGroup)
@@ -29,6 +31,8 @@ trait SmallGroupDao {
 	def saveOrUpdate(occurrence: SmallGroupEventOccurrence)
 	def saveOrUpdate(attendance: SmallGroupEventAttendance)
 	def saveOrUpdate(note: SmallGroupEventAttendanceNote)
+	def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet)
+	def saveOrUpdate(smallGroup: DepartmentSmallGroup)
 	
 	def findByModuleAndYear(module: Module, year: AcademicYear): Seq[SmallGroup]
 
@@ -53,12 +57,16 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 	def getSmallGroupById(id: String) = getById[SmallGroup](id)
 	def getSmallGroupEventById(id: String) = getById[SmallGroupEvent](id)
 	def getSmallGroupEventOccurrenceById(id: String) = getById[SmallGroupEventOccurrence](id)
+	def getDepartmentSmallGroupSetById(id: String) = getById[DepartmentSmallGroupSet](id)
+	def getDepartmentSmallGroupById(id: String) = getById[DepartmentSmallGroup](id)
 	def saveOrUpdate(smallGroupSet: SmallGroupSet) = session.saveOrUpdate(smallGroupSet)
 	def saveOrUpdate(smallGroup: SmallGroup) = session.saveOrUpdate(smallGroup)
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent) = session.saveOrUpdate(smallGroupEvent)
 	def saveOrUpdate(occurrence: SmallGroupEventOccurrence) = session.saveOrUpdate(occurrence)
 	def saveOrUpdate(attendance: SmallGroupEventAttendance) = session.saveOrUpdate(attendance)
 	def saveOrUpdate(note: SmallGroupEventAttendanceNote) = session.saveOrUpdate(note)
+	def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet) = session.saveOrUpdate(smallGroupSet)
+	def saveOrUpdate(smallGroup: DepartmentSmallGroup) = session.saveOrUpdate(smallGroup)
 
 	def getSmallGroupEventOccurrence(event: SmallGroupEvent, week: Int) =
 		session.newCriteria[SmallGroupEventOccurrence]

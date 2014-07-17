@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroupSet}
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
@@ -33,6 +33,10 @@ class AssessmentGroup extends GeneratedId {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "group_set_id")
 	var smallGroupSet: SmallGroupSet = _
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "department_group_set_id")
+	var departmentSmallGroupSet: DepartmentSmallGroupSet = _
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "upstream_id")

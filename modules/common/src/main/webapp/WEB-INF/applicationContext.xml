@@ -134,6 +134,8 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupEventIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupEventOccurrenceIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.DepartmentSmallGroupSetIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.DepartmentSmallGroupIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.DayOfWeekConverter"/>
                 <bean class="uk.ac.warwick.tabula.data.convert.NumberConverterFactory"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.StudentCourseDetailsConverter"/>

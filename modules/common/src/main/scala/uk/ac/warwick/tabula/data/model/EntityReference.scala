@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroupSet, SmallGroup}
+import uk.ac.warwick.tabula.data.model.groups._
 
 /**
  * Stores a reference to an entity that is being pointed at in a
@@ -106,6 +106,18 @@ class SmallGroupSetEntityReference extends EntityReference[SmallGroupSet] {
 
 @Entity @DiscriminatorValue(value="smallGroupEvent")
 class SmallGroupEventEntityReference extends EntityReference[SmallGroupEvent] {
+	@ManyToOne
+	var entity: Entity = null
+}
+
+@Entity @DiscriminatorValue(value="departmentSmallGroupSet")
+class DepartmentSmallGroupSetEntityReference extends EntityReference[DepartmentSmallGroupSet] {
+	@ManyToOne
+	var entity: Entity = null
+}
+
+@Entity @DiscriminatorValue(value="departmentSmallGroup")
+class DepartmentSmallGroupEntityReference extends EntityReference[DepartmentSmallGroup] {
 	@ManyToOne
 	var entity: Entity = null
 }
