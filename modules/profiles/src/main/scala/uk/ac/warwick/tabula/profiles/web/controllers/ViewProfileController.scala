@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordService
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
@@ -35,6 +36,7 @@ abstract class ViewProfileController extends ProfilesController {
 	var assignmentService = Wire[AssignmentService]
 	var termService = Wire[TermService]
 	var monitoringPointMeetingRelationshipTermService = Wire[MonitoringPointMeetingRelationshipTermService]
+	var attendanceMonitoringMeetingRecordService = Wire[AttendanceMonitoringMeetingRecordService]
 
 	@ModelAttribute("searchProfilesCommand")
 	def searchProfilesCommand =
@@ -98,7 +100,7 @@ abstract class ViewProfileController extends ProfilesController {
 		// For the currently selected year, get meetings for all relationship types 
 		// (not just the enabled ones for that dept)
 		// because we show a relationship on the profile page if there is one
-		val relationshipMeetings = getRelationshipMeetingsMapForYear(studentCourseDetails,	studentCourseYearDetails, allRelationshipTypes);
+		val relationshipMeetings = getRelationshipMeetingsMapForYear(studentCourseDetails,	studentCourseYearDetails, allRelationshipTypes)
 
 		val relationshipTypes: List[String] =
 			if (currentMember.isStudent)
@@ -113,7 +115,7 @@ abstract class ViewProfileController extends ProfilesController {
 		}
 
 		val meetings = relationshipMeetings.values.flatten
-		val openMeeting = meetings.find(m => m.id == openMeetingId).getOrElse(null)
+		val openMeeting = meetings.find(m => m.id == openMeetingId).orNull
 
 		val agent = userLookup.getUserByWarwickUniId(agentId)
 
@@ -136,7 +138,10 @@ abstract class ViewProfileController extends ProfilesController {
 			"isSelf" -> isSelf,
 			"meetingsById" -> relationshipMeetings.map { case (relType, m) => (relType.id, m) },
 			"meetingApprovalWillCreateCheckpoint" -> meetings.map {
-				case (meeting: MeetingRecord) => meeting.id -> monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
+				case (meeting: MeetingRecord) => meeting.id -> (
+					monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
+					|| attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
+				)
 				case (meeting: ScheduledMeetingRecord) => meeting.id -> false
 			}.toMap,
 			"openMeeting" -> openMeeting,

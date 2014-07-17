@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.Convertible
  * "99/00" or "11/12" but we just store the first year as a 4-digit number.
  * toString() returns the traditional format.
  */
-case class AcademicYear(val startYear: Int) extends Ordered[AcademicYear] with Convertible[JInteger] {
+case class AcademicYear(startYear: Int) extends Ordered[AcademicYear] with Convertible[JInteger] {
 	val endYear = startYear + 1
 	if (endYear > 9999 || startYear < 1000) throw new IllegalArgumentException()
 
@@ -44,7 +44,7 @@ case class AcademicYear(val startYear: Int) extends Ordered[AcademicYear] with C
 		assert(yearsBefore >= 0)
 		assert(yearsAfter >= 0)
 		val length = 1 + yearsBefore + yearsAfter
-		val first = (this - yearsBefore)
+		val first = this - yearsBefore
 		Iterable.iterate(first, length) { y => y.next }.toSeq
 	}
 
@@ -105,10 +105,10 @@ object AcademicYear {
 	 * not when the academic year starts/stops
 	 */
 	def guessByDate(now: DateTime) = {
-		if (now.getMonthOfYear() >= AUGUST) {
-			new AcademicYear(now.getYear())
+		if (now.getMonthOfYear >= AUGUST) {
+			new AcademicYear(now.getYear)
 		} else {
-			new AcademicYear(now.getYear() - 1)
+			new AcademicYear(now.getYear - 1)
 		}
 	}
 
@@ -124,7 +124,7 @@ object AcademicYear {
 				case _ => findAutumnTermForTerm(termService.getPreviousTerm(term))
 			}
 		}
-		val firstWeekOfYear =  findAutumnTermForTerm(termContainingIntervalStart).getStartDate
+		val firstWeekOfYear = findAutumnTermForTerm(termContainingIntervalStart).getStartDate
 		AcademicYear(firstWeekOfYear.getYear)
 	}
 
