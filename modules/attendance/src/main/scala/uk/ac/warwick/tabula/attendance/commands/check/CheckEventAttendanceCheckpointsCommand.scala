@@ -16,6 +16,7 @@ case class CheckpointResult(
 	student: StudentMember
 )
 
+// TODO: When old-style points are retired have this command return a Seq[AttendanceMonitoringCheckpoint]
 object CheckEventAttendanceCheckpointsCommand {
 	def apply(occurrence: SmallGroupEventOccurrence) =
 		new CheckEventAttendanceCheckpointsCommandInternal(occurrence)

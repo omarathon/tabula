@@ -100,11 +100,12 @@
 			</div>
 			<script>
 				jQuery(function($){
-					$('#meetingDate, #format').on('change', function(){
-						$.get('<@routes.meeting_will_create_checkpoint studentCourseDetails.student />', {
+					$('#meetingDateTime, #format').on('change', function(){
+						$.get('<@routes.meeting_will_create_checkpoint />', {
+							'student' : '${studentCourseDetails.student.universityId}',
 							'relationshipType' : '${relationshipType.urlPart}',
 							'meetingFormat' : $('#format').val(),
-							'meetingDate' : $('#meetingDate').val()
+							'meetingDate' : $('#meetingDateTime').val()
 						}, function(data){
 							if(data.willCheckpointBeCreated) {
 								$('#willCheckpointBeCreatedMessage').show();
