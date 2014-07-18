@@ -14,10 +14,6 @@ import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupSer
 
 object DepartmentSmallGroup {
 	final val NotDeletedFilter = "notDeleted"
-	final val DefaultGroupSize = 15
-	object Settings {
-		val MaxGroupSize = "MaxGroupSize"
-	}
 
 	// For sorting a collection by group name. Either pass to the sort function,
 	// or expose as an implicit val.
@@ -37,9 +33,7 @@ class DepartmentSmallGroup
 	with CanBeDeleted
 	with ToString
 	with PermissionsTarget
-	with HasSettings
 	with Serializable
-	with PostLoadBehaviour
 	with ToEntityReference {
 	type Entity = DepartmentSmallGroup
 	import DepartmentSmallGroup._
@@ -80,11 +74,6 @@ class DepartmentSmallGroup
 	}
 	def students_=(group: UserGroup) { _studentsGroup = group }
 
-	def maxGroupSize = getIntSetting(Settings.MaxGroupSize)
-	def maxGroupSize_=(defaultSize:Int) = settings += (Settings.MaxGroupSize -> defaultSize)
-
-	def isFull = groupSet.defaultMaxGroupSizeEnabled && maxGroupSize.getOrElse(0) <= students.size
-
 	def toStringProps = Seq(
 		"id" -> id,
 		"name" -> name,
@@ -96,12 +85,7 @@ class DepartmentSmallGroup
 		newGroup.groupSet = groupSet
 		newGroup.name = name
 		newGroup._studentsGroup = _studentsGroup.duplicate()
-		newGroup.settings = Map() ++ settings
 		newGroup
-	}
-
-	def postLoad {
-		ensureSettings
 	}
 
 	override def toEntityReference = new DepartmentSmallGroupEntityReference().put(this)

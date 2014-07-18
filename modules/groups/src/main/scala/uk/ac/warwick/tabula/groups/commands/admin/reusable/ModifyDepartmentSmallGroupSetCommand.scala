@@ -82,16 +82,11 @@ abstract class ModifyDepartmentSmallGroupSetCommandInternal
 	def copyFrom(set: DepartmentSmallGroupSet) {
 		name = set.name
 		academicYear = set.academicYear
-		allocationMethod = set.allocationMethod
-		allowSelfGroupSwitching = set.allowSelfGroupSwitching
 	}
 
 	def copyTo(set: DepartmentSmallGroupSet) {
 		set.name = name
 		set.academicYear = academicYear
-		set.allocationMethod = allocationMethod
-
-		set.allowSelfGroupSwitching = allowSelfGroupSwitching
 
 		if (set.members == null) set.members = UserGroup.ofUniversityIds
 	}

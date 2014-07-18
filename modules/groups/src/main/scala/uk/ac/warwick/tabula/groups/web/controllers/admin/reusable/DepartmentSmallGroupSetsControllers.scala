@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, DepartmentSmallGroupSet, SmallGroupAllocationMethod, WeekRange}
-import uk.ac.warwick.tabula.groups.commands.admin.reusable.{CreateDepartmentSmallGroupSetCommandState, EditDepartmentSmallGroupSetCommandState, ModifyDepartmentSmallGroupSetCommand}
+import uk.ac.warwick.tabula.groups.commands.admin.reusable.{UpdateStudentsForDepartmentSmallGroupSetCommand, CreateDepartmentSmallGroupSetCommandState, EditDepartmentSmallGroupSetCommandState, ModifyDepartmentSmallGroupSetCommand}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor

@@ -52,6 +52,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro crossmodulegroups department><@_u page="/admin/department/${department.code}/groups/reusable"  /></#macro>
 <#macro createcrossmodulegroups department><@_u page="/admin/department/${department.code}/groups/reusable/new"  /></#macro>
+<#macro createcrossmodulegroupsstudents set><@_u page="/admin/department/${set.department.code}/groups/reusable/new/${set.id}/students"  /></#macro>
 <#macro editcrossmodulegroups set><@_u page="/admin/department/${set.department.code}/groups/reusable/edit/${set.id}"  /></#macro>
 <#macro editcrossmodulegroupsstudents set><@_u page="/admin/department/${set.department.code}/groups/reusable/edit/${set.id}/students"  /></#macro>
+<#macro crossmodulegroupsselectstudents set><@_u page="/admin/department/${set.department.code}/groups/reusable/edit/${set.id}/students/select"  /></#macro>
 <#macro deletecrossmodulegroups set><@_u page="/admin/department/${set.department.code}/groups/reusable/delete/${set.id}"  /></#macro>

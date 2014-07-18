@@ -7,10 +7,8 @@ import org.hibernate.annotations.{Type, Filter, FilterDef, AccessType, BatchSize
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup._
 import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, AssignmentMembershipService, UserGroupCacheManager}
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
-import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.userlookup.User
@@ -18,10 +16,6 @@ import scala.collection.JavaConverters._
 
 object DepartmentSmallGroupSet {
 	final val NotDeletedFilter = "notDeleted"
-	object Settings {
-		val DefaultMaxGroupSizeEnabled = "DefaultMaxGroupSizeEnabled"
-		val DefaultMaxGroupSize = "DefaultMaxGroupSize"
-	}
 
 	// For sorting a collection by set name. Either pass to the sort function,
 	// or expose as an implicit val.
@@ -45,9 +39,7 @@ class DepartmentSmallGroupSet
 	with CanBeDeleted
 	with ToString
 	with PermissionsTarget
-	with HasSettings
 	with Serializable
-	with PostLoadBehaviour
 	with ToEntityReference {
 	type Entity = DepartmentSmallGroupSet
 
@@ -72,17 +64,6 @@ class DepartmentSmallGroupSet
 	var name: String = _
 
 	var archived: JBoolean = false
-
-	@Column(name="allocation_method")
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethodUserType")
-	var allocationMethod: SmallGroupAllocationMethod = _
-
-	@Column(name="self_group_switching")
-	var allowSelfGroupSwitching: Boolean = true
-
-	@Column(name="signup_state")
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpStateUserType")
-	var signupState: SmallGroupSetSelfSignUpState = SmallGroupSetSelfSignUpState.Closed
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "department_id")
@@ -130,12 +111,6 @@ class DepartmentSmallGroupSet
 
 	def permissionsParents = Option(department).toStream
 
-	def defaultMaxGroupSizeEnabled = getBooleanSetting(Settings.DefaultMaxGroupSizeEnabled).getOrElse(false)
-	def defaultMaxGroupSizeEnabled_=(isEnabled:Boolean) = settings += (Settings.DefaultMaxGroupSizeEnabled -> isEnabled)
-
-	def defaultMaxGroupSize = getIntSetting(Settings.DefaultMaxGroupSize).getOrElse(DefaultGroupSize)
-	def defaultMaxGroupSize_=(defaultSize:Int) = settings += (Settings.DefaultMaxGroupSize -> defaultSize)
-
 	def toStringProps = Seq(
 		"id" -> id,
 		"name" -> name,
@@ -145,8 +120,6 @@ class DepartmentSmallGroupSet
 		val newSet = new DepartmentSmallGroupSet()
 		newSet.id = id
 		newSet.academicYear = academicYear
-		newSet.allocationMethod = allocationMethod
-		newSet.allowSelfGroupSwitching = allowSelfGroupSwitching
 		newSet.archived = archived
 		newSet.memberQuery = memberQuery
 		newSet.groups = groups.asScala.map(_.duplicateTo(newSet)).asJava
@@ -154,13 +127,7 @@ class DepartmentSmallGroupSet
 		newSet.membershipService= membershipService
 		newSet.department = department
 		newSet.name = name
-		newSet.signupState = signupState
-		newSet.settings = Map() ++ settings
 		newSet
-	}
-
-	def postLoad {
-		ensureSettings
 	}
 
 	override def toEntityReference = new DepartmentSmallGroupSetEntityReference().put(this)

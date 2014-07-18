@@ -7,4 +7,14 @@ object ManageDepartmentSmallGroupsMappingParameters {
 	final val editAndAddStudents = "editAndAddStudents"
 	final val editAndAddGroups = "editAndAddGroups"
 	final val editAndAllocate = "editAndAllocate"
+
+	final val linkToSits = "linkToSits"
+	final val importAsList = "importAsList"
+	final val reset = "reset"
+
+	final val findStudents = "findStudents"
+	final val manuallyAddForm = "manuallyAddForm"
+	final val manuallyAddSubmit = "manuallyAddSubmit"
+	final val resetMembership = "resetMembership"
+	final val manuallyExclude = "manuallyExclude"
 }

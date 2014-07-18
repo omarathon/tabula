@@ -8,10 +8,6 @@ create table DepartmentSmallGroupSet (
   deleted number(1, 0) default 0,
   membersgroup_id nvarchar2(255),
   member_query nclob,
-  allocation_method nvarchar2(50) default 'Manual',
-  self_group_switching NUMBER(1, 0),
-  settings nclob,
-  signup_state nvarchar2(50) not null,
   constraint DSmallGroupSet_PK primary key (id)
 );
 
@@ -24,7 +20,6 @@ create table DepartmentSmallGroup (
   name nvarchar2(255),
   deleted number(1, 0) default 0,
   studentsgroup_id nvarchar2(255),
-  settings nclob,
   constraint DSmallGroup_PK primary key (id)
 );
 
