@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.attendance.commands.view
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.commands.GroupsPoints
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.data.model.{Department, AttendanceNote, StudentMember}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpointTotal, AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringCheckpointTotal, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.data.model.{AttendanceNote, Department, StudentMember}
 import uk.ac.warwick.tabula.services.TermServiceComponent
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceComponent
 
@@ -57,6 +57,45 @@ trait BuildsFilteredStudentsAttendanceResult extends TaskBenchmarking with Group
 			}
 			FilteredStudentResult(student, groupedPointCheckpointPairs, attendanceNotes, checkpointTotal)
 		}}
-		FilteredStudentsAttendanceResult(totalResults, results, students)
+		FilteredStudentsAttendanceResult(totalResults, benchmarkTask("spacePoints"){spacePoints(results)}, students)
+	}
+
+	private def spacePoints(results: Seq[FilteredStudentResult]): Seq[FilteredStudentResult] = {
+		// do not remove; import needed for sorting
+		// should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+
+		val allPointsByPeriod = results.flatMap(_.groupedPointCheckpointPairs.toSeq).groupBy(_._1).mapValues(_.flatMap(_._2))
+
+		// All the distinct dates in a given period
+		val requiredDatesByPeriod = allPointsByPeriod.map {
+			case (period, pointCheckpointPairs) => period -> pointCheckpointPairs.map(_._1.startDate).distinct.sorted
+		}
+
+		// For each period, for each distinct date, the maximum number of points
+		val maxPointsPerDatePerPeriod = results.flatMap(fsr => {
+			// For each student get the number of points per date
+			fsr.groupedPointCheckpointPairs.map { case (period, pairs) =>
+				period -> pairs.groupBy(_._1.startDate).mapValues(_.size)
+			}.toSeq
+		}).groupBy(_._1).map{ case(period, maxPointsPerDatePerPeriodPerUser) => period -> {
+			// For all the date-count pairs, get the max for each date
+			maxPointsPerDatePerPeriodPerUser.flatMap(_._2.toSeq).groupBy(_._1).mapValues(_.map(_._2).max)
+		}}
+
+		results.map{fsr =>
+			FilteredStudentResult(
+				fsr.student,
+				fsr.groupedPointCheckpointPairs.map{ case (period, pointCheckpointPairs) => period -> {
+					requiredDatesByPeriod(period).flatMap(requiredDate => {
+						val pointsForDate = pointCheckpointPairs.filter(_._1.startDate == requiredDate)
+						// Return all the student's points for this date, followed by enough nulls to pad out to the max for that date
+						pointsForDate ++ (pointsForDate.size until maxPointsPerDatePerPeriod(period)(requiredDate)).map(i => null)
+					})
+				}},
+				fsr.attendanceNotes,
+				fsr.checkpointTotal
+			)
+		}
 	}
 }

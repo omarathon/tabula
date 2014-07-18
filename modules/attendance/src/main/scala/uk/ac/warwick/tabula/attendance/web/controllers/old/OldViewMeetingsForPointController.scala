@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.web.controllers
+package uk.ac.warwick.tabula.attendance.web.controllers.old
 
 import uk.ac.warwick.tabula.data.model.{MeetingFormat, MeetingRecord, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
@@ -11,21 +11,22 @@ import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, Re
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
 import scala.collection.mutable
 import org.springframework.stereotype.Controller
+import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 
-object ViewMeetingsForPointCommand {
+object OldViewMeetingsForPointCommand {
 	def apply(student: StudentMember, point: MonitoringPoint) =
-		new ViewMeetingsForPointCommand(student, point)
+		new OldViewMeetingsForPointCommand(student, point)
 		with ComposableCommand[Seq[Pair[MeetingRecord, Seq[String]]]]
-		with ViewMeetingsForPointPermission
-		with ViewMeetingsForPointCommandState
+		with OldViewMeetingsForPointPermission
+		with OldViewMeetingsForPointCommandState
 		with AutowiringRelationshipServiceComponent
 		with AutowiringMeetingRecordDaoComponent
 		with AutowiringTermServiceComponent
 		with ReadOnly with Unaudited
 }
 
-class ViewMeetingsForPointCommand(val student: StudentMember, val point: MonitoringPoint)
-	extends CommandInternal[Seq[Pair[MeetingRecord, Seq[String]]]] with ViewMeetingsForPointCommandState {
+class OldViewMeetingsForPointCommand(val student: StudentMember, val point: MonitoringPoint)
+	extends CommandInternal[Seq[Pair[MeetingRecord, Seq[String]]]] with OldViewMeetingsForPointCommandState {
 
 	self: RelationshipServiceComponent with MeetingRecordDaoComponent with TermServiceComponent =>
 
@@ -63,31 +64,31 @@ class ViewMeetingsForPointCommand(val student: StudentMember, val point: Monitor
 
 }
 
-trait ViewMeetingsForPointPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ViewMeetingsForPointCommandState =>
+trait OldViewMeetingsForPointPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: OldViewMeetingsForPointCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.MonitoringPoints.View, student)
 	}
 }
 
-trait ViewMeetingsForPointCommandState {
+trait OldViewMeetingsForPointCommandState {
 	def student: StudentMember
 	def point: MonitoringPoint
 }
 
 @Controller
 @RequestMapping(Array("/{department}/{monitoringPoint}/meetings/{student}"))
-class ViewMeetingsForPointController extends AttendanceController {
+class OldViewMeetingsForPointController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def createCommand(@PathVariable student: StudentMember,	@PathVariable monitoringPoint: MonitoringPoint) =
-		ViewMeetingsForPointCommand(student, monitoringPoint)
+		OldViewMeetingsForPointCommand(student, monitoringPoint)
 
 	@RequestMapping
 	def home(@ModelAttribute("command") cmd: Appliable[Seq[Pair[MeetingRecord, Seq[String]]]]) = {
 		val meetingsStatuses = cmd.apply()
-		Mav("home/meetings",
+		Mav("home/old/meetings",
 			"meetingsStatuses" -> meetingsStatuses,
 			"allMeetingFormats" -> MeetingFormat.members
 		).noLayoutIf(ajax)

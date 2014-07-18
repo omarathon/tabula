@@ -472,7 +472,11 @@
 			<td>
 				<#if result.groupedPointCheckpointPairs[term]??>
 					<#list result.groupedPointCheckpointPairs[term] as pointCheckpointPair>
-						<@checkpointIconForPointCheckpointPair department result.student pointCheckpointPair result.attendanceNotes />
+						<#if pointCheckpointPair??>
+							<@checkpointIconForPointCheckpointPair department result.student pointCheckpointPair result.attendanceNotes />
+						<#else>
+							<i class="icon-fixed-width"></i>
+						</#if>
 					</#list>
 				<#else>
 					<i class="icon-fixed-width"></i>
@@ -485,7 +489,11 @@
 		<td>
 			<#if result.groupedPointCheckpointPairs[month]??>
 				<#list result.groupedPointCheckpointPairs[month] as pointCheckpointPair>
-					<@checkpointIconForPointCheckpointPair department result.student pointCheckpointPair result.attendanceNotes />
+					<#if pointCheckpointPair??>
+						<@checkpointIconForPointCheckpointPair department result.student pointCheckpointPair result.attendanceNotes />
+					<#else>
+						<i class="icon-fixed-width"></i>
+					</#if>
 				</#list>
 			<#else>
 				<i class="icon-fixed-width"></i>
@@ -546,13 +554,13 @@
 
 					<tbody>
 						<#list filterResult.results as result>
-						<tr class="student">
-							<#if visiblePeriods?size == 0>
-								<td colspan="${visiblePeriods?size}"><span class="muted"><em>No monitoring points found</em></span></td>
-							<#else>
-								<@listCheckpointIcons department visiblePeriods monthNames result />
-							</#if>
-						</tr>
+							<tr class="student">
+								<#if visiblePeriods?size == 0>
+									<td colspan="${visiblePeriods?size}"><span class="muted"><em>No monitoring points found</em></span></td>
+								<#else>
+									<@listCheckpointIcons department visiblePeriods monthNames result />
+								</#if>
+							</tr>
 						</#list>
 					</tbody>
 				</table>
