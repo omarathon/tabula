@@ -40,7 +40,7 @@
 
 		${titleHeader}
 
-		<@attendance_macros.attendanceButtons />
+		<@attendance_macros.attendanceButtons startDateInFuture=command.templateMonitoringPoint.startDateInFuture/>
 
 		<div class="fix-area">
 			<div class="fix-header pad-when-fixed">

@@ -69,7 +69,6 @@ trait StudentRecordValidation extends SelfValidating {
 	self: StudentRecordCommandState =>
 
 	override def validate(errors: Errors) = {
-		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), pointSet.academicYear)
 		val points = pointSet.points.asScala
 		checkpointMap.asScala.foreach{case (point, state) =>
 			errors.pushNestedPath(s"checkpointMap[${point.id}]")
@@ -81,11 +80,9 @@ trait StudentRecordValidation extends SelfValidating {
 				errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
 			}
 
-			if (thisAcademicYear.startYear <= pointSet.academicYear.startYear
-				&& currentAcademicWeek < point.validFromWeek
-				&& !(state == null || state == AttendanceState.MissedAuthorised)
-			) {
-				errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
+			if (point.isStartDateInFuture	&& !(state == null || state == AttendanceState.MissedAuthorised)) {
+				if (state == AttendanceState.MissedUnauthorised) errors.rejectValue("", "monitoringCheckpoint.missedUnauthorised.beforeStart")
+				else if (state == AttendanceState.Attended) errors.rejectValue("", "monitoringCheckpoint.attended.beforeStart")
 			}
 			errors.popNestedPath()
 		}

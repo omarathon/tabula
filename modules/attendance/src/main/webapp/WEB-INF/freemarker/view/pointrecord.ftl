@@ -42,7 +42,7 @@
 
 	<div class="recordCheckpointForm">
 
-		<@attendance_macros.attendanceButtons />
+		<@attendance_macros.attendanceButtons startDateInFuture=!command.templatePoint.startDateInFuture />
 
 		<div class="fix-area">
 			<div class="fix-header pad-when-fixed">
@@ -78,6 +78,7 @@
 								</a>
 							</span>
 							<div class="btn-group">
+
 								<button
 										type="button"
 										class="btn use-tooltip"

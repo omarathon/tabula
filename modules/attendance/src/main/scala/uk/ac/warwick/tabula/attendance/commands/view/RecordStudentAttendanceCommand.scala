@@ -69,8 +69,9 @@ trait RecordStudentAttendanceValidation extends SelfValidating {
 				errors.rejectValue("", "attendanceMonitoringCheckpoint.alreadyReportedThisTerm")
 			}
 
-			if (DateTime.now.isBefore(point.startDate.toDateTimeAtStartOfDay) && !(state == null || state == AttendanceState.MissedAuthorised)) {
-				errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
+			if (point.isStartDateInFuture && !(state == null || state == AttendanceState.MissedAuthorised)) {
+				if (state == AttendanceState.MissedUnauthorised) errors.rejectValue("", "monitoringCheckpoint.missedUnauthorised.beforeStart")
+				else if (state == AttendanceState.Attended) errors.rejectValue("", "monitoringCheckpoint.attended.beforeStart")
 			}
 
 			errors.popNestedPath()

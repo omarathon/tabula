@@ -104,7 +104,7 @@
 	</#if>
 </#macro>
 
-<#macro attendanceButtons>
+<#macro attendanceButtons startDateInFuture=false>
 	<div style="display:none;" class="forCloning">
 		<div class="btn-group" data-toggle="buttons-radio">
 			<button
@@ -119,9 +119,9 @@
 			</button>
 			<button
 					type="button"
-					class="btn btn-unauthorised use-tooltip"
+					class="btn btn-unauthorised use-tooltip <#if (startDateInFuture)>disabled</#if>"
 					data-state="unauthorised"
-					title="Set to 'Missed (unauthorised)'"
+					title=<#if (startDateInFuture)> "This event hasn't happened yet so it can't be marked as missed (unauthorised)"<#else> "Set to 'Missed (unauthorised)'"</#if>
 					data-html="true"
 					data-container="body"
 					>
@@ -139,9 +139,9 @@
 			</button>
 			<button
 					type="button"
-					class="btn btn-attended use-tooltip"
+					class="btn btn-attended use-tooltip <#if (startDateInFuture)>disabled</#if>"
 					data-state="attended"
-					title="Set to 'Attended'"
+					title=<#if (startDateInFuture)> "This event hasn't happened yet so it can't be marked as attended"<#else> "Set to 'Attended'" </#if>
 					data-html="true"
 					data-container="body"
 					>

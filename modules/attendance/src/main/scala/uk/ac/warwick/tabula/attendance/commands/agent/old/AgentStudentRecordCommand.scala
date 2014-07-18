@@ -81,9 +81,9 @@ trait AgentStudentRecordValidation extends SelfValidating {
 
 			if (thisAcademicYear.startYear <= pointSet.academicYear.startYear
 				&& currentAcademicWeek < point.validFromWeek
-				&& !(state == null || state == AttendanceState.MissedAuthorised)
-			) {
-				errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
+				&& !(state == null || state == AttendanceState.MissedAuthorised)) {
+					if (state == AttendanceState.MissedUnauthorised) errors.rejectValue("", "monitoringCheckpoint.missedUnauthorised.beforeStart")
+					else if (state == AttendanceState.Attended) errors.rejectValue("", "monitoringCheckpoint.attended.beforeStart")
 			}
 			errors.popNestedPath()
 		}}

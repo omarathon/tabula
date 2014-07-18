@@ -245,7 +245,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("studentsState[0000001][point1Id]")
-		errors.getFieldError.getCodes should contain ("monitoringCheckpoint.beforeValidFromWeek")
+		errors.getFieldError.getCodes should contain ("monitoringCheckpoint.attended.beforeStart")
 	}}
 
 	private def getErrors[A <: CommandTestSupport](command: A) = {
