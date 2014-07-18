@@ -27,7 +27,7 @@ trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], 
 
 	def emit(relationshipChanges: Seq[StudentRelationshipChange]): Seq[Notification[StudentRelationship, Unit]] = {
 		val studentNotifications = if (notifyStudent) {
-			relationshipChanges.filter(_.modifiedRelationship.endDate == null).flatMap { // TAB-2486
+			relationshipChanges.flatMap {
 				change =>
 					change.modifiedRelationship.studentMember.map { student =>
 						Notification.init(new BulkStudentRelationshipNotification, apparentUser, Seq(change.modifiedRelationship))
