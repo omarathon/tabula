@@ -3,25 +3,25 @@
 
 <#macro listStudentIdInputs>
 	<#list findCommand.staticStudentIds as id>
-	<input type="hidden" name="staticStudentIds" value="${id}" />
+		<input type="hidden" name="staticStudentIds" value="${id}" />
 	</#list>
 	<#list findCommand.includedStudentIds as id>
-	<input type="hidden" name="includedStudentIds" value="${id}" />
+		<input type="hidden" name="includedStudentIds" value="${id}" />
 	</#list>
 	<#list findCommand.excludedStudentIds as id>
-	<input type="hidden" name="excludedStudentIds" value="${id}" />
+		<input type="hidden" name="excludedStudentIds" value="${id}" />
 	</#list>
 </#macro>
 
-<h1>Edit scheme: ${scheme.displayName}</h1>
+<h1>Create scheme: ${scheme.displayName}</h1>
 
 <form method="POST">
 	<input type="hidden" name="filterQueryString" value="${findCommand.serializeFilter}" />
 	<@listStudentIdInputs />
 
 	<p class="progress-arrows">
-		<span class="arrow-right use-tooltip" title="Save and edit properties"><button type="submit" class="btn btn-link" name="${ManageSchemeMappingParameters.saveAndEditProperties}">Properties</button></span>
-		<span class="arrow-right arrow-left use-tooltip active">Students</span>
+		<span class="arrow-right">Properties</span>
+		<span class="arrow-right arrow-left active">Students</span>
 		<span class="arrow-right arrow-left use-tooltip" title="Save and edit points"><button type="submit" class="btn btn-link" name="${ManageSchemeMappingParameters.createAndAddPoints}">Points</button></span>
 	</p>
 
@@ -51,9 +51,19 @@
 
 			<input
 				type="submit"
-				class="btn btn-primary"
-				name="create"
+				class="btn btn-success use-tooltip"
+				name="${ManageSchemeMappingParameters.createAndAddPoints}"
+				value="Add points"
+				title="Select which monitoring points this scheme should use"
+				data-container="body"
+			/>
+			<input
+				type="submit"
+				class="btn btn-primary use-tooltip"
+				name="persist"
 				value="Save"
+				title="Save your blank scheme and add points to it later"
+				data-container="body"
 			/>
 			<a class="btn" href="<@routes.manageHomeForYear scheme.department scheme.academicYear.startYear?c />">Cancel</a>
 		</div>

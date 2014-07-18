@@ -2,8 +2,9 @@ package uk.ac.warwick.tabula.attendance.web.controllers.manage
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
-import uk.ac.warwick.tabula.attendance.commands.manage.AddStudentsToSchemeCommand
+import uk.ac.warwick.tabula.attendance.commands.manage._
 import uk.ac.warwick.tabula.commands.Appliable
 import javax.validation.Valid
 import org.springframework.validation.Errors
@@ -13,28 +14,36 @@ import uk.ac.warwick.tabula.attendance.web.Routes
 @RequestMapping(Array("/manage/{department}/{academicYear}/{scheme}/edit/students"))
 class EditStudentsOnSchemeController extends AbstractManageSchemeStudentsController {
 
-	@ModelAttribute("command")
-	override def command(@PathVariable("scheme") scheme: AttendanceMonitoringScheme) =
+	@ModelAttribute("persistanceCommand")
+	override def persistanceCommand(@PathVariable("scheme") scheme: AttendanceMonitoringScheme) =
 		AddStudentsToSchemeCommand(mandatory(scheme), user)
 
-	override protected def render(scheme: AttendanceMonitoringScheme) = {
-		Mav("manage/editschemestudents",
-			"ManageSchemeMappingParameters" -> ManageSchemeMappingParameters
-		).crumbs(
-				Breadcrumbs.Manage.Home,
-				Breadcrumbs.Manage.Department(scheme.department),
-				Breadcrumbs.Manage.DepartmentForYear(scheme.department, scheme.academicYear)
-			)
-	}
+	@ModelAttribute("findCommand")
+	override def findCommand(@PathVariable scheme: AttendanceMonitoringScheme) =
+		FindStudentsForSchemeCommand(mandatory(scheme), user)
+
+	@ModelAttribute("editMembershipCommand")
+	override def editMembershipCommand(@PathVariable scheme: AttendanceMonitoringScheme) =
+		EditSchemeMembershipCommand(mandatory(scheme), user)
+
+	override protected val renderPath = "manage/editschemestudents"
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.createAndAddPoints))
 	def saveAndEditPoints(
 		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
 		errors: Errors,
+		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with FindStudentsForSchemeCommandState,
+		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
 		@PathVariable scheme: AttendanceMonitoringScheme
 	) = {
 		if (errors.hasErrors) {
-			render(scheme)
+			val findStudentsForSchemeCommandResult =
+				if (findCommand.filterQueryString.length > 0)
+					findCommand.apply()
+				else
+					FindStudentsForSchemeCommandResult(JArrayList(), Seq())
+			val editMembershipCommandResult = editMembershipCommand.apply()
+			render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult)
 		} else {
 			val scheme = cmd.apply()
 			Redirect(Routes.Manage.editSchemePoints(scheme))
@@ -46,10 +55,18 @@ class EditStudentsOnSchemeController extends AbstractManageSchemeStudentsControl
 	def saveAndEditProperties(
 		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
 		errors: Errors,
+		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with FindStudentsForSchemeCommandState,
+		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
 		@PathVariable scheme: AttendanceMonitoringScheme
 	) = {
 		if (errors.hasErrors) {
-			render(scheme)
+			val findStudentsForSchemeCommandResult =
+				if (findCommand.filterQueryString.length > 0)
+					findCommand.apply()
+				else
+					FindStudentsForSchemeCommandResult(JArrayList(), Seq())
+			val editMembershipCommandResult = editMembershipCommand.apply()
+			render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult)
 		} else {
 			val scheme = cmd.apply()
 			Redirect(Routes.Manage.editScheme(scheme))

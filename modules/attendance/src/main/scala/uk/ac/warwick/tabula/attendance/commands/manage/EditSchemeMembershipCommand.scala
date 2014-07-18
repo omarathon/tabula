@@ -15,8 +15,8 @@ import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipE
 import uk.ac.warwick.tabula.data.SchemeMembershipItem
 
 case class EditSchemeMembershipCommandResult(
-	updatedIncludedStudentIds: JList[String],
-	updatedExcludedStudentIds: JList[String],
+	includedStudentIds: JList[String],
+	excludedStudentIds: JList[String],
 	membershipItems: Seq[SchemeMembershipItem]
 )
 
@@ -53,14 +53,14 @@ class EditSchemeMembershipCommandInternal(val scheme: AttendanceMonitoringScheme
 
 	override def applyInternal() = {
 		val membershipItems: Seq[SchemeMembershipItem] = {
-			val excludedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(updatedExcludedStudentIds.asScala, SchemeMembershipExcludeType)
-			val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(updatedIncludedStudentIds.asScala, SchemeMembershipIncludeType)
+			val excludedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(excludedStudentIds.asScala, SchemeMembershipExcludeType)
+			val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems( includedStudentIds.asScala, SchemeMembershipIncludeType)
 			(excludedMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
 		}
 
 		EditSchemeMembershipCommandResult(
-			updatedIncludedStudentIds,
-			updatedExcludedStudentIds,
+			includedStudentIds,
+			excludedStudentIds,
 			membershipItems
 		)
 	}
@@ -72,8 +72,8 @@ trait PopulateEditSchemeMembershipCommand extends PopulateOnForm {
 	self: EditSchemeMembershipCommandState =>
 
 	override def populate() = {
-		updatedIncludedStudentIds = includedStudentIds
-		updatedExcludedStudentIds = excludedStudentIds
+		includedStudentIds = scheme.members.includedUserIds.asJava
+		excludedStudentIds = scheme.members.excludedUserIds.asJava
 	}
 
 }
@@ -112,8 +112,8 @@ trait AddsUsersToEditSchemeMembershipCommand {
 		val noPermissionsMembers = permissionsMap.filter(!_._2).toMap.keySet.toSeq
 		val validPermissionMembers = permissionsMap.filter(_._2).toMap.keySet
 
-		updatedIncludedStudentIds = (updatedIncludedStudentIds.asScala.toSeq ++ validPermissionMembers.map(_.universityId)).asJava
-		updatedExcludedStudentIds = (updatedExcludedStudentIds.asScala.toSeq diff updatedIncludedStudentIds.asScala.toSeq).asJava
+		includedStudentIds = (includedStudentIds.asScala.toSeq ++ validPermissionMembers.map(_.universityId)).asJava
+		excludedStudentIds = (excludedStudentIds.asScala.toSeq diff includedStudentIds.asScala.toSeq).asJava
 
 		// Users processed, so reset fields
 		massAddUsers = ""
@@ -128,7 +128,7 @@ trait RemovesUsersFromEditSchemeMembershipCommand {
 	self: EditSchemeMembershipCommandState =>
 
 	def removeUsers() = {
-		updatedExcludedStudentIds = (updatedExcludedStudentIds.asScala ++ excludeIds.asScala).distinct.asJava
+		excludedStudentIds = (excludedStudentIds.asScala ++ excludeIds.asScala).distinct.asJava
 	}
 }
 
@@ -137,16 +137,16 @@ trait ResetsMembershipInEditSchemeMembershipCommand {
 	self: EditSchemeMembershipCommandState =>
 
 	def resetMembership() = {
-		updatedIncludedStudentIds = (updatedIncludedStudentIds.asScala diff resetStudentIds.asScala).asJava
-		updatedExcludedStudentIds = (updatedExcludedStudentIds.asScala diff resetStudentIds.asScala).asJava
+		includedStudentIds = (includedStudentIds.asScala diff resetStudentIds.asScala).asJava
+		excludedStudentIds = (excludedStudentIds.asScala diff resetStudentIds.asScala).asJava
 	}
 
 	def resetAllIncluded() = {
-		updatedIncludedStudentIds.clear()
+		 includedStudentIds.clear()
 	}
 
 	def resetAllExcluded() = {
-		updatedExcludedStudentIds.clear()
+		excludedStudentIds.clear()
 	}
 }
 
@@ -170,14 +170,9 @@ trait EditSchemeMembershipCommandState {
 
 	// Bind variables
 
-	// Store original students for reset
 	var includedStudentIds: JList[String] = LazyLists.create()
 	var excludedStudentIds: JList[String] = LazyLists.create()
 	var staticStudentIds: JList[String] = LazyLists.create()
-
-	// Store updated students
-	var updatedIncludedStudentIds: JList[String] = LazyLists.create()
-	var updatedExcludedStudentIds: JList[String] = LazyLists.create()
 
 	var massAddUsers: String = _
 	// parse massAddUsers into a collection of individual tokens
