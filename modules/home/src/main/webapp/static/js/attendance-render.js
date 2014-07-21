@@ -516,7 +516,6 @@ $(function(){
 			};
 
 			var updateFilter = function($el) {
-				// Add in route search
 				// Update the filter content
 				var $list = $el.closest('ul');
 				var shortValues = $list.find(':checked').map(function() {
@@ -598,6 +597,27 @@ $(function(){
 					prependClearLink($list);
 				});
 			});
+
+			$('.route-search-query').on('change', function(){
+				var $this = $(this);
+				if ($this.data('routecode') === undefined || $this.data('routecode').length === 0)
+					return;
+
+				$('<li/>').addClass('check-list-item').append(
+					$('<label/>').addClass('checkbox').append(
+						$('<input/>').attr({
+							'type':'checkbox',
+							'name':'routes',
+							'value':$this.data('routecode'),
+							'checked':true
+						}).data('short-value',$this.data('routecode').toUpperCase())
+					).append(
+						$this.val()
+					)
+				).insertBefore($this.closest('ul').find('li.check-list-item:first'));
+				$this.data('routecode','').val('');
+				updateFilter($this);
+			}).routePicker({});
 		}
 	})();
 
