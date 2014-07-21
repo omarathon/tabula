@@ -32,6 +32,7 @@ abstract class BulkRelationshipChangeNotification extends Notification[StudentRe
 
 	def actionRequired = false
 
+	// oldAgent will always be the same for the student notification (single) or the oldAgentNotification - this is not used by the new agent notification
 	def oldAgent = {
 		val rel = items.asScala.headOption.map{ _.entity }
 		val previousRelationship = rel.flatMap { rel => relationshipService.getPreviousRelationship(rel) }

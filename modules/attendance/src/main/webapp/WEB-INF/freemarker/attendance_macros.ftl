@@ -274,7 +274,7 @@
 							  style="margin-left: 0.5em;"
 							/>
 						</#if>
-						<#if (showResetButton && (editMembershipCommandResult.updatedIncludedStudentIds?size > 0 || editMembershipCommandResult.updatedExcludedStudentIds?size > 0))>
+						<#if (showResetButton && (editMembershipCommandResult.includedStudentIds?size > 0 || editMembershipCommandResult.excludedStudentIds?size > 0))>
 							<input class="btn btn-warning hideOnClosed btn-small use-tooltip"
 								   type="submit"
 								   style="float: right; padding-left: 5px; padding-right: 5px; margin-left: 5px;"

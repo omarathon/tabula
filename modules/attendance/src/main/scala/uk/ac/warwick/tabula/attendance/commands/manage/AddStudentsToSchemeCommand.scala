@@ -22,12 +22,10 @@ object AddStudentsToSchemeCommand {
 			with AutowiringProfileServiceComponent
 			with AutowiringSecurityServiceComponent
 			with ComposableCommand[AttendanceMonitoringScheme]
-			with PopulateAddStudentsToSchemeCommandInternal
 			with AddStudentsToSchemeValidation
 			with AddStudentsToSchemeDescription
 			with AddStudentsToSchemePermissions
 			with AddStudentsToSchemeCommandState
-			with SetStudents
 }
 
 
@@ -37,10 +35,19 @@ class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme,
 	self: AddStudentsToSchemeCommandState with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal() = {
-		scheme.members.staticUserIds = staticStudentIds.asScala
-		scheme.members.includedUserIds = includedStudentIds.asScala
-		scheme.members.excludedUserIds = excludedStudentIds.asScala
-		scheme.memberQuery = filterQueryString
+		if (linkToSits) {
+			scheme.members.staticUserIds = staticStudentIds.asScala
+			scheme.members.includedUserIds = includedStudentIds.asScala
+			scheme.members.excludedUserIds = excludedStudentIds.asScala
+			scheme.memberQuery = filterQueryString
+		} else {
+			scheme.members.staticUserIds = Seq()
+			scheme.members.includedUserIds = Seq()
+			scheme.members.excludedUserIds = Seq()
+			scheme.memberQuery = ""
+			scheme.members.includedUserIds = ((staticStudentIds.asScala diff excludedStudentIds.asScala) ++ includedStudentIds.asScala).distinct
+		}
+
 		scheme.updatedDate = DateTime.now
 		attendanceMonitoringService.saveOrUpdate(scheme)
 
@@ -51,43 +58,6 @@ class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme,
 		attendanceMonitoringService.updateCheckpointTotalsAsync(students, scheme.department, scheme.academicYear)
 
 		scheme
-	}
-
-}
-
-trait PopulateAddStudentsToSchemeCommandInternal extends PopulateOnForm {
-
-	self: AddStudentsToSchemeCommandState =>
-
-	override def populate() = {
-		staticStudentIds = scheme.members.staticUserIds.asJava
-		includedStudentIds = scheme.members.includedUserIds.asJava
-		excludedStudentIds = scheme.members.excludedUserIds.asJava
-		filterQueryString = scheme.memberQuery
-	}
-}
-
-trait SetStudents {
-
-	self: AddStudentsToSchemeCommandState =>
-
-	def linkToSits() = {
-		includedStudentIds.clear()
-		includedStudentIds.addAll(updatedIncludedStudentIds)
-		excludedStudentIds.clear()
-		excludedStudentIds.addAll(updatedExcludedStudentIds)
-		staticStudentIds.clear()
-		staticStudentIds.addAll(updatedStaticStudentIds)
-		filterQueryString = updatedFilterQueryString
-	}
-
-	def importAsList() = {
-		includedStudentIds.clear()
-		excludedStudentIds.clear()
-		staticStudentIds.clear()
-		val newList = ((updatedStaticStudentIds.asScala diff updatedExcludedStudentIds.asScala) ++ updatedIncludedStudentIds.asScala).distinct
-		includedStudentIds.addAll(newList.asJava)
-		filterQueryString = ""
 	}
 
 }
@@ -104,11 +74,16 @@ trait AddStudentsToSchemeValidation extends SelfValidating with TaskBenchmarking
 				((staticStudentIds.asScala
 					diff excludedStudentIds.asScala)
 					diff includedStudentIds.asScala)
-					++ includedStudentIds.asScala
+				++ includedStudentIds.asScala
 			)
 		}
 		val noPermissionMembers = benchmark("noPermissionMembers") {
-			members.filter(!securityService.can(user, Permissions.MonitoringPoints.Manage, _))
+			members.filter {
+				case student: StudentMember =>
+					!student.affiliatedDepartments.contains(scheme.department) &&
+						!securityService.can(user, Permissions.MonitoringPoints.Manage, student)
+				case _ => false
+			}
 		}
 		if (noPermissionMembers.nonEmpty) {
 			errors.rejectValue(
@@ -162,15 +137,9 @@ trait AddStudentsToSchemeCommandState {
 
 	// Bind variables
 
-	// Students to persists
 	var includedStudentIds: JList[String] = LazyLists.create()
 	var excludedStudentIds: JList[String] = LazyLists.create()
 	var staticStudentIds: JList[String] = LazyLists.create()
 	var filterQueryString: String = ""
-
-	// Students from Select page
-	var updatedIncludedStudentIds: JList[String] = LazyLists.create()
-	var updatedExcludedStudentIds: JList[String] = LazyLists.create()
-	var updatedStaticStudentIds: JList[String] = LazyLists.create()
-	var updatedFilterQueryString: String = ""
+	var linkToSits: Boolean = _
 }

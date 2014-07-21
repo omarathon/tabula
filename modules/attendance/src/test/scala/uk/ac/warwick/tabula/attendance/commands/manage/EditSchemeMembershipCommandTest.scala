@@ -46,13 +46,13 @@ class EditSchemeMembershipCommandTest extends TestBase with Mockito {
 
 		val result = command.addUsers()
 		result.missingMembers.size should be (2)
-		result.missingMembers.contains(invalidNoone) should be (true)
-		result.missingMembers.contains(invalidStaff.universityId) should be (true)
+		result.missingMembers.contains(invalidNoone) should be {true}
+		result.missingMembers.contains(invalidStaff.universityId) should be {true}
 		result.noPermissionMembers.size should be (1)
 		result.noPermissionMembers.head should be (invalidNoPermission)
-		command.updatedIncludedStudentIds.size should be (2)
-		command.updatedIncludedStudentIds.contains(validStudent.universityId) should be (true)
-		command.updatedIncludedStudentIds.contains(validStudentWithUsercode.universityId) should be (true)
+		command.includedStudentIds.size should be (2)
+		command.includedStudentIds.contains(validStudent.universityId) should be {true}
+		command.includedStudentIds.contains(validStudentWithUsercode.universityId) should be {true}
 	}}
 
 }
