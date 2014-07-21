@@ -91,6 +91,9 @@
 <#macro manageAddStudents scheme>
 	<@_u page="/manage/${scheme.department.code}/${scheme.academicYear.startYear?c}/new/${scheme.id}/students"/>
 </#macro>
+<#macro manageAddStudentsAllStudents scheme>
+	<@_u page="/manage/${scheme.department.code}/${scheme.academicYear.startYear?c}/new/${scheme.id}/students/all"/>
+</#macro>
 <#macro manageNewSchemeAddPoints scheme>
 	<@_u page="/manage/${scheme.department.code}/${scheme.academicYear.startYear?c}/new/${scheme.id}/points"/>
 </#macro>
