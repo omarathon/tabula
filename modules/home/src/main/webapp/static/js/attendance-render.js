@@ -413,6 +413,22 @@ $(function(){
 				}, 10);
 			});
 
+			var allStudentsAjax;
+			$('details.all-students').on('open.details', function(){
+				var $this = $(this);
+				if ($this.find('div.students').length === 0 && allStudentsAjax === undefined) {
+					$this.find('.loading').show();
+					allStudentsAjax = $.ajax($this.data('href'), {
+						type: 'POST',
+						data: $this.closest('form').serialize(),
+						success: function(result) {
+							$this.find('.loading').hide();
+							$this.append(result);
+						}
+					})
+				}
+			});
+
 			$('.tablesorter').find('th.sortable').addClass('header').on('click', function() {
 				var $th = $(this)
 					, sortDescending = function() {

@@ -4,7 +4,6 @@ import javax.validation.Valid
 
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
-import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.attendance.commands.manage._
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
@@ -17,13 +16,17 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 
 	validatesSelf[SelfValidating]
 
-	def persistanceCommand(scheme: AttendanceMonitoringScheme): Appliable[AttendanceMonitoringScheme]
+	@ModelAttribute("persistanceCommand")
+	def persistanceCommand(@PathVariable("scheme") scheme: AttendanceMonitoringScheme) =
+		AddStudentsToSchemeCommand(mandatory(scheme), user)
 
-	def findCommand(scheme: AttendanceMonitoringScheme): Appliable[FindStudentsForSchemeCommandResult]
-		with PopulateOnForm with UpdatesFindStudentsForSchemeCommand
+	@ModelAttribute("findCommand")
+	def findCommand(@PathVariable scheme: AttendanceMonitoringScheme) =
+		FindStudentsForSchemeCommand(mandatory(scheme), user)
 
-	def editMembershipCommand(scheme: AttendanceMonitoringScheme): Appliable[EditSchemeMembershipCommandResult]
-		with AddsUsersToEditSchemeMembershipCommand with RemovesUsersFromEditSchemeMembershipCommand with ResetsMembershipInEditSchemeMembershipCommand
+	@ModelAttribute("editMembershipCommand")
+	def editMembershipCommand(@PathVariable scheme: AttendanceMonitoringScheme) =
+		EditSchemeMembershipCommand(mandatory(scheme), user)
 
 	@ModelAttribute("ManageSchemeMappingParameters")
 	def manageSchemeMappingParameters = ManageSchemeMappingParameters
@@ -81,13 +84,16 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 	) = {
 		findCommand.populate()
 		editMembershipCommand.populate()
-		val findStudentsForSchemeCommandResult =
-			if (findCommand.filterQueryString.length > 0)
-				findCommand.apply()
-			else
-				FindStudentsForSchemeCommandResult(JArrayList(), Seq())
+		val findStudentsForSchemeCommandResult = findCommand.apply()
 		val editMembershipCommandResult = editMembershipCommand.apply()
 		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult)
+	}
+
+	@RequestMapping(Array("/all"))
+	def allStudents(
+		@ModelAttribute("persistanceCommand") cmd: AddStudentsToSchemeCommandState
+	) = {
+		Mav("manage/_allstudents", "membershipItems" -> cmd.membershipItems).noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.findStudents))
@@ -165,11 +171,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 		@PathVariable scheme: AttendanceMonitoringScheme
 	) = {
 		if (errors.hasErrors) {
-			val findStudentsForSchemeCommandResult =
-				if (findCommand.filterQueryString.length > 0)
-					findCommand.apply()
-				else
-					FindStudentsForSchemeCommandResult(JArrayList(), Seq())
+			val findStudentsForSchemeCommandResult = findCommand.apply()
 			val editMembershipCommandResult = editMembershipCommand.apply()
 			render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult)
 		} else {

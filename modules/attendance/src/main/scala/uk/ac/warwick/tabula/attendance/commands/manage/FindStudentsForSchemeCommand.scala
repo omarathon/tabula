@@ -87,10 +87,11 @@ trait PopulateFindStudentsForSchemeCommand extends PopulateOnForm {
 		excludedStudentIds = scheme.members.excludedUserIds.asJava
 		filterQueryString = scheme.memberQuery
 		linkToSits = scheme.memberQuery != null && scheme.memberQuery.nonEmpty
-		deserializeFilter(filterQueryString)
 		// Default to current students
 		if (filterQueryString == null || filterQueryString.size == 0)
 			allSprStatuses.find(_.code == "C").map(sprStatuses.add)
+		else
+			deserializeFilter(filterQueryString)
 	}
 
 }
@@ -106,6 +107,8 @@ trait UpdatesFindStudentsForSchemeCommand {
 		// Default to current students
 		if (filterQueryString == null || filterQueryString.size == 0)
 			allSprStatuses.find(_.code == "C").map(sprStatuses.add)
+		else
+			deserializeFilter(filterQueryString)
 	}
 
 }

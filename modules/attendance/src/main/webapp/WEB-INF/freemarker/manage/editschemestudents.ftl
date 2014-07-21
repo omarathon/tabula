@@ -52,7 +52,7 @@
 			<input
 				type="submit"
 				class="btn btn-primary"
-				name="create"
+				name="persist"
 				value="Save"
 			/>
 			<a class="btn" href="<@routes.manageHomeForYear scheme.department scheme.academicYear.startYear?c />">Cancel</a>

@@ -41,6 +41,16 @@
 		<p><#noescape>${summaryString}</#noescape></p>
 	</#if>
 
+	<details class="all-students" data-href="<@routes.manageAddStudentsAllStudents scheme />">
+		<summary class="large-chevron collapsible">
+			<span class="legend">View all students on this scheme</span>
+		</summary>
+
+		<div class="loading" style="display: none;">
+			<i class="icon-spinner icon-spin"></i><em> Loading&hellip;</em>
+		</div>
+	</details>
+
 	<details class="find-students" <#if expandFind>open</#if> data-submitparam="${ManageSchemeMappingParameters.findStudents}">
 		<summary class="large-chevron collapsible">
 			<span class="legend">Find students

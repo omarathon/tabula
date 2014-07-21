@@ -78,7 +78,12 @@ trait AddStudentsToSchemeValidation extends SelfValidating with TaskBenchmarking
 			)
 		}
 		val noPermissionMembers = benchmark("noPermissionMembers") {
-			members.filter(!securityService.can(user, Permissions.MonitoringPoints.Manage, _))
+			members.filter {
+				case student: StudentMember =>
+					!student.affiliatedDepartments.contains(scheme.department) &&
+						!securityService.can(user, Permissions.MonitoringPoints.Manage, student)
+				case _ => false
+			}
 		}
 		if (noPermissionMembers.nonEmpty) {
 			errors.rejectValue(
