@@ -2,54 +2,73 @@ package uk.ac.warwick.tabula.groups.commands.admin.reusable
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 object UpdateStudentsForDepartmentSmallGroupSetCommand {
-	def apply(set: DepartmentSmallGroupSet) =
-		new UpdateStudentsForDepartmentSmallGroupSetCommandInternal(set)
+	def apply(department: Department, set: DepartmentSmallGroupSet) =
+		new UpdateStudentsForDepartmentSmallGroupSetCommandInternal(department, set)
 			with ComposableCommand[DepartmentSmallGroupSet]
 			with UpdateStudentsForDepartmentSmallGroupSetPermissions
 			with UpdateStudentsForDepartmentSmallGroupSetDescription
-			with PopulateUpdateStudentsForDepartmentSmallGroupSetCommandInternal
-			with SetStudents
 			with AutowiringUserLookupComponent
 			with AutowiringSmallGroupServiceComponent
 }
 
-class UpdateStudentsForDepartmentSmallGroupSetCommandInternal(val set: DepartmentSmallGroupSet)
+class UpdateStudentsForDepartmentSmallGroupSetCommandInternal(val department: Department, val set: DepartmentSmallGroupSet)
 	extends CommandInternal[DepartmentSmallGroupSet] with UpdateStudentsForDepartmentSmallGroupSetCommandState {
 	self: UserLookupComponent with SmallGroupServiceComponent =>
 
 	override def applyInternal() = {
-		set.members.knownType.staticUserIds = staticStudentIds.asScala
-		set.members.knownType.includedUserIds = includedStudentIds.asScala
-		set.members.knownType.excludedUserIds = excludedStudentIds.asScala
-		set.memberQuery = filterQueryString
+		val autoDeregister = set.department.autoGroupDeregistration
+
+		val oldUsers =
+			if (autoDeregister) set.members.users.toSet
+			else Set[User]()
+
+		if (linkToSits) {
+			set.members.knownType.staticUserIds = staticStudentIds.asScala
+			set.members.knownType.includedUserIds = includedStudentIds.asScala
+			set.members.knownType.excludedUserIds = excludedStudentIds.asScala
+			set.memberQuery = filterQueryString
+		} else {
+			set.members.knownType.staticUserIds = Seq()
+			set.members.knownType.includedUserIds = Seq()
+			set.members.knownType.excludedUserIds = Seq()
+			set.memberQuery = ""
+			set.members.knownType.includedUserIds = ((staticStudentIds.asScala diff excludedStudentIds.asScala) ++ includedStudentIds.asScala).distinct
+		}
+
+		val newUsers =
+			if (autoDeregister) set.members.users.toSet
+			else Set[User]()
+
+		// TAB-1561
+		if (autoDeregister) {
+			// TODO FIXME Wrap removal in a sub-command so that we can do auditing
+			for {
+				user <- oldUsers -- newUsers
+				group <- set.groups.asScala
+				if (group.students.includesUser(user))
+			} group.students.remove(user)
+		}
+
 		smallGroupService.saveOrUpdate(set)
 
 		set
 	}
 }
 
-trait PopulateUpdateStudentsForDepartmentSmallGroupSetCommandInternal extends PopulateOnForm {
-	self: UpdateStudentsForDepartmentSmallGroupSetCommandState =>
-
-	override def populate() = {
-		staticStudentIds = set.members.knownType.staticUserIds.asJava
-		includedStudentIds = set.members.knownType.includedUserIds.asJava
-		excludedStudentIds = set.members.knownType.excludedUserIds.asJava
-		filterQueryString = set.memberQuery
-	}
-}
-
 trait UpdateStudentsForDepartmentSmallGroupSetCommandState {
 	self: UserLookupComponent =>
 
+	def department: Department
 	def set: DepartmentSmallGroupSet
 
 	def membershipItems: Seq[DepartmentSmallGroupSetMembershipItem] = {
@@ -69,46 +88,18 @@ trait UpdateStudentsForDepartmentSmallGroupSetCommandState {
 
 	// Bind variables
 
-	// Students to persist
 	var includedStudentIds: JList[String] = LazyLists.create()
 	var excludedStudentIds: JList[String] = LazyLists.create()
 	var staticStudentIds: JList[String] = LazyLists.create()
 	var filterQueryString: String = ""
-
-	// Students from Select page
-	var updatedIncludedStudentIds: JList[String] = LazyLists.create()
-	var updatedExcludedStudentIds: JList[String] = LazyLists.create()
-	var updatedStaticStudentIds: JList[String] = LazyLists.create()
-	var updatedFilterQueryString: String = ""
-}
-
-trait SetStudents {
-	self: UpdateStudentsForDepartmentSmallGroupSetCommandState =>
-
-	def linkToSits() = {
-		includedStudentIds.clear()
-		includedStudentIds.addAll(updatedIncludedStudentIds)
-		excludedStudentIds.clear()
-		excludedStudentIds.addAll(updatedExcludedStudentIds)
-		staticStudentIds.clear()
-		staticStudentIds.addAll(updatedStaticStudentIds)
-		filterQueryString = updatedFilterQueryString
-	}
-
-	def importAsList() = {
-		includedStudentIds.clear()
-		excludedStudentIds.clear()
-		staticStudentIds.clear()
-		val newList = ((updatedStaticStudentIds.asScala diff updatedExcludedStudentIds.asScala) ++ updatedIncludedStudentIds.asScala).distinct
-		includedStudentIds.addAll(newList.asJava)
-		filterQueryString = ""
-	}
+	var linkToSits = true
 }
 
 trait UpdateStudentsForDepartmentSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: UpdateStudentsForDepartmentSmallGroupSetCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
+		mustBeLinked(set, department)
 		p.PermissionCheck(Permissions.SmallGroups.Update, set)
 	}
 

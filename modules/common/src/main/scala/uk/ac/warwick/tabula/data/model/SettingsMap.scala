@@ -33,26 +33,26 @@ trait HasSettings {
 
 	protected def settingsIterator = settings.iterator
 
-	protected def getSetting(key: String) = settings.get(key)
+	protected def getSetting(key: String) = Option(settings).flatMap { _.get(key) }
 
-	protected def getStringSetting(key: String) = settings.get(key) match {
+	protected def getStringSetting(key: String) = getSetting(key) match {
 		case Some(value: String) => Some(value)
 		case _ => None
 	}
-	protected def getIntSetting(key: String) = settings.get(key) match {
+	protected def getIntSetting(key: String) = getSetting(key) match {
 		case Some(value: Int) => Some(value)
 		case _ => None
 	}
-	protected def getBooleanSetting(key: String) = settings.get(key) match {
+	protected def getBooleanSetting(key: String) = getSetting(key) match {
 		case Some(value: Boolean) => Some(value)
 		case _ => None
 	}
-	protected def getStringSeqSetting(key: String) = settings.get(key) match {
+	protected def getStringSeqSetting(key: String) = getSetting(key) match {
 		case Some(value: Seq[_]) => Some(value.asInstanceOf[Seq[String]])
 		case _ => None
 	}
-	protected def getStringMapSetting(key: String) = {		
-		settings.get(key) match {
+	protected def getStringMapSetting(key: String) = {
+		getSetting(key) match {
 			case Some(value: Map[_, _]) => Some(value.asInstanceOf[Map[String, String]])
 			case Some(value: collection.mutable.Map[_, _]) => Some(value.toMap.asInstanceOf[Map[String, String]])
 			case _ => None
@@ -69,7 +69,7 @@ trait HasSettings {
 	protected def getStringSeqSetting(key: String, default: => Seq[String]): Seq[String] = getStringSeqSetting(key) getOrElse(default)
 	protected def getStringMapSetting(key: String, default: => Map[String, String]): Map[String, String] = getStringMapSetting(key) getOrElse(default)
 
-	protected def settingsSeq = settings.toSeq
+	protected def settingsSeq = Option(settings).map { _.toSeq }.getOrElse(Nil)
 
 	protected def ensureSettings {
 		if (settings == null) settings = Map()

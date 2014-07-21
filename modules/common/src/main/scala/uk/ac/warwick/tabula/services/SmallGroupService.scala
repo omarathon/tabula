@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import org.joda.time.DateTime
+import scala.collection.JavaConverters._
 
 trait SmallGroupServiceComponent {
 	def smallGroupService: SmallGroupService
@@ -99,10 +100,29 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		val manuallyEnrolled = 
 			groupSetManualMembersHelper.findBy(user)
 				.filterNot { sgs => sgs.deleted || sgs.archived }
+
+		val linked =
+			departmentGroupSetManualMembersHelper.findBy(user)
+				.filterNot { dsgs => dsgs.deleted || dsgs.archived }
+				.flatMap { _.linkedSets.asScala }
+				.filterNot { sgs => sgs.deleted || sgs.archived }
 		
-		(autoEnrolled ++ manuallyEnrolled).distinct
+		(autoEnrolled ++ manuallyEnrolled ++ linked).distinct
 	}
-	def findSmallGroupsByStudent(user: User): Seq[SmallGroup] = studentGroupHelper.findBy(user)
+
+	def findSmallGroupsByStudent(user: User): Seq[SmallGroup] = {
+		val groups =
+			studentGroupHelper.findBy(user)
+				.filterNot { group => group.groupSet.deleted || group.groupSet.archived }
+
+		val linkedGroups =
+			departmentStudentGroupHelper.findBy(user)
+				.filterNot { group => group.groupSet.deleted || group.groupSet.archived }
+				.flatMap { _.linkedGroups.asScala }
+				.filterNot { group => group.groupSet.deleted || group.groupSet.archived }
+
+		(groups ++ linkedGroups).distinct
+	}
 
 	def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int) {
 		for {

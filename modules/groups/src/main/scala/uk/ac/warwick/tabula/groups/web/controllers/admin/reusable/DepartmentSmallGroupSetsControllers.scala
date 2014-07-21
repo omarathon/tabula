@@ -105,8 +105,8 @@ class EditDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCont
 
 	type EditDepartmentSmallGroupSetCommand = Appliable[DepartmentSmallGroupSet] with EditDepartmentSmallGroupSetCommandState
 
-	@ModelAttribute("editDepartmentSmallGroupSetCommand") def cmd(@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): EditDepartmentSmallGroupSetCommand =
-		ModifyDepartmentSmallGroupSetCommand.edit(set)
+	@ModelAttribute("editDepartmentSmallGroupSetCommand") def cmd(@PathVariable("department") department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): EditDepartmentSmallGroupSetCommand =
+		ModifyDepartmentSmallGroupSetCommand.edit(department, set)
 
 	@RequestMapping
 	def form(@ModelAttribute("editDepartmentSmallGroupSetCommand") cmd: EditDepartmentSmallGroupSetCommand, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet) = {

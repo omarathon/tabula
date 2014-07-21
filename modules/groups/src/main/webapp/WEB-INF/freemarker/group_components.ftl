@@ -184,6 +184,8 @@
 									<#else>
 										<span class="use-tooltip" title="This group is closed for self sign-up"><i class="icon-lock"></i></span>
 									</#if>
+								<#elseif setItem.isLinked()>
+									<span class="use-tooltip" title="Allocations for this group are linked and reused"><i class="icon-link"></i></span>
 								<#else>
 									<span class="use-tooltip" title="This is a manually allocated group"><i class="icon-random"></i></span>
 								</#if>
@@ -729,7 +731,7 @@
 							  style="margin-left: 0.5em;"
 							/>
 						</#if>
-						<#if (showResetButton && (editMembershipCommandResult.updatedIncludedStudentIds?size > 0 || editMembershipCommandResult.updatedExcludedStudentIds?size > 0))>
+						<#if (showResetButton && (editMembershipCommandResult.includedStudentIds?size > 0 || editMembershipCommandResult.excludedStudentIds?size > 0))>
 							<input class="btn btn-warning hideOnClosed btn-small use-tooltip"
 								   type="submit"
 								   style="float: right; padding-left: 5px; padding-right: 5px; margin-left: 5px;"

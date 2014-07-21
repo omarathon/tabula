@@ -13,7 +13,7 @@
 	</#list>
 </#macro>
 
-<h1>Edit reusable small groups: ${smallGroupSet.name}</h1>
+<h1>Create a set of reusable small groups: ${smallGroupSet.name}</h1>
 
 <form method="POST">
 	<input type="hidden" name="filterQueryString" value="${findCommand.serializeFilter}" />
@@ -22,8 +22,8 @@
 	<p class="progress-arrows">
 		<span class="arrow-right">Properties</span>
 		<span class="arrow-right arrow-left active">Students</span>
-		<span class="arrow-right arrow-left use-tooltip" title="Save and edit groups"><button type="submit" class="btn btn-link" name="${ManageDepartmentSmallGroupsMappingParameters.editAndAddGroups}">Groups</button></span>
-		<span class="arrow-right arrow-left use-tooltip" title="Save and allocate students to groups"><button type="submit" class="btn btn-link" name="${ManageDepartmentSmallGroupsMappingParameters.editAndAllocate}">Allocate</button></span>
+		<span class="arrow-right arrow-left use-tooltip" title="Save and edit groups"><button type="submit" class="btn btn-link" name="${ManageDepartmentSmallGroupsMappingParameters.createAndAddGroups}">Groups</button></span>
+		<span class="arrow-right arrow-left use-tooltip" title="Save and allocate students to groups"><button type="submit" class="btn btn-link" name="${ManageDepartmentSmallGroupsMappingParameters.createAndAllocate}">Allocate</button></span>
 	</p>
 
 	<div class="fix-area">
@@ -52,16 +52,18 @@
 			<input
 				type="submit"
 				class="btn btn-success use-tooltip"
-				name="${ManageDepartmentSmallGroupsMappingParameters.editAndAddGroups}"
-				value="Save and edit groups"
-				title="Edit groups for set of reusable groups"
+				name="${ManageDepartmentSmallGroupsMappingParameters.createAndAddGroups}"
+				value="Save and add groups"
+				title="Add groups to this set of reusable groups"
 				data-container="body"
 				/>
 			<input
 				type="submit"
-				class="btn btn-primary"
+				class="btn btn-primary use-tooltip"
 				name="persist"
 				value="Save and exit"
+				title="Save your groups and add students and groups to it later"
+				data-container="body"
 				/>
 			<a class="btn" href="<@routes.crossmodulegroups smallGroupSet.department />">Cancel</a>
 		</div>

@@ -33,16 +33,8 @@
 					</div>
 					<span class="lead">${set.name}</span>
 					<span class="muted">
-						<#if set.members.members?size == 0>
-							(0 students,
-						<#else>
-							(<a href="<@routes.editcrossmodulegroupsstudents set />"><@fmt.p set.members.members?size "student" /></a>,
-						</#if>
-						<#if set.groups?size == 0>
-							0 groups)
-						<#else>
-							<a href="<@routes.editcrossmodulegroupsgroups set />"><@fmt.p set.groups?size "group" /></a>)
-						</#if>
+						(<a href="<@routes.editcrossmodulegroupsstudents set />"><@fmt.p set.members.members?size "student" /></a>,
+						<a href="<@routes.editcrossmodulegroupsgroups set />"><@fmt.p set.groups?size "group" /></a>)
 					</span>
 				</div>
 			</div>

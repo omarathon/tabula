@@ -3,9 +3,7 @@ package uk.ac.warwick.tabula.groups.commands.admin
 import org.hibernate.validator.constraints._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat
+import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.helpers.LazyLists
@@ -23,7 +21,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import javax.validation.Valid
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 
 /**
  * Common superclass for creation and modification. Note that any defaults on the vars here are defaults
@@ -99,6 +96,8 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 		// linked assessmentGroups
 		assessmentGroups = set.assessmentGroups
 
+		linkedDepartmentSmallGroupSet = set.linkedDepartmentSmallGroupSet
+
 		groups.clear()
 		groups.addAll(set.groups.asScala.map(x => {new EditSmallGroupCommand(x, this)}).asJava)
 		
@@ -124,6 +123,8 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 		set.studentsCanSeeTutorName = studentsCanSeeTutorName
 		set.defaultMaxGroupSizeEnabled = defaultMaxGroupSizeEnabled
 		set.defaultMaxGroupSize = defaultMaxGroupSize
+
+		set.linkedDepartmentSmallGroupSet = linkedDepartmentSmallGroupSet
 
 		// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
 		// TAB-2304 Don't do a .clear() and .addAll() because that confuses Hibernate
@@ -168,4 +169,6 @@ trait SmallGroupSetProperties extends CurrentAcademicYear {
 	var defaultMaxGroupSize:Int = SmallGroup.DefaultGroupSize
 	
 	var collectAttendance: Boolean = true
+
+	var linkedDepartmentSmallGroupSet: DepartmentSmallGroupSet = _
 }

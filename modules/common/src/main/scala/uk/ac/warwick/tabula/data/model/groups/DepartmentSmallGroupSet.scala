@@ -74,6 +74,10 @@ class DepartmentSmallGroupSet
 	@BatchSize(size=200)
 	var groups: JList[DepartmentSmallGroup] = JArrayList()
 
+	@OneToMany(mappedBy = "linkedDepartmentSmallGroupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@BatchSize(size=200)
+	var linkedSets: JSet[SmallGroupSet] = JHashSet()
+
 	// only students manually added or excluded. use allStudents to get all students in the group set
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "membersgroup_id")
@@ -109,7 +113,7 @@ class DepartmentSmallGroupSet
 
 	def hasAllocated = groups.asScala.exists { !_.students.isEmpty }
 
-	def permissionsParents = Option(department).toStream
+	def permissionsParents = Option(department).toStream ++ linkedSets.asScala.toStream
 
 	def toStringProps = Seq(
 		"id" -> id,

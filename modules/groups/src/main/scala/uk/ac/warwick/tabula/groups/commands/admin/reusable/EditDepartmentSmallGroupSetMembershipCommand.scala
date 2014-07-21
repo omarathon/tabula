@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.groups.commands.admin.reusable
 
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -12,8 +13,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyLists
 
 case class EditDepartmentSmallGroupSetMembershipCommandResult(
-	updatedIncludedStudentIds: JList[String],
-	updatedExcludedStudentIds: JList[String],
+	includedStudentIds: JList[String],
+	excludedStudentIds: JList[String],
 	membershipItems: Seq[DepartmentSmallGroupSetMembershipItem]
 )
 
@@ -22,8 +23,8 @@ case class AddUsersToEditDepartmentSmallGroupSetMembershipCommandResult(
 )
 
 object EditDepartmentSmallGroupSetMembershipCommand {
-	def apply(set: DepartmentSmallGroupSet) =
-		new EditDepartmentSmallGroupSetMembershipCommandInternal(set)
+	def apply(department: Department, set: DepartmentSmallGroupSet) =
+		new EditDepartmentSmallGroupSetMembershipCommandInternal(department, set)
 			with AutowiringUserLookupComponent
 			with ComposableCommand[EditDepartmentSmallGroupSetMembershipCommandResult]
 			with PopulateEditDepartmentSmallGroupSetMembershipCommand
@@ -38,7 +39,7 @@ object EditDepartmentSmallGroupSetMembershipCommand {
 /**
  * Not persisted, just used to validate users entered and render student table
  */
-class EditDepartmentSmallGroupSetMembershipCommandInternal(val set: DepartmentSmallGroupSet)
+class EditDepartmentSmallGroupSetMembershipCommandInternal(val department: Department, val set: DepartmentSmallGroupSet)
 	extends CommandInternal[EditDepartmentSmallGroupSetMembershipCommandResult] {
 
 	self: EditDepartmentSmallGroupSetMembershipCommandState with UserLookupComponent =>
@@ -50,14 +51,14 @@ class EditDepartmentSmallGroupSetMembershipCommandInternal(val set: DepartmentSm
 		}
 
 		val membershipItems: Seq[DepartmentSmallGroupSetMembershipItem] = {
-			val excludedMemberItems = updatedExcludedStudentIds.asScala.map(toMembershipItem(_, DepartmentSmallGroupSetMembershipExcludeType))
-			val includedMemberItems = updatedIncludedStudentIds.asScala.map(toMembershipItem(_, DepartmentSmallGroupSetMembershipIncludeType))
+			val excludedMemberItems = excludedStudentIds.asScala.map(toMembershipItem(_, DepartmentSmallGroupSetMembershipExcludeType))
+			val includedMemberItems = includedStudentIds.asScala.map(toMembershipItem(_, DepartmentSmallGroupSetMembershipIncludeType))
 			(excludedMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
 		}
 
 		EditDepartmentSmallGroupSetMembershipCommandResult(
-			updatedIncludedStudentIds,
-			updatedExcludedStudentIds,
+			includedStudentIds,
+			excludedStudentIds,
 			membershipItems
 		)
 	}
@@ -69,8 +70,8 @@ trait PopulateEditDepartmentSmallGroupSetMembershipCommand extends PopulateOnFor
 	self: EditDepartmentSmallGroupSetMembershipCommandState =>
 
 	override def populate() = {
-		updatedIncludedStudentIds = includedStudentIds
-		updatedExcludedStudentIds = excludedStudentIds
+		includedStudentIds = includedStudentIds
+		excludedStudentIds = excludedStudentIds
 	}
 
 }
@@ -100,8 +101,8 @@ trait AddsUsersToEditDepartmentSmallGroupSetMembershipCommand {
 		val missingUsers = massAddedUserMap.filter(!_._2.isDefined).keys.toSeq
 		val validUsers = massAddedUserMap.filter(_._2.isDefined).values.flatten.toSeq
 
-		updatedIncludedStudentIds = (updatedIncludedStudentIds.asScala.toSeq ++ validUsers.map(_.getWarwickId)).asJava
-		updatedExcludedStudentIds = (updatedExcludedStudentIds.asScala.toSeq diff updatedIncludedStudentIds.asScala.toSeq).asJava
+		includedStudentIds = (includedStudentIds.asScala.toSeq ++ validUsers.map(_.getWarwickId)).asJava
+		excludedStudentIds = (excludedStudentIds.asScala.toSeq diff includedStudentIds.asScala.toSeq).asJava
 
 		// Users processed, so reset fields
 		massAddUsers = ""
@@ -116,7 +117,7 @@ trait RemovesUsersFromEditDepartmentSmallGroupSetMembershipCommand {
 	self: EditDepartmentSmallGroupSetMembershipCommandState =>
 
 	def removeUsers() = {
-		updatedExcludedStudentIds = (updatedExcludedStudentIds.asScala ++ excludeIds.asScala).distinct.asJava
+		excludedStudentIds = (excludedStudentIds.asScala ++ excludeIds.asScala).distinct.asJava
 	}
 }
 
@@ -125,16 +126,16 @@ trait ResetsMembershipInEditDepartmentSmallGroupSetMembershipCommand {
 	self: EditDepartmentSmallGroupSetMembershipCommandState =>
 
 	def resetMembership() = {
-		updatedIncludedStudentIds = (updatedIncludedStudentIds.asScala diff resetStudentIds.asScala).asJava
-		updatedExcludedStudentIds = (updatedExcludedStudentIds.asScala diff resetStudentIds.asScala).asJava
+		includedStudentIds = (includedStudentIds.asScala diff resetStudentIds.asScala).asJava
+		excludedStudentIds = (excludedStudentIds.asScala diff resetStudentIds.asScala).asJava
 	}
 
 	def resetAllIncluded() = {
-		updatedIncludedStudentIds.clear()
+		includedStudentIds.clear()
 	}
 
 	def resetAllExcluded() = {
-		updatedExcludedStudentIds.clear()
+		excludedStudentIds.clear()
 	}
 }
 
@@ -143,6 +144,7 @@ trait EditDepartmentSmallGroupSetMembershipPermissions extends RequiresPermissio
 	self: EditDepartmentSmallGroupSetMembershipCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
+		mustBeLinked(set, department)
 		p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
 	}
 
@@ -150,17 +152,13 @@ trait EditDepartmentSmallGroupSetMembershipPermissions extends RequiresPermissio
 
 trait EditDepartmentSmallGroupSetMembershipCommandState {
 	def set: DepartmentSmallGroupSet
+	def department: Department
 
 	// Bind variables
 
-	// Store original students for reset
 	var includedStudentIds: JList[String] = LazyLists.create()
 	var excludedStudentIds: JList[String] = LazyLists.create()
 	var staticStudentIds: JList[String] = LazyLists.create()
-
-	// Store updated students
-	var updatedIncludedStudentIds: JList[String] = LazyLists.create()
-	var updatedExcludedStudentIds: JList[String] = LazyLists.create()
 
 	var massAddUsers: String = _
 	// parse massAddUsers into a collection of individual tokens

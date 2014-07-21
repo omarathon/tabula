@@ -4,13 +4,15 @@ import javax.persistence.CascadeType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
 
-import org.hibernate.annotations.{AccessType, Filter, FilterDef}
+import org.hibernate.annotations.{BatchSize, AccessType, Filter, FilterDef}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, UserGroupCacheManager}
+
+import scala.collection.JavaConverters._
 
 object DepartmentSmallGroup {
 	final val NotDeletedFilter = "notDeleted"
@@ -53,7 +55,11 @@ class DepartmentSmallGroup
 	@JoinColumn(name = "set_id", insertable = false, updatable = false)
 	var groupSet: DepartmentSmallGroupSet = _
 
-	def permissionsParents = Option(groupSet).toStream
+	@OneToMany(mappedBy = "linkedDepartmentSmallGroup", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@BatchSize(size=200)
+	var linkedGroups: JSet[SmallGroup] = JHashSet()
+
+	def permissionsParents = Option(groupSet).toStream ++ linkedGroups.asScala.toStream
 	override def humanReadableId = name
 
 	/**

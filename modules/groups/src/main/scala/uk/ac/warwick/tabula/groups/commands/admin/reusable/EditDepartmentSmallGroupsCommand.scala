@@ -1,34 +1,38 @@
 package uk.ac.warwick.tabula.groups.commands.admin.reusable
 
-import org.springframework.validation.Errors
+import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, DepartmentSmallGroup}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
+import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object EditDepartmentSmallGroupsCommand {
-	def apply(set: DepartmentSmallGroupSet) =
-		new EditDepartmentSmallGroupsCommandInternal(set)
+	def apply(department: Department, set: DepartmentSmallGroupSet) =
+		new EditDepartmentSmallGroupsCommandInternal(department, set)
 			with ComposableCommand[Seq[DepartmentSmallGroup]]
 			with EditDepartmentSmallGroupsPermissions
 			with EditDepartmentSmallGroupsValidation
 			with EditDepartmentSmallGroupsDescription
 			with PopulateEditDepartmentSmallGroupsCommand
+			with EditDepartmentSmallGroupsCommandRemoveTrailingEmptyGroups
 			with AutowiringSmallGroupServiceComponent
 }
 
 trait EditDepartmentSmallGroupsCommandState {
+	def department: Department
 	def set: DepartmentSmallGroupSet
 
 	var groupNames: JList[String] = LazyLists.create()
 }
 
-class EditDepartmentSmallGroupsCommandInternal(val set: DepartmentSmallGroupSet) extends CommandInternal[Seq[DepartmentSmallGroup]] with EditDepartmentSmallGroupsCommandState {
+class EditDepartmentSmallGroupsCommandInternal(val department: Department, val set: DepartmentSmallGroupSet) extends CommandInternal[Seq[DepartmentSmallGroup]] with EditDepartmentSmallGroupsCommandState {
 	self: SmallGroupServiceComponent =>
 
 	override def applyInternal() = {
@@ -69,6 +73,7 @@ trait EditDepartmentSmallGroupsPermissions extends RequiresPermissionsChecking w
 	self: EditDepartmentSmallGroupsCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
+		mustBeLinked(set, department)
 		p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
 	}
 }
@@ -99,6 +104,17 @@ trait EditDepartmentSmallGroupsValidation extends SelfValidating {
 					errors.rejectValue(s"groupNames[${i - 1}]", "smallGroup.delete.notEmpty")
 				}
 			}
+		}
+	}
+}
+
+trait EditDepartmentSmallGroupsCommandRemoveTrailingEmptyGroups extends BindListener {
+	self: EditDepartmentSmallGroupsCommandState =>
+
+	override def onBind(result: BindingResult) {
+		// If the last element of events is both a Creation and is empty, disregard it
+		while (!groupNames.isEmpty() && !groupNames.asScala.last.hasText) {
+			groupNames.remove(groupNames.asScala.last)
 		}
 	}
 }

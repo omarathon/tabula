@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{RequestMapping, PathVariable, ModelAttribute}
 import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable, SelfValidating}
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, DepartmentSmallGroup}
 import uk.ac.warwick.tabula.groups.commands.admin.reusable.EditDepartmentSmallGroupsCommand
 import uk.ac.warwick.tabula.groups.web.Routes
@@ -20,8 +21,8 @@ abstract class AbstractEditDepartmentSmallGroupsController extends GroupsControl
 
 	@ModelAttribute("ManageDepartmentSmallGroupsMappingParameters") def params = ManageDepartmentSmallGroupsMappingParameters
 
-	@ModelAttribute("command") def command(@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): EditDepartmentSmallGroupsCommand =
-		EditDepartmentSmallGroupsCommand(set)
+	@ModelAttribute("command") def command(@PathVariable("department") department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): EditDepartmentSmallGroupsCommand =
+		EditDepartmentSmallGroupsCommand(department, set)
 
 	protected def render(set: DepartmentSmallGroupSet): Mav
 

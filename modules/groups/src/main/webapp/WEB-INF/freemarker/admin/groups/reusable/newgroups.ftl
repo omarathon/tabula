@@ -10,6 +10,8 @@
 			<span class="arrow-right arrow-left use-tooltip" title="Save and allocate students to groups"><button type="submit" class="btn btn-link" name="${ManageDepartmentSmallGroupsMappingParameters.createAndAllocate}">Allocate</button></span>
 		</p>
 
+		<#include "_editGroups.ftl" />
+
 		<div class="submit-buttons">
 			<input
 				type="submit"

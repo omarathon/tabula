@@ -20,8 +20,8 @@ object ModifyDepartmentSmallGroupSetCommand {
 			with CreateDepartmentSmallGroupSetDescription
 			with AutowiringSmallGroupServiceComponent
 
-	def edit(set: DepartmentSmallGroupSet) =
-		new EditDepartmentSmallGroupSetCommandInternal(set)
+	def edit(department: Department, set: DepartmentSmallGroupSet) =
+		new EditDepartmentSmallGroupSetCommandInternal(department, set)
 			with ComposableCommand[DepartmentSmallGroupSet]
 			with ModifyDepartmentSmallGroupSetCommandValidation
 			with EditDepartmentSmallGroupSetPermissions
@@ -30,6 +30,7 @@ object ModifyDepartmentSmallGroupSetCommand {
 }
 
 trait ModifyDepartmentSmallGroupSetState extends CurrentAcademicYear {
+	def department: Department
 	def existingSet: Option[DepartmentSmallGroupSet]
 
 	var name: String = _
@@ -40,7 +41,6 @@ trait ModifyDepartmentSmallGroupSetState extends CurrentAcademicYear {
 }
 
 trait CreateDepartmentSmallGroupSetCommandState extends ModifyDepartmentSmallGroupSetState {
-	def department: Department
 	val existingSet = None
 }
 
@@ -62,7 +62,7 @@ trait EditDepartmentSmallGroupSetCommandState extends ModifyDepartmentSmallGroup
 	lazy val existingSet = Some(smallGroupSet)
 }
 
-class EditDepartmentSmallGroupSetCommandInternal(val smallGroupSet: DepartmentSmallGroupSet) extends ModifyDepartmentSmallGroupSetCommandInternal with EditDepartmentSmallGroupSetCommandState {
+class EditDepartmentSmallGroupSetCommandInternal(val department: Department, val smallGroupSet: DepartmentSmallGroupSet) extends ModifyDepartmentSmallGroupSetCommandInternal with EditDepartmentSmallGroupSetCommandState {
 	self: SmallGroupServiceComponent =>
 
 	copyFrom(smallGroupSet)
@@ -126,6 +126,7 @@ trait EditDepartmentSmallGroupSetPermissions extends RequiresPermissionsChecking
 	self: EditDepartmentSmallGroupSetCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
+		mustBeLinked(smallGroupSet, department)
 		p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(smallGroupSet))
 	}
 }

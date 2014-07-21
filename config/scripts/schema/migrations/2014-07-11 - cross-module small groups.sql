@@ -25,3 +25,9 @@ create table DepartmentSmallGroup (
 
 create index idx_dsmallgroup_set on DepartmentSmallGroup(set_id);
 create index idx_dsmallgroup_deleted on DepartmentSmallGroup(deleted);
+
+alter table SmallGroupSet add linked_dept_group_set_id nvarchar2(255);
+create index idx_sgs_linked_dsgs on SmallGroupSet(linked_dept_group_set_id);
+
+alter table SmallGroup add linked_dept_group_id nvarchar2(255);
+create index idx_sg_linked_dsg on SmallGroup(linked_dept_group_id);

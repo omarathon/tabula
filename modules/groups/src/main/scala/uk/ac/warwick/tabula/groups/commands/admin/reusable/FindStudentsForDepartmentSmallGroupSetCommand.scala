@@ -14,13 +14,13 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 
 case class FindStudentsForDepartmentSmallGroupSetCommandResult(
-	updatedStaticStudentIds: JList[String],
+	staticStudentIds: JList[String],
 	membershipItems: Seq[DepartmentSmallGroupSetMembershipItem]
 )
 
 object FindStudentsForDepartmentSmallGroupSetCommand {
-	def apply(set: DepartmentSmallGroupSet) =
-		new FindStudentsForDepartmentSmallGroupSetCommandInternal(set)
+	def apply(department: Department, set: DepartmentSmallGroupSet) =
+		new FindStudentsForDepartmentSmallGroupSetCommandInternal(department, set)
 			with AutowiringProfileServiceComponent
 			with AutowiringDeserializesFilterImpl
 			with AutowiringUserLookupComponent
@@ -33,16 +33,16 @@ object FindStudentsForDepartmentSmallGroupSetCommand {
 }
 
 
-class FindStudentsForDepartmentSmallGroupSetCommandInternal(val set: DepartmentSmallGroupSet)
+class FindStudentsForDepartmentSmallGroupSetCommandInternal(val department: Department, val set: DepartmentSmallGroupSet)
 	extends CommandInternal[FindStudentsForDepartmentSmallGroupSetCommandResult] with TaskBenchmarking {
 
 	self: ProfileServiceComponent with FindStudentsForDepartmentSmallGroupSetCommandState with UserLookupComponent =>
 
 	override def applyInternal() = {
 		if (serializeFilter.isEmpty) {
-			FindStudentsForDepartmentSmallGroupSetCommandResult(updatedStaticStudentIds, Seq())
+			FindStudentsForDepartmentSmallGroupSetCommandResult(staticStudentIds, Seq())
 		} else {
-			updatedStaticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments") {
+			staticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments") {
 				profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
 					department = department,
 					restrictions = buildRestrictions(),
@@ -57,20 +57,20 @@ class FindStudentsForDepartmentSmallGroupSetCommandInternal(val set: DepartmentS
 
 			val startResult = studentsPerPage * (page-1)
 			val staticMembershipItemsToDisplay =
-				updatedStaticStudentIds.asScala.slice(startResult, startResult + studentsPerPage).map(toMembershipItem(_, DepartmentSmallGroupSetMembershipStaticType))
+				staticStudentIds.asScala.slice(startResult, startResult + studentsPerPage).map(toMembershipItem(_, DepartmentSmallGroupSetMembershipStaticType))
 
 			val membershipItems: Seq[DepartmentSmallGroupSetMembershipItem] = {
 				staticMembershipItemsToDisplay.map { item =>
-					if (updatedExcludedStudentIds.asScala.contains(item.universityId))
+					if (excludedStudentIds.asScala.contains(item.universityId))
 						DepartmentSmallGroupSetMembershipItem(DepartmentSmallGroupSetMembershipExcludeType, item.firstName, item.lastName, item.universityId, item.userId)
-					else if (updatedIncludedStudentIds.asScala.contains(item.universityId))
+					else if (includedStudentIds.asScala.contains(item.universityId))
 						DepartmentSmallGroupSetMembershipItem(DepartmentSmallGroupSetMembershipIncludeType, item.firstName, item.lastName, item.universityId, item.userId)
 					else
 						item
 				}
 			}
 
-			FindStudentsForDepartmentSmallGroupSetCommandResult(updatedStaticStudentIds, membershipItems)
+			FindStudentsForDepartmentSmallGroupSetCommandResult(staticStudentIds, membershipItems)
 		}
 	}
 
@@ -81,10 +81,16 @@ trait PopulateFindStudentsForDepartmentSmallGroupSetCommand extends PopulateOnFo
 	self: FindStudentsForDepartmentSmallGroupSetCommandState =>
 
 	override def populate() = {
-		updatedIncludedStudentIds = includedStudentIds
-		updatedExcludedStudentIds = excludedStudentIds
-		updatedStaticStudentIds = staticStudentIds
-		deserializeFilter(filterQueryString)
+		staticStudentIds = set.members.knownType.staticUserIds.asJava
+		includedStudentIds = set.members.knownType.includedUserIds.asJava
+		excludedStudentIds = set.members.knownType.excludedUserIds.asJava
+		filterQueryString = Option(set.memberQuery).getOrElse("")
+		linkToSits = set.members.isEmpty || (set.memberQuery != null && set.memberQuery.nonEmpty)
+		// Default to current students
+		if (filterQueryString == null || filterQueryString.size == 0)
+			allSprStatuses.find(_.code == "C").map(sprStatuses.add)
+		else
+			deserializeFilter(filterQueryString)
 	}
 
 }
@@ -94,9 +100,13 @@ trait UpdatesFindStudentsForDepartmentSmallGroupSetCommand {
 	self: FindStudentsForDepartmentSmallGroupSetCommandState =>
 
 	def update(editSchemeMembershipCommandResult: EditDepartmentSmallGroupSetMembershipCommandResult) = {
-		updatedIncludedStudentIds = editSchemeMembershipCommandResult.updatedIncludedStudentIds
-		updatedExcludedStudentIds = editSchemeMembershipCommandResult.updatedExcludedStudentIds
-		deserializeFilter(updatedFilterQueryString)
+		includedStudentIds = editSchemeMembershipCommandResult.includedStudentIds
+		excludedStudentIds = editSchemeMembershipCommandResult.excludedStudentIds
+		// Default to current students
+		if (filterQueryString == null || filterQueryString.size == 0)
+			allSprStatuses.find(_.code == "C").map(sprStatuses.add)
+		else
+			deserializeFilter(filterQueryString)
 	}
 
 }
@@ -105,14 +115,14 @@ trait FindStudentsForDepartmentSmallGroupSetPermissions extends RequiresPermissi
 	self: FindStudentsForDepartmentSmallGroupSetCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
+		mustBeLinked(set, department)
 		p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
 	}
 }
 
 trait FindStudentsForDepartmentSmallGroupSetCommandState extends FiltersStudents with DeserializesFilter {
+	def department: Department
 	def set: DepartmentSmallGroupSet
-
-	def department: Department = set.department
 
 	// Bind variables
 
@@ -121,24 +131,18 @@ trait FindStudentsForDepartmentSmallGroupSetCommandState extends FiltersStudents
 	var excludedStudentIds: JList[String] = LazyLists.create()
 	var staticStudentIds: JList[String] = LazyLists.create()
 	var filterQueryString: String = ""
-
-	// Store updated students
-	var updatedIncludedStudentIds: JList[String] = LazyLists.create()
-	var updatedExcludedStudentIds: JList[String] = LazyLists.create()
-	var updatedStaticStudentIds: JList[String] = LazyLists.create()
-	var updatedFilterQueryString: String = ""
+	var linkToSits = true
 
 	// Filter properties
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
 	var sortOrder: JList[Order] = JArrayList()
 	var page = 1
-	def totalResults = updatedStaticStudentIds.size
+	def totalResults = staticStudentIds.size
 	val studentsPerPage = FiltersStudents.DefaultStudentsPerPage
 
 	// Filter binds
 	var courseTypes: JList[CourseType] = JArrayList()
 	var routes: JList[Route] = JArrayList()
-	lazy val visibleRoutes = set.department.routes.asScala
 	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
 	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()

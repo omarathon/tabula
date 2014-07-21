@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.groups.services.docconversion
 
+import uk.ac.warwick.spring.Wire
+
 import scala.collection.JavaConversions._
 import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader}
@@ -46,6 +48,13 @@ class GroupsExtractor {
 		}
 		allocateStudentItems
 	}
+}
+
+trait GroupsExtractorComponent {
+	def groupsExtractor: GroupsExtractor
+}
+trait AutowiringGroupsExtractorComponent extends GroupsExtractorComponent {
+	val groupsExtractor = Wire[GroupsExtractor]
 }
 
 
