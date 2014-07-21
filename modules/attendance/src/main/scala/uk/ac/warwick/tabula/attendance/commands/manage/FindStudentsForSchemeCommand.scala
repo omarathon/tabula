@@ -103,7 +103,6 @@ trait UpdatesFindStudentsForSchemeCommand {
 	def update(editSchemeMembershipCommandResult: EditSchemeMembershipCommandResult) = {
 		includedStudentIds = editSchemeMembershipCommandResult.includedStudentIds
 		excludedStudentIds = editSchemeMembershipCommandResult.excludedStudentIds
-		deserializeFilter(filterQueryString)
 		// Default to current students
 		if (filterQueryString == null || filterQueryString.size == 0)
 			allSprStatuses.find(_.code == "C").map(sprStatuses.add)
