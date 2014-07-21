@@ -26,8 +26,8 @@ object DepartmentSmallGroup {
 	implicit val defaultOrdering = NameOrdering
 }
 
-@FilterDef(name = SmallGroup.NotDeletedFilter, defaultCondition = "deleted = 0")
-@Filter(name = SmallGroup.NotDeletedFilter)
+@FilterDef(name = DepartmentSmallGroup.NotDeletedFilter, defaultCondition = "deleted = 0")
+@Filter(name = DepartmentSmallGroup.NotDeletedFilter)
 @Entity
 @AccessType("field")
 class DepartmentSmallGroup

@@ -68,13 +68,13 @@ trait PermissionsCheckingMethods extends Logging {
 		}
 	
 	def mustBeLinked(set: SmallGroupSet, module: Module) =
-		if (mandatory(set).module.id != mandatory(module).id) {
+		if (mandatory(mandatory(set).module).id != mandatory(module).id) {
 			logger.info("Not displaying small group set as it doesn't belong to specified module")
 			throw new ItemNotFoundException(set)
 		}
 
 	def mustBeLinked(set: DepartmentSmallGroupSet, department: Department) =
-		if (mandatory(set).department.id != mandatory(department).id) {
+		if (mandatory(mandatory(set).department).id != mandatory(department).id) {
 			logger.info("Not displaying department small group set as it doesn't belong to specified department")
 			throw new ItemNotFoundException(set)
 		}

@@ -34,10 +34,6 @@ trait ModifyDepartmentSmallGroupSetState extends CurrentAcademicYear {
 	def existingSet: Option[DepartmentSmallGroupSet]
 
 	var name: String = _
-
-	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
-
-	var allowSelfGroupSwitching: Boolean = true
 }
 
 trait CreateDepartmentSmallGroupSetCommandState extends ModifyDepartmentSmallGroupSetState {
@@ -98,8 +94,6 @@ trait ModifyDepartmentSmallGroupSetCommandValidation extends SelfValidating {
 	override def validate(errors: Errors) {
 		if (!name.hasText) errors.rejectValue("name", "smallGroupSet.name.NotEmpty")
 		else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroupSet.name.Length", Array[Object](200: JInteger), "")
-
-		if (allocationMethod == null) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.NotEmpty")
 	}
 }
 
