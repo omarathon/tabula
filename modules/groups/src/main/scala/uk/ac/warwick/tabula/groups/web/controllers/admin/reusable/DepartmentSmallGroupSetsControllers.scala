@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, DepartmentSmallGroupSet, SmallGroupAllocationMethod, WeekRange}
-import uk.ac.warwick.tabula.groups.commands.admin.reusable.{UpdateStudentsForDepartmentSmallGroupSetCommand, CreateDepartmentSmallGroupSetCommandState, EditDepartmentSmallGroupSetCommandState, ModifyDepartmentSmallGroupSetCommand}
+import uk.ac.warwick.tabula.groups.commands.admin.reusable._
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
@@ -150,4 +150,29 @@ class EditDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCont
 			Redirect(Routes.admin.reusable.editAllocate(set))
 		}
 	}
+}
+
+@RequestMapping(Array("/admin/department/{department}/groups/reusable/delete/{smallGroupSet}"))
+@Controller
+class DeleteDepartmentSmallGroupSetController extends GroupsController {
+
+	validatesSelf[SelfValidating]
+	type DeleteDepartmentSmallGroupSetCommand = Appliable[DepartmentSmallGroupSet] with DeleteDepartmentSmallGroupSetValidation
+
+	@ModelAttribute("command")
+	def cmd(@PathVariable("department") department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): DeleteDepartmentSmallGroupSetCommand =
+		DeleteDepartmentSmallGroupSetCommand(department, set)
+
+	@RequestMapping
+	def form(@PathVariable("department") department: Department) =
+		Mav("admin/groups/reusable/delete").crumbs(Breadcrumbs.Department(department))
+
+	@RequestMapping(method = Array(POST))
+	def submit(@Valid @ModelAttribute("command") cmd: DeleteDepartmentSmallGroupSetCommand, errors: Errors, @PathVariable("department") department: Department) =
+		if (errors.hasErrors) form(department)
+		else {
+			cmd.apply()
+			Redirect(Routes.admin.reusable(department))
+		}
+
 }

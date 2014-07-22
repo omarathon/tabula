@@ -4,7 +4,7 @@ import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, DepartmentSmallGroup}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, DepartmentSmallGroupSet, DepartmentSmallGroup}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
@@ -46,16 +46,32 @@ class EditDepartmentSmallGroupsCommandInternal(val department: Department, val s
 				group.name = name
 
 				set.groups.add(group)
+
+				// We also need to create a linked group elsewhere for any sets linked to this set
+				set.linkedSets.asScala.foreach { smallGroupSet =>
+					val smallGroup = new SmallGroup
+					smallGroup.name = name
+					smallGroup.linkedDepartmentSmallGroup = group
+					smallGroupSet.groups.add(smallGroup)
+				}
 			}
 		}
 
 		if (groupNames.size() < set.groups.size()) {
 			for (i <- set.groups.size() until groupNames.size() by -1) {
+				val group = set.groups.get(i - 1)
 				set.groups.remove(i - 1)
+
+				// Also remove any linked groups
+				group.linkedGroups.asScala.foreach { smallGroup =>
+					smallGroup.groupSet.groups.remove(smallGroup)
+				}
 			}
 		}
 
 		smallGroupService.saveOrUpdate(set)
+		set.linkedSets.asScala.foreach(smallGroupService.saveOrUpdate)
+
 		set.groups.asScala
 	}
 }
