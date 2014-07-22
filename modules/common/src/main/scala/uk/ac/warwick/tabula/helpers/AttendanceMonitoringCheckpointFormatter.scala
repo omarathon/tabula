@@ -148,7 +148,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 				"Unrecorded",
 				"label-warning",
 				"icon-warning-sign late",
-				s"${point.name} (${pointDuration(point, department)})",
+				s"${point.name} ${pointDuration(point, department)}",
 				"",
 				s"$noteText",
 				s"$noteUrl"
@@ -158,7 +158,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 				"",
 				"",
 				"icon-minus",
-				s"${point.name} (${pointDuration(point, department)})",
+				s"${point.name} ${pointDuration(point, department)}",
 				"",
 				s"$noteText",
 				s"$noteUrl"

@@ -428,14 +428,16 @@
 </#macro>
 
 <#macro checkpointIcon department checkpoint="" point="" student="" note="">
+	<#local nonActivePoint = checkpoint?has_content && !checkpoint.activePoint />
 	<#local formatResult = formatResult(department, checkpoint, point, student, note) />
 	<#local popoverContent>
+		<#if nonActivePoint><p>Attendance is not somethingsomethingdarkside</p></#if>
 		<#if formatResult.status?has_content><p>${formatResult.status}</p></#if>
 		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
 		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
 		<#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}'>View attendance note</a></p></#if>
 	</#local>
-	<i class="use-popover icon-fixed-width ${formatResult.iconClass}" data-content="${popoverContent}" data-html="true"></i>
+	<i class="use-popover icon-fixed-width ${formatResult.iconClass} <#if nonActivePoint>non-active</#if>" data-content="${popoverContent}" data-html="true"></i>
 </#macro>
 
 <#macro checkpointIconForPointCheckpointPair department student pointCheckpointPair attendanceNotesMap>
@@ -507,7 +509,7 @@
 	</#list>
 </#macro>
 
-<#macro scrollablePointsTable command department filterResult visiblePeriods monthNames  doCommandSorting=true>
+<#macro scrollablePointsTable command department filterResult visiblePeriods monthNames doCommandSorting=true>
 	<div class="scrollable-points-table">
 		<div class="row">
 			<div class="left">
