@@ -36,7 +36,7 @@ object AllocateStudentsToDepartmentalSmallGroupsCommand {
 class AllocateStudentsToDepartmentalSmallGroupsCommandInternal(val department: Department, val set: DepartmentSmallGroupSet, val viewer: CurrentUser) extends CommandInternal[DepartmentSmallGroupSet] with AllocateStudentsToDepartmentalSmallGroupsCommandState {
 	self: GroupsObjects[User, DepartmentSmallGroup] with SmallGroupServiceComponent =>
 
-	override protected def applyInternal() = transactional() {
+	override def applyInternal() = transactional() {
 		for ((group, users) <- mapping.asScala) {
 			val userGroup = UserGroup.ofUniversityIds
 			users.asScala.foreach { user => userGroup.addUserId(user.getWarwickId) }

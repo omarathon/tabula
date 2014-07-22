@@ -45,8 +45,6 @@ class DepartmentSmallGroupSet
 
 	import DepartmentSmallGroupSet._
 
-	@transient var membershipService = Wire[AssignmentMembershipService]
-
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
 	@transient var smallGroupService = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
 
@@ -128,7 +126,6 @@ class DepartmentSmallGroupSet
 		newSet.memberQuery = memberQuery
 		newSet.groups = groups.asScala.map(_.duplicateTo(newSet)).asJava
 		newSet._membersGroup = _membersGroup.duplicate()
-		newSet.membershipService= membershipService
 		newSet.department = department
 		newSet.name = name
 		newSet

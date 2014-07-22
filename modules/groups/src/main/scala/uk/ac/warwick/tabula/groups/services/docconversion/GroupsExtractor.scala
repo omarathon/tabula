@@ -26,8 +26,12 @@ object GroupsExtractor {
 	val AcceptedFileExtensions = Seq(".xlsx")
 }
 
+trait GroupsExtractor {
+	def readXSSFExcelFile(file: InputStream): JList[AllocateStudentItem]
+}
+
 @Service
-class GroupsExtractor {
+class GroupsExtractorImpl extends GroupsExtractor {
 
 	/**
 	 * Method for reading in a xlsx spreadsheet and converting it into a list of AllocateStudentItem

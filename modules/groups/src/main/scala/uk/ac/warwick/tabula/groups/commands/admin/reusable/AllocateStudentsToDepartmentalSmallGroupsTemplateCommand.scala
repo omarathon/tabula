@@ -15,7 +15,6 @@ object AllocateStudentsToDepartmentalSmallGroupsTemplateCommand {
 		new AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(department, set)
 			with ComposableCommand[ExcelView]
 			with AllocateStudentsToDepartmentalSmallGroupsTemplatePermissions
-			with AllocateStudentsToDepartmentalSmallGroupsTemplateDescription
 			with ReadOnly with Unaudited
 }
 
@@ -164,13 +163,4 @@ trait AllocateStudentsToDepartmentalSmallGroupsTemplatePermissions extends Requi
 		mustBeLinked(set, department)
 		p.PermissionCheck(Permissions.SmallGroups.Allocate, mandatory(set))
 	}
-}
-
-trait AllocateStudentsToDepartmentalSmallGroupsTemplateDescription extends Describable[ExcelView] {
-	self: AllocateStudentsToDepartmentalSmallGroupsTemplateCommandState =>
-
-	override def describe(d: Description) {
-		d.department(set.department).properties("smallGroupSet" -> set.id)
-	}
-
 }
