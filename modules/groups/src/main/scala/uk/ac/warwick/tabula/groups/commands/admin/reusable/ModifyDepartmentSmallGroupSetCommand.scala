@@ -94,6 +94,10 @@ trait ModifyDepartmentSmallGroupSetCommandValidation extends SelfValidating {
 	override def validate(errors: Errors) {
 		if (!name.hasText) errors.rejectValue("name", "smallGroupSet.name.NotEmpty")
 		else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroupSet.name.Length", Array[Object](200: JInteger), "")
+
+		existingSet.foreach { set =>
+			if (academicYear != set.academicYear) errors.rejectValue("academicYear", "smallGroupSet.academicYear.cantBeChanged")
+		}
 	}
 }
 

@@ -50,7 +50,7 @@ class EditDepartmentSmallGroupsCommandInternal(val department: Department, val s
 		}
 
 		if (groupNames.size() < set.groups.size()) {
-			for (i <- set.groups.size() to groupNames.size()) {
+			for (i <- set.groups.size() until groupNames.size() by -1) {
 				set.groups.remove(i - 1)
 			}
 		}
@@ -97,7 +97,7 @@ trait EditDepartmentSmallGroupsValidation extends SelfValidating {
 		}
 
 		if (groupNames.size() < set.groups.size()) {
-			for (i <- set.groups.size() to groupNames.size()) {
+			for (i <- set.groups.size() until groupNames.size() by -1) {
 				val group = set.groups.get(i - 1)
 
 				if (!group.students.isEmpty) {
