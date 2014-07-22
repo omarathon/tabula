@@ -32,7 +32,6 @@ object EditDepartmentSmallGroupSetMembershipCommand {
 			with RemovesUsersFromEditDepartmentSmallGroupSetMembershipCommand
 			with ResetsMembershipInEditDepartmentSmallGroupSetMembershipCommand
 			with EditDepartmentSmallGroupSetMembershipPermissions
-			with EditDepartmentSmallGroupSetMembershipCommandState
 			with Unaudited with ReadOnly
 }
 
@@ -40,9 +39,8 @@ object EditDepartmentSmallGroupSetMembershipCommand {
  * Not persisted, just used to validate users entered and render student table
  */
 class EditDepartmentSmallGroupSetMembershipCommandInternal(val department: Department, val set: DepartmentSmallGroupSet)
-	extends CommandInternal[EditDepartmentSmallGroupSetMembershipCommandResult] {
-
-	self: EditDepartmentSmallGroupSetMembershipCommandState with UserLookupComponent =>
+	extends CommandInternal[EditDepartmentSmallGroupSetMembershipCommandResult] with EditDepartmentSmallGroupSetMembershipCommandState {
+	self: UserLookupComponent =>
 
 	override def applyInternal() = {
 		def toMembershipItem(universityId: String, itemType: DepartmentSmallGroupSetMembershipItemType) = {
@@ -70,8 +68,8 @@ trait PopulateEditDepartmentSmallGroupSetMembershipCommand extends PopulateOnFor
 	self: EditDepartmentSmallGroupSetMembershipCommandState =>
 
 	override def populate() = {
-		includedStudentIds = includedStudentIds
-		excludedStudentIds = excludedStudentIds
+		includedStudentIds = set.members.knownType.includedUserIds.asJava
+		excludedStudentIds = set.members.knownType.excludedUserIds.asJava
 	}
 
 }

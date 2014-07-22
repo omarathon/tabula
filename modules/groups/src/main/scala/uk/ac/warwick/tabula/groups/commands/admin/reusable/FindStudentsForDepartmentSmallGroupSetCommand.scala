@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.groups.commands.admin.reusable
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
@@ -29,14 +30,18 @@ object FindStudentsForDepartmentSmallGroupSetCommand {
 			with UpdatesFindStudentsForDepartmentSmallGroupSetCommand
 			with FindStudentsForDepartmentSmallGroupSetPermissions
 			with FindStudentsForDepartmentSmallGroupSetCommandState
+			with FiltersStudents
+			with DeserializesFilter
 			with Unaudited with ReadOnly
 }
 
 
 class FindStudentsForDepartmentSmallGroupSetCommandInternal(val department: Department, val set: DepartmentSmallGroupSet)
-	extends CommandInternal[FindStudentsForDepartmentSmallGroupSetCommandResult] with TaskBenchmarking {
+	extends CommandInternal[FindStudentsForDepartmentSmallGroupSetCommandResult]
+		with FindStudentsForDepartmentSmallGroupSetCommandState
+		with TaskBenchmarking {
 
-	self: ProfileServiceComponent with FindStudentsForDepartmentSmallGroupSetCommandState with UserLookupComponent =>
+	self: FiltersStudents with ProfileServiceComponent with UserLookupComponent =>
 
 	override def applyInternal() = {
 		if (serializeFilter.isEmpty) {
@@ -78,7 +83,7 @@ class FindStudentsForDepartmentSmallGroupSetCommandInternal(val department: Depa
 
 trait PopulateFindStudentsForDepartmentSmallGroupSetCommand extends PopulateOnForm {
 
-	self: FindStudentsForDepartmentSmallGroupSetCommandState =>
+	self: FindStudentsForDepartmentSmallGroupSetCommandState with FiltersStudents with DeserializesFilter =>
 
 	override def populate() = {
 		staticStudentIds = set.members.knownType.staticUserIds.asJava
@@ -87,7 +92,7 @@ trait PopulateFindStudentsForDepartmentSmallGroupSetCommand extends PopulateOnFo
 		filterQueryString = Option(set.memberQuery).getOrElse("")
 		linkToSits = set.members.isEmpty || (set.memberQuery != null && set.memberQuery.nonEmpty)
 		// Default to current students
-		if (filterQueryString == null || filterQueryString.size == 0)
+		if (!filterQueryString.hasText)
 			allSprStatuses.find(_.code == "C").map(sprStatuses.add)
 		else
 			deserializeFilter(filterQueryString)
@@ -97,13 +102,13 @@ trait PopulateFindStudentsForDepartmentSmallGroupSetCommand extends PopulateOnFo
 
 trait UpdatesFindStudentsForDepartmentSmallGroupSetCommand {
 
-	self: FindStudentsForDepartmentSmallGroupSetCommandState =>
+	self: FindStudentsForDepartmentSmallGroupSetCommandState with FiltersStudents with DeserializesFilter =>
 
 	def update(editSchemeMembershipCommandResult: EditDepartmentSmallGroupSetMembershipCommandResult) = {
 		includedStudentIds = editSchemeMembershipCommandResult.includedStudentIds
 		excludedStudentIds = editSchemeMembershipCommandResult.excludedStudentIds
 		// Default to current students
-		if (filterQueryString == null || filterQueryString.size == 0)
+		if (!filterQueryString.hasText)
 			allSprStatuses.find(_.code == "C").map(sprStatuses.add)
 		else
 			deserializeFilter(filterQueryString)
@@ -120,7 +125,7 @@ trait FindStudentsForDepartmentSmallGroupSetPermissions extends RequiresPermissi
 	}
 }
 
-trait FindStudentsForDepartmentSmallGroupSetCommandState extends FiltersStudents with DeserializesFilter {
+trait FindStudentsForDepartmentSmallGroupSetCommandState {
 	def department: Department
 	def set: DepartmentSmallGroupSet
 

@@ -39,7 +39,6 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandInternal(val department: De
 			set.memberQuery = filterQueryString
 		} else {
 			set.members.knownType.staticUserIds = Seq()
-			set.members.knownType.includedUserIds = Seq()
 			set.members.knownType.excludedUserIds = Seq()
 			set.memberQuery = ""
 			set.members.knownType.includedUserIds = ((staticStudentIds.asScala diff excludedStudentIds.asScala) ++ includedStudentIds.asScala).distinct
