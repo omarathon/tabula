@@ -80,21 +80,20 @@ class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 	import WeekRangesFormatter._
 
 	// Pimp Term to have a clever toString output
-	implicit class PimpedTerm(term: Term) {
+	implicit class PimpedTerm(termOrVacation: Term) {
 		def print(weekRange: WeekRange, dayOfWeek: DayOfWeek, numberingSystem: String) = {
 			// TODO we've already done this calculation once in groupWeekRangesByTerm, do we really need to do it again?
 			val startDate = weekNumberToDate(weekRange.minWeek, dayOfWeek)
 			val endDate = weekNumberToDate(weekRange.maxWeek, dayOfWeek)
 
-			term match {
-				case vac: Vacation => {
+			termOrVacation match {
+				case vac: Vacation =>
 					// Date range
 					if (startDate.equals(endDate))
 						"%s, %s" format (vac.getTermTypeAsString, IntervalFormatter.format(startDate, includeTime = false))
 					else
 						"%s, %s" format (vac.getTermTypeAsString, IntervalFormatter.format(startDate, endDate, includeTime = false))
-				}
-				case term => {
+				case term =>
 					// Convert week numbers to the correct style
 					val termNumber = term.getTermType match {
 						case Term.TermType.autumn => 1
@@ -110,13 +109,12 @@ class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 
 					if (weekRange.isSingleWeek) "Term %d, week %d" format (termNumber, weekNumber(startDate))
 					else "Term %d, weeks %d-%d" format (termNumber, weekNumber(startDate), weekNumber(endDate))
-				}
 			}
 		}
 	}
 
 	def format(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek, numberingSystem: String) = numberingSystem match {
-		case WeekRange.NumberingSystem.Academic => {
+		case WeekRange.NumberingSystem.Academic =>
 			// Special early exit for the "academic" week numbering system - because that's what we
 			// store, we can simply return that.
 			val prefix =
@@ -124,16 +122,14 @@ class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 				else "Weeks"
 
 			prefix + " " + ranges.mkString(separator)
-		}
-		case WeekRange.NumberingSystem.None => {
+		case WeekRange.NumberingSystem.None =>
 			ranges.map { weekRange =>
 				val startDate = weekNumberToDate(weekRange.minWeek, dayOfWeek)
 				val endDate = weekNumberToDate(weekRange.maxWeek, dayOfWeek)
 
 				IntervalFormatter.format(startDate, endDate, includeTime = false)
 			}.mkString(separator)
-		}
-		case _ => {
+		case _ =>
 			/*
 			 * The first thing we need to do is split the WeekRanges by term.
 			 *
@@ -148,7 +144,6 @@ class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 				case (weekRange, term) =>
 					term.print(weekRange, dayOfWeek, numberingSystem)
 			}.mkString(separator)
-		}
 	}
 
 }
@@ -295,7 +290,7 @@ trait WeekRangesDumper extends KnowsUserNumberingSystem {
 		val system = numberingSystem(user, () => department)
 
 		val weekDescriptions = termsAndWeeks map {
-			case (year, weekNumber, weekInterval) => {
+			case (year, weekNumber, weekInterval) =>
 				val defaultDescription = formatWeekName(year, weekNumber, system)
 
 				// weekRangeFormatter always includes vacations, but we don't want them here, so if the
@@ -308,7 +303,6 @@ trait WeekRangesDumper extends KnowsUserNumberingSystem {
 				}
 
 				(weekInterval.getStart.getMillis, weekInterval.getEnd.getMillis, description)
-			}
 		}
 
 		// could use Jackson to map these objects but it doesn't seem worth it
@@ -339,14 +333,14 @@ class WeekRangesDumperTag extends TemplateMethodModelEx with WeekRangesDumper wi
 
 class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYear)  {
 
-	implicit class PimpedTerm(term: Term) {
+	implicit class PimpedTerm(termOrVacation: Term) {
 		def print(weekRange: WeekRange, dayOfWeek: DayOfWeek, numberingSystem: String, short: Boolean) = {
 			val startDate = weekNumberToDate(weekRange.minWeek, dayOfWeek)
 			val endDate = weekNumberToDate(weekRange.maxWeek, dayOfWeek)
 			val Monday = DayOfWeek.Monday.getAsInt
 
-			term match {
-				case vac: Vacation => {
+			termOrVacation match {
+				case vac: Vacation =>
 					if (weekRange.isSingleWeek) {
 						if (short) startDate.withDayOfWeek(Monday).toString("dd/MM")
 						else "%s, w/c %s" format (
@@ -367,8 +361,7 @@ class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYe
 								IntervalFormatter.format(startDate.withDayOfWeek(Monday), endDate.withDayOfWeek(Monday), includeTime = false).replaceAll("Mon", "w/c Mon")
 								)
 					}
-				}
-				case term => {
+				case term =>
 					// Convert week numbers to the correct style
 					val termNumber = term.getTermType match {
 						case Term.TermType.autumn => 1
@@ -389,7 +382,6 @@ class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYe
 						if (weekRange.isSingleWeek) "Term %d, week %d" format (termNumber, weekNumber(startDate))
 						else "Term %d, weeks %d-%d" format (termNumber, weekNumber(startDate), weekNumber(endDate))
 					}
-				}
 			}
 		}
 	}
@@ -399,7 +391,7 @@ class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYe
 		import WeekRangesFormatter._
 
 		numberingSystem match {
-			case WeekRange.NumberingSystem.Academic => {
+			case WeekRange.NumberingSystem.Academic =>
 				val prefix =
 					if (short) {
 						""
@@ -408,8 +400,7 @@ class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYe
 						else "Weeks "
 					}
 				prefix + ranges.mkString(separator)
-			}
-			case WeekRange.NumberingSystem.None => {
+			case WeekRange.NumberingSystem.None =>
 				ranges.map { weekRange =>
 					val Monday = DayOfWeek.Monday
 					val startDate = weekNumberToDate(weekRange.minWeek, Monday)
@@ -422,13 +413,11 @@ class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYe
 						IntervalFormatter.format(startDate, endDate, includeTime = false).replaceAll("Mon", "w/c Mon")
 					}
 				}.mkString(separator)
-			}
-			case _ => {
+			case _ =>
 				groupWeekRangesByTerm(ranges, dayOfWeek).map {
 					case (weekRange, term) =>
 						term.print(weekRange, dayOfWeek, numberingSystem, short)
 				}.mkString(separator)
-			}
 		}
 	}
 }
@@ -467,13 +456,11 @@ class WholeWeekFormatterTag extends TemplateMethodModelEx with KnowsUserNumberin
 
 		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {
-			case Seq(startWeekNumber: JInteger, endWeekNumber: JInteger, academicYear: AcademicYear, dept: Department, short: JBoolean) => {
+			case Seq(startWeekNumber: JInteger, endWeekNumber: JInteger, academicYear: AcademicYear, dept: Department, short: JBoolean) =>
 				format(Seq(WeekRange(startWeekNumber, endWeekNumber)), DayOfWeek.Thursday, academicYear, numberingSystem(user, () => Option(dept)), short)
-			}
 
-			case Seq(startWeekNumber: JInteger, endWeekNumber: JInteger, academicYear: AcademicYear, short: JBoolean) => {
+			case Seq(startWeekNumber: JInteger, endWeekNumber: JInteger, academicYear: AcademicYear, short: JBoolean) =>
 				format(Seq(WeekRange(startWeekNumber, endWeekNumber)), DayOfWeek.Thursday, academicYear, WeekRange.NumberingSystem.None, short)
-			}
 
 			case _ => throw new IllegalArgumentException("Bad args: " + args)
 		}

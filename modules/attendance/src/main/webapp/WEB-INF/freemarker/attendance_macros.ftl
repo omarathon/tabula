@@ -256,6 +256,7 @@
 		<table class="manage-student-table table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-darkRed tablesorter sb-no-wrapper-table-popout">
 			<thead>
 			<tr>
+				<th class="profile_link-col"></th>
 				<th style="width: 50px;" <#if doSorting> class="${sortClass("source", command)} sortable" data-field="source"</#if>>Source</th>
 				<th <#if doSorting> class="${sortClass("firstName", command)} sortable" data-field="firstName"</#if>>First name</th>
 				<th <#if doSorting> class="${sortClass("lastName", command)} sortable" data-field="lastName"</#if>>Last name</th>
@@ -291,6 +292,7 @@
 			<tbody>
 				<#list membershipItems as item>
 					<tr class="${item.itemTypeString}">
+						<td class="profile_link"><@pl.profile_link item.universityId /></td>
 						<td>
 							<#if item.itemTypeString == "static">
 								<span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span>
@@ -302,7 +304,7 @@
 						</td>
 						<td>${item.firstName}</td>
 						<td>${item.lastName}</td>
-						<td>${item.universityId}</td>
+						<td><a class="profile-link" href="<@routes.profile item />">${item.universityId}</a></td>
 						<td>${item.userId}</td>
 						<td>
 							<#if item.existingSchemes?size == 0>
@@ -344,6 +346,8 @@
 				</#list>
 			</tbody>
 		</table>
+
+		<div id="profile-modal" class="modal fade profile-subset"></div>
 	</#if>
 </#macro>
 
