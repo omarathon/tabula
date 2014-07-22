@@ -1,4 +1,32 @@
-<h1>Use a template</h1>
+<#if command.schemes?size == 1>
+
+	<h1>Use a template for scheme: ${command.schemes?first.displayName}</h1>
+
+	<p>
+		Use an AQA-approved template to add points. Which template do you want to use?
+	</p>
+
+<#else>
+
+	<h1>Use template</h1>
+
+	<p>
+		Use an AQA-approved template to add points to
+		<a href="#" class="use-popover"
+		   data-content="
+			<ul>
+				<#list schemes as scheme>
+					<li>${scheme.displayName}</li>
+				</#list>
+			</ul>"
+		   data-html="true"
+		   data-placement="right"
+		><@fmt.p schemes?size "scheme" /></a>.
+
+		Which template do you want to use?
+	</p>
+
+</#if>
 
 <#if errors?has_content>
 <div class="alert alert-error">
@@ -7,19 +35,6 @@
 	</#list>
 </div>
 </#if>
-
-<p>Use an AQA-approved template to add points to
-	<a href="#" class="use-popover"
-	   data-content="
-		<ul>
-			<#list schemes as scheme>
-				<li>${scheme.displayName}</li>
-			</#list>
-		</ul>"
-	   data-html="true"
-	   data-placement="right"><@fmt.p schemes?size "scheme" /></a>.
-
-	Which template do you want to use?</p>
 
 <@f.form action="" method="POST" commandName="command" class="form-horizontal">
 

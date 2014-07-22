@@ -1,20 +1,28 @@
 <#escape x as x?html>
 
-<h1>Add monitoring point</h1>
+<#if command.schemes?size == 1>
 
-<#assign popoverContent><#noescape>
-	<ul>
-		<#list command.schemes?sort_by("displayName") as scheme>
-			<li>${scheme.displayName}</li>
-		</#list>
-	</ul>
-</#noescape></#assign>
-<p>
-	You are adding this point to
-	<a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="top">
-		<@fmt.p command.schemes?size "scheme" />
-	</a>
-</p>
+	<h1>Add monitoring point to scheme: ${command.schemes?first.displayName}</h1>
+
+<#else>
+
+	<h1>Add monitoring point</h1>
+
+	<#assign popoverContent><#noescape>
+		<ul>
+			<#list command.schemes?sort_by("displayName") as scheme>
+				<li>${scheme.displayName}</li>
+			</#list>
+		</ul>
+	</#noescape></#assign>
+	<p>
+		You are adding this point to
+		<a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="top">
+			<@fmt.p command.schemes?size "scheme" />
+		</a>
+	</p>
+
+</#if>
 
 <#function extractParam collection param>
 	<#local result = [] />

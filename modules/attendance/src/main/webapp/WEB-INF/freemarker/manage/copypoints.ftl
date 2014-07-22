@@ -1,16 +1,20 @@
 <#escape x as x?html>
 <#import "../attendance_variables.ftl" as attendance_variables />
 
-<h1>Copy points</h1>
+<#if command.schemes?size == 1>
 
-<div class="fix-area">
+	<h1>Copy points to scheme: ${command.schemes?first.displayName}</h1>
+
+<#else>
+
+	<h1>Copy points</h1>
 
 	<#assign popoverContent><#noescape>
-	<ul>
-		<#list command.schemes?sort_by("displayName") as scheme>
-			<li>${scheme.displayName}</li>
-		</#list>
-	</ul>
+		<ul>
+			<#list command.schemes?sort_by("displayName") as scheme>
+				<li>${scheme.displayName}</li>
+			</#list>
+		</ul>
 	</#noescape></#assign>
 	<p>
 		You are copying these points to
@@ -18,6 +22,10 @@
 			<@fmt.p command.schemes?size "scheme" />
 		</a>
 	</p>
+
+</#if>
+
+<div class="fix-area">
 
 	<form action="<@routes.manageAddPointsCopy command.department command.academicYear.startYear?c />" method="post" class="form-inline">
 		<#list command.schemes as scheme>
@@ -58,7 +66,7 @@
 				</select>
 			</label>
 
-			<input style="margin-left: 16px;" type="submit" class="btn btn-primary" name="search" value="Change"/>
+			<input style="margin-left: 16px;" type="submit" class="btn btn-primary" name="search" value="Display"/>
 		</p>
 
 		<#if allSchemes??>
