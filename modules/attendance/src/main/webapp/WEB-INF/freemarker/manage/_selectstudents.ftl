@@ -134,12 +134,46 @@
 			${courseType.description}
 			</@filter>
 
+			<#-- Non-standard drop-down for routes -->
 			<#assign placeholder = "All routes" />
-			<#assign currentfilter><@current_filter_value "findCommand.routes" placeholder; route>${route.code?upper_case}</@current_filter_value></#assign>
-			<@filter "findCommand.routes" placeholder currentfilter findCommand.allRoutes findCommand.visibleRoutes; route, isValid>
-				<input type="checkbox" name="${status.expression}" value="${route.code}" data-short-value="${route.code?upper_case}" ${contains_by_code(findCommand.routes, route)?string('checked','')} <#if !isValid>disabled</#if>>
-				<@fmt.route_name route false />
-			</@filter>
+			<#assign currentFilter><@current_filter_value "findCommand.routes" placeholder; route>${route.code?upper_case}</@current_filter_value></#assign>
+			<@spring.bind path="findCommand.routes">
+				<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
+					<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+						<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="">${currentFilter}</span>
+						<span class="caret"></span>
+					</a>
+					<div class="dropdown-menu filter-list">
+						<button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
+						<ul>
+							<li>
+								<div class="route-search input-append">
+									<input class="route-search-query route" type="text" value="" placeholder="Search for a route" />
+									<span class="add-on"><i class="icon-search"></i></span>
+								</div>
+							</li>
+							<#macro routeLi route route_index>
+								<li class="check-list-item" data-natural-sort="${route_index}">
+									<label class="checkbox">
+										<input type="checkbox" name="${status.expression}" value="${route.code}" data-short-value="${route.code?upper_case}" ${contains_by_code(findCommand.routes, route)?string('checked','')}>
+										<@fmt.route_name route false />
+									</label>
+								</li>
+							</#macro>
+							<#list findCommand.outOfDepartmentRoutes as route>
+								<@routeLi route route_index />
+							</#list>
+							<#if findCommand.allRoutes?has_content>
+								<#list findCommand.allRoutes as route>
+									<@routeLi route route_index />
+								</#list>
+							<#else>
+								<li><small class="muted" style="padding-left: 5px;">N/A for this department</small></li>
+							</#if>
+						</ul>
+					</div>
+				</div>
+			</@spring.bind>
 
 			<#assign placeholder = "All attendance" />
 			<#assign currentfilter><@current_filter_value "findCommand.modesOfAttendance" placeholder; moa>${moa.shortName?capitalize}</@current_filter_value></#assign>

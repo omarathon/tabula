@@ -1,14 +1,9 @@
 package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
-
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.AutowiringCourseDaoComponent
-import uk.ac.warwick.tabula.data.AutowiringRouteDaoComponent
-import uk.ac.warwick.tabula.data.CourseDaoComponent
-import uk.ac.warwick.tabula.data.RouteDaoComponent
-import uk.ac.warwick.tabula.data.model.Course
-import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.data.{AutowiringCourseDaoComponent, AutowiringRouteDaoComponent, CourseDaoComponent, RouteDaoComponent}
+import uk.ac.warwick.tabula.data.model.{Course, Route}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
@@ -33,6 +28,9 @@ trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent {
 	def getCourseByCode(code: String): Option[Course] = code.maybeText.flatMap {
 		ccode => courseDao.getByCode(ccode.toLowerCase)
 	}
+
+	def findRoutesNamedLike(query: String): Seq[Route] =
+		routeDao.findRoutesNamedLike(query)
 }
 
 abstract class AbstractCourseAndRouteService extends CourseAndRouteService {

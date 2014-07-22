@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.data
 
-import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.{Department, Route}
-import uk.ac.warwick.spring.Wire
 import org.hibernate.criterion.Order
+import org.hibernate.criterion.Restrictions._
 import org.joda.time.DateTime
+import org.springframework.stereotype.Repository
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.{Department, Route}
 
 trait RouteDaoComponent {
 	val routeDao: RouteDao
@@ -21,6 +22,7 @@ trait RouteDao {
 	def getById(id: String): Option[Route]
 	def findByDepartment(department:Department):Seq[Route]
 	def stampMissingRows(dept: Department, seenCodes: Seq[String]): Int
+	def findRoutesNamedLike(query: String): Seq[Route]
 }
 
 @Repository
@@ -60,6 +62,15 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 			.setParameter("now", DateTime.now)
 			.setEntity("department", dept)
 			.executeUpdate()
+	}
+
+	def findRoutesNamedLike(query: String): Seq[Route] = {
+		session.newCriteria[Route]
+			.add(disjunction()
+			.add(like("code", s"%${query.toLowerCase}%").ignoreCase)
+			.add(like("name", s"%${query.toLowerCase}%").ignoreCase)
+			)
+			.setMaxResults(20).seq.sorted(Route.DegreeTypeOrdering)
 	}
 
 }
