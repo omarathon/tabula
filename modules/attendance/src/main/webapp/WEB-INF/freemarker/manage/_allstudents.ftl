@@ -7,6 +7,9 @@
 	<div class="students">
 		<@attendance_macros.manageStudentTable membershipItems />
 	</div>
+	<script>
+		jQuery('a.ajax-modal').ajaxModalLink();
+	</script>
 </#if>
 
 </#escape>

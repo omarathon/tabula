@@ -27,6 +27,8 @@
 
 	<div class="fix-area">
 
+		<input type="hidden" name="findStudents" value="submit" />
+
 		<#include "_selectstudents.ftl" />
 
 		<div class="fix-footer submit-buttons">

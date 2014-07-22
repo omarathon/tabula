@@ -148,6 +148,8 @@
 		trigger: 'click',
 		container: '#container'
 	});
+
+	jQuery('a.ajax-modal').ajaxModalLink();
 </script>
 
 </#escape>

@@ -30,7 +30,7 @@ class EditStudentsOnSchemeController extends AbstractManageSchemeStudentsControl
 			render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult)
 		} else {
 			val scheme = cmd.apply()
-			Redirect(Routes.Manage.editSchemePoints(scheme))
+			RedirectForce(Routes.Manage.editSchemePoints(scheme))
 		}
 
 	}
@@ -49,7 +49,7 @@ class EditStudentsOnSchemeController extends AbstractManageSchemeStudentsControl
 			render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult)
 		} else {
 			val scheme = cmd.apply()
-			Redirect(Routes.Manage.editScheme(scheme))
+			RedirectForce(Routes.Manage.editScheme(scheme))
 		}
 
 	}
