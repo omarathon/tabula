@@ -104,7 +104,7 @@
 	</#if>
 </#macro>
 
-<#macro attendanceButtons startDateInFuture=false>
+<#macro attendanceButtons>
 	<div style="display:none;" class="forCloning">
 		<div class="btn-group" data-toggle="buttons-radio">
 			<button
@@ -119,9 +119,9 @@
 			</button>
 			<button
 					type="button"
-					class="btn btn-unauthorised use-tooltip <#if (startDateInFuture)>disabled</#if>"
+					class="btn btn-unauthorised use-tooltip"
 					data-state="unauthorised"
-					title=<#if (startDateInFuture)> "This event hasn't happened yet so it can't be marked as missed (unauthorised)"<#else> "Set to 'Missed (unauthorised)'"</#if>
+					title="Set to 'Missed (unauthorised)'"
 					data-html="true"
 					data-container="body"
 					>
@@ -139,9 +139,9 @@
 			</button>
 			<button
 					type="button"
-					class="btn btn-attended use-tooltip <#if (startDateInFuture)>disabled</#if>"
+					class="btn btn-attended use-tooltip"
 					data-state="attended"
-					title=<#if (startDateInFuture)> "This event hasn't happened yet so it can't be marked as attended"<#else> "Set to 'Attended'" </#if>
+					title="Set to 'Attended'"
 					data-html="true"
 					data-container="body"
 					>
@@ -411,15 +411,16 @@
 		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
 		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
 	</#local>
+	<#local startDateInFuture = point.startDateInFuture />
 	<select
 		id="${id}"
 		name="${name}"
 		title="${tooltipContent}"
 	>
 		<option value="" <#if !checkpoint?has_content >selected</#if>>Not recorded</option>
-		<option value="unauthorised" <#if checkpoint?has_content && checkpoint.state.dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
+		<option <#if startDateInFuture>class="disabled" title="This event hasn't happened yet so it can't be marked as missed (unauthorised)" </#if> value="unauthorised" <#if checkpoint?has_content && checkpoint.state.dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
 		<option value="authorised" <#if checkpoint?has_content && checkpoint.state.dbValue == "authorised">selected</#if>>Missed (authorised)</option>
-		<option value="attended" <#if checkpoint?has_content && checkpoint.state.dbValue == "attended">selected</#if>>Attended</option>
+		<option <#if startDateInFuture>class="disabled" title="This event hasn't happened yet so it can't be marked as attended" </#if> value="attended" <#if checkpoint?has_content && checkpoint.state.dbValue == "attended">selected</#if>>Attended</option>
 	</select>
 </#macro>
 
