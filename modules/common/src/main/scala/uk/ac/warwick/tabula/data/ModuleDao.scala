@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.data
-import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.{Assignment, Module, Department}
-import org.hibernate.criterion.{Projections, Order}
 import org.hibernate.criterion.Restrictions._
+import org.hibernate.criterion.{Order, Projections}
 import org.joda.time.DateTime.now
+import org.springframework.stereotype.Repository
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 
 trait ModuleDao {
 	def allModules: Seq[Module]

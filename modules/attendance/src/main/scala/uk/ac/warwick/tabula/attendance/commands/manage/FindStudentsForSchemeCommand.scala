@@ -43,6 +43,9 @@ class FindStudentsForSchemeCommandInternal(val scheme: AttendanceMonitoringSchem
 	self: ProfileServiceComponent with FindStudentsForSchemeCommandState with AttendanceMonitoringServiceComponent with UserLookupComponent =>
 
 	override def applyInternal() = {
+		// Remove any duplicate routes caused by search for routes already displayed
+		routes = routes.asScala.distinct.asJava
+
 		if (serializeFilter.isEmpty || findStudents.isEmpty ) {
 			FindStudentsForSchemeCommandResult(staticStudentIds, Seq())
 		} else {
@@ -147,6 +150,7 @@ trait FindStudentsForSchemeCommandState extends FiltersStudents with Deserialize
 	// Filter binds
 	var courseTypes: JList[CourseType] = JArrayList()
 	var routes: JList[Route] = JArrayList()
+	lazy val outOfDepartmentRoutes = routes.asScala.toSeq.diff(allRoutes)
 	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
 	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()

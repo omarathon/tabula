@@ -51,11 +51,10 @@ class ModulePickerCommand extends CommandInternal[Seq[ModulePickerResult]] {
 		} else {
 			val modules: Seq[Module] = moduleAndDepartmentService.findModulesNamedLike(query)
 			modules.map {
-				case (module) => {
+				case (module) =>
 					ModulePickerResult(module,
 						if (checkGroups) smallGroupService.hasSmallGroups(module) else false,
 						if (checkAssignments) moduleAndDepartmentService.hasAssignments(module) else false)
-				}
 			}
 		}
 	}

@@ -19,6 +19,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController
 	with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent with AutowiringAttendanceMonitoringMeetingRecordServiceComponent {
 
 	type PopulatableCommand = Appliable[MeetingRecord] with PopulateOnForm
+	type ConvertScheduledMeetingRecordCommand = Appliable[MeetingRecord] with PopulateOnForm with ConvertScheduledMeetingRecordState
 
 	validatesSelf[SelfValidating]
 
@@ -95,38 +96,38 @@ class ConvertScheduledMeetingRecordController extends ProfilesController
 	def submitIframe(
 		@Valid @ModelAttribute("command") command: Option[CreateMeetingRecordCommand],
 		createErrors: Errors,
-		@Valid @ModelAttribute("convertCommand") convertCommand: Appliable[MeetingRecord] with PopulateOnForm with ConvertScheduledMeetingRecordState,
+		@Valid @ModelAttribute("convertCommand") convertCommand: Option[ConvertScheduledMeetingRecordCommand],
 		convertErrors: Errors,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable meetingRecord: ScheduledMeetingRecord,
 		@ModelAttribute("viewMeetingRecordCommand") viewCommand: Option[Appliable[Seq[AbstractMeetingRecord]]]
-	) = command match {
-			case Some(cmd) =>
+	) = (command, convertCommand) match {
+			case (Some(cmd), Some(convertCmd)) =>
 				if (createErrors.hasErrors || convertErrors.hasErrors) {
 					form(cmd, studentCourseDetails, meetingRecord, iframe = true)
 				} else {
-					convertCommand.createCommand = cmd
-					val modifiedMeeting = convertCommand.apply()
+						convertCmd.createCommand = cmd
+						val modifiedMeeting = convertCmd.apply()
 
-					val meetingList = viewCommand match {
-						case None => Seq()
-						case Some(c) => c.apply()
-					}
-					Mav("related_students/meeting/list",
-						"studentCourseDetails" -> studentCourseDetails,
-						"role" -> modifiedMeeting.relationship.relationshipType,
-						"meetings" -> meetingList,
-						"meetingApprovalWillCreateCheckpoint" -> meetingList.map {
-							case (meeting: MeetingRecord) => meeting.id -> (
-								monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
-									|| attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
-								)
-							case (meeting: ScheduledMeetingRecord) => meeting.id -> false
-						}.toMap,
-						"viewer" -> currentMember,
-						"openMeeting" -> modifiedMeeting).noLayout()
+						val meetingList = viewCommand match {
+							case None => Seq()
+							case Some(c) => c.apply()
+						}
+						Mav("related_students/meeting/list",
+							"studentCourseDetails" -> studentCourseDetails,
+							"role" -> modifiedMeeting.relationship.relationshipType,
+							"meetings" -> meetingList,
+							"meetingApprovalWillCreateCheckpoint" -> meetingList.map {
+								case (meeting: MeetingRecord) => meeting.id -> (
+									monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
+										|| attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
+									)
+								case (meeting: ScheduledMeetingRecord) => meeting.id -> false
+							}.toMap,
+							"viewer" -> currentMember,
+							"openMeeting" -> modifiedMeeting).noLayout()
 				}
-			case None => Mav("related_students/meeting/was_deleted")
+			case _ => Mav("related_students/meeting/was_deleted")
 	}
 
 
@@ -134,21 +135,21 @@ class ConvertScheduledMeetingRecordController extends ProfilesController
 	def submit(
 		@Valid @ModelAttribute("command") command: Option[CreateMeetingRecordCommand],
 		createErrors: Errors,
-		@Valid @ModelAttribute("convertCommand") convertCommand: Appliable[MeetingRecord] with PopulateOnForm with ConvertScheduledMeetingRecordState,
+		@Valid @ModelAttribute("convertCommand") convertCommand: Option[ConvertScheduledMeetingRecordCommand],
 		convertErrors: Errors,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable meetingRecord: ScheduledMeetingRecord
-	) = command match {
-		case Some(cmd) =>
+	) = (command, convertCommand) match {
+		case (Some(cmd), Some(convertCmd)) =>
 			if (createErrors.hasErrors || convertErrors.hasErrors) {
 				form(cmd, studentCourseDetails, meetingRecord, iframe = false)
 			} else {
-				convertCommand.createCommand = cmd
-				convertCommand.apply()
+				convertCmd.createCommand = cmd
+				convertCmd.apply()
 
 				Redirect(Routes.profile.view(studentCourseDetails.student))
 			}
-		case None => Mav("related_students/meeting/was_deleted")
+		case _ => Mav("related_students/meeting/was_deleted")
 	}
 }
 

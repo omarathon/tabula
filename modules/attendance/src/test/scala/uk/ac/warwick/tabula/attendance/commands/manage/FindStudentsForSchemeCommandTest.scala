@@ -61,6 +61,8 @@ class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
 		command.includedStudentIds.add(student3.universityId)
 		command.excludedStudentIds.add(student2.universityId)
 
+		command.findStudents = "submit"
+
 		val result = command.applyInternal()
 		// 2 results from search, even with 1 removed
 		result.membershipItems.size should be (2)
