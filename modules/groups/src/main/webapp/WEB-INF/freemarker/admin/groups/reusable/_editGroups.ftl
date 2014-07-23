@@ -45,7 +45,6 @@
 				$clone.find('button[data-toggle="add"]').remove();
 
 				var index = parseInt(/\[(\d+)\]/.exec($clone.find('input[type="text"]').attr('name'))[1]);
-				console.log(index);
 				$clone.find('label').text((index + 1) + ".");
 
 				$clone.insertBefore($group);

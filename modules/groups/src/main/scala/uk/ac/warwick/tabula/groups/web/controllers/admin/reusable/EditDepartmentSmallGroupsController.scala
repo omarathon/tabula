@@ -70,7 +70,7 @@ class CreateDepartmentSmallGroupSetAddGroupsController extends AbstractEditDepar
 			render(set)
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin.reusable.createAddStudents(set))
+			RedirectForce(Routes.admin.reusable.createAddStudents(set))
 		}
 	}
 
@@ -84,7 +84,7 @@ class CreateDepartmentSmallGroupSetAddGroupsController extends AbstractEditDepar
 			render(set)
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin.reusable.createAllocate(set))
+			RedirectForce(Routes.admin.reusable.createAllocate(set))
 		}
 	}
 
@@ -109,7 +109,7 @@ class EditDepartmentSmallGroupSetAddGroupsController extends AbstractEditDepartm
 			render(set)
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin.reusable.editAddStudents(set))
+			RedirectForce(Routes.admin.reusable.editAddStudents(set))
 		}
 	}
 
@@ -123,7 +123,7 @@ class EditDepartmentSmallGroupSetAddGroupsController extends AbstractEditDepartm
 			render(set)
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin.reusable.editAllocate(set))
+			RedirectForce(Routes.admin.reusable.editAllocate(set))
 		}
 	}
 

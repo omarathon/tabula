@@ -76,7 +76,7 @@ class CreateDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCo
 		if (errors.hasErrors) form(cmd)
 		else {
 			val set = cmd.apply()
-			Redirect(Routes.admin.reusable.createAddStudents(set))
+			RedirectForce(Routes.admin.reusable.createAddStudents(set))
 		}
 	}
 
@@ -85,7 +85,7 @@ class CreateDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCo
 		if (errors.hasErrors) form(cmd)
 		else {
 			val set = cmd.apply()
-			Redirect(Routes.admin.reusable.createAddGroups(set))
+			RedirectForce(Routes.admin.reusable.createAddGroups(set))
 		}
 	}
 
@@ -94,7 +94,7 @@ class CreateDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCo
 		if (errors.hasErrors) form(cmd)
 		else {
 			val set = cmd.apply()
-			Redirect(Routes.admin.reusable.createAllocate(set))
+			RedirectForce(Routes.admin.reusable.createAllocate(set))
 		}
 	}
 }
@@ -129,7 +129,7 @@ class EditDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCont
 		if (errors.hasErrors) form(cmd, set)
 		else {
 			cmd.apply()
-			Redirect(Routes.admin.reusable.editAddStudents(set))
+			RedirectForce(Routes.admin.reusable.editAddStudents(set))
 		}
 	}
 
@@ -138,7 +138,7 @@ class EditDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCont
 		if (errors.hasErrors) form(cmd, set)
 		else {
 			cmd.apply()
-			Redirect(Routes.admin.reusable.editAddGroups(set))
+			RedirectForce(Routes.admin.reusable.editAddGroups(set))
 		}
 	}
 
@@ -147,7 +147,7 @@ class EditDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCont
 		if (errors.hasErrors) form(cmd, set)
 		else {
 			cmd.apply()
-			Redirect(Routes.admin.reusable.editAllocate(set))
+			RedirectForce(Routes.admin.reusable.editAllocate(set))
 		}
 	}
 }

@@ -59,7 +59,7 @@
 				/>
 			<input
 				type="submit"
-				class="btn btn-primary"
+				class="btn btn-primary spinnable spinner-auto"
 				name="persist"
 				value="Save and exit"
 				/>
