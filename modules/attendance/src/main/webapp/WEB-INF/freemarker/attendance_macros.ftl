@@ -431,7 +431,13 @@
 	<#local nonActivePoint = checkpoint?has_content && !checkpoint.activePoint />
 	<#local formatResult = formatResult(department, checkpoint, point, student, note) />
 	<#local popoverContent>
-		<#if nonActivePoint><p>Attendance is not somethingsomethingdarkside</p></#if>
+		<#if nonActivePoint>
+			<p>
+				This attendance can no longer be edited, because it was recorded for a monitoring scheme (${checkpoint.point.scheme.displayName})
+				that no longer applies to this student.
+				<a href='http://warwick.ac.uk/tabula/faqs/attendancemonitoring/deptadminsfaqs/nonactivepoints' target='_blank'><i class='icon-question-sign'></i></a>
+			</p>
+		</#if>
 		<#if formatResult.status?has_content><p>${formatResult.status}</p></#if>
 		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
 		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
