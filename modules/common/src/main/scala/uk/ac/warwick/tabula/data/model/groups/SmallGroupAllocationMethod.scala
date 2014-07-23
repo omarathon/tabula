@@ -9,11 +9,12 @@ sealed abstract class SmallGroupAllocationMethod(val dbValue: String)
 object SmallGroupAllocationMethod {
 	case object Manual extends SmallGroupAllocationMethod("Manual")
 	case object StudentSignUp extends SmallGroupAllocationMethod("StudentSignUp")
+	case object Linked extends SmallGroupAllocationMethod("Linked")
 	case object Random extends SmallGroupAllocationMethod("Random")
 
   val Default = Manual
 	// lame manual collection. Keep in sync with the case objects above
-	val members = Seq(Manual, StudentSignUp, Random)
+	val members = Seq(Manual, StudentSignUp, Linked, Random)
 
 	def fromDatabase(dbValue: String) ={
 		if (dbValue == null) null

@@ -275,65 +275,22 @@
 
 #container .progress-arrows {
 	span {
-		float: left;
-		padding: 5px 10px;
 		background: @tabulaRedDarkTint;
-		line-height: 25px;
-		position: relative;
+
 		&.active {
 			background: @tabulaRedDark;
-			color: white;
 		}
 
 		&.arrow-right {
-			padding-right: 5px;
 			&:after {
-				position: absolute;
-				top: 0;
-				left: 100%;
-				content: " ";
-				height: 0;
-				width: 0;
-				border: 17px solid transparent;
 				border-left-color: @tabulaRedDarkTint;
-				border-right-width: 0px;
-				z-index: 2;
-
 			}
+
 			&.active:after {
 				border-left-color: @tabulaRedDark;
 			}
 		}
-
-		&.arrow-left {
-			margin-left: 10px;
-			padding-left: 25px;
-			&:before {
-				position: absolute;
-				top: 0;
-				left: 0;
-				content: " ";
-				height: 0;
-				width: 0;
-				border: 17px solid transparent;
-				border-left-color: white;
-				border-right-width: 0px;
-			}
-		}
-
-		button {
-			padding: 0px;
-			border: 0px;
-			margin: 0px;
-			text-decoration: underline;
-			color: @link-colour;
-			&:hover {
-				color: @link-hover;
-			}
-		}
 	}
-
-	height: 40px;
 }
 
 details .hideOnClosed {

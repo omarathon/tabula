@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.groups.web
 import java.net.URLEncoder
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.{Module, Department}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroupSet}
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
@@ -33,5 +33,17 @@ object Routes {
 
 		def allocate(set: SmallGroupSet) = context + "/admin/module/%s/groups/%s/allocate" format (encoded(set.module.code), encoded(set.id))
 
+		object reusable {
+			def apply(department: Department) = context + "/admin/department/%s/groups/reusable" format (encoded(department.code))
+			def create(department: Department) = context + "/admin/department/%s/groups/reusable/new" format (encoded(department.code))
+			def createAddStudents(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s/students" format (encoded(set.department.code), encoded(set.id))
+			def createAddGroups(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s/groups" format (encoded(set.department.code), encoded(set.id))
+			def createAllocate(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s/allocate" format (encoded(set.department.code), encoded(set.id))
+			def edit(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/edit/%s" format (encoded(set.department.code), encoded(set.id))
+			def editAddStudents(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/edit/%s/students" format (encoded(set.department.code), encoded(set.id))
+			def editAddGroups(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/edit/%s/groups" format (encoded(set.department.code), encoded(set.id))
+			def editAllocate(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/edit/%s/allocate" format (encoded(set.department.code), encoded(set.id))
+			def delete(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/delete/%s" format (encoded(set.department.code), encoded(set.id))
+		}
 	}
 }
