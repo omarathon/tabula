@@ -7,21 +7,17 @@ import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{AssignmentMembershipInfo, UserLookupService, AssignmentMembershipService}
+import uk.ac.warwick.tabula.services._
 import scala.collection.mutable.ListBuffer
 import uk.ac.warwick.userlookup.User
 
 trait UpdatesStudentMembership {
-
-	this : CurrentAcademicYear with SpecifiesGroupType =>
-
-	var userLookup = Wire.auto[UserLookupService]
-	var membershipService = Wire.auto[AssignmentMembershipService]
+	self: CurrentAcademicYear with SpecifiesGroupType with UserLookupComponent with AssignmentMembershipServiceComponent =>
 
 	// needs a module to determine the possible options from SITS
-	val module : Module
-	val existingGroups: Option[Seq[UpstreamAssessmentGroup]]
-	val existingMembers: Option[UnspecifiedTypeUserGroup]
+	def module: Module
+	def existingGroups: Option[Seq[UpstreamAssessmentGroup]]
+	def existingMembers: Option[UnspecifiedTypeUserGroup]
 
 	/**
 	 * Convert Spring-bound upstream group references to an AssessmentGroup buffer
@@ -119,7 +115,7 @@ trait UpdatesStudentMembership {
 		}
 
 		// now get implicit membership list from upstream
-		val upstreamMembers = existingGroups.map(membershipService.determineMembershipUsers(_, existingMembers)).getOrElse(Seq())
+		val upstreamMembers = existingGroups.map(assignmentMembershipService.determineMembershipUsers(_, existingMembers)).getOrElse(Seq())
 
 		for (user <- usersToAdd.distinct) {
 			if (members.excludes.contains(user)) {
@@ -155,8 +151,8 @@ trait UpdatesStudentMembership {
 	 */
 	lazy val availableUpstreamGroups: Seq[UpstreamGroup] = {
 		for {
-			ua <- membershipService.getAssessmentComponents(module)
-			uag <- membershipService.getUpstreamAssessmentGroups(ua, academicYear)
+			ua <- assignmentMembershipService.getAssessmentComponents(module)
+			uag <- assignmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
 		} yield new UpstreamGroup(ua, uag)
 	}
 
@@ -169,7 +165,7 @@ trait UpdatesStudentMembership {
 	/**
 	 * Returns a sequence of MembershipItems
 	 */
-	def membershipInfo : AssignmentMembershipInfo = membershipService.determineMembership(linkedUpstreamAssessmentGroups, Option(members))
+	def membershipInfo : AssignmentMembershipInfo = assignmentMembershipService.determineMembership(linkedUpstreamAssessmentGroups, Option(members))
 
 }
 
@@ -211,5 +207,5 @@ class UpstreamGroupPropertyEditor extends AbstractPropertyEditor[UpstreamGroup] 
 	override def toString(ug: UpstreamGroup) = ug.id
 }
 trait SpecifiesGroupType{
-	val updateStudentMembershipGroupIsUniversityIds:Boolean
+	val updateStudentMembershipGroupIsUniversityIds: Boolean
 }

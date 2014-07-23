@@ -19,20 +19,20 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
  * Common superclass for creation and modification. Note that any defaults on the vars here are defaults
  * for creation; the Edit command should call .copyFrom(SmallGroup) to copy any existing properties.
  */
-abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSetProperties)
+abstract class OldModifySmallGroupCommand(module: Module)
 	extends PromisingCommand[SmallGroup] with SelfValidating with BindListener {
 
 	var userLookup = Wire[UserLookupService]
 
 	var name: String = _
 
-	var maxGroupSize: Int = if (properties.defaultMaxGroupSizeEnabled) properties.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
+	var maxGroupSize: Int = ??? // TODO FIXME if (properties.defaultMaxGroupSizeEnabled) properties.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
 
 	// Used by parent command
 	var delete: Boolean = false
 
 	// A collection of sub-commands for modifying the events
-	var events: JList[ModifySmallGroupEventCommand] = LazyLists.create { () =>
+	var events: JList[OldModifySmallGroupEventCommand] = LazyLists.create { () =>
 		new CreateSmallGroupEventCommand(this, module)
 	}
 

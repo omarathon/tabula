@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.SmallGroupService
 
-class EditSmallGroupEventCommand(event: SmallGroupEvent) extends ModifySmallGroupEventCommand {
+class EditSmallGroupEventCommand(event: SmallGroupEvent) extends OldModifySmallGroupEventCommand {
 	
 	PermissionCheck(Permissions.SmallGroups.Update, event)
 	

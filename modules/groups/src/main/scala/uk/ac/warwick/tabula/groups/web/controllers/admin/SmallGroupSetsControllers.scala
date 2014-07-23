@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 import org.springframework.validation.BeanPropertyBindingResult
-import uk.ac.warwick.tabula.commands.{UpstreamGroupPropertyEditor, UpstreamGroup, Appliable}
+import uk.ac.warwick.tabula.commands._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
@@ -31,6 +31,7 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 trait SmallGroupSetsController extends GroupsController {
 
 	var smallGroupService = Wire[SmallGroupService]
+	type ModifySmallGroupSetCommand = Appliable[SmallGroupSet] with ModifySmallGroupSetCommandState with UpdatesStudentMembership
 	
 	@ModelAttribute("academicYearChoices") def academicYearChoices =
 		AcademicYear.guessByDate(DateTime.now).yearsSurrounding(2, 2)
@@ -69,13 +70,14 @@ case class TermWeekRange(val weekRange: WeekRange) {
 @Controller
 class CreateSmallGroupSetController extends SmallGroupSetsController {
 	
-	validatesSelf[CreateSmallGroupSetCommand]
+	validatesSelf[SelfValidating]
+	type CreateSmallGroupSetCommand = Appliable[SmallGroupSet] with CreateSmallGroupSetCommandState with ModifiesSmallGroupSetMembership
 	
-	@ModelAttribute("createSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module) = 
-		new CreateSmallGroupSetCommand(module)
+	@ModelAttribute("createSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module): CreateSmallGroupSetCommand =
+		ModifySmallGroupSetCommand.create(module)
 		
 	@RequestMapping
-	def form(cmd: CreateSmallGroupSetCommand) = {
+	def form(@ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand) = {
 		cmd.afterBind()
 
 		Mav("admin/groups/new",
@@ -87,7 +89,7 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 	}
 	
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh"))
-	def submit(@Valid cmd: CreateSmallGroupSetCommand, errors: Errors) = {
+	def submit(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand, errors: Errors) = {
 		cmd.afterBind()
 
 		if (errors.hasErrors) form(cmd)
@@ -110,12 +112,13 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 @Controller
 class EditSmallGroupSetController extends SmallGroupSetsController {
 	
-	validatesSelf[EditSmallGroupSetCommand]
-		
+	validatesSelf[SelfValidating]
+	type EditSmallGroupSetCommand = Appliable[SmallGroupSet] with EditSmallGroupSetCommandState with ModifiesSmallGroupSetMembership
+
 	@ModelAttribute("smallGroupSet") def set(@PathVariable("set") set: SmallGroupSet) = set 
 	
-	@ModelAttribute("editSmallGroupSetCommand") def cmd(@PathVariable("set") set: SmallGroupSet, user:CurrentUser) =
-		new EditSmallGroupSetCommand(set, user.apparentUser)
+	@ModelAttribute("editSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("set") set: SmallGroupSet) =
+		ModifySmallGroupSetCommand.edit(module, set)
 
 	@ModelAttribute("canDelete") def canDelete(@PathVariable("set") set: SmallGroupSet) = {
 		val cmd = new DeleteSmallGroupSetCommand(set.module, set)
@@ -125,7 +128,7 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	}
 	
 	@RequestMapping
-	def form(cmd: EditSmallGroupSetCommand, @PathVariable("set") set: SmallGroupSet,
+	def form(@ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, @PathVariable("set") set: SmallGroupSet,
 		@RequestParam(value="openGroupsDetails", required=false) openGroupsDetails: Boolean
 	) = {
 		cmd.copyGroupsFrom(set)
@@ -142,7 +145,7 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("action=update"))
-	def update(@Valid cmd: EditSmallGroupSetCommand, errors: Errors, @PathVariable("set") set: SmallGroupSet) = {
+	def update(@Valid @ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors, @PathVariable("set") set: SmallGroupSet) = {
 		cmd.afterBind()
 
 		if (!errors.hasErrors) {

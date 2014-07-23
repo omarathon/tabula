@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.TestBase
 
 class ModifySmallGroupCommandTest extends TestBase {
 
-	class TestableModifySmallGroupCommand(module: Module, properties: SmallGroupSetProperties) extends ModifySmallGroupCommand(module,properties){
+	class TestableModifySmallGroupCommand(module: Module, properties: SmallGroupSetProperties) extends OldModifySmallGroupCommand(module,properties){
 		def describe(d: Description) {}
 		protected def applyInternal(): SmallGroup = {null}
 	}

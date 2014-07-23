@@ -20,7 +20,6 @@ trait SmallGroupServiceComponent {
 
 trait AutowiringSmallGroupServiceComponent extends SmallGroupServiceComponent {
 	var smallGroupService = Wire[SmallGroupService]
-	var assignmentMembershipService = Wire[AssignmentMembershipService]
 }
 
 trait SmallGroupService {

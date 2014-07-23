@@ -27,7 +27,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
  * Common superclass for creation and modification. Note that any defaults on the vars here are defaults
  * for creation; the Edit command should call .copyFrom(SmallGroupEvent) to copy any existing properties.
  */
-abstract class ModifySmallGroupEventCommand extends PromisingCommand[SmallGroupEvent] with SelfValidating with BindListener {
+abstract class OldModifySmallGroupEventCommand extends PromisingCommand[SmallGroupEvent] with SelfValidating with BindListener {
 	
 	var weeks: JSet[JInteger] = JSet()
 	

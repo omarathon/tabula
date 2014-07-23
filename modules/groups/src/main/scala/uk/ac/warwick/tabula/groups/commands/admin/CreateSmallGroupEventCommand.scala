@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.SmallGroupService
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.joda.time.LocalTime
 
-class CreateSmallGroupEventCommand(group: Promise[SmallGroup], module: Module) extends ModifySmallGroupEventCommand {
+class CreateSmallGroupEventCommand(group: Promise[SmallGroup], module: Module) extends OldModifySmallGroupEventCommand {
 	import CreateSmallGroupEventCommand._
 	
 	PermissionCheck(Permissions.SmallGroups.Create, module)
