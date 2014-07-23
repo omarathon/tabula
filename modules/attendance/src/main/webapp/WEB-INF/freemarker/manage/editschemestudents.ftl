@@ -27,8 +27,6 @@
 
 	<div class="fix-area">
 
-		<input type="hidden" name="findStudents" value="submit" />
-
 		<#include "_selectstudents.ftl" />
 
 		<div class="fix-footer submit-buttons">
@@ -53,9 +51,10 @@
 
 			<input
 				type="submit"
-				class="btn btn-primary"
+				class="btn btn-primary spinnable spinner-auto"
 				name="persist"
 				value="Save"
+				data-loading-text="Saving&hellip;"
 			/>
 			<a class="btn" href="<@routes.manageHomeForYear scheme.department scheme.academicYear.startYear?c />">Cancel</a>
 		</div>
