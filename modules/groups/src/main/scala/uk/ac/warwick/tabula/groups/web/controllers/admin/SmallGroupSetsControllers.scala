@@ -31,22 +31,17 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 trait SmallGroupSetsController extends GroupsController {
 
 	var smallGroupService = Wire[SmallGroupService]
-	type ModifySmallGroupSetCommand = Appliable[SmallGroupSet] with ModifySmallGroupSetCommandState with UpdatesStudentMembership
+	type ModifySmallGroupSetCommand = Appliable[SmallGroupSet] with ModifySmallGroupSetCommandState
+
+	@ModelAttribute("ManageSmallGroupsMappingParameters") def params = ManageSmallGroupsMappingParameters
 	
 	@ModelAttribute("academicYearChoices") def academicYearChoices =
 		AcademicYear.guessByDate(DateTime.now).yearsSurrounding(2, 2)
 	
 	@ModelAttribute("allFormats") def allFormats = SmallGroupFormat.members
-	
-	@ModelAttribute("allDays") def allDays = DayOfWeek.members
 
 	@ModelAttribute("departmentSmallGroupSets") def departmentSmallGroupSets(@PathVariable("module") module: Module) =
 		smallGroupService.getDepartmentSmallGroupSets(module.department)
-	
-	def allTermWeekRanges(cmd: ModifySmallGroupSetCommand) = {
-		WeekRange.termWeekRanges(Option(cmd.academicYear).getOrElse(AcademicYear.guessByDate(DateTime.now)))
-		.map { TermWeekRange(_) }
-	}
 	
 	override final def binding[A](binder: WebDataBinder, cmd: A) {		
 		binder.registerCustomEditor(classOf[SmallGroupFormat], new AbstractPropertyEditor[SmallGroupFormat] {
@@ -61,36 +56,31 @@ trait SmallGroupSetsController extends GroupsController {
 	
 }
 
-case class TermWeekRange(val weekRange: WeekRange) {
-	def isFull(weeks: JList[WeekRange.Week]) = weekRange.toWeeks.forall(weeks.contains(_))
-	def isPartial(weeks: JList[WeekRange.Week]) = weekRange.toWeeks.exists(weeks.contains(_))
-}
-
 @RequestMapping(Array("/admin/module/{module}/groups/new"))
 @Controller
 class CreateSmallGroupSetController extends SmallGroupSetsController {
 	
 	validatesSelf[SelfValidating]
-	type CreateSmallGroupSetCommand = Appliable[SmallGroupSet] with CreateSmallGroupSetCommandState with ModifiesSmallGroupSetMembership
+	type CreateSmallGroupSetCommand = Appliable[SmallGroupSet] with CreateSmallGroupSetCommandState
 	
 	@ModelAttribute("createSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module): CreateSmallGroupSetCommand =
 		ModifySmallGroupSetCommand.create(module)
 		
 	@RequestMapping
 	def form(@ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand) = {
-		cmd.afterBind()
+//		cmd.afterBind()
 
-		Mav("admin/groups/new",
-			"allTermWeekRanges" -> allTermWeekRanges(cmd),
-			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
-			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
-			"assessmentGroups" -> cmd.assessmentGroups
-		).crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
+		Mav("admin/groups/new")
+//			"allTermWeekRanges" -> allTermWeekRanges(cmd)
+//			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
+//			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
+//			"assessmentGroups" -> cmd.assessmentGroups
+		.crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
 	}
 	
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh"))
 	def submit(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand, errors: Errors) = {
-		cmd.afterBind()
+//		cmd.afterBind()
 
 		if (errors.hasErrors) form(cmd)
 		else {
@@ -113,7 +103,7 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 class EditSmallGroupSetController extends SmallGroupSetsController {
 	
 	validatesSelf[SelfValidating]
-	type EditSmallGroupSetCommand = Appliable[SmallGroupSet] with EditSmallGroupSetCommandState with ModifiesSmallGroupSetMembership
+	type EditSmallGroupSetCommand = Appliable[SmallGroupSet] with EditSmallGroupSetCommandState
 
 	@ModelAttribute("smallGroupSet") def set(@PathVariable("set") set: SmallGroupSet) = set 
 	
@@ -131,22 +121,22 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	def form(@ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, @PathVariable("set") set: SmallGroupSet,
 		@RequestParam(value="openGroupsDetails", required=false) openGroupsDetails: Boolean
 	) = {
-		cmd.copyGroupsFrom(set)
-
-		cmd.afterBind()
+//		cmd.copyGroupsFrom(set)
+//
+//		cmd.afterBind()
 
 		Mav("admin/groups/edit",
-			"allTermWeekRanges" -> allTermWeekRanges(cmd),
-			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
-			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
-			"assessmentGroups" -> cmd.assessmentGroups,
+//			"allTermWeekRanges" -> allTermWeekRanges(cmd),
+//			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
+//			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
+//			"assessmentGroups" -> cmd.assessmentGroups,
 			"openGroupsDetails" -> openGroupsDetails
 		).crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("action=update"))
 	def update(@Valid @ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors, @PathVariable("set") set: SmallGroupSet) = {
-		cmd.afterBind()
+//		cmd.afterBind()
 
 		if (!errors.hasErrors) {
 			cmd.apply()
@@ -157,7 +147,7 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh", "action!=update"))
 	def submit(@Valid cmd: EditSmallGroupSetCommand, errors: Errors, @PathVariable("set") set: SmallGroupSet) = {
-		cmd.afterBind()
+//		cmd.afterBind()
 
 		if (errors.hasErrors) form(cmd, set, false)
 		else {

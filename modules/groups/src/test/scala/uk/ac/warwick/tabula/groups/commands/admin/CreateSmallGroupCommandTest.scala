@@ -11,42 +11,42 @@ import uk.ac.warwick.userlookup.User
 
 class CreateSmallGroupCommandTest extends TestBase with Mockito {
 
-	@Test
-	def UsesDefaultMaxGroupSizeIfEnabled (){
-
-		val module = Fixtures.module("in101", "Set Theory")
-		val set = Fixtures.smallGroupSet("My small groups")
-		set.defaultMaxGroupSize = 9
-		set.defaultMaxGroupSizeEnabled = false
-		val promise = Promises.promise(set)
-		val properties = mock[ModifySmallGroupSetCommand]
-		when(properties.defaultMaxGroupSize).thenReturn(8)
-		when(properties.defaultMaxGroupSizeEnabled).thenReturn(true)
-
-		val command = new CreateSmallGroupCommand(promise, module, properties)
-
-		val newGroup = command.applyInternal()
-		newGroup.maxGroupSize should be(Some(8))
-
-	}
-
-	@Test
-	def DoesntUseDefaultMaxGroupSizeIfNotEnabled (){
-
-		val module = Fixtures.module("in101", "Set Theory")
-		val set = Fixtures.smallGroupSet("My small groups")
-		set.defaultMaxGroupSize = 9
-		set.defaultMaxGroupSizeEnabled = false
-		val promise = Promises.promise(set)
-		val properties = mock[ModifySmallGroupSetCommand]
-		when(properties.defaultMaxGroupSize).thenReturn(8)
-		when(properties.defaultMaxGroupSizeEnabled).thenReturn(false)
-
-		val command = new CreateSmallGroupCommand(promise, module, properties)
-
-		val newGroup = command.applyInternal()
-		newGroup.maxGroupSize should be(Some(SmallGroup.DefaultGroupSize))
-
-	}
+//	@Test
+//	def UsesDefaultMaxGroupSizeIfEnabled (){
+//
+//		val module = Fixtures.module("in101", "Set Theory")
+//		val set = Fixtures.smallGroupSet("My small groups")
+//		set.defaultMaxGroupSize = 9
+//		set.defaultMaxGroupSizeEnabled = false
+//		val promise = Promises.promise(set)
+//		val properties = mock[ModifySmallGroupSetCommand]
+//		when(properties.defaultMaxGroupSize).thenReturn(8)
+//		when(properties.defaultMaxGroupSizeEnabled).thenReturn(true)
+//
+//		val command = new CreateSmallGroupCommand(promise, module, properties)
+//
+//		val newGroup = command.applyInternal()
+//		newGroup.maxGroupSize should be(Some(8))
+//
+//	}
+//
+//	@Test
+//	def DoesntUseDefaultMaxGroupSizeIfNotEnabled (){
+//
+//		val module = Fixtures.module("in101", "Set Theory")
+//		val set = Fixtures.smallGroupSet("My small groups")
+//		set.defaultMaxGroupSize = 9
+//		set.defaultMaxGroupSizeEnabled = false
+//		val promise = Promises.promise(set)
+//		val properties = mock[ModifySmallGroupSetCommand]
+//		when(properties.defaultMaxGroupSize).thenReturn(8)
+//		when(properties.defaultMaxGroupSizeEnabled).thenReturn(false)
+//
+//		val command = new CreateSmallGroupCommand(promise, module, properties)
+//
+//		val newGroup = command.applyInternal()
+//		newGroup.maxGroupSize should be(Some(SmallGroup.DefaultGroupSize))
+//
+//	}
 
 }
