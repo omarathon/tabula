@@ -162,7 +162,7 @@
 			</@filter>
 
 			<div class="btn-group">
-				<button disabled class="btn btn-mini btn-primary search" type="submit" name="${ManageDepartmentSmallGroupsMappingParameters.findStudents}">
+				<button disabled class="btn btn-mini btn-primary search" type="submit" name="${ManageDepartmentSmallGroupsMappingParameters.findStudents}" value="true">
 					<i class="icon-search"></i> Find
 				</button>
 			</div>
@@ -232,6 +232,7 @@
 	</details>
 
 	<input type="hidden" name="returnTo" value="${returnTo}">
+	<@f.hidden path="findCommand.doFind" />
 </div>
 
 </#escape>

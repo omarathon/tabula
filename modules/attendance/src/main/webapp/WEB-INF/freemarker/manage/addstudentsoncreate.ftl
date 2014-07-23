@@ -27,8 +27,6 @@
 
 	<div class="fix-area">
 
-		<input type="hidden" name="findStudents" value="${findCommand.findStudents}" />
-
 		<#include "_selectstudents.ftl" />
 
 		<div class="fix-footer submit-buttons">
@@ -37,7 +35,7 @@
 					<@f.checkbox path="findCommand.linkToSits" />
 					Link to SITS
 					<#assign popoverContent><#noescape>
-						If ticked, this filter will be automatically update this group of students from SITS.
+						If ticked, this filter will automatically update this group of students from SITS.
 						<br />
 						If not, these students will be imported into a static list which will <strong>not</strong> be updated from SITS.
 					</#noescape></#assign>
@@ -53,19 +51,21 @@
 
 			<input
 				type="submit"
-				class="btn btn-success use-tooltip"
+				class="btn btn-success use-tooltip spinnable spinner-auto"
 				name="${ManageSchemeMappingParameters.createAndAddPoints}"
 				value="Add points"
 				title="Select which monitoring points this scheme should use"
 				data-container="body"
+				data-loading-text="Saving&hellip;"
 			/>
 			<input
 				type="submit"
-				class="btn btn-primary use-tooltip"
+				class="btn btn-primary use-tooltip spinnable spinner-auto"
 				name="persist"
 				value="Save"
 				title="Save your blank scheme and add points to it later"
 				data-container="body"
+				data-loading-text="Saving&hellip;"
 			/>
 			<a class="btn" href="<@routes.manageHomeForYear scheme.department scheme.academicYear.startYear?c />">Cancel</a>
 		</div>

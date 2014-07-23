@@ -91,6 +91,12 @@ trait PopulateFindStudentsForDepartmentSmallGroupSetCommand extends PopulateOnFo
 		excludedStudentIds = set.members.knownType.excludedUserIds.asJava
 		filterQueryString = Option(set.memberQuery).getOrElse("")
 		linkToSits = set.members.isEmpty || (set.memberQuery != null && set.memberQuery.nonEmpty)
+
+		// Should only be true when editing
+		if (linkToSits && set.members.knownType.members.nonEmpty) {
+			doFind = true
+		}
+
 		// Default to current students
 		if (!filterQueryString.hasText)
 			allSprStatuses.find(_.code == "C").map(sprStatuses.add)
@@ -137,6 +143,7 @@ trait FindStudentsForDepartmentSmallGroupSetCommandState {
 	var staticStudentIds: JList[String] = LazyLists.create()
 	var filterQueryString: String = ""
 	var linkToSits = true
+	var doFind: Boolean = false
 
 	// Filter properties
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm

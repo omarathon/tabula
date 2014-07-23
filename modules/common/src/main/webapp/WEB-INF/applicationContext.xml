@@ -542,6 +542,12 @@
 		<bean id="SmallGroup-_studentsGroup" parent="userGroupCacheBean"
 			  p:runtimeClass="uk.ac.warwick.tabula.data.model.groups.SmallGroup"
 			  p:path="_studentsGroup" />
+		<bean id="DepartmentSmallGroupSet-_membersGroup" parent="userGroupCacheBean"
+			  p:runtimeClass="uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet"
+			  p:path="_membersGroup" />
+		<bean id="DepartmentSmallGroup-_studentsGroup" parent="userGroupCacheBean"
+			  p:runtimeClass="uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroup"
+			  p:path="_studentsGroup" />
 		<bean id="StaffMember-_assistantsGroup" parent="userGroupCacheBean"
 			  p:runtimeClass="uk.ac.warwick.tabula.data.model.StaffMember"
 			  p:path="_assistantsGroup" />

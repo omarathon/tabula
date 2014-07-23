@@ -127,7 +127,7 @@ class SmallGroupSet
 	// only students manually added or excluded. use allStudents to get all students in the group set
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "membersgroup_id")
-	private var _membersGroup: UserGroup = UserGroup.ofUniversityIds
+	var _membersGroup: UserGroup = UserGroup.ofUniversityIds
 	def members: UnspecifiedTypeUserGroup = {
 		Option(linkedDepartmentSmallGroupSet).map { _.members }.getOrElse {
 			smallGroupService match {

@@ -51,7 +51,7 @@
 
 			<input
 				type="submit"
-				class="btn btn-success use-tooltip"
+				class="btn btn-success use-tooltip spinnable spinner-auto"
 				name="${ManageDepartmentSmallGroupsMappingParameters.createAndAddGroups}"
 				value="Save and add groups"
 				title="Add groups to this set of reusable groups"
@@ -59,7 +59,7 @@
 				/>
 			<input
 				type="submit"
-				class="btn btn-primary use-tooltip"
+				class="btn btn-primary use-tooltip spinnable spinner-auto"
 				name="persist"
 				value="Save and exit"
 				title="Save your groups and add students and groups to it later"

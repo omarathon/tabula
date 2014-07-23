@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion.{Order, Projections}
+import org.hibernate.criterion.{Restrictions, Order, Projections}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -79,6 +79,12 @@ trait AttendanceMonitoringDao {
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], students: Seq[StudentMember]): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]]
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
+	def getNonActiveCheckpoints(
+		student: StudentMember,
+		departmentOption: Option[Department],
+		academicYear: AcademicYear,
+		activeCheckpoints: Seq[AttendanceMonitoringCheckpoint]
+	): Seq[AttendanceMonitoringCheckpoint]
 	def removeCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit
 	def saveOrUpdateCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
@@ -329,6 +335,29 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 			.add(is("point", point))
 			.project[Number](Projections.rowCount())
 			.uniqueResult.get.intValue()
+
+	def getNonActiveCheckpoints(
+		student: StudentMember,
+		departmentOption: Option[Department],
+		academicYear: AcademicYear,
+		activeCheckpoints: Seq[AttendanceMonitoringCheckpoint]
+	): Seq[AttendanceMonitoringCheckpoint] = {
+		val c = session.newCriteria[AttendanceMonitoringCheckpoint]
+			.createAlias("point", "point")
+			.createAlias("point.scheme", "scheme")
+			.add(is("student", student))
+			.add(is("scheme.academicYear", academicYear))
+		if (activeCheckpoints.nonEmpty)
+			c.add(Restrictions.not(safeIn("id", activeCheckpoints.map(_.id))))
+		departmentOption match {
+			case Some(department: Department) => c.add(is("scheme.department", department))
+			case _ =>
+		}
+		c.seq.map{c =>
+			c.activePoint = false
+			c
+		}
+	}
 
 	def removeCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit =
 		checkpoints.foreach(session.delete)

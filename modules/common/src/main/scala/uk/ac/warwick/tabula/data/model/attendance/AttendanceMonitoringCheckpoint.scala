@@ -45,4 +45,7 @@ class AttendanceMonitoringCheckpoint extends GeneratedId {
 
 	var autoCreated: Boolean = false
 
+	@transient
+	var activePoint = true
+
 }
