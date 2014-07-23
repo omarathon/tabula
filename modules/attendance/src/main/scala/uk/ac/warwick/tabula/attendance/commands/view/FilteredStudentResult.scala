@@ -39,13 +39,18 @@ trait BuildsFilteredStudentsAttendanceResult extends TaskBenchmarking with Group
 			val checkpointMap = benchmarkTask("getCheckpoints") {
 				attendanceMonitoringService.getCheckpoints(points, student)
 			}
+			val nonActiveCheckpoints = benchmarkTask("nonActiveCheckpoints") {
+				attendanceMonitoringService.getNonActiveCheckpoints(student, departmentOption, academicYear, checkpointMap.values.toSeq)
+			}
+			val allPoints = points ++ nonActiveCheckpoints.map{_.point}
+			val allCheckpointMap = checkpointMap ++ nonActiveCheckpoints.map(c => c.point -> c)
 			val groupedPoints = benchmarkTask("groupedPoints") {
-				groupByTerm(points, groupSimilar = false) ++ groupByMonth(points, groupSimilar = false)
+				groupByTerm(allPoints, groupSimilar = false) ++ groupByMonth(allPoints, groupSimilar = false)
 			}
 			val groupedPointCheckpointPairs = benchmarkTask("groupedPointCheckpointPairs") {
 				groupedPoints.map { case (period, thesePoints) =>
 					period -> thesePoints.map { groupedPoint =>
-						groupedPoint.templatePoint -> checkpointMap.getOrElse(groupedPoint.templatePoint, null)
+						groupedPoint.templatePoint -> allCheckpointMap.getOrElse(groupedPoint.templatePoint, null)
 					}
 				}
 			}

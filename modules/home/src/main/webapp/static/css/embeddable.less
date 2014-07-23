@@ -1909,6 +1909,11 @@ input.flexi-picker {
 .icon-remove.unauthorised { color: @errorText; }
 .icon-remove-circle.authorised, .icon-ok-circle.authorised { color: @infoText; }
 .icon-warning-sign.late { color: @warningText; }
+.icon-ok.attended, .icon-remove.unauthorised, .icon-remove-circle.authorised, .icon-ok-circle.authorised {
+	&.non-active {
+		opacity: 0.3;
+	}
+}
 
 th.nowrap, td.nowrap { white-space: nowrap; }
 

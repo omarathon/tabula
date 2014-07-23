@@ -35,7 +35,7 @@
 					<@f.checkbox path="findCommand.linkToSits" />
 					Link to SITS
 					<#assign popoverContent><#noescape>
-						If ticked, this filter will be automatically update this group of students from SITS.
+						If ticked, this filter will automatically update this group of students from SITS.
 						<br />
 						If not, these students will be imported into a static list which will <strong>not</strong> be updated from SITS.
 					</#noescape></#assign>
