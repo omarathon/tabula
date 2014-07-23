@@ -66,6 +66,22 @@
 				  </a>
 				</label>
 			</#if>
+			<#if features.smallGroupCrossModules>
+				<label class="radio">
+					<@f.radiobutton path="allocationMethod" value="Linked" selector=".linked-options" />
+					Linked
+					<a class="use-popover" data-html="true"
+					   data-content="Link these groups to a reusable set of small groups">
+						<i class="icon-question-sign"></i>
+					</a>
+					to
+					<span class="linked-options">
+						<@f.select path="linkedDepartmentSmallGroupSet" id="academicYear">
+							<@f.options items=departmentSmallGroupSets itemLabel="name" itemValue="id" />
+						</@f.select>
+					</span>
+				</label>
+			</#if>
 			<#if features.smallGroupTeachingRandomAllocation>
 				<label class="radio">
 					<@f.radiobutton path="allocationMethod" value="Random" />

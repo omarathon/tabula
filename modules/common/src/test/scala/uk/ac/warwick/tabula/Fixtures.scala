@@ -2,8 +2,7 @@ package uk.ac.warwick.tabula
 
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet, SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, MonitoringCheckpoint, AttendanceState, MonitoringPoint}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.MonitoringPointService
@@ -89,6 +88,20 @@ object Fixtures extends Mockito {
 
 	def smallGroup(name:String) = {
 		val s = new SmallGroup
+		s.smallGroupService = None
+		s.name = name
+		s
+	}
+
+	def departmentSmallGroupSet(name:String) = {
+		val s = new DepartmentSmallGroupSet
+		s.smallGroupService = None
+		s.name = name
+		s
+	}
+
+	def departmentSmallGroup(name:String) = {
+		val s = new DepartmentSmallGroup
 		s.smallGroupService = None
 		s.name = name
 		s

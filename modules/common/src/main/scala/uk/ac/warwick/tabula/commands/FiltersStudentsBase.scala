@@ -63,7 +63,7 @@ trait DeserializesFilter {
 	def deserializeFilter(filterString: String): Unit
 }
 
-trait DeserializesFilterImpl extends Logging with FiltersStudentsBase with CourseAndRouteServiceComponent with ModeOfAttendanceDaoComponent
+trait DeserializesFilterImpl extends DeserializesFilter with Logging with FiltersStudentsBase with CourseAndRouteServiceComponent with ModeOfAttendanceDaoComponent
 	with SitsStatusDaoComponent with ModuleAndDepartmentServiceComponent {
 
 	def deserializeFilter(filterString: String): Unit = {

@@ -59,8 +59,10 @@ class SmallGroup
 		this.groupSet = _set
 	}
 
-	@NotNull
-	var name: String = _
+	@Column(name="name")
+	private var _name: String = _
+	def name = Option(linkedDepartmentSmallGroup).map { _.name }.getOrElse(_name)
+	def name_=(name: String) { _name = name }
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "set_id", insertable = false, updatable = false)
@@ -70,6 +72,11 @@ class SmallGroup
 	@JoinColumn(name = "group_id")
 	@BatchSize(size=200)
 	var events: JList[SmallGroupEvent] = JArrayList()
+
+	// A linked departmental small group; if this is linked, allocations aren't kept here.
+	@ManyToOne(fetch = FetchType.LAZY, optional = true)
+	@JoinColumn(name = "linked_dept_group_id")
+	var linkedDepartmentSmallGroup: DepartmentSmallGroup = _
 	
 	def permissionsParents = Option(groupSet).toStream
 	override def humanReadableId = name
@@ -83,11 +90,13 @@ class SmallGroup
 	@JoinColumn(name = "studentsgroup_id")
 	private var _studentsGroup: UserGroup = UserGroup.ofUniversityIds
   def students: UnspecifiedTypeUserGroup = {
-		smallGroupService match {
-			case Some(smallGroupService) => {
-				new UserGroupCacheManager(_studentsGroup, smallGroupService.studentGroupHelper)
+		Option(linkedDepartmentSmallGroup).map { _.students }.getOrElse {
+			smallGroupService match {
+				case Some(smallGroupService) => {
+					new UserGroupCacheManager(_studentsGroup, smallGroupService.studentGroupHelper)
+				}
+				case _ => _studentsGroup
 			}
-			case _ => _studentsGroup
 		}
 	}
 	def students_=(group: UserGroup) { _studentsGroup = group }
@@ -114,15 +123,16 @@ class SmallGroup
     }
   }
 
-  def duplicateTo( groupSet:SmallGroupSet):SmallGroup = {
+  def duplicateTo(groupSet: SmallGroupSet): SmallGroup = {
     val newGroup = new SmallGroup()
     newGroup.id = id
     newGroup.events = events.asScala.map(_.duplicateTo(newGroup)).asJava
     newGroup.groupSet = groupSet
     newGroup.name = name
+		newGroup.linkedDepartmentSmallGroup = linkedDepartmentSmallGroup
     newGroup.permissionsService = permissionsService
-    newGroup._studentsGroup = _studentsGroup.duplicate()
-    newGroup.settings = Map() ++ settings
+		if (_studentsGroup != null) newGroup._studentsGroup = _studentsGroup.duplicate()
+		newGroup.settings = Map() ++ (if (settings != null) settings else Map())
     newGroup
   }
 

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroupSet}
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.services.AssignmentMembershipService

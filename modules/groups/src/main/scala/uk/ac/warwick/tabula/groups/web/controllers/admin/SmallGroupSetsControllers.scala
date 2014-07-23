@@ -6,6 +6,8 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.{RequestParam, InitBinder, ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.SmallGroupService
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat
@@ -27,6 +29,8 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewModule, ViewSe
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 
 trait SmallGroupSetsController extends GroupsController {
+
+	var smallGroupService = Wire[SmallGroupService]
 	
 	@ModelAttribute("academicYearChoices") def academicYearChoices =
 		AcademicYear.guessByDate(DateTime.now).yearsSurrounding(2, 2)
@@ -34,8 +38,9 @@ trait SmallGroupSetsController extends GroupsController {
 	@ModelAttribute("allFormats") def allFormats = SmallGroupFormat.members
 	
 	@ModelAttribute("allDays") def allDays = DayOfWeek.members
-		
-	@ModelAttribute("module") def module(@PathVariable("module") module: Module) = module 
+
+	@ModelAttribute("departmentSmallGroupSets") def departmentSmallGroupSets(@PathVariable("module") module: Module) =
+		smallGroupService.getDepartmentSmallGroupSets(module.department)
 	
 	def allTermWeekRanges(cmd: ModifySmallGroupSetCommand) = {
 		WeekRange.termWeekRanges(Option(cmd.academicYear).getOrElse(AcademicYear.guessByDate(DateTime.now)))

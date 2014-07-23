@@ -25,6 +25,7 @@ class DeptDetailsController extends BaseSysadminController {
 
 	@RequestMapping(Array("/{dept}/"))
 	def department(@PathVariable("dept") dept: Department) = {
+		mandatory(dept)
 		Mav("sysadmin/departments/single",
 			"department" -> dept)
 			.crumbs(Breadcrumbs.Current(s"Sysadmin ${dept.name} overview"))
@@ -37,10 +38,10 @@ trait DepartmentPermissionControllerMethods extends BaseSysadminController {
 	type RevokeRoleCommand = Appliable[GrantedRole[Department]] with RevokeRoleCommandState[Department]
 
 	@ModelAttribute("addCommand") def addCommandModel(@PathVariable("department") department: Department): GrantRoleCommand =
-		GrantRoleCommand(department, DepartmentalAdministratorRoleDefinition)
+		GrantRoleCommand(mandatory(department), DepartmentalAdministratorRoleDefinition)
 
 	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable("department") department: Department) =
-		RevokeRoleCommand(department, DepartmentalAdministratorRoleDefinition)
+		RevokeRoleCommand(mandatory(department), DepartmentalAdministratorRoleDefinition)
 
 	def form(@PathVariable("department") department: Department): Mav = {
 		Mav("sysadmin/departments/permissions", "department" -> department)
@@ -62,7 +63,7 @@ trait DepartmentPermissionControllerMethods extends BaseSysadminController {
 class DepartmentPermissionController extends BaseSysadminController with DepartmentPermissionControllerMethods {
 	@RequestMapping
 	def permissionsForm(@PathVariable("department") department: Department): Mav =
-		form(department)
+		form(mandatory(department))
 }
 
 @Controller @RequestMapping(Array("/sysadmin/departments/{department}/permissions"))
