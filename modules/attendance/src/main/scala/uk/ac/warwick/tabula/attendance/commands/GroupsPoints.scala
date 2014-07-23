@@ -5,13 +5,15 @@ import uk.ac.warwick.tabula.services.TermServiceComponent
 import java.text.DateFormatSymbols
 import org.joda.time.{DateTimeConstants, DateMidnight}
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
+
 import uk.ac.warwick.tabula.AcademicYear
 
 case class GroupedPoint(
 	templatePoint: AttendanceMonitoringPoint,
 	schemes: Seq[AttendanceMonitoringScheme],
-	points: Seq[AttendanceMonitoringPoint]
-)
+	points: Seq[AttendanceMonitoringPoint]) {
+		def hasRecordedCheckpoints: Boolean = points.exists { _.hasRecordedCheckpoints }
+}
 
 case class GroupedOldPoint(
 	templatePoint: MonitoringPoint,
