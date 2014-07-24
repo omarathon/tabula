@@ -209,7 +209,7 @@
 			</@filter>
 
 			<div class="btn-group">
-				<button class="btn btn-mini btn-primary search" type="submit" name="${ManageSchemeMappingParameters.findStudents}">
+				<button class="btn btn-mini btn-primary search" type="submit" name="${ManageSchemeMappingParameters.findStudents}" value="true">
 					<i class="icon-search"></i> Find
 				</button>
 			</div>
@@ -289,6 +289,7 @@
 	</details>
 
 	<input type="hidden" name="returnTo" value="${returnTo}">
+	<@f.hidden path="findCommand.doFind" />
 </div>
 
 </#escape>

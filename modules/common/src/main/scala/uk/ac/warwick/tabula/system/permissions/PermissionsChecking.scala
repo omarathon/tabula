@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.system.permissions
 import org.springframework.util.Assert
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{SubmitPermissionDeniedException, CurrentUser, PermissionDeniedException, ItemNotFoundException}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroupSet}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.permissions.Permission
@@ -68,8 +68,14 @@ trait PermissionsCheckingMethods extends Logging {
 		}
 	
 	def mustBeLinked(set: SmallGroupSet, module: Module) =
-		if (mandatory(set).module.id != mandatory(module).id) {
+		if (mandatory(mandatory(set).module).id != mandatory(module).id) {
 			logger.info("Not displaying small group set as it doesn't belong to specified module")
+			throw new ItemNotFoundException(set)
+		}
+
+	def mustBeLinked(set: DepartmentSmallGroupSet, department: Department) =
+		if (mandatory(mandatory(set).department).id != mandatory(department).id) {
+			logger.info("Not displaying department small group set as it doesn't belong to specified department")
 			throw new ItemNotFoundException(set)
 		}
 

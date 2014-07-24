@@ -49,3 +49,15 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro studentslist group><@_u page="/group/${group.id}/studentspopup" /></#macro>
 <#macro unallocatedstudentslist groupset><@_u page="/${groupset.id}/unallocatedstudentspopup" /></#macro>
+
+<#macro crossmodulegroups department><@_u page="/admin/department/${department.code}/groups/reusable"  /></#macro>
+<#macro createcrossmodulegroups department><@_u page="/admin/department/${department.code}/groups/reusable/new"  /></#macro>
+<#macro createcrossmodulegroupsstudents set><@_u page="/admin/department/${set.department.code}/groups/reusable/new/${set.id}/students"  /></#macro>
+<#macro createcrossmodulegroupsgroups set><@_u page="/admin/department/${set.department.code}/groups/reusable/new/${set.id}/groups"  /></#macro>
+<#macro createcrossmodulegroupsallocate set><@_u page="/admin/department/${set.department.code}/groups/reusable/new/${set.id}/allocate"  /></#macro>
+<#macro editcrossmodulegroups set><@_u page="/admin/department/${set.department.code}/groups/reusable/edit/${set.id}"  /></#macro>
+<#macro editcrossmodulegroupsstudents set><@_u page="/admin/department/${set.department.code}/groups/reusable/edit/${set.id}/students"  /></#macro>
+<#macro editcrossmodulegroupsgroups set><@_u page="/admin/department/${set.department.code}/groups/reusable/edit/${set.id}/groups"  /></#macro>
+<#macro editcrossmodulegroupsallocate set><@_u page="/admin/department/${set.department.code}/groups/reusable/edit/${set.id}/allocate"  /></#macro>
+<#macro deletecrossmodulegroups set><@_u page="/admin/department/${set.department.code}/groups/reusable/delete/${set.id}"  /></#macro>
+<#macro crossmodulegroupstemplate set><@_u page="/admin/department/${set.department.code}/groups/reusable/${set.id}/template"  /></#macro>

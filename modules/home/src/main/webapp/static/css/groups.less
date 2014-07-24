@@ -45,7 +45,7 @@ input.deleted {
 
 // arrange students into groups
 
-#allocateStudentsToGroupsCommand {
+#allocateStudentsToGroupsCommand, .allocateStudentsToGroupsCommand {
 
 	.filter {
 		select { width: 100%; }
@@ -150,6 +150,26 @@ input.deleted {
 		vertical-align: middle;
 		.missed {
 			color: @errorText;
+		}
+	}
+}
+
+#container .progress-arrows {
+	span {
+		background: @tabulaGreenLightTint;
+
+		&.active {
+			background: @tabulaGreenDark;
+		}
+
+		&.arrow-right {
+			&:after {
+				border-left-color: @tabulaGreenLightTint;
+			}
+
+			&.active:after {
+				border-left-color: @tabulaGreenDark;
+			}
 		}
 	}
 }

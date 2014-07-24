@@ -91,6 +91,19 @@ If you are doing any work on this, it would be good to do the above first.
 					<li<#if !hasGroupAttendance> class="disabled"</#if>>
 						<a href="<@routes.departmentAttendance department />"><i class="icon-group icon-fixed-width"></i> Attendance</a>
 					</li>
+
+					<#if features.smallGroupCrossModules>
+						<li>
+							<#assign cross_module_url><@routes.crossmodulegroups department /></#assign>
+							<@fmt.permission_button
+							permission='SmallGroups.Create'
+							scope=department
+							action_descr='create reusable small group allocations'
+							href=cross_module_url>
+								<i class="icon-group icon-fixed-width"></i> Reusable small groups
+							</@fmt.permission_button>
+						</li>
+					</#if>
 				</ul>
 			</div>
 

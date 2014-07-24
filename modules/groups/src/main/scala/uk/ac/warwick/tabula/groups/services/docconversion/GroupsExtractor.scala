@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.groups.services.docconversion
 
+import uk.ac.warwick.spring.Wire
+
 import scala.collection.JavaConversions._
 import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader}
@@ -24,8 +26,12 @@ object GroupsExtractor {
 	val AcceptedFileExtensions = Seq(".xlsx")
 }
 
+trait GroupsExtractor {
+	def readXSSFExcelFile(file: InputStream): JList[AllocateStudentItem]
+}
+
 @Service
-class GroupsExtractor {
+class GroupsExtractorImpl extends GroupsExtractor {
 
 	/**
 	 * Method for reading in a xlsx spreadsheet and converting it into a list of AllocateStudentItem
@@ -46,6 +52,13 @@ class GroupsExtractor {
 		}
 		allocateStudentItems
 	}
+}
+
+trait GroupsExtractorComponent {
+	def groupsExtractor: GroupsExtractor
+}
+trait AutowiringGroupsExtractorComponent extends GroupsExtractorComponent {
+	val groupsExtractor = Wire[GroupsExtractor]
 }
 
 

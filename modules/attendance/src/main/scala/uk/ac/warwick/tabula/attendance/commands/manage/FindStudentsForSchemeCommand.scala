@@ -46,9 +46,11 @@ class FindStudentsForSchemeCommandInternal(val scheme: AttendanceMonitoringSchem
 		// Remove any duplicate routes caused by search for routes already displayed
 		routes = routes.asScala.distinct.asJava
 
-		if (serializeFilter.isEmpty || findStudents.isEmpty ) {
+		if (!doFind && (serializeFilter.isEmpty || findStudents.isEmpty)) {
 			FindStudentsForSchemeCommandResult(staticStudentIds, Seq())
 		} else {
+			doFind = true
+
 			staticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments") {
 				profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
 					department = department,
@@ -90,6 +92,10 @@ trait PopulateFindStudentsForSchemeCommand extends PopulateOnForm {
 		excludedStudentIds = scheme.members.excludedUserIds.asJava
 		filterQueryString = scheme.memberQuery
 		linkToSits = scheme.memberQuery != null && scheme.memberQuery.nonEmpty || scheme.members.members.isEmpty
+		// Should only be true when editing
+		if (linkToSits && scheme.members.members.nonEmpty) {
+			doFind = true
+		}
 		// Default to current students
 		if (filterQueryString == null || filterQueryString.size == 0)
 			allSprStatuses.find(_.code == "C").map(sprStatuses.add)
@@ -139,6 +145,7 @@ trait FindStudentsForSchemeCommandState extends FiltersStudents with Deserialize
 	var filterQueryString: String = ""
 	var linkToSits: Boolean = true
 	var findStudents: String = ""
+	var doFind: Boolean = false
 
 	// Filter properties
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
