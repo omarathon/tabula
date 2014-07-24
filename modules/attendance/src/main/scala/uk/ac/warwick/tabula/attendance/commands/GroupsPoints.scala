@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.services.TermServiceComponent
 import java.text.DateFormatSymbols
 import org.joda.time.{DateTimeConstants, DateMidnight}
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-
 import uk.ac.warwick.tabula.AcademicYear
 
 case class GroupedPoint(
