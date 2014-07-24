@@ -72,9 +72,6 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 	@Column(name = "updated_date")
 	var updatedDate: DateTime = _
 
-	def hasRecordedCheckpoints =
-		attendanceMonitoringService.countCheckpointsForPoint(this) > 0
-
 	def cloneTo(scheme: AttendanceMonitoringScheme): AttendanceMonitoringPoint = {
 		val newPoint = new AttendanceMonitoringPoint
 		newPoint.scheme = scheme
@@ -116,9 +113,6 @@ trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehavio
 
 	@transient
 	var assignmentService = Wire[AssignmentService]
-
-	@transient
-	var attendanceMonitoringService = Wire[AttendanceMonitoringService]
 
 	// Setting for MonitoringPointType.Meeting
 	def meetingRelationships = getStringSeqSetting(Settings.MeetingRelationships, Seq())

@@ -76,6 +76,7 @@ trait AttendanceMonitoringService {
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], students: Seq[StudentMember]): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]]
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
+	def hasRecordedCheckpoints(points: Seq[AttendanceMonitoringPoint]): Boolean
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
 	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint]
@@ -247,7 +248,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int =
 		attendanceMonitoringDao.countCheckpointsForPoint(point)
-	
+
+	def hasRecordedCheckpoints(points: Seq[AttendanceMonitoringPoint]): Boolean =
+		attendanceMonitoringDao.hasRecordedCheckpoints(points)
 
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote] = {
 		attendanceMonitoringDao.getAttendanceNote(student, point)

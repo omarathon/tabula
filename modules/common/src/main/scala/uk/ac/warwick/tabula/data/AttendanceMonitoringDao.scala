@@ -79,6 +79,7 @@ trait AttendanceMonitoringDao {
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], students: Seq[StudentMember]): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]]
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
+	def hasRecordedCheckpoints(points: Seq[AttendanceMonitoringPoint]): Boolean
 	def removeCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit
 	def saveOrUpdateCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
@@ -329,6 +330,17 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 			.add(is("point", point))
 			.project[Number](Projections.rowCount())
 			.uniqueResult.get.intValue()
+
+	def hasRecordedCheckpoints(points: Seq[AttendanceMonitoringPoint]): Boolean = {
+		if (points.isEmpty)
+			false
+		else {
+			session.newCriteria[AttendanceMonitoringCheckpoint]
+				.add(safeIn("point", points))
+				.project[Number](Projections.rowCount())
+				.uniqueResult.get.intValue() > 0
+		}
+	}
 
 	def removeCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit =
 		checkpoints.foreach(session.delete)
