@@ -30,8 +30,9 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 
 trait SmallGroupSetsController extends GroupsController {
 
+	validatesSelf[SelfValidating]
+
 	var smallGroupService = Wire[SmallGroupService]
-	type ModifySmallGroupSetCommand = Appliable[SmallGroupSet] with ModifySmallGroupSetCommandState
 
 	@ModelAttribute("ManageSmallGroupsMappingParameters") def params = ManageSmallGroupsMappingParameters
 	
@@ -60,105 +61,119 @@ trait SmallGroupSetsController extends GroupsController {
 @Controller
 class CreateSmallGroupSetController extends SmallGroupSetsController {
 	
-	validatesSelf[SelfValidating]
 	type CreateSmallGroupSetCommand = Appliable[SmallGroupSet] with CreateSmallGroupSetCommandState
 	
 	@ModelAttribute("createSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module): CreateSmallGroupSetCommand =
 		ModifySmallGroupSetCommand.create(module)
-		
+
 	@RequestMapping
 	def form(@ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand) = {
-//		cmd.afterBind()
-
-		Mav("admin/groups/new")
-//			"allTermWeekRanges" -> allTermWeekRanges(cmd)
-//			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
-//			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
-//			"assessmentGroups" -> cmd.assessmentGroups
-		.crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
+		Mav("admin/groups/new").crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
 	}
-	
-	@RequestMapping(method=Array(POST), params=Array("action!=refresh"))
+
+	@RequestMapping(method = Array(POST))
 	def submit(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand, errors: Errors) = {
-//		cmd.afterBind()
-
 		if (errors.hasErrors) form(cmd)
-		else {
-			val set = cmd.apply()
-			
-			// Redirect straight to allocation only for manual allocation groups 
-			if (set.allocationMethod == SmallGroupAllocationMethod.Manual) Redirect(Routes.admin.allocate(set))
-			else Redirect(Routes.admin.module(cmd.module))
-		}
-	}
-
-	@InitBinder
-	def upstreamGroupBinder(binder: WebDataBinder) {
-		binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
-	}
-}
-
-@RequestMapping(Array("/admin/module/{module}/groups/{set}/edit"))
-@Controller
-class EditSmallGroupSetController extends SmallGroupSetsController {
-	
-	validatesSelf[SelfValidating]
-	type EditSmallGroupSetCommand = Appliable[SmallGroupSet] with EditSmallGroupSetCommandState
-
-	@ModelAttribute("smallGroupSet") def set(@PathVariable("set") set: SmallGroupSet) = set 
-	
-	@ModelAttribute("editSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("set") set: SmallGroupSet) =
-		ModifySmallGroupSetCommand.edit(module, set)
-
-	@ModelAttribute("canDelete") def canDelete(@PathVariable("set") set: SmallGroupSet) = {
-		val cmd = new DeleteSmallGroupSetCommand(set.module, set)
-		val errors = new BeanPropertyBindingResult(cmd, "cmd")
-		cmd.validateCanDelete(errors)
-		!errors.hasErrors
-	}
-	
-	@RequestMapping
-	def form(@ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, @PathVariable("set") set: SmallGroupSet,
-		@RequestParam(value="openGroupsDetails", required=false) openGroupsDetails: Boolean
-	) = {
-//		cmd.copyGroupsFrom(set)
-//
-//		cmd.afterBind()
-
-		Mav("admin/groups/edit",
-//			"allTermWeekRanges" -> allTermWeekRanges(cmd),
-//			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
-//			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
-//			"assessmentGroups" -> cmd.assessmentGroups,
-			"openGroupsDetails" -> openGroupsDetails
-		).crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
-	}
-
-	@RequestMapping(method = Array(POST), params = Array("action=update"))
-	def update(@Valid @ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors, @PathVariable("set") set: SmallGroupSet) = {
-//		cmd.afterBind()
-
-		if (!errors.hasErrors) {
-			cmd.apply()
-		}
-
-		form(cmd, set, false)
-	}
-
-	@RequestMapping(method=Array(POST), params=Array("action!=refresh", "action!=update"))
-	def submit(@Valid cmd: EditSmallGroupSetCommand, errors: Errors, @PathVariable("set") set: SmallGroupSet) = {
-//		cmd.afterBind()
-
-		if (errors.hasErrors) form(cmd, set, false)
 		else {
 			cmd.apply()
 			Redirect(Routes.admin.module(cmd.module))
 		}
 	}
 
-	@InitBinder
-	def upstreamGroupBinder(binder: WebDataBinder) {
-		binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddStudents))
+	def submitAndAddStudents(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand, errors: Errors) = {
+		if (errors.hasErrors) form(cmd)
+		else {
+			val set = cmd.apply()
+			RedirectForce(Routes.admin.createAddStudents(set))
+		}
+	}
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddGroups))
+	def submitAndAddGroups(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand, errors: Errors) = {
+		if (errors.hasErrors) form(cmd)
+		else {
+			val set = cmd.apply()
+			RedirectForce(Routes.admin.createAddGroups(set))
+		}
+	}
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddEvents))
+	def submitAndAddEvents(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand, errors: Errors) = {
+		if (errors.hasErrors) form(cmd)
+		else {
+			val set = cmd.apply()
+			RedirectForce(Routes.admin.createAddEvents(set))
+		}
+	}
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAllocate))
+	def submitAndAllocate(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand, errors: Errors) = {
+		if (errors.hasErrors) form(cmd)
+		else {
+			val set = cmd.apply()
+			RedirectForce(Routes.admin.createAllocate(set))
+		}
+	}
+}
+
+@RequestMapping(Array("/admin/module/{module}/groups/{smallGroupSet}/edit", "/admin/module/{module}/groups/edit/{smallGroupSet}"))
+@Controller
+class EditSmallGroupSetController extends SmallGroupSetsController {
+	
+	type EditSmallGroupSetCommand = Appliable[SmallGroupSet] with EditSmallGroupSetCommandState
+	
+	@ModelAttribute("editSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
+		ModifySmallGroupSetCommand.edit(module, set)
+
+	@RequestMapping
+	def form(@ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand) = {
+		Mav("admin/groups/edit").crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@Valid @ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors) = {
+		if (errors.hasErrors) form(cmd)
+		else {
+			cmd.apply()
+			Redirect(Routes.admin.module(cmd.module))
+		}
+	}
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddStudents))
+	def submitAndAddStudents(@Valid @ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors) = {
+		if (errors.hasErrors) form(cmd)
+		else {
+			val set = cmd.apply()
+			RedirectForce(Routes.admin.editAddStudents(set))
+		}
+	}
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddGroups))
+	def submitAndAddGroups(@Valid @ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors) = {
+		if (errors.hasErrors) form(cmd)
+		else {
+			val set = cmd.apply()
+			RedirectForce(Routes.admin.editAddGroups(set))
+		}
+	}
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddEvents))
+	def submitAndAddEvents(@Valid @ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors) = {
+		if (errors.hasErrors) form(cmd)
+		else {
+			val set = cmd.apply()
+			RedirectForce(Routes.admin.editAddEvents(set))
+		}
+	}
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAllocate))
+	def submitAndAllocate(@Valid @ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors) = {
+		if (errors.hasErrors) form(cmd)
+		else {
+			val set = cmd.apply()
+			RedirectForce(Routes.admin.editAllocate(set))
+		}
 	}
 }
 
@@ -188,159 +203,15 @@ class DeleteSmallGroupSetController extends GroupsController {
 	
 }
 
-@RequestMapping(Array("/admin/module/{module}/groups/{set}/archive"))
-@Controller
-class ArchiveSmallGroupSetController extends GroupsController {
-		
-	@ModelAttribute("smallGroupSet") def set(@PathVariable("set") set: SmallGroupSet) = set 
-	
-	@ModelAttribute("archiveSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("set") set: SmallGroupSet) = 
-		new ArchiveSmallGroupSetCommand(module, set)
-
-	@RequestMapping
-	def form(cmd: ArchiveSmallGroupSetCommand) =
-		Mav("admin/groups/archive").noLayoutIf(ajax)
-
-	@RequestMapping(method = Array(POST))
-	def submit(cmd: ArchiveSmallGroupSetCommand) = {
-		cmd.apply()
-		Mav("ajax_success").noLayoutIf(ajax) // should be AJAX, otherwise you'll just get a terse success response.
-	}
-	
-}
-
-@RequestMapping(Array("/admin/module/{module}/groups/{set}/release"))
-@Controller
-class ReleaseSmallGroupSetController extends GroupsController {
-
-	@ModelAttribute("releaseGroupSetCommand") def getReleaseGroupSetCommand(@PathVariable("set") set: SmallGroupSet): ReleaseSmallGroupSetCommand = {
-		new ReleaseGroupSetCommandImpl(Seq(set), user.apparentUser)
-	}
-
-	@RequestMapping
-	def form(@ModelAttribute("releaseGroupSetCommand") cmd: ReleaseSmallGroupSetCommand) =
-		Mav("admin/groups/release").noLayoutIf(ajax)
 
 
-	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("releaseGroupSetCommand") cmd: ReleaseSmallGroupSetCommand) = {
-		val updatedSet = cmd.apply() match {
-			case releasedSet :: Nil => releasedSet.set
-			case _ => throw new IllegalStateException("Received multiple updated sets from a single update operation!")
-		}
-		val groupSetItem = new ViewSet(updatedSet, updatedSet.groups.asScala.sorted, GroupsViewModel.Tutor)
-		val moduleItem = new ViewModule(updatedSet.module, Seq(groupSetItem), true)
-		Mav("admin/groups/single_groupset",
-			"groupsetItem" -> groupSetItem,
-			"moduleItem" -> moduleItem,
-			"notificationSentMessage" -> cmd.describeOutcome).noLayoutIf(ajax) // should be AJAX, otherwise you'll just get a terse success response.
-	}
-}
-
-@RequestMapping(Array("/admin/module/{module}/groups/{set}/selfsignup/{action}"))
-@Controller
-class OpenSmallGroupSetController extends GroupsController {
-	
-	@ModelAttribute("openGroupSetCommand")
-	def getOpenGroupSetCommand(
-		@PathVariable("module") module: Module,
-		@PathVariable("set") set: SmallGroupSet,
-		@PathVariable action: SmallGroupSetSelfSignUpState
-	): Appliable[Seq[SmallGroupSet]] with OpenSmallGroupSetState = {
-		OpenSmallGroupSetCommand(module.department, Seq(set), user.apparentUser, action)
-		
-	}
-
-	@RequestMapping
-	def form(@ModelAttribute("openGroupSetCommand") cmd: Appliable[Seq[SmallGroupSet]]) =
-		Mav("admin/groups/open").noLayoutIf(ajax)
-
-	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("openGroupSetCommand") cmd: Appliable[Seq[SmallGroupSet]]) = {
-		cmd.apply()
-		Mav("ajax_success").noLayoutIf(ajax) // should be AJAX, otherwise you'll just get a terse success response.
-	}
-}
 
 
-@RequestMapping(Array("/admin/department/{department}/groups/release"))
-@Controller
-class ReleaseAllSmallGroupSetsController extends GroupsController {
 
-  @ModelAttribute("moduleList") def newViewModel():ModuleListViewModel={
-    new ModuleListViewModel()
-  }
 
-  @RequestMapping
-  def form(@ModelAttribute("moduleList") model: ModuleListViewModel, @PathVariable department:Department, showFlash:Boolean=false) ={
-    Mav("admin/groups/bulk-release", "department"->department, "modules"->department.modules, "showFlash"->showFlash)
-    .crumbs(Breadcrumbs.Department(department))
-  }
 
-  @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("moduleList") model: ModuleListViewModel,@PathVariable department:Department) = {
-    model.createCommand(user.apparentUser).apply()
-    Redirect(Routes.admin.release(department), "batchReleaseSuccess"->true)
-  }
 
-	class ModuleListViewModel() {
-		var checkedModules: JList[Module] = JArrayList()
-		var notifyStudents: JBoolean = true
-		var notifyTutors: JBoolean = true
 
-		def smallGroupSets() = {
-			if (checkedModules == null) {
-				// if  no modules are selected, spring binds null, not an empty list :-(
-				Nil
-			} else {
-				checkedModules.asScala.flatMap(mod =>
-					mod.groupSets.asScala
-				)
-			}
-		}
 
-		def createCommand(user: User): Appliable[Seq[ReleasedSmallGroupSet]] = {
-			val command = new ReleaseGroupSetCommandImpl(smallGroupSets(), user)
-			command.notifyStudents = notifyStudents
-			command.notifyTutors = notifyTutors
-			command
-		}
-	}
-}
-
-@RequestMapping(Array("/admin/department/{department}/groups/selfsignup/{action}"))
-@Controller
-class OpenAllSmallGroupSetsController extends GroupsController {
-	
-	@ModelAttribute("setList") def newViewModelOpen(
-		@PathVariable department: Department, @PathVariable action: SmallGroupSetSelfSignUpState
-	): GroupsetListViewModel = {
-		new GroupsetListViewModel((user, sets) => OpenSmallGroupSetCommand(department, sets, user, action), action)
-	}
-	
-	@RequestMapping
-	def form(@ModelAttribute("setList") model: GroupsetListViewModel, @PathVariable department: Department, showFlash: Boolean = false) = {
-		val groupSets = department.modules.asScala.flatMap(_.groupSets.asScala).filter(_.allocationMethod == SmallGroupAllocationMethod.StudentSignUp)
-		Mav("admin/groups/bulk-open", "department" -> department, "groupSets" -> groupSets, "showFlash" -> showFlash, "setState" -> model.getName)
-		.crumbs(Breadcrumbs.Department(department))
-	}
-
-	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("setList") model: GroupsetListViewModel, @PathVariable department:Department) = {
-		model.applyCommand(user.apparentUser)
-		Redirect(Routes.admin.selfsignup(department, model.getName), "batchOpenSuccess" -> true)
-	}
-
-	class GroupsetListViewModel(val createCommand: (User, Seq[SmallGroupSet]) => Appliable[Seq[SmallGroupSet]], var action: SmallGroupSetSelfSignUpState) {
-		var checkedGroupsets: JList[SmallGroupSet] = JArrayList()
-		
-		def getName = action.name
-
-		def applyCommand(user: User)= {
-			createCommand(user, checkedGroupsets.asScala).apply()
-		}
-	}
-
-}
 
 

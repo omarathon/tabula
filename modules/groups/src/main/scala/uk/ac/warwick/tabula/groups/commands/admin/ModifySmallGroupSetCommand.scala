@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import org.springframework.validation.Errors
+import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -15,6 +16,7 @@ object ModifySmallGroupSetCommand {
 	def create(module: Module) =
 		new CreateSmallGroupSetCommandInternal(module)
 			with ComposableCommand[SmallGroupSet]
+			with SetDefaultSmallGroupSetName
 			with CreateSmallGroupSetPermissions
 			with CreateSmallGroupSetDescription
 			with ModifySmallGroupSetValidation
@@ -42,8 +44,6 @@ trait ModifySmallGroupSetCommandState extends CurrentAcademicYear {
 	var allowSelfGroupSwitching: Boolean = true
 	var studentsCanSeeTutorName: Boolean = false
 	var studentsCanSeeOtherMembers: Boolean = false
-	var defaultMaxGroupSizeEnabled: Boolean = false
-	var defaultMaxGroupSize: Int = SmallGroup.DefaultGroupSize
 
 	var collectAttendance: Boolean = true
 
@@ -70,6 +70,17 @@ class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmall
 	}
 }
 
+trait SetDefaultSmallGroupSetName extends BindListener {
+	self: CreateSmallGroupSetCommandState =>
+
+	override def onBind(result: BindingResult) {
+		// If we haven't set a name, make one up
+		if (!name.hasText) {
+			Option(format).foreach { format => name = "%s %ss".format(module.code.toUpperCase, format) }
+		}
+	}
+}
+
 class EditSmallGroupSetCommandInternal(val module: Module, val set: SmallGroupSet) extends ModifySmallGroupSetCommandInternal with EditSmallGroupSetCommandState {
 	self: SmallGroupServiceComponent =>
 
@@ -91,8 +102,6 @@ abstract class ModifySmallGroupSetCommandInternal extends CommandInternal[SmallG
 		allowSelfGroupSwitching = set.allowSelfGroupSwitching
 		studentsCanSeeTutorName = set.studentsCanSeeTutorName
 		studentsCanSeeOtherMembers = set.studentsCanSeeOtherMembers
-		defaultMaxGroupSizeEnabled = set.defaultMaxGroupSizeEnabled
-		defaultMaxGroupSize = set.defaultMaxGroupSize
 		collectAttendance = set.collectAttendance
 		linkedDepartmentSmallGroupSet = set.linkedDepartmentSmallGroupSet
 	}
@@ -107,8 +116,6 @@ abstract class ModifySmallGroupSetCommandInternal extends CommandInternal[SmallG
 		set.allowSelfGroupSwitching = allowSelfGroupSwitching
 		set.studentsCanSeeOtherMembers = studentsCanSeeOtherMembers
 		set.studentsCanSeeTutorName = studentsCanSeeTutorName
-		set.defaultMaxGroupSizeEnabled = defaultMaxGroupSizeEnabled
-		set.defaultMaxGroupSize = defaultMaxGroupSize
 
 		set.linkedDepartmentSmallGroupSet = linkedDepartmentSmallGroupSet
 	}

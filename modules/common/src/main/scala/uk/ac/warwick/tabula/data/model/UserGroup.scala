@@ -35,7 +35,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 	/* For Hibernate xx */
 	def this() { this(false) }
 
-	@transient var userLookup = Wire.auto[UserLookupService]
+	@transient var userLookup = Wire[UserLookupService]
 	private def groupService = userLookup.getGroupService
 
 	var baseWebgroup: String = _

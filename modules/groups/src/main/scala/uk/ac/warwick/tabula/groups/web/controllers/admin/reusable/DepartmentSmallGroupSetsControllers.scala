@@ -24,19 +24,8 @@ trait DepartmentSmallGroupSetsController extends GroupsController {
 	@ModelAttribute("academicYearChoices") def academicYearChoices =
 		AcademicYear.guessByDate(DateTime.now).yearsSurrounding(2, 2)
 
-	@ModelAttribute("allDays") def allDays = DayOfWeek.members
-
 	@ModelAttribute("ManageDepartmentSmallGroupsMappingParameters") def params = ManageDepartmentSmallGroupsMappingParameters
 
-	case class TermWeekRange(val weekRange: WeekRange) {
-		def isFull(weeks: JList[WeekRange.Week]) = weekRange.toWeeks.forall(weeks.contains(_))
-		def isPartial(weeks: JList[WeekRange.Week]) = weekRange.toWeeks.exists(weeks.contains(_))
-	}
-	
-	def allTermWeekRanges(academicYear: Option[AcademicYear]) = {
-		WeekRange.termWeekRanges(academicYear.getOrElse(AcademicYear.guessByDate(DateTime.now))).map { TermWeekRange(_) }
-	}
-	
 	override final def binding[A](binder: WebDataBinder, cmd: A) {
 		binder.registerCustomEditor(classOf[SmallGroupAllocationMethod], new AbstractPropertyEditor[SmallGroupAllocationMethod] {
 			override def fromString(code: String) = SmallGroupAllocationMethod.fromDatabase(code)			
@@ -57,9 +46,7 @@ class CreateDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCo
 		
 	@RequestMapping
 	def form(@ModelAttribute("createDepartmentSmallGroupSetCommand") cmd: CreateDepartmentSmallGroupSetCommand) = {
-		Mav("admin/groups/reusable/new",
-			"allTermWeekRanges" -> allTermWeekRanges(Option(cmd.academicYear))
-		).crumbs(Breadcrumbs.Department(cmd.department))
+		Mav("admin/groups/reusable/new").crumbs(Breadcrumbs.Department(cmd.department))
 	}
 	
 	@RequestMapping(method = Array(POST))
@@ -110,9 +97,7 @@ class EditDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCont
 
 	@RequestMapping
 	def form(@ModelAttribute("editDepartmentSmallGroupSetCommand") cmd: EditDepartmentSmallGroupSetCommand, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet) = {
-		Mav("admin/groups/reusable/edit",
-			"allTermWeekRanges" -> allTermWeekRanges(Option(cmd.academicYear))
-		).crumbs(Breadcrumbs.Department(set.department))
+		Mav("admin/groups/reusable/edit").crumbs(Breadcrumbs.Department(set.department))
 	}
 
 	@RequestMapping(method = Array(POST))

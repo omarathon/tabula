@@ -30,13 +30,18 @@ trait EditSmallGroupsCommandState {
 	def set: SmallGroupSet
 
 	var groupNames: JList[String] = LazyLists.create()
-	var maxGroupSizes: JList[Int] = LazyLists.create()
+	var maxGroupSizes: JList[Int] = LazyLists.create(() => 0)
+	var defaultMaxGroupSizeEnabled: Boolean = false
+	var defaultMaxGroupSize: Int = SmallGroup.DefaultGroupSize
 }
 
 class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet) extends CommandInternal[Seq[SmallGroup]] with EditSmallGroupsCommandState {
 	self: SmallGroupServiceComponent =>
 
 	override def applyInternal() = {
+		set.defaultMaxGroupSizeEnabled = defaultMaxGroupSizeEnabled
+		set.defaultMaxGroupSize = defaultMaxGroupSize
+
 		groupNames.asScala.zipWithIndex.foreach { case (name, i) =>
 			val group =
 				if (set.groups.size() > i) {
@@ -77,6 +82,8 @@ trait PopulateEditSmallGroupsCommand extends PopulateOnForm {
 		maxGroupSizes.addAll(set.groups.asScala.map { _.maxGroupSize.getOrElse {
 			if (set.defaultMaxGroupSizeEnabled) set.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
 		}}.asJava)
+		defaultMaxGroupSizeEnabled = set.defaultMaxGroupSizeEnabled
+		defaultMaxGroupSize = set.defaultMaxGroupSize
 	}
 }
 

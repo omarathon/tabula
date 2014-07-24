@@ -54,12 +54,10 @@ trait UpdatesStudentMembership {
 	 * with Spring binding.
 	 */
 	var members: UnspecifiedTypeUserGroup = {
-		val ug = if (updateStudentMembershipGroupIsUniversityIds){
-			UserGroup.ofUniversityIds
+		val ug =
+			if (updateStudentMembershipGroupIsUniversityIds) UserGroup.ofUniversityIds
+		  else UserGroup.ofUsercodes
 
-		}else{
-			UserGroup.ofUsercodes
-		}
 		ug.userLookup = userLookup
 		ug
 	}
