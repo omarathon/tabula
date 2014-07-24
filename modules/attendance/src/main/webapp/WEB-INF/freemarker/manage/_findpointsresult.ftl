@@ -8,7 +8,8 @@
 			<div class="span12">
 				<div class="pull-right">
 					<a class="btn btn-primary" href="<@routes.manageEditPoint groupedPoint.templatePoint filterQuery returnTo />">Edit</a>
-					<a class="btn btn-danger" href="<@routes.manageDeletePoint groupedPoint.templatePoint filterQuery returnTo />"><i class="icon-remove"></i></a>
+					<#assign hasRecordedCheckpoints = groupedPoint.hasRecordedCheckpoints/>
+					<a class="btn btn-danger <#if hasRecordedCheckpoints> disabled use-tooltip</#if>" <#if hasRecordedCheckpoints>title="This point cannot be removed as it has attendance marks against it."</#if> href="<@routes.manageDeletePoint groupedPoint.templatePoint filterQuery returnTo />"><i class="icon-remove"></i></a>
 				</div>
 				${groupedPoint.templatePoint.name}
 				(<a class="use-tooltip" data-html="true" title="
@@ -46,7 +47,8 @@
 			<div class="span12">
 				<div class="pull-right">
 					<a class="btn btn-primary" href="<@routes.manageEditPoint groupedPoint.templatePoint filterQuery returnTo />">Edit</a>
-					<a class="btn btn-danger" href="<@routes.manageDeletePoint groupedPoint.templatePoint filterQuery returnTo />"><i class="icon-remove"></i></a>
+					<#assign hasRecordedCheckpoints = groupedPoint.hasRecordedCheckpoints/>
+					<a class="btn btn-danger<#if hasRecordedCheckpoints> disabled use-tooltip</#if>" <#if hasRecordedCheckpoints>title="This point cannot be removed as it has attendance marks against it."</#if> href="<@routes.manageDeletePoint groupedPoint.templatePoint filterQuery returnTo />"><i class="icon-remove"></i></a>
 				</div>
 				${groupedPoint.templatePoint.name}
 				(<@fmt.interval groupedPoint.templatePoint.startDate groupedPoint.templatePoint.endDate />)

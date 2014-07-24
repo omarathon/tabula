@@ -85,6 +85,7 @@ trait AttendanceMonitoringDao {
 		academicYear: AcademicYear,
 		activeCheckpoints: Seq[AttendanceMonitoringCheckpoint]
 	): Seq[AttendanceMonitoringCheckpoint]
+	def hasRecordedCheckpoints(points: Seq[AttendanceMonitoringPoint]): Boolean
 	def removeCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit
 	def saveOrUpdateCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
@@ -356,6 +357,17 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 		c.seq.map{c =>
 			c.activePoint = false
 			c
+		}
+	}
+
+	def hasRecordedCheckpoints(points: Seq[AttendanceMonitoringPoint]): Boolean = {
+		if (points.isEmpty)
+			false
+		else {
+			session.newCriteria[AttendanceMonitoringCheckpoint]
+				.add(safeIn("point", points))
+				.project[Number](Projections.rowCount())
+				.uniqueResult.get.intValue() > 0
 		}
 	}
 
