@@ -10,7 +10,6 @@ import collection.JavaConverters._
 import javax.validation.constraints.NotNull
 import javax.persistence.{Entity, JoinColumn, FetchType, ManyToOne, Column}
 import org.hibernate.annotations.Type
-import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 
 @Entity
 class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPointSettings {
