@@ -11,7 +11,7 @@
 					<#assign hasRecordedCheckpoints = groupedPoint.hasRecordedCheckpoints/>
 					<a class="btn btn-danger <#if hasRecordedCheckpoints> disabled use-tooltip</#if>" <#if hasRecordedCheckpoints>title="This point cannot be removed as it has attendance marks against it."</#if> href="<@routes.manageDeletePoint groupedPoint.templatePoint filterQuery returnTo />"><i class="icon-remove"></i></a>
 				</div>
-				${groupedPoint.templatePoint.name}exists
+				${groupedPoint.templatePoint.name}
 				(<a class="use-tooltip" data-html="true" title="
 					<@fmt.wholeWeekDateFormat
 						groupedPoint.templatePoint.startWeek
