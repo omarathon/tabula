@@ -5,17 +5,16 @@ import uk.ac.warwick.tabula.data.model.Notification
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands.Notifies
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
 import uk.ac.warwick.tabula.data.model.notifications.{SmallGroupSetChangedTutorNotification, SmallGroupSetChangedStudentNotification, SmallGroupSetChangedNotification}
 
 trait SmallGroupSetCommand {
-	val set: SmallGroupSet
-	val apparentUser: User
-	var userLookup: UserLookupService
+	def set: SmallGroupSet
+	def apparentUser: User
 }
 
 trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet] {
-	this: SmallGroupSetCommand =>
+	this: SmallGroupSetCommand with UserLookupComponent =>
 
 	val setBeforeUpdates: SmallGroupSet = set.duplicateTo(set.module)
 

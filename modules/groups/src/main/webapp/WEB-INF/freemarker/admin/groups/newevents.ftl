@@ -3,24 +3,24 @@
 	<h1>Create small groups</h1>
 	<h4><span class="muted">for</span> <@fmt.module_name module /></h4>
 
-	<@f.form id="newGroups" method="POST" commandName="command" class="form-horizontal">
+	<@f.form id="newEvents" method="POST" commandName="command" class="form-horizontal">
 		<p class="progress-arrows">
 			<span class="arrow-right">Properties</span>
 			<span class="arrow-right arrow-left">Students</span>
-			<span class="arrow-right arrow-left active">Groups</span>
-			<span class="arrow-right arrow-left use-tooltip" title="Save and edit events"><button type="submit" class="btn btn-link" name="${ManageSmallGroupsMappingParameters.createAndAddEvents}">Events</button></span>
+			<span class="arrow-right arrow-left">Groups</span>
+			<span class="arrow-right arrow-left active">Events</span>
 			<span class="arrow-right arrow-left use-tooltip" title="Save and allocate students to groups"><button type="submit" class="btn btn-link" name="${ManageSmallGroupsMappingParameters.createAndAllocate}">Allocate</button></span>
 		</p>
 
-		<#include "_editGroups.ftl" />
+		<#include "_editEvents.ftl" />
 
 		<div class="submit-buttons">
 			<input
 				type="submit"
 				class="btn btn-success use-tooltip"
-				name="${ManageSmallGroupsMappingParameters.createAndAddEvents}"
-				value="Save and add events"
-				title="Add events to these groups"
+				name="${ManageSmallGroupsMappingParameters.createAndAllocate}"
+				value="Save and allocate students"
+				title="Add students to these groups"
 				data-container="body"
 				/>
 			<input
@@ -28,7 +28,7 @@
 				class="btn btn-primary use-tooltip"
 				name="create"
 				value="Save and exit"
-				title="Save your groups and add events later"
+				title="Save your groups and allocate students later"
 				data-container="body"
 				/>
 			<a class="btn" href="<@routes.depthome module=smallGroupSet.module />">Cancel</a>

@@ -1,4 +1,6 @@
 <#escape x as x?html>
+	<input type="hidden" name="action" value="submit" id="action-input">
+
 	<fieldset>
 		<@form.labelled_row "format" "Type">
 			<@f.select path="format" id="format">

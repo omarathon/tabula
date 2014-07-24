@@ -1,21 +1,25 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.CurrentUser
-import org.apache.poi.xssf.usermodel._
-import uk.ac.warwick.tabula.commands.{ReadOnly, Unaudited, Command}
-import uk.ac.warwick.tabula.permissions.Permissions
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.web.views.ExcelView
 import org.apache.poi.ss.util.CellRangeAddressList
+import org.apache.poi.xssf.usermodel._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.web.views.ExcelView
+import scala.collection.JavaConverters._
 
-class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSet, viewer: CurrentUser)
-		extends Command[ExcelView] with ReadOnly with Unaudited {
+object AllocateStudentsToGroupsTemplateCommand {
+	def apply(module: Module, set: SmallGroupSet) =
+		new AllocateStudentsToGroupsTemplateCommandInternal(module, set)
+			with ComposableCommand[ExcelView]
+			with AllocateStudentsToGroupsTemplatePermissions
+			with ReadOnly with Unaudited
+}
 
-	mustBeLinked(set, module)
-	PermissionCheck(Permissions.SmallGroups.Allocate, set)
+class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val set: SmallGroupSet)
+	extends CommandInternal[ExcelView] with AllocateStudentsToGroupsTemplateCommandState {
 
 	val groupLookupSheetName = "GroupLookup"
 	val allocateSheetName = "AllocateStudents"
@@ -26,7 +30,6 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 		val workbook = generateWorkbook()
 		new ExcelView("Allocation for " + set.name +  ".xlsx", workbook)
 	}
-
 
 	def generateWorkbook() = {
 		val groups = set.groups.asScala.toList
@@ -71,7 +74,6 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 		workbook
 	}
 
-
 	def createUnprotectedCell(workbook: XSSFWorkbook, row: XSSFRow, col: Int, value: String = "") = {
 		val lockedCellStyle = workbook.createCellStyle()
 		lockedCellStyle.setLocked(false)
@@ -81,8 +83,6 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 		cell
 	}
 
-
-
 	// attaches the data validation to the sheet
 	def generateGroupDropdowns(sheet: XSSFSheet, groups: Seq[_]) {
 		val dropdownRange = new CellRangeAddressList(1, spreadsheetRows, 2, 2)
@@ -90,7 +90,6 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 
 		sheet.addValidationData(validation)
 	}
-
 
 	// Excel data validation - will only accept the values fed to this method, also puts a dropdown on each cell
 	def getDataValidation(groups: Seq[_], sheet: XSSFSheet, addressList: CellRangeAddressList) = {
@@ -101,7 +100,6 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 		validation.setShowErrorBox(true)
 		validation
 	}
-
 
 	def generateGroupLookupSheet(workbook: XSSFWorkbook) = {
 		val groupSheet: XSSFSheet = workbook.createSheet(groupLookupSheetName)
@@ -115,7 +113,6 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 		groupSheet.protectSheet(sheetPassword)
 		groupSheet
 	}
-
 
 	def generateAllocationSheet(workbook: XSSFWorkbook): XSSFSheet =  {
 		val sheet = workbook.createSheet(allocateSheetName)
@@ -151,5 +148,19 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 		// set ID column to be wider
 		sheet.setColumnWidth(3, 7000)
 
+	}
+}
+
+trait AllocateStudentsToGroupsTemplateCommandState {
+	def module: Module
+	def set: SmallGroupSet
+}
+
+trait AllocateStudentsToGroupsTemplatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: AllocateStudentsToGroupsTemplateCommandState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		mustBeLinked(set, module)
+		p.PermissionCheck(Permissions.SmallGroups.Allocate, mandatory(set))
 	}
 }

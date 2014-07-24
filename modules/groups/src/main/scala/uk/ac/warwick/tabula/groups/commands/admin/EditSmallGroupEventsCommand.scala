@@ -28,11 +28,21 @@ object EditSmallGroupEventsCommand {
 			with PopulateEditSmallGroupEventsSubCommands
 }
 
+class GroupProperties(val module: Module, val set: SmallGroupSet, val group: SmallGroup) {
+	var events: JList[SmallGroupEventCommand] = LazyLists.create { () =>
+		ModifySmallGroupEventCommand.create(module, set, group)
+	}
+
+	group.events.asScala.foreach { event =>
+		events.add(ModifySmallGroupEventCommand.edit(module, set, group, event))
+	}
+}
+
 trait EditSmallGroupEventsCommandState {
 	def module: Module
 	def set: SmallGroupSet
 
-	var groups: JMap[SmallGroup, JList[SmallGroupEventCommand]] = JHashMap()
+	var groups: JMap[SmallGroup, GroupProperties] = JHashMap()
 }
 
 trait PopulateEditSmallGroupEventsSubCommands {
@@ -40,13 +50,7 @@ trait PopulateEditSmallGroupEventsSubCommands {
 
 	groups.clear()
 	set.groups.asScala.foreach { group =>
-		groups.put(group, LazyLists.create { () =>
-			ModifySmallGroupEventCommand.create(module, set, group)
-		})
-
-		group.events.asScala.foreach { event =>
-			groups.get(group).add(ModifySmallGroupEventCommand.edit(module, set, group, event))
-		}
+		groups.put(group, new GroupProperties(module, set, group))
 	}
 }
 
@@ -54,7 +58,9 @@ class EditSmallGroupEventsCommandInternal(val module: Module, val set: SmallGrou
 	self: SmallGroupServiceComponent =>
 
 	override def applyInternal() = transactional() {
-		groups.asScala.foreach { case (group, events) =>
+		groups.asScala.foreach { case (group, props) =>
+			val events = props.events
+
 			// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
 			// TAB-2304 Don't do a .clear() and .addAll() because that confuses Hibernate
 			val newEvents = events.asScala.filter(!_.delete).map(_.apply())
@@ -76,10 +82,12 @@ trait EditSmallGroupEventsValidation extends SelfValidating {
 	self: EditSmallGroupEventsCommandState =>
 
 	override def validate(errors: Errors) {
-		groups.asScala.foreach { case (group, events) =>
+		groups.asScala.foreach { case (group, props) =>
+			val events = props.events
+
 			errors.pushNestedPath(s"groups[${group.id}]")
 			events.asScala.zipWithIndex.foreach { case (command, index) =>
-				errors.pushNestedPath(s"[${index}]")
+				errors.pushNestedPath(s"events[${index}]")
 				command.validate(errors)
 				errors.popNestedPath()
 			}
@@ -92,7 +100,7 @@ trait EditSmallGroupEventsBinding extends BindListener {
 	self: EditSmallGroupEventsCommandState =>
 
 	override def onBind(result: BindingResult) {
-		groups.asScala.values.foreach { events =>
+		groups.asScala.values.map { _.events }.foreach { events =>
 			// If the last element of events is both a Creation and is empty, disregard it
 			if (!events.isEmpty()) {
 				val last = events.asScala.last

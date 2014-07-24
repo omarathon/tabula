@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.commands.Description
@@ -162,7 +162,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
 
 
   class StubCommand(val set: SmallGroupSet, val apparentUser: User, var userLookup: UserLookupService)
-    extends SmallGroupSetCommand with NotifiesAffectedGroupMembers {
+    extends SmallGroupSetCommand with UserLookupComponent with NotifiesAffectedGroupMembers {
   }
 
 }
