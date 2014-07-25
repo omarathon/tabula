@@ -20,7 +20,7 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.util.cache.{SingularCacheEntryFactory, CacheEntryFactory, Caches}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.util.queue.conversion.ItemType
-import org.codehaus.jackson.annotate.JsonAutoDetect
+import org.codehaus.jackson.annotate.{JsonIgnore, JsonAutoDetect}
 import uk.ac.warwick.util.queue.QueueListener
 import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.util.queue.Queue
@@ -406,7 +406,7 @@ trait PermissionsServiceCachesImpl extends PermissionsServiceCaches with Granted
 @ItemType("PermissionsCacheBuster")
 @JsonAutoDetect
 class PermissionsCacheBusterMessage {
-	@BeanProperty var classTag: ClassTag[_ <: PermissionsTarget] = _
+	@JsonIgnore @BeanProperty var classTag: ClassTag[_ <: PermissionsTarget] = _
 	@BeanProperty var usercode: String = _
 	@BeanProperty var webgroups: Seq[String] = _
 }
