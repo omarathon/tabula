@@ -6,8 +6,13 @@
 	<@f.form id="editEvents" method="POST" commandName="command" class="form-horizontal">
 		<p class="progress-arrows">
 			<span class="arrow-right">Properties</span>
-			<span class="arrow-right arrow-left use-tooltip" title="Save and edit students"><button type="submit" class="btn btn-link" name="${ManageSmallGroupsMappingParameters.editAndAddStudents}">Students</button></span>
-			<span class="arrow-right arrow-left use-tooltip" title="Save and edit groups"><button type="submit" class="btn btn-link" name="${ManageSmallGroupsMappingParameters.editAndAddGroups}">Groups</button></span>
+			<#if smallGroupSet.linked>
+				<span class="arrow-right arrow-left">Students</span>
+				<span class="arrow-right arrow-left">Groups</span>
+			<#else>
+				<span class="arrow-right arrow-left use-tooltip" title="Save and edit students"><button type="submit" class="btn btn-link" name="${ManageSmallGroupsMappingParameters.editAndAddStudents}">Students</button></span>
+				<span class="arrow-right arrow-left use-tooltip" title="Save and edit groups"><button type="submit" class="btn btn-link" name="${ManageSmallGroupsMappingParameters.editAndAddGroups}">Groups</button></span>
+			</#if>
 			<span class="arrow-right arrow-left active">Events</span>
 			<span class="arrow-right arrow-left use-tooltip" title="Save and allocate students to groups"><button type="submit" class="btn btn-link" name="${ManageSmallGroupsMappingParameters.editAndAllocate}">Allocate</button></span>
 		</p>

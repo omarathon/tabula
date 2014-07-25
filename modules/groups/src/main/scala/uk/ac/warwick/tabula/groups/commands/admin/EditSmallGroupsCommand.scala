@@ -4,7 +4,7 @@ import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
@@ -109,6 +109,10 @@ trait EditSmallGroupsValidation extends SelfValidating {
 	self: EditSmallGroupsCommandState =>
 
 	override def validate(errors: Errors) {
+		if (set.allocationMethod == SmallGroupAllocationMethod.Linked) {
+			errors.reject("smallGroupSet.linked")
+		}
+
 		groupNames.asScala.zipWithIndex.foreach { case (name, index) =>
 			if (!name.hasText) errors.rejectValue(s"groupNames[${index}]", "smallGroup.name.NotEmpty")
 			else if (name.orEmpty.length > 200) errors.rejectValue(s"groupNames[${index}]", "smallGroup.name.Length", Array[Object](200: JInteger), "")

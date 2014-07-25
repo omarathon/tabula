@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
@@ -55,6 +55,7 @@ trait SmallGroupService {
 	def hasSmallGroups(module: Module): Boolean
 
 	def getDepartmentSmallGroupSets(department: Department): Seq[DepartmentSmallGroupSet]
+	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear): Seq[DepartmentSmallGroupSet]
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -195,6 +196,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def hasSmallGroups(module: Module): Boolean = smallGroupDao.hasSmallGroups(module)
 
 	def getDepartmentSmallGroupSets(department: Department) = smallGroupDao.getDepartmentSmallGroupSets(department)
+	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear) = smallGroupDao.getDepartmentSmallGroupSets(department, year)
 }
 
 trait SmallGroupMembershipHelpers {

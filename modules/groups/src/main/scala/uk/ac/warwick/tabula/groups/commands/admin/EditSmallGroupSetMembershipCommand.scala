@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -22,6 +23,7 @@ object EditSmallGroupSetMembershipCommand {
 			with ModifiesSmallGroupSetMembership
 			with EditSmallGroupSetMembershipPermissions
 			with EditSmallGroupSetMembershipDescription
+			with EditSmallGroupSetMembershipValidation
 			with AutowiringSmallGroupServiceComponent
 			with PopulateStateWithExistingData
 
@@ -152,6 +154,16 @@ trait EditSmallGroupSetMembershipDescription extends Describable[SmallGroupSet] 
 		d.smallGroupSet(set)
 	}
 
+}
+
+trait EditSmallGroupSetMembershipValidation extends SelfValidating {
+	self: EditSmallGroupSetMembershipCommandState =>
+
+	override def validate(errors: Errors) {
+		if (set.allocationMethod == SmallGroupAllocationMethod.Linked) {
+			errors.reject("smallGroupSet.linked")
+		}
+	}
 }
 
 class StubEditSmallGroupSetMembershipCommand(val module: Module, val updateStudentMembershipGroupIsUniversityIds: Boolean = true) extends CommandInternal[SmallGroupSet] with EditSmallGroupSetMembershipCommandState {

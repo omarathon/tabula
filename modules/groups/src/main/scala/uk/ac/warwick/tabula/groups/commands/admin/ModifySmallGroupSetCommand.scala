@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import scala.collection.JavaConverters._
 
 object ModifySmallGroupSetCommand {
 	def create(module: Module) =
@@ -65,6 +66,18 @@ class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmall
 	override def applyInternal() = transactional() {
 		val set = new SmallGroupSet(module)
 		copyTo(set)
+
+		if (set.allocationMethod == SmallGroupAllocationMethod.Linked) {
+			Option(set.linkedDepartmentSmallGroupSet).foreach { linkedSet =>
+				linkedSet.groups.asScala.foreach { linkedGroup =>
+					val smallGroup = new SmallGroup(set)
+					smallGroup.name = linkedGroup.name
+					smallGroup.linkedDepartmentSmallGroup = linkedGroup
+					set.groups.add(smallGroup)
+				}
+			}
+		}
+
 		smallGroupService.saveOrUpdate(set)
 		set
 	}
@@ -87,7 +100,20 @@ class EditSmallGroupSetCommandInternal(val module: Module, val set: SmallGroupSe
 	copyFrom(set)
 
 	override def applyInternal() = transactional() {
-		copyTo(set)
+		if (linkedDepartmentSmallGroupSet != set.linkedDepartmentSmallGroupSet) {
+			copyTo(set)
+
+			set.groups.clear()
+			linkedDepartmentSmallGroupSet.groups.asScala.foreach { linkedGroup =>
+				val smallGroup = new SmallGroup(set)
+				smallGroup.name = linkedGroup.name
+				smallGroup.linkedDepartmentSmallGroup = linkedGroup
+				set.groups.add(smallGroup)
+			}
+		} else {
+			copyTo(set)
+		}
+
 		smallGroupService.saveOrUpdate(set)
 		set
 	}
@@ -133,6 +159,12 @@ trait ModifySmallGroupSetValidation extends SelfValidating {
 
 		existingSet.foreach { set =>
 			if (academicYear != set.academicYear) errors.rejectValue("academicYear", "smallGroupSet.academicYear.cantBeChanged")
+
+			if (set.releasedToStudents || set.releasedToTutors) {
+				// Can't unlink or link a released set
+				if (set.linked && allocationMethod != SmallGroupAllocationMethod.Linked) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.released")
+				else if (set.linkedDepartmentSmallGroupSet != linkedDepartmentSmallGroupSet) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.released")
+			}
 		}
 	}
 }

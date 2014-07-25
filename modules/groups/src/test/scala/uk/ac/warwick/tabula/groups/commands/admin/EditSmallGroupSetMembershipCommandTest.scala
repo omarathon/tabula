@@ -1,13 +1,11 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
+import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.{Fixtures, TestBase, Mockito, MockUserLookup}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet, SmallGroup}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, Department, Module, UserGroup}
+import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, Department, UserGroup}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.events.EventHandling
 
 class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 
@@ -102,6 +100,24 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 
 		// Two now, because it includes the one from before
 		there were two (command.smallGroupService).saveOrUpdate(set)
+	}}
+
+	private trait ValidationFixture extends Fixture {
+		val command = new EditSmallGroupSetMembershipValidation with EditSmallGroupSetMembershipCommandState {
+			val module = ValidationFixture.this.module
+			val set = ValidationFixture.this.set
+		}
+	}
+
+	@Test def validateLinked { new ValidationFixture {
+		set.allocationMethod = SmallGroupAllocationMethod.Linked
+
+		val errors = new BindException(command, "command")
+		command.validate(errors)
+
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getGlobalError.getCodes should contain ("smallGroupSet.linked")
 	}}
 
 }

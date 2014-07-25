@@ -62,20 +62,33 @@
 					</label>
 				</#if>
 				<#if features.smallGroupCrossModules>
-					<label class="radio">
-						<@f.radiobutton path="allocationMethod" value="Linked" selector=".linked-options" />
-						Linked
-						<a class="use-popover" data-html="true"
-						   data-content="Link these groups to a reusable set of small groups">
-							<i class="icon-question-sign"></i>
-						</a>
-						to
-						<span class="linked-options">
-							<@f.select path="linkedDepartmentSmallGroupSet" id="academicYear">
-								<@f.options items=departmentSmallGroupSets itemLabel="name" itemValue="id" />
-							</@f.select>
-						</span>
-					</label>
+					<#if departmentSmallGroupSets?size gt 0>
+						<label class="radio">
+							<@f.radiobutton path="allocationMethod" value="Linked" selector=".linked-options" />
+							Linked
+							<a class="use-popover" data-html="true"
+							   data-content="Link these groups to a reusable set of small groups">
+								<i class="icon-question-sign"></i>
+							</a>
+							to
+							<span class="linked-options">
+								<@f.select path="linkedDepartmentSmallGroupSet" id="academicYear">
+									<@f.options items=departmentSmallGroupSets itemLabel="name" itemValue="id" />
+								</@f.select>
+							</span>
+						</label>
+					<#else>
+						<label class="radio">
+							<span class="disabled use-tooltip" title="There are no reusable small group sets to link to">
+								<input type="radio" disabled="disabled">
+								Linked
+								<a class="use-popover" data-html="true"
+								   data-content="Link these groups to a reusable set of small groups">
+									<i class="icon-question-sign"></i>
+								</a>
+							</span>
+						</label>
+					</#if>
 				</#if>
 				<#if features.smallGroupTeachingRandomAllocation>
 					<label class="radio">
@@ -153,6 +166,21 @@
 		jQuery(function($) {
 			// Set up radios to enable/disable self-sign up options fields.
 			$("input:radio[name='allocationMethod']").radioControlled();
+
+			var recalculateSteps = function() {
+				if ($('input:radio[name="allocationMethod"]:checked').val() == "Linked") {
+					$('.show-when-linked').show();
+					$('.hide-when-linked').hide();
+					$('.disable-when-linked button').addClass('disabled');
+				} else {
+					$('.show-when-linked').hide();
+					$('.hide-when-linked').show();
+					$('.disable-when-linked button').removeClass('disabled');
+				}
+			};
+
+			$("input:radio[name='allocationMethod']").on('change', recalculateSteps);
+			recalculateSteps();
 		});
 	</script>
 </#escape>

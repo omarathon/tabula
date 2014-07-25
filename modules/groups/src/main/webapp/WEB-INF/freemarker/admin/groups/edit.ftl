@@ -8,8 +8,8 @@
 <@f.form method="post" action="${url('/groups/admin/module/${module.code}/groups/${smallGroupSet.id}/edit')}" commandName="editSmallGroupSetCommand" cssClass="form-horizontal">
 	<p class="progress-arrows">
 		<span class="arrow-right active">Properties</span>
-		<span class="arrow-right arrow-left use-tooltip" title="Save and edit students"><button type="submit" class="btn btn-link" name="${ManageSmallGroupsMappingParameters.editAndAddStudents}">Students</button></span>
-		<span class="arrow-right arrow-left use-tooltip" title="Save and edit groups"><button type="submit" class="btn btn-link" name="${ManageSmallGroupsMappingParameters.editAndAddGroups}">Groups</button></span>
+		<span class="arrow-right arrow-left use-tooltip disable-when-linked" title="Save and edit students"><button type="submit" class="btn btn-link" name="${ManageSmallGroupsMappingParameters.editAndAddStudents}">Students</button></span>
+		<span class="arrow-right arrow-left use-tooltip disable-when-linked" title="Save and edit groups"><button type="submit" class="btn btn-link" name="${ManageSmallGroupsMappingParameters.editAndAddGroups}">Groups</button></span>
 		<span class="arrow-right arrow-left use-tooltip" title="Save and edit events"><button type="submit" class="btn btn-link" name="${ManageSmallGroupsMappingParameters.editAndAddEvents}">Events</button></span>
 		<span class="arrow-right arrow-left use-tooltip" title="Save and allocate students to groups"><button type="submit" class="btn btn-link" name="${ManageSmallGroupsMappingParameters.editAndAllocate}">Allocate</button></span>
 	</p>
@@ -22,10 +22,17 @@
 	<div class="submit-buttons">
 		<input
 			type="submit"
-			class="btn btn-success"
+			class="btn btn-success hide-when-linked"
 			name="${ManageSmallGroupsMappingParameters.editAndAddStudents}"
 			value="Save and add students"
 			title="Add students to these groups"
+			/>
+		<input
+			type="submit"
+			class="btn btn-success show-when-linked"
+			name="${ManageSmallGroupsMappingParameters.editAndAddEvents}"
+			value="Save and add events"
+			title="Add events to these groups"
 			/>
 		<input
 			type="submit"

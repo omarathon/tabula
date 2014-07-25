@@ -24,6 +24,9 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		val set = new SmallGroupSet(module)
 		set.id = "existingId"
 		set.name = "Existing set"
+		set.academicYear = AcademicYear.guessByDate(DateTime.now)
+		set.format = SmallGroupFormat.Seminar
+		set.allocationMethod = SmallGroupAllocationMethod.Manual
 	}
 
 	private trait CreateCommandFixture extends Fixture {
@@ -228,6 +231,95 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("academicYear")
 		errors.getFieldError.getCodes should contain ("smallGroupSet.academicYear.cantBeChanged")
+	}}
+
+	@Test def validateCanUnlinkIfNotReleased { new ValidationFixtureExistingSet {
+		command.name = "That's not my name"
+		command.academicYear = AcademicYear.guessByDate(DateTime.now)
+		command.format = SmallGroupFormat.Seminar
+		command.allocationMethod = SmallGroupAllocationMethod.Manual
+
+		set.allocationMethod = SmallGroupAllocationMethod.Linked
+
+		val errors = new BindException(command, "command")
+		command.validate(errors)
+
+		errors.hasErrors should be (false)
+	}}
+
+	@Test def validateCanChangeLinkIfNotReleased { new ValidationFixtureExistingSet {
+		command.name = "That's not my name"
+		command.academicYear = AcademicYear.guessByDate(DateTime.now)
+		command.format = SmallGroupFormat.Seminar
+		command.allocationMethod = SmallGroupAllocationMethod.Linked
+		command.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("A set")
+
+		set.allocationMethod = SmallGroupAllocationMethod.Linked
+		set.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("Another set")
+
+		val errors = new BindException(command, "command")
+		command.validate(errors)
+
+		errors.hasErrors should be (false)
+	}}
+
+	@Test def validateNoChangesWhenReleased { new ValidationFixtureExistingSet {
+		set.format = SmallGroupFormat.Seminar
+		set.allocationMethod = SmallGroupAllocationMethod.Linked
+		set.linkedDepartmentSmallGroupSet = { val set = Fixtures.departmentSmallGroupSet("A set"); set.id = "someId"; set }
+		set.releasedToStudents = true
+		set.releasedToTutors = true
+
+		command.name = set.name
+		command.format = set.format
+		command.academicYear = set.academicYear
+		command.allocationMethod = SmallGroupAllocationMethod.Linked
+		command.linkedDepartmentSmallGroupSet = set.linkedDepartmentSmallGroupSet
+
+		val errors = new BindException(command, "command")
+		command.validate(errors)
+
+		errors.hasErrors should be (false)
+	}}
+
+	@Test def validateCantUnlinkIfReleased { new ValidationFixtureExistingSet {
+		command.name = "That's not my name"
+		command.academicYear = set.academicYear
+		command.format = SmallGroupFormat.Seminar
+		command.allocationMethod = SmallGroupAllocationMethod.Manual
+
+		set.allocationMethod = SmallGroupAllocationMethod.Linked
+		set.releasedToStudents = true
+		set.releasedToTutors = true
+
+		val errors = new BindException(command, "command")
+		command.validate(errors)
+
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getFieldError.getField should be ("allocationMethod")
+		errors.getFieldError.getCodes should contain ("smallGroupSet.allocationMethod.released")
+	}}
+
+	@Test def validateCantChangeLinkIfReleased { new ValidationFixtureExistingSet {
+		command.name = "That's not my name"
+		command.format = SmallGroupFormat.Seminar
+		command.academicYear = set.academicYear
+		command.allocationMethod = SmallGroupAllocationMethod.Linked
+		command.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("A set")
+
+		set.allocationMethod = SmallGroupAllocationMethod.Linked
+		set.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("Another set")
+		set.releasedToStudents = true
+		set.releasedToTutors = true
+
+		val errors = new BindException(command, "command")
+		command.validate(errors)
+
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getFieldError.getField should be ("allocationMethod")
+		errors.getFieldError.getCodes should contain ("smallGroupSet.allocationMethod.released")
 	}}
 
 	@Test def describeCreate { new Fixture {

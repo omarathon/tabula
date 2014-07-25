@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.groups.commands.admin
 
 import org.springframework.validation.{BindException, BindingResult}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet, SmallGroup}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -184,6 +184,17 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 		command.validate(errors)
 
 		errors.hasErrors should be (false)
+	}}
+
+	@Test def validateLinked { new ValidationFixture {
+		set.allocationMethod = SmallGroupAllocationMethod.Linked
+
+		val errors = new BindException(command, "command")
+		command.validate(errors)
+
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getGlobalError.getCodes should contain ("smallGroupSet.linked")
 	}}
 
 	@Test def validateNoName { new ValidationFixture {
