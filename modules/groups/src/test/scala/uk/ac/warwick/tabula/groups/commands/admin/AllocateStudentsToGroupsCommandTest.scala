@@ -98,6 +98,9 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		set.members.add(user4)
 		set.members.add(user5)
 
+		set.membershipService = smartMock[AssignmentMembershipService]
+		set.membershipService.determineMembershipUsers(Seq(), Some(set.members)) returns (set.members.users)
+
 		val department = Fixtures.department("CE")
 		val sitsStatus = Fixtures.sitsStatus() // defaults to fully enrolled
 

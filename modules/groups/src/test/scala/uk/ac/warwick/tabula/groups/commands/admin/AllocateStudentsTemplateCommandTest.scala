@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.{Unaudited, ReadOnly, Appliable}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.UserGroupCacheManager
+import uk.ac.warwick.tabula.services.{AssignmentMembershipService, UserGroupCacheManager}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
@@ -97,6 +97,9 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 
 		set.module = module
 		wireUserLookup(set.members)
+
+		set.membershipService = smartMock[AssignmentMembershipService]
+		set.membershipService.determineMembershipUsers(Seq(), Some(set.members)) returns (set.members.users)
 	}
 
 	private trait CommandFixture extends Fixture {
