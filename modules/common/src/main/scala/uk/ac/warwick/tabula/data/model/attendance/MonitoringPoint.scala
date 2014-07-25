@@ -7,9 +7,10 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.annotations.{Type, BatchSize}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{AssignmentService, ModuleAndDepartmentService, RelationshipService}
+import uk.ac.warwick.tabula.services.{TermService, AssignmentService, ModuleAndDepartmentService, RelationshipService}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.AcademicYear
 
 @Entity
 class MonitoringPoint extends CommonMonitoringPointProperties with MonitoringPointSettings {
@@ -23,6 +24,14 @@ class MonitoringPoint extends CommonMonitoringPointProperties with MonitoringPoi
 
 	def isLate(currentAcademicWeek: Int): Boolean = {
 		currentAcademicWeek > requiredFromWeek
+	}
+
+	def isStartDateInFuture(): Boolean = {
+		val currentAcademicYear = AcademicYear.guessByDate(new DateTime()).startYear
+		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), pointSet.academicYear)
+
+		currentAcademicYear < pointSet.academicYear.startYear ||
+			(currentAcademicYear == pointSet.academicYear.startYear && currentAcademicWeek < validFromWeek)
 	}
 
 	var sentToAcademicOffice: Boolean = false
@@ -71,6 +80,9 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 
 	@transient
 	var assignmentService = Wire[AssignmentService]
+
+	@transient
+	var termService = Wire[TermService]
 
 	override def postLoad() {
 		ensureSettings
