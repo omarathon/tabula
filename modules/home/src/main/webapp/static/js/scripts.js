@@ -1267,4 +1267,7 @@ jQuery(function($) {
 	$(document.body).on('click', 'a.disabled', function(e) {
 		e.preventDefault();
 	});
+	$(document.body).on('click', 'button.disabled', function(e) {
+		e.preventDefault();
+	});
 });
