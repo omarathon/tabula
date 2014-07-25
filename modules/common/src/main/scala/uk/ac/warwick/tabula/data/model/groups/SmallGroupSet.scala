@@ -129,13 +129,14 @@ class SmallGroupSet
 	@JoinColumn(name = "membersgroup_id")
 	var _membersGroup: UserGroup = UserGroup.ofUniversityIds
 	def members: UnspecifiedTypeUserGroup = {
-		Option(linkedDepartmentSmallGroupSet).map { _.members }.getOrElse {
-			smallGroupService match {
-				case Some(smallGroupService) => {
-					new UserGroupCacheManager(_membersGroup, smallGroupService.groupSetManualMembersHelper)
+		linkedDepartmentSmallGroupSet match {
+			case ldsgs: DepartmentSmallGroupSet => ldsgs.members
+			case _ =>
+				smallGroupService match {
+					case Some(service) =>
+						new UserGroupCacheManager(_membersGroup, service.groupSetManualMembersHelper)
+					case _ => _membersGroup
 				}
-				case _ => _membersGroup
-			}
 		}
 	}
 	def members_=(group: UserGroup) { _membersGroup = group }
