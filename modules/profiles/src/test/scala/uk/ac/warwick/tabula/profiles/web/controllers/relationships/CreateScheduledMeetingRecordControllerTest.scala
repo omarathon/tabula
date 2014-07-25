@@ -12,6 +12,6 @@ class CreateScheduledMeetingRecordControllerTest extends TestBase with Mockito {
 	@Test
 	def getCreateCommand() {
 		val cmd = controller.getCreateCommand(null , studentCourseDetails)
-		cmd should be(None)
+		cmd should be(null)
 	}
 }
