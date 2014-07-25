@@ -42,8 +42,8 @@ object TimetableEvent {
 		case SmallGroupFormat.Tutorial => TimetableEventType.Other("Tutorial")
 		case SmallGroupFormat.Project => TimetableEventType.Other("Project")
 		case SmallGroupFormat.Example => TimetableEventType.Other("Example")
-		case SmallGroupFormat.Lecture => TimetableEventType.Lecture
 		case SmallGroupFormat.Workshop => TimetableEventType.Other("Workshop")
+		case SmallGroupFormat.Lecture => TimetableEventType.Lecture
 	}
 
 }

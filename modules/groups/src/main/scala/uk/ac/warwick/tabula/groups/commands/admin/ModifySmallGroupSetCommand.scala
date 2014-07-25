@@ -1,86 +1,99 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import org.hibernate.validator.constraints._
-import uk.ac.warwick.tabula.data.model._
+import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.helpers.LazyLists
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.helpers.Promise
-import uk.ac.warwick.tabula.helpers.Promises._
-import scala.collection.JavaConverters._
-import scala.collection.JavaConversions._
-import javax.validation.constraints.NotNull
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.system.BindListener
-import org.springframework.validation.BindingResult
-import uk.ac.warwick.tabula.UniversityId
-import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import javax.validation.Valid
 
-/**
- * Common superclass for creation and modification. Note that any defaults on the vars here are defaults
- * for creation; the Edit command should call .copyFrom(SmallGroupSet) to copy any existing properties.
- */
-abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentMembershipGroupIsUniversityIds: Boolean = true)
-	extends PromisingCommand[SmallGroupSet]
-	with SmallGroupSetProperties
-	with UpdatesStudentMembership
-	with SpecifiesGroupType
-	with SelfValidating
-	with BindListener {
+object ModifySmallGroupSetCommand {
+	def create(module: Module) =
+		new CreateSmallGroupSetCommandInternal(module)
+			with ComposableCommand[SmallGroupSet]
+			with SetDefaultSmallGroupSetName
+			with CreateSmallGroupSetPermissions
+			with CreateSmallGroupSetDescription
+			with ModifySmallGroupSetValidation
+			with AutowiringSmallGroupServiceComponent
 
-	val setOption : Option[SmallGroupSet]
-	
-	// start complicated membership stuff
+	def edit(module: Module, set: SmallGroupSet) =
+		new EditSmallGroupSetCommandInternal(module, set)
+			with ComposableCommand[SmallGroupSet]
+			with EditSmallGroupSetPermissions
+			with EditSmallGroupSetDescription
+			with ModifySmallGroupSetValidation
+			with AutowiringSmallGroupServiceComponent
+}
 
-	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroup]] =  setOption.map(_.upstreamAssessmentGroups)
-	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = setOption.map(_.members)
+trait ModifySmallGroupSetCommandState extends CurrentAcademicYear {
+	def module: Module
+	def existingSet: Option[SmallGroupSet]
 
-	def copyGroupsFrom(smallGroupSet: SmallGroupSet) {
-		upstreamGroups.addAll(availableUpstreamGroups filter { ug =>
-			assessmentGroups.exists( ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence )
-		})
+	var name: String = _
+
+	var format: SmallGroupFormat = _
+
+	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
+
+	var allowSelfGroupSwitching: Boolean = true
+	var studentsCanSeeTutorName: Boolean = false
+	var studentsCanSeeOtherMembers: Boolean = false
+
+	var collectAttendance: Boolean = true
+
+	var linkedDepartmentSmallGroupSet: DepartmentSmallGroupSet = _
+}
+
+trait CreateSmallGroupSetCommandState extends ModifySmallGroupSetCommandState {
+	val existingSet = None
+}
+
+trait EditSmallGroupSetCommandState extends ModifySmallGroupSetCommandState {
+	def set: SmallGroupSet
+	def existingSet = Some(set)
+}
+
+class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmallGroupSetCommandInternal with CreateSmallGroupSetCommandState {
+	self: SmallGroupServiceComponent =>
+
+	override def applyInternal() = transactional() {
+		val set = new SmallGroupSet(module)
+		copyTo(set)
+		smallGroupService.saveOrUpdate(set)
+		set
 	}
+}
 
-	/**
-	 * Convert Spring-bound upstream group references to an AssessmentGroup buffer
-	 */
-	def updateAssessmentGroups() {
-		assessmentGroups = upstreamGroups.asScala.flatMap ( ug => {
-			val template = new AssessmentGroup
-			template.assessmentComponent = ug.assessmentComponent
-			template.occurrence = ug.occurrence
-			template.smallGroupSet = setOption.getOrElse(null)
-			membershipService.getAssessmentGroup(template) orElse Some(template)
-		}).distinct.asJava
-	}
+trait SetDefaultSmallGroupSetName extends BindListener {
+	self: CreateSmallGroupSetCommandState =>
 
-	// end of complicated membership stuff
-		
-	// A collection of sub-commands for modifying the child groups
-	var groups: JList[ModifySmallGroupCommand] = LazyLists.create { () => 
-		new CreateSmallGroupCommand(this, module, this)
-	}
-	
-	def validate(errors: Errors) {
-		if (!name.hasText) errors.rejectValue("name", "smallGroupSet.name.NotEmpty")
-		else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroupSet.name.Length", Array[Object](200: JInteger), "")
-		
-		if (format == null) errors.rejectValue("format", "smallGroupSet.format.NotEmpty")
-		if (allocationMethod == null) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.NotEmpty")
-		
-		groups.asScala.zipWithIndex foreach { case (cmd, index) =>
-			errors.pushNestedPath("groups[" + index + "]")
-			cmd.validate(errors)
-			errors.popNestedPath()
+	override def onBind(result: BindingResult) {
+		// If we haven't set a name, make one up
+		if (!name.hasText) {
+			Option(format).foreach { format => name = "%s %ss".format(module.code.toUpperCase, format) }
 		}
 	}
-	
+}
+
+class EditSmallGroupSetCommandInternal(val module: Module, val set: SmallGroupSet) extends ModifySmallGroupSetCommandInternal with EditSmallGroupSetCommandState {
+	self: SmallGroupServiceComponent =>
+
+	copyFrom(set)
+
+	override def applyInternal() = transactional() {
+		copyTo(set)
+		smallGroupService.saveOrUpdate(set)
+		set
+	}
+}
+
+abstract class ModifySmallGroupSetCommandInternal extends CommandInternal[SmallGroupSet] with ModifySmallGroupSetCommandState {
 	def copyFrom(set: SmallGroupSet) {
 		name = set.name
 		academicYear = set.academicYear
@@ -89,86 +102,74 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 		allowSelfGroupSwitching = set.allowSelfGroupSwitching
 		studentsCanSeeTutorName = set.studentsCanSeeTutorName
 		studentsCanSeeOtherMembers = set.studentsCanSeeOtherMembers
-		defaultMaxGroupSizeEnabled = set.defaultMaxGroupSizeEnabled
-		defaultMaxGroupSize = set.defaultMaxGroupSize
 		collectAttendance = set.collectAttendance
-
-		// linked assessmentGroups
-		assessmentGroups = set.assessmentGroups
-
 		linkedDepartmentSmallGroupSet = set.linkedDepartmentSmallGroupSet
-
-		groups.clear()
-		groups.addAll(set.groups.asScala.map(x => {new EditSmallGroupCommand(x, this)}).asJava)
-		
-		if (set.members != null) members = set.members.duplicate()
 	}
-	
+
 	def copyTo(set: SmallGroupSet) {
 		set.name = name
 		set.academicYear = academicYear
 		set.format = format
 		set.allocationMethod = allocationMethod
-		
 		set.collectAttendance = collectAttendance
 
-		set.assessmentGroups.clear
-		set.assessmentGroups.addAll(assessmentGroups)
-		for (group <- set.assessmentGroups if group.smallGroupSet == null) {
-			group.smallGroupSet = set
-		}
-		
 		set.allowSelfGroupSwitching = allowSelfGroupSwitching
 		set.studentsCanSeeOtherMembers = studentsCanSeeOtherMembers
 		set.studentsCanSeeTutorName = studentsCanSeeTutorName
-		set.defaultMaxGroupSizeEnabled = defaultMaxGroupSizeEnabled
-		set.defaultMaxGroupSize = defaultMaxGroupSize
 
 		set.linkedDepartmentSmallGroupSet = linkedDepartmentSmallGroupSet
-
-		// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
-		// TAB-2304 Don't do a .clear() and .addAll() because that confuses Hibernate
-		val newGroups = groups.asScala.filter(!_.delete).map(_.apply())
-		set.groups.asScala.filterNot(newGroups.contains).foreach(set.groups.remove)
-		newGroups.filterNot(set.groups.contains).foreach(set.groups.add)
-		
-		if (set.members == null) set.members = UserGroup.ofUniversityIds
-		set.members.copyFrom(members)
 	}
-	
-	override def onBind(result: BindingResult) {
-		// If the last element of groups is both a Creation and is empty, disregard it
-		def isEmpty(cmd: ModifySmallGroupCommand) = cmd match {
-			case cmd: CreateSmallGroupCommand if !cmd.name.hasText && cmd.events.isEmpty => true
-			case _ => false
-		}
-		
-		while (!groups.isEmpty() && isEmpty(groups.asScala.last))
-			groups.remove(groups.asScala.last)
-			
-		// For each empty group, take our bound max group size value
-		groups.asScala.filter { _.events.isEmpty }.foreach { _.maxGroupSize = defaultMaxGroupSize }
-		
-		groups.asScala.foreach(_.onBind(result))
-	}
-
 }
 
+trait ModifySmallGroupSetValidation extends SelfValidating {
+	self: ModifySmallGroupSetCommandState =>
 
-trait SmallGroupSetProperties extends CurrentAcademicYear {
-	var name: String = _
+	override def validate(errors: Errors) {
+		if (!name.hasText) errors.rejectValue("name", "smallGroupSet.name.NotEmpty")
+		else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroupSet.name.Length", Array[Object](200: JInteger), "")
 
-	var format: SmallGroupFormat = _
+		if (format == null) errors.rejectValue("format", "smallGroupSet.format.NotEmpty")
+		if (allocationMethod == null) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.NotEmpty")
 
-	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
+		existingSet.foreach { set =>
+			if (academicYear != set.academicYear) errors.rejectValue("academicYear", "smallGroupSet.academicYear.cantBeChanged")
+		}
+	}
+}
 
-	var allowSelfGroupSwitching: Boolean = true
-	var studentsCanSeeTutorName:Boolean = false
-	var studentsCanSeeOtherMembers:Boolean = false
-	var defaultMaxGroupSizeEnabled:Boolean = false
-	var defaultMaxGroupSize:Int = SmallGroup.DefaultGroupSize
-	
-	var collectAttendance: Boolean = true
+trait CreateSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: CreateSmallGroupSetCommandState =>
 
-	var linkedDepartmentSmallGroupSet: DepartmentSmallGroupSet = _
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.SmallGroups.Create, mandatory(module))
+	}
+}
+
+trait CreateSmallGroupSetDescription extends Describable[SmallGroupSet] {
+	self: CreateSmallGroupSetCommandState =>
+
+	override def describe(d: Description) {
+		d.module(module).properties("name" -> name)
+	}
+
+	override def describeResult(d: Description, set: SmallGroupSet) =
+		d.smallGroupSet(set)
+}
+
+trait EditSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: EditSmallGroupSetCommandState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		mustBeLinked(set, module)
+		p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
+	}
+}
+
+trait EditSmallGroupSetDescription extends Describable[SmallGroupSet] {
+	self: EditSmallGroupSetCommandState =>
+
+	override def describe(d: Description) {
+		d.smallGroupSet(set)
+	}
+
 }

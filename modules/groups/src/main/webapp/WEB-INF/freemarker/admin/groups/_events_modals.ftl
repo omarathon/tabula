@@ -2,9 +2,7 @@
 	don't have to be rendered right next to each event. -->
 
 <#escape x as x?html>
-<@spring.bind path="academicYear">
-<#assign academicYear=status.actualValue />
-</@spring.bind>
+<#assign academicYear=smallGroupSet.academicYear />
 
 <#-- Groups section should be open once modal is closed -->
 <input type="hidden" name="openGroupsDetails" id="openGroupsDetails-input" value="true" />
@@ -84,22 +82,22 @@
 </#macro>
 
 <#list groups as group>
-<@spring.nestedPath path="groups[${group_index}]">
-	<@spring.nestedPath path="events[${group.events?size}]">
-		<@modal group_index group.events?size>
-		Add event for ${group.name!""}
-		</@modal>
-	</@spring.nestedPath>
-	<#list group.events as event>
-		<@spring.nestedPath path="events[${event_index}]">
-		<#if !((event.isEmpty())!false) || event_has_next>
-			<@modal group_index event_index>
-				Edit event for ${group.name!""}
+	<@spring.nestedPath path="groups[${group.id}]">
+		<@spring.nestedPath path="events[${group.events?size}]">
+			<@modal group_index group.events?size>
+				Add event for ${group.name!""}
 			</@modal>
-		</#if>
 		</@spring.nestedPath>
-	</#list>
-</@spring.nestedPath>
+		<#list group.events as event>
+			<@spring.nestedPath path="events[${event_index}]">
+			<#if !((event.isEmpty())!false) || event_has_next>
+				<@modal group_index event_index>
+					Edit event for ${group.name!""}
+				</@modal>
+			</#if>
+			</@spring.nestedPath>
+		</#list>
+	</@spring.nestedPath>
 </#list>
 
 </#escape>

@@ -10,15 +10,22 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.{AutowiringAssignmentMembershipServiceComponent, AutowiringUserLookupComponent, AssignmentService}
 
 
 /**
  * Common behaviour
  */
- abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembershipGroupIsUniversityIds:Boolean=false)
-	extends Command[Assignment] with SharedAssignmentProperties with SelfValidating with UpdatesStudentMembership
-	with SpecifiesGroupType with CurrentAcademicYear with SchedulesNotifications[Assignment] {
+abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembershipGroupIsUniversityIds:Boolean=false)
+	extends Command[Assignment]
+		with SharedAssignmentProperties
+		with SelfValidating
+		with SpecifiesGroupType
+		with CurrentAcademicYear
+		with SchedulesNotifications[Assignment]
+		with AutowiringUserLookupComponent
+		with AutowiringAssignmentMembershipServiceComponent
+		with UpdatesStudentMembership {
 
 	var service = Wire.auto[AssignmentService]
 
@@ -150,7 +157,7 @@ import uk.ac.warwick.tabula.services.AssignmentService
 			template.assessmentComponent = ug.assessmentComponent
 			template.occurrence = ug.occurrence
 			template.assignment = assignment
-			membershipService.getAssessmentGroup(template) orElse Some(template)
+			assignmentMembershipService.getAssessmentGroup(template) orElse Some(template)
 		}).distinct.asJava
 	}
 

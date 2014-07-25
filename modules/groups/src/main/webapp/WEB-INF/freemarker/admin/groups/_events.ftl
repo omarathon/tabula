@@ -1,7 +1,5 @@
 <#escape x as x?html>
-	<@spring.bind path="academicYear">
-		<#assign academicYear=status.actualValue />
-	</@spring.bind>
+	<#assign academicYear=smallGroupSet.academicYear />
 	
 	<#macro button group_index event_index extra_classes="">
 		<button type="button" data-target="#group${group_index}-event${event_index}-modal" class="btn ${extra_classes}" data-toggle="modal">
@@ -12,46 +10,28 @@
 
 	<div class="striped-section-contents">
 		<#list groups as group>
-			<@spring.nestedPath path="groups[${group_index}]">
-				<@spring.bind path="delete">
-					<#assign deleteGroup=status.actualValue />
-				</@spring.bind>
-			
-				<div class="item-info<#if deleteGroup> deleted</#if>">
+			<@spring.nestedPath path="groups[${group.id}]">
+				<div class="item-info">
 					<div class="row-fluid">
 						<div class="span10 groupDetail">
 							<h3 class="name inline-block">
 								${group.name!""}
-								<#if !newRecord>
-									<small><@fmt.p (group.group.students.size)!0 "student" "students" /></small>
-								</#if>
+								<small><@fmt.p (group.students.size)!0 "student" "students" /></small>
 							</h3>
-							<#assign unlimited = !((smallGroupSet.defaultMaxGroupSizeEnabled)!false) />
-
-							<span class="groupSizeUnlimited groupSizeDetails" <#if !unlimited>style="display:none;"</#if>>
-								Unlimited group size
-							</span>
-							<span class="groupSizeLimited groupSizeDetails" <#if unlimited>style="display:none;"</#if>>
-								Maximum group size: <@f.input path="maxGroupSize" type="number" min="0" cssClass="input-small" />
-							</span>
 						</div>
 						<div class="span2">
-							<#if !deleteGroup>
-								<@spring.nestedPath path="events[${group.events?size}]">
-									<@button group_index=group_index event_index=group.events?size extra_classes="pull-right">
-										Add event
-									</@button>
-								</@spring.nestedPath>
-							<#else>
-								<div><span class="label label-important pull-right" data-toggle="tooltip" title="This group, any events and any allocation will be deleted when you click Save">Marked for deletion</span></div>
-							</#if>
+							<@spring.nestedPath path="events[${group.events?size}]">
+								<@button group_index=group_index event_index=group.events?size extra_classes="pull-right">
+									Add event
+								</@button>
+							</@spring.nestedPath>
 						</div>
 					</div>
 
 					<div class="row-fluid">
 						<div class="span12">
 							<ul class="events unstyled">
-								<#list group.events as event>
+								<#list mapGet(command.groups, group).events as event>
 									<#if !((event.isEmpty())!false) || event_has_next>
 										<@spring.nestedPath path="events[${event_index}]">
 											<li>
@@ -72,22 +52,20 @@
 												<#if event.startTime??><@fmt.time event.startTime /><#else>[no start time]</#if> 
 												- 
 												<#if event.endTime??><@fmt.time event.endTime /><#else>[no end time]</#if><#if event.location?has_content>,</#if>
-												${event.location!"[no location]"}
-												
-												<#if !deleteGroup>
-													<div class="buttons pull-right">
-														<@button group_index event_index "btn-mini btn-info">
-															Edit
-														</@button>
-													
-														<button type="button" class="btn btn-danger btn-mini" data-toggle="delete" data-value="true" data-target="#group${group_index}_event${event_index}_delete">
-															<i class="icon-remove"></i>
-														</button>
-														<button type="button" class="btn btn-info btn-mini" data-toggle="delete" data-value="false" data-target="#group${group_index}_event${event_index}_delete">
-															<i class="icon-undo"></i>
-														</button>
-													</div>
-												</#if>
+												<#if (event.location!"")?length gt 0>${event.location}<#else>[no location]</#if>
+
+												<div class="buttons pull-right">
+													<@button group_index event_index "btn-mini btn-info">
+														Edit
+													</@button>
+
+													<button type="button" class="btn btn-danger btn-mini" data-toggle="delete" data-value="true" data-target="#group${group_index}_event${event_index}_delete">
+														<i class="icon-remove"></i>
+													</button>
+													<button type="button" class="btn btn-info btn-mini" data-toggle="delete" data-value="false" data-target="#group${group_index}_event${event_index}_delete">
+														<i class="icon-undo"></i>
+													</button>
+												</div>
 											</li>
 										</@spring.nestedPath>
 									</#if>

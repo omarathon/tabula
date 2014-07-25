@@ -38,7 +38,7 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 		classes.find(_.startsWith("groupset-")).get.replaceFirst("groupset-","")
 	}
 
-	def goToEditProperties:EditSmallGroupSetPropertiesPage = {
+	def goToEditProperties: EditSmallGroupSetPropertiesPage = {
 		underlying.findElement(By.partialLinkText("Actions")).click()
 		val editGroupset = underlying.findElement(By.partialLinkText("Edit properties"))
 		eventually {
@@ -49,6 +49,26 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 		// HACK: the module name is the module code in uppercase in the test data. Should really pass it around separately
 		propsPage.isCurrentPage(moduleCode.toUpperCase)
 		propsPage
+	}
+
+	def goToEditStudents: EditSmallGroupSetStudentsPage = {
+		val propsPage = goToEditProperties
+		propsPage.submitAndAddStudents()
+
+		val studentsPage = new EditSmallGroupSetStudentsPage()
+		// HACK: the module name is the module code in uppercase in the test data. Should really pass it around separately
+		studentsPage.isCurrentPage(moduleCode.toUpperCase)
+		studentsPage
+	}
+
+	def goToEditGroups: EditSmallGroupSetGroupsPage = {
+		val studentsPage = goToEditStudents
+		studentsPage.submitAndAddGroups()
+
+		val groupsPage = new EditSmallGroupSetGroupsPage()
+		// HACK: the module name is the module code in uppercase in the test data. Should really pass it around separately
+		groupsPage.isCurrentPage(moduleCode.toUpperCase)
+		groupsPage
 	}
 
 	def goToAllocate = {

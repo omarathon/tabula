@@ -1,56 +1,144 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.SmallGroupService
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.Transactions._
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.StringUtils._
+import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.helpers.LazyLists
-import uk.ac.warwick.tabula.groups.services.docconversion.GroupsExtractor
-import org.springframework.validation.BindingResult
-import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.StudentSignUp
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroup, SmallGroupSet}
+import uk.ac.warwick.tabula.groups.services.docconversion.{AutowiringGroupsExtractorComponent, GroupsExtractorComponent, GroupsExtractor}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
-class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet, val viewer: CurrentUser)
-	extends Command[SmallGroupSet]
-		with GroupsObjectsWithFileUpload[User, SmallGroup]
-		with SelfValidating
-		with BindListener
-		with SmallGroupSetCommand
-		with MemberCollectionHelper
-		with NotifiesAffectedGroupMembers {
+object AllocateStudentsToGroupsCommand {
+	def apply(module: Module, set: SmallGroupSet, viewer: CurrentUser) =
+		new AllocateStudentsToGroupsCommandInternal(module, set, viewer)
+			with ComposableCommand[SmallGroupSet]
+			with AllocateStudentsToGroupsSorting
+			with AllocateStudentsToGroupsFileUploadSupport
+			with PopulateAllocateStudentsToGroupsCommand
+			with AllocateStudentsToGroupsPermissions
+			with AllocateStudentsToGroupsDescription
+			with AllocateStudentsToGroupsValidation
+			with AllocateStudentsToGroupsViewHelpers
+			with NotifiesAffectedGroupMembers
+			with AutowiringProfileServiceComponent
+			with AutowiringSecurityServiceComponent
+			with AutowiringSmallGroupServiceComponent
+			with AutowiringUserLookupComponent
+			with AutowiringGroupsExtractorComponent
+}
 
-	mustBeLinked(set, module)
-	PermissionCheck(Permissions.SmallGroups.Allocate, set)
+class AllocateStudentsToGroupsCommandInternal(val module: Module, val set: SmallGroupSet, val viewer: CurrentUser) extends CommandInternal[SmallGroupSet] with AllocateStudentsToGroupsCommandState {
+	self: GroupsObjects[User, SmallGroup] with SmallGroupServiceComponent =>
 
+	override def applyInternal() = transactional() {
+		for ((group, users) <- mapping.asScala) {
+			val userGroup = UserGroup.ofUniversityIds
+			users.asScala.foreach { user => userGroup.addUserId(user.getWarwickId) }
+			group.students.copyFrom(userGroup)
+			smallGroupService.saveOrUpdate(group)
+		}
+		set
+	}
+}
+
+trait AllocateStudentsToGroupsSorting extends GroupsObjects[User, SmallGroup] {
 	// Sort users by last name, first name
 	implicit val defaultOrderingForUser = Ordering.by { user: User => (user.getLastName, user.getFirstName, user.getUserId) }
 
-	var userLookup = Wire[UserLookupService]
-	val apparentUser = viewer.apparentUser
+	// Sort all the lists of users by surname, firstname.
+	override def sort() {
+		def validUser(user: User) = user.isFoundUser && user.getWarwickId.hasText
 
-	var service = Wire[SmallGroupService]
-	var profileService = Wire[ProfileService]
-	var securityService = Wire[SecurityService]
-	var groupsExtractor = Wire.auto[GroupsExtractor]
+		// Because sortBy is not an in-place sort, we have to replace the lists entirely.
+		// Alternative is Collections.sort or math.Sorting but these would be more code.
+		for ((group, users) <- mapping.asScala) {
+			mapping.put(group, JArrayList(users.asScala.toList.filter(validUser).sorted))
+		}
+
+		unallocated = JArrayList(unallocated.asScala.toList.filter(validUser).sorted)
+	}
+}
+
+trait AllocateStudentsToGroupsFileUploadSupport extends GroupsObjectsWithFileUpload[User, SmallGroup] {
+	self: AllocateStudentsToGroupsCommandState with GroupsExtractorComponent with UserLookupComponent with SmallGroupServiceComponent =>
+
+	override def validateUploadedFile(result: BindingResult) {
+		val fileNames = file.fileNames map (_.toLowerCase)
+		val invalidFiles = fileNames.filter(s => !GroupsExtractor.AcceptedFileExtensions.exists(s.endsWith))
+
+		if (invalidFiles.size > 0) {
+			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
+			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+		}
+	}
+
+	override def extractDataFromFile(file: FileAttachment, result: BindingResult) = {
+		val allocations = groupsExtractor.readXSSFExcelFile(file.dataStream)
+
+		// work out users to add to set (all users mentioned in spreadsheet - users currently in set)
+		val allocateUsers = userLookup.getUsersByWarwickUniIds(allocations.asScala.map { _.universityId }.filter { _.hasText }).values.toSet
+		val usersToAddToSet = allocateUsers.filterNot(set.allStudents.toSet)
+		for(user <- usersToAddToSet) set.members.add(user)
+
+		allocations.asScala
+			.filter(_.groupId != null)
+			.groupBy{ x => smallGroupService.getSmallGroupById(x.groupId).orNull }
+			.mapValues{ values =>
+			values.map(item => allocateUsers.find(item.universityId == _.getWarwickId).getOrElse(null)).asJava
+		}
+	}
+}
+
+trait AllocateStudentsToGroupsCommandState extends SmallGroupSetCommand {
+	def module: Module
+	def set: SmallGroupSet
+	def viewer: CurrentUser
+	def apparentUser = viewer.apparentUser
+
+	def isStudentSignup = set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp
+}
+
+trait AllocateStudentsToGroupsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: AllocateStudentsToGroupsCommandState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		mustBeLinked(set, module)
+		p.PermissionCheck(Permissions.SmallGroups.Allocate, mandatory(set))
+	}
+}
+
+trait AllocateStudentsToGroupsDescription extends Describable[SmallGroupSet] {
+	self: AllocateStudentsToGroupsCommandState =>
+
+	override def describe(d: Description) {
+		d.smallGroupSet(set)
+	}
+
+}
+
+trait AllocateStudentsToGroupsValidation extends SelfValidating {
+	self: AllocateStudentsToGroupsCommandState with GroupsObjects[User, SmallGroup] =>
+
+	override def validate(errors: Errors) {
+		// Disallow submitting unrelated Groups
+		if (!mapping.asScala.keys.forall( g => set.groups.contains(g) )) {
+			errors.reject("smallGroup.allocation.groups.invalid")
+		}
+	}
+}
+
+trait PopulateAllocateStudentsToGroupsCommand extends PopulateOnForm {
+	self: AllocateStudentsToGroupsCommandState with GroupsObjects[User, SmallGroup] with ProfileServiceComponent =>
 
 	for (group <- set.groups.asScala) mapping.put(group, JArrayList())
 
-	var isStudentSignup = set.allocationMethod == StudentSignUp
-
-	// Only called on initial form view
 	override def populate() {
 		for (group <- set.groups.asScala)
 			mapping.put(group, JArrayList(group.students.users.toList))
@@ -67,13 +155,17 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 		}
 		membersFiltered.map { mem => mem.asSsoUser}
 	}
+}
+
+trait AllocateStudentsToGroupsViewHelpers extends MemberCollectionHelper {
+	self: AllocateStudentsToGroupsCommandState with GroupsObjects[User, SmallGroup] with ProfileServiceComponent with SecurityServiceComponent =>
 
 	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.
 	// Do not modify the returned value!
 	def mappingById =
 		(mapping.asScala
-		.filter { case (group, users) => group != null && users != null }
-		.map {
+			.filter { case (group, users) => group != null && users != null }
+			.map {
 			case (group, users) => (group.id, users)
 		}).toMap
 
@@ -81,6 +173,8 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	lazy val membersById = loadMembersById
 
 	def loadMembersById = {
+		def validUser(user: User) = user.isFoundUser && user.getWarwickId.hasText
+
 		val allUsers = (unallocated.asScala ++ (for ((group, users) <- mapping.asScala) yield users.asScala).flatten)
 		val allUniversityIds = allUsers.filter(validUser).map { _.getWarwickId }
 		val members = profileService.getAllMembersWithUniversityIds(allUniversityIds)
@@ -96,63 +190,4 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	def allMembersYears(): Seq[JInteger] = {
 		allMembersYears(membersById.values)
 	}
-
-	// Sort all the lists of users by surname, firstname.
-	override def sort() {
-		// Because sortBy is not an in-place sort, we have to replace the lists entirely.
-		// Alternative is Collections.sort or math.Sorting but these would be more code.
-		for ((group, users) <- mapping.asScala) {
-			mapping.put(group, JArrayList(users.asScala.toList.filter(validUser).sorted))
-		}
-
-		unallocated = JArrayList(unallocated.asScala.toList.filter(validUser).sorted)
-	}
-
-	final def applyInternal() = transactional() {
-		for ((group, users) <- mapping.asScala) {
-			val userGroup = UserGroup.ofUniversityIds
-			users.asScala.foreach { user => userGroup.addUserId(user.getWarwickId) }
-			group.students.copyFrom(userGroup)
-			service.saveOrUpdate(group)
-		}
-		set
-	}
-
-	def validate(errors: Errors) {
-		// Disallow submitting unrelated Groups
-		if (!mapping.asScala.keys.forall( g => set.groups.contains(g) )) {
-			errors.reject("smallGroup.allocation.groups.invalid")
-		}
-	}
-
-	private def validUser(user: User) = user.isFoundUser && user.getWarwickId.hasText
-	
-	def validateUploadedFile(result: BindingResult) {
-		val fileNames = file.fileNames map (_.toLowerCase)
-		val invalidFiles = fileNames.filter(s => !GroupsExtractor.AcceptedFileExtensions.exists(s.endsWith))
-
-		if (invalidFiles.size > 0) {
-			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
-			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
-		}
-	}
-
-	def extractDataFromFile(file: FileAttachment, result: BindingResult) = {
-		val allocations = groupsExtractor.readXSSFExcelFile(file.dataStream)
-
-		// work out users to add to set (all users mentioned in spreadsheet - users currently in set)
-		val allocateUsers = userLookup.getUsersByWarwickUniIds(allocations.asScala.map { _.universityId }.filter { _.hasText }).values.toSet
-		val usersToAddToSet = allocateUsers.filterNot(set.allStudents.toSet)
-		for(user <- usersToAddToSet) set.members.add(user)
-
-		allocations.asScala
-			.filter(_.groupId != null)
-			.groupBy{ x => service.getSmallGroupById(x.groupId).orNull }
-			.mapValues{ values =>
-				values.map(item => allocateUsers.find(item.universityId == _.getWarwickId).getOrElse(null)).asJava
-			}
-	}
-
-	def describe(d: Description) = d.smallGroupSet(set)
-
 }

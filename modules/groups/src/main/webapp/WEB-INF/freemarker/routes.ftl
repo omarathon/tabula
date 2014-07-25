@@ -30,6 +30,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro openset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/open" /></#macro>
 <#macro closeset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/close" /></#macro>
 
+<#macro createsetallocate set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}/allocate" /></#macro>
+<#macro editsetallocate set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/allocate" /></#macro>
+
 <#macro register event><@_u page="/event/${event.id}/register" /></#macro>
 <#macro registerForWeek event week><@_u page="/event/${event.id}/register?week=${week?c}" /></#macro>
 <#macro groupAttendance group><@_u page="/group/${group.id}/attendance" /></#macro>
