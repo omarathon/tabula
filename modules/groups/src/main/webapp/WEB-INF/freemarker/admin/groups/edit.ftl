@@ -22,19 +22,17 @@
 	<div class="submit-buttons">
 		<input
 			type="submit"
-			class="btn btn-success use-tooltip"
+			class="btn btn-success"
 			name="${ManageSmallGroupsMappingParameters.editAndAddStudents}"
 			value="Save and add students"
 			title="Add students to these groups"
-			data-container="body"
 			/>
 		<input
 			type="submit"
-			class="btn btn-primary use-tooltip"
+			class="btn btn-primary"
 			name="create"
 			value="Save and exit"
 			title="Save your groups and add students later"
-			data-container="body"
 			/>
 		<a class="btn" href="<@routes.depthome module=smallGroupSet.module />">Cancel</a>
 	</div>

@@ -40,7 +40,7 @@ class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet)
 
 	override def applyInternal() = {
 		set.defaultMaxGroupSizeEnabled = defaultMaxGroupSizeEnabled
-		set.defaultMaxGroupSize = defaultMaxGroupSize
+		if (defaultMaxGroupSizeEnabled) set.defaultMaxGroupSize = defaultMaxGroupSize
 
 		groupNames.asScala.zipWithIndex.foreach { case (name, i) =>
 			val group =

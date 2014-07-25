@@ -133,6 +133,8 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid @ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors) = {
+		println(errors)
+
 		if (errors.hasErrors) form(cmd)
 		else {
 			cmd.apply()
