@@ -415,15 +415,16 @@
 		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
 		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
 	</#local>
+	<#local startDateInFuture = point.startDateInFuture />
 	<select
 		id="${id}"
 		name="${name}"
 		title="${tooltipContent}"
 	>
 		<option value="" <#if !checkpoint?has_content >selected</#if>>Not recorded</option>
-		<option value="unauthorised" <#if checkpoint?has_content && checkpoint.state.dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
+		<option <#if startDateInFuture>class="disabled" title="This event hasn't happened yet so it can't be marked as missed (unauthorised)" </#if> value="unauthorised" <#if checkpoint?has_content && checkpoint.state.dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
 		<option value="authorised" <#if checkpoint?has_content && checkpoint.state.dbValue == "authorised">selected</#if>>Missed (authorised)</option>
-		<option value="attended" <#if checkpoint?has_content && checkpoint.state.dbValue == "attended">selected</#if>>Attended</option>
+		<option <#if startDateInFuture>class="disabled" title="This event hasn't happened yet so it can't be marked as attended" </#if> value="attended" <#if checkpoint?has_content && checkpoint.state.dbValue == "attended">selected</#if>>Attended</option>
 	</select>
 </#macro>
 

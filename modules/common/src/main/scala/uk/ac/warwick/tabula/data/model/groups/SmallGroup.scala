@@ -1,18 +1,19 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import org.hibernate.annotations.{Filter, FilterDef, BatchSize, AccessType}
-import javax.persistence._
 import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.JavaImports._
+import javax.persistence._
+
+import org.hibernate.annotations.{AccessType, BatchSize, Filter, FilterDef}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.ToString
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.data.PostLoadBehaviour
-import javax.validation.constraints.NotNull
+import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, UserGroupCacheManager}
+
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.services.{UserGroupCacheManager, SmallGroupService, SmallGroupMembershipHelpers}
 
 object SmallGroup {
 	final val NotDeletedFilter = "notDeleted"
@@ -47,7 +48,7 @@ class SmallGroup
 		with PostLoadBehaviour
 		with ToEntityReference {
 	type Entity = SmallGroup
-	import SmallGroup._
+	import uk.ac.warwick.tabula.data.model.groups.SmallGroup._
 	
 	@transient var permissionsService = Wire[PermissionsService]
 
@@ -90,13 +91,14 @@ class SmallGroup
 	@JoinColumn(name = "studentsgroup_id")
 	private var _studentsGroup: UserGroup = UserGroup.ofUniversityIds
   def students: UnspecifiedTypeUserGroup = {
-		Option(linkedDepartmentSmallGroup).map { _.students }.getOrElse {
-			smallGroupService match {
-				case Some(smallGroupService) => {
-					new UserGroupCacheManager(_studentsGroup, smallGroupService.studentGroupHelper)
+		linkedDepartmentSmallGroup match {
+			case ldsg: DepartmentSmallGroup => ldsg.students
+			case _ =>
+				smallGroupService match {
+					case Some(service) =>
+						new UserGroupCacheManager(_studentsGroup, service.studentGroupHelper)
+					case _ => _studentsGroup
 				}
-				case _ => _studentsGroup
-			}
 		}
 	}
 	def students_=(group: UserGroup) { _studentsGroup = group }

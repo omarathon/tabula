@@ -6,16 +6,30 @@
 var exports = {};
 
 exports.createButtonGroup = function(id){
-    var $this = $(id), selectedValue = $this.find('option:selected').val();
-    var activeButton = $('.recordCheckpointForm div.forCloning div.btn-group')
-        .clone(true)
-        .insertAfter($this)
+    var $this = $(id), selectedValue = $this.find('option:selected').val(), disabledOptions = $this.find('option.disabled');
+
+    var disabledOptionValues = $.map(disabledOptions, function(option) {return option.value});
+
+    var clonedButtons = $('.recordCheckpointForm div.forCloning div.btn-group')
+    	.clone(true)
+    	.insertAfter($this)
+
+    var activeButton = clonedButtons
         .find('button').filter(function(){
             return $(this).data('state') == selectedValue;
         }).addClass('active');
+
     if ($this.attr('title') && $this.attr('title').length > 0) {
         activeButton.attr('title', '<p>' + activeButton.attr('title') +'</p>' + $this.attr('title'));
     }
+
+    clonedButtons.find('button').each(function(){
+    	var index = $.inArray($(this).data('state'), disabledOptionValues);
+    	if (index > -1) {
+    		$(this).addClass('disabled').attr('title', disabledOptions[index].getAttribute('title'));
+    	}
+    });
+
     $this.hide();
 };
 
