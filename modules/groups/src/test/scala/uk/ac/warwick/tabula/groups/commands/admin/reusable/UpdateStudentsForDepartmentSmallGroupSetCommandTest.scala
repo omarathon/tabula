@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.groups.commands.admin.reusable
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{UserGroup, UnspecifiedTypeUserGroup}
-import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{UserGroupCacheManager, SmallGroupService, SmallGroupServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -19,9 +19,11 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
 		case ug: UserGroup => ug.userLookup = userLookup
 	}
 
-	private trait CommandTestSupport extends UserLookupComponent with SmallGroupServiceComponent {
+	private trait CommandTestSupport extends UserLookupComponent with SmallGroupServiceComponent with RemovesUsersFromDepartmentGroups {
 		val userLookup = UpdateStudentsForDepartmentSmallGroupSetCommandTest.this.userLookup
 		val smallGroupService = smartMock[SmallGroupService]
+
+		def removeFromGroup(user: User, group: DepartmentSmallGroup) = group.students.remove(user)
 	}
 
 	private trait Fixture {

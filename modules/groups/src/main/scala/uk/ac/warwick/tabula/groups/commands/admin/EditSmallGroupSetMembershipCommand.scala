@@ -1,12 +1,14 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 object EditSmallGroupSetMembershipCommand {
@@ -16,6 +18,7 @@ object EditSmallGroupSetMembershipCommand {
 			with AutowiringAssignmentMembershipServiceComponent
 			with ComposableCommand[SmallGroupSet]
 			with SmallGroupAutoDeregistration
+			with RemovesUsersFromGroupsCommand
 			with ModifiesSmallGroupSetMembership
 			with EditSmallGroupSetMembershipPermissions
 			with EditSmallGroupSetMembershipDescription
@@ -111,7 +114,7 @@ trait ModifiesSmallGroupSetMembership extends UpdatesStudentMembership with Spec
 }
 
 trait SmallGroupAutoDeregistration {
-	self: AssignmentMembershipServiceComponent with EditSmallGroupSetMembershipCommandState with ModifiesSmallGroupSetMembership =>
+	self: AssignmentMembershipServiceComponent with EditSmallGroupSetMembershipCommandState with ModifiesSmallGroupSetMembership with RemovesUsersFromGroups =>
 
 	def autoDeregister(fn: () => SmallGroupSet) = {
 		val oldUsers =
@@ -127,7 +130,7 @@ trait SmallGroupAutoDeregistration {
 			user <- oldUsers -- newUsers
 			group <- updatedSet.groups.asScala
 			if (group.students.includesUser(user))
-		} ??? // TODO FIXME removeFromGroupCommand(user, group).apply()
+		} removeFromGroup(user, group)
 
 		updatedSet
 	}
@@ -167,4 +170,12 @@ trait StubEditSmallGroupSetMembershipPermissions extends RequiresPermissionsChec
 			CheckablePermission(Permissions.SmallGroups.Update, mandatory(module))
 		))
 	}
+}
+
+trait RemovesUsersFromGroups {
+	def removeFromGroup(user: User, group: SmallGroup)
+}
+
+trait RemovesUsersFromGroupsCommand extends RemovesUsersFromGroups {
+	def removeFromGroup(user: User, group: SmallGroup) = new RemoveUserFromSmallGroupCommand(user, group).apply()
 }

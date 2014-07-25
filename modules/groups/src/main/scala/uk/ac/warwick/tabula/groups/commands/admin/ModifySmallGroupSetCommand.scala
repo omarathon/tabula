@@ -130,6 +130,10 @@ trait ModifySmallGroupSetValidation extends SelfValidating {
 
 		if (format == null) errors.rejectValue("format", "smallGroupSet.format.NotEmpty")
 		if (allocationMethod == null) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.NotEmpty")
+
+		existingSet.foreach { set =>
+			if (academicYear != set.academicYear) errors.rejectValue("academicYear", "smallGroupSet.academicYear.cantBeChanged")
+		}
 	}
 }
 

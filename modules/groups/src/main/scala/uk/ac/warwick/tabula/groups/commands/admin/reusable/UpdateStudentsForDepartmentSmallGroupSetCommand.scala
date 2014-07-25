@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.groups.commands.admin.reusable
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
@@ -17,13 +17,14 @@ object UpdateStudentsForDepartmentSmallGroupSetCommand {
 			with ComposableCommand[DepartmentSmallGroupSet]
 			with UpdateStudentsForDepartmentSmallGroupSetPermissions
 			with UpdateStudentsForDepartmentSmallGroupSetDescription
+			with RemovesUsersFromDepartmentGroupsCommand
 			with AutowiringUserLookupComponent
 			with AutowiringSmallGroupServiceComponent
 }
 
 class UpdateStudentsForDepartmentSmallGroupSetCommandInternal(val department: Department, val set: DepartmentSmallGroupSet)
 	extends CommandInternal[DepartmentSmallGroupSet] with UpdateStudentsForDepartmentSmallGroupSetCommandState {
-	self: UserLookupComponent with SmallGroupServiceComponent =>
+	self: UserLookupComponent with SmallGroupServiceComponent with RemovesUsersFromDepartmentGroups =>
 
 	override def applyInternal() = {
 		val autoDeregister = set.department.autoGroupDeregistration
@@ -50,12 +51,11 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandInternal(val department: De
 
 		// TAB-1561
 		if (autoDeregister) {
-			// TODO FIXME Wrap removal in a sub-command so that we can do auditing
 			for {
 				user <- oldUsers -- newUsers
 				group <- set.groups.asScala
 				if (group.students.includesUser(user))
-			} group.students.remove(user)
+			} removeFromGroup(user, group)
 		}
 
 		smallGroupService.saveOrUpdate(set)
@@ -112,4 +112,12 @@ trait UpdateStudentsForDepartmentSmallGroupSetDescription extends Describable[De
 	override def describe(d: Description) {
 		d.properties("smallGroupSet" -> set.id)
 	}
+}
+
+trait RemovesUsersFromDepartmentGroups {
+	def removeFromGroup(user: User, group: DepartmentSmallGroup)
+}
+
+trait RemovesUsersFromDepartmentGroupsCommand extends RemovesUsersFromDepartmentGroups {
+	def removeFromGroup(user: User, group: DepartmentSmallGroup) = new RemoveUserFromDepartmentSmallGroupCommand(user, group).apply()
 }
