@@ -20,12 +20,12 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 	extends Command[Assignment]
 		with SharedAssignmentProperties
 		with SelfValidating
-		with UpdatesStudentMembership
 		with SpecifiesGroupType
 		with CurrentAcademicYear
 		with SchedulesNotifications[Assignment]
 		with AutowiringUserLookupComponent
-		with AutowiringAssignmentMembershipServiceComponent {
+		with AutowiringAssignmentMembershipServiceComponent
+		with UpdatesStudentMembership {
 
 	var service = Wire.auto[AssignmentService]
 
