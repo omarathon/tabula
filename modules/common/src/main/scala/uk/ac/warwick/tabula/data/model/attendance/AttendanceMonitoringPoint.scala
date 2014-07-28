@@ -58,6 +58,9 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 	def isDateValidForPoint(date: LocalDate): Boolean =
 		date == startDate || date == endDate || (startDate.isBefore(date) && endDate.isAfter(date))
 
+	def isStartDateInFuture(): Boolean =
+		DateTime.now.isBefore(startDate.toDateTimeAtStartOfDay)
+
 	@Column(name="point_type")
 	@NotNull
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointTypeUserType")
@@ -115,7 +118,7 @@ trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehavio
 
 	// Setting for MonitoringPointType.Meeting
 	def meetingRelationships = getStringSeqSetting(Settings.MeetingRelationships, Seq())
-		.map(relationshipService.getStudentRelationshipTypeById(_).getOrElse(null))
+		.map(relationshipService.getStudentRelationshipTypeById(_).orNull)
 	def meetingRelationships_= (relationships: Seq[StudentRelationshipType]):Unit =
 		settings += (Settings.MeetingRelationships -> relationships.map(_.id))
 	// Ugh. This sucks. But Spring always wants to use the Seq version if they share a method name, and therefore won't bind
@@ -145,7 +148,7 @@ trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehavio
 	}
 
 	def smallGroupEventModules = getStringSeqSetting(Settings.SmallGroupEventModules, Seq())
-		.map(moduleAndDepartmentService.getModuleById(_).getOrElse(null))
+		.map(moduleAndDepartmentService.getModuleById(_).orNull)
 	def smallGroupEventModules_= (modules: Seq[Module]) =
 		settings += (Settings.SmallGroupEventModules -> modules.map(_.id))
 	// See above
@@ -167,7 +170,7 @@ trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehavio
 	}
 
 	def assignmentSubmissionModules = getStringSeqSetting(Settings.AssignmentSubmissionModules, Seq())
-		.map(moduleAndDepartmentService.getModuleById(_).getOrElse(null))
+		.map(moduleAndDepartmentService.getModuleById(_).orNull)
 	def assignmentSubmissionModules_= (modules: Seq[Module]) =
 		settings += (Settings.AssignmentSubmissionModules -> modules.map(_.id))
 	// See above
@@ -175,7 +178,7 @@ trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehavio
 		assignmentSubmissionModules = modules.asScala.toSeq
 
 	def assignmentSubmissionAssignments = getStringSeqSetting(Settings.AssignmentSubmissionAssignments, Seq())
-		.map(assignmentService.getAssignmentById(_).getOrElse(null))
+		.map(assignmentService.getAssignmentById(_).orNull)
 	def assignmentSubmissionAssignments_= (assignments: Seq[Assignment]) =
 		settings += (Settings.AssignmentSubmissionAssignments -> assignments.map(_.id))
 	// See above

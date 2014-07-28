@@ -66,16 +66,28 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 				intervalFormatter.exec(JList(
 					wrapper.wrap(point.startDate.toDate),
 					wrapper.wrap(point.endDate.toDate)
-				))
+				)).asInstanceOf[String]
 			case AttendanceMonitoringPointStyle.Week =>
 				val wholeWeekFormatter = Environment.getCurrentEnvironment.getGlobalVariable("wholeWeekFormatter").asInstanceOf[TemplateMethodModel]
-				wholeWeekFormatter.exec(JList(
+				val userFormat = wholeWeekFormatter.exec(JList(
 					wrapper.wrap(point.startWeek),
 					wrapper.wrap(point.endWeek),
 					wrapper.wrap(point.scheme.academicYear),
 					wrapper.wrap(department),
 					wrapper.wrap(false)
-				))
+				)).asInstanceOf[String]
+				if (userFormat.indexOf("w/c") == -1) {
+					userFormat + s" (${
+						wholeWeekFormatter.exec(JList(
+							wrapper.wrap(point.startWeek),
+							wrapper.wrap(point.endWeek),
+							wrapper.wrap(point.scheme.academicYear),
+							wrapper.wrap(false)
+						)).asInstanceOf[String]
+					})"
+				} else {
+					userFormat
+				}
 		}
 	}
 
@@ -94,7 +106,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 					"Attended",
 					"label-success",
 					"icon-ok attended",
-					s"Attended: ${point.name} (${pointDuration(point, department)})",
+					s"Attended: ${point.name} ${pointDuration(point, department)}",
 					describeCheckpoint(checkpoint),
 					s"$noteText",
 					s"$noteUrl"
@@ -104,7 +116,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 					"Missed (authorised)",
 					"label-info",
 					"icon-remove-circle authorised",
-					s"Missed (authorised): ${point.name} (${pointDuration(point, department)})",
+					s"Missed (authorised): ${point.name} ${pointDuration(point, department)}",
 					describeCheckpoint(checkpoint),
 					s"$noteText",
 					s"$noteUrl"
@@ -114,7 +126,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 					"Missed (unauthorised)",
 					"label-important",
 					"icon-remove unauthorised",
-					s"Missed (unauthorised): ${point.name} (${pointDuration(point, department)})",
+					s"Missed (unauthorised): ${point.name} ${pointDuration(point, department)}",
 					describeCheckpoint(checkpoint),
 					s"$noteText",
 					s"$noteUrl"
@@ -136,7 +148,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 				"Unrecorded",
 				"label-warning",
 				"icon-warning-sign late",
-				s"${point.name} (${pointDuration(point, department)})",
+				s"${point.name} ${pointDuration(point, department)}",
 				"",
 				s"$noteText",
 				s"$noteUrl"
@@ -146,7 +158,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 				"",
 				"",
 				"icon-minus",
-				s"${point.name} (${pointDuration(point, department)})",
+				s"${point.name} ${pointDuration(point, department)}",
 				"",
 				s"$noteText",
 				s"$noteUrl"

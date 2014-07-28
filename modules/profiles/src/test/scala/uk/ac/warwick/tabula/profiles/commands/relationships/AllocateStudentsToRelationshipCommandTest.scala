@@ -104,8 +104,12 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 		}
 	}
 
-	@Test def testGetRemoveCommands = withUser("boombastic") {
+	@Test def testGetRemoveCommandsForDroppedAgents = withUser("boombastic") {
 		new Environment {
+			val droppedAgents1 = Set[Member]()
+			var removeCommands1 = cmd.getRemoveCommandsForDroppedAgents(droppedAgents1)
+			removeCommands1.size should be (0)
+
 			service.listStudentRelationshipsWithMember(relationshipType, staff1) returns (Seq(rel1, rel2))
 			service.listStudentRelationshipsWithMember(relationshipType, staff2) returns (Seq(rel3))
 
@@ -123,38 +127,82 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 		}
 	}
 
+	@Test def testGetRemoveCommandsForChangedAgents = withUser("boombastic") {
+		new Environment {
+			val changedAgents = Set(staff1.asInstanceOf[Member], staff2.asInstanceOf[Member])
+			val mappings = cmd.getMemberAgentMappingsFromDatabase
+
+			// with no changes we should get no commands back
+			var removeCommands = cmd.getRemoveCommandsForChangedAgents(mappings, mappings, changedAgents)
+
+			// swap round students 2 and 3 - that shouldn't result in any drop commands, only edit commands (which incorporate dropping)
+			val newStudentSetForStaff1 = Set(student1, student3)
+			val newStudentSetForStaff2 = Set(student2)
+
+			val newAgentMappingsMutable = scala.collection.mutable.Map[Member, Set[StudentMember]]()
+			newAgentMappingsMutable(staff1) = newStudentSetForStaff1
+			newAgentMappingsMutable(staff2) = newStudentSetForStaff2
+			val newAgentMappings = newAgentMappingsMutable.toMap
+
+			removeCommands = cmd.getRemoveCommandsForChangedAgents(mappings, newAgentMappings, changedAgents)
+			removeCommands.size should be (0)
+
+		}
+	}
+
+
 	@Test def testGetEditCommands = withUser("boombastic") {
 		new Environment {
+			val mappings = cmd.getMemberAgentMappingsFromDatabase
+
 			service.listStudentRelationshipsWithMember(relationshipType, staff1) returns (Seq(rel1, rel2))
 			service.listStudentRelationshipsWithMember(relationshipType, staff2) returns (Seq(rel3))
 
 			// we're going to look to see if we need any edit commands for staff1 or staff2
 			var agentsToEdit = Set(staff1.asInstanceOf[Member], staff2.asInstanceOf[Member])
 
+			// we've already have a relationship from staff 2 to student 3.
+			// now add a relationship from staff 2 to student 4:
+			val newStudentSet1 = Set(student3, student4)
+
+			// and assigning the new set to agent 2:
+			val newAgentMappingsMutable1 = scala.collection.mutable.Map[Member, Set[StudentMember]]()
+			newAgentMappingsMutable1(staff2) = newStudentSet1
+			val newAgentMappings1 = newAgentMappingsMutable1.toMap
+
+			// now with that set of mappings we should just see a command for the new relationship coming back:
+			val editCommands1 = cmd.getEditStudentCommands(mappings, newAgentMappings1, agentsToEdit)
+			editCommands1.size should be (1)
+			editCommands1.map(_.oldAgent).head should be (None)
+			editCommands1.map(_.agent) should be (Set(staff2))
+			editCommands1.map(_.studentCourseDetails) should be (Set(student4.mostSignificantCourseDetails.head))
+			editCommands1.map(_.relationshipType) should be (Set(relationshipType))
+
 			// putting students 5, 6 and 7 in a set
-			val newStudentSet = Set(student5, student6, student7)
+			val newStudentSet2 = Set(student5, student6, student7)
 
 			// and assigning that set, perversely and irrelevantly, to agent 4
-			val newAgentMappings = scala.collection.mutable.Map[Member, Set[StudentMember]]()
-			newAgentMappings(staff4) = newStudentSet
-			val mappings = newAgentMappings.toMap
+			val newAgentMappingsMutable2 = scala.collection.mutable.Map[Member, Set[StudentMember]]()
+			newAgentMappingsMutable2(staff4) = newStudentSet2
+			val newAgentMappings2 = newAgentMappingsMutable2.toMap
 
 			// now with that set of mappings and the unconnected agents, we should see no commands coming back:
-			var editCommands = cmd.getEditStudentCommands(mappings, agentsToEdit)
-			editCommands.size should be (0)
+			val editCommands2 = cmd.getEditStudentCommands(mappings, newAgentMappings2, agentsToEdit)
+			editCommands2.size should be (0)
 
 			// now, more sensibly, get the edit commands for staff 4 which should return commands we can inspect:
 			service.findCurrentRelationships(relationshipType, student5.mostSignificantCourseDetails.head) returns Seq()
 			service.findCurrentRelationships(relationshipType, student6.mostSignificantCourseDetails.head) returns Seq()
 			service.findCurrentRelationships(relationshipType, student7.mostSignificantCourseDetails.head) returns Seq()
 
-			editCommands = cmd.getEditStudentCommands(mappings, Set(staff4.asInstanceOf[Member]))
+			val editCommands3 = cmd.getEditStudentCommands(mappings, newAgentMappings2, Set(staff4.asInstanceOf[Member]))
 
-			editCommands.size should be (3)
-			editCommands.map(_.oldAgent).head should be (None)
-			editCommands.map(_.agent) should be (Set(staff4))
-			editCommands.map(_.studentCourseDetails) should be (Set(student5.mostSignificantCourseDetails.head, student6.mostSignificantCourseDetails.head, student7.mostSignificantCourseDetails.head))
-			editCommands.map(_.relationshipType) should be (Set(relationshipType))
+			editCommands3.size should be (3)
+			editCommands3.map(_.oldAgent).head should be (None)
+			editCommands3.map(_.agent) should be (Set(staff4))
+			editCommands3.map(_.studentCourseDetails) should be (Set(student5.mostSignificantCourseDetails.head, student6.mostSignificantCourseDetails.head, student7.mostSignificantCourseDetails.head))
+			editCommands3.map(_.relationshipType) should be (Set(relationshipType))
+
 		}
 	}
 

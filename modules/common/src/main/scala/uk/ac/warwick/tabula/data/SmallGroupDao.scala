@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEventOccurrence, SmallGroupEvent, SmallGroup, SmallGroupSet, SmallGroupEventAttendance}
+import uk.ac.warwick.tabula.data.model.groups._
 import org.hibernate.criterion.{Projections, Order}
 import org.hibernate.criterion.Restrictions._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{StudentMember, Module}
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember, Module}
 import scala.collection.JavaConverters._
 
 trait SmallGroupDaoComponent {
@@ -22,6 +22,8 @@ trait SmallGroupDao {
 	def getSmallGroupById(id: String): Option[SmallGroup]
 	def getSmallGroupEventById(id: String): Option[SmallGroupEvent]
 	def getSmallGroupEventOccurrenceById(id: String): Option[SmallGroupEventOccurrence]
+	def getDepartmentSmallGroupSetById(id: String): Option[DepartmentSmallGroupSet]
+	def getDepartmentSmallGroupById(id: String): Option[DepartmentSmallGroup]
 	
 	def saveOrUpdate(smallGroupSet: SmallGroupSet)
 	def saveOrUpdate(smallGroup: SmallGroup)
@@ -29,6 +31,8 @@ trait SmallGroupDao {
 	def saveOrUpdate(occurrence: SmallGroupEventOccurrence)
 	def saveOrUpdate(attendance: SmallGroupEventAttendance)
 	def saveOrUpdate(note: SmallGroupEventAttendanceNote)
+	def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet)
+	def saveOrUpdate(smallGroup: DepartmentSmallGroup)
 	
 	def findByModuleAndYear(module: Module, year: AcademicYear): Seq[SmallGroup]
 
@@ -43,6 +47,9 @@ trait SmallGroupDao {
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
 
 	def hasSmallGroups(module: Module): Boolean
+
+	def getDepartmentSmallGroupSets(department: Department): Seq[DepartmentSmallGroupSet]
+	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear): Seq[DepartmentSmallGroupSet]
 }
 
 @Repository
@@ -53,12 +60,16 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 	def getSmallGroupById(id: String) = getById[SmallGroup](id)
 	def getSmallGroupEventById(id: String) = getById[SmallGroupEvent](id)
 	def getSmallGroupEventOccurrenceById(id: String) = getById[SmallGroupEventOccurrence](id)
+	def getDepartmentSmallGroupSetById(id: String) = getById[DepartmentSmallGroupSet](id)
+	def getDepartmentSmallGroupById(id: String) = getById[DepartmentSmallGroup](id)
 	def saveOrUpdate(smallGroupSet: SmallGroupSet) = session.saveOrUpdate(smallGroupSet)
 	def saveOrUpdate(smallGroup: SmallGroup) = session.saveOrUpdate(smallGroup)
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent) = session.saveOrUpdate(smallGroupEvent)
 	def saveOrUpdate(occurrence: SmallGroupEventOccurrence) = session.saveOrUpdate(occurrence)
 	def saveOrUpdate(attendance: SmallGroupEventAttendance) = session.saveOrUpdate(attendance)
 	def saveOrUpdate(note: SmallGroupEventAttendanceNote) = session.saveOrUpdate(note)
+	def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet) = session.saveOrUpdate(smallGroupSet)
+	def saveOrUpdate(smallGroup: DepartmentSmallGroup) = session.saveOrUpdate(smallGroup)
 
 	def getSmallGroupEventOccurrence(event: SmallGroupEvent, week: Int) =
 		session.newCriteria[SmallGroupEventOccurrence]
@@ -134,5 +145,24 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 			.add(is("module", module))
 			.project[Number](Projections.rowCount())
 			.uniqueResult.get.intValue() > 0
+	}
+
+	def getDepartmentSmallGroupSets(department: Department) = {
+		session.newCriteria[DepartmentSmallGroupSet]
+			.add(is("department", department))
+			.add(is("deleted", false))
+			.add(is("archived", false))
+			.addOrder(asc("name"))
+			.seq
+	}
+
+	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear) = {
+		session.newCriteria[DepartmentSmallGroupSet]
+			.add(is("department", department))
+			.add(is("academicYear", year))
+			.add(is("deleted", false))
+			.add(is("archived", false))
+			.addOrder(asc("name"))
+			.seq
 	}
 }

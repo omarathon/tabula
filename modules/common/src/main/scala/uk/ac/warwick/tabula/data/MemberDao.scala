@@ -127,13 +127,13 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 	def getAllWithUniversityIds(universityIds: Seq[String]) =
 		if (universityIds.isEmpty) Seq.empty
 		else session.newCriteria[Member]
-			.add(in("universityId", universityIds map { _.safeTrim }))
+			.add(safeIn("universityId", universityIds map { _.safeTrim }))
 			.seq
 
 	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]) = {
 		if (universityIds.isEmpty) Seq.empty
 		else sessionWithoutFreshFilters.newCriteria[Member]
-			.add(in("universityId", universityIds map { _.safeTrim }))
+			.add(safeIn("universityId", universityIds map { _.safeTrim }))
 			.seq
 	}
 

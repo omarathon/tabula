@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.attendance.web.controllers
 
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{Member, StudentMember, MeetingFormat, StudentRelationshipType}
-import org.joda.time.{LocalDate, DateTime}
-import uk.ac.warwick.tabula.commands.{Appliable, Unaudited, ReadOnly, CommandInternal, ComposableCommand}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
+import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.data.model.{MeetingFormat, StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointMeetingRelationshipTermServiceComponent, MonitoringPointMeetingRelationshipTermServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.views.JSONView
 
 object MeetingCheckpointCommand {

@@ -43,7 +43,6 @@ class ConvertScheduledMeetingRecordCommand (val creator: Member, val meetingReco
 	self: MeetingRecordServiceComponent with FileAttachmentServiceComponent =>
 
 	def applyInternal() = {
-
 		val newMeeting = createCommand.apply()
 		newMeeting.attachments.foreach(_.meetingRecord = newMeeting)
 
@@ -80,7 +79,6 @@ trait ConvertScheduledMeetingRecordState {
 	var posted: Boolean = false
 
 	lazy val relationship: StudentRelationship = meetingRecord.relationship
-
 	var createCommand: CreateMeetingRecordCommand = _
 }
 
@@ -89,7 +87,7 @@ trait ConvertScheduledMeetingRecordPermissions extends RequiresPermissionsChecki
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(
-			Permissions.Profiles.MeetingRecord.Create(meetingRecord.relationship.relationshipType),
+			Permissions.Profiles.ScheduledMeetingRecord.Update,
 			mandatory(meetingRecord.relationship.studentMember)
 		)
 	}

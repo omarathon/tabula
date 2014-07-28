@@ -1,21 +1,20 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import org.joda.time.{LocalDate, DateTime}
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils.rejectIfEmptyOrWhitespace
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.MeetingRecordDao
+import uk.ac.warwick.tabula.data.{Daoisms, FileDao, MeetingRecordDao}
+import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
-import uk.ac.warwick.tabula.system.BindListener
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
-import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.MonitoringPointMeetingRelationshipTermService
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordService
+import uk.ac.warwick.tabula.system.BindListener
+
+import scala.collection.JavaConverters._
 
 abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship, val considerAlternatives: Boolean = false)
 	extends Command[MeetingRecord] with Notifies[MeetingRecord, MeetingRecord] with SelfValidating with FormattedHtml
@@ -24,6 +23,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 	var meetingRecordDao = Wire.auto[MeetingRecordDao]
 	var fileDao = Wire.auto[FileDao]
 	var monitoringPointMeetingRelationshipTermService = Wire.auto[MonitoringPointMeetingRelationshipTermService]
+	var attendanceMonitoringMeetingRecordService = Wire.auto[AttendanceMonitoringMeetingRecordService]
 
 	var title: String = _
 	var description: String = _
@@ -82,6 +82,8 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 		if (features.attendanceMonitoringMeetingPointType) {
 			monitoringPointMeetingRelationshipTermService.updateCheckpointsForMeeting(meeting)
+			if (features.attendanceMonitoringAcademicYear2014)
+				attendanceMonitoringMeetingRecordService.updateCheckpoints(meeting)
 		}
 
 		meeting

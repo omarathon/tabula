@@ -70,7 +70,7 @@ class SmallGroupSet
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
-	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
+	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
 
 	@NotNull
 	var name: String = _
@@ -84,7 +84,7 @@ class SmallGroupSet
   
   def visibleToStudents = releasedToStudents || allocationMethod == SmallGroupAllocationMethod.StudentSignUp
 
-  def fullyReleased= releasedToStudents && releasedToTutors
+  def fullyReleased = releasedToStudents && releasedToTutors
 
 	@Column(name="group_format")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupFormatUserType")
@@ -103,11 +103,11 @@ class SmallGroupSet
 	@Column(name="open_for_signups")
 	var openForSignups: Boolean = false
 
-  def openState:SmallGroupSetSelfSignUpState = if (openForSignups) SmallGroupSetSelfSignUpState.Open else SmallGroupSetSelfSignUpState.Closed 
+  def openState: SmallGroupSetSelfSignUpState = if (openForSignups) SmallGroupSetSelfSignUpState.Open else SmallGroupSetSelfSignUpState.Closed
   
- def openState_= (value:SmallGroupSetSelfSignUpState):Unit =  value match {
-	  case SmallGroupSetSelfSignUpState.Open => openForSignups = true
-	  case SmallGroupSetSelfSignUpState.Closed => openForSignups = false
+ 	def openState_=(value:SmallGroupSetSelfSignUpState) : Unit = value match {
+	 	case SmallGroupSetSelfSignUpState.Open => openForSignups = true
+	 	case SmallGroupSetSelfSignUpState.Closed => openForSignups = false
   }
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -119,16 +119,24 @@ class SmallGroupSet
 	@BatchSize(size=200)
 	var groups: JList[SmallGroup] = JArrayList()
 
+	// A linked departmental small group set; if this is linked, memberships aren't kept here.
+	@ManyToOne(fetch = FetchType.LAZY, optional = true)
+	@JoinColumn(name = "linked_dept_group_set_id")
+	var linkedDepartmentSmallGroupSet: DepartmentSmallGroupSet = _
+
 	// only students manually added or excluded. use allStudents to get all students in the group set
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "membersgroup_id")
-	private var _membersGroup = UserGroup.ofUniversityIds
+	private var _membersGroup: UserGroup = UserGroup.ofUniversityIds
 	def members: UnspecifiedTypeUserGroup = {
-		smallGroupService match {
-			case Some(smallGroupService) => {
-				new UserGroupCacheManager(_membersGroup, smallGroupService.groupSetManualMembersHelper)
-			}
-			case _ => _membersGroup
+		linkedDepartmentSmallGroupSet match {
+			case ldsgs: DepartmentSmallGroupSet => ldsgs.members
+			case _ =>
+				smallGroupService match {
+					case Some(service) =>
+						new UserGroupCacheManager(_membersGroup, service.groupSetManualMembersHelper)
+					case _ => _membersGroup
+				}
 		}
 	}
 	def members_=(group: UserGroup) { _membersGroup = group }
@@ -148,22 +156,37 @@ class SmallGroupSet
 	
 	def isStudentMember(user: User): Boolean = {
 		groups.asScala.exists(_.students.includesUser(user)) ||
-		membershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
+		Option(linkedDepartmentSmallGroupSet).map { _.isStudentMember(user) }.getOrElse {
+			membershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
+		}
 	}
 
-	def allStudents = membershipService.determineMembershipUsers(upstreamAssessmentGroups, Some(members))
-	def allStudentsCount = membershipService.countMembershipWithUniversityIdGroup(upstreamAssessmentGroups, Some(members))
+	def allStudents =
+		Option(linkedDepartmentSmallGroupSet).map { _.allStudents }.getOrElse {
+			membershipService.determineMembershipUsers(upstreamAssessmentGroups, Some(members))
+		}
+
+	def allStudentsCount =
+		Option(linkedDepartmentSmallGroupSet).map { _.allStudentsCount }.getOrElse {
+			membershipService.countMembershipWithUniversityIdGroup(upstreamAssessmentGroups, Some(members))
+		}
 	
 	def unallocatedStudents = {
-		val allocatedStudents = groups.asScala flatMap { _.students.users }
+		Option(linkedDepartmentSmallGroupSet).map { _.unallocatedStudents }.getOrElse {
+			val allocatedStudents = groups.asScala.flatMap { _.students.users }
 
-		allStudents diff allocatedStudents
+			allStudents diff allocatedStudents
+		}
 	}
 	
 	def unallocatedStudentsCount = {
-		// TAB-2296 we can't rely just on counts here
-		unallocatedStudents.size
+		Option(linkedDepartmentSmallGroupSet).map { _.unallocatedStudentsCount }.getOrElse {
+			// TAB-2296 we can't rely just on counts here
+			unallocatedStudents.size
+		}
 	}
+
+	def linked = allocationMethod == SmallGroupAllocationMethod.Linked
 	
 	def hasAllocated = groups.asScala exists { !_.students.isEmpty }
 	
@@ -205,6 +228,8 @@ class SmallGroupSet
     newSet.permissionsService = permissionsService
     newSet.releasedToStudents = releasedToStudents
     newSet.releasedToTutors = releasedToTutors
+		newSet.openForSignups = openForSignups
+		newSet.linkedDepartmentSmallGroupSet = linkedDepartmentSmallGroupSet
 		newSet.settings = Map() ++ settings
     newSet
   }

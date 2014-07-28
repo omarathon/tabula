@@ -58,8 +58,10 @@ class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
 			MemberOrUser(student3).asUser
 		)
 
-		command.updatedIncludedStudentIds.add(student3.universityId)
-		command.updatedExcludedStudentIds.add(student2.universityId)
+		command.includedStudentIds.add(student3.universityId)
+		command.excludedStudentIds.add(student2.universityId)
+
+		command.findStudents = "submit"
 
 		val result = command.applyInternal()
 		// 2 results from search, even with 1 removed
@@ -71,7 +73,7 @@ class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
 		// 0 marked included (not displayed if not in search)
 		result.membershipItems.count(_.itemType == SchemeMembershipIncludeType) should be (0)
 
-		result.membershipItems.size should be (result.updatedStaticStudentIds.size)
+		result.membershipItems.size should be (result.staticStudentIds.size)
 	}}}
 
 }

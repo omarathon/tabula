@@ -18,22 +18,26 @@
 			<#list command.point.meetingRelationships as relationship>
 			${relationship.description}<#if relationship_has_next> or </#if>
 			</#list>
-			<#if command.point.validFromWeek == command.point.requiredFromWeek>
-				in
-				<a class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.validFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear />">
-					<@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
-				</a>
-			<#else>
-				between
-				<a class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.validFromWeek command.point.validFromWeek command.point.pointSet.academicYear />">
-					<@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
-				</a>
-				and
-				<a class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.requiredFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear />">
-					<@fmt.monitoringPointWeeksFormat command.point.requiredFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
-				</a>
-			</#if>
 
+			<#if command.point.scheme.pointStyle.dbValue == "week">
+				<#if command.point.startWeek == command.point.endWeek>
+					in
+					<a class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.startWeek command.point.endWeek command.point.scheme.academicYear />">
+						<@fmt.monitoringPointWeeksFormat command.point.startWeek command.point.endWeek command.point.scheme.academicYear command.point.scheme.department />
+					</a>
+				<#else>
+					between
+					<a class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.startWeek command.point.startWeek command.point.scheme.academicYear />">
+						<@fmt.monitoringPointWeeksFormat command.point.startWeek command.point.startWeek command.point.scheme.academicYear command.point.scheme.department />
+					</a>
+					and
+					<a class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.endWeek command.point.endWeek command.point.scheme.academicYear />">
+						<@fmt.monitoringPointWeeksFormat command.point.endWeek command.point.endWeek command.point.scheme.academicYear command.point.scheme.department />
+					</a>
+				</#if>
+			<#else>
+				(<@fmt.interval command.point.startDate command.point.endDate />)
+			</#if>
 		</p>
 
 		<#if meetingsStatuses?size == 0>
@@ -65,9 +69,20 @@
 									<#assign popoverContent>
 										<#list reasons as reason>
 											<#if reason == "Took place before">
-												Took place before <@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+												Took place before
+												<#if command.point.scheme.pointStyle.dbValue == "week">
+													<@fmt.monitoringPointWeeksFormat command.point.startWeek command.point.startWeek command.point.scheme.academicYear command.point.scheme.department />
+												<#else>
+													<@fmt.interval command.point.startDate command.point.startDate/>
+
+												</#if>
 											<#elseif reason == "Took place after">
-												Took place after <@fmt.monitoringPointWeeksFormat command.point.requiredFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+												Took place after
+												<#if command.point.scheme.pointStyle.dbValue == "week">
+													<@fmt.monitoringPointWeeksFormat command.point.endWeek command.point.endWeek command.point.scheme.academicYear command.point.scheme.department />
+												<#else>
+													<@fmt.interval command.point.endDate command.point.endDate/>
+												</#if>
 											<#else>
 												${reason}
 											</#if>

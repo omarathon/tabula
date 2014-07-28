@@ -591,6 +591,118 @@ jQuery(function($){
 	$('.assignment-picker').assignmentPicker({});
 });
 
+
+/**
+ * Like the ModulePicker, but for Routes
+ */
+var RoutePicker = function (options) {
+	var self = this;
+	var $element = $(options.input);
+
+	// Might have manually wired this element up with an existing picker,
+	// but add the class for CSS style purposes.
+	if (!$element.hasClass('route-picker')) {
+		$element.addClass('route-picker');
+	}
+
+	// Disable browser autocomplete dropdowns, it gets in the way.
+	$element.attr('autocomplete', 'off');
+
+	var $typeahead = new TabulaTypeahead({
+		element: $element,
+		source: function(query, process){
+			// Abort any existing search
+			if (self.currentSearch) {
+				self.currentSearch.abort();
+				self.currentSearch = null;
+			}
+			self.currentSearch = $.ajax({
+				url: '/api/routepicker/query',
+				dataType: 'json',
+				data: {
+					query: query
+				},
+				success: function(data) {
+					process(data)
+				}
+			});
+		},
+		item: '<li class="flexi-picker-result route"><a href="#"><div class="name"></div><div class=department></div></a></li>'
+	});
+
+	// Renders each result item with icon and description.
+	$typeahead.render = function (items) {
+		var that = this;
+
+		items = $(items).map(function (i, item) {
+			if (item != undefined) {
+				i = $(that.options.item);
+				i.attr('data-routecode', item.code);
+				i.find('div.name').html(that.highlighter(item.code.toUpperCase() + ' ' + item.name));
+				i.find('div.department').html(item.department);
+				return i[0];
+			} else {
+				// no idea what's happened here. Return an empty item.
+				return $(that.options.item)[0];
+			}
+		});
+
+		items.first().addClass('active');
+		this.$menu.html(items);
+		return this;
+	};
+
+	// The Bootstrap Typeahead always appends the drop-down to directly after the input
+	// Replace the show method so that the drop-down is added to the body
+	$typeahead.show = function () {
+		var pos = $.extend({}, this.$element.offset(), {
+			height: this.$element[0].offsetHeight
+		});
+
+		this.$menu.appendTo($('body')).show().css({
+			top: pos.top + pos.height, left: pos.left
+		});
+
+		this.shown = true;
+		return this;
+	};
+
+	// Override select item to store the relevant attributes
+	var oldSelect = $typeahead.select;
+	$typeahead.select = function () {
+		this.$element.data('routecode', this.$menu.find('.active').data('routecode'));
+		return oldSelect.call($typeahead);
+	};
+
+	$typeahead.updater = function() {
+		return this.$menu.find('.active .name').text();
+	};
+};
+
+// The jQuery plugin
+$.fn.routePicker = function (options) {
+	this.each(function () {
+		var $this = $(this);
+		if ($this.data('route-picker')) {
+			throw new Error("FlexiPicker has already been added to this element.");
+		}
+		var allOptions = {
+			input: this
+		};
+		$.extend(allOptions, options || {});
+		$this.data('route-picker', new RoutePicker(allOptions));
+	});
+	return this;
+};
+
+/**
+ * Any input with the route-picker class will have the picker enabled on it,
+ * so you can use the picker without writing any code yourself.
+ */
+jQuery(function($){
+	$('.route-picker').routePicker({});
+});
+
 // End of wrapping
 })(jQuery);
 

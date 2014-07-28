@@ -5,7 +5,7 @@ import javax.persistence.{DiscriminatorValue, Entity, NamedQueries}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.{AutowiringAssignmentMembershipDaoComponent, SmallGroupDao, SmallGroupDaoComponent, UserGroupDao, UserGroupDaoComponent}
 import uk.ac.warwick.tabula.data.model.{Department, Module, ModuleRegistration}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.events.EventHandling
@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.events.EventHandling
 class SmallGroupServiceTest extends TestBase with Mockito {
 	trait Environment {
 		val studentGroupMembershipHelper = smartMock[UserGroupMembershipHelper[SmallGroup]]
+		val departmentStudentGroupMembershipHelper = smartMock[UserGroupMembershipHelper[DepartmentSmallGroup]]
 
 		val mockUserLookup: UserLookupService = smartMock[UserLookupService]
 
@@ -55,7 +56,9 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 			with Logging {
 				val eventTutorsHelper: UserGroupMembershipHelper[SmallGroupEvent] = null
 				val groupSetManualMembersHelper: UserGroupMembershipHelper[SmallGroupSet] = null
+				val departmentGroupSetManualMembersHelper: UserGroupMembershipHelper[DepartmentSmallGroupSet] = null
 				val studentGroupHelper: UserGroupMembershipHelper[SmallGroup] = studentGroupMembershipHelper
+				val departmentStudentGroupHelper: UserGroupMembershipHelper[DepartmentSmallGroup] = departmentStudentGroupMembershipHelper
 
 				val smallGroupDao: SmallGroupDao = smartMock[SmallGroupDao]
 				smallGroupDao.findByModuleAndYear(module, new AcademicYear(2013)) returns Seq[SmallGroup](group)
@@ -70,9 +73,15 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 	@Test
 	def findSmallGroupsByMemberCallsMembershipHelper() {
 		new Environment {
-			studentGroupMembershipHelper.findBy(user) returns  Seq(group)
-			service.findSmallGroupsByStudent(user) should be(Seq(group))
+			val departmentGroup = new DepartmentSmallGroup(new DepartmentSmallGroupSet)
+			departmentGroup.linkedGroups.add(group2)
+
+			studentGroupMembershipHelper.findBy(user) returns Seq(group)
+			departmentStudentGroupMembershipHelper.findBy(user) returns Seq(departmentGroup)
+
+			service.findSmallGroupsByStudent(user) should be(Seq(group, group2))
 			there was one (studentGroupMembershipHelper).findBy(user)
+			there was one (departmentStudentGroupMembershipHelper).findBy(user)
 		}
 	}
 

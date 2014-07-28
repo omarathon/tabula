@@ -2,8 +2,7 @@ package uk.ac.warwick.tabula.groups.web.views
 
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.StudentSignUp
-import uk.ac.warwick.tabula.web.views.ViewModel._
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 import scala.collection.JavaConverters._
 
 /**
@@ -33,8 +32,8 @@ object GroupsViewModel {
 		canManageGroups: Boolean
 	) {
 		def hasUnreleasedGroupsets = module.hasUnreleasedGroupSets
-		def hasOpenableGroupsets = module.groupSets.asScala.exists(s => (!s.openForSignups) && s.allocationMethod == StudentSignUp )
-		def hasCloseableGroupsets = module.groupSets.asScala.exists(s => (s.openForSignups) && s.allocationMethod == StudentSignUp )
+		def hasOpenableGroupsets = module.groupSets.asScala.exists(s => (!s.openForSignups) && s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp )
+		def hasCloseableGroupsets = module.groupSets.asScala.exists(s => (s.openForSignups) && s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp )
 	}
 
 	case class ViewSet(
@@ -46,7 +45,8 @@ object GroupsViewModel {
 		def viewerMustSignUp = (viewerRole == StudentNotAssignedToGroup) && isStudentSignUp && set.openForSignups
 		def canViewMembers = viewerRole == Tutor || set.studentsCanSeeOtherMembers
 		def canViewTutors = viewerRole == Tutor || set.studentsCanSeeTutorName
-		def isStudentSignUp = set.allocationMethod == StudentSignUp
+		def isStudentSignUp = set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp
+		def isLinked = set.allocationMethod == SmallGroupAllocationMethod.Linked
 	}
 	sealed trait ViewerRole
 	case object StudentAssignedToGroup extends ViewerRole

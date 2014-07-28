@@ -2,19 +2,17 @@ package uk.ac.warwick.tabula.groups.web.controllers.admin
 
 import scala.collection.JavaConverters._
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
-import uk.ac.warwick.tabula.data.model.{Module, Department}
+import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.groups.commands.admin.AdminDepartmentHomeCommand
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{Tutor, ViewModules, ViewSet, ViewModule}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 
 @Controller
-@RequestMapping(value=Array("/admin/module/{module}"))
+@RequestMapping(value=Array("/admin/module/{module}", "/admin/module/{module}/groups"))
 class AdminModuleHomeController extends GroupsController {
 
 	hideDeletedItems

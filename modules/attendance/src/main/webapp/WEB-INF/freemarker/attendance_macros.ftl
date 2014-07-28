@@ -256,6 +256,7 @@
 		<table class="manage-student-table table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-darkRed tablesorter sb-no-wrapper-table-popout">
 			<thead>
 			<tr>
+				<th class="profile_link-col"></th>
 				<th style="width: 50px;" <#if doSorting> class="${sortClass("source", command)} sortable" data-field="source"</#if>>Source</th>
 				<th <#if doSorting> class="${sortClass("firstName", command)} sortable" data-field="firstName"</#if>>First name</th>
 				<th <#if doSorting> class="${sortClass("lastName", command)} sortable" data-field="lastName"</#if>>Last name</th>
@@ -274,7 +275,7 @@
 							  style="margin-left: 0.5em;"
 							/>
 						</#if>
-						<#if (showResetButton && (editMembershipCommandResult.updatedIncludedStudentIds?size > 0 || editMembershipCommandResult.updatedExcludedStudentIds?size > 0))>
+						<#if (showResetButton && (editMembershipCommandResult.includedStudentIds?size > 0 || editMembershipCommandResult.excludedStudentIds?size > 0))>
 							<input class="btn btn-warning hideOnClosed btn-small use-tooltip"
 								   type="submit"
 								   style="float: right; padding-left: 5px; padding-right: 5px; margin-left: 5px;"
@@ -291,6 +292,7 @@
 			<tbody>
 				<#list membershipItems as item>
 					<tr class="${item.itemTypeString}">
+						<td class="profile_link"><@pl.profile_link item.universityId /></td>
 						<td>
 							<#if item.itemTypeString == "static">
 								<span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span>
@@ -302,7 +304,7 @@
 						</td>
 						<td>${item.firstName}</td>
 						<td>${item.lastName}</td>
-						<td>${item.universityId}</td>
+						<td><a class="profile-link" href="<@routes.profile item />">${item.universityId}</a></td>
 						<td>${item.userId}</td>
 						<td>
 							<#if item.existingSchemes?size == 0>
@@ -344,6 +346,8 @@
 				</#list>
 			</tbody>
 		</table>
+
+		<div id="profile-modal" class="modal fade profile-subset"></div>
 	</#if>
 </#macro>
 
@@ -411,27 +415,36 @@
 		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
 		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
 	</#local>
+	<#local startDateInFuture = point.startDateInFuture />
 	<select
 		id="${id}"
 		name="${name}"
 		title="${tooltipContent}"
 	>
 		<option value="" <#if !checkpoint?has_content >selected</#if>>Not recorded</option>
-		<option value="unauthorised" <#if checkpoint?has_content && checkpoint.state.dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
+		<option <#if startDateInFuture>class="disabled" title="This event hasn't happened yet so it can't be marked as missed (unauthorised)" </#if> value="unauthorised" <#if checkpoint?has_content && checkpoint.state.dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
 		<option value="authorised" <#if checkpoint?has_content && checkpoint.state.dbValue == "authorised">selected</#if>>Missed (authorised)</option>
-		<option value="attended" <#if checkpoint?has_content && checkpoint.state.dbValue == "attended">selected</#if>>Attended</option>
+		<option <#if startDateInFuture>class="disabled" title="This event hasn't happened yet so it can't be marked as attended" </#if> value="attended" <#if checkpoint?has_content && checkpoint.state.dbValue == "attended">selected</#if>>Attended</option>
 	</select>
 </#macro>
 
 <#macro checkpointIcon department checkpoint="" point="" student="" note="">
+	<#local nonActivePoint = checkpoint?has_content && !checkpoint.activePoint />
 	<#local formatResult = formatResult(department, checkpoint, point, student, note) />
 	<#local popoverContent>
+		<#if nonActivePoint>
+			<p>
+				This attendance can no longer be edited, because it was recorded for a monitoring scheme (${checkpoint.point.scheme.displayName})
+				that no longer applies to this student.
+				<a href='http://warwick.ac.uk/tabula/faqs/attendancemonitoring/deptadminsfaqs/nonactivepoints' target='_blank'><i class='icon-question-sign'></i></a>
+			</p>
+		</#if>
 		<#if formatResult.status?has_content><p>${formatResult.status}</p></#if>
 		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
 		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
 		<#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}'>View attendance note</a></p></#if>
 	</#local>
-	<i class="use-popover icon-fixed-width ${formatResult.iconClass}" data-content="${popoverContent}" data-html="true"></i>
+	<i class="use-popover icon-fixed-width ${formatResult.iconClass} <#if nonActivePoint>non-active</#if>" data-content="${popoverContent}" data-html="true"></i>
 </#macro>
 
 <#macro checkpointIconForPointCheckpointPair department student pointCheckpointPair attendanceNotesMap>
@@ -472,7 +485,11 @@
 			<td>
 				<#if result.groupedPointCheckpointPairs[term]??>
 					<#list result.groupedPointCheckpointPairs[term] as pointCheckpointPair>
-						<@checkpointIconForPointCheckpointPair department result.student pointCheckpointPair result.attendanceNotes />
+						<#if pointCheckpointPair??>
+							<@checkpointIconForPointCheckpointPair department result.student pointCheckpointPair result.attendanceNotes />
+						<#else>
+							<i class="icon-fixed-width"></i>
+						</#if>
 					</#list>
 				<#else>
 					<i class="icon-fixed-width"></i>
@@ -485,7 +502,11 @@
 		<td>
 			<#if result.groupedPointCheckpointPairs[month]??>
 				<#list result.groupedPointCheckpointPairs[month] as pointCheckpointPair>
-					<@checkpointIconForPointCheckpointPair department result.student pointCheckpointPair result.attendanceNotes />
+					<#if pointCheckpointPair??>
+						<@checkpointIconForPointCheckpointPair department result.student pointCheckpointPair result.attendanceNotes />
+					<#else>
+						<i class="icon-fixed-width"></i>
+					</#if>
 				</#list>
 			<#else>
 				<i class="icon-fixed-width"></i>
@@ -495,7 +516,7 @@
 	</#list>
 </#macro>
 
-<#macro scrollablePointsTable command department filterResult visiblePeriods monthNames  doCommandSorting=true>
+<#macro scrollablePointsTable command department filterResult visiblePeriods monthNames doCommandSorting=true>
 	<div class="scrollable-points-table">
 		<div class="row">
 			<div class="left">
@@ -546,13 +567,13 @@
 
 					<tbody>
 						<#list filterResult.results as result>
-						<tr class="student">
-							<#if visiblePeriods?size == 0>
-								<td colspan="${visiblePeriods?size}"><span class="muted"><em>No monitoring points found</em></span></td>
-							<#else>
-								<@listCheckpointIcons department visiblePeriods monthNames result />
-							</#if>
-						</tr>
+							<tr class="student">
+								<#if visiblePeriods?size == 0>
+									<td colspan="${visiblePeriods?size}"><span class="muted"><em>No monitoring points found</em></span></td>
+								<#else>
+									<@listCheckpointIcons department visiblePeriods monthNames result />
+								</#if>
+							</tr>
 						</#list>
 					</tbody>
 				</table>

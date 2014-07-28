@@ -1,19 +1,20 @@
 package uk.ac.warwick.tabula.profiles.commands
 
+import org.joda.time.DateTime
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.FeaturesComponent
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
-import uk.ac.warwick.tabula.data.model.{Notification, MeetingRecord, MeetingRecordApproval}
+import uk.ac.warwick.tabula.data.model.notifications.{MeetingRecordApprovedNotification, MeetingRecordRejectedNotification}
+import uk.ac.warwick.tabula.data.model.{MeetingRecord, MeetingRecordApproval, Notification}
+import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordServiceComponent, AutowiringAttendanceMonitoringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointMeetingRelationshipTermServiceComponent, MonitoringPointMeetingRelationshipTermServiceComponent}
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
-import uk.ac.warwick.tabula.data.model.notifications.{MeetingRecordRejectedNotification, MeetingRecordApprovedNotification}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object ApproveMeetingRecordCommand {
 	def apply(approval: MeetingRecordApproval) =
@@ -25,12 +26,14 @@ object ApproveMeetingRecordCommand {
 		with ApproveMeetingRecordNotification
 		with AutowiringMeetingRecordDaoComponent
 		with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
+		with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 
 }
 
 class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval) extends CommandInternal[MeetingRecordApproval] with ApproveMeetingRecordState {
 
-	self: MeetingRecordDaoComponent with MonitoringPointMeetingRelationshipTermServiceComponent with FeaturesComponent =>
+	self: MeetingRecordDaoComponent with MonitoringPointMeetingRelationshipTermServiceComponent
+		with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent =>
 
 	def applyInternal() = transactional() {
 		if (approved) {
@@ -44,8 +47,11 @@ class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval) extends 
 
 		meetingRecordDao.saveOrUpdate(approval)
 
-		if (features.attendanceMonitoringMeetingPointType)
+		if (features.attendanceMonitoringMeetingPointType) {
 			monitoringPointMeetingRelationshipTermService.updateCheckpointsForMeeting(approval.meetingRecord)
+			if (features.attendanceMonitoringAcademicYear2014)
+				attendanceMonitoringMeetingRecordService.updateCheckpoints(approval.meetingRecord)
+		}
 
 		approval
 	}

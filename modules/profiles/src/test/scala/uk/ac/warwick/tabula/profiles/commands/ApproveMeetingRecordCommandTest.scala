@@ -1,20 +1,20 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.{FeaturesComponent, Features, TestBase, Mockito}
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.{StudentRelationship, StudentRelationshipType, MeetingRecordApproval, MeetingRecord}
-import uk.ac.warwick.tabula.data.{MeetingRecordDaoComponent, MeetingRecordDao}
+import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, MeetingRecord, MeetingRecordApproval, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.{MeetingRecordDao, MeetingRecordDaoComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.services.{MonitoringPointMeetingRelationshipTermService, MonitoringPointMeetingRelationshipTermServiceComponent}
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.data.model.ExternalStudentRelationship
+import uk.ac.warwick.tabula.{Features, FeaturesComponent, Fixtures, Mockito, TestBase}
 
 class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends ApproveMeetingRecordState with MeetingRecordDaoComponent with ApproveMeetingRecordValidation
-		with MonitoringPointMeetingRelationshipTermServiceComponent with FeaturesComponent {
-		val meetingRecordDao = mock[MeetingRecordDao]
-		val monitoringPointMeetingRelationshipTermService = mock[MonitoringPointMeetingRelationshipTermService]
-		val features = mock[Features]
+		with MonitoringPointMeetingRelationshipTermServiceComponent with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent {
+		val meetingRecordDao = smartMock[MeetingRecordDao]
+		val monitoringPointMeetingRelationshipTermService = smartMock[MonitoringPointMeetingRelationshipTermService]
+		val features = smartMock[Features]
+		val attendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
 	}
 
 	trait Fixture {
@@ -38,7 +38,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 		new Fixture {
 			cmd.approved = true
 			val approval = cmd.applyInternal()
-			approval.meetingRecord.isApproved should be(true)
+			approval.meetingRecord.isApproved should be {true}
 			there was one(cmd.meetingRecordDao).saveOrUpdate(approval)
 			there was one(cmd.monitoringPointMeetingRelationshipTermService).updateCheckpointsForMeeting(approval.meetingRecord)
 		}
@@ -49,7 +49,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 		new Fixture {
 			cmd.approved = false
 			val approval = cmd.applyInternal()
-			approval.meetingRecord.isApproved should be(false)
+			approval.meetingRecord.isApproved should be {false}
 			there was one(cmd.meetingRecordDao).saveOrUpdate(approval)
 			there was one(cmd.monitoringPointMeetingRelationshipTermService).updateCheckpointsForMeeting(approval.meetingRecord)
 		}
@@ -76,7 +76,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
 
 		cmd.validate(errors)
-		errors.hasErrors should be(false)
+		errors.hasErrors should be {false}
 	}
 
 	@Test
@@ -99,7 +99,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
-		errors.hasErrors should be (true)
+		errors.hasErrors should be {true}
 		errors.getErrorCount should be (1)
 		errors.getGlobalError.getCode should be ("meetingRecordApproval.meetingRecord.deleted")
 

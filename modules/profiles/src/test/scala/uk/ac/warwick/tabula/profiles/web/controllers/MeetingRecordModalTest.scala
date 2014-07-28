@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.profiles.web.controllers.relationships.MeetingRecordModal
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordServiceComponent, AttendanceMonitoringMeetingRecordService}
 import uk.ac.warwick.tabula.web.controllers.{ControllerViews, ControllerImports, ControllerMethods}
 import uk.ac.warwick.tabula.data.model._
 
@@ -15,15 +16,17 @@ class MeetingRecordModalTest extends TestBase with Mockito {
 	with ControllerImports
 	with CurrentMemberComponent
 	with ControllerViews
-	with MonitoringPointMeetingRelationshipTermServiceComponent {
+	with MonitoringPointMeetingRelationshipTermServiceComponent
+	with AttendanceMonitoringMeetingRecordServiceComponent {
 		var requestInfo: Option[RequestInfo] = _
 		var user: CurrentUser = _
-		var securityService: SecurityService = mock[SecurityService]
+		var securityService: SecurityService = smartMock[SecurityService]
 		var optionalCurrentMember: Option[Member] = None
 		var currentMember: Member = _
-		var profileService: ProfileService = mock[ProfileService]
-		var relationshipService: RelationshipService = mock[RelationshipService]
-		var monitoringPointMeetingRelationshipTermService = mock[MonitoringPointMeetingRelationshipTermService]
+		var profileService: ProfileService = smartMock[ProfileService]
+		var relationshipService: RelationshipService = smartMock[RelationshipService]
+		var monitoringPointMeetingRelationshipTermService = smartMock[MonitoringPointMeetingRelationshipTermService]
+		val attendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
 	}
 
 	val scd = new StudentCourseDetails()

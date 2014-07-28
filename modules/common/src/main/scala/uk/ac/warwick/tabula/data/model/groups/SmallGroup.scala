@@ -1,18 +1,19 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import org.hibernate.annotations.{Filter, FilterDef, BatchSize, AccessType}
-import javax.persistence._
 import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.JavaImports._
+import javax.persistence._
+
+import org.hibernate.annotations.{AccessType, BatchSize, Filter, FilterDef}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.ToString
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.data.PostLoadBehaviour
-import javax.validation.constraints.NotNull
+import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, UserGroupCacheManager}
+
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.services.{UserGroupCacheManager, SmallGroupService, SmallGroupMembershipHelpers}
 
 object SmallGroup {
 	final val NotDeletedFilter = "notDeleted"
@@ -47,7 +48,7 @@ class SmallGroup
 		with PostLoadBehaviour
 		with ToEntityReference {
 	type Entity = SmallGroup
-	import SmallGroup._
+	import uk.ac.warwick.tabula.data.model.groups.SmallGroup._
 	
 	@transient var permissionsService = Wire[PermissionsService]
 
@@ -59,8 +60,10 @@ class SmallGroup
 		this.groupSet = _set
 	}
 
-	@NotNull
-	var name: String = _
+	@Column(name="name")
+	private var _name: String = _
+	def name = Option(linkedDepartmentSmallGroup).map { _.name }.getOrElse(_name)
+	def name_=(name: String) { _name = name }
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "set_id", insertable = false, updatable = false)
@@ -70,6 +73,11 @@ class SmallGroup
 	@JoinColumn(name = "group_id")
 	@BatchSize(size=200)
 	var events: JList[SmallGroupEvent] = JArrayList()
+
+	// A linked departmental small group; if this is linked, allocations aren't kept here.
+	@ManyToOne(fetch = FetchType.LAZY, optional = true)
+	@JoinColumn(name = "linked_dept_group_id")
+	var linkedDepartmentSmallGroup: DepartmentSmallGroup = _
 	
 	def permissionsParents = Option(groupSet).toStream
 	override def humanReadableId = name
@@ -83,11 +91,14 @@ class SmallGroup
 	@JoinColumn(name = "studentsgroup_id")
 	private var _studentsGroup: UserGroup = UserGroup.ofUniversityIds
   def students: UnspecifiedTypeUserGroup = {
-		smallGroupService match {
-			case Some(smallGroupService) => {
-				new UserGroupCacheManager(_studentsGroup, smallGroupService.studentGroupHelper)
-			}
-			case _ => _studentsGroup
+		linkedDepartmentSmallGroup match {
+			case ldsg: DepartmentSmallGroup => ldsg.students
+			case _ =>
+				smallGroupService match {
+					case Some(service) =>
+						new UserGroupCacheManager(_studentsGroup, service.studentGroupHelper)
+					case _ => _studentsGroup
+				}
 		}
 	}
 	def students_=(group: UserGroup) { _studentsGroup = group }
@@ -114,15 +125,16 @@ class SmallGroup
     }
   }
 
-  def duplicateTo( groupSet:SmallGroupSet):SmallGroup = {
+  def duplicateTo(groupSet: SmallGroupSet): SmallGroup = {
     val newGroup = new SmallGroup()
     newGroup.id = id
     newGroup.events = events.asScala.map(_.duplicateTo(newGroup)).asJava
     newGroup.groupSet = groupSet
     newGroup.name = name
+		newGroup.linkedDepartmentSmallGroup = linkedDepartmentSmallGroup
     newGroup.permissionsService = permissionsService
-    newGroup._studentsGroup = _studentsGroup.duplicate()
-    newGroup.settings = Map() ++ settings
+		if (_studentsGroup != null) newGroup._studentsGroup = _studentsGroup.duplicate()
+		newGroup.settings = Map() ++ (if (settings != null) settings else Map())
     newGroup
   }
 

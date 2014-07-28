@@ -60,6 +60,9 @@ trait ControllerViews extends Logging {
 
 	def Redirect(path: String, objects: Pair[String, _]*) = Mav("redirect:" + getReturnTo(path), objects: _*)
 	def Redirect(path: String, objects: Map[String, _]) = Mav("redirect:" + getReturnTo(path), objects)
+	// Force the redirect regardless of returnTo
+	def RedirectForce(path: String, objects: Pair[String, _]*) = Mav("redirect:" + path, objects: _*)
+	def RedirectForce(path: String, objects: Map[String, _]) = Mav("redirect:" + path, objects)
 
 	def RedirectToSignin(target: String = loginUrl): Mav = Redirect(target)
 

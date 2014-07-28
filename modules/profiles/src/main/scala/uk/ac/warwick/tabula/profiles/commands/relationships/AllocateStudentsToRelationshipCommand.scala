@@ -31,6 +31,8 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		with MemberCollectionHelper
 		with NotifiesAffectedStudents {
 
+	type AgentMap = Map[Member, Set[StudentMember]]
+
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), mandatory(department))
 
 	// throw this request out if this relationship can't be edited in Tabula for this department
@@ -171,7 +173,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	 */
 	final def applyInternal() = transactional() {
 
-		var memberAgentMappingsBefore: Map[Member, Set[StudentMember]] = getMemberAgentMappingsFromDatabase
+		var memberAgentMappingsBefore: AgentMap = getMemberAgentMappingsFromDatabase
 
 		val memberAgentsBefore = memberAgentMappingsBefore.keySet.toSet // .toSet to make it immutable and avoid type issues
 
@@ -183,15 +185,13 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 		val memberAgentsAfter = mapping.keySet.asScala.toSet // .toSet to make it immutable and avoid type issues
 
-
 		val newMemberAgents = memberAgentsAfter.filterNot(memberAgentsBefore)
 		val droppedMemberAgents = memberAgentsBefore.filterNot(memberAgentsAfter)
 		val changedMemberAgents = memberAgentsAfter.intersect(memberAgentsBefore).filterNot(agent => memberAgentMappingsBefore.get(agent).equals(memberAgentMappingsAfter.get(agent)))
 
 		val removeCommandsForDroppedAgents = getRemoveCommandsForDroppedAgents(droppedMemberAgents)
 		val removeCommandsForChangedAgents = getRemoveCommandsForChangedAgents(memberAgentMappingsBefore, memberAgentMappingsAfter, changedMemberAgents)
-
-		val editCommands = getEditStudentCommands(memberAgentMappingsAfter, newMemberAgents ++ changedMemberAgents)
+		val editCommands = getEditStudentCommands(memberAgentMappingsBefore, memberAgentMappingsAfter, newMemberAgents ++ changedMemberAgents)
 
 		val commandResults = (editCommands ++ removeCommandsForChangedAgents ++ removeCommandsForDroppedAgents).map { cmd =>
 			/*
@@ -211,7 +211,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		commandResults.flatten.toSeq
 	}
 
-	def getMemberAgentMappingsFromDatabase: Map[Member, Set[StudentMember]] = {
+	def getMemberAgentMappingsFromDatabase: AgentMap = {
 		var memberAgentMappingsBefore = scala.collection.mutable.Map[Member, Set[StudentMember]]()
 
 		service
@@ -243,17 +243,28 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	}
 
 	/**
-	 * 	getEditStudentCommands: get the commands needed to edit the relationship for each of the students
-	 * 	who is now attached to a tutor
+	 * 	getEditStudentCommands
+	 *
+	 * for each member of agentsToEdit, work out which of their relationships are new and
+	 * get the commands needed to add or replace them
+	 *
 	 */
-	def getEditStudentCommands(memberAgentMappingsAfter: Map[Member, Set[StudentMember]], agentsToEdit: Set[Member]): Set[EditStudentRelationshipCommand] = {
+	def getEditStudentCommands(memberAgentMappingsBefore: AgentMap,
+															memberAgentMappingsAfter: AgentMap,
+															agentsToEdit: Set[Member]): Set[EditStudentRelationshipCommand] = {
+
+		def getStudentsForAgent(agentMap: AgentMap, agent: Member) = agentMap.get(agent) match {
+			case Some(students: Set[StudentMember]) => students
+			case _ => Set[StudentMember]()
+		}
+
 		(for (agentToEdit <- agentsToEdit) yield {
 
-			// get the new student set for each agent
-			val newStudentMembersForAgent = memberAgentMappingsAfter.get(agentToEdit) match {
-				case Some(students: Set[StudentMember]) => students
-				case _ => Set[StudentMember]()
-			}
+			// get the old and new student sets for the agent
+			val studentsBefore = getStudentsForAgent(memberAgentMappingsBefore, agentToEdit)
+			val studentsAfter = getStudentsForAgent(memberAgentMappingsAfter, agentToEdit)
+
+			val newStudentMembersForAgent = studentsAfter.filterNot(studentsBefore)
 
 			// and for each, get a command to edit the relationship for that student to change it to the agent
 			newStudentMembersForAgent.flatMap (	stu => {
@@ -274,15 +285,18 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 	/**
 	 * getRemoveCommandsForChangedAgents: get the commands needed to remove the relationships for students who
-	 * are no longer attached to tutors with changed tutee sets
+	 * are no longer attached to any tutor tutors with changed tutee sets
 	 */
-	def getRemoveCommandsForChangedAgents(memberAgentMappingsBefore: Map[Member, Set[StudentMember]],
-																				memberAgentMappingsAfter: Map[Member, Set[StudentMember]],
+	def getRemoveCommandsForChangedAgents(memberAgentMappingsBefore: AgentMap,
+																				memberAgentMappingsAfter: AgentMap,
 																				changedMemberAgents: Set[Member]): Set[EndStudentRelationshipCommand] = {
+
 		val commands = for (agent <- changedMemberAgents) yield {
 			val studentsForAgentBefore = memberAgentMappingsBefore.get(agent).getOrElse(Set[StudentMember]())
 			val studentsForAgentAfter = memberAgentMappingsAfter.get(agent).getOrElse(Set[StudentMember]())
-			val studentsToDrop = studentsForAgentBefore.filterNot(studentsForAgentAfter)
+
+			// drop those students who don't feature at all in the after mapping
+			val studentsToDrop = studentsForAgentBefore.filterNot(memberAgentMappingsAfter.values.flatten.toSet)
 
 			studentsToDrop.flatMap ( stu => {
 				stu.mostSignificantCourseDetails.map (scd => {

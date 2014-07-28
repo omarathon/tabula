@@ -134,6 +134,8 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupEventIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupEventOccurrenceIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.DepartmentSmallGroupSetIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.DepartmentSmallGroupIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.DayOfWeekConverter"/>
                 <bean class="uk.ac.warwick.tabula.data.convert.NumberConverterFactory"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.StudentCourseDetailsConverter"/>
@@ -539,6 +541,12 @@
 			  p:path="_membersGroup" />
 		<bean id="SmallGroup-_studentsGroup" parent="userGroupCacheBean"
 			  p:runtimeClass="uk.ac.warwick.tabula.data.model.groups.SmallGroup"
+			  p:path="_studentsGroup" />
+		<bean id="DepartmentSmallGroupSet-_membersGroup" parent="userGroupCacheBean"
+			  p:runtimeClass="uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet"
+			  p:path="_membersGroup" />
+		<bean id="DepartmentSmallGroup-_studentsGroup" parent="userGroupCacheBean"
+			  p:runtimeClass="uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroup"
 			  p:path="_studentsGroup" />
 		<bean id="StaffMember-_assistantsGroup" parent="userGroupCacheBean"
 			  p:runtimeClass="uk.ac.warwick.tabula.data.model.StaffMember"
