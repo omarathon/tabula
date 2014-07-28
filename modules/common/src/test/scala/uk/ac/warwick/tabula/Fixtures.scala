@@ -252,7 +252,8 @@ object Fixtures extends Mockito {
 		scyd.yearOfStudy = yearOfStudy
 		scyd.studentCourseDetails = studentCourseDetails
 		scyd.sceSequenceNumber = 1
-		scyd.casUsed = true
+		scyd.casUsed = false
+		scyd.tier4Visa = false
 		scyd
 	}
 

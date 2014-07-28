@@ -9,8 +9,8 @@ import uk.ac.warwick.tabula.scheduling.services.{Tier4VisaImporterComponent, Aut
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object ImportTier4ForStudentCommand {
-	def apply(student: StudentMember, year: AcademicYear) =
-		new ImportTier4ForStudentCommandInternal(student, year)
+	def apply(student: StudentMember, yearOnwards: AcademicYear) =
+		new ImportTier4ForStudentCommandInternal(student, yearOnwards)
 			with ComposableCommand[Unit]
 			with ImportTier4ForStudentCommandPermissions
 			with AutowiringCasUsageImporterComponent
@@ -19,7 +19,7 @@ object ImportTier4ForStudentCommand {
 			with Unaudited
 }
 
-class ImportTier4ForStudentCommandInternal(student: StudentMember, year: AcademicYear) extends CommandInternal[Unit] {
+class ImportTier4ForStudentCommandInternal(student: StudentMember, yearOnwards: AcademicYear) extends CommandInternal[Unit] {
 
 	self: CasUsageImporterComponent with Tier4VisaImporterComponent with StudentCourseYearDetailsDaoComponent =>
 
@@ -27,7 +27,7 @@ class ImportTier4ForStudentCommandInternal(student: StudentMember, year: Academi
 		val newCasUsed = casUsageImporter.isCasUsed(student.universityId)
 		val newTier4Visa = tier4VisaImporter.hasTier4Visa(student.universityId)
 
-		student.freshOrStaleStudentCourseYearDetails(year).map {
+		student.freshOrStaleStudentCourseYearDetailsFrom(yearOnwards).map {
 			var hasChanged = false
 			scyd => {
 				if (scyd.casUsed != newCasUsed) {
