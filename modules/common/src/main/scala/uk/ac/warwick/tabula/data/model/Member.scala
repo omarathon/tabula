@@ -237,6 +237,12 @@ class StudentMember extends Member with StudentProperties {
 			.flatMap(_.freshOrStaleStudentCourseYearDetails)
 			.filter(_.academicYear == year)
 
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	def freshOrStaleStudentCourseYearDetailsFrom(year: AcademicYear) =
+		freshOrStaleStudentCourseDetails
+			.flatMap(_.freshOrStaleStudentCourseYearDetails)
+			.filter(_.academicYear >= year)
+
 	@OneToOne(fetch = FetchType.LAZY) // don't cascade, cascaded separately
 	@JoinColumn(name = "mostSignificantCourse")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))

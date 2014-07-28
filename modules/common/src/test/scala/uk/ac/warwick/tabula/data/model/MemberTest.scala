@@ -324,11 +324,10 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 	}
 
-	@Test def casUsedTest =  {
-
+	@Test def testVisaProperties =  {
 		val studentMember = Fixtures.student()
-		studentMember.casUsed.get should be (true)
-
+		studentMember.casUsed.get should be (false)
+		studentMember.hasTier4Visa.get should be (false)
 	}
 
 }
