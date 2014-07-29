@@ -89,7 +89,7 @@ trait EditDepartmentCommandValidation extends SelfValidating {
 			errors.rejectValue("fullName", "department.name.empty")
 		} else if (fullName != department.fullName) {
 			if (department.hasParent) {
-				if (fullName == (department.parent.fullName)) {
+				if (fullName == department.parent.fullName) {
 					errors.rejectValue("fullName", "department.name.mustDifferFromParent", Array(department.parent.fullName), "")
 				}
 
@@ -106,7 +106,7 @@ trait EditDepartmentCommandValidation extends SelfValidating {
 
 		if (shortName.hasText && shortName != department.shortName) {
 			if (department.hasParent) {
-				if (shortName == (department.parent.name)) {
+				if (shortName == department.parent.name) {
 					errors.rejectValue("shortName", "department.name.mustDifferFromParent", Array(department.parent.name), "")
 				}
 

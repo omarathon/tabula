@@ -82,7 +82,7 @@ trait AddSubDepartmentCommandValidation extends SelfValidating {
 		if (!name.hasText) {
 			errors.rejectValue("name", "department.name.empty")
 		} else {
-			if (name == (parent.name)){
+			if (name == parent.name){
 				errors.rejectValue("name", "department.name.mustDifferFromParent", Array(parent.name), "")
 			}
 

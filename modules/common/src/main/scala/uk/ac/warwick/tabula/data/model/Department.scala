@@ -194,14 +194,14 @@ class Department extends GeneratedId
 	@Column(name="FilterRuleName")
 	var filterRule: FilterRule = AllMembersFilterRule
 
-	def includesMember(m: Member): Boolean = Option(parent) match {
-		case None => filterRule.matches(m)
-		case Some(p) => filterRule.matches(m) && p.includesMember(m)
+	def includesMember(m: Member, d: Option[Department]): Boolean = Option(parent) match {
+		case None => filterRule.matches(m, d)
+		case Some(p) => filterRule.matches(m, d) && p.includesMember(m, d)
 	}
 
 
 	def subDepartmentsContaining(member: Member): Stream[Department] = {
-		if (!includesMember(member)) {
+		if (!includesMember(member, Option(this))) {
 			Stream.empty // no point looking further down the tree if this level doesn't contain the required member
 		} else {
 			this #:: children.asScala.flatMap(child => child.subDepartmentsContaining(member)).toStream
@@ -257,7 +257,7 @@ object Department {
 
 		val allFilterRules: Seq[FilterRule] = {
 			val inYearRules = (1 until 9).map(InYearFilterRule)
-			Seq(AllMembersFilterRule, UndergraduateFilterRule, PostgraduateFilterRule) ++ inYearRules
+			Seq(AllMembersFilterRule, UndergraduateFilterRule, PostgraduateFilterRule, DepartmentRoutesFilterRule) ++ inYearRules
 		}
 
 		def withName(name: String): FilterRule = {
@@ -268,7 +268,7 @@ object Department {
 	sealed trait FilterRule extends Convertible[String] {
 		val name: String
 		val courseTypes: Seq[CourseType]
-		def matches(member: Member): Boolean
+		def matches(member: Member, department: Option[Department]): Boolean
 		def getName = name // for Spring
 		def value = name
 	}
@@ -276,7 +276,7 @@ object Department {
 	case object UndergraduateFilterRule extends FilterRule {
 		val name = "UG"
 		val courseTypes = CourseType.ugCourseTypes
-		def matches(member: Member) = member match {
+		def matches(member: Member, department: Option[Department]) = member match {
 			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.flatMap { route => Option(route.degreeType) } match {
 				case Some(DegreeType.Undergraduate) => true
 				case _ => false
@@ -288,7 +288,7 @@ object Department {
 	case object PostgraduateFilterRule extends FilterRule {
 		val name = "PG"
 		val courseTypes = CourseType.pgCourseTypes
-		def matches(member: Member) = member match {
+		def matches(member: Member, department: Option[Department]) = member match {
 			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.flatMap { route => Option(route.degreeType) } match {
 				case Some(DegreeType.Undergraduate) => false
 				case _ => true
@@ -300,23 +300,32 @@ object Department {
 	case object AllMembersFilterRule extends FilterRule {
 		val name = "All"
 		val courseTypes = CourseType.all
-		def matches(member: Member) = true
+		def matches(member: Member, department: Option[Department]) = true
 	}
 
 
 	case class InYearFilterRule(year:Int) extends FilterRule {
 		val name=s"Y$year"
 		val courseTypes = CourseType.all
-		def matches(member: Member) = member match{
+		def matches(member: Member, department: Option[Department]) = member match{
 			case s:StudentMember => s.mostSignificantCourseDetails.exists(_.latestStudentCourseYearDetails.yearOfStudy == year)
 			case _=>false
+		}
+	}
+
+	case object DepartmentRoutesFilterRule extends FilterRule {
+		val name = "DepartmentRoutes"
+		val courseTypes = CourseType.all
+		def matches(member: Member, department: Option[Department]) = member match {
+			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.exists{r => department.exists(_ == r.department)}
+			case _ => false
 		}
 	}
 
 	case class CompositeFilterRule(rules:Seq[FilterRule]) extends FilterRule{
 		val name = rules.map(_.name).mkString(",")
 		val courseTypes = CourseType.all
-		def matches(member:Member) = rules.forall(_.matches(member))
+		def matches(member:Member, department: Option[Department]) = rules.forall(_.matches(member, department))
 	}
 
 
