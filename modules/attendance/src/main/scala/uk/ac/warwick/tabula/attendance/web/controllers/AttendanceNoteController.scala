@@ -31,15 +31,20 @@ class AttendanceNoteController extends AttendanceController {
 		@PathVariable academicYear: AcademicYear
 	) = {
 		val attendanceNote = monitoringPointService.getAttendanceNote(student, point).getOrElse(throw new ItemNotFoundException())
-		val checkpoint = monitoringPointService.getCheckpoints(Seq(point), student).head._2
-		Mav("note/view_note",
+
+		val mav = Mav("note/view_note",
 			"attendanceNote" -> attendanceNote,
 			"academicYear" -> academicYear.startYear.toString,
-			"checkpoint" -> checkpoint,
 			"updatedBy" -> userLookup.getUserByUserId(attendanceNote.updatedBy).getFullName,
 			"updatedDate" -> DateBuilder.format(attendanceNote.updatedDate),
 			"isModal" -> ajax
-		).noLayoutIf(ajax)
+		)
+
+		val pointsCheckpointsMap = monitoringPointService.getCheckpoints(Seq(point), student)
+		if (!pointsCheckpointsMap.isEmpty) mav.addObjects("checkpoint" -> pointsCheckpointsMap.head._2)
+
+		mav.noLayoutIf(ajax)
+
 	}
 
 }
