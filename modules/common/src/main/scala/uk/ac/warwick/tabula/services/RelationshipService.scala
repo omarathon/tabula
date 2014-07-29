@@ -191,7 +191,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 			scd => !scd.permanentlyWithdrawn && scd.missingFromImportSince == null)
 	}
 
-	def studentDepartmentFilterMatches(department: Department)(member: StudentMember)	= department.filterRule.matches(member)
+	def studentDepartmentFilterMatches(department: Department)(member: StudentMember)	= department.filterRule.matches(member, Option(department))
 
 	def studentNotPermanentlyWithdrawn(member: StudentMember) = !member.permanentlyWithdrawn
 
