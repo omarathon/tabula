@@ -934,7 +934,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val mr = Fixtures.moduleRegistration(scd, module1, new java.math.BigDecimal("12.0"), new AcademicYear(2013), "A")
 
 		// this shouldn't affect anything if the assignment is not for that module:
-		scyd.academicYear = new AcademicYear(2013)
+		scyd.academicYear = new AcademicYear(2014)
 		val resultWhenSomeMR = assignmentService.filterAssignmentsByCourseAndYear(Seq(assignment1, assignment2), scyd)
 		resultWhenSomeMR.size should be (2)
 
