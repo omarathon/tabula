@@ -105,6 +105,7 @@ class SmallGroup
 
 	def maxGroupSize = getIntSetting(Settings.MaxGroupSize)
 	def maxGroupSize_=(defaultSize:Int) = settings += (Settings.MaxGroupSize -> defaultSize)
+	def removeMaxGroupSize() = settings -= Settings.MaxGroupSize
 
 	def isFull = groupSet.defaultMaxGroupSizeEnabled && maxGroupSize.getOrElse(0) <= students.size
 

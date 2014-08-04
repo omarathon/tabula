@@ -166,21 +166,6 @@
 		jQuery(function($) {
 			// Set up radios to enable/disable self-sign up options fields.
 			$("input:radio[name='allocationMethod']").radioControlled();
-
-			var recalculateSteps = function() {
-				if ($('input:radio[name="allocationMethod"]:checked').val() == "Linked") {
-					$('.show-when-linked').show();
-					$('.hide-when-linked').hide();
-					$('.disable-when-linked button').addClass('disabled');
-				} else {
-					$('.show-when-linked').hide();
-					$('.hide-when-linked').show();
-					$('.disable-when-linked button').removeClass('disabled');
-				}
-			};
-
-			$("input:radio[name='allocationMethod']").on('change', recalculateSteps);
-			recalculateSteps();
 		});
 	</script>
 </#escape>

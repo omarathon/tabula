@@ -32,6 +32,7 @@ object Routes {
 		}
 
 		def create(module: Module) = context + "/admin/module/%s/groups/new" format (encoded(module.code))
+		def create(set: SmallGroupSet) = context + "/admin/module/%s/groups/new/%s" format (encoded(set.module.code), encoded(set.id))
 		def createAddStudents(set: SmallGroupSet) = context + "/admin/module/%s/groups/new/%s/students" format (encoded(set.module.code), encoded(set.id))
 		def createAddGroups(set: SmallGroupSet) = context + "/admin/module/%s/groups/new/%s/groups" format (encoded(set.module.code), encoded(set.id))
 		def createAddEvents(set: SmallGroupSet) = context + "/admin/module/%s/groups/new/%s/events" format (encoded(set.module.code), encoded(set.id))

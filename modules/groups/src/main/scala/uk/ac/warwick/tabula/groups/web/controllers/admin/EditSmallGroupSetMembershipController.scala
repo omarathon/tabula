@@ -42,8 +42,8 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
 		@PathVariable("smallGroupSet") set: SmallGroupSet,
 		@ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand
 	) = {
-		cmd.afterBind()
 		cmd.copyGroupsFrom(set)
+		cmd.afterBind()
 
 		render(set, cmd)
 	}
@@ -59,21 +59,23 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
 		form(set, cmd)
 	}
 
-	@RequestMapping(method = Array(POST))
-	def save(
-		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
-		errors: Errors,
-		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = {
+	protected def submit(cmd: EditSmallGroupSetMembershipCommand, errors: Errors, set: SmallGroupSet, route: String) = {
 		cmd.afterBind()
 
 		if (errors.hasErrors) {
 			render(set, cmd)
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin.module(set.module))
+			RedirectForce(route)
 		}
 	}
+
+	@RequestMapping(method = Array(POST))
+	def save(
+		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
+		errors: Errors,
+		@PathVariable("smallGroupSet") set: SmallGroupSet
+	) = submit(cmd, errors, set, Routes.admin.module(set.module))
 
 	@InitBinder
 	def upstreamGroupBinder(binder: WebDataBinder) {
@@ -88,53 +90,33 @@ class CreateSmallGroupSetAddStudentsController extends AbstractEditSmallGroupSet
 
 	override val renderPath = "admin/groups/newstudents"
 
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndEditProperties))
+	def saveAndEditProperties(
+		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
+		errors: Errors,
+		@PathVariable("smallGroupSet") set: SmallGroupSet
+	) = submit(cmd, errors, set, Routes.admin.create(set))
+
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddGroups))
 	def saveAndAddGroups(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = {
-		cmd.afterBind()
-
-		if (errors.hasErrors) {
-			render(set, cmd)
-		} else {
-			cmd.apply()
-			RedirectForce(Routes.admin.createAddGroups(set))
-		}
-	}
+	) = submit(cmd, errors, set, Routes.admin.createAddGroups(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddEvents))
 	def saveAndAddEvents(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = {
-		cmd.afterBind()
-
-		if (errors.hasErrors) {
-			render(set, cmd)
-		} else {
-			cmd.apply()
-			RedirectForce(Routes.admin.createAddEvents(set))
-		}
-	}
+	) = submit(cmd, errors, set, Routes.admin.createAddEvents(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAllocate))
 	def saveAndAddAllocate(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = {
-		cmd.afterBind()
-
-		if (errors.hasErrors) {
-			render(set, cmd)
-		} else {
-			cmd.apply()
-			RedirectForce(Routes.admin.createAllocate(set))
-		}
-	}
+	) = submit(cmd, errors, set, Routes.admin.createAllocate(set))
 
 }
 
@@ -144,52 +126,32 @@ class EditSmallGroupSetAddStudentsController extends AbstractEditSmallGroupSetMe
 
 	override val renderPath = "admin/groups/editstudents"
 
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndEditProperties))
+	def saveAndEditProperties(
+		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
+		errors: Errors,
+		@PathVariable("smallGroupSet") set: SmallGroupSet
+	) = submit(cmd, errors, set, Routes.admin.edit(set))
+
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddGroups))
 	def saveAndAddGroups(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = {
-		cmd.afterBind()
-
-		if (errors.hasErrors) {
-			render(set, cmd)
-		} else {
-			cmd.apply()
-			RedirectForce(Routes.admin.editAddGroups(set))
-		}
-	}
+	) = submit(cmd, errors, set, Routes.admin.editAddGroups(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddEvents))
 	def saveAndAddEvents(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = {
-		cmd.afterBind()
-
-		if (errors.hasErrors) {
-			render(set, cmd)
-		} else {
-			cmd.apply()
-			RedirectForce(Routes.admin.editAddEvents(set))
-		}
-	}
+	) = submit(cmd, errors, set, Routes.admin.editAddEvents(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAllocate))
 	def saveAndAddAllocate(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = {
-		cmd.afterBind()
-
-		if (errors.hasErrors) {
-			render(set, cmd)
-		} else {
-			cmd.apply()
-			RedirectForce(Routes.admin.editAllocate(set))
-		}
-	}
+	) = submit(cmd, errors, set, Routes.admin.editAllocate(set))
 
 }

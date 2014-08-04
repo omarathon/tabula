@@ -774,3 +774,119 @@
 		</table>
 	</#if>
 </#macro>
+
+<#macro set_wizard is_new current_step is_linked=false>
+	<p class="progress-arrows">
+		<#if is_linked && (current_step == 'students' || current_step == 'groups' || current_step == 'allocate')>
+			<#local properties_url><#if is_new><@routes.createeditproperties smallGroupSet /><#else><@routes.editsetproperties smallGroupSet /></#if></#local>
+			<@wizard_link
+				label="Properties"
+				is_first=true
+				is_active=(current_step == 'properties')
+				is_available=true
+				tooltip="Save and edit properties"
+				url=properties_url />
+
+			<#local groups_url><#if is_new><@routes.createsetgroups smallGroupSet /><#else><@routes.editsetgroups smallGroupSet /></#if></#local>
+			<@wizard_link
+				label="Groups"
+				is_first=false
+				is_active=(current_step == 'groups')
+				is_available=true
+				tooltip="Save and edit groups"
+				url=groups_url />
+
+			<#local students_url><#if is_new><@routes.createsetstudents smallGroupSet /><#else><@routes.editsetstudents smallGroupSet /></#if></#local>
+			<@wizard_link
+				label="Students"
+				is_first=false
+				is_active=(current_step == 'students')
+				is_available=true
+				tooltip="Save and edit students"
+				url=students_url />
+
+			<#local events_url><#if is_new><@routes.createsetevents smallGroupSet /><#else><@routes.editsetevents smallGroupSet /></#if></#local>
+			<@wizard_link
+				label="Events"
+				is_first=false
+				is_active=(current_step == 'events')
+				is_available=true
+				tooltip="Save and edit events"
+				url=events_url />
+
+			<#local allocate_url><#if is_new><@routes.createsetallocate smallGroupSet /><#else><@routes.editsetallocate smallGroupSet /></#if></#local>
+			<@wizard_link
+				label="Allocate"
+				is_first=false
+				is_active=(current_step == 'allocate')
+				is_available=true
+				tooltip="Save and allocate students to groups"
+				url=allocate_url />
+		<#else>
+			<#local properties_action><#if is_new>${ManageSmallGroupsMappingParameters.createAndEditProperties}<#else>${ManageSmallGroupsMappingParameters.editAndEditProperties}</#if></#local>
+			<@wizard_button
+				label="Properties"
+				is_first=true
+				is_active=(current_step == 'properties')
+				is_available=true
+				tooltip="Save and edit properties"
+				action=properties_action />
+
+			<#local groups_action><#if is_new>${ManageSmallGroupsMappingParameters.createAndAddGroups}<#else>${ManageSmallGroupsMappingParameters.editAndAddGroups}</#if></#local>
+			<@wizard_button
+				label="Groups"
+				is_first=false
+				is_active=(current_step == 'groups')
+				is_available=true
+				tooltip="Save and edit groups"
+				action=groups_action />
+
+			<#local students_action><#if is_new>${ManageSmallGroupsMappingParameters.createAndAddStudents}<#else>${ManageSmallGroupsMappingParameters.editAndAddStudents}</#if></#local>
+			<@wizard_button
+				label="Students"
+				is_first=false
+				is_active=(current_step == 'students')
+				is_available=true
+				tooltip="Save and edit students"
+				action=students_action />
+
+			<#local events_action><#if is_new>${ManageSmallGroupsMappingParameters.createAndAddEvents}<#else>${ManageSmallGroupsMappingParameters.editAndAddEvents}</#if></#local>
+			<@wizard_button
+				label="Events"
+				is_first=false
+				is_active=(current_step == 'events')
+				is_available=true
+				tooltip="Save and edit events"
+				action=events_action />
+
+			<#local allocate_action><#if is_new>${ManageSmallGroupsMappingParameters.createAndAllocate}<#else>${ManageSmallGroupsMappingParameters.editAndAllocate}</#if></#local>
+			<@wizard_button
+				label="Allocate"
+				is_first=false
+				is_active=(current_step == 'allocate')
+				is_available=true
+				tooltip="Save and allocate students to groups"
+				action=allocate_action />
+		</#if>
+	</p>
+</#macro>
+
+<#macro wizard_button label is_first is_active is_available tooltip="" action="">
+	<span class="arrow-right<#if !is_first> arrow-left</#if><#if is_active> active</#if><#if is_available && !is_active> use-tooltip</#if>" <#if is_available && !is_active>title="${tooltip}"</#if>><#compress>
+		<#if is_available && !is_active>
+			<button type="submit" class="btn btn-link" name="${action}">${label}</button>
+		<#else>
+			${label}
+		</#if>
+	</#compress></span>
+</#macro>
+
+<#macro wizard_link label is_first is_active is_available tooltip="" url="">
+	<span class="arrow-right<#if !is_first> arrow-left</#if><#if is_active> active</#if><#if is_available && !is_active> use-tooltip</#if>" <#if is_available && !is_active>title="${tooltip}"</#if>><#compress>
+		<#if is_available && !is_active>
+			<a href="${url}">${label}</a>
+		<#else>
+			${label}
+		</#if>
+	</#compress></span>
+</#macro>

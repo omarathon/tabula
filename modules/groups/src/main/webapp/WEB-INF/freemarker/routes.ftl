@@ -30,10 +30,12 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro openset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/open" /></#macro>
 <#macro closeset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/close" /></#macro>
 
+<#macro createeditproperties set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}" /></#macro>
 <#macro createsetstudents set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}/students" /></#macro>
 <#macro createsetgroups set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}/groups" /></#macro>
 <#macro createsetevents set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}/events" /></#macro>
 <#macro createsetallocate set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}/allocate" /></#macro>
+<#macro editsetproperties set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}" /></#macro>
 <#macro editsetstudents set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/students" /></#macro>
 <#macro editsetgroups set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/groups" /></#macro>
 <#macro editsetevents set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/events" /></#macro>

@@ -22,6 +22,7 @@ object ModifySmallGroupSetCommand {
 			with CreateSmallGroupSetDescription
 			with ModifySmallGroupSetValidation
 			with AutowiringSmallGroupServiceComponent
+			with AutowiringAssignmentMembershipServiceComponent
 
 	def edit(module: Module, set: SmallGroupSet) =
 		new EditSmallGroupSetCommandInternal(module, set)
@@ -61,7 +62,7 @@ trait EditSmallGroupSetCommandState extends ModifySmallGroupSetCommandState {
 }
 
 class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmallGroupSetCommandInternal with CreateSmallGroupSetCommandState {
-	self: SmallGroupServiceComponent =>
+	self: SmallGroupServiceComponent with AssignmentMembershipServiceComponent =>
 
 	override def applyInternal() = transactional() {
 		val set = new SmallGroupSet(module)
@@ -75,6 +76,18 @@ class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmall
 					smallGroup.linkedDepartmentSmallGroup = linkedGroup
 					set.groups.add(smallGroup)
 				}
+			}
+		} else {
+			// TAB-2535 Automatically link to any available upstream groups
+			for {
+				ua <- assignmentMembershipService.getAssessmentComponents(module)
+				uag <- assignmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
+			} {
+				val ag = new AssessmentGroup
+				ag.assessmentComponent = ua
+				ag.occurrence = uag.occurrence
+				ag.smallGroupSet = set
+				set.assessmentGroups.add(ag)
 			}
 		}
 
