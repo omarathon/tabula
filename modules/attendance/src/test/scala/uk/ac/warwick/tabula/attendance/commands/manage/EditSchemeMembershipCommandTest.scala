@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.tabula.services.{SecurityService, SecurityServiceComponent, UserLookupComponent, ProfileServiceComponent, ProfileService}
 import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.permissions.Permissions
+import scala.collection.JavaConverters._
 
 class EditSchemeMembershipCommandTest extends TestBase with Mockito {
 
@@ -22,25 +23,32 @@ class EditSchemeMembershipCommandTest extends TestBase with Mockito {
 
 		val validStudent = Fixtures.student("1111111","abcd")
 		val validStudentWithUsercode = Fixtures.student("2222222","cdef")
-		val invalidStaff = Fixtures.staff("3333333","abcd")
+		val validStudentAlreadyIncluded = Fixtures.student("3333333", "dcba")
+		val invalidStaff = Fixtures.staff("4444444","abcd")
 		val invalidNoone = "unknown"
-		val invalidNoPermission = Fixtures.student("4444444")
+		val invalidNoPermission = Fixtures.student("5555555")
 
-		command.massAddUsers = "%s\n%s\n%s\n%s\n%s" format (
+		command.includedStudentIds.add(validStudentAlreadyIncluded.universityId)
+
+		command.massAddUsers = "%s\n%s\n%s\n%s\n%s\n%s" format (
 			validStudent.universityId,
+			validStudentAlreadyIncluded.universityId,
 			validStudentWithUsercode.userId,
 			invalidStaff.universityId,
 			invalidNoone,
 			invalidNoPermission.universityId
 		)
 
+
 		command.profileService.getMemberByUniversityId(validStudent.universityId) returns Option(validStudent)
+		command.profileService.getMemberByUniversityId(validStudentAlreadyIncluded.universityId) returns Option(validStudentAlreadyIncluded)
 		command.profileService.getMemberByUniversityId(invalidStaff.universityId) returns Option(invalidStaff)
 		command.profileService.getMemberByUniversityId(invalidNoPermission.universityId) returns Option(invalidNoPermission)
 		command.userLookup.registerUserObjects(MemberOrUser(validStudentWithUsercode).asUser)
 		command.profileService.getMemberByUser(MemberOrUser(validStudentWithUsercode).asUser) returns Option(validStudentWithUsercode)
 
 		command.securityService.can(currentUser, Permissions.MonitoringPoints.Manage, validStudent) returns true
+		command.securityService.can(currentUser, Permissions.MonitoringPoints.Manage, validStudentAlreadyIncluded) returns true
 		command.securityService.can(currentUser, Permissions.MonitoringPoints.Manage, validStudentWithUsercode) returns true
 		command.securityService.can(currentUser, Permissions.MonitoringPoints.Manage, invalidNoPermission) returns false
 
@@ -50,8 +58,10 @@ class EditSchemeMembershipCommandTest extends TestBase with Mockito {
 		result.missingMembers.contains(invalidStaff.universityId) should be {true}
 		result.noPermissionMembers.size should be (1)
 		result.noPermissionMembers.head should be (invalidNoPermission)
-		command.includedStudentIds.size should be (2)
-		command.includedStudentIds.contains(validStudent.universityId) should be {true}
+		command.includedStudentIds.size should be (3)
+		// TAB-2531 The same student shouldn't be added multiple times
+		command.includedStudentIds.asScala.count(_ == validStudentAlreadyIncluded.universityId) should be {1}
+		command.includedStudentIds.contains(validStudentAlreadyIncluded.universityId) should be {true}
 		command.includedStudentIds.contains(validStudentWithUsercode.universityId) should be {true}
 	}}
 

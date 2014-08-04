@@ -37,9 +37,14 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 		findStudentsForSchemeCommandResult: FindStudentsForSchemeCommandResult,
 		editMembershipCommandResult: EditSchemeMembershipCommandResult
 	): String = {
-		val sitsCount = (findStudentsForSchemeCommandResult.staticStudentIds.asScala diff editMembershipCommandResult.excludedStudentIds.asScala).size
+
+		val sitsCount = (findStudentsForSchemeCommandResult.staticStudentIds.asScala
+			diff editMembershipCommandResult.excludedStudentIds.asScala
+			diff editMembershipCommandResult.includedStudentIds.asScala).size
+
 		val removedCount = editMembershipCommandResult.excludedStudentIds.asScala.count(findStudentsForSchemeCommandResult.staticStudentIds.asScala.contains)
-		val addedCount = (editMembershipCommandResult.includedStudentIds.asScala diff findStudentsForSchemeCommandResult.staticStudentIds.asScala).size
+		val addedCount = editMembershipCommandResult.includedStudentIds.asScala.size
+
 		if (sitsCount == 0)
 			""
 		else
