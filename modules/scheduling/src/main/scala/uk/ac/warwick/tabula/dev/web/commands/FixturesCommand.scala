@@ -136,6 +136,10 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 					session.delete(scheme)
 				}
 
+				for (total <- attendanceMonitoringDao.getAllCheckpointTotals(dept)) {
+					session.delete(total)
+				}
+
 			  for (student <- scds.map{ _.student}.distinct) {
 					//should cascade delete SCDs too
 					session.delete(student)
@@ -184,7 +188,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 			}
 		}
 		def recursivelyGetChildren(department:Department): Set[Department] = {
-			val descendents = department.children flatMap { recursivelyGetChildren(_) }
+			val descendents = department.children flatMap { recursivelyGetChildren }
 			descendents.toSet ++ department.children
 		}
 

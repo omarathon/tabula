@@ -32,16 +32,16 @@ class AcademicDateHelper(val delegate: TermFactory) extends AnyVal {
 
 	def getTermFromDateIncludingVacations(date: BaseDateTime) = {
 		val term = delegate.getTermFromDate(date)
-		if (date.isBefore(term.getStartDate())) FunctionalTestVacation(delegate.getPreviousTerm(term), term)
+		if (date.isBefore(term.getStartDate)) FunctionalTestVacation(delegate.getPreviousTerm(term), term)
 		else term
 	}
 }
 
 case class FunctionalTestVacation(before: Term, after: Term) extends Term {
 	// Starts the day after the previous term and ends the day before the new term
-	def getStartDate = before.getEndDate().plusDays(1)
+	def getStartDate = before.getEndDate.plusDays(1)
 
-	def getEndDate = after.getStartDate().minusDays(1)
+	def getEndDate = after.getStartDate.minusDays(1)
 
 	def getTermType = null
 
@@ -58,7 +58,7 @@ case class FunctionalTestVacation(before: Term, after: Term) extends Term {
 	def getAcademicWeekNumber(date: BaseDateTime) = after.getAcademicWeekNumber(date)
 }
 
-case class FunctionalTestAcademicYear(val startYear: Int) extends Ordered[FunctionalTestAcademicYear] {
+case class FunctionalTestAcademicYear(startYear: Int) extends Ordered[FunctionalTestAcademicYear] {
 	val endYear = startYear + 1
 	def compare(that:FunctionalTestAcademicYear): Int = {
 		this.startYear - that.startYear

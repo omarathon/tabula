@@ -46,11 +46,10 @@ abstract class BrowserTest
 	def Path(path: String) = P.SiteRoot + path
 
 	implicit lazy val webDriver: WebDriver = P.Browser match {
-		case "htmlunit" => { //new HtmlUnitDriver(true) // JS enabled
+		case "htmlunit" => //new HtmlUnitDriver(true) // JS enabled
 			val driver = new HtmlUnitDriver(htmlUnitBrowserVersion) // JS enabled
 			driver.setJavascriptEnabled(true)
 			driver
-		}
 		case "chrome" => new ChromeDriver
 		case "firefox" => new FirefoxDriver
 		case "ie" => new InternetExplorerDriver
@@ -86,7 +85,7 @@ abstract class BrowserTest
 				underlying.clear()
 				underlying.sendKeys(nearestHourAsString)
 			} while (value != nearestHourAsString) // loop to fix weird Selenium failure mode where string is repeated
-			val script = s"var dtp = jQuery('${selector}').data('datetimepicker'); if (dtp!=undefined) dtp.update();"
+			val script = s"var dtp = jQuery('$selector').data('datetimepicker'); if (dtp!=undefined) dtp.update();"
 			executeScript(script)
 		}
 
@@ -106,7 +105,7 @@ abstract class BrowserTest
 	}
 }
 
-case class LoginDetails(val usercode: String, val password: String, description: String, warwickId:String)
+case class LoginDetails(usercode: String, password: String, description: String, warwickId:String)
 
 trait EventuallyAjax extends Eventually with SpanSugar {
 	/**
