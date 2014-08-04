@@ -27,7 +27,7 @@ class MonitoringPointProfileTermAssignmentServiceTest extends TestBase with Mock
 	trait StudentFixture {
 		val service = new AbstractMonitoringPointProfileTermAssignmentService with ServiceTestSupport
 
-		val academicYear2013 = AcademicYear(2013)
+		val academicYear2012 = AcademicYear(2012)
 		val academicYear2014 = AcademicYear(2014)
 
 		val student = Fixtures.student("1234")

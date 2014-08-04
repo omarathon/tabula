@@ -26,8 +26,8 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val dept = new Department()
-		val thisAcademicYear = AcademicYear.guessByDate(new DateTime())
-		val lastAcademicYear = AcademicYear.guessByDate(new DateTime()).previous
+		val thisAcademicYear = AcademicYear.guessByDate(new DateTime().withYear(2013))
+		val lastAcademicYear = thisAcademicYear.previous
 
 		val monitoringPoint = new MonitoringPoint
 		val existingName = "Point 1"

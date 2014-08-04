@@ -19,7 +19,8 @@
 
 		<#-- Members picker is pretty hefty so it is in a separate file -->
 		<@membership_picker.header command />
-		<@membership_picker.fieldset command 'group' 'group set'/>
+		<#assign enrolment_url><@routes.enrolment smallGroupSet /></#assign>
+		<@membership_picker.fieldset command 'group' 'group set' enrolment_url/>
 	</@form.row>
 
 <script type="text/javascript">

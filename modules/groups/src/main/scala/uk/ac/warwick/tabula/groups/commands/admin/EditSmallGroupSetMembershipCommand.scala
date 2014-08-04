@@ -31,8 +31,8 @@ object EditSmallGroupSetMembershipCommand {
 	 * This is a stub class, which isn't applied, but exposes the student membership (enrolment) for groups
    * to rebuild views within an existing form
 	 */
-	def stub(module: Module) =
-		new StubEditSmallGroupSetMembershipCommand(module)
+	def stub(module: Module, set: SmallGroupSet) =
+		new StubEditSmallGroupSetMembershipCommand(module, set)
 			with AutowiringUserLookupComponent
 			with AutowiringAssignmentMembershipServiceComponent
 			with ComposableCommand[SmallGroupSet]
@@ -166,10 +166,9 @@ trait EditSmallGroupSetMembershipValidation extends SelfValidating {
 	}
 }
 
-class StubEditSmallGroupSetMembershipCommand(val module: Module, val updateStudentMembershipGroupIsUniversityIds: Boolean = true) extends CommandInternal[SmallGroupSet] with EditSmallGroupSetMembershipCommandState {
+class StubEditSmallGroupSetMembershipCommand(val module: Module, val set: SmallGroupSet, val updateStudentMembershipGroupIsUniversityIds: Boolean = true) extends CommandInternal[SmallGroupSet] with EditSmallGroupSetMembershipCommandState {
 	self: ModifiesSmallGroupSetMembership with UserLookupComponent with AssignmentMembershipServiceComponent =>
 
-	val set = null
 	override def applyInternal() = throw new UnsupportedOperationException
 }
 

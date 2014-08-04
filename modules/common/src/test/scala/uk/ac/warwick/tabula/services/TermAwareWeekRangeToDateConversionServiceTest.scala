@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
-import uk.ac.warwick.util.termdates.TermFactory
 import org.joda.time._
-import uk.ac.warwick.tabula.JavaImports.{JArrayList,JInteger}
-import uk.ac.warwick.util.collections.{Pair=>WPair}
+import uk.ac.warwick.tabula.JavaImports.JInteger
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 
 class TermAwareWeekRangeToDateConversionServiceTest extends TestBase with Mockito{
@@ -29,6 +27,9 @@ class TermAwareWeekRangeToDateConversionServiceTest extends TestBase with Mockit
 		(JInteger(Some(2)), new Interval(week1Interval.getEnd, week1Interval.getEnd.plusDays(7)))
 	)
 
+	mockTf.getAcademicWeeksForYear(localCurrentYear.previous.dateInTermOne) returns Seq()
+
+
 	@Test
 	def canGetWeekContainingDate(){
 		converter.getWeekContainingDate(localNow.toLocalDate) should be(Some(week1))
@@ -46,7 +47,7 @@ class TermAwareWeekRangeToDateConversionServiceTest extends TestBase with Mockit
 		val overlapsStart = new Interval(dtNow.minusDays(5), dtNow.plusDays(1))
 		val overlapsEnd = new Interval(dtNow.plusDays(2), dtNow.plusDays(10))
 
-		converter.intersectsWeek(whollyContained,week1,localCurrentYear) should be(true)
+		converter.intersectsWeek(whollyContained,week1,localCurrentYear) should be (true)
 		converter.intersectsWeek(overlapsBothEnds, week1, localCurrentYear) should be (true)
 		converter.intersectsWeek(overlapsStart, week1, localCurrentYear) should be (true)
 		converter.intersectsWeek(overlapsEnd, week1, localCurrentYear) should be (true)
@@ -56,7 +57,7 @@ class TermAwareWeekRangeToDateConversionServiceTest extends TestBase with Mockit
 	def intersectsWeekReturnsFalseIfWeeksDontIntersect(){
 		val before= new Interval(dtNow.minusDays(6), dtNow.minusDays(5))
 		val after = new Interval(dtNow.plusDays(10), dtNow.plusDays(15))
-		converter.intersectsWeek(before,week1,localCurrentYear) should be(false)
+		converter.intersectsWeek(before,week1,localCurrentYear) should be (false)
 		converter.intersectsWeek(after, week1, localCurrentYear) should be (false)
 	}
 

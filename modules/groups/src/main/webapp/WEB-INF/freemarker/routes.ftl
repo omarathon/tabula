@@ -26,7 +26,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro archiveset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/archive" /></#macro>
 <#macro allocateset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/allocate" /></#macro>
 <#macro releaseset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/release" /></#macro>
-<#macro enrolment module><@_u page="/admin/module/${module.code}/groups/enrolment"/></#macro>
+<#macro enrolment set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/enrolment"/></#macro>
 <#macro openset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/open" /></#macro>
 <#macro closeset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/close" /></#macro>
 
