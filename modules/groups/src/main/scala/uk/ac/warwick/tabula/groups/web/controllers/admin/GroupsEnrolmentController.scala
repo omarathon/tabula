@@ -15,14 +15,14 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, UpstreamGroupPr
 * Controller to populate the user listing for editing, without persistence
 */
 @Controller
-@RequestMapping(value = Array("/admin/module/{module}/groups/enrolment"))
+@RequestMapping(value = Array("/admin/module/{module}/groups/{smallGroupSet}/enrolment"))
 class GroupsEnrolmentController extends GroupsController {
 
 	validatesSelf[SelfValidating]
 	type EditSmallGroupSetMembershipCommand = Appliable[SmallGroupSet] with ModifiesSmallGroupSetMembership
 
-	@ModelAttribute("command") def formObject(@PathVariable("module") module: Module) = {
-		val cmd = EditSmallGroupSetMembershipCommand.stub(mandatory(module))
+	@ModelAttribute("command") def formObject(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) = {
+		val cmd = EditSmallGroupSetMembershipCommand.stub(mandatory(module), mandatory(set))
 		cmd.upstreamGroups.clear()
 		cmd
 	}

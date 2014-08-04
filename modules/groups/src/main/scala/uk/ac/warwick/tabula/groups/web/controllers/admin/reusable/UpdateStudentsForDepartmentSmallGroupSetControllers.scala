@@ -41,9 +41,13 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 		findStudentsCommandResult: FindStudentsForDepartmentSmallGroupSetCommandResult,
 		editMembershipCommandResult: EditDepartmentSmallGroupSetMembershipCommandResult
 	): String = {
-		val sitsCount = (findStudentsCommandResult.staticStudentIds.asScala diff editMembershipCommandResult.excludedStudentIds.asScala).size
+		val sitsCount = (findStudentsCommandResult.staticStudentIds.asScala
+			diff editMembershipCommandResult.excludedStudentIds.asScala
+			diff editMembershipCommandResult.includedStudentIds.asScala).size
+
 		val removedCount = editMembershipCommandResult.excludedStudentIds.asScala.count(findStudentsCommandResult.staticStudentIds.asScala.contains)
-		val addedCount = (editMembershipCommandResult.includedStudentIds.asScala diff findStudentsCommandResult.staticStudentIds.asScala).size
+		val addedCount = editMembershipCommandResult.includedStudentIds.asScala.size
+
 		if (sitsCount == 0)
 			""
 		else

@@ -69,8 +69,9 @@ Generates the bulk of the picker HTML, inside a fieldset element
 	command: The command object that extends UpdatesStudentMembership
 	classifier: String to be used in IDs and classes - e.g. 'assignment' or 'group'
 	name: Name in english to describe the entity with members - e.g. 'assignment' or 'group set'
+	enrolment_url: URL to submit to
 -->
-<#macro fieldset command classifier name>
+<#macro fieldset command classifier name enrolment_url>
 
 <fieldset id="${classifier}EnrolmentFields"><!-- new and improved -->
 <div class="${classifier}EnrolmentInner">
@@ -421,7 +422,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 
 				$.ajax({
 					type: 'POST',
-					url: '<@routes.enrolment module />',
+					url: '${enrolment_url}',
 					data: $('#${classifier}EnrolmentFields').find('input, textarea, select').add('#academicYear').serialize(),
 					error: function() {
 						$m.modal('hide');
@@ -447,7 +448,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				$(this).addClass('disabled').prop('disabled', 'disabled');
 				$.ajax({
 					type: 'POST',
-					url: '<@routes.enrolment module />',
+					url: '${enrolment_url}',
 					data: $('#${classifier}EnrolmentFields').find('input, textarea, select').add('#academicYear').serialize(),
 					error: function() {
 						$m.modal('hide');
