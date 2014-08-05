@@ -321,24 +321,37 @@ jQuery(function($){
 		$blankInput.find('a.btn').remove(); // this button is added by initFlexiPicker, so remove it now or we'll see double
 
 		// check whenever field is changed or focused
-		$collection.on('change focus', 'input', function(ev) {
+		if (!!($collection.data('automatic'))) {
+			$collection.on('change focus', 'input', function(ev) {
+				// remove empty pickers
+				var $inputs = $collection.find('input');
+				if ($inputs.length > 1) {
+					var toRemove = $inputs.not(':focus').not(':last').filter(emptyValue).closest('.flexi-picker-container');
+					toRemove.remove();
+				}
 
-			// remove empty pickers
-			var $inputs = $collection.find('input');
-			if ($inputs.length > 1) {
-				var toRemove = $inputs.not(':focus').not(':last').filter(emptyValue).closest('.flexi-picker-container');
-				toRemove.remove();
-			}
-
-			// if last picker is nonempty OR focused, append an blank picker.
-			var $last = $inputs.last();
-			var lastFocused = (ev.type == 'focusin' && ev.target == $last[0]);
-			if (lastFocused || $last.val().trim() != '') {
-				var input = $blankInput.clone();
-				$collection.append(input);
-				input.find('input').first().flexiPicker({});
-			}
-		});
+				// if last picker is nonempty OR focused, append an blank picker.
+				var $last = $inputs.last();
+				var lastFocused = (ev.type == 'focusin' && ev.target == $last[0]);
+				if (lastFocused || $last.val().trim() != '') {
+					var input = $blankInput.clone();
+					$collection.append(input);
+					input.find('input').first().flexiPicker({});
+				}
+			});
+		} else {
+			$collection.append(
+				$('<button />')
+					.attr({'type':'button'})
+					.addClass('btn').addClass('btn-mini')
+					.html('<i class="icon-plus"></i> Add another')
+					.on('click', function() {
+						var input = $blankInput.clone();
+						$(this).before(input);
+						input.find('input').first().flexiPicker({});
+					})
+			);
+		}
 	});
 
 });

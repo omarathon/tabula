@@ -5,7 +5,7 @@
 		</@form.labelled_row>
 
 		<@form.labelled_row "tutors" "Tutors">
-			<@form.flexipicker path="tutors" placeholder="User name" list=true multiple=true />
+			<@form.flexipicker path="tutors" placeholder="User name" list=true multiple=true auto_multiple=false />
 		</@form.labelled_row>
 
 		<@form.row path="weeks">
