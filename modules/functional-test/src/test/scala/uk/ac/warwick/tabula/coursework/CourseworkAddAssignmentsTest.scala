@@ -30,7 +30,7 @@ class CourseworkAddAssignmentsTest extends BrowserTest with CourseworkFixtures w
 
 		Then("I should see one item")
 		val rows = page.itemRows
-		rows should have length(1)
+		rows should have length(2)
 
 		And("that item checkbox should already be selected")
 		page.getCheckboxForRow(rows.head).isSelected
