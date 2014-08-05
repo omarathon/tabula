@@ -29,7 +29,7 @@
 	<input name="returnTo" value="${returnTo}" type="hidden" />
 
 	<div class="form-actions">
-		<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Deleting&hellip;">
+		<button class="btn btn-danger spinnable spinner-auto" type="submit" name="submit" data-loading-text="Deleting&hellip;">
 			Delete
 		</button>
 		<a href="${returnTo}" class="btn">Cancel</a>

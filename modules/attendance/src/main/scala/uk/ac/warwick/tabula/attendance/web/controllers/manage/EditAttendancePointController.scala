@@ -71,7 +71,8 @@ class EditAttendancePointController extends AttendanceController {
 			val points = cmd.apply()
 			Redirect(
 				getReturnTo(Routes.Manage.editPoints(department, academicYear)),
-				"points" -> points.size.toString
+				"points" -> points.size.toString,
+				"actionCompleted" -> "edited"
 			)
 		}
 	}
