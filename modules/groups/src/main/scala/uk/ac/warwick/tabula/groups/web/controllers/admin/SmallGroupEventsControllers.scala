@@ -14,25 +14,49 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.groups.commands.admin.{ModifySmallGroupEventCommandState, ModifySmallGroupEventCommand}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
+import uk.ac.warwick.tabula.services.{TermService, AutowiringTermServiceComponent, TermServiceComponent}
+import uk.ac.warwick.util.termdates.Term
 
 trait SmallGroupEventsController extends GroupsController {
+	self: TermServiceComponent =>
 
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("allDays") def allDays = DayOfWeek.members
+//
+//	case class TermWeekRange(val weekRange: WeekRange) {
+//		def isFull(weeks: JList[WeekRange.Week]) = weekRange.toWeeks.forall(weeks.contains(_))
+//		def isPartial(weeks: JList[WeekRange.Week]) = weekRange.toWeeks.exists(weeks.contains(_))
+//	}
+//
+//	@ModelAttribute("allTermWeekRanges") def allTermWeekRanges(@PathVariable("smallGroupSet") set: SmallGroupSet) = {
+//		WeekRange.termWeekRanges(Option(set.academicYear).getOrElse(AcademicYear.guessByDate(DateTime.now)))
+//			.map { TermWeekRange(_) }
+//	}
 
-	case class TermWeekRange(val weekRange: WeekRange) {
-		def isFull(weeks: JList[WeekRange.Week]) = weekRange.toWeeks.forall(weeks.contains(_))
-		def isPartial(weeks: JList[WeekRange.Week]) = weekRange.toWeeks.exists(weeks.contains(_))
-	}
+	case class NamedTerm(val name: String, val term: Term, val weekRange: WeekRange)
 
-	@ModelAttribute("allTermWeekRanges") def allTermWeekRanges(@PathVariable("smallGroupSet") set: SmallGroupSet) = {
-		WeekRange.termWeekRanges(Option(set.academicYear).getOrElse(AcademicYear.guessByDate(DateTime.now)))
-			.map { TermWeekRange(_) }
+	@ModelAttribute("allTerms") def allTerms(@PathVariable("smallGroupSet") set: SmallGroupSet) = {
+		val year = Option(set.academicYear).getOrElse(AcademicYear.guessByDate(DateTime.now))
+		val weeks = termService.getAcademicWeeksForYear(year.dateInTermOne).toMap
+
+		val terms =
+			weeks
+				.map { case (weekNumber, dates) =>
+					(weekNumber, termService.getTermFromAcademicWeekIncludingVacations(weekNumber, year))
+				}
+				.groupBy { _._2 }
+				.map { case (term, weekNumbersAndTerms) =>
+					(term, WeekRange(weekNumbersAndTerms.keys.min, weekNumbersAndTerms.keys.max))
+				}
+				.toSeq
+				.sortBy { case (_, weekRange) => weekRange.minWeek.toInt }
+
+		TermService.orderedTermNames.zip(terms).map { case (name, (term, weekRange)) => NamedTerm(name, term, weekRange) }
 	}
 }
 
-abstract class AbstractCreateSmallGroupEventController extends SmallGroupEventsController {
+abstract class AbstractCreateSmallGroupEventController extends SmallGroupEventsController with AutowiringTermServiceComponent {
 
 	type CreateSmallGroupEventCommand = Appliable[SmallGroupEvent] with ModifySmallGroupEventCommandState
 
@@ -84,7 +108,7 @@ class EditSmallGroupSetCreateEventController extends AbstractCreateSmallGroupEve
 
 }
 
-abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsController {
+abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsController with AutowiringTermServiceComponent {
 
 	type EditSmallGroupEventCommand = Appliable[SmallGroupEvent] with ModifySmallGroupEventCommandState
 

@@ -8,37 +8,62 @@
 			<@form.flexipicker path="tutors" placeholder="User name" list=true multiple=true />
 		</@form.labelled_row>
 
-		<@form.labelled_row path="weeks" label="Terms" fieldCssClass="controls-row">
-			<@spring.bind path="weeks">
-				<#assign allWeeks=(status.actualValue)![] />
-			</@spring.bind>
+		<@form.row path="weeks">
+			<@form.label>
+				Running in these weeks
+				<@form.label checkbox=true clazz="pull-right">
+					<input type="checkbox" id="show-vacations" value="true">
+					Show vacations
+				</@form.label>
+			</@form.label>
 
-			<#list allTermWeekRanges as term_week_range>
-				<#assign weeks = term_week_range.weekRange.toWeeks />
-				<#assign full = term_week_range.isFull(allWeeks) />
-				<#assign partial = !full && term_week_range.isPartial(allWeeks) />
-
-				<div class="span4">
-					<@form.label checkbox=true>
-						<input id="weeks${term_week_range_index}-checkbox" type="checkbox" value="true" <#if full || partial>checked="checked"</#if> data-indeterminate="<#if partial>true<#else>false</#if>" data-target="#weeks${term_week_range_index}">
-						Term ${term_week_range_index+1}
-					</@form.label>
-
-					<@f.select path="weeks" id="weeks${term_week_range_index}" size="${weeks?size?c}" multiple="true" cssClass="individual-weeks span1">
-						<#list weeks as week>
-							<@f.option value="${week}" label="${week_index+1}" />
+			<@form.field>
+				<table class="table table-striped table-bordered week-selector">
+					<thead>
+						<tr>
+							<#assign colspan=0 />
+							<#list allTerms as namedTerm>
+								<#if (namedTerm.weekRange.maxWeek - namedTerm.weekRange.minWeek) gt colspan>
+									<#assign colspan=(namedTerm.weekRange.maxWeek - namedTerm.weekRange.minWeek) />
+								</#if>
+							</#list>
+							<th colspan="${colspan + 2}" style="text-align: center;">
+								Weeks
+								<#assign helpText>
+									<p>Select the weeks that this small group event will run in by clicking on each week. Click on the name of the term or vacation to select all weeks in that term or vacation.</p>
+								</#assign>
+								<a href="#"
+								   class="use-introductory<#if showIntro("sgt-week-selector", "anywhere")> auto</#if>"
+								   data-title="Selecting weeks for a small group event"
+								   data-trigger="click"
+								   data-placement="bottom"
+								   data-html="true"
+								   data-hash="${introHash("sgt-week-selector", "anywhere")}"
+								   data-content="${helpText}"><i class="icon-question-sign icon-fixed-width"></i></a>
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<#list allTerms as namedTerm>
+							<#assign is_vacation = !(namedTerm.term.termType?has_content) />
+							<tr<#if is_vacation> class="vacation"</#if>>
+								<th>${namedTerm.name}<#if !is_vacation> term</#if></th>
+								<#list namedTerm.weekRange.minWeek..namedTerm.weekRange.maxWeek as weekNumber>
+									<td
+										class="use-tooltip"
+										title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear module.department />"
+										data-html="true"
+										data-container="body">
+										<@f.checkbox path="weeks" value="${weekNumber}" />
+										<span class="week-number"><@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear module.department true /></span>
+									</td>
+								</#list>
+							</tr>
 						</#list>
-					</@f.select>
-				</div>
-			</#list>
-
-			<div class="very-subtle individual-weeks span3" style="margin-top: 30px;">
-				Drag to select a week range. Hold Ctrl and click to select and deselect individual weeks.
-			</div>
-
-			<div class="clearfix"></div>
-			<button type="button" class="btn btn-mini" data-toggle="elements" data-target=".individual-weeks">Select individual weeks</button>
-		</@form.labelled_row>
+					</tbody>
+				</table>
+			</@form.field>
+		</@form.row>
 
 		<@form.labelled_row "day" "Day">
 			<@f.select path="day" id="day">
@@ -121,6 +146,77 @@
 				} else {
 					$target.find('option').removeAttr('selected');
 				}
+			});
+
+			$('table.week-selector').each(function() {
+				var $table = $(this);
+
+				var updateCell = function($cell, value) {
+					var $icon = $cell.find('i');
+					if (value) {
+						$icon.addClass('icon-ok');
+						$cell.addClass('checked');
+					} else {
+						$icon.removeClass('icon-ok');
+						$cell.removeClass('checked');
+					}
+				};
+
+				$table.find('input[type="checkbox"]').each(function() {
+					var $checkbox = $(this);
+					var $cell = $checkbox.closest('td');
+
+					$checkbox.hide();
+
+					var $icon = $('<i />').addClass('icon-fixed-width');
+					$checkbox.after($icon);
+
+					updateCell($cell, $checkbox.is(':checked'));
+
+					$cell.on('click', function() {
+						$checkbox.prop('checked', !$checkbox.prop('checked'));
+						updateCell($cell, $checkbox.is(':checked'));
+					});
+				});
+				$table.find('tbody tr th').each(function() {
+					var $header = $(this);
+					var $cells = $header.closest('tr').find('td');
+					$header.on('click', function() {
+						var allChecked = $cells.find('input[type="checkbox"]:not(:checked)').length == 0;
+						if (allChecked) {
+							$cells.each(function() {
+								var $cell = $(this);
+								$cell.find('input[type="checkbox"]').prop('checked', false);
+								updateCell($cell, false);
+							});
+						} else {
+							$cells.each(function() {
+								var $cell = $(this);
+								$cell.find('input[type="checkbox"]').prop('checked', true);
+								updateCell($cell, true);
+							});
+						}
+					});
+				});
+
+				$('#show-vacations').each(function() {
+					var $checkbox = $(this);
+
+					if ($table.find('tr.vacation td.checked').length) {
+						$checkbox.prop('checked', true);
+					}
+
+					var updateDisplay = function() {
+						if ($checkbox.is(':checked')) {
+							$table.find('tr.vacation').show();
+						} else {
+							$table.find('tr.vacation').hide();
+						}
+					};
+					updateDisplay();
+
+					$checkbox.on('change', updateDisplay);
+				});
 			});
 		});
 	</script>

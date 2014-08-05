@@ -82,6 +82,8 @@ class CreateSmallGroupEventCommandInternal(val module: Module, val set: SmallGro
 		val event = new SmallGroupEvent(group)
 		copyTo(event)
 		smallGroupService.saveOrUpdate(event)
+		group.events.add(event)
+		smallGroupService.saveOrUpdate(group)
 		event
 	}
 }
