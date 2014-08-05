@@ -8,8 +8,8 @@ import org.scalatest.selenium.WebBrowser.go
 class AttendanceStudentProfileTest extends AttendanceFixture with GivenWhenThen {
 
 	"A Student" should "see their profile" in {
-		Given("I am logged in as Student1")
-		signIn as P.Student1 to Path("/")
+		Given("I am logged in as Student3")
+		signIn as P.Student3 to Path("/")
 
 		When("I go to /attendance/")
 		go to Path("/attendance/")
