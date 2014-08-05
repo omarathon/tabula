@@ -40,10 +40,10 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
 
 		Then("I see the students")
 		eventually(
-			findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be (1)
+			findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be (2)
 		)
-		pageSource should include("1 students on this scheme")
-		pageSource should include("(1 from SITS)")
+		pageSource should include("2 students on this scheme")
+		pageSource should include("(2 from SITS)")
 
 		When("I add a student manually")
 		click on cssSelector("input[name=manuallyAddForm]")
@@ -56,8 +56,8 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
 		eventually(
 			findAll(cssSelector("details.manually-added table.manage-student-table tbody tr")).size should be (1)
 		)
-		pageSource should include("2 students on this scheme")
-		pageSource should include("(1 from SITS, plus 1 added manually)")
+		pageSource should include("3 students on this scheme")
+		pageSource should include("(2 from SITS, plus 1 added manually)")
 
 		When("I save the scheme")
 		click on cssSelector("#main-content form input.btn.btn-primary")
