@@ -1,25 +1,45 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import uk.ac.warwick.tabula.commands.{Description, Command}
-import uk.ac.warwick.tabula.data.model.UnspecifiedTypeUserGroup
-import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, SmallGroup}
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-class DeleteSmallGroupEventCommand(val user: User, val group: DepartmentSmallGroup) extends Command[UnspecifiedTypeUserGroup] {
-	
-	PermissionCheck(Permissions.SmallGroups.Update, group)
-	
-	def applyInternal() = {
-		val ug = group.students
-		ug.remove(user)
-		ug
+object DeleteSmallGroupEventCommand {
+	def apply(group: SmallGroup, event: SmallGroupEvent) =
+		new DeleteSmallGroupEventCommandInternal(group, event)
+			with ComposableCommand[SmallGroupEvent]
+			with DeleteSmallGroupEventPermissions
+			with DeleteSmallGroupEventDescription
+}
+
+trait DeleteSmallGroupEventCommandState {
+	def group: SmallGroup
+	def event: SmallGroupEvent
+}
+
+class DeleteSmallGroupEventCommandInternal(val group: SmallGroup, val event: SmallGroupEvent) extends CommandInternal[SmallGroupEvent] with DeleteSmallGroupEventCommandState {
+
+	override def applyInternal() = {
+		group.events.remove(event)
+		event
 	}
 
-	override def describe(d: Description) = 
-		d.departmentSmallGroup(group).properties(
-			"usercode" -> user.getUserId,
-			"universityId" -> user.getWarwickId
-		)
+}
 
+trait DeleteSmallGroupEventPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: DeleteSmallGroupEventCommandState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		mustBeLinked(event, group)
+		p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(event))
+	}
+}
+
+trait DeleteSmallGroupEventDescription extends Describable[SmallGroupEvent] {
+	self: DeleteSmallGroupEventCommandState =>
+
+	override def describe(d: Description) {
+		d.smallGroupEvent(event)
+	}
 }

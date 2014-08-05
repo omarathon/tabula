@@ -1,8 +1,4 @@
 <#escape x as x?html>
-	<@form.row>
-		<span class="legend" >Groups <small>Create and name empty groups</small> </span>
-	</@form.row>
-
 	<#if smallGroupSet.linked>
 		<@form.row>
 			<p>There are <@fmt.p smallGroupSet.groups?size "group" /> in ${smallGroupSet.name} (from <i class="icon-link"></i> ${smallGroupSet.linkedDepartmentSmallGroupSet.name}).</p>

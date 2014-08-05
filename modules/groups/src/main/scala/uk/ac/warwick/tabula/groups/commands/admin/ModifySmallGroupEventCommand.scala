@@ -62,9 +62,6 @@ trait ModifySmallGroupEventCommandState extends CurrentAcademicYear {
 				.map(i => JInteger(Some(i)))
 				.toSet)
 	}
-
-	// Used by parent command
-	var delete: Boolean = false
 }
 
 trait CreateSmallGroupEventCommandState extends ModifySmallGroupEventCommandState {
@@ -146,19 +143,17 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 
 	override def validate(errors: Errors) {
 		// Skip validation when this event is being deleted
-		if (!delete) {
-			if (tutors.isEmpty) { // TAB-1278 Allow unscheduled events
-				if (weeks == null || weeks.isEmpty) errors.rejectValue("weeks", "smallGroupEvent.weeks.NotEmpty")
+		if (tutors.isEmpty) { // TAB-1278 Allow unscheduled events
+			if (weeks == null || weeks.isEmpty) errors.rejectValue("weeks", "smallGroupEvent.weeks.NotEmpty")
 
-				if (day == null) errors.rejectValue("day", "smallGroupEvent.day.NotEmpty")
+			if (day == null) errors.rejectValue("day", "smallGroupEvent.day.NotEmpty")
 
-				if (startTime == null) errors.rejectValue("startTime", "smallGroupEvent.startTime.NotEmpty")
+			if (startTime == null) errors.rejectValue("startTime", "smallGroupEvent.startTime.NotEmpty")
 
-				if (endTime == null) errors.rejectValue("endTime", "smallGroupEvent.endTime.NotEmpty")
-			}
-
-			if (endTime != null && endTime.isBefore(startTime)) errors.rejectValue("endTime", "smallGroupEvent.endTime.beforeStartTime")
+			if (endTime == null) errors.rejectValue("endTime", "smallGroupEvent.endTime.NotEmpty")
 		}
+
+		if (endTime != null && endTime.isBefore(startTime)) errors.rejectValue("endTime", "smallGroupEvent.endTime.beforeStartTime")
 	}
 }
 

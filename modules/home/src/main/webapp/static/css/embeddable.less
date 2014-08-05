@@ -602,11 +602,6 @@ fieldset.internal {
 .assignment-info, .striped-section-contents .item-info {
 	border-top: 2px groove white;
 
-	//fix appearance against bottom of rounded module box
-	&:last-child {
-		border-radius: 0 0 @box-style-border-radius @box-style-border-radius;
-	}
-
 	padding: 0.5em;
 	margin-left: -0.5em;
 	margin-right: -0.5em;
@@ -675,6 +670,15 @@ fieldset.internal {
 
 .striped-section-contents .item-info {
 	&:nth-of-type(odd) { background-color: @zebra-pale; }
+}
+
+.striped-section.no-title {
+	padding-top: 0;
+
+	.striped-section-contents .item-info:first-child {
+		.border-radius(@box-style-border-radius @box-style-border-radius 0px 0px);
+		border-top: 0;
+	}
 }
 
 // fix for icons sitting a bit off the baseline

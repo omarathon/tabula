@@ -3,10 +3,6 @@
 
 	<input type="hidden" name="action" value="submit" id="action-submit" >
 
-	<@form.row>
-		<span class="legend" >Students <small>Select which students should be in this set of groups</small> </span>
-	</@form.row>
-
 	<#if smallGroupSet.linked>
 		<@form.row "members" "groupEnrolment">
 			<p>There are <@fmt.p smallGroupSet.members.size "student" /> in ${smallGroupSet.name} (from <i class="icon-link"></i> ${smallGroupSet.linkedDepartmentSmallGroupSet.name}).</p>

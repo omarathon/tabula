@@ -4,21 +4,15 @@
 
 <fieldset>
 	<@form.row>
-		<span class="legend" >Events <small>Add weekly events for these groups</small> </span>
+		<p>There are <@fmt.p smallGroupSet.groups?size "group" /> in ${smallGroupSet.name}<#if smallGroupSet.linked> (from <i class="icon-link"></i> ${smallGroupSet.linkedDepartmentSmallGroupSet.name})</#if>.</p>
 	</@form.row>
 
-	<div class="striped-section">
-		<div class="clearfix">
-			<h2 class="section-title with-button">Groups</h2>
-		</div>
-
+	<div class="striped-section no-title">
 		<#if groups?size gt 0>
 			<#include "_events.ftl" />
 		</#if>
 	</div>
 </fieldset>
-
-<#include "_events_modals.ftl" />
 
 <script type="text/javascript">
 	jQuery(function($) {

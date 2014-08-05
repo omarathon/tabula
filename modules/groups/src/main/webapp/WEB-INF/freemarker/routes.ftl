@@ -41,6 +41,11 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro editsetevents set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/events" /></#macro>
 <#macro editsetallocate set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/allocate" /></#macro>
 
+<#macro createseteventsnewevent group><@_u page="/admin/module/${group.groupSet.module.code}/groups/new/${group.groupSet.id}/events/${group.id}/new" /></#macro>
+<#macro createseteventseditevent event><@_u page="/admin/module/${event.group.groupSet.module.code}/groups/new/${event.group.groupSet.id}/events/${event.group.id}/edit/${event.id}" /></#macro>
+<#macro editseteventsnewevent group><@_u page="/admin/module/${group.groupSet.module.code}/groups/new/${group.groupSet.id}/events/${group.id}/new" /></#macro>
+<#macro editseteventseditevent event><@_u page="/admin/module/${event.group.groupSet.module.code}/groups/new/${event.group.groupSet.id}/events/${event.group.id}/edit/${event.id}" /></#macro>
+
 <#macro register event><@_u page="/event/${event.id}/register" /></#macro>
 <#macro registerForWeek event week><@_u page="/event/${event.id}/register?week=${week?c}" /></#macro>
 <#macro groupAttendance group><@_u page="/group/${group.id}/attendance" /></#macro>
