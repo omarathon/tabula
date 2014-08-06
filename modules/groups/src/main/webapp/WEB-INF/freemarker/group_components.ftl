@@ -16,7 +16,13 @@
 	<#if event.title?has_content><span class="eventTitle">${event.title} - </span></#if>
 	<@fmt.weekRanges event />,
 	${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime /><#if ((event.location.name)!)?has_content>,</#if>
-	${(event.location.name)!"[no location]"}
+	<#if ((event.location.name)!)?has_content>
+		<#if ((event.location.locationId)!)?has_content>
+			<span class="map-location" data-lid="${event.location.locationId}">${event.location.name}</span>
+		<#else>
+			${event.location.name}
+		</#if>
+	</#if>
 </#if>
 </#macro>
 
