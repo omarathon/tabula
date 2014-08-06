@@ -161,7 +161,16 @@
 				});
 			});
 
-			$('#location').locationPicker();
+			$('#location')
+				.on('change', function() {
+					var $this = $(this);
+					if ($this.data('lid') === undefined || $this.data('lid').length === 0)
+						return;
+
+					$('#locationId').val($this.data('lid'));
+					$this.data('lid','');
+				})
+				.locationPicker();
 		});
 	</script>
 
