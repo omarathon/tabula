@@ -45,7 +45,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 		val removedCount = editMembershipCommandResult.excludedStudentIds.asScala.count(findStudentsForSchemeCommandResult.staticStudentIds.asScala.contains)
 		val addedCount = editMembershipCommandResult.includedStudentIds.asScala.size
 
-		if (sitsCount == 0)
+		if (sitsCount == 0 && addedCount == 0)
 			""
 		else
 			s"${sitsCount + addedCount} students on this scheme <span class='muted'>($sitsCount from SITS${ removedCount match {

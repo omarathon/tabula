@@ -26,7 +26,7 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 		Then("I see the students currently on the scheme")
 		eventually(currentUrl should endWith(s"students"))
 		pageSource should include("1 students on this scheme")
-		pageSource should include("(1 from SITS)")
+		pageSource should include("0 from SITS")
 
 		When("I add a student manually")
 		click on cssSelector("input[name=manuallyAddForm]")
@@ -40,7 +40,7 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 			findAll(cssSelector("details.manually-added table.manage-student-table tbody tr")).size should be (2)
 		)
 		pageSource should include("2 students on this scheme")
-		pageSource should include("(1 from SITS, plus 1 added manually)")
+		pageSource should include("(0 from SITS, plus 2 added manually)")
 
 		When("I choose a route")
 		click on cssSelector("#main-content input[name=routes]")
@@ -50,10 +50,10 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 
 		Then("I see the students")
 		eventually(
-			findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be (1)
+			findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be (2)
 		)
-		pageSource should include("2 students on this scheme")
-		pageSource should include("(1 from SITS, plus 1 added manually)")
+		pageSource should include("3 students on this scheme")
+		pageSource should include("(1 from SITS, plus 2 added manually)")
 
 		When("I choose to link to SITS")
 		click on cssSelector("input[name=linkToSits]")
@@ -65,32 +65,32 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 		pageSource should include(s"Manage monitoring points for ${new FunctionalTestAcademicYear(new DateTime().getYear).toString}")
 
 		When("I choose to edit the students on the same scheme")
-		click on linkText("2 students")
+		click on linkText("3 students")
 
 		Then("I see the students currently on the scheme")
 		eventually(currentUrl should endWith(s"students"))
-		pageSource should include("2 students on this scheme")
+		pageSource should include("3 students on this scheme")
 
 		When("I reset both manually added students")
 		cssSelector("details.manually-added input[name=resetStudentIds]").findAllElements.foreach(input => click on input)
 		click on cssSelector("input[name=resetMembership]")
 
-		Then("Only the SITS student remains")
+		Then("Only the SITS students remain")
 		eventually {
-			findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be(1)
+			findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be(2)
 			findAll(cssSelector("details.manually-added table.manage-student-table tbody tr")).size should be(0)
 		}
-		pageSource should include("1 students on this scheme")
+		pageSource should include("2 students on this scheme")
 
-		When("I exclude the SITS student")
-		click on cssSelector("details.find-students input[name=excludeIds]")
+		When("I exclude the SITS students")
+		cssSelector("details.find-students input[name=excludeIds]").findAllElements.foreach(input => click on input)
 		click on cssSelector("input[name=manuallyExclude]")
 
 		Then("No students remain")
 		eventually {
-			findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be(1)
-			findAll(cssSelector("details.find-students table.manage-student-table tbody tr.exclude")).size should be(1)
-			findAll(cssSelector("details.manually-added table.manage-student-table tbody tr")).size should be(1)
+			findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be(2)
+			findAll(cssSelector("details.find-students table.manage-student-table tbody tr.exclude")).size should be(2)
+			findAll(cssSelector("details.manually-added table.manage-student-table tbody tr")).size should be(2)
 		}
 
 		When("I save the scheme")
@@ -99,6 +99,7 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 		Then("I am redirected to the manage home page")
 		eventually(currentUrl should endWith(s"/attendance/manage/xxx/$thisAcademicYearString"))
 		pageSource should include(s"Manage monitoring points for ${new FunctionalTestAcademicYear(new DateTime().getYear).toString}")
+		pageSource should include("0 students")
 
 	}
 }
