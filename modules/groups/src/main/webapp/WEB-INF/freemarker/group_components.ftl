@@ -55,6 +55,7 @@
 			var $module = jQuery(this);
 			Groups.zebraStripeGroups($module);
 			Groups.wireModalButtons($module);
+			Groups.wireMapLocations($module);
 			AjaxPopup.wireAjaxPopupLinks($module);
 			$module.find('.use-tooltip').tooltip();
 			$module.find('.use-popover').tabulaPopover({
