@@ -19,7 +19,7 @@ class EditSmallGroupSetPropertiesPage (implicit val webDriver:WebDriver) extends
 		click on cssSelector("input.btn-primary")
 	}
 
-	def submitAndAddStudents() {
+	def submitAndAddGroups() {
 		click on cssSelector("input.btn-success")
 	}
 
