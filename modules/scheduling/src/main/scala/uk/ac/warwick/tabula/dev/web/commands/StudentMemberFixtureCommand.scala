@@ -48,6 +48,7 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 			newMember.firstName = userLookupUser.getFirstName
 			newMember.lastName = userLookupUser.getLastName
 			newMember.inUseFlag = "Active"
+			if (dept.isDefined) newMember.homeDepartment = dept.get
 
 			val scd = new StudentCourseDetails(newMember, userLookupUser.getWarwickId + "/" + yearOfStudy)
 			scd.mostSignificant = true
