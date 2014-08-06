@@ -89,65 +89,6 @@
 
 	<script type="text/javascript">
 		jQuery(function($) {
-			$('span[data-toggle="tooltip"]').tooltip();
-
-			$('button[data-toggle="elements"][data-target]').on('click', function() {
-				var $button = $(this);
-				var $target = $($button.data('target'));
-
-				$target.show();
-				$button.hide();
-			});
-
-			// Initially hide all of the elements, we may show them if they're the target of indeterminate-ness
-			$('button[data-toggle="elements"][data-target]').each(function() {
-				var $button = $(this);
-				var $target = $($button.data('target'));
-				$target.hide();
-			});
-
-			$('input[type="checkbox"][data-indeterminate]').each(function() {
-				var $checkbox = $(this);
-				$checkbox.prop('indeterminate', $checkbox.data('indeterminate'));
-
-				if ($checkbox.data('target')) {
-					var $target = $($checkbox.data('target'));
-
-					if ($target.prop('multiple')) {
-						// Wire a change listener on the target to manage the indeterminate nature
-						$target.on('change', function() {
-							var $select = $(this);
-							var $options = $select.find('option');
-							var $selected = $options.filter(':selected');
-
-							if ($options.length == $selected.length) {
-								// All selected
-								$checkbox.attr('checked', 'checked');
-								$checkbox.prop('indeterminate', false);
-							} else if ($selected.length == 0) {
-								// None selected
-								$checkbox.removeAttr('checked');
-								$checkbox.prop('indeterminate', false);
-							} else {
-								// Indeterminate
-								$checkbox.attr('checked', 'checked');
-								$checkbox.prop('indeterminate', true);
-							}
-						});
-					}
-				}
-			});
-
-			$('input[type="checkbox"][data-target]').on('change', function() {
-				var $checkbox = $(this);
-				var $target = $($checkbox.data('target'));
-				if ($checkbox.is(':checked')) {
-					$target.find('option').attr('selected', 'selected');
-				} else {
-					$target.find('option').removeAttr('selected');
-				}
-			});
-
 			$('table.week-selector').each(function() {
 				var $table = $(this);
 
@@ -218,6 +159,8 @@
 					$checkbox.on('change', updateDisplay);
 				});
 			});
+
+			$('#location').locationPicker();
 		});
 	</script>
 
