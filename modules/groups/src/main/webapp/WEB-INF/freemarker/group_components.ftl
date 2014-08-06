@@ -15,8 +15,14 @@
 	<#-- Weeks, day/time, location -->
 	<#if event.title?has_content><span class="eventTitle">${event.title} - </span></#if>
 	<@fmt.weekRanges event />,
-	${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime /><#if event.location?has_content>,</#if>
-	${event.location!"[no location]"}
+	${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime /><#if ((event.location.name)!)?has_content>,</#if>
+	<#if ((event.location.name)!)?has_content>
+		<#if ((event.location.locationId)!)?has_content>
+			<span class="map-location" data-lid="${event.location.locationId}">${event.location.name}</span>
+		<#else>
+			${event.location.name}
+		</#if>
+	</#if>
 </#if>
 </#macro>
 
@@ -49,6 +55,7 @@
 			var $module = jQuery(this);
 			Groups.zebraStripeGroups($module);
 			Groups.wireModalButtons($module);
+			Groups.wireMapLocations($module);
 			AjaxPopup.wireAjaxPopupLinks($module);
 			$module.find('.use-tooltip').tooltip();
 			$module.find('.use-popover').tabulaPopover({

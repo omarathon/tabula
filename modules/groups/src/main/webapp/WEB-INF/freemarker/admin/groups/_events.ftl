@@ -20,9 +20,9 @@
 				${tutor.fullName}<#if tutor_has_next>,</#if>
 			</#compress></#list>
 		</#if>
-		<#if ((event.location)!"")?has_content>
+		<#if ((event.location.name)!"")?has_content>
 			<div class="location">
-				Room: ${event.location}
+				Room: ${event.location.name}
 			</div>
 		</#if>
 		<div class="running">

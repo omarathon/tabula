@@ -209,7 +209,7 @@ class SmallGroupEventBuilder(){
   }
 
   def withLocation(s: String)  = {
-    template.location = s
+    template.location = NamedLocation(s)
     this
   }
 
