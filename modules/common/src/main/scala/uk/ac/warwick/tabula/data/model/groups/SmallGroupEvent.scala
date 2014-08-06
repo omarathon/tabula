@@ -51,9 +51,9 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	
 	var startTime: LocalTime = _
 	var endTime: LocalTime = _
-	
-	// TODO We're storing locations as Strings atm, but do we need a more complex type to generate map links?
-	var location: String = _
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.LocationUserType")
+	var location: Location = _
 	
 	var title: String = _
 	

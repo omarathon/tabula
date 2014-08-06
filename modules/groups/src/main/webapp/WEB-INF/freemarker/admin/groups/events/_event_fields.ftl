@@ -83,6 +83,7 @@
 		</@form.labelled_row>
 
 		<@form.labelled_row "location" "Location">
+			<@f.hidden path="locationId" />
 			<@f.input path="location" />
 		</@form.labelled_row>
 	</fieldset>

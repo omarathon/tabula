@@ -51,6 +51,7 @@ trait ModifySmallGroupEventCommandState extends CurrentAcademicYear {
 	var startTime: LocalTime = DefaultStartTime
 	var endTime: LocalTime = DefaultEndTime
 	var location: String = _
+	var locationId: String = _
 	var title: String = _
 	var tutors: JList[String] = JArrayList()
 
@@ -103,7 +104,15 @@ class EditSmallGroupEventCommandInternal(val module: Module, val set: SmallGroup
 abstract class ModifySmallGroupEventCommandInternal extends CommandInternal[SmallGroupEvent] with ModifySmallGroupEventCommandState {
 	def copyFrom(event: SmallGroupEvent) {
 		title = event.title
-		location = event.location
+
+		Option(event.location).foreach {
+			case NamedLocation(name) => location = name
+			case MapLocation(name, lid) => {
+				location = name
+				locationId = lid
+			}
+		}
+
 		weekRanges = event.weekRanges
 		day = event.day
 		startTime = event.startTime
@@ -114,7 +123,25 @@ abstract class ModifySmallGroupEventCommandInternal extends CommandInternal[Smal
 
 	def copyTo(event: SmallGroupEvent) {
 		event.title = title
-		event.location = location
+
+		// If the location name has changed, but the location ID hasn't, we're changing from a map location
+		// to a named location
+		Option(event.location).collect { case m: MapLocation => m }.foreach { mapLocation =>
+			if (location != mapLocation.name && locationId == mapLocation.locationId) {
+				locationId = null
+			}
+		}
+
+		if (location.hasText) {
+			if (locationId.hasText) {
+				event.location = MapLocation(location, locationId)
+			} else {
+				event.location = NamedLocation(location)
+			}
+		} else {
+			event.location = null
+		}
+
 		event.weekRanges = weekRanges
 		event.day = day
 		event.startTime = startTime
@@ -144,7 +171,6 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 	self: ModifySmallGroupEventCommandState =>
 
 	override def validate(errors: Errors) {
-		// Skip validation when this event is being deleted
 		if (tutors.isEmpty) { // TAB-1278 Allow unscheduled events
 			if (weeks == null || weeks.isEmpty) errors.rejectValue("weeks", "smallGroupEvent.weeks.NotEmpty")
 
@@ -156,6 +182,8 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 		}
 
 		if (endTime != null && endTime.isBefore(startTime)) errors.rejectValue("endTime", "smallGroupEvent.endTime.beforeStartTime")
+
+		if (location.safeContains("|")) errors.rejectValue("location", "smallGroupEvent.location.invalidChar")
 	}
 }
 
