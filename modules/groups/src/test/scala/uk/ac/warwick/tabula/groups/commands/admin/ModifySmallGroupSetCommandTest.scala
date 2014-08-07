@@ -5,16 +5,18 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.{Appliable, Describable, DescriptionImpl, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{AssessmentType, AssessmentComponent}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups.{WeekRange, SmallGroupAllocationMethod, SmallGroupFormat, SmallGroupSet}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AssignmentMembershipServiceComponent, SmallGroupService, SmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 
 class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
-	private trait CommandTestSupport extends SmallGroupServiceComponent with AssignmentMembershipServiceComponent {
+	private trait CommandTestSupport extends SmallGroupServiceComponent with AssignmentMembershipServiceComponent with GeneratesDefaultWeekRanges {
 		val smallGroupService = smartMock[SmallGroupService]
 		val assignmentMembershipService = smartMock[AssignmentMembershipService]
+
+		override def defaultWeekRanges(year: AcademicYear): Seq[WeekRange] = Nil
 	}
 
 	private trait Fixture {
@@ -403,5 +405,17 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command should be (anInstanceOf[EditSmallGroupSetPermissions])
 		command should be (anInstanceOf[EditSmallGroupSetCommandState])
 	}}
+
+	@Test def defaultWeekRanges {
+		val generator = new GeneratesDefaultWeekRangesWithTermService with TermServiceComponent {
+			val termService = new TermServiceImpl
+		}
+
+		generator.defaultWeekRanges(AcademicYear.parse("13/14")) should be (Seq(
+			WeekRange(1, 10),
+			WeekRange(15, 24),
+			WeekRange(30, 34)
+		))
+	}
 
 }

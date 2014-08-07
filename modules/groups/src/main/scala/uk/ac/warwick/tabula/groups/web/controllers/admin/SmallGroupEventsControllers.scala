@@ -23,16 +23,6 @@ trait SmallGroupEventsController extends GroupsController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("allDays") def allDays = DayOfWeek.members
-//
-//	case class TermWeekRange(val weekRange: WeekRange) {
-//		def isFull(weeks: JList[WeekRange.Week]) = weekRange.toWeeks.forall(weeks.contains(_))
-//		def isPartial(weeks: JList[WeekRange.Week]) = weekRange.toWeeks.exists(weeks.contains(_))
-//	}
-//
-//	@ModelAttribute("allTermWeekRanges") def allTermWeekRanges(@PathVariable("smallGroupSet") set: SmallGroupSet) = {
-//		WeekRange.termWeekRanges(Option(set.academicYear).getOrElse(AcademicYear.guessByDate(DateTime.now)))
-//			.map { TermWeekRange(_) }
-//	}
 
 	case class NamedTerm(val name: String, val term: Term, val weekRange: WeekRange)
 
@@ -67,9 +57,11 @@ abstract class AbstractCreateSmallGroupEventController extends SmallGroupEventsC
 	): CreateSmallGroupEventCommand =
 		ModifySmallGroupEventCommand.create(module, set, group)
 
+	protected def cancelUrl(set: SmallGroupSet): String
+
 	@RequestMapping
 	def form(@ModelAttribute("createSmallGroupEventCommand") cmd: CreateSmallGroupEventCommand) = {
-		Mav("admin/groups/events/new").crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
+		Mav("admin/groups/events/new", "cancelUrl" -> cancelUrl(cmd.set)).crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
 	}
 
 	protected def submit(cmd: CreateSmallGroupEventCommand, errors: Errors, route: String) = {
@@ -86,8 +78,7 @@ abstract class AbstractCreateSmallGroupEventController extends SmallGroupEventsC
 @Controller
 class CreateSmallGroupSetCreateEventController extends AbstractCreateSmallGroupEventController {
 
-	@ModelAttribute("cancelUrl") def cancelUrl(@PathVariable("smallGroupSet") set: SmallGroupSet) =
-		Routes.admin.createAddEvents(set)
+	override def cancelUrl(set: SmallGroupSet) = Routes.admin.createAddEvents(set)
 
 	@RequestMapping(method = Array(POST))
 	def saveAndExit(@Valid @ModelAttribute("createSmallGroupEventCommand") cmd: CreateSmallGroupEventCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet) =
@@ -99,8 +90,7 @@ class CreateSmallGroupSetCreateEventController extends AbstractCreateSmallGroupE
 @Controller
 class EditSmallGroupSetCreateEventController extends AbstractCreateSmallGroupEventController {
 
-	@ModelAttribute("cancelUrl") def cancelUrl(@PathVariable("smallGroupSet") set: SmallGroupSet) =
-		Routes.admin.editAddEvents(set)
+	override def cancelUrl(set: SmallGroupSet) = Routes.admin.editAddEvents(set)
 
 	@RequestMapping(method = Array(POST))
 	def saveAndExit(@Valid @ModelAttribute("createSmallGroupEventCommand") cmd: CreateSmallGroupEventCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet) =
@@ -120,9 +110,11 @@ abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsCon
 	): EditSmallGroupEventCommand =
 		ModifySmallGroupEventCommand.edit(module, set, group, event)
 
+	protected def cancelUrl(set: SmallGroupSet): String
+
 	@RequestMapping
 	def form(@ModelAttribute("editSmallGroupEventCommand") cmd: EditSmallGroupEventCommand) = {
-		Mav("admin/groups/events/edit").crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
+		Mav("admin/groups/events/edit", "cancelUrl" -> cancelUrl(cmd.set)).crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
 	}
 
 	protected def submit(cmd: EditSmallGroupEventCommand, errors: Errors, route: String) = {
@@ -139,8 +131,7 @@ abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsCon
 @Controller
 class CreateSmallGroupSetEditEventController extends AbstractEditSmallGroupEventController {
 
-	@ModelAttribute("cancelUrl") def cancelUrl(@PathVariable("smallGroupSet") set: SmallGroupSet) =
-		Routes.admin.createAddEvents(set)
+	override def cancelUrl(set: SmallGroupSet) = Routes.admin.createAddEvents(set)
 
 	@RequestMapping(method = Array(POST))
 	def saveAndExit(@Valid @ModelAttribute("editSmallGroupEventCommand") cmd: EditSmallGroupEventCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet) =
@@ -152,8 +143,7 @@ class CreateSmallGroupSetEditEventController extends AbstractEditSmallGroupEvent
 @Controller
 class EditSmallGroupSetEditEventController extends AbstractEditSmallGroupEventController {
 
-	@ModelAttribute("cancelUrl") def cancelUrl(@PathVariable("smallGroupSet") set: SmallGroupSet) =
-		Routes.admin.editAddEvents(set)
+	override def cancelUrl(set: SmallGroupSet) = Routes.admin.editAddEvents(set)
 
 	@RequestMapping(method = Array(POST))
 	def saveAndExit(@Valid @ModelAttribute("editSmallGroupEventCommand") cmd: EditSmallGroupEventCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet) =
