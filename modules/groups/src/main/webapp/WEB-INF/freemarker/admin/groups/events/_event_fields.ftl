@@ -20,14 +20,16 @@
 		</@form.labelled_row>
 
 		<#-- The time-picker causes the entire page to become a submit button, can't work out why -->
-		<@form.labelled_row "startTime" "Start time">
-			<@f.input path="startTime" cssClass="time-picker startDateTime" />
-			<input class="endoffset" type="hidden" data-end-offset="3600000" />
-		</@form.labelled_row>
+		<div class="dateTimePair">
+			<@form.labelled_row "startTime" "Start time">
+				<@f.input path="startTime" cssClass="time-picker startDateTime" />
+				<input class="endoffset" type="hidden" data-end-offset="3600000" />
+			</@form.labelled_row>
 
-		<@form.labelled_row "endTime" "End time">
-			<@f.input path="endTime" cssClass="time-picker endDateTime" />
-		</@form.labelled_row>
+			<@form.labelled_row "endTime" "End time">
+				<@f.input path="endTime" cssClass="time-picker endDateTime" />
+			</@form.labelled_row>
+		</div>
 
 		<@form.labelled_row "location" "Location">
 			<@f.hidden path="locationId" />
