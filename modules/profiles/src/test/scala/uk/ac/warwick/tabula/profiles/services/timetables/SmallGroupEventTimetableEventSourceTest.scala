@@ -30,7 +30,7 @@ class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 	event.startTime = LocalTime.now
 	event.endTime = event.startTime.plusHours(1)
 	event.group = group
-	event.location  = "location"
+	event.location  = NamedLocation("location")
 	group.events = JArrayList(event)
 	group.name = "group name"
 	group.groupSet = new SmallGroupSet

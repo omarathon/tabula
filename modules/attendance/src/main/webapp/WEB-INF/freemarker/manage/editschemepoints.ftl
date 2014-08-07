@@ -2,7 +2,7 @@
 <#import "../attendance_macros.ftl" as attendance_macros />
 
 <#assign filterQuery = findCommand.serializeFilter />
-<#assign returnTo = (info.requestedUri!"")?url />
+<#assign returnTo><@routes.manageEditSchemePoints scheme.department scheme.academicYear.startYear?c scheme /></#assign>
 
 <h1>Edit scheme: ${scheme.displayName}</h1>
 
@@ -18,7 +18,7 @@
 		<p><@fmt.p scheme.points?size "point" /> on this scheme</p>
 	<#else>
 		<div class="alert alert-success">
-			<strong><@fmt.p newPoints "point" /></strong> added to this scheme
+			<strong><@fmt.p newPoints "point" /></strong> ${actionCompleted!"added to this scheme"}
 			<a class="btn" href="<@routes.manageEditPoints findCommand.department findCommand.academicYear.startYear?c schemesParam />">Edit points</a>
 		</div>
 

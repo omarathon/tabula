@@ -26,18 +26,28 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro archiveset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/archive" /></#macro>
 <#macro allocateset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/allocate" /></#macro>
 <#macro releaseset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/release" /></#macro>
-<#macro enrolment module><@_u page="/admin/module/${module.code}/groups/enrolment"/></#macro>
+<#macro enrolment set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/enrolment"/></#macro>
 <#macro openset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/open" /></#macro>
 <#macro closeset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/close" /></#macro>
 
+<#macro createeditproperties set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}" /></#macro>
 <#macro createsetstudents set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}/students" /></#macro>
 <#macro createsetgroups set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}/groups" /></#macro>
 <#macro createsetevents set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}/events" /></#macro>
 <#macro createsetallocate set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}/allocate" /></#macro>
+<#macro editsetproperties set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}" /></#macro>
 <#macro editsetstudents set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/students" /></#macro>
 <#macro editsetgroups set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/groups" /></#macro>
 <#macro editsetevents set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/events" /></#macro>
 <#macro editsetallocate set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/allocate" /></#macro>
+
+<#macro createseteventsnewevent group><@_u page="/admin/module/${group.groupSet.module.code}/groups/new/${group.groupSet.id}/events/${group.id}/new" /></#macro>
+<#macro createseteventseditevent event><@_u page="/admin/module/${event.group.groupSet.module.code}/groups/new/${event.group.groupSet.id}/events/${event.group.id}/edit/${event.id}" /></#macro>
+<#macro editseteventsnewevent group><@_u page="/admin/module/${group.groupSet.module.code}/groups/new/${group.groupSet.id}/events/${group.id}/new" /></#macro>
+<#macro editseteventseditevent event><@_u page="/admin/module/${event.group.groupSet.module.code}/groups/new/${event.group.groupSet.id}/events/${event.group.id}/edit/${event.id}" /></#macro>
+
+<#macro createseteventdefaults set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}/events/defaults" /></#macro>
+<#macro editseteventdefaults set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/events/defaults" /></#macro>
 
 <#macro register event><@_u page="/event/${event.id}/register" /></#macro>
 <#macro registerForWeek event week><@_u page="/event/${event.id}/register?week=${week?c}" /></#macro>

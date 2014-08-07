@@ -329,7 +329,8 @@ object TurnitinResponse {
 		2324 -> "When excluding small matches by percentage, you must enter a number between 1 and 100",
 
 		// Custom Tabula errors 9000+
-		9000 -> "Turnitin server unavailable"
+		9000 -> "Turnitin server unavailable",
+		9001 -> "Unexpected formatting in response from Turnitin"
 	)
 		
 

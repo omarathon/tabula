@@ -20,7 +20,8 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 	var routeCode: String = ""
 	var courseCode:String=""
 	var yearOfStudy: Int = 1
-  var deptCode:String=""
+	var deptCode:String=""
+	var academicYear: AcademicYear = _
 
 	var memberDao = Wire[MemberDao]
 	var routeDao = Wire[RouteDao]
@@ -40,7 +41,6 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 			val currentStudentStatus = statusDao.getByCode("C").get
 
 
-
 			val newMember = new StudentMember
 			newMember.universityId = userLookupUser.getWarwickId
 			newMember.userId = userId
@@ -48,6 +48,7 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 			newMember.firstName = userLookupUser.getFirstName
 			newMember.lastName = userLookupUser.getLastName
 			newMember.inUseFlag = "Active"
+			if (dept.isDefined) newMember.homeDepartment = dept.get
 
 			val scd = new StudentCourseDetails(newMember, userLookupUser.getWarwickId + "/" + yearOfStudy)
 			scd.mostSignificant = true
@@ -58,7 +59,15 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 			if (route.isDefined) scd.route = route.get
 			if (course.isDefined) scd.course = course.get
 			if (dept.isDefined)  scd.department = dept.get
-			val yd = new StudentCourseYearDetails(scd, 1, AcademicYear.guessByDate(DateTime.now))
+
+			val scydAcademicYear = {
+				if (null != academicYear) academicYear
+				else AcademicYear.guessByDate(DateTime.now)
+			}
+
+			// actually, if the specified academic year is before now, perhaps we should create and
+			// attach a StudentCourseYearDetails for every year between then and now
+			val yd = new StudentCourseYearDetails(scd, 1, scydAcademicYear)
 			yd.yearOfStudy = yearOfStudy
 			if (dept.isDefined) yd.enrolmentDepartment = dept.get
 			scd.attachStudentCourseYearDetails(yd)

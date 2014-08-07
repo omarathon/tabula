@@ -63,7 +63,7 @@
 		<@modal.footer>
 			<span class="submit-buttons">
 				<#if can.do("MonitoringPoints.Record", attendanceNote.student) >
-					<a href="<@routes.editNote attendanceNote.student attendanceNote.point />" class="btn btn-primary spinnable spinner-auto">
+					<a href="<@routes.noteEdit academicYear attendanceNote.student attendanceNote.point />" class="btn btn-primary spinnable spinner-auto">
 						Edit
 					</a>
 				</#if>
@@ -76,7 +76,7 @@
 		<#noescape>${content}</#noescape>
 
 		<#if can.do("MonitoringPoints.Record", attendanceNote.student) >
-			<a href="<@routes.editNote attendanceNote.student attendanceNote.point />" class="btn btn-primary spinnable spinner-auto">Edit</a>
+			<a href="<@routes.noteEdit academicYear attendanceNote.student attendanceNote.point />" class="btn btn-primary spinnable spinner-auto">Edit</a>
 		</#if>
 
 	</#if>

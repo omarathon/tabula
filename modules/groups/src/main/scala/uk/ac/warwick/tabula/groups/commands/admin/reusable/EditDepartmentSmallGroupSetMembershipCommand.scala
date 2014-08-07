@@ -99,8 +99,8 @@ trait AddsUsersToEditDepartmentSmallGroupSetMembershipCommand {
 		val missingUsers = massAddedUserMap.filter(!_._2.isDefined).keys.toSeq
 		val validUsers = massAddedUserMap.filter(_._2.isDefined).values.flatten.toSeq
 
-		includedStudentIds = (includedStudentIds.asScala.toSeq ++ validUsers.map(_.getWarwickId)).asJava
-		excludedStudentIds = (excludedStudentIds.asScala.toSeq diff includedStudentIds.asScala.toSeq).asJava
+		includedStudentIds = (includedStudentIds.asScala.toSeq ++ validUsers.map(_.getWarwickId)).distinct.asJava
+		excludedStudentIds = (excludedStudentIds.asScala.toSeq diff includedStudentIds.asScala.toSeq).distinct.asJava
 
 		// Users processed, so reset fields
 		massAddUsers = ""

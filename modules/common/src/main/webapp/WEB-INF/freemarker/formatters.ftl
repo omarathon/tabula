@@ -444,5 +444,13 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 
 </#macro>
 
+<#macro location location>
+	<#if ((location.locationId)!)?has_content>
+		<span class="map-location" data-lid="${location.locationId}">${location.name}</span>
+	<#else>
+		${location.name}
+	</#if>
+</#macro>
+
 </#escape>
 

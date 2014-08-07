@@ -14,7 +14,7 @@ the comments textarea needs to maintain newlines.
 
 <#import "*/membership_picker_macros.ftl" as membership_picker />
 <@membership_picker.header command />
-<@membership_picker.fieldset command 'assignment' 'assignment'/>
+<@membership_picker.fieldset command 'assignment' 'assignment' submitUrl/>
 
 </@f.form>
 </#escape>

@@ -94,9 +94,9 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 						}
 					}
 
-					benchmarkTask("Update casUsed field on StudentCourseYearDetails records") {
+					benchmarkTask("Update visa fields on StudentCourseYearDetails records") {
 						transactional() {
-							updateCasUsed(importMemberCommands)
+							updateVisa(importMemberCommands)
 						}
 					}
 
@@ -175,27 +175,26 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	}
 
 
-	// For each student in the batch, find out if they have used a
-	// Confirmation of Acceptance to Study letter to obtain a visa.
+	// For each student in the batch, find out if they have used a CAS (Confirmation of Acceptance to Study) letter
+	// (which is required to obtain a Tier 4 visa), and whether they are recorded as having a Tier 4 visa.
 	//
-	// This is called after a batch of rows are processed because each SCYD record for a
-	// student is updated with the same data, so it only needs to be done on a per-student
-	// basis, not a per-row basis - but it can only be done once the SCYD records are
-	// in place
-	def updateCasUsed(rowCommands: Seq[ImportMemberCommand]){
-		logger.info("Updating cas used statuses")
+	// This is called only after a batch of student rows are processed, and all SCYDs populated.
+	// Although the visa relates to a person, CAS is associated with a particular course and time, so we store it against
+	// StudentCourseYearDetails in Tabula.
 
-		// first need to get a list of members from the list of commands
-		val members = rowCommands.flatMap(command => memberDao.getByUniversityId(command.universityId))
+	// Because SITS dates aren't always reliably updated, we just take a snapshot of visa state at the point of import
+	// and, since TAB-2517, apply to all SCYDs from the current SITS year onwards. If in future, a student's visa state
+	// changes, then all SCYDs from that point onwards can be updated, so we retain data at no worse than
+	// academic year granularity.
+	def updateVisa(rowCommands: Seq[ImportMemberCommand]) {
+		logger.info("Updating visa status")
 
-		members.map { member => member match {
-				case student: StudentMember => {
-					val importTier4ForStudentCommand = ImportTier4ForStudentCommand(student, getCurrentSitsAcademicYear)
-					importTier4ForStudentCommand.apply()
+		val members = rowCommands.flatMap {
+			command => memberDao.getByUniversityId(command.universityId)
+		}
 
-				}
-				case _ =>
-			}
+		members.collect {
+			case student: StudentMember => ImportTier4ForStudentCommand(student, getCurrentSitsAcademicYear).apply()
 		}
 
 		session.flush()
@@ -225,7 +224,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 					session.flush
 
-					updateCasUsed(importMemberCommands)
+					updateVisa(importMemberCommands)
 
 					// re-import module registrations and delete old module and group registrations:
 					val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(warwickId -> user))

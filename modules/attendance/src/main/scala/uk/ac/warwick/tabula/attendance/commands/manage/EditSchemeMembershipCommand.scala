@@ -112,8 +112,8 @@ trait AddsUsersToEditSchemeMembershipCommand {
 		val noPermissionsMembers = permissionsMap.filter(!_._2).toMap.keySet.toSeq
 		val validPermissionMembers = permissionsMap.filter(_._2).toMap.keySet
 
-		includedStudentIds = (includedStudentIds.asScala.toSeq ++ validPermissionMembers.map(_.universityId)).asJava
-		excludedStudentIds = (excludedStudentIds.asScala.toSeq diff includedStudentIds.asScala.toSeq).asJava
+		includedStudentIds = (includedStudentIds.asScala.toSeq ++ validPermissionMembers.map(_.universityId)).distinct.asJava
+		excludedStudentIds = (excludedStudentIds.asScala.toSeq diff includedStudentIds.asScala.toSeq).distinct.asJava
 
 		// Users processed, so reset fields
 		massAddUsers = ""

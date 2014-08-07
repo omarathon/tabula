@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.coursework
 
 import uk.ac.warwick.tabula.BrowserTest
-import org.openqa.selenium.By
 
 class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixtures {
 
@@ -50,7 +49,7 @@ class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixt
 			click on linkText("Add link to SITS")
 			eventually { className("link-sits").element.isDisplayed should be (true) }
 
-			find("sits-table").get.underlying.findElement(By.xpath("./tbody/tr/td/input")).click()
+			getInputByLabel("Cool essay").get.click()
 
 			eventually { className("link-sits").element.attribute("class").get.contains("disabled") should be (false) }
 			click on className("link-sits")

@@ -145,8 +145,8 @@ class StudentCourseDetails
 
 	def isFresh = (missingFromImportSince == null)
 
+	// use these methods ONLY for tests, as they don't automagically update latestStudentCourseYearDetails
 	def addStudentCourseYearDetails(scyd: StudentCourseYearDetails) = studentCourseYearDetails.add(scyd)
-
 	def removeStudentCourseYearDetails(scyd: StudentCourseYearDetails) = studentCourseYearDetails.remove(scyd)
 
 	def beginYear = beginDate match {

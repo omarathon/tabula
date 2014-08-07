@@ -30,27 +30,31 @@ abstract class AbstractAllocateStudentsToGroupsController extends GroupsControll
 		AllocateStudentsToGroupsCommand(module, smallGroupSet, user)
 
 	@RequestMapping
-	def showForm(@ModelAttribute("command") cmd: AllocateStudentsToGroupsCommand, @PathVariable("module") module: Module) = {
+	def showForm(@ModelAttribute("command") cmd: AllocateStudentsToGroupsCommand, @PathVariable("smallGroupSet") set: SmallGroupSet) = {
 		cmd.populate()
 		cmd.sort()
-		form(cmd, module)
+		render(set)
 	}
 
 	protected val renderPath: String
 
-	protected def form(cmd: AllocateStudentsToGroupsCommand, module: Module) =
-		Mav(renderPath).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+	protected def render(set: SmallGroupSet) = {
+		Mav(renderPath).crumbs(Breadcrumbs.Department(set.module.department), Breadcrumbs.Module(set.module))
+	}
 
-	@RequestMapping(method=Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: AllocateStudentsToGroupsCommand, errors: Errors, @PathVariable("module") module: Module, @PathVariable("smallGroupSet") smallGroupSet: SmallGroupSet): Mav = {
+	protected def submit(cmd: AllocateStudentsToGroupsCommand, errors: Errors, set: SmallGroupSet, route: String, objects: Pair[String, _]*) = {
 		cmd.sort()
-		if (errors.hasErrors()) {
-			form(cmd, module)
+		if (errors.hasErrors) {
+			render(set)
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin.module(module), "allocated" -> smallGroupSet.id)
+			RedirectForce(route, objects: _*)
 		}
 	}
+
+	@RequestMapping(method=Array(POST))
+	def saveAndExit(@Valid @ModelAttribute("command") cmd: AllocateStudentsToGroupsCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
+		submit(cmd, errors, set, Routes.admin.module(set.module), "allocated" -> set.id)
 
 }
 
@@ -64,10 +68,42 @@ class AllocateStudentsToGroupsController extends AbstractAllocateStudentsToGroup
 @RequestMapping(value=Array("/admin/module/{module}/groups/new/{smallGroupSet}/allocate"))
 class CreateSmallGroupSetAllocateController extends AbstractAllocateStudentsToGroupsController {
 	override protected val renderPath = "admin/groups/newallocate"
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndEditProperties))
+	def saveAndEditProperties(@Valid @ModelAttribute("command") cmd: AllocateStudentsToGroupsCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
+		submit(cmd, errors, set, Routes.admin.create(set))
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddGroups))
+	def saveAndEditGroups(@Valid @ModelAttribute("command") cmd: AllocateStudentsToGroupsCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
+		submit(cmd, errors, set, Routes.admin.createAddGroups(set))
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddStudents))
+	def saveAndEditStudents(@Valid @ModelAttribute("command") cmd: AllocateStudentsToGroupsCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
+		submit(cmd, errors, set, Routes.admin.createAddStudents(set))
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddEvents))
+	def saveAndEditEvents(@Valid @ModelAttribute("command") cmd: AllocateStudentsToGroupsCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
+		submit(cmd, errors, set, Routes.admin.createAddEvents(set))
 }
 
 @Controller
 @RequestMapping(value=Array("/admin/module/{module}/groups/edit/{smallGroupSet}/allocate"))
 class EditSmallGroupSetAllocateController extends AbstractAllocateStudentsToGroupsController {
 	override protected val renderPath = "admin/groups/editallocate"
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndEditProperties))
+	def saveAndEditProperties(@Valid @ModelAttribute("command") cmd: AllocateStudentsToGroupsCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
+		submit(cmd, errors, set, Routes.admin.edit(set))
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddGroups))
+	def saveAndEditGroups(@Valid @ModelAttribute("command") cmd: AllocateStudentsToGroupsCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
+		submit(cmd, errors, set, Routes.admin.editAddGroups(set))
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddStudents))
+	def saveAndEditStudents(@Valid @ModelAttribute("command") cmd: AllocateStudentsToGroupsCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
+		submit(cmd, errors, set, Routes.admin.editAddStudents(set))
+
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddEvents))
+	def saveAndEditEvents(@Valid @ModelAttribute("command") cmd: AllocateStudentsToGroupsCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
+		submit(cmd, errors, set, Routes.admin.editAddEvents(set))
 }

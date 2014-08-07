@@ -321,24 +321,37 @@ jQuery(function($){
 		$blankInput.find('a.btn').remove(); // this button is added by initFlexiPicker, so remove it now or we'll see double
 
 		// check whenever field is changed or focused
-		$collection.on('change focus', 'input', function(ev) {
+		if (!!($collection.data('automatic'))) {
+			$collection.on('change focus', 'input', function(ev) {
+				// remove empty pickers
+				var $inputs = $collection.find('input');
+				if ($inputs.length > 1) {
+					var toRemove = $inputs.not(':focus').not(':last').filter(emptyValue).closest('.flexi-picker-container');
+					toRemove.remove();
+				}
 
-			// remove empty pickers
-			var $inputs = $collection.find('input');
-			if ($inputs.length > 1) {
-				var toRemove = $inputs.not(':focus').not(':last').filter(emptyValue).closest('.flexi-picker-container');
-				toRemove.remove();
-			}
-
-			// if last picker is nonempty OR focused, append an blank picker.
-			var $last = $inputs.last();
-			var lastFocused = (ev.type == 'focusin' && ev.target == $last[0]);
-			if (lastFocused || $last.val().trim() != '') {
-				var input = $blankInput.clone();
-				$collection.append(input);
-				input.find('input').first().flexiPicker({});
-			}
-		});
+				// if last picker is nonempty OR focused, append an blank picker.
+				var $last = $inputs.last();
+				var lastFocused = (ev.type == 'focusin' && ev.target == $last[0]);
+				if (lastFocused || $last.val().trim() != '') {
+					var input = $blankInput.clone();
+					$collection.append(input);
+					input.find('input').first().flexiPicker({});
+				}
+			});
+		} else {
+			$collection.append(
+				$('<button />')
+					.attr({'type':'button'})
+					.addClass('btn').addClass('btn-mini')
+					.html('<i class="icon-plus"></i> Add another')
+					.on('click', function() {
+						var input = $blankInput.clone();
+						$(this).before(input);
+						input.find('input').first().flexiPicker({});
+					})
+			);
+		}
 	});
 
 });
@@ -701,6 +714,124 @@ $.fn.routePicker = function (options) {
  */
 jQuery(function($){
 	$('.route-picker').routePicker({});
+});
+
+
+/**
+ * Like the FlexiPicker, but for Locations
+ */
+var LocationPicker = function (options) {
+	var self = this;
+	var $element = $(options.input);
+
+	// Might have manually wired this element up with an existing picker,
+	// but add the class for CSS style purposes.
+	if (!$element.hasClass('location-picker')) {
+		$element.addClass('location-picker');
+	}
+
+	// Disable browser autocomplete dropdowns, it gets in the way.
+	$element.attr('autocomplete', 'off');
+
+	var $typeahead = new TabulaTypeahead({
+		element: $element,
+		source: function(query, process){
+			// Abort any existing search
+			if (self.currentSearch) {
+				self.currentSearch.abort();
+				self.currentSearch = null;
+			}
+			self.currentSearch = $.ajax({
+				url: 'https://campus.warwick.ac.uk/Services/api.php?callback=?',
+				dataType: 'json',
+				data: {
+					config: 'warwick',
+					act: 'ac',
+					mlim: 2,
+					limit: 1000,
+					type: 'lb',
+					_ts: new Date().getTime(),
+					q: query
+				},
+				success: function(data) {
+					process(data)
+				}
+			});
+		},
+		item: '<li class="flexi-picker-result location"><a href="#"><div class="name"></div><div class="department"></div></a></li>'
+	});
+
+	// Renders each result item with icon and description.
+	$typeahead.render = function (items) {
+		var that = this;
+
+		items = $(items).map(function (i, item) {
+			if (item != undefined) {
+				i = $(that.options.item);
+				i.attr('data-lid', item.lid);
+				i.find('div.name').html(that.highlighter(item.name));
+				i.find('div.department').html(item.sub || '&nbsp;');
+				return i[0];
+			} else {
+				// no idea what's happened here. Return an empty item.
+				return $(that.options.item)[0];
+			}
+		});
+
+		items.first().addClass('active');
+		this.$menu.html(items);
+		return this;
+	};
+
+	// The Bootstrap Typeahead always appends the drop-down to directly after the input
+	// Replace the show method so that the drop-down is added to the body
+	$typeahead.show = function () {
+		var pos = $.extend({}, this.$element.offset(), {
+			height: this.$element[0].offsetHeight
+		});
+
+		this.$menu.appendTo($('body')).show().css({
+			top: pos.top + pos.height, left: pos.left
+		});
+
+		this.shown = true;
+		return this;
+	};
+
+	// Override select item to store the relevant attributes
+	var oldSelect = $typeahead.select;
+	$typeahead.select = function () {
+		this.$element.data('lid', this.$menu.find('.active').data('lid'));
+		return oldSelect.call($typeahead);
+	};
+
+	$typeahead.updater = function() {
+		return this.$menu.find('.active .name').text();
+	};
+};
+
+// The jQuery plugin
+$.fn.locationPicker = function (options) {
+	this.each(function () {
+		var $this = $(this);
+		if ($this.data('location-picker')) {
+			throw new Error("FlexiPicker has already been added to this element.");
+		}
+		var allOptions = {
+			input: this
+		};
+		$.extend(allOptions, options || {});
+		$this.data('location-picker', new LocationPicker(allOptions));
+	});
+	return this;
+};
+
+/**
+ * Any input with the location-picker class will have the picker enabled on it,
+ * so you can use the picker without writing any code yourself.
+ */
+jQuery(function($){
+	$('.location-picker').locationPicker({});
 });
 
 // End of wrapping

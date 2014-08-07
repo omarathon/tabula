@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
 import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups._
@@ -11,6 +12,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.util.termdates.Term.TermType
 import scala.collection.JavaConverters._
 
 object ModifySmallGroupSetCommand {
@@ -22,6 +24,9 @@ object ModifySmallGroupSetCommand {
 			with CreateSmallGroupSetDescription
 			with ModifySmallGroupSetValidation
 			with AutowiringSmallGroupServiceComponent
+			with AutowiringAssignmentMembershipServiceComponent
+			with GeneratesDefaultWeekRangesWithTermService
+			with AutowiringTermServiceComponent
 
 	def edit(module: Module, set: SmallGroupSet) =
 		new EditSmallGroupSetCommandInternal(module, set)
@@ -61,10 +66,14 @@ trait EditSmallGroupSetCommandState extends ModifySmallGroupSetCommandState {
 }
 
 class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmallGroupSetCommandInternal with CreateSmallGroupSetCommandState {
-	self: SmallGroupServiceComponent =>
+	self: SmallGroupServiceComponent with AssignmentMembershipServiceComponent with GeneratesDefaultWeekRanges =>
 
 	override def applyInternal() = transactional() {
 		val set = new SmallGroupSet(module)
+
+		// TAB-2541 By default, new sets should have default week ranges
+		set.defaultWeekRanges = defaultWeekRanges(academicYear)
+
 		copyTo(set)
 
 		if (set.allocationMethod == SmallGroupAllocationMethod.Linked) {
@@ -76,10 +85,49 @@ class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmall
 					set.groups.add(smallGroup)
 				}
 			}
+		} else {
+			// TAB-2535 Automatically link to any available upstream groups
+			for {
+				ua <- assignmentMembershipService.getAssessmentComponents(module)
+				uag <- assignmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
+			} {
+				val ag = new AssessmentGroup
+				ag.assessmentComponent = ua
+				ag.occurrence = uag.occurrence
+				ag.smallGroupSet = set
+				set.assessmentGroups.add(ag)
+			}
 		}
 
 		smallGroupService.saveOrUpdate(set)
 		set
+	}
+}
+
+trait GeneratesDefaultWeekRanges {
+	def defaultWeekRanges(year: AcademicYear): Seq[WeekRange]
+}
+
+trait GeneratesDefaultWeekRangesWithTermService extends GeneratesDefaultWeekRanges {
+	self: TermServiceComponent =>
+
+	def defaultWeekRanges(year: AcademicYear) = {
+		val weeks = termService.getAcademicWeeksForYear(year.dateInTermOne).toMap
+
+		val startingWeekNumbers =
+			weeks
+				.map { case (weekNumber, dates) =>
+					(weekNumber, termService.getTermFromAcademicWeekIncludingVacations(weekNumber, year))
+				}
+				.filterNot { case (_, term) => (term.getTermType == null) } // Remove vacations - can't do this above as mins would be wrong
+				.groupBy { _._2.getTermType() }
+				.map { case (termType, weekNumbersAndTerms) => (termType, weekNumbersAndTerms.keys.min) } // Map to minimum week number
+
+		Seq(
+			WeekRange(startingWeekNumbers(TermType.autumn), startingWeekNumbers(TermType.autumn) + 9), // Autumn term
+			WeekRange(startingWeekNumbers(TermType.spring), startingWeekNumbers(TermType.spring) + 9), // Spring term
+			WeekRange(startingWeekNumbers(TermType.summer), startingWeekNumbers(TermType.summer) + 4) // Summer term - only first 5 weeks
+		)
 	}
 }
 

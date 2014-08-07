@@ -4,15 +4,19 @@ import org.joda.time.DateTime
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.{Appliable, Describable, DescriptionImpl, SelfValidating}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.{AssessmentType, AssessmentComponent}
+import uk.ac.warwick.tabula.data.model.groups.{WeekRange, SmallGroupAllocationMethod, SmallGroupFormat, SmallGroupSet}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 
 class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
-	private trait CommandTestSupport extends SmallGroupServiceComponent {
-		val smallGroupService = mock[SmallGroupService]
+	private trait CommandTestSupport extends SmallGroupServiceComponent with AssignmentMembershipServiceComponent with GeneratesDefaultWeekRanges {
+		val smallGroupService = smartMock[SmallGroupService]
+		val assignmentMembershipService = smartMock[AssignmentMembershipService]
+
+		override def defaultWeekRanges(year: AcademicYear): Seq[WeekRange] = Nil
 	}
 
 	private trait Fixture {
@@ -41,10 +45,35 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command.name = "Set name"
 		command.academicYear = AcademicYear.guessByDate(DateTime.now)
 
+		command.assignmentMembershipService.getAssessmentComponents(module) returns (Seq())
+
 		val set = command.applyInternal()
 		set.name should be ("Set name")
 		set.academicYear should be (AcademicYear.guessByDate(DateTime.now))
 		set.members should not be (null)
+
+		there was one (command.smallGroupService).saveOrUpdate(set)
+	}}
+
+	@Test def createAutoLinkToSits { new CreateCommandFixture {
+		command.name = "Set name"
+		command.academicYear = AcademicYear.guessByDate(DateTime.now)
+
+		val ac1 = Fixtures.upstreamAssignment("in", 1)
+		val upstream1 = Fixtures.assessmentGroup(ac1)
+
+		val ac2 = Fixtures.upstreamAssignment("in", 2)
+		val upstream2 = Fixtures.assessmentGroup(ac2)
+
+		command.assignmentMembershipService.getAssessmentComponents(module) returns (Seq(ac1, ac2))
+		command.assignmentMembershipService.getUpstreamAssessmentGroups(ac1, command.academicYear) returns (Seq(upstream1))
+		command.assignmentMembershipService.getUpstreamAssessmentGroups(ac2, command.academicYear) returns (Seq(upstream2))
+
+		val set = command.applyInternal()
+		set.name should be ("Set name")
+		set.academicYear should be (AcademicYear.guessByDate(DateTime.now))
+		set.members should not be (null)
+		set.assessmentGroups.size() should be (2)
 
 		there was one (command.smallGroupService).saveOrUpdate(set)
 	}}
@@ -376,5 +405,17 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command should be (anInstanceOf[EditSmallGroupSetPermissions])
 		command should be (anInstanceOf[EditSmallGroupSetCommandState])
 	}}
+
+	@Test def defaultWeekRanges {
+		val generator = new GeneratesDefaultWeekRangesWithTermService with TermServiceComponent {
+			val termService = new TermServiceImpl
+		}
+
+		generator.defaultWeekRanges(AcademicYear.parse("13/14")) should be (Seq(
+			WeekRange(1, 10),
+			WeekRange(15, 24),
+			WeekRange(30, 34)
+		))
+	}
 
 }

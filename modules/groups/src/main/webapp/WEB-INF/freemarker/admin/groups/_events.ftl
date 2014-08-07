@@ -1,12 +1,42 @@
 <#escape x as x?html>
 	<#assign academicYear=smallGroupSet.academicYear />
-	
-	<#macro button group_index event_index extra_classes="">
-		<button type="button" data-target="#group${group_index}-event${event_index}-modal" class="btn ${extra_classes}" data-toggle="modal">
-			<#nested/>
-		</button>
+
+	<#macro eventShortDetails event>
+		<#if event.title?has_content><span class="eventTitle">${event.title} - </span></#if>
+		<#if event.startTime??><@fmt.time event.startTime /></#if> ${(event.day.name)!""}
 	</#macro>
 
+	<#macro eventDetails event><#compress>
+		<#if event.title?has_content><div class="eventTitle">${event.title}</div></#if>
+		<div class="day-time">
+			${(event.day.name)!""}
+			<#if event.startTime??><@fmt.time event.startTime /><#else>[no start time]</#if>
+			-
+			<#if event.endTime??><@fmt.time event.endTime /><#else>[no end time]</#if>
+		</div>
+		<#if event.tutors.size gt 0>
+			Tutor<#if event.tutors.size gt 1>s</#if>:
+			<#list event.tutors.users as tutor> <#compress> <#-- intentional space -->
+				${tutor.fullName}<#if tutor_has_next>,</#if>
+			</#compress></#list>
+		</#if>
+		<#if ((event.location.name)!"")?has_content>
+			<div class="location">
+				Room: <@fmt.location event.location />
+			</div>
+		</#if>
+		<div class="running">
+			Running: <#compress>
+				<#if event.weekRanges?size gt 0 && event.day??>
+					<#noescape>${weekRangesFormatter(event.weekRanges, event.day, academicYear, module.department)}</#noescape>
+				<#elseif event.weekRanges?size gt 0>
+					[no day of week selected]
+				<#else>
+					[no dates selected]
+				</#if>
+			</#compress>
+		</div>
+	</#compress></#macro>
 
 	<div class="striped-section-contents">
 		<#list groups as group>
@@ -20,11 +50,12 @@
 							</h3>
 						</div>
 						<div class="span2">
-							<@spring.nestedPath path="events[${group.events?size}]">
-								<@button group_index=group_index event_index=group.events?size extra_classes="pull-right">
-									Add event
-								</@button>
-							</@spring.nestedPath>
+							<#if is_edit>
+								<#assign addEventUrl><@routes.editseteventsnewevent group /></#assign>
+							<#else>
+								<#assign addEventUrl><@routes.createseteventsnewevent group /></#assign>
+							</#if>
+							<a class="btn pull-right" href="${addEventUrl}">Add event</a>
 						</div>
 					</div>
 
@@ -32,43 +63,35 @@
 						<div class="span12">
 							<ul class="events unstyled">
 								<#list mapGet(command.groups, group).events as event>
-									<#if !((event.isEmpty())!false) || event_has_next>
-										<@spring.nestedPath path="events[${event_index}]">
-											<li>
-												<@f.hidden path="delete" id="group${group_index}_event${event_index}_delete" />
-											
-												<#-- TODO display tutors -->
-												<#if event.title?has_content><span class="eventTitle">${event.title} - </span></#if>
-												<#-- TODO this should be a formatter, the current formatter expects a full fat event -->
-												<#if event.weekRanges?size gt 0 && event.day??>
-													<#noescape>${weekRangesFormatter(event.weekRanges, event.day, academicYear, module.department)}</#noescape>,
-												<#elseif event.weekRanges?size gt 0>
-													[no day of week selected]
+									<@spring.nestedPath path="events[${event_index}]">
+										<li>
+											<@f.hidden path="delete" id="group${group_index}_event${event_index}_delete" />
+
+											<@eventShortDetails event.event />
+
+											<#assign popoverContent><@eventDetails event.event /></#assign>
+											<a class="use-popover"
+											   data-html="true"
+											   data-content="${popoverContent}"><i class="icon-question-sign"></i></a>
+
+											<div class="buttons pull-right">
+												<#if is_edit>
+													<#assign editEventUrl><@routes.editseteventseditevent event.event /></#assign>
 												<#else>
-													[no dates selected]
+													<#assign editEventUrl><@routes.createseteventseditevent event.event /></#assign>
 												</#if>
-												
-												${(event.day.shortName)!"[no day selected]"} 
-												<#if event.startTime??><@fmt.time event.startTime /><#else>[no start time]</#if> 
-												- 
-												<#if event.endTime??><@fmt.time event.endTime /><#else>[no end time]</#if><#if event.location?has_content>,</#if>
-												<#if (event.location!"")?length gt 0>${event.location}<#else>[no location]</#if>
 
-												<div class="buttons pull-right">
-													<@button group_index event_index "btn-mini btn-info">
-														Edit
-													</@button>
+												<a class="btn btn-mini btn-info" href="${editEventUrl}">Edit</a>
 
-													<button type="button" class="btn btn-danger btn-mini" data-toggle="delete" data-value="true" data-target="#group${group_index}_event${event_index}_delete">
-														<i class="icon-remove"></i>
-													</button>
-													<button type="button" class="btn btn-info btn-mini" data-toggle="delete" data-value="false" data-target="#group${group_index}_event${event_index}_delete">
-														<i class="icon-undo"></i>
-													</button>
-												</div>
-											</li>
-										</@spring.nestedPath>
-									</#if>
+												<button type="button" class="btn btn-danger btn-mini" data-toggle="delete" data-value="true" data-target="#group${group_index}_event${event_index}_delete">
+													<i class="icon-remove"></i>
+												</button>
+												<button type="button" class="btn btn-info btn-mini" data-toggle="delete" data-value="false" data-target="#group${group_index}_event${event_index}_delete">
+													<i class="icon-undo"></i>
+												</button>
+											</div>
+										</li>
+									</@spring.nestedPath>
 								</#list>
 							</ul>
 						</div>
@@ -80,66 +103,6 @@
 	
 	<script type="text/javascript">
 		jQuery(function($) {
-
-			$('span[data-toggle="tooltip"]').tooltip();
-		
-			$('button[data-toggle="elements"][data-target]').on('click', function() {
-				var $button = $(this);
-				var $target = $($button.data('target'));
-				
-				$target.show();
-				$button.hide();
-			});
-			
-			// Initially hide all of the elements, we may show them if they're the target of indeterminate-ness 
-			$('button[data-toggle="elements"][data-target]').each(function() {
-				var $button = $(this);
-				var $target = $($button.data('target'));
-				$target.hide();
-			});
-		
-			$('input[type="checkbox"][data-indeterminate]').each(function() {
-				var $checkbox = $(this);
-				$checkbox.prop('indeterminate', $checkbox.data('indeterminate'));
-				
-				if ($checkbox.data('target')) {
-					var $target = $($checkbox.data('target'));
-				
-					if ($target.prop('multiple')) {				
-						// Wire a change listener on the target to manage the indeterminate nature
-						$target.on('change', function() {
-							var $select = $(this);
-							var $options = $select.find('option');
-							var $selected = $options.filter(':selected');
-							
-							if ($options.length == $selected.length) {
-								// All selected
-								$checkbox.attr('checked', 'checked');
-								$checkbox.prop('indeterminate', false);
-							} else if ($selected.length == 0) {
-								// None selected
-								$checkbox.removeAttr('checked');
-								$checkbox.prop('indeterminate', false);
-							} else {
-								// Indeterminate
-								$checkbox.attr('checked', 'checked');
-								$checkbox.prop('indeterminate', true);
-							}
-						});
-					}
-				}
-			});
-			
-			$('input[type="checkbox"][data-target]').on('change', function() {
-				var $checkbox = $(this);
-				var $target = $($checkbox.data('target'));
-				if ($checkbox.is(':checked')) {
-					$target.find('option').attr('selected', 'selected');
-				} else {
-					$target.find('option').removeAttr('selected');
-				}
-			});
-			
 			$('.events button[data-toggle="delete"]').each(function() {
 				var $button = $(this);
 				var $li = $button.closest('li');
@@ -176,12 +139,6 @@
 	</script>
 	
 	<style type="text/css">
-		<#-- Hide the confusing dates in the header of the time picker -->
-		.datetimepicker-hours thead i { display: none !important; }
-		.datetimepicker-hours thead .switch { visibility: hidden; }
-		.datetimepicker-hours thead th { height: 0px; }
-		.datetimepicker-minutes thead .switch { visibility: hidden; }
-		
 		.item-info .events li { line-height: 30px; padding: 0 3px; }
 		.item-info .events li button { margin-top: 0; }
 		.item-info .events li:hover { background: #dddddd; }

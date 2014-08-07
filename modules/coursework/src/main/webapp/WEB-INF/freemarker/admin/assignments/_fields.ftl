@@ -152,7 +152,8 @@ the comments textarea needs to maintain newlines.
 			</div>
 			<@membership_picker.header command />
 		</summary>
-		<@membership_picker.fieldset command 'assignment' 'assignment'/>
+		<#assign enrolment_url><@routes.enrolment module /></#assign>
+		<@membership_picker.fieldset command 'assignment' 'assignment' enrolment_url />
 	</details>
 </@form.row>
 

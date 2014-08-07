@@ -2,11 +2,12 @@ package uk.ac.warwick.tabula.coursework.services.turnitin
 
 import dispatch.classic._
 import dispatch.classic.mime.Mime._
-import java.io.{IOException, FileInputStream}
+import java.io.IOException
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.entity.mime.content.FileBody
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.Products._
+import org.xml.sax.SAXParseException
 
 /**
  * Acquired from a call to Turnitin.login(), this will call Turnitin methods as a particular
@@ -71,6 +72,10 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 			case e: IOException => {
 				logger.error("Exception contacting Turnitin", e)
 				new TurnitinResponse(code = 9000, diagnostic = Some(e.getMessage))
+			}
+			case e: SAXParseException => {
+				logger.error("Unexpected response from Turnitin", e)
+				new TurnitinResponse(code = 9001, diagnostic = Some (e.getMessage))
 			}
 		}
 	}

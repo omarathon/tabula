@@ -1,11 +1,14 @@
 package uk.ac.warwick.tabula.attendance.manage
 
+import org.joda.time.DateTime
 import org.scalatest.GivenWhenThen
+import uk.ac.warwick.tabula.FunctionalTestAcademicYear
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
 
 class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
 
 	val schemeName = "The Scheme of things"
+	val thisAcademicYearString = new FunctionalTestAcademicYear(new DateTime().getYear).startYear.toString
 
 	"A Member of staff" should "be able to create monitoring point schemes" in {
 		Given("I am logged in as Admin1")
@@ -15,26 +18,57 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
 		// Without disabling js, it's impossible to click on the submit button
 		ifHtmlUnitDriver(h=>h.setJavascriptEnabled(false))
 
-		When("I go to /attendance/manage/xxx/2014/new")
-		go to Path("/attendance/manage/xxx/2014/new")
+		When(s"I go to /attendance/manage/xxx/$thisAcademicYearString/new")
+		go to Path(s"/attendance/manage/xxx/$thisAcademicYearString/new")
 
-		Then("I can enter a scheme name")
+		And("I enter a scheme name")
 		click on id("name")
 		pressKeys(schemeName)
 
-		When("then I select 'term weeks' as the Date format")
+		And("I select 'term weeks' as the Date format")
 		radioButtonGroup("pointStyle").value= "week"
 
-		And("I can create the scheme")
+		Then("I create the scheme and add students")
+		click on cssSelector("#main-content form input.btn.btn-success")
+		eventually(currentUrl should endWith(s"students"))
+
+		When("I choose a route")
+		click on cssSelector("#main-content input[name=routes]")
+
+		And("I click on Find")
+		click on cssSelector("#main-content button[name=findStudents]")
+
+		Then("I see the students")
+		eventually(
+			findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be (2)
+		)
+		pageSource should include("2 students on this scheme")
+		pageSource should include("(2 from SITS)")
+
+		When("I add a student manually")
+		click on cssSelector("input[name=manuallyAddForm]")
+		eventually(pageSource should include("Add students manually"))
+		click on cssSelector("textarea[name=massAddUsers]")
+		pressKeys("tabula-functest-student2")
+		click on cssSelector("#main-content form input.btn.btn-success")
+
+		Then("I see the manually added student")
+		eventually(
+			findAll(cssSelector("details.manually-added table.manage-student-table tbody tr")).size should be (1)
+		)
+		pageSource should include("3 students on this scheme")
+		pageSource should include("(2 from SITS, plus 1 added manually)")
+
+		When("I save the scheme")
 		click on cssSelector("#main-content form input.btn.btn-primary")
 
 		Then("I am redirected to the manage home page")
-		eventually(currentUrl should endWith("/attendance/manage/xxx/2014"))
-		pageSource should include("Manage monitoring points for 14/15")
+		eventually(currentUrl should endWith(s"/attendance/manage/xxx/$thisAcademicYearString"))
+		pageSource should include(s"Manage monitoring points for ${new FunctionalTestAcademicYear(new DateTime().getYear).toString}")
 		pageSource should include(schemeName)
 
 		When("The I click the 'Add points' link")
-		click on (linkText("Add points"))
+		click on linkText("Add points")
 
 		Then("I am redirected to the add points page")
 		eventually(currentUrl should include("/attendance/manage/xxx/2014/addpoints"))

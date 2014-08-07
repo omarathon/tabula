@@ -30,7 +30,7 @@ class AddStudentsToSchemeController extends AbstractManageSchemeStudentsControll
 			render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult)
 		} else {
 			val scheme = cmd.apply()
-			Redirect(Routes.Manage.addPointsToNewScheme(scheme))
+			RedirectForce(Routes.Manage.addPointsToNewScheme(scheme))
 		}
 
 	}

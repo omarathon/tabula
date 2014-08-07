@@ -15,8 +15,10 @@
 	<#-- Weeks, day/time, location -->
 	<#if event.title?has_content><span class="eventTitle">${event.title} - </span></#if>
 	<@fmt.weekRanges event />,
-	${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime /><#if event.location?has_content>,</#if>
-	${event.location!"[no location]"}
+	${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime /><#if ((event.location.name)!)?has_content>,</#if>
+	<#if ((event.location.name)!)?has_content>
+		<@fmt.location event.location />
+	</#if>
 </#if>
 </#macro>
 
@@ -49,6 +51,7 @@
 			var $module = jQuery(this);
 			Groups.zebraStripeGroups($module);
 			Groups.wireModalButtons($module);
+			Groups.wireMapLocations($module);
 			AjaxPopup.wireAjaxPopupLinks($module);
 			$module.find('.use-tooltip').tooltip();
 			$module.find('.use-popover').tabulaPopover({
@@ -773,4 +776,182 @@
 			</tbody>
 		</table>
 	</#if>
+</#macro>
+
+<#macro set_wizard is_new current_step is_linked=false>
+	<p class="progress-arrows">
+		<#if is_linked && (current_step == 'students' || current_step == 'groups' || current_step == 'allocate')>
+			<#local properties_url><#if is_new><@routes.createeditproperties smallGroupSet /><#else><@routes.editsetproperties smallGroupSet /></#if></#local>
+			<@wizard_link
+				label="Properties"
+				is_first=true
+				is_active=(current_step == 'properties')
+				is_available=true
+				tooltip="Save and edit properties"
+				url=properties_url />
+
+			<#local groups_url><#if is_new><@routes.createsetgroups smallGroupSet /><#else><@routes.editsetgroups smallGroupSet /></#if></#local>
+			<@wizard_link
+				label="Groups"
+				is_first=false
+				is_active=(current_step == 'groups')
+				is_available=true
+				tooltip="Save and edit groups"
+				url=groups_url />
+
+			<#local students_url><#if is_new><@routes.createsetstudents smallGroupSet /><#else><@routes.editsetstudents smallGroupSet /></#if></#local>
+			<@wizard_link
+				label="Students"
+				is_first=false
+				is_active=(current_step == 'students')
+				is_available=true
+				tooltip="Save and edit students"
+				url=students_url />
+
+			<#local events_url><#if is_new><@routes.createsetevents smallGroupSet /><#else><@routes.editsetevents smallGroupSet /></#if></#local>
+			<@wizard_link
+				label="Events"
+				is_first=false
+				is_active=(current_step == 'events')
+				is_available=true
+				tooltip="Save and edit events"
+				url=events_url />
+
+			<#local allocate_url><#if is_new><@routes.createsetallocate smallGroupSet /><#else><@routes.editsetallocate smallGroupSet /></#if></#local>
+			<@wizard_link
+				label="Allocate"
+				is_first=false
+				is_active=(current_step == 'allocate')
+				is_available=true
+				tooltip="Save and allocate students to groups"
+				url=allocate_url />
+		<#else>
+			<#local properties_action><#if is_new>${ManageSmallGroupsMappingParameters.createAndEditProperties}<#else>${ManageSmallGroupsMappingParameters.editAndEditProperties}</#if></#local>
+			<@wizard_button
+				label="Properties"
+				is_first=true
+				is_active=(current_step == 'properties')
+				is_available=true
+				tooltip="Save and edit properties"
+				action=properties_action />
+
+			<#local groups_action><#if is_new>${ManageSmallGroupsMappingParameters.createAndAddGroups}<#else>${ManageSmallGroupsMappingParameters.editAndAddGroups}</#if></#local>
+			<@wizard_button
+				label="Groups"
+				is_first=false
+				is_active=(current_step == 'groups')
+				is_available=true
+				tooltip="Save and edit groups"
+				action=groups_action />
+
+			<#local students_action><#if is_new>${ManageSmallGroupsMappingParameters.createAndAddStudents}<#else>${ManageSmallGroupsMappingParameters.editAndAddStudents}</#if></#local>
+			<@wizard_button
+				label="Students"
+				is_first=false
+				is_active=(current_step == 'students')
+				is_available=true
+				tooltip="Save and edit students"
+				action=students_action />
+
+			<#local events_action><#if is_new>${ManageSmallGroupsMappingParameters.createAndAddEvents}<#else>${ManageSmallGroupsMappingParameters.editAndAddEvents}</#if></#local>
+			<@wizard_button
+				label="Events"
+				is_first=false
+				is_active=(current_step == 'events')
+				is_available=true
+				tooltip="Save and edit events"
+				action=events_action />
+
+			<#local allocate_action><#if is_new>${ManageSmallGroupsMappingParameters.createAndAllocate}<#else>${ManageSmallGroupsMappingParameters.editAndAllocate}</#if></#local>
+			<@wizard_button
+				label="Allocate"
+				is_first=false
+				is_active=(current_step == 'allocate')
+				is_available=true
+				tooltip="Save and allocate students to groups"
+				action=allocate_action />
+		</#if>
+	</p>
+</#macro>
+
+<#macro wizard_button label is_first is_active is_available tooltip="" action="">
+	<span class="arrow-right<#if !is_first> arrow-left</#if><#if is_active> active</#if><#if is_available && !is_active> use-tooltip</#if>" <#if is_available && !is_active>title="${tooltip}"</#if>><#compress>
+		<#if is_available && !is_active>
+			<button type="submit" class="btn btn-link" name="${action}">${label}</button>
+		<#else>
+			${label}
+		</#if>
+	</#compress></span>
+</#macro>
+
+<#macro wizard_link label is_first is_active is_available tooltip="" url="">
+	<span class="arrow-right<#if !is_first> arrow-left</#if><#if is_active> active</#if><#if is_available && !is_active> use-tooltip</#if>" <#if is_available && !is_active>title="${tooltip}"</#if>><#compress>
+		<#if is_available && !is_active>
+			<a href="${url}">${label}</a>
+		<#else>
+			${label}
+		</#if>
+	</#compress></span>
+</#macro>
+
+<#macro week_selector path allTerms smallGroupSet>
+	<#-- TODO hmm this is suck -->
+	<#local f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
+
+	<@form.row path=path>
+		<@form.label>
+			Running in these weeks
+			<@form.label checkbox=true clazz="pull-right">
+				<input type="checkbox" class="show-vacations" value="true">
+				Show vacations
+			</@form.label>
+		</@form.label>
+
+		<@form.field>
+			<table class="table table-striped table-bordered week-selector">
+				<thead>
+					<tr>
+						<#local colspan=0 />
+						<#list allTerms as namedTerm>
+							<#if (namedTerm.weekRange.maxWeek - namedTerm.weekRange.minWeek) gt colspan>
+								<#local colspan=(namedTerm.weekRange.maxWeek - namedTerm.weekRange.minWeek) />
+							</#if>
+						</#list>
+						<th colspan="${colspan + 2}" style="text-align: center;">
+							Weeks
+							<#local helpText>
+								<p>Select the weeks that this small group event will run in by clicking on each week. Click on the name of the term or vacation to select all weeks in that term or vacation.</p>
+							</#local>
+							<a href="#"
+							   class="use-introductory<#if showIntro("sgt-week-selector", "anywhere")> auto</#if>"
+							   data-title="Selecting weeks for a small group event"
+							   data-trigger="click"
+							   data-placement="bottom"
+							   data-html="true"
+							   data-hash="${introHash("sgt-week-selector", "anywhere")}"
+							   data-content="${helpText}"><i class="icon-question-sign icon-fixed-width"></i></a>
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<#list allTerms as namedTerm>
+						<#local is_vacation = !(namedTerm.term.termType?has_content) />
+						<tr<#if is_vacation> class="vacation"</#if>>
+							<th>${namedTerm.name}<#if !is_vacation> term</#if></th>
+							<#list namedTerm.weekRange.minWeek..namedTerm.weekRange.maxWeek as weekNumber>
+								<td
+									class="use-tooltip"
+									title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.department />"
+									data-html="true"
+									data-container="body">
+									<@f.checkbox path=path value="${weekNumber}" />
+									<span class="week-number"><@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.department true /></span>
+								</td>
+							</#list>
+						</tr>
+					</#list>
+				</tbody>
+			</table>
+		</@form.field>
+	</@form.row>
 </#macro>

@@ -90,16 +90,14 @@
 	<script type="text/javascript">
 		jQuery(document).ready(function($) {
 
-			$('#save-agent').click(function() {
-				if ($(this).hasClass("disabled")) return;
+			function submitForm() {
 				$.post($("#editStudentRelationshipCommand").prop('action'), $("#editStudentRelationshipCommand").serialize(), function(){
 					$('#modal-change-agent').modal('hide');
 					var agentId = $('#editStudentRelationshipCommand input[name=agent]').val();
 					var remove = $('#editStudentRelationshipCommand input[name=remove]').val();
 					var error = $('input[name=error]').val();
 
-
-					if(agentId == undefined) {
+					if(agentId == undefined || !agentId) {
 						var action = "error";
 					}
 					else if(remove == "true") {
@@ -111,6 +109,16 @@
 					var currentUrl = [location.protocol, '//', location.host, location.pathname].join('');    // url without query string
 					window.location = currentUrl + "?action=agent" + action + "&agentId=" + agentId + "&relationshipType=${relationshipType.id}";
 				});
+			}
+
+			$("#edit-agent-modal").on('submit', 'form', function(e){
+				e.preventDefault();
+				submitForm();
+			});
+
+			$('#save-agent').click(function() {
+				if ($(this).hasClass("disabled")) return;
+				submitForm();
 			});
 
 			function setStudent(memberString) {

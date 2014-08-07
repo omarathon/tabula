@@ -30,7 +30,7 @@ trait EditSmallGroupsCommandState {
 	def set: SmallGroupSet
 
 	var groupNames: JList[String] = LazyLists.create()
-	var maxGroupSizes: JList[Int] = LazyLists.create(() => 0)
+	var maxGroupSizes: JList[JInteger] = LazyLists.create(() => 0)
 	var defaultMaxGroupSizeEnabled: Boolean = false
 	var defaultMaxGroupSize: Int = SmallGroup.DefaultGroupSize
 }
@@ -56,7 +56,12 @@ class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet)
 				}
 
 			group.name = name
-			group.maxGroupSize = maxGroupSizes.get(i)
+
+			if (defaultMaxGroupSizeEnabled) {
+				group.maxGroupSize = maxGroupSizes.get(i)
+			} else {
+				group.removeMaxGroupSize()
+			}
 		}
 
 		if (groupNames.size() < set.groups.size()) {
@@ -79,9 +84,13 @@ trait PopulateEditSmallGroupsCommand extends PopulateOnForm {
 		maxGroupSizes.clear()
 
 		groupNames.addAll(set.groups.asScala.map { _.name }.asJava)
-		maxGroupSizes.addAll(set.groups.asScala.map { _.maxGroupSize.getOrElse {
-			if (set.defaultMaxGroupSizeEnabled) set.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
-		}}.asJava)
+		maxGroupSizes.addAll(set.groups.asScala.map { group =>
+			val groupSize = group.maxGroupSize.getOrElse {
+				if (set.defaultMaxGroupSizeEnabled) set.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
+			}
+
+			groupSize: JInteger
+		}.asJava)
 		defaultMaxGroupSizeEnabled = set.defaultMaxGroupSizeEnabled
 		defaultMaxGroupSize = set.defaultMaxGroupSize
 	}

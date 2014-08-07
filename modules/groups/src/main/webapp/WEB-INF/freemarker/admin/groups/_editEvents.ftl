@@ -4,21 +4,38 @@
 
 <fieldset>
 	<@form.row>
-		<span class="legend" >Events <small>Add weekly events for these groups</small> </span>
+		<p>There are <@fmt.p smallGroupSet.groups?size "group" /> in ${smallGroupSet.name}<#if smallGroupSet.linked> (from <i class="icon-link"></i> ${smallGroupSet.linkedDepartmentSmallGroupSet.name})</#if>.</p>
+
+		<p>
+			<#if is_edit>
+				<#assign default_properties_url><@routes.editseteventdefaults smallGroupSet /></#assign>
+			<#else>
+				<#assign default_properties_url><@routes.createseteventdefaults smallGroupSet /></#assign>
+			</#if>
+
+			<a class="btn" href="${default_properties_url}">Default properties</a>
+
+			<#assign helpText>
+				<p>You can set default properties for events created for all groups, such as tutor, location or which weeks
+				   the events are running, and then edit these for individual groups if necessary.</p>
+			</#assign>
+			<a href="#"
+			   class="use-introductory<#if showIntro("sgt-default-event-properties", "anywhere")> auto</#if>"
+			   data-title="Default properties for events"
+			   data-trigger="click"
+			   data-placement="bottom"
+			   data-html="true"
+			   data-hash="${introHash("sgt-default-event-properties", "anywhere")}"
+			   data-content="${helpText}"><i class="icon-question-sign icon-fixed-width"></i></a>
+		</p>
 	</@form.row>
 
-	<div class="striped-section">
-		<div class="clearfix">
-			<h2 class="section-title with-button">Groups</h2>
-		</div>
-
+	<div class="striped-section no-title">
 		<#if groups?size gt 0>
 			<#include "_events.ftl" />
 		</#if>
 	</div>
 </fieldset>
-
-<#include "_events_modals.ftl" />
 
 <script type="text/javascript">
 	jQuery(function($) {
