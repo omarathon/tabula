@@ -22,7 +22,7 @@
 		</#if>
 		<#if ((event.location.name)!"")?has_content>
 			<div class="location">
-				Room: ${event.location.name}
+				Room: <@fmt.location event.location />
 			</div>
 		</#if>
 		<div class="running">

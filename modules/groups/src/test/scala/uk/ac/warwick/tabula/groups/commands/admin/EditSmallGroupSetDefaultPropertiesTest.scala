@@ -43,6 +43,46 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
 		there was one (command.smallGroupService).saveOrUpdate(set)
 	}}
 
+	@Test def resetExistingEvents { new CommandFixture {
+		command.defaultWeekRanges = Seq(WeekRange(1, 10))
+		command.defaultLocation = "The park"
+
+		val group1 = Fixtures.smallGroup("Group A")
+		val group2 = Fixtures.smallGroup("Group B")
+
+		val event1 = Fixtures.smallGroupEvent("Event 1")
+		val event2 = Fixtures.smallGroupEvent("Event 2")
+		event2.location = MapLocation("ITS WW", "12354")
+
+		val event3 = Fixtures.smallGroupEvent("Event 3")
+		event3.weekRanges = Seq(WeekRange(1, 5))
+
+		set.groups.add(group1)
+		set.groups.add(group2)
+
+		group1.events.add(event1)
+		group1.events.add(event2)
+		group2.events.add(event3)
+
+		command.resetExistingEvents = true
+
+		command.applyInternal() should be (set)
+
+		set.defaultWeekRanges should be (Seq(WeekRange(1, 10)))
+		set.defaultLocation should be (NamedLocation("The park"))
+
+		event1.weekRanges should be (Seq(WeekRange(1, 10)))
+		event1.location should be (NamedLocation("The park"))
+
+		event2.weekRanges should be (Seq(WeekRange(1, 10)))
+		event2.location should be (NamedLocation("The park"))
+
+		event3.weekRanges should be (Seq(WeekRange(1, 10)))
+		event3.location should be (NamedLocation("The park"))
+
+		there was one (command.smallGroupService).saveOrUpdate(set)
+	}}
+
 	@Test def permissions { new Fixture {
 		val (theModule, theSet) = (module, set)
 		val command = new EditSmallGroupSetDefaultPropertiesPermissions with EditSmallGroupSetDefaultPropertiesCommandState {

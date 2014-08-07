@@ -4,6 +4,8 @@
 	<h1>Set default event properties</h1>
 	<h4><span class="muted">for</span> ${smallGroupSet.name}</h4>
 
+	<p>Defaults set here will apply to any new events. You can adjust these properties for individual events.</p>
+
 	<@f.form method="post" action="" commandName="command" cssClass="form-horizontal">
 		<@f.errors cssClass="error form-errors" />
 
@@ -18,6 +20,15 @@
 				<@f.hidden path="defaultLocationId" />
 				<@f.input path="defaultLocation" />
 			</@form.labelled_row>
+
+			<@form.row "resetExistingEvents">
+				<@form.field>
+					<@form.label checkbox=true>
+						<@f.checkbox path="resetExistingEvents" value="true" />
+						Reset existing events to these defaults
+					</@form.label>
+				</@form.field>
+			</@form.row>
 		</fieldset>
 
 		<div class="submit-buttons">

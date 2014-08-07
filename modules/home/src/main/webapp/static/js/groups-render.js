@@ -8,6 +8,7 @@ var exports = {};
 exports.wireMapLocations = function($container) {
 	$container.find('.map-location[data-lid]').each(function() {
 		var $el = $(this);
+		if ($el.data('map-wired')) return;
 
 		var mapUrl = '//campus.warwick.ac.uk/?lite=1&search=' + encodeURIComponent($el.text()) + '&lid=' + encodeURIComponent($el.data('lid'));
 
@@ -25,6 +26,8 @@ exports.wireMapLocations = function($container) {
 			html: true,
 			content: '<iframe width="300" height="400" frameborder="0" src="' + mapUrl + '"></iframe>'
 		});
+
+		$el.data('map-wired', true);
 	});
 };
 
@@ -34,6 +37,11 @@ window.Groups = jQuery.extend(window.Groups, exports);
 
 $(function() {
 	exports.wireMapLocations($('#container'));
+
+	// Look for popovers being shown
+	$(document.body).on('shown', function() {
+		exports.wireMapLocations($('.popover-content'));
+	});
 });
 
 }(jQuery));
