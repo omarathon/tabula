@@ -96,7 +96,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro feedbackreport department><@_u page="/admin/department/${department.code}/reports/feedback" /></#macro>
 
-
+<#macro setupSitsAssignments department><@_u page="/admin/department/${department.code}/setup-assignments" /></#macro>
 <#macro copyDepartmentsAssignments department><@_u page="/admin/department/${department.code}/copy-assignments" /></#macro>
 <#macro archiveDepartmentsAssignments department><@_u page="/admin/department/${department.code}/archive-assignments" /></#macro>
 
