@@ -79,6 +79,8 @@ trait EditSmallGroupEventCommandState extends ModifySmallGroupEventCommandState 
 class CreateSmallGroupEventCommandInternal(val module: Module, val set: SmallGroupSet, val group: SmallGroup) extends ModifySmallGroupEventCommandInternal with CreateSmallGroupEventCommandState {
 	self: SmallGroupServiceComponent =>
 
+	copyFromDefaults(set)
+
 	override def applyInternal() = transactional() {
 		val event = new SmallGroupEvent(group)
 		copyTo(event)
@@ -102,6 +104,20 @@ class EditSmallGroupEventCommandInternal(val module: Module, val set: SmallGroup
 }
 
 abstract class ModifySmallGroupEventCommandInternal extends CommandInternal[SmallGroupEvent] with ModifySmallGroupEventCommandState {
+	def copyFromDefaults(set: SmallGroupSet) {
+		weekRanges = set.defaultWeekRanges
+
+		Option(set.defaultLocation).foreach {
+			case NamedLocation(name) => location = name
+			case MapLocation(name, lid) => {
+				location = name
+				locationId = lid
+			}
+		}
+
+		if (set.defaultTutors != null) tutors.addAll(set.defaultTutors.knownType.allIncludedIds.asJava)
+	}
+
 	def copyFrom(event: SmallGroupEvent) {
 		title = event.title
 

@@ -91,6 +91,91 @@ $(function() {
     });
 });
 
+// Week selector and location picker
+$(function() {
+	$('table.week-selector').each(function() {
+		var $table = $(this);
+
+		var updateCell = function($cell, value) {
+			var $icon = $cell.find('i');
+			if (value) {
+				$icon.addClass('icon-ok');
+				$cell.addClass('checked');
+			} else {
+				$icon.removeClass('icon-ok');
+				$cell.removeClass('checked');
+			}
+		};
+
+		$table.find('input[type="checkbox"]').each(function() {
+			var $checkbox = $(this);
+			var $cell = $checkbox.closest('td');
+
+			$checkbox.hide();
+
+			var $icon = $('<i />').addClass('icon-fixed-width');
+			$checkbox.after($icon);
+
+			updateCell($cell, $checkbox.is(':checked'));
+
+			$cell.on('click', function() {
+				$checkbox.prop('checked', !$checkbox.prop('checked'));
+				updateCell($cell, $checkbox.is(':checked'));
+			});
+		});
+		$table.find('tbody tr th').each(function() {
+			var $header = $(this);
+			var $cells = $header.closest('tr').find('td');
+			$header.on('click', function() {
+				var allChecked = $cells.find('input[type="checkbox"]:not(:checked)').length == 0;
+				if (allChecked) {
+					$cells.each(function() {
+						var $cell = $(this);
+						$cell.find('input[type="checkbox"]').prop('checked', false);
+						updateCell($cell, false);
+					});
+				} else {
+					$cells.each(function() {
+						var $cell = $(this);
+						$cell.find('input[type="checkbox"]').prop('checked', true);
+						updateCell($cell, true);
+					});
+				}
+			});
+		});
+
+		$table.closest('.control-group').find('.show-vacations').each(function() {
+			var $checkbox = $(this);
+
+			if ($table.find('tr.vacation td.checked').length) {
+				$checkbox.prop('checked', true);
+			}
+
+			var updateDisplay = function() {
+				if ($checkbox.is(':checked')) {
+					$table.find('tr.vacation').show();
+				} else {
+					$table.find('tr.vacation').hide();
+				}
+			};
+			updateDisplay();
+
+			$checkbox.on('change', updateDisplay);
+		});
+	});
+
+	$('input#location, input#defaultLocation')
+		.on('change', function() {
+			var $this = $(this);
+			if ($this.data('lid') === undefined || $this.data('lid').length === 0)
+				return;
+
+			$this.closest('.controls').find('input[type="hidden"]').val($this.data('lid'));
+			$this.data('lid','');
+		})
+		.locationPicker();
+});
+
 // Re-usable small groups
 $(function() {
 	if ($('.add-student-to-set').length > 0) {
