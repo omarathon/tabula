@@ -17,11 +17,7 @@
 	<@fmt.weekRanges event />,
 	${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime /><#if ((event.location.name)!)?has_content>,</#if>
 	<#if ((event.location.name)!)?has_content>
-		<#if ((event.location.locationId)!)?has_content>
-			<span class="map-location" data-lid="${event.location.locationId}">${event.location.name}</span>
-		<#else>
-			${event.location.name}
-		</#if>
+		<@fmt.location event.location />
 	</#if>
 </#if>
 </#macro>

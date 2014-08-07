@@ -29,6 +29,7 @@ trait EditSmallGroupSetDefaultPropertiesCommandState {
 	var defaultTutors: JList[String] = JArrayList()
 	var defaultLocation: String = _
 	var defaultLocationId: String = _
+	var resetExistingEvents: Boolean = false
 
 	def defaultWeekRanges = Option(defaultWeeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse(Seq())
 	def defaultWeekRanges_=(ranges: Seq[WeekRange]) {
@@ -47,6 +48,15 @@ class EditSmallGroupSetDefaultPropertiesCommandInternal(val module: Module, val 
 
 	override def applyInternal() = {
 		copyTo(set)
+
+		if (resetExistingEvents) {
+			set.groups.asScala.flatMap { _.events.asScala }.foreach { event =>
+				event.weekRanges = set.defaultWeekRanges
+				event.location = set.defaultLocation
+				event.tutors.copyFrom(set.defaultTutors)
+			}
+		}
+
 		smallGroupService.saveOrUpdate(set)
 		set
 	}
