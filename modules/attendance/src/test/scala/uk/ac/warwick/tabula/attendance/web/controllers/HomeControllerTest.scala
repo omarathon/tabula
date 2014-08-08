@@ -62,6 +62,21 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
+		val mav = controller.home(command)
+		mav.viewName should be(s"redirect:/attendance/view/$departmentCode")
+
+	}}
+
+	@Test
+	def onlyOneViewPermissionRedirectedToViewDepartmentOldAM(){new Fixture{
+		info = HomeInformation(
+			hasProfile = false,
+			viewPermissions = Set(new Department().tap(_.code=departmentCode)),
+			managePermissions = Set(),
+			allRelationshipTypes = Seq(),
+			relationshipTypesMap = Map()
+		)
+
 		controller.features.attendanceMonitoringAcademicYear2014 = false
 		val mav = controller.home(command)
 		mav.viewName should be(s"redirect:/attendance/$departmentCode")
@@ -70,6 +85,21 @@ class HomeControllerTest extends TestBase with Mockito{
 
 	@Test
 	def onlyOneManagePermissionRedirectedToManageDepartment(){new Fixture{
+		info = HomeInformation(
+			hasProfile = false,
+			viewPermissions = Set(),
+			managePermissions = Set(new Department().tap(_.code=departmentCode)),
+			allRelationshipTypes = Seq(),
+			relationshipTypesMap = Map()
+		)
+
+		val mav = controller.home(command)
+		mav.viewName should be(s"redirect:/attendance/manage/$departmentCode")
+
+	}}
+
+	@Test
+	def onlyOneManagePermissionRedirectedToManageDepartmentOldAM(){new Fixture{
 		info = HomeInformation(
 			hasProfile = false,
 			viewPermissions = Set(),
