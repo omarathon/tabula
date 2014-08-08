@@ -80,3 +80,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro editcrossmodulegroupsallocate set><@_u page="/admin/department/${set.department.code}/groups/reusable/edit/${set.id}/allocate"  /></#macro>
 <#macro deletecrossmodulegroups set><@_u page="/admin/department/${set.department.code}/groups/reusable/delete/${set.id}"  /></#macro>
 <#macro crossmodulegroupstemplate set><@_u page="/admin/department/${set.department.code}/groups/reusable/${set.id}/template"  /></#macro>
+
+<#macro students_json set><@_u page="/module/${set.module.code}/groups/${set.id}/students/search.json" /></#macro>

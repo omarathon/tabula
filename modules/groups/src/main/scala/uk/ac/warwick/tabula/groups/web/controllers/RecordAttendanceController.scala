@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.groups.web.controllers
 
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.groups.commands.RecordAttendanceCommand
+import uk.ac.warwick.tabula.groups.commands.{RecordAttendanceState, AddAdditionalStudent, RecordAttendanceCommand, SmallGroupEventInFutureCheck}
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.{ RequestMapping, PathVariable, ModelAttribute }
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
@@ -16,7 +16,6 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventAttendance
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.PopulateOnForm
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.groups.commands.SmallGroupEventInFutureCheck
 
 @RequestMapping(value = Array("/event/{event}/register"))
 @Controller
@@ -25,7 +24,7 @@ class RecordAttendanceController extends GroupsController {
 	validatesSelf[SelfValidating]
 	
 	type RecordAttendanceCommand = Appliable[(SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])] 
-								   with PopulateOnForm with SmallGroupEventInFutureCheck
+								   with PopulateOnForm with SmallGroupEventInFutureCheck with RecordAttendanceState with AddAdditionalStudent
 
 	@ModelAttribute
 	def command(@PathVariable event: SmallGroupEvent, @RequestParam week: Int, user: CurrentUser)
@@ -46,12 +45,19 @@ class RecordAttendanceController extends GroupsController {
 			"returnTo" -> getReturnTo(Routes.tutor.mygroups))
 	}
 
-	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute command: RecordAttendanceCommand, errors: Errors, user: CurrentUser): Mav = {
+	@RequestMapping(method = Array(POST), params = Array("action=refresh"))
+	def refresh(@ModelAttribute command: RecordAttendanceCommand): Mav = {
+		command.addAdditionalStudent(command.members)
+
+		form(command)
+	}
+
+	@RequestMapping(method = Array(POST), params = Array("action!=refresh"))
+	def submit(@Valid @ModelAttribute command: RecordAttendanceCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			form(command)
 		} else {
-			val (occurrence, attendances) = command.apply()
+			val (occurrence, _) = command.apply()
 			Redirect(Routes.tutor.mygroups, "updatedOccurrence" -> occurrence.id)
 		}
 	}

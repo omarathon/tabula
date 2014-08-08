@@ -41,15 +41,38 @@
 		<div class="fix-header">
 			<div class="row-fluid record-attendance-form-header check-all">
 				<div class="span12">
-					<span class="studentsLoadingMessage" style="display: none;">
-							<i class="icon-spinner icon-spin"></i><em> Loading&hellip;</em>
-						</span>
-					<script>
-						jQuery('.studentsLoadingMessage').show();
+					<span class="studentsLoadingMessage">
+						<i class="icon-spinner icon-spin"></i><em> Loading&hellip;</em>
+					</span>
+					<script type="text/javascript">
 						jQuery(function($){
 							$('.studentsLoadingMessage').hide();
-						})
+						});
 					</script>
+					<div class="pull-left">
+						<div class="form-inline">
+							<label for="additionalStudentQuery">Add student:</label>
+							<span class="profile-search input-append" data-target="<@routes.students_json command.event.group.groupSet />?excludeEvent=${command.event.id}&excludeWeek=${command.week}">
+								<input type="hidden" name="additionalStudent" />
+								<input type="text" name="query" value="" id="additionalStudentQuery" placeholder="Search for students&hellip;" />
+								<button class="btn" type="button" style="margin-top: 0px;">
+									<i class="icon-search"></i>
+								</button>
+							</span>
+
+							<#assign helpText>
+								<p>If a student not normally in this group has attended or will be attending this session, you can search for them here.</p>
+							</#assign>
+							<a href="#"
+							   class="use-introductory<#if showIntro("sgt-add-adhoc-student", "anywhere")></#if>"
+							   data-title="Adding a student not normally present to an event occurrence"
+							   data-trigger="click"
+							   data-placement="bottom"
+							   data-html="true"
+							   data-hash="${introHash("sgt-add-adhoc-student", "anywhere")}"
+							   data-content="${helpText}"><i class="icon-question-sign icon-fixed-width"></i></a>
+						</div>
+					</div>
 					<div class="pull-right" style="display: none;">
 						<span class="checkAllMessage">
 							Check all
@@ -96,7 +119,7 @@
 
 		<#else>
 
-			<#macro studentRow student>
+			<#macro studentRow student added_manually>
 				<div class="row-fluid item-info">
 					<div class="span12">
 						<div class="pull-right">
@@ -152,6 +175,11 @@
 						<@fmt.member_photo student "tinythumbnail" true />
 						${student.fullName}
 
+						<#if added_manually>
+							<i class="icon-hand-up use-tooltip" title="Added manually to this event occurrence" data-container="body"></i>
+							<button class="btn btn-mini btn-danger" type="button">Remove from this occurrence</button>
+						</#if>
+
 						<@spring.bind path="command.studentsState[${student.universityId}]">
 							<#list status.errorMessages as err>${err}</#list>
 							<div class="text-error"><@f.errors path="studentsState[${student.universityId}]" cssClass="error"/></div>
@@ -165,12 +193,16 @@
 
 			<div class="striped-section-contents attendees">
 				<form id="recordAttendance" action="" method="post" data-occurrence="${command.occurrence.id}">
-					<script>
+					<script type="text/javascript">
 						AttendanceRecording.bindButtonGroupHandler(true);
 					</script>
 
+					<#if command.additionalStudent??>
+						<@studentRow command.additionalStudent true />
+					</#if>
+
 					<#list command.members as student>
-						<@studentRow student />
+						<@studentRow student command.manuallyAddedUniversityIds?seq_contains(student.universityId) />
 					</#list>
 
 					<div class="fix-footer submit-buttons">

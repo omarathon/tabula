@@ -32,6 +32,13 @@ class SmallGroupEventAttendance extends GeneratedId with PermissionsTarget with 
 	@NotNull
 	var updatedBy: String = _
 
+	@Column(name = "added_manually")
+	var addedManually: Boolean = false
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="replaces_attendance_id")
+	var replacesAttendance: SmallGroupEventAttendance = _
+
 	def permissionsParents = Stream(occurrence)
 
 }

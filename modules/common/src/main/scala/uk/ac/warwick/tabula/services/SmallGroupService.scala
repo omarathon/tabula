@@ -44,7 +44,7 @@ trait SmallGroupService {
 	def findSmallGroupsByStudent(student: User): Seq[SmallGroup]
 	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet]
 
-	def saveOrUpdateAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, state: AttendanceState, user: CurrentUser): SmallGroupEventAttendance
+	def saveOrUpdateAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, state: AttendanceState, user: CurrentUser, addedManually: Boolean = false): SmallGroupEventAttendance
 	def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int): Unit
 	def findAttendanceByGroup(smallGroup: SmallGroup): Seq[SmallGroupEventOccurrence]
 	def getAttendanceNote(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendanceNote]
@@ -138,7 +138,8 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		event: SmallGroupEvent,
 		weekNumber: Int,
 		state: AttendanceState,
-		user: CurrentUser
+		user: CurrentUser,
+		addedManually: Boolean = false
 	): SmallGroupEventAttendance = {
 		val occurrence = getOrCreateSmallGroupEventOccurrence(event, weekNumber)
 		
@@ -148,8 +149,12 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			newAttendance.universityId = studentId
 			newAttendance
 		})
-		
+
 		attendance.state = state
+
+		// Don't allow true to ever become false. True once, true forever.
+		if (addedManually) attendance.addedManually = addedManually
+
 		attendance.updatedBy = user.userId
 		attendance.updatedDate = DateTime.now
 		smallGroupDao.saveOrUpdate(attendance)

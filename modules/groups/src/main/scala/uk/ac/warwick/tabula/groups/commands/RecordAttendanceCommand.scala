@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.groups.commands
 
+import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringEventAttendanceServiceComponent, AutowiringAttendanceMonitoringEventAttendanceServiceComponent}
 
 import scala.collection.JavaConverters._
@@ -39,9 +40,31 @@ object RecordAttendanceCommand {
 	}
 }
 
+trait AddAdditionalStudent {
+	self: SmallGroupServiceComponent with RecordAttendanceState =>
+	def occurrence: SmallGroupEventOccurrence
+
+	var additionalStudent: Member = _
+
+	lazy val manuallyAddedUniversityIds = occurrence.attendance.asScala.filter { _.addedManually }.map { _.universityId }
+
+	def addAdditionalStudent(members: Seq[MemberOrUser]) {
+		Option(additionalStudent)
+			.filterNot { member => members.find { _.universityId == member.universityId }.isDefined }
+			.foreach { member =>
+				transactional() {
+					smallGroupService.saveOrUpdateAttendance(member.universityId, event, week, AttendanceState.NotRecorded, user, true)
+				}
+
+				studentsState.put(member.universityId, null)
+			}
+	}
+}
+
 abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int, val user: CurrentUser) 
 	extends CommandInternal[(SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])] 
-		with RecordAttendanceState 
+		with RecordAttendanceState
+		with AddAdditionalStudent
 		with PopulateOnForm
 		with TaskBenchmarking {
 
@@ -49,21 +72,22 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 		with MonitoringPointGroupProfileServiceComponent with AttendanceMonitoringEventAttendanceServiceComponent =>
 		
 	if (!event.group.groupSet.collectAttendance) throw new ItemNotFoundException
-		
+
 	lazy val occurrence = transactional() { smallGroupService.getOrCreateSmallGroupEventOccurrence(event, week) }
-	
-	var studentsState: JMap[UniversityId, AttendanceState] = 
+
+	var studentsState: JMap[UniversityId, AttendanceState] =
 		LazyMaps.create { member: UniversityId => null: AttendanceState }.asJava
 	
 	lazy val members: Seq[MemberOrUser] = {
 		(event.group.students.users.map { user =>
 			val member = profileService.getMemberByUniversityId(user.getWarwickId)
-			MemberOrUser(member, user)
+			(false, MemberOrUser(member, user))
 		} ++ occurrence.attendance.asScala.toSeq.map { a =>
 			val member = profileService.getMemberByUniversityId(a.universityId)
 			val user = userLookup.getUserByWarwickUniId(a.universityId)
-			MemberOrUser(member, user)
-		}).distinct.sortBy(mou => (mou.lastName, mou.firstName, mou.universityId))
+			(a.addedManually, MemberOrUser(member, user))
+		}).distinct.sortBy { case (addedManually, mou) => (!addedManually, mou.lastName, mou.firstName, mou.universityId) }
+			.map { case (_, mou) => mou }
 	}
 
 	lazy val attendanceNotes: Map[MemberOrUser, Map[SmallGroupEventOccurrence, SmallGroupEventAttendanceNote]] = benchmarkTask("Get attendance notes") {
@@ -74,20 +98,16 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 		}.toMap
 	}
 	
-	def populate() {		
+	def populate() {
 		studentsState = members.map { member =>
 			member.universityId -> 
 				occurrence.attendance.asScala
-					.find {
-					_.universityId == member.universityId
-				}
-					.flatMap { a => Option(a.state)}.orNull
+					.find { _.universityId == member.universityId }
+					.flatMap { a => Option(a.state) }.orNull
 		}.toMap.asJava
 	}
 
 	def applyInternal() = {
-		val occurrence = transactional() { smallGroupService.getOrCreateSmallGroupEventOccurrence(event, week) }
-		
 		val attendances = studentsState.asScala.flatMap { case (studentId, state) =>
 			if (state == null) {
 				smallGroupService.deleteAttendance(studentId, event, week)
@@ -150,6 +170,7 @@ trait RecordAttendanceCommandPermissions extends RequiresPermissionsChecking {
 trait RecordAttendanceState {
 	val event: SmallGroupEvent
 	val week: Int
+	val user: CurrentUser
 	
 	def studentsState: JMap[UniversityId, AttendanceState]
 	def members: Seq[MemberOrUser]
