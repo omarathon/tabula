@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.attendance.commands.HomeInformation
 import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.data.model.Department
 
 /**
  * Displays the Attendance home screen.
@@ -33,13 +34,12 @@ class HomeController extends AttendanceController {
 		val hasAnyRelationships = info.relationshipTypesMap.exists{ case (_, b) => b}
 
 		if (info.hasProfile && info.managePermissions.size == 0 && info.viewPermissions.size == 0 && !hasAnyRelationships)
-			Redirect(Routes.old.profile()) // TODO FIXME
-		else if (!features.attendanceMonitoringAcademicYear2014) {
-			if (!info.hasProfile && info.managePermissions.size == 0 && info.viewPermissions.size == 1 && !hasAnyRelationships)
-				Redirect(Routes.old.department.view(info.viewPermissions.head))
-			else if (!info.hasProfile && info.managePermissions.size == 1 && info.viewPermissions.size == 0 && !hasAnyRelationships)
-				Redirect(Routes.old.department.manage(info.managePermissions.head))
-			else
+			Redirect(Routes.Profile.home) // TODO FIXME
+			else if (!info.hasProfile && info.managePermissions.size == 0 && info.viewPermissions.size == 1 && !hasAnyRelationships) {
+					Redirect(getViewDepartmentUrl(info.viewPermissions.head))
+			} else if (!info.hasProfile && info.managePermissions.size == 1 && info.viewPermissions.size == 0 && !hasAnyRelationships) {
+					Redirect(getManageDepartmentUrl(info.managePermissions.head))
+			} else {
 				Mav("home",
 					"hasProfile" -> info.hasProfile,
 					"relationshipTypesMap" -> info.relationshipTypesMap,
@@ -48,18 +48,17 @@ class HomeController extends AttendanceController {
 					"viewPermissions" -> info.viewPermissions,
 					"managePermissions" -> info.managePermissions
 				)
-		}	else {
-			Mav("home",
-				"hasProfile" -> info.hasProfile,
-				"relationshipTypesMap" -> info.relationshipTypesMap,
-				"relationshipTypesMapById" -> info.relationshipTypesMap.map {
-					case (k, v) => (k.id, v)
-				},
-				"hasAnyRelationships" -> hasAnyRelationships,
-				"viewPermissions" -> info.viewPermissions,
-				"managePermissions" -> info.managePermissions
-			)
 		}
+	}
+
+	def getViewDepartmentUrl(department:Department) = {
+		if (features.attendanceMonitoringAcademicYear2014) Routes.View.department(department)
+		else Routes.old.department.view(department)
+	}
+
+	def getManageDepartmentUrl(department:Department) = {
+		if (features.attendanceMonitoringAcademicYear2014) Routes.Manage.department(department)
+		else Routes.old.department.manage(department)
 	}
 
 }
