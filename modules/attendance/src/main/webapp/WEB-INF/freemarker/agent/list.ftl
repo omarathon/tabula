@@ -54,7 +54,16 @@
 					<div class="span12">
 						<div class="pull-right">
 							<#assign record_url><@routes.agentRecordPoints relationshipType academicYear.startYear?c groupedPoint.templatePoint returnTo/></#assign>
-							<a href="${record_url}" class="btn btn-primary">Record</a>
+							<@fmt.permission_button
+							permission='MonitoringPoints.Record'
+							scope=(groupedPoint.templatePoint.scheme.department)
+							action_descr='record monitoring points'
+							classes='btn btn-primary'
+							href=record_url
+							tooltip='Record'
+							>
+								Record
+							</@fmt.permission_button>
 						</div>
 						${groupedPoint.templatePoint.name}
 						(<a class="use-tooltip" data-html="true" title="
@@ -90,7 +99,16 @@
 					<div class="span12">
 						<div class="pull-right">
 							<#assign record_url><@routes.agentRecordPoints relationshipType academicYear.startYear?c groupedPoint.templatePoint returnTo/></#assign>
-							<a href="${record_url}" class="btn btn-primary">Record</a>
+							<@fmt.permission_button
+							permission='MonitoringPoints.Record'
+							scope=(groupedPoint.templatePoint.scheme.department)
+							action_descr='record monitoring points'
+							classes='btn btn-primary'
+							href=record_url
+							tooltip='Record'
+							>
+								Record
+							</@fmt.permission_button>
 						</div>
 						${groupedPoint.templatePoint.name}
 						(<@fmt.interval groupedPoint.templatePoint.startDate groupedPoint.templatePoint.endDate />)
