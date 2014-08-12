@@ -33,6 +33,26 @@ exports.createButtonGroup = function(id){
     $this.hide();
 };
 
+exports.wireButtons = function(id) {
+	var $this = $(id);
+
+	$this.find('.use-popover')
+		.on('shown', function(e) {
+			var $po = $(e.target).popover().data('popover').tip();
+			$po.find('[data-action="remove"]').on('click', function() {
+				var id = $(this).attr('data-student');
+				$('form#recordAttendance')
+					.prepend($('<input />').attr({ 'type': 'hidden', 'name': 'removeAdditionalStudent', 'value': id }))
+					.prepend($('<input />').attr({ 'type': 'hidden', 'name': 'action', 'value': 'refresh' }))
+					.submit();
+			});
+		})
+		.tabulaPopover({
+			trigger: 'click',
+			container: '#container'
+		});
+};
+
 var setArgOnUrl = function(url, argName, argValue){
 	if(url.indexOf('?') === 0) {
 		return url + '?' + argName + '=' + argValue;
@@ -195,22 +215,57 @@ $(function(){
 			$(this).find('.profile-search').each(function() {
 				var $search = $(this);
 				var searchUrl = $search.data('target');
+				var formUrl = $search.data('form');
+				var $modalElement = $($search.data('modal'));
 
 				var $input = $search.find('input[type="text"]').first();
 				var $target = $search.find('input[type="hidden"]').first();
 
 				$search.on('tabula:selected', function(evt, name, universityId, userId, description) {
-					var $form = $('.recordCheckpointForm form');
+					$modalElement.html('<div class="modal-header"><h3>Loading&hellip;</h3></div>');
+					$modalElement.modal({ remote: null });
+					$modalElement.load(formUrl + '&student=' + universityId);
 
-					$form.prepend($target.clone()).prepend(
-						$('<input />').attr({
-							'type': 'hidden',
-							'name': 'action',
-							'value': 'refresh'
+					$modalElement
+						.on('shown', function() {
+							var $eventInput = $modalElement.find('input[name="replacedEvent"]');
+							var $weekInput = $modalElement.find('input[name="replacedWeek"]');
+							var $replacementInput = $modalElement.find('select#replacementEventAndWeek');
+
+							$replacementInput.on('change', function() {
+								var $opt = $(this).find(':selected');
+								$eventInput.val($opt.data('event'));
+								$weekInput.val($opt.data('week'));
+							});
+
+							var onSubmit = function(e) {
+								e.preventDefault();
+								e.stopPropagation();
+
+								var $form = $('.recordCheckpointForm form');
+
+								$form.prepend($target.clone()).prepend(
+									$('<input />').attr({
+										'type': 'hidden',
+										'name': 'action',
+										'value': 'refresh'
+									})
+								).prepend($eventInput).prepend($weekInput);
+
+								$form.submit();
+
+								return false;
+							};
+
+							$modalElement.find('form').on('submit', onSubmit);
+							$modalElement.find('[type="submit"]').on('click', onSubmit);
 						})
-					);
-
-					$form.submit();
+						.on('hidden', function() {
+							// There was no modal-body when we first started, so revert back to
+							// this situation to allow the init code to work next time.
+							$modalElement.html("");
+							$modalElement.removeData('modal');
+						});
 				});
 
 				var xhr = null;

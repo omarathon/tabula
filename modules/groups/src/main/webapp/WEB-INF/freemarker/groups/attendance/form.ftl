@@ -1,4 +1,5 @@
-<script>
+<#escape x as x?html>
+<script type="text/javascript">
 (function ($) {
 	$(function() {
 		$('.fix-area').fixHeaderFooter();
@@ -10,6 +11,8 @@
 	});
 } (jQuery));
 </script>
+
+<div id="addAdditional-modal" class="modal fade"></div>
 
 <div class="recordCheckpointForm">
 	<div style="display:none;" class="forCloning">
@@ -52,9 +55,9 @@
 					<div class="pull-left">
 						<div class="form-inline">
 							<label for="additionalStudentQuery">Add student:</label>
-							<span class="profile-search input-append" data-target="<@routes.students_json command.event.group.groupSet />?excludeEvent=${command.event.id}&excludeWeek=${command.week}">
+							<span class="profile-search input-append" data-target="<@routes.students_json command.event.group.groupSet />?excludeEvent=${command.event.id}&excludeWeek=${command.week}" data-form="<@routes.addAdditionalStudent command.event command.week />" data-modal="#addAdditional-modal">
 								<input type="hidden" name="additionalStudent" />
-								<input type="text" name="query" value="" id="additionalStudentQuery" placeholder="Search for students&hellip;" />
+								<input class="input-xlarge" type="text" name="query" value="" id="additionalStudentQuery" placeholder="Search for a student to add&hellip;" />
 								<button class="btn" type="button" style="margin-top: 0px;">
 									<i class="icon-search"></i>
 								</button>
@@ -62,14 +65,15 @@
 
 							<#assign helpText>
 								<p>If a student not normally in this group has attended or will be attending this session, you can search for them here.</p>
+
+								<p>Only students registered to small groups in this module are included in the search results.</p>
 							</#assign>
 							<a href="#"
-							   class="use-introductory<#if showIntro("sgt-add-adhoc-student", "anywhere")></#if>"
+							   class="use-popover"
 							   data-title="Adding a student not normally present to an event occurrence"
 							   data-trigger="click"
 							   data-placement="bottom"
 							   data-html="true"
-							   data-hash="${introHash("sgt-add-adhoc-student", "anywhere")}"
 							   data-content="${helpText}"><i class="icon-question-sign icon-fixed-width"></i></a>
 						</div>
 					</div>
@@ -119,9 +123,9 @@
 
 		<#else>
 
-			<#macro studentRow student added_manually>
+			<#macro studentRow student added_manually linked_info={}>
 				<div class="row-fluid item-info">
-					<div class="span12">
+					<div class="span12" id="student-${student.universityId}">
 						<div class="pull-right">
 							<#local hasState = mapGet(command.studentsState, student.universityId)?? />
 							<#if hasState>
@@ -176,8 +180,32 @@
 						${student.fullName}
 
 						<#if added_manually>
-							<i class="icon-hand-up use-tooltip" title="Added manually to this event occurrence" data-container="body"></i>
-							<button class="btn btn-mini btn-danger" type="button">Remove from this occurrence</button>
+							<#assign popoverText>
+								<p>${student.fullName} has been manually added to this occurrence of ${command.event.group.groupSet.name}, ${command.event.group.name}.</p>
+
+								<#if linked_info.replacesAttendance??>
+									<p>Attending instead of
+										${linked_info.replacesAttendance.occurrence.event.group.groupSet.name}, ${linked_info.replacesAttendance.occurrence.event.group.name}:
+										${linked_info.replacesAttendance.occurrence.event.day.name} <@fmt.time linked_info.replacesAttendance.occurrence.event.startTime /> - <@fmt.time linked_info.replacesAttendance.occurrence.event.endTime />, Week ${linked_info.replacesAttendance.occurrence.week}.
+									</p>
+								</#if>
+
+								<button class="btn btn-mini btn-danger" type="button" data-action="remove" data-student="${student.universityId}">Remove from this occurrence</button>
+							</#assign>
+
+							<a class="use-popover" data-container="body" data-content="${popoverText}" data-html="true">
+								<i class="icon-hand-up"></i>
+							</a>
+						</#if>
+
+						<#if linked_info.replacedBy??>
+							<#list linked_info.replacedBy as replaced_by>
+								<i class="icon-link use-tooltip" data-container="body" title="<#compress>
+									Replaced by attendance at
+									${replaced_by.occurrence.event.group.groupSet.name}, ${replaced_by.occurrence.event.group.name}:
+									${replaced_by.occurrence.event.day.name} <@fmt.time replaced_by.occurrence.event.startTime /> - <@fmt.time replaced_by.occurrence.event.endTime />, Week ${replaced_by.occurrence.week}.
+								</#compress>"></i>
+							</#list>
 						</#if>
 
 						<@spring.bind path="command.studentsState[${student.universityId}]">
@@ -185,8 +213,9 @@
 							<div class="text-error"><@f.errors path="studentsState[${student.universityId}]" cssClass="error"/></div>
 						</@spring.bind>
 					</div>
-					<script>
+					<script type="text/javascript">
 						AttendanceRecording.createButtonGroup('#studentsState-${student.universityId}');
+						AttendanceRecording.wireButtons('#student-${student.universityId}');
 					</script>
 				</div>
 			</#macro>
@@ -198,11 +227,20 @@
 					</script>
 
 					<#if command.additionalStudent??>
-						<@studentRow command.additionalStudent true />
+						<#assign already_in = false />
+						<#list command.members as student>
+							<#if student.universityId == command.additionalStudent.universityId>
+								<#assign already_in = true />
+							</#if>
+						</#list>
+
+						<#if !already_in><@studentRow command.additionalStudent true command.linkedAttendance /></#if>
 					</#if>
 
 					<#list command.members as student>
-						<@studentRow student command.manuallyAddedUniversityIds?seq_contains(student.universityId) />
+						<#if !(command.removeAdditionalStudent??) || command.removeAdditionalStudent.universityId != student.universityId>
+							<@studentRow student command.manuallyAddedUniversityIds?seq_contains(student.universityId) mapGet(command.attendances, student) />
+						</#if>
 					</#list>
 
 					<div class="fix-footer submit-buttons">
@@ -223,3 +261,4 @@
 
 	</div>
 </div>
+</#escape>

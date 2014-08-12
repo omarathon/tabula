@@ -45,18 +45,60 @@ trait AddAdditionalStudent {
 	def occurrence: SmallGroupEventOccurrence
 
 	var additionalStudent: Member = _
+	var replacedWeek: JInteger = _
+	var replacedEvent: SmallGroupEvent = _
 
 	lazy val manuallyAddedUniversityIds = occurrence.attendance.asScala.filter { _.addedManually }.map { _.universityId }
+
+	var linkedAttendance: SmallGroupEventAttendance = _
 
 	def addAdditionalStudent(members: Seq[MemberOrUser]) {
 		Option(additionalStudent)
 			.filterNot { member => members.find { _.universityId == member.universityId }.isDefined }
 			.foreach { member =>
-				transactional() {
-					smallGroupService.saveOrUpdateAttendance(member.universityId, event, week, AttendanceState.NotRecorded, user, true)
+				val attendance = transactional() {
+					smallGroupService.saveOrUpdateAttendance(member.universityId, event, week, AttendanceState.NotRecorded, user)
 				}
 
+				attendance.addedManually = true
+				Option(replacedEvent).foreach { event =>
+					val replacedOccurrence = transactional() { smallGroupService.getOrCreateSmallGroupEventOccurrence(event, replacedWeek) }
+					val replacedAttendance = transactional() {
+						smallGroupService.getAttendance(member.universityId, replacedOccurrence) match {
+							case Some(attendance) if attendance.state == AttendanceState.Attended => attendance
+							case Some(attendance) => {
+								attendance.state = AttendanceState.MissedAuthorised
+								smallGroupService.saveOrUpdate(attendance)
+								attendance
+							}
+							case None => smallGroupService.saveOrUpdateAttendance(member.universityId, replacedEvent, replacedWeek, AttendanceState.MissedAuthorised, user)
+						}
+					}
+
+					attendance.replacesAttendance = replacedAttendance
+				}
+
+				linkedAttendance = transactional() { smallGroupService.saveOrUpdate(attendance); attendance }
+
 				studentsState.put(member.universityId, null)
+			}
+	}
+}
+
+trait RemoveAdditionalStudent {
+	self: SmallGroupServiceComponent with RecordAttendanceState =>
+
+	var removeAdditionalStudent: Member = _
+
+	def doRemoveAdditionalStudent(members: Seq[MemberOrUser]) {
+		Option(removeAdditionalStudent)
+			.filter { member => members.find { _.universityId == member.universityId }.isDefined }
+			.foreach { member =>
+				transactional() {
+					smallGroupService.deleteAttendance(member.universityId, event, week)
+				}
+
+				studentsState.remove(member.universityId)
 			}
 	}
 }
@@ -65,6 +107,7 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 	extends CommandInternal[(SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])] 
 		with RecordAttendanceState
 		with AddAdditionalStudent
+		with RemoveAdditionalStudent
 		with PopulateOnForm
 		with TaskBenchmarking {
 
@@ -96,6 +139,11 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 				case(o, notes) => o -> notes.head
 			}
 		}.toMap
+	}
+
+	lazy val attendances: Map[MemberOrUser, Option[SmallGroupEventAttendance]] = benchmarkTask("Get attendances") {
+		val all = occurrence.attendance.asScala
+		members.map { m => (m, all.find { a => a.universityId == m.universityId })}.toMap
 	}
 	
 	def populate() {
@@ -150,7 +198,7 @@ trait RecordAttendanceCommandValidation extends SelfValidating {
 		studentsState.asScala.foreach { case (studentId, state) => 
 			errors.pushNestedPath(s"studentsState[$studentId]")
 			
-			if (isFutureEvent && !(state == null || state == AttendanceState.MissedAuthorised)) {
+			if (isFutureEvent && !(state == null || state == AttendanceState.MissedAuthorised || state == AttendanceState.NotRecorded)) {
 				errors.rejectValue("", "smallGroup.attendance.beforeEvent")
 			}
 			

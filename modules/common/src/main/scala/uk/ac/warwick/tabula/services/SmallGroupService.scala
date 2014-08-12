@@ -37,6 +37,7 @@ trait SmallGroupService {
 	def saveOrUpdate(note: SmallGroupEventAttendanceNote)
 	def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet)
 	def saveOrUpdate(smallGroup: DepartmentSmallGroup)
+	def saveOrUpdate(attendance: SmallGroupEventAttendance)
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent]
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup]
 	def removeFromSmallGroups(moduleRegistration: ModuleRegistration)
@@ -44,7 +45,7 @@ trait SmallGroupService {
 	def findSmallGroupsByStudent(student: User): Seq[SmallGroup]
 	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet]
 
-	def saveOrUpdateAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, state: AttendanceState, user: CurrentUser, addedManually: Boolean = false): SmallGroupEventAttendance
+	def saveOrUpdateAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, state: AttendanceState, user: CurrentUser): SmallGroupEventAttendance
 	def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int): Unit
 	def findAttendanceByGroup(smallGroup: SmallGroup): Seq[SmallGroupEventOccurrence]
 	def getAttendanceNote(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendanceNote]
@@ -88,6 +89,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def saveOrUpdate(note: SmallGroupEventAttendanceNote) = smallGroupDao.saveOrUpdate(note)
 	def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet) = smallGroupDao.saveOrUpdate(smallGroupSet)
 	def saveOrUpdate(smallGroup: DepartmentSmallGroup) = smallGroupDao.saveOrUpdate(smallGroup)
+	def saveOrUpdate(attendance: SmallGroupEventAttendance) = smallGroupDao.saveOrUpdate(attendance)
 
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = eventTutorsHelper.findBy(user)
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = findSmallGroupEventsByTutor(user).groupBy(_.group).keys.toSeq
@@ -129,7 +131,13 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			occurrence <- smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber)
 			attendance <- smallGroupDao.getAttendance(studentId, occurrence)
 		} {
-			smallGroupDao.deleteAttendance(attendance)
+			if (attendance.replacesAttendance == null) {
+				occurrence.attendance.remove(attendance)
+				smallGroupDao.deleteAttendance(attendance)
+			} else {
+				attendance.state = AttendanceState.NotRecorded // don't unlink
+				smallGroupDao.saveOrUpdate(attendance)
+			}
 		}
 	}
 	
@@ -138,8 +146,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		event: SmallGroupEvent,
 		weekNumber: Int,
 		state: AttendanceState,
-		user: CurrentUser,
-		addedManually: Boolean = false
+		user: CurrentUser
 	): SmallGroupEventAttendance = {
 		val occurrence = getOrCreateSmallGroupEventOccurrence(event, weekNumber)
 		
@@ -151,9 +158,6 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		})
 
 		attendance.state = state
-
-		// Don't allow true to ever become false. True once, true forever.
-		if (addedManually) attendance.addedManually = addedManually
 
 		attendance.updatedBy = user.userId
 		attendance.updatedDate = DateTime.now
