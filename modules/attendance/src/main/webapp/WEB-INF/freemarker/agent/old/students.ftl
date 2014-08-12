@@ -28,9 +28,7 @@
 	<#include "../../home/_points_table_js_sort.ftl" />
 
 	<#function permission_button_function groupedPoint>
-
 		<#local record_url><@routes.agentPointRecord groupedPoint.pointId command.relationshipType thisPath /></#local>
-
 		<#local result>
 			<@fmt.permission_button
 			permission='MonitoringPoints.Record'
