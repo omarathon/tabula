@@ -30,7 +30,16 @@
 	<#function permission_button_function groupedPoint>
 		<#local record_url><@routes.agentPointRecord groupedPoint.pointId command.relationshipType thisPath /></#local>
 		<#local result>
-			<a href="${record_url}" class="btn btn-primary">Record</a>
+			<@fmt.permission_button
+			permission='MonitoringPoints.Record'
+			scope=(groupedPoint.routes?first)._1()
+			action_descr='record monitoring points'
+			classes='btn btn-primary'
+			href=record_url
+			tooltip='Record'
+			>
+			Record
+			</@fmt.permission_button>
 		</#local>
 		<#return result>
 	</#function>
