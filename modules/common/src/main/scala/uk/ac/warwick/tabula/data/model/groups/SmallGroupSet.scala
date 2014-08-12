@@ -245,7 +245,7 @@ class SmallGroupSet
     newSet.releasedToTutors = releasedToTutors
 		newSet.openForSignups = openForSignups
 		newSet.defaultWeekRanges = defaultWeekRanges
-		newSet._defaultTutors = _defaultTutors.duplicate()
+		if (_defaultTutors != null) newSet._defaultTutors = _defaultTutors.duplicate()
 		newSet.defaultLocation = defaultLocation
 		newSet.linkedDepartmentSmallGroupSet = linkedDepartmentSmallGroupSet
 		newSet.settings = Map() ++ settings
