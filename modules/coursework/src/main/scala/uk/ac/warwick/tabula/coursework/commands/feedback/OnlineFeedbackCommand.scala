@@ -50,6 +50,7 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 			new StudentFeedbackGraph(student, hasSubmission, hasFeedback, hasPublishedFeedback, false, false)
 		}
 	}
+
 }
 
 

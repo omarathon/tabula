@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
-import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
+import uk.ac.warwick.tabula.{MockUserLookup, CurrentUser, Mockito, TestBase}
 import uk.ac.warwick.tabula.coursework.web.controllers.admin.{OnlineFeedbackFormController, OnlineFeedbackController}
 import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineFeedbackFormCommand, OnlineFeedbackCommandTestSupport, OnlineFeedbackCommand}
 import uk.ac.warwick.tabula.data.model.{StudentMember, Department, Module, Assignment}
@@ -25,9 +25,11 @@ class OnlineFeedbackControllerTest extends TestBase {
 	}
 
 	@Test def controllerShowsList() {
+		val userLookup = new MockUserLookup
+
 		new Fixture {
 			val controller = new OnlineFeedbackController
-			val mav = controller.showTable(command, null)
+			val mav = controller.showTable(command, null, userLookup)
 			mav.map("assignment") should be(assignment)
 			mav.map("command") should be(command)
 			mav.map("studentFeedbackGraphs") should be(Seq())

@@ -1,11 +1,13 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
+import uk.ac.warwick.tabula.coursework.helpers.MarkerFeedbackCollecting
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineMarkerFeedbackFormCommand, OnlineMarkerFeedbackCommand, OnlineFeedbackFormCommand, OnlineFeedbackCommand}
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupService}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.CurrentUser
 import javax.validation.Valid
@@ -16,7 +18,7 @@ import uk.ac.warwick.userlookup.User
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/online"))
-class OnlineFeedbackController extends CourseworkController {
+class OnlineFeedbackController extends CourseworkController with MarkerFeedbackCollecting with AutowiringUserLookupComponent {
 
 	@ModelAttribute
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
@@ -28,22 +30,30 @@ class OnlineFeedbackController extends CourseworkController {
 		val feedbackGraphs = command.apply()
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
+		val markerFeedbackCollections = getMarkerFeedbackCollections(assignment, module, user, userLookup)
+
 		Mav("admin/assignments/feedback/online_framework",
 			"showMarkingCompleted" -> false,
 			"showGenericFeedback" -> true,
 			"assignment" -> assignment,
 			"command" -> command,
+			"inProgressFeedback" -> markerFeedbackCollections.inProgressFeedback,
+			"completedFeedback" -> markerFeedbackCollections.completedFeedback,
+			"rejectedFeedback" -> markerFeedbackCollections.rejectedFeedback,
 			"studentFeedbackGraphs" -> feedbackGraphs,
 			"onlineMarkingUrls" -> feedbackGraphs.map{ graph =>
 				graph.student.getUserId -> Routes.admin.assignment.onlineFeedback(assignment)
 			}.toMap
 		).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Online marking for ${assignment.name}"))
 	}
+
+
+
 }
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/online"))
-class OnlineMarkerFeedbackController extends CourseworkController {
+class OnlineMarkerFeedbackController extends CourseworkController with MarkerFeedbackCollecting with AutowiringUserLookupComponent {
 
 	@ModelAttribute
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
@@ -55,6 +65,8 @@ class OnlineMarkerFeedbackController extends CourseworkController {
 		val feedbackGraphs = command.apply()
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
+		val markerFeedbackCollections = getMarkerFeedbackCollections(assignment, module, user, userLookup)
+
 		// will need to take into account Seen Second Marking also
 		val showMarkingCompleted =
 			assignment.markingWorkflow.markingMethod != ModeratedMarking || assignment.isFirstMarker(command.marker)
@@ -65,6 +77,9 @@ class OnlineMarkerFeedbackController extends CourseworkController {
 			"assignment" -> assignment,
 			"command" -> command,
 			"studentFeedbackGraphs" -> feedbackGraphs,
+			"inProgressFeedback" -> markerFeedbackCollections.inProgressFeedback,
+			"completedFeedback" -> markerFeedbackCollections.completedFeedback,
+			"rejectedFeedback" -> markerFeedbackCollections.rejectedFeedback,
 			"onlineMarkingUrls" -> feedbackGraphs.map{ graph =>
 				graph.student.getUserId -> assignment.markingWorkflow.onlineMarkingUrl(assignment, command.marker, graph.student.getUserId)
 			}.toMap

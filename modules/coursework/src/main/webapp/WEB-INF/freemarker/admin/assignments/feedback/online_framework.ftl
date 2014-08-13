@@ -13,46 +13,49 @@
 	</#if>
 </#function>
 
-<#macro row graph>
-	<#assign u = graph.student />
-	<tr class="itemContainer" data-contentid="${markingId(u)}" data-markingurl="${onlineMarkingUrls[u.userId]}">
-		<#if showMarkingCompleted>
-			<td class="check-col">
-				<input type="checkbox" class="collection-checkbox" name="students" value="${markingId(u)}">
-			</td>
+<#macro row items>
+	<#list items as item>
+		<#assign student = item.student />
+		<#if (item.feedbacks?size > 0)>
+			<#local thisFeedback = item.feedbacks?last />
+
+			<tr class="itemContainer" data-contentid="${markingId(student)}" data-markingurl="${onlineMarkingUrls[student.userId]}">
+				<#if showMarkingCompleted>
+					<td class="check-col">
+						<input type="checkbox" class="collection-checkbox" name="students" value="${markingId(student)}">
+					</td>
+				</#if>
+				<#if department.showStudentName>
+					<td class="student-col toggle-cell"><h6 class="toggle-icon">${student.firstName}</h6></td>
+					<td class="student-col toggle-cell"><h6>${student.lastName}&nbsp;<@pl.profile_link student.warwickId! /></h6></td>
+				<#else>
+					<td class="student-col toggle-cell"><h6 class="toggle-icon">${student.warwickId!}</h6></td>
+				</#if>
+				<td class="status-col toggle-cell content-cell">
+					<dl style="margin: 0; border-bottom: 0;">
+						<dt>
+							<#if thisFeedback.state.toString == "ReleasedForMarking">
+								<div class="label label-warning">Ready for marking</div>
+							<#elseif thisFeedback.state.toString == "InProgress">
+								<div class="label label-info">In Progress</div>
+							<#elseif thisFeedback.state.toString == "MarkingCompleted">
+								<div class="label label-success">Marking completed</div>
+							<#elseif thisFeedback.state.toString == "Rejected">
+								<div class="label label-important">Rejected</div>
+							</#if>
+
+
+						</dt>
+						<dd style="display: none;" class="table-content-container" data-contentid="${markingId(student)}">
+							<div id="content-${markingId(student)}" class="content-container" data-contentid="${markingId(student)}">
+								<p>No data is currently available.</p>
+							</div>
+						</dd>
+					</dl>
+				</td>
+			</tr>
 		</#if>
-		<#if department.showStudentName>
-			<td class="student-col toggle-cell"><h6 class="toggle-icon">${u.firstName}</h6></td>
-			<td class="student-col toggle-cell"><h6>${u.lastName}&nbsp;<@pl.profile_link u.warwickId! /></h6></td>
-		<#else>
-			<td class="student-col toggle-cell"><h6 class="toggle-icon">${u.warwickId!}</h6></td>
-		</#if>
-		<td class="status-col toggle-cell content-cell">
-			<dl style="margin: 0; border-bottom: 0;">
-				<dt>
-					<#if graph.hasSubmission>
-						<div class="label">Submitted</div>
-					<#else>
-						<div class="label label-warning">No submission</div>
-					</#if>
-					<#if graph.hasPublishedFeedback>
-						<div class="label label-success">Published</div>
-					<#elseif graph.hasCompletedFeedback>
-						<div class="label label-success">Marking completed</div>
-					<#elseif graph.hasFeedback>
-						<div class="label label-warning marked">Marked</div>
-					<#elseif graph.hasRejectedFeedback>
-						<div class="label label-important">Rejected</div>
-					</#if>
-				</dt>
-				<dd style="display: none;" class="table-content-container" data-contentid="${markingId(u)}">
-					<div id="content-${markingId(u)}" class="content-container" data-contentid="${markingId(u)}">
-						<p>No data is currently available.</p>
-					</div>
-				</dd>
-			</dl>
-		</td>
-	</tr>
+	</#list>
 </#macro>
 
 <#escape x as x?html>
@@ -109,9 +112,9 @@
 
 		<#if feedbackGraphs?size gt 0>
 			<tbody>
-				<#list feedbackGraphs as graph>
-					<@row graph />
-				</#list>
+					<@row inProgressFeedback />
+					<@row completedFeedback />
+					<@row rejectedFeedback />
 			</tbody>
 		</#if>
 	</table>
