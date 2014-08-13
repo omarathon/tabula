@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineMarkerFeedbackFormCommand, OnlineMarkerFeedbackCommand, OnlineFeedbackFormCommand, OnlineFeedbackCommand}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupService}
+import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.CurrentUser
 import javax.validation.Valid

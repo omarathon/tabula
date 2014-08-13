@@ -6,10 +6,10 @@ import uk.ac.warwick.tabula.data.model.{MarkingState, Module, Assignment}
 import uk.ac.warwick.tabula.services.UserLookupService
 
 case class MarkerFeedbackCollections(
-																			inProgressFeedback: Seq[MarkerFeedbackItem],
-																			completedFeedback: Seq[MarkerFeedbackItem],
-																			rejectedFeedback: Seq[MarkerFeedbackItem]
-																			)
+	inProgressFeedback: Seq[MarkerFeedbackItem],
+	completedFeedback: Seq[MarkerFeedbackItem],
+	rejectedFeedback: Seq[MarkerFeedbackItem]
+)
 
 trait MarkerFeedbackCollecting  {
 	def getMarkerFeedbackCollections(assignment: Assignment, module: Module, user: CurrentUser, userLookup: UserLookupService) = {
