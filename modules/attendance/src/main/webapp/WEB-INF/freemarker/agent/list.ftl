@@ -59,9 +59,9 @@
 						${groupedPoint.templatePoint.name}
 						(<a class="use-tooltip" data-html="true" title="
 							<@fmt.wholeWeekDateFormat
-								  groupedPoint.templatePoint.startWeek
-								  groupedPoint.templatePoint.endWeek
-								  groupedPoint.templatePoint.scheme.academicYear
+								groupedPoint.templatePoint.startWeek
+								groupedPoint.templatePoint.endWeek
+								groupedPoint.templatePoint.scheme.academicYear
 							  />
 						"><@fmt.monitoringPointWeeksFormat
 							groupedPoint.templatePoint.startWeek
