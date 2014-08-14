@@ -21,19 +21,19 @@
 		<td class="unrecorded">
 			<a href="<@routes.agentStudent relationshipType academicYear.startYear?c result.student />">
 				<span class="badge badge-<#if (result.checkpointTotal.unrecorded > 2)>important<#elseif (result.checkpointTotal.unrecorded > 0)>warning<#else>success</#if>">
-			${result.checkpointTotal.unrecorded}
+					${result.checkpointTotal.unrecorded}
 				</span>
 			</a>
 		</td>
 		<td class="missed">
 			<a href="<@routes.agentStudent relationshipType academicYear.startYear?c result.student />">
 				<span class="badge badge-<#if (result.checkpointTotal.unauthorised > 2)>important<#elseif (result.checkpointTotal.unauthorised > 0)>warning<#else>success</#if>">
-				${result.checkpointTotal.unauthorised}
+					${result.checkpointTotal.unauthorised}
 				</span>
 			</a>
 		</td>
 		<td class="record">
-				<#assign record_url><@routes.agentRecord relationshipType academicYear.startYear?c result.student returnTo/></#assign>
+			<#assign record_url><@routes.agentRecord relationshipType academicYear.startYear?c result.student returnTo/></#assign>
 				<@fmt.permission_button
 				permission='MonitoringPoints.Record'
 				scope=result.student
@@ -59,9 +59,9 @@
 						${groupedPoint.templatePoint.name}
 						(<a class="use-tooltip" data-html="true" title="
 							<@fmt.wholeWeekDateFormat
-							  groupedPoint.templatePoint.startWeek
-							  groupedPoint.templatePoint.endWeek
-							  groupedPoint.templatePoint.scheme.academicYear
+								  groupedPoint.templatePoint.startWeek
+								  groupedPoint.templatePoint.endWeek
+								  groupedPoint.templatePoint.scheme.academicYear
 							  />
 						"><@fmt.monitoringPointWeeksFormat
 							groupedPoint.templatePoint.startWeek
