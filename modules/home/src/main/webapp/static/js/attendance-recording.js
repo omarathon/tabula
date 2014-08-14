@@ -33,6 +33,26 @@ exports.createButtonGroup = function(id){
     $this.hide();
 };
 
+exports.wireButtons = function(id) {
+	var $this = $(id);
+
+	$this.find('.use-popover')
+		.on('shown', function(e) {
+			var $po = $(e.target).popover().data('popover').tip();
+			$po.find('[data-action="remove"]').on('click', function() {
+				var id = $(this).attr('data-student');
+				$('form#recordAttendance')
+					.prepend($('<input />').attr({ 'type': 'hidden', 'name': 'removeAdditionalStudent', 'value': id }))
+					.prepend($('<input />').attr({ 'type': 'hidden', 'name': 'action', 'value': 'refresh' }))
+					.submit();
+			});
+		})
+		.tabulaPopover({
+			trigger: 'click',
+			container: '#container'
+		});
+};
+
 var setArgOnUrl = function(url, argName, argValue){
 	if(url.indexOf('?') === 0) {
 		return url + '?' + argName + '=' + argValue;
@@ -119,7 +139,7 @@ $(function(){
 	// SCRIPTS FOR RECORDING MONITORING POINTS
 
 	$('.recordCheckpointForm').find('.fix-header')
-        .find('div.pull-right').show()
+		.find('div.pull-right').show()
         .end().each(function(){
 		$(this).find('.btn-group button').each(function(i){
 			$(this).on('click', function(){
@@ -177,6 +197,125 @@ $(function(){
             });
         }
     }).end().show();
+
+	function flattenMemberData(data) {
+		var members = [];
+		$.each(data, function(i, member) {
+			var item = member.name + "|" + member.id + "|" + member.userId + "|" + member.description;
+			members.push(item);
+		});
+
+		return members;
+	}
+
+	// Lookup for additional people to add
+	$('.recordCheckpointForm').find('.fix-header')
+		.find('div.pull-left').show()
+		.end().each(function() {
+			$(this).find('.profile-search').each(function() {
+				var $search = $(this);
+				var searchUrl = $search.data('target');
+				var formUrl = $search.data('form');
+				var $modalElement = $($search.data('modal'));
+
+				var $input = $search.find('input[type="text"]').first();
+				var $target = $search.find('input[type="hidden"]').first();
+
+				$search.on('tabula:selected', function(evt, name, universityId, userId, description) {
+					$modalElement.html('<div class="modal-header"><h3>Loading&hellip;</h3></div>');
+					$modalElement.modal({ remote: null });
+					$modalElement.load(formUrl + '&student=' + universityId);
+
+					$modalElement
+						.on('shown', function() {
+							var $eventInput = $modalElement.find('input[name="replacedEvent"]');
+							var $weekInput = $modalElement.find('input[name="replacedWeek"]');
+							var $replacementInput = $modalElement.find('select#replacementEventAndWeek');
+
+							$replacementInput.on('change', function() {
+								var $opt = $(this).find(':selected');
+								$eventInput.val($opt.data('event'));
+								$weekInput.val($opt.data('week'));
+							});
+
+							var onSubmit = function(e) {
+								e.preventDefault();
+								e.stopPropagation();
+
+								var $form = $('.recordCheckpointForm form');
+
+								$form.prepend($target.clone()).prepend(
+									$('<input />').attr({
+										'type': 'hidden',
+										'name': 'action',
+										'value': 'refresh'
+									})
+								).prepend($eventInput).prepend($weekInput);
+
+								$form.submit();
+
+								return false;
+							};
+
+							$modalElement.find('form').on('submit', onSubmit);
+							$modalElement.find('[type="submit"]').on('click', onSubmit);
+						})
+						.on('hidden', function() {
+							// There was no modal-body when we first started, so revert back to
+							// this situation to allow the init code to work next time.
+							$modalElement.html("");
+							$modalElement.removeData('modal');
+						});
+				});
+
+				var xhr = null;
+				$input.prop('autocomplete','off').each(function() {
+					var $spinner = $('<div />').addClass('spinner-container').addClass('pull-right').attr('style', 'position: relative; top: 15px; left: 15px;');
+					$search.before($spinner);
+
+					$(this).typeahead({
+						source: function(query, process) {
+							if (xhr != null) {
+								xhr.abort();
+								xhr = null;
+							}
+
+							query = $.trim(query);
+							if (query.length < 3) { process([]); return; }
+
+							// At least one of the search terms must have more than 1 character
+							var terms = query.split(/\s+/g);
+							if ($.grep(terms, function(term) { return term.length > 1; }).length == 0) {
+								process([]); return;
+							}
+
+							$spinner.spin('small');
+							xhr = $.get(searchUrl, { query : query }, function(data) {
+								$spinner.spin(false);
+
+								var members = flattenMemberData(data);
+								process(members);
+							}).error(function(jqXHR, textStatus, errorThrown) { if (textStatus != "abort") $spinner.spin(false); });
+						},
+
+						matcher: function(item) { return true; },
+						sorter: function(items) { return items; }, // use 'as-returned' sort
+						highlighter: function(item) {
+							var member = item.split("|");
+							return '<img src="/profiles/view/photo/' + member[1] + '.jpg?size=tinythumbnail" class="photo pull-right"><h3 class="name">' + member[0] + '</h3><div class="description">' + member[3] + '</div>';
+						},
+
+						updater: function(memberString) {
+							var member = memberString.split("|");
+							$target.val(member[1]);
+							$search.trigger('tabula:selected', member);
+							return member[0];
+						},
+						minLength:3
+					});
+				});
+			});
+		});
 
 	// END SCRIPTS FOR RECORDING MONITORING POINTS
 });

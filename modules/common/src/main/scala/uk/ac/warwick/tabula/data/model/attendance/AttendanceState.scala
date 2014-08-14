@@ -10,16 +10,18 @@ object AttendanceState {
 	case object Attended extends AttendanceState("attended", "Attended")
 	case object MissedAuthorised extends AttendanceState("authorised", "Missed (authorised)")
 	case object MissedUnauthorised extends AttendanceState("unauthorised", "Missed (unauthorised)")
+	case object NotRecorded extends AttendanceState("not-recorded", "Not recorded") // Equivalent to null
 
 	def fromCode(code: String) = code match {
 	  	case Attended.dbValue => Attended
 	  	case MissedAuthorised.dbValue => MissedAuthorised
 	  	case MissedUnauthorised.dbValue => MissedUnauthorised
+			case NotRecorded.dbValue => NotRecorded
 	  	case null => null
 	  	case _ => throw new IllegalArgumentException()
 	}
 
-	val values: Seq[AttendanceState] = Seq(MissedUnauthorised, MissedAuthorised, Attended)
+	val values: Seq[AttendanceState] = Seq(MissedUnauthorised, MissedAuthorised, Attended, NotRecorded)
 }
 
 class AttendanceStateUserType extends AbstractBasicUserType[AttendanceState, String] {

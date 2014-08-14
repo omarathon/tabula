@@ -37,6 +37,7 @@ trait SmallGroupService {
 	def saveOrUpdate(note: SmallGroupEventAttendanceNote)
 	def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet)
 	def saveOrUpdate(smallGroup: DepartmentSmallGroup)
+	def saveOrUpdate(attendance: SmallGroupEventAttendance)
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent]
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup]
 	def removeFromSmallGroups(moduleRegistration: ModuleRegistration)
@@ -88,6 +89,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def saveOrUpdate(note: SmallGroupEventAttendanceNote) = smallGroupDao.saveOrUpdate(note)
 	def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet) = smallGroupDao.saveOrUpdate(smallGroupSet)
 	def saveOrUpdate(smallGroup: DepartmentSmallGroup) = smallGroupDao.saveOrUpdate(smallGroup)
+	def saveOrUpdate(attendance: SmallGroupEventAttendance) = smallGroupDao.saveOrUpdate(attendance)
 
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = eventTutorsHelper.findBy(user)
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = findSmallGroupEventsByTutor(user).groupBy(_.group).keys.toSeq
@@ -129,7 +131,13 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			occurrence <- smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber)
 			attendance <- smallGroupDao.getAttendance(studentId, occurrence)
 		} {
-			smallGroupDao.deleteAttendance(attendance)
+			if (attendance.replacesAttendance == null) {
+				occurrence.attendance.remove(attendance)
+				smallGroupDao.deleteAttendance(attendance)
+			} else {
+				attendance.state = AttendanceState.NotRecorded // don't unlink
+				smallGroupDao.saveOrUpdate(attendance)
+			}
 		}
 	}
 	
@@ -148,8 +156,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			newAttendance.universityId = studentId
 			newAttendance
 		})
-		
+
 		attendance.state = state
+
 		attendance.updatedBy = user.userId
 		attendance.updatedDate = DateTime.now
 		smallGroupDao.saveOrUpdate(attendance)
