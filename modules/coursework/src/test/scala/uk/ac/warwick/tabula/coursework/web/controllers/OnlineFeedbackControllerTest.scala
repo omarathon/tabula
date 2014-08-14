@@ -25,11 +25,11 @@ class OnlineFeedbackControllerTest extends TestBase {
 
 	}
 
-	@Test def controllerShowsList() {
-		val userLookup = new MockUserLookup
+	@Test def controllerShowsList() = withUser("cusdx") {
 
 		new Fixture {
 			val controller = new OnlineFeedbackController
+			controller.userLookup = new MockUserLookup
 			val mav = controller.showTable(command, null)
 			mav.map("assignment") should be(assignment)
 			mav.map("command") should be(command)
