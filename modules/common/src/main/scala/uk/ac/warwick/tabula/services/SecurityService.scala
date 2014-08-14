@@ -71,7 +71,7 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 		}) map { case (_, target) => target }
 
 		val matchesScope = matchingPermissions.exists {
-			case Some(permissionScope) => if (scopeMatches(permissionScope, scope)) true else false
+			case Some(permissionScope) => scopeMatches(permissionScope, scope)
 			case None =>
 				if (scope != null) true // Global permission
 				else false
