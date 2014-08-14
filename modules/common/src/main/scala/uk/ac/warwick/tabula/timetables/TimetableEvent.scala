@@ -30,7 +30,7 @@ object TimetableEvent {
 			day = sge.day,
 			startTime = sge.startTime,
 			endTime = sge.endTime,
-			location = Option(sge.location),
+			location = Option(sge.location).map { _.name },
 			context = Some(sge.group.groupSet.module.code.toUpperCase),
 			staffUniversityIds = sge.tutors.knownType.members,
 			year = sge.group.groupSet.academicYear)

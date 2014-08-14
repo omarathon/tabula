@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import uk.ac.warwick.tabula.{FieldAccessByReflection, PersistenceTestBase, AppContextTestBase, AcademicYear}
+import uk.ac.warwick.tabula.{FieldAccessByReflection, PersistenceTestBase, AcademicYear}
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import org.joda.time.LocalTime
 import scala.collection.JavaConverters._
@@ -69,7 +68,7 @@ class SmallGroupPersistenceTest extends PersistenceTestBase with FieldAccessByRe
 			
 			val event1 = new SmallGroupEvent(group1)
 			event1.title = "Event 1"
-			event1.location = "A0.01"
+			event1.location = NamedLocation("A0.01")
 			event1.weekRanges = Seq(WeekRange(1, 3), WeekRange(6), WeekRange(16, 24)) // Weeks 1, 2, 3, 6, 16, 17, 18, 19, 20, 21, 22, 23, 24
 			event1.day = DayOfWeek.Tuesday
 			event1.startTime = new LocalTime(15, 0) // 3pm
@@ -77,7 +76,7 @@ class SmallGroupPersistenceTest extends PersistenceTestBase with FieldAccessByRe
 			
 			val event2 = new SmallGroupEvent(group1)
 			event2.title = "Event 2"
-			event2.location = "A0.01"
+			event2.location = MapLocation("A0.01", "12345")
 			event2.weekRanges = Seq(WeekRange(1, 3), WeekRange(6), WeekRange(16, 24)) // Weeks 1, 2, 3, 6, 16, 17, 18, 19, 20, 21, 22, 23, 24
 			event2.day = DayOfWeek.Thursday
 			event2.startTime = new LocalTime(13, 0) // 1pm

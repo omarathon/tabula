@@ -148,6 +148,21 @@ class SmallGroupSet
 	
 	@Column(name="collect_attendance")
 	var collectAttendance: Boolean = true
+
+	// Default properties for creating/applying to SGEs
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.WeekRangeListUserType")
+	@Column(name = "default_weekranges")
+	var defaultWeekRanges: Seq[WeekRange] = Nil
+
+	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
+	@JoinColumn(name = "default_tutorsgroup_id")
+	private var _defaultTutors: UserGroup = UserGroup.ofUsercodes
+	def defaultTutors: UnspecifiedTypeUserGroup = _defaultTutors // No need to wrap this in a cache
+	def defaultTutors_=(group: UserGroup) { _defaultTutors = group }
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.LocationUserType")
+	@Column(name = "default_location")
+	var defaultLocation: Location = _
 	
 	def showAttendanceReports = !archived && !deleted && collectAttendance
 
@@ -229,6 +244,9 @@ class SmallGroupSet
     newSet.releasedToStudents = releasedToStudents
     newSet.releasedToTutors = releasedToTutors
 		newSet.openForSignups = openForSignups
+		newSet.defaultWeekRanges = defaultWeekRanges
+		if (_defaultTutors != null) newSet._defaultTutors = _defaultTutors.duplicate()
+		newSet.defaultLocation = defaultLocation
 		newSet.linkedDepartmentSmallGroupSet = linkedDepartmentSmallGroupSet
 		newSet.settings = Map() ++ settings
     newSet

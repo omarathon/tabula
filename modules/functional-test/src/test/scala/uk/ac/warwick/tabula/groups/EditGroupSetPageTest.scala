@@ -65,11 +65,11 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 			val editGroups = groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditGroups
 
 		Then("I should see the options to set a default maximum group size")
-			checkbox("defaultMaxGroupSizeEnabled") should not be (null)
+			radioButton("defaultMaxGroupSizeEnabled") should not be (null)
 			find("defaultMaxGroupSizeeee") should not be (null)
 
-		When("I check the checkbox, select a default value, and click Save")
-				checkbox("defaultMaxGroupSizeEnabled").select()
+		When("I set group size to be limited, select a default value, and click Save")
+				radioButtonGroup("defaultMaxGroupSizeEnabled").value = "true"
 				id("defaultMaxGroupSize").webElement.clear()
 				id("defaultMaxGroupSize").webElement.sendKeys("12")
 				editGroups.submitAndExit()
@@ -80,15 +80,15 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 		When("I navigate to the edit groups page again")
 		  groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditGroups
 
-		Then("The checkbox should still be checked")
-			checkbox("defaultMaxGroupSizeEnabled").isSelected should be(true)
+		Then("Group size should still be limited")
+			radioButtonGroup("defaultMaxGroupSizeEnabled").value should be("true")
 
 		And("The default value should be enabled and should have been saved")
 			id("defaultMaxGroupSize").webElement.isEnabled should be(true)
 			id("defaultMaxGroupSize").webElement.getAttribute("value") should be ("12")
 
-		When("I uncheck the checkbox and click Save")
-			checkbox("defaultMaxGroupSizeEnabled").clear()
+		When("I set group size to be unlimited")
+			radioButtonGroup("defaultMaxGroupSizeEnabled").value = "false"
 			editGroups.submitAndExit()
 
 		Then("The page is the groupset summary page")
@@ -97,8 +97,8 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 		When("I navigate to the edit groups page again")
 			groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditGroups
 
-		Then("The checkbox should be unchecked")
-			checkbox("defaultMaxGroupSizeEnabled").isSelected should be(false)
+		Then("Group size should be unlimited")
+		radioButtonGroup("defaultMaxGroupSizeEnabled").value should be("false")
 
 		And("The default value should remain the same but the field disabled")
 			id("defaultMaxGroupSize").webElement.isEnabled should be(false)

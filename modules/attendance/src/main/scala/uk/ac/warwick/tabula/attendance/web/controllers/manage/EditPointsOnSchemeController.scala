@@ -14,8 +14,7 @@ class EditPointsOnSchemeController extends AbstractManageSchemePointsController 
 	override protected def render(
 		findCommandResult: FindPointsResult,
 		scheme: AttendanceMonitoringScheme,
-		points:
-		JavaImports.JInteger,
+		points: JavaImports.JInteger,
 		actionCompleted: String
 	) = {
 		Mav("manage/editschemepoints",
@@ -27,8 +26,8 @@ class EditPointsOnSchemeController extends AbstractManageSchemePointsController 
 			"actionCompleted" -> actionCompleted
 		).crumbs(
 			Breadcrumbs.Manage.Home,
-			Breadcrumbs.Manage.Department(scheme.department),
-			Breadcrumbs.Manage.DepartmentForYear(scheme.department, scheme.academicYear)
+			Breadcrumbs.Manage.Department(mandatory(scheme).department),
+			Breadcrumbs.Manage.DepartmentForYear(mandatory(scheme).department, mandatory(scheme).academicYear)
 		)
 	}
 }

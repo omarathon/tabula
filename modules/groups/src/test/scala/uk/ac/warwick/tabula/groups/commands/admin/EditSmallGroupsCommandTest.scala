@@ -75,6 +75,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 		command.groupNames.add("Group B")
 		command.maxGroupSizes.add(15)
 		command.maxGroupSizes.add(15)
+		command.defaultMaxGroupSizeEnabled = true
 
 		val groups = command.applyInternal()
 		set.groups.asScala should be (groups)

@@ -52,7 +52,7 @@
 									<#list groupedPointMap[term] as pointPair>
 										<#assign point = pointPair._1() />
 										<tr class="point">
-											<td class="point" title="${point.name} (<@fmt.monitoringPointWeeksFormat point.startWeek point.endWeek point.scheme.academicYear department />)">
+											<td class="point" title="${point.name} (<@fmt.monitoringPointWeeksFormat point.startWeek point.endWeek point.scheme.academicYear point.scheme.department />)">
 												${point.name}
 												(<a class="use-tooltip" data-html="true" title="
 													<@fmt.wholeWeekDateFormat
@@ -64,14 +64,14 @@
 													point.startWeek
 													point.endWeek
 													point.scheme.academicYear
-													department
+													point.scheme.department
 												/></a>)
 											</td>
 											<td class="state">
 												<#if pointPair._2()??>
-													<@attendance_macros.checkpointLabel department=department checkpoint=pointPair._2() />
+													<@attendance_macros.checkpointLabel department=point.scheme.department checkpoint=pointPair._2() />
 												<#else>
-													<@attendance_macros.checkpointLabel department=department point=pointPair._1() student=student />
+													<@attendance_macros.checkpointLabel department=point.scheme.department point=pointPair._1() student=student />
 												</#if>
 											</td>
 										</tr>
@@ -98,9 +98,9 @@
 										</td>
 										<td class="state">
 											<#if pointPair._2()??>
-												<@attendance_macros.checkpointLabel department=department checkpoint=pointPair._2() />
+												<@attendance_macros.checkpointLabel department=point.scheme.department checkpoint=pointPair._2() />
 											<#else>
-												<@attendance_macros.checkpointLabel department=department point=pointPair._1() student=student />
+												<@attendance_macros.checkpointLabel department=point.scheme.department point=pointPair._1() student=student />
 											</#if>
 										</td>
 									</tr>

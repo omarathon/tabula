@@ -6,6 +6,7 @@
 	<@f.form id="newEvents" method="POST" commandName="command" class="form-horizontal">
 		<@components.set_wizard true 'events' smallGroupSet.linked />
 
+		<#assign is_edit = false />
 		<#include "_editEvents.ftl" />
 
 		<div class="submit-buttons">

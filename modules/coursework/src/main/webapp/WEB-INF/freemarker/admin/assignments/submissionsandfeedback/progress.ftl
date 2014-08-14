@@ -237,6 +237,18 @@
 									</#compress></@stage>
 								</#if>
 
+								<#if student.stages?keys?seq_contains('Moderation')>
+									<#if submission?? && submission.assignment??>
+										<#if submission.secondMarker?has_content>
+											<#local secondMarker><span data-profile="${submission.secondMarker.warwickId!}">${submission.secondMarker.fullName}</span></#local>
+										</#if>
+									</#if>
+
+									<@stage student.stages['Moderation']> <#compress>
+										<#if secondMarker?default("")?length gt 0>(<#noescape>${secondMarker}</#noescape>)</#if>
+									</#compress></@stage>
+								</#if>
+
 								<#if student.stages?keys?seq_contains('FinaliseSeenSecondMarking')>
 									<#if submission?? && submission.assignment??>
 										<#if submission.firstMarker?has_content>

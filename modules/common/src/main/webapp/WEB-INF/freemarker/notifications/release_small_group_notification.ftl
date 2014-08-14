@@ -7,7 +7,7 @@ ${group.groupSet.module.code?upper_case} ${group.groupSet.name} ${group.groupSet
 <#list group.events as event>
 	<@fmt.p number=event.tutors.users?size singular="Tutor" shownumber=false/>:<#list event.tutors.users as tutor> ${tutor.fullName}</#list>
 	<#if !event.unscheduled>
-	<@fmt.time time=event.startTime /> ${event.day.name}, ${event.location!}, <@fmt.weekRanges event />
+	<@fmt.time time=event.startTime /> ${event.day.name}, ${(event.location.name)!}, <@fmt.weekRanges event />
 	</#if>
 </#list>
 </#list>

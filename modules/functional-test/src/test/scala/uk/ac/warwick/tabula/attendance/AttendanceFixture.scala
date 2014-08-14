@@ -18,8 +18,11 @@ class AttendanceFixture extends BrowserTest with FeaturesDriver with FixturesDri
 		createRoute(TEST_PG_ROUTE_CODE, TEST_DEPARTMENT_CODE, "PG Route")
 		createCourse(TEST_UNDERGRAD_COURSE_CODE,"Test UG Course")
 		createCourse(TEST_POSTGRAD_COURSE_CODE,"Test PG Course")
-		createStudentMember(P.Student1.usercode,routeCode=TEST_UG_ROUTE_CODE, courseCode=TEST_UNDERGRAD_COURSE_CODE,deptCode = TEST_DEPARTMENT_CODE, yearOfStudy = 1)
+		createStudentMember(P.Student1.usercode,routeCode=TEST_UG_ROUTE_CODE, courseCode=TEST_UNDERGRAD_COURSE_CODE,deptCode = TEST_DEPARTMENT_CODE, yearOfStudy = 1,
+			academicYear = "2013")
 		createStudentMember(P.Student2.usercode,routeCode=TEST_PG_ROUTE_CODE, courseCode=TEST_POSTGRAD_COURSE_CODE,deptCode = TEST_DEPARTMENT_CODE, yearOfStudy = 1)
+		createStudentMember(P.Student3.usercode,routeCode=TEST_UG_ROUTE_CODE, courseCode=TEST_UNDERGRAD_COURSE_CODE,deptCode = TEST_DEPARTMENT_CODE, yearOfStudy = 1,
+			academicYear = "2014")
 		createStaffMember(P.Marker1.usercode, deptCode = TEST_DEPARTMENT_CODE)
 		createMonitoringPointSet(TEST_UG_ROUTE_CODE, 3, "2013", Option(1))
 

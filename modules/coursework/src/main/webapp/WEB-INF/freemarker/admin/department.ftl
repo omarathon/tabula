@@ -42,6 +42,17 @@
 					</li>
 
 					<li<#if !modules?has_content> class="disabled"</#if>>
+						<#assign setup_Url><@routes.setupSitsAssignments department /></#assign>
+						<@fmt.permission_button
+						permission='Assignment.ImportFromExternalSystem'
+						scope=department
+						action_descr='setup assignments from SITS'
+						href=setup_Url>
+							<i class="icon-cloud-download"></i> Create assignments from SITS
+						</@fmt.permission_button>
+					</li>
+
+					<li<#if !modules?has_content> class="disabled"</#if>>
 						<#assign copy_url><@routes.copyDepartmentsAssignments department /></#assign>
 						<@fmt.permission_button
 						permission='Assignment.Create'

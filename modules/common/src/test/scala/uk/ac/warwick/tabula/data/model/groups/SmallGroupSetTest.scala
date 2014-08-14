@@ -31,6 +31,7 @@ class SmallGroupSetTest extends TestBase with Mockito{
     source.format = SmallGroupFormat.Lab
     source.groups  = JArrayList(group)
     source.members = UserGroup.ofUniversityIds.tap(_.addUserId("test user"))
+    source.defaultTutors = (UserGroup.ofUniversityIds.tap(_.addUserId("test tutor")))
 
     source.membershipService = mock[AssignmentMembershipService]
     source.module = new Module
@@ -57,6 +58,8 @@ class SmallGroupSetTest extends TestBase with Mockito{
     clone.groups.asScala.head should be(cloneGroup)
 		clone.members should not be(source.members)
     clone.members.hasSameMembersAs(source.members) should be (true)
+    clone.defaultTutors should not be(source.defaultTutors)
+    clone.defaultTutors.hasSameMembersAs(source.defaultTutors) should be (true)
     clone.module should be (cloneModule)
     clone.name should be(source.name)
     clone.permissionsService should be(source.permissionsService)
@@ -65,6 +68,14 @@ class SmallGroupSetTest extends TestBase with Mockito{
     clone.defaultMaxGroupSize should be (source.defaultMaxGroupSize)
     clone.defaultMaxGroupSizeEnabled should be (source.defaultMaxGroupSizeEnabled)
   }
+
+	@Test
+	def duplicateWithNullDefaultTutors(){
+		val source = new SmallGroupSet
+		source.defaultTutors = null
+		val clone = source.duplicateTo(source.module)
+		clone.defaultTutors.size should be (0)
+	}
 
 	@Test
 	def duplicateCreatesNewSettingsMap(){

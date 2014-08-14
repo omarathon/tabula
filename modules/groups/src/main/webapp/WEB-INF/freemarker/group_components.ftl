@@ -15,8 +15,10 @@
 	<#-- Weeks, day/time, location -->
 	<#if event.title?has_content><span class="eventTitle">${event.title} - </span></#if>
 	<@fmt.weekRanges event />,
-	${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime /><#if event.location?has_content>,</#if>
-	${event.location!"[no location]"}
+	${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime /><#if ((event.location.name)!)?has_content>,</#if>
+	<#if ((event.location.name)!)?has_content>
+		<@fmt.location event.location />
+	</#if>
 </#if>
 </#macro>
 
@@ -49,6 +51,7 @@
 			var $module = jQuery(this);
 			Groups.zebraStripeGroups($module);
 			Groups.wireModalButtons($module);
+			Groups.wireMapLocations($module);
 			AjaxPopup.wireAjaxPopupLinks($module);
 			$module.find('.use-tooltip').tooltip();
 			$module.find('.use-popover').tabulaPopover({
@@ -889,4 +892,66 @@
 			${label}
 		</#if>
 	</#compress></span>
+</#macro>
+
+<#macro week_selector path allTerms smallGroupSet>
+	<#-- TODO hmm this is suck -->
+	<#local f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
+
+	<@form.row path=path>
+		<@form.label>
+			Running in these weeks
+			<@form.label checkbox=true clazz="pull-right">
+				<input type="checkbox" class="show-vacations" value="true">
+				Show vacations
+			</@form.label>
+		</@form.label>
+
+		<@form.field>
+			<table class="table table-striped table-bordered week-selector">
+				<thead>
+					<tr>
+						<#local colspan=0 />
+						<#list allTerms as namedTerm>
+							<#if (namedTerm.weekRange.maxWeek - namedTerm.weekRange.minWeek) gt colspan>
+								<#local colspan=(namedTerm.weekRange.maxWeek - namedTerm.weekRange.minWeek) />
+							</#if>
+						</#list>
+						<th colspan="${colspan + 2}" style="text-align: center;">
+							Weeks
+							<#local helpText>
+								<p>Select the weeks that this small group event will run in by clicking on each week. Click on the name of the term or vacation to select all weeks in that term or vacation.</p>
+							</#local>
+							<a href="#"
+							   class="use-introductory<#if showIntro("sgt-week-selector", "anywhere")> auto</#if>"
+							   data-title="Selecting weeks for a small group event"
+							   data-trigger="click"
+							   data-placement="bottom"
+							   data-html="true"
+							   data-hash="${introHash("sgt-week-selector", "anywhere")}"
+							   data-content="${helpText}"><i class="icon-question-sign icon-fixed-width"></i></a>
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<#list allTerms as namedTerm>
+						<#local is_vacation = !(namedTerm.term.termType?has_content) />
+						<tr<#if is_vacation> class="vacation"</#if>>
+							<th>${namedTerm.name}<#if !is_vacation> term</#if></th>
+							<#list namedTerm.weekRange.minWeek..namedTerm.weekRange.maxWeek as weekNumber>
+								<td
+									class="use-tooltip"
+									title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.department />"
+									data-html="true"
+									data-container="body">
+									<@f.checkbox path=path value="${weekNumber}" />
+									<span class="week-number"><@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.department true /></span>
+								</td>
+							</#list>
+						</tr>
+					</#list>
+				</tbody>
+			</table>
+		</@form.field>
+	</@form.row>
 </#macro>

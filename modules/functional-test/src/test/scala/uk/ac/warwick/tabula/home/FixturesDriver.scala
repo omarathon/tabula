@@ -76,7 +76,8 @@ trait FixturesDriver extends SimpleHttpFetching {
 													routeCode:String="",
 													yearOfStudy:Int=1,
 													courseCode:String="",
-													deptCode:String=""){
+													deptCode:String="",
+													academicYear:String = "2014"){
 		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/studentMember"
 		val req = url(uri).POST << Map(
 			"userId" -> userId,
@@ -84,7 +85,8 @@ trait FixturesDriver extends SimpleHttpFetching {
 		  "yearOfStudy"->yearOfStudy.toString,
 		  "routeCode"->routeCode,
 		  "courseCode"->courseCode,
-		  "deptCode"->deptCode
+		  "deptCode"->deptCode,
+		  "academicYear"->academicYear
 		)
 		http.when(_==200)(req >|)
 	}
@@ -155,6 +157,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 			"studentUniId" -> student.warwickId,
 			"agent"->agent.warwickId,
 		  "relationshipType"->relationshipType)
+
 		http.when(_==200)(req >|)
 	}
 

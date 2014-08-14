@@ -109,7 +109,7 @@
 	<div class="submit-buttons form-actions">
 		<input type="hidden" name="confirm" value="true">
 		<input class="btn btn-primary" type="submit" value="Confirm">
-		<a class="btn" href="<@routes.depthome module=assignment.module />">Cancel</a>
+		<a class="btn" href="<@routes.listmarkersubmissions assignment />">Cancel</a>
 	</div>
 	</@f.form>
 

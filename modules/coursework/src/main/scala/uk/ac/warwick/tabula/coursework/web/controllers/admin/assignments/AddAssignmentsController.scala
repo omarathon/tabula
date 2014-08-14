@@ -88,7 +88,7 @@ class AddAssignmentsController extends CourseworkController {
 	}
 
 	@ModelAttribute def cmd(department: Department, user: CurrentUser) = {
-		new AddAssignmentsCommand(department, user)
+		new AddAssignmentsCommand(mandatory(department), user)
 	}
 
 	// The shared Mav for most of the request mappings

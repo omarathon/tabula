@@ -14,7 +14,7 @@ class SmallGroupEventTest extends TestBase with Mockito{
     source.day = DayOfWeek.Monday
     source.endTime = new LocalTime(13,0,0,0)
     source.group = new SmallGroup
-    source.location = "test"
+    source.location = NamedLocation("test")
     source.permissionsService = mock[PermissionsService]
     source.startTime = new LocalTime(12,0,0,0)
     source.title= "test title"

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
 import scala.collection.immutable.ListMap
 import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
-import uk.ac.warwick.tabula.data.model.MarkingMethod.SeenSecondMarking
+import uk.ac.warwick.tabula.data.model.MarkingMethod.{ModeratedMarking, SeenSecondMarking}
 
 @Service
 class CourseworkWorkflowService {
@@ -31,7 +31,11 @@ class CourseworkWorkflowService {
 				stages = stages ++ Seq(ReleaseForMarking, FirstMarking)
 				
 				if (assignment.markingWorkflow.hasSecondMarker) {
-					stages = stages ++ Seq(SecondMarking)
+					if (assignment.markingWorkflow.markingMethod == ModeratedMarking) {
+						stages = stages ++ Seq(Moderation)
+					} else {
+						stages = stages ++ Seq(SecondMarking)
+					}
 				}
 
 				if (assignment.markingWorkflow.markingMethod == SeenSecondMarking) {
@@ -235,6 +239,34 @@ object WorkflowStages {
 							completed = false
 						)
 				case _ => StageProgress(SecondMarking, started = false, messageCode = "workflow.SecondMarking.notMarked")
+			}
+		}
+		override def preconditions = Seq(Seq(Submission, ReleaseForMarking, FirstMarking))
+	}
+
+	case object Moderation extends WorkflowStage {
+		def actionCode = "workflow.ModeratedMarking.action"
+		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
+			val hasSubmission = coursework.enhancedSubmission.exists(_.submission.isReleasedToSecondMarker)
+			coursework.enhancedFeedback match {
+				case Some(item) if hasSubmission && item.feedback.retrieveSecondMarkerFeedback.state != Rejected =>
+					if (item.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted)
+						StageProgress(
+							Moderation,
+							started = true,
+							messageCode = "workflow.ModeratedMarking.marked",
+							health = Good,
+							completed = true
+						)
+					else
+						StageProgress(
+							Moderation,
+							started = item.feedback.retrieveFirstMarkerFeedback.state == MarkingCompleted,
+							messageCode = "workflow.ModeratedMarking.notMarked",
+							health = Warning,
+							completed = false
+						)
+				case _ => StageProgress(Moderation, started = false, messageCode = "workflow.ModeratedMarking.notMarked")
 			}
 		}
 		override def preconditions = Seq(Seq(Submission, ReleaseForMarking, FirstMarking))

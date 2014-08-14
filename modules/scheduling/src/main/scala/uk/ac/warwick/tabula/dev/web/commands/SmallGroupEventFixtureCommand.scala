@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
 import uk.ac.warwick.tabula.commands.{Appliable, Unaudited, ComposableCommand, CommandInternal}
-import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek, SmallGroupEvent, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.{AutowiringSmallGroupDaoComponent, Daoisms, SmallGroupDaoComponent}
 import collection.JavaConverters._
@@ -32,7 +32,7 @@ class SmallGroupEventFixtureCommand extends CommandInternal[SmallGroupEvent] wit
 			event.startTime = start
 			event.weekRanges = Seq(WeekRange.fromString(weekRange))
 			event.endTime = event.startTime.plusHours(1)
-			event.location = location
+			event.location = NamedLocation(location)
 			event.title = title
 			
 			smallGroupDao.saveOrUpdate(group)
