@@ -30,16 +30,18 @@
 				</a>
 				<ul class="dropdown-menu pull-right">
 
-					<li<#if !modules?has_content> class="disabled"</#if>>
-						<#assign archive_url><@routes.archiveDepartmentsAssignments department /></#assign>
+					<li>
+						<#assign settings_url><@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}</#assign>
 						<@fmt.permission_button
-						permission='Assignment.Archive'
+						permission='Department.ManageDisplaySettings'
 						scope=department
-						action_descr='archive existing assignments'
-						href=archive_url>
-							<i class="icon-folder-close"></i> Archive assignments
+						action_descr='manage department settings'
+						href=settings_url>
+							<i class="icon-list-alt"></i> Department settings
 						</@fmt.permission_button>
 					</li>
+
+					<li class="divider"></li>
 
 					<li<#if !modules?has_content> class="disabled"</#if>>
 						<#assign setup_Url><@routes.setupSitsAssignments department /></#assign>
@@ -63,16 +65,18 @@
 						</@fmt.permission_button>
 					</li>
 
-					<li>
-						<#assign settings_url><@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}</#assign>
+					<li<#if !modules?has_content> class="disabled"</#if>>
+						<#assign archive_url><@routes.archiveDepartmentsAssignments department /></#assign>
 						<@fmt.permission_button
-						permission='Department.ManageDisplaySettings'
+						permission='Assignment.Archive'
 						scope=department
-						action_descr='manage department settings'
-						href=settings_url>
-							<i class="icon-list-alt"></i> Department settings
+						action_descr='archive existing assignments'
+						href=archive_url>
+							<i class="icon-folder-close"></i> Archive assignments
 						</@fmt.permission_button>
 					</li>
+
+					<li class="divider"></li>
 
 					<#if features.extensions>
 						<li>
@@ -80,8 +84,37 @@
 							<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
 								<i class="icon-list-alt"></i> Extension settings
 							</@fmt.permission_button>
-					   </li>
-				   </#if>
+						</li>
+
+						<li>
+							<#assign extensions_url><@routes.manage_extensions department /></#assign>
+							<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
+								<i class="icon-calendar"></i> Manage extensions
+							</@fmt.permission_button>
+						</li>
+
+						<li class="divider"></li>
+
+					</#if>
+
+					<#if features.markingWorkflows>
+						<li>
+							<#assign markingflow_url><@routes.markingworkflowlist department /></#assign>
+							<@fmt.permission_button permission='MarkingWorkflow.Read' scope=department action_descr='manage marking workflows' href=markingflow_url>
+								<i class="icon-check"></i> Marking workflows
+							</@fmt.permission_button>
+						</li>
+						<li class="divider"></li>
+					</#if>
+
+					<#if features.feedbackTemplates>
+						<li>
+							<#assign feedback_url><@routes.feedbacktemplates department /></#assign>
+							<@fmt.permission_button permission='FeedbackTemplate.Create' scope=department action_descr='create feedback template' href=feedback_url>
+								<i class="icon-comment"></i> Feedback templates
+							</@fmt.permission_button>
+						</li>
+					</#if>
 
 					<li<#if !modules?has_content> class="disabled"</#if> id="feedback-report-button">
 						<#assign feedbackrep_url><@routes.feedbackreport department /></#assign>
@@ -103,33 +136,6 @@
 							})(jQuery);
 						</script>
 					</li>
-
-					<#if features.feedbackTemplates>
-						<li>
-							<#assign feedback_url><@routes.feedbacktemplates department /></#assign>
-							<@fmt.permission_button permission='FeedbackTemplate.Create' scope=department action_descr='create feedback template' href=feedback_url>
-								<i class="icon-comment"></i> Feedback templates
-							</@fmt.permission_button>
-						</li>
-					</#if>
-
-					<#if features.extensions>
-						<li>
-							<#assign extensions_url><@routes.manage_extensions department /></#assign>
-							<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
-								<i class="icon-calendar"></i> Manage extensions
-							</@fmt.permission_button>
-						</li>
-					</#if>
-
-					<#if features.markingWorkflows>
-						<li>
-							<#assign markingflow_url><@routes.markingworkflowlist department /></#assign>
-							<@fmt.permission_button permission='MarkingWorkflow.Read' scope=department action_descr='manage marking workflows' href=markingflow_url>
-								<i class="icon-check"></i> Marking workflows
-							</@fmt.permission_button>
-						</li>
-					</#if>
 
 				</ul>
 			</div>
