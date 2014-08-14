@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.attendance.commands.agent.{AgentStudentsCommandResul
 import uk.ac.warwick.tabula.attendance.web.controllers.{HasMonthNames, AttendanceController}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.permissions.Permissions
 
 @Controller
 @RequestMapping(Array("/agent/{relationshipType}/{academicYear}"))
@@ -27,6 +28,7 @@ class AgentStudentsController extends AttendanceController with HasMonthNames {
 			"studentAttendance" -> result.studentAttendance,
 			"visiblePeriods" -> result.studentAttendance.results.flatMap(_.groupedPointCheckpointPairs.map(_._1)).distinct,
 			"department" -> currentMember.homeDepartment,
+			"canRecordAny" -> securityService.canForAny(user, Permissions.MonitoringPoints.Record, result.studentAttendance.results.map(_.student)),
 			"groupedPoints" -> result.groupedPoints
 		).crumbs(
 			Breadcrumbs.Agent.Relationship(relationshipType)

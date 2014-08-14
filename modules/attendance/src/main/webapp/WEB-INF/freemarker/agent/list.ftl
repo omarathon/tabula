@@ -1,51 +1,51 @@
 <#escape x as x?html>
 
-<#import "../attendance_macros.ftl" as attendance_macros />
-<#import "../attendance_variables.ftl" as attendance_variables />
+	<#import "../attendance_macros.ftl" as attendance_macros />
+	<#import "../attendance_variables.ftl" as attendance_variables />
 
 <h1>My ${relationshipType.studentRole}s</h1>
 
-<#if studentAttendance.totalResults == 0>
+	<#if studentAttendance.totalResults == 0>
 	<p><em>No ${relationshipType.studentRole}s were found.</em></p>
-<#else>
-	<#assign returnTo><@routes.agentHomeForYear relationshipType academicYear.startYear?c /></#assign>
+	<#else>
+		<#assign returnTo><@routes.agentHomeForYear relationshipType academicYear.startYear?c /></#assign>
 
-	<@attendance_macros.scrollablePointsTable
+		<@attendance_macros.scrollablePointsTable
 		command=command
 		filterResult=studentAttendance
 		visiblePeriods=visiblePeriods
 		monthNames=monthNames
 		department=department
 		doCommandSorting=false
-	; result>
+		; result>
 		<td class="unrecorded">
 			<a href="<@routes.agentStudent relationshipType academicYear.startYear?c result.student />">
 				<span class="badge badge-<#if (result.checkpointTotal.unrecorded > 2)>important<#elseif (result.checkpointTotal.unrecorded > 0)>warning<#else>success</#if>">
-					${result.checkpointTotal.unrecorded}
+				${result.checkpointTotal.unrecorded}
 				</span>
 			</a>
 		</td>
 		<td class="missed">
 			<a href="<@routes.agentStudent relationshipType academicYear.startYear?c result.student />">
 				<span class="badge badge-<#if (result.checkpointTotal.unauthorised > 2)>important<#elseif (result.checkpointTotal.unauthorised > 0)>warning<#else>success</#if>">
-					${result.checkpointTotal.unauthorised}
+				${result.checkpointTotal.unauthorised}
 				</span>
 			</a>
 		</td>
 		<td class="record">
 			<#assign record_url><@routes.agentRecord relationshipType academicYear.startYear?c result.student returnTo/></#assign>
-				<@fmt.permission_button
-				permission='MonitoringPoints.Record'
-				scope=result.student
-				action_descr='record monitoring points'
-				classes='btn btn-primary btn-mini'
-				href=record_url
-				tooltip='Record'
+			<@fmt.permission_button
+			permission='MonitoringPoints.Record'
+			scope=result.student
+			action_descr='record monitoring points'
+			classes='btn btn-primary btn-mini'
+			href=record_url
+			tooltip='Record'
 			>
 				<i class="icon-pencil icon-fixed-width late"></i>
 			</@fmt.permission_button>
 		</td>
-	</@attendance_macros.scrollablePointsTable>
+		</@attendance_macros.scrollablePointsTable>
 
 	<div class="monitoring-points">
 		<#list attendance_variables.monitoringPointTermNames as term>
@@ -54,29 +54,20 @@
 					<div class="span12">
 						<div class="pull-right">
 							<#assign record_url><@routes.agentRecordPoints relationshipType academicYear.startYear?c groupedPoint.templatePoint returnTo/></#assign>
-							<@fmt.permission_button
-							permission='MonitoringPoints.Record'
-							scope=(groupedPoint.templatePoint.scheme.department)
-							action_descr='record monitoring points'
-							classes='btn btn-primary'
-							href=record_url
-							tooltip='Record'
-							>
-								Record
-							</@fmt.permission_button>
+							<a href="${record_url}" class="btn btn-primary <#if !canRecordAny>disabled</#if>">Record</a>
 						</div>
-						${groupedPoint.templatePoint.name}
+					${groupedPoint.templatePoint.name}
 						(<a class="use-tooltip" data-html="true" title="
 							<@fmt.wholeWeekDateFormat
-								groupedPoint.templatePoint.startWeek
-								groupedPoint.templatePoint.endWeek
-								groupedPoint.templatePoint.scheme.academicYear
-							/>
+					groupedPoint.templatePoint.startWeek
+					groupedPoint.templatePoint.endWeek
+					groupedPoint.templatePoint.scheme.academicYear
+					/>
 						"><@fmt.monitoringPointWeeksFormat
 							groupedPoint.templatePoint.startWeek
-							groupedPoint.templatePoint.endWeek
-							groupedPoint.templatePoint.scheme.academicYear
-							department
+					groupedPoint.templatePoint.endWeek
+					groupedPoint.templatePoint.scheme.academicYear
+					department
 						/></a>)
 						<#assign popoverContent>
 							<ul>
@@ -99,18 +90,9 @@
 					<div class="span12">
 						<div class="pull-right">
 							<#assign record_url><@routes.agentRecordPoints relationshipType academicYear.startYear?c groupedPoint.templatePoint returnTo/></#assign>
-							<@fmt.permission_button
-							permission='MonitoringPoints.Record'
-							scope=(groupedPoint.templatePoint.scheme.department)
-							action_descr='record monitoring points'
-							classes='btn btn-primary'
-							href=record_url
-							tooltip='Record'
-							>
-								Record
-							</@fmt.permission_button>
+							<a href="${record_url}" class="btn btn-primary <#if !canRecordAny>disabled</#if>">Record</a>
 						</div>
-						${groupedPoint.templatePoint.name}
+					${groupedPoint.templatePoint.name}
 						(<@fmt.interval groupedPoint.templatePoint.startDate groupedPoint.templatePoint.endDate />)
 						<#assign popoverContent>
 							<ul>

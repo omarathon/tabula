@@ -139,6 +139,11 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 
 	def can(user: CurrentUser, permission: ScopelessPermission ) = _can(user, permission, None, false)
 	def can(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope), false)
+
+	def canForAny(user: CurrentUser, permission: Permission, scopes: Seq[PermissionsTarget]): Boolean  = {
+		scopes.exists(scope => _can(user, permission, Option(scope), false))
+	}
+
 	def canDelegate(user: CurrentUser, permission: ScopelessPermission ) = _can(user, permission, None, true)
 	def canDelegate(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope), true)
 

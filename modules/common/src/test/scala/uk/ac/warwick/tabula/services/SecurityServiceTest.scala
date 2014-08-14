@@ -283,15 +283,18 @@ class SecurityServiceTest extends TestBase with Mockito {
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Create(type1), student1) should be (true)
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Create(type2), student1) should be (false)
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Create(PermissionsSelector.Any[StudentRelationshipType]), student1) should be (false)
-		
+
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Create(type1), studentCourseDetails) should be (true)
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Create(type2), studentCourseDetails) should be (false)
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Create(PermissionsSelector.Any[StudentRelationshipType]), studentCourseDetails) should be (false)
-		
+
+
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Create(type1), student2) should be (false)
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Create(type2), student2) should be (false)
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Create(PermissionsSelector.Any[StudentRelationshipType]), student2) should be (false)
-		
+
+		securityService.canForAny(currentUser, Permissions.Profiles.StudentRelationship.Create(type1), Seq(student1, student2)) should be (true)
+
 		// Can read any type over the dept
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type1), department) should be (true)
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type2), department) should be (true)
@@ -300,7 +303,7 @@ class SecurityServiceTest extends TestBase with Mockito {
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type1), student1) should be (true)
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type2), student1) should be (true)
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), student1) should be (true)
-		
+
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type1), studentCourseDetails) should be (true)
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type2), studentCourseDetails) should be (true)
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), studentCourseDetails) should be (true)
