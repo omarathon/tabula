@@ -76,9 +76,8 @@
 						</@fmt.permission_button>
 					</li>
 
-					<li class="divider"></li>
-
 					<#if features.extensions>
+						<li class="divider"></li>
 						<li>
 							<#assign extensions_url><@routes.extensionsettings department /></#assign>
 							<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
@@ -92,20 +91,19 @@
 								<i class="icon-calendar"></i> Manage extensions
 							</@fmt.permission_button>
 						</li>
-
-						<li class="divider"></li>
-
 					</#if>
 
 					<#if features.markingWorkflows>
+						<li class="divider"></li>
 						<li>
 							<#assign markingflow_url><@routes.markingworkflowlist department /></#assign>
 							<@fmt.permission_button permission='MarkingWorkflow.Read' scope=department action_descr='manage marking workflows' href=markingflow_url>
 								<i class="icon-check"></i> Marking workflows
 							</@fmt.permission_button>
 						</li>
-						<li class="divider"></li>
 					</#if>
+
+					<li class="divider"></li>
 
 					<#if features.feedbackTemplates>
 						<li>
