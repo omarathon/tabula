@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.ListMarkerFeedbackCo
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.assignments.MarkerFeedbackCollections
+import uk.ac.warwick.tabula.coursework.helpers.MarkerFeedbackCollections
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/list"))

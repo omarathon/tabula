@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
-import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
+import uk.ac.warwick.tabula.services.{UserLookupComponent, AutowiringUserLookupComponent}
+import uk.ac.warwick.tabula.{MockUserLookup, CurrentUser, Mockito, TestBase}
 import uk.ac.warwick.tabula.coursework.web.controllers.admin.{OnlineFeedbackFormController, OnlineFeedbackController}
 import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineFeedbackFormCommand, OnlineFeedbackCommandTestSupport, OnlineFeedbackCommand}
 import uk.ac.warwick.tabula.data.model.{StudentMember, Department, Module, Assignment}
 import uk.ac.warwick.userlookup.User
 import org.mockito.Mockito._
 import org.springframework.validation.Errors
-
 
 class OnlineFeedbackControllerTest extends TestBase {
 
@@ -22,11 +22,14 @@ class OnlineFeedbackControllerTest extends TestBase {
 		assignment.name = "Herons are evil"
 
 		val command = new OnlineFeedbackCommand(module, assignment) with OnlineFeedbackCommandTestSupport
+
 	}
 
-	@Test def controllerShowsList() {
+	@Test def controllerShowsList() = withUser("cusdx") {
+
 		new Fixture {
 			val controller = new OnlineFeedbackController
+			controller.userLookup = new MockUserLookup
 			val mav = controller.showTable(command, null)
 			mav.map("assignment") should be(assignment)
 			mav.map("command") should be(command)
