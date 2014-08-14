@@ -288,7 +288,6 @@ class SecurityServiceTest extends TestBase with Mockito {
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Create(type2), studentCourseDetails) should be (false)
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Create(PermissionsSelector.Any[StudentRelationshipType]), studentCourseDetails) should be (false)
 
-
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Create(type1), student2) should be (false)
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Create(type2), student2) should be (false)
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Create(PermissionsSelector.Any[StudentRelationshipType]), student2) should be (false)
