@@ -1,24 +1,13 @@
 package uk.ac.warwick.tabula.services
-import uk.ac.warwick.userlookup.GroupService
-import org.springframework.beans.factory.annotation.{Autowired,Value}
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model._
-import forms.Extension
-import uk.ac.warwick.tabula.{Features, CurrentUser, PermissionDeniedException, SubmitPermissionDeniedException}
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.permissions.ScopelessPermission
-import uk.ac.warwick.tabula.services.permissions.RoleService
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCaching}
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget, ScopelessPermission, SelectorPermission}
 import uk.ac.warwick.tabula.roles.Role
-import scala.annotation.tailrec
-import uk.ac.warwick.tabula.helpers.RequestLevelCaching
-import uk.ac.warwick.tabula.permissions.SelectorPermission
+import uk.ac.warwick.tabula.services.permissions.RoleService
+import uk.ac.warwick.tabula.{CurrentUser, Features, PermissionDeniedException, SubmitPermissionDeniedException}
 
 trait SecurityServiceComponent {
 	def securityService: SecurityService
@@ -59,7 +48,7 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 	def checkGod(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = if (user.god) Allow else Continue
 	
 	private def checkScopedPermission(
-		allPermissions: Map[Permission, Option[PermissionsTarget]], 
+		allPermissions: Seq[(Permission, Option[PermissionsTarget])],
 		user: CurrentUser,
 		permission: Permission, 
 		scope: PermissionsTarget
@@ -71,36 +60,38 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 					targetScope.permissionsParents != null &&
 					targetScope.permissionsParents.exists(scopeMatches(permissionScope, _)))
 			
-		val matchingPermission = permission match {
-			case selectorPerm: SelectorPermission[_] => allPermissions.find {
+		val matchingPermissions: Seq[Option[PermissionsTarget]] = (permission match {
+			case selectorPerm: SelectorPermission[_] => allPermissions.filter {
 				case (otherSelectorPerm: SelectorPermission[_], target)
 					if (otherSelectorPerm.getClass == selectorPerm.getClass) && 
 						 (selectorPerm <= otherSelectorPerm) => true
 				case _ => false
-			} map { case (_, target) => target }
-			case _ => allPermissions.get(permission) 
-		}
-		
-		matchingPermission match {
-			case Some(permissionScope) => permissionScope match {
-				case Some(permissionScope) => if (scopeMatches(permissionScope, scope)) Allow else Continue
-				case None => 
-					if (scope != null) Allow // Global permission
-					else Continue
 			}
-			case None => Continue
+			case _ => allPermissions.filter{case(p, _) => p == permission}
+		}) map { case (_, target) => target }
+
+		val matchesScope = matchingPermissions.exists {
+			case Some(permissionScope) => if (scopeMatches(permissionScope, scope)) true else false
+			case None =>
+				if (scope != null) true // Global permission
+				else false
+		}
+
+		matchesScope match {
+			case true => Allow
+			case false => Continue
 		}
 	}
 	
 	def checkPermissions(
-		allPermissions: Map[Permission, Option[PermissionsTarget]], 
+		allPermissions: Seq[(Permission, Option[PermissionsTarget])],
 		user: CurrentUser, 
 		permission: Permission, 
 		scope: PermissionsTarget
 	): Response =
 		if (allPermissions == null || allPermissions.isEmpty) Continue
 		else permission match {
-			case _: ScopelessPermission => if (allPermissions.contains(permission)) Allow else Continue
+			case _: ScopelessPermission => if (allPermissions.exists{case(p, _) => p == permission}) Allow else Continue
 			case _ => checkScopedPermission(allPermissions, user, permission, scope)
 		}
 	
@@ -111,11 +102,11 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 			val (allow, deny) = explicitPermissions.partition(_.permissionType)
 			
 			// Confusingly, we check for an "Allow" for the deny perms and then immediately deny it
-			val denyPerms = (deny map { defn => (defn.permission -> defn.scope) }).toMap
+			val denyPerms = deny map { defn => defn.permission -> defn.scope}
 			
 			if (checkPermissions(denyPerms, user, permission, scope) != Continue) Deny
 			else {
-				val allowPerms = (allow map { defn => (defn.permission -> defn.scope) }).toMap
+				val allowPerms = allow map { defn => defn.permission -> defn.scope}
 			
 				checkPermissions(allowPerms, user, permission, scope)
 			}
@@ -137,10 +128,10 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 	}
 
 
-	def can(user: CurrentUser, permission: ScopelessPermission ) = _can(user, permission, None, false)
-	def can(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope), false)
-	def canDelegate(user: CurrentUser, permission: ScopelessPermission ) = _can(user, permission, None, true)
-	def canDelegate(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope), true)
+	def can(user: CurrentUser, permission: ScopelessPermission ) = _can(user, permission, None, canDelegate = false)
+	def can(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope), canDelegate = false)
+	def canDelegate(user: CurrentUser, permission: ScopelessPermission ) = _can(user, permission, None, canDelegate = true)
+	def canDelegate(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope), canDelegate = true)
 
 	private def _can(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget],canDelegate:Boolean): Boolean = transactional(readOnly=true) {
 		// Lazily go through the checks using a view, and try to get the first one that's Allow or Deny
@@ -175,10 +166,10 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 	def check(user: CurrentUser, permission: ScopelessPermission) = _check(user, permission, None)
 	def check(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _check(user, permission, Option(scope))
 
-	private def _check(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]) = if (!_can(user, permission, scope, false)) {
+	private def _check(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]) = if (!_can(user, permission, scope, canDelegate = false)) {
 		(permission, scope) match {
 			case (Permissions.Submission.Create, Some(assignment: Assignment)) => throw new SubmitPermissionDeniedException(assignment)
-			case (permission, scope) => throw new PermissionDeniedException(user, permission, scope)
+			case (p, s) => throw new PermissionDeniedException(user, p, s)
 		}
 	}
 }
