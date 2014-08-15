@@ -31,10 +31,11 @@ with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponen
 	// re-use the event source, so it can cache lookups between requests
 	val studentTimetableEventSource = (new CombinedStudentTimetableEventSourceComponent
 		with SmallGroupEventTimetableEventSourceComponentImpl
-		with ScientiaHttpTimetableFetchingServiceComponent
+		with CombinedHttpTimetableFetchingServiceComponent
 		with AutowiringSmallGroupServiceComponent
 		with AutowiringUserLookupComponent
 		with AutowiringScientiaConfigurationComponent
+		with AutowiringCelcatConfigurationComponent
 		with SystemClockComponent
 		).studentTimetableEventSource
 

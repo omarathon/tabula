@@ -18,7 +18,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 
 		delegate.getTimetableForStudent(studentId) returns studentEvents
 		
-		val cache = new CachedTimetableFetchingService(delegate)
+		val cache = new CachedTimetableFetchingService(delegate, "cacheName")
 	}
 
 	@Before def clearCaches {
