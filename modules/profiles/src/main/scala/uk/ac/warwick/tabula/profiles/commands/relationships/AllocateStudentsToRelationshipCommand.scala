@@ -81,7 +81,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 			// We reverse because removing from the back is better
 			indexesToRemove.reverse.foreach {
-				additionalAgents.remove(_)
+				additionalAgents.remove
 			}
 		}
 	}
@@ -123,9 +123,9 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.
 	// Do not modify the returned value!
-	def mappingById = (mapping.asScala.map {
+	def mappingById = mapping.asScala.map {
 		case (member, users) => (member.universityId, users)
-	}).toMap
+	}.toMap
 
 	// For use by Freemarker to get a simple map of university IDs to Member objects - permissions aware!
 	lazy val membersById = loadMembersById
@@ -173,7 +173,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	 */
 	final def applyInternal() = transactional() {
 
-		var memberAgentMappingsBefore: AgentMap = getMemberAgentMappingsFromDatabase
+		val memberAgentMappingsBefore: AgentMap = getMemberAgentMappingsFromDatabase
 
 		val memberAgentsBefore = memberAgentMappingsBefore.keySet.toSet // .toSet to make it immutable and avoid type issues
 
@@ -212,7 +212,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	}
 
 	def getMemberAgentMappingsFromDatabase: AgentMap = {
-		var memberAgentMappingsBefore = scala.collection.mutable.Map[Member, Set[StudentMember]]()
+		val memberAgentMappingsBefore = scala.collection.mutable.Map[Member, Set[StudentMember]]()
 
 		service
 			.listStudentRelationshipsByDepartment(relationshipType, department) // get all relationships by dept
@@ -292,8 +292,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 																				changedMemberAgents: Set[Member]): Set[EndStudentRelationshipCommand] = {
 
 		val commands = for (agent <- changedMemberAgents) yield {
-			val studentsForAgentBefore = memberAgentMappingsBefore.get(agent).getOrElse(Set[StudentMember]())
-			val studentsForAgentAfter = memberAgentMappingsAfter.get(agent).getOrElse(Set[StudentMember]())
+			val studentsForAgentBefore = memberAgentMappingsBefore.getOrElse(agent, Set[StudentMember]())
 
 			// drop those students who don't feature at all in the after mapping
 			val studentsToDrop = studentsForAgentBefore.filterNot(memberAgentMappingsAfter.values.flatten.toSet)
