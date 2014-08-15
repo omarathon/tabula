@@ -97,7 +97,8 @@ class EditStudentRelationshipCommand(
 
 	override def describe(d: Description) = 
 		d.property("student SPR code" -> studentCourseDetails.sprCode)
-		 .property("new agent ID" -> Option(agent).map { _.universityId }.getOrElse(""))
+			.property("old agent ID" -> oldAgent.map{_.universityId}.getOrElse(""))
+		  .property("new agent ID" -> Option(agent).map { _.universityId }.getOrElse(""))
 
 	def emit(modifiedRelationships: Seq[StudentRelationship]) = {
 		val notifications = modifiedRelationships.flatMap(relationship => {
