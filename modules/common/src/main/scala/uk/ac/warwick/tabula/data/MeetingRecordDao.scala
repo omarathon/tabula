@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.criterion.{Order, Restrictions}
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model._
-import org.hibernate.criterion.{Restrictions,Order}
-import scala.collection.JavaConversions._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model._
 
 trait MeetingRecordDao {
 	def saveOrUpdate(meeting: MeetingRecord)
@@ -44,15 +43,15 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 	}
 
 	private def addMeetingRecordListRestrictions[A](criteria: ScalaCriteria[A], rel: Set[StudentRelationship], currentUser: Option[Member]) = {
-		criteria.add(Restrictions.in("relationship", rel))
+		criteria.add(safeIn("relationship", rel.toSeq))
 
 		// and only pick records where deleted = 0 or the current user id is the creator id
 		// - so that no-one can see records created and deleted by someone else
 		currentUser match {
 			case None | Some(_: RuntimeMember) => criteria.add(is("deleted", false))
-			case Some(currentUser) => criteria.add(Restrictions.disjunction()
+			case Some(cu) => criteria.add(Restrictions.disjunction()
 				.add(is("deleted", false))
-				.add(is("creator", currentUser))
+				.add(is("creator", cu))
 			)
 		}
 
