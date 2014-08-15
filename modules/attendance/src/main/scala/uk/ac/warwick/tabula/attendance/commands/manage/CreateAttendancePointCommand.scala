@@ -112,6 +112,14 @@ trait CreateAttendancePointValidation extends SelfValidating with AttendanceMoni
 						isAnySmallGroupEventModules,
 						smallGroupEventQuantity
 					)
+					validateOverlapSmallGroup(
+						errors,
+						startDate,
+						endDate,
+						smallGroupEventModules,
+						isAnySmallGroupEventModules,
+						schemes
+					)
 				case AttendanceMonitoringPointType.AssignmentSubmission =>
 					validateTypeAssignmentSubmission(
 						errors,

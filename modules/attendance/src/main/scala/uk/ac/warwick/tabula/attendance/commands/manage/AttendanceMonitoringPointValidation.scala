@@ -10,7 +10,7 @@ import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.services.TermServiceComponent
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme}
 import collection.JavaConverters._
 import uk.ac.warwick.util.termdates.Term
 
@@ -239,7 +239,8 @@ trait AttendanceMonitoringPointValidation {
 	) = {
 		val allPoints = schemes.map(_.points.asScala).flatten
 		if (allPoints.exists(point =>
-			datesOverlap(point, startDate, endDate) &&
+			point.pointType == AttendanceMonitoringPointType.Meeting &&
+				datesOverlap(point, startDate, endDate) &&
 				point.meetingRelationships.exists(meetingRelationships.contains) &&
 				point.meetingFormats.exists(meetingFormats.contains)
 		)) {
@@ -256,10 +257,60 @@ trait AttendanceMonitoringPointValidation {
 		point: AttendanceMonitoringPoint
 	): Boolean = {
 		val allPoints = point.scheme.points.asScala
-		if (allPoints.exists(p => point.id != p.id &&
-			datesOverlap(p, startDate, endDate) &&
-			p.meetingRelationships.exists(meetingRelationships.contains) &&
-			p.meetingFormats.exists(meetingFormats.contains)
+		if (allPoints.exists(p =>
+			point.id != p.id &&
+				p.pointType == AttendanceMonitoringPointType.Meeting &&
+				datesOverlap(p, startDate, endDate) &&
+				p.meetingRelationships.exists(meetingRelationships.contains) &&
+				p.meetingFormats.exists(meetingFormats.contains)
+		)) {
+			errors.reject("attendanceMonitoringPoint.overlaps")
+			true
+		} else {
+			false
+		}
+	}
+
+	def validateOverlapSmallGroup(
+		errors: Errors,
+		startDate: LocalDate,
+		endDate: LocalDate,
+		smallGroupEventModules: JSet[Module],
+		isAnySmallGroupEventModules: Boolean,
+		schemes: Seq[AttendanceMonitoringScheme]
+	) = {
+		val allPoints = schemes.map(_.points.asScala).flatten
+		if (allPoints.exists(point =>
+			point.pointType == AttendanceMonitoringPointType.SmallGroup &&
+				datesOverlap(point, startDate, endDate) &&
+				(
+					isAnySmallGroupEventModules ||
+						point.smallGroupEventModules.isEmpty ||
+						point.smallGroupEventModules.exists(smallGroupEventModules.asScala.contains)
+				)
+		)) {
+			errors.reject("attendanceMonitoringPoint.overlaps")
+		}
+	}
+
+	def validateOverlapSmallGroupForEdit(
+		errors: Errors,
+		startDate: LocalDate,
+		endDate: LocalDate,
+		smallGroupEventModules: JSet[Module],
+		isAnySmallGroupEventModules: Boolean,
+		point: AttendanceMonitoringPoint
+	): Boolean = {
+		val allPoints = point.scheme.points.asScala
+		if (allPoints.exists(p =>
+			point.id != p.id &&
+				p.pointType == AttendanceMonitoringPointType.SmallGroup &&
+				datesOverlap(p, startDate, endDate) &&
+				(
+					isAnySmallGroupEventModules ||
+						p.smallGroupEventModules.isEmpty ||
+						p.smallGroupEventModules.exists(smallGroupEventModules.asScala.contains)
+				)
 		)) {
 			errors.reject("attendanceMonitoringPoint.overlaps")
 			true
