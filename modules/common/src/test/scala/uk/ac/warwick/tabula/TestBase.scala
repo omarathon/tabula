@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula
 
-import java.io.File
-import java.io.StringReader
+import java.io.{InputStream, File, StringReader}
 import scala.collection.JavaConversions._
 import scala.collection.GenSeq
 import org.apache.commons.configuration.PropertiesConfiguration
@@ -237,6 +236,7 @@ trait TestHelpers extends TestFixtures {
 	  */
 	def resourceAsString(path: String, encoding: String = "UTF-8"): String = new String(resourceAsBytes(path), encoding)
 	def resourceAsBytes(path: String): Array[Byte] = FileCopyUtils.copyToByteArray(new ClassPathResource(path).getInputStream)
+	def resourceAsStream(path: String): InputStream = new ClassPathResource(path).getInputStream
 
 	/**
 	 * custom matcher to let you write

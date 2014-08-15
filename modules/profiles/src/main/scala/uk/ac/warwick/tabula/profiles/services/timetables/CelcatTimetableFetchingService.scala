@@ -45,7 +45,7 @@ trait AutowiringCelcatConfigurationComponent extends CelcatConfigurationComponen
 		)
 		lazy val authScope = new AuthScope("www2.warwick.ac.uk", 443)
 		lazy val credentials = Credentials(Wire.property("${celcat.fetcher.username}"), Wire.property("${celcat.fetcher.password}"))
-		val cacheEnabled = false
+		val cacheEnabled = true
 	}
 }
 
@@ -69,7 +69,7 @@ object CelcatHttpTimetableFetchingService {
 	}
 }
 
-private class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguration) extends StudentTimetableFetchingService with Logging with DisposableBean {
+class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguration) extends StudentTimetableFetchingService with Logging with DisposableBean {
 	self: UserLookupComponent with TermServiceComponent =>
 
 	lazy val baseUris = celcatConfiguration.perDepartmentBaseUris.toMap
@@ -111,38 +111,33 @@ private class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConf
 	}
 
 	def combineIdenticalEvents(events: Seq[TimetableEvent]): Seq[TimetableEvent] = {
-		println("woop")
 		// If we run an identical event in separate weeks, combine the weeks for them
 		val groupedEvents = events.groupBy { event =>
 			(event.name, event.title, event.description, event.eventType, event.day, event.startTime, event.endTime,
 				event.location, event.context, event.staffUniversityIds, event.year)
 		}.values.toSeq
 
-		println("woop")
-
-//		groupedEvents.map {
-//			case event :: Nil => event
-//			case events => {
-//				val event = events.head
-//				TimetableEvent(
-//					event.name,
-//					event.title,
-//					event.description,
-//					event.eventType,
-//					events.flatMap { _.weekRanges },
-//					event.day,
-//					event.startTime,
-//					event.endTime,
-//					event.location,
-//					event.context,
-//					event.staffUniversityIds,
-//					event.year
-//				)
-//				event
-//			}
-//		}
-
-		events
+		groupedEvents.map {
+			case event :: Nil => event
+			case events => {
+				val event = events.head
+				TimetableEvent(
+					event.name,
+					event.title,
+					event.description,
+					event.eventType,
+					events.flatMap { _.weekRanges },
+					event.day,
+					event.startTime,
+					event.endTime,
+					event.location,
+					event.context,
+					event.staffUniversityIds,
+					event.year
+				)
+				event
+			}
+		}
 	}
 
 	def parseICal(is: InputStream): Seq[TimetableEvent] = {
