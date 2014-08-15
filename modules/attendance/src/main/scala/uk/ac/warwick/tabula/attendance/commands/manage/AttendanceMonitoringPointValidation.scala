@@ -228,4 +228,46 @@ trait AttendanceMonitoringPointValidation {
 			false
 		}
 	}
+
+	def validateOverlapMeeting(
+		errors: Errors,
+		startDate: LocalDate,
+		endDate: LocalDate,
+		meetingRelationships: mutable.Set[StudentRelationshipType],
+		meetingFormats: mutable.Set[MeetingFormat],
+		schemes: Seq[AttendanceMonitoringScheme]
+	) = {
+		val allPoints = schemes.map(_.points.asScala).flatten
+		if (allPoints.exists(point =>
+			datesOverlap(point, startDate, endDate) &&
+				point.meetingRelationships.exists(meetingRelationships.contains) &&
+				point.meetingFormats.exists(meetingFormats.contains)
+		)) {
+			errors.reject("attendanceMonitoringPoint.overlaps")
+		}
+	}
+
+	def validateOverlapMeetingForEdit(
+		errors: Errors,
+		startDate: LocalDate,
+		endDate: LocalDate,
+		meetingRelationships: mutable.Set[StudentRelationshipType],
+		meetingFormats: mutable.Set[MeetingFormat],
+		point: AttendanceMonitoringPoint
+	): Boolean = {
+		val allPoints = point.scheme.points.asScala
+		if (allPoints.exists(p => point.id != p.id &&
+			datesOverlap(p, startDate, endDate) &&
+			p.meetingRelationships.exists(meetingRelationships.contains) &&
+			p.meetingFormats.exists(meetingFormats.contains)
+		)) {
+			errors.reject("attendanceMonitoringPoint.overlaps")
+			true
+		} else {
+			false
+		}
+	}
+
+	private def datesOverlap(point: AttendanceMonitoringPoint, startDate: LocalDate, endDate: LocalDate) =
+		(point.startDate.isBefore(endDate) || point.startDate == endDate)	&& (point.endDate.isAfter(startDate) || point.endDate == startDate)
 }

@@ -34,6 +34,8 @@
 
 <@f.form action="" method="POST" commandName="command" class="form-horizontal">
 
+	<#assign hasOverlap = false />
+
 	<#list command.schemes as scheme>
 		<input name="schemes" value="${scheme.id}" type="hidden" />
 	</#list>
@@ -42,7 +44,7 @@
 	<#include "_managepoint.ftl" />
 
 	<div>
-		<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Adding&hellip;">
+		<button class="btn btn-primary spinnable spinner-auto" type="submit" name="<#if hasOverlap>submitConfirm<#else>submit</#if>" data-loading-text="Adding&hellip;">
 			Add
 		</button>
 		<button class="btn" type="submit" name="cancel">Cancel</button>

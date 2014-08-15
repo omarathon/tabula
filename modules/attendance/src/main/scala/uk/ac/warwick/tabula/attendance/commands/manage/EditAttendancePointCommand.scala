@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -94,31 +95,47 @@ trait EditAttendancePointValidation extends SelfValidating with AttendanceMonito
 				points.exists(p => validateDuplicateForWeekForEdit(errors, name, startWeek, endWeek, p))
 		}
 
-		pointType match {
-			case AttendanceMonitoringPointType.Meeting =>
-				validateTypeMeeting(
-					errors,
-					meetingRelationships.asScala,
-					meetingFormats.asScala,
-					meetingQuantity,
-					department
-				)
-			case AttendanceMonitoringPointType.SmallGroup =>
-				validateTypeSmallGroup(
-					errors,
-					smallGroupEventModules,
-					isAnySmallGroupEventModules,
-					smallGroupEventQuantity
-				)
-			case AttendanceMonitoringPointType.AssignmentSubmission =>
-				validateTypeAssignmentSubmission(
-					errors,
-					isSpecificAssignments,
-					assignmentSubmissionQuantity,
-					assignmentSubmissionModules,
-					assignmentSubmissionAssignments
-				)
-			case _ =>
+		if (!errors.hasErrors) {
+			if (pointStyle == AttendanceMonitoringPointStyle.Week) {
+				val weeksForYear = termService.getAcademicWeeksForYear(schemes.head.academicYear.dateInTermOne).toMap
+				startDate = weeksForYear(startWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
+				endDate = weeksForYear(endWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate.plusDays(6)
+			}
+			pointType match {
+				case AttendanceMonitoringPointType.Meeting =>
+					validateTypeMeeting(
+						errors,
+						meetingRelationships.asScala,
+						meetingFormats.asScala,
+						meetingQuantity,
+						department
+					)
+					points.exists(p =>
+						validateOverlapMeetingForEdit(
+							errors,
+							startDate,
+							endDate,
+							meetingRelationships.asScala,
+							meetingFormats.asScala,
+							p
+					))
+				case AttendanceMonitoringPointType.SmallGroup =>
+					validateTypeSmallGroup(
+						errors,
+						smallGroupEventModules,
+						isAnySmallGroupEventModules,
+						smallGroupEventQuantity
+					)
+				case AttendanceMonitoringPointType.AssignmentSubmission =>
+					validateTypeAssignmentSubmission(
+						errors,
+						isSpecificAssignments,
+						assignmentSubmissionQuantity,
+						assignmentSubmissionModules,
+						assignmentSubmissionAssignments
+					)
+				case _ =>
+			}
 		}
 	}
 
