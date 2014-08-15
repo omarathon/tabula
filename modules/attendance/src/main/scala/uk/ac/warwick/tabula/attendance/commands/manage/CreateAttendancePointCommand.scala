@@ -128,6 +128,16 @@ trait CreateAttendancePointValidation extends SelfValidating with AttendanceMoni
 						assignmentSubmissionModules,
 						assignmentSubmissionAssignments
 					)
+					validateOverlapAssignment(
+						errors,
+						startDate,
+						endDate,
+						isSpecificAssignments,
+						assignmentSubmissionModules,
+						assignmentSubmissionAssignments,
+						isAssignmentSubmissionDisjunction,
+						schemes
+					)
 				case _ =>
 			}
 		}

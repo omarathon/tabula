@@ -319,6 +319,67 @@ trait AttendanceMonitoringPointValidation {
 		}
 	}
 
+	def validateOverlapAssignment(
+		errors: Errors,
+		startDate: LocalDate,
+		endDate: LocalDate,
+		isSpecificAssignments: Boolean,
+		assignmentSubmissionModules: JSet[Module],
+		assignmentSubmissionAssignments: JSet[Assignment],
+		isAssignmentSubmissionDisjunction: Boolean,
+		schemes: Seq[AttendanceMonitoringScheme]
+	) = {
+		val allPoints = schemes.map(_.points.asScala).flatten
+		if (allPoints.exists(point =>
+			point.pointType == AttendanceMonitoringPointType.AssignmentSubmission &&
+				datesOverlap(point, startDate, endDate) &&
+				assignmentOverlap(point, isSpecificAssignments, assignmentSubmissionModules, assignmentSubmissionAssignments, isAssignmentSubmissionDisjunction)
+		)) {
+			errors.reject("attendanceMonitoringPoint.overlaps")
+		}
+	}
+
+	def validateOverlapAssignmentForEdit(
+		errors: Errors,
+		startDate: LocalDate,
+		endDate: LocalDate,
+		isSpecificAssignments: Boolean,
+		assignmentSubmissionModules: JSet[Module],
+		assignmentSubmissionAssignments: JSet[Assignment],
+		isAssignmentSubmissionDisjunction: Boolean,
+		point: AttendanceMonitoringPoint
+	): Boolean = {
+		val allPoints = point.scheme.points.asScala
+		if (allPoints.exists(p =>
+			point.id != p.id &&
+				p.pointType == AttendanceMonitoringPointType.AssignmentSubmission &&
+				datesOverlap(p, startDate, endDate) &&
+				assignmentOverlap(p, isSpecificAssignments, assignmentSubmissionModules, assignmentSubmissionAssignments, isAssignmentSubmissionDisjunction)
+		)) {
+			errors.reject("attendanceMonitoringPoint.overlaps")
+			true
+		} else {
+			false
+		}
+	}
+
 	private def datesOverlap(point: AttendanceMonitoringPoint, startDate: LocalDate, endDate: LocalDate) =
 		(point.startDate.isBefore(endDate) || point.startDate == endDate)	&& (point.endDate.isAfter(startDate) || point.endDate == startDate)
+
+	private def assignmentOverlap(
+		point: AttendanceMonitoringPoint,
+		isSpecificAssignments: Boolean,
+		assignmentSubmissionModules: JSet[Module],
+		assignmentSubmissionAssignments: JSet[Assignment],
+		isAssignmentSubmissionDisjunction: Boolean
+	): Boolean = {
+		if (isSpecificAssignments && point.assignmentSubmissionIsSpecificAssignments) {
+			isAssignmentSubmissionDisjunction && point.assignmentSubmissionIsDisjunction && point.assignmentSubmissionAssignments.exists(assignmentSubmissionAssignments.asScala.contains) ||
+				!isAssignmentSubmissionDisjunction && !point.assignmentSubmissionIsDisjunction && point.assignmentSubmissionAssignments.forall(assignmentSubmissionAssignments.asScala.contains)
+		} else if (!isSpecificAssignments && !point.assignmentSubmissionIsSpecificAssignments) {
+			point.assignmentSubmissionModules.exists(assignmentSubmissionModules.asScala.contains)
+		} else {
+			false
+		}
+	}
 }

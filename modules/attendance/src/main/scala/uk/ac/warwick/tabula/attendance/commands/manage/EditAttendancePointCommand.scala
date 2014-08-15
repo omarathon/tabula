@@ -118,7 +118,8 @@ trait EditAttendancePointValidation extends SelfValidating with AttendanceMonito
 							meetingRelationships.asScala,
 							meetingFormats.asScala,
 							p
-					))
+						)
+					)
 				case AttendanceMonitoringPointType.SmallGroup =>
 					validateTypeSmallGroup(
 						errors,
@@ -134,7 +135,8 @@ trait EditAttendancePointValidation extends SelfValidating with AttendanceMonito
 							smallGroupEventModules,
 							isAnySmallGroupEventModules,
 							p
-						))
+						)
+					)
 				case AttendanceMonitoringPointType.AssignmentSubmission =>
 					validateTypeAssignmentSubmission(
 						errors,
@@ -142,6 +144,18 @@ trait EditAttendancePointValidation extends SelfValidating with AttendanceMonito
 						assignmentSubmissionQuantity,
 						assignmentSubmissionModules,
 						assignmentSubmissionAssignments
+					)
+					points.exists(p =>
+						validateOverlapAssignmentForEdit(
+							errors,
+							startDate,
+							endDate,
+							isSpecificAssignments,
+							assignmentSubmissionModules,
+							assignmentSubmissionAssignments,
+							isAssignmentSubmissionDisjunction,
+							p
+						)
 					)
 				case _ =>
 			}
