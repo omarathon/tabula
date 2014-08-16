@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.commands.relationships
 
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.commands.{DescriptionImpl, Description}
 import uk.ac.warwick.tabula.profiles.TutorFixture
 import uk.ac.warwick.tabula.NoCurrentUser
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
@@ -16,13 +16,15 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 	def describeShouldIncludeNewTutorAndStudent { new TutorFixture {
 		val command = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Some(oldTutor), NoCurrentUser(), false)
 		command.agent = newTutor
-		val desc = mock[Description]
-		// calls to desc.property are chained, so we need to set up the return
-		desc.property("student SPR code", student.mostSignificantCourseDetails.get.sprCode) returns desc
+		val desc = new DescriptionImpl
 		command.describe(desc)
-		verify(desc, atLeastOnce()).property("student SPR code", student.mostSignificantCourseDetails.get.sprCode)
-//		verify(desc, atLeastOnce()).property("student SPR code" -> studentCourseDetails.sprCode)
-		verify(desc, atLeastOnce()).property("new agent ID" -> newTutor.universityId)
+
+		desc.allProperties should be (Map(
+			"students" -> List("student"),
+			"sprCode" -> "0000001/1",
+			"oldAgent" -> "0000002",
+			"newAgent" -> "0000001"
+		))
 	}}
 
 	@Test
