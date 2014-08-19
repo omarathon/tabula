@@ -25,7 +25,7 @@ class CreateAttendancePointController extends AttendanceController {
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam schemes: JList[AttendanceMonitoringScheme]
 	) =
-			CreateAttendancePointCommand(mandatory(department), mandatory(academicYear), schemes.asScala.toSeq)
+		CreateAttendancePointCommand(mandatory(department), mandatory(academicYear), schemes.asScala.toSeq)
 
 	@RequestMapping(method = Array(POST))
 	def form(
@@ -44,7 +44,7 @@ class CreateAttendancePointController extends AttendanceController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("submit"))
-	def submit(
+	def submitNormal(
 		@Valid @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]],
 		errors: Errors,
 		@PathVariable department: Department,
@@ -53,13 +53,31 @@ class CreateAttendancePointController extends AttendanceController {
 		if (errors.hasErrors) {
 			form(cmd, department, academicYear)
 		} else {
-			val points = cmd.apply()
-			Redirect(
-				getReturnTo(""),
-				"points" -> points.size.toString,
-				"schemes" -> points.map(_.scheme.id).mkString(",")
-			)
+			doApply(cmd)
 		}
+	}
+
+	@RequestMapping(method = Array(POST), params = Array("submitConfirm"))
+	def submitSkipOverlap(
+		@Valid @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]],
+		errors: Errors,
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear
+	) = {
+		if (errors.hasErrors && errors.getErrorCount != 1 && errors.getAllErrors.get(0).getCode != "attendanceMonitoringPoint.overlaps") {
+			form(cmd, department, academicYear)
+		} else {
+			doApply(cmd)
+		}
+	}
+
+	private def doApply(cmd: Appliable[Seq[AttendanceMonitoringPoint]]) = {
+		val points = cmd.apply()
+		Redirect(
+			getReturnTo(""),
+			"points" -> points.size.toString,
+			"schemes" -> points.map(_.scheme.id).mkString(",")
+		)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("cancel"))
