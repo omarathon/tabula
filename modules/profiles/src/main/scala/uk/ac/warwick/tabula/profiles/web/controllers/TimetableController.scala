@@ -18,13 +18,13 @@ import uk.ac.warwick.tabula.commands.Appliable
 import net.fortuna.ical4j.model.{TimeZoneRegistryFactory, Calendar}
 import net.fortuna.ical4j.model.property.{XProperty, Method, CalScale, Version, ProdId}
 import net.fortuna.ical4j.model.component.VEvent
-import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import uk.ac.warwick.tabula.timetables.EventOccurrence
 
 @Controller
 @RequestMapping(value = Array("/timetable"))
 class TimetableController extends ProfilesController with TermBasedEventOccurrenceComponent with AutowiringTermServiceComponent
-with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponent {
+	with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponent {
 
 	var userLookup = Wire[UserLookupService]
 
@@ -58,7 +58,7 @@ with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponen
 	def command(
 	  @RequestParam(value="whoFor", required=false) whoFor:Member,
 	  @RequestParam(value="timetableHash", required=false) timetableHash:String
-   	) = {
+   	): Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState = {
 	  if (timetableHash.hasText) {
 		  profileService.getMemberByTimetableHash(timetableHash).map {
 			  member => member match {
@@ -76,10 +76,26 @@ with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponen
 	}
 
 	@RequestMapping(value = Array("/ical"))
-	def getIcalFeed(@ModelAttribute("command") command:Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState): Mav = {
+	def getIcalFeed(@ModelAttribute("command") command: Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState): Mav = {
+		// Guess the year based on the term start date, not the actual date, to get around the comment in AcademicYear.guessByDate
+		val year = AcademicYear.guessByDate(termService.getTermFromDateIncludingVacations(DateTime.now).getStartDate)
 
-		val start = DateTime.now.minusWeeks(1).toLocalDate
-		val end = DateTime.now.plusWeeks(15).toLocalDate
+		// Start from either 1 week ago, or the start of the current academic year, whichever is earlier
+		val start = {
+			val startOfYear = termService.getTermFromAcademicWeek(1, year).getStartDate.toLocalDate
+			val oneWeekAgo = DateTime.now.minusWeeks(1).toLocalDate
+
+			if (startOfYear.isBefore(oneWeekAgo)) startOfYear else oneWeekAgo
+		}
+
+		// End either at the end of the current academic year, or in 15 weeks time, whichever is later
+		val end = {
+			val endOfYear = termService.getTermFromAcademicWeek(1, year + 1).getStartDate.toLocalDate
+			val fifteenWeeksTime = DateTime.now.plusWeeks(15).toLocalDate
+
+			if (endOfYear.isAfter(fifteenWeeksTime)) endOfYear else fifteenWeeksTime
+		}
+
 		command.start = start
 		command.end = end
 
@@ -90,6 +106,8 @@ with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponen
 		cal.getProperties.add(Version.VERSION_2_0)
 		cal.getProperties.add(CalScale.GREGORIAN)
 		cal.getProperties.add(Method.PUBLISH)
+		cal.getProperties.add(new XProperty("X-PUBLISHED-TTL", "PT12H"))
+		cal.getProperties.add(new XProperty("X-WR-CALNAME", s"Tabula timetable - ${command.member.universityId}"))
 		cal.getProperties.add(new XProperty("X-WR-TIMEZONE", "Europe/London"))
 		cal.getProperties.add(new XProperty("X-LIC-LOCATION", "Europe/London"))
 		val vTimezone = TimeZoneRegistryFactory.getInstance.createRegistry.getTimeZone("Europe/London").getVTimeZone
@@ -101,7 +119,7 @@ with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponen
 			cal.getComponents.add(vEvent)
 		}
 
-		Mav(new IcalView(cal))
+		Mav(new IcalView(cal), "filename" -> s"${command.member.universityId}.ics")
 	}
 
 	@RequestMapping(value = Array("/api"))

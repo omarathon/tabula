@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 
 trait ViewStaffPersonalTimetableCommandState extends PersonalTimetableCommandState {
 	val staff: StaffMember
+	lazy val member = staff
 }
 
 /*
