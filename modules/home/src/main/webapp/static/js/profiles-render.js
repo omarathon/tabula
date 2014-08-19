@@ -440,6 +440,16 @@
                                         // for all other views
                                         '': 'h:mm{ - h:mm}'   //  5:00 - 6:30
                                     },
+									titleFormat: {
+										month: 'MMMM yyyy',
+										week: "MMM d[ yyyy]{ '&#8212;'[ MMM] d yyyy}",
+										day: 'dddd, MMM d, yyyy'
+									},
+									columnFormat: {
+										month: 'ddd',
+										week: 'ddd d/M',
+										day: 'dddd d/M'
+									},
 									weekends:showWeekends,
 									viewRender:onViewUpdate,
 									header: {
