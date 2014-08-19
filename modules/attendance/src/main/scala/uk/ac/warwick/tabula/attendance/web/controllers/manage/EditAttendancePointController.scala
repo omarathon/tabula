@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.attendance.commands.manage.{SetsFindPointsResultOnCommandState, EditAttendancePointCommand, FindPointsCommand, FindPointsResult}
 import uk.ac.warwick.tabula.attendance.web.Routes
+import collection.JavaConverters._
 
 @Controller
 @RequestMapping(Array("/manage/{department}/{academicYear}/editpoints/{templatePoint}/edit"))
@@ -68,13 +69,41 @@ class EditAttendancePointController extends AttendanceController {
 		if (errors.hasErrors) {
 			render(department, academicYear)
 		} else {
-			val points = cmd.apply()
-			Redirect(
-				getReturnTo(Routes.Manage.editPoints(department, academicYear)),
-				"points" -> points.size.toString,
-				"actionCompleted" -> "edited"
-			)
+			doApply(cmd, department, academicYear)
 		}
+	}
+
+	@RequestMapping(method = Array(POST), params = Array("submitConfirm"))
+	def submitSkipOverlap(
+		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]]
+			with SetsFindPointsResultOnCommandState with SelfValidating,
+		errors: Errors,
+		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear
+	) = {
+		val findCommandResult = findCommand.apply()
+		cmd.setFindPointsResult(findCommandResult)
+		cmd.validate(errors)
+		if (errors.hasErrors && errors.getAllErrors.asScala.exists(_.getCode != "attendanceMonitoringPoint.overlaps")) {
+			render(department, academicYear)
+		} else {
+			doApply(cmd, department, academicYear)
+		}
+	}
+
+	private def doApply(
+		cmd: Appliable[Seq[AttendanceMonitoringPoint]]
+			with SetsFindPointsResultOnCommandState with SelfValidating,
+		department: Department,
+		academicYear: AcademicYear
+	) = {
+		val points = cmd.apply()
+		Redirect(
+			getReturnTo(Routes.Manage.editPoints(department, academicYear)),
+			"points" -> points.size.toString,
+			"actionCompleted" -> "edited"
+		)
 	}
 
 }

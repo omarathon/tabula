@@ -40,8 +40,11 @@ class EndStudentRelationshipCommand(
 		Seq(relationship)
 	}
 
-	override def describe(d: Description) = 
-		d.property("student SPR code" -> studentCourseDetails.sprCode)
+	override def describe(d: Description) =
+		d.studentIds(Seq(studentCourseDetails.student.universityId)).properties(
+			"sprCode" -> studentCourseDetails.sprCode,
+			"oldAgent" -> oldAgent.fold("") { _.universityId }
+		)
 
 	def emit(relationships: Seq[StudentRelationship]): Seq[uk.ac.warwick.tabula.data.model.Notification[StudentRelationship,Unit]] = {
 		val notifications = relationships.flatMap {

@@ -131,8 +131,8 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 					s"$noteText",
 					s"$noteUrl"
 				)
-			case AttendanceState.NotRecorded =>
-				throw new UnsupportedOperationException("Unexpected NotRecorded state to formatter")
+			// Should never be the case, but stops a compile warning
+			case _ => AttendanceMonitoringCheckpointFormatterResult("","","","","","","")
 		}
 	}
 
