@@ -11,7 +11,7 @@ trait StudentTimetableEventSourceComponent {
 }
 
 trait CombinedStudentTimetableEventSourceComponent extends StudentTimetableEventSourceComponent {
-	self: TimetableFetchingServiceComponent with SmallGroupEventTimetableEventSourceComponent =>
+	self: StaffAndStudentTimetableFetchingServiceComponent with SmallGroupEventTimetableEventSourceComponent =>
 
 	def studentTimetableEventSource: StudentTimetableEventSource = new CombinedStudentTimetableEventSource
 

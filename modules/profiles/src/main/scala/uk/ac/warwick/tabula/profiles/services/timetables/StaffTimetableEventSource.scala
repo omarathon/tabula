@@ -11,7 +11,7 @@ trait StaffTimetableEventSourceComponent {
 }
 
 trait CombinedStaffTimetableEventSourceComponent extends StaffTimetableEventSourceComponent {
-	this: TimetableFetchingServiceComponent with SmallGroupEventTimetableEventSourceComponent =>
+	this: StaffTimetableFetchingServiceComponent with SmallGroupEventTimetableEventSourceComponent =>
 
 	def staffTimetableEventSource: StaffTimetableEventSource = new CombinedStaffTimetableEventSource
 
@@ -22,8 +22,5 @@ trait CombinedStaffTimetableEventSourceComponent extends StaffTimetableEventSour
 				staffGroupEventSource.eventsFor(staff)
 		}
 
-
-
 	}
-
 }

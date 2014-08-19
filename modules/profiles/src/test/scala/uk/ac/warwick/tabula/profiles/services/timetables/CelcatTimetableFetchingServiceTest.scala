@@ -3,29 +3,31 @@ package uk.ac.warwick.tabula.profiles.services.timetables
 import dispatch.classic.Credentials
 import org.apache.http.auth.AuthScope
 import org.joda.time.LocalTime
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
+import uk.ac.warwick.tabula.services.permissions.CacheStrategyComponent
 import uk.ac.warwick.tabula.services.{TermServiceImpl, TermServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
+import uk.ac.warwick.util.cache.Caches.CacheStrategy
 
 class CelcatTimetableFetchingServiceTest extends TestBase {
 
 	val service = new CelcatHttpTimetableFetchingService(new CelcatConfiguration {
-		val perDepartmentBaseUris =	Seq(
-			("ch", "https://www2.warwick.ac.uk/appdata/chem-timetables"),
-			("es", "https://www2.warwick.ac.uk/appdata/eng-timetables")
+		val departmentConfiguration =	Map(
+			"ch" -> CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"),
+			"es" -> CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/eng-timetables")
 		)
 		lazy val authScope = new AuthScope("www2.warwick.ac.uk", 443)
 		lazy val credentials = Credentials("username", "password")
 		val cacheEnabled = false
-	}) with UserLookupComponent with TermServiceComponent {
+	}) with UserLookupComponent with TermServiceComponent with CacheStrategyComponent {
 		val userLookup = new MockUserLookup
 		val termService = new TermServiceImpl
+		val cacheStrategy = CacheStrategy.InMemoryOnly
 	}
 
 	@Test def parseICal {
-		val events = service.parseICal(resourceAsStream("1313406.ics"))
+		val events = service.parseICal(resourceAsStream("1313406.ics"), Nil)
 		events.size should be (142)
 
 		val combined = service.combineIdenticalEvents(events).sortBy { event => (event.weekRanges.head.minWeek, event.day.jodaDayOfWeek, event.startTime.getMillisOfDay)}

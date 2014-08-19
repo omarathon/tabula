@@ -16,23 +16,65 @@ import scala.util.{Success, Try}
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-trait StudentTimetableFetchingService {
+trait PartialTimetableFetchingService
+
+trait StudentTimetableFetchingService extends PartialTimetableFetchingService {
 	def getTimetableForStudent(universityId: String): Seq[TimetableEvent]
 }
 
-trait TimetableFetchingService extends StudentTimetableFetchingService {
+trait ModuleTimetableFetchingService extends PartialTimetableFetchingService {
 	def getTimetableForModule(moduleCode: String): Seq[TimetableEvent]
+}
+
+trait CourseTimetableFetchingService extends PartialTimetableFetchingService {
 	def getTimetableForCourse(courseCode: String): Seq[TimetableEvent]
+}
+
+trait RoomTimetableFetchingService extends PartialTimetableFetchingService {
 	def getTimetableForRoom(roomName: String): Seq[TimetableEvent]
+}
+
+trait StaffTimetableFetchingService extends PartialTimetableFetchingService {
 	def getTimetableForStaff(universityId: String): Seq[TimetableEvent]
 }
+
+trait CompleteTimetableFetchingService
+	extends StudentTimetableFetchingService
+		with ModuleTimetableFetchingService
+		with CourseTimetableFetchingService
+		with RoomTimetableFetchingService
+		with StaffTimetableFetchingService
 
 trait StudentTimetableFetchingServiceComponent {
 	def timetableFetchingService: StudentTimetableFetchingService
 }
 
-trait TimetableFetchingServiceComponent extends StudentTimetableFetchingServiceComponent {
-	def timetableFetchingService: TimetableFetchingService
+trait ModuleTimetableFetchingServiceComponent {
+	def timetableFetchingService: ModuleTimetableFetchingService
+}
+
+trait CourseTimetableFetchingServiceComponent {
+	def timetableFetchingService: CourseTimetableFetchingService
+}
+
+trait RoomTimetableFetchingServiceComponent {
+	def timetableFetchingService: RoomTimetableFetchingService
+}
+
+trait StaffTimetableFetchingServiceComponent {
+	def timetableFetchingService: StaffTimetableFetchingService
+}
+
+trait StaffAndStudentTimetableFetchingServiceComponent extends StudentTimetableFetchingServiceComponent with StaffTimetableFetchingServiceComponent {
+	def timetableFetchingService: StudentTimetableFetchingService with StaffTimetableFetchingService
+}
+
+trait CompleteTimetableFetchingServiceComponent
+	extends StaffAndStudentTimetableFetchingServiceComponent
+		with ModuleTimetableFetchingServiceComponent
+		with CourseTimetableFetchingServiceComponent
+		with RoomTimetableFetchingServiceComponent {
+	def timetableFetchingService: CompleteTimetableFetchingService
 }
 
 trait ScientiaConfiguration {
@@ -45,7 +87,7 @@ trait ScientiaConfigurationComponent {
 
 trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComponent with ClockComponent{
 	val scientiaConfiguration = new AutowiringScientiaConfiguration
-	class AutowiringScientiaConfiguration extends ScientiaConfiguration{
+	class AutowiringScientiaConfiguration extends ScientiaConfiguration {
 		def scientiaFormat(year:AcademicYear) = {
 				// e.g. 1314
 				(year.startYear%100).toString +(year.endYear%100).toString
@@ -58,7 +100,7 @@ trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComp
 	}
 }
 
-trait CombinedHttpTimetableFetchingServiceComponent extends TimetableFetchingServiceComponent {
+trait CombinedHttpTimetableFetchingServiceComponent extends CompleteTimetableFetchingServiceComponent {
 	self: ScientiaConfigurationComponent with CelcatConfigurationComponent =>
 
 	lazy val timetableFetchingService = new CombinedTimetableFetchingService(
@@ -68,7 +110,7 @@ trait CombinedHttpTimetableFetchingServiceComponent extends TimetableFetchingSer
 
 }
 
-class CombinedTimetableFetchingService(services: StudentTimetableFetchingService*) extends TimetableFetchingService {
+class CombinedTimetableFetchingService(services: PartialTimetableFetchingService*) extends CompleteTimetableFetchingService {
 
 	def mergeDuplicates(events: Seq[TimetableEvent]): Seq[TimetableEvent] = {
 		// If an event runs on the same day, between the same times, in the same weeks, of the same type, on the same module, it is the same
@@ -97,28 +139,28 @@ class CombinedTimetableFetchingService(services: StudentTimetableFetchingService
 	}
 
 	def getTimetableForStudent(universityId: String) =
-		mergeDuplicates(services.flatMap { _.getTimetableForStudent(universityId) })
+		mergeDuplicates(services.collect { case service: StudentTimetableFetchingService => service }.flatMap { _.getTimetableForStudent(universityId) })
 
 	def getTimetableForModule(moduleCode: String) =
-		mergeDuplicates(services.collect { case service: TimetableFetchingService => service }.flatMap { _.getTimetableForModule(moduleCode) })
+		mergeDuplicates(services.collect { case service: ModuleTimetableFetchingService => service }.flatMap { _.getTimetableForModule(moduleCode) })
 
 	def getTimetableForCourse(courseCode: String) =
-		mergeDuplicates(services.collect { case service: TimetableFetchingService => service }.flatMap { _.getTimetableForCourse(courseCode) })
+		mergeDuplicates(services.collect { case service: CourseTimetableFetchingService => service }.flatMap { _.getTimetableForCourse(courseCode) })
 
 	def getTimetableForStaff(universityId: String) =
-		mergeDuplicates(services.collect { case service: TimetableFetchingService => service }.flatMap { _.getTimetableForStaff(universityId) })
+		mergeDuplicates(services.collect { case service: StaffTimetableFetchingService => service }.flatMap { _.getTimetableForStaff(universityId) })
 
 	def getTimetableForRoom(roomName: String) =
-		mergeDuplicates(services.collect { case service: TimetableFetchingService => service }.flatMap { _.getTimetableForRoom(roomName) })
+		mergeDuplicates(services.collect { case service: RoomTimetableFetchingService => service }.flatMap { _.getTimetableForRoom(roomName) })
 }
 
-trait ScientiaHttpTimetableFetchingServiceComponent extends TimetableFetchingServiceComponent {
+trait ScientiaHttpTimetableFetchingServiceComponent extends CompleteTimetableFetchingServiceComponent {
 	self: ScientiaConfigurationComponent =>
 
 	lazy val timetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)
 }
 
-private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: ScientiaConfiguration) extends TimetableFetchingService with Logging with DisposableBean {
+private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: ScientiaConfiguration) extends CompleteTimetableFetchingService with Logging with DisposableBean {
 	import ScientiaHttpTimetableFetchingService._
 
 	lazy val perYearUris = scientiaConfiguration.perYearUris
@@ -190,7 +232,7 @@ object ScientiaHttpTimetableFetchingService {
 			// don't cache if we're using the test stub - otherwise we won't see updates that the test setup makes
 			service
 		} else {
-			new CachedTimetableFetchingService(service, cacheName)
+			new CachedCompleteTimetableFetchingService(service, cacheName)
 		}
 	}
 	
