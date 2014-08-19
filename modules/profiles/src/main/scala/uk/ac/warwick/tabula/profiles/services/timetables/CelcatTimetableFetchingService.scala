@@ -137,7 +137,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 				)
 				event
 			}
-		}
+		}.toList
 	}
 
 	def parseICal(is: InputStream): Seq[TimetableEvent] = {

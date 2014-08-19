@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.profiles.services.timetables.TimetableCacheKey._
  */
 class CachedStudentTimetableFetchingService(delegate: StudentTimetableFetchingService, cacheName: String) extends StudentTimetableFetchingService with AutowiringCacheStrategyComponent {
 
-	val CacheExpiryTime = 1000 * 60 * 60 * 6 // 6 hours in ms
+	val CacheExpiryTime = 60 * 60 * 6 // 6 hours in seconds
 
 	/**
 	 * Yukkiness Ahead.
@@ -64,9 +64,8 @@ class CachedStudentTimetableFetchingService(delegate: StudentTimetableFetchingSe
 	}
 
 	// rather than using 5 little caches, use one big one with a composite key
-	lazy val timetableCache = {
+	lazy val timetableCache =
 		Caches.newCache(cacheName, cacheEntryFactory, CacheExpiryTime, cacheStrategy)
-	}
 
 	def getTimetableForStudent(universityId: String): Seq[TimetableEvent] = timetableCache.get(StudentKey(universityId))
 
@@ -79,7 +78,7 @@ class CachedTimetableFetchingService(delegate: TimetableFetchingService, cacheNa
 	def getTimetableForStaff(universityId: String): Seq[TimetableEvent] = timetableCache.get(StaffKey(universityId))
 }
 
-sealed trait TimetableCacheKey extends Serializable {
+@SerialVersionUID(3326840601345l) sealed trait TimetableCacheKey extends Serializable {
 	val id: String
 }
 
