@@ -24,7 +24,7 @@ object TimetableEvent {
 	def apply(sge: SmallGroupEvent): TimetableEvent = {
 		TimetableEvent(name = sge.group.groupSet.name,
 			title = Option(sge.title).getOrElse(""),
-			description = sge.group.groupSet.name + " " + sge.group.name,
+			description = s"${sge.group.groupSet.name}: ${sge.group.name}",
 			eventType = smallGroupFormatToTimetableEventType(sge.group.groupSet.format),
 			weekRanges = sge.weekRanges,
 			day = sge.day,
