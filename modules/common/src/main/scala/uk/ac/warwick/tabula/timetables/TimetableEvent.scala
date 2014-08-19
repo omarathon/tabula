@@ -48,7 +48,7 @@ object TimetableEvent {
 
 }
 
-sealed abstract class TimetableEventType(val code: String, val displayName: String)
+@SerialVersionUID(2903326840601345835l) sealed abstract class TimetableEventType(val code: String, val displayName: String) extends Serializable
 
 object TimetableEventType {
 
@@ -63,11 +63,11 @@ object TimetableEventType {
 	val members = Seq(Lecture, Practical, Seminar, Induction, Meeting)
 
 	def unapply(code: String): Option[TimetableEventType] = code match {
-		case Lecture.code => Some(Lecture)
-		case Practical.code => Some(Practical)
-		case Seminar.code => Some(Seminar)
-		case Induction.code => Some(Induction)
-		case Meeting.code => Some(Meeting)
+		case Lecture.code | Lecture.displayName => Some(Lecture)
+		case Practical.code | Practical.displayName => Some(Practical)
+		case Seminar.code | Seminar.displayName => Some(Seminar)
+		case Induction.code | Induction.displayName => Some(Induction)
+		case Meeting.code | Meeting.displayName => Some(Meeting)
 		case _ => None
 	}
 
