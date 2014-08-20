@@ -38,6 +38,7 @@ class EditAssignmentController extends CourseworkController {
 			"department" -> module.department,
 			"module" -> module,
 			"assignment" -> assignment,
+			"academicYear" -> assignment.academicYear,
 			"canDelete" -> couldDelete,
 			"availableUpstreamGroups" -> form.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
