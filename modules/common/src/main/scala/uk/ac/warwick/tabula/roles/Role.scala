@@ -1,14 +1,11 @@
 package uk.ac.warwick.tabula.roles
 
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.permissions.Permissions._
-import uk.ac.warwick.tabula.{JavaImports, CurrentUser, CaseObjectEqualityFixes}
-import scala.annotation.tailrec
-import scala.collection.immutable.ListMap
-import javax.persistence.Transient
-import org.apache.commons.lang3.builder.HashCodeBuilder
-import org.apache.commons.lang3.builder.EqualsBuilder
+import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.{CaseObjectEqualityFixes, JavaImports}
+
+import scala.collection.immutable.ListMap
 
 trait RoleDefinition {
 	/**
@@ -94,12 +91,11 @@ abstract class SelectorBuiltInRoleDefinition[A <: PermissionsSelector[A]](val se
 	}
 	
 	override def equals(other: Any) = other match {
-		case that: SelectorBuiltInRoleDefinition[A] => {
+		case that: SelectorBuiltInRoleDefinition[A] =>
 			new EqualsBuilder()
 			.append(getName, that.getName)
 			.append(selector, that.selector)
 			.build()
-		}
 		case _ => false
 	}
 	
@@ -109,7 +105,7 @@ abstract class SelectorBuiltInRoleDefinition[A <: PermissionsSelector[A]](val se
 		.append(selector)
 		.build()
 		
-	override def toString() = "%s(%s)".format(super.toString, selector) 
+	override def toString() = "%s(%s)".format(super.toString(), selector)
 }
 
 object SelectorBuiltInRoleDefinition {
@@ -161,7 +157,7 @@ object RoleDefinition {
 
 abstract class Role(val definition: RoleDefinition, val scope: Option[PermissionsTarget]) {
 
-	private var permissions: Map[Permission, Option[PermissionsTarget]] = ListMap()
+	private var permissions: Seq[(Permission, Option[PermissionsTarget])] = Seq()
 	private var roles: Set[Role] = Set()
 
 	def getName = getClass.getSimpleName

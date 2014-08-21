@@ -54,7 +54,7 @@
 					<div class="span12">
 						<div class="pull-right">
 							<#assign record_url><@routes.agentRecordPoints relationshipType academicYear.startYear?c groupedPoint.templatePoint returnTo/></#assign>
-							<a href="${record_url}" class="btn btn-primary">Record</a>
+							<a href="${record_url}" class="btn btn-primary <#if !canRecordAny>disabled</#if>">Record</a>
 						</div>
 						${groupedPoint.templatePoint.name}
 						(<a class="use-tooltip" data-html="true" title="
@@ -90,7 +90,7 @@
 					<div class="span12">
 						<div class="pull-right">
 							<#assign record_url><@routes.agentRecordPoints relationshipType academicYear.startYear?c groupedPoint.templatePoint returnTo/></#assign>
-							<a href="${record_url}" class="btn btn-primary">Record</a>
+							<a href="${record_url}" class="btn btn-primary <#if !canRecordAny>disabled</#if>">Record</a>
 						</div>
 						${groupedPoint.templatePoint.name}
 						(<@fmt.interval groupedPoint.templatePoint.startDate groupedPoint.templatePoint.endDate />)

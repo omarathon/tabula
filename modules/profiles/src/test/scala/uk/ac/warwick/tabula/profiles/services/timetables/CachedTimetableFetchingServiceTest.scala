@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.profiles.services.timetables
 
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-import org.joda.time.LocalTime
+import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek}
+import org.joda.time.{DateTime, LocalTime}
 import uk.ac.warwick.util.cache.{HashMapCacheStore, Caches}
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 import net.spy.memcached.transcoders.SerializingTranscoder
@@ -14,11 +14,11 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 
 		val studentId = "studentId"
 		val studentEvents = Seq(new TimetableEvent("test","test","test",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,None,Nil, AcademicYear(2013)))
-		val delegate = mock[TimetableFetchingService]
+		val delegate = mock[CompleteTimetableFetchingService]
 
 		delegate.getTimetableForStudent(studentId) returns studentEvents
 		
-		val cache = new CachedTimetableFetchingService(delegate)
+		val cache = new CachedCompleteTimetableFetchingService(delegate, "cacheName")
 	}
 
 	@Before def clearCaches {
@@ -61,6 +61,46 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		transcoder.encode(TimetableCacheKey.StudentKey("0672089"))
 		transcoder.encode(TimetableCacheKey.StudentKey(""))
 		transcoder.encode(TimetableCacheKey.ModuleKey("cs118"))
+	}
+
+	@Test
+	def eventListSerialization() {
+		val transcoder: SerializingTranscoder = new SerializingTranscoder
+		val events = List(
+			TimetableEvent(
+				"event 1 name",
+				"event 1 title",
+				"event 1 description",
+				TimetableEventType.Lecture,
+				Seq(WeekRange(1, 10), WeekRange(18)),
+				DayOfWeek.Monday,
+				new LocalTime(16, 0),
+				new LocalTime(17, 0),
+				Some("event 1 location"),
+				Some("CS118"),
+				Seq("0672089", "0672088"),
+				AcademicYear.guessByDate(DateTime.now)
+			),
+			TimetableEvent(
+				"event 2 name",
+				"event 2 title",
+				"event 2 description",
+				TimetableEventType.Other("Another type"),
+				Seq(WeekRange(1), WeekRange(2)),
+				DayOfWeek.Tuesday,
+				new LocalTime(10, 0),
+				new LocalTime(14, 0),
+				None,
+				None,
+				Nil,
+				AcademicYear.guessByDate(DateTime.now)
+			)
+		)
+
+		val cachedData = transcoder.encode(events)
+		cachedData should not be (null)
+
+		transcoder.decode(cachedData) should be (events)
 	}
 
 }

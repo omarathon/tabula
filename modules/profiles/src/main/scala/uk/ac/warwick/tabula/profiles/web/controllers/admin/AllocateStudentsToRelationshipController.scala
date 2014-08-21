@@ -1,17 +1,18 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.admin
 
-import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
-import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.data.model.Department
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.stereotype.Controller
 import javax.validation.Valid
-import uk.ac.warwick.tabula.profiles.commands.relationships.AllocateStudentsToRelationshipCommand
+
+import org.springframework.stereotype.Controller
+import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
+import uk.ac.warwick.tabula.profiles.commands.relationships.{TransientStudentRelationshipTemplateCommand, AllocateStudentsToRelationshipCommand}
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.views.ExcelView
+
 import scala.collection.JavaConverters._
 
 /**
@@ -39,7 +40,7 @@ class AllocateStudentsToRelationshipController extends ProfilesController {
 		Mav("relationships/allocate")
 	}
 	
-	@RequestMapping(method = Array(POST), params = Array("isfile=true", "action!=refresh"))
+	@RequestMapping(method = Array(POST), params = Array("doUpload", "action!=refresh"))
 	def previewFileUpload(@PathVariable("department") department: Department, @Valid cmd: AllocateStudentsToRelationshipCommand, errors: Errors): Mav = {
 		if (errors.hasErrors && errors.getFieldErrors.asScala.exists { _.getCode == "file.wrongtype.one" }) {
 			form(cmd)
@@ -50,12 +51,19 @@ class AllocateStudentsToRelationshipController extends ProfilesController {
 
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh"))
 	def submit(@Valid cmd: AllocateStudentsToRelationshipCommand, errors: Errors): Mav = {
-		if (errors.hasErrors()) {
+		if (errors.hasErrors) {
 			form(cmd)
 		} else {
 			cmd.apply()
 			Redirect(Routes.relationships(cmd.department, cmd.relationshipType))
 		}
 	}
+
+	@ModelAttribute("templateCommand")
+	def templateCommand(@PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) =
+		TransientStudentRelationshipTemplateCommand(department, relationshipType)
+
+	@RequestMapping(method=Array(POST), params=Array("template", "!action"))
+	def template(@ModelAttribute("templateCommand") cmd: Appliable[ExcelView]) = cmd.apply()
 
 }

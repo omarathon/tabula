@@ -523,6 +523,7 @@ $(function() {
 					$statusContainer.append($('<div class="label label-success">Marking completed</div>'));
 				}
 				else if(!$statusContainer.find('.marked').length) {
+					$statusContainer.find('.label-warning').remove() // remove existing label before adding another
 					$statusContainer.append($('<div class="label label-warning marked">Marked</div>'));
 				}
 

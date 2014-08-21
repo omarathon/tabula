@@ -232,6 +232,17 @@
 
 </div>
 
+<@spring.bind path="command">
+	<#if status.error && status.errorCodes?seq_contains("attendanceMonitoringPoint.overlaps")>
+		<div class="alert alert-warning">
+			There is already a monitoring point that will be met by these criteria.
+			If you create this point, it is possible that the same event will mark two points as 'attended'.
+			We recommend that you change the settings for this point.
+		</div>
+		<#assign hasOverlap = true />
+	</#if>
+</@spring.bind>
+
 <script>
 	jQuery(function($) {
 		// Show relavant extra options when changing assignment type

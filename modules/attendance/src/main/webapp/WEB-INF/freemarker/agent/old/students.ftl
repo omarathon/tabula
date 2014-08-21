@@ -30,7 +30,7 @@
 	<#function permission_button_function groupedPoint>
 		<#local record_url><@routes.agentPointRecord groupedPoint.pointId command.relationshipType thisPath /></#local>
 		<#local result>
-			<a href="${record_url}" class="btn btn-primary">Record</a>
+			<a href="${record_url}" class="btn btn-primary <#if !canRecordAny>disabled</#if>">Record</a>
 		</#local>
 		<#return result>
 	</#function>

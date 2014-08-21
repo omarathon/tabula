@@ -49,12 +49,12 @@ class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 		events.size should be (1)
 		val tte:TimetableEvent = events.head
 		tte.day should be(DayOfWeek.Monday)
-		tte.description should be("groupset name")
+		tte.description should be("groupset name: group name")
 		tte.endTime should be(event.endTime)
 		tte.eventType should be(TimetableEventType.Practical)
 		tte.location should be(Some("location"))
 		tte.context should be(Some("MODCODE"))
-		tte.name should be("group name")
+		tte.name should be("groupset name")
 		tte.startTime should be (event.startTime)
 	}
 

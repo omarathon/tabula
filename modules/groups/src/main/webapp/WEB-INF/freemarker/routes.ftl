@@ -51,6 +51,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro register event><@_u page="/event/${event.id}/register" /></#macro>
 <#macro registerForWeek event week><@_u page="/event/${event.id}/register?week=${week?c}" /></#macro>
+<#macro addAdditionalStudent event week><@_u page="/event/${event.id}/register/additional?week=${week?c}" /></#macro>
 <#macro groupAttendance group><@_u page="/group/${group.id}/attendance" /></#macro>
 <#macro setAttendance set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/attendance" /></#macro>
 <#macro moduleAttendance module><@_u page="/admin/module/${module.code}/attendance" /></#macro>
@@ -80,3 +81,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro editcrossmodulegroupsallocate set><@_u page="/admin/department/${set.department.code}/groups/reusable/edit/${set.id}/allocate"  /></#macro>
 <#macro deletecrossmodulegroups set><@_u page="/admin/department/${set.department.code}/groups/reusable/delete/${set.id}"  /></#macro>
 <#macro crossmodulegroupstemplate set><@_u page="/admin/department/${set.department.code}/groups/reusable/${set.id}/template"  /></#macro>
+
+<#macro students_json set><@_u page="/module/${set.module.code}/groups/${set.id}/students/search.json" /></#macro>

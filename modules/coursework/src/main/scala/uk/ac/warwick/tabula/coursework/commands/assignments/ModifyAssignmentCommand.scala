@@ -4,7 +4,7 @@ import scala.collection.JavaConversions.{asScalaBuffer, seqAsJavaList}
 import scala.collection.JavaConverters._
 
 import org.hibernate.validator.constraints.{Length, NotEmpty}
-import org.joda.time.{Days, DateTime}
+import org.joda.time.DateTime
 import org.springframework.validation.Errors
 
 import uk.ac.warwick.spring.Wire

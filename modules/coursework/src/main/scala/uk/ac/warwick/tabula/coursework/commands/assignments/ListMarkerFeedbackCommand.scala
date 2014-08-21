@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import uk.ac.warwick.tabula.coursework.helpers.{MarkerFeedbackCollections, MarkerFeedbackCollecting}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, Unaudited}
@@ -14,13 +15,7 @@ case class MarkerFeedbackItem(
 	feedbacks: Seq[MarkerFeedback]
 )
 
-case class MarkerFeedbackCollections(
-	inProgressFeedback: Seq[MarkerFeedbackItem],
-	completedFeedback: Seq[MarkerFeedbackItem],
-	rejectedFeedback: Seq[MarkerFeedbackItem]
-)
-
-object ListMarkerFeedbackCommand {
+object ListMarkerFeedbackCommand  {
 	def apply(assignment:Assignment, module: Module, user:CurrentUser) =
 		new ListMarkerFeedbackCommand(assignment, module, user)
 		with ComposableCommand[MarkerFeedbackCollections]
@@ -30,29 +25,13 @@ object ListMarkerFeedbackCommand {
 		with Unaudited with ReadOnly
 }
 
-class ListMarkerFeedbackCommand(val assignment: Assignment, val module: Module, val user: CurrentUser) extends CommandInternal[MarkerFeedbackCollections] {
+class ListMarkerFeedbackCommand(val assignment: Assignment, val module: Module, val user: CurrentUser)
+	extends CommandInternal[MarkerFeedbackCollections] with MarkerFeedbackCollecting {
 
 	self: UserLookupComponent =>
 
-	def applyInternal() = {
-		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
+	def applyInternal() = getMarkerFeedbackCollections(assignment, module, user, userLookup)
 
-		val (inProgressFeedback: Seq[MarkerFeedbackItem], completedFeedback: Seq[MarkerFeedbackItem], rejectedFeedback: Seq[MarkerFeedbackItem]) = {
-			val markerFeedbackItems = submissions.map{ submission =>
-				val student = userLookup.getUserByWarwickUniId(submission.universityId)
-				val feedbacks = assignment.getAllMarkerFeedbacks(submission.universityId, user.apparentUser).reverse
-				MarkerFeedbackItem(student, submission, feedbacks)
-			}.filterNot(_.feedbacks.isEmpty)
-
-			(
-				markerFeedbackItems.filter(f => f.feedbacks.last.state != MarkingState.MarkingCompleted && f.feedbacks.last.state != MarkingState.Rejected),
-				markerFeedbackItems.filter(f => f.feedbacks.last.state == MarkingState.MarkingCompleted),
-				markerFeedbackItems.filter(f => f.feedbacks.last.state == MarkingState.Rejected)
-			)
-		}
-
-		MarkerFeedbackCollections(inProgressFeedback, completedFeedback, rejectedFeedback)
-	}
 }
 
 trait ListMarkerFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

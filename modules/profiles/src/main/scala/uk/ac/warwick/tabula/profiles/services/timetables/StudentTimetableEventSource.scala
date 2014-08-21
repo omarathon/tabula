@@ -11,16 +11,15 @@ trait StudentTimetableEventSourceComponent {
 }
 
 trait CombinedStudentTimetableEventSourceComponent extends StudentTimetableEventSourceComponent {
-	this: TimetableFetchingServiceComponent with SmallGroupEventTimetableEventSourceComponent =>
+	self: StaffAndStudentTimetableFetchingServiceComponent with SmallGroupEventTimetableEventSourceComponent =>
 
 	def studentTimetableEventSource: StudentTimetableEventSource = new CombinedStudentTimetableEventSource
 
-	class CombinedStudentTimetableEventSource() extends StudentTimetableEventSource{
-
+	class CombinedStudentTimetableEventSource() extends StudentTimetableEventSource {
 		def eventsFor(student: StudentMember): Seq[TimetableEvent] = {
 			val events = timetableFetchingService.getTimetableForStudent(student.universityId) ++
 				studentGroupEventSource.eventsFor(student)
-			if(student.isPGR) { events ++ timetableFetchingService.getTimetableForStaff(student.universityId) }
+			if (student.isPGR) { events ++ timetableFetchingService.getTimetableForStaff(student.universityId) }
 			events
 		}
 	}
