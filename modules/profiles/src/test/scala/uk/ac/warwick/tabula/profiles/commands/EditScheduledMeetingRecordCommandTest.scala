@@ -34,7 +34,7 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		command.title = newTitle
 		command.meetingDate = sameDate
 
-		Thread.sleep(2)
+		Thread.sleep(2) // otherwise sometimes the last updated date is not after created date and that assertion fails
 
 		val result: ScheduledMeetingRecordResult = command.applyInternal()
 
@@ -60,7 +60,7 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		command.format = newFormat
 		command.meetingDate = newMeetingDate
 
-		Thread.sleep(2)
+		Thread.sleep(2) // otherwise sometimes the last updated date is not after created date and that assertion fails
 
 		val result: ScheduledMeetingRecordResult = command.applyInternal()
 
