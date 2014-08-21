@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands.{Command, Unaudited, ComposableCommand, App
 import uk.ac.warwick.tabula.profiles.services.timetables._
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
 import uk.ac.warwick.tabula.services._
 import org.joda.time.{Interval, LocalDate}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -18,10 +18,12 @@ import uk.ac.warwick.tabula.CurrentUser
 trait PersonalTimetableCommandState {
 	var start: LocalDate = LocalDate.now.minusMonths(12)
 	var end: LocalDate = start.plusMonths(13)
+	def member: Member
 }
 
 trait ViewStudentPersonalTimetableCommandState extends PersonalTimetableCommandState {
 	val student: StudentMember
+	lazy val member = student
 }
 
 /*

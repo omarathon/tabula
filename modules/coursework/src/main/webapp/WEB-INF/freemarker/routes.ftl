@@ -41,7 +41,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro markingCompleted assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/marking-completed" /></#macro>
 <#macro markingUncompleted assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/marking-uncompleted" /></#macro>
 
-<#macro enrolment module><@_u page="/admin/module/${module.code}/assignments/enrolment"/></#macro>
+<#macro enrolment module academicYear><@_u page="/admin/module/${module.code}/assignments/enrolment/${academicYear.startYear?c}"/></#macro>
 
 <#macro createAssignment module><@_u page="/admin/module/${module.code}/assignments/new" /></#macro>
 <#macro copyModuleAssignments module><@_u page="/admin/module/${module.code}/copy-assignments" /></#macro>

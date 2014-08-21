@@ -27,12 +27,14 @@
 
 <@f.form action="" method="POST" commandName="command" class="form-horizontal">
 
+	<#assign hasOverlap = false />
+
 	<input name="returnTo" value="${returnTo}" type="hidden" />
 
 	<#include "_managepoint.ftl" />
 
 	<div class="form-actions">
-		<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Saving&hellip;">
+		<button class="btn btn-primary spinnable spinner-auto" type="submit" name="<#if hasOverlap>submitConfirm<#else>submit</#if>" data-loading-text="Saving&hellip;">
 			Save
 		</button>
 		<a href="${returnTo}" class="btn">Cancel</a>

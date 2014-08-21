@@ -13,9 +13,9 @@ import uk.ac.warwick.tabula.profiles.services.timetables.TimetableCacheKey._
  * cache, thus allowing us not to thrash Syllabus+ too badly
  *
  */
-class CachedTimetableFetchingService(delegate:TimetableFetchingService) extends TimetableFetchingService with AutowiringCacheStrategyComponent {
+class CachedPartialTimetableFetchingService(delegate: PartialTimetableFetchingService, cacheName: String) extends PartialTimetableFetchingService with AutowiringCacheStrategyComponent {
 
-	val CacheExpiryTime = 1000 * 60 * 60 * 6 // 6 hours in ms
+	val CacheExpiryTime = 60 * 60 * 6 // 6 hours in seconds
 
 	/**
 	 * Yukkiness Ahead.
@@ -28,7 +28,7 @@ class CachedTimetableFetchingService(delegate:TimetableFetchingService) extends 
 
 	val cacheEntryFactory = new CacheEntryFactory[TimetableCacheKey, EventList] {
 
-	 private def toEventList(events: Seq[TimetableEvent]): EventList = {
+		private def toEventList(events: Seq[TimetableEvent]): EventList = {
 			events match {
 				// can't use "case v: EventList" because the type inference engine in 2.10 can't cope.
 				case v: Seq[TimetableEvent] with java.io.Serializable => v
@@ -37,11 +37,26 @@ class CachedTimetableFetchingService(delegate:TimetableFetchingService) extends 
 		}
 
 		def create(key:TimetableCacheKey):EventList = toEventList(key match {
-			case StudentKey(id) => delegate.getTimetableForStudent(id)
-			case StaffKey(id)   => delegate.getTimetableForStaff(id)
-			case CourseKey(id)  => delegate.getTimetableForCourse(id)
-			case RoomKey(id)    => delegate.getTimetableForRoom(id)
-			case ModuleKey(id)  => delegate.getTimetableForModule(id)
+			case StudentKey(id) => delegate match {
+				case delegate: StudentTimetableFetchingService => delegate.getTimetableForStudent(id)
+				case _ => throw new UnsupportedOperationException("Delegate does not support fetching student timetables")
+			}
+			case StaffKey(id)   => delegate match {
+				case delegate: StaffTimetableFetchingService => delegate.getTimetableForStaff(id)
+				case _ => throw new UnsupportedOperationException("Delegate does not support fetching staff timetables")
+			}
+			case CourseKey(id)  => delegate match {
+				case delegate: CourseTimetableFetchingService => delegate.getTimetableForCourse(id)
+				case _ => throw new UnsupportedOperationException("Delegate does not support fetching course timetables")
+			}
+			case RoomKey(id)    => delegate match {
+				case delegate: RoomTimetableFetchingService => delegate.getTimetableForRoom(id)
+				case _ => throw new UnsupportedOperationException("Delegate does not support fetching room timetables")
+			}
+			case ModuleKey(id)  => delegate match {
+				case delegate: ModuleTimetableFetchingService => delegate.getTimetableForModule(id)
+				case _ => throw new UnsupportedOperationException("Delegate does not support fetching module timetables")
+			}
 		})
 
 		def create(keys: JList[TimetableCacheKey]): JMap[TimetableCacheKey, EventList] = {
@@ -52,20 +67,42 @@ class CachedTimetableFetchingService(delegate:TimetableFetchingService) extends 
 	}
 
 	// rather than using 5 little caches, use one big one with a composite key
-	lazy val timetableCache = {
-		Caches.newCache("SyllabusPlusTimetables", cacheEntryFactory, CacheExpiryTime, cacheStrategy)
-	}
+	lazy val timetableCache =
+		Caches.newCache(cacheName, cacheEntryFactory, CacheExpiryTime, cacheStrategy)
 
 	def getTimetableForStudent(universityId: String): Seq[TimetableEvent] = timetableCache.get(StudentKey(universityId))
 	def getTimetableForModule(moduleCode: String): Seq[TimetableEvent] = timetableCache.get(ModuleKey(moduleCode))
 	def getTimetableForCourse(courseCode: String): Seq[TimetableEvent] = timetableCache.get(CourseKey(courseCode))
 	def getTimetableForRoom(roomName: String): Seq[TimetableEvent] = timetableCache.get(RoomKey(roomName))
 	def getTimetableForStaff(universityId: String): Seq[TimetableEvent] = timetableCache.get(StaffKey(universityId))
+
 }
 
-sealed trait TimetableCacheKey extends Serializable {
+class CachedStudentTimetableFetchingService(delegate: StudentTimetableFetchingService, cacheName: String)
+	extends CachedPartialTimetableFetchingService(delegate, cacheName) with StudentTimetableFetchingService
+
+class CachedModuleTimetableFetchingService(delegate: ModuleTimetableFetchingService, cacheName: String)
+	extends CachedPartialTimetableFetchingService(delegate, cacheName) with ModuleTimetableFetchingService
+
+class CachedCourseTimetableFetchingService(delegate: CourseTimetableFetchingService, cacheName: String)
+	extends CachedPartialTimetableFetchingService(delegate, cacheName) with CourseTimetableFetchingService
+
+class CachedRoomTimetableFetchingService(delegate: RoomTimetableFetchingService, cacheName: String)
+	extends CachedPartialTimetableFetchingService(delegate, cacheName) with RoomTimetableFetchingService
+
+class CachedStaffTimetableFetchingService(delegate: StaffTimetableFetchingService, cacheName: String)
+	extends CachedPartialTimetableFetchingService(delegate, cacheName) with StaffTimetableFetchingService
+
+class CachedStaffAndStudentTimetableFetchingService(delegate: StudentTimetableFetchingService with StaffTimetableFetchingService, cacheName: String)
+	extends CachedPartialTimetableFetchingService(delegate, cacheName) with StudentTimetableFetchingService with StaffTimetableFetchingService
+
+class CachedCompleteTimetableFetchingService(delegate: CompleteTimetableFetchingService, cacheName: String)
+	extends CachedPartialTimetableFetchingService(delegate, cacheName) with CompleteTimetableFetchingService
+
+@SerialVersionUID(3326840601345l) sealed trait TimetableCacheKey extends Serializable {
 	val id: String
 }
+
 object TimetableCacheKey {
 	case class StudentKey(val id: String) extends TimetableCacheKey
 	case class StaffKey(val id: String) extends TimetableCacheKey

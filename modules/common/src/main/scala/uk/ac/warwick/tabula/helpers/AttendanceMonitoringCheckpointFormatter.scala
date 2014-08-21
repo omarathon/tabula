@@ -131,6 +131,8 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 					s"$noteText",
 					s"$noteUrl"
 				)
+			// Should never be the case, but stops a compile warning
+			case _ => AttendanceMonitoringCheckpointFormatterResult("","","","","","","")
 		}
 	}
 
