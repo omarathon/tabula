@@ -34,6 +34,8 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		command.title = newTitle
 		command.meetingDate = sameDate
 
+		Thread.sleep(2)
+
 		val result: ScheduledMeetingRecordResult = command.applyInternal()
 
 		result.meetingRecord.title should be (newTitle)
@@ -57,6 +59,9 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		command.description = newDescription
 		command.format = newFormat
 		command.meetingDate = newMeetingDate
+
+		Thread.sleep(2)
+
 		val result: ScheduledMeetingRecordResult = command.applyInternal()
 
 		result.meetingRecord.title should be (newTitle)
