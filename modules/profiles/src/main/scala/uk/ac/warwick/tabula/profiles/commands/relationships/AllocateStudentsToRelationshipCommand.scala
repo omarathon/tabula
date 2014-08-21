@@ -58,7 +58,21 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	var additionalAgents: JList[String] = JArrayList()
 
 	var previouslyAllocatedMapping: JMap[Member, JList[Member]] = _ // populated by hidden field in form
-	
+
+	val memberAgentMappingsBefore: AgentMap = getMemberAgentMappingsFromDatabase
+	val studentsBefore = memberAgentMappingsBefore.values.flatten.toSet
+
+	var memberAgentMappingsAfter: AgentMap = _
+	var studentsAfter: Set[StudentMember] = _
+
+	var studentsWithTutorRemoved: Set[StudentMember] = _
+	var studentsWithTutorAdded: Set[StudentMember] = _
+	var studentsWithTutorChanged: Set[StudentMember] = _
+
+	var newOrChangedMapping: AgentMap = _
+
+	var hasChanges: Boolean = _
+
 	override def onBind(result: BindingResult) {
 		super.onBind(result)
 
@@ -71,6 +85,37 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 			.foreach { member =>
 				if (!mapping.containsKey(member)) mapping.put(member, JArrayList())
 			}
+
+		memberAgentMappingsAfter = mapping.asScala.map {
+			case (key, value) => (key, value.asScala.toSet )
+		}.map {
+			case (key, value) => (key, value.collect {case s: StudentMember => s})
+		}.toMap // .toMap to make it immutable to avoid type issues
+
+		studentsAfter = memberAgentMappingsAfter.values.flatten.toSet
+
+		studentsWithTutorRemoved = studentsBefore.filterNot(memberAgentMappingsAfter.values.flatten.toSet)
+		studentsWithTutorAdded = studentsAfter.filterNot(memberAgentMappingsBefore.values.flatten.toSet)
+		studentsWithTutorChanged = studentsBefore.intersect(studentsAfter).filter(isTutorChanged)
+
+		newOrChangedMapping = getNewOrChangedMapping
+
+		hasChanges = (studentsWithTutorRemoved.size + studentsWithTutorAdded.size + studentsWithTutorChanged.size) > 0
+
+		def getNewOrChangedMapping: AgentMap = {
+			val mappingsNewOrChangedMutable = scala.collection.mutable.Map[Member, Set[StudentMember]]()
+
+			for (agentMap <- memberAgentMappingsAfter) {
+				val agent = agentMap._1
+				val studentsForAgentAfter = agentMap._2
+				val studentsForAgentBefore = if (memberAgentMappingsBefore.contains(agent)) memberAgentMappingsBefore(agent) else Set[StudentMember]()
+				val changedStudentsForAgent = (studentsForAgentBefore ++ studentsForAgentAfter) -- studentsForAgentBefore.intersect(studentsForAgentAfter)
+				if (!changedStudentsForAgent.isEmpty) {
+					mappingsNewOrChangedMutable(agent) = changedStudentsForAgent
+				}
+			}
+			mappingsNewOrChangedMutable.toMap
+		}
 
 		def removeBlankAgents() {
 			// Find all empty textboxes for agents and remove them - otherwise we end up with a never ending list of empties
@@ -172,17 +217,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	 *  but existing relationships with non-member agents are preserved (except where the agent is replaced).
 	 */
 	final def applyInternal() = transactional() {
-
-		val memberAgentMappingsBefore: AgentMap = getMemberAgentMappingsFromDatabase
-
 		val memberAgentsBefore = memberAgentMappingsBefore.keySet.toSet // .toSet to make it immutable and avoid type issues
-
-		val memberAgentMappingsAfter = mapping.asScala.map {
-			case (key, value) => (key, value.asScala.toSet )
-		}.map {
-			case (key, value) => (key, value.collect {case s: StudentMember => s})
-		}.toMap // .toMap to make it immutable to avoid type issues
-
 		val memberAgentsAfter = mapping.keySet.asScala.toSet // .toSet to make it immutable and avoid type issues
 
 		val newMemberAgents = memberAgentsAfter.filterNot(memberAgentsBefore)
@@ -209,6 +244,12 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		}
 
 		commandResults.flatten.toSeq
+	}
+
+	def isTutorChanged(student: StudentMember): Boolean = {
+		val tutorsBefore = memberAgentMappingsBefore.filter(agentMap => agentMap._2.contains(student)).keySet
+		val tutorsAfter = memberAgentMappingsAfter.filter(agentMap => agentMap._2.contains(student)).keySet
+		tutorsBefore != tutorsAfter
 	}
 
 	def getMemberAgentMappingsFromDatabase: AgentMap = {
