@@ -78,6 +78,7 @@ class AddAssignmentController extends CourseworkController {
 		Mav("admin/assignments/new",
 			"department" -> module.department,
 			"module" -> module,
+			"academicYear" -> form.academicYear,
 			"availableUpstreamGroups" -> form.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
 			"assessmentGroups" -> form.assessmentGroups,

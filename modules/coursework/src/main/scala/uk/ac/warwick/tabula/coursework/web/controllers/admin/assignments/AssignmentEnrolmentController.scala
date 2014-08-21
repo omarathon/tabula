@@ -9,19 +9,20 @@ import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands.{UpstreamGroupPropertyEditor, UpstreamGroup}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.AcademicYear
 
 
 /**
  * Controller to populate the user listing for editing, without persistence
  */
 @Controller
-@RequestMapping(value = Array("/admin/module/{module}/assignments/enrolment"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/enrolment/{academicYear}"))
 class AssignmentEnrolmentController extends CourseworkController with Logging{
 
 	validatesSelf[EditAssignmentEnrolmentCommand]
 
-	@ModelAttribute def formObject(@PathVariable("module") module: Module) = {
-		val cmd = new EditAssignmentEnrolmentCommand(mandatory(module))
+	@ModelAttribute def formObject(@PathVariable("module") module: Module, @PathVariable("academicYear") academicYear: AcademicYear) = {
+		val cmd = new EditAssignmentEnrolmentCommand(mandatory(module), academicYear)
 		cmd.upstreamGroups.clear()
 		cmd
 	}
@@ -34,6 +35,7 @@ class AssignmentEnrolmentController extends CourseworkController with Logging{
 		Mav("admin/assignments/enrolment",
 			"department" -> form.module.department,
 			"module" -> form.module,
+			"academicYear" -> form.academicYear,
 			"availableUpstreamGroups" -> form.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
 			"assessmentGroups" -> form.assessmentGroups,
