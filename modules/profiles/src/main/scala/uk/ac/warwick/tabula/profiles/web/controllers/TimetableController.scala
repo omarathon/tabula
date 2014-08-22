@@ -41,10 +41,11 @@ class TimetableController extends ProfilesController with TermBasedEventOccurren
 
 	val staffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
 		with SmallGroupEventTimetableEventSourceComponentImpl
-		with ScientiaHttpTimetableFetchingServiceComponent
+		with CombinedHttpTimetableFetchingServiceComponent
 		with AutowiringSmallGroupServiceComponent
 		with AutowiringUserLookupComponent
 		with AutowiringScientiaConfigurationComponent
+		with AutowiringCelcatConfigurationComponent
 		with SystemClockComponent
 		).staffTimetableEventSource
 
