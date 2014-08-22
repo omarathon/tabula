@@ -51,9 +51,9 @@
 				</#if>
 				<#if mapGet(attendanceNotes, point)??>
 					<#assign note = mapGet(attendanceNotes, point) />
-					<#if note.note?has_content || note.attachment?has_content >
-						<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note" title="Edit attendance note" href="<@routes.noteEdit academicYear.startYear?c student point />">
-							<i class="icon-edit-sign attendance-note-icon"></i>
+					<#if note.hasContent>
+						<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note edit" title="Edit attendance note" href="<@routes.noteEdit academicYear.startYear?c student point />">
+							<i class="icon-edit attendance-note-icon"></i>
 						</a>
 					<#else>
 						<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note" title="Add attendance note" href="<@routes.noteEdit academicYear.startYear?c student point />">

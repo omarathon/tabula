@@ -141,15 +141,15 @@
 								<#local hasNote = mapGet(mapGet(command.attendanceNotes, student), command.occurrence)?? />
 								<#if hasNote>
 									<#local note = mapGet(mapGet(command.attendanceNotes, student), command.occurrence) />
-									<#if note.note?has_content || note.attachment?has_content>
+									<#if note.hasContent>
 										<a
 											id="attendanceNote-${student.universityId}-${command.occurrence.id}"
-											class="btn use-tooltip attendance-note"
+											class="btn use-tooltip attendance-note edit"
 											title="Edit attendance note"
 											data-container="body"
 											href="<@routes.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />"
 										>
-											<i class="icon-edit-sign attendance-note-icon"></i>
+											<i class="icon-edit attendance-note-icon"></i>
 										</a>
 									<#else>
 										<a

@@ -54,7 +54,7 @@ exports.wireButtons = function(id) {
 };
 
 var setArgOnUrl = function(url, argName, argValue){
-	if(url.indexOf('?') === 0) {
+	if(url.indexOf('?') === -1) {
 		return url + '?' + argName + '=' + argValue;
 	} else {
 		var args = url.substring(url.indexOf('?') + 1, url.length).split('&'),

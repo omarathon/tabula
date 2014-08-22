@@ -70,8 +70,8 @@
 												<#local hasNote = mapGet(command.attendanceNotes, point)?? />
 												<#if hasNote>
 													<#local note = mapGet(command.attendanceNotes, point) />
-													<#if note.note?has_content || note.attachment?has_content>
-														<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note" title="Edit attendance note" href="<@routes.editNote student=command.student point=point returnTo=((info.requestedUri!"")?url) />"><i class="icon-edit-sign attendance-note-icon"></i></a>
+													<#if note.hasContent>
+														<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note edit" title="Edit attendance note" href="<@routes.editNote student=command.student point=point returnTo=((info.requestedUri!"")?url) />"><i class="icon-edit attendance-note-icon"></i></a>
 													<#else>
 														<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note" title="Add attendance note" href="<@routes.editNote student=command.student point=point returnTo=((info.requestedUri!"")?url) />"><i class="icon-edit attendance-note-icon"></i></a>
 													</#if>
