@@ -106,7 +106,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 	// a dispatch response handler which reads iCal from the response and parses it into a list of TimetableEvents
 	def handler(config: CelcatDepartmentConfiguration) = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
-		req >> { (is) => combineIdenticalEvents(parseICal(is, config.excludedEventTypes)) }
+		req >> { (is) => combineIdenticalEvents(parseICal(is, config)) }
 	}
 
 	def getTimetableForStudent(universityId: UniversityId): Seq[TimetableEvent] = {
@@ -139,7 +139,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 			def bsvHandler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 				req >- { _.split('\n').flatMap { _.split("\\|", 4) match {
-					case Array(celcatId, staffId, initials, name) => Some(staffId -> CelcatStaffInfo(celcatId, staffId, initials, name))
+					case Array(celcatId, staffId, initials, name) => Some(staffId -> CelcatStaffInfo(celcatId.trim(), staffId.trim(), initials.trim(), name.trim()))
 					case _ => None
 				}}.toList }
 			}
@@ -168,7 +168,9 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		Caches.newCache("CelcatBSVCache", bsvCacheEntryFactory, 60 * 60 * 24, cacheStrategy)
 
 	def lookupCelcatIDFromBSV(universityId: UniversityId, config: CelcatDepartmentConfiguration) =
-		bsvCache.get(config.baseUri).toMap.get(universityId).map { _.celcatId }
+		staffInfo(config).get(universityId).map { _.celcatId }
+
+	def staffInfo(config: CelcatDepartmentConfiguration) = bsvCache.get(config.baseUri).toMap
 
 	def doRequest(filename: String, config: CelcatDepartmentConfiguration): Seq[TimetableEvent] = {
 		// Add {universityId}.ics to the URL
@@ -214,12 +216,14 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		}.toList
 	}
 
-	def parseICal(is: InputStream, excludedEventTypes: Seq[TimetableEventType]): Seq[TimetableEvent] = {
+	def parseICal(is: InputStream, config: CelcatDepartmentConfiguration): Seq[TimetableEvent] = {
 		CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING, true)
 		CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_VALIDATION, true)
 
 		val builder = new CalendarBuilder
 		val cal = builder.build(is)
+
+		val allStaff = staffInfo(config)
 
 		cal.getComponents(Component.VEVENT).asScala.collect { case event: VEvent => event }.flatMap { event =>
 			val eventType =
@@ -227,7 +231,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					TimetableEventType(c.getCategories.iterator().next().asInstanceOf[String])
 				}.orNull
 
-			if (excludedEventTypes.contains(eventType)) None
+			if (config.excludedEventTypes.contains(eventType)) None
 			else {
 				// Convert date/time to academic year, local times and week number
 				val start = toDateTime(event.getStartDate)
@@ -256,6 +260,20 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 				val summary = Option(event.getSummary).fold("") { _.getValue }
 				val moduleCode = summary.maybeText.collect { case r"([A-Za-z]{2}[0-9]{3})${m}.*" => m.toUpperCase() }
 
+				val staffIds: Seq[UniversityId] =
+					if (!allStaff.isEmpty)
+						summary.maybeText
+							.collect { case r"^.* - ((?:[^/0-9]+(?: (?:[0-9\\-]+,?)+)?/?)+)${namesOrInitials}" =>
+								namesOrInitials.split('/').toSeq
+									.collect { case r"([^/0-9]+)${nameOrInitial}(?: (?:[0-9\\-]+,?)+)?" => nameOrInitial }
+							}
+							.map { namesOrInitials =>
+								namesOrInitials.flatMap { nameOrInitial => allStaff.values.find { info =>
+									info.fullName == nameOrInitial || info.initials == nameOrInitial
+								}.map { _.universityId }}
+							}.getOrElse(Nil)
+					else Nil
+
 				Some(TimetableEvent(
 					name = summary,
 					title = "",
@@ -267,7 +285,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					endTime = end.toLocalTime,
 					location = Option(event.getLocation).flatMap { _.getValue.maybeText },
 					context = moduleCode,
-					staffUniversityIds = Nil,
+					staffUniversityIds = staffIds,
 					year = year
 				))
 			}
