@@ -54,31 +54,39 @@
 				</tbody>
 			</table>
 			<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/marks')}" commandName="markerAddMarksCommand">
-				<input name="isfile" value="false" type="hidden"/>
-				<table class="marksUploadTable">
-					<tr class="mark-header"><th>University ID</th><th>Marks</th><th>Grade</th></tr>
-						<#if marksToDisplay??>
-							<#list marksToDisplay as markItem>
-								<tr class="mark-row">
-									<td>
-										<div class="input-prepend input-append">
-											<span class="add-on"><i class="icon-user"></i></span>
-											<input class="universityId span2" value="${markItem.universityId}" name="marks[${markItem_index}].universityId" type="text" readonly="readonly" />
-										</div>
-									</td>
-									<td><input name="marks[${markItem_index}].actualMark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" /></td>
-									<td><input name="marks[${markItem_index}].actualGrade" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" /></td>
-								</tr>
-							</#list>
-						</#if>
-				</table>
-				<br /><button class="add-additional-marks btn"><i class="icon-plus"></i> Add</button>
-				<div class="submit-buttons">
-					<input type="submit" class="btn btn-primary" value="Save">
-					or <a href="<@routes.listmarkersubmissions assignment />" class="btn">Cancel</a>
+				<div class="fix-area">
+					<input name="isfile" value="false" type="hidden"/>
+					<table class="marksUploadTable">
+						<tr class="mark-header"><th>University ID</th><th>Marks</th><th>Grade</th></tr>
+							<#if marksToDisplay??>
+								<#list marksToDisplay as markItem>
+									<tr class="mark-row">
+										<td>
+											<div class="input-prepend input-append">
+												<span class="add-on"><i class="icon-user"></i></span>
+												<input class="universityId span2" value="${markItem.universityId}" name="marks[${markItem_index}].universityId" type="text" readonly="readonly" />
+											</div>
+										</td>
+										<td><input name="marks[${markItem_index}].actualMark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" /></td>
+										<td><input name="marks[${markItem_index}].actualGrade" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" /></td>
+									</tr>
+								</#list>
+							</#if>
+					</table>
+					<br /><button class="add-additional-marks btn"><i class="icon-plus"></i> Add</button>
+					<div class="submit-buttons fix-footer">
+						<input type="submit" class="btn btn-primary" value="Save">
+						or <a href="<@routes.listmarkersubmissions assignment />" class="btn">Cancel</a>
+					</div>
 				</div>
 			</@f.form>
 		</div>
 	</div>
 </div>
+
+<script>
+	jQuery(function($){
+		$('.fix-area').fixHeaderFooter();
+	});
+</script>
 </#escape>
