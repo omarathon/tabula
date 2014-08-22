@@ -49,7 +49,7 @@ class ListFilesController extends BaseController {
 }
 
 object ListFilesController {
-	val MaxResponses = 100
+	val MaxResponses = 10000
 	
 	val StartParam = "start"
 	
