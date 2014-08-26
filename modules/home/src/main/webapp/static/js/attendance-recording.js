@@ -151,14 +151,23 @@ $(function(){
 	}).end().find('a.meetings').on('click', function(e){
         e.preventDefault();
         $.get($(this).attr('href'), function(data){
-            $('#modal .modal-body').html(data);
-            $('#modal').modal("show");
+            $('#meetings-modal .modal-body').html(data);
+            $('#meetings-modal').modal("show");
             $('.use-popover').tabulaPopover({
                 trigger: 'click',
                 container: '#container'
             });
         });
-    });
+    }).end().find('a.small-groups').on('click', function(e){
+		e.preventDefault();
+		$.get($(this).attr('href'), function(data){
+			$('#small-groups-modal').html(data).modal("show");
+			$('.use-popover').tabulaPopover({
+				trigger: 'click',
+				container: '#container'
+			});
+		});
+	});
 
     $('.agent-search').find('input').on('keyup', function(){
         var rows = $('table.agents tbody tr'), query = $(this).val().toLowerCase();

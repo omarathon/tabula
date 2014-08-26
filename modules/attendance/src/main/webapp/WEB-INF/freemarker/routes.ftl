@@ -130,6 +130,7 @@
 	<@_u page="/profile/${student.universityId}/${academicYearString}/record${returnTo}"/>
 </#macro>
 <#macro profileMeetings student academicYearString point><@_u page="/profile/${student.universityId}/${academicYearString}/${point.id}/meetings"/></#macro>
+<#macro profileGroups student academicYearString point><@_u page="/profile/${student.universityId}/${academicYearString}/${point.id}/groups"/></#macro>
 
 <#macro viewHome><@_u page="/view"/></#macro>
 <#macro viewHomeYears department><@_u page="/view/${department.code}"/></#macro>

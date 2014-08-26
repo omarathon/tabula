@@ -1,4 +1,12 @@
 <#escape x as x?html>
+<#import "*/modal_macros.ftl" as modal />
+
+<@modal.header isModal>
+	<h3>${student.fullName} small group teaching events</h3>
+</@modal.header>
+
+<@modal.body isModal>
+
 	<#if !point.pointType?? || point.pointType.dbValue != "smallGroup">
 		<div class="alert alert-error">
 			Specified monitoring point is not a Teaching event point
@@ -211,4 +219,7 @@
 		</details>
 
 	</#if>
+
+</@modal.body>
+
 </#escape>

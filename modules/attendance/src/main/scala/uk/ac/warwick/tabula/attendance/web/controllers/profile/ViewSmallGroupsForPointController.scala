@@ -31,7 +31,8 @@ class ViewSmallGroupsForPointController extends AttendanceController {
 		val result = cmd.apply()
 		Mav("profile/groups",
 			"result" -> result,
-			"currentMember" -> currentMember
+			"currentMember" -> currentMember,
+			"isModal" -> ajax
 		).noLayoutIf(ajax)
 	}
 }
