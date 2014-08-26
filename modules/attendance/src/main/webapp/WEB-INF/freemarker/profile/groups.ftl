@@ -103,10 +103,111 @@
 			</#if>
 		</details>
 
-		<details open>
+		<details class="groups" open>
 			<summary>
 				<span class="legend">Project groups, Seminars</span>
 			</summary>
+
+			<#macro instanceFormat instance academicYear department><#compress>
+				<#local event = instance._1() />
+				<#local week = instance._2() />
+				${event.day.shortName} <@fmt.time event.startTime />, <@fmt.singleWeekFormat week academicYear department />
+			</#compress></#macro>
+
+			<#macro groupsInATerm term>
+				<h4>${term.name}</h4>
+
+				<table class="table table-striped table-bordered table-condensed">
+					<thead>
+						<tr>
+							<th class="sortable nowrap"></th>
+							<#list term.weeks as weekPair>
+								<th class="instance-date-header <#if !weekPair._2()>irrelevant</#if>">
+									<#if currentMember.homeDepartment??>
+										<@fmt.singleWeekFormat week=weekPair._1() academicYear=academicYear dept=currentMember.homeDepartment short=true />
+									</#if>
+								</th>
+							</#list>
+						</tr>
+					</thead>
+					<tbody>
+						<#list term.groups as group>
+							<tr <#if !group.relevant>class="irrelevant"</#if>>
+								<td>
+									${group.name}
+								</td>
+								<#list term.weeks as weekPair>
+									<td <#if !weekPair._2()>class="irrelevant"</#if>>
+										<#list mapGet(group.attendance, weekPair._1()) as attendance>
+											<#if !attendance.instance??>
+												<i class="use-popover icon-fixed-width irrelevant" data-content="${attendance.reason}"></i>
+											<#else>
+												<#local titles = [] />
+
+												<#if attendance.reason?has_content>
+													<#local reason><#noescape><strong>${attendance.reason}</strong></#noescape></#local>
+													<#local titles = titles + [reason] />
+												</#if>
+
+												<#local title><@instanceFormat attendance.instance academicYear currentMember.homeDepartment /></#local>
+												<#if attendance.state.name == 'Attended'>
+													<#local class = "icon-ok attended" />
+													<#local title = "${student.fullName} attended: " + title />
+												<#elseif attendance.state.name == 'MissedAuthorised'>
+													<#local class = "icon-remove-circle authorised" />
+													<#local title = "${student.fullName} did not attend (authorised absence): " + title />
+												<#elseif attendance.state.name == 'MissedUnauthorised'>
+													<#local class = "icon-remove unauthorised" />
+													<#local title = "${student.fullName} did not attend (unauthorised): " + title />
+												<#elseif attendance.state.name == 'Late'>
+													<#local class = "icon-warning-sign late" />
+													<#local title = "No data: " + title />
+												<#else>
+													<#local class = "icon-minus" />
+												</#if>
+
+												<#local titles = titles + [title] />
+
+												<#if attendance.note??>
+													<#local studentNote = attendance.note />
+													<#local note>
+														${studentNote.truncatedNote}
+														<#if (studentNote.truncatedNote?length > 0)>
+															<br/>
+														</#if>
+														<a class='attendance-note-modal' href='<@routes.groupsNoteView studentNote.student studentNote.occurrence />'>View attendance note</a>
+													</#local>
+													<#local titles = titles + [note] />
+												</#if>
+
+												<#local renderedTitle>
+													<#list titles as t>
+														<#if (titles?size > 1)>
+															<p>${t}</p>
+														<#else>
+														${t}
+														</#if>
+													</#list>
+												</#local>
+
+												<i class="use-popover icon-fixed-width ${class} <#if !attendance.relevant>irrelevant</#if>" data-content="<#noescape>${renderedTitle}</#noescape>" data-html="true"></i>
+											</#if>
+										</#list>
+									</td>
+								</#list>
+							</tr>
+						</#list>
+					</tbody>
+				</table>
+			</#macro>
+
+			<#if result.groupData.terms?size == 0>
+				<em>There are no small group events defined for this academic year.</em>
+			<#else>
+				<#list result.groupData.terms as term>
+					<@groupsInATerm term />
+				</#list>
+			</#if>
 		</details>
 
 	</#if>
