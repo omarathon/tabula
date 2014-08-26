@@ -34,7 +34,7 @@
 				<span class="legend">Course: ${result.course.name}</span>
 			</summary>
 
-			<table>
+			<table class="table table-condensed">
 				<tbody>
 					<tr>
 						<th>Route:</th>
@@ -68,6 +68,39 @@
 			<summary>
 				<span class="legend">Modules</span>
 			</summary>
+
+			<#if result.modules?size == 0>
+				<em>No module registrations found.</em>
+			<#else>
+				<table class="table table-condensed">
+					<thead>
+						<tr>
+							<td></td>
+							<td>Code</td>
+							<td>Title</td>
+							<td>Department</td>
+							<td>CATS</td>
+							<td>Status</td>
+						</tr>
+					</thead>
+					<tbody>
+						<#list result.modules as module>
+							<tr>
+								<td>
+									<#if !module.hasGroups>
+										<i class="icon-fixed-width icon-exclamation-sign" title="This module has no small groups set up in Tabula"></i>
+									</#if>
+								</td>
+								<td>${module.code}</td>
+								<td>${module.title}</td>
+								<td>${module.department}</td>
+								<td>${module.cats}</td>
+								<td>${module.status}</td>
+							</tr>
+						</#list>
+					</tbody>
+				</table>
+			</#if>
 		</details>
 
 		<details open>
