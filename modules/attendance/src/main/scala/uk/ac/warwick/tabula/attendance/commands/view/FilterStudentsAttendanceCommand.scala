@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.attendance.commands.view
 
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order._
+import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.attendance.commands.old.AutowiringSecurityServicePermissionsAwareRoutes
@@ -11,6 +12,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringTermServiceComponent, ProfileServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
@@ -25,6 +27,7 @@ object FilterStudentsAttendanceCommand {
 			with ComposableCommand[FilteredStudentsAttendanceResult]
 			with FilterStudentsAttendancePermissions
 			with FilterStudentsAttendanceCommandState
+			with OnBindFilterStudentsAttendanceCommand
 			with ReadOnly with Unaudited
 }
 
@@ -60,6 +63,18 @@ class FilterStudentsAttendanceCommandInternal(val department: Department, val ac
 
 }
 
+trait OnBindFilterStudentsAttendanceCommand extends BindListener {
+
+	self: FilterStudentsAttendanceCommandState =>
+
+	override def onBind(result: BindingResult) = {
+		if (!hasBeenFiltered) {
+			allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach { sprStatuses.add }
+		}
+	}
+
+}
+
 trait FilterStudentsAttendancePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
 	self: FilterStudentsAttendanceCommandState =>
@@ -81,6 +96,7 @@ trait FilterStudentsAttendanceCommandState extends AttendanceFilterExtras {
 
 	var page = 1
 	var sortOrder: JList[Order] = JArrayList()
+	var hasBeenFiltered = false
 
 	var courseTypes: JList[CourseType] = JArrayList()
 	var routes: JList[Route] = JArrayList()

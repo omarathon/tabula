@@ -150,8 +150,8 @@
 	<#if sortOrder?has_content>
 		<#local args = args + ["sortOrder=" + sortOrder ] />
 	</#if>
-	<#local query><#list args as arg>${arg}<#if arg_has_next>&</#if></#list></#local>
-	<@_u page="/view/${department.code}/${academicYearString}/students?${query}"/>
+	<#local query><#if !queryString?has_content && args?has_content>?</#if><#list args as arg>${arg}<#if arg_has_next>&</#if></#list></#local>
+	<@_u page="/view/${department.code}/${academicYearString}/students${query}"/>
 </#macro>
 <#macro viewSingleStudent department academicYearString student><@_u page="/view/${department.code}/${academicYearString}/students/${student.universityId}" /></#macro>
 <#macro viewRecordStudent department academicYearString student returnTo="">

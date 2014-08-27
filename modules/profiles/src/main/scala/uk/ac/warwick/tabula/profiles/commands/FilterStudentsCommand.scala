@@ -59,7 +59,7 @@ abstract class FilterStudentsCommand(val department: Department) extends Command
 
 	def onBind(result: BindingResult) {
 		// Add all non-withdrawn codes to SPR statuses by default
-		if (sprStatuses.isEmpty) {
+		if (!hasBeenFiltered) {
 			allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach { sprStatuses.add }
 		}
 	}
@@ -80,6 +80,8 @@ trait FilterStudentsState extends FiltersStudents {
 	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()
 	var modules: JList[Module] = JArrayList()
+
+	var hasBeenFiltered = false
 }
 
 trait FilterStudentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
