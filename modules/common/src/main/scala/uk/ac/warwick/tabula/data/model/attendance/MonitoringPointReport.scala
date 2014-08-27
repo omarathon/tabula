@@ -13,9 +13,6 @@ import uk.ac.warwick.tabula.services.TermService
 @Entity
 class MonitoringPointReport extends GeneratedId {
 
-	@transient
-	var termService = Wire[TermService]
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="student", referencedColumnName="universityId")
 	var student: StudentMember = _
@@ -40,7 +37,7 @@ class MonitoringPointReport extends GeneratedId {
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
-	var academicYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(new DateTime(), termService)
+	var academicYear: AcademicYear = _
 
 	@NotNull
 	@Min(1)
