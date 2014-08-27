@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.collection.JavaConversions._
-
+import javax.persistence.CascadeType._
 import javax.persistence._
 
-import org.hibernate.annotations.{BatchSize, AccessType, Type}
+import org.hibernate.annotations.{AccessType, BatchSize, Type}
 import org.joda.time.DateTime
-
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.forms.{FormattedHtml, SavedFormValue}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.data.model.forms.{FormattedHtml, FormField, SavedFormValue}
+
+import scala.collection.JavaConversions._
 
 
 trait FeedbackAttachments {
@@ -93,15 +92,15 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var agreedGrade: Option[String] = None
 
-	@OneToOne(cascade=Array(ALL), fetch = FetchType.LAZY)
+	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
 	@JoinColumn(name = "first_marker_feedback")
 	var firstMarkerFeedback: MarkerFeedback = _
 
-	@OneToOne(cascade=Array(ALL), fetch = FetchType.LAZY)
+	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
 	@JoinColumn(name = "second_marker_feedback")
 	var secondMarkerFeedback: MarkerFeedback = _
 
-	@OneToOne(cascade=Array(ALL), fetch = FetchType.LAZY)
+	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
 	@JoinColumn(name = "third_marker_feedback")
 	var thirdMarkerFeedback: MarkerFeedback = _
 
