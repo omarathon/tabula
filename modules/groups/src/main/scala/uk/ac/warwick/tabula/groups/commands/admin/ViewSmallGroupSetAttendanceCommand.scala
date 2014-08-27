@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
+import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand
+
 import scala.collection.JavaConverters._
 import scala.collection.immutable.SortedMap
 import uk.ac.warwick.tabula.commands.CommandInternal
@@ -13,8 +15,7 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.groups.commands.ViewSmallGroupAttendanceCommand
-import uk.ac.warwick.tabula.groups.commands.ViewSmallGroupAttendanceCommand._
+import ViewSmallGroupAttendanceCommand._
 import uk.ac.warwick.tabula.ItemNotFoundException
 
 object ViewSmallGroupSetAttendanceCommand {

@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.services.permissions.CacheStrategyComponent
 import uk.ac.warwick.tabula.services.{TermServiceImpl, TermServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class CelcatTimetableFetchingServiceTest extends TestBase {
 
@@ -27,7 +28,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 	}
 
 	@Test def parseICal {
-		val events = service.parseICal(resourceAsStream("1313406.ics"), Nil)
+		val events = service.parseICal(resourceAsStream("1313406.ics"), CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"))
 		events.size should be (142)
 
 		val combined = service.combineIdenticalEvents(events).sortBy { event => (event.weekRanges.head.minWeek, event.day.jodaDayOfWeek, event.startTime.getMillisOfDay)}

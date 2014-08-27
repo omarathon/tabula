@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures}
+import uk.ac.warwick.tabula.JavaImports.JBoolean
 
 class FeedbackDaoTest extends PersistenceTestBase {
 
@@ -8,7 +9,10 @@ class FeedbackDaoTest extends PersistenceTestBase {
 		def session = FeedbackDaoTest.this.session
 	}
 
-	@Test def crud = transactional { tx =>
+	@Test def crud() = transactional { tx =>
+		// TAB-2415
+		session.enableFilter("notDeleted")
+
 		val f1 = Fixtures.feedback("0205225")
 		val f2 = Fixtures.feedback("0205225")
 		val f3 = Fixtures.feedback("0205226")
@@ -18,7 +22,7 @@ class FeedbackDaoTest extends PersistenceTestBase {
 
 		session.save(ass1)
 		session.save(ass2)
-		session.flush
+		session.flush()
 
 		ass1.feedbacks.add(f1)
 		f1.assignment = ass1
@@ -32,7 +36,7 @@ class FeedbackDaoTest extends PersistenceTestBase {
 		session.saveOrUpdate(f1)
 		session.saveOrUpdate(f2)
 		session.saveOrUpdate(f3)
-		session.flush
+		session.flush()
 
 		val mf1 = Fixtures.markerFeedback(f1)
 		val mf2 = Fixtures.markerFeedback(f2)

@@ -14,7 +14,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 
 @Entity @AccessType("field")
-class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityReference {
+class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityReference with CanBeDeleted {
 	type Entity = MarkerFeedback
 
 	def this(parent:Feedback){
@@ -42,7 +42,8 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	def getMarkerUser: User = userLookup.getUserByUserId(getMarkerUsercode.get)
 
 	@OneToOne(fetch = FetchType.LAZY, optional = false, cascade=Array())
-	@JoinColumn(name = "feedback_id")
+	@JoinColumn(name = "feedback_id", nullable = false)
+	@ForeignKey(name = "none")
 	var feedback: Feedback = _
 
 	@Column(name = "uploaded_date")

@@ -67,6 +67,8 @@
 				</#if>
 				<#if point.pointType.dbValue == "meeting">
 					<a class="meetings" title="Meetings with this student" href="<@routes.profileMeetings student academicYear.startYear?c point />"><i class="icon-info-sign icon-fixed-width"></i></a>
+				<#elseif point.pointType.dbValue == "smallGroup">
+					<a class="small-groups" title="Small group teaching events for this student" href="<@routes.profileGroups student academicYear.startYear?c point />"><i class="icon-info-sign icon-fixed-width"></i></a>
 				<#else>
 					<i class="icon-fixed-width"></i>
 				</#if>
@@ -181,11 +183,12 @@
 </div>
 </#if>
 
-<div id="modal" class="modal hide fade" style="display:none;">
+<div id="meetings-modal" class="modal hide fade" style="display:none;">
 	<@modal.header>
 		<h3>Meetings</h3>
 	</@modal.header>
 	<@modal.body></@modal.body>
 </div>
+<div id="small-groups-modal" class="modal hide fade" style="display:none;"></div>
 
 </#escape>
