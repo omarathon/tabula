@@ -41,7 +41,7 @@ class CopyDepartmentAssignmentsController extends CourseworkController with Unar
 
 	@ModelAttribute
 	def copyAssignmentsCommand(@PathVariable("department") department: Department) = {
-		val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive))
+		val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive)).sortBy { _.code }
 		CopyAssignmentsCommand(department, modules)
 	}
 

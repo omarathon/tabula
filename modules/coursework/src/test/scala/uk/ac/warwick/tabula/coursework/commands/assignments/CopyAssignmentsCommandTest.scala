@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{Module, Assignment}
+import uk.ac.warwick.tabula.data.model.{UpstreamAssessmentGroup, AssessmentGroup, Assignment}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.Fixtures
 
 class CopyAssignmentsCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends AssignmentServiceComponent {
+	trait CommandTestSupport extends AssignmentServiceComponent with AssignmentMembershipServiceComponent {
 		val assignmentService = mock[AssignmentService]
+		val assignmentMembershipService = mock[AssignmentMembershipService]
 		def apply(): Seq[Assignment] = Seq()
 	}
 
@@ -65,8 +65,8 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 				newAssignment.academicYear.toString should be("13/14")
 				newAssignment.module should be(module)
 				newAssignment.name should be("Test")
-				newAssignment.openDate should be(fakeDate.plusYears(1))
-				newAssignment.closeDate should be(fakeDate.plusDays(30).plusYears(1))
+				newAssignment.openDate should be(fakeDate.plusYears(1).withDayOfWeek(fakeDate.getDayOfWeek()))
+				newAssignment.closeDate should be(fakeDate.plusDays(30).plusYears(1).withDayOfWeek(fakeDate.plusDays(30).getDayOfWeek()))
 				newAssignment.openEnded.booleanValue should be(false)
 				newAssignment.collectMarks.booleanValue should be(true)
 				newAssignment.collectSubmissions.booleanValue should be(true)
@@ -78,6 +78,68 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 				newAssignment.allowExtensionRequests.booleanValue should be(false)
 				newAssignment.summative.booleanValue should be(false)
 			}
+		}
+	}
+
+	@Test def guessSitsLinks() {
+		new Fixture {
+			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
+			command.assignments = Seq(assignment)
+			command.academicYear = AcademicYear.parse("13/14")
+
+			val ag1 = {
+				val group = new AssessmentGroup
+				group.assignment = assignment
+				group.occurrence = "A"
+				group.assessmentComponent = Fixtures.upstreamAssignment("BS", 1)
+				group.membershipService = command.assignmentMembershipService
+				group
+			}
+
+			val ag2 = {
+				val group = new AssessmentGroup
+				group.assignment = assignment
+				group.occurrence = "B"
+				group.assessmentComponent = Fixtures.upstreamAssignment("BS", 2)
+				group.membershipService = command.assignmentMembershipService
+				group
+			}
+
+			assignment.assessmentGroups.add(ag1)
+			assignment.assessmentGroups.add(ag2)
+
+			val template1 = {
+				val template = new UpstreamAssessmentGroup
+				template.academicYear = AcademicYear.parse("13/14")
+				template.assessmentGroup = ag1.assessmentComponent.assessmentGroup
+				template.moduleCode = ag1.assessmentComponent.moduleCode
+				template.occurrence = ag1.occurrence
+				template
+			}
+			val template2 = {
+				val template = new UpstreamAssessmentGroup
+				template.academicYear = AcademicYear.parse("13/14")
+				template.assessmentGroup = ag2.assessmentComponent.assessmentGroup
+				template.moduleCode = ag2.assessmentComponent.moduleCode
+				template.occurrence = ag2.occurrence
+				template
+			}
+
+			command.assignmentMembershipService.getUpstreamAssessmentGroup(any[UpstreamAssessmentGroup]) answers { t =>
+				val template = t.asInstanceOf[UpstreamAssessmentGroup]
+				if (template.occurrence == "A")
+					Some(Fixtures.assessmentGroup(template1.academicYear, ag1.assessmentComponent.assessmentGroup, ag1.assessmentComponent.moduleCode, ag1.occurrence))
+				else
+					None
+			}
+
+			val newAssignment = command.applyInternal().get(0)
+			newAssignment.assessmentGroups.size should be (1)
+
+			val link = newAssignment.assessmentGroups.get(0)
+			link.assessmentComponent should be (ag1.assessmentComponent)
+			link.assignment should be (newAssignment)
+			link.occurrence should be (ag1.occurrence)
 		}
 	}
 
