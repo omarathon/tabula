@@ -132,8 +132,8 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	 * server will explode with a confusing error if you don't provide a Content-Length header.
 	 */
 	def addPdata(file: Option[FileData], req: Request) = file match {
-		case Some(data) => req.add("pdata", new FileBody(data.file, data.name, "application/octet-stream", null))
-		case None => req
+		case Some(data) if data.file != null => req.add("pdata", new FileBody(data.file, data.name, "application/octet-stream", null))
+		case _ => req
 	}
 
 	/**
