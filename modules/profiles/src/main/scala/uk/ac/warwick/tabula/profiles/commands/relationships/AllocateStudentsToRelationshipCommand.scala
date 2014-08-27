@@ -59,8 +59,8 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 	var previouslyAllocatedMapping: JMap[Member, JList[Member]] = _ // populated by hidden field in form
 
-	val memberAgentMappingsBefore: AgentMap = getMemberAgentMappingsFromDatabase
-	val studentsBefore = memberAgentMappingsBefore.values.flatten.toSet
+	var memberAgentMappingsBefore: AgentMap = _
+	var studentsBefore: Set[StudentMember] = _
 
 	var memberAgentMappingsAfter: AgentMap = _
 	var studentsAfter: Set[StudentMember] = _
@@ -69,9 +69,13 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	var studentsWithTutorAdded: Set[StudentMember] = _
 	var studentsWithTutorChanged: Set[StudentMember] = _
 
+	var studentsWithTutorChangedOrAdded: Set[StudentMember] = _
+
 	var newOrChangedMapping: AgentMap = _
 
 	var hasChanges: Boolean = _
+
+	var spreadsheet: Boolean = _
 
 	override def onBind(result: BindingResult) {
 		super.onBind(result)
@@ -90,13 +94,18 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 			case (key, value) => (key, value.asScala.toSet )
 		}.map {
 			case (key, value) => (key, value.collect {case s: StudentMember => s})
-		}.toMap // .toMap to make it immutable to avoid type issues
+		}.toMap // .toMap to make it immutable and avoid type issues
 
 		studentsAfter = memberAgentMappingsAfter.values.flatten.toSet
+
+		memberAgentMappingsBefore = getMemberAgentMappingsBefore
+		studentsBefore = memberAgentMappingsBefore.values.flatten.toSet
 
 		studentsWithTutorRemoved = studentsBefore.filterNot(memberAgentMappingsAfter.values.flatten.toSet)
 		studentsWithTutorAdded = studentsAfter.filterNot(memberAgentMappingsBefore.values.flatten.toSet)
 		studentsWithTutorChanged = studentsBefore.intersect(studentsAfter).filter(isTutorChanged)
+
+		studentsWithTutorChangedOrAdded = studentsWithTutorChanged ++ studentsWithTutorAdded
 
 		newOrChangedMapping = getNewOrChangedMapping
 
@@ -218,7 +227,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	 */
 	final def applyInternal() = transactional() {
 		val memberAgentsBefore = memberAgentMappingsBefore.keySet.toSet // .toSet to make it immutable and avoid type issues
-		val memberAgentsAfter = mapping.keySet.asScala.toSet // .toSet to make it immutable and avoid type issues
+		val memberAgentsAfter = memberAgentMappingsAfter.keySet.toSet // .toSet to make it immutable and avoid type issues
 
 		val newMemberAgents = memberAgentsAfter.filterNot(memberAgentsBefore)
 		val droppedMemberAgents = memberAgentsBefore.filterNot(memberAgentsAfter)
@@ -252,8 +261,30 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		tutorsBefore != tutorsAfter
 	}
 
+	def getMemberAgentMappingsBefore: AgentMap = {
+		if (spreadsheet) {
+			// spreadsheet upload - we only want the students who are included in the input data set (studentsAfter) to be included in comparisons
+			assert(studentsAfter != null)
+			val mappingsBeforeMutable = scala.collection.mutable.Map[Member, Set[StudentMember]]()
+
+			for (agentMap <- getMemberAgentMappingsFromDatabase) {
+				val agent = agentMap._1
+				val students = agentMap._2 match {
+					case studentSet: Set[StudentMember] => studentSet.filter(studentsAfter.contains(_))
+					case _ => Set[StudentMember]()
+				}
+
+				if (!students.isEmpty) mappingsBeforeMutable(agent) = students
+			}
+			mappingsBeforeMutable.toMap
+		}
+		else {
+			getMemberAgentMappingsFromDatabase
+		}
+	}
+
 	def getMemberAgentMappingsFromDatabase: AgentMap = {
-		val memberAgentMappingsBefore = scala.collection.mutable.Map[Member, Set[StudentMember]]()
+		val memberAgentMappingsFromDb = scala.collection.mutable.Map[Member, Set[StudentMember]]()
 
 		service
 			.listStudentRelationshipsByDepartment(relationshipType, department) // get all relationships by dept
@@ -262,12 +293,12 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 			if (agent.forall(_.isDigit)) {
 				profileService.getMemberByUniversityId(agent) match {
 					case Some(member) =>
-						memberAgentMappingsBefore(member) = students.flatMap(_.studentMember).toSet
+						memberAgentMappingsFromDb(member) = students.flatMap(_.studentMember).toSet
 					case _ => // the agent isn't a member
 				}
 			}
 		}
-		memberAgentMappingsBefore.toMap // convert to immutable map
+		memberAgentMappingsFromDb.toMap // convert to immutable map
 	}
 
 	// get the commands needed to remove the relationships of this type for dropped agents:

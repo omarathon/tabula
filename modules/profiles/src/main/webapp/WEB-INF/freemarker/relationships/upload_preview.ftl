@@ -13,7 +13,9 @@
 		<h1>Spreadsheet upload of ${relationshipType.description} changes for ${department.name}</h1>
 		
 		<div class="submit-buttons">
-			<#if hasRows><input type="hidden" name="confirm" value="true"></#if>
+			<#if hasRows>
+				<input type="hidden" name="spreadsheet" value="true" />
+			</#if>
 
 			<button type="submit" class="btn btn-primary">Continue</button>
 
@@ -61,7 +63,7 @@
 							<#else>
 								<td colspan="2"></td>
 							</#if>
-						</td>
+						</tr>
 					</#macro>
 				
 					<@spring.bind path="allocateStudentsToRelationshipCommand">
