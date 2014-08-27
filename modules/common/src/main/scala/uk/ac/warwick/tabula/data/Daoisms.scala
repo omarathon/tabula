@@ -35,7 +35,7 @@ trait ExtendedSessionComponent extends SessionComponent {
 	 */
 	protected def getById[A:ClassTag](id: String): Option[A] = {
 		val runtimeClass = classTag[A].runtimeClass
-		session.get(runtimeClass.getName(), id) match {
+		session.get(runtimeClass.getName, id) match {
 			case entity: CanBeDeleted if entity.deleted && isFilterEnabled("notDeleted") => None
 			case entity: Any if runtimeClass.isInstance(entity) => Some(entity.asInstanceOf[A])
 			case _ => None
