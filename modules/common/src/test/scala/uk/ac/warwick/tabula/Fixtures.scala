@@ -248,7 +248,7 @@ object Fixtures extends Mockito {
 	}
 
 	def studentCourseYearDetails(
-		academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now),
+		academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now),
 		modeOfAttendance: ModeOfAttendance = null,
 		yearOfStudy: Int = 1,
 		studentCourseDetails: StudentCourseDetails = null

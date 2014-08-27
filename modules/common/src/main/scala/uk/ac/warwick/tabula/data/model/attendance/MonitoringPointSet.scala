@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import uk.ac.warwick.tabula.JavaImports._
 import javax.persistence._
-import uk.ac.warwick.tabula.data.model.{GeneratedId, Route}
-import org.joda.time.DateTime
+
 import org.hibernate.annotations.{BatchSize, Type}
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.{GeneratedId, Route}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Entity
@@ -59,7 +60,7 @@ class MonitoringPointSet extends GeneratedId with PermissionsTarget {
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
-	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
+	var academicYear: AcademicYear = _
 	
 	def permissionsParents = Option(route).toStream
 

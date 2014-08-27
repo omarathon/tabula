@@ -77,7 +77,7 @@ class SandboxAccreditedPriorLearningImporter extends AccreditedPriorLearningImpo
 				scjCode = "%s/1".format(universityId),
 				awardCode = "BA",
 				sequenceNumber = 1,
-				academicYear = AcademicYear.guessByDate(DateTime.now).toString,
+				academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString,
 				cats = new java.math.BigDecimal(15),
 				levelCode = "2",
 				reason = "Exemption of 30 CATS for 3 terms of Open Studies Languages"

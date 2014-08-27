@@ -27,7 +27,7 @@ class AddAssignmentController extends CourseworkController {
 	@Autowired var assignmentService: AssignmentService = _
 
 	@ModelAttribute("academicYearChoices") def academicYearChoices: JList[AcademicYear] = {
-		AcademicYear.guessByDate(DateTime.now).yearsSurrounding(2, 2).asJava
+		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2).asJava
 	}
 
 	validatesSelf[AddAssignmentCommand]

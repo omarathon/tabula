@@ -46,7 +46,7 @@
 								<#if searchAcademicYear.toString == year.toString>
 									selected
 								</#if>
-							<#elseif currentAcademicYear.toString == year.toString>
+							<#elseif academicYear.toString == year.toString>
 								selected
 							</#if>
 						>

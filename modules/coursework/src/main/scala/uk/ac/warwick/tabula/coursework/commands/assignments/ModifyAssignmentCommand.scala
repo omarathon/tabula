@@ -21,7 +21,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		with SharedAssignmentProperties
 		with SelfValidating
 		with SpecifiesGroupType
-		with CurrentAcademicYear
+		with CurrentSITSAcademicYear
 		with SchedulesNotifications[Assignment]
 		with AutowiringUserLookupComponent
 		with AutowiringAssignmentMembershipServiceComponent

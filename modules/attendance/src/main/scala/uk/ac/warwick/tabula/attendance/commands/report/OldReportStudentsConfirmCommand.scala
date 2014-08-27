@@ -109,7 +109,7 @@ trait ReportStudentsConfirmState extends ReportStudentsState {
 	var academicYear: AcademicYear = _
 	var unreportedStudentsWithMissed: Seq[(StudentMember, Int)] = _
 	var thisPeriod: String = _
-	var thisAcademicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
+	var thisAcademicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 	var confirm: Boolean = false
 }

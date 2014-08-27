@@ -93,7 +93,7 @@ class Assignment
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
-	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
+	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.StringListUserType")
 	var fileExtensions: Seq[String] = _

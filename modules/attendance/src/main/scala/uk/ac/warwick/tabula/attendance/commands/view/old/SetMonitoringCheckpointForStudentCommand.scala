@@ -94,7 +94,7 @@ trait SetMonitoringCheckpointForStudentCommandValidation extends SelfValidating 
 	def validate(errors: Errors) {
 
 		val academicYear = templateMonitoringPoint.pointSet.academicYear
-		val thisAcademicYear = AcademicYear.guessByDate(DateTime.now)
+		val thisAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)
 		studentsState.asScala.foreach{ case(_, pointMap) =>
 			val studentPointSet = monitoringPointService.getPointSetForStudent(student, academicYear)

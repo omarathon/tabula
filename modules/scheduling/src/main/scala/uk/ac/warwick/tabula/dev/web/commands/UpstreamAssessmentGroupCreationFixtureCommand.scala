@@ -23,7 +23,7 @@ class UpstreamAssessmentGroupCreationFixtureCommandInternal extends CommandInter
 		 group.moduleCode = moduleCode
 		 group.occurrence = occurrence
 		 group.assessmentGroup = assessmentGroup
-		 group.academicYear = AcademicYear.guessByDate(DateTime.now)
+		 group.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 		 group.members.knownType.staticUserIds = universityIds.asScala
 
 		 assignmentMembershipService.save(group)

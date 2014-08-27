@@ -80,7 +80,7 @@ class EditSmallGroupSetMembershipCommandInternal(val module: Module, val set: Sm
 	}
 }
 
-trait EditSmallGroupSetMembershipCommandState extends CurrentAcademicYear {
+trait EditSmallGroupSetMembershipCommandState extends CurrentSITSAcademicYear {
 	def module: Module
 	def set: SmallGroupSet
 }

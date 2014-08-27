@@ -11,7 +11,7 @@ class WholeWeekFormatterTest extends TestBase {
 	val termService = new TermServiceImpl
 
 	@Test def termNumbering() = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
-		val formatter = new WholeWeekFormatter(AcademicYear.guessByDate(DateTime.now))
+		val formatter = new WholeWeekFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		formatter.termService = termService
 
 		formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = false) should be("Term 1, week 1")
@@ -34,7 +34,7 @@ class WholeWeekFormatterTest extends TestBase {
 
 
 	@Test def cumulativeTermNumbering() = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
-		val formatter = new WholeWeekFormatter(AcademicYear.guessByDate(DateTime.now))
+		val formatter = new WholeWeekFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		formatter.termService = termService
 
 		formatter.format(Seq(WeekRange(4)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = false) should be("Term 1, week 4")
@@ -58,7 +58,7 @@ class WholeWeekFormatterTest extends TestBase {
 
 
 	@Test def academicWeekNumbering() = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
-		val formatter = new WholeWeekFormatter(AcademicYear.guessByDate(DateTime.now))
+		val formatter = new WholeWeekFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		formatter.termService = termService
 
 		formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Week 1")
@@ -81,7 +81,7 @@ class WholeWeekFormatterTest extends TestBase {
 	}
 
 	@Test def noWeekNumbers() = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
-		val formatter = new WholeWeekFormatter(AcademicYear.guessByDate(DateTime.now))
+		val formatter = new WholeWeekFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		formatter.termService = termService
 
 		formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 3<sup>rd</sup> Oct 2011")
