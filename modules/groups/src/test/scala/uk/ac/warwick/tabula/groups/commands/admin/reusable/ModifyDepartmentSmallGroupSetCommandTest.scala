@@ -35,11 +35,11 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def create { new CreateCommandFixture {
 		command.name = "Set name"
-		command.academicYear = AcademicYear.guessByDate(DateTime.now)
+		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		val set = command.applyInternal()
 		set.name should be ("Set name")
-		set.academicYear should be (AcademicYear.guessByDate(DateTime.now))
+		set.academicYear should be (AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		set.members should not be (null)
 
 		there was one (command.smallGroupService).saveOrUpdate(set)
@@ -50,11 +50,11 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 		command.academicYear should be (set.academicYear)
 
 		command.name = "Set name"
-		command.academicYear = AcademicYear.guessByDate(DateTime.now)
+		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		command.applyInternal() should be (set)
 		set.name should be ("Set name")
-		set.academicYear should be (AcademicYear.guessByDate(DateTime.now))
+		set.academicYear should be (AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		set.members should not be (null)
 
 		there was one (command.smallGroupService).saveOrUpdate(set)
@@ -143,7 +143,7 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def validationPasses { new ValidationFixture {
 		command.name = "That's not my name"
-		command.academicYear = AcademicYear.guessByDate(DateTime.now)
+		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -153,7 +153,7 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def validateNoName { new ValidationFixture {
 		command.name = "             "
-		command.academicYear = AcademicYear.guessByDate(DateTime.now)
+		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -166,7 +166,7 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def validateNameTooLong { new ValidationFixture {
 		command.name = (1 to 300).map { _ => "a" }.mkString("")
-		command.academicYear = AcademicYear.guessByDate(DateTime.now)
+		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -178,7 +178,7 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def validateCantChangeAcademicYear { new ValidationFixtureExistingSet {
-		set.academicYear = AcademicYear.guessByDate(DateTime.now)
+		set.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		command.name = "That's not my name"
 		command.academicYear = set.academicYear + 1

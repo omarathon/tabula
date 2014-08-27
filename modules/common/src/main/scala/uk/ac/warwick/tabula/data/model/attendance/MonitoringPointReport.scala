@@ -1,14 +1,20 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
 import javax.persistence._
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{GeneratedId, StudentCourseYearDetails, StudentCourseDetails, StudentMember}
 import org.joda.time.DateTime
 import org.hibernate.annotations.Type
 import uk.ac.warwick.tabula.AcademicYear
 import javax.validation.constraints.{Min, NotNull}
 
+import uk.ac.warwick.tabula.services.TermService
+
 @Entity
 class MonitoringPointReport extends GeneratedId {
+
+	@transient
+	var termService = Wire[TermService]
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="student", referencedColumnName="universityId")
@@ -34,7 +40,7 @@ class MonitoringPointReport extends GeneratedId {
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
-	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
+	var academicYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(new DateTime(), termService)
 
 	@NotNull
 	@Min(1)

@@ -10,7 +10,7 @@ class TermAwareWeekRangeToDateConversionServiceTest extends TestBase with Mockit
 	val localNow = LocalDateTime.now.withDayOfWeek(DateTimeConstants.MONDAY)
 	val dtNow = localNow.toDateTime
 
-  val localCurrentYear = AcademicYear.guessByDate(localNow.toDateTime)
+  val localCurrentYear = AcademicYear.guessSITSAcademicYearByDate(localNow.toDateTime)
 
 	val week1:WeekRange.Week = 1
   val week1Interval = new Interval(dtNow.withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay(),

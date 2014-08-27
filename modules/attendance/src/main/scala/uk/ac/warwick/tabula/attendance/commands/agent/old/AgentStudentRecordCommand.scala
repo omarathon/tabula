@@ -119,7 +119,7 @@ trait AgentStudentRecordCommandState extends GroupMonitoringPointsByTerm with Mo
 	def relationshipType: StudentRelationshipType
 	def student: StudentMember
 	def academicYearOption: Option[AcademicYear]
-	val thisAcademicYear = AcademicYear.guessByDate(new DateTime())
+	val thisAcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
 	val academicYear = academicYearOption.getOrElse(thisAcademicYear)
 	lazy val pointSet = monitoringPointService.getPointSetForStudent(student, academicYear).getOrElse(throw new ItemNotFoundException)
 

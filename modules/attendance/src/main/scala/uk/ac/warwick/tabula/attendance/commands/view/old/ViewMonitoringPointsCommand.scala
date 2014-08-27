@@ -85,7 +85,7 @@ trait ViewMonitoringPointsState extends FiltersStudents with PermissionsAwareRou
 	def academicYearOption: Option[AcademicYear]
 	def user: CurrentUser
 
-	val thisAcademicYear = AcademicYear.guessByDate(new DateTime())
+	val thisAcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
 	val academicYear = academicYearOption.getOrElse(thisAcademicYear)
 	var students: Seq[StudentMember] = _
 

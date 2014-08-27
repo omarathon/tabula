@@ -96,7 +96,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 		if (string == null) AssessmentComponent.NoneAssessmentGroup
 		else string
 
-	private def yearsToImport = AcademicYear.guessByDate(DateTime.now).yearsSurrounding(0, 1)
+	private def yearsToImport = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
 }
 
 @Profile(Array("sandbox")) @Service
@@ -123,7 +123,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 			uniId <- range
 		} callback(
 			UpstreamModuleRegistration(
-				year = AcademicYear.guessByDate(DateTime.now).toString,
+				year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString,
 				sprCode = "%d/1".format(uniId),
 				occurrence = "A",
 				moduleCode = "%s-15".format(moduleCode.toUpperCase),
@@ -141,7 +141,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 		} yield {
 			val ag = new UpstreamAssessmentGroup()
 			ag.moduleCode = "%s-15".format(moduleCode.toUpperCase)
-			ag.academicYear = AcademicYear.guessByDate(DateTime.now)
+			ag.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 			ag.assessmentGroup = "A"
 			ag.occurrence = "A"
 			ag

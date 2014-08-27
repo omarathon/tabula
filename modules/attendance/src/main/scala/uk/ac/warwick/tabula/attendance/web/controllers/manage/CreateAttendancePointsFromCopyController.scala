@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.attendance.web.controllers.manage
 
-import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -24,9 +23,8 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 	@Autowired var moduleAndDepartmentService: ModuleAndDepartmentService = _
 
 	@ModelAttribute("allAcademicYears")
-	def allAcademicYears() = {
-		val thisAcademicYear = AcademicYear.guessByDate(DateTime.now)
-		Seq(thisAcademicYear.previous, thisAcademicYear, thisAcademicYear.next)
+	def allAcademicYears(@PathVariable academicYear: AcademicYear) = {
+		Seq(academicYear.previous, academicYear, academicYear.next)
 	}
 
 	@ModelAttribute("allDepartments")
@@ -70,7 +68,6 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 		@PathVariable academicYear: AcademicYear
 	) = {
 		Mav("manage/copypoints",
-			"currentAcademicYear" -> AcademicYear.guessByDate(DateTime.now),
 			"returnTo" -> getReturnTo("")
 		).crumbs(
 			Breadcrumbs.Manage.Home,
@@ -104,7 +101,6 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 			"isSchemes" -> searchResult.schemes.nonEmpty,
 			"allTypes" -> AttendanceMonitoringPointType.values,
 			"findResult" -> findCommand.apply(),
-			"currentAcademicYear" -> AcademicYear.guessByDate(DateTime.now),
 			"returnTo" -> getReturnTo("")
 		).crumbs(
 			Breadcrumbs.Manage.Home,
@@ -144,7 +140,6 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 				"isSchemes" -> searchResult.schemes.nonEmpty,
 				"allTypes" -> AttendanceMonitoringPointType.values,
 				"errors" -> errors,
-				"currentAcademicYear" -> AcademicYear.guessByDate(DateTime.now),
 				"returnTo" -> getReturnTo("")
 			).crumbs(
 				Breadcrumbs.Manage.Home,

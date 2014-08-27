@@ -239,7 +239,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 				val day = DayOfWeek(start.getDayOfWeek)
 
 				// Guess the year based on the term start date, not the actual date, to get around the comment in AcademicYear.guessByDate
-				val year = AcademicYear.guessByDate(termService.getTermFromDateIncludingVacations(start).getStartDate)
+				val year = AcademicYear.guessSITSAcademicYearByDate(termService.getTermFromDateIncludingVacations(start).getStartDate)
 
 				// Convert the date to an academic week number
 				val startWeek = termService.getAcademicWeekForAcademicYear(start, year)

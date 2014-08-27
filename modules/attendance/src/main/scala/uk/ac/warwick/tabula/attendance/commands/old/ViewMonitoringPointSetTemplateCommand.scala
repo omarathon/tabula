@@ -32,7 +32,7 @@ abstract class ViewMonitoringPointSetTemplateCommand(val set: MonitoringPointSet
 trait ViewMonitoringPointSetTemplateState extends GroupMonitoringPointsByTerm {
 	def set: MonitoringPointSetTemplate
 
-	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
+	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 	// Just used to access week render setting
 	var department: Department = null

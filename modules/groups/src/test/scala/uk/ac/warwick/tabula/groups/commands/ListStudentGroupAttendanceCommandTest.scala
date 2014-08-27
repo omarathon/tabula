@@ -41,7 +41,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		}
 		
 		val now = DateTime.now
-		val academicYear = AcademicYear.guessByDate(now)
+		val academicYear = AcademicYear.guessSITSAcademicYearByDate(now)
 		
 		val set = new SmallGroupSet
 		set.academicYear = academicYear 

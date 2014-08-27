@@ -101,7 +101,7 @@ trait ReportStudentsConfirmCommandState extends ReportStudentsChoosePeriodComman
 	def user: CurrentUser
 
 	lazy val currentPeriod = termService.getTermFromDateIncludingVacations(DateTime.now).getTermTypeAsString
-	lazy val currentAcademicYear = AcademicYear.guessByDate(DateTime.now)
+	lazy val currentAcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now, termService)
 
 	// Bind variables
 	var students: JList[StudentMember] = LazyLists.create()

@@ -555,7 +555,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 		userLookup.registerUserObjects(student1, student2, student3, student4, student5, manual1, manual2, manual3, manual4, manual5, manual10)
 
-		val year = AcademicYear.guessByDate(DateTime.now)
+		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
 			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)

@@ -9,7 +9,7 @@ class ListAllExtensionsCommandTest extends TestBase with Mockito {
 
 	trait Environment {
 		val dept = Fixtures.department("fi", "Film")
-		val year = AcademicYear.guessByDate(new DateTime())
+		val year = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
 
 		val user1 = Fixtures.user("0123456", "cuspxp")
 		val userLookup = smartMock[UserLookupService]

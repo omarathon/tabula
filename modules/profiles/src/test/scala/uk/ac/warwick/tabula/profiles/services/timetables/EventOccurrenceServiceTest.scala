@@ -15,7 +15,7 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 	// deliberately pick a date that _isn't_ now, so that we can highlight places where we're accidentally
 	// guessing the current year instead of reading it from the event
 	val week1Start = DateTime.now().minusYears(2).withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay()
-	val year = AcademicYear.guessByDate(week1Start)
+	val year = AcademicYear.guessSITSAcademicYearByDate(week1Start)
 	val week1end = week1Start.plusDays(7)
 	val week2Start = week1end
 	val week2End = week2Start.plusDays(7)

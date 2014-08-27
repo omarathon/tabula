@@ -94,7 +94,7 @@ trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComp
 		}
 
 		lazy val scientiaBaseUrl = Wire.optionProperty("${scientia.base.url}").getOrElse("https://test-timetablingmanagement.warwick.ac.uk/xml")
-		lazy val currentAcademicYear = AcademicYear.guessByDate(clock.now)
+		lazy val currentAcademicYear = AcademicYear.guessSITSAcademicYearByDate(clock.now)
 		lazy val prevAcademicYear = currentAcademicYear.-(1)
 		lazy val perYearUris =	Seq(prevAcademicYear, currentAcademicYear) map (year=>(scientiaBaseUrl + scientiaFormat(year) + "/",year))
 	}

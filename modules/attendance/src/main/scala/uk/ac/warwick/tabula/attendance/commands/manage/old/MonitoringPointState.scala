@@ -16,7 +16,7 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm with SmallGroupSe
 	var name: String = _
 	var validFromWeek: Int = 0
 	var requiredFromWeek: Int = 0
-	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
+	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
 
 	var pointType: MonitoringPointType = _
 

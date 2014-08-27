@@ -120,7 +120,7 @@ trait StudentRecordCommandState extends GroupMonitoringPointsByTerm with Monitor
 	def student: StudentMember
 	def user: CurrentUser
 	def academicYearOption: Option[AcademicYear]
-	val thisAcademicYear = AcademicYear.guessByDate(new DateTime())
+	val thisAcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
 	val academicYear = academicYearOption.getOrElse(thisAcademicYear)
 	lazy val pointSet = monitoringPointService.getPointSetForStudent(student, academicYear).getOrElse(throw new ItemNotFoundException)
 

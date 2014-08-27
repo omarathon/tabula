@@ -177,7 +177,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			"enrolment_status_code" -> "C",
 			"year_of_study" -> ((member.universityId.toLong % 3) + 1).toInt,
 			"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
-			"sce_academic_year" -> AcademicYear.guessByDate(DateTime.now).toString,
+			"sce_academic_year" -> AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString,
 			"sce_sequence_number" -> 1,
 			"enrolment_department_code" -> member.departmentCode.toUpperCase,
 			"mod_reg_status" -> "CON",

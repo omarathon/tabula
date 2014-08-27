@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import javax.persistence._
 import uk.ac.warwick.tabula.data.model.{GeneratedId, Route}
@@ -7,10 +8,14 @@ import org.joda.time.DateTime
 import org.hibernate.annotations.{BatchSize, Type}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.services.TermService
 
 @Entity
 @Table(name = "monitoringpointset")
 class MonitoringPointSet extends GeneratedId with PermissionsTarget {
+
+	@transient
+	var termService = Wire[TermService]
 
 	def displayName = {
 		s"${route.code.toUpperCase} ${route.name} ${
@@ -59,7 +64,7 @@ class MonitoringPointSet extends GeneratedId with PermissionsTarget {
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
-	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
+	var academicYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(new DateTime(), termService)
 	
 	def permissionsParents = Option(route).toStream
 

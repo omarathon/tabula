@@ -78,7 +78,7 @@ class TimetableController extends ProfilesController with TermBasedEventOccurren
 	@RequestMapping(value = Array("/ical"))
 	def getIcalFeed(@ModelAttribute("command") command: Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState): Mav = {
 		// Guess the year based on the term start date, not the actual date, to get around the comment in AcademicYear.guessByDate
-		val year = AcademicYear.guessByDate(termService.getTermFromDateIncludingVacations(DateTime.now).getStartDate)
+		val year = AcademicYear.guessSITSAcademicYearByDate(termService.getTermFromDateIncludingVacations(DateTime.now).getStartDate)
 
 		// Start from either 1 week ago, or the start of the current academic year, whichever is earlier
 		val start = {

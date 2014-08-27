@@ -53,5 +53,5 @@ class SitsAcademicYearServiceImpl extends SitsAcademicYearService {
 class SandboxSitsAcademicYearService extends SitsAcademicYearService {
 
 	def getCurrentSitsAcademicYearString: String =
-		AcademicYear.guessByDate(DateTime.now).toString()
+		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString()
 }

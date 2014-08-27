@@ -28,8 +28,8 @@ class AssignmentDaoTest extends PersistenceTestBase {
 		val moduleNotInDept = Fixtures.module("ca101")
 		session.save(moduleNotInDept)
 
-		val thisYear = AcademicYear.guessByDate(new DateTime())
-		val previousYear = AcademicYear.guessByDate(new DateTime().minusYears(2))
+		val thisYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
+		val previousYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime().minusYears(2))
 
 		// these assignments are in the current department and year
 		val assignment1 = Fixtures.assignment("assignment 1")

@@ -62,7 +62,7 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 
 			val scydAcademicYear = {
 				if (null != academicYear) academicYear
-				else AcademicYear.guessByDate(DateTime.now)
+				else AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 			}
 
 			// actually, if the specified academic year is before now, perhaps we should create and

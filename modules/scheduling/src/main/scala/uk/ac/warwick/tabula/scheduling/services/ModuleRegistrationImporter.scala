@@ -85,7 +85,7 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 				assessmentGroup = "A",
 				selectionStatusCode = "C",
 				occurrence = "A",
-				academicYear = AcademicYear.guessByDate(DateTime.now).toString,
+				academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString,
 				agreedMark = Some(new java.math.BigDecimal("90.0")),
 				agreedGrade = "A"
 			)

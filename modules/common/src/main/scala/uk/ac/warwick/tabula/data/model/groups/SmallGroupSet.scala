@@ -70,7 +70,7 @@ class SmallGroupSet
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
-	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
+	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 	@NotNull
 	var name: String = _

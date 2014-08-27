@@ -79,7 +79,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 				Some("event 1 location"),
 				Some("CS118"),
 				Seq("0672089", "0672088"),
-				AcademicYear.guessByDate(DateTime.now)
+				AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 			),
 			TimetableEvent(
 				"event 2 name",
@@ -93,7 +93,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 				None,
 				None,
 				Nil,
-				AcademicYear.guessByDate(DateTime.now)
+				AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 			)
 		)
 

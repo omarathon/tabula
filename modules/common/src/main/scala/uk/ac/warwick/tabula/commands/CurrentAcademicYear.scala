@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.AcademicYear
 
 trait CurrentAcademicYear {
 
-	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime)
+	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime)
 
 	def getAcademicYearString = Option(academicYear).map(_.toString).getOrElse("")
 

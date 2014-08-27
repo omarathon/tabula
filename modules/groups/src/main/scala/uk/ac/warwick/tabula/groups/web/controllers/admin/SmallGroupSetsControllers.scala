@@ -37,7 +37,7 @@ trait SmallGroupSetsController extends GroupsController {
 	@ModelAttribute("ManageSmallGroupsMappingParameters") def params = ManageSmallGroupsMappingParameters
 	
 	@ModelAttribute("academicYearChoices") def academicYearChoices =
-		AcademicYear.guessByDate(DateTime.now).yearsSurrounding(2, 2)
+		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2)
 	
 	@ModelAttribute("allFormats") def allFormats = SmallGroupFormat.members
 	
@@ -61,7 +61,7 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 	type CreateSmallGroupSetCommand = Appliable[SmallGroupSet] with CreateSmallGroupSetCommandState
 
 	@ModelAttribute("departmentSmallGroupSets") def departmentSmallGroupSets(@PathVariable("module") module: Module, @RequestParam(value="academicYear", required=false) academicYear: AcademicYear) =
-		smallGroupService.getDepartmentSmallGroupSets(module.department, Option(academicYear).getOrElse(AcademicYear.guessByDate(DateTime.now)))
+		smallGroupService.getDepartmentSmallGroupSets(module.department, Option(academicYear).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
 	
 	@ModelAttribute("createSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module): CreateSmallGroupSetCommand =
 		ModifySmallGroupSetCommand.create(module)

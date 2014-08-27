@@ -107,7 +107,7 @@ trait CopyAssignmentsPermissions extends ArchiveAssignmentsPermissions {
 }
 
 trait CopyAssignmentsState extends ArchiveAssignmentsState {
-	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime)
+	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime)
 	var archive: JBoolean = false
 }
 
