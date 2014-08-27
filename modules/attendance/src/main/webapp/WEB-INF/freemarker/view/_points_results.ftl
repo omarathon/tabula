@@ -6,10 +6,10 @@
 
 <#if validationError?has_content>
 	<#noescape>${validationError}</#noescape>
-<#elseif !filterQuery?has_content>
-<p class="alert alert-info"><i class="icon-lightbulb"></i> Find points for students using the filter options above.</p>
-<#elseif filterQuery?has_content && filterCommand.filterTooVague>
-<p class="alert"><i class="icon-warning-sign"></i> The filter you have chosen includes too many students.</p>
+<#elseif !filterCommand.hasBeenFiltered>
+	<p class="alert alert-info"><i class="icon-lightbulb"></i> Find points for students using the filter options above.</p>
+<#elseif filterCommand.filterTooVague>
+	<p class="alert"><i class="icon-warning-sign"></i> The filter you have chosen includes too many students.</p>
 <#elseif filterResult?size == 0>
 	<p class="alert"><i class="icon-warning-sign"></i> No points exist for the selected options.</p>
 <#else>

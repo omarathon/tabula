@@ -27,12 +27,6 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 			}
 		}
 
-
-	def courseRestriction: Option[ScalaRestriction] = startsWithIfNotEmpty(
-		"course.code", courseTypes.asScala.map { _.courseCodeChar.toString },
-		getAliasPaths("course") : _*
-	)
-
 	def attendanceRestriction: Option[ScalaRestriction] = inIfNotEmpty(
 		"studentCourseYearDetails.modeOfAttendance", modesOfAttendance.asScala,
 		getAliasPaths("studentCourseYearDetails") : _*
