@@ -60,7 +60,7 @@ abstract class ViewProfileController extends ProfilesController {
 
 		val filterYear = studentCourseYearDetails match {
 			case Some(scd: StudentCourseYearDetails) => scd.academicYear
-			case None => AcademicYear.guessSITSAcademicYearByDate(DateTime.now); // default to this year
+			case None => AcademicYear.guessSITSAcademicYearByDate(DateTime.now) // default to this year
 		}
 	
 		allRelationshipTypes.flatMap { relationshipType =>

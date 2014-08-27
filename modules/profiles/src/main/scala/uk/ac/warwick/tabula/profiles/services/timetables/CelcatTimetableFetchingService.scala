@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.profiles.services.timetables
 
 import java.io.InputStream
-import java.util
 
 import dispatch.classic.thread.ThreadSafeHttpClient
 import dispatch.classic._
@@ -96,7 +95,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(Some(celcatConfiguration.authScope, celcatConfiguration.credentials)), maxConnections, maxConnectionsPerRoute) {
-			getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
+			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
 		}
 	}
 
@@ -123,7 +122,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 			case FoundUser(u) => configs.get(u.getDepartmentCode.toLowerCase).map { config =>
 				val filename = config.staffFilenameLookupStrategy match {
 					case FilenameGenerationStrategy.Default => s"${u.getWarwickId}.ics"
-					case FilenameGenerationStrategy.BSV => lookupCelcatIDFromBSV(u.getWarwickId, config).map { id => s"${id}.ics" }.getOrElse(s"${u.getWarwickId}.ics")
+					case FilenameGenerationStrategy.BSV => lookupCelcatIDFromBSV(u.getWarwickId, config).map { id => s"$id.ics" }.getOrElse(s"${u.getWarwickId}.ics")
 				}
 
 				doRequest(filename, config)
@@ -172,7 +171,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 	def doRequest(filename: String, config: CelcatDepartmentConfiguration): Seq[TimetableEvent] = {
 		// Add {universityId}.ics to the URL
-		val req = (url(config.baseUri) / filename <<? Map("forcebasic" -> "true"))
+		val req = url(config.baseUri) / filename <<? Map("forcebasic" -> "true")
 
 		// Execute the request
 		// If the status is OK, pass the response to the handler function for turning into TimetableEvents
@@ -193,7 +192,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 		groupedEvents.map {
 			case event :: Nil => event
-			case events => {
+			case _ =>
 				val event = events.head
 				TimetableEvent(
 					event.name,
@@ -210,7 +209,6 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					event.year
 				)
 				event
-			}
 		}.toList
 	}
 
@@ -238,8 +236,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 				val day = DayOfWeek(start.getDayOfWeek)
 
-				// Guess the year based on the term start date, not the actual date, to get around the comment in AcademicYear.guessByDate
-				val year = AcademicYear.guessSITSAcademicYearByDate(termService.getTermFromDateIncludingVacations(start).getStartDate)
+				val year = AcademicYear.findAcademicYearContainingDate(start, termService)
 
 				// Convert the date to an academic week number
 				val startWeek = termService.getAcademicWeekForAcademicYear(start, year)

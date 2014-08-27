@@ -40,7 +40,7 @@ object ModifySmallGroupEventCommand {
 			with AutowiringSmallGroupServiceComponent
 }
 
-trait ModifySmallGroupEventCommandState extends CurrentAcademicYear {
+trait ModifySmallGroupEventCommandState extends CurrentSITSAcademicYear {
 	def module: Module
 	def set: SmallGroupSet
 	def group: SmallGroup
