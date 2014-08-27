@@ -1,4 +1,6 @@
 <#import "../submissionsandfeedback/_submission_details.ftl" as sd />
+<#import "*/submission_components.ftl" as components />
+
 <div class="well">
 	<h3>Submission</h3>
 
@@ -18,5 +20,12 @@
 
 	<div>
 		<@spring.message code=command.submissionState /><@sd.submission_details command.submission />
+
+		<#list submission.allAttachments as attachment>
+			<!-- Checking originality report for ${attachment.name} ... -->
+			<#if attachment.originalityReport??>
+				<@components.originalityReport attachment />
+			</#if>
+		</#list>
 	</div>
 </div>

@@ -1,5 +1,6 @@
 <#import "_submission_details.ftl" as sd />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<#import "*/submission_components.ftl" as components />
 <#escape x as x?html>
 
 <div id="feedback-modal" class="modal fade"></div>
@@ -38,33 +39,6 @@
 	</div>
 
 	<#if students??>
-		<#macro originalityReport attachment>
-			<#local r=attachment.originalityReport />
-
-			<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
-			<div id="tip-content-${attachment.id}" class="hide">
-				<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
-				<p class="similarity-subcategories-tooltip">
-					Web: ${r.webOverlap}%<br>
-					Student papers: ${r.studentOverlap}%<br>
-					Publications: ${r.publicationOverlap}%
-				</p>
-				<p>
-					<a target="turnitin-viewer" href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
-				</p>
-			</div>
-			<script type="text/javascript">
-			jQuery(function($){
-			  $("#tool-tip-${attachment.id}").popover({
-				placement: 'right',
-				html: true,
-				content: function(){return $('#tip-content-${attachment.id}').html();},
-				title: 'Turnitin report summary'
-			  });
-			});
-			</script>
-		</#macro>
-
 		<#function hasSubmissionOrFeedback students>
 			<#local result = [] />
 			<#list students as student>
@@ -261,7 +235,7 @@
 										<#list submission.allAttachments as attachment>
 											<!-- Checking originality report for ${attachment.name} ... -->
 											<#if attachment.originalityReport??>
-												<@originalityReport attachment />
+												<@components.originalityReport attachment />
 											</#if>
 										</#list>
 									</#if>

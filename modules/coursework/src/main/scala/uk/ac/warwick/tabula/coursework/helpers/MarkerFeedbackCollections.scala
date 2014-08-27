@@ -26,7 +26,7 @@ trait MarkerFeedbackCollecting  {
 				markerFeedbackItems.filter(f => f.feedbacks.last.state != MarkingState.MarkingCompleted && f.feedbacks.last.state != MarkingState.Rejected),
 				markerFeedbackItems.filter(f => f.feedbacks.last.state == MarkingState.MarkingCompleted),
 				markerFeedbackItems.filter(f => f.feedbacks.last.state == MarkingState.Rejected)
-				)
+			)
 		}
 
 		MarkerFeedbackCollections(inProgressFeedback, completedFeedback, rejectedFeedback)

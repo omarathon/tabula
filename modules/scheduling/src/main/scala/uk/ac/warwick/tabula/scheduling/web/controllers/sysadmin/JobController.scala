@@ -46,7 +46,7 @@ class JobController extends BaseController {
 		val jobInstance = jobService.add(Some(user), TestingJob("sysadmin test", TestingJob.DefaultDelay))
 		val id = jobInstance.id
 		testStatus(id)
-		Redirect(Routes.sysadmin.jobs.status(jobInstance))
+		Redirect(Routes.scheduling.jobs.status(jobInstance))
 	}
 
 	@RequestMapping(Array("/job-status"))
@@ -61,7 +61,7 @@ class JobController extends BaseController {
 	def kill(@RequestParam("id") id: String) = {
 		val instance = jobService.getInstance(id)
 		jobService.kill(instance.get)
-		Redirect(Routes.sysadmin.jobs.list)
+		Redirect(Routes.scheduling.jobs.list)
 	}
 	
 	@RequestMapping(Array("/run"))
@@ -70,7 +70,7 @@ class JobController extends BaseController {
 		val job = jobService.findJob(instance.jobType).get
 		
 		jobService.processInstance(instance, job)
-		Redirect(Routes.sysadmin.jobs.list)
+		Redirect(Routes.scheduling.jobs.list)
 	}
 
 }
