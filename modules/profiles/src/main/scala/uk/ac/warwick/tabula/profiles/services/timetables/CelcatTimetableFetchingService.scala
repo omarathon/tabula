@@ -2,28 +2,28 @@ package uk.ac.warwick.tabula.profiles.services.timetables
 
 import java.io.InputStream
 
-import dispatch.classic.thread.ThreadSafeHttpClient
 import dispatch.classic._
+import dispatch.classic.thread.ThreadSafeHttpClient
 import net.fortuna.ical4j.data.CalendarBuilder
-import net.fortuna.ical4j.model.parameter.Value
-import net.fortuna.ical4j.model.property.{RRule, DateProperty, Categories}
-import net.fortuna.ical4j.model.{Parameter, Property, Component}
 import net.fortuna.ical4j.model.component.VEvent
+import net.fortuna.ical4j.model.parameter.Value
+import net.fortuna.ical4j.model.property.{Categories, DateProperty, RRule}
+import net.fortuna.ical4j.model.{Component, Parameter, Property}
 import net.fortuna.ical4j.util.CompatibilityHints
 import org.apache.http.auth.AuthScope
-import org.apache.http.client.params.{CookiePolicy, ClientPNames}
+import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek}
-import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
 import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
-import uk.ac.warwick.tabula.services.{TermServiceComponent, AutowiringTermServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
-import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
-import uk.ac.warwick.util.cache.{CacheEntryUpdateException, SingularCacheEntryFactory, CacheEntryFactory, Caches}
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringUserLookupComponent, TermServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.util.cache.{CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
@@ -194,8 +194,8 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 		groupedEvents.map {
 			case event :: Nil => event
-			case _ =>
-				val event = events.head
+			case eventSeq =>
+				val event = eventSeq.head
 				TimetableEvent(
 					event.name,
 					event.title,
