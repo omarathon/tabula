@@ -127,7 +127,7 @@
 	</div>
 </div>
 
-<div id="modal" class="modal hide fade" style="display:none;">
+<div id="meetings-modal" class="modal hide fade" style="display:none;">
 	<@modal.header>
 		<h3>Meetings</h3>
 	</@modal.header>

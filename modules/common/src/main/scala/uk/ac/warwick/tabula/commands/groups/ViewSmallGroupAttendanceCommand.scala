@@ -1,23 +1,17 @@
-package uk.ac.warwick.tabula.groups.commands
+package uk.ac.warwick.tabula.commands.groups
 
-import uk.ac.warwick.tabula.commands.{MemberOrUser, Unaudited, CommandInternal, ComposableCommand, ReadOnly, TaskBenchmarking}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroup, SmallGroupEventOccurrence, SmallGroupEvent}
-import uk.ac.warwick.tabula.services.SmallGroupServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringSmallGroupServiceComponent
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
-import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, MemberOrUser, ReadOnly, TaskBenchmarking, Unaudited}
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupEventAttendanceNote, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, AutowiringUserLookupComponent, SmallGroupServiceComponent, TermServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
 import scala.collection.immutable.SortedMap
-import uk.ac.warwick.tabula.services.TermServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.services.UserLookupComponent
-import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
-import uk.ac.warwick.tabula.ItemNotFoundException
 
 sealed abstract class SmallGroupAttendanceState {
 	def getName = toString
@@ -109,7 +103,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 	extends CommandInternal[ViewSmallGroupAttendanceCommand.SmallGroupAttendanceInformation] with ViewSmallGroupAttendanceState with TaskBenchmarking {
 	self: SmallGroupServiceComponent with TermServiceComponent with UserLookupComponent =>
 		
-	import ViewSmallGroupAttendanceCommand._
+	import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand._
 	
 	if (!group.groupSet.collectAttendance) throw new ItemNotFoundException
 	

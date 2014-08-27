@@ -1,23 +1,18 @@
-package uk.ac.warwick.tabula.groups.commands
+package uk.ac.warwick.tabula.commands.groups
 
-import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
-import uk.ac.warwick.tabula.commands.{TaskBenchmarking, Unaudited, ComposableCommand, ReadOnly, CommandInternal}
+import org.joda.time.{DateMidnight, DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand._
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, TaskBenchmarking, Unaudited}
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEventAttendanceNote, SmallGroupEventOccurrence, WeekRange}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.SmallGroupServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringSmallGroupServiceComponent
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.services.TermServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEventOccurrence, SmallGroup, DayOfWeek, WeekRange}
-import org.joda.time.DateTime
-import scala.collection.immutable.SortedMap
+import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, SmallGroupServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.util.termdates.Term
-import org.joda.time.DateMidnight
-import org.joda.time.DateTimeConstants
-import uk.ac.warwick.tabula.groups.commands.ViewSmallGroupAttendanceCommand._
+
+import scala.collection.JavaConverters._
+import scala.collection.immutable.SortedMap
 
 case class StudentGroupAttendance(
 	termWeeks: SortedMap[Term, WeekRange],
@@ -28,7 +23,6 @@ case class StudentGroupAttendance(
 )
 
 object ListStudentGroupAttendanceCommand {
-	import ViewSmallGroupAttendanceCommand._
 
 	type PerGroupAttendance = SortedMap[SmallGroup, SortedMap[SmallGroupEventOccurrence.WeekNumber, SortedMap[EventInstance, SmallGroupAttendanceState]]]
 	type PerTermAttendance = SortedMap[Term, PerGroupAttendance]
@@ -47,8 +41,6 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 		with ListStudentGroupAttendanceCommandState with TaskBenchmarking {
 	self: SmallGroupServiceComponent with TermServiceComponent =>
 
-	import ViewSmallGroupAttendanceCommand._
-
 	implicit val defaultOrderingForGroup = Ordering.by { group: SmallGroup => (group.groupSet.module.code, group.groupSet.name, group.name, group.id) }
 	implicit val defaultOrderingForDateTime = Ordering.by[DateTime, Long] ( _.getMillis )
 	implicit val defaultOrderingForTerm = Ordering.by[Term, DateTime] ( _.getStartDate )
@@ -61,7 +53,7 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 				group.groupSet.showAttendanceReports &&
 				group.groupSet.visibleToStudents &&
 				group.groupSet.academicYear == academicYear &&
-				!group.events.asScala.isEmpty
+				group.events.asScala.nonEmpty
 		}
 
 		val allInstances = groups.flatMap { group => allEventInstances(group, smallGroupService.findAttendanceByGroup(group)) }
