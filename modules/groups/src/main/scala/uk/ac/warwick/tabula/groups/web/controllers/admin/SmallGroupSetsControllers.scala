@@ -81,7 +81,7 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 
 	@RequestMapping(method = Array(POST), params=Array("action!=refresh"))
 	def saveAndExit(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand, errors: Errors) =
-		submit(cmd, errors, { _ => Routes.admin.module(cmd.module) })
+		submit(cmd, errors, { _ => Routes.admin(cmd.module.department, cmd.academicYear) })
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddStudents, "action!=refresh"))
 	def submitAndAddStudents(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand, errors: Errors) =
@@ -127,7 +127,7 @@ class CreateSmallGroupSetEditPropertiesController extends SmallGroupSetsControll
 
 	@RequestMapping(method = Array(POST), params=Array("action!=refresh"))
 	def saveAndExit(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors) =
-		submit(cmd, errors, { _ => Routes.admin.module(cmd.module) })
+		submit(cmd, errors, { _ => Routes.admin(cmd.module.department, cmd.academicYear) })
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddStudents, "action!=refresh"))
 	def submitAndAddStudents(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors) =
@@ -173,7 +173,7 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 
 	@RequestMapping(method = Array(POST), params=Array("action!=refresh"))
 	def saveAndExit(@Valid @ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors) =
-		submit(cmd, errors, { _ => Routes.admin.module(cmd.module) })
+		submit(cmd, errors, { _ => Routes.admin(cmd.module.department, cmd.academicYear) })
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddStudents, "action!=refresh"))
 	def submitAndAddStudents(@Valid @ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors) =
@@ -212,8 +212,8 @@ class DeleteSmallGroupSetController extends GroupsController {
 	def submit(@Valid cmd: DeleteSmallGroupSetCommand, errors: Errors) =
 		if (errors.hasErrors) form(cmd)
 		else {
-			cmd.apply()
-			Redirect(Routes.admin.module(cmd.module))
+			val set = cmd.apply()
+			Redirect(Routes.admin(cmd.module.department, set.academicYear))
 		}
 	
 }

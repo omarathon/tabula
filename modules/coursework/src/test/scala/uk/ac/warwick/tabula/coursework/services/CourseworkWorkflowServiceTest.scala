@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.services
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.{WorkflowStages, Fixtures, TestBase, Features}
 import uk.ac.warwick.tabula.coursework.commands.assignments.ExtensionListItem
 import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
 import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
@@ -8,7 +7,6 @@ import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.Features
 import scala.collection.immutable.ListMap
 import uk.ac.warwick.tabula.data.model.FileAttachment
 
@@ -39,7 +37,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		)
 		
 	@Test def stagesForAssignment() {
-		import WorkflowStages._
+		import CourseworkWorkflowStages._
 		
 		assignment.collectMarks = false
 		assignment.collectSubmissions = false
@@ -64,7 +62,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		assignment.collectSubmissions = true
 		
 		service.getStagesFor(assignment) should be (Seq(
-			WorkflowStages.Submission, DownloadSubmission, 
+			CourseworkWorkflowStages.Submission, DownloadSubmission,
 			AddMarks, AddFeedback, ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback
 		))
 		
@@ -72,7 +70,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		department.plagiarismDetectionEnabled = true
 		
 		service.getStagesFor(assignment) should be (Seq(
-			WorkflowStages.Submission, CheckForPlagiarism, DownloadSubmission,
+			CourseworkWorkflowStages.Submission, CheckForPlagiarism, DownloadSubmission,
 			AddMarks, AddFeedback, ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback
 		))
 		
@@ -80,14 +78,14 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		assignment.markingWorkflow = Fixtures.studentsChooseMarkerWorkflow("my workflow")
 		
 		service.getStagesFor(assignment) should be (Seq(
-			WorkflowStages.Submission, CheckForPlagiarism, DownloadSubmission,
+			CourseworkWorkflowStages.Submission, CheckForPlagiarism, DownloadSubmission,
 			ReleaseForMarking, FirstMarking,
 			AddMarks, AddFeedback, ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback
 		))
 
 		assignment.markingWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("my workflow")
 		service.getStagesFor(assignment) should be (Seq(
-			WorkflowStages.Submission, CheckForPlagiarism, DownloadSubmission,
+			CourseworkWorkflowStages.Submission, CheckForPlagiarism, DownloadSubmission,
 			ReleaseForMarking, FirstMarking, SecondMarking,
 			AddMarks, AddFeedback, ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback
 		))
@@ -101,6 +99,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		department.plagiarismDetectionEnabled = false
 		
 		// lines were getting a bit long...
+		import CourseworkWorkflowStages._
 		import WorkflowStages._
 		
 		{

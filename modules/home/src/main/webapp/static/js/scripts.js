@@ -589,7 +589,11 @@
 			else $icon.addClass('icon-fixed-width icon-chevron-right');
 
 			var $title = $section.find('.section-title');
-			$title.prepend(' ').prepend($icon);
+			if ($title.find('.icon-container').length) {
+				$title.find('.icon-container').first().prepend(' ').prepend($icon);
+			} else {
+				$title.prepend(' ').prepend($icon);
+			}
 
 			var populateContent = function(onComplete) { onComplete(); }
 			if ($section.data('populate') && $section.data('href')) {

@@ -1,42 +1,6 @@
 <#escape x as x?html>
+	<#import "*/group_components.ftl" as components />
 	<#assign academicYear=smallGroupSet.academicYear />
-
-	<#macro eventShortDetails event>
-		<#if event.title?has_content><span class="eventTitle">${event.title} - </span></#if>
-		<#if event.startTime??><@fmt.time event.startTime /></#if> ${(event.day.name)!""}
-	</#macro>
-
-	<#macro eventDetails event><#compress>
-		<#if event.title?has_content><div class="eventTitle">${event.title}</div></#if>
-		<div class="day-time">
-			${(event.day.name)!""}
-			<#if event.startTime??><@fmt.time event.startTime /><#else>[no start time]</#if>
-			-
-			<#if event.endTime??><@fmt.time event.endTime /><#else>[no end time]</#if>
-		</div>
-		<#if event.tutors.size gt 0>
-			Tutor<#if event.tutors.size gt 1>s</#if>:
-			<#list event.tutors.users as tutor> <#compress> <#-- intentional space -->
-				${tutor.fullName}<#if tutor_has_next>,</#if>
-			</#compress></#list>
-		</#if>
-		<#if ((event.location.name)!"")?has_content>
-			<div class="location">
-				Room: <@fmt.location event.location />
-			</div>
-		</#if>
-		<div class="running">
-			Running: <#compress>
-				<#if event.weekRanges?size gt 0 && event.day??>
-					<#noescape>${weekRangesFormatter(event.weekRanges, event.day, academicYear, module.department)}</#noescape>
-				<#elseif event.weekRanges?size gt 0>
-					[no day of week selected]
-				<#else>
-					[no dates selected]
-				</#if>
-			</#compress>
-		</div>
-	</#compress></#macro>
 
 	<div class="striped-section-contents">
 		<#list groups as group>
@@ -67,9 +31,9 @@
 										<li>
 											<@f.hidden path="delete" id="group${group_index}_event${event_index}_delete" />
 
-											<@eventShortDetails event.event />
+											<@components.eventShortDetails event.event />
 
-											<#assign popoverContent><@eventDetails event.event /></#assign>
+											<#assign popoverContent><@components.eventDetails event.event /></#assign>
 											<a class="use-popover"
 											   data-html="true"
 											   data-content="${popoverContent}"><i class="icon-question-sign"></i></a>

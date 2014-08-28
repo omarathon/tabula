@@ -48,7 +48,7 @@ abstract class AbstractEditSmallGroupEventsController extends GroupsController {
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.module(set.module))
+	) = submit(cmd, errors, set, Routes.admin(set.module.department, set.academicYear))
 
 }
 

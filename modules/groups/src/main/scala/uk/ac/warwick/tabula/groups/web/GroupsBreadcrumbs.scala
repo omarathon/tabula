@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.groups.web
 
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.web.BreadCrumb
 import uk.ac.warwick.tabula.data.model
 
@@ -16,7 +18,7 @@ object GroupsBreadcrumbs {
 	 */
 	case class Department(val department: model.Department) extends Abstract {
 		val title = department.name
-		val url = Some(Routes.admin(department))
+		val url = Some(Routes.admin(department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
 	}
 
 	/**
@@ -25,7 +27,7 @@ object GroupsBreadcrumbs {
 	 */
 	case class Module(val module: model.Module) extends Abstract {
 		val title = module.code.toUpperCase
-		val url = Some(Routes.admin.module(module))
+		val url = Some(Routes.admin(module.department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
 		override val tooltip = module.name
 	}
 
