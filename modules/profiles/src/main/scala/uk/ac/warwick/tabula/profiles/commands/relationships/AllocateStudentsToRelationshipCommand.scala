@@ -80,7 +80,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	override def onBind(result: BindingResult) {
 		super.onBind(result)
 
-		initialiseData
+		initialiseData()
 	}
 
 	def initialiseData() {
