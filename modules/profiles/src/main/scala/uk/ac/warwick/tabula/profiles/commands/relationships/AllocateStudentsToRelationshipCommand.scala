@@ -80,20 +80,26 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	override def onBind(result: BindingResult) {
 		super.onBind(result)
 
+		initialiseData
+	}
+
+	def initialiseData() {
 		removeBlankAgents()
 
 		// 'mapping' contains a map from agent to students, populated in the form.
 		// When new agents are added through the "Add <e.g. personal tutors>" modal, add them to mapping
 		additionalAgents.asScala
-			.flatMap { profileService.getAllMembersWithUserId(_) }
+			.flatMap {
+			profileService.getAllMembersWithUserId(_)
+		}
 			.foreach { member =>
-				if (!mapping.containsKey(member)) mapping.put(member, JArrayList())
-			}
+			if (!mapping.containsKey(member)) mapping.put(member, JArrayList())
+		}
 
 		memberAgentMappingsAfter = mapping.asScala.map {
-			case (key, value) => (key, value.asScala.toSet )
+			case (key, value) => (key, value.asScala.toSet)
 		}.map {
-			case (key, value) => (key, value.collect {case s: StudentMember => s})
+			case (key, value) => (key, value.collect { case s: StudentMember => s})
 		}.toMap // .toMap to make it immutable and avoid type issues
 
 		studentsAfter = memberAgentMappingsAfter.values.flatten.toSet
