@@ -118,6 +118,8 @@
 <#macro manageEditPoint point filterQuery returnTo><@_u page="/manage/${point.scheme.department.code}/${point.scheme.academicYear.startYear?c}/editpoints/${point.id}/edit?returnTo=${returnTo}&${filterQuery}"/></#macro>
 <#macro manageDeletePoint point filterQuery returnTo><@_u page="/manage/${point.scheme.department.code}/${point.scheme.academicYear.startYear?c}/editpoints/${point.id}/delete?returnTo=${returnTo}&${filterQuery}"/></#macro>
 
+<#macro noteView academicYearString student point returnTo=""><@_u page="/note/${academicYearString}/${student.universityId}/${point.id}/?returnTo=${returnTo}" /></#macro>
+<#macro groupsNoteView student occurrence returnTo=""><@_u context="/groups" page="/note/${student.universityId}/${occurrence.id}/?returnTo=${returnTo}" /></#macro>
 <#macro noteEdit academicYearString student point><@_u page="/note/${academicYearString}/${student.universityId}/${point.id}/edit"/></#macro>
 
 <#macro profileHome><@_u page="/profile"/></#macro>
@@ -128,6 +130,7 @@
 	<@_u page="/profile/${student.universityId}/${academicYearString}/record${returnTo}"/>
 </#macro>
 <#macro profileMeetings student academicYearString point><@_u page="/profile/${student.universityId}/${academicYearString}/${point.id}/meetings"/></#macro>
+<#macro profileGroups student academicYearString point><@_u page="/profile/${student.universityId}/${academicYearString}/${point.id}/groups"/></#macro>
 
 <#macro viewHome><@_u page="/view"/></#macro>
 <#macro viewHomeYears department><@_u page="/view/${department.code}"/></#macro>
@@ -147,8 +150,8 @@
 	<#if sortOrder?has_content>
 		<#local args = args + ["sortOrder=" + sortOrder ] />
 	</#if>
-	<#local query><#list args as arg>${arg}<#if arg_has_next>&</#if></#list></#local>
-	<@_u page="/view/${department.code}/${academicYearString}/students?${query}"/>
+	<#local query><#if !queryString?has_content && args?has_content>?</#if><#list args as arg>${arg}<#if arg_has_next>&</#if></#list></#local>
+	<@_u page="/view/${department.code}/${academicYearString}/students${query}"/>
 </#macro>
 <#macro viewSingleStudent department academicYearString student><@_u page="/view/${department.code}/${academicYearString}/students/${student.universityId}" /></#macro>
 <#macro viewRecordStudent department academicYearString student returnTo="">

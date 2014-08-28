@@ -14,11 +14,6 @@ object Routes {
 	import RoutesUtils._
 	private val context = "/sysadmin"
 
-	object jobs {
-		def list = context + "/jobs/list"
-		def status(instance: JobInstance) = context + "/jobs/job-status?id=%s" format encoded(instance.id)
-	}
-
 	object AttendanceTemplates {
 		def list = context + "/attendancetemplates"
 		def edit(template: AttendanceMonitoringTemplate) = context + "/attendancetemplates/%s/edit" format encoded(template.id)

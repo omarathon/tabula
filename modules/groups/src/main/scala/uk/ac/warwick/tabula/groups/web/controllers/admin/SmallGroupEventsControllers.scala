@@ -27,7 +27,7 @@ trait SmallGroupEventsController extends GroupsController {
 	case class NamedTerm(val name: String, val term: Term, val weekRange: WeekRange)
 
 	@ModelAttribute("allTerms") def allTerms(@PathVariable("smallGroupSet") set: SmallGroupSet) = {
-		val year = Option(set.academicYear).getOrElse(AcademicYear.guessByDate(DateTime.now))
+		val year = Option(set.academicYear).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		val weeks = termService.getAcademicWeeksForYear(year.dateInTermOne).toMap
 
 		val terms =

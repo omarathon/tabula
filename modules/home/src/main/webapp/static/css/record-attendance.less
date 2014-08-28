@@ -75,9 +75,8 @@
 			*background-color: darken(#e6e6e6, 5%);
 		}
 
-			// IE 7 + 8 can't handle box-shadow to show active, so we darken a bit ourselves
-			&:active,
-			&.active {
+		// IE 7 + 8 can't handle box-shadow to show active, so we darken a bit ourselves
+		&:active, &.active {
 			background-color: @activeColour e("\9");
 		}
 	}
@@ -97,6 +96,15 @@
 
 	.checkAllMessage {
 	  padding-right: 6px;
+	}
+
+	a.attendance-note.edit {
+		text-shadow: none;
+		background-image: none;
+		color: #fff;
+		background-color: #3a3a3c;
+		*background-color: darken(#3a3a3c, 5%);
+		background-color: #3a3a3c e("\9");
 	}
 }
 

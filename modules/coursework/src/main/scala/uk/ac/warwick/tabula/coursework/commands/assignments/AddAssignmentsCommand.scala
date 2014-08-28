@@ -76,7 +76,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	// academic year to create all these assignments under. Defaults to whatever academic year it will be in 3
 	// months, which means it will start defaulting to next year from about May (under the assumption that
 	// you would've done the current year's import long before then).
-	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now.plusMonths(3))
+	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now.plusMonths(3))
 
 	// All the possible assignments, prepopulated from SITS.
 	var assignmentItems: JList[AssignmentItem] = LazyLists.create()

@@ -29,7 +29,7 @@ trait CustomHamcrestMatchers {
 		}
 	}
 
-	def hasProperty[A](name: Symbol, value: AnyRef) = new HasPropertyMatcher(name, value)
+	def hasProperty[A](name: Symbol, value: AnyRef) = new HasPropertyMatcher[A](name, value)
 
 }
 

@@ -2,13 +2,12 @@ package uk.ac.warwick.tabula.groups.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, RequestMapping, ModelAttribute}
+import uk.ac.warwick.tabula.commands.groups.{ListStudentGroupAttendanceCommand, StudentGroupAttendance}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat.Example
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.groups.commands.ListStudentGroupAttendanceCommand
-import uk.ac.warwick.tabula.groups.commands.StudentGroupAttendance
 
 /**
  * Displays a student's attendance at small groups.

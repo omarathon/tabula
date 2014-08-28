@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import java.text.BreakIterator
 import org.hibernate.annotations.Type
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Entity
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
@@ -46,5 +47,7 @@ abstract class AttendanceNote extends GeneratedId with FormattedHtml {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AbsenceTypeUserType")
 	@Column(name = "absence_type")
 	var absenceType: AbsenceType = _
+
+	def hasContent = note.hasText || attachment != null || absenceType != null
 
 }

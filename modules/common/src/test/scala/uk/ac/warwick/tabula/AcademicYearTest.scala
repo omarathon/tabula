@@ -5,8 +5,8 @@ import org.joda.time.DateTime
 //scalastyle:off magic.number
 class AcademicYearTest extends TestBase {
 	@Test def year {
-		AcademicYear.guessByDate(dateTime(2010,11)).startYear should be(2010)
-		AcademicYear.guessByDate(dateTime(2010,5)).startYear should be(2009)
+		AcademicYear.guessSITSAcademicYearByDate(dateTime(2010,11)).startYear should be(2010)
+		AcademicYear.guessSITSAcademicYearByDate(dateTime(2010,5)).startYear should be(2009)
 	}
 	
 	@Test def strings {

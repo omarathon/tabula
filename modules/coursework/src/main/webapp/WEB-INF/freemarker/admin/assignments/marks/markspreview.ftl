@@ -8,7 +8,7 @@
 	<@spring.bind path=commandName>
 	<#assign hasErrors=status.errors.allErrors?size gt 0 />
 	</@spring.bind>
-	
+<div class="fix-area">
 	<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marks')}" commandName=commandName>
 	
 	<#assign isfile=RequestParameters.isfile/>
@@ -112,11 +112,18 @@
 		</#if>
 	</@spring.bind>
 	
-	<div class="submit-buttons form-actions">
+	<div class="submit-buttons fix-footer">
 		<input type="hidden" name="confirm" value="true">
 		<input class="btn btn-primary" type="submit" value="Confirm">
 		<a class="btn" href="<@routes.depthome module=assignment.module />">Cancel</a>
 	</div>
 	</@f.form>
+</div>
+
+<script>
+	jQuery(function($){
+		$('.fix-area').fixHeaderFooter();
+	});
+</script>
 
 </#escape>

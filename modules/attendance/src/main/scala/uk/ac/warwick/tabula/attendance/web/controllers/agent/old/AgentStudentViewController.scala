@@ -44,7 +44,7 @@ trait AgentStudentViewPermissions extends RequiresPermissionsChecking {
 trait AgentStudentViewCommandState {
 	def student: StudentMember
 	def academicYearOption: Option[AcademicYear]
-	val thisAcademicYear = AcademicYear.guessByDate(DateTime.now())
+	val thisAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now())
 	val academicYear = academicYearOption.getOrElse(thisAcademicYear)
 }
 

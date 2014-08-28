@@ -2,14 +2,13 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Module, Assignment}
+import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Module, Assignment, Department}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.Department
 
 object CopyAssignmentsCommand {
 	def apply(department: Department, modules: Seq[Module]) =
@@ -17,7 +16,8 @@ object CopyAssignmentsCommand {
 			with ComposableCommand[Seq[Assignment]]
 			with CopyAssignmentsPermissions
 			with CopyAssignmentsDescription
-			with AutowiringAssignmentServiceComponent {
+			with AutowiringAssignmentServiceComponent
+			with AutowiringAssignmentMembershipServiceComponent {
 				override lazy val eventName = "CopyAssignmentsFromPrevious"
 			}
 }
@@ -25,7 +25,7 @@ object CopyAssignmentsCommand {
 abstract class CopyAssignmentsCommand(val department: Department, val modules: Seq[Module]) extends CommandInternal[Seq[Assignment]]
 	with Appliable[Seq[Assignment]] with CopyAssignmentsState with FindAssignmentFields {
 
-	self: AssignmentServiceComponent =>
+	self: AssignmentServiceComponent with AssignmentMembershipServiceComponent =>
 
 	def applyInternal(): Seq[Assignment] = {
 
@@ -52,8 +52,8 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 
 		// best guess of new open and close dates. likely to be wrong by up to a few weeks but better than out by years
 		val yearOffest = academicYear.startYear - assignment.academicYear.startYear
-		newAssignment.openDate = assignment.openDate.plusYears(yearOffest)
-		newAssignment.closeDate = assignment.closeDate.plusYears(yearOffest)
+		newAssignment.openDate = assignment.openDate.plusYears(yearOffest).withDayOfWeek(assignment.openDate.getDayOfWeek)
+		newAssignment.closeDate = assignment.closeDate.plusYears(yearOffest).withDayOfWeek(assignment.closeDate.getDayOfWeek)
 
 		// copy the other fields from the target assignment
 		newAssignment.module = assignment.module
@@ -87,6 +87,17 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 		newField.min = field.min
 		newField.conventions = field.conventions
 
+		// TAB-1175 Guess SITS links
+		assignment.assessmentGroups.asScala
+			.filter { _.toUpstreamAssessmentGroup(newAssignment.academicYear).isDefined } // Only where defined in the new year
+			.foreach { group =>
+				val newGroup = new AssessmentGroup
+				newGroup.assessmentComponent = group.assessmentComponent
+				newGroup.occurrence = group.occurrence
+				newGroup.assignment = newAssignment
+				newAssignment.assessmentGroups.add(newGroup)
+			}
+
 		newAssignment
 	}
 }
@@ -107,7 +118,7 @@ trait CopyAssignmentsPermissions extends ArchiveAssignmentsPermissions {
 }
 
 trait CopyAssignmentsState extends ArchiveAssignmentsState {
-	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime)
+	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime)
 	var archive: JBoolean = false
 }
 

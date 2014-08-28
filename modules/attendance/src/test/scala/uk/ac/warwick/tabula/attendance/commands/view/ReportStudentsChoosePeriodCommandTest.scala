@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands.view
 
-import org.joda.time.LocalDate
+import org.joda.time.{DateTime, LocalDate}
 import org.mockito.Matchers
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
@@ -13,8 +13,10 @@ import uk.ac.warwick.util.termdates.TermImpl
 
 class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 
+	val thisTermService = smartMock[TermService]
+
 	trait TestSupport extends TermServiceComponent with AttendanceMonitoringServiceComponent with ProfileServiceComponent {
-		val termService = smartMock[TermService]
+		val termService = thisTermService
 		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
 		val profileService = smartMock[ProfileService]
 	}
@@ -32,8 +34,8 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		val point2 = Fixtures.attendanceMonitoringPoint(null)
 		point2.startDate = new LocalDate(2014, 6, 6)
 
-		val autumnTerm = new TermImpl(null, null, null, TermType.autumn)
-		val springTerm = new TermImpl(null, null, null, TermType.spring)
+		val autumnTerm = new TermImpl(null, DateTime.now, null, TermType.autumn)
+		val springTerm = new TermImpl(null, DateTime.now, null, TermType.spring)
 		val christmasVacation = new Vacation(autumnTerm, null)
 
 		val fakeNow = new LocalDate(2015, 1, 1).toDateTimeAtStartOfDay
@@ -47,6 +49,9 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 			val department = Fixtures.department("its")
 			val academicYear = AcademicYear(2014)
 		}
+
+		thisTermService.getPreviousTerm(christmasVacation) returns autumnTerm
+		thisTermService.getPreviousTerm(springTerm) returns christmasVacation
 
 		val command = new ReportStudentsChoosePeriodCommandInternal(Fixtures.department("its"),  AcademicYear(2014)) with ReportStudentsChoosePeriodCommandState with TestSupport
 	}

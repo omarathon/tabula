@@ -22,7 +22,7 @@ trait DepartmentSmallGroupSetsController extends GroupsController {
 	validatesSelf[SelfValidating]
 	
 	@ModelAttribute("academicYearChoices") def academicYearChoices =
-		AcademicYear.guessByDate(DateTime.now).yearsSurrounding(2, 2)
+		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2)
 
 	@ModelAttribute("ManageDepartmentSmallGroupsMappingParameters") def params = ManageDepartmentSmallGroupsMappingParameters
 

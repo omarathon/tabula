@@ -18,7 +18,7 @@ trait GroupedPointValidation {
 		studentsStateAsScala: Map[StudentMember, Map[MonitoringPoint, AttendanceState]]
 	) = {
 		val academicYear = templateMonitoringPoint.pointSet.academicYear
-		val thisAcademicYear = AcademicYear.guessByDate(DateTime.now)
+		val thisAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)
 
 		studentsStateAsScala.foreach{ case(student, pointMap) =>

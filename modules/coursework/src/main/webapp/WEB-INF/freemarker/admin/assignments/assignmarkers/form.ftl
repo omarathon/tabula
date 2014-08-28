@@ -53,7 +53,7 @@
 							</#list>
 						</ul>
 
-						<a href="#" class="btn show-list" data-container=".agent-${markerMapName}-${marker.userCode}" data-title="Students to be marked by ${marker.fullName}"><i class="icon-list"></i> List</a>
+						<a href="#" class="btn show-list" data-container="#main-content" data-title="Students to be marked by ${marker.fullName}"><i class="icon-list"></i> List</a>
 
 					</div>
 				</#list>

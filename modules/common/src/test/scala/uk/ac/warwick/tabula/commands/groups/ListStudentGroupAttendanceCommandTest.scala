@@ -1,29 +1,15 @@
-package uk.ac.warwick.tabula.groups.commands
+package uk.ac.warwick.tabula.commands.groups
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.services.{UserGroupCacheManager, SmallGroupService, TermServiceComponent, SmallGroupServiceComponent, TermService}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-import org.joda.time.LocalTime
-import uk.ac.warwick.tabula.data.model.groups.WeekRange
-import uk.ac.warwick.tabula.MockUserLookup
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import SmallGroupAttendanceState._
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup, MemberUserType}
-import org.joda.time.DateMidnight
-import org.joda.time.DateTimeConstants
-import org.joda.time.Interval
+import org.joda.time.{DateMidnight, DateTime, DateTimeConstants, Interval, LocalTime}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.util.termdates.Term
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, MockUserLookup, Mockito, TestBase}
+import uk.ac.warwick.tabula.commands.groups.SmallGroupAttendanceState._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventAttendance
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEvent, SmallGroupEventAttendance, SmallGroupEventOccurrence, SmallGroupSet, WeekRange}
+import uk.ac.warwick.tabula.data.model.{MemberUserType, UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent, TermService, TermServiceComponent, UserGroupCacheManager}
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.termdates.Term
 
 class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 	
@@ -41,7 +27,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		}
 		
 		val now = DateTime.now
-		val academicYear = AcademicYear.guessByDate(now)
+		val academicYear = AcademicYear.guessSITSAcademicYearByDate(now)
 		
 		val set = new SmallGroupSet
 		set.academicYear = academicYear 

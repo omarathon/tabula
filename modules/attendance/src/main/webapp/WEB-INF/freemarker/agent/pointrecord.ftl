@@ -1,6 +1,7 @@
 <#escape x as x?html>
 
 <#import "*/attendance_macros.ftl" as attendance_macros />
+<#import "*/modal_macros.ftl" as modal />
 
 <#assign titleHeader>
 	<h1>Record attendance</h1>
@@ -160,9 +161,9 @@
 
 										<#if mapGet(mapGet(attendanceNoteMap, student), point)??>
 											<#assign note = mapGet(mapGet(attendanceNoteMap, student), point) />
-											<#if note.note?has_content || note.attachment?has_content >
-												<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note" title="Edit attendance note" href="<@routes.noteEdit academicYear.startYear?c student point />">
-													<i class="icon-edit-sign attendance-note-icon"></i>
+											<#if note.hasContent>
+												<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note edit" title="Edit attendance note" href="<@routes.noteEdit academicYear.startYear?c student point />">
+													<i class="icon-edit attendance-note-icon"></i>
 												</a>
 											<#else>
 												<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note" title="Add attendance note" href="<@routes.noteEdit academicYear.startYear?c student point />">
@@ -177,6 +178,8 @@
 
 										<#if point.pointType.dbValue == "meeting">
 											<a class="meetings" title="Meetings with this student" href="<@routes.profileMeetings student academicYear.startYear?c point />"><i class="icon-info-sign icon-fixed-width"></i></a>
+										<#elseif point.pointType.dbValue == "smallGroup">
+											<a class="small-groups" title="Small group teaching events for this student" href="<@routes.profileGroups student academicYear.startYear?c point />"><i class="icon-info-sign icon-fixed-width"></i></a>
 										<#else>
 											<i class="icon-fixed-width"></i>
 										</#if>
@@ -216,5 +219,12 @@
 
 </#if>
 
+<div id="meetings-modal" class="modal hide fade" style="display:none;">
+	<@modal.header>
+		<h3>Meetings</h3>
+	</@modal.header>
+	<@modal.body></@modal.body>
+</div>
+<div id="small-groups-modal" class="modal hide fade" style="display:none;"></div>
 
 </#escape>

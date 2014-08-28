@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.services
 import org.joda.time._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.AcademicYear
-import scala.collection.JavaConverters._
 
 trait WeekToDateConverterComponent{
 	val weekToDateConverter: WeekToDateConverter
@@ -26,7 +25,7 @@ trait TermAwareWeekToDateConverterComponent extends WeekToDateConverterComponent
 
 		def getWeekContainingDate(date: LocalDate): Option[WeekRange.Week] = {
 			val zonedDate = date.toDateTimeAtStartOfDay
-			val year = AcademicYear.guessByDate(zonedDate)
+			val year = AcademicYear.findAcademicYearContainingDate(zonedDate, termService)
 			val weeks = weeksForYear(year)
 			// brute-force search through the map; since there should never be more than 53 entries to look for it's
 			// hopefully OK
@@ -37,7 +36,7 @@ trait TermAwareWeekToDateConverterComponent extends WeekToDateConverterComponent
 
 		def intersectsWeek(interval: Interval, week: WeekRange.Week, year: AcademicYear): Boolean = {
 			val weekInterval = weeksForYear(year).get(week)
-			weekInterval.map((interval.overlap(_) != null)).getOrElse(false)
+			weekInterval.exists(interval.overlap(_) != null)
 		}
 
 
@@ -54,7 +53,7 @@ trait TermAwareWeekToDateConverterComponent extends WeekToDateConverterComponent
 			termService.getAcademicWeeksForYear(year.dateInTermOne).toMap
 
 		def weekNumberToDate(year: AcademicYear, weekNumber: Int, dayOfWeek: DayOfWeek) =
-			weeksForYear(year)(weekNumber).getStart().withDayOfWeek(dayOfWeek.jodaDayOfWeek)
+			weeksForYear(year)(weekNumber).getStart.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
 	}
 
 }

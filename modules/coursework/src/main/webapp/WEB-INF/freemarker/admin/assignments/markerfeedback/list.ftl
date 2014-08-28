@@ -1,4 +1,6 @@
-<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl >
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<#import "*/submission_components.ftl" as components />
+
 <#macro listMarkerFeedback items>
 	<#list items as item>
 		<tr>
@@ -15,6 +17,16 @@
 			<td>
 				<@fmt.date date=item.submission.submittedDate seconds=true capitalise=true />
 			</td>
+			<#if hasOriginalityReport && item.submission?? && item.submission.hasOriginalityReport>
+				<td>
+					<#list item.submission.allAttachments as attachment>
+						<!-- Checking originality report for ${attachment.name} ... -->
+						<#if attachment.originalityReport??>
+							<@components.originalityReport attachment />
+						</#if>
+					</#list>
+				</td>
+			</#if>
 
 			<#if hasSecondMarkerFeedback || hasFirstMarkerFeedback>
 				<#local lastIndex = item.feedbacks?size - 1 />
@@ -199,6 +211,9 @@
 				</th>
 				<th>Student</th>
 				<th>Date submitted</th>
+				<#if hasOriginalityReport>
+					<th>Plagiarism report</th>
+				</#if>
 				<#if hasSecondMarkerFeedback>
 					<th>Other marks</th>
 					<th>Other grades</th>

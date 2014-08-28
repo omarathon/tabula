@@ -35,6 +35,10 @@ class ListMarkerFeedbackController  extends CourseworkController {
 		val hasFirstMarkerFeedback = maxFeedbackCount > 1
 		val hasSecondMarkerFeedback = maxFeedbackCount > 2
 
+		val hasOriginalityReport =
+			Seq(inProgressFeedback, completedFeedback, rejectedFeedback)
+				.exists { _.exists { _.submission.hasOriginalityReport }}
+
 		Mav("admin/assignments/markerfeedback/list",
 			"assignment" -> assignment,
 			"inProgressFeedback" -> inProgressFeedback,
@@ -44,7 +48,8 @@ class ListMarkerFeedbackController  extends CourseworkController {
 			"secondMarkerRoleName" -> assignment.markingWorkflow.secondMarkerRoleName,
 			"thirdMarkerRoleName" -> assignment.markingWorkflow.thirdMarkerRoleName,
 			"hasFirstMarkerFeedback" -> hasFirstMarkerFeedback,
-			"hasSecondMarkerFeedback" -> hasSecondMarkerFeedback
+			"hasSecondMarkerFeedback" -> hasSecondMarkerFeedback,
+			"hasOriginalityReport" -> hasOriginalityReport
 		)
 	}
 

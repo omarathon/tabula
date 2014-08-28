@@ -104,7 +104,7 @@ object AcademicYear {
 	 * This function returns the year based on when SITS rolls over,
 	 * not when the academic year starts/stops
 	 */
-	def guessByDate(now: DateTime) = {
+	def guessSITSAcademicYearByDate(now: DateTime) = {
 		if (now.getMonthOfYear >= AUGUST) {
 			new AcademicYear(now.getYear)
 		} else {

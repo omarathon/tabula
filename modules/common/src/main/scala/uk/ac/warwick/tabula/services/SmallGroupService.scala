@@ -92,7 +92,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def saveOrUpdate(attendance: SmallGroupEventAttendance) = smallGroupDao.saveOrUpdate(attendance)
 
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = eventTutorsHelper.findBy(user)
-	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = findSmallGroupEventsByTutor(user).groupBy(_.group).keys.toSeq
+	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = findSmallGroupEventsByTutor(user)
+		.groupBy(_.group).keys.toSeq
+		.filterNot { sg => sg.groupSet.deleted || sg.groupSet.archived }
 
 	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet] = {
 		val autoEnrolled = 
