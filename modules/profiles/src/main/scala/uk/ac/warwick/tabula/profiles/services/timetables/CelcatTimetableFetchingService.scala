@@ -229,7 +229,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					TimetableEventType(c.getCategories.iterator().next().asInstanceOf[String])
 				}.orNull
 
-			if (config.excludedEventTypes.contains(eventType)) None
+			if (config.excludedEventTypes.contains(eventType) || eventType.code.toLowerCase().contains("on tabula")) None
 			else {
 				// Convert date/time to academic year, local times and week number
 				val start = toDateTime(event.getStartDate)
