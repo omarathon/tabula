@@ -140,6 +140,22 @@ jQuery(function($){
 	var decorateOptionsModal = function() {
 		$optsModalBody.find('details').details();
 
+		// TAB-118 Disable submit until modal is scrolled to the bottom
+		$optsModalBody.on('scroll.bottomcheck', function() {
+			if (($optsModalBody.scrollTop() + $optsModalBody.height()) * 1.05 > $optsModalBody.get(0).scrollHeight) {
+				$optsModal.find('.modal-footer button.btn-primary').attr({
+					'disabled' : false,
+					'title' : ''
+				});
+
+				$optsModalBody.off('scroll.bottomcheck');
+			}
+		});
+		$optsModal.find('.modal-footer button.btn-primary').attr({
+			'disabled' : true,
+			'title' : 'Scroll to the bottom to see all options'
+		});
+
 		// do all sorts of clever stuff when we submit this form.
 		$optsModalBody.find('form').on('submit', function(e){
 			e.preventDefault();

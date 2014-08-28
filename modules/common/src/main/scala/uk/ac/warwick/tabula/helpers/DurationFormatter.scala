@@ -1,16 +1,6 @@
 package uk.ac.warwick.tabula.helpers
-import org.joda.time.Duration
+import org.joda.time.{DateTime, Duration, Period, PeriodType, ReadablePeriod}
 import org.joda.time.format.PeriodFormatterBuilder
-import org.joda.time.PeriodType
-import org.joda.time.ReadablePeriod
-import org.joda.time.ReadableInterval
-import org.joda.time.Period
-import freemarker.template.TemplateMethodModelEx
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.JavaImports._
-import freemarker.template.utility.DeepUnwrap
-import org.joda.time.DateTime
-import freemarker.template.TemplateModel
 import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 
 class DurationFormatterTag extends BaseTemplateMethodModelEx {
@@ -29,7 +19,7 @@ class DurationFormatterTag extends BaseTemplateMethodModelEx {
 object DurationFormatter {
 
 	// if commas are disagreeable, change this to a single space
-	val sep = ", ";
+	val sep = ", "
 	// if the final "and" is disagreeable, assign it sep
 	val finalSep = " and "
 	val ago = " ago"
@@ -70,7 +60,7 @@ object DurationFormatter {
 	}
 	
 	private def stripTime(period: Period, duration: Duration): Period =
-		if (duration.getStandardDays() >= 7)
+		if (duration.getStandardDays >= 7)
 			period.withHours(0).withMinutes(0).withSeconds(0)
 		else
 			period
