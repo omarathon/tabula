@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.{RequestParam, PathVariable, Mode
 import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSetFilters, SmallGroupAllocationMethod, SmallGroupSet}
 import uk.ac.warwick.tabula.groups.commands.admin.{AdminSmallGroupsHomeInformation, AdminSmallGroupsHomeCommand}
 import uk.ac.warwick.tabula.commands.Appliable
 
@@ -33,7 +33,7 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController {
 		val hasGroups = info.setsWithPermission.nonEmpty
 		val hasGroupAttendance = info.setsWithPermission.exists { _.set.showAttendanceReports }
 
-		Mav("admin/department",
+		val model = Map(
 			"department" -> department,
 			"canAdminDepartment" -> info.canAdminDepartment,
 			"modules" -> info.modulesWithPermission,
@@ -43,7 +43,14 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController {
 			"hasCloseableGroupsets" -> info.setsWithPermission.exists { sv => sv.set.openForSignups && sv.set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp },
 			"hasModules" -> hasModules,
 			"hasGroups" -> hasGroups,
-			"hasGroupAttendance" -> hasGroupAttendance)
+			"hasGroupAttendance" -> hasGroupAttendance,
+			"allStatusFilters" -> SmallGroupSetFilters.Status.all,
+			"allModuleFilters" -> SmallGroupSetFilters.allModuleFilters(info.modulesWithPermission),
+			"allAllocationFilters" -> SmallGroupSetFilters.AllocationMethod.all(info.departmentSmallGroupSets)
+		)
+
+		if (ajax) Mav("admin/department-noLayout", model).noLayout()
+		else Mav("admin/department", model)
 	}
 }
 
