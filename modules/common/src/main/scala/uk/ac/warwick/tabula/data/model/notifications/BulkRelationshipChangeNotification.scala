@@ -67,7 +67,7 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
 	def extraModel = Map(
 		"student" -> modifiedRelationship.studentMember,
 		"oldAgent" -> oldAgent,
-		"newAgent" -> modifiedRelationship.agentMember
+		"newAgent" -> newAgent
 	)
 	
 }

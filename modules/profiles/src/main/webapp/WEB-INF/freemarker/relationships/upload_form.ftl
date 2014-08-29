@@ -36,5 +36,5 @@
 
 
 <div class="submit-buttons">
-	<button class="btn btn-primary btn-large" name="doUpload"><i class="icon-upload icon-white"></i> Upload</button>
+	<button class="btn btn-primary btn-large" name="doPreviewSpreadsheetUpload"><i class="icon-upload icon-white"></i> Upload</button>
 </div>

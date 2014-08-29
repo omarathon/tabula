@@ -109,7 +109,8 @@
 						<div class="span2">
 						</div>
 						<div class="span5">
-							<button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#add-agents">Add ${relationshipType.agentRole}s</button>
+							<button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#add-agents">
+								Add ${relationshipType.agentRole}s</button>
 							<h3>${relationshipType.agentRole?cap_first}s</h3>
 
 						</div>
@@ -238,10 +239,8 @@
 					</div>
 				</div>
 
-					<#include "_allocate_notifications_modal.ftl" />
-
 						<div class="submit-buttons fix-footer">
-							<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#notify-modal">Save</button>
+							<button type="submit" class="btn btn-primary">Save</button>
 							<a href="<@routes.home />" class="btn">Cancel</a> <#-- TODO better url -->
 						</div>
 
