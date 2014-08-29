@@ -229,6 +229,8 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 			cmd.mapping.get(staff1).addAll(Seq(student4).asJavaCollection)
 			cmd.mapping.get(staff3).addAll(Seq(student5, student7).asJavaCollection)
 
+			cmd.onBind(new BindException(cmd, "cmd"))
+
 			val commandResults = cmd.applyInternal()
 			commandResults.size should be (3)
 			commandResults.map(_.modifiedRelationship).toSet should be (Set(rel41, rel35, rel37))
@@ -252,6 +254,8 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 			cmd.mapping.get(staff1).addAll(Seq(student4).asJavaCollection)
 			cmd.mapping.get(staff1).removeAll(Seq(student1).asJavaCollection)
 
+			cmd.onBind(new BindException(cmd, "cmd"))
+
 			val commandResults = cmd.applyInternal()
 			commandResults.size should be (2) // one to remove, one to add
 			commandResults.map(_.modifiedRelationship).toSet should be (Set(rel1, rel14))
@@ -269,6 +273,8 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 			cmd.onBind(new BindException(cmd, "cmd"))
 
 			cmd.mapping.remove(staff1)
+
+			cmd.onBind(new BindException(cmd, "cmd"))
 
 			val commandResults = cmd.applyInternal()
 			commandResults.size should be (1)
