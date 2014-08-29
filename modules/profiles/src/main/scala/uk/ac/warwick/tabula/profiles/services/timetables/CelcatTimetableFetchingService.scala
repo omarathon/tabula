@@ -110,7 +110,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 	def getTimetableForStudent(universityId: UniversityId): Seq[TimetableEvent] = {
 		userLookup.getUserByWarwickUniId(universityId) match {
-			case FoundUser(u) => configs.get(u.getDepartmentCode.toLowerCase).map { config =>
+			case FoundUser(u) if u.getDepartmentCode.hasText => configs.get(u.getDepartmentCode.toLowerCase).map { config =>
 				doRequest(s"${u.getWarwickId}.ics", config)
 			}.getOrElse(Nil)
 			case _ => Nil
@@ -119,7 +119,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 	def getTimetableForStaff(universityId: UniversityId): Seq[TimetableEvent] = {
 		userLookup.getUserByWarwickUniId(universityId) match {
-			case FoundUser(u) => configs.get(u.getDepartmentCode.toLowerCase).map { config =>
+			case FoundUser(u) if u.getDepartmentCode.hasText => configs.get(u.getDepartmentCode.toLowerCase).map { config =>
 				val filename = config.staffFilenameLookupStrategy match {
 					case FilenameGenerationStrategy.Default => s"${u.getWarwickId}.ics"
 					case FilenameGenerationStrategy.BSV => lookupCelcatIDFromBSV(u.getWarwickId, config).map { id => s"$id.ics" }.getOrElse(s"${u.getWarwickId}.ics")
