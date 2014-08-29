@@ -1,38 +1,7 @@
-<#--
-
-
-
-
-
-This will soon be refactored to use some components from group_components.ftl,
-in the same way that tutor_home.ftl and TutorHomeController are currently
-
-If you are doing any work on this, it would be good to do the above first.
-
-
-
--->
 <#import "*/group_components.ftl" as components />
 <#escape x as x?html>
-
-<#macro longDateRange start end>
-	<#local openTZ><@warwick.formatDate value=start pattern="z" /></#local>
-	<#local closeTZ><@warwick.formatDate value=end pattern="z" /></#local>
-	<@fmt.date start />
-	<#if openTZ != closeTZ>(${openTZ})</#if>
-	-<br>
-	<@fmt.date end /> (${closeTZ})
-</#macro>
-
-<#function module_anchor module>
-	<#return "module-${module.code}" />
-</#function>
-
-<#if department??>
-	<#assign can_manage_dept=data.canManageDepartment />
-
 	<div class="btn-toolbar dept-toolbar">
-		<#if !data.moduleItems?has_content && department.children?has_content>
+		<#if !modules?has_content && department.children?has_content>
 			<a class="btn btn-medium dropdown-toggle disabled use-tooltip" title="This department doesn't directly contain any modules. Check subdepartments.">
 				<i class="icon-wrench"></i>
 				Manage
@@ -57,7 +26,7 @@ If you are doing any work on this, it would be good to do the above first.
 					</li>
 
 					<#if features.smallGroupTeachingStudentSignUp>
-						<li ${data.hasOpenableGroupsets?string(''," class='disabled use-tooltip' title='There are no self-signup groups to open' ")}>
+						<li ${hasOpenableGroupsets?string(''," class='disabled use-tooltip' title='There are no self-signup groups to open' ")}>
 							<#assign open_url><@routes.batchopen department /></#assign>
 							<@fmt.permission_button
 								permission='SmallGroups.Update'
@@ -67,7 +36,7 @@ If you are doing any work on this, it would be good to do the above first.
 								<i class="icon-unlock-alt icon-fixed-width"></i> Open
 							</@fmt.permission_button>
 						</li>
-						<li ${data.hasCloseableGroupsets?string(''," class='disabled use-tooltip' title='There are no self-signup groups to close' ")}>
+						<li ${hasCloseableGroupsets?string(''," class='disabled use-tooltip' title='There are no self-signup groups to close' ")}>
 							<#assign close_url><@routes.batchclose department /></#assign>
 							<@fmt.permission_button
 								permission='SmallGroups.Update'
@@ -78,7 +47,7 @@ If you are doing any work on this, it would be good to do the above first.
 							</@fmt.permission_button>
 						</li>
 					</#if>
-					<li ${data.hasUnreleasedGroupsets?string(''," class='disabled use-tooltip' title='All modules already notified' ")} >
+					<li ${hasUnreleasedGroupsets?string(''," class='disabled use-tooltip' title='All modules already notified' ")} >
 						<#assign notify_url><@routes.batchnotify department /></#assign>
 						<@fmt.permission_button
 							permission='SmallGroups.Update'
@@ -106,39 +75,81 @@ If you are doing any work on this, it would be good to do the above first.
 					</#if>
 				</ul>
 			</div>
-
-			<#if hasModules>
-				<div class="btn-group dept-show">
-					<a class="btn btn-medium use-tooltip" href="#" data-container="body" title="Modules with no groups are hidden. Click to show all modules." data-title-show="Modules with no groups are hidden. Click to show all modules." data-title-hide="Modules with no groups are shown. Click to hide them">
-						<i class="icon-eye-open"></i> Show
-					</a>
-				</div>
-			</#if>
 		</#if>
+
+		<div class="btn-group dept-settings">
+			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
+				<i class="icon-calendar"></i>
+				${adminCommand.academicYear.label}
+				<span class="caret"></span>
+			</a>
+			<ul class="dropdown-menu pull-right">
+				<#list academicYears as year>
+					<li>
+						<a href="<@routes.departmenthome department year />">
+							<#if year.startYear == adminCommand.academicYear.startYear>
+								<strong>${year.label}</strong>
+							<#else>
+								${year.label}
+							</#if>
+						</a>
+					</li>
+				</#list>
+			</ul>
+		</div>
 	</div>
 
-	<@fmt.deptheader "" "" department routes "departmenthome" "with-settings" />
+	<#macro deptheaderroutemacro department>
+		<@routes.departmenthome department adminCommand.academicYear />
+	</#macro>
+	<#assign deptheaderroute = deptheaderroutemacro in routes />
 
-	<#if !hasModules>
-		<p class="alert alert-info"><i class="icon-info-sign"></i> This department doesn't contain any modules.</p>
-	<#elseif !hasGroups>
-		<p class="alert alert-info empty-hint"><i class="icon-lightbulb"></i> This department doesn't have any groups set up. Press 'Show' above to show all modules and begin creating groups.</p>
+	<@fmt.deptheader "" "" department routes "deptheaderroute" "with-settings" />
+
+	<#if !hasGroups>
+		<p class="alert alert-info empty-hint"><i class="icon-lightbulb"></i> There are no small groups set up for ${adminCommand.academicYear.label} in ${department.name}.</p>
 	</#if>
 
-<#-- This is the big list of modules -->
-<@components.module_info data=data expand_by_default=(!can_manage_dept && data.moduleItems?size lte 5) />
+	<h2>Create groups</h2>
 
-<div id="modal-container" class="modal fade"></div>
-<#else>
-	<p>No department.</p>
-</#if>
+	<div class="form-inline creation-form">
+		<label for="module-picker">For this module:</label>
+		<select id="module-picker">
+			<option value=""></option>
+			<#list modules as module>
+				<option value="${module.code}"><@fmt.module_name module false /></option>
+			</#list>
+		</select>
+		<button type="button" class="btn disabled">Create</button>
+	</div>
 
-<script>
-	jQuery(function($) {
-		$('.dept-show').on('click', function() {
-			$('.empty-hint').fadeOut('slow');
-		});
-	});
-</script>
+	<script type="text/javascript">
+		(function($) {
+			<#assign template_module={"code":"__MODULE_CODE__"} />
+			var url = '<@routes.createset template_module />?academicYear=${adminCommand.academicYear.startYear?c}';
 
+			var $picker = $('.creation-form #module-picker');
+			var $button = $('.creation-form button');
+
+			$picker.on('change', function() {
+				var value = $(this).find(':selected').val();
+				if (value) {
+					$button.removeClass('disabled');
+				} else {
+					$button.addClass('disabled');
+				}
+			});
+			$button.on('click', function() {
+				var moduleCode = $picker.find(':selected').val();
+				if (moduleCode) {
+					window.location.href = url.replace('__MODULE_CODE__', moduleCode);
+				}
+			});
+		})(jQuery);
+	</script>
+
+	<#-- This is the big list of sets -->
+	<@components.sets_info sets sets?size lte 5 />
+
+	<div id="modal-container" class="modal fade"></div>
 </#escape>

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.groups.web
 
 import java.net.URLEncoder
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.{Module, Department}
 import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroupSet}
@@ -22,14 +23,10 @@ object Routes {
 	}
 
 	object admin {
-		def apply(department: Department) = context + "/admin/department/%s" format (encoded(department.code))
+		def apply(department: Department, year: AcademicYear) = context + "/admin/department/%s/%s" format (encoded(department.code), year.startYear.toString)
 
-		def release(department: Department) = apply(department) + "/groups/release"
-		def selfsignup(department: Department, action: String) = apply(department) + "/groups/selfsignup/" + encoded(action)
-
-		object module {
-			def apply(module: Module) = admin(module.department) + "#module-" + encoded(module.code)
-		}
+		def release(department: Department) = context + "/admin/department/%s/groups/release" format (encoded(department.code))
+		def selfsignup(department: Department, action: String) = context + "/admin/department/%s/groups/selfsignup/%s" format (encoded(department.code), encoded(action))
 
 		def create(module: Module) = context + "/admin/module/%s/groups/new" format (encoded(module.code))
 		def create(set: SmallGroupSet) = context + "/admin/module/%s/groups/new/%s" format (encoded(set.module.code), encoded(set.id))
