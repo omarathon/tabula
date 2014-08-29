@@ -91,14 +91,41 @@
 
 					<div class="span4 next-action">
 						<#if setItem.nextStage??>
-							<@spring.message code=setItem.nextStage.actionCode />
+							<#local nextStageUrl="" />
+							<#local nextStageModal="" />
+							<#if setItem.nextStage.actionCode == "workflow.smallGroupSet.AddGroups.action">
+								<#local nextStageUrl><@routes.editsetgroups set /></#local>
+							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AddStudents.action">
+								<#local nextStageUrl><@routes.editsetstudents set /></#local>
+							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AddEvents.action">
+								<#local nextStageUrl><@routes.editsetevents set /></#local>
+							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AllocateStudents.action">
+								<#local nextStageUrl><@routes.editsetallocate set /></#local>
+							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.OpenSignUp.action">
+								<#local nextStageUrl><@routes.openset set /></#local>
+								<#local nextStageModal = "#modal-container" />
+							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.CloseSignUp.action">
+								<#local nextStageUrl><@routes.closeset set /></#local>
+								<#local nextStageModal = "#modal-container" />
+							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.SendNotifications.action">
+								<#local nextStageUrl><@routes.releaseset set /></#local>
+								<#local nextStageModal = "#modal-container" />
+							</#if>
+
+							<#if nextStageUrl?has_content>
+								<a href="${nextStageUrl}"<#if nextStageModal?has_content> data-toggle="modal" data-target="${nextStageModal}" data-container="body"</#if>>
+									<@spring.message code=setItem.nextStage.actionCode />
+								</a>
+							<#else>
+								<@spring.message code=setItem.nextStage.actionCode />
+							</#if>
 						<#elseif setItem.progress.percentage == 100>
 							Complete
 						</#if>
 					</div>
 
-					<div class="btn-group span1">
-						<div class="pull-right">
+					<div class="span1">
+						<div class="btn-group pull-right">
 							<@dropdown_menu "Manage" "wrench" "btn-mini">
 								<li>
 									<#local edit_url><@routes.editset set /></#local>

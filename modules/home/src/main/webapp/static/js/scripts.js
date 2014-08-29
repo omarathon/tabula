@@ -677,6 +677,11 @@
 					return;
 				}
 
+				if ($(e.target).is('a,button') || $(e.target).closest('a,button').length) {
+					// Ignore if we're clicking a button
+					return;
+				}
+
 				if (open()) {
 					$section.removeClass('expanded');
 					$icon.removeClass().addClass('icon-fixed-width icon-chevron-right');

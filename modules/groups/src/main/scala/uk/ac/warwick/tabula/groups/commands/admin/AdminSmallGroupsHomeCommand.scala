@@ -56,7 +56,7 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 			else modulesWithPermission
 
 		val sets =
-			smallGroupService.getSmallGroupSets(department, academicYear).sortBy { _.name }
+			smallGroupService.getSmallGroupSets(department, academicYear)
 				.filter { set => securityService.can(user, RequiredPermission, set) }
 
 		val setViews = sets.map { set =>

@@ -84,6 +84,7 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 			.add(is("module.department", department))
 			.add(is("academicYear", year))
 			.add(is("deleted", false))
+			.addOrder(asc("archived"))
 			.addOrder(asc("name"))
 			.seq
 

@@ -80,7 +80,7 @@ object SmallGroupSetWorkflowStages {
 			if (set.linked && set.linkedDepartmentSmallGroupSet != null) {
 				// Linked upstream (to SITS), no students
 				if (set.members.isEmpty && set.linkedDepartmentSmallGroupSet.memberQuery.hasText)
-					StageProgress(AddStudents, started = true, messageCode = "workflow.smallGroupSet.AddStudents.linkedUpstreamSits.empty", health = Warning)
+					StageProgress(AddStudents, started = true, messageCode = "workflow.smallGroupSet.AddStudents.linkedUpstreamSits.empty", health = Warning, completed = true)
 
 				// Linked upstream (manually), no students
 				else if (set.members.isEmpty && !set.linkedDepartmentSmallGroupSet.memberQuery.hasText)
@@ -92,7 +92,7 @@ object SmallGroupSetWorkflowStages {
 			} else {
 				// Linked to SITS, no students
 				if (!set.assessmentGroups.isEmpty && set.allStudentsCount == 0)
-					StageProgress(AddStudents, started = false, messageCode = "workflow.smallGroupSet.AddStudents.linkedToSits.empty", health = Warning)
+					StageProgress(AddStudents, started = true, messageCode = "workflow.smallGroupSet.AddStudents.linkedToSits.empty", health = Warning, completed = true)
 
 				// Not linked to SITS, no students
 				else if (set.assessmentGroups.isEmpty && set.allStudentsCount == 0)
@@ -149,7 +149,7 @@ object SmallGroupSetWorkflowStages {
 			else if (set.openForSignups)
 				StageProgress(CloseSignUp, started = false, messageCode = "workflow.smallGroupSet.CloseSignUp.notClosed", health = Warning)
 			else
-				StageProgress(CloseSignUp, started = true, messageCode = "workflow.smallGroupSet.OpenSignUp.notOpen", health = Warning)
+				StageProgress(CloseSignUp, started = false, messageCode = "workflow.smallGroupSet.OpenSignUp.notOpen", health = Warning)
 
 		override def preconditions = Seq(Seq(OpenSignUp))
 	}

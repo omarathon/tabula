@@ -10,7 +10,7 @@ exports.zebraStripeGroups = function($module) {
 };
 
 exports.wireModalButtons = function($container) {
-	$container.find('.btn-group').on('click', 'a[data-toggle=modal]', function(e){
+	$container.on('click', 'a[data-toggle=modal]', function(e){
       e.preventDefault();
       var $this = $(this);
       var target = $this.attr('data-target');
