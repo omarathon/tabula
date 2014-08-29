@@ -750,6 +750,7 @@ var LocationPicker = function (options) {
 					mlim: 2,
 					limit: 1000,
 					type: 'lb',
+					key: '$2a$11$ra7c/DofvF6yZuQhl.SBEuLrA8k2fvyt.WlJ8bbI.Asd1OyT.N2JS',
 					_ts: new Date().getTime(),
 					q: query
 				},
