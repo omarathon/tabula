@@ -30,7 +30,7 @@ class AdminDepartmentHomeControllerTest extends TestBase with Mockito{
       groupSet1.releasedToTutors = false
 
       val cmd = mock[Appliable[AdminSmallGroupsHomeInformation]]
-      when(cmd.apply()).thenReturn(AdminSmallGroupsHomeInformation(false, Seq(groupSet1.module), Seq(ViewSetWithProgress(groupSet1, Nil, GroupsViewModel.Tutor, null, None, ListMap()))))
+      when(cmd.apply()).thenReturn(AdminSmallGroupsHomeInformation(false, Seq(groupSet1.module), Seq(ViewSetWithProgress(groupSet1, Nil, GroupsViewModel.Tutor, null, None, ListMap())), Nil))
       val mav = createController.adminDepartment(cmd, department, currentUser)
       mav.map.get("hasUnreleasedGroupsets") match{
         case Some(v: Boolean) => v should be (true)
@@ -47,7 +47,7 @@ class AdminDepartmentHomeControllerTest extends TestBase with Mockito{
       groupSet1.releasedToTutors = true
 
       val cmd = mock[Appliable[AdminSmallGroupsHomeInformation]]
-      when(cmd.apply()).thenReturn(AdminSmallGroupsHomeInformation(false, Seq(groupSet1.module), Seq(ViewSetWithProgress(groupSet1, Nil, GroupsViewModel.Tutor, null, None, ListMap()))))
+      when(cmd.apply()).thenReturn(AdminSmallGroupsHomeInformation(false, Seq(groupSet1.module), Seq(ViewSetWithProgress(groupSet1, Nil, GroupsViewModel.Tutor, null, None, ListMap())), Nil))
       val mav = createController.adminDepartment(cmd, department, currentUser)
       mav.map.get("hasUnreleasedGroupsets") match {
         case Some(v: Boolean) => v should be (false)

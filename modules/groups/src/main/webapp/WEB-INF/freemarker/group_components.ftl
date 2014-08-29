@@ -43,8 +43,37 @@
 		<#-- List of students modal -->
 		<div id="students-list-modal" class="modal fade"></div>
 
+		<#-- Immediately start waiting for collapsibles to load - don't wait to wire this handler in, because we initialise collapsibles before the DOM has loaded below -->
+		<script type="text/javascript">
+			(function($) {
+				var processContainer = function($container) {
+					Groups.zebraStripeGroups($container);
+					Groups.wireModalButtons($container);
+					Groups.wireMapLocations($container);
+					AjaxPopup.wireAjaxPopupLinks($container);
+					$container.find('.use-tooltip').tooltip();
+					$container.find('.use-popover').tabulaPopover({
+						trigger: 'click',
+						container: '#container'
+					});
+				};
+
+				$(document.body).on('loaded.collapsible', '.set-info', function() {
+					var $set = $(this);
+					processContainer($set);
+				});
+			})(jQuery);
+		</script>
+
 		<#list sets as setItem>
 			<@single_set setItem expand_by_default />
+
+			<#if !expand_by_default>
+			<#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
+				<script type="text/javascript">
+					GlobalScripts.initCollapsible(jQuery('#${set_anchor(setItem.set)}'));
+				</script>
+			</#if>
 		</#list>
 	</div>
 </#macro>

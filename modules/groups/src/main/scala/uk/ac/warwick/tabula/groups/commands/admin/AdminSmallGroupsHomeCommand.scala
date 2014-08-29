@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetFilter
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroupSetFilter}
 import uk.ac.warwick.tabula.groups.services.{SmallGroupSetWorkflowServiceComponent, AutowiringSmallGroupSetWorkflowServiceComponent}
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel._
 
@@ -17,7 +17,8 @@ import uk.ac.warwick.tabula.JavaImports._
 case class AdminSmallGroupsHomeInformation(
 	canAdminDepartment: Boolean,
 	modulesWithPermission: Seq[Module],
-	setsWithPermission: Seq[ViewSetWithProgress]
+	setsWithPermission: Seq[ViewSetWithProgress],
+	departmentSmallGroupSets: Seq[DepartmentSmallGroupSet]
 )
 
 object AdminSmallGroupsHomeCommand {
@@ -83,7 +84,8 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 		AdminSmallGroupsHomeInformation(
 			canAdminDepartment = canManageDepartment,
 			modulesWithPermission = modules.toSeq.sortBy { _.code },
-			setsWithPermission = setViews
+			setsWithPermission = setViews,
+			departmentSmallGroupSets = smallGroupService.getDepartmentSmallGroupSets(department, academicYear)
 		)
 	}
 }
