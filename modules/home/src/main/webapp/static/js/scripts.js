@@ -677,7 +677,7 @@
 					return;
 				}
 
-				if ($(e.target).is('a,button') || $(e.target).closest('a,button').length) {
+				if ($(e.target).is('a, button') || $(e.target).closest('a, button').length) {
 					// Ignore if we're clicking a button
 					return;
 				}
