@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetFilter
 import uk.ac.warwick.tabula.groups.services.{SmallGroupSetWorkflowServiceComponent, AutowiringSmallGroupSetWorkflowServiceComponent}
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel._
 
@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import AdminSmallGroupsHomeCommand._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.JavaImports._
 
 case class AdminSmallGroupsHomeInformation(
 	canAdminDepartment: Boolean,
@@ -38,6 +39,10 @@ trait AdminSmallGroupsHomeCommandState {
 	def department: Department
 	def user: CurrentUser
 	def academicYear: AcademicYear
+
+	var moduleFilters: JList[SmallGroupSetFilter] = JArrayList()
+	var statusFilters: JList[SmallGroupSetFilter] = JArrayList()
+	var allocationMethodFilters: JList[SmallGroupSetFilter] = JArrayList()
 }
 
 trait AdminSmallGroupsHomePermissionsRestrictedState {
@@ -58,6 +63,9 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 		val sets =
 			smallGroupService.getSmallGroupSets(department, academicYear)
 				.filter { set => securityService.can(user, RequiredPermission, set) }
+				.filter { set => moduleFilters.asScala.isEmpty || moduleFilters.asScala.exists { _(set) } }
+				.filter { set => statusFilters.asScala.isEmpty || statusFilters.asScala.forall { _(set) } } // Status filters are an AND
+				.filter { set => allocationMethodFilters.asScala.isEmpty || allocationMethodFilters.asScala.exists { _(set) } }
 
 		val setViews = sets.map { set =>
 			val progress = smallGroupSetWorkflowService.progress(set)
