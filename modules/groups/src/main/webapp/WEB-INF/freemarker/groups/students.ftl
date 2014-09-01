@@ -1,4 +1,5 @@
 <#import "../group_components.ftl" as components />
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
 <div class="modal-header">
 	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -56,7 +57,7 @@
 				</#if>
 
 				<div class="name">
-					<h6>${student.fullName}</h6>
+					<h6>${student.fullName} <@pl.profile_link student.universityId /></h6>
 					${student.shortDepartment!""}
 				</div>
 			</div>

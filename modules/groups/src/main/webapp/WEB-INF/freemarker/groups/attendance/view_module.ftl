@@ -12,8 +12,8 @@
 		</#list>
 		
 		<#-- List of students modal -->
-		<div id="students-list-modal" class="modal fade">
-		</div>
+		<div id="students-list-modal" class="modal fade"></div>
+		<div id="profile-modal" class="modal fade profile-subset"></div>
 	<#else>
 		<p>There are no small group events for <@fmt.module_name module false /></p>
 	</#if>

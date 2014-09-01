@@ -33,17 +33,21 @@ jQuery.fn.ajaxModalLink = function(options) {
 		    $modalBody = $modalElement.find('.modal-body'),
 		    wholeContent = $modalBody.length === 0;
 
+		var onLoad = function() {
+			// Allow recursive modal links, because that can only end well
+			$modalElement.find('a.ajax-modal').ajaxModalLink();
+		};
+
 		if (wholeContent) {
 			// HTML has no modal-body. bootstrap.js doesn't directly support this,
 			// so let's manually shove it in.
 			$modalElement.html('<div class="modal-header"><h3>Loading&hellip;</h3></div>');
 			$modalElement.modal({ remote: null });
-			$modalElement.load(href);
+			$modalElement.load(href, onLoad);
 		} else {
 			$modalElement.find('.modal-body').html("<p>Loading&hellip;</p>");
-			$modalElement.modal({
-				remote: href
-			});
+			$modalElement.modal({ remote: null });
+			$modalElement.find('.modal-body').load(href, onLoad);
 		}
 
 		// Forget about modal on hide, otherwise it'll only load once.

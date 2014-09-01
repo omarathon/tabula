@@ -89,6 +89,12 @@
 				</table>
 			</div>
 		</div>
+
+		<div class="link-to-full clearfix">
+			<a href="<@routes.profile profile />" target="_blank">
+				View ${profile.fullName}'s full profile<img class="targetBlank" alt="" title="Link opens in a new window" src="/static/images/shim.gif"/>
+			</a>
+		</div>
 	</@modal.body>
 <#else>
 	<@modal.header>

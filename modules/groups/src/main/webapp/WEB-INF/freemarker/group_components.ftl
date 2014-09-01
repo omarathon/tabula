@@ -42,6 +42,7 @@
 	<div class="small-group-sets-list">
 		<#-- List of students modal -->
 		<div id="students-list-modal" class="modal fade"></div>
+		<div id="profile-modal" class="modal fade profile-subset"></div>
 
 		<#-- Immediately start waiting for collapsibles to load - don't wait to wire this handler in, because we initialise collapsibles before the DOM has loaded below -->
 		<script type="text/javascript">
@@ -330,6 +331,7 @@
 <div class="small-group-modules-list">
 	<#-- List of students modal -->
 	<div id="students-list-modal" class="modal fade"></div>
+	<div id="profile-modal" class="modal fade profile-subset"></div>
 
 	<#-- Immediately start waiting for collapsibles to load - don't wait to wire this handler in, because we initialise collapsibles before the DOM has loaded below -->
 	<script type="text/javascript">
