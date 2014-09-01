@@ -65,7 +65,9 @@ jQuery.fn.bigList = function(options) {
             }
         });
 
-        options.setup.call($this);
+		var doNothing = function(){};
+		var setupFunction = options.setup || doNothing;
+		setupFunction.call($this);
 
         $(function(){
             $checkboxes.change();

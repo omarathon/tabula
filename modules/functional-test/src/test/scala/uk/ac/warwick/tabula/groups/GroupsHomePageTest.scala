@@ -4,9 +4,7 @@ import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BreadcrumbsMatcher
 import uk.ac.warwick.tabula.groups.pages.{GroupsHomePage, BatchOpenPage, SmallGroupTeachingPage}
 
-
 class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with BreadcrumbsMatcher{
-
 
 	val TEST_MODULE_CODE = "xxx999"
 	val TEST_GROUPSET_NAME="Test Tutorial"
@@ -30,7 +28,6 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 		groupsPage.isCurrentPage()
 
 		groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should not be ('defined)
-
 	}
 
 	"A student" should "be able to see released groups" in {
@@ -52,11 +49,9 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 		groupsPage.isCurrentPage() should be (true)
 
 		groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should be ('defined)
-
 	}
 
-
-		"Department Admin" should "be offered a link to the department's group pages" in {
+	"Department Admin" should "be offered a link to the department's group pages" in {
 		Given("the administrator is logged in and viewing the groups home page")
 			signIn as(P.Admin1)  to (Path("/groups"))
 			pageTitle should be ("Tabula - Small Group Teaching")
@@ -67,20 +62,8 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 		Then("The page should be the small group teaching page")
 				breadCrumbsMatch(Seq("Small Group Teaching"))
 
-		And("The page should display at least one module")
-			findAll(className("module-info")).toList should not be (Nil)
-
-		And("Some modules should be hidden")
-			val allDisplayed = findAll(className("module-info")).forall(_.isDisplayed)
-			allDisplayed should be (false)
-
-		When("The administrator clicks the 'show' link")
-			click on (linkText("Show"))
-
-		Then("All modules should be displayed")
-			for (info <- findAll(className("module-info")))
-				info.isDisplayed should be (true)
-
+		And("The page should display at least one set")
+			findAll(className("set-info")).toList should not be (Nil)
 	}
 
 	it should "be able to open batches of groups" in {
