@@ -23,7 +23,8 @@ object Routes {
 	}
 
 	object admin {
-		def apply(department: Department, year: AcademicYear) = context + "/admin/department/%s/%s" format (encoded(department.code), year.startYear.toString)
+		def apply(department: Department, year: AcademicYear): String = context + "/admin/department/%s/%s" format (encoded(department.code), year.startYear.toString)
+		def apply(set: SmallGroupSet): String = apply(set.module.department, set.academicYear) + s"#set-${set.id}"
 
 		def release(department: Department) = context + "/admin/department/%s/groups/release" format (encoded(department.code))
 		def selfsignup(department: Department, action: String) = context + "/admin/department/%s/groups/selfsignup/%s" format (encoded(department.code), encoded(action))

@@ -207,6 +207,7 @@ class SmallGroupSet
 	def hasAllocated = groups.asScala exists { !_.students.isEmpty }
 	
 	def permissionsParents = Option(module).toStream
+	override def humanReadableId = name
 
 	def studentsCanSeeTutorName = getBooleanSetting(Settings.StudentsCanSeeTutorNames).getOrElse(false)
 	def studentsCanSeeTutorName_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeTutorNames -> canSee)
