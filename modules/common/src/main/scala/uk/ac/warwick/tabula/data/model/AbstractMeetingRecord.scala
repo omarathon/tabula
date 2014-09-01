@@ -13,7 +13,7 @@ import java.sql.Types
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
-import uk.ac.warwick.tabula.timetables.{TimetableEventType, EventOccurrence}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType, EventOccurrence}
 
 trait MeetingRecordAttachments {
 	var attachments: JList[FileAttachment]
@@ -88,9 +88,9 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 		this.relationship = relationship
 	}
 
-	def toEventOccurrence: Option[EventOccurrence]
+	def toEventOccurrence(context: TimetableEvent.Context): Option[EventOccurrence]
 
-	protected def asEventOccurrence: Option[EventOccurrence] = {
+	protected def asEventOccurrence(context: TimetableEvent.Context): Option[EventOccurrence] = {
 		Some(EventOccurrence(
 			title,
 			title,
@@ -100,7 +100,10 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 			meetingDate.plusHours(1).toLocalDateTime,
 			if (format == MeetingFormat.FaceToFace) None else Option(format).map { _.description },
 			Some(relationship.relationshipType.description),
-			relationship.agentMember.map { _.universityId }.toSeq
+			context match {
+				case TimetableEvent.Context.Staff => relationship.studentMember.map { _.universityId }.toSeq
+				case TimetableEvent.Context.Student => relationship.agentMember.map { _.universityId }.toSeq
+			}
 		))
 	}
 

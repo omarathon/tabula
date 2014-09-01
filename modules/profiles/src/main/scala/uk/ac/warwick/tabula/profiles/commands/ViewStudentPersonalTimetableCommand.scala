@@ -61,7 +61,7 @@ class ViewStudentPersonalTimetableCommandImpl(
 		val timetableEvents = studentTimetableEventSource.eventsFor(student)
 		val occurrences =
 			timetableEvents.flatMap(eventsToOccurrences) ++
-			scheduledMeetingEventSource.occurrencesFor(student, currentUser)
+			scheduledMeetingEventSource.occurrencesFor(student, currentUser, TimetableEvent.Context.Student)
 
 		// Converter to make localDates sortable
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._

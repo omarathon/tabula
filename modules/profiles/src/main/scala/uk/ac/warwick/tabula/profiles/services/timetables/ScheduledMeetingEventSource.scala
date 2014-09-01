@@ -3,11 +3,11 @@ package uk.ac.warwick.tabula.profiles.services.timetables
 import uk.ac.warwick.tabula.data.model.{StaffMember, Member, AbstractMeetingRecord, RuntimeMember, StudentMember}
 import uk.ac.warwick.tabula.services.{SecurityServiceComponent, RelationshipServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.timetables.EventOccurrence
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence}
 import uk.ac.warwick.tabula.permissions.Permissions
 
 trait ScheduledMeetingEventSource {
-	def occurrencesFor(member: Member, currentUser: CurrentUser): Seq[EventOccurrence]
+	def occurrencesFor(member: Member, currentUser: CurrentUser, context: TimetableEvent.Context): Seq[EventOccurrence]
 }
 trait ScheduledMeetingEventSourceComponent {
 	def scheduledMeetingEventSource: ScheduledMeetingEventSource
@@ -20,7 +20,7 @@ trait MeetingRecordServiceScheduledMeetingEventSourceComponent extends Scheduled
 
 	class MeetingRecordServiceScheduledMeetingEventSource extends ScheduledMeetingEventSource {
 
-		def occurrencesFor(member: Member, currentUser: CurrentUser) = {
+		def occurrencesFor(member: Member, currentUser: CurrentUser, context: TimetableEvent.Context) = {
 			def canReadMeeting(meeting: AbstractMeetingRecord) =
 				securityService.can(currentUser, Permissions.Profiles.MeetingRecord.Read(meeting.relationship.relationshipType), member)
 
@@ -32,7 +32,7 @@ trait MeetingRecordServiceScheduledMeetingEventSourceComponent extends Scheduled
 			}
 
 			val meetings = meetingRecordService.listAll(relationships, currentUser.profile)
-			meetings.flatMap { meeting => meeting.toEventOccurrence.map {
+			meetings.flatMap { meeting => meeting.toEventOccurrence(context).map {
 				case occurrence if canReadMeeting(meeting) => occurrence
 				case occurrence => {
 					// No permission to read meeting details, just show as busy

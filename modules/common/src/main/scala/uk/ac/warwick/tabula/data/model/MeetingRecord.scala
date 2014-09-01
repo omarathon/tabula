@@ -6,7 +6,7 @@ import org.hibernate.annotations.BatchSize
 import uk.ac.warwick.tabula.JavaImports._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
-import uk.ac.warwick.tabula.timetables.{TimetableEventType, EventOccurrence}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType, EventOccurrence}
 
 object MeetingRecord {
 	val DefaultMeetingTimeOfDay = 12 // Should be used for legacy meetings (where isRealTime is false)
@@ -28,9 +28,9 @@ class MeetingRecord extends AbstractMeetingRecord {
 	@Column(name="real_time")
 	var isRealTime: Boolean = true
 
-	def toEventOccurrence: Option[EventOccurrence] = {
+	def toEventOccurrence(context: TimetableEvent.Context): Option[EventOccurrence] = {
 		if (isRealTime) {
-			this.asEventOccurrence
+			this.asEventOccurrence(context)
 		}	else {
 			None
 		}

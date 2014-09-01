@@ -21,6 +21,12 @@ case class TimetableEvent(
 
 object TimetableEvent {
 
+	sealed abstract trait Context
+	object Context {
+		case object Student extends Context
+		case object Staff extends Context
+	}
+
 	def apply(sge: SmallGroupEvent): TimetableEvent = {
 		TimetableEvent(name = sge.group.groupSet.name,
 			title = Option(sge.title).getOrElse(""),
