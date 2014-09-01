@@ -4,7 +4,7 @@
 	<h4><span class="muted">for</span> <@fmt.module_name module /></h4>
 
 	<@f.form id="newEvents" method="POST" commandName="command" class="form-horizontal">
-		<@components.set_wizard true 'events' smallGroupSet.linked />
+		<@components.set_wizard true 'events' smallGroupSet />
 
 		<#assign is_edit = false />
 		<#include "_editEvents.ftl" />

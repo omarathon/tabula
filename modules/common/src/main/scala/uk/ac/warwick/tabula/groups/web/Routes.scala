@@ -45,6 +45,7 @@ object Routes {
 		object reusable {
 			def apply(department: Department) = context + "/admin/department/%s/groups/reusable" format (encoded(department.code))
 			def create(department: Department) = context + "/admin/department/%s/groups/reusable/new" format (encoded(department.code))
+			def create(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s" format (encoded(set.department.code), encoded(set.id))
 			def createAddStudents(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s/students" format (encoded(set.department.code), encoded(set.id))
 			def createAddGroups(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s/groups" format (encoded(set.department.code), encoded(set.id))
 			def createAllocate(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s/allocate" format (encoded(set.department.code), encoded(set.id))

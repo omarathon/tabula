@@ -117,6 +117,7 @@ class SmallGroupSet
 	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
 	@JoinColumn(name = "set_id")
 	@BatchSize(size=200)
+	@OrderBy("name")
 	var groups: JList[SmallGroup] = JArrayList()
 
 	// A linked departmental small group set; if this is linked, memberships aren't kept here.

@@ -162,14 +162,7 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 		render(set, findStudentsCommandResult, editMembershipCommandResult, expandManual = true)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array("persist"))
-	def save(
-		@Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
-		errors: Errors,
-		@ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
-		@ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
-		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
-	) = {
+	protected def submit(cmd: UpdateStudentsForDepartmentSmallGroupSetCommand, errors: Errors, findCommand: FindStudentsForDepartmentSmallGroupSetCommand, editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand, set: DepartmentSmallGroupSet, route: String) = {
 		if (errors.hasErrors) {
 			val findStudentsCommandResult =
 				if (findCommand.filterQueryString.length > 0)
@@ -179,10 +172,19 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 			val editMembershipCommandResult = editMembershipCommand.apply()
 			render(set, findStudentsCommandResult, editMembershipCommandResult)
 		} else {
-			val set = cmd.apply()
-			Redirect(Routes.admin.reusable(set.department))
+			cmd.apply()
+			RedirectForce(route)
 		}
 	}
+
+	@RequestMapping(method = Array(POST), params = Array("persist"))
+	def save(
+		@Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+		errors: Errors,
+		@ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
+		@ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
+	) = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable(set.department))
 
 }
 
@@ -192,6 +194,15 @@ class CreateDepartmentSmallGroupSetAddStudentsController extends UpdateStudentsF
 
 	override protected val renderPath = "admin/groups/reusable/addstudentsoncreate"
 
+	@RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.createAndEditProperties))
+	def saveAndEditProperties(
+		@Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+		errors: Errors,
+		@ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
+		@ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
+	) = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable.create(set))
+
 	@RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.createAndAddGroups))
 	def saveAndAddGroups(
 		@Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
@@ -199,20 +210,7 @@ class CreateDepartmentSmallGroupSetAddStudentsController extends UpdateStudentsF
 		@ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
 		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
-	) = {
-		if (errors.hasErrors) {
-			val findStudentsCommandResult =
-				if (findCommand.filterQueryString.length > 0)
-					findCommand.apply()
-				else
-					FindStudentsForDepartmentSmallGroupSetCommandResult(JArrayList(), Seq())
-			val editMembershipCommandResult = editMembershipCommand.apply()
-			render(set, findStudentsCommandResult, editMembershipCommandResult)
-		} else {
-			val set = cmd.apply()
-			RedirectForce(Routes.admin.reusable.createAddGroups(set))
-		}
-	}
+	) = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable.createAddGroups(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.createAndAllocate))
 	def saveAndAllocate(
@@ -221,20 +219,7 @@ class CreateDepartmentSmallGroupSetAddStudentsController extends UpdateStudentsF
 		@ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
 		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
-	) = {
-		if (errors.hasErrors) {
-			val findStudentsCommandResult =
-				if (findCommand.filterQueryString.length > 0)
-					findCommand.apply()
-				else
-					FindStudentsForDepartmentSmallGroupSetCommandResult(JArrayList(), Seq())
-			val editMembershipCommandResult = editMembershipCommand.apply()
-			render(set, findStudentsCommandResult, editMembershipCommandResult)
-		} else {
-			val set = cmd.apply()
-			RedirectForce(Routes.admin.reusable.createAllocate(set))
-		}
-	}
+	) = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable.createAllocate(set))
 
 }
 
@@ -244,48 +229,31 @@ class EditDepartmentSmallGroupSetAddStudentsController extends UpdateStudentsFor
 
 	override protected val renderPath = "admin/groups/reusable/editstudents"
 
-	@RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.editAndAddGroups))
-	def editAndAddGroups(
+	@RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.editAndEditProperties))
+	def saveAndEditProperties(
 		@Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
 		errors: Errors,
 		@ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
 		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
-	) = {
-		if (errors.hasErrors) {
-			val findStudentsCommandResult =
-				if (findCommand.filterQueryString.length > 0)
-					findCommand.apply()
-				else
-					FindStudentsForDepartmentSmallGroupSetCommandResult(JArrayList(), Seq())
-			val editMembershipCommandResult = editMembershipCommand.apply()
-			render(set, findStudentsCommandResult, editMembershipCommandResult)
-		} else {
-			val set = cmd.apply()
-			RedirectForce(Routes.admin.reusable.editAddGroups(set))
-		}
-	}
+	) = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable.edit(set))
+
+	@RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.editAndAddGroups))
+	def saveAndAddGroups(
+		@Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+		errors: Errors,
+		@ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
+		@ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
+	) = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable.editAddGroups(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.editAndAllocate))
-	def editAndAllocate(
+	def saveAndAllocate(
 		@Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
 		errors: Errors,
 		@ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
 		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
-	) = {
-		if (errors.hasErrors) {
-			val findStudentsCommandResult =
-				if (findCommand.filterQueryString.length > 0)
-					findCommand.apply()
-				else
-					FindStudentsForDepartmentSmallGroupSetCommandResult(JArrayList(), Seq())
-			val editMembershipCommandResult = editMembershipCommand.apply()
-			render(set, findStudentsCommandResult, editMembershipCommandResult)
-		} else {
-			val set = cmd.apply()
-			RedirectForce(Routes.admin.reusable.editAllocate(set))
-		}
-	}
+	) = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable.editAllocate(set))
 
 }

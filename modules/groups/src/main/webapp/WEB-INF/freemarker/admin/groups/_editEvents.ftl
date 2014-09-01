@@ -4,7 +4,7 @@
 
 <fieldset>
 	<@form.row>
-		<p>There are <@fmt.p smallGroupSet.groups?size "group" /> in ${smallGroupSet.name}<#if smallGroupSet.linked> (from <i class="icon-link"></i> ${smallGroupSet.linkedDepartmentSmallGroupSet.name})</#if>.</p>
+		<p>There are <@fmt.p smallGroupSet.groups?size "group" /> in ${smallGroupSet.name}<#if smallGroupSet.linked> (from ${smallGroupSet.linkedDepartmentSmallGroupSet.name})</#if>.</p>
 
 		<p>
 			<#if is_edit>

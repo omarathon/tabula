@@ -1,7 +1,7 @@
 <#escape x as x?html>
 	<#if smallGroupSet.linked>
 		<@form.row>
-			<p>There are <@fmt.p smallGroupSet.groups?size "group" /> in ${smallGroupSet.name} (from <i class="icon-link"></i> ${smallGroupSet.linkedDepartmentSmallGroupSet.name}).</p>
+			<p>There are <@fmt.p smallGroupSet.groups?size "group" /> in ${smallGroupSet.name} (from ${smallGroupSet.linkedDepartmentSmallGroupSet.name}).</p>
 
 			<#if smallGroupSet.groups?size gt 0>
 				<ul>

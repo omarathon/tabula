@@ -6,7 +6,8 @@
 
 <@f.form method="post" action="${url('/groups/admin/module/${module.code}/groups/new')}" commandName="createSmallGroupSetCommand" cssClass="form-horizontal">
 
-	<@components.set_wizard true 'properties' />
+	<#assign fakeSet = {'linked':false, 'groups':[]} />
+	<@components.set_wizard true 'properties' fakeSet />
 
 	<@f.errors cssClass="error form-errors" />
 	

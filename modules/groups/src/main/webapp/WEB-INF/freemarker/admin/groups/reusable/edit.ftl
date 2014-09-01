@@ -3,12 +3,7 @@
 	<h1>Edit reusable small groups: ${smallGroupSet.name}</h1>
 
 	<@f.form id="editGroups" method="POST" commandName="editDepartmentSmallGroupSetCommand" class="form-horizontal">
-		<p class="progress-arrows">
-			<span class="arrow-right active">Properties</span>
-			<span class="arrow-right arrow-left use-tooltip" title="Save and edit students"><button type="submit" class="btn btn-link" name="${ManageDepartmentSmallGroupsMappingParameters.editAndAddStudents}">Students</button></span>
-			<span class="arrow-right arrow-left use-tooltip" title="Save and edit groups"><button type="submit" class="btn btn-link" name="${ManageDepartmentSmallGroupsMappingParameters.editAndAddGroups}">Groups</button></span>
-			<span class="arrow-right arrow-left use-tooltip" title="Save and allocate students to groups"><button type="submit" class="btn btn-link" name="${ManageDepartmentSmallGroupsMappingParameters.editAndAllocate}">Allocate</button></span>
-		</p>
+		<@components.reusable_set_wizard false 'properties' smallGroupSet />
 
 		<fieldset>
 			<@form.labelled_row "name" "Set name">
@@ -30,9 +25,9 @@
 			<input
 				type="submit"
 				class="btn btn-success use-tooltip"
-				name="${ManageDepartmentSmallGroupsMappingParameters.editAndAddStudents}"
-				value="Save and add students"
-				title="Select which students are included in these groups"
+				name="${ManageDepartmentSmallGroupsMappingParameters.editAndAddGroups}"
+				value="Save and edit groups"
+				title="Edit groups for set of reusable groups"
 				data-container="body"
 				/>
 			<input

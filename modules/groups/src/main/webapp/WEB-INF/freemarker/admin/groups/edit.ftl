@@ -7,7 +7,7 @@
 <#if smallGroupSet?? && smallGroupSet.allocationMethod.dbValue == 'StudentSignUp'><div class="alert">These groups are currently <strong>${smallGroupSet.openForSignups?string("open","closed")}</strong> for self sign-up</div></#if>
 
 <@f.form method="post" action="${url('/groups/admin/module/${module.code}/groups/${smallGroupSet.id}/edit')}" commandName="editSmallGroupSetCommand" cssClass="form-horizontal">
-	<@components.set_wizard false 'properties' />
+	<@components.set_wizard false 'properties' smallGroupSet />
 
 	<@f.errors cssClass="error form-errors" />
 	

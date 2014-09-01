@@ -2,6 +2,15 @@
 	<#import "*/group_components.ftl" as components />
 	<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
+	<#if smallGroupSet.linked>
+		<div class="alert alert-block">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			<h4>Allocation linked to ${smallGroupSet.linkedDepartmentSmallGroupSet.name}</h4>
+
+			<p>Changing the allocation on this screen will change the group allocation for any other modules linked to these groups.</p>
+		</div>
+	</#if>
+
 	<#assign mappingById=command.mappingById />
 	<#assign membersById=command.membersById />
 

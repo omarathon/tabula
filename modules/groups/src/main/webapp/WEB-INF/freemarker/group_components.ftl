@@ -101,9 +101,9 @@
 								<span class="use-tooltip" title="These groups are closed for self sign-up"><i class="icon-lock"></i></span>
 							</#if>
 						<#elseif setItem.isLinked()>
-							<span class="use-tooltip" title="Allocations for these groups are linked and reused"><i class="icon-link"></i></span>
+							<span class="use-tooltip" title="These group allocations may be linked to other modules"><i class="icon-link"></i></span>
 						<#else>
-							<span class="use-tooltip" title="These groups are manually allocated groups"><i class="icon-random"></i></span>
+							<span class="use-tooltip" title="These groups are manually allocated"><i class="icon-random"></i></span>
 						</#if>
 
 						<#if set.archived>
@@ -1078,7 +1078,10 @@
 	</#if>
 </#macro>
 
-<#macro set_wizard is_new current_step is_linked=false>
+<#macro set_wizard is_new current_step set>
+	<#local is_linked = set.linked />
+	<#local has_groups = set.groups?size gt 0 />
+
 	<p class="progress-arrows">
 		<#if is_linked && (current_step == 'students' || current_step == 'groups' || current_step == 'allocate')>
 			<#local properties_url><#if is_new><@routes.createeditproperties smallGroupSet /><#else><@routes.editsetproperties smallGroupSet /></#if></#local>
@@ -1113,16 +1116,16 @@
 				label="Events"
 				is_first=false
 				is_active=(current_step == 'events')
-				is_available=true
+				is_available=has_groups
 				tooltip="Save and edit events"
 				url=events_url />
 
 			<#local allocate_url><#if is_new><@routes.createsetallocate smallGroupSet /><#else><@routes.editsetallocate smallGroupSet /></#if></#local>
 			<@wizard_link
-				label="Allocate"
+				label="Allocation"
 				is_first=false
 				is_active=(current_step == 'allocate')
-				is_available=true
+				is_available=has_groups
 				tooltip="Save and allocate students to groups"
 				url=allocate_url />
 		<#else>
@@ -1158,19 +1161,61 @@
 				label="Events"
 				is_first=false
 				is_active=(current_step == 'events')
-				is_available=true
+				is_available=has_groups
 				tooltip="Save and edit events"
 				action=events_action />
 
 			<#local allocate_action><#if is_new>${ManageSmallGroupsMappingParameters.createAndAllocate}<#else>${ManageSmallGroupsMappingParameters.editAndAllocate}</#if></#local>
 			<@wizard_button
-				label="Allocate"
+				label="Allocation"
 				is_first=false
 				is_active=(current_step == 'allocate')
-				is_available=true
+				is_available=has_groups
 				tooltip="Save and allocate students to groups"
 				action=allocate_action />
 		</#if>
+	</p>
+</#macro>
+
+<#macro reusable_set_wizard is_new current_step set>
+	<#local has_groups = set.groups?size gt 0 />
+
+	<p class="progress-arrows">
+		<#local properties_action><#if is_new>${ManageDepartmentSmallGroupsMappingParameters.createAndEditProperties}<#else>${ManageDepartmentSmallGroupsMappingParameters.editAndEditProperties}</#if></#local>
+		<@wizard_button
+			label="Properties"
+			is_first=true
+			is_active=(current_step == 'properties')
+			is_available=true
+			tooltip="Save and edit properties"
+			action=properties_action />
+
+		<#local groups_action><#if is_new>${ManageDepartmentSmallGroupsMappingParameters.createAndAddGroups}<#else>${ManageDepartmentSmallGroupsMappingParameters.editAndAddGroups}</#if></#local>
+		<@wizard_button
+			label="Groups"
+			is_first=false
+			is_active=(current_step == 'groups')
+			is_available=true
+			tooltip="Save and edit groups"
+			action=groups_action />
+
+		<#local students_action><#if is_new>${ManageDepartmentSmallGroupsMappingParameters.createAndAddStudents}<#else>${ManageDepartmentSmallGroupsMappingParameters.editAndAddStudents}</#if></#local>
+		<@wizard_button
+			label="Students"
+			is_first=false
+			is_active=(current_step == 'students')
+			is_available=true
+			tooltip="Save and edit students"
+			action=students_action />
+
+		<#local allocate_action><#if is_new>${ManageDepartmentSmallGroupsMappingParameters.createAndAllocate}<#else>${ManageDepartmentSmallGroupsMappingParameters.editAndAllocate}</#if></#local>
+		<@wizard_button
+			label="Allocation"
+			is_first=false
+			is_active=(current_step == 'allocate')
+			is_available=has_groups
+			tooltip="Save and allocate students to groups"
+			action=allocate_action />
 	</p>
 </#macro>
 

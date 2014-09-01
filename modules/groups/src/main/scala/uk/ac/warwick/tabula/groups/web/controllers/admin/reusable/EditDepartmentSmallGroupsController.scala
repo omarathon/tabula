@@ -24,7 +24,10 @@ abstract class AbstractEditDepartmentSmallGroupsController extends GroupsControl
 	@ModelAttribute("command") def command(@PathVariable("department") department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): EditDepartmentSmallGroupsCommand =
 		EditDepartmentSmallGroupsCommand(department, set)
 
-	protected def render(set: DepartmentSmallGroupSet): Mav
+	protected def render(set: DepartmentSmallGroupSet) =
+		Mav(renderPath).crumbs(Breadcrumbs.Department(set.department))
+
+	protected val renderPath: String
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(
@@ -35,19 +38,20 @@ abstract class AbstractEditDepartmentSmallGroupsController extends GroupsControl
 		render(set)
 	}
 
+	protected def submit(cmd: EditDepartmentSmallGroupsCommand, errors: Errors, set: DepartmentSmallGroupSet, route: String) =
+		if (errors.hasErrors) {
+			render(set)
+		} else {
+			cmd.apply()
+			RedirectForce(route)
+		}
+
 	@RequestMapping(method = Array(POST))
 	def save(
 		@Valid @ModelAttribute("command") cmd: EditDepartmentSmallGroupsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
-	) = {
-		if (errors.hasErrors) {
-			render(set)
-		} else {
-			cmd.apply()
-			Redirect(Routes.admin.reusable(set.department))
-		}
-	}
+	) = submit(cmd, errors, set, Routes.admin.reusable(set.department))
 
 }
 
@@ -55,38 +59,28 @@ abstract class AbstractEditDepartmentSmallGroupsController extends GroupsControl
 @Controller
 class CreateDepartmentSmallGroupSetAddGroupsController extends AbstractEditDepartmentSmallGroupsController {
 
-	override protected def render(set: DepartmentSmallGroupSet) = {
-		Mav("admin/groups/reusable/newgroups")
-			.crumbs(Breadcrumbs.Department(set.department))
-	}
+	override protected val renderPath = "admin/groups/reusable/newgroups"
+
+	@RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.createAndEditProperties))
+	def saveAndEditProperties(
+		@Valid @ModelAttribute("command") cmd: EditDepartmentSmallGroupsCommand,
+		errors: Errors,
+		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
+	) = submit(cmd, errors, set, Routes.admin.reusable.create(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.createAndAddStudents))
 	def saveAndAddStudents(
 		@Valid @ModelAttribute("command") cmd: EditDepartmentSmallGroupsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
-	) = {
-		if (errors.hasErrors) {
-			render(set)
-		} else {
-			cmd.apply()
-			RedirectForce(Routes.admin.reusable.createAddStudents(set))
-		}
-	}
+	) = submit(cmd, errors, set, Routes.admin.reusable.createAddStudents(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.createAndAllocate))
 	def saveAndAddAllocate(
 		@Valid @ModelAttribute("command") cmd: EditDepartmentSmallGroupsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
-	) = {
-		if (errors.hasErrors) {
-			render(set)
-		} else {
-			cmd.apply()
-			RedirectForce(Routes.admin.reusable.createAllocate(set))
-		}
-	}
+	) = submit(cmd, errors, set, Routes.admin.reusable.createAllocate(set))
 
 }
 
@@ -94,37 +88,27 @@ class CreateDepartmentSmallGroupSetAddGroupsController extends AbstractEditDepar
 @Controller
 class EditDepartmentSmallGroupSetAddGroupsController extends AbstractEditDepartmentSmallGroupsController {
 
-	override protected def render(set: DepartmentSmallGroupSet) = {
-		Mav("admin/groups/reusable/editgroups")
-			.crumbs(Breadcrumbs.Department(set.department))
-	}
+	override protected val renderPath = "admin/groups/reusable/editgroups"
+
+	@RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.editAndEditProperties))
+	def saveAndEditProperties(
+		@Valid @ModelAttribute("command") cmd: EditDepartmentSmallGroupsCommand,
+		errors: Errors,
+		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
+	) = submit(cmd, errors, set, Routes.admin.reusable.edit(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.editAndAddStudents))
 	def saveAndAddStudents(
 		@Valid @ModelAttribute("command") cmd: EditDepartmentSmallGroupsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
-	) = {
-		if (errors.hasErrors) {
-			render(set)
-		} else {
-			cmd.apply()
-			RedirectForce(Routes.admin.reusable.editAddStudents(set))
-		}
-	}
+	) = submit(cmd, errors, set, Routes.admin.reusable.editAddStudents(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.editAndAllocate))
 	def saveAndAddAllocate(
 		@Valid @ModelAttribute("command") cmd: EditDepartmentSmallGroupsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
-	) = {
-		if (errors.hasErrors) {
-			render(set)
-		} else {
-			cmd.apply()
-			RedirectForce(Routes.admin.reusable.editAllocate(set))
-		}
-	}
+	) = submit(cmd, errors, set, Routes.admin.reusable.editAllocate(set))
 
 }
