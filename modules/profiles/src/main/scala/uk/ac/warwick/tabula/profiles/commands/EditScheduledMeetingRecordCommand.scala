@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.ScheduledMeetingRecordInviteeNotification
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.{BindingResult, Errors}
@@ -11,7 +12,6 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.services.{MeetingRecordServiceComponent, AutowiringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, FileAttachmentServiceComponent}
-import uk.ac.warwick.tabula.data.model.notifications.ScheduledMeetingRecordInviteeNotification
 
 case class ScheduledMeetingRecordResult(meetingRecord: ScheduledMeetingRecord, isRescheduled: Boolean) extends ToEntityReference {
 	override type Entity = AbstractMeetingRecord

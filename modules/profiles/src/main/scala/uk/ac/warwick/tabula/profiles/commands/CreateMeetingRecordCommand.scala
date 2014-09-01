@@ -5,7 +5,7 @@ import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands.Description
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.notifications.NewMeetingRecordApprovalNotification
+import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.NewMeetingRecordApprovalNotification
 
 class CreateMeetingRecordCommand(creator: Member, relationship: StudentRelationship, considerAlternatives: Boolean)
 	extends ModifyMeetingRecordCommand(creator, relationship, considerAlternatives) {

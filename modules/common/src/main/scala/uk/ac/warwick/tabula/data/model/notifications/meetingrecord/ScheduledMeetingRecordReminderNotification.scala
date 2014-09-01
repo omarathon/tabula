@@ -1,9 +1,9 @@
-package uk.ac.warwick.tabula.data.model.notifications
+package uk.ac.warwick.tabula.data.model.notifications.meetingrecord
 
 import javax.persistence.{DiscriminatorValue, Entity}
 
-import uk.ac.warwick.tabula.data.model.{SingleRecipientNotification, FreemarkerModel}
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
+import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotification}
 
 abstract class ScheduledMeetingRecordReminderNotification extends ScheduledMeetingRecordNotification with SingleRecipientNotification {
 

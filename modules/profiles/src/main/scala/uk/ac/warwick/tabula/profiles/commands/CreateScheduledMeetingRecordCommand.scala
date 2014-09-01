@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
+import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.ScheduledMeetingRecordInviteeNotification
 import uk.ac.warwick.tabula.data.model.{Notification, FileAttachment, MeetingFormat, ScheduledMeetingRecord, StudentRelationship, Member}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -10,7 +11,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
-import uk.ac.warwick.tabula.data.model.notifications.ScheduledMeetingRecordInviteeNotification
 
 object CreateScheduledMeetingRecordCommand {
 	def apply(creator: Member, relationship: StudentRelationship, considerAlternatives: Boolean) =

@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model.notifications
 
+import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.ScheduledMeetingRecordMissedInviteeNotification
 import uk.ac.warwick.tabula.{Fixtures, TestBase, Mockito}
 import uk.ac.warwick.tabula.data.model.{MeetingFormat, ScheduledMeetingRecord, StudentRelationshipType, StudentRelationship, MeetingRecord, Notification}
 import org.joda.time.DateTime

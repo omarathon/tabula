@@ -1,6 +1,6 @@
-package uk.ac.warwick.tabula.data.model.notifications
+package uk.ac.warwick.tabula.data.model.notifications.meetingrecord
 
-import uk.ac.warwick.tabula.data.model.{StudentRelationship, MeetingRecord}
+import uk.ac.warwick.tabula.data.model.{MeetingRecord, StudentRelationship}
 import uk.ac.warwick.tabula.profiles.web.Routes
 
 trait MeetingRecordNotificationTrait {

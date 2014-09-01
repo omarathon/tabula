@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.profiles.commands
 
+import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.EditedMeetingRecordApprovalNotification
 import uk.ac.warwick.tabula.data.model.{Notification, MeetingRecord}
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import scala.language.implicitConversions
-import uk.ac.warwick.tabula.data.model.notifications.EditedMeetingRecordApprovalNotification
 
 class EditMeetingRecordCommand(meetingRecord: MeetingRecord)
 	extends ModifyMeetingRecordCommand(meetingRecord.creator, meetingRecord.relationship) with FormattedHtml {

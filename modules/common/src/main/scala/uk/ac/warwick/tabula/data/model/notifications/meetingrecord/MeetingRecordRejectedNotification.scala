@@ -1,7 +1,8 @@
-package uk.ac.warwick.tabula.data.model.notifications
+package uk.ac.warwick.tabula.data.model.notifications.meetingrecord
 
-import uk.ac.warwick.tabula.data.model.{NotificationPriority, SingleItemNotification, Notification, FreemarkerModel, MeetingRecordApproval}
-import javax.persistence.{Entity, DiscriminatorValue}
+import javax.persistence.{DiscriminatorValue, Entity}
+
+import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MeetingRecordApproval, Notification, NotificationPriority, SingleItemNotification}
 
 @Entity
 @DiscriminatorValue("meetingRecordRejected")

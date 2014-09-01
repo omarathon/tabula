@@ -1,7 +1,8 @@
-package uk.ac.warwick.tabula.data.model.notifications
+package uk.ac.warwick.tabula.data.model.notifications.meetingrecord
+
+import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotification}
-import javax.persistence.{DiscriminatorValue, Entity}
 
 @Entity
 @DiscriminatorValue(value="ScheduledMeetingRecordInvitee")

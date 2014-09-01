@@ -1,9 +1,10 @@
-package uk.ac.warwick.tabula.data.model.notifications
+package uk.ac.warwick.tabula.data.model.notifications.meetingrecord
 
-import uk.ac.warwick.tabula.data.model.{SingleItemNotification, StudentRelationship, NotificationWithTarget, FreemarkerModel, MeetingRecord}
-import javax.persistence.{Entity, DiscriminatorValue}
-import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Warning}
+import javax.persistence.{DiscriminatorValue, Entity}
+
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Warning}
+import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MeetingRecord, NotificationWithTarget, SingleItemNotification, StudentRelationship}
 
 abstract class MeetingRecordApprovalNotification(val verb: String)
 	extends NotificationWithTarget[MeetingRecord, StudentRelationship]
