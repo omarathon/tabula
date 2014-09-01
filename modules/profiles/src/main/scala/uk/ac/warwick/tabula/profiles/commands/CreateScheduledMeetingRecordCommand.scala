@@ -22,6 +22,7 @@ object CreateScheduledMeetingRecordCommand {
 			with AutowiringMeetingRecordServiceComponent
 			with CreateScheduledMeetingRecordCommandValidation
 			with CreateScheduledMeetingRecordNotification
+			with ModifyScheduledMeetingRecordNotifications
 }
 
 class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship: StudentRelationship, val considerAlternatives: Boolean = false)
