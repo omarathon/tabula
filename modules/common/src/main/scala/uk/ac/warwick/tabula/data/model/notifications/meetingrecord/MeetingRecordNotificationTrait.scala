@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 
 trait MeetingRecordNotificationTrait {
 
-	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meeting_record_notification_template.ftl"
+	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/meeting_record_notification_template.ftl"
 
 	def meeting: MeetingRecord
 	def relationship: StudentRelationship

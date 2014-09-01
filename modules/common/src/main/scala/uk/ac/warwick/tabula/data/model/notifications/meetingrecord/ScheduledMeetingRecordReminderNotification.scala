@@ -11,7 +11,7 @@ abstract class ScheduledMeetingRecordReminderNotification extends ScheduledMeeti
 	priority = Warning
 	def actionRequired = false
 
-	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/scheduled_meeting_record_reminder_notification.ftl"
+	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_reminder_notification.ftl"
 
 	def title = s"${agentRole.capitalize} meeting today"
 
@@ -25,8 +25,7 @@ abstract class ScheduledMeetingRecordReminderNotification extends ScheduledMeeti
 			case false => meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage))
 		}),
 		"dateTimeFormatter" -> dateTimeFormatter,
-		"meetingRecord" -> meeting,
-		"url" -> url
+		"meetingRecord" -> meeting
 	))
 }
 

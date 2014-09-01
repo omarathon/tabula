@@ -7,8 +7,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
-import uk.ac.warwick.tabula.data.model.notifications.MeetingRecordRejectedNotification
-import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.{MeetingRecordRejectedNotification, MeetingRecordApprovedNotification}
+import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.{MeetingRecordApprovedNotification, MeetingRecordRejectedNotification}
 import uk.ac.warwick.tabula.data.model.{MeetingRecord, MeetingRecordApproval, Notification}
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._

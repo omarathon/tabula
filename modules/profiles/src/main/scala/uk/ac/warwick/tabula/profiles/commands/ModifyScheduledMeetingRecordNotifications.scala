@@ -8,7 +8,9 @@ trait ModifyScheduledMeetingRecordNotifications extends SchedulesNotifications[S
 	override def scheduledNotifications(result: ScheduledMeetingRecordResult) = {
 		Seq(
 			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderStudent", result.meetingRecord, result.meetingRecord.meetingDate.withTimeAtStartOfDay),
-			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderAgent", result.meetingRecord, result.meetingRecord.meetingDate.withTimeAtStartOfDay)
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderAgent", result.meetingRecord, result.meetingRecord.meetingDate.withTimeAtStartOfDay),
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", result.meetingRecord, result.meetingRecord.meetingDate),
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", result.meetingRecord, result.meetingRecord.meetingDate.plusDays(5))
 		)
 	}
 

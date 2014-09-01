@@ -14,7 +14,7 @@ class ScheduledMeetingRecordInviteeNotification
 		verbSetting.value = theVerb
 	}
 
-	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/scheduled_meeting_record_invitee_notification.ftl"
+	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_invitee_notification.ftl"
 	def title = s"Meeting $verb"
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
 		"actor" -> agent,
