@@ -247,7 +247,19 @@
 									tooltip='Archive small group' data_attr='data-popup-target=.btn-group data-container=body'>
 										<i class="icon-folder-close icon-fixed-width"></i> ${archive_caption}
 									</@fmt.permission_button>
-									</a></li>
+									</a>
+								</li>
+
+								<li<#if set.releasedToStudents || set.releasedToTutors> class="disabled use-tooltip" title="Can't delete small groups where students or tutors have been notified"</#if>>
+									<#local delete_url><@routes.deleteset set /></#local>
+									<@fmt.permission_button
+										permission='SmallGroups.Delete'
+										scope=set
+										action_descr='delete small groups'
+										href=delete_url>
+										<i class="icon-remove icon-fixed-width"></i> Delete groups
+									</@fmt.permission_button>
+								</li>
 							</@dropdown_menu>
 						</div>
 					</div>
