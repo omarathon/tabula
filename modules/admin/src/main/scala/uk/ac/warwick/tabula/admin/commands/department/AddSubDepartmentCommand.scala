@@ -86,9 +86,10 @@ trait AddSubDepartmentCommandValidation extends SelfValidating {
 				errors.rejectValue("name", "department.name.mustDifferFromParent", Array(parent.name), "")
 			}
 
-			if (!name.startsWith(parent.name)) {
-				errors.rejectValue("name", "department.name.mustStartWithParent", Array(parent.name), "")
-			}
+			// Remove this requirement TAB-2498
+//			if (!name.startsWith(parent.name)) {
+//				errors.rejectValue("name", "department.name.mustStartWithParent", Array(parent.name), "")
+//			}
 
 			// Name must not exceed 100 characters
 			if (name.length > 100) {
