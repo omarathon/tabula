@@ -65,7 +65,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 			Nil,
 			AcademicYear.parse("13/14")
 		))
-		
+
 		/*
 		BEGIN:VEVENT
 		DTSTAMP:20140811T221200Z
