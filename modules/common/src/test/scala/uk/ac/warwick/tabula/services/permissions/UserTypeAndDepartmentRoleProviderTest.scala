@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.services.{StaffAssistantsHelpers, ModuleAndDepartmentService, ProfileService}
 import uk.ac.warwick.tabula.data.model.MemberUserType
-import uk.ac.warwick.tabula.roles.{SSOStaffRole, StudentRole, StaffRole, UniversityMemberRole}
+import uk.ac.warwick.tabula.roles._
 
 class UserTypeAndDepartmentRoleProviderTest extends TestBase with Mockito {
 
@@ -26,28 +26,28 @@ class UserTypeAndDepartmentRoleProviderTest extends TestBase with Mockito {
 		member.profileService = profileService
 
 		profileService.getAllMembersWithUserId("cuscav", true) returns (Seq(member))
-		provider.getRolesFor(currentUser) should be (Seq(UniversityMemberRole(member), StudentRole(dept1), StudentRole(dept3)))
+		provider.getRolesFor(currentUser) should be (Seq(UniversityMemberRole(member), StudentRole(dept1), StudentRole(dept3), LoggedInRole(currentUser.apparentUser)))
 	}
 
 	@Test def staff = withUser("cuscav") {
 		val member = Fixtures.staff(department=dept1)
 		profileService.getAllMembersWithUserId("cuscav", true) returns (Seq(member))
 
-		provider.getRolesFor(currentUser) should be (Seq(UniversityMemberRole(member), StaffRole(dept1)))
+		provider.getRolesFor(currentUser) should be (Seq(UniversityMemberRole(member), StaffRole(dept1), LoggedInRole(currentUser.apparentUser)))
 	}
 
 	@Test def emeritus = withUser("cuscav") {
 		val member = Fixtures.member(MemberUserType.Emeritus, department=dept2)
 		profileService.getAllMembersWithUserId("cuscav", true) returns (Seq(member))
 
-		provider.getRolesFor(currentUser) should be (Seq(UniversityMemberRole(member), StaffRole(dept2)))
+		provider.getRolesFor(currentUser) should be (Seq(UniversityMemberRole(member), StaffRole(dept2), LoggedInRole(currentUser.apparentUser)))
 	}
 
 	@Test def other = withUser("cuscav") {
 		val member = Fixtures.member(MemberUserType.Other, department=dept1)
 		profileService.getAllMembersWithUserId("cuscav", true) returns (Seq(member))
 
-		provider.getRolesFor(currentUser) should be (Seq(UniversityMemberRole(member)))
+		provider.getRolesFor(currentUser) should be (Seq(UniversityMemberRole(member), LoggedInRole(currentUser.apparentUser)))
 	}
 
 	@Test def multipleRolesMultipleDepartments = withUser("cuscav") {
@@ -57,7 +57,7 @@ class UserTypeAndDepartmentRoleProviderTest extends TestBase with Mockito {
 
 		profileService.getAllMembersWithUserId("cuscav", true) returns (Seq(member1, member2))
 
-		provider.getRolesFor(currentUser) should be (Seq(UniversityMemberRole(member1), StudentRole(dept1), StudentRole(dept3), UniversityMemberRole(member2), StaffRole(dept2)))
+		provider.getRolesFor(currentUser) should be (Seq(UniversityMemberRole(member1), StudentRole(dept1), StudentRole(dept3), UniversityMemberRole(member2), StaffRole(dept2), LoggedInRole(currentUser.apparentUser)))
 	}
 
 	@Test def fallbackToSSOStaff = withUser("cuscav") {
@@ -67,7 +67,7 @@ class UserTypeAndDepartmentRoleProviderTest extends TestBase with Mockito {
 		currentUser.realUser.setDepartmentCode("CS")
 		currentUser.realUser.setStaff(true)
 
-		provider.getRolesFor(currentUser) should be (Seq(SSOStaffRole(dept1)))
+		provider.getRolesFor(currentUser) should be (Seq(SSOStaffRole(dept1), LoggedInRole(currentUser.apparentUser)))
 	}
 
 	@Test def fallbackToSSOStudent = withUser("cuscav") {
@@ -77,13 +77,13 @@ class UserTypeAndDepartmentRoleProviderTest extends TestBase with Mockito {
 		currentUser.realUser.setDepartmentCode("EN")
 		currentUser.realUser.setStudent(true)
 
-		provider.getRolesFor(currentUser) should be (Seq(StudentRole(dept2)))
+		provider.getRolesFor(currentUser) should be (Seq(StudentRole(dept2), LoggedInRole(currentUser.apparentUser)))
 	}
 
 	@Test def fallbackToSSOOther = withUser("cuscav") {
 		profileService.getAllMembersWithUserId("cuscav", true) returns (Seq())
 
-		provider.getRolesFor(currentUser) should be (Seq())
+		provider.getRolesFor(currentUser) should be (Seq(LoggedInRole(currentUser.apparentUser)))
 	}
 
 }
