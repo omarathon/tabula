@@ -1,5 +1,9 @@
 package uk.ac.warwick.tabula.data.model.groups
 
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.services.TermService
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model
 
@@ -47,12 +51,20 @@ object SmallGroupSetFilters {
 			val description = "Open for sign up"
 			def apply(set: SmallGroupSet) = set.openForSignups
 		}
+		case object ClosedForSignUp extends SmallGroupSetFilter {
+			val description = "Closed for sign up"
+			def apply(set: SmallGroupSet) = !set.openForSignups
+		}
 		case object NeedsNotificationsSending extends SmallGroupSetFilter {
 			val description = "Needs notifications sending"
 			def apply(set: SmallGroupSet) = !set.fullyReleased
 		}
+		case object Completed extends SmallGroupSetFilter {
+			val description = "Completed"
+			def apply(set: SmallGroupSet) = set.fullyReleased
+		}
 
-		val all = Seq(ContainsGroups, UnallocatedStudents, OpenForSignUp, NeedsNotificationsSending)
+		val all = Seq(ContainsGroups, UnallocatedStudents, OpenForSignUp, ClosedForSignUp, NeedsNotificationsSending, Completed)
 	}
 
 	object AllocationMethod {
@@ -65,11 +77,39 @@ object SmallGroupSetFilters {
 			def apply(set: SmallGroupSet) = set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp
 		}
 		case class Linked(linked: DepartmentSmallGroupSet) extends SmallGroupSetFilter {
-			val description = "Linked to " + linked.name
+			val description = linked.name
 			override val getName = "AllocationMethod.Linked(" + linked.id + ")"
 			def apply(set: SmallGroupSet) = set.linked && set.linkedDepartmentSmallGroupSet == linked
 		}
 
 		def all(linked: Seq[DepartmentSmallGroupSet]) = Seq(ManuallyAllocated, StudentSignUp) ++ linked.map { Linked(_) }
+	}
+
+	case class Term(termName: String, weekRange: WeekRange) extends SmallGroupSetFilter {
+		val description = termName
+		override val getName = s"Term(${termName}, ${weekRange.minWeek}, ${weekRange.maxWeek})"
+		def apply(set: SmallGroupSet) =
+			set.groups.asScala
+				.flatMap { _.events.asScala }
+				.flatMap { _.weekRanges }
+				.flatMap { _.toWeeks }
+				.exists(weekRange.toWeeks.contains)
+	}
+	def allTermFilters(year: AcademicYear, termService: TermService) = {
+		val weeks = termService.getAcademicWeeksForYear(year.dateInTermOne).toMap
+
+		val terms =
+			weeks
+				.map { case (weekNumber, dates) =>
+					(weekNumber, termService.getTermFromAcademicWeekIncludingVacations(weekNumber, year))
+				}
+				.groupBy { _._2 }
+				.map { case (term, weekNumbersAndTerms) =>
+					(term, WeekRange(weekNumbersAndTerms.keys.min, weekNumbersAndTerms.keys.max))
+				}
+				.toSeq
+				.sortBy { case (_, weekRange) => weekRange.minWeek.toInt }
+
+		TermService.orderedTermNames.zip(terms).map { case (name, (term, weekRange)) => Term(name, weekRange) }
 	}
 }

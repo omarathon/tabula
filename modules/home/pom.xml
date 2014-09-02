@@ -213,6 +213,7 @@
 								<include>ajax-popup.js</include>
 								<include>app-comments.js</include>
 								<include>select-deselect-checkboxes.js</include>
+								<include>combo-typeahead.js</include>
 							</includes>
 						</aggregation>
 						<aggregation>

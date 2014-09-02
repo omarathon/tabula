@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.groups.web.controllers.admin
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 
 import scala.collection.JavaConverters._
 
@@ -12,11 +13,11 @@ import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSetFilters, SmallGroupAllocationMethod, SmallGroupSet}
-import uk.ac.warwick.tabula.groups.commands.admin.{AdminSmallGroupsHomeInformation, AdminSmallGroupsHomeCommand}
+import uk.ac.warwick.tabula.groups.commands.admin.{AdminSmallGroupsHomeCommandState, AdminSmallGroupsHomeInformation, AdminSmallGroupsHomeCommand}
 import uk.ac.warwick.tabula.commands.Appliable
 
-abstract class AbstractAdminDepartmentHomeController extends GroupsController {
-	type AdminSmallGroupsHomeCommand = Appliable[AdminSmallGroupsHomeInformation]
+abstract class AbstractAdminDepartmentHomeController extends GroupsController with AutowiringTermServiceComponent {
+	type AdminSmallGroupsHomeCommand = Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState
 
 	hideDeletedItems
 
@@ -46,7 +47,8 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController {
 			"hasGroupAttendance" -> hasGroupAttendance,
 			"allStatusFilters" -> SmallGroupSetFilters.Status.all,
 			"allModuleFilters" -> SmallGroupSetFilters.allModuleFilters(info.modulesWithPermission),
-			"allAllocationFilters" -> SmallGroupSetFilters.AllocationMethod.all(info.departmentSmallGroupSets)
+			"allAllocationFilters" -> SmallGroupSetFilters.AllocationMethod.all(info.departmentSmallGroupSets),
+			"allTermFilters" -> SmallGroupSetFilters.allTermFilters(cmd.academicYear, termService)
 		)
 
 		if (ajax) Mav("admin/department-noLayout", model).noLayout()

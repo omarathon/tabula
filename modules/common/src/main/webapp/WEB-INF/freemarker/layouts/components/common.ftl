@@ -17,3 +17,4 @@
 <@script "/static/js/ajax-popup.js" />
 <@script "/static/js/app-comments.js" />
 <@script "/static/js/select-deselect-checkboxes.js" />
+<@script "/static/js/combo-typeahead.js" />

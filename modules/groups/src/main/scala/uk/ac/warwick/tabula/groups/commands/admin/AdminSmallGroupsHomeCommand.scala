@@ -44,6 +44,7 @@ trait AdminSmallGroupsHomeCommandState {
 	var moduleFilters: JList[SmallGroupSetFilter] = JArrayList()
 	var statusFilters: JList[SmallGroupSetFilter] = JArrayList()
 	var allocationMethodFilters: JList[SmallGroupSetFilter] = JArrayList()
+	var termFilters: JList[SmallGroupSetFilter] = JArrayList()
 }
 
 trait AdminSmallGroupsHomePermissionsRestrictedState {
@@ -65,8 +66,9 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 			smallGroupService.getSmallGroupSets(department, academicYear)
 				.filter { set => securityService.can(user, RequiredPermission, set) }
 				.filter { set => moduleFilters.asScala.isEmpty || moduleFilters.asScala.exists { _(set) } }
-				.filter { set => statusFilters.asScala.isEmpty || statusFilters.asScala.forall { _(set) } } // Status filters are an AND
+				.filter { set => statusFilters.asScala.isEmpty || statusFilters.asScala.exists { _(set) } }
 				.filter { set => allocationMethodFilters.asScala.isEmpty || allocationMethodFilters.asScala.exists { _(set) } }
+				.filter { set => termFilters.asScala.isEmpty || termFilters.asScala.exists { _(set) } }
 
 		val setViews = sets.map { set =>
 			val progress = smallGroupSetWorkflowService.progress(set)

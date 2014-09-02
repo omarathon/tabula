@@ -114,7 +114,7 @@
 
 	<div class="form-inline creation-form" style="margin-bottom: 10px;">
 		<label for="module-picker">For this module:</label>
-		<select id="module-picker">
+		<select id="module-picker" class="input-xlarge" placeholder="Start typing a module code or name&hellip;" data-provide="typeahead">
 			<option value=""></option>
 			<#list modules as module>
 				<option value="${module.code}"><@fmt.module_name module false /></option>
@@ -131,15 +131,22 @@
 			var $picker = $('.creation-form #module-picker');
 			var $button = $('.creation-form button');
 
+			var manageButtonState = function(value) {
+				if (value) {
+					$button.removeClass('disabled').addClass('btn-primary');
+				} else {
+					$button.addClass('disabled').removeClass('btn-primary');
+				}
+			};
+			manageButtonState($picker.find(':selected').val());
+
 			$picker.on('change', function() {
 				var value = $(this).find(':selected').val();
-				if (value) {
-					$button.removeClass('disabled');
-				} else {
-					$button.addClass('disabled');
-				}
+				manageButtonState(value);
 			});
 			$button.on('click', function() {
+				if ($button.is('.disabled')) return;
+
 				var moduleCode = $picker.find(':selected').val();
 				if (moduleCode) {
 					window.location.href = url.replace('__MODULE_CODE__', moduleCode);
@@ -207,15 +214,6 @@
 						</@spring.bind>
 					</#compress></#macro>
 
-					<#function contains_by_module_code collection item>
-						<#list collection as c>
-							<#if c.module.code == item.code>
-								<#return true />
-							</#if>
-						</#list>
-						<#return false />
-					</#function>
-
 					<#function contains_by_filter_name collection item>
 						<#list collection as c>
 							<#if c.name == item.name>
@@ -252,6 +250,16 @@
 							   value="${f.name}"
 							   data-short-value="${f.description}"
 						${contains_by_filter_name(adminCommand.allocationMethodFilters, f)?string('checked','')}>
+						${f.description}
+					</@filter>
+
+					<#assign placeholder = "All terms" />
+					<#assign currentfilter><@current_filter_value "termFilters" placeholder; f>${f.description}</@current_filter_value></#assign>
+					<@filter "termFilters" placeholder currentfilter allTermFilters; f>
+						<input type="checkbox" name="${status.expression}"
+							   value="${f.name}"
+							   data-short-value="${f.description}"
+						${contains_by_filter_name(adminCommand.termFilters, f)?string('checked','')}>
 						${f.description}
 					</@filter>
 				</@f.form>
