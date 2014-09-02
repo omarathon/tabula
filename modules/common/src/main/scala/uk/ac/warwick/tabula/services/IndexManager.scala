@@ -4,6 +4,7 @@ import org.codehaus.jackson.annotate.JsonAutoDetect
 import org.springframework.beans.factory.annotation.{Qualifier, Autowired}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.NotificationDao
 import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.queue.Queue
@@ -26,7 +27,7 @@ class IndexManagerImpl extends IndexManager {
 
 	@Autowired @Qualifier("indexTopic") var queue: Queue = _
 	@Autowired var notificationIndexService: NotificationIndexService = _
-	@Autowired var notificationService: NotificationService = _
+	@Autowired var notificationDao: NotificationDao = _
 	@Autowired var userLookup: UserLookupService = _
 
 	def indexNotificationRecipients(notifications: Seq[Notification[_,_]], user: User) {
@@ -36,7 +37,7 @@ class IndexManagerImpl extends IndexManager {
 
 	def indexNotificationRecipients(message: IndexNotificationRecipientsMessage) {
 		// Convert back into notifications and user
-		val notifications = message.notificationIds.asScala.flatMap(notificationService.getNotificationById).toSeq
+		val notifications = message.notificationIds.asScala.flatMap(notificationDao.getById).toSeq
 		val user = userLookup.getUserByUserId(message.userId)
 
 		val recipientNotifications = notifications.map(new RecipientNotification(_, user))
