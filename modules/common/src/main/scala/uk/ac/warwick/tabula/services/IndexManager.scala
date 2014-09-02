@@ -4,6 +4,7 @@ import org.codehaus.jackson.annotate.JsonAutoDetect
 import org.springframework.beans.factory.annotation.{Qualifier, Autowired}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.NotificationDao
 import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.userlookup.User
@@ -11,6 +12,7 @@ import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.util.queue.conversion.ItemType
 import scala.collection.JavaConverters._
 import scala.beans.BeanProperty
+import uk.ac.warwick.tabula.data.Transactions._
 
 /**
  * A manager that will automatically send and process messages for writable index operations. It's really hard to do this
@@ -35,7 +37,7 @@ class IndexManagerImpl extends IndexManager {
 		queue.send(new IndexNotificationRecipientsMessage(notifications, user))
 	}
 
-	def indexNotificationRecipients(message: IndexNotificationRecipientsMessage) {
+	def indexNotificationRecipients(message: IndexNotificationRecipientsMessage) = transactional(readOnly = true) {
 		// Convert back into notifications and user
 		val notifications = message.notificationIds.asScala.flatMap(notificationDao.getById).toSeq
 		val user = userLookup.getUserByUserId(message.userId)

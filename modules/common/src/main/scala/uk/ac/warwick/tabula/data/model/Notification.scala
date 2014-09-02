@@ -120,7 +120,6 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 
 	// when performing operations on recipientNotificationInfos you should use this to fetch a users info.
 	private def getRecipientNotificationInfo(user: User) = {
-		if (!recipients.contains(user)) throw new IllegalArgumentException("user must be a recipient of this notification")
 		recipientNotificationInfos.asScala.find(_.recipient == user).getOrElse {
 			val newInfo = new RecipientNotificationInfo(this, user)
 			recipientNotificationInfos.add(newInfo)
@@ -184,7 +183,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	}
 	def onPreSave(newRecord: Boolean) {}
 
-	override def toString = s"Notification[${(if (id != null) id else "transient " + hashCode)}]{${agent.getFullName}, ${verb}, ${items.getClass.getSimpleName}}"
+	override def toString = s"Notification[${(if (id != null) id else "transient " + hashCode)}]{${Option(agent).fold("(no agent)") { _.getFullName }}, ${verb}, ${items.getClass.getSimpleName}}"
 }
 
 /**

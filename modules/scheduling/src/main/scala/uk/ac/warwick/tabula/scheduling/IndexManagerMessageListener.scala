@@ -15,7 +15,7 @@ class IndexManagerMessageListener extends QueueListener with InitializingBean wi
 
 	override def isListeningToQueue = true
 	override def onReceive(item: Any) {
-		logger.info("Synchronising item " + item + " for " + context)
+		logger.info("Received message " + item)
 		item match {
 			case message: IndexNotificationRecipientsMessage => indexManager.indexNotificationRecipients(message)
 			case _ => // Should never happen

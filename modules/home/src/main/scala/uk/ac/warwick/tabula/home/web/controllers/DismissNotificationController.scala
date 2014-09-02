@@ -9,8 +9,7 @@ import uk.ac.warwick.tabula.data.model.{ToEntityReference, Activity, Notificatio
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.web.views.MarkdownRendererImpl
 
-// Disabled until TAB-1959 is properly fixed
-//@Controller
+@Controller
 class DismissNotificationController extends BaseController with ActivityJsonMav with MarkdownRendererImpl {
 
 	@ModelAttribute("dismissCommand")
