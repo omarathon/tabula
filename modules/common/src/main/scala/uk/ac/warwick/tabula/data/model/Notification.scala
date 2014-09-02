@@ -17,6 +17,12 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.hibernate.ObjectNotFoundException
 
 object Notification {
+
+	/**
+	 * By default, the priority that a notification must be at or above in order to generate an email.
+	 */
+	val PriorityEmailThreshold = NotificationPriority.Info
+
 	/**
 	 * A little explanation...
 	 * Without this, every single Notification class needs a constructor that calls a super
@@ -90,11 +96,12 @@ object Notification {
 @DiscriminatorColumn(name="notification_type")
 abstract class Notification[A >: Null <: ToEntityReference, B]
 	extends GeneratedId with Serializable with HasSettings with PermissionsTarget with NotificationPreSaveBehaviour {
-
-	def permissionsParents = Stream.empty
+	import Notification._
 
 	@transient final val dateOnlyFormatter = DateFormats.NotificationDateOnly
 	@transient final val dateTimeFormatter = DateFormats.NotificationDateTime
+
+	def permissionsParents = Stream.empty
 
 	@Column(nullable=false)
 	@Type(`type`="uk.ac.warwick.tabula.data.model.SSOUserType")

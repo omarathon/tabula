@@ -5,10 +5,17 @@ import java.sql.Types
 sealed abstract class NotificationPriority (val dbValue: String) {
 	// When transforming notifications to activity streams priority is represented by a numerical value between 0 and 1
 	def toNumericalValue: Double
+
+	def < (other: NotificationPriority) = toNumericalValue < other.toNumericalValue
+	def <= (other: NotificationPriority) = toNumericalValue <= other.toNumericalValue
+	def > (other: NotificationPriority) = toNumericalValue > other.toNumericalValue
+	def >= (other: NotificationPriority) = toNumericalValue >= other.toNumericalValue
 }
 
 object NotificationPriority {
 
+	// Notification is trivial; by default this will not generate an email
+	case object Trivial extends NotificationPriority("trivial") { def toNumericalValue = 0.1 }
 	// Notification is for information only
 	case object Info extends NotificationPriority("info") { def toNumericalValue = 0.25 }
 	// Notification is about an action that the user should take
@@ -16,7 +23,7 @@ object NotificationPriority {
 	// Notification is about an action that is super important
 	case object Critical extends NotificationPriority("critical") { def toNumericalValue = 0.75 }
 
-	val values = Set(Info, Warning, Critical)
+	val values = Set(Trivial, Info, Warning, Critical)
 
 	def fromDbValue(value: String): NotificationPriority =
 		if (value == null) null
