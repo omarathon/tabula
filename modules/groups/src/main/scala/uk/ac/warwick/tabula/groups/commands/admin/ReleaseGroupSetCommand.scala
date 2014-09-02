@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.groups.commands.admin
 
 import uk.ac.warwick.tabula.commands.{Appliable, Notifies, Command, Description}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup}
-import uk.ac.warwick.tabula.data.model.Notification
+import uk.ac.warwick.tabula.data.model.{NotificationPriority, Notification}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
@@ -30,7 +30,9 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
     case _=> true
   }
 
-  groupsToPublish.foreach(g=>PermissionCheck(Permissions.SmallGroups.Update, g))
+	var sendEmail: JBoolean = true
+
+  groupsToPublish.foreach(g => PermissionCheck(Permissions.SmallGroups.Update, g))
 
   def singleGroupToPublish:SmallGroupSet = {
     groupsToPublish match {
@@ -52,6 +54,7 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
 				val n = Notification.init(new ReleaseSmallGroupSetsNotification(), currentUser, List(group))
 					.tap { _.isStudent = false }
 				n.recipientUserId = tutor.getUserId
+				n.priority = (if (sendEmail) NotificationPriority.Info else NotificationPriority.Trivial)
 				n
 			}
 
@@ -66,6 +69,7 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
 				val n = Notification.init(new ReleaseSmallGroupSetsNotification(), currentUser, List(group))
 					.tap { _.isStudent = true }
 				n.recipientUserId = student.getUserId
+				n.priority = (if (sendEmail) NotificationPriority.Info else NotificationPriority.Trivial)
 				n
 			}
 		

@@ -39,13 +39,17 @@ object SmallGroupSetFilters {
 	def allModuleFilters(modules: Seq[model.Module]) = modules.map { Module(_) }
 
 	object Status {
-		case object ContainsGroups extends SmallGroupSetFilter {
-			val description = "Contains groups"
-			def apply(set: SmallGroupSet) = set.groups.asScala.nonEmpty
+		case object NeedsGroupsCreating extends SmallGroupSetFilter {
+			val description = "Needs groups creating"
+			def apply(set: SmallGroupSet) = set.groups.asScala.isEmpty
 		}
 		case object UnallocatedStudents extends SmallGroupSetFilter {
-			val description = "Unallocated students"
+			val description = "Contains unallocated students"
 			def apply(set: SmallGroupSet) = set.unallocatedStudentsCount > 0
+		}
+		case object NeedsEventsCreating extends SmallGroupSetFilter {
+			val description = "Needs events creating"
+			def apply(set: SmallGroupSet) = set.groups.asScala.forall { _.events.asScala.isEmpty }
 		}
 		case object OpenForSignUp extends SmallGroupSetFilter {
 			val description = "Open for sign up"
@@ -60,11 +64,11 @@ object SmallGroupSetFilters {
 			def apply(set: SmallGroupSet) = !set.fullyReleased
 		}
 		case object Completed extends SmallGroupSetFilter {
-			val description = "Completed"
+			val description = "Complete"
 			def apply(set: SmallGroupSet) = set.fullyReleased
 		}
 
-		val all = Seq(ContainsGroups, UnallocatedStudents, OpenForSignUp, ClosedForSignUp, NeedsNotificationsSending, Completed)
+		val all = Seq(NeedsGroupsCreating, UnallocatedStudents, NeedsEventsCreating, OpenForSignUp, ClosedForSignUp, NeedsNotificationsSending, Completed)
 	}
 
 	object AllocationMethod {

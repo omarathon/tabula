@@ -29,7 +29,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 	val mailFooter = "\n\nThank you,\nTabula"
 	val replyWarning = "\n\nThis email was sent from an automated system, and replies to it will not reach a real person."
 
-	def link(n: Notification[_,_]) = if(n.actionRequired) {
+	def link(n: Notification[_,_]) = if (n.actionRequired) {
 		s"\n\nYou need to ${n.urlTitle}. Please visit ${topLevelUrl}${n.url}."
 	} else {
 		s"\n\nTo ${n.urlTitle}, please visit ${topLevelUrl}${n.url}."
@@ -80,7 +80,13 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 
 	def listen(recipientInfo: RecipientNotificationInfo) = {
 		if (!recipientInfo.emailSent) {
-			if (recipientInfo.recipient.getEmail.hasText) {
+			if (recipientInfo.notification.priority < Notification.PriorityEmailThreshold) {
+				logger.info(s"Not sending email as notification priority ${recipientInfo.notification.priority} below threshold")
+
+				// TODO This is incorrect, really - we're not sending the email, we're cancelling the sending of the email
+				recipientInfo.emailSent = true
+				service.save(recipientInfo)
+			} else if (recipientInfo.recipient.getEmail.hasText) {
 				generateMessage(recipientInfo) match {
 					case Some(message) => {
 						val future = mailSender.send(message)

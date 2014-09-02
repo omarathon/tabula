@@ -107,7 +107,7 @@
 						</#if>
 
 						<#if set.archived>
-							<span class="use-tooltip" title="These groups have been archived"><i class="icon-archive"></i></span>
+							<span class="use-tooltip" title="These groups have been archived"><i class="icon-folder-close"></i></span>
 						</#if>
 					</div>
 
@@ -156,17 +156,7 @@
 
 					<div class="span1">
 						<div class="btn-group pull-right">
-							<@dropdown_menu "Manage" "wrench" "btn-mini">
-								<li>
-									<#local permissions_url><@routes.permissions set /></#local>
-									<@fmt.permission_button
-									permission='RolesAndPermissions.Create'
-									scope=set
-									action_descr='modify permissions'
-									href=permissions_url>
-										<i class="icon-lock icon-fixed-width"></i> Permissions
-									</@fmt.permission_button>
-								</li>
+							<@dropdown_menu "Actions" "cog" "btn-mini">
 								<li>
 									<#local edit_url><@routes.editset set /></#local>
 									<@fmt.permission_button
@@ -174,9 +164,22 @@
 									scope=set
 									action_descr='edit small group properties'
 									href=edit_url>
-										<i class="icon-wrench icon-fixed-width"></i> Edit properties
+										<i class="icon-wrench icon-fixed-width"></i> Edit
 									</@fmt.permission_button>
 								</li>
+
+								<#--<li>
+									<#local allocateset_url><@routes.allocateset set /></#local>
+									<@fmt.permission_button
+									permission='SmallGroups.Allocate'
+									scope=set
+									action_descr='allocate students'
+									href=allocateset_url>
+										<i class="icon-random icon-fixed-width"></i> Allocate students
+									</@fmt.permission_button>
+								</li>-->
+								<li class="divider"></li>
+
 								<#if features.smallGroupTeachingStudentSignUp>
 									<#if set.openForSignups>
 										<li ${(set.allocationMethod.dbValue == "StudentSignUp")?string
@@ -210,16 +213,7 @@
 										</li>
 									</#if>
 								</#if>
-								<li>
-									<#local allocateset_url><@routes.allocateset set /></#local>
-									<@fmt.permission_button
-									permission='SmallGroups.Allocate'
-									scope=set
-									action_descr='allocate students'
-									href=allocateset_url>
-										<i class="icon-random icon-fixed-width"></i> Allocate students
-									</@fmt.permission_button>
-								</li>
+
 								<li ${set.fullyReleased?string(" class='disabled use-tooltip' title='Already notified' ",'')} >
 									<#local notifyset_url><@routes.releaseset set /></#local>
 									<@fmt.permission_button
@@ -233,22 +227,13 @@
 									</@fmt.permission_button>
 								</li>
 
-								<#if set.collectAttendance>
-									<#local set_attendance_url><@routes.setAttendance set /></#local>
-									<li>
-										<@fmt.permission_button permission='SmallGroupEvents.ViewRegister' scope=set action_descr='view attendance' href=set_attendance_url
-										tooltip='View attendance at groups' data_attr='data-popup-target=.btn-group data-container=body'>
-											<i class="icon-group icon-fixed-width"></i> Attendance
-										</@fmt.permission_button>
-									</li>
-								</#if>
-
+								<li class="divider"></li>
 
 								<li>
 									<#if set.archived>
-										<#local archive_caption>Unarchive groups</#local>
+										<#local archive_caption>Unarchive</#local>
 									<#else>
-										<#local archive_caption>Archive groups</#local>
+										<#local archive_caption>Archive</#local>
 									</#if>
 
 									<#local archive_url><@routes.archiveset set /></#local>
@@ -267,7 +252,30 @@
 										scope=set
 										action_descr='delete small groups'
 										href=delete_url>
-										<i class="icon-remove icon-fixed-width"></i> Delete groups
+										<i class="icon-remove icon-fixed-width"></i> Delete
+									</@fmt.permission_button>
+								</li>
+
+								<li class="divider"></li>
+
+								<#if set.collectAttendance>
+									<#local set_attendance_url><@routes.setAttendance set /></#local>
+									<li>
+										<@fmt.permission_button permission='SmallGroupEvents.ViewRegister' scope=set action_descr='view attendance' href=set_attendance_url
+										tooltip='View attendance at groups' data_attr='data-popup-target=.btn-group data-container=body'>
+											<i class="icon-group icon-fixed-width"></i> View attendance
+										</@fmt.permission_button>
+									</li>
+								</#if>
+
+								<li>
+									<#local permissions_url><@routes.permissions set /></#local>
+									<@fmt.permission_button
+									permission='RolesAndPermissions.Create'
+									scope=set
+									action_descr='modify permissions'
+									href=permissions_url>
+										<i class="icon-user icon-fixed-width"></i> Edit permissions
 									</@fmt.permission_button>
 								</li>
 							</@dropdown_menu>
@@ -329,7 +337,7 @@
 
 								<#if showAttendanceButton>
 									<div class="span2">
-										<a href="<@routes.groupAttendance group />" class="btn btn-primary pull-right">
+										<a href="<@routes.groupAttendance group />" class="btn btn-primary btn-mini pull-right">
 											Attendance
 										</a>
 									</div>

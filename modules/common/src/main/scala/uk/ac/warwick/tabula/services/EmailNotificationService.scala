@@ -17,7 +17,7 @@ class EmailNotificationService extends Logging with Daoisms {
 	var listener: RecipientNotificationListener = Wire[EmailNotificationListener]
 
 	def processNotifications() = transactional() {
-		dao.unemailedRecipients.take(RunBatchSize).foreach { recipient =>
+		unemailedRecipients.take(RunBatchSize).foreach { recipient =>
 			try {
 				logger.info("Emailing recipient - " + recipient)
 				listener.listen(recipient)
