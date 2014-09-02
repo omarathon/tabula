@@ -158,6 +158,16 @@
 						<div class="btn-group pull-right">
 							<@dropdown_menu "Manage" "wrench" "btn-mini">
 								<li>
+									<#local permissions_url><@routes.permissions set /></#local>
+									<@fmt.permission_button
+									permission='RolesAndPermissions.Create'
+									scope=set
+									action_descr='modify permissions'
+									href=permissions_url>
+										<i class="icon-lock icon-fixed-width"></i> Permissions
+									</@fmt.permission_button>
+								</li>
+								<li>
 									<#local edit_url><@routes.editset set /></#local>
 									<@fmt.permission_button
 									permission='SmallGroups.Update'

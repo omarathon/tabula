@@ -441,11 +441,33 @@
 		</property>
 	</bean>
 
+	<!-- Listeners for settingsSyncTopic -->
 	<bean class="uk.ac.warwick.tabula.FeatureFlagListener" />
 	<bean class="uk.ac.warwick.tabula.services.MaintenanceModeListener" />
 	<bean class="uk.ac.warwick.tabula.services.SSOMaintenanceModeListener" />
 	<bean class="uk.ac.warwick.tabula.services.UserGroupMembershipHelperCacheService" />
 	<bean class="uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceListener" />
+
+	<bean id="indexTopic" parent="abstractQueue">
+		<constructor-arg value="LuceneIndexing" />
+
+		<!-- We don't need this to be persistent -->
+		<property name="persistent" value="false" />
+
+		<!-- This isn't a Queue, it's a Topic - we are effectively broadcasting -->
+		<property name="pubSub" value="true" />
+		<property name="pubSubNoLocal" value="true" />
+
+		<property name="messageConverter">
+			<bean class="uk.ac.warwick.util.queue.conversion.JsonMessageConverter">
+				<property name="annotatedClasses">
+					<list>
+						<value>uk.ac.warwick.tabula.services.IndexNotificationRecipientsMessage</value>
+					</list>
+				</property>
+			</bean>
+		</property>
+	</bean>
 
 	<!-- Expose EhCache properties as system properties -->
 	<bean

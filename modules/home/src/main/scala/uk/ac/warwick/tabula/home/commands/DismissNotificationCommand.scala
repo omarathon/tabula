@@ -8,8 +8,6 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.NotificationServiceComponent
 
-
-
 object DismissNotificationCommand {
 
 	def apply(notifications: Seq[Notification[_,_]], dismiss: Boolean, user: User) =

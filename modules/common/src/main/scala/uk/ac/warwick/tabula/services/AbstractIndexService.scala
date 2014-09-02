@@ -14,6 +14,7 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.springframework.beans.factory.annotation._
 import org.springframework.beans.factory.InitializingBean
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Closeables._
@@ -25,6 +26,7 @@ import java.util.concurrent.TimeUnit
 import org.springframework.beans.factory.DisposableBean
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.util.queue.Queue
 import language.implicitConversions
 
 trait CommonQueryMethods[A] extends TaskBenchmarking { self: AbstractIndexService[A] =>
@@ -137,18 +139,12 @@ abstract class AbstractIndexService[A]
 	var mostRecentIndexedItem: Option[DateTime] = None
 
 	/**
-		* Wrapper around the indexing code so that it is only running once.
+	* Wrapper around the indexing code so that it is only running once.
 	 * If it's already running, the code is skipped.
-	 * We only try indexing once a minute so thmiere's no need to bother about
+	 * We only try indexing once a minute so there's no need to bother about
 	 * tight race conditions here.
 	 */
-	def ifNotIndexing(work: => Unit) =
-		if (indexing) {
-			logger.info("Skipped indexing because the indexer is already/still running.")
-		} else {
-			try { indexing = true; work }
-			finally indexing = false
-		}
+	def guardMultipleIndexes(work: => Unit) = this.synchronized(work)
 
 	// QueryParser isn't thread safe, hence why this is a def
 	def parser = new QueryParser(IndexService.TabulaLuceneVersion, "", analyzer)
@@ -188,7 +184,7 @@ abstract class AbstractIndexService[A]
 	 * up as soon as it reached a quiet time.
 	 */
 	def incrementalIndex() = transactional(readOnly = true) {
-		ifNotIndexing {
+		guardMultipleIndexes {
 			val stopWatch = StopWatch()
 			stopWatch.record("Incremental index") {
 				val startDate = latestIndexItem
@@ -208,7 +204,7 @@ abstract class AbstractIndexService[A]
 	protected def listNewerThan(startDate: DateTime, batchSize: Int): TraversableOnce[A]
 
 	def indexFrom(startDate: DateTime) = transactional(readOnly = true) {
-		ifNotIndexing {
+		guardMultipleIndexes {
 			val newer = listNewerThan(startDate, MaxBatchSize)
 			doIndexItems(newer, isIncremental = true)
 			newer match {
@@ -222,11 +218,11 @@ abstract class AbstractIndexService[A]
 	 * Indexes a specific given list of items.
 	 */
 	def indexItems(items: TraversableOnce[A]) = transactional(readOnly = true) {
-		ifNotIndexing { doIndexItems(items, isIncremental = false) }
+		guardMultipleIndexes { doIndexItems(items, isIncremental = false) }
 	}
 
 	def indexItemsWithoutNewTransaction(items: TraversableOnce[A]) = {
-		ifNotIndexing { doIndexItems(items, isIncremental = false) }
+		guardMultipleIndexes { doIndexItems(items, isIncremental = false) }
 	}
 
 	// Overridable - configure index writer

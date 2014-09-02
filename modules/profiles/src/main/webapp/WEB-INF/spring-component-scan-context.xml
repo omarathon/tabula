@@ -7,6 +7,5 @@
 		
 	<context:component-scan base-package="uk.ac.warwick.tabula.profiles.web.controllers" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.profiles.services" />
-	<context:component-scan base-package="uk.ac.warwick.tabula.profiles.jobs" />
 
 </beans>
