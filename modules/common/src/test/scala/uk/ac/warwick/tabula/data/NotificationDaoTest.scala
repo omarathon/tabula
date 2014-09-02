@@ -3,13 +3,14 @@ package uk.ac.warwick.tabula.data
 import org.junit.{After, Before}
 
 import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.{ScheduledMeetingRecordNotification, ScheduledMeetingRecordInviteeNotification}
 import uk.ac.warwick.tabula.{PackageScanner, Mockito, Fixtures, PersistenceTestBase}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{SecurityService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 import javax.persistence.DiscriminatorValue
 import org.joda.time.{DateTimeUtils, DateTime}
-import uk.ac.warwick.tabula.data.model.notifications.{ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification, SubmissionReceivedNotification}
+import uk.ac.warwick.tabula.data.model.notifications.SubmissionReceivedNotification
 import org.hibernate.ObjectNotFoundException
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}

@@ -79,7 +79,7 @@ trait ConvertScheduledMeetingRecordState {
 	var posted: Boolean = false
 
 	lazy val relationship: StudentRelationship = meetingRecord.relationship
-	var createCommand: CreateMeetingRecordCommand = _
+	var createCommand: Appliable[MeetingRecord] = _
 }
 
 trait ConvertScheduledMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

@@ -1,11 +1,11 @@
-package uk.ac.warwick.tabula.data.model.notifications
+package uk.ac.warwick.tabula.data.model.notifications.meetingrecord
 
-import uk.ac.warwick.tabula.data.model.{StudentRelationship, MeetingRecord}
+import uk.ac.warwick.tabula.data.model.{MeetingRecord, StudentRelationship}
 import uk.ac.warwick.tabula.profiles.web.Routes
 
 trait MeetingRecordNotificationTrait {
 
-	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meeting_record_notification_template.ftl"
+	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/meeting_record_notification_template.ftl"
 
 	def meeting: MeetingRecord
 	def relationship: StudentRelationship

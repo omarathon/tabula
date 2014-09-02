@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.profiles.commands
 
+import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.data.MeetingRecordDao
-import org.hibernate.Session
 
-class ConvertScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
+class ConvertScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 
 	EventHandling.enabled = false
 
@@ -22,13 +22,11 @@ class ConvertScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
 
 
-		val createCommand: CreateMeetingRecordCommand = new CreateMeetingRecordCommand(creator, relationship, false) {
-			override val session = 	mock[Session]
+		val createCommand = new Appliable[MeetingRecord] {
+			override def apply(): MeetingRecord = {
+				new MeetingRecord
+			}
 		}
-		createCommand.meetingRecordDao = meetingRecordDao
-		createCommand.features = emptyFeatures
-		createCommand.features.attendanceMonitoringMeetingPointType = false
-		createCommand.notificationService = notificationService
 
 		val scheduledMeetingRecord: ScheduledMeetingRecord = new ScheduledMeetingRecord()
 
@@ -42,9 +40,7 @@ class ConvertScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 	def apply() { new Fixture {
 		val newMeetingRecord = command.applyInternal()
 
-		there was one(createCommand.meetingRecordDao).saveOrUpdate(newMeetingRecord)
 		there was one(mockMeetingRecordService).purge(scheduledMeetingRecord)
-
 	}}
 
 	trait ConvertScheduledMeetingRecordCommandSupport extends FileAttachmentServiceComponent {

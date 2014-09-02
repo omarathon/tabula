@@ -1,6 +1,6 @@
-package uk.ac.warwick.tabula.data.model.notifications
+package uk.ac.warwick.tabula.data.model.notifications.meetingrecord
 
-import uk.ac.warwick.tabula.data.model.{NotificationWithTarget, SingleItemNotification, StudentRelationship, ScheduledMeetingRecord}
+import uk.ac.warwick.tabula.data.model.{NotificationWithTarget, ScheduledMeetingRecord, SingleItemNotification, StudentRelationship}
 import uk.ac.warwick.tabula.profiles.web.Routes
 
 abstract class ScheduledMeetingRecordNotification
@@ -16,7 +16,8 @@ abstract class ScheduledMeetingRecordNotification
 	def agentNotFoundMessage = "Agent member for code " + meeting.relationship.agent + " not found"
 	def url = Routes.profile.view(
 			meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)),
-			meeting)
+			meeting
+	)
 	def urlTitle = "view this meeting"
 
 	def agentRole = meeting.relationship.relationshipType.agentRole

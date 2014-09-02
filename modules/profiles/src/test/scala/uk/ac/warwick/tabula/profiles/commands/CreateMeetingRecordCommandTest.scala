@@ -24,13 +24,14 @@ class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRec
 		cmd.meetingDateTime  = dateTime(3903, DateTimeConstants.MARCH) // it's the future
 		cmd.maintenanceMode = maintenanceModeService
 		cmd.notificationService = notificationService
+		cmd.scheduledNotificationService = scheduledNotificationService
 
 		// check invalid future date
 		var errors = new BindException(cmd, "command")
 		cmd.validate(errors)
-		errors.hasErrors should be (true)
+		errors.hasErrors should be {true}
 		errors.getErrorCount should be (2)
-		errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateTime") should be (true)
+		errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateTime") should be {true}
 		errors.getFieldError.getCode should be ("meetingRecord.date.future")
 
 		cmd.meetingDateTime = dateTime(2007, DateTimeConstants.MARCH) // > 5 years ago
@@ -38,9 +39,9 @@ class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRec
 		// check invalid past date
 		errors = new BindException(cmd, "command")
 		cmd.validate(errors)
-		errors.hasErrors should be (true)
+		errors.hasErrors should be {true}
 		errors.getErrorCount should be (2)
-		errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateTime") should be (true)
+		errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateTime") should be {true}
 		errors.getFieldError.getCode should be ("meetingRecord.date.prehistoric")
 
 		cmd.meetingDateTime = marchHare
@@ -52,7 +53,7 @@ class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRec
 		// check invalid empty title
 		errors = new BindException(cmd, "command")
 		cmd.validate(errors)
-		errors.hasErrors should be (true)
+		errors.hasErrors should be {true}
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("title")
 		errors.getFieldError.getCode should be ("NotEmpty")
@@ -63,7 +64,7 @@ class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRec
 		// check invalid empty format
 		errors = new BindException(cmd, "command")
 		cmd.validate(errors)
-		errors.hasErrors should be (true)
+		errors.hasErrors should be {true}
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("format")
 		errors.getFieldError.getCode should be ("NotEmpty")
@@ -73,7 +74,7 @@ class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRec
 		// check valid
 		errors = new BindException(cmd, "command")
 		cmd.validate(errors)
-		errors.hasErrors should be (false)
+		errors.hasErrors should be {false}
 
 		// add some text and apply
 		cmd.description = "Lovely words"

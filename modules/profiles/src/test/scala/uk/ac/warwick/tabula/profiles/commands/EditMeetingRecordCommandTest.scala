@@ -19,6 +19,7 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 		cmd.title = "Updated title fools"
 		cmd.maintenanceMode = maintenanceModeService
 		cmd.notificationService = notificationService
+		cmd.scheduledNotificationService = scheduledNotificationService
 		cmd.meetingRecordDao = meetingRecordDao
 		cmd.features = emptyFeatures
 		cmd.features.meetingRecordApproval = true
@@ -73,6 +74,7 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 
 		editCmd.meetingRecordDao = meetingRecordDao
 		editCmd.notificationService = notificationService
+		editCmd.scheduledNotificationService = scheduledNotificationService
 		editCmd.copyToCommand(meeting)
 		editCmd.description = "The meeting room was full of angry herons. It was truly harrowing."
 		val meeting2 = transactional { tx => editCmd.apply() }

@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.commands.{Notifies, ComposableCommand, Describable, CommandInternal, SelfValidating, Description}
+import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.ScheduledMeetingRecordInviteeNotification
 import uk.ac.warwick.tabula.data.model.{Notification, ScheduledMeetingRecord, AbstractMeetingRecord, MeetingRecord}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
-import uk.ac.warwick.tabula.data.model.notifications.ScheduledMeetingRecordInviteeNotification
 
 trait RemoveMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: RemoveMeetingRecordState =>
