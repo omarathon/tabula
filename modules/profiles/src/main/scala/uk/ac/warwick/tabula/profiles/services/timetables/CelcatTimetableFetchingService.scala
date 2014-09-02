@@ -255,7 +255,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 				val weekRange = WeekRange(startWeek, endWeek)
 
 				val summary = Option(event.getSummary).fold("") { _.getValue }
-				val moduleCode = summary.maybeText.collect { case r"([A-Za-z]{2}[0-9A-Za-z]{2})${m}.*" => m.toUpperCase() }
+				val moduleCode = summary.maybeText.collect { case r"([A-Za-z]{2}[0-9][0-9A-Za-z]{2})${m}.*" => m.toUpperCase() }
 
 				val staffIds: Seq[UniversityId] =
 					if (!allStaff.isEmpty)
