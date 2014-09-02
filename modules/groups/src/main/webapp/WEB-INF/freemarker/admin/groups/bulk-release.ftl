@@ -6,18 +6,25 @@
 </div>
 </#if>
     <@f.form method="post" action="" commandName="moduleList" cssClass="form-horizonatal form-tiny">
-    <p> Notify these people via email that these groups are ready to view in Tabula
-    </p>
+    	<p>Notify these people via email that these groups are ready to view in Tabula:</p>
         <@form.row "notifyStudents">
-        <label class="checkbox">
-            <@f.checkbox path="notifyStudents"/>Students
-        </label>
+			<label class="checkbox">
+				<@f.checkbox path="notifyStudents"/>Students
+			</label>
         </@form.row>
         <@form.row "notifyTutors" >
-        <label class="checkbox">
-            <@f.checkbox path="notifyTutors"/>Tutors
-        </label>
+			<label class="checkbox">
+				<@f.checkbox path="notifyTutors"/>Tutors
+			</label>
         </@form.row>
+		<hr>
+		<@form.row "sendEmail">
+			<@form.label checkbox=true>
+				<@f.checkbox path="sendEmail" />
+				Send an email with this notification
+			</@form.label>
+		</@form.row>
+
         <div class="control-group">
             <input class="btn btn-info" type="submit" value="Notify">
         </div>

@@ -26,7 +26,7 @@ class ReleaseAllSmallGroupSetsController extends GroupsController {
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("moduleList") model: ModuleListViewModel,@PathVariable department:Department) = {
+  def submit(@ModelAttribute("moduleList") model: ModuleListViewModel, @PathVariable department:Department) = {
     model.createCommand(user.apparentUser).apply()
     Redirect(Routes.admin.release(department), "batchReleaseSuccess"->true)
   }
@@ -35,6 +35,7 @@ class ReleaseAllSmallGroupSetsController extends GroupsController {
 		var checkedModules: JList[Module] = JArrayList()
 		var notifyStudents: JBoolean = true
 		var notifyTutors: JBoolean = true
+		var sendEmail: JBoolean = true
 
 		def smallGroupSets() = {
 			if (checkedModules == null) {
@@ -51,6 +52,7 @@ class ReleaseAllSmallGroupSetsController extends GroupsController {
 			val command = new ReleaseGroupSetCommandImpl(smallGroupSets(), user)
 			command.notifyStudents = notifyStudents
 			command.notifyTutors = notifyTutors
+			command.sendEmail = sendEmail
 			command
 		}
 	}

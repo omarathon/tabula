@@ -38,8 +38,8 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 	}
 
 	def goToEditProperties: EditSmallGroupSetPropertiesPage = {
-		underlying.findElement(By.partialLinkText("Manage")).click()
-		val editGroupset = underlying.findElement(By.partialLinkText("Edit properties"))
+		underlying.findElement(By.partialLinkText("Actions")).click()
+		val editGroupset = underlying.findElement(By.partialLinkText("Edit"))
 		eventually {
 			editGroupset.isDisplayed should be (true)
 		}
@@ -62,7 +62,7 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 	}
 
 	def goToAllocate = {
-		underlying.findElement(By.partialLinkText("Manage")).click()
+		underlying.findElement(By.partialLinkText("Actions")).click()
 		val allocate = underlying.findElement(By.partialLinkText("Allocate students"))
 		eventually {
 			allocate.isDisplayed should be(true)
@@ -74,12 +74,12 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 	}
 
 	def isShowingOpenButton() = {
-		underlying.findElement(By.partialLinkText("Manage")).click()
+		underlying.findElement(By.partialLinkText("Actions")).click()
 		!underlying.findElements(By.partialLinkText("Open")).isEmpty
 	}
 
 	def getOpenButton() = {
-		underlying.findElement(By.partialLinkText("Manage")).click()
+		underlying.findElement(By.partialLinkText("Actions")).click()
 		underlying.findElement(By.partialLinkText("Open"))
 	}
 }
