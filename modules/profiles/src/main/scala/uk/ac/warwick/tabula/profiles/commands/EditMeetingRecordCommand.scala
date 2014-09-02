@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.EditedMeetingRecordApprovalNotification
-import uk.ac.warwick.tabula.data.model.{Notification, MeetingRecord}
+import org.joda.time.DateTime
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
+import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.EditedMeetingRecordApprovalNotification
+import uk.ac.warwick.tabula.data.model.{Notification, MeetingRecord, ScheduledNotification}
+
 import scala.language.implicitConversions
 
 class EditMeetingRecordCommand(meetingRecord: MeetingRecord)
@@ -38,7 +40,11 @@ class EditMeetingRecordCommand(meetingRecord: MeetingRecord)
 		}
 	}
 
-	def emit(meeting: MeetingRecord) = Seq(
+	override def emit(meeting: MeetingRecord) = Seq(
 		Notification.init(new EditedMeetingRecordApprovalNotification, creator.asSsoUser, Seq(meeting), relationship)
+	)
+
+	override def scheduledNotifications(result: MeetingRecord) = Seq(
+		new ScheduledNotification[MeetingRecord]("editedMeetingRecordApproval", result, DateTime.now.plusWeeks(1))
 	)
 }

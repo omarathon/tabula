@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import scala.collection.JavaConverters._
 
 abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship, val considerAlternatives: Boolean = false)
-	extends Command[MeetingRecord] with Notifies[MeetingRecord, MeetingRecord] with SelfValidating with FormattedHtml
+	extends Command[MeetingRecord] with Notifies[MeetingRecord, MeetingRecord] with SchedulesNotifications[MeetingRecord] with SelfValidating with FormattedHtml
 	with BindListener with Daoisms {
 
 	var meetingRecordDao = Wire.auto[MeetingRecordDao]
