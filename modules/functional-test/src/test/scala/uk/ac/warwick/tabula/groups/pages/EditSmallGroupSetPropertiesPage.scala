@@ -25,25 +25,6 @@ class EditSmallGroupSetPropertiesPage (implicit val webDriver:WebDriver) extends
 
 }
 
-class EditSmallGroupSetStudentsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher{
-
-	def isCurrentPage(moduleName:String){
-		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
-		val heading =find(cssSelector("#main-content h1")).get
-		heading.text should startWith ("Edit small groups")
-		currentUrl should endWith ("/students")
-	}
-
-	def submitAndExit() {
-		click on cssSelector("input.btn-primary")
-	}
-
-	def submitAndAddGroups() {
-		click on cssSelector("input.btn-success")
-	}
-
-}
-
 class EditSmallGroupSetGroupsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher{
 
 	def isCurrentPage(moduleName:String){
@@ -57,7 +38,45 @@ class EditSmallGroupSetGroupsPage (implicit val webDriver:WebDriver) extends Web
 		click on cssSelector("input.btn-primary")
 	}
 
+	def submitAndAddStudents() {
+		click on cssSelector("input.btn-success")
+	}
+
+}
+
+class EditSmallGroupSetStudentsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher{
+
+	def isCurrentPage(moduleName:String){
+		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
+		val heading =find(cssSelector("#main-content h1")).get
+		heading.text should startWith ("Edit small groups")
+		currentUrl should endWith ("/students")
+	}
+
+	def submitAndExit() {
+		click on cssSelector("input.btn-primary")
+	}
+
 	def submitAndAddEvents() {
+		click on cssSelector("input.btn-success")
+	}
+
+}
+
+class EditSmallGroupSetEventsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher{
+
+	def isCurrentPage(moduleName:String){
+		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
+		val heading =find(cssSelector("#main-content h1")).get
+		heading.text should startWith ("Edit small groups")
+		currentUrl should endWith ("/events")
+	}
+
+	def submitAndExit() {
+		click on cssSelector("input.btn-primary")
+	}
+
+	def submitAndAllocate() {
 		click on cssSelector("input.btn-success")
 	}
 
@@ -67,7 +86,8 @@ class AllocateStudentsToGroupsPage(implicit val webDriver:WebDriver)extends WebB
 	def isCurrentPage(moduleName:String){
 		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
 		val heading =find(cssSelector("#main-content h1")).get
-		heading.text should startWith ("Allocate students")
+		heading.text should startWith ("Edit small groups")
+		currentUrl should endWith ("/allocate")
 	}
 
 	def findAllUnallocatedStudents =  {
