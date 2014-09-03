@@ -86,7 +86,8 @@ class AllocateStudentsToGroupsPage(implicit val webDriver:WebDriver)extends WebB
 	def isCurrentPage(moduleName:String){
 		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
 		val heading =find(cssSelector("#main-content h1")).get
-		heading.text should startWith ("Allocate students")
+		heading.text should startWith ("Edit small groups")
+		currentUrl should endWith ("/allocate")
 	}
 
 	def findAllUnallocatedStudents =  {
