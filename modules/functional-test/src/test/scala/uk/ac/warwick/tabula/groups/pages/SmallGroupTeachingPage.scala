@@ -61,13 +61,30 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 		groupsPage
 	}
 
+	def goToEditStudents: EditSmallGroupSetStudentsPage = {
+		val groupsPage = goToEditGroups
+		groupsPage.submitAndAddStudents()
+
+		val studentsPage = new EditSmallGroupSetStudentsPage()
+		// HACK: the module name is the module code in uppercase in the test data. Should really pass it around separately
+		studentsPage.isCurrentPage(moduleCode.toUpperCase)
+		studentsPage
+	}
+
+	def goToEditEvents: EditSmallGroupSetEventsPage = {
+		val studentsPage = goToEditStudents
+		studentsPage.submitAndAddEvents()
+
+		val eventsPage = new EditSmallGroupSetEventsPage()
+		// HACK: the module name is the module code in uppercase in the test data. Should really pass it around separately
+		eventsPage.isCurrentPage(moduleCode.toUpperCase)
+		eventsPage
+	}
+
 	def goToAllocate = {
-		underlying.findElement(By.partialLinkText("Actions")).click()
-		val allocate = underlying.findElement(By.partialLinkText("Allocate students"))
-		eventually {
-			allocate.isDisplayed should be(true)
-		}
-		allocate.click()
+		val eventsPage = goToEditEvents
+		eventsPage.submitAndAllocate()
+
 		val allocatePage = new AllocateStudentsToGroupsPage()
 		allocatePage.isCurrentPage(moduleCode.toUpperCase())
 		allocatePage
