@@ -56,7 +56,7 @@
 				<div id="allocatestudents-tab1" class="tab-pane active">
 
 				<p>Drag students onto a ${relationshipType.agentRole} to allocate them to the ${relationshipType.agentRole}. Select multiple students by dragging a box around them.
-					 You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key to add to a selection.</p>
+					 You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key and drag to add to a selection.</p>
 
 				<@spring.hasBindErrors name="allocateStudentsToRelationshipCommand">
 					<#if errors.hasErrors()>
