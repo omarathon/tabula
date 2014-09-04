@@ -7,6 +7,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Info, Warning}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
@@ -62,6 +63,35 @@ class FeedbackDueGeneralNotification
 	override final def deadline = assignment.feedbackDeadline.getOrElse(throw new IllegalStateException("No feedback deadline for open-ended assignments"))
 
 	override def content: FreemarkerModel = FreemarkerModel("/WEB-INF/freemarker/notifications/feedback_reminder_general.ftl", Map(
+		"assignment" -> assignment,
+		"daysLeft" -> daysLeft,
+		"dateOnlyFormatter" -> dateOnlyFormatter,
+		"deadline" -> deadline
+	))
+}
+
+@Entity
+@DiscriminatorValue("FeedbackDueExtension")
+class FeedbackDueExtensionNotification
+	extends Notification[Extension, Unit] with SingleItemNotification[Extension] with FeedbackDueNotification {
+
+	final def extention = item.entity
+
+	override final def assignment = extention.assignment
+
+	override final def title = s"${assignment.module.code.toUpperCase} feedback due for ${extention.universityId}"
+
+	override final def recipients = {
+		val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+		moduleAndDepartmentService.getModuleByCode(assignment.module.code)
+			.getOrElse(throw new IllegalStateException("No such module"))
+			.managers.users
+	}
+
+	override final def deadline = extention.feedbackDeadline.toLocalDate
+
+	override def content: FreemarkerModel = FreemarkerModel("/WEB-INF/freemarker/notifications/feedback_reminder_extention.ftl", Map(
+		"extention" -> extention,
 		"assignment" -> assignment,
 		"daysLeft" -> daysLeft,
 		"dateOnlyFormatter" -> dateOnlyFormatter,
