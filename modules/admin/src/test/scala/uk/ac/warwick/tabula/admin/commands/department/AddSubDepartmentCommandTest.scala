@@ -155,19 +155,20 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 		errors.getFieldError.getCodes should contain ("department.name.empty")
 	}}
 
-	@Test def validateNameDoesntStartWithParent() { new Fixture {
-		command.code = "in-ug"
-		command.name = "ITS Undergraduates"
-		command.filterRule = Department.UndergraduateFilterRule
-
-		val errors = new BindException(command, "command")
-		command.validate(errors)
-
-		errors.hasErrors should be (true)
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("name")
-		errors.getFieldError.getCodes should contain ("department.name.mustStartWithParent")
-	}}
+	// Remove this requirement TAB-2498
+//	@Test def validateNameDoesntStartWithParent() { new Fixture {
+//		command.code = "in-ug"
+//		command.name = "ITS Undergraduates"
+//		command.filterRule = Department.UndergraduateFilterRule
+//
+//		val errors = new BindException(command, "command")
+//		command.validate(errors)
+//
+//		errors.hasErrors should be (true)
+//		errors.getErrorCount should be (1)
+//		errors.getFieldError.getField should be ("name")
+//		errors.getFieldError.getCodes should contain ("department.name.mustStartWithParent")
+//	}}
 
 	@Test def validateNameTooLong() { new Fixture {
 		command.code = "in-ug"

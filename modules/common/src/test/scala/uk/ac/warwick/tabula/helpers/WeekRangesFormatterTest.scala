@@ -15,7 +15,7 @@ class WeekRangesFormatterTest extends TestBase {
 	val termService = new TermServiceImpl
 
 	@Test def termNumbering = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
-		val formatter = new WeekRangesFormatter(AcademicYear.guessByDate(DateTime.now))
+		val formatter = new WeekRangesFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		formatter.termService = termService
 
 		formatter.format(Seq(WeekRange(1, 10)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term) should be("Term 1, weeks 1-10")
@@ -27,7 +27,7 @@ class WeekRangesFormatterTest extends TestBase {
 	}
 
 	@Test def cumulativeTermNumbering = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
-		val formatter = new WeekRangesFormatter(AcademicYear.guessByDate(DateTime.now))
+		val formatter = new WeekRangesFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		formatter.termService = termService
 
 		formatter.format(Seq(WeekRange(1, 10)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative) should be("Term 1, weeks 1-10")
@@ -39,7 +39,7 @@ class WeekRangesFormatterTest extends TestBase {
 	}
 
 	@Test def academicWeekNumbering = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
-		val formatter = new WeekRangesFormatter(AcademicYear.guessByDate(DateTime.now))
+		val formatter = new WeekRangesFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		formatter.termService = termService
 
 		formatter.format(Seq(WeekRange(1, 10)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic) should be("Weeks 1-10")
@@ -51,7 +51,7 @@ class WeekRangesFormatterTest extends TestBase {
 	}
 
 	@Test def noWeekNumbers = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
-		val formatter = new WeekRangesFormatter(AcademicYear.guessByDate(DateTime.now))
+		val formatter = new WeekRangesFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		formatter.termService = termService
 
 		formatter.format(Seq(WeekRange(1, 10)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None) should be("Tue 4<sup>th</sup> Oct - Tue 6<sup>th</sup> Dec 2011")

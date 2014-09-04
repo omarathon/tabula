@@ -2,11 +2,11 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.ScheduledMeetingRecordMissedInviteeNotification
 import uk.ac.warwick.tabula.data.model.{Notification, ScheduledMeetingRecord}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.data.model.notifications.ScheduledMeetingRecordMissedInviteeNotification
 
 object ScheduledMeetingRecordMissedCommand {
 	def apply(meetingRecord: ScheduledMeetingRecord) =

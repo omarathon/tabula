@@ -105,7 +105,7 @@ class SmallGroupPersistenceTest extends PersistenceTestBase with FieldAccessByRe
 		
 		// Check a few choice fields to check they're persisted right
 		set1.format should be (SmallGroupFormat.Seminar)
-		set1.academicYear should be (AcademicYear.guessByDate(DateTime.now))
+		set1.academicYear should be (AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		
 		group1.name should be ("Group 1")
 		

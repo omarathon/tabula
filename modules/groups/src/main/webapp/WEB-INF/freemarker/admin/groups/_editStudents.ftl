@@ -5,7 +5,7 @@
 
 	<#if smallGroupSet.linked>
 		<@form.row "members" "groupEnrolment">
-			<p>There are <@fmt.p smallGroupSet.members.size "student" /> in ${smallGroupSet.name} (from <i class="icon-link"></i> ${smallGroupSet.linkedDepartmentSmallGroupSet.name}).</p>
+			<p>There are <@fmt.p smallGroupSet.members.size "student" /> in ${smallGroupSet.name} (from ${smallGroupSet.linkedDepartmentSmallGroupSet.name}).</p>
 
 			<div id="enrolment">
 				<table id="enrolment-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-orangeLight">

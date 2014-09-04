@@ -3,12 +3,8 @@
 	<h1>Create a set of reusable small groups</h1>
 
 	<@f.form id="newGroups" method="POST" commandName="createDepartmentSmallGroupSetCommand" class="form-horizontal">
-		<p class="progress-arrows">
-			<span class="arrow-right active">Properties</span>
-			<span class="arrow-right arrow-left use-tooltip" title="Save and edit students"><button type="submit" class="btn btn-link" name="${ManageDepartmentSmallGroupsMappingParameters.createAndAddStudents}">Students</button></span>
-			<span class="arrow-right arrow-left use-tooltip" title="Save and edit groups"><button type="submit" class="btn btn-link" name="${ManageDepartmentSmallGroupsMappingParameters.createAndAddGroups}">Groups</button></span>
-			<span class="arrow-right arrow-left">Allocate</span>
-		</p>
+		<#assign fakeSet = {'groups':[]} />
+		<@components.reusable_set_wizard true 'properties' fakeSet />
 
 		<fieldset>
 			<@form.labelled_row "name" "Set name">
@@ -29,10 +25,10 @@
 		<div class="submit-buttons">
 			<input
 				type="submit"
-				class="btn btn-success use-tooltip"
-				name="${ManageDepartmentSmallGroupsMappingParameters.createAndAddStudents}"
-				value="Save and add students"
-				title="Select which students are included in these groups"
+				class="btn btn-success use-tooltip spinnable spinner-auto"
+				name="${ManageDepartmentSmallGroupsMappingParameters.createAndAddGroups}"
+				value="Save and add groups"
+				title="Add groups to this set of reusable groups"
 				data-container="body"
 				/>
 			<input

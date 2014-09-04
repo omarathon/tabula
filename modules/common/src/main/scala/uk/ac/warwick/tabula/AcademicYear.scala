@@ -4,7 +4,7 @@ import scala.language.implicitConversions
 import org.joda.time.{LocalDate, DateTimeConstants, DateMidnight, DateTime}
 import org.joda.time.DateTimeConstants._
 import org.joda.time.base.BaseDateTime
-import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.util.termdates.{TermNotFoundException, Term}
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.TermService
@@ -104,7 +104,7 @@ object AcademicYear {
 	 * This function returns the year based on when SITS rolls over,
 	 * not when the academic year starts/stops
 	 */
-	def guessByDate(now: DateTime) = {
+	def guessSITSAcademicYearByDate(now: BaseDateTime) = {
 		if (now.getMonthOfYear >= AUGUST) {
 			new AcademicYear(now.getYear)
 		} else {
@@ -117,15 +117,21 @@ object AcademicYear {
 	 *
 	 */
 	def findAcademicYearContainingDate(date: BaseDateTime, termService:TermService): AcademicYear = {
-		val termContainingIntervalStart = termService.getTermFromDateIncludingVacations(date)
-		def findAutumnTermForTerm(term: Term): Term = {
-			term.getTermType match {
-				case TermType.autumn => term
-				case _ => findAutumnTermForTerm(termService.getPreviousTerm(term))
+		try {
+			val termContainingIntervalStart = termService.getTermFromDateIncludingVacations(date)
+			def findAutumnTermForTerm(term: Term): Term = {
+				term.getTermType match {
+					case TermType.autumn => term
+					case _ => findAutumnTermForTerm(termService.getPreviousTerm(term))
+				}
 			}
+			val firstWeekOfYear = findAutumnTermForTerm(termContainingIntervalStart).getStartDate
+			AcademicYear(firstWeekOfYear.getYear)
+		} catch {
+			case tnf: TermNotFoundException =>
+				// Fall back to guessing behaviour
+				guessSITSAcademicYearByDate(date)
 		}
-		val firstWeekOfYear = findAutumnTermForTerm(termContainingIntervalStart).getStartDate
-		AcademicYear(firstWeekOfYear.getYear)
 	}
 
 }

@@ -75,7 +75,7 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.module(set.module))
+	) = submit(cmd, errors, set, Routes.admin(set.module.department, set.academicYear))
 
 	@InitBinder
 	def upstreamGroupBinder(binder: WebDataBinder) {

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.groups.web
 
 import java.net.URLEncoder
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.{Module, Department}
 import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroupSet}
@@ -22,14 +23,11 @@ object Routes {
 	}
 
 	object admin {
-		def apply(department: Department) = context + "/admin/department/%s" format (encoded(department.code))
+		def apply(department: Department, year: AcademicYear): String = context + "/admin/department/%s/%s" format (encoded(department.code), year.startYear.toString)
+		def apply(set: SmallGroupSet): String = apply(set.module.department, set.academicYear) + s"#set-${set.id}"
 
-		def release(department: Department) = apply(department) + "/groups/release"
-		def selfsignup(department: Department, action: String) = apply(department) + "/groups/selfsignup/" + encoded(action)
-
-		object module {
-			def apply(module: Module) = admin(module.department) + "#module-" + encoded(module.code)
-		}
+		def release(department: Department) = context + "/admin/department/%s/groups/release" format (encoded(department.code))
+		def selfsignup(department: Department, action: String) = context + "/admin/department/%s/groups/selfsignup/%s" format (encoded(department.code), encoded(action))
 
 		def create(module: Module) = context + "/admin/module/%s/groups/new" format (encoded(module.code))
 		def create(set: SmallGroupSet) = context + "/admin/module/%s/groups/new/%s" format (encoded(set.module.code), encoded(set.id))
@@ -48,6 +46,7 @@ object Routes {
 		object reusable {
 			def apply(department: Department) = context + "/admin/department/%s/groups/reusable" format (encoded(department.code))
 			def create(department: Department) = context + "/admin/department/%s/groups/reusable/new" format (encoded(department.code))
+			def create(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s" format (encoded(set.department.code), encoded(set.id))
 			def createAddStudents(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s/students" format (encoded(set.department.code), encoded(set.id))
 			def createAddGroups(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s/groups" format (encoded(set.department.code), encoded(set.id))
 			def createAllocate(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s/allocate" format (encoded(set.department.code), encoded(set.id))

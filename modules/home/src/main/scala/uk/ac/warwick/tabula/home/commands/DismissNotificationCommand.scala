@@ -8,8 +8,6 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.NotificationServiceComponent
 
-
-
 object DismissNotificationCommand {
 
 	def apply(notifications: Seq[Notification[_,_]], dismiss: Boolean, user: User) =
@@ -22,7 +20,6 @@ object DismissNotificationCommand {
 
 abstract class DismissNotificationCommandInternal(val notifications: Seq[Notification[_,_]], val dismiss: Boolean, val user: User)
 		extends CommandInternal[Seq[Activity[_]]] with DismissNotificationCommandState with NotificationServiceComponent{
-
 
 	def applyInternal() = {
 		if (dismiss) {
@@ -51,9 +48,7 @@ trait DismissNotificationCommandState {
 trait DismissNotificationCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: DismissNotificationCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
-		notifications.foreach(
-			p.PermissionCheck(Permissions.Notification.Dismiss , _)
-		)
+		p.PermissionCheckAll(Permissions.Notification.Dismiss, notifications)
 	}
 }
 

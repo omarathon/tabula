@@ -32,7 +32,7 @@ jQuery(function($) {
 
 		return $('<div>', {'class': 'activity ' + priority})
 			.data('notification-id', item._id)
-			/*.append($('<button>', {'class':'close', title: 'Dismiss'}).html('&times;'))*/
+			.append($('<button>', {'class':'close', title: 'Dismiss'}).html('&times;'))
 			.append($('<div>', {'class': 'headline'})
 				.append($('<i></i>', {'class': icons[priority]}))
 				.append($('<h5>', {'class': 'title'})

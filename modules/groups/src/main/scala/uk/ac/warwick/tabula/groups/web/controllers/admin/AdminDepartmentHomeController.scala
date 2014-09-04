@@ -1,56 +1,75 @@
 package uk.ac.warwick.tabula.groups.web.controllers.admin
 
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+
 import scala.collection.JavaConverters._
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
-import uk.ac.warwick.tabula.data.model.{Module, Department}
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.groups.commands.admin.AdminDepartmentHomeCommand
-import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{Tutor, ViewModules, ViewSet, ViewModule}
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSetFilters, SmallGroupAllocationMethod, SmallGroupSet}
+import uk.ac.warwick.tabula.groups.commands.admin.{AdminSmallGroupsHomeCommandState, AdminSmallGroupsHomeInformation, AdminSmallGroupsHomeCommand}
 import uk.ac.warwick.tabula.commands.Appliable
 
-@Controller
-@RequestMapping(value=Array("/admin/department/{department}"))
-class AdminDepartmentHomeController extends GroupsController {
+abstract class AbstractAdminDepartmentHomeController extends GroupsController with AutowiringTermServiceComponent {
+	type AdminSmallGroupsHomeCommand = Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState
 
 	hideDeletedItems
 
-	@ModelAttribute("adminCommand") def command(@PathVariable("department") dept: Department, user: CurrentUser) =
-		AdminDepartmentHomeCommand(dept, user)
+	@ModelAttribute("academicYears") def academicYearChoices: JList[AcademicYear] =
+		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2).asJava
 
 	@ModelAttribute("allocated") def allocatedSet(@RequestParam(value="allocated", required=false) set: SmallGroupSet) = set
 
 	@RequestMapping
-	def adminDepartment(@ModelAttribute("adminCommand") cmd: Appliable[Seq[Module]], @PathVariable("department") department:Department, user: CurrentUser) = {
-		val modules = cmd.apply()
+	def adminDepartment(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable("department") department: Department, user: CurrentUser) = {
+		val info = cmd.apply()
 
-		// Build the view model
-		val moduleItems =
-			for (module <- modules) yield {
-				ViewModule(module,
-					module.groupSets.asScala map { set => ViewSet(set, set.groups.asScala, Tutor) },
-					canManageGroups=securityService.can(user, Permissions.Module.ManageSmallGroups, module)
-				)
-			}
+		val hasModules = info.modulesWithPermission.nonEmpty
+		val hasGroups = info.setsWithPermission.nonEmpty
+		val hasGroupAttendance = info.setsWithPermission.exists { _.set.showAttendanceReports }
 
-		val data = ViewModules(
-			moduleItems.toSeq,
-			canManageDepartment=securityService.can(user, Permissions.Module.ManageSmallGroups, department)
-		)
-
-		val hasModules = !moduleItems.isEmpty
-		val hasGroups = moduleItems.exists { _.module.groupSets.asScala.exists { g => !g.deleted && !g.archived } }
-		val hasGroupAttendance = moduleItems.exists { _.module.groupSets.asScala.exists { g => g.showAttendanceReports } }
-
-		Mav("admin/department",
+		val model = Map(
 			"department" -> department,
-			"data" -> data,
+			"canAdminDepartment" -> info.canAdminDepartment,
+			"modules" -> info.modulesWithPermission,
+			"sets" -> info.setsWithPermission,
+			"hasUnreleasedGroupsets" -> info.setsWithPermission.exists { !_.set.fullyReleased },
+			"hasOpenableGroupsets" -> info.setsWithPermission.exists { sv => (!sv.set.openForSignups) && sv.set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp },
+			"hasCloseableGroupsets" -> info.setsWithPermission.exists { sv => sv.set.openForSignups && sv.set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp },
 			"hasModules" -> hasModules,
 			"hasGroups" -> hasGroups,
-			"hasGroupAttendance" -> hasGroupAttendance)
+			"hasGroupAttendance" -> hasGroupAttendance,
+			"allStatusFilters" -> SmallGroupSetFilters.Status.all,
+			"allModuleFilters" -> SmallGroupSetFilters.allModuleFilters(info.modulesWithPermission),
+			"allAllocationFilters" -> SmallGroupSetFilters.AllocationMethod.all(info.departmentSmallGroupSets),
+			"allTermFilters" -> SmallGroupSetFilters.allTermFilters(cmd.academicYear, termService)
+		)
+
+		if (ajax) Mav("admin/department-noLayout", model).noLayout()
+		else Mav("admin/department", model)
 	}
+}
+
+@Controller
+@RequestMapping(value=Array("/admin/department/{department}"))
+class AdminDepartmentHomeController extends AbstractAdminDepartmentHomeController {
+
+	@ModelAttribute("adminCommand") def command(@PathVariable("department") dept: Department, user: CurrentUser): AdminSmallGroupsHomeCommand =
+		AdminSmallGroupsHomeCommand(mandatory(dept), AcademicYear.guessSITSAcademicYearByDate(DateTime.now), user)
+
+}
+
+@Controller
+@RequestMapping(value=Array("/admin/department/{department}/{academicYear}"))
+class AdminDepartmentHomeForYearController extends AbstractAdminDepartmentHomeController {
+
+	@ModelAttribute("adminCommand") def command(@PathVariable("department") dept: Department, @PathVariable("academicYear") academicYear: AcademicYear, user: CurrentUser): AdminSmallGroupsHomeCommand =
+		AdminSmallGroupsHomeCommand(mandatory(dept), mandatory(academicYear), user)
+
 }

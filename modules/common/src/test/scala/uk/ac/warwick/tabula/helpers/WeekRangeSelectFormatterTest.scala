@@ -12,7 +12,7 @@ class WeekRangesSelectFormatterTest extends TestBase {
 	val termService = new TermServiceImpl
 
 	@Test def firstTermNumbering = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
-		val select = new WeekRangeSelectFormatter(AcademicYear.guessByDate(DateTime.now))
+		val select = new WeekRangeSelectFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		WeekRange.termService = termService
 		select.termService = termService
 
@@ -31,7 +31,7 @@ class WeekRangesSelectFormatterTest extends TestBase {
 	}
 
 	@Test def secondTermNumbering = withFakeTime(new DateTime(2012, 2, 12, 13, 36, 44)) {
-		val select = new WeekRangeSelectFormatter(AcademicYear.guessByDate(DateTime.now))
+		val select = new WeekRangeSelectFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		WeekRange.termService = termService
 		select.termService = termService
 
@@ -45,7 +45,7 @@ class WeekRangesSelectFormatterTest extends TestBase {
 
 
 	@Test def firstCumulativeTermNumbering = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
-		val select = new WeekRangeSelectFormatter(AcademicYear.guessByDate(DateTime.now))
+		val select = new WeekRangeSelectFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		WeekRange.termService = termService
 		select.termService = termService
 
@@ -60,7 +60,7 @@ class WeekRangesSelectFormatterTest extends TestBase {
 	}
 
 	@Test def secondCumulativeTermNumbering = withFakeTime(new DateTime(2012, 1, 12, 13, 36, 44)) {
-		val select = new WeekRangeSelectFormatter(AcademicYear.guessByDate(DateTime.now))
+		val select = new WeekRangeSelectFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		WeekRange.termService = termService
 		select.termService = termService
 
@@ -75,7 +75,7 @@ class WeekRangesSelectFormatterTest extends TestBase {
 	}
 
 	@Test def thirdCumulativeTermNumbering = withFakeTime(new DateTime(2012, 5, 12, 13, 36, 44)) {
-		val select = new WeekRangeSelectFormatter(AcademicYear.guessByDate(DateTime.now))
+		val select = new WeekRangeSelectFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		WeekRange.termService = termService
 		select.termService = termService
 
@@ -93,7 +93,7 @@ class WeekRangesSelectFormatterTest extends TestBase {
 
 
 	@Test def academicWeekNumbering = withFakeTime(new DateTime(2012, 5, 12, 13, 36, 44)) {
-		val select = new WeekRangeSelectFormatter(AcademicYear.guessByDate(DateTime.now))
+		val select = new WeekRangeSelectFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		WeekRange.termService = termService
 		select.termService = termService
 

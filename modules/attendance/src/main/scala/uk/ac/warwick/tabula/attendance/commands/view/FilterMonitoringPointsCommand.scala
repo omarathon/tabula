@@ -1,7 +1,9 @@
 package uk.ac.warwick.tabula.attendance.commands.view
 
+import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, TermServiceComponent, AutowiringTermServiceComponent}
 import uk.ac.warwick.tabula.commands.{TaskBenchmarking, CommandInternal, Unaudited, ReadOnly, ComposableCommand}
@@ -21,6 +23,7 @@ object FilterMonitoringPointsCommand {
 			with ComposableCommand[Map[String, Seq[GroupedPoint]]]
 			with FilterMonitoringPointsPermissions
 			with FilterMonitoringPointsCommandState
+			with OnBindFilterMonitoringPointsCommand
 			with ReadOnly with Unaudited
 }
 
@@ -31,6 +34,7 @@ class FilterMonitoringPointsCommandInternal(val department: Department, val acad
 
 	override def applyInternal() = {
 		if (serializeFilter.isEmpty) {
+			filterTooVague = true
 			Map()
 		} else {
 			val studentDatas = benchmarkTask("profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments") {
@@ -53,6 +57,18 @@ class FilterMonitoringPointsCommandInternal(val department: Department, val acad
 			}
 		}
 	}
+}
+
+trait OnBindFilterMonitoringPointsCommand extends BindListener {
+
+	self: FilterMonitoringPointsCommandState =>
+
+	override def onBind(result: BindingResult) = {
+		if (!hasBeenFiltered) {
+			allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach { sprStatuses.add }
+		}
+	}
+
 }
 
 trait FilterMonitoringPointsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -83,6 +99,7 @@ trait FilterMonitoringPointsCommandState extends AttendanceFilterExtras {
 	var modules: JList[Module] = JArrayList()
 
 	var filterTooVague = false
+	var hasBeenFiltered = false
 
 }
 

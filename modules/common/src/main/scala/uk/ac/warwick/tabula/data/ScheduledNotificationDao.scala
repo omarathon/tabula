@@ -29,9 +29,13 @@ class ScheduledNotificationDaoImpl extends ScheduledNotificationDao with Daoisms
 	override def getById(id: String) = getById[ScheduledNotification[_ >: Null <: ToEntityReference]](id)
 
 	override def getScheduledNotifications(entity: Any) = {
+		val targetEntity = entity match {
+			case ref: ToEntityReference => ref.toEntityReference.entity
+			case _ => entity
+		}
 		session.newCriteria[ScheduledNotification[_  >: Null <: ToEntityReference]]
 			.createAlias("target", "target")
-			.add(Restrictions.eq("target.entity", entity))
+			.add(Restrictions.eq("target.entity", targetEntity))
 			.add(Restrictions.ne("completed", true))
 			.addOrder(Order.asc("scheduledDate"))
 			.seq

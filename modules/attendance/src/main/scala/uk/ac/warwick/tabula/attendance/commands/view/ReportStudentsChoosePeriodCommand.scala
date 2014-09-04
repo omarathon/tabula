@@ -85,7 +85,7 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
 	lazy val availablePeriods: Seq[(String, Boolean)] = benchmarkTask("availablePeriods") {
 		val termsWithPoints = termPoints.keys.toSeq
 		val thisTerm = {
-			if (academicYear.startYear < AcademicYear.guessByDate(DateTime.now).startYear)
+			if (academicYear.startYear < AcademicYear.findAcademicYearContainingDate(DateTime.now, termService).startYear)
 				TermService.orderedTermNames.last
 			else
 				termService.getTermFromDateIncludingVacations(DateTime.now).getTermTypeAsString

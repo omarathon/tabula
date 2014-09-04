@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.admin.web.controllers.permissions
 
+import org.joda.time.DateTime
 import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.permissions.{SelectorPermission, Permission, Permissions, PermissionsSelector, PermissionsTarget}
@@ -17,11 +18,12 @@ import javax.validation.Valid
 import org.springframework.validation.Errors
 import scala.reflect.ClassTag
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroup}
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroupEvent, SmallGroup}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.helpers.ReflectionHelper
 import uk.ac.warwick.tabula.data.Transactions._
 import scala.collection.immutable.SortedMap
+import uk.ac.warwick.tabula.web.Routes
 
 abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] extends AdminController {
 
@@ -218,23 +220,58 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 
 }
 
+case class AdminLink(title: String, href: String)
+
 @Controller @RequestMapping(value = Array("/permissions/member/{target}"))
-class MemberPermissionsController extends PermissionsControllerMethods[Member]
+class MemberPermissionsController extends PermissionsControllerMethods[Member] {
+	@ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") member: Member) = Seq(
+		AdminLink("View profile", Routes.profiles.profile.view(member))
+	)
+}
 
 @Controller @RequestMapping(value = Array("/permissions/department/{target}"))
-class DepartmentPermissionsController extends PermissionsControllerMethods[Department]
+class DepartmentPermissionsController extends PermissionsControllerMethods[Department] {
+	@ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") department: Department) = Seq(
+		AdminLink("Coursework Management", Routes.coursework.admin.department(department)),
+		AdminLink("Small Group Teaching", Routes.groups.admin(department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
+		AdminLink("Monitoring Points - View and record", Routes.attendance.View.department(department)),
+		AdminLink("Monitoring Points - Create and edit", Routes.attendance.Manage.department(department)),
+		AdminLink("Administration & Permissions", Routes.admin.department(department))
+	)
+}
 
 @Controller @RequestMapping(value = Array("/permissions/module/{target}"))
-class ModulePermissionsController extends PermissionsControllerMethods[Module]
+class ModulePermissionsController extends PermissionsControllerMethods[Module] {
+	@ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") module: Module) = Seq(
+		AdminLink("Coursework Management", Routes.coursework.admin.module(module)),
+		AdminLink("Small Group Teaching", Routes.groups.admin(module.department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
+		AdminLink("Administration & Permissions", Routes.admin.module(module))
+	)
+}
 
 @Controller @RequestMapping(value = Array("/permissions/route/{target}"))
-class RoutePermissionsController extends PermissionsControllerMethods[Route]
+class RoutePermissionsController extends PermissionsControllerMethods[Route] {
+	@ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") route: Route) = Seq(
+		AdminLink("Administration & Permissions", Routes.admin.route(route))
+	)
+}
+
+@Controller @RequestMapping(value = Array("/permissions/assignment/{target}"))
+class AssignmentPermissionsController extends PermissionsControllerMethods[Assignment] {
+	@ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") assignment: Assignment) = Seq(
+		AdminLink("Manage", Routes.coursework.admin.module(assignment.module))
+	)
+}
+
+@Controller @RequestMapping(value = Array("/permissions/smallgroupset/{target}"))
+class SmallGroupSetPermissionsController extends PermissionsControllerMethods[SmallGroupSet] {
+	@ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") set: SmallGroupSet) = Seq(
+		AdminLink("Manage", Routes.groups.admin(set))
+	)
+}
 
 @Controller @RequestMapping(value = Array("/permissions/smallgroup/{target}"))
 class SmallGroupPermissionsController extends PermissionsControllerMethods[SmallGroup]
-
-@Controller @RequestMapping(value = Array("/permissions/assignment/{target}"))
-class AssignmentPermissionsController extends PermissionsControllerMethods[Assignment]
 
 @Controller @RequestMapping(value = Array("/permissions/smallgroupevent/{target}"))
 class SmallGroupEventPermissionsController extends PermissionsControllerMethods[SmallGroupEvent]

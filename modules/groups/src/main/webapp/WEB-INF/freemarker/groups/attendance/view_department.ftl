@@ -10,7 +10,7 @@
 		<@components.department_attendance department modules />
 
 		<#-- List of students modal -->
-		<div id="students-list-modal" class="modal fade">
-		</div>
+		<div id="students-list-modal" class="modal fade"></div>
+		<div id="profile-modal" class="modal fade profile-subset"></div>
 	</#if>
 </#escape>

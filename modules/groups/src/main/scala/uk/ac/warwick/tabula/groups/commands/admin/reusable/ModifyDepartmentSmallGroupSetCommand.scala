@@ -29,7 +29,7 @@ object ModifyDepartmentSmallGroupSetCommand {
 			with AutowiringSmallGroupServiceComponent
 }
 
-trait ModifyDepartmentSmallGroupSetState extends CurrentAcademicYear {
+trait ModifyDepartmentSmallGroupSetState extends CurrentSITSAcademicYear {
 	def department: Department
 	def existingSet: Option[DepartmentSmallGroupSet]
 

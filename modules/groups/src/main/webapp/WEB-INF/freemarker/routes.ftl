@@ -10,7 +10,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro _u page context='/groups'><@url context=context page=page /></#macro>
 
 <#macro home><@_u page="/" /></#macro>
-<#macro departmenthome department><@_u page="/admin/department/${department.code}/" /></#macro>
+<#macro departmenthome department year=""><#compress>
+	<#local p>/admin/department/${department.code}/<#if year?has_content>${year.startYear?c}/</#if></#local>
+	<@_u page=p />
+</#compress></#macro>
 <#macro modulehome module><@_u page="/admin/module/${module.code}/" /></#macro>
 <#macro depthome module><@_u page="/admin/department/${module.department.code}/#module-${module.code}" /></#macro>
 <#macro moduleperms module><@_u page="/module/${module.code}/permissions" context="/admin" /></#macro>
@@ -29,6 +32,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro enrolment set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/enrolment"/></#macro>
 <#macro openset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/open" /></#macro>
 <#macro closeset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/close" /></#macro>
+
+<#macro templatespreadsheet set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/allocate/template" /></#macro>
 
 <#macro createeditproperties set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}" /></#macro>
 <#macro createsetstudents set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}/students" /></#macro>
@@ -83,3 +88,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro crossmodulegroupstemplate set><@_u page="/admin/department/${set.department.code}/groups/reusable/${set.id}/template"  /></#macro>
 
 <#macro students_json set><@_u page="/module/${set.module.code}/groups/${set.id}/students/search.json" /></#macro>
+
+<#macro permissions scope><@_u page="/permissions/${scope.urlCategory}/${scope.urlSlug}" context="/admin" /></#macro>

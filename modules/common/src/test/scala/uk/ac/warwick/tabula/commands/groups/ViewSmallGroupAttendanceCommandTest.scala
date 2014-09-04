@@ -1,23 +1,13 @@
-package uk.ac.warwick.tabula.groups.commands
+package uk.ac.warwick.tabula.commands.groups
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.services.{UserGroupCacheManager, SmallGroupService, TermServiceComponent, SmallGroupServiceComponent, TermService, UserLookupComponent}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-import org.joda.time.LocalTime
-import uk.ac.warwick.tabula.data.model.groups.WeekRange
-import uk.ac.warwick.tabula.MockUserLookup
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import SmallGroupAttendanceState._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventAttendance
-import uk.ac.warwick.userlookup.User
+import org.joda.time.{DateTime, LocalTime}
+import uk.ac.warwick.tabula.{AcademicYear, MockUserLookup, Mockito, TestBase}
+import uk.ac.warwick.tabula.commands.groups.SmallGroupAttendanceState._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEvent, SmallGroupEventAttendance, SmallGroupEventOccurrence, SmallGroupSet, WeekRange}
 import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent, TermService, TermServiceComponent, UserGroupCacheManager, UserLookupComponent}
+import uk.ac.warwick.userlookup.User
 
 class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 	
@@ -38,7 +28,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 	
 	trait Fixture extends BaseFixture {
 		val set = new SmallGroupSet
-		set.academicYear = AcademicYear.guessByDate(DateTime.now)
+		set.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 		
 		val group = new SmallGroup(set)
 		wireUserLookup(group.students)
@@ -205,7 +195,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		// This means that we risk students with the same name getting merged into one.
 		// Bad!	
 		val set = new SmallGroupSet
-		set.academicYear = AcademicYear.guessByDate(DateTime.now)
+		set.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 		
 		val group = new SmallGroup(set)
 		wireUserLookup(group.students)

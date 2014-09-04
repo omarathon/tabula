@@ -1,30 +1,29 @@
 package uk.ac.warwick.tabula.profiles.services.timetables
 
 import java.io.InputStream
-import java.util
 
-import dispatch.classic.thread.ThreadSafeHttpClient
 import dispatch.classic._
+import dispatch.classic.thread.ThreadSafeHttpClient
 import net.fortuna.ical4j.data.CalendarBuilder
-import net.fortuna.ical4j.model.parameter.Value
-import net.fortuna.ical4j.model.property.{RRule, DateProperty, Categories}
-import net.fortuna.ical4j.model.{Parameter, Property, Component}
 import net.fortuna.ical4j.model.component.VEvent
+import net.fortuna.ical4j.model.parameter.Value
+import net.fortuna.ical4j.model.property.{Categories, DateProperty, RRule}
+import net.fortuna.ical4j.model.{Component, Parameter, Property}
 import net.fortuna.ical4j.util.CompatibilityHints
 import org.apache.http.auth.AuthScope
-import org.apache.http.client.params.{CookiePolicy, ClientPNames}
+import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek}
-import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
 import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
-import uk.ac.warwick.tabula.services.{TermServiceComponent, AutowiringTermServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
-import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
-import uk.ac.warwick.util.cache.{CacheEntryUpdateException, SingularCacheEntryFactory, CacheEntryFactory, Caches}
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringUserLookupComponent, TermServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.util.cache.{CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
@@ -96,7 +95,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(Some(celcatConfiguration.authScope, celcatConfiguration.credentials)), maxConnections, maxConnectionsPerRoute) {
-			getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
+			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
 		}
 	}
 
@@ -106,12 +105,12 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 	// a dispatch response handler which reads iCal from the response and parses it into a list of TimetableEvents
 	def handler(config: CelcatDepartmentConfiguration) = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
-		req >> { (is) => combineIdenticalEvents(parseICal(is, config.excludedEventTypes)) }
+		req >> { (is) => combineIdenticalEvents(parseICal(is, config)) }
 	}
 
 	def getTimetableForStudent(universityId: UniversityId): Seq[TimetableEvent] = {
 		userLookup.getUserByWarwickUniId(universityId) match {
-			case FoundUser(u) => configs.get(u.getDepartmentCode.toLowerCase).map { config =>
+			case FoundUser(u) if u.getDepartmentCode.hasText => configs.get(u.getDepartmentCode.toLowerCase).map { config =>
 				doRequest(s"${u.getWarwickId}.ics", config)
 			}.getOrElse(Nil)
 			case _ => Nil
@@ -120,10 +119,10 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 	def getTimetableForStaff(universityId: UniversityId): Seq[TimetableEvent] = {
 		userLookup.getUserByWarwickUniId(universityId) match {
-			case FoundUser(u) => configs.get(u.getDepartmentCode.toLowerCase).map { config =>
+			case FoundUser(u) if u.getDepartmentCode.hasText => configs.get(u.getDepartmentCode.toLowerCase).map { config =>
 				val filename = config.staffFilenameLookupStrategy match {
 					case FilenameGenerationStrategy.Default => s"${u.getWarwickId}.ics"
-					case FilenameGenerationStrategy.BSV => lookupCelcatIDFromBSV(u.getWarwickId, config).map { id => s"${id}.ics" }.getOrElse(s"${u.getWarwickId}.ics")
+					case FilenameGenerationStrategy.BSV => lookupCelcatIDFromBSV(u.getWarwickId, config).map { id => s"$id.ics" }.getOrElse(s"${u.getWarwickId}.ics")
 				}
 
 				doRequest(filename, config)
@@ -139,7 +138,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 			def bsvHandler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 				req >- { _.split('\n').flatMap { _.split("\\|", 4) match {
-					case Array(celcatId, staffId, initials, name) => Some(staffId -> CelcatStaffInfo(celcatId, staffId, initials, name))
+					case Array(celcatId, staffId, initials, name) => Some(staffId -> CelcatStaffInfo(celcatId.trim(), staffId.trim(), initials.trim(), name.trim()))
 					case _ => None
 				}}.toList }
 			}
@@ -168,11 +167,13 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		Caches.newCache("CelcatBSVCache", bsvCacheEntryFactory, 60 * 60 * 24, cacheStrategy)
 
 	def lookupCelcatIDFromBSV(universityId: UniversityId, config: CelcatDepartmentConfiguration) =
-		bsvCache.get(config.baseUri).toMap.get(universityId).map { _.celcatId }
+		staffInfo(config).get(universityId).map { _.celcatId }
+
+	def staffInfo(config: CelcatDepartmentConfiguration) = bsvCache.get(config.baseUri).toMap
 
 	def doRequest(filename: String, config: CelcatDepartmentConfiguration): Seq[TimetableEvent] = {
 		// Add {universityId}.ics to the URL
-		val req = (url(config.baseUri) / filename <<? Map("forcebasic" -> "true"))
+		val req = url(config.baseUri) / filename <<? Map("forcebasic" -> "true")
 
 		// Execute the request
 		// If the status is OK, pass the response to the handler function for turning into TimetableEvents
@@ -193,8 +194,8 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 		groupedEvents.map {
 			case event :: Nil => event
-			case events => {
-				val event = events.head
+			case eventSeq =>
+				val event = eventSeq.head
 				TimetableEvent(
 					event.name,
 					event.title,
@@ -210,16 +211,17 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					event.year
 				)
 				event
-			}
 		}.toList
 	}
 
-	def parseICal(is: InputStream, excludedEventTypes: Seq[TimetableEventType]): Seq[TimetableEvent] = {
+	def parseICal(is: InputStream, config: CelcatDepartmentConfiguration): Seq[TimetableEvent] = {
 		CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING, true)
 		CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_VALIDATION, true)
 
 		val builder = new CalendarBuilder
 		val cal = builder.build(is)
+
+		val allStaff = staffInfo(config)
 
 		cal.getComponents(Component.VEVENT).asScala.collect { case event: VEvent => event }.flatMap { event =>
 			val eventType =
@@ -227,7 +229,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					TimetableEventType(c.getCategories.iterator().next().asInstanceOf[String])
 				}.orNull
 
-			if (excludedEventTypes.contains(eventType)) None
+			if (config.excludedEventTypes.contains(eventType) || eventType.code.toLowerCase().contains("on tabula")) None
 			else {
 				// Convert date/time to academic year, local times and week number
 				val start = toDateTime(event.getStartDate)
@@ -238,8 +240,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 				val day = DayOfWeek(start.getDayOfWeek)
 
-				// Guess the year based on the term start date, not the actual date, to get around the comment in AcademicYear.guessByDate
-				val year = AcademicYear.guessByDate(termService.getTermFromDateIncludingVacations(start).getStartDate)
+				val year = AcademicYear.findAcademicYearContainingDate(start, termService)
 
 				// Convert the date to an academic week number
 				val startWeek = termService.getAcademicWeekForAcademicYear(start, year)
@@ -254,7 +255,21 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 				val weekRange = WeekRange(startWeek, endWeek)
 
 				val summary = Option(event.getSummary).fold("") { _.getValue }
-				val moduleCode = summary.maybeText.collect { case r"([A-Za-z]{2}[0-9]{3})${m}.*" => m.toUpperCase() }
+				val moduleCode = summary.maybeText.collect { case r"([A-Za-z]{2}[0-9][0-9A-Za-z]{2})${m}.*" => m.toUpperCase() }
+
+				val staffIds: Seq[UniversityId] =
+					if (!allStaff.isEmpty)
+						summary.maybeText
+							.collect { case r"^.* - ((?:[^/0-9]+(?: (?:[0-9\\-]+,?)+)?/?)+)${namesOrInitials}" =>
+								namesOrInitials.split('/').toSeq
+									.collect { case r"([^/0-9]+)${nameOrInitial}(?: (?:[0-9\\-]+,?)+)?" => nameOrInitial }
+							}
+							.map { namesOrInitials =>
+								namesOrInitials.flatMap { nameOrInitial => allStaff.values.find { info =>
+									info.fullName == nameOrInitial || info.initials == nameOrInitial
+								}.map { _.universityId }}
+							}.getOrElse(Nil)
+					else Nil
 
 				Some(TimetableEvent(
 					name = summary,
@@ -267,7 +282,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					endTime = end.toLocalTime,
 					location = Option(event.getLocation).flatMap { _.getValue.maybeText },
 					context = moduleCode,
-					staffUniversityIds = Nil,
+					staffUniversityIds = staffIds,
 					year = year
 				))
 			}

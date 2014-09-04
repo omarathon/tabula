@@ -2,6 +2,15 @@
 	<#import "*/group_components.ftl" as components />
 	<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
+	<#if smallGroupSet.linked>
+		<div class="alert alert-block">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			<h4>Allocation linked to ${smallGroupSet.linkedDepartmentSmallGroupSet.name}</h4>
+
+			<p>Changing the allocation on this screen will change the group allocation for any other modules linked to these groups.</p>
+		</div>
+	</#if>
+
 	<#assign mappingById=command.mappingById />
 	<#assign membersById=command.membersById />
 
@@ -150,7 +159,7 @@
 								<div class="span5">
 									<h3 class="smallscreen-only">Groups</h3>
 									<div id="groupslist" class="groups fix-on-scroll">
-										<#list smallGroupSet.groups as group>
+										<#list smallGroupSet.groups?sort_by("name") as group>
 											<#assign existingStudents = mappingById[group.id]![] />
 											<div class="drag-target well clearfix group-${group.id}">
 												<div class="group-header">
@@ -205,7 +214,7 @@
 					<p>You can allocate students to groups using a spreadsheet.</p>
 
 					<ol>
-						<li><strong><a href="allocate/template">Download a template spreadsheet</a></strong>. This will be prefilled with the names and University ID numbers of students you have selected to be in ${smallGroupSet.name}. In Excel you may need to <a href="http://office.microsoft.com/en-gb/excel-help/what-is-protected-view-RZ101665538.aspx?CTT=1&section=7">exit protected view</a> to edit the spreadsheet.
+						<li><strong><a href="<@routes.templatespreadsheet smallGroupSet />">Download a template spreadsheet</a></strong>. This will be prefilled with the names and University ID numbers of students you have selected to be in ${smallGroupSet.name}. In Excel you may need to <a href="http://office.microsoft.com/en-gb/excel-help/what-is-protected-view-RZ101665538.aspx?CTT=1&section=7">exit protected view</a> to edit the spreadsheet.
 						</li>
 						<li><strong>Allocate students</strong> to groups using the dropdown menu in the <strong>Group name</strong> column or by pasting in a list of group names. The group names must match the groups you have already created for ${smallGroupSet.name}. The <strong>group_id</strong> field will be updated with a unique ID number for that group.
 							You can select additional students to be in ${smallGroupSet.name} by entering their University ID numbers in the <strong>student_id</strong> column. Any students with an empty group_id field will be added to the list of students who haven't been allocated to a group.</li>

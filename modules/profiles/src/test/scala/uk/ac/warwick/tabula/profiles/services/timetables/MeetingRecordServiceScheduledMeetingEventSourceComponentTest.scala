@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.services.timetables
 
 import uk.ac.warwick.tabula.{Fixtures, CurrentUser, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.{AbstractMeetingRecord, StudentRelationshipType, StudentRelationship, StudentMember}
-import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEventType}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence, TimetableEventType}
 import org.joda.time.LocalDateTime
 import uk.ac.warwick.tabula.services.{SecurityServiceComponent, SecurityService, MeetingRecordServiceComponent, RelationshipServiceComponent, MeetingRecordService, RelationshipService}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -21,7 +21,7 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 	val meetings = Seq(new AbstractMeetingRecord {
 		relationship = relationships.head
 
-		override def toEventOccurrence = Some(occurrence)
+		override def toEventOccurrence(context: TimetableEvent.Context) = Some(occurrence)
 	})
 
 	val source = new MeetingRecordServiceScheduledMeetingEventSourceComponent
@@ -42,7 +42,7 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 
 	@Test
 	def callsBothServicesAndGeneratesOccurrence(){
-		source.scheduledMeetingEventSource.occurrencesFor(student, user) should be (Seq(occurrence))
+		source.scheduledMeetingEventSource.occurrencesFor(student, user, TimetableEvent.Context.Staff) should be (Seq(occurrence))
 	}
 
 

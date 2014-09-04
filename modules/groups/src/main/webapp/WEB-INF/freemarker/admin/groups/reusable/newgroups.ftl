@@ -3,12 +3,7 @@
 	<h1>Create a set of reusable small groups</h1>
 
 	<@f.form id="newGroups" method="POST" commandName="command" class="form-horizontal">
-		<p class="progress-arrows">
-			<span class="arrow-right">Properties</span>
-			<span class="arrow-right arrow-left">Students</span>
-			<span class="arrow-right arrow-left active">Groups</span>
-			<span class="arrow-right arrow-left use-tooltip" title="Save and allocate students to groups"><button type="submit" class="btn btn-link" name="${ManageDepartmentSmallGroupsMappingParameters.createAndAllocate}">Allocate</button></span>
-		</p>
+		<@components.reusable_set_wizard true 'groups' smallGroupSet />
 
 		<#include "_editGroups.ftl" />
 
@@ -16,9 +11,9 @@
 			<input
 				type="submit"
 				class="btn btn-success use-tooltip"
-				name="${ManageDepartmentSmallGroupsMappingParameters.createAndAllocate}"
-				value="Save and allocate students to groups"
-				title="Allocate students to this set of reusable groups"
+				name="${ManageDepartmentSmallGroupsMappingParameters.createAndAddStudents}"
+				value="Save and add students"
+				title="Select which students are included in these groups"
 				data-container="body"
 				/>
 			<input

@@ -84,7 +84,7 @@ class AddAssignmentsController extends CourseworkController {
 	}
 
 	@ModelAttribute("academicYearChoices") def academicYearChoices: JList[AcademicYear] = {
-		AcademicYear.guessByDate(DateTime.now).yearsSurrounding(0, 1)
+		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
 	}
 
 	@ModelAttribute def cmd(department: Department, user: CurrentUser) = {

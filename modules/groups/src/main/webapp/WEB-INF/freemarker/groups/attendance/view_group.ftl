@@ -30,6 +30,6 @@
 	<@components.singleGroupAttendance group instances studentAttendance attendanceNotes />
 	
 	<#-- List of students modal -->
-	<div id="students-list-modal" class="modal fade">
-	</div>
+	<div id="students-list-modal" class="modal fade"></div>
+	<div id="profile-modal" class="modal fade profile-subset"></div>
 </#escape>

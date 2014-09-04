@@ -16,7 +16,7 @@ trait AvailablePeriods extends MonitoringPointServiceComponent with GroupMonitor
 		val termsWithPoints = groupByTerm(pointSets.flatMap(_.points.asScala), academicYear).keys.toSeq
 		// Get the index in the list of all terms of the current term
 		val thisTerm = {
-			if (academicYear.startYear < AcademicYear.guessByDate(DateTime.now).startYear)
+			if (academicYear.startYear < AcademicYear.findAcademicYearContainingDate(DateTime.now, termService).startYear)
 				TermService.orderedTermNames.last
 			else
 				termService.getTermFromDateIncludingVacations(DateTime.now).getTermTypeAsString

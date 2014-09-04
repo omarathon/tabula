@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Activity, Notification}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
@@ -31,7 +32,8 @@ case class SearchPagination(lastDoc: Int, lastField: Long, token: Long) {
 class NotificationService extends Logging with FreemarkerTextRenderer {
 
 	var dao = Wire[NotificationDao]
-	var index = Wire[NotificationIndexServiceImpl]
+	var index = Wire[NotificationIndexService]
+	var indexManager = Wire[IndexManager]
 
 	def getNotificationById(id: String) = dao.getById(id)
 
@@ -46,8 +48,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 	// update the notifications and rebuild their entries index
 	def update(notifications: Seq[Notification[_,_]], user: User) {
 		notifications.foreach(dao.update)
-		val recipientNotifications = notifications.map(new RecipientNotification(_, user))
-		index.indexItems(recipientNotifications)
+		indexManager.indexNotificationRecipients(notifications, user)
 	}
 
 	def stream(req: ActivityStreamRequest): PagingSearchResultItems[Activity[Any]] = {

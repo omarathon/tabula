@@ -25,6 +25,9 @@ class RecipientNotification(val notification: Notification[_,_], val recipient: 
 trait NotificationIndexService {
 	def indexFrom(startDate: DateTime): Unit
 	def incrementalIndex(): Unit
+	def indexItems(items: TraversableOnce[RecipientNotification])
+
+	def userStream(req: ActivityStreamRequest): PagingSearchResultItems[Notification[_,_]]
 }
 
 trait NotificationQueryMethods { self: NotificationIndexServiceImpl =>

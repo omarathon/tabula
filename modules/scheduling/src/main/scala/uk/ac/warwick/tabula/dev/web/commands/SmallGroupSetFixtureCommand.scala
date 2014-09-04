@@ -34,7 +34,7 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 			groupSet.name = groupSetName
 			groupSet.format = SmallGroupFormat.fromCode(formatName)
 			groupSet.module = module
-			groupSet.academicYear =AcademicYear.findAcademicYearContainingDate(DateTime.now, termService)
+			groupSet.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 			groupSet.allocationMethod = SmallGroupAllocationMethod.fromDatabase(allocationMethodName)
 			if (groupSet.allocationMethod == StudentSignUp ){
 				groupSet.allowSelfGroupSwitching = allowSelfGroupSwitching

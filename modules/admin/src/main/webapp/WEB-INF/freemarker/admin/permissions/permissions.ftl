@@ -8,6 +8,23 @@
 	<#if target.permissionsParents?size gt 0 || target.customRoleDefinitions??>
 		<div class="pull-right">
 			<div>
+				<div class="btn-group">
+					<#if adminLinks?has_content>
+						<#if adminLinks?size = 1>
+							<a class="btn" href="${adminLinks[0].href}">${adminLinks[0].title}</a>
+						<#elseif adminLinks?size gt 1>
+							<button class="btn dropdown-toggle" data-toggle="dropdown">
+								Manage <span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu">
+								<#list adminLinks as link>
+									<li><a href="${link.href}">${link.title}</a></li>
+								</#list>
+							</ul>
+						</#if>
+					</#if>
+				</div>
+
 				<#if target.customRoleDefinitions??>
 					<a class="btn" href="<@routes.customroles target />">
 						<i class="icon-user"></i> Custom roles
@@ -33,7 +50,10 @@
 	</#if>
 
 	<h1 class="with-settings">Permissions</h1>
-	<h5><span class="muted">on</span> ${target.humanReadableId}</h5>
+	<h5>
+		<span class="muted">on</span>
+		${target.humanReadableId}
+	</h5>
 
 	<#-- Alerts -->
 

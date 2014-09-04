@@ -42,6 +42,8 @@ trait SmallGroupService {
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup]
 	def removeFromSmallGroups(moduleRegistration: ModuleRegistration)
 
+	def getSmallGroupSets(department: Department, year: AcademicYear): Seq[SmallGroupSet]
+
 	def findSmallGroupsByStudent(student: User): Seq[SmallGroup]
 	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet]
 
@@ -91,8 +93,12 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def saveOrUpdate(smallGroup: DepartmentSmallGroup) = smallGroupDao.saveOrUpdate(smallGroup)
 	def saveOrUpdate(attendance: SmallGroupEventAttendance) = smallGroupDao.saveOrUpdate(attendance)
 
+	def getSmallGroupSets(department: Department, year: AcademicYear) = smallGroupDao.findSetsByDepartmentAndYear(department, year)
+
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = eventTutorsHelper.findBy(user)
-	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = findSmallGroupEventsByTutor(user).groupBy(_.group).keys.toSeq
+	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = findSmallGroupEventsByTutor(user)
+		.groupBy(_.group).keys.toSeq
+		.filterNot { sg => sg.groupSet.deleted || sg.groupSet.archived }
 
 	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet] = {
 		val autoEnrolled = 

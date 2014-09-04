@@ -33,7 +33,8 @@ trait SmallGroupDao {
 	def saveOrUpdate(note: SmallGroupEventAttendanceNote)
 	def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet)
 	def saveOrUpdate(smallGroup: DepartmentSmallGroup)
-	
+
+	def findSetsByDepartmentAndYear(department: Department, year: AcademicYear): Seq[SmallGroupSet]
 	def findByModuleAndYear(module: Module, year: AcademicYear): Seq[SmallGroup]
 
 	def getSmallGroupEventOccurrence(event: SmallGroupEvent, week: Int): Option[SmallGroupEventOccurrence]
@@ -76,6 +77,16 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 			.add(is("event", event))
 			.add(is("week", week))
 			.uniqueResult
+
+	def findSetsByDepartmentAndYear(department: Department, year: AcademicYear) =
+		session.newCriteria[SmallGroupSet]
+			.createAlias("module", "module")
+			.add(is("module.department", department))
+			.add(is("academicYear", year))
+			.add(is("deleted", false))
+			.addOrder(asc("archived"))
+			.addOrder(asc("name"))
+			.seq
 
 	def findByModuleAndYear(module: Module, year: AcademicYear) =
 		session.newCriteria[SmallGroup]

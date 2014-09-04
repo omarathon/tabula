@@ -20,9 +20,11 @@ object SmallGroupFormat {
 	case object Example extends SmallGroupFormat("example", "Example Class")
 	case object Workshop extends SmallGroupFormat("workshop", "Workshop")
 	case object Lecture extends SmallGroupFormat("lecture", "Lecture")
+	case object Meeting extends SmallGroupFormat("meeting", "Meeting")
+	case object Exam extends SmallGroupFormat("exam", "Exam")
 
 	// lame manual collection. Keep in sync with the case objects above
-	val members = Seq(Seminar, Lab, Tutorial, Project, Example, Workshop, Lecture)
+	val members = Seq(Seminar, Lab, Tutorial, Project, Example, Workshop, Lecture, Exam, Meeting)
 
 	def fromCode(code: String) =
 		if (code == null) null

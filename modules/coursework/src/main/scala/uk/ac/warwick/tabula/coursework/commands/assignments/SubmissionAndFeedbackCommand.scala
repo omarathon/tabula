@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import uk.ac.warwick.tabula.{WorkflowStages, WorkflowStage}
+
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 import org.joda.time.DateTime
@@ -9,20 +11,16 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
 import uk.ac.warwick.tabula.coursework.helpers.{CourseworkFilter, CourseworkFilters}
-import uk.ac.warwick.tabula.coursework.services.{CourseworkWorkflowService, WorkflowStage, WorkflowStages}
+import uk.ac.warwick.tabula.coursework.services.CourseworkWorkflowService
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.{AssignmentMembershipService, UserLookupService, AuditEventIndexService}
+import uk.ac.warwick.tabula.services.{AssignmentMembershipService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.Errors
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.coursework.commands.feedback.ListFeedbackCommand
-import uk.ac.warwick.tabula.helpers.Stopwatches._
 
 class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment) 
 	extends Command[SubmissionAndFeedbackResults] with Unaudited with ReadOnly with SelfValidating {

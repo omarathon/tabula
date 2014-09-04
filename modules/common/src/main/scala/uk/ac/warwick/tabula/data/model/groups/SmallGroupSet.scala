@@ -70,7 +70,7 @@ class SmallGroupSet
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
-	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
+	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 	@NotNull
 	var name: String = _
@@ -117,6 +117,7 @@ class SmallGroupSet
 	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
 	@JoinColumn(name = "set_id")
 	@BatchSize(size=200)
+	@OrderBy("name")
 	var groups: JList[SmallGroup] = JArrayList()
 
 	// A linked departmental small group set; if this is linked, memberships aren't kept here.
@@ -206,6 +207,7 @@ class SmallGroupSet
 	def hasAllocated = groups.asScala exists { !_.students.isEmpty }
 	
 	def permissionsParents = Option(module).toStream
+	override def humanReadableId = name
 
 	def studentsCanSeeTutorName = getBooleanSetting(Settings.StudentsCanSeeTutorNames).getOrElse(false)
 	def studentsCanSeeTutorName_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeTutorNames -> canSee)

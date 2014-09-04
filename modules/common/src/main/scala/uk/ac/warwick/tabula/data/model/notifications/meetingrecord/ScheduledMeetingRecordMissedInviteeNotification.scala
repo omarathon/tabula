@@ -1,8 +1,9 @@
-package uk.ac.warwick.tabula.data.model.notifications
+package uk.ac.warwick.tabula.data.model.notifications.meetingrecord
 
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotification}
 import javax.persistence.{DiscriminatorValue, Entity}
+
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
+import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotification}
 
 @Entity
 @DiscriminatorValue(value="ScheduledMeetingRecordMissedInvitee")
@@ -13,7 +14,7 @@ class ScheduledMeetingRecordMissedInviteeNotification
 	priority = Warning
 	def actionRequired = false
 
-	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/scheduled_meeting_record_missed_invitee_notification.ftl"
+	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_missed_invitee_notification.ftl"
 	def title = s"Scheduled personal tutor meeting did not take place"
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
 		"actor" -> agent,

@@ -58,8 +58,9 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
 	def getRolesFor(user: CurrentUser): Stream[Role] = {
 		if (user.realUser.isLoggedIn) {
 			val members = profileService.getAllMembersWithUserId(user.apparentId, true)
-			if (!members.isEmpty) getRolesForMembers(members)
-			else getRolesForSSO(user)
+
+			if (!members.isEmpty) getRolesForMembers(members) :+ LoggedInRole(user.apparentUser)
+			else getRolesForSSO(user) :+ LoggedInRole(user.apparentUser)
 		} else Stream.empty
 	}
 	

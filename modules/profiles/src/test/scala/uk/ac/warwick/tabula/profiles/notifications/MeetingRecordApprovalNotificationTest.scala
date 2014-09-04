@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.profiles.notifications
 
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.NewMeetingRecordApprovalNotification
 import uk.ac.warwick.tabula.data.model.{Notification, MeetingRecord, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.services.ProfileService
@@ -14,7 +15,6 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import java.io.StringWriter
-import uk.ac.warwick.tabula.data.model.notifications.NewMeetingRecordApprovalNotification
 
 class MeetingRecordApprovalNotificationTest extends TestBase with Mockito with FreemarkerRendering {
 	

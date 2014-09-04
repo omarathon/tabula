@@ -12,7 +12,7 @@ class OriginalityReport extends GeneratedId with ToEntityReference {
 	// Don't cascade as this is the wrong side of the association
 	@OneToOne(optional = false, cascade=Array(), fetch = FetchType.LAZY)
 	@JoinColumn(name="ATTACHMENT_ID")
-    var attachment: FileAttachment = _
+  var attachment: FileAttachment = _
 
 	def completed = similarity map { _ > -1 } getOrElse false
 

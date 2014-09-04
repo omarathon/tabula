@@ -48,7 +48,7 @@ trait ManageMonitoringPointSetState extends CourseAndRouteServiceComponent with 
 	def dept: Department
 	def user: CurrentUser
 	def academicYearOption: Option[AcademicYear]
-	val thisAcademicYear = AcademicYear.guessByDate(new DateTime())
+	val thisAcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
 	val academicYear = academicYearOption.getOrElse(thisAcademicYear)
 	lazy val setsByRouteByAcademicYear = {
 		routesForPermission(user, Permissions.MonitoringPoints.Manage, dept).toSeq.collect{

@@ -41,10 +41,11 @@ class TimetableController extends ProfilesController with TermBasedEventOccurren
 
 	val staffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
 		with SmallGroupEventTimetableEventSourceComponentImpl
-		with ScientiaHttpTimetableFetchingServiceComponent
+		with CombinedHttpTimetableFetchingServiceComponent
 		with AutowiringSmallGroupServiceComponent
 		with AutowiringUserLookupComponent
 		with AutowiringScientiaConfigurationComponent
+		with AutowiringCelcatConfigurationComponent
 		with SystemClockComponent
 		).staffTimetableEventSource
 
@@ -61,11 +62,9 @@ class TimetableController extends ProfilesController with TermBasedEventOccurren
    	): Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState = {
 	  if (timetableHash.hasText) {
 		  profileService.getMemberByTimetableHash(timetableHash).map {
-			  member => member match {
-					case student: StudentMember => PublicStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
-					case staff: StaffMember => PublicStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, user)
-				}
-		  }.getOrElse(throw new ItemNotFoundException)
+				case student: StudentMember => PublicStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
+				case staff: StaffMember => PublicStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, user)
+			}.getOrElse(throw new ItemNotFoundException)
 	  } else {
 		  whoFor match {
 				case student: StudentMember => ViewStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
@@ -77,8 +76,7 @@ class TimetableController extends ProfilesController with TermBasedEventOccurren
 
 	@RequestMapping(value = Array("/ical"))
 	def getIcalFeed(@ModelAttribute("command") command: Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState): Mav = {
-		// Guess the year based on the term start date, not the actual date, to get around the comment in AcademicYear.guessByDate
-		val year = AcademicYear.guessByDate(termService.getTermFromDateIncludingVacations(DateTime.now).getStartDate)
+		val year = AcademicYear.findAcademicYearContainingDate(DateTime.now, termService)
 
 		// Start from either 1 week ago, or the start of the current academic year, whichever is earlier
 		val start = {

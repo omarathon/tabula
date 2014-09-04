@@ -589,7 +589,11 @@
 			else $icon.addClass('icon-fixed-width icon-chevron-right');
 
 			var $title = $section.find('.section-title');
-			$title.prepend(' ').prepend($icon);
+			if ($title.find('.icon-container').length) {
+				$title.find('.icon-container').first().prepend(' ').prepend($icon);
+			} else {
+				$title.prepend(' ').prepend($icon);
+			}
 
 			var populateContent = function(onComplete) { onComplete(); }
 			if ($section.data('populate') && $section.data('href')) {
@@ -670,6 +674,11 @@
 			$title.css('cursor', 'pointer').on('click', function(e) {
 				// Ignore clicks where we are clearing a dropdown
 				if ($(this).parent().find('.dropdown-menu').is(':visible')) {
+					return;
+				}
+
+				if ($(e.target).is('a, button') || $(e.target).closest('a, button').length) {
+					// Ignore if we're clicking a button
 					return;
 				}
 
@@ -1099,9 +1108,9 @@
 						, state = $f.find(".attendance-note-success").data('state');
 					var link = $(linkId).attr('data-original-title', state + ' attendance note');
 					if (state === 'Edit') {
-						link.find('i').removeClass('icon-edit').addClass('icon-edit-sign');
+						link.addClass('edit');
 					} else {
-						link.find('i').removeClass('icon-edit-sign').addClass('icon-edit');
+						link.removeClass('edit');
 					}
 					$m.modal("hide");
 				} else {

@@ -13,7 +13,8 @@
 	<context:component-scan base-package="uk.ac.warwick.tabula.coursework.jobs" />
 	
 	<context:component-scan base-package="uk.ac.warwick.tabula.profiles.services" />
-	<context:component-scan base-package="uk.ac.warwick.tabula.profiles.jobs" />
+
+	<bean class="uk.ac.warwick.tabula.scheduling.IndexManagerMessageListener" />
 	
 	<beans profile="dev">
 		<context:component-scan base-package="uk.ac.warwick.tabula.dev.web.controllers" />

@@ -25,7 +25,7 @@ class ListAllExtensionsCommand(val department: Department)
 	var userLookup = Wire[UserLookupService]
 
 	def applyInternal(): Seq[ExtensionGraph] = {
-		val year = AcademicYear.guessByDate(new DateTime())
+		val year = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
 
 		// get all extensions for assignments in modules in the department for the current year
 		assignmentDao.getAssignments(department, year)

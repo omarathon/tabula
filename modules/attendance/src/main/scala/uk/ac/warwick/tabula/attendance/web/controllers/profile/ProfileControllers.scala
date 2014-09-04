@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.attendance.web.controllers.profile
 
 import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
@@ -11,15 +12,18 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.services.TermService
 
 @Controller
 @RequestMapping(value = Array("/profile"))
 class ProfileHomeController extends AttendanceController {
 
+	@Autowired var termServce: TermService = _
+
 	@RequestMapping
 	def render() = user.profile match {
 		case Some(student: StudentMember) =>
-			Redirect(Routes.Profile.profileForYear(student, AcademicYear.guessByDate(DateTime.now)))
+			Redirect(Routes.Profile.profileForYear(student, AcademicYear.findAcademicYearContainingDate(DateTime.now, termServce)))
 		case _ if user.isStaff =>
 			Mav("profile/staff").noLayoutIf(ajax)
 		case _ =>

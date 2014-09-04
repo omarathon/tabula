@@ -69,6 +69,10 @@
 							<span class="help-block">
 								If you feel that a mark or grade other than the mark given is more appropriate you can include
 								it here.
+								<br />
+								The first marker, ${firstMarkerFeedback.markerUser.fullName}
+								(<i class="icon-envelope-alt"></i> <a href="mailto:${firstMarkerFeedback.markerUser.email}">${firstMarkerFeedback.markerUser.email}</a>),
+								will be notified of the rejection.
 							</span>
 						</div>
 					</div>

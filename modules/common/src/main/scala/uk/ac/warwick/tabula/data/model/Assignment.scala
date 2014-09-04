@@ -93,7 +93,7 @@ class Assignment
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
-	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
+	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.StringListUserType")
 	var fileExtensions: Seq[String] = _
@@ -317,9 +317,11 @@ class Assignment
 	def isLate(submission: Submission) =
 		!openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.universityId, submission.userId, submission.submittedDate)
 
-	def submissionDeadline(user: User) =
+	def submissionDeadline(user: User): DateTime = submissionDeadline(user.getWarwickId, user.getUserId)
+
+	def submissionDeadline(universityId: String, usercode: String): DateTime =
 		if (openEnded) null
-		else extensions.find(e => e.isForUser(user) && e.approved).fold(closeDate)(_.expiryDate)
+		else extensions.find(e => e.isForUser(universityId, usercode) && e.approved).fold(closeDate)(_.expiryDate)
 
 	/**
 	 * Deadline taking into account any approved extension
@@ -342,6 +344,20 @@ class Assignment
 			if (lateDay.isBefore(submission.submittedDate.toLocalDate)) daysLate + 1
 			else daysLate
 		} else 0
+
+	def workingDaysLateIfSubmittedNow(universityId: String, usercode: String): Int = {
+		val deadline = submissionDeadline(universityId, usercode)
+
+		val offset =
+			if (deadline.toLocalTime.isAfter(DateTime.now.toLocalTime)) -1
+			else 0
+
+		val daysLate = workingDaysHelper.getNumWorkingDays(deadline.toLocalDate, DateTime.now.toLocalDate) + offset
+		val lateDay = workingDaysHelper.datePlusWorkingDays(deadline.toLocalDate, daysLate)
+
+		if (lateDay.isBefore(DateTime.now.toLocalDate)) daysLate + 1
+		else daysLate
+	}
 
 	/**
 	 * retrospectively checks if a submission was an 'authorised late'
@@ -385,7 +401,7 @@ class Assignment
 		if (field.context == null) throw new IllegalArgumentException("Field with name " + field.name + " has no context specified")
 		if (fields.exists(_.name == field.name)) throw new IllegalArgumentException("Field with name " + field.name + " already exists")
 		field.assignment = this
-		field.position = fields.filter(_.context == field.context).length
+		field.position = fields.count(_.context == field.context)
 		fields.add(field)
 	}
 
@@ -484,8 +500,8 @@ class Assignment
 
 	// Help views decide whether to show a publish button.
 	def canPublishFeedback: Boolean =
-		!fullFeedback.isEmpty &&
-			!unreleasedFeedback.isEmpty &&
+		fullFeedback.nonEmpty &&
+			unreleasedFeedback.nonEmpty &&
 			(closeDate.isBeforeNow || openEnded)
 
 	def canSubmit(user: User): Boolean = {
@@ -685,11 +701,11 @@ case class SubmissionsReport(assignment: Assignment) {
 
 	def hasProblems: Boolean = {
 		val shouldBeEmpty = Set(feedbackOnly, submissionOnly, plagiarised)
-		val problems = assignment.collectSubmissions && shouldBeEmpty.exists { !_.isEmpty }
+		val problems = assignment.collectSubmissions && shouldBeEmpty.exists { _.nonEmpty }
 
 		if (assignment.collectMarks) {
 			val shouldBeEmptyWhenCollectingMarks = Set(withoutAttachments, withoutMarks)
-			problems || shouldBeEmptyWhenCollectingMarks.exists { !_.isEmpty }
+			problems || shouldBeEmptyWhenCollectingMarks.exists { _.nonEmpty }
 		} else {
 		    problems
 		}

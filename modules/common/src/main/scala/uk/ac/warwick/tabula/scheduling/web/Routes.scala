@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.scheduling.web
 
+import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
@@ -11,4 +12,9 @@ import uk.ac.warwick.tabula.web.RoutesUtils
 object Routes {
 	import RoutesUtils._
 	private val context = "/scheduling"
+
+	object jobs {
+		def list = context + "/sysadmin/jobs/list"
+		def status(instance: JobInstance) = context + "/sysadmin/jobs/job-status?id=%s" format encoded(instance.id)
+	}
 }

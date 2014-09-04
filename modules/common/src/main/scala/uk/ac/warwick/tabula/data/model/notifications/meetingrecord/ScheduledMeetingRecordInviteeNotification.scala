@@ -1,7 +1,8 @@
-package uk.ac.warwick.tabula.data.model.notifications
+package uk.ac.warwick.tabula.data.model.notifications.meetingrecord
+
+import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotification}
-import javax.persistence.{DiscriminatorValue, Entity}
 
 @Entity
 @DiscriminatorValue(value="ScheduledMeetingRecordInvitee")
@@ -13,7 +14,7 @@ class ScheduledMeetingRecordInviteeNotification
 		verbSetting.value = theVerb
 	}
 
-	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/scheduled_meeting_record_invitee_notification.ftl"
+	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_invitee_notification.ftl"
 	def title = s"Meeting $verb"
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
 		"actor" -> agent,

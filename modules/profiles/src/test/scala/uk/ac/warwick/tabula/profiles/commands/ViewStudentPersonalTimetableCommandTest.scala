@@ -33,7 +33,7 @@ class ViewStudentPersonalTimetableCommandTest extends TestBase with Mockito{
 	command.start=  new LocalDate
 	command.end = command.start.plusDays(2)
 	studentTimetableEventSource.eventsFor(testStudent) returns timetableEvents
-	scheduledMeetingEventSource.occurrencesFor(testStudent, user) returns meetingOccurrences
+	scheduledMeetingEventSource.occurrencesFor(testStudent, user, TimetableEvent.Context.Student) returns meetingOccurrences
 	command.eventOccurrenceService.fromTimetableEvent(any[TimetableEvent], any[Interval]) returns eventOccurences
 
 	@Test

@@ -10,7 +10,7 @@ import org.scalatest.matchers.ShouldMatchers
 import uk.ac.warwick.tabula.EventuallyAjax
 
 
-class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:WebDriver) extends Page with WebBrowser with	BreadcrumbsMatcher with EventuallyAjax with ShouldMatchers  with ModuleAndGroupSetList {
+class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:WebDriver) extends Page with WebBrowser with	BreadcrumbsMatcher with EventuallyAjax with ShouldMatchers  with GroupSetList {
 
 	val url = FunctionalTestProperties.SiteRoot + "/groups/admin/department/" + departmentCode
 
@@ -34,13 +34,12 @@ class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:W
 class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: String)(implicit webDriver: WebDriver) extends Eventually with ShouldMatchers {
 
 	val groupsetId = {
-		val classes = underlying.getAttribute("class").split(" ")
-		classes.find(_.startsWith("groupset-")).get.replaceFirst("groupset-","")
+		underlying.getAttribute("id").replaceFirst("set-","")
 	}
 
 	def goToEditProperties: EditSmallGroupSetPropertiesPage = {
 		underlying.findElement(By.partialLinkText("Actions")).click()
-		val editGroupset = underlying.findElement(By.partialLinkText("Edit properties"))
+		val editGroupset = underlying.findElement(By.partialLinkText("Edit"))
 		eventually {
 			editGroupset.isDisplayed should be (true)
 		}
@@ -62,13 +61,30 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 		groupsPage
 	}
 
+	def goToEditStudents: EditSmallGroupSetStudentsPage = {
+		val groupsPage = goToEditGroups
+		groupsPage.submitAndAddStudents()
+
+		val studentsPage = new EditSmallGroupSetStudentsPage()
+		// HACK: the module name is the module code in uppercase in the test data. Should really pass it around separately
+		studentsPage.isCurrentPage(moduleCode.toUpperCase)
+		studentsPage
+	}
+
+	def goToEditEvents: EditSmallGroupSetEventsPage = {
+		val studentsPage = goToEditStudents
+		studentsPage.submitAndAddEvents()
+
+		val eventsPage = new EditSmallGroupSetEventsPage()
+		// HACK: the module name is the module code in uppercase in the test data. Should really pass it around separately
+		eventsPage.isCurrentPage(moduleCode.toUpperCase)
+		eventsPage
+	}
+
 	def goToAllocate = {
-		underlying.findElement(By.partialLinkText("Actions")).click()
-		val allocate = underlying.findElement(By.partialLinkText("Allocate students"))
-		eventually {
-			allocate.isDisplayed should be(true)
-		}
-		allocate.click()
+		val eventsPage = goToEditEvents
+		eventsPage.submitAndAllocate()
+
 		val allocatePage = new AllocateStudentsToGroupsPage()
 		allocatePage.isCurrentPage(moduleCode.toUpperCase())
 		allocatePage
@@ -82,6 +98,14 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 	def getOpenButton() = {
 		underlying.findElement(By.partialLinkText("Actions")).click()
 		underlying.findElement(By.partialLinkText("Open"))
+	}
+}
+
+class ModuleGroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: String)(implicit webDriver: WebDriver) extends Eventually with ShouldMatchers {
+
+	val groupsetId = {
+		val classes = underlying.getAttribute("class").split(" ")
+		classes.find(_.startsWith("groupset-")).get.replaceFirst("groupset-","")
 	}
 
 	def getSignupButton() = {
@@ -115,7 +139,7 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 
 	def findSelectGroupCheckboxFor(groupName:String ) = {
 		val groupNameHeading = underlying.findElements(By.tagName("h4")).asScala.filter(e=>e.getText.trim.startsWith(groupName + " ")).head
-    // ugh. Might be worth investigating ways of using JQuery selector/traversals in selenium instead of this horror:
+		// ugh. Might be worth investigating ways of using JQuery selector/traversals in selenium instead of this horror:
 		groupNameHeading.findElement(By.xpath("../../div[contains(@class,'pull-left')]/input"))
 	}
 }
@@ -137,29 +161,52 @@ class BatchOpenPage(val departmentCode: String)(implicit webDriver: WebDriver) e
 	}
 }
 
-trait ModuleAndGroupSetList {
+trait GroupSetList {
 	this: WebBrowser with EventuallyAjax with ShouldMatchers =>
-	private def getModuleInfo(moduleCode: String)(implicit webdriver:WebDriver): Option[WebElement] = {
-		val moduleInfoElements = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == moduleCode.toUpperCase)
-		if (moduleInfoElements.isEmpty) {
+
+	def getGroupsetInfo(moduleCode: String, groupsetName: String)(implicit webdriver:WebDriver): Option[GroupSetInfoSummarySection] = {
+		val setInfoElements = findAll(className("set-info")).filter(_.underlying.findElement(By.className("colour-h6")).getText.trim == groupsetName)
+		if (setInfoElements.isEmpty) {
 			None
 		}	else {
-			Some(moduleInfoElements.next().underlying)
+			Some(setInfoElements.next().underlying).map { section =>
+				if (section.getAttribute("class").indexOf("collapsible") != -1 && section.getAttribute("class").indexOf("expanded") == -1) {
+					click on section.findElement(By.className("section-title"))
+
+					eventuallyAjax {
+						section.getAttribute("class") should include ("expanded")
+					}
+				}
+
+				new GroupSetInfoSummarySection(section, moduleCode)
+			}
+		}
+	}
+}
+
+trait ModuleAndGroupSetList {
+	this: WebBrowser with EventuallyAjax with ShouldMatchers =>
+
+	def getGroupsetInfo(moduleCode: String, groupsetName: String)(implicit webdriver: WebDriver): Option[ModuleGroupSetInfoSummarySection] = {
+		getModuleInfo(moduleCode).flatMap { module =>
+			if (module.getAttribute("class").indexOf("collapsible") != -1 && module.getAttribute("class").indexOf("expanded") == -1) {
+				click on module.findElement(By.className("section-title"))
+				eventuallyAjax {
+					module.getAttribute("class") should include("expanded")
+				}
+			}
+
+			val groupSet = module.findElements(By.className("item-info")).asScala.find(_.findElement(By.className("name")).getText.trim == groupsetName)
+			groupSet.map { new ModuleGroupSetInfoSummarySection(_, moduleCode) }
 		}
 	}
 
-	def getGroupsetInfo(moduleCode: String, groupsetName: String)(implicit webdriver:WebDriver): Option[GroupSetInfoSummarySection] = {
-		getModuleInfo(moduleCode).flatMap { module => 
-			if (module.getAttribute("class").indexOf("collapsible") != -1 && module.getAttribute("class").indexOf("expanded") == -1) {
-				click on module.findElement(By.className("section-title"))
-				
-				eventuallyAjax {
-					module.getAttribute("class") should include ("expanded")
-				}
-			}
-			
-			val groupSet = module.findElements(By.className("item-info")).asScala.find(_.findElement(By.className("name")).getText.trim == groupsetName)
-			groupSet.map { new GroupSetInfoSummarySection(_, moduleCode) }
+	private def getModuleInfo(moduleCode: String)(implicit webdriver: WebDriver): Option[WebElement] = {
+		val moduleInfoElements = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == moduleCode.toUpperCase)
+		if (moduleInfoElements.isEmpty) {
+			None
+		} else {
+			Some(moduleInfoElements.next().underlying)
 		}
 	}
 }

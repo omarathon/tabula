@@ -19,12 +19,7 @@
 	<input type="hidden" name="filterQueryString" value="${findCommand.serializeFilter}" />
 	<@listStudentIdInputs />
 
-	<p class="progress-arrows">
-		<span class="arrow-right">Properties</span>
-		<span class="arrow-right arrow-left active">Students</span>
-		<span class="arrow-right arrow-left use-tooltip" title="Save and edit groups"><button type="submit" class="btn btn-link" name="${ManageDepartmentSmallGroupsMappingParameters.createAndAddGroups}">Groups</button></span>
-		<span class="arrow-right arrow-left use-tooltip" title="Save and allocate students to groups"><button type="submit" class="btn btn-link" name="${ManageDepartmentSmallGroupsMappingParameters.createAndAllocate}">Allocate</button></span>
-	</p>
+	<@components.reusable_set_wizard true 'students' smallGroupSet />
 
 	<div class="fix-area">
 		<#include "_selectStudents.ftl" />
@@ -51,10 +46,10 @@
 
 			<input
 				type="submit"
-				class="btn btn-success use-tooltip spinnable spinner-auto"
-				name="${ManageDepartmentSmallGroupsMappingParameters.createAndAddGroups}"
-				value="Save and add groups"
-				title="Add groups to this set of reusable groups"
+				class="btn btn-success use-tooltip"
+				name="${ManageDepartmentSmallGroupsMappingParameters.createAndAllocate}"
+				value="Save and allocate students to groups"
+				title="Allocate students to this set of reusable groups"
 				data-container="body"
 				/>
 			<input

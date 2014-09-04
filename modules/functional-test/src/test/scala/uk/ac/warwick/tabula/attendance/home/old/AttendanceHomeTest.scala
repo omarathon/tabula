@@ -9,15 +9,14 @@ class AttendanceHomeTest extends AttendanceFixture with GivenWhenThen{
 	val year = FunctionalTestAcademicYear.current.startYear
 
 	"A student" should "see monitoring points for the current year" in {
-
 		Given("I am logged in as Student1")
 		signIn as P.Student1 to Path("/")
 
 		When("I go to /attendance")
 		go to Path("/attendance")
 
-		Then("I am redirected to /attendance/{P.Student1.warwickId}/2014")
-		eventually(currentUrl should include(s"/attendance/profile/${P.Student1.warwickId}/2014"))
+		Then(s"I am redirected to /attendance/${P.Student1.warwickId}/${year}")
+		eventually(currentUrl should include(s"/attendance/profile/${P.Student1.warwickId}/${year}"))
 		pageSource should include("My Monitoring Points")
 	}
 

@@ -54,7 +54,7 @@ exports.wireButtons = function(id) {
 };
 
 var setArgOnUrl = function(url, argName, argValue){
-	if(url.indexOf('?') === 0) {
+	if(url.indexOf('?') === -1) {
 		return url + '?' + argName + '=' + argValue;
 	} else {
 		var args = url.substring(url.indexOf('?') + 1, url.length).split('&'),
@@ -151,14 +151,23 @@ $(function(){
 	}).end().find('a.meetings').on('click', function(e){
         e.preventDefault();
         $.get($(this).attr('href'), function(data){
-            $('#modal .modal-body').html(data);
-            $('#modal').modal("show");
+            $('#meetings-modal .modal-body').html(data);
+            $('#meetings-modal').modal("show");
             $('.use-popover').tabulaPopover({
                 trigger: 'click',
                 container: '#container'
             });
         });
-    });
+    }).end().find('a.small-groups').on('click', function(e){
+		e.preventDefault();
+		$.get($(this).attr('href'), function(data){
+			$('#small-groups-modal').html(data).modal("show");
+			$('.use-popover').tabulaPopover({
+				trigger: 'click',
+				container: '#container'
+			});
+		});
+	});
 
     $('.agent-search').find('input').on('keyup', function(){
         var rows = $('table.agents tbody tr'), query = $(this).val().toLowerCase();

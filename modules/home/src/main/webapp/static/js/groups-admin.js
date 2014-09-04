@@ -10,7 +10,7 @@ exports.zebraStripeGroups = function($module) {
 };
 
 exports.wireModalButtons = function($container) {
-	$container.find('.btn-group').on('click', 'a[data-toggle=modal]', function(e){
+	$container.on('click', 'a[data-toggle=modal]', function(e){
       e.preventDefault();
       var $this = $(this);
       var target = $this.attr('data-target');
@@ -293,7 +293,7 @@ $(function() {
 		};
 
 		var updateClearAllButton = function($el) {
-			var $filterList = $el.closest(".student-filter");
+			var $filterList = $el.closest(".student-filter, .small-groups-filter");
 
 			if ($filterList.find(".empty-filter").length == $filterList.find(".btn-group").length) {
 				$('.clear-all-filters').attr("disabled", "disabled");
@@ -303,7 +303,7 @@ $(function() {
 		};
 
 		var updateSearchButton = function($el) {
-			var $filter = $el.closest('.student-filter');
+			var $filter = $el.closest('.student-filter, .small-groups-filter');
 			if ($filter.find('input:checked').length > 0) {
 				$filter.find('button.search').attr('disabled', false);
 			} else {
@@ -311,7 +311,7 @@ $(function() {
 			}
 		};
 
-		$('.student-filter input').on('change', function() {
+		$('.student-filter input, .small-groups-filter input').on('change', function() {
 			// Load the new results
 			var $checkbox = $(this);
 			updateFilter($checkbox);

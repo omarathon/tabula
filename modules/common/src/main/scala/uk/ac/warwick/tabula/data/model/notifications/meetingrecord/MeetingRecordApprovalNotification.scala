@@ -1,9 +1,10 @@
-package uk.ac.warwick.tabula.data.model.notifications
+package uk.ac.warwick.tabula.data.model.notifications.meetingrecord
 
-import uk.ac.warwick.tabula.data.model.{SingleItemNotification, StudentRelationship, NotificationWithTarget, FreemarkerModel, MeetingRecord}
-import javax.persistence.{Entity, DiscriminatorValue}
-import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Warning}
+import javax.persistence.{DiscriminatorValue, Entity}
+
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Warning}
+import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MeetingRecord, NotificationWithTarget, SingleItemNotification, StudentRelationship}
 
 abstract class MeetingRecordApprovalNotification(val verb: String)
 	extends NotificationWithTarget[MeetingRecord, StudentRelationship]
@@ -22,17 +23,17 @@ abstract class MeetingRecordApprovalNotification(val verb: String)
 	def meeting = item.entity
 	def relationship = target.entity
 
-	def title = "Meeting record approval required"
+	def title = s"${agentRole.capitalize} meeting needs review"
 	def actionRequired = true
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
-		"actor" -> agent,
-		"role"->agentRole,
+		"actor" -> meeting.creator.asSsoUser,
+		"role"-> agentRole,
 		"dateFormatter" -> dateOnlyFormatter,
 		"verbed" ->  (if (verb == "create") "created" else "edited"),
 		"meetingRecord" -> meeting
 	))
 	def recipients = meeting.pendingApprovers.map(_.asSsoUser)
-	def urlTitle = "approve or reject the meeting record"
+	def urlTitle = "review the meeting record"
 
 }
 

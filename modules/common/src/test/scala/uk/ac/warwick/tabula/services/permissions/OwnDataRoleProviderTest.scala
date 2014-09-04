@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services.permissions
 
 import uk.ac.warwick.tabula.{CurrentUser, TestBase, Fixtures}
-import uk.ac.warwick.tabula.roles.{NotificationRecepient, Submitter, FeedbackRecipient, SettingsOwner}
+import uk.ac.warwick.tabula.roles.{Submitter, FeedbackRecipient, SettingsOwner}
 
 class OwnDataRoleProviderTest extends TestBase {
 	
@@ -32,11 +32,6 @@ class OwnDataRoleProviderTest extends TestBase {
 		provider.getRolesFor(currentUser, feedback) should be (Seq(FeedbackRecipient(feedback)))
 		
 		provider.getRolesFor(currentUser, Fixtures.feedback()) should be (Seq())
-	}
-
-	@Test def forNotifications = withCurrentUser(new CurrentUser(user,user)) {
-		provider.getRolesFor(currentUser, notification) should be (Seq(NotificationRecepient(notification)))
-		provider.getRolesFor(currentUser, notification2) should be (Seq())
 	}
 	
 	@Test def forSettings = withUser("cuscav", "0123456") {

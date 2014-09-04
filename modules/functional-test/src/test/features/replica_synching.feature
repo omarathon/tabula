@@ -6,7 +6,7 @@ Feature: Replica Synching
   	When I request https://HOST/scheduling/sync/listFiles.json?start=1902016056220
   	Then the status code should be 200
   	And the Content-Type response header should be "application/json;charset=UTF-8"
-  	And the Content-Length response header should be "84"
+  	And the Content-Length response header should be "86"
   	And the response body should include the text '"createdSince":1902016056220'
   	And the response body should include the text '"files":[]'
   	

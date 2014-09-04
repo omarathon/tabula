@@ -46,14 +46,6 @@ class OwnDataRoleProvider extends RoleProvider {
 					Stream(customRoleFor(department)(SettingsOwnerRoleDefinition, settings).getOrElse(SettingsOwner(settings)))
 				else Stream.empty
 
-			// You can modify properties of your own notifications
-			case notification : Notification[_,_] => {
-				if (user.apparentId.hasText && notification.recipients.contains(user.apparentUser))
-					Stream(customRoleFor(department)(NotificationRecepientRoleDefinition, notification)
-						.getOrElse(NotificationRecepient(notification)))
-				else Stream.empty
-			}
-
 			// You can view small groups that you are a member of
 			case smallGroup: SmallGroup => {
 				val studentId = user.apparentUser.getWarwickId

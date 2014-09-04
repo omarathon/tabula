@@ -1,10 +1,13 @@
-<#macro lateness submission=""><#compress>
+<#macro lateness submission="" assignment="" user=""><#compress>
 	<#if submission?has_content && submission.submittedDate?? && (submission.late || submission.authorisedLate)>
 		<#if submission.late>
 			<@fmt.p submission.workingDaysLate "working day" /> late, ${durationFormatter(submission.deadline, submission.submittedDate)} after deadline
 		<#else>
 			${durationFormatter(submission.assignment.closeDate, submission.submittedDate)} after close
 		</#if>
+	<#elseif assignment?has_content && user?has_content>
+		<#local lateness = assignment.workingDaysLateIfSubmittedNow(user.universityId, user.userId) />
+		<@fmt.p lateness "working day" /> overdue, the deadline/extention was ${durationFormatter(assignment.submissionDeadline(user.universityId, user.userId))}
 	</#if>
 </#compress></#macro>
 

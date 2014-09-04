@@ -1,42 +1,53 @@
 package uk.ac.warwick.tabula.groups.controllers
 
-import uk.ac.warwick.tabula.{Mockito, CurrentUser, TestBase}
-import uk.ac.warwick.tabula.groups.web.controllers.admin.{AdminDepartmentHomeController}
-import uk.ac.warwick.tabula.data.model.{Module, Department}
-import uk.ac.warwick.tabula.groups.SmallGroupFixture
+import org.joda.time.DateTime
+import org.joda.time.base.BaseDateTime
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewModules
+import uk.ac.warwick.tabula.groups.SmallGroupFixture
+import uk.ac.warwick.tabula.groups.commands.admin.{AdminSmallGroupsHomeCommandState, AdminSmallGroupsHomeInformation}
+import uk.ac.warwick.tabula.groups.web.controllers.admin.AdminDepartmentHomeController
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewSetWithProgress
+import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget}
+import uk.ac.warwick.tabula.services.{TermService, SecurityService}
+import uk.ac.warwick.tabula._
+
+import scala.collection.immutable.ListMap
 
 class AdminDepartmentHomeControllerTest extends TestBase with Mockito{
-
 
   def createController = {
     val controller = new AdminDepartmentHomeController()
     controller.securityService = mock[SecurityService]
-    when(controller.securityService.can(any[CurrentUser], any[Permission], any[PermissionsTarget])).thenReturn(true)
+		controller.termService = mock[TermService]
+    when(controller.securityService.can(any[CurrentUser], any[Permission], any[PermissionsTarget])).thenReturn{true}
+		when(controller.termService.getAcademicWeeksForYear(any[BaseDateTime])).thenReturn(Nil)
     controller
   }
+
   @Test
   def reportsWhenNotAllGroupsetsAreReleased(){new SmallGroupFixture {
-    withUser("test"){
-
+    withUser("test") {
       groupSet1.releasedToStudents = true
       groupSet1.releasedToTutors = false
 
-      val cmd = mock[Appliable[Seq[Module]]]
-      when(cmd.apply()).thenReturn(Seq(groupSet1.module))
-      val mav = createController.adminDepartment(cmd,department, currentUser)
-      mav.map.get("data") match{
-        case Some(v:ViewModules) => v.hasUnreleasedGroupsets should be(true)
+      val cmd = new Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState {
+				val department = Fixtures.department("in")
+				def user = NoCurrentUser()
+				def academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+
+				def apply = {
+					AdminSmallGroupsHomeInformation(false, Seq(groupSet1.module), Seq(ViewSetWithProgress(groupSet1, Nil, GroupsViewModel.Tutor, null, None, ListMap())), Nil)
+				}
+			}
+
+      val mav = createController.adminDepartment(cmd, department, currentUser)
+      mav.map.get("hasUnreleasedGroupsets") match{
+        case Some(v: Boolean) => v should be {true}
         case _ => fail()
       }
     }}
-
-
   }
 
   @Test
@@ -46,11 +57,19 @@ class AdminDepartmentHomeControllerTest extends TestBase with Mockito{
       groupSet1.releasedToStudents = true
       groupSet1.releasedToTutors = true
 
-      val cmd = mock[Appliable[Seq[Module]]]
-      when(cmd.apply()).thenReturn(Seq(groupSet1.module))
+      val cmd = new Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState {
+				val department = Fixtures.department("in")
+				def user = NoCurrentUser()
+				def academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+
+				def apply = {
+					AdminSmallGroupsHomeInformation(false, Seq(groupSet1.module), Seq(ViewSetWithProgress(groupSet1, Nil, GroupsViewModel.Tutor, null, None, ListMap())), Nil)
+				}
+			}
+
       val mav = createController.adminDepartment(cmd, department, currentUser)
-      mav.map.get("data") match{
-        case Some(v:ViewModules) => v.hasUnreleasedGroupsets should be(false)
+      mav.map.get("hasUnreleasedGroupsets") match {
+        case Some(v: Boolean) => v should be {false}
         case _ => fail()
       }
 

@@ -16,6 +16,7 @@ import net.fortuna.ical4j.model.property.Location
 import net.fortuna.ical4j.model.property.Organizer
 import net.fortuna.ical4j.model.parameter.Cn
 import org.apache.commons.codec.digest.DigestUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait EventOccurrenceService{
 	def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence]
@@ -30,27 +31,7 @@ trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
 
 	val eventOccurrenceService: EventOccurrenceService = new TermBasedEventOccurrenceService
 
-	class TermBasedEventOccurrenceService extends EventOccurrenceService{
-
-		//TODO move this into [VacactionAware]TermFactory/Service/whatever it's called now.
-		/**
-		 * Find the academic year that contains a given date. There ought to be a simpler
-		 * way to do this, probably by adding a method to VacationAwareTermFactory to walk through
-		 * the terms looking for the first one that's after the specified date, then back-tracking to the previous
-		 * one.
-		 */
-		def getAcademicYearContainingDate(date:DateTime):AcademicYear={
-			val termContainingIntervalStart = termService.getTermFromDateIncludingVacations(date)
-			def findAutumnTermForTerm(term:Term):Term = {
-				term.getTermType match {
-					case TermType.autumn=>term
-					case _ =>findAutumnTermForTerm(termService.getPreviousTerm(term))
-				}
-			}
-			val firstWeekOfYear = findAutumnTermForTerm(termContainingIntervalStart).getStartDate
-			AcademicYear(firstWeekOfYear.getYear)
-		}
-
+	class TermBasedEventOccurrenceService extends EventOccurrenceService {
 
 		def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence] = {
 
@@ -92,7 +73,7 @@ trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
 			if (eventOccurrence.start.toDateTime.isEqual(end)) {
 				end = end.plusMinutes(1)
 			}
-			val event: VEvent = new VEvent(toDateTime(eventOccurrence.start.toDateTime), toDateTime(end.toDateTime), eventOccurrence.name)
+			val event: VEvent = new VEvent(toDateTime(eventOccurrence.start.toDateTime), toDateTime(end.toDateTime), eventOccurrence.title.maybeText.getOrElse(eventOccurrence.name))
 			event.getProperties.getProperty(Property.DTSTART).getParameters.add(Value.DATE_TIME)
 			event.getProperties.getProperty(Property.DTEND).getParameters.add(Value.DATE_TIME)
 
@@ -112,7 +93,7 @@ trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
 				universityId =>
 				profileService.getMemberByUniversityId(universityId, disableFilter = true).map {
 					staffMember =>
-						val organiser: Organizer = new Organizer
+						val organiser: Organizer = new Organizer(s"MAILTO:${staffMember.email}")
 						organiser.getParameters.add(new Cn(staffMember.fullName.getOrElse("unknown")))
 						event.getProperties.add(organiser)
 				}
