@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.ScheduledMeetingRecordInviteeNotification
-import uk.ac.warwick.tabula.data.model.{Notification, FileAttachment, MeetingFormat, ScheduledMeetingRecord, StudentRelationship, Member}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -22,7 +22,7 @@ object CreateScheduledMeetingRecordCommand {
 			with AutowiringMeetingRecordServiceComponent
 			with CreateScheduledMeetingRecordCommandValidation
 			with CreateScheduledMeetingRecordNotification
-			with ModifyScheduledMeetingRecordNotifications
+			with CreateScheduledMeetingRecordNotifications
 }
 
 class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship: StudentRelationship, val considerAlternatives: Boolean = false)
@@ -108,4 +108,17 @@ trait CreateScheduledMeetingRecordNotification extends Notifies[ScheduledMeeting
 		val user = meeting.creator.asSsoUser
 		Seq(Notification.init(new ScheduledMeetingRecordInviteeNotification("created"), user, meeting, meeting.relationship))
 	}
+}
+
+trait CreateScheduledMeetingRecordNotifications extends SchedulesNotifications[ScheduledMeetingRecord] {
+
+	override def scheduledNotifications(result: ScheduledMeetingRecord) = {
+		Seq(
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderStudent", result, result.meetingDate.withTimeAtStartOfDay),
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderAgent", result, result.meetingDate.withTimeAtStartOfDay),
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", result, result.meetingDate),
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", result, result.meetingDate.plusDays(5))
+		)
+	}
+
 }
