@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model.notifications.meetingrecord
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotification}
 
 @Entity
@@ -16,8 +15,15 @@ class ScheduledMeetingRecordInviteeNotification
 
 	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_invitee_notification.ftl"
 	def title = s"Meeting $verb"
+
+	def actor = if (agent.getWarwickId == meeting.relationship.studentId || agent == meeting.relationship.agentMember) {
+		agent
+	} else {
+		meeting.relationship.agentMember.map(_.asSsoUser).getOrElse(throw new IllegalStateException("Relationship has no agent"))
+	}
+
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
-		"actor" -> agent,
+		"actor" -> actor,
 		"role" -> agentRole,
 		"verb" -> verb,
 		"dateTimeFormatter" -> dateTimeFormatter,
