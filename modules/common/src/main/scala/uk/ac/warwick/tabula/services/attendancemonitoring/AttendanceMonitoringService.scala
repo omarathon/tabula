@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services.attendancemonitoring
 
 import org.codehaus.jackson.annotate.JsonAutoDetect
-import org.joda.time.DateTime
+import org.joda.time.{LocalDate, DateTime}
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
@@ -92,6 +92,7 @@ trait AttendanceMonitoringService {
 	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
 	def getCheckpointTotals(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal]
 	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
+	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
 
 }
 
@@ -386,6 +387,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 			}
 		attendanceMonitoringPoints
 	}
+
+	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint] =
+		attendanceMonitoringDao.findUnrecordedPoints(department, academicYear, endDate)
 }
 
 trait AttendanceMonitoringMembershipHelpers {

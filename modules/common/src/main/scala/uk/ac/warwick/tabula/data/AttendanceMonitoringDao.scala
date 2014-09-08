@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data
 
 import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.{Restrictions, Order, Projections}
+import org.joda.time.LocalDate
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -93,7 +94,7 @@ trait AttendanceMonitoringDao {
 	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear, withFlush: Boolean = false): Option[AttendanceMonitoringCheckpointTotal]
 	def getCheckpointTotals(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal]
 	def getAllCheckpointTotals(department: Department): Seq[AttendanceMonitoringCheckpointTotal]
-	
+	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
 }
 
 
@@ -437,6 +438,22 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 	def getAllCheckpointTotals(department: Department): Seq[AttendanceMonitoringCheckpointTotal] = {
 		session.newCriteria[AttendanceMonitoringCheckpointTotal]
 			.add(is("department", department))
+			.seq
+	}
+
+	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint] = {
+		session.newQuery(
+			"""
+				|select point from AttendanceMonitoringPoint point, AttendanceMonitoringScheme scheme
+				|where point.scheme = scheme
+				|and scheme.department = :department
+				|and scheme.academicYear = :academicYear
+				|and point.endDate <= :endDate
+				|and point not in (select checkpoint.point from AttendanceMonitoringCheckpoint checkpoint)
+			""".stripMargin)
+			.setParameter("department", department)
+			.setParameter("academicYear", academicYear)
+			.setParameter("endDate", endDate)
 			.seq
 	}
 }
