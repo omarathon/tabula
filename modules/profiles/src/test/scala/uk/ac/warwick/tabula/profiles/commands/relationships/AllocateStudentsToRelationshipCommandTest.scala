@@ -173,7 +173,7 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 			// now with that set of mappings we should just see a command for the new relationship coming back:
 			val editCommands1 = cmd.getEditStudentCommands(mappings, newAgentMappings1, agentsToEdit)
 			editCommands1.size should be (1)
-			editCommands1.map(_.oldAgent).head should be (None)
+			editCommands1.map(_.oldAgents).isEmpty should be (true)
 			editCommands1.map(_.agent) should be (Set(staff2))
 			editCommands1.map(_.studentCourseDetails) should be (Set(student4.mostSignificantCourseDetails.head))
 			editCommands1.map(_.relationshipType) should be (Set(relationshipType))
@@ -198,7 +198,7 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 			val editCommands3 = cmd.getEditStudentCommands(mappings, newAgentMappings2, Set(staff4.asInstanceOf[Member]))
 
 			editCommands3.size should be (3)
-			editCommands3.map(_.oldAgent).head should be (None)
+			editCommands3.map(_.oldAgents).isEmpty should be (true)
 			editCommands3.map(_.agent) should be (Set(staff4))
 			editCommands3.map(_.studentCourseDetails) should be (Set(student5.mostSignificantCourseDetails.head, student6.mostSignificantCourseDetails.head, student7.mostSignificantCourseDetails.head))
 			editCommands3.map(_.relationshipType) should be (Set(relationshipType))

@@ -28,12 +28,12 @@ import uk.ac.warwick.tabula.data.model.notifications.{StudentRelationshipChangeT
 class EditStudentRelationshipCommand(
 	val studentCourseDetails: StudentCourseDetails,
 	val relationshipType: StudentRelationshipType,
-	val currentAgent: Option[Member],
+	val currentAgents: Seq[Member],
 	val currentUser: CurrentUser,
 	val remove: Boolean
 ) extends AbstractEditStudentRelationshipCommand with SelfValidating {
 
-	def oldAgent = currentAgent
+	def oldAgents = currentAgents
 
 	var agent: Member = _
 
@@ -54,51 +54,51 @@ class EditStudentRelationshipCommand(
 	}
 
 	def applyInternal() = {
-		if (!currentAgent.isDefined) {
+		if (currentAgents.isEmpty) {
 			// Brand new agent
 			val newRelationship = relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(agent)).head
-
 			Seq(newRelationship)
-		} else if (currentAgent.get != agent) {
-			// Replacing the current agent with a new one
-			val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
+		} else if (!currentAgents.contains(agent)) { // this agent is new for this tutee
+				if (remove) {
+					val preexistingRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
+					relationshipService.endStudentRelationships(preexistingRelationships)
+					preexistingRelationships
+				} else {
+					// Replacing the current agent with a new one
+					val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
 
-			// Is there an existing relationship for this agent?
-			// Could happen if a student has two agents, and we're trying to replace the second with the first
-			currentRelationships.find(_.agent == agent.universityId) match {
-				case Some(existingRelationship) =>
-					// Just return the existing relationship without any notifications
-					Nil
-				case _ =>
-					// Find the relationship for the current agent, and end it
-					endAgentRelationship(currentRelationships)
+					// Is there an existing relationship for this agent?
+					// Could happen if a student has two agents, and we're trying to replace the second with the first
+					currentRelationships.find(_.agent == agent.universityId) match {
+						case Some(existingRelationship) =>
+							// Just return the existing relationship without any notifications
+							Nil
+						case _ =>
+							// Find the relationship for the current agent, and end it
+							relationshipService.endStudentRelationships(currentRelationships)
 
-					// Save the new relationship
-					val newRelationship = relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(agent)).head
+							// Save the new relationship
+							val newRelationship = relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(agent)).head
 
-					Seq(newRelationship)
-			}
-		} else if (currentAgent.get == agent && remove) {		
-			val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
-			endAgentRelationship(currentRelationships)
-						
-			currentRelationships
-		} else {
-			Nil
-		}
-	}
-
-	def endAgentRelationship(currentRelationships: Seq[StudentRelationship]) {
-		currentRelationships.find(_.agent == currentAgent.get.universityId) foreach { rel =>
-			rel.endDate = DateTime.now
-			relationshipService.saveOrUpdate(rel)
+							Seq(newRelationship)
+					}
+				}
+		} else { // this agent is already an agent for this tutee
+				if (remove) {
+					// remove the other agents
+					val preexistingRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
+					val relationshipsForOtherAgents = preexistingRelationships.filter(rel => rel.agent != agent)
+					relationshipService.endStudentRelationships(relationshipsForOtherAgents)
+					relationshipsForOtherAgents
+				}
+				else Nil
 		}
 	}
 
 	override def describe(d: Description) =
 		d.studentIds(Seq(studentCourseDetails.student.universityId)).properties(
 			"sprCode" -> studentCourseDetails.sprCode,
-			"oldAgent" -> oldAgent.fold("") { _.universityId },
+			"oldAgents" -> oldAgents.flatMap(_.universityId).mkString(" "),
 			"newAgent" -> Option(agent).fold("") { _.universityId }
 		)
 
@@ -109,11 +109,11 @@ class EditStudentRelationshipCommand(
 				Some(Notification.init(new StudentRelationshipChangeToStudentNotification, currentUser.apparentUser, Seq(relationship)))
 			} else None
 
-			val oldAgentNotification = if (notifyOldAgent) {
-				currentAgent.map(oldAgent => {
+			val oldAgentNotifications = if (notifyOldAgents) {
+				currentAgents.map(oldAgent => {
 					Notification.init(new StudentRelationshipChangeToOldAgentNotification, currentUser.apparentUser, Seq(relationship))
 				})
-			} else None
+			} else Nil
 
 			val newAgentNotification = if (notifyNewAgent) {
 				relationship.agentMember.map(newAgent => {
@@ -121,7 +121,7 @@ class EditStudentRelationshipCommand(
 				})
 			} else None
 
-			studentNotification ++ oldAgentNotification ++ newAgentNotification
+			studentNotification ++ oldAgentNotifications ++ newAgentNotification
 		})
 		
 		notifications

@@ -30,15 +30,14 @@ trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], 
 			relationshipChanges.flatMap {
 				change =>
 					change.modifiedRelationship.studentMember.map { student =>
-						Notification.init(new BulkStudentRelationshipNotification, apparentUser, Seq(change.modifiedRelationship))
+						Notification.init(new BulkStudentRelationshipNotification, apparentUser, Seq(change))
 					}
 			}
 		} else Nil
 		
 		val oldAgentNotifications = if (notifyOldAgent) {
 			relationshipChanges
-				.filter(_.oldAgent.isDefined)
-				.groupBy(_.oldAgent.get)
+				.groupBy(_.oldAgents)
 				.map { case (oldAgent, changes) =>
 					val relationships = changes.map { _.modifiedRelationship }
 					Notification.init(new BulkOldAgentRelationshipNotification, apparentUser, relationships)

@@ -9,10 +9,11 @@ import javax.persistence.{Entity, DiscriminatorValue}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.profiles.commands.relationships.StudentRelationshipChange
 
-abstract class BulkRelationshipChangeNotification extends Notification[StudentRelationship, Unit] {
+abstract class BulkRelationshipChangeNotification extends Notification[StudentRelationshipChange, Unit] {
 	@transient val templateLocation: String
 
-	def relationshipType = items.get(0).entity.relationshipType
+	def changes = items.asScala.map { reference => reference.entity}
+	def relationshipType = changes(0).modifiedRelationship.relationshipType
 
 	var relationshipService = Wire[RelationshipService]
 
@@ -20,11 +21,7 @@ abstract class BulkRelationshipChangeNotification extends Notification[StudentRe
 
 	def content = {
 		FreemarkerModel(templateLocation, Map(
-			"changes" -> items.asScala.map { reference =>
-				val relationship = reference.entity
-				val previousRelationship = relationshipService.getPreviousRelationship(relationship)
-				StudentRelationshipChange(previousRelationship.flatMap{_.agentMember}, relationship)
-			},
+			"changes" -> changes,
 			"relationshipType" -> relationshipType,
 			"path" -> url
 		) ++ extraModel)
@@ -32,32 +29,20 @@ abstract class BulkRelationshipChangeNotification extends Notification[StudentRe
 
 	def actionRequired = false
 
-	// oldAgent will always be the same for the student notification (single) or the oldAgentNotification - this is not used by the new agent notification
-	def oldAgent = {
-		val rel = items.asScala.headOption.map{ _.entity }
 
-		// if the specified relationship is ended, pick it - else pick previous if there was one:
-		val relToPick: Option[StudentRelationship] = rel match {
-			case None => None
-			case Some(stuRel: StudentRelationship) => {
-					if (stuRel.endDate != null && stuRel.endDate.isBeforeNow) Some(stuRel) // it's an old relationship anyway
-					else relationshipService.getPreviousRelationship(stuRel)
-			}
-		}
-		relToPick.flatMap{_.agentMember}
-	}
+	def oldAgents = changes.flatMap( _.oldAgents)
 
 	def extraModel: Map[String, Any]
 }
 
 @Entity
 @DiscriminatorValue(value="BulkStudentRelationship")
-class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotification with SingleItemNotification[StudentRelationship] {
+class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotification with SingleItemNotification[StudentRelationshipChange] {
 	@transient val templateLocation = BulkRelationshipChangeNotification.StudentTemplate
 
-	def modifiedRelationship = item.entity
+	def modifiedRelationship = item.entity.modifiedRelationship
 
-	def title: String = s"${relationshipType.agentRole.capitalize} allocation"
+	def title: String = s"${modifiedRelationship.relationshipType.agentRole.capitalize} allocation"
 
 	def newAgent =
 		if (modifiedRelationship.endDate != null && modifiedRelationship.endDate.isBeforeNow) None
@@ -74,7 +59,7 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
 
 	def extraModel = Map(
 		"student" -> modifiedRelationship.studentMember,
-		"oldAgent" -> oldAgent,
+		"oldAgents" -> oldAgents.map(_.universityId).mkString(" "),
 		"newAgent" -> newAgent
 	)
 	
@@ -85,7 +70,7 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
 class BulkNewAgentRelationshipNotification extends BulkRelationshipChangeNotification {
 	@transient val templateLocation = BulkRelationshipChangeNotification.NewAgentTemplate
 
-	def newAgent = items.asScala.headOption.flatMap { _.entity.agentMember }
+	def newAgent = items.asScala.headOption.flatMap { _.entity.modifiedRelationship.agentMember }
 
 	def title: String = s"Allocation of new ${relationshipType.studentRole}s"
 
@@ -100,7 +85,7 @@ class BulkNewAgentRelationshipNotification extends BulkRelationshipChangeNotific
 	)
 
 	// Doesn't make sense here as there could be multiple old agents
-	override def oldAgent = throw new UnsupportedOperationException("No sensible value for new agent notification")
+	override def oldAgents = throw new UnsupportedOperationException("No sensible value for new agent notification")
 }
 
 @Entity
@@ -110,14 +95,14 @@ class BulkOldAgentRelationshipNotification extends BulkRelationshipChangeNotific
 
 	def title: String = s"Change to ${relationshipType.studentRole.capitalize}s"
 
-	def recipients = oldAgent.map { _.asSsoUser }.toSeq
+	def recipients = oldAgents.map { _.asSsoUser }.toSeq
 
 	def url: String = Routes.students(relationshipType)
 
 	def urlTitle: String = s"view your ${relationshipType.studentRole}s"
 
 	def extraModel = Map(
-		"oldAgent" -> oldAgent
+		"oldAgents" -> oldAgents
 	)
 }
 

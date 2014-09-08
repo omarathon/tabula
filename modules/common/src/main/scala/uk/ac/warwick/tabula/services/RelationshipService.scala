@@ -57,6 +57,7 @@ trait RelationshipService {
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship]
+	def endStudentRelationships(relationships: Seq[StudentRelationship])
 }
 
 @Service(value = "relationshipService")
@@ -147,10 +148,19 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		// Don't need to do anything with existingRelationships, but need to handle the others
 
 		// End all relationships for agents not passed in
-		relationshipsToEnd.foreach { _.endDate = DateTime.now }
+		endStudentRelationships(relationshipsToEnd)
 
 		// Save new relationships for agents that don't already exist
 		saveStudentRelationships(relationshipType, studentCourseDetails, agentsToAdd)
+	}
+
+	def endStudentRelationships(relationships: Seq[StudentRelationship]) {
+		relationships.map {
+			rel => {
+				rel.endDate = DateTime.now
+				saveOrUpdate(rel)
+			}
+		}
 	}
 
 	def replaceStudentRelationshipsWithPercentages(
