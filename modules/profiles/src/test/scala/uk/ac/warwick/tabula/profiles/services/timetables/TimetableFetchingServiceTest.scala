@@ -23,9 +23,11 @@ class TimetableFetchingServiceTest extends TestBase {
 			eventType=TimetableEventType.Lecture,
 			location=Some("L5"),
 			context=Some("CS132"),
+			comments=None,
 			staffUniversityIds=Seq("1170047"),
 		  year = AcademicYear(2012)
 		))
+		events(1).comments should be (Some("Some comments"))
 	}
 	
 	val TimetableEvents = """<?xml version="1.0" encoding="UTF-8"?>
@@ -39,6 +41,7 @@ class TimetableFetchingServiceTest extends TestBase {
          <weeks>6-10</weeks>
          <day>4</day>
          <type>LEC</type>
+				 <comments></comments>
          <rooms>
             <room>L5</room>
          </rooms>
@@ -57,6 +60,7 @@ class TimetableFetchingServiceTest extends TestBase {
          <weeks>31</weeks>
          <day>2</day>
          <type>LEC</type>
+         <comments>Some comments</comments>
          <rooms>
             <room>MS.02</room>
          </rooms>
