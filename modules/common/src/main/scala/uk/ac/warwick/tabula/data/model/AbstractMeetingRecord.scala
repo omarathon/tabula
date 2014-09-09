@@ -92,15 +92,16 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 
 	protected def asEventOccurrence(context: TimetableEvent.Context): Option[EventOccurrence] = {
 		Some(EventOccurrence(
-			title,
-			title,
-			description,
-			TimetableEventType.Meeting,
-			meetingDate.toLocalDateTime,
-			meetingDate.plusHours(1).toLocalDateTime,
-			if (format == MeetingFormat.FaceToFace) None else Option(format).map { _.description },
-			Some(relationship.relationshipType.description),
-			context match {
+			name = title,
+			title = title,
+			description = description,
+			eventType = TimetableEventType.Meeting,
+			start = meetingDate.toLocalDateTime,
+			end = meetingDate.plusHours(1).toLocalDateTime,
+			location = if (format == MeetingFormat.FaceToFace) None else Option(format).map { _.description },
+			context = Some(relationship.relationshipType.description),
+			comments = None,
+			staffUniversityIds = context match {
 				case TimetableEvent.Context.Staff => relationship.studentMember.map { _.universityId }.toSeq
 				case TimetableEvent.Context.Student => relationship.agentMember.map { _.universityId }.toSeq
 			}

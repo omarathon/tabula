@@ -207,6 +207,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					event.endTime,
 					event.location,
 					event.context,
+					event.comments,
 					event.staffUniversityIds,
 					event.year
 				)
@@ -281,6 +282,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					startTime = start.toLocalTime,
 					endTime = end.toLocalTime,
 					location = Option(event.getLocation).flatMap { _.getValue.maybeText },
+					comments = None,
 					context = moduleCode,
 					staffUniversityIds = staffIds,
 					year = year

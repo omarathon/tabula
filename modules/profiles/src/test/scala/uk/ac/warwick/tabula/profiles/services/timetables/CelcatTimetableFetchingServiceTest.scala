@@ -62,6 +62,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 			new LocalTime(13, 0),
 			Some("R021"),
 			Some("ES186"),
+			None,
 			Nil,
 			AcademicYear.parse("13/14")
 		))
@@ -93,6 +94,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 			new LocalTime(11, 0),
 			Some("P521"),
 			Some("ES186"),
+			None,
 			Nil,
 			AcademicYear.parse("13/14")
 		))
