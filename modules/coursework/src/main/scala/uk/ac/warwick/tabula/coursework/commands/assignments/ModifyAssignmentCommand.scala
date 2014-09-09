@@ -76,14 +76,6 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		validateShared(errors)
 	}
 
-
-	private def addUserId(item: String) {
-		val user = userLookup.getUserByUserId(item)
-		if (user.isFoundUser && null != user.getWarwickId) {
-			includeUsers.add(user.getUserId)
-		}
-	}
-
 	def copyTo(assignment: Assignment) {
 		assignment.name = name
 		assignment.openDate = openDate
@@ -91,7 +83,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		assignment.academicYear = academicYear
 		assignment.feedbackTemplate = feedbackTemplate
 
-		assignment.assessmentGroups.clear
+		assignment.assessmentGroups.clear()
 		assignment.assessmentGroups.addAll(assessmentGroups)
 		for (group <- assignment.assessmentGroups if group.assignment == null) {
 			group.assignment = assignment
@@ -140,7 +132,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		academicYear = assignment.academicYear
 		feedbackTemplate = assignment.feedbackTemplate
 		if (assignment.members != null) {
-			members = assignment.members.duplicate
+			members = assignment.members.duplicate()
 		}
 		copyNonspecificFrom(assignment)
 	}
@@ -168,23 +160,43 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		} else {
 			val dayOfDeadline = assignment.closeDate.withTime(0, 0, 0, 0)
 
-			// skip the week late notification if late submission isn't possible
-			val daysToSend = if (assignment.allowLateSubmissions) {
-				Seq(-7, -1, 1, 7)
-			} else {
-				Seq(-7, -1, 1)
+			val submissionNotifications = {
+				// skip the week late notification if late submission isn't possible
+				val daysToSend = if (assignment.allowLateSubmissions) {
+					Seq(-7, -1, 1, 7)
+				} else {
+					Seq(-7, -1, 1)
+				}
+
+				val surroundingTimes = for (day <- daysToSend) yield assignment.closeDate.plusDays(day)
+				val proposedTimes = Seq(dayOfDeadline) ++ surroundingTimes
+
+				// Filter out all times that are in the past. This should only generate ScheduledNotifications for the future.
+				val allTimes = proposedTimes.filter(_.isAfterNow)
+
+				allTimes.map {
+					when =>
+						new ScheduledNotification[Assignment]("SubmissionDueGeneral", assignment, when)
+				}
 			}
 
-			val surroundingTimes = for (day <- daysToSend) yield assignment.closeDate.plusDays(day)
-			val proposedTimes = Seq(dayOfDeadline) ++ surroundingTimes
+			val feedbackNotifications = {
+				val daysToSend = Seq(-7, -1, 0)
 
-			// Filter out all times that are in the past. This should only generate ScheduledNotifications for the future.
-			val allTimes = proposedTimes.filter(_.isAfterNow)
+				val proposedTimes = for (day <- daysToSend) yield assignment.feedbackDeadline
+					.getOrElse(throw new IllegalStateException("No feedback deadline for open-ended assignments"))
+					.plusDays(day).toDateTimeAtStartOfDay
 
-			allTimes.map {
-				when =>
-					new ScheduledNotification[Assignment]("SubmissionDueGeneral", assignment, when)
+				// Filter out all times that are in the past. This should only generate ScheduledNotifications for the future.
+				val allTimes = proposedTimes.filter(_.isAfterNow)
+
+				allTimes.map {
+					when =>
+						new ScheduledNotification[Assignment]("FeedbackDueGeneral", assignment, when)
+				}
 			}
+
+			submissionNotifications ++ feedbackNotifications
 		}
 	}
 

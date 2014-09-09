@@ -1,0 +1,1 @@
+Feedback for ${assignment.module.code?upper_case} ${assignment.module.name} ${assignment.name} is due in <#if daysLeft == 0>today<#else>${daysLeft} working days on ${dateOnlyFormatter.print(deadline)}</#if>.
