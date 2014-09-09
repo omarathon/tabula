@@ -75,11 +75,11 @@ class FeedbackDueGeneralNotification
 class FeedbackDueExtensionNotification
 	extends Notification[Extension, Unit] with SingleItemNotification[Extension] with FeedbackDueNotification {
 
-	final def extention = item.entity
+	final def extension = item.entity
 
-	override final def assignment = extention.assignment
+	override final def assignment = extension.assignment
 
-	override final def title = s"${assignment.module.code.toUpperCase} feedback due for ${extention.universityId}"
+	override final def title = s"${assignment.module.code.toUpperCase} feedback due for ${extension.universityId}"
 
 	override final def recipients = {
 		val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
@@ -88,10 +88,10 @@ class FeedbackDueExtensionNotification
 			.managers.users
 	}
 
-	override final def deadline = extention.feedbackDeadline.toLocalDate
+	override final def deadline = extension.feedbackDeadline.toLocalDate
 
-	override def content: FreemarkerModel = FreemarkerModel("/WEB-INF/freemarker/notifications/feedback_reminder_extention.ftl", Map(
-		"extention" -> extention,
+	override def content: FreemarkerModel = FreemarkerModel("/WEB-INF/freemarker/notifications/feedback_reminder_extension.ftl", Map(
+		"extension" -> extension,
 		"assignment" -> assignment,
 		"daysLeft" -> daysLeft,
 		"dateOnlyFormatter" -> dateOnlyFormatter,
