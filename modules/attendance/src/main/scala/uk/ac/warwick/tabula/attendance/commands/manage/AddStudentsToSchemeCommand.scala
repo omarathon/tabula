@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyLists
 import collection.JavaConverters._
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipStaticType, SchemeMembershipItem}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.StudentMember
@@ -30,9 +30,9 @@ object AddStudentsToSchemeCommand {
 
 
 class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme, val user: CurrentUser)
-	extends CommandInternal[AttendanceMonitoringScheme] with TaskBenchmarking {
+	extends CommandInternal[AttendanceMonitoringScheme] with TaskBenchmarking with UpdatesAttendanceMonitoringScheme {
 
-	self: AddStudentsToSchemeCommandState with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
+	self: AddStudentsToSchemeCommandState with AttendanceMonitoringServiceComponent	with ProfileServiceComponent =>
 
 	override def applyInternal() = {
 		if (linkToSits) {
@@ -51,11 +51,7 @@ class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme,
 		scheme.updatedDate = DateTime.now
 		attendanceMonitoringService.saveOrUpdate(scheme)
 
-		val students = profileService.getAllMembersWithUniversityIds(scheme.members.members).flatMap {
-			case student: StudentMember => Option(student)
-			case _ => None
-		}
-		attendanceMonitoringService.updateCheckpointTotalsAsync(students, scheme.department, scheme.academicYear)
+		afterUpdate(Seq(scheme))
 
 		scheme
 	}

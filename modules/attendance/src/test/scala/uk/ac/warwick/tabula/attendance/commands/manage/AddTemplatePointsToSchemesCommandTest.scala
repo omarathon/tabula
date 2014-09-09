@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
 import org.joda.time.DateTime
+import org.mockito.Matchers
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{ScheduledNotification, Department}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceMonitoringTemplate, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
@@ -12,8 +13,11 @@ import org.hamcrest.Matchers._
 
 class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends AddTemplatePointsToSchemesCommandState with TermServiceComponent with
-	AttendanceMonitoringServiceComponent with ProfileServiceComponent {
+	val academicYear = new AcademicYear(2014)
+	val department = new Department
+
+	trait CommandTestSupport extends AddTemplatePointsToSchemesCommandState with TermServiceComponent
+		with AttendanceMonitoringServiceComponent with ProfileServiceComponent {
 		val termService = mock[TermService]
 		val attendanceMonitoringService = mock[AttendanceMonitoringService]
 		val profileService = mock[ProfileService]
@@ -41,9 +45,11 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 		val points = Seq(point1, point2, point3)
 
 		val scheme = new AttendanceMonitoringScheme
+		scheme.department = department
 		scheme.pointStyle = AttendanceMonitoringPointStyle.Date
 
 		val scheme1 = new AttendanceMonitoringScheme
+		scheme1.department = department
 		scheme1.pointStyle = AttendanceMonitoringPointStyle.Date
 
 		schemes.add(scheme)
@@ -55,11 +61,10 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 	}
 
 	trait Fixture {
-		val academicYear = new AcademicYear(2014)
-		val department = new Department
 
 		val command = new AddTemplatePointsToSchemesCommandInternal(department, academicYear) with CommandTestSupport with AddTemplatePointsToSchemesValidation
 		val errors = new BindException(command, "command")
+		command.thisScheduledNotificationService = smartMock[ScheduledNotificationService]
 	}
 
 	@Test
@@ -67,6 +72,8 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 		new Fixture {
 			val newPoints = command.applyInternal()
 			newPoints.size should be (6)
+			there was one (command.thisScheduledNotificationService).removeInvalidNotifications(department)
+			there was atLeastOne (command.thisScheduledNotificationService).push(Matchers.any[ScheduledNotification[Department]])
 		}
 	}
 

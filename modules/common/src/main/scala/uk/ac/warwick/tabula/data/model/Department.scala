@@ -23,8 +23,11 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Entity @AccessType("field")
 class Department extends GeneratedId
-	with PostLoadBehaviour with HasSettings with PermissionsTarget with Serializable{
+	with PostLoadBehaviour with HasSettings with PermissionsTarget with Serializable with ToEntityReference {
+
 	import Department._
+
+	type Entity = Department
 
 	@Column(unique = true)
 	var code: String = null
@@ -246,6 +249,8 @@ class Department extends GeneratedId
 	def isUpstream = !hasParent
 
 	override def toString = "Department(" + code + ")"
+
+	def toEntityReference = new DepartmentEntityReference().put(this)
 
 }
 

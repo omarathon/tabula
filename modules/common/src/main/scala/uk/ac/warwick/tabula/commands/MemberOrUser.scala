@@ -16,7 +16,7 @@ import uk.ac.warwick.userlookup.User
 object MemberOrUser {
 	def apply(member: Member): MemberOrUser = WrappedMember(member)
 	def apply(user: User): MemberOrUser = WrappedUser(user)
-	def apply(member: Option[Member], user: User): MemberOrUser = member map { WrappedMember(_) } getOrElse WrappedUser(user)
+	def apply(member: Option[Member], user: User): MemberOrUser = member map { WrappedMember } getOrElse WrappedUser(user)
 }
 
 sealed trait MemberOrUser{

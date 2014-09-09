@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
-import uk.ac.warwick.tabula.data.model.StudentMember
+import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Describable, Description, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
-import uk.ac.warwick.tabula.commands.{SelfValidating, Description, Describable, ComposableCommand, CommandInternal}
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
+
 import scala.collection.JavaConverters._
-import org.springframework.validation.Errors
 
 object DeleteSchemeCommand {
 	def apply(scheme: AttendanceMonitoringScheme) =
@@ -24,18 +24,14 @@ object DeleteSchemeCommand {
 }
 
 class DeleteSchemeCommandInternal(val scheme: AttendanceMonitoringScheme)
-	extends CommandInternal[AttendanceMonitoringScheme] {
+	extends CommandInternal[AttendanceMonitoringScheme] with UpdatesAttendanceMonitoringScheme {
 
 	self: AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal() = {
 		attendanceMonitoringService.deleteScheme(scheme)
 
-		val students = profileService.getAllMembersWithUniversityIds(scheme.members.members).flatMap {
-			case student: StudentMember => Option(student)
-			case _ => None
-		}
-		attendanceMonitoringService.updateCheckpointTotalsAsync(students, scheme.department, scheme.academicYear)
+		afterUpdate(Seq(scheme))
 
 		scheme
 	}

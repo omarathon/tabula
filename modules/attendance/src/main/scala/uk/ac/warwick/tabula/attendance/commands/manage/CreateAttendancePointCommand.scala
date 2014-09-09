@@ -4,12 +4,12 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
@@ -31,9 +31,10 @@ object CreateAttendancePointCommand {
 
 
 class CreateAttendancePointCommandInternal(val department: Department, val academicYear: AcademicYear, val schemes: Seq[AttendanceMonitoringScheme])
-	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with TaskBenchmarking {
+	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with TaskBenchmarking with UpdatesAttendanceMonitoringScheme {
 
-	self: CreateAttendancePointCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent with ProfileServiceComponent =>
+	self: CreateAttendancePointCommandState with AttendanceMonitoringServiceComponent
+		with TermServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal() = {
 		val points = schemes.map(scheme => {
@@ -46,11 +47,8 @@ class CreateAttendancePointCommandInternal(val department: Department, val acade
 			point
 		})
 
-		val students = profileService.getAllMembersWithUniversityIds(schemes.flatMap(_.members.members).distinct).flatMap {
-			case student: StudentMember => Option(student)
-			case _ => None
-		}
-		attendanceMonitoringService.updateCheckpointTotalsAsync(students, department, academicYear)
+		afterUpdate(schemes)
+
 		points
 	}
 
