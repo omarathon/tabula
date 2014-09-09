@@ -39,11 +39,12 @@ class AddTemplatePointsToSchemesCommandInternal(val department: Department, val 
 		val attendanceMonitoringPoints = attendanceMonitoringService.generatePointsFromTemplateScheme(templateScheme, academicYear)
 
 		val newPoints = schemes.asScala.flatMap { scheme =>
-				attendanceMonitoringPoints.map { point =>
+			attendanceMonitoringPoints.map { point =>
 				val newPoint = point.cloneTo(scheme)
 				newPoint.pointType = AttendanceMonitoringPointType.Standard
 				newPoint.createdDate = new DateTime()
 				newPoint.updatedDate = new DateTime()
+				scheme.points.add(point)
 				attendanceMonitoringService.saveOrUpdate(newPoint)
 				newPoint
 			}
