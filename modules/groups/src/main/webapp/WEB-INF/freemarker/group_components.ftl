@@ -302,7 +302,7 @@
 									</a>
 								</li>
 
-								<li<#if set.releasedToStudents || set.releasedToTutors> class="disabled use-tooltip" title="Can't delete small groups where students or tutors have been notified"</#if>>
+								<li<#if set.releasedToStudents || set.releasedToTutors> class="disabled use-tooltip" data-container="body" title="Can't delete small groups where students or tutors have been notified"</#if>>
 									<#local delete_url><@routes.deleteset set /></#local>
 									<@fmt.permission_button
 										permission='SmallGroups.Delete'
