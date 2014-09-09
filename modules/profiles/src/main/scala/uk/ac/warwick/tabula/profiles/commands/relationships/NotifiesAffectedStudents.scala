@@ -18,7 +18,7 @@ trait RelationshipChangingCommand {
 	var profileService: ProfileService
 }
 
-trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationship], Seq[StudentRelationship]] {
+trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], Seq[StudentRelationship]] {
 	this: RelationshipChangingCommand =>
 		
 	var notifyStudent: Boolean = false

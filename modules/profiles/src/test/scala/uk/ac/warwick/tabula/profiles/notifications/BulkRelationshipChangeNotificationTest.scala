@@ -42,22 +42,6 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def oldAgentNotification() {
-		new Environment {
-			val notification = new BulkOldAgentRelationshipNotification
-			notification.relationshipService = service
-			notification.addItems(Seq(rel1))
-			notification.oldAgent.get.universityId should be("1")
-			// rel1 is ended, so the old agent for the notification is just the agent of the relationship
-
-			val notification2 = new BulkOldAgentRelationshipNotification
-			notification2.relationshipService = service
-			notification2.addItems(Seq(rel2))
-			notification2.oldAgent.get.universityId should be("1") // rel2 is not ended, so the old agent for the notification is the agent of the previous relationship
-		}
-	}
-
-	@Test
 	def studentNotification() {
 		new Environment {
 			val notification = new BulkStudentRelationshipNotification
