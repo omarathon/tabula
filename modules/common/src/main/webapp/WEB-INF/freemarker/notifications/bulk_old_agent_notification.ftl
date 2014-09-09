@@ -1,8 +1,8 @@
 You are no longer assigned as ${relationshipType.agentRole} to the following students:
 
-<#list changes as change><#compress>
-* ${change.modifiedRelationship.studentMember.officialName} <#compress>
-	<#if !(change.modifiedRelationship.endDate?? && change.modifiedRelationship.endDate.beforeNow)>
+<#list modifiedRelationships as rel><#compress>
+* ${rel.studentMember.officialName} <#compress>
+	<#if !(rel.endDate?? && change.rel.endDate.beforeNow)>
 		(New ${relationshipType.agentRole} ${change.modifiedRelationship.agentName})
 	</#if>
 </#compress>

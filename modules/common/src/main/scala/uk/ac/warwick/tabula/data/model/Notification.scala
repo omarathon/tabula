@@ -44,32 +44,39 @@ object Notification {
 	 *    just have to cast it or put it in an appropriately typed var)
 	 *
 	 * Some of the above may be solvable things caused by our inability to understand type system.
+	 *
+	 * "item" (or "items" in the case of multiple items) is the persisted entity the notification draws information from
+	 * e.g. Feedback
+	 * "target" is a secondary persisted item you might want to draw information from e.g. Assignment - normally "target"
+	 * is a parent of "item"
 	 */
+
+	// factory for multiple items with a target
 	def init[A >: Null <: ToEntityReference, B >: Null <: ToEntityReference, C <: NotificationWithTarget[A, B]]
-			(notification: C, agent: User, seq: Seq[A], target: B): C = {
+			(notification: C, agent: User, items: Seq[A], target: B): C = {
 		notification.created = DateTime.now
 		notification.agent = agent
 		if (target != null) {
 			notification.target = target.toEntityReference.asInstanceOf[EntityReference[B]]
 		}
-		notification.addItems(seq)
+		notification.addItems(items)
 		notification
 	}
 
-	// factory for single items
+	// factory for single items with a target
 	def init[A >: Null <: ToEntityReference, B >: Null <: ToEntityReference, C <: NotificationWithTarget[A, B]]
 		(notification: C, agent: User, item: A, target: B): C = init[A,B,C](notification, agent, Seq(item), target)
 
-
+	// factory for multiple items without a target
 	def init[A >: Null <: ToEntityReference, C <: Notification[A, Unit]]
-			(notification: C, agent: User, seq: Seq[A]): C = {
+			(notification: C, agent: User, items: Seq[A]): C = {
 		notification.created = DateTime.now
 		notification.agent = agent
-		notification.addItems(seq)
+		notification.addItems(items)
 		notification
 	}
 
-	// factory for single items
+	// factory for single items without a target
 	def init[A >: Null <: ToEntityReference, C <: Notification[A, Unit]]
 		(notification: C, agent: User, item: A): C = init[A,C](notification, agent, Seq(item))
 
