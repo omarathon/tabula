@@ -282,17 +282,15 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	def getStudentRelationshipById(id: String): Option[StudentRelationship] = relationshipDao.getStudentRelationshipById(id)
 
 	def getPreviousRelationship(relationship: StudentRelationship): Option[StudentRelationship] = {
-		relationship.studentMember.flatMap { student =>
-			val rels = getRelationships(relationship.relationshipType, student)
-			val sortedRels = rels.sortBy { _.startDate }
+		val rels = relationshipDao.getAllPastAndPresentRelationships(relationship.relationshipType, relationship.studentCourseDetails)
+		val sortedRels = rels.sortBy { _.startDate }
 
-			// Get the element before the current relationship
-			val index = sortedRels.indexOf(relationship)
-			if (index > 0) {
-				Some(sortedRels(index-1))
-			} else {
-				None
-			}
+		// Get the element before the current relationship
+		val index = sortedRels.indexOf(relationship)
+		if (index > 0) {
+			Some(sortedRels(index-1)) // get the relationship before this one which started latest
+		} else {
+			None
 		}
 	}
 }

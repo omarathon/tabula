@@ -43,6 +43,8 @@ trait RelationshipDao {
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
+	def getAllPastAndPresentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
+
 }
 
 @Repository
@@ -86,6 +88,13 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 		session.newCriteria[StudentRelationship]
 			.createAlias("studentCourseDetails", "scd")
 			.add(is("scd.student", student))
+			.seq
+	}
+
+	def getAllPastAndPresentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = {
+		session.newCriteria[StudentRelationship]
+			.add(is("studentCourseDetails", scd))
+			.add(is("relationshipType", relationshipType))
 			.seq
 	}
 
