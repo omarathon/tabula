@@ -83,4 +83,11 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 		notifications.exists(_.isInstanceOf[StudentRelationshipChangeToStudentNotification]) should be (true)
 	}}
 
+	@Test
+	def testApply() { new TutorFixture {
+		val command = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Seq(oldTutor), NoCurrentUser(), false)
+
+		val rels = command.applyInternal
+	}
+
 }

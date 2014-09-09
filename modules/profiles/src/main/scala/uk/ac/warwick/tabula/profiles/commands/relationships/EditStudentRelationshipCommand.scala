@@ -33,7 +33,7 @@ class EditStudentRelationshipCommand(
 	val remove: Boolean
 ) extends AbstractEditStudentRelationshipCommand with SelfValidating {
 
-	def oldAgents = currentAgents
+	override def oldAgents = currentAgents
 
 	var agent: Member = _
 

@@ -39,6 +39,8 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 		service.getPreviousRelationship(rel2) returns Some(rel1)
 
 		profiles.getMemberByUniversityId("1") returns (Some(agent1))
+		profiles.getMemberByUniversityId("2") returns (Some(agent2))
+
 	}
 
 	@Test
@@ -46,7 +48,12 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 		new Environment {
 			val notification = new BulkStudentRelationshipNotification
 			notification.relationshipService = service
+			notification.profileService = profiles
 			notification.addItems(Seq(rel1))
+
+			notification.oldAgentIds.value = Seq(agent2.universityId)
+			notification.oldAgents should be (Seq(agent2))
+
 			notification.newAgent should be (None) // rel1 is ended, so there should be no new agent
 
 			val notification2 = new BulkStudentRelationshipNotification
