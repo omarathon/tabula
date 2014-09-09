@@ -93,7 +93,7 @@ trait AttendanceMonitoringService {
 	def getCheckpointTotals(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal]
 	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
-
+	def findUnrecordedUsers(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[User]
 }
 
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService with TaskBenchmarking {
@@ -390,6 +390,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint] =
 		attendanceMonitoringDao.findUnrecordedPoints(department, academicYear, endDate)
+
+	def findUnrecordedUsers(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[User] =
+		attendanceMonitoringDao.findUnrecordedUsers(department, academicYear, endDate)
 }
 
 trait AttendanceMonitoringMembershipHelpers {

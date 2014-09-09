@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.attendance
 import javax.persistence.{Column, JoinColumn, FetchType, ManyToOne, Entity}
 import uk.ac.warwick.tabula.data.model.{StudentMember, GeneratedId}
 import uk.ac.warwick.spring.Wire
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{ForeignKey, Type}
 import org.joda.time.DateTime
 import javax.validation.constraints.NotNull
 
@@ -16,10 +16,12 @@ class AttendanceMonitoringCheckpoint extends GeneratedId {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "point_id")
+	@ForeignKey(name="none")
 	var point: AttendanceMonitoringPoint = _
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "student_id")
+	@ForeignKey(name="none")
 	var student: StudentMember = _
 
 	@NotNull

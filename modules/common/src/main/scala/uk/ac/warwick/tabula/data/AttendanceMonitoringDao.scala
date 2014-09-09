@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion.{Restrictions, Order, Projections}
+import org.hibernate.criterion.{Order, Projections, Restrictions}
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.userlookup.User
 
 abstract class SchemeMembershipItemType(val value: String)
 case object SchemeMembershipStaticType extends SchemeMembershipItemType("static")
@@ -95,6 +96,7 @@ trait AttendanceMonitoringDao {
 	def getCheckpointTotals(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal]
 	def getAllCheckpointTotals(department: Department): Seq[AttendanceMonitoringCheckpointTotal]
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
+	def findUnrecordedUsers(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[User]
 }
 
 
@@ -442,18 +444,52 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 	}
 
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint] = {
-		session.newQuery(
-			"""
-				|select point from AttendanceMonitoringPoint point, AttendanceMonitoringScheme scheme
-				|where point.scheme = scheme
-				|and scheme.department = :department
-				|and scheme.academicYear = :academicYear
-				|and point.endDate <= :endDate
-				|and point not in (select checkpoint.point from AttendanceMonitoringCheckpoint checkpoint)
-			""".stripMargin)
-			.setParameter("department", department)
-			.setParameter("academicYear", academicYear)
-			.setParameter("endDate", endDate)
+		val relevantPoints = session.newCriteria[AttendanceMonitoringPoint]
+			.createAlias("scheme", "scheme")
+			.add(is("scheme.department", department))
+			.add(is("scheme.academicYear", academicYear))
+			.add(le("endDate", endDate))
 			.seq
+
+		if (relevantPoints.isEmpty) {
+			Seq()
+		} else {
+			val checkpointCounts: Map[AttendanceMonitoringPoint, Int] = session.newCriteria[AttendanceMonitoringCheckpoint]
+				.add(safeIn("point", relevantPoints))
+				.project(Projections.projectionList()
+					.add(Projections.groupProperty("point"))
+					.add(Projections.count("point"))
+				).seq.asInstanceOf[Seq[Array[java.lang.Object]]].map{ objArray =>
+					objArray(0).asInstanceOf[AttendanceMonitoringPoint] -> objArray(1).asInstanceOf[Long].toInt
+				}.toMap.withDefaultValue(0)
+
+			relevantPoints.filter(p => checkpointCounts(p) < p.scheme.members.members.size)
+		}
+	}
+
+	def findUnrecordedUsers(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[User] = {
+		val relevantPoints = session.newCriteria[AttendanceMonitoringPoint]
+			.createAlias("scheme", "scheme")
+			.add(is("scheme.department", department))
+			.add(is("scheme.academicYear", academicYear))
+			.add(le("endDate", endDate))
+			.seq
+
+		if (relevantPoints.isEmpty) {
+			Seq()
+		} else {
+			val checkpointsByPoint = session.newCriteria[AttendanceMonitoringCheckpoint]
+				.add(safeIn("point", relevantPoints))
+				.seq.groupBy(_.point).withDefaultValue(Seq())
+
+			relevantPoints.flatMap(point => {
+				// every user that should have a checkpoint for this point
+				val users = point.scheme.members.users
+				// filter to users that don't have a checkpoint for this point
+				users.filter(user =>
+					!checkpointsByPoint(point).exists(_.student.universityId == user.getWarwickId)
+				)
+			}).distinct
+		}
 	}
 }

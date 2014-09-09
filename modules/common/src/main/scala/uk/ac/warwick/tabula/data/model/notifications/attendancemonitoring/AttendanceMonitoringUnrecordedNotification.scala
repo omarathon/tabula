@@ -10,9 +10,7 @@ import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, TermService}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.userlookup.User
 
-@Entity
-@DiscriminatorValue(value="AttendanceMonitoringUnrecordedPoints")
-class AttendanceMonitoringUnrecordedPointsNotification
+abstract class AbstractAttendanceMonitoringUnrecordedNotification
 	extends NotificationWithTarget[Department, Department]
 	with SingleItemNotification[Department] {
 
@@ -38,6 +36,13 @@ class AttendanceMonitoringUnrecordedPointsNotification
 
 	final def department = item.entity
 
+}
+
+@Entity
+@DiscriminatorValue(value="AttendanceMonitoringUnrecordedPoints")
+class AttendanceMonitoringUnrecordedPointsNotification
+	extends AbstractAttendanceMonitoringUnrecordedNotification {
+
 	override final def url = Routes.View.pointsUnrecorded(department, academicYear)
 
 	override final def urlTitle = "record attendance for these points"
@@ -57,7 +62,7 @@ class AttendanceMonitoringUnrecordedPointsNotification
 		"points" -> unrecordedPoints
 	))
 
-	override def recipients: Seq[User] = {
+	override final def recipients: Seq[User] = {
 		if (unrecordedPoints.size > 0) {
 			// department.owners is not populated correctly if department not fetched directly
 			moduleAndDepartmentService.getDepartmentById(department.id).get.owners.users
@@ -65,4 +70,40 @@ class AttendanceMonitoringUnrecordedPointsNotification
 			Seq()
 		}
 	}
+
+}
+
+@Entity
+@DiscriminatorValue(value="AttendanceMonitoringUnrecordedStudents")
+class AttendanceMonitoringUnrecordedStudentsNotification
+	extends AbstractAttendanceMonitoringUnrecordedNotification {
+
+	override final def url = Routes.View.studentsUnrecorded(department, academicYear)
+
+	override final def urlTitle = "record attendance for these students"
+
+	override def title = "Students need attendance recording"
+
+	final def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/attendancemonitoring/attendance_monitoring_unrecorded_students_notification.ftl"
+
+	@transient
+	final lazy val unrecordedUsers = {
+		attendanceMonitoringService.findUnrecordedUsers(department, academicYear, referenceDate.toLocalDate).sortBy(u => (u.getLastName, u.getFirstName))
+	}
+
+	override def content: FreemarkerModel = FreemarkerModel(FreemarkerTemplate, Map(
+		"department" -> department,
+		"academicYear" -> academicYear,
+		"users" -> unrecordedUsers,
+		"truncatedUsers" -> unrecordedUsers.slice(0, 10)
+	))
+
+	@transient
+	override def recipients: Seq[User] =
+		if (unrecordedUsers.size > 0) {
+			// department.owners is not populated correctly if department not fetched directly
+			moduleAndDepartmentService.getDepartmentById(department.id).get.owners.users
+		} else {
+			Seq()
+		}
 }

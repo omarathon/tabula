@@ -34,8 +34,11 @@ trait UpdatesAttendanceMonitoringScheme extends Logging {
 
 			thisScheduledNotificationService.removeInvalidNotifications(department)
 
-			val notifications = deptSchemes.flatMap(_.points.asScala.map(_.endDate.plusDays(7).toDateTimeAtStartOfDay)).map(notificationDate => {
-				new ScheduledNotification[Department]("AttendanceMonitoringUnrecordedPoints", department, notificationDate)
+			val notifications = deptSchemes.flatMap(_.points.asScala.map(_.endDate.plusDays(7).toDateTimeAtStartOfDay)).flatMap(notificationDate => {
+				Seq(
+					new ScheduledNotification[Department]("AttendanceMonitoringUnrecordedPoints", department, notificationDate),
+					new ScheduledNotification[Department]("AttendanceMonitoringUnrecordedStudents", department, notificationDate)
+				)
 			})
 
 			for (scheduledNotification <- notifications) {
