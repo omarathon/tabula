@@ -44,6 +44,12 @@ class ViewProfileByCourseDetailsController extends ViewProfileController {
 		@RequestParam(defaultValue = "", required = false) agentId: String): Mav = {
 
 			val profiledStudentMember = profileCmd.apply()
-			viewProfileForCourse(Some(studentCourseDetails), studentCourseYearFromYear(studentCourseDetails, year), openMeetingId, agentId, profiledStudentMember)
+			viewProfileForCourse(
+				Option(studentCourseDetails),
+				Option(mandatory(studentCourseYearFromYear(studentCourseDetails, year))),
+				openMeetingId,
+				agentId,
+				profiledStudentMember
+			)
 	}
 }
