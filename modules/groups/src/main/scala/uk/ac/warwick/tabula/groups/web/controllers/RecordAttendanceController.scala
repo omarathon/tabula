@@ -41,7 +41,7 @@ class RecordAttendanceController extends GroupsController with AutowiringSmallGr
 		form(command)
 	}
 
-	def form(@ModelAttribute command: RecordAttendanceCommand): Mav = {
+	def form(command: RecordAttendanceCommand): Mav = {
 		Mav("groups/attendance/form",
 			"command" -> command,
 			"allCheckpointStates" -> AttendanceState.values,
