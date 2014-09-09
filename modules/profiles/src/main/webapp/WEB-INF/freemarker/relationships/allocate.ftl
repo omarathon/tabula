@@ -47,7 +47,7 @@
 				<li class="active">
 					<a href="#allocatestudents-tab1" data-toggle="tab">Drag and drop</a>
 				</li>
-				<li >
+				<li style="display: none;">
 					<a href="#allocatestudents-tab2" data-toggle="tab">Upload spreadsheet</a>
 				</li>
 			</ul>
@@ -261,6 +261,9 @@
 
 	<script type="text/javascript">
 		(function($) {
+
+			// TAB-2627
+			$('.tabbable ul li').show();
 
 			<!-- TAB-1266 - warning popup for 'Remove All' button -->
 			$('body').on('click','.popover #confirm-remove-all', function() {
