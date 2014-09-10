@@ -2,22 +2,24 @@
 <#assign mappingById=allocateStudentsToRelationshipCommand.mappingById />
 
 <#macro student_item profile bindpath="">
-	<#local mostSignificantCourseDetails = profile.mostSignificantCourseDetails />
-	<#if mostSignificantCourseDetails?? && mostSignificantCourseDetails.route?? >
-		<#local route = mostSignificantCourseDetails.route />
-	</#if>
-	<li class="student well well-small"
-	data-f-gender="${(profile.gender.dbValue)!}"
-	data-f-route="${(route.code)!}"
-	data-f-year="${(mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
-		<div class="profile clearfix">
-			<div class="name">
-				<h6>${profile.fullName}</h6>
-				${(route.name)!profile.homeDepartment.name}
+	<#if profile.mostSignificantCourseDetails??>
+		<#local mostSignificantCourseDetails = profile.mostSignificantCourseDetails />
+		<#if mostSignificantCourseDetails?? && mostSignificantCourseDetails.route?? >
+			<#local route = mostSignificantCourseDetails.route />
+		</#if>
+		<li class="student well well-small"
+		data-f-gender="${(profile.gender.dbValue)!}"
+		data-f-route="${(route.code)!}"
+		data-f-year="${(mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
+			<div class="profile clearfix">
+				<div class="name">
+					<h6>${profile.fullName}</h6>
+					${(route.name)!profile.homeDepartment.name}
+				</div>
 			</div>
-		</div>
-		<input type="hidden" name="${bindpath}" value="${profile.universityId}" />
-	</li>
+			<input type="hidden" name="${bindpath}" value="${profile.universityId}" />
+		</li>
+	</#if>
 </#macro>
 
 <#escape x as x?html>
@@ -34,7 +36,8 @@
 
 		<p>This page expects students to have exactly one ${relationshipType.agentRole}. If you allocate a student to a ${relationshipType.agentRole},
 		it will remove any existing ${relationshipType.agentRole}s that the student has. This makes this page unsuitable for students who
-		are expected to have multiple ${relationshipType.agentRole}s.</p>
+		are expected to have multiple ${relationshipType.agentRole}s. You should edit multiple relationships on such students' individual
+		profile pages instead.</p>
 
 		<p>We hope to change this behaviour in the future to make it easier to manage ${relationshipType.agentRole}s for students.</p>
 	</div>

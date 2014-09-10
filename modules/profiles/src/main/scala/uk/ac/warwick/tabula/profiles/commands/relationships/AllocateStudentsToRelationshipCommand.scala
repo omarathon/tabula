@@ -404,16 +404,19 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	}
 
 	def extractDataFromFile(file: FileAttachment, result: BindingResult) = {
-		val allocations = relationshipExtractor.readXSSFExcelFile(file.dataStream, relationshipType)
-		
+		val allocations = relationshipExtractor.readXSSFExcelFile(file.dataStream, relationshipType, Some(department))
+
 		// Put any errors into the BindingResult
 		allocations.foreach { case (row, _, errors) =>
 			errors.foreach { case (field, code) =>
 				result.rejectValue("", code, Array(field, row), "")
 			}
 		}
-		
-		val rawRelationships = allocations.flatMap { case (_, rel, _) => rel }
+
+		// TAB-2624 Filter erroring rows out of the allocations
+		val rawRelationships = allocations
+			.filterNot { case (_, _, errors) => errors.nonEmpty }
+			.flatMap { case (_, rel, _) => rel }
 
 		unallocated.clear()
 		unallocated.addAll(
