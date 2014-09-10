@@ -46,7 +46,7 @@
 					<#assign pendingAction = meeting.pendingActionBy(viewer) />
 					<#assign pendingActionClasses><#if pendingAction>well</#if></#assign>
 
-					<#if (openMeeting?? && openMeeting.id == meeting.id) || pendingAction>
+					<#if (openMeetingId?? && openMeetingId == meeting.id) || pendingAction>
 						<#assign openClass>open</#assign>
 						<#assign openAttribute>open="open"</#assign>
 					<#else>
