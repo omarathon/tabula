@@ -10,10 +10,7 @@ import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.Property
 import net.fortuna.ical4j.model.parameter.Value
-import net.fortuna.ical4j.model.property.Uid
-import net.fortuna.ical4j.model.property.Description
-import net.fortuna.ical4j.model.property.Location
-import net.fortuna.ical4j.model.property.Organizer
+import net.fortuna.ical4j.model.property._
 import net.fortuna.ical4j.model.parameter.Cn
 import org.apache.commons.codec.digest.DigestUtils
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -88,6 +85,7 @@ trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
 				eventOccurrence.location.getOrElse(""), eventOccurrence.context.getOrElse("")).mkString)
 
 			event.getProperties.add(new Uid(uid))
+			event.getProperties.add(Method.PUBLISH)
 
 			eventOccurrence.staffUniversityIds.headOption.flatMap {
 				universityId =>
