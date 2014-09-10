@@ -81,7 +81,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro timetable_ical student webcal=true><#compress>
 	<#local https_url><@_u page="/timetable/ical?timetableHash=${student.timetableHash}" /></#local>
 	<#if webcal>
-		${https_url?replace('https','webcals')}
+		${https_url?replace('https','webcal')}
 	<#else>
 		${https_url}
 	</#if>
