@@ -73,7 +73,7 @@
 				<#if studentCourseDetails.hasRelationship(relationshipType) || relationshipType.displayIfEmpty(studentCourseDetails) && studentCourseDetails.isStudentRelationshipTypeForDisplay(relationshipType)>
 					<li id="${relationshipType.id}-pane">
 						<#assign relMeetings=(meetingsById[relationshipType.id])![] />
-							<@profile_macros.relationship_section studentCourseDetails relationshipType relMeetings viewerRelationshipTypes />
+							<@profile_macros.relationship_section studentCourseDetails relationshipType />
 					</li>
 				</#if>
 			</#list>

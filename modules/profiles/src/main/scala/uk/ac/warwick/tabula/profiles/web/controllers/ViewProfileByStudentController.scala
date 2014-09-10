@@ -1,15 +1,11 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestParam
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.data.model.{StaffMember, StudentCourseYearDetails, StudentCourseDetails, Member, StudentMember}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 class ViewProfileByStudentController extends ViewProfileController {
