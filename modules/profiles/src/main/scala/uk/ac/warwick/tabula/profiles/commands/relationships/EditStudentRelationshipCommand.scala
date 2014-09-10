@@ -98,8 +98,10 @@ class EditStudentRelationshipCommand(
 	override def describe(d: Description) =
 		d.studentIds(Seq(studentCourseDetails.student.universityId)).properties(
 			"sprCode" -> studentCourseDetails.sprCode,
-			"oldAgents" -> oldAgents.flatMap(_.universityId).mkString(" "),
-			"newAgent" -> Option(agent).fold("") { _.universityId }
+			"oldAgents" -> oldAgents.map(_.universityId).mkString(" "),
+			"newAgent" -> Option(agent).fold("") {
+				_.universityId
+			}
 		)
 
 	def emit(modifiedRelationships: Seq[StudentRelationship]) = {

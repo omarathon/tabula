@@ -22,7 +22,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 		desc.allProperties should be (Map(
 			"students" -> List("student"),
 			"sprCode" -> "0000001/1",
-			"oldAgent" -> "0000002",
+			"oldAgents" -> "0000002",
 			"newAgent" -> "0000001"
 		))
 	}}
@@ -88,6 +88,6 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 		val command = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Seq(oldTutor), NoCurrentUser(), false)
 
 		val rels = command.applyInternal
-	}
+	}}
 
 }
