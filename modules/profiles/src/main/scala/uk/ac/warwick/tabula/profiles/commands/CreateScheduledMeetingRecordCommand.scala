@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.ScheduledMeetingRecordInviteeNotification
+import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.{ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -22,7 +22,7 @@ object CreateScheduledMeetingRecordCommand {
 			with AutowiringMeetingRecordServiceComponent
 			with CreateScheduledMeetingRecordCommandValidation
 			with CreateScheduledMeetingRecordNotification
-			with CreateScheduledMeetingRecordNotifications
+			with CreateScheduledMeetingRecordScheduledNotifications
 }
 
 class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship: StudentRelationship, val considerAlternatives: Boolean = false)
@@ -106,11 +106,17 @@ trait CreateScheduledMeetingRecordDescription extends Describable[ScheduledMeeti
 trait CreateScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRecord, ScheduledMeetingRecord] {
 	def emit(meeting: ScheduledMeetingRecord) = {
 		val user = meeting.creator.asSsoUser
-		Seq(Notification.init(new ScheduledMeetingRecordInviteeNotification("created"), user, meeting, meeting.relationship))
+		val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("created"), user, meeting, meeting.relationship)
+		if(!meeting.creatorInRelationship) {
+			val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification("created"), user, meeting, meeting.relationship)
+			Seq(inviteeNotification, behalfNotification)
+		} else {
+			Seq(inviteeNotification)
+		}
 	}
 }
 
-trait CreateScheduledMeetingRecordNotifications extends SchedulesNotifications[ScheduledMeetingRecord] {
+trait CreateScheduledMeetingRecordScheduledNotifications extends SchedulesNotifications[ScheduledMeetingRecord] {
 
 	override def scheduledNotifications(result: ScheduledMeetingRecord) = {
 		Seq(
