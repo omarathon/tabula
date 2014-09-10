@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.commands.profiles.{DefaultPhoto, ResizesPhoto}
 import uk.ac.warwick.util.files.imageresize.CachingImageResizer
 import uk.ac.warwick.util.files.imageresize.JAIImageResizer
-import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import org.springframework.core.io.ClassPathResource
 import java.io.File
-import uk.ac.warwick.tabula.JavaImports._
 
 class ResizesPhotoTest extends TestBase {
 	
