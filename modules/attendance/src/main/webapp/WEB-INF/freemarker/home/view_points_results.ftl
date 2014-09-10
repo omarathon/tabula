@@ -17,7 +17,7 @@
 <#elseif command.hasBeenFiltered && command.filterTooVague>
 	<p class="alert"><i class="icon-warning-sign"></i> The filter you have chosen includes too many students.</p>
 <#elseif pointsMap?keys?size == 0>
-	<p class="alert"><i class="icon-warning-sign"></i> No points exist for the selected options.</p>
+	<p class="alert"><i class="icon-warning-sign"></i> No students with points exist for the selected options.</p>
 <#else>
 	<#assign filterQuery = command.serializeFilter />
 	<#assign returnTo><@routes.viewDepartmentPointsWithAcademicYear command.department command.academicYear filterQuery/></#assign>

@@ -30,7 +30,7 @@ object EditScheduledMeetingRecordCommand {
 			with EditScheduledMeetingRecordNotification
 			with AutowiringFileAttachmentServiceComponent
 			with EditScheduledMeetingRecordCommandPopulate
-			with ModifyScheduledMeetingRecordNotifications
+			with EditScheduledMeetingRecordNotifications
 }
 
 trait EditScheduledMeetingRecordCommandPopulate	extends PopulateOnForm {
@@ -146,4 +146,17 @@ trait EditScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRe
 
 		Seq(Notification.init(new ScheduledMeetingRecordInviteeNotification(verb), user, meeting, meeting.relationship))
 	}
+}
+
+trait EditScheduledMeetingRecordNotifications extends SchedulesNotifications[ScheduledMeetingRecordResult] {
+
+	override def scheduledNotifications(result: ScheduledMeetingRecordResult) = {
+		Seq(
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderStudent", result.meetingRecord, result.meetingRecord.meetingDate.withTimeAtStartOfDay),
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderAgent", result.meetingRecord, result.meetingRecord.meetingDate.withTimeAtStartOfDay),
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", result.meetingRecord, result.meetingRecord.meetingDate),
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", result.meetingRecord, result.meetingRecord.meetingDate.plusDays(5))
+		)
+	}
+
 }

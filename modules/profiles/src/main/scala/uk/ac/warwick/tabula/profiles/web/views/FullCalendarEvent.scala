@@ -17,9 +17,9 @@ case class FullCalendarEvent(title: String,
 														 allDay: Boolean,
 														 start: Long,
 														 end: Long,
-														 backgroundColor:String="#4daacc", // tabulaBlueLight.
-														 borderColor:String="#4daacc",
-														 textColor:String="#000",
+														 backgroundColor: String="#4daacc", // tabulaBlueLight.
+														 borderColor: String="#4daacc",
+														 textColor: String="#000",
 														 // fields below here are not used by FullCalendar itself, they're custom fields
 														 // for use in the renderEvent callback
 														 formattedStartTime: String,
@@ -29,7 +29,8 @@ case class FullCalendarEvent(title: String,
 														 description: String = "",
 														 shorterTitle: String = "", // used in the pop-up to display event details
 														 tutorNames: String = "",
-                             context: String="")
+                             context: String = "",
+														 comments: String = "")
 
 object FullCalendarEvent {
 
@@ -51,7 +52,8 @@ object FullCalendarEvent {
 			description = source.description,
 			shorterTitle = source.context.map { _ + " " }.getOrElse("") + source.eventType.displayName,
 			tutorNames = userLookup.getUsersByWarwickUniIds(source.staffUniversityIds).values.map(_.getFullName).mkString(", "),
-		  context = source.context.getOrElse("")
+		  context = source.context.getOrElse(""),
+			comments = source.comments.getOrElse("")
 		)
 	}
 }

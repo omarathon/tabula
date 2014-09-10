@@ -1,17 +1,16 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
-import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.util.termdates.TermFactory
-import uk.ac.warwick.spring.Wire
-import org.joda.time.DateMidnight
-import org.joda.time.DateTimeConstants
-import uk.ac.warwick.util.termdates.Term
-import uk.ac.warwick.tabula.services.TermService
 
-case class WeekRange(val minWeek: WeekRange.Week, val maxWeek: WeekRange.Week) {
+import org.hibernate.`type`.StandardBasicTypes
+import org.joda.time.{DateMidnight, DateTimeConstants}
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
+import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.util.termdates.Term
+
+case class WeekRange(minWeek: WeekRange.Week, maxWeek: WeekRange.Week) {
 	if (maxWeek < minWeek) throw new IllegalArgumentException("maxWeek must be >= minWeek")
 	
 	def isSingleWeek = maxWeek == minWeek
@@ -31,7 +30,7 @@ object WeekRange {
 	def fromString(rep: String) = rep.split('-') match {
 		case Array(singleWeek) => WeekRange(singleWeek.trim.toInt)
 		case Array(min, max) => WeekRange(min.trim.toInt, max.trim.toInt)
-		case _ => throw new IllegalArgumentException("Couldn't convert string representation %s to WeekRange" format (rep))
+		case _ => throw new IllegalArgumentException("Couldn't convert string representation %s to WeekRange" format rep)
 	}
 	
 	/**
@@ -58,7 +57,7 @@ object WeekRange {
 		val summerTerm = termService.getNextTerm(springTerm)
 		
 		def toWeekRange(term: Term) =
-			WeekRange(term.getAcademicWeekNumber(term.getStartDate()), term.getAcademicWeekNumber(term.getEndDate()))
+			WeekRange(term.getAcademicWeekNumber(term.getStartDate), term.getAcademicWeekNumber(term.getEndDate))
 			
 		Seq(autumnTerm, springTerm, summerTerm).map(toWeekRange)
 	}

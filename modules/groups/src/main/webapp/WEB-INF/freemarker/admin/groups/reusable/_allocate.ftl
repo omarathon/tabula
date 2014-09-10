@@ -41,7 +41,7 @@
 		<div class="tab-content">
 			<div class="tab-pane active" id="allocategroups-tab1">
 				<p>Drag students onto a group to allocate them to it. Select multiple students by dragging a box around them.
-					You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key to add to a selection.</p>
+					You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key and drag to add to a selection.</p>
 
 				<@spring.hasBindErrors name="command">
 					<#if errors.hasErrors()>

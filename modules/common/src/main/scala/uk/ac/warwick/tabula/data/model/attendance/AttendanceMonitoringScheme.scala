@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import javax.validation.constraints.NotNull
 import javax.persistence._
 import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.data.model.{KnownTypeUserGroup, GeneratedId, Department, UserGroup}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMembershipHelpers, AttendanceMonitoringService}
 import uk.ac.warwick.tabula.services.UserGroupCacheManager
 import uk.ac.warwick.spring.Wire

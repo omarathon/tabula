@@ -11,7 +11,7 @@
 <#elseif filterCommand.filterTooVague>
 	<p class="alert"><i class="icon-warning-sign"></i> The filter you have chosen includes too many students.</p>
 <#elseif filterResult?size == 0>
-	<p class="alert"><i class="icon-warning-sign"></i> No points exist for the selected options.</p>
+	<p class="alert"><i class="icon-warning-sign"></i> No students with points exist for the selected options.</p>
 <#else>
 
 	<#assign returnTo><@routes.viewPoints filterCommand.department filterCommand.academicYear.startYear?c filterQuery/></#assign>

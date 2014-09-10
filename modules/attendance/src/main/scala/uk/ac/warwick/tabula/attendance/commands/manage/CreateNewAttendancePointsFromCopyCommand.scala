@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, MonitoringPointType, MonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceMonitoringPoint}
-import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringTermServiceComponent, TermServiceComponent}
+import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme, MonitoringPoint, MonitoringPointType}
+import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object CreateNewAttendancePointsFromCopyCommand {
 	def apply(
@@ -32,19 +32,16 @@ object CreateNewAttendancePointsFromCopyCommand {
 
 
 class CreateNewAttendancePointsFromCopyCommandInternal(val department: Department, val academicYear: AcademicYear, val schemes: Seq[AttendanceMonitoringScheme])
-	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with GetsPointsToCreate with TaskBenchmarking {
+	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with GetsPointsToCreate with TaskBenchmarking with UpdatesAttendanceMonitoringScheme {
 
-	self: CreateNewAttendancePointsFromCopyCommandState with TermServiceComponent with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
+	self: CreateNewAttendancePointsFromCopyCommandState with TermServiceComponent
+		with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal() = {
 		val points = getPoints(findPointsResult, schemes, pointStyle)
 		points.foreach(attendanceMonitoringService.saveOrUpdate)
 
-		val students = profileService.getAllMembersWithUniversityIds(schemes.flatMap(_.members.members).distinct).flatMap {
-			case student: StudentMember => Option(student)
-			case _ => None
-		}
-		attendanceMonitoringService.updateCheckpointTotalsAsync(students, department, academicYear)
+		afterUpdate(schemes)
 
 		points
 	}

@@ -57,7 +57,7 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
 
 	def modifiedRelationship = item.entity
 
-	def title: String = s"${relationshipType.agentRole} allocation"
+	def title: String = s"${relationshipType.agentRole.capitalize} allocation"
 
 	def newAgent =
 		if (modifiedRelationship.endDate != null && modifiedRelationship.endDate.isBeforeNow) None
@@ -108,7 +108,7 @@ class BulkNewAgentRelationshipNotification extends BulkRelationshipChangeNotific
 class BulkOldAgentRelationshipNotification extends BulkRelationshipChangeNotification{
 	@transient val templateLocation = BulkRelationshipChangeNotification.OldAgentTemplate
 
-	def title: String = s"Change to ${relationshipType.studentRole}s"
+	def title: String = s"Change to ${relationshipType.studentRole.capitalize}s"
 
 	def recipients = oldAgent.map { _.asSsoUser }.toSeq
 

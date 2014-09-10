@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
+
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups._
 
@@ -124,6 +125,12 @@ class DepartmentSmallGroupEntityReference extends EntityReference[DepartmentSmal
 
 @Entity @DiscriminatorValue(value="originalityReport")
 class OriginalityReportEntityReference extends EntityReference[OriginalityReport] {
+	@ManyToOne
+	var entity: Entity = null
+}
+
+@Entity @DiscriminatorValue(value="department")
+class DepartmentEntityReference extends EntityReference[Department] {
 	@ManyToOne
 	var entity: Entity = null
 }

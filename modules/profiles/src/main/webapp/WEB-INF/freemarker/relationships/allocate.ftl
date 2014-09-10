@@ -47,7 +47,7 @@
 				<li class="active">
 					<a href="#allocatestudents-tab1" data-toggle="tab">Drag and drop</a>
 				</li>
-				<li >
+				<li style="display: none;">
 					<a href="#allocatestudents-tab2" data-toggle="tab">Upload spreadsheet</a>
 				</li>
 			</ul>
@@ -56,7 +56,7 @@
 				<div id="allocatestudents-tab1" class="tab-pane active">
 
 				<p>Drag students onto a ${relationshipType.agentRole} to allocate them to the ${relationshipType.agentRole}. Select multiple students by dragging a box around them.
-					 You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key to add to a selection.</p>
+					 You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key and drag to add to a selection.</p>
 
 				<@spring.hasBindErrors name="allocateStudentsToRelationshipCommand">
 					<#if errors.hasErrors()>
@@ -261,6 +261,9 @@
 
 	<script type="text/javascript">
 		(function($) {
+
+			// TAB-2627
+			$('.tabbable ul li').show();
 
 			<!-- TAB-1266 - warning popup for 'Remove All' button -->
 			$('body').on('click','.popover #confirm-remove-all', function() {

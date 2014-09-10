@@ -462,14 +462,25 @@
 										if (event.fullTitle && event.fullTitle.length > 0) {
 											content = content + "<tr><th>Title</th><td>" + event.fullTitle + "</td></tr>";
 										}
-                                        if (event.description && event.description.length > 0) {
+
+										if (event.description && event.description.length > 0) {
 											content = content + "<tr><th>What</th><td>" + event.description + "</td></tr>";
 										}
-                                        content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
-                                        content = content + "<tr><th>Where</th><td>" + event.location + "</td></tr>";
+
+										content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
+
+										if (event.location && event.location.length > 0) {
+											content = content + "<tr><th>Where</th><td>" + event.location + "</td></tr>";
+										}
+
                                         if (event.tutorNames.length > 0){
                                         	content = content + "<tr><th>Who</th><td> " + event.tutorNames + "</td></tr>";
                                         }
+
+										if (event.comments && event.comments.length > 0) {
+											content = content + "<tr><th>Comments</th><td>" + event.comments + "</td></tr>";
+										}
+
                                     	content = content + "</table>";
                                     	$(element).tabulaPopover({html:true, container:"#container",title:event.shorterTitle, content:content})
                                     }
