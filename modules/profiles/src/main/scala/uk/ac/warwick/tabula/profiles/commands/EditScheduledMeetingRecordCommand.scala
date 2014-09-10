@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.ScheduledMeetingRecordInviteeNotification
+import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.{ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.{BindingResult, Errors}
@@ -144,7 +144,13 @@ trait EditScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRe
 			if (result.isRescheduled) "rescheduled"
 			else "updated"
 
-		Seq(Notification.init(new ScheduledMeetingRecordInviteeNotification(verb), user, meeting, meeting.relationship))
+		val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification(verb), user, meeting, meeting.relationship)
+		if(!meeting.creatorInRelationship) {
+			val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification(verb), user, meeting, meeting.relationship)
+			Seq(inviteeNotification, behalfNotification)
+		} else {
+			Seq(inviteeNotification)
+		}
 	}
 }
 
