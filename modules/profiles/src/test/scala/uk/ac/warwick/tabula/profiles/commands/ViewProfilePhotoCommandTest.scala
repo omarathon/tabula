@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
+import uk.ac.warwick.tabula.commands.profiles.DefaultPhoto
 import uk.ac.warwick.tabula.{Mockito, ItemNotFoundException, TestBase}
 import uk.ac.warwick.tabula.data.model.{FileAttachment, StudentMember, Member}
 import scala.language.reflectiveCalls
