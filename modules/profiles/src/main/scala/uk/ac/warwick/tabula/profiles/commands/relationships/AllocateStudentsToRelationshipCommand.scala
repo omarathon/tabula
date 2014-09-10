@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.RelationshipService
