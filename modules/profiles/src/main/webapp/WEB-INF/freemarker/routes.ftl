@@ -79,7 +79,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro meeting_will_create_checkpoint><@_u page="/check/meeting" context="/attendance" /></#macro>
 
 <#macro timetable_ical student webcal=true><#compress>
-	<#local https_url><@_u page="/timetable/ical?timetableHash=${student.timetableHash}" /></#local>
+	<#local https_url><@_u page="/timetable/ical/${student.timetableHash}.ics" /></#local>
 	<#if webcal>
 		${https_url?replace('https','webcal')}
 	<#else>

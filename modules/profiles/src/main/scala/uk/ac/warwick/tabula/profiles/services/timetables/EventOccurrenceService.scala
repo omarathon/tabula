@@ -2,13 +2,10 @@ package uk.ac.warwick.tabula.profiles.services.timetables
 
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import org.joda.time._
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.services.{ProfileServiceComponent, TermServiceComponent, WeekToDateConverterComponent}
-import uk.ac.warwick.util.termdates.Term
-import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 import net.fortuna.ical4j.model.component.VEvent
-import net.fortuna.ical4j.model.Property
+import net.fortuna.ical4j.model.parameter
 import net.fortuna.ical4j.model.parameter.Value
 import net.fortuna.ical4j.model.property._
 import net.fortuna.ical4j.model.parameter.Cn
@@ -70,9 +67,11 @@ trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
 			if (eventOccurrence.start.toDateTime.isEqual(end)) {
 				end = end.plusMinutes(1)
 			}
-			val event: VEvent = new VEvent(toDateTime(eventOccurrence.start.toDateTime), toDateTime(end.toDateTime), eventOccurrence.title.maybeText.getOrElse(eventOccurrence.name))
-			event.getProperties.getProperty(Property.DTSTART).getParameters.add(Value.DATE_TIME)
-			event.getProperties.getProperty(Property.DTEND).getParameters.add(Value.DATE_TIME)
+			val event: VEvent = new VEvent(toDateTime(eventOccurrence.start.toDateTime), toDateTime(end.toDateTime), eventOccurrence.title.maybeText.getOrElse(eventOccurrence.name).safeSubstring(0, 255))
+			event.getStartDate.getParameters.add(Value.DATE_TIME)
+			event.getStartDate.getParameters.add(new parameter.TzId("Europe/London"))
+			event.getEndDate.getParameters.add(Value.DATE_TIME)
+			event.getEndDate.getParameters.add(new parameter.TzId("Europe/London"))
 
 			if (!eventOccurrence.description.isEmpty) {
 				event.getProperties.add(new Description(eventOccurrence.description))
@@ -92,12 +91,11 @@ trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
 				profileService.getMemberByUniversityId(universityId, disableFilter = true).map {
 					staffMember =>
 						val organiser: Organizer = new Organizer(s"MAILTO:${staffMember.email}")
-						organiser.getParameters.add(new Cn(staffMember.fullName.getOrElse("unknown")))
+						organiser.getParameters.add(new Cn(staffMember.fullName.getOrElse("Unknown")))
 						event.getProperties.add(organiser)
 				}
 			}.getOrElse {
-				val organiser: Organizer = new Organizer
-				organiser.getParameters.add(new Cn("unknown"))
+				val organiser: Organizer = new Organizer(s"MAILTO:no-reply@tabula.warwick.ac.uk")
 				event.getProperties.add(organiser)
 			}
 
