@@ -17,6 +17,7 @@ case class TimetableEvent(
 	context: Option[String],
 	comments: Option[String],
 	staffUniversityIds: Seq[String],
+	studentUniversityIds: Seq[String],
 	year: AcademicYear
 )
 
@@ -41,6 +42,7 @@ object TimetableEvent {
 			context = Some(sge.group.groupSet.module.code.toUpperCase),
 			comments = None,
 			staffUniversityIds = sge.tutors.knownType.members,
+			studentUniversityIds = sge.group.students.knownType.members,
 			year = sge.group.groupSet.academicYear)
 	}
 

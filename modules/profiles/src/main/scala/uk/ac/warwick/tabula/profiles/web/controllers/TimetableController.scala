@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
-import uk.ac.warwick.tabula.profiles.services.timetables._
+import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.services.{TermAwareWeekToDateConverterComponent, AutowiringProfileServiceComponent, AutowiringTermServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringMeetingRecordServiceComponent, AutowiringRelationshipServiceComponent, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
 import uk.ac.warwick.tabula.helpers.SystemClockComponent

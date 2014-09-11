@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.profiles.services.timetables
+package uk.ac.warwick.tabula.services.timetables
 
 import uk.ac.warwick.tabula.data.model.{StaffMember, Member, AbstractMeetingRecord, RuntimeMember, StudentMember}
 import uk.ac.warwick.tabula.services.{SecurityServiceComponent, RelationshipServiceComponent, MeetingRecordServiceComponent}

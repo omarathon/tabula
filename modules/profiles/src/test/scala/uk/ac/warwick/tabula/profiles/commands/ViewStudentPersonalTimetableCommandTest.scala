@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.profiles.services.timetables._
+import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek}
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, Mockito, TestBase}
 import org.joda.time.{Interval, LocalDate, LocalDateTime, LocalTime}
@@ -14,7 +14,7 @@ class ViewStudentPersonalTimetableCommandTest extends TestBase with Mockito{
 	val testStudent = new StudentMember
 	val user = mock[CurrentUser]
 
-	val event = TimetableEvent("","","",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,None,None,Nil, AcademicYear(2012))
+	val event = TimetableEvent("","","",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,None,None,Nil,Nil, AcademicYear(2012))
 	val timetableEvents = Seq(event)
 
 	val occurrence = EventOccurrence("", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, None, None, Nil)

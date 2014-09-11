@@ -1,11 +1,11 @@
-package uk.ac.warwick.tabula.profiles.services.timetables
+package uk.ac.warwick.tabula.services.timetables
 
-import uk.ac.warwick.tabula.{AcademicYear, TestBase}
-import scala.xml.XML
-import uk.ac.warwick.tabula.data.model.groups.WeekRange
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import org.joda.time.LocalTime
-import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.{AcademicYear, TestBase}
+
+import scala.xml.XML
 
 class TimetableFetchingServiceTest extends TestBase {
 	
@@ -25,9 +25,11 @@ class TimetableFetchingServiceTest extends TestBase {
 			context=Some("CS132"),
 			comments=None,
 			staffUniversityIds=Seq("1170047"),
+			studentUniversityIds=Nil,
 		  year = AcademicYear(2012)
 		))
 		events(1).comments should be (Some("Some comments"))
+		events(1).studentUniversityIds should be (Seq("1234567"))
 	}
 	
 	val TimetableEvents = """<?xml version="1.0" encoding="UTF-8"?>
@@ -71,6 +73,9 @@ class TimetableFetchingServiceTest extends TestBase {
             <staffmember>1170047</staffmember>
             <staffmember>8570237</staffmember>
          </staffmembers>
+				 <students>
+		 			  <student>1234567</student>
+	 			 </students>
       </Activity>
       <Activity>
          <name>CS130L</name>

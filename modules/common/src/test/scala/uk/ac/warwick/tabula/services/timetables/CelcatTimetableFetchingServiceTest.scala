@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.profiles.services.timetables
+package uk.ac.warwick.tabula.services.timetables
 
 import dispatch.classic.Credentials
 import org.apache.http.auth.AuthScope
@@ -6,10 +6,9 @@ import org.joda.time.LocalTime
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.services.permissions.CacheStrategyComponent
-import uk.ac.warwick.tabula.services.{TermServiceImpl, TermServiceComponent, UserLookupComponent}
-import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
+import uk.ac.warwick.tabula.services.{TermServiceComponent, TermServiceImpl, UserLookupComponent}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class CelcatTimetableFetchingServiceTest extends TestBase {
 
@@ -64,6 +63,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 			Some("ES186"),
 			None,
 			Nil,
+			Nil,
 			AcademicYear.parse("13/14")
 		))
 
@@ -95,6 +95,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 			Some("P521"),
 			Some("ES186"),
 			None,
+			Nil,
 			Nil,
 			AcademicYear.parse("13/14")
 		))

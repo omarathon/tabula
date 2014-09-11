@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember}
 import org.joda.time.{Interval, LocalDate}
-import uk.ac.warwick.tabula.profiles.services.timetables.{TermBasedEventOccurrenceComponent, StaffTimetableEventSource, EventOccurrenceServiceComponent, ScheduledMeetingEventSource, StudentTimetableEventSource}
+import uk.ac.warwick.tabula.services.timetables.{TermBasedEventOccurrenceComponent, StaffTimetableEventSource, EventOccurrenceServiceComponent, ScheduledMeetingEventSource, StudentTimetableEventSource}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Command, Unaudited, ReadOnly, ComposableCommand, Appliable, CommandInternal}
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence}
