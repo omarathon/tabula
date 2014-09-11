@@ -431,8 +431,17 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.getAssessmentComponents(Fixtures.module("la101")) should be (Seq(ua3))
 		assignmentMembershipService.getAssessmentComponents(Fixtures.module("cs101")) should be (Seq())
 
-		assignmentMembershipService.getAssessmentComponents(Fixtures.department("ch")) should be (Seq(ua1, ua2))
-		assignmentMembershipService.getAssessmentComponents(Fixtures.department("la")) should be (Seq(ua3))
+
+		val chemistryDept = Fixtures.department("ch")
+		val chemistryModule = Fixtures.module("ch101")
+		chemistryDept.modules.add(chemistryModule)
+
+		val lawDept = Fixtures.department("la")
+		val lawModules = Seq(Fixtures.module("la101"), Fixtures.module("la102"))
+		lawDept.modules.addAll(lawModules.asJava)
+
+		assignmentMembershipService.getAssessmentComponents(chemistryDept) should be (Seq(ua1, ua2))
+		assignmentMembershipService.getAssessmentComponents(lawDept) should be (Seq(ua3))
 		assignmentMembershipService.getAssessmentComponents(Fixtures.department("cs")) should be (Seq())
 	}
 
@@ -457,6 +466,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.save(upstreamAssignment) should be (upstreamAssignment)
 
 		val assignment = newDeepAssignment("ch101")
+
 		val department = assignment.module.department
 
 		session.save(department)
