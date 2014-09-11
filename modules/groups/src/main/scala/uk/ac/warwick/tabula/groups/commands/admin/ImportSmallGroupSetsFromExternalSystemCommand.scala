@@ -67,19 +67,19 @@ class ImportSmallGroupSetsFromExternalSystemCommandInternal(val department: Depa
 		with SmallGroupEventGenerator
 		with UserLookupComponent =>
 
+	lazy val events =
+		modules.toSeq
+			.flatMap { module =>
+			val events =
+				timetableFetchingService.getTimetableForModule(module.code.toUpperCase)
+					.filter { event => event.year == academicYear }
+					.filter { event => event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar }
+					.groupBy { _.eventType }
+
+			events.toSeq.map { case (eventType, events) => (module, eventType, events) }
+		}
+
 	def applyInternal() = transactional() {
-		val events =
-			modules.toSeq
-				.flatMap { module =>
-					val events =
-						timetableFetchingService.getTimetableForModule(module.code.toUpperCase)
-							.filter { event => event.year == academicYear }
-							.filter { event => event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar }
-							.groupBy { _.eventType }
-
-					events.toSeq.map { case (eventType, events) => (module, eventType, events) }
-				}
-
 		// For each combination of module & event type, create a small group set with a group for each event
 		events.map { case (module, eventType, events) =>
 			val format = eventType match {
