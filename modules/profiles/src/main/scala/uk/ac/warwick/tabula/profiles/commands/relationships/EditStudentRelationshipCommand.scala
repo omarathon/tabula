@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.profiles.commands.relationships
 
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands.{SelfValidating, Description}
@@ -16,21 +15,18 @@ import uk.ac.warwick.tabula.data.model.notifications.{StudentRelationshipChangeT
 
 /**
  * Command to edit the relationship for the StudentCourseDetails passed in, passing 
- * in the current agent if the student has one. This is passed in to distinguish 
+ * in the current agent to change. This is passed in to distinguish
  * which agent is being "changed" if a student has multiple agents, or that an 
  * agent is being added and the existing one shouldn't be removed.
  * 
- * The command returns a Seq of the modified relationships - so if nothing has
- * changed, it will return Nil - but it may also return relationships that have
- * been ended with other agents (for example when removing multiple agents) that
- * weren't initially requested.
  */
 class EditStudentRelationshipCommand(
 	val studentCourseDetails: StudentCourseDetails,
 	val relationshipType: StudentRelationshipType,
-	val currentAgents: Seq[Member],
+	val currentAgents: Seq[Member], // from the profile screen, this is the agent being changed - otherwise existing agents
 	val currentUser: CurrentUser,
-	val remove: Boolean
+	val removeOnly: Boolean // this is a remove action from the student profile screen
+
 ) extends AbstractEditStudentRelationshipCommand with SelfValidating {
 
 	override def oldAgents = currentAgents
@@ -53,45 +49,52 @@ class EditStudentRelationshipCommand(
 		}
 	}
 
-	def applyInternal() = {
+	/** applyInternal actions 3 different things:
+		*
+		* 1. From the student profile page, a user removes an agent (removeOnly == true)
+		* 2. From the student profile page, a user replaces a single specified agent (held in currentAgents) with another specified agent (agent)
+		* 3. Using drag-and-drop/spreadsheet upload, a user replaces all existing agents (held in currentAgents) with another specified agent (agent)
+		*
+		* In case 3 currentAgents will be all the old agents but not necessarily in case 2.
+		*
+		* It returns a Seq of relationships it has modified, excluding relationships that have been ended as part of a change
+		* allowing it to return enough information for notifications, given that the calling method also has access to oldAgents.
+		*
+		* If all this does is add an agent, the new relationship is returned.
+		*
+		* If an agent is changed, it returns the new relationship only -
+		* notifications will use oldAgent to figure out what relationships have been ended.
+		*
+		* If the sole action is to remove an agent, the ended relationship is returned.
+		*/
+
+	def applyInternal(): Seq[StudentRelationship] = {
+
 		if (currentAgents.isEmpty) {
-			// Brand new agent
+			// student has no existing agent - just create a new relationship
 			val newRelationship = relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(agent)).head
 			Seq(newRelationship)
-		} else if (!currentAgents.contains(agent)) { // this agent is new for this tutee
-				if (remove) {
-					val preexistingRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
-					relationshipService.endStudentRelationships(preexistingRelationships)
-					preexistingRelationships
-				} else {
-					// Replacing the current agent with a new one
-					val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
+		}
+		else if (!currentAgents.contains(agent)) {
+				// we've been given a new agent -
+				// replace the current agents with the new one and return the new relationship
+				val relationshipsToReplace = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
+				relationshipService.endStudentRelationships(relationshipsToReplace)
+				relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(agent))
+		}
+		else {
+			if (removeOnly) {
+			// remove the relationship for the specified agent and return the ended relationship
+			val preexistingRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
 
-					// Is there an existing relationship for this agent?
-					// Could happen if a student has two agents, and we're trying to replace the second with the first
-					currentRelationships.find(_.agent == agent.universityId) match {
-						case Some(existingRelationship) =>
-							// Just return the existing relationship without any notifications
-							Nil
-						case _ =>
-							// Find the relationship for the current agent, and end it
-							relationshipService.endStudentRelationships(currentRelationships)
-
-							// Save the new relationship
-							val newRelationship = relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(agent)).head
-
-							Seq(newRelationship)
-					}
-				}
-		} else { // this agent is already an agent for this tutee
-				if (remove) {
-					// remove the other agents
-					val preexistingRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
-					val relationshipsForOtherAgents = preexistingRelationships.filter(rel => rel.agent != agent)
-					relationshipService.endStudentRelationships(relationshipsForOtherAgents)
-					relationshipsForOtherAgents
-				}
-				else Nil
+			val relationshipsToRemove: Seq[StudentRelationship] = preexistingRelationships.filter(rel => rel.agent == agent)
+			relationshipService.endStudentRelationships(relationshipsToRemove)
+			relationshipsToRemove
+			}
+			else {
+				// the agent is already tutor for this student and this isn't a remove action - do nothing
+				Nil
+			}
 		}
 	}
 
