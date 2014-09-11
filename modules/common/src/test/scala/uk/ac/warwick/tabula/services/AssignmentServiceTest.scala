@@ -466,7 +466,6 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.save(upstreamAssignment) should be (upstreamAssignment)
 
 		val assignment = newDeepAssignment("ch101")
-
 		val department = assignment.module.department
 
 		session.save(department)
