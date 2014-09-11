@@ -10,10 +10,10 @@
 	<div class="tab-content">
 		<div class="tab-pane active" id="upload">
 			<p>
-				The marks spreadsheet that you upload must be an .xlsx spreadsheet (created in Microsoft Office 2007+).
-				The spreadsheet should have two columns in the following order: student ID then mark.
+				You can upload marks in a spreadsheet, which must be saved as an .xlsx file (ie created in Microsoft Office 2007 or later).
+				The spreadsheet should have three column headings in the following order: <b>ID, Mark, Grade</b>.
 				You can use this <a href="<@routes.markstemplate assignment=assignment  />">generated spreadsheet</a> as
-				a template.
+				a template. Note that you can upload just marks, just grades or both.
 			</p>
 			<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marks')}" commandName="adminAddMarksCommand">
 				<input name="isfile" value="true" type="hidden"/>
