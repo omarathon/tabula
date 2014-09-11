@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import scala.collection.JavaConverters._
 
 trait AssignmentMembershipDaoComponent {
 	val membershipDao: AssignmentMembershipDao
@@ -174,14 +175,25 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 			.seq filter isInteresting
 	}
 
-	/** Just gets components of type Assignment for this department, not all components. */
-	def getAssessmentComponents(department: Department) = {
-		session.newCriteria[AssessmentComponent]
-			.add(is("departmentCode", department.code.toUpperCase))
-			.addOrder(Order.asc("moduleCode"))
-			.addOrder(Order.asc("sequence"))
-			.seq filter isInteresting
-	}
+		/** Just gets components of type Assignment for modules in this department, not all components. */
+		def getAssessmentComponents(department: Department):Seq[AssessmentComponent] = {
+
+			val deptModuleCodes = department.modules.asScala.map {_.code}
+
+			val allComponents:Seq[AssessmentComponent] = {
+				session.newQuery[AssessmentComponent]("""select ac from AssessmentComponent ac
+								where ac.departmentCode = :rootdeptcode
+								order by ac.moduleCode asc, ac.sequence asc""")
+								.setString("rootdeptcode", department.rootDepartment.code.toUpperCase)
+								.seq filter isInteresting
+			}
+
+			allComponents filter {
+				component => deptModuleCodes.contains(component.moduleCodeBasic.toLowerCase)
+			}
+		}
+
+
 
 	def countPublishedFeedback(assignment: Assignment): Int = {
 		session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = 1""")

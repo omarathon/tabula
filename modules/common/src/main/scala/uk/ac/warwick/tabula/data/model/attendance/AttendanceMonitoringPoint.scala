@@ -14,7 +14,7 @@ import org.hibernate.annotations.Type
 @Entity
 class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPointSettings {
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "scheme_id")
 	var scheme: AttendanceMonitoringScheme = _
 
@@ -58,7 +58,7 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 	def isDateValidForPoint(date: LocalDate): Boolean =
 		date == startDate || date == endDate || (startDate.isBefore(date) && endDate.isAfter(date))
 
-	def isStartDateInFuture(): Boolean =
+	def isStartDateInFuture: Boolean =
 		DateTime.now.isBefore(startDate.toDateTimeAtStartOfDay)
 
 	@Column(name="point_type")
@@ -76,6 +76,7 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 
 	def cloneTo(scheme: AttendanceMonitoringScheme): AttendanceMonitoringPoint = {
 		val newPoint = new AttendanceMonitoringPoint
+		scheme.points.add(newPoint)
 		newPoint.scheme = scheme
 		newPoint.name = this.name
 		newPoint.startWeek = _startWeek
