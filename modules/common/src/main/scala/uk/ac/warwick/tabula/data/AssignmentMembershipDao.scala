@@ -176,9 +176,9 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 
 		/** Just gets components of type Assignment for modules in this department, not all components. */
 		def getAssessmentComponents(department: Department):Seq[AssessmentComponent] = {
-			session.newQuery[AssessmentComponent]("""select ua from AssessmentComponent ua
-				where ua.departmentCode = :rootdeptcode
-				and SUBSTR(ua.moduleCode,1,INSTR(ua.moduleCode, '-')-1) in
+			session.newQuery[AssessmentComponent]("""select ac from AssessmentComponent ac
+				where ac.departmentCode = :rootdeptcode
+				and SUBSTR(ac.moduleCode,1,INSTR(ac.moduleCode, '-')-1) in
 				(select UPPER(m.code) from Department d join d.modules as m where d.code = :deptcode)
 				order by modulecode asc, sequence asc""")
 				.setString("rootdeptcode", department.rootDepartment.code.toUpperCase)
