@@ -16,8 +16,8 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, PermissionDeniedExceptio
 class ViewProfileCommand(user: CurrentUser, profile: Member)
 	extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
 
-	if ((user.isStudent && user.universityId != profile.universityId) ||
-			(user.isStaff && profile.isStaff && user.universityId != profile.universityId ) ) {
+	if (!user.god && ((user.isStudent && user.universityId != profile.universityId) ||
+			(user.isStaff && profile.isStaff && user.universityId != profile.universityId )) ) {
 		logger.info("Denying access for user " + user + " to view profile " + profile)
 		throw new PermissionDeniedException(user, Permissions.Profiles.Read.Core, profile)
 	}
