@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotifica
 @Entity
 @DiscriminatorValue(value="ScheduledMeetingRecordInvitee")
 class ScheduledMeetingRecordInviteeNotification extends ScheduledMeetingRecordNotification
-	with SingleRecipientNotification with AddsIcalAttachmenToScheduledMeetingNotification {
+	with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification {
 
 	def this(theVerb: String) {
 		this()

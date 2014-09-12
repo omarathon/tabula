@@ -42,7 +42,7 @@ private case class ByteArrayDataSource(bytes: Array[Byte], contentType: String, 
 	override def getContentType: String = contentType
 }
 
-trait AddsIcalAttachmenToScheduledMeetingNotification extends HasNotificationAttachment {
+trait AddsIcalAttachmentToScheduledMeetingNotification extends HasNotificationAttachment {
 
 	self: ScheduledMeetingRecordNotification =>
 
@@ -97,13 +97,13 @@ trait AddsIcalAttachmenToScheduledMeetingNotification extends HasNotificationAtt
 
 		// iCal part for Outlook/Office 365
 		val icalPart = new MimeBodyPart
-		icalPart.setDataHandler(new DataHandler(ByteArrayDataSource(iCal, "text/calendar; method=" + cal.getMethod.getValue, "booking.ics")))
+		icalPart.setDataHandler(new DataHandler(ByteArrayDataSource(iCal, "text/calendar; method=" + cal.getMethod.getValue, "meeting.ics")))
 
 		// Attachment for everyone else
 		val attachmentBodyPart = new MimeBodyPart
 		attachmentBodyPart.setDisposition(Part.ATTACHMENT)
 		attachmentBodyPart.setFileName("booking.ics")
-		attachmentBodyPart.setDataHandler(new DataHandler(ByteArrayDataSource(iCal, "text/calendar", "booking.ics")))
+		attachmentBodyPart.setDataHandler(new DataHandler(ByteArrayDataSource(iCal, "text/calendar", "meeting.ics")))
 
 		mp.addBodyPart(textPart)
 		mp.addBodyPart(icalPart)
