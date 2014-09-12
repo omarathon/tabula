@@ -74,7 +74,7 @@ class UserLookupTagTest extends TestBase with Mockito {
 		DeepUnwrap.unwrap(env.getCurrentNamespace().get("returned_users")) should be (Map(
 			"cuscav" -> userLookup.getUserByUserId("cuscav"),
 			"cusebr" -> userLookup.getUserByUserId("cusebr")
-		).asJava)
+		))
 	}
 	
 }
