@@ -159,7 +159,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 		command.canManageDepartment should be (true)
 		command.modules should be (Seq(module1, module2))
 		command.timetabledEvents should be (Seq(
-			new TimetabledSmallGroupEvent(module1, TimetableEventType.Seminar, Seq(tEventModule1Seminar1, tEventModule1Seminar2))
+			new TimetabledSmallGroupEvent(module1, TimetableEventType.Seminar, Seq(tEventModule1Seminar2, tEventModule1Seminar1))
 		))
 	}}
 
@@ -176,7 +176,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 		set.name should be ("IN101 Seminars")
 		set.groups.size should be (2)
 
-		val group1 = set.groups.get(0)
+		val group1 = set.groups.get(1) // Order intentionally reversed; the events are re-ordered because Thursday is before Friday
 		group1.name = "Group 1"
 		group1.students.knownType.includedUserIds should be (Seq("0000001", "0000002", "0000003"))
 		group1.events.size should be (1)
@@ -189,7 +189,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 		group1event.location should be (NamedLocation("CS1.04"))
 		group1event.tutors.knownType.includedUserIds should be (Seq("abcdef"))
 
-		val group2 = set.groups.get(1)
+		val group2 = set.groups.get(0) // Order intentionally reversed; the events are re-ordered because Thursday is before Friday
 		group2.name = "Group 2"
 		group2.students.knownType.includedUserIds should be (Seq("0000004", "0000005", "0000006"))
 
