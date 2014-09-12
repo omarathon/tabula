@@ -5,6 +5,7 @@ import javax.persistence._
 import org.hibernate.ObjectNotFoundException
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
+import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.util.Assert
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
@@ -258,4 +259,8 @@ trait SingleRecipientNotification {
 	def recipients: Seq[User] = {
 		Seq(recipient)
 	}
+}
+
+trait HasNotificationAttachment {
+	def generateAttachments(helper: MimeMessageHelper): Unit
 }
