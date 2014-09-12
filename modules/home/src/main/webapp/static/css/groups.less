@@ -220,4 +220,12 @@ input.deleted {
 	}
 }
 
+.tabula-page #import-groups-table {
+	.striped-section { margin: 0; }
+
+	tr.selected td, tr.highlight td {
+		background-color: lighten(@tabulaGreenLight, 40%) !important;
+	}
+}
+
 @import "record-attendance.less";

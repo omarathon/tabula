@@ -8,9 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.UserLookupService
 import freemarker.template.utility.DeepUnwrap
 import uk.ac.warwick.tabula.JavaImports._
-import freemarker.ext.beans.BeansWrapper
 import freemarker.template.TemplateException
 import collection.JavaConversions._
+
+import scala.collection.JavaConverters._
 
 /**
  * Accepts either id="abc" or ids=["abc","def"] as attributes.
@@ -34,15 +35,20 @@ class UserLookupTag extends TemplateDirectiveModel {
 
 		val user = unwrap(params.get("id")).asInstanceOf[String]
 		val users = unwrap(params.get("ids")).asInstanceOf[JList[String]]
+		val universityId = Option(unwrap(params.get("universityId")).asInstanceOf[JBoolean]).map { _.booleanValue() }.getOrElse(false)
 
 		if (body == null) {
 			throw new TemplateException("UserLookupTag: must have a body", env);
 		}
 		
 		if (user != null) {
-			env.getCurrentNamespace().put("returned_user", wrapper.wrap(userLookup.getUserByUserId(user)))
+			val u = (if (universityId) userLookup.getUserByWarwickUniId(user) else userLookup.getUserByUserId(user))
+			env.getCurrentNamespace().put("returned_user", wrapper.wrap(u))
 		} else if (users != null) {
-			val map = userLookup.getUsersByUserIds(users)
+			val map =
+				if (universityId) userLookup.getUsersByWarwickUniIds(users)
+				else userLookup.getUsersByUserIds(users).asScala
+
 			val missingUserIds = map.values.filterNot(_.isFoundUser()).map(_.getUserId)
 			env.getCurrentNamespace().put("returned_users", wrapper.wrap(map))
 			env.getCurrentNamespace().put("missing_ids", wrapper.wrap(missingUserIds))

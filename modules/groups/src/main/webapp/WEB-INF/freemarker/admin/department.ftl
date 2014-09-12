@@ -21,9 +21,36 @@
 							scope=department
 							action_descr='manage department settings'
 							href=settings_url>
-							<i class="icon-list-alt icon-fixed-width"></i> Settings
+							<i class="icon-list-alt icon-fixed-width"></i> Department settings
 						</@fmt.permission_button>
 					</li>
+
+					<li class="divider"></li>
+
+					<li<#if !modules?has_content> class="disabled"</#if>>
+						<#assign import_url><@routes.import_groups_for_year department adminCommand.academicYear /></#assign>
+						<@fmt.permission_button
+						permission='SmallGroups.ImportFromExternalSystem'
+						scope=department
+						action_descr='import small groups from Syllabus+'
+						href=import_url>
+							<i class="icon-cloud-download"></i> Create small groups from Syllabus+
+						</@fmt.permission_button>
+					</li>
+					<#if features.smallGroupCrossModules>
+						<li>
+							<#assign cross_module_url><@routes.crossmodulegroups department /></#assign>
+							<@fmt.permission_button
+							permission='SmallGroups.Create'
+							scope=department
+							action_descr='create reusable small group allocations'
+							href=cross_module_url>
+								<i class="icon-group icon-fixed-width"></i> Reusable small groups
+							</@fmt.permission_button>
+						</li>
+					</#if>
+
+					<li class="divider"></li>
 
 					<#if features.smallGroupTeachingStudentSignUp>
 						<li ${hasOpenableGroupsets?string(''," class='disabled use-tooltip' title='There are no self-signup groups to open' ")}>
@@ -57,22 +84,12 @@
 							<i class="icon-envelope-alt icon-fixed-width"></i> Notify
 						</@fmt.permission_button>
 					</li>
-					<li<#if !hasGroupAttendance> class="disabled"</#if>>
-						<a href="<@routes.departmentAttendance department />"><i class="icon-group icon-fixed-width"></i> Attendance</a>
-					</li>
 
-					<#if features.smallGroupCrossModules>
-						<li>
-							<#assign cross_module_url><@routes.crossmodulegroups department /></#assign>
-							<@fmt.permission_button
-							permission='SmallGroups.Create'
-							scope=department
-							action_descr='create reusable small group allocations'
-							href=cross_module_url>
-								<i class="icon-group icon-fixed-width"></i> Reusable small groups
-							</@fmt.permission_button>
-						</li>
-					</#if>
+					<li class="divider"></li>
+
+					<li<#if !hasGroupAttendance> class="disabled"</#if>>
+						<a href="<@routes.departmentAttendance department />"><i class="icon-group icon-fixed-width"></i> View attendance</a>
+					</li>
 				</ul>
 			</div>
 		</#if>

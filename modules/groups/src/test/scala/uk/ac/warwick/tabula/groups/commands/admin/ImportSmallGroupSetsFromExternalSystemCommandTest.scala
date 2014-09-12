@@ -4,6 +4,7 @@ import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.commands.DescriptionImpl
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.groups.commands.admin.ImportSmallGroupSetsFromExternalSystemCommand.TimetabledSmallGroupEvent
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.{ModuleTimetableFetchingService, ModuleTimetableFetchingServiceComponent}
@@ -157,8 +158,8 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 	@Test def init { new CommandFixture with FixtureWithSingleSeminarForYear {
 		command.canManageDepartment should be (true)
 		command.modules should be (Seq(module1, module2))
-		command.events should be (Seq(
-			(module1, TimetableEventType.Seminar, Seq(tEventModule1Seminar1, tEventModule1Seminar2))
+		command.timetabledEvents should be (Seq(
+			new TimetabledSmallGroupEvent(module1, TimetableEventType.Seminar, Seq(tEventModule1Seminar1, tEventModule1Seminar2))
 		))
 	}}
 
