@@ -24,4 +24,10 @@ class ScheduledMeetingRecord extends AbstractMeetingRecord {
 
 	def toEventOccurrence(context: TimetableEvent.Context): Option[EventOccurrence] = asEventOccurrence(context)
 
+	// false when the meeting has been scheduled by a third party
+	def creatorInRelationship = {
+		def isStudent = creator.universityId == relationship.studentId
+		def isAgent = relationship.agentMember.exists(_ == creator)
+		isStudent || isAgent
+	}
 }

@@ -6,46 +6,43 @@
 	<@spring.bind path="allocateStudentsToRelationshipCommand">
 		<#assign hasErrors=status.errors.allErrors?size gt 0 />
 	</@spring.bind>
-	
+
 	<#assign hasRows = allocateStudentsToRelationshipCommand.unallocated?has_content || allocateStudentsToRelationshipCommand.mapping?keys?has_content />
 
 	<@f.form method="post" action=formDestination commandName="allocateStudentsToRelationshipCommand">
-		<h1>Spreadsheet upload of ${relationshipType.description} changes for ${department.name}</h1>
-		
+		<h1>Spreadsheet upload of ${relationshipType.description} changes</h1>
+		<h4><span class="muted">for</span> ${department.name}</h4>
+
 		<div class="submit-buttons">
 			<#if hasRows>
 				<input type="hidden" name="spreadsheet" value="true" />
+				<button type="submit" class="btn btn-primary">Continue</button>
 			</#if>
-
-			<button type="submit" class="btn btn-primary">Continue</button>
 
 			<a class="btn" href="<@routes.relationship_allocate department relationshipType />">Cancel</a>
 		</div>
-		
+
 		<#if hasErrors>
 			<h2>Invalid rows</h2>
-			
-			<div class="alert">
-				<p>There were problems with some rows in your spreadsheet. If you confirm, these rows will be ignored.</p>
-			</div>
-			
+			<h6>The following rows had errors which prevent them being uploaded</h6>
+
 			<table class="table table-bordered table-condensed table-striped">
 				<thead>
 					<tr>
 						<th>${relationshipType.studentRole?cap_first} ID</th>
-						<th>${relationshipType.studentRole?cap_first} Name</th>
+						<th>${relationshipType.studentRole?cap_first} name</th>
 						<th>${relationshipType.agentRole?cap_first} ID</th>
-						<th>${relationshipType.agentRole?cap_first} Name</th>
+						<th>${relationshipType.agentRole?cap_first} name</th>
 					</tr>
 				</thead>
 				<tbody>
 					<#macro errorRow error>
 						<#local field=error.arguments[0] />
 						<#local rowData=error.arguments[1] />
-						
+
 						<#local studentNameField>${relationshipType.studentRole?lower_case} name</#local>
 						<#local agentNameField>${relationshipType.agentRole?lower_case} name</#local>
-					
+
 						<tr class="no-bottom-border">
 							<td<#if field == 'student_id'> class="error"</#if>>${(rowData['student_id'])!}</td>
 							<td<#if field == 'student_id'> class="error"</#if>>${(rowData[studentNameField])!}</td>
@@ -65,7 +62,7 @@
 							</#if>
 						</tr>
 					</#macro>
-				
+
 					<@spring.bind path="allocateStudentsToRelationshipCommand">
 						<#list status.errors.allErrors as error>
 							<#if error.arguments?size gt 0>
@@ -76,10 +73,10 @@
 				</tbody>
 			</table>
 		</#if>
-		
+
 		<#if hasRows>
-			<h2>Data found in spreadsheet</h2>
-	
+			<h2>Valid rows</h2>
+
 			<table class="table table-bordered table-condensed table-striped">
 				<thead>
 					<tr>
@@ -110,17 +107,23 @@
 
 					<#list allocateStudentsToRelationshipCommand.mapping?keys as agent>
 						<#assign existingStudents = mappingById[agent.universityId]![] />
-						
+
 						<#list existingStudents as student>
 							<@hasAgent "mapping[${agent.universityId}][${student_index}]" student agent />
 						</#list>
 					</#list>
 				</tbody>
 			</table>
+		<#elseif hasErrors>
+			<h2>Valid rows</h2>
+
+			<p class="text-error">
+				<i class="icon-warning-sign"></i> There were no valid rows in the spreadsheet. Please review your spreadsheet data.
+			</p>
 		<#else>
 			<div class="alert alert-block alert-error">
 				<h2>No information was found in the spreadsheet</h2>
-				
+
 				<p>In order for students to be allocated or unallocated from their ${relationshipType.agentRole}, there must be
 				at least two columns in the spreadsheet. One must have a header of <strong>student_id</strong> and contain
 				University card numbers for students, and the other must have a header of <strong>agent_id</strong> and contain

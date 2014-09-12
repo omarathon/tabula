@@ -79,9 +79,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro meeting_will_create_checkpoint><@_u page="/check/meeting" context="/attendance" /></#macro>
 
 <#macro timetable_ical student webcal=true><#compress>
-	<#local https_url><@_u page="/timetable/ical?timetableHash=${student.timetableHash}" /></#local>
+	<#local https_url><@_u page="/timetable/ical/${student.timetableHash}.ics" /></#local>
 	<#if webcal>
-		${https_url?replace('https','webcals')}
+		${https_url?replace('https','webcal')}
 	<#else>
 		${https_url}
 	</#if>
@@ -96,3 +96,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro agentHomeForYear relationshipType academicYearString><@_u page="/agent/${relationshipType.urlPart}/${academicYearString}" context="/attendance" /></#macro>
 <#macro listmarkersubmissions assignment><@_u context="/coursework" page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/list"/></#macro>
+
+<#macro listMeetings relationshipType scjCode academicYear><@_u page="/view/meetings/${relationshipType.urlPart}/${scjCode}/${academicYear.startYear?c}"/></#macro>

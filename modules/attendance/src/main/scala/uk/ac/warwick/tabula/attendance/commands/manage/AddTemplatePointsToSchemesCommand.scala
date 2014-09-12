@@ -44,7 +44,6 @@ class AddTemplatePointsToSchemesCommandInternal(val department: Department, val 
 				newPoint.pointType = AttendanceMonitoringPointType.Standard
 				newPoint.createdDate = new DateTime()
 				newPoint.updatedDate = new DateTime()
-				scheme.points.add(point)
 				attendanceMonitoringService.saveOrUpdate(newPoint)
 				newPoint
 			}

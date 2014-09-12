@@ -5,15 +5,14 @@ import uk.ac.warwick.tabula.profiles.commands.{PublicStaffPersonalTimetableComma
 import uk.ac.warwick.tabula.data.model.{StaffMember, Member, StudentMember}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.IcalView
-import org.springframework.web.bind.annotation.{ModelAttribute, RequestParam, RequestMapping}
+import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestParam, RequestMapping}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
 import uk.ac.warwick.tabula.profiles.services.timetables._
 import uk.ac.warwick.tabula.services.{TermAwareWeekToDateConverterComponent, AutowiringProfileServiceComponent, AutowiringTermServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringMeetingRecordServiceComponent, AutowiringRelationshipServiceComponent, UserLookupService, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringMeetingRecordServiceComponent, AutowiringRelationshipServiceComponent, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Appliable
 import net.fortuna.ical4j.model.{TimeZoneRegistryFactory, Calendar}
 import net.fortuna.ical4j.model.property.{XProperty, Method, CalScale, Version, ProdId}
@@ -21,12 +20,9 @@ import net.fortuna.ical4j.model.component.VEvent
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import uk.ac.warwick.tabula.timetables.EventOccurrence
 
-@Controller
-@RequestMapping(value = Array("/timetable"))
-class TimetableController extends ProfilesController with TermBasedEventOccurrenceComponent with AutowiringTermServiceComponent
-	with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponent {
+abstract class AbstractTimetableController extends ProfilesController with AutowiringProfileServiceComponent {
 
-	var userLookup = Wire[UserLookupService]
+	type TimetableCommand = Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState
 
 	// re-use the event source, so it can cache lookups between requests
 	val studentTimetableEventSource = (new CombinedStudentTimetableEventSourceComponent
@@ -53,29 +49,71 @@ class TimetableController extends ProfilesController with TermBasedEventOccurren
 		with AutowiringRelationshipServiceComponent
 		with AutowiringMeetingRecordServiceComponent
 		with AutowiringSecurityServiceComponent
-	).scheduledMeetingEventSource
+		).scheduledMeetingEventSource
 
-	@ModelAttribute("command")
-	def command(
-	  @RequestParam(value="whoFor", required=false) whoFor:Member,
-	  @RequestParam(value="timetableHash", required=false) timetableHash:String
-   	): Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState = {
-	  if (timetableHash.hasText) {
-		  profileService.getMemberByTimetableHash(timetableHash).map {
-				case student: StudentMember => PublicStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
-				case staff: StaffMember => PublicStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, user)
-			}.getOrElse(throw new ItemNotFoundException)
-	  } else {
-		  whoFor match {
-				case student: StudentMember => ViewStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
-				case staff: StaffMember => ViewStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, user)
-				case _ => throw new RuntimeException("Don't know how to render timetables for non-student or non-staff users")
-			}
-	  }
+	protected def commandForMember(whoFor: Member): TimetableCommand = whoFor match {
+		case student: StudentMember => ViewStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
+		case staff: StaffMember => ViewStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, user)
+		case _ => throw new RuntimeException("Don't know how to render timetables for non-student or non-staff users")
 	}
 
-	@RequestMapping(value = Array("/ical"))
-	def getIcalFeed(@ModelAttribute("command") command: Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState): Mav = {
+	protected def commandForTimetableHash(timetableHash: String): TimetableCommand =
+		profileService.getMemberByTimetableHash(timetableHash).map {
+			case student: StudentMember => PublicStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
+			case staff: StaffMember => PublicStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, user)
+		}.getOrElse(throw new ItemNotFoundException)
+}
+
+@Controller
+@RequestMapping(value = Array("/timetable"))
+class TimetableController extends AbstractTimetableController with AutowiringUserLookupComponent {
+
+	@ModelAttribute("command")
+	def command(@RequestParam(value="whoFor") whoFor: Member) = commandForMember(whoFor)
+
+	@RequestMapping(value = Array("/api"))
+	def getEvents(
+		@RequestParam from: Long,
+		@RequestParam to: Long,
+		@ModelAttribute("command") command: TimetableCommand
+	): Mav = {
+		// from and to are seconds since the epoch, because that's what FullCalendar likes to send.
+		// This conversion could move onto the command, if anyone felt strongly that it was a concern of the command
+		// or we could write an EpochSecondsToDateTime 2-way converter.
+		val start = new DateTime(from * 1000).toLocalDate
+		val end = new DateTime(to * 1000).toLocalDate
+		command.start = start
+		command.end = end
+		val timetableEvents = command.apply()
+		val calendarEvents = timetableEvents.map (FullCalendarEvent(_, userLookup))
+		Mav(new JSONView(colourEvents(calendarEvents)))
+	}
+
+	def colourEvents(uncoloured: Seq[FullCalendarEvent]):Seq[FullCalendarEvent] = {
+		val colours = Seq("#239b92","#a3b139","#ec8d22","#ef3e36","#df4094","#4daacc","#167ec2","#f1592a","#818285")
+		// an infinitely repeating stream of colours
+		val colourStream = Stream.continually(colours.toStream).flatten
+		val contexts = uncoloured.map(_.context).distinct
+		val contextsWithColours = contexts.zip(colourStream)
+		uncoloured.map { event =>
+			if (event.title == "Busy") { // FIXME hack
+				event.copy(backgroundColor = "#bbb", borderColor = "#bbb")
+			} else {
+				val colour = contextsWithColours.find(_._1 == event.context).get._2
+				event.copy(backgroundColor = colour, borderColor = colour)
+			}
+		}
+	}
+}
+
+abstract class AbstractTimetableICalController
+	extends AbstractTimetableController
+		with TermBasedEventOccurrenceComponent
+		with AutowiringTermServiceComponent
+		with TermAwareWeekToDateConverterComponent {
+
+	@RequestMapping
+	def getIcalFeed(@ModelAttribute("command") command: TimetableCommand): Mav = {
 		val year = AcademicYear.findAcademicYearContainingDate(DateTime.now, termService)
 
 		// Start from either 1 week ago, or the start of the current academic year, whichever is earlier
@@ -120,38 +158,23 @@ class TimetableController extends ProfilesController with TermBasedEventOccurren
 		Mav(new IcalView(cal), "filename" -> s"${command.member.universityId}.ics")
 	}
 
-	@RequestMapping(value = Array("/api"))
-	def getEvents(
-		@RequestParam from: Long,
-		@RequestParam to: Long,
-		@ModelAttribute("command") command:Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState
-	): Mav = {
-		// from and to are seconds since the epoch, because that's what FullCalendar likes to send.
-		// This conversion could move onto the command, if anyone felt strongly that it was a concern of the command
-		// or we could write an EpochSecondsToDateTime 2-way converter.
-		val start = new DateTime(from * 1000).toLocalDate
-		val end = new DateTime(to * 1000).toLocalDate
-		command.start = start
-		command.end = end
-		val timetableEvents = command.apply()
-		val calendarEvents = timetableEvents.map (FullCalendarEvent(_, userLookup))
-		Mav(new JSONView(colourEvents(calendarEvents)))
-	}
+}
 
-	def colourEvents(uncoloured:Seq[FullCalendarEvent]):Seq[FullCalendarEvent] = {
-		val colours = Seq("#239b92","#a3b139","#ec8d22","#ef3e36","#df4094","#4daacc","#167ec2","#f1592a","#818285")
-		// an infinitely repeating stream of colours
- 		val colourStream = Stream.continually(colours.toStream).flatten
-		val contexts = uncoloured.map(_.context).distinct
-		val contextsWithColours = contexts.zip(colourStream)
-		uncoloured.map { event =>
-			if (event.title == "Busy") { // FIXME hack
-				event.copy(backgroundColor = "#bbb", borderColor = "#bbb")
-			} else {
-				val colour = contextsWithColours.find(_._1 == event.context).get._2
-				event.copy(backgroundColor = colour, borderColor = colour)
-			}
-		}
-	}
+@Controller
+@RequestMapping(value = Array("/timetable/ical/{timetableHash}.ics"))
+class TimetableICalController extends AbstractTimetableICalController {
+
+	@ModelAttribute("command")
+	def command(@PathVariable(value="timetableHash") timetableHash: String) = commandForTimetableHash(timetableHash)
+
+}
+
+@Controller
+@RequestMapping(value = Array("/timetable/ical"))
+class LegacyTimetableICalController extends AbstractTimetableICalController {
+
+	@ModelAttribute("command")
+	def command(@RequestParam(value="timetableHash") timetableHash: String) = commandForTimetableHash(timetableHash)
+
 }
 
