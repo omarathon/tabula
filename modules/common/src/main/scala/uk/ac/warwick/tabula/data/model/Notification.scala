@@ -1,20 +1,20 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.collection.JavaConverters._
 import javax.persistence._
-import org.joda.time.DateTime
 
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.services.UserLookupComponent
-import org.springframework.util.Assert
-import uk.ac.warwick.tabula.data.PreSaveBehaviour
+import org.hibernate.ObjectNotFoundException
 import org.hibernate.annotations.{BatchSize, Type}
-import scala.beans.BeanProperty
+import org.joda.time.DateTime
+import org.springframework.util.Assert
+import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import org.hibernate.ObjectNotFoundException
+import uk.ac.warwick.tabula.services.UserLookupComponent
+import uk.ac.warwick.userlookup.User
+
+import scala.beans.BeanProperty
+import scala.collection.JavaConverters._
 
 object Notification {
 
@@ -103,7 +103,6 @@ object Notification {
 @DiscriminatorColumn(name="notification_type")
 abstract class Notification[A >: Null <: ToEntityReference, B]
 	extends GeneratedId with Serializable with HasSettings with PermissionsTarget with NotificationPreSaveBehaviour {
-	import Notification._
 
 	@transient final val dateOnlyFormatter = DateFormats.NotificationDateOnly
 	@transient final val dateTimeFormatter = DateFormats.NotificationDateTime
@@ -197,7 +196,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	}
 	def onPreSave(newRecord: Boolean) {}
 
-	override def toString = s"Notification[${(if (id != null) id else "transient " + hashCode)}]{${Option(agent).fold("(no agent)") { _.getFullName }}, ${verb}, ${items.getClass.getSimpleName}}"
+	override def toString = s"Notification[${if (id != null) id else "transient " + hashCode}]{${Option(agent).fold("(no agent)") { _.getFullName }}, $verb, ${items.getClass.getSimpleName}}"
 }
 
 /**

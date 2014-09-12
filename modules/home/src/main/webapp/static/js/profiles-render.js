@@ -72,10 +72,6 @@
 		});
 	});
 
-	// take anything we've attached to "exports" and add it to the global "Profiles"
-	// we use extend() to add to any existing variable rather than clobber it
-	window.Profiles = jQuery.extend(window.Profiles, exports);
-
 	// make chevron rotate when "More details" clicked
     $(function() {
 		$(".expandable-course-details").on("click", "h6", function() {
@@ -85,228 +81,222 @@
 
 
 	// MEETING RECORD STUFF
-	$(function() {
-		function scrollToOpenDetails() {
-			// prevent js errors when getNavigationHeight is undefined
-			if(window.getNavigationHeight != undefined){
-				$("details.open").each(function() {
-					$("html, body").animate({
-						scrollTop: $(this).offset().top - window.getNavigationHeight()
-					}, 300);
-				});
+	exports.SetupMeetingRecords = function() {
+		$(function() {
+			function scrollToOpenDetails() {
+				// prevent js errors when getNavigationHeight is undefined
+				if(window.getNavigationHeight != undefined){
+					$("details.open").each(function() {
+						$("html, body").animate({
+							scrollTop: $(this).offset().top - window.getNavigationHeight()
+						}, 300);
+					});
+				}
 			}
-		};
 
-		function frameLoad(frame) {
-			var $m = $("#modal");
-			var $f = $(frame).contents();
+			function frameLoad(frame) {
+				var $m = $("#modal");
+				var $f = $(frame).contents();
 
-			// reset slow load spinner
-			$m.tabulaPrepareSpinners();
+				// reset slow load spinner
+				$m.tabulaPrepareSpinners();
 
-			if ($f.find("#meeting-record-form").length == 1) {
-				// unhide the iframe
-				$m.find('.modal-body').slideDown();
+				if ($f.find("#meeting-record-form").length == 1) {
+					// unhide the iframe
+					$m.find('.modal-body').slideDown();
 
-				// reset datepicker & submit protection
-				var $form = $m.find('form.double-submit-protection');
-				$form.tabulaSubmitOnce();
-				$form.find(".btn").removeClass('disabled');
-				// wipe any existing state information for the submit protection
-				$form.removeData('submitOnceSubmitted');
+					// reset datepicker & submit protection
+					var $form = $m.find('form.double-submit-protection');
+					$form.tabulaSubmitOnce();
+					$form.find(".btn").removeClass('disabled');
+					// wipe any existing state information for the submit protection
+					$form.removeData('submitOnceSubmitted');
 
-//				// firefox fix
-//				var wait = setInterval(function() {
-//					var h = $f.find("body").height();
-//					if (h > 0) {
-//						clearInterval(wait);
-//						$m.find(".modal-body").animate({ height: h });
-//					}
-//				}, 300); // this didn't work for me (ZLJ) at 150 but did at 200; upping to 300 to include safety margin
+	//				// firefox fix
+	//				var wait = setInterval(function() {
+	//					var h = $f.find("body").height();
+	//					if (h > 0) {
+	//						clearInterval(wait);
+	//						$m.find(".modal-body").animate({ height: h });
+	//					}
+	//				}, 300); // this didn't work for me (ZLJ) at 150 but did at 200; upping to 300 to include safety margin
 
-				// show-time
-				$m.modal("show");
-				$m.on("shown", function() {
-					$f.find("[name='title']").focus();
-				});
-			} else if ($f.find("section.meetings").length == 1) {
-                var source =$f.find("section.meetings");
-                var targetClass = source.attr('data-target-container');
-                var target = $("section."+targetClass);
-				// bust the returned content out to the original page, and kill the modal
-				target.replaceWith(source);
-				$('details').details();
-				// rebind all of this stuff to the new UI
-				decorateMeetingRecords();
-				$m.modal("hide");
-			} else {
-				/*
-					TODO more user-friendly fall-back?
-					This is where you end up with an unexpected failure, eg. permission failure, mangled URL etc.
-					The default is to reload the original profile page. Not sure if there's something more helpful
-					we could/should do here.
-				*/
-				$m.modal('hide');
-				document.location.reload(true);
+					// show-time
+					$m.modal("show");
+					$m.on("shown", function() {
+						$f.find("[name='title']").focus();
+					});
+				} else if ($f.find("section.meetings").length == 1) {
+					var source =$f.find("section.meetings");
+					var targetClass = source.attr('data-target-container');
+					var target = $("section."+targetClass);
+					// bust the returned content out to the original page, and kill the modal
+					target.replaceWith(source);
+					$('details').details();
+					// rebind all of this stuff to the new UI
+					decorateMeetingRecords();
+					$m.modal("hide");
+				} else {
+					/*
+						TODO more user-friendly fall-back?
+						This is where you end up with an unexpected failure, eg. permission failure, mangled URL etc.
+						The default is to reload the original profile page. Not sure if there's something more helpful
+						we could/should do here.
+					*/
+					$m.modal('hide');
+					document.location.reload(true);
+				}
 			}
-		}
 
 
-		function decorateMeetingRecords(){
+			function decorateMeetingRecords(){
 
-			// delete meeting records
-			$('a.delete-meeting-record').on('click', function(e) {
-				var $this = $(this);
-				var $details = $this.closest('details');
+				// delete meeting records
+				$('a.delete-meeting-record').on('click', function() {
+					var $this = $(this);
+					var $details = $this.closest('details');
 
-				if (!$details.hasClass("deleted")) {
-					$details.addClass("processing");
-					var url = $this.attr("href");
-					$.post(url, function(data) {
-						if (data.status == "successful") {
-							$details.addClass("deleted muted");
-						} else if (data.status == "error") {
-							// TAB-2487 was hard to spot because nothing is done with failed ajax
-							// TODO - come up with a better way of reporting JSONErrorView failures app wide
-							alert(data.errors[0]); // alert the first error.
+					if (!$details.hasClass("deleted")) {
+						$details.addClass("processing");
+						var url = $this.attr("href");
+						$.post(url, function(data) {
+							if (data.status == "successful") {
+								$details.addClass("deleted muted");
+							} else if (data.status == "error") {
+								// TAB-2487 was hard to spot because nothing is done with failed ajax
+								// TODO - come up with a better way of reporting JSONErrorView failures app wide
+								alert(data.errors[0]); // alert the first error.
+							}
+							$details.removeClass("processing");
+						}, "json");
+					}
+					return false;
+				});
+
+				// restore meeting records
+				$('a.restore-meeting-record').on('click', function() {
+					var $this = $(this);
+					var $details = $this.closest('details');
+
+					if ($details.hasClass("deleted")) {
+						$details.addClass("processing");
+						var url = $this.attr("href");
+						$.post(url, function(data) {
+							if (data.status == "successful") {
+								$details.removeClass("deleted muted");
+							}
+							$details.removeClass("processing");
+						}, "json");
+					}
+					return false;
+				});
+
+				// purge meeting records
+				$('a.purge-meeting-record').on('click', function() {
+					var $this = $(this);
+					var $details = $this.closest('details');
+
+					if ($details.hasClass("deleted")) {
+						$details.addClass("processing");
+						var url = $this.attr("href");
+						$.post(url, function(data) {
+							if (data.status == "successful") {
+								$details.remove();
+							}
+						}, "json");
+					}
+					return false;
+				});
+
+				// make modal links use ajax
+				$('section.meetings .meeting-record-toolbar, section.meetings details.meeting.normal').tabulaAjaxSubmit(function() {
+					document.location.reload(true);
+				});
+
+				var $m = $("#modal");
+
+				scrollToOpenDetails();
+
+				/* load form into modal, with picker enabled
+				 * click selector must be specific otherwise the click event will propagate up past the section element
+				 * these HTML5 elements have default browser driven behaviour that is hard to override.
+				 */
+
+				// named handler that can be unbound
+				var iframeHandler = function() {
+					frameLoad(this);
+					$(this).off('load', iframeHandler);
+				};
+
+				var getModal = function($this, targetUrl) {
+					$.get(targetUrl + "?modal", function(data) {
+						$m.html(data);
+						var $mb = $m.find(".modal-body").empty();
+						var iframeMarkup = "<iframe frameBorder='0' scrolling='no' style='height:100%;width:100%;' id='modal-content'></iframe>";
+						$(iframeMarkup)
+							.on('load', iframeHandler)
+							.attr("src", targetUrl + "?iframe")
+							.appendTo($mb);
+					}).fail(function() {
+						if (!$('#meeting-modal-failure').length) {
+							var $error = $('<p id="meeting-modal-failure" class="alert alert-error hide"><i class="icon-warning-sign"></i> Sorry, I\'m unable to edit meeting records for this student at the moment.</p>');
+							$this.before($error);
+							$error.slideDown();
 						}
-						$details.removeClass("processing");
-					}, "json");
-				}
-				return false;
-			});
+					});
+				};
 
-			// restore meeting records
-			$('a.restore-meeting-record').on('click', function(e) {
-				var $this = $(this);
-				var $details = $this.closest('details');
+				var meetingsSection = $("section.meetings");
+				$(".new, .edit-meeting-record", meetingsSection).on("click", function() {
+					var $this = $(this);
+					getModal($this, $this.attr("href"));
 
-				if ($details.hasClass("deleted")) {
-					$details.addClass("processing");
-					var url = $this.attr("href");
-					$.post(url, function(data) {
-						if (data.status == "successful") {
-							$details.removeClass("deleted muted");
-						}
-						$details.removeClass("processing");
-					}, "json");
-				}
-				return false;
-			});
+					return false;
+				});
 
-			// purge meeting records
-			$('a.purge-meeting-record').on('click', function(e) {
-				var $this = $(this);
-				var $details = $this.closest('details');
-
-				if ($details.hasClass("deleted")) {
-					$details.addClass("processing");
-					var url = $this.attr("href");
-					$.post(url, function(data) {
-						if (data.status == "successful") {
-							$details.remove();
-						}
-					}, "json");
-				}
-				return false;
-			});
-
-			// show rejection comment box
-			var rejectRadios = $('input.reject').each( function() {
-				var $this = $(this);
-				var $form = $this.closest('form');
-				var $commentBox = $form.find('.rejection-comment');
-				$this.slideMoreOptions($commentBox, true);
-			});
-
-			// make modal links use ajax
-			$('section.meetings .meeting-record-toolbar, section.meetings details.meeting.normal').tabulaAjaxSubmit(function() {
-				document.location.reload(true);
-			});
-
-			var $m = $("#modal");
-
-			scrollToOpenDetails();
-
-			/* load form into modal, with picker enabled
-			 * click selector must be specific otherwise the click event will propagate up past the section element
-			 * these HTML5 elements have default browser driven behaviour that is hard to override.
-			 */
-
-			// named handler that can be unbound
-			var iframeHandler = function() {
-				frameLoad(this);
-				$(this).off('load', iframeHandler);
-			};
-
-			var getModal = function($this, targetUrl) {
-				$.get(targetUrl + "?modal", function(data) {
-					$m.html(data);
-					var $mb = $m.find(".modal-body").empty();
-					var iframeMarkup = "<iframe frameBorder='0' scrolling='no' style='height:100%;width:100%;' id='modal-content'></iframe>";
-					$(iframeMarkup)
+				$m.on('submit', 'form', function(e){
+					e.preventDefault();
+					// reattach the load handler and submit the inner form in the iframe
+					$m.find('iframe')
 						.on('load', iframeHandler)
-						.attr("src", targetUrl + "?iframe")
-						.appendTo($mb);
-				}).fail(function() {
-					if (!$('#meeting-modal-failure').length) {
-						var $error = $('<p id="meeting-modal-failure" class="alert alert-error hide"><i class="icon-warning-sign"></i> Sorry, I\'m unable to edit meeting records for this student at the moment.</p>');
-						$this.before($error);
-						$error.slideDown();
+						.contents().find('form').submit();
+
+					// hide the iframe, so we don't get a FOUC
+					$m.find('.modal-body').slideUp();
+				});
+
+				// Scheduled meetings
+
+				meetingsSection.find('form.scheduled-action').on('submit', function(event){
+					event.preventDefault();
+					var $this = $(this), checkedInput = $this.find('input:checked');
+					$this.find('div.ajaxErrors').hide();
+					switch (checkedInput.val()) {
+						case "confirm": {
+							getModal($this, checkedInput.data('formhref'));
+						} break;
+						case "reschedule": {
+							$this.closest('details').find('.meeting-record-toolbar .edit-meeting-record').trigger('click');
+						} break;
+						case "missed": {
+							$.post(checkedInput.data('formhref'), $this.serialize(), function(data){
+								if(data.status === "successful") {
+									document.location.reload(true);
+								} else {
+									$this.find('div.ajaxErrors').empty().html(data.errors.join('<br />')).show();
+								}
+							});
+						} break;
 					}
 				});
+
 			}
-
-			var meetingsSection = $("section.meetings");
-			$(".new, .edit-meeting-record", meetingsSection).on("click", function(e) {
-				var $this = $(this);
-				getModal($this, $this.attr("href"));
-
-				return false;
-			});
-
-			$m.on('submit', 'form', function(e){
-				e.preventDefault();
-				// reattach the load handler and submit the inner form in the iframe
-				$m.find('iframe')
-					.on('load', iframeHandler)
-					.contents().find('form').submit();
-
-				// hide the iframe, so we don't get a FOUC
-				$m.find('.modal-body').slideUp();
-			});
-
-			// Scheduled meetings
-
-			meetingsSection.find('form.scheduled-action').on('submit', function(event){
-				event.preventDefault();
-				var $this = $(this), checkedInput = $this.find('input:checked');
-				$this.find('div.ajaxErrors').hide();
-				switch (checkedInput.val()) {
-					case "confirm": {
-						getModal($this, checkedInput.data('formhref'));
-					} break;
-					case "reschedule": {
-						$this.closest('details').find('.meeting-record-toolbar .edit-meeting-record').trigger('click');
-					} break;
-					case "missed": {
-						$.post(checkedInput.data('formhref'), $this.serialize(), function(data){
-							if(data.status === "successful") {
-								document.location.reload(true);
-							} else {
-								$this.find('div.ajaxErrors').empty().html(data.errors.join('<br />')).show();
-							}
-						});
-					} break;
-				}
-			});
-
-		}
-		// call on page load
-		decorateMeetingRecords();
+			// call on page load
+			decorateMeetingRecords();
 
 
-	});
+		});
+	};
 	//END MEETING RECORD APPROVAL STUFF
 
 	//MEMBERNOTE STUFF
@@ -429,50 +419,61 @@
 		function createCalendar(container,defaultViewName, studentId){
 			var showWeekends = (defaultViewName == "month");
 			var cal = $(container).fullCalendar({
-									events:getEvents(studentId, $(container)),
-									defaultView: defaultViewName,
-									allDaySlot: false,
-									slotMinutes: 60,
-									firstHour:8,
-									firstDay: 1, //monday
-									timeFormat: {
-                                        agendaWeek: '', // don't display time on event
-                                        // for all other views
-                                        '': 'h:mm{ - h:mm}'   //  5:00 - 6:30
-                                    },
-									titleFormat: {
-										month: 'MMMM yyyy',
-										week: "MMM d[ yyyy]{ '&#8212;'[ MMM] d yyyy}",
-										day: 'dddd, MMM d, yyyy'
-									},
-									columnFormat: {
-										month: 'ddd',
-										week: 'ddd d/M',
-										day: 'dddd d/M'
-									},
-									weekends:showWeekends,
-									viewRender:onViewUpdate,
-									header: {
-										left:   'title',
-										center: '',
-										right:  'today prev,next'
-									},
-                                    eventAfterRender: function(event, element, view){
-										var content = "<table class='event-info'>";
-										if (event.fullTitle && event.fullTitle.length > 0) {
-											content = content + "<tr><th>Title</th><td>" + event.fullTitle + "</td></tr>";
-										}
-                                        if (event.description && event.description.length > 0) {
-											content = content + "<tr><th>What</th><td>" + event.description + "</td></tr>";
-										}
-                                        content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
-                                        content = content + "<tr><th>Where</th><td>" + event.location + "</td></tr>";
-                                        if (event.tutorNames.length > 0){
-                                        	content = content + "<tr><th>Who</th><td> " + event.tutorNames + "</td></tr>";
-                                        }
-                                    	content = content + "</table>";
-                                    	$(element).tabulaPopover({html:true, container:"#container",title:event.shorterTitle, content:content})
-                                    }
+				events:getEvents(studentId, $(container)),
+				defaultView: defaultViewName,
+				allDaySlot: false,
+				slotMinutes: 60,
+				firstHour:8,
+				firstDay: 1, //monday
+				timeFormat: {
+					agendaWeek: '', // don't display time on event
+					// for all other views
+					'': 'h:mm{ - h:mm}'   //  5:00 - 6:30
+				},
+				titleFormat: {
+					month: 'MMMM yyyy',
+					week: "MMM d[ yyyy]{ '&#8212;'[ MMM] d yyyy}",
+					day: 'dddd, MMM d, yyyy'
+				},
+				columnFormat: {
+					month: 'ddd',
+					week: 'ddd d/M',
+					day: 'dddd d/M'
+				},
+				weekends:showWeekends,
+				viewRender:onViewUpdate,
+				header: {
+					left:   'title',
+					center: '',
+					right:  'today prev,next'
+				},
+				eventAfterRender: function(event, element, view){
+					var content = "<table class='event-info'>";
+					if (event.fullTitle && event.fullTitle.length > 0) {
+						content = content + "<tr><th>Title</th><td>" + event.fullTitle + "</td></tr>";
+					}
+
+					if (event.description && event.description.length > 0) {
+						content = content + "<tr><th>What</th><td>" + event.description + "</td></tr>";
+					}
+
+					content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
+
+					if (event.location && event.location.length > 0) {
+						content = content + "<tr><th>Where</th><td>" + event.location + "</td></tr>";
+					}
+
+					if (event.tutorNames.length > 0){
+						content = content + "<tr><th>Who</th><td> " + event.tutorNames + "</td></tr>";
+					}
+
+					if (event.comments && event.comments.length > 0) {
+						content = content + "<tr><th>Comments</th><td>" + event.comments + "</td></tr>";
+					}
+
+					content = content + "</table>";
+					$(element).tabulaPopover({html:true, container:"#container",title:event.shorterTitle, content:content})
+				}
 			});
 			$(document).on('tabbablechanged', function(e) {
 				// redraw the calendar if the layout updates
@@ -491,4 +492,8 @@
 				$('#timetable-ical-modal').modal('show');
 			});
 		});
+
+	// take anything we've attached to "exports" and add it to the global "Profiles"
+	// we use extend() to add to any existing variable rather than clobber it
+	window.Profiles = jQuery.extend(window.Profiles, exports);
 }(jQuery));

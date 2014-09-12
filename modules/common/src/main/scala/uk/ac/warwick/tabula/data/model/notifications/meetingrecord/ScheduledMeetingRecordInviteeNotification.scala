@@ -16,9 +16,10 @@ class ScheduledMeetingRecordInviteeNotification
 	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_invitee_notification.ftl"
 	def title = s"Meeting $verb"
 
-	def actor = if (agent.getWarwickId == meeting.relationship.studentId || agent == meeting.relationship.agentMember) {
+	def actor = if (meeting.creatorInRelationship) {
 		agent
 	} else {
+		// meeting was scheduled by someone else on the relationship agents behalf so actor is them
 		meeting.relationship.agentMember.map(_.asSsoUser).getOrElse(throw new IllegalStateException("Relationship has no agent"))
 	}
 

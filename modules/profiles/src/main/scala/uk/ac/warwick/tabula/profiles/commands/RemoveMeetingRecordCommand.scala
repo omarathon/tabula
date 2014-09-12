@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.commands.{Notifies, ComposableCommand, Describable, CommandInternal, SelfValidating, Description}
-import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.ScheduledMeetingRecordInviteeNotification
+import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.{ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification}
 import uk.ac.warwick.tabula.data.model.{Notification, ScheduledMeetingRecord, AbstractMeetingRecord, MeetingRecord}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
@@ -76,7 +76,13 @@ trait DeleteScheduledMeetingRecordNotification extends Notifies[AbstractMeetingR
 		meeting match {
 			case m: ScheduledMeetingRecord => {
 				val user = meeting.creator.asSsoUser
-				Seq(Notification.init(new ScheduledMeetingRecordInviteeNotification("deleted"), user, m, m.relationship))
+				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("deleted"), user, m, m.relationship)
+				if(!m.creatorInRelationship) {
+					val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification("deleted"), user, m, m.relationship)
+					Seq(inviteeNotification, behalfNotification)
+				} else {
+					Seq(inviteeNotification)
+				}
 			}
 			case _ => Nil
 		}
@@ -110,7 +116,13 @@ trait RestoreScheduledMeetingRecordNotification extends Notifies[AbstractMeeting
 		meeting match {
 			case m: ScheduledMeetingRecord => {
 				val user = meeting.creator.asSsoUser
-				Seq(Notification.init(new ScheduledMeetingRecordInviteeNotification("rescheduled"), user, m, m.relationship))
+				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("rescheduled"), user, m, m.relationship)
+				if(!m.creatorInRelationship) {
+					val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification("rescheduled"), user, m, m.relationship)
+					Seq(inviteeNotification, behalfNotification)
+				} else {
+					Seq(inviteeNotification)
+				}
 			}
 			case _ => Seq()
 		}

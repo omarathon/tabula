@@ -6,10 +6,9 @@ import org.joda.time.LocalTime
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.services.permissions.CacheStrategyComponent
-import uk.ac.warwick.tabula.services.{TermServiceImpl, TermServiceComponent, UserLookupComponent}
-import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
+import uk.ac.warwick.tabula.services.{TermServiceComponent, TermServiceImpl, UserLookupComponent}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class CelcatTimetableFetchingServiceTest extends TestBase {
 
@@ -27,7 +26,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 		val cacheStrategy = CacheStrategy.InMemoryOnly
 	}
 
-	@Test def parseICal {
+	@Test def parseICal() {
 		val events = service.parseICal(resourceAsStream("1313406.ics"), CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"))
 		events.size should be (142)
 
@@ -62,6 +61,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 			new LocalTime(13, 0),
 			Some("R021"),
 			Some("ES186"),
+			None,
 			Nil,
 			AcademicYear.parse("13/14")
 		))
@@ -87,15 +87,27 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 			"",
 			"Engineering Skills, Support sessions for students without A-level Physics",
 			TimetableEventType.Lecture,
-			Seq(WeekRange(2, 3)),
+			Seq(WeekRange(2, 3), WeekRange(5, 10)),
 			DayOfWeek.Monday,
 			new LocalTime(10, 0),
 			new LocalTime(11, 0),
 			Some("P521"),
 			Some("ES186"),
+			None,
 			Nil,
 			AcademicYear.parse("13/14")
 		))
+	}
+
+	@Test def tab2662() {
+		val events = service.parseICal(resourceAsStream("duplicates.ics"), CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"))
+		events.size should be (2)
+
+		val combined = service.combineIdenticalEvents(events).sortBy { event => (event.weekRanges.head.minWeek, event.day.jodaDayOfWeek, event.startTime.getMillisOfDay)}
+		combined.size should be (1)
+		combined.head.weekRanges should be (Seq(WeekRange(1), WeekRange(3, 5)))
+
+
 	}
 
 }

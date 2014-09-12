@@ -15,6 +15,7 @@ case class TimetableEvent(
 	endTime: LocalTime,
 	location: Option[String],
 	context: Option[String],
+	comments: Option[String],
 	staffUniversityIds: Seq[String],
 	year: AcademicYear
 )
@@ -38,6 +39,7 @@ object TimetableEvent {
 			endTime = sge.endTime,
 			location = Option(sge.location).map { _.name },
 			context = Some(sge.group.groupSet.module.code.toUpperCase),
+			comments = None,
 			staffUniversityIds = sge.tutors.knownType.members,
 			year = sge.group.groupSet.academicYear)
 	}
@@ -95,6 +97,7 @@ case class EventOccurrence(
 	end: LocalDateTime,
 	location: Option[String],
 	context: Option[String],
+	comments: Option[String],
 	staffUniversityIds: Seq[String]
 )
 
@@ -109,6 +112,7 @@ object EventOccurrence {
 			end,
 			timetableEvent.location,
 			timetableEvent.context,
+			timetableEvent.comments,
 			timetableEvent.staffUniversityIds
 		)
 	}
@@ -121,6 +125,7 @@ object EventOccurrence {
 			TimetableEventType.Other("Busy"),
 			occurrence.start,
 			occurrence.end,
+			None,
 			None,
 			None,
 			Nil

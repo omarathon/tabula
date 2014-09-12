@@ -192,26 +192,29 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 				event.location, event.context, event.staffUniversityIds, event.year)
 		}.values.toSeq
 
-		groupedEvents.map {
-			case event :: Nil => event
-			case eventSeq =>
+		groupedEvents.map { eventSeq => eventSeq.size match {
+			case 1 =>
+				eventSeq.head
+			case _ =>
 				val event = eventSeq.head
 				TimetableEvent(
 					event.name,
 					event.title,
 					event.description,
 					event.eventType,
-					events.flatMap { _.weekRanges },
+					eventSeq.flatMap {
+						_.weekRanges
+					},
 					event.day,
 					event.startTime,
 					event.endTime,
 					event.location,
 					event.context,
+					event.comments,
 					event.staffUniversityIds,
 					event.year
 				)
-				event
-		}.toList
+		}}.toList
 	}
 
 	def parseICal(is: InputStream, config: CelcatDepartmentConfiguration): Seq[TimetableEvent] = {
@@ -229,7 +232,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					TimetableEventType(c.getCategories.iterator().next().asInstanceOf[String])
 				}.orNull
 
-			if (config.excludedEventTypes.contains(eventType) || eventType.code.toLowerCase().contains("on tabula")) None
+			if (config.excludedEventTypes.contains(eventType) || eventType.code.toLowerCase.contains("on tabula")) None
 			else {
 				// Convert date/time to academic year, local times and week number
 				val start = toDateTime(event.getStartDate)
@@ -258,7 +261,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 				val moduleCode = summary.maybeText.collect { case r"([A-Za-z]{2}[0-9][0-9A-Za-z]{2})${m}.*" => m.toUpperCase() }
 
 				val staffIds: Seq[UniversityId] =
-					if (!allStaff.isEmpty)
+					if (allStaff.nonEmpty)
 						summary.maybeText
 							.collect { case r"^.* - ((?:[^/0-9]+(?: (?:[0-9\\-]+,?)+)?/?)+)${namesOrInitials}" =>
 								namesOrInitials.split('/').toSeq
@@ -281,6 +284,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					startTime = start.toLocalTime,
 					endTime = end.toLocalTime,
 					location = Option(event.getLocation).flatMap { _.getValue.maybeText },
+					comments = None,
 					context = moduleCode,
 					staffUniversityIds = staffIds,
 					year = year

@@ -1,17 +1,18 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, AttendanceMonitoringPointStyle, AttendanceMonitoringPoint, AttendanceMonitoringTemplate, AttendanceMonitoringScheme}
-import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.JavaImports._
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.commands._
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme, AttendanceMonitoringTemplate}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
+import scala.collection.JavaConverters._
 
 
 object AddTemplatePointsToSchemesCommand {
@@ -28,15 +29,17 @@ object AddTemplatePointsToSchemesCommand {
 }
 
 class AddTemplatePointsToSchemesCommandInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with TaskBenchmarking {
-	self: AddTemplatePointsToSchemesCommandState with AttendanceMonitoringServiceComponent  with ProfileServiceComponent with TermServiceComponent =>
+	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with TaskBenchmarking with UpdatesAttendanceMonitoringScheme {
+
+	self: AddTemplatePointsToSchemesCommandState with AttendanceMonitoringServiceComponent
+		with ProfileServiceComponent with TermServiceComponent =>
 
 	override def applyInternal(): Seq[AttendanceMonitoringPoint] = {
 
 		val attendanceMonitoringPoints = attendanceMonitoringService.generatePointsFromTemplateScheme(templateScheme, academicYear)
 
 		val newPoints = schemes.asScala.flatMap { scheme =>
-				attendanceMonitoringPoints.map { point =>
+			attendanceMonitoringPoints.map { point =>
 				val newPoint = point.cloneTo(scheme)
 				newPoint.pointType = AttendanceMonitoringPointType.Standard
 				newPoint.createdDate = new DateTime()
@@ -46,11 +49,7 @@ class AddTemplatePointsToSchemesCommandInternal(val department: Department, val 
 			}
 		}
 
-		val students = profileService.getAllMembersWithUniversityIds(schemes.asScala.flatMap(_.members.members).distinct).flatMap {
-			case student: StudentMember => Option(student)
-			case _ => None
-		}
-		attendanceMonitoringService.updateCheckpointTotalsAsync(students, department, academicYear)
+		afterUpdate(schemes.asScala)
 
 		newPoints
 	}

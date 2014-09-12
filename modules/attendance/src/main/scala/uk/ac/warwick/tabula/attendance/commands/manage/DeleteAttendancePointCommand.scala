@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceMonitoringPointStyle, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object DeleteAttendancePointCommand {
 	def apply(department: Department, templatePoint: AttendanceMonitoringPoint) =
@@ -24,18 +24,15 @@ object DeleteAttendancePointCommand {
 
 
 class DeleteAttendancePointCommandInternal(val department: Department, val templatePoint: AttendanceMonitoringPoint)
-	extends CommandInternal[Seq[AttendanceMonitoringPoint]] {
+	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with UpdatesAttendanceMonitoringScheme {
 
-	self: DeleteAttendancePointCommandState with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
+	self: DeleteAttendancePointCommandState with AttendanceMonitoringServiceComponent
+		with ProfileServiceComponent =>
 
 	override def applyInternal() = {
 		pointsToDelete.foreach(attendanceMonitoringService.deletePoint)
 
-		val students = profileService.getAllMembersWithUniversityIds(schemesToEdit.flatMap(_.members.members).distinct).flatMap {
-			case student: StudentMember => Option(student)
-			case _ => None
-		}
-		attendanceMonitoringService.updateCheckpointTotalsAsync(students, department, schemesToEdit.head.academicYear)
+		afterUpdate(schemesToEdit)
 
 		pointsToDelete
 	}

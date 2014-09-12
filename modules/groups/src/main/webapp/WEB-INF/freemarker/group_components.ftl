@@ -157,13 +157,14 @@
 					<div class="span1">
 						<div class="btn-group pull-right">
 							<@dropdown_menu "Actions" "cog" "btn-mini">
-								<li class="dropdown-submenu">
+								<li class="dropdown-submenu pull-left">
 									<#local edit_url><@routes.editset set /></#local>
 									<@fmt.permission_button
-									permission='SmallGroups.Update'
-									scope=set
-									action_descr='edit small groups'
-									href=edit_url>
+										permission='SmallGroups.Update'
+										scope=set
+										action_descr='edit small groups'
+										href=edit_url
+									>
 										<i class="icon-wrench icon-fixed-width"></i> Edit
 									</@fmt.permission_button>
 
@@ -171,56 +172,61 @@
 										<li>
 											<#local edit_url><@routes.editsetproperties set /></#local>
 											<@fmt.permission_button
-		                  permission='SmallGroups.Update'
-			                scope=set
-		                  action_descr='edit small group properties'
-		                  href=edit_url>
-		                    Properties
-		                  </@fmt.permission_button>
+												permission='SmallGroups.Update'
+												scope=set
+												action_descr='edit small group properties'
+												href=edit_url
+											>
+												Properties
+		                  					</@fmt.permission_button>
 										</li>
 
-                    <li>
-                      <#local edit_url><@routes.editsetgroups set /></#local>
-                      <@fmt.permission_button
-                      permission='SmallGroups.Update'
-                      scope=set
-                      action_descr='edit small groups'
-                      href=edit_url>
-                        Groups
-                      </@fmt.permission_button>
-                    </li>
-
-                    <li>
-                      <#local edit_url><@routes.editsetstudents set /></#local>
-                      <@fmt.permission_button
-                      permission='SmallGroups.Update'
-                      scope=set
-                      action_descr='edit small group students'
-                      href=edit_url>
-                        Students
-                      </@fmt.permission_button>
-                    </li>
-
-                    <li>
-                      <#local edit_url><@routes.editsetevents set /></#local>
-                      <@fmt.permission_button
-                      permission='SmallGroups.Update'
-                      scope=set
-                      action_descr='edit small group events'
-                      href=edit_url>
-                        Events
-                      </@fmt.permission_button>
-                    </li>
+										<li>
+											<#local edit_url><@routes.editsetgroups set /></#local>
+											<@fmt.permission_button
+												permission='SmallGroups.Update'
+												scope=set
+												action_descr='edit small groups'
+												href=edit_url
+											>
+												Groups
+											</@fmt.permission_button>
+										</li>
 
 										<li>
-		                  <#local allocateset_url><@routes.editsetallocate set /></#local>
-		                  <@fmt.permission_button
-		                  permission='SmallGroups.Allocate'
-		                  scope=set
-		                  action_descr='allocate students'
-		                  href=allocateset_url>
-		                    Allocation
-		                  </@fmt.permission_button>
+											<#local edit_url><@routes.editsetstudents set /></#local>
+											<@fmt.permission_button
+												permission='SmallGroups.Update'
+												scope=set
+												action_descr='edit small group students'
+												href=edit_url
+											>
+												Students
+											</@fmt.permission_button>
+										</li>
+
+										<li>
+											<#local edit_url><@routes.editsetevents set /></#local>
+											<@fmt.permission_button
+												permission='SmallGroups.Update'
+												scope=set
+												action_descr='edit small group events'
+												href=edit_url
+											>
+												Events
+											</@fmt.permission_button>
+										</li>
+
+										<li>
+											<#local allocateset_url><@routes.editsetallocate set /></#local>
+											<@fmt.permission_button
+												permission='SmallGroups.Allocate'
+												scope=set
+												action_descr='allocate students'
+												href=allocateset_url
+											>
+												Allocation
+											</@fmt.permission_button>
 										</li>
 									</ul>
 								</li>
@@ -302,7 +308,7 @@
 									</a>
 								</li>
 
-								<li<#if set.releasedToStudents || set.releasedToTutors> class="disabled use-tooltip" title="Can't delete small groups where students or tutors have been notified"</#if>>
+								<li<#if set.releasedToStudents || set.releasedToTutors> class="disabled use-tooltip" data-container="body" title="Can't delete small groups where students or tutors have been notified"</#if>>
 									<#local delete_url><@routes.deleteset set /></#local>
 									<@fmt.permission_button
 										permission='SmallGroups.Delete'

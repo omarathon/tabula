@@ -1,4 +1,6 @@
 <#escape x as x?html>
+<#import "*/modal_macros.ftl" as modal />
+
 <script type="text/javascript">
 (function ($) {
 	$(function() {
@@ -37,7 +39,61 @@
 		<h4><span class="muted">for</span>
 			${command.event.group.groupSet.name},
 			${command.event.group.name}</h4>
-		<h6>
+
+		<div id="print-modal" class="modal hide fade">
+			<@modal.header>
+				<h3>Print register</h3>
+			</@modal.header>
+			<form method="get" action="<@routes.registerPdf command.event />" style="margin-bottom: 0;" class="form-horizontal">
+				<input type="hidden" name="week" value="${command.week?c}" />
+				<@modal.body>
+					<p>Generate a PDF of this register so that it can be printed.</p>
+
+					<@form.labelled_row "" "">
+						<@form.label checkbox=true>
+							<input type="hidden" name="_showPhotos" value="" />
+							<input type="checkbox" name="showPhotos" value="true" checked />
+							Show student photos
+						</@form.label>
+					</@form.labelled_row>
+
+					<@form.labelled_row "" "Name display">
+						<@form.label checkbox=true>
+							<input type="radio" name="displayName" value="name" checked />
+							Show student name only
+						</@form.label>
+						<@form.label checkbox=true>
+							<input type="radio" name="displayName" value="id" />
+							Show University ID only
+						</@form.label>
+						<@form.label checkbox=true>
+							<input type="radio" name="displayName" value="both" />
+							Show both name and University ID
+						</@form.label>
+					</@form.labelled_row>
+
+					<@form.labelled_row "" "Fill area">
+						<@form.label checkbox=true>
+							<input type="radio" name="displayCheck" value="checkbox" checked />
+							Include checkbox
+						</@form.label>
+						<@form.label checkbox=true>
+							<input type="radio" name="displayCheck" value="line" />
+							Include signature line
+						</@form.label>
+					</@form.labelled_row>
+				</@modal.body>
+				<@modal.footer>
+					<button type="submit" class="btn btn-primary"><i class="icon-download"></i> Save as PDF</button>
+					<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+				</@modal.footer>
+			</form>
+		</div>
+		<div class="pull-right" style="margin-top: -10px;">
+			<button type="button" class="btn" data-toggle="modal" data-target="#print-modal"><i class="icon-print"></i> Print</button>
+		</div>
+
+		<h6 style="margin: -8px 0 12px;">
 			${command.event.day.name} <@fmt.time event.startTime /> - <@fmt.time event.endTime />, Week ${command.week}
 		</h6>
 

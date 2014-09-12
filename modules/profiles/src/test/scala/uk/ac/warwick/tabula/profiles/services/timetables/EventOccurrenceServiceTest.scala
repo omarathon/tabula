@@ -29,8 +29,8 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 	val intervalIncludingTwoOccurrences = new Interval(week1Start,week2End)
 
 
-	val singleOccurrence = new TimetableEvent("test","test", "test",TimetableEventType.Lecture,singleWeek, DayOfWeek.Monday,tenAm,tenThirty,None,Some("XX-123"),Nil,year)
-	val doubleOccurrenence	= new TimetableEvent("test","test", "test", TimetableEventType.Lecture,twoWeeks, DayOfWeek.Monday,tenAm,tenThirty,None,Some("XX-123"),Nil,year)
+	val singleOccurrence = new TimetableEvent("test","test", "test",TimetableEventType.Lecture,singleWeek, DayOfWeek.Monday,tenAm,tenThirty,None,Some("XX-123"),None,Nil,year)
+	val doubleOccurrenence	= new TimetableEvent("test","test", "test", TimetableEventType.Lecture,twoWeeks, DayOfWeek.Monday,tenAm,tenThirty,None,Some("XX-123"),None,Nil,year)
 
 
 

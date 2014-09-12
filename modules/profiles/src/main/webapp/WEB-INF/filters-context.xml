@@ -11,6 +11,7 @@
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 			<excluded-url-pattern>/test/*</excluded-url-pattern>
 			<excluded-url-pattern>/timetable/ical</excluded-url-pattern>
+			<excluded-url-pattern>/timetable/ical/*</excluded-url-pattern>
 		</mapping>
 	</filter-stack>
 

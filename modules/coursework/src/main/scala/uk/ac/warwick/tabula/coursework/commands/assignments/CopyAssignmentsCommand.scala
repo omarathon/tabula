@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.DateTime
+import org.joda.time.{Duration, DateTime}
 
 object CopyAssignmentsCommand {
 	def apply(department: Department, modules: Seq[Module]) =
@@ -53,7 +53,7 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 		// best guess of new open and close dates. likely to be wrong by up to a few weeks but better than out by years
 		val yearOffest = academicYear.startYear - assignment.academicYear.startYear
 		newAssignment.openDate = assignment.openDate.plusYears(yearOffest).withDayOfWeek(assignment.openDate.getDayOfWeek)
-		newAssignment.closeDate = assignment.closeDate.plusYears(yearOffest).withDayOfWeek(assignment.closeDate.getDayOfWeek)
+		newAssignment.closeDate = newAssignment.openDate.plus(new Duration(assignment.openDate, assignment.closeDate))
 
 		// copy the other fields from the target assignment
 		newAssignment.module = assignment.module

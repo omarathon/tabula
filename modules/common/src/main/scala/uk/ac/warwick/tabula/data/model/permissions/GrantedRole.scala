@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.roles.RoleDefinition
 import org.hibernate.annotations.ForeignKey
 import scala.reflect._
 import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup, SmallGroupEvent}
 
 @Entity
 @AccessType("field")
@@ -99,6 +99,7 @@ object GrantedRole {
 			case member: Member => new MemberGrantedRole(member, definition)
 			case assignment: Assignment => new AssignmentGrantedRole(assignment, definition)
 			case group: SmallGroup => new SmallGroupGrantedRole(group, definition)
+			case smallGroupSet: SmallGroupSet => new SmallGroupSetGrantedRole(smallGroupSet, definition)
 			case event: SmallGroupEvent => new SmallGroupEventGrantedRole(event, definition)
 			case _ => throw new IllegalArgumentException("Cannot define new roles for " + scope)
 		}).asInstanceOf[GrantedRole[A]]
@@ -110,6 +111,7 @@ object GrantedRole {
 		case _: Member => true
 		case _: Assignment => true
 		case _: SmallGroup => true
+		case _: SmallGroupSet => true
 		case _: SmallGroupEvent => true
 		case _ => false
 	}
@@ -121,6 +123,7 @@ object GrantedRole {
 		case t if isSubtype(t, classTag[Member]) => classOf[MemberGrantedRole]
 		case t if isSubtype(t, classTag[Assignment]) => classOf[AssignmentGrantedRole]
 		case t if isSubtype(t, classTag[SmallGroup]) => classOf[SmallGroupGrantedRole]
+		case t if isSubtype(t, classTag[SmallGroupSet]) => classOf[SmallGroupSetGrantedRole]
 		case t if isSubtype(t, classTag[SmallGroupEvent]) => classOf[SmallGroupEventGrantedRole]
 		case _ => classOf[GrantedRole[_]]
 	}
@@ -252,6 +255,20 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	var scope: SmallGroup = _
 	
 	def scopeDepartment = Some(scope.groupSet.module.department)
+}
+@Entity @DiscriminatorValue("SmallGroupSet") class SmallGroupSetGrantedRole extends GrantedRole[SmallGroupSet] {
+	def this(groupset: SmallGroupSet, definition: RoleDefinition) = {
+		this()
+		this.scope = groupset
+		this.roleDefinition = definition
+	}
+
+	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
+	@JoinColumn(name="scope_id")
+	@ForeignKey(name="none")
+	var scope: SmallGroupSet = _
+
+	def scopeDepartment = Some(scope.module.department)
 }
 @Entity @DiscriminatorValue("SmallGroupEvent") class SmallGroupEventGrantedRole extends GrantedRole[SmallGroupEvent] {
 	def this(event: SmallGroupEvent, definition: RoleDefinition) = {

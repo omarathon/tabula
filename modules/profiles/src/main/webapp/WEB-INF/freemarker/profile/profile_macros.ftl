@@ -20,7 +20,7 @@
 	</div>
 </#macro>
 
-<#macro relationship_section studentCourseDetails relationshipType meetings viewerRelationshipTypes >
+<#macro relationship_section studentCourseDetails relationshipType>
 <section id="relationship-${relationshipType.id}" class="relationship-section clearfix">
 
 	<#if (RequestParameters.relationshipType!) == relationshipType.id>
@@ -107,6 +107,17 @@
 			</div>
 		</#list>
 		</div>
+
+		<#local ajaxRoute><@routes.listMeetings relationshipType studentCourseDetails.urlSafeId studentCourseYearDetails.academicYear/></#local>
+		<#local ajaxTarget>meetings-target-${relationshipType.urlPart}-${studentCourseDetails.urlSafeId}-${studentCourseYearDetails.academicYear.startYear?c}</#local>
+		<div id="${ajaxTarget}"><i class="icon-spinner icon-spin"></i><em> Loading meetings&hellip;</em></div>
+		<script>
+			jQuery(function($){
+				$.get('${ajaxRoute}', function(data){
+					$('#${ajaxTarget}').empty().html(data);
+				});
+			});
+		</script>
 	<#else>
 		<h4>${relationshipType.agentRole?cap_first}</h4>
 		<p class="text-warning"><i class="icon-warning-sign"></i> No ${relationshipType.agentRole} details are recorded in Tabula for the current year.</p>
@@ -120,8 +131,6 @@
 			</a>
 		</#if>
 	</#if>
-
-	<@meeting_macros.list studentCourseDetails meetings relationshipType viewerRelationshipTypes />
 </section>
 </#macro>
 

@@ -18,16 +18,15 @@ trait NotificationHandling extends Logging {
 		val result = f
 
 		cmd match {
-			case ns: Notifies[A, B] => {
+			case ns: Notifies[A, B] =>
 				for (notification <- ns.emit(result)) {
 					notificationService.push(notification)
 				}
-			}
 			case _ =>
 		}
 
 		cmd match {
-			case sn: SchedulesNotifications[A] => {
+			case sn: SchedulesNotifications[A] =>
 
 				scheduledNotificationService.removeInvalidNotifications(result)
 
@@ -38,7 +37,6 @@ trait NotificationHandling extends Logging {
 						scheduledNotificationService.push(scheduledNotification)
 					}
 				}
-			}
 			case _ =>
 		}
 
