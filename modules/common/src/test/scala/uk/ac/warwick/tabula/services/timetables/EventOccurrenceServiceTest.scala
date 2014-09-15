@@ -37,7 +37,7 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 
 	val intervalOutsideOccurrence = new Interval(1,2)
 
-	val osc = new TermBasedEventOccurrenceComponent with WeekToDateConverterComponent with TermServiceComponent with ProfileServiceComponent {
+	val occurrenceService = new TermBasedEventOccurrenceService with WeekToDateConverterComponent with TermServiceComponent with ProfileServiceComponent {
 		val weekToDateConverter = mock[WeekToDateConverter]
 		var termService = mock[TermService]
 		val profileService = mock[ProfileService]
@@ -45,15 +45,13 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 
 	val termFactory = mock[TermFactory]
 
-	osc.termService.getTermFromDate(any[DateTime]) returns new TermImpl(termFactory, DateTime.now().minusDays(14), DateTime.now().plusDays(7),TermType.autumn)
-
-	val occurrenceService = osc.eventOccurrenceService
+	occurrenceService.termService.getTermFromDate(any[DateTime]) returns new TermImpl(termFactory, DateTime.now().minusDays(14), DateTime.now().plusDays(7),TermType.autumn)
 
 	@Test
 	def singleOccurenceDuringInterval(){
-		osc.weekToDateConverter.intersectsWeek(intervalIncludingOccurrence,week1,year) returns true
-		osc.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenAm,year) returns Some(week1Start.plusHours(10).toLocalDateTime)
-		osc.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenThirty,year) returns Some(week1Start.plusHours(10).plusMinutes(30).toLocalDateTime)
+		occurrenceService.weekToDateConverter.intersectsWeek(intervalIncludingOccurrence,week1,year) returns true
+		occurrenceService.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenAm,year) returns Some(week1Start.plusHours(10).toLocalDateTime)
+		occurrenceService.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenThirty,year) returns Some(week1Start.plusHours(10).plusMinutes(30).toLocalDateTime)
 
 		val eo = occurrenceService.fromTimetableEvent(singleOccurrence,intervalIncludingOccurrence)
 
@@ -62,15 +60,15 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 
 		// verify that the academicYear used to calculate the intersection and the occurrence dates
 		// is the year from the event, not the current year
-		there was one(osc.weekToDateConverter).intersectsWeek(intervalIncludingOccurrence,week1,year)
-		there was one(osc.weekToDateConverter).toLocalDatetime(week1,DayOfWeek.Monday,tenAm,year)
-		there was one(osc.weekToDateConverter).toLocalDatetime(week1,DayOfWeek.Monday,tenThirty,year)
+		there was one(occurrenceService.weekToDateConverter).intersectsWeek(intervalIncludingOccurrence,week1,year)
+		there was one(occurrenceService.weekToDateConverter).toLocalDatetime(week1,DayOfWeek.Monday,tenAm,year)
+		there was one(occurrenceService.weekToDateConverter).toLocalDatetime(week1,DayOfWeek.Monday,tenThirty,year)
 
 	}
 
 	@Test
 	def singleOccurenceOutsideInterval(){
-		osc.weekToDateConverter.intersectsWeek(intervalOutsideOccurrence,week1,year) returns false
+		occurrenceService.weekToDateConverter.intersectsWeek(intervalOutsideOccurrence,week1,year) returns false
 		val eo = occurrenceService.fromTimetableEvent(singleOccurrence,intervalIncludingOccurrence)
 		eo.size should be (0)
 	}
@@ -82,23 +80,23 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 		val eventEndDate = intervalIncludingOccurrence.getStart.minusDays(1).toLocalDateTime
 
 		// ...but the week that the event is in, still intersects with the interval
-		osc.weekToDateConverter.intersectsWeek(intervalIncludingOccurrence,1,year) returns true
+		occurrenceService.weekToDateConverter.intersectsWeek(intervalIncludingOccurrence,1,year) returns true
 
-		osc.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenAm,year) returns Some(new LocalDateTime())
-		osc.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenThirty,year) returns Some(eventEndDate)
+		occurrenceService.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenAm,year) returns Some(new LocalDateTime())
+		occurrenceService.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenThirty,year) returns Some(eventEndDate)
 
 		val eo = occurrenceService.fromTimetableEvent(singleOccurrence,intervalIncludingOccurrence)
 		eo.size should be (0)
 	}
 
 	@Test
-  def multipleOccurrencesDuringInterval(){
-		osc.weekToDateConverter.intersectsWeek(intervalIncludingTwoOccurrences,week1,year) returns true
-		osc.weekToDateConverter.intersectsWeek(intervalIncludingTwoOccurrences,week2,year) returns true
-		osc.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenAm,year) returns Some(week1Start.plusHours(10).toLocalDateTime)
-		osc.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenThirty,year) returns Some(week1Start.plusHours(10).plusMinutes(30).toLocalDateTime)
-		osc.weekToDateConverter.toLocalDatetime(week2,DayOfWeek.Monday,tenAm,year) returns Some(week2Start.plusHours(10).toLocalDateTime)
-		osc.weekToDateConverter.toLocalDatetime(week2,DayOfWeek.Monday,tenThirty,year) returns Some(week2Start.plusHours(10).plusMinutes(30).toLocalDateTime)
+	def multipleOccurrencesDuringInterval(){
+		occurrenceService.weekToDateConverter.intersectsWeek(intervalIncludingTwoOccurrences,week1,year) returns true
+		occurrenceService.weekToDateConverter.intersectsWeek(intervalIncludingTwoOccurrences,week2,year) returns true
+		occurrenceService.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenAm,year) returns Some(week1Start.plusHours(10).toLocalDateTime)
+		occurrenceService.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenThirty,year) returns Some(week1Start.plusHours(10).plusMinutes(30).toLocalDateTime)
+		occurrenceService.weekToDateConverter.toLocalDatetime(week2,DayOfWeek.Monday,tenAm,year) returns Some(week2Start.plusHours(10).toLocalDateTime)
+		occurrenceService.weekToDateConverter.toLocalDatetime(week2,DayOfWeek.Monday,tenThirty,year) returns Some(week2Start.plusHours(10).plusMinutes(30).toLocalDateTime)
 
 		val eo = occurrenceService.fromTimetableEvent(doubleOccurrenence,intervalIncludingTwoOccurrences)
 
@@ -107,10 +105,10 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 
 	@Test
 	def multipleOccurrencesNotAllDuringInterval(){
-		osc.weekToDateConverter.intersectsWeek(intervalIncludingTwoOccurrences,week1,year) returns true
-		osc.weekToDateConverter.intersectsWeek(intervalIncludingTwoOccurrences,week2,year) returns false
-		osc.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenAm,year) returns Some(week1Start.plusHours(10).toLocalDateTime)
-		osc.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenThirty,year) returns Some(week1Start.plusHours(10).plusMinutes(30).toLocalDateTime)
+		occurrenceService.weekToDateConverter.intersectsWeek(intervalIncludingTwoOccurrences,week1,year) returns true
+		occurrenceService.weekToDateConverter.intersectsWeek(intervalIncludingTwoOccurrences,week2,year) returns false
+		occurrenceService.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenAm,year) returns Some(week1Start.plusHours(10).toLocalDateTime)
+		occurrenceService.weekToDateConverter.toLocalDatetime(week1,DayOfWeek.Monday,tenThirty,year) returns Some(week1Start.plusHours(10).plusMinutes(30).toLocalDateTime)
 
 		val eo = occurrenceService.fromTimetableEvent(doubleOccurrenence,intervalIncludingTwoOccurrences)
 

@@ -1,14 +1,18 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember}
-import org.joda.time.{Interval, LocalDate}
-import uk.ac.warwick.tabula.services.timetables.{TermBasedEventOccurrenceComponent, StaffTimetableEventSource, EventOccurrenceServiceComponent, ScheduledMeetingEventSource, StudentTimetableEventSource}
+import org.joda.time.Interval
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.{Command, Unaudited, ReadOnly, ComposableCommand, Appliable, CommandInternal}
-import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence}
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringTermServiceComponent, TermAwareWeekToDateConverterComponent}
-import uk.ac.warwick.tabula.system.permissions.{Public, PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.commands.{Appliable, Command, CommandInternal, ComposableCommand, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent, ScheduledMeetingEventSource, StaffTimetableEventSource}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Public, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
+
+// Do not remove
+// Should be import uk.ac.warwick.tabula.helpers.DateTimeOrdering
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering
 
 trait ViewStaffPersonalTimetableCommandState extends PersonalTimetableCommandState {
 	val staff: StaffMember
@@ -72,16 +76,16 @@ trait ViewStaffTimetablePermissions extends RequiresPermissionsChecking{
 object ViewStaffPersonalTimetableCommand {
 
 	def apply(
-						 staffTimetableEventSource:StaffTimetableEventSource,
-						 scheduledMeetingEventSource: ScheduledMeetingEventSource,
-						 staff: StaffMember,
-						 currentUser: CurrentUser
-						 ): Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState =
+		staffTimetableEventSource:StaffTimetableEventSource,
+		scheduledMeetingEventSource: ScheduledMeetingEventSource,
+		staff: StaffMember,
+		currentUser: CurrentUser
+	): Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState =
 		new ViewStaffPersonalTimetableCommandImpl(staffTimetableEventSource, scheduledMeetingEventSource, staff, currentUser)
 			with ComposableCommand[Seq[EventOccurrence]]
 			with ViewStaffTimetablePermissions
 			with ReadOnly with Unaudited
-			with TermBasedEventOccurrenceComponent
+			with AutowiringTermBasedEventOccurrenceServiceComponent
 			with TermAwareWeekToDateConverterComponent
 			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
@@ -91,16 +95,16 @@ object ViewStaffPersonalTimetableCommand {
 object PublicStaffPersonalTimetableCommand {
 
 	def apply(
-						 staffTimetableEventSource: StaffTimetableEventSource,
-						 scheduledMeetingEventSource: ScheduledMeetingEventSource,
-						 staff: StaffMember,
-						 currentUser: CurrentUser
-						 ): Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState =
+		staffTimetableEventSource: StaffTimetableEventSource,
+		scheduledMeetingEventSource: ScheduledMeetingEventSource,
+		staff: StaffMember,
+		currentUser: CurrentUser
+	): Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState =
 		new ViewStaffPersonalTimetableCommandImpl(staffTimetableEventSource, scheduledMeetingEventSource, staff, currentUser)
 			with Command[Seq[EventOccurrence]]
 			with Public
 			with ReadOnly with Unaudited
-			with TermBasedEventOccurrenceComponent
+			with AutowiringTermBasedEventOccurrenceServiceComponent
 			with TermAwareWeekToDateConverterComponent
 			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
