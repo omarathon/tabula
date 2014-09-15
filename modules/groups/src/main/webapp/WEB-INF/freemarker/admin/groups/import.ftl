@@ -98,7 +98,7 @@
 		<@f.form method="post" id="import-form" action="${post_url}" commandName="command" cssClass="form-horizontal">
 			<input type="hidden" name="action" value="" />
 
-			<p>Below are all of the scheduled events defined for modules in this department in Syllabus+, the central timetabling system.</p>
+			<p>Below are all of the scheduled small groups defined for modules in this department in Syllabus+, the central timetabling system.</p>
 
 			<p>Use the checkboxes on the left hand side to choose which ones you want to import into Tabula.
 			   If there is already a set of small groups with the same name for this academic year, it will have
