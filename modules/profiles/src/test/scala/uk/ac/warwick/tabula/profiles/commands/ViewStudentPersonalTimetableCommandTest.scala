@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek}
-import uk.ac.warwick.tabula.services.{EventOccurrenceServiceComponent, EventOccurrenceService}
+import uk.ac.warwick.tabula.services.timetables.{EventOccurrenceServiceComponent, EventOccurrenceService}
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, Mockito, TestBase}
 import org.joda.time.{Interval, LocalDate, LocalDateTime, LocalTime}
 import uk.ac.warwick.tabula.data.model.StudentMember
