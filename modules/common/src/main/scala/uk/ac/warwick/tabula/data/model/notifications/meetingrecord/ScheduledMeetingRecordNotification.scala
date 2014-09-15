@@ -102,7 +102,7 @@ trait AddsIcalAttachmentToScheduledMeetingNotification extends HasNotificationAt
 		// Attachment for everyone else
 		val attachmentBodyPart = new MimeBodyPart
 		attachmentBodyPart.setDisposition(Part.ATTACHMENT)
-		attachmentBodyPart.setFileName("booking.ics")
+		attachmentBodyPart.setFileName("meeting.ics")
 		attachmentBodyPart.setDataHandler(new DataHandler(ByteArrayDataSource(iCal, "text/calendar", "meeting.ics")))
 
 		mp.addBodyPart(textPart)
