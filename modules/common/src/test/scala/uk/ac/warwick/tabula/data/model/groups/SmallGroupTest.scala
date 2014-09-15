@@ -11,6 +11,8 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.SmallGroupService
 
+import scala.util.Random
+
 class SmallGroupTest extends TestBase with Mockito {
 
   val event = newEventWithMockedServices
@@ -176,6 +178,10 @@ class SmallGroupTest extends TestBase with Mockito {
 		val group5 = Fixtures.smallGroup("Group 9")
 		val group6 = Fixtures.smallGroup("Late group 1")
 
-		Seq(group1, group2, group3, group4, group5, group6).sorted should be (Seq(group1, group2, group5, group4, group3, group6))
+		for (i <- 1 to 10) {
+			val shuffled = Random.shuffle(Seq(group1, group2, group3, group4, group5, group6))
+
+			shuffled.sorted should be (Seq(group1, group2, group5, group4, group3, group6))
+		}
 	}
 }
