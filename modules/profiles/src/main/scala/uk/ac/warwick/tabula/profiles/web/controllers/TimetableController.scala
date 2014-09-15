@@ -111,7 +111,7 @@ abstract class AbstractTimetableICalController
 
 	@RequestMapping
 	def getIcalFeed(@ModelAttribute("command") command: TimetableCommand): Mav = {
-		val year = AcademicYear.findAcademicYearContainingDate(DateTime.now, termService)
+		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		// Start from either 1 week ago, or the start of the current academic year, whichever is earlier
 		val start = {
