@@ -10,9 +10,9 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.profiles.commands.{PersonalTimetableCommandState, PublicStaffPersonalTimetableCommand, PublicStudentPersonalTimetableCommand, ViewStaffPersonalTimetableCommand, ViewStudentPersonalTimetableCommand}
-import uk.ac.warwick.tabula.profiles.services.timetables._
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
-import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.timetables._
+import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, AutowiringProfileServiceComponent, AutowiringRelationshipServiceComponent, AutowiringSecurityServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, AutowiringUserLookupComponent}
 import uk.ac.warwick.tabula.timetables.EventOccurrence
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}

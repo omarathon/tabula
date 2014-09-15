@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.profiles.services.timetables
+package uk.ac.warwick.tabula.services.timetables
 
 import java.io.InputStream
 
@@ -189,7 +189,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		// If we run an identical event in separate weeks, combine the weeks for them
 		val groupedEvents = events.groupBy { event =>
 			(event.name, event.title, event.description, event.eventType, event.day, event.startTime, event.endTime,
-				event.location, event.context, event.staffUniversityIds, event.year)
+				event.location, event.context, event.staffUniversityIds, event.studentUniversityIds, event.year)
 		}.values.toSeq
 
 		groupedEvents.map { eventSeq => eventSeq.size match {
@@ -212,6 +212,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					event.context,
 					event.comments,
 					event.staffUniversityIds,
+					event.studentUniversityIds,
 					event.year
 				)
 		}}.toList
@@ -287,6 +288,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					comments = None,
 					context = moduleCode,
 					staffUniversityIds = staffIds,
+					studentUniversityIds = Nil,
 					year = year
 				))
 			}

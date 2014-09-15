@@ -1,11 +1,11 @@
-package uk.ac.warwick.tabula.profiles.services.timetables
+package uk.ac.warwick.tabula.services.timetables
 
-import uk.ac.warwick.tabula.{Fixtures, CurrentUser, Mockito, TestBase}
-import uk.ac.warwick.tabula.data.model.{AbstractMeetingRecord, StudentRelationshipType, StudentRelationship, StudentMember}
-import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence, TimetableEventType}
 import org.joda.time.LocalDateTime
-import uk.ac.warwick.tabula.services.{SecurityServiceComponent, SecurityService, MeetingRecordServiceComponent, RelationshipServiceComponent, MeetingRecordService, RelationshipService}
+import uk.ac.warwick.tabula.data.model.{AbstractMeetingRecord, StudentMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{MeetingRecordService, MeetingRecordServiceComponent, RelationshipService, RelationshipServiceComponent, SecurityService, SecurityServiceComponent}
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
 class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestBase with Mockito {
 	val student = new StudentMember

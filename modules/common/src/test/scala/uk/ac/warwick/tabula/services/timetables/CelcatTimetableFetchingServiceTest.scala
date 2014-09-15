@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.profiles.services.timetables
+package uk.ac.warwick.tabula.services.timetables
 
 import dispatch.classic.Credentials
 import org.apache.http.auth.AuthScope
@@ -63,6 +63,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 			Some("ES186"),
 			None,
 			Nil,
+			Nil,
 			AcademicYear.parse("13/14")
 		))
 
@@ -94,6 +95,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 			Some("P521"),
 			Some("ES186"),
 			None,
+			Nil,
 			Nil,
 			AcademicYear.parse("13/14")
 		))

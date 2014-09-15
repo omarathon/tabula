@@ -13,7 +13,7 @@ case object ModuleManagerRoleDefinition extends BuiltInRoleDefinition {
 	
 	GeneratesSubRole(ModuleAssistantRoleDefinition)
 
-	GrantsScopedPermission( 	
+	GrantsScopedPermission(
 		Assignment.Archive,
 		Assignment.Delete,
 
@@ -23,7 +23,8 @@ case object ModuleManagerRoleDefinition extends BuiltInRoleDefinition {
 		Feedback.Publish,
 		
 		SmallGroups.Archive,
-		SmallGroups.Delete
+		SmallGroups.Delete,
+		SmallGroups.ImportFromExternalSystem
 	)
 	def canDelegateThisRolesPermissions: JBoolean = true
 }

@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.services.timetables
 
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.parameter
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 
-
-trait EventOccurrenceServiceComponent{
+trait EventOccurrenceServiceComponent {
 	val eventOccurrenceService: EventOccurrenceService
 }
 
@@ -96,12 +96,12 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 
 		eventOccurrence.staffUniversityIds.headOption.flatMap {
 			universityId =>
-				profileService.getMemberByUniversityId(universityId, disableFilter = true).map {
-					staffMember =>
-						val organiser: Organizer = new Organizer(s"MAILTO:${staffMember.email}")
-						organiser.getParameters.add(new Cn(staffMember.fullName.getOrElse("Unknown")))
-						event.getProperties.add(organiser)
-				}
+			profileService.getMemberByUniversityId(universityId, disableFilter = true).map {
+				staffMember =>
+					val organiser: Organizer = new Organizer(s"MAILTO:${staffMember.email}")
+					organiser.getParameters.add(new Cn(staffMember.fullName.getOrElse("Unknown")))
+					event.getProperties.add(organiser)
+			}
 		}.getOrElse {
 			val organiser: Organizer = new Organizer(s"MAILTO:no-reply@tabula.warwick.ac.uk")
 			event.getProperties.add(organiser)
