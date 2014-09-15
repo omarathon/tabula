@@ -5,10 +5,14 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Appliable, Command, CommandInternal, ComposableCommand, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.profiles.services.timetables.{ScheduledMeetingEventSource, StaffTimetableEventSource}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent, ScheduledMeetingEventSource, StaffTimetableEventSource}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Public, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
+
+// Do not remove
+// Should be import uk.ac.warwick.tabula.helpers.DateTimeOrdering
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering
 
 trait ViewStaffPersonalTimetableCommandState extends PersonalTimetableCommandState {
 	val staff: StaffMember

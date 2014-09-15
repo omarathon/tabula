@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.profiles.services.timetables
+package uk.ac.warwick.tabula.services.timetables
 
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -96,6 +96,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 						event.context,
 						events.flatMap { _.comments }.headOption,
 						events.flatMap { _.staffUniversityIds }.distinct,
+						events.flatMap { _.studentUniversityIds }.distinct,
 						event.year
 					)
 				}

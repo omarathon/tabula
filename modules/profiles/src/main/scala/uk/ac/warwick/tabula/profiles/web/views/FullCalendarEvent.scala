@@ -37,14 +37,25 @@ object FullCalendarEvent {
 	def apply(source: EventOccurrence, userLookup: UserLookupService): FullCalendarEvent = {
 		val intervalFormatter = new ConfigurableIntervalFormatter(Hour12OptionalMins, IncludeDays)
 
-		
 		val shortTimeFormat = DateTimeFormat.shortTime()
+
+		// Some event providers (namely Celcat) have events scheduled from xx:05 to xx:55.
+		// This is fine for displaying the formatted time, but for the seconds time it's neater
+		// to roll these times to the hour
+		def rollToHour(dt: DateTime) =
+			if (dt.getMinuteOfHour == 5) dt.minusMinutes(5)
+			else if (dt.getMinuteOfHour == 55) dt.plusMinutes(5)
+			else dt
+
+		val startTimeSeconds = rollToHour(source.start.toDateTime).getMillis / 1000
+		val endTimeSeconds = rollToHour(source.end.toDateTime).getMillis / 1000
+
 		FullCalendarEvent(
 			title = source.context.map { _ + " " }.getOrElse("") + source.eventType.displayName + source.location.map(l => s" ($l)").getOrElse(""),
 			fullTitle = source.title,
 			allDay = false,
-			start = source.start.toDateTime.getMillis / 1000,
-			end = source.end.toDateTime.getMillis / 1000,
+			start = startTimeSeconds,
+			end = endTimeSeconds,
 			formattedStartTime = shortTimeFormat.print(source.start.toDateTime),
 			formattedEndTime = shortTimeFormat.print(source.end.toDateTime),
 			formattedInterval = intervalFormatter.format(source.start.toDateTime, source.end.toDateTime),

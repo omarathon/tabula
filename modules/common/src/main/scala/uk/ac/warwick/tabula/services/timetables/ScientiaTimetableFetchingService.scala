@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.profiles.services.timetables
+package uk.ac.warwick.tabula.services.timetables
 
 import dispatch.classic.thread.ThreadSafeHttpClient
 import dispatch.classic.{url, thread, Http}
@@ -143,6 +143,7 @@ object ScientiaHttpTimetableFetchingService {
 				comments = Option((activity \\ "comments").text).flatMap { _.maybeText },
 				context = Option((activity \\ "module").text),
 				staffUniversityIds = (activity \\ "staffmember") map { _.text },
+				studentUniversityIds = (activity \\ "student") map { _.text },
 				year = year
 			)
 		}

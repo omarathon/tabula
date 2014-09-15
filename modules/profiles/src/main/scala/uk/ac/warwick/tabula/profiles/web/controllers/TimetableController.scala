@@ -10,9 +10,9 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.profiles.commands.{PersonalTimetableCommandState, PublicStaffPersonalTimetableCommand, PublicStudentPersonalTimetableCommand, ViewStaffPersonalTimetableCommand, ViewStudentPersonalTimetableCommand}
-import uk.ac.warwick.tabula.profiles.services.timetables._
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
-import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.timetables._
+import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, AutowiringProfileServiceComponent, AutowiringRelationshipServiceComponent, AutowiringSecurityServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, AutowiringUserLookupComponent}
 import uk.ac.warwick.tabula.timetables.EventOccurrence
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
@@ -23,7 +23,7 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 	type TimetableCommand = Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState
 
 	// re-use the event source, so it can cache lookups between requests
-	val studentTimetableEventSource = (new CombinedStudentTimetableEventSourceComponent
+	val studentTimetableEventSource: StudentTimetableEventSource = (new CombinedStudentTimetableEventSourceComponent
 		with SmallGroupEventTimetableEventSourceComponentImpl
 		with CombinedHttpTimetableFetchingServiceComponent
 		with AutowiringSmallGroupServiceComponent
@@ -33,7 +33,7 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 		with SystemClockComponent
 		).studentTimetableEventSource
 
-	val staffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
+	val staffTimetableEventSource: StaffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
 		with SmallGroupEventTimetableEventSourceComponentImpl
 		with CombinedHttpTimetableFetchingServiceComponent
 		with AutowiringSmallGroupServiceComponent
@@ -43,7 +43,7 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 		with SystemClockComponent
 		).staffTimetableEventSource
 
-	val scheduledMeetingEventSource = (new MeetingRecordServiceScheduledMeetingEventSourceComponent
+	val scheduledMeetingEventSource: ScheduledMeetingEventSource = (new MeetingRecordServiceScheduledMeetingEventSourceComponent
 		with AutowiringRelationshipServiceComponent
 		with AutowiringMeetingRecordServiceComponent
 		with AutowiringSecurityServiceComponent
@@ -111,7 +111,7 @@ abstract class AbstractTimetableICalController
 
 	@RequestMapping
 	def getIcalFeed(@ModelAttribute("command") command: TimetableCommand): Mav = {
-		val year = AcademicYear.findAcademicYearContainingDate(DateTime.now, termService)
+		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		// Start from either 1 week ago, or the start of the current academic year, whichever is earlier
 		val start = {

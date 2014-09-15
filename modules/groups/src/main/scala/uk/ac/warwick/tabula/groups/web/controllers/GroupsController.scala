@@ -20,7 +20,7 @@ abstract class GroupsController extends BaseController with GroupsBreadcrumbs {
 		val moduleItems = for ((module, sets) <- mapping) yield {
 			ViewModule(module,
 				sets.toSeq map { case (set, groups) =>
-					ViewSet(set, groups, viewerRole)
+					ViewSet(set, groups.sorted, viewerRole)
 				},
 				canManageGroups = false
 			)

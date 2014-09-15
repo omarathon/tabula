@@ -325,6 +325,8 @@ object Permissions {
 
 		case object Allocate extends Permission("Allocate students to small groups")
 		case object AllocateSelf extends Permission("Allocate the current user to a small group")
+
+		case object ImportFromExternalSystem extends Permission("Import small groups from Syllabus+")
 	}
 
 	object SmallGroupEvents {

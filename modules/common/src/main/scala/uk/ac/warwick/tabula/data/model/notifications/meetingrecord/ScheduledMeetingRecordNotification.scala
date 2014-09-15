@@ -12,7 +12,7 @@ import org.springframework.mail.javamail.MimeMessageHelper
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.services.{EventOccurrenceService, TermBasedEventOccurrenceService}
+import uk.ac.warwick.tabula.services.timetables.{TermBasedEventOccurrenceService, EventOccurrenceService}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 abstract class ScheduledMeetingRecordNotification
