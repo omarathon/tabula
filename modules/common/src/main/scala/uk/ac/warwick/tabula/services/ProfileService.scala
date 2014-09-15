@@ -75,11 +75,6 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	var profileIndexService = Wire.auto[ProfileIndexService]
 
-	def regenerateTimetableHash(member: Member) = {
-		member.timetableHash = UUID.randomUUID.toString
-		save(member)
-	}
-
 	def getMemberByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false) = transactional(readOnly = true) {
 		memberDao.getByUniversityId(universityId, disableFilter, eagerLoad)
 	}
@@ -122,6 +117,8 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	def getMemberByTimetableHash(timetableHash: String): Option[Member] = {
 		memberDao.getMemberByTimetableHash(timetableHash)
 	}
+
+	def regenerateTimetableHash(member: Member) = memberDao.setTimetableHash(member, UUID.randomUUID.toString)
 
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean) = transactional(readOnly = true) {
 		profileIndexService.find(query, departments, userTypes, isGod)

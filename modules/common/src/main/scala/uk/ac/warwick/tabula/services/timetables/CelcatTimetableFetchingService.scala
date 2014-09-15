@@ -152,9 +152,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 			}
 
 			// Execute the request
-			// If the status is OK, pass the response to the handler function for turning into TimetableEvents
-			// else return an empty list.
-			logger.info(s"Requesting timetable data from $req")
+			logger.info(s"Requesting staff information from $req")
 			Try(http.when(_==200)(req >:+ bsvHandler)) match {
 				case Success(ev) => toBSVCacheEntry(ev)
 				case Failure(ex) => throw new CacheEntryUpdateException(ex)
