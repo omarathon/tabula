@@ -1,19 +1,17 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.commands.{Command, Unaudited, ComposableCommand, Appliable, CommandInternal}
-import uk.ac.warwick.tabula.profiles.services.timetables._
-import uk.ac.warwick.tabula.system.permissions.Public
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
-import uk.ac.warwick.tabula.services._
 import org.joda.time.{Interval, LocalDate}
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.{Appliable, Command, CommandInternal, ComposableCommand, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.profiles.services.timetables._
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Public, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 // Do not remove
 // Should be import uk.ac.warwick.tabula.helpers.DateTimeOrdering
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering
-import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
-import uk.ac.warwick.tabula.CurrentUser
 
 trait PersonalTimetableCommandState {
 	var start: LocalDate = LocalDate.now.minusMonths(12)
@@ -92,7 +90,7 @@ object ViewStudentPersonalTimetableCommand {
 			with ComposableCommand[Seq[EventOccurrence]]
 			with ViewStudentTimetablePermissions
 			with ReadOnly with Unaudited
-			with TermBasedEventOccurrenceComponent
+			with AutowiringTermBasedEventOccurrenceServiceComponent
 			with TermAwareWeekToDateConverterComponent
 			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
@@ -111,7 +109,7 @@ object PublicStudentPersonalTimetableCommand {
 			with Command[Seq[EventOccurrence]]
 			with Public
 			with ReadOnly with Unaudited
-			with TermBasedEventOccurrenceComponent
+			with AutowiringTermBasedEventOccurrenceServiceComponent
 			with TermAwareWeekToDateConverterComponent
 			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent

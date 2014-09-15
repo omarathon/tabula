@@ -1,24 +1,22 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
-import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.profiles.commands.{PublicStaffPersonalTimetableCommand, PersonalTimetableCommandState, ViewStaffPersonalTimetableCommand, PublicStudentPersonalTimetableCommand, ViewStudentPersonalTimetableCommandState, ViewStudentPersonalTimetableCommand}
-import uk.ac.warwick.tabula.data.model.{StaffMember, Member, StudentMember}
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.views.IcalView
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestParam, RequestMapping}
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.web.views.JSONView
-import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
-import uk.ac.warwick.tabula.profiles.services.timetables._
-import uk.ac.warwick.tabula.services.{TermAwareWeekToDateConverterComponent, AutowiringProfileServiceComponent, AutowiringTermServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringMeetingRecordServiceComponent, AutowiringRelationshipServiceComponent, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
-import uk.ac.warwick.tabula.helpers.SystemClockComponent
-import uk.ac.warwick.tabula.commands.Appliable
-import net.fortuna.ical4j.model.{TimeZoneRegistryFactory, Calendar}
-import net.fortuna.ical4j.model.property.{XProperty, Method, CalScale, Version, ProdId}
 import net.fortuna.ical4j.model.component.VEvent
-import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+import net.fortuna.ical4j.model.property.{CalScale, Method, ProdId, Version, XProperty}
+import net.fortuna.ical4j.model.{Calendar, TimeZoneRegistryFactory}
+import org.joda.time.DateTime
+import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
+import uk.ac.warwick.tabula.helpers.SystemClockComponent
+import uk.ac.warwick.tabula.profiles.commands.{PersonalTimetableCommandState, PublicStaffPersonalTimetableCommand, PublicStudentPersonalTimetableCommand, ViewStaffPersonalTimetableCommand, ViewStudentPersonalTimetableCommand}
+import uk.ac.warwick.tabula.profiles.services.timetables._
+import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.EventOccurrence
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
 abstract class AbstractTimetableController extends ProfilesController with AutowiringProfileServiceComponent {
 
@@ -108,9 +106,8 @@ class TimetableController extends AbstractTimetableController with AutowiringUse
 
 abstract class AbstractTimetableICalController
 	extends AbstractTimetableController
-		with TermBasedEventOccurrenceComponent
-		with AutowiringTermServiceComponent
-		with TermAwareWeekToDateConverterComponent {
+		with AutowiringTermBasedEventOccurrenceServiceComponent
+		with AutowiringTermServiceComponent {
 
 	@RequestMapping
 	def getIcalFeed(@ModelAttribute("command") command: TimetableCommand): Mav = {
