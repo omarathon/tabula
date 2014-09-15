@@ -40,7 +40,7 @@ trait SearchStudentsInSmallGroupSetCommandState {
 
 	def validQuery =
 		(query.trim().length >= MinimumQueryLength) &&
-		(query.split("""\s+""").find{_.length >= MinimumTermLength}.isDefined)
+		query.split( """\s+""").exists(_.length >= MinimumTermLength)
 }
 
 class SearchStudentsInSmallGroupSetCommandInternal(val module: Module, val set: SmallGroupSet) extends CommandInternal[Seq[Member]] with SearchStudentsInSmallGroupSetCommandState {
@@ -57,12 +57,12 @@ class SearchStudentsInSmallGroupSetCommandInternal(val module: Module, val set: 
 
 	def allUniversityIdsInSet = {
 		// Include the university IDs of any users in any SmallGroupSet within this module
-		(module.groupSets.asScala.flatMap { set =>
+		module.groupSets.asScala.flatMap { set =>
 			set.members.knownType.members ++ set.groups.asScala.flatMap { group =>
-				group.students.users.map { _.getWarwickId } ++
-					group.events.asScala.flatMap { _.occurrences.asScala.flatMap { _.attendance.asScala.toSeq.map { _.universityId } }}
+				group.students.users.map(_.getWarwickId) ++
+					smallGroupService.findAttendanceByGroup(group).flatMap(_.attendance.asScala.toSeq.map(_.universityId))
 			}
-		}).distinct
+		}.distinct
 	}
 
 	def members = {
@@ -76,10 +76,10 @@ class SearchStudentsInSmallGroupSetCommandInternal(val module: Module, val set: 
 
 	override def applyInternal() = {
 		if (validQuery) {
-			val terms = query.split("""\s+""").map { _.trim().toLowerCase() }
+			val terms = query.split("""\s+""").map { _.trim().toLowerCase }
 			members.filter { member =>
 				terms.forall { term =>
-					member.fullName.fold(false) { _.toLowerCase().contains(term) }
+					member.fullName.fold(false) { _.toLowerCase.contains(term) }
 				}
 			}.sortBy { member => (member.lastName, member.firstName, member.universityId) }
 		} else Nil
