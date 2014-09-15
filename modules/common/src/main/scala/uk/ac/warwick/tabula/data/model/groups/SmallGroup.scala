@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, UserGroupCacheManager}
@@ -47,8 +48,8 @@ object SmallGroup {
 		private def compareStrings(s1: String, s2: String) = {
 			var s1Marker = 0
 			var s2Marker = 0
-			val s1Length = s1.length
-			val s2Length = s2.length
+			val s1Length = s1.safeLength
+			val s2Length = s2.safeLength
 
 			var result = 0
 			while (s1Marker < s1Length && s2Marker < s2Length && result == 0) {
@@ -79,7 +80,7 @@ object SmallGroup {
 		}
 
 		def compare(a: SmallGroup, b: SmallGroup) = {
-			val nameCompare = compareStrings(a.name.toLowerCase(), b.name.toLowerCase())
+			val nameCompare = compareStrings(a.name.safeLowercase, b.name.safeLowercase)
 			if (nameCompare != 0) nameCompare else a.id compare b.id
 		}
 	}
