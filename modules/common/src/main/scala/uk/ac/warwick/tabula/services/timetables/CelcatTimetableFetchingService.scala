@@ -117,18 +117,31 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		}
 	}
 
-	def getTimetableForStaff(universityId: UniversityId): Seq[TimetableEvent] = {
+	def findConfigForStaff(universityId: UniversityId): Option[CelcatDepartmentConfiguration] = {
 		userLookup.getUserByWarwickUniId(universityId) match {
-			case FoundUser(u) if u.getDepartmentCode.hasText => configs.get(u.getDepartmentCode.toLowerCase).map { config =>
-				val filename = config.staffFilenameLookupStrategy match {
-					case FilenameGenerationStrategy.Default => s"${u.getWarwickId}.ics"
-					case FilenameGenerationStrategy.BSV => lookupCelcatIDFromBSV(u.getWarwickId, config).map { id => s"$id.ics" }.getOrElse(s"${u.getWarwickId}.ics")
-				}
+			// User in a department with a config
+			case FoundUser(u) if u.getDepartmentCode.hasText && configs.contains(u.getDepartmentCode.toLowerCase) =>
+				configs.get(u.getDepartmentCode.toLowerCase)
 
-				doRequest(filename, config)
-			}.getOrElse(Nil)
-			case _ => Nil
+			// Look for a BSV-style config that contains the user
+			case FoundUser(u) =>
+				configs.values
+					.filter { _.staffFilenameLookupStrategy == FilenameGenerationStrategy.BSV }
+					.find { lookupCelcatIDFromBSV(u.getWarwickId, _).isDefined }
+
+			case _ => None
 		}
+	}
+
+	def getTimetableForStaff(universityId: UniversityId): Seq[TimetableEvent] = {
+		findConfigForStaff(universityId).map { config =>
+			val filename = config.staffFilenameLookupStrategy match {
+				case FilenameGenerationStrategy.Default => s"$universityId.ics"
+				case FilenameGenerationStrategy.BSV => lookupCelcatIDFromBSV(universityId, config).map { id => s"$id.ics" }.getOrElse(s"$universityId.ics")
+			}
+
+			doRequest(filename, config)
+		}.getOrElse(Nil)
 	}
 
 	type BSVCacheEntry = Seq[(UniversityId, CelcatStaffInfo)] with java.io.Serializable
