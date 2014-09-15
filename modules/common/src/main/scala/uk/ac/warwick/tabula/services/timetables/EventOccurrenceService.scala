@@ -1,18 +1,17 @@
 package uk.ac.warwick.tabula.services.timetables
 
+import net.fortuna.ical4j.model.component.VEvent
+import net.fortuna.ical4j.model.parameter
+import net.fortuna.ical4j.model.parameter.{Cn, Value}
+import net.fortuna.ical4j.model.property._
+import org.apache.commons.codec.digest.DigestUtils
+import org.joda.time._
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
-import org.joda.time._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
-import net.fortuna.ical4j.model.component.VEvent
-import net.fortuna.ical4j.model.parameter
-import net.fortuna.ical4j.model.parameter.Value
-import net.fortuna.ical4j.model.property._
-import net.fortuna.ical4j.model.parameter.Cn
-import org.apache.commons.codec.digest.DigestUtils
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait EventOccurrenceServiceComponent {
 	val eventOccurrenceService: EventOccurrenceService
@@ -26,7 +25,7 @@ trait AutowiringTermBasedEventOccurrenceServiceComponent extends TermBasedEventO
 	val eventOccurrenceService: TermBasedEventOccurrenceService = Wire[TermBasedEventOccurrenceService]
 }
 
-trait EventOccurrenceService{
+trait EventOccurrenceService {
 	def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence]
 	def toVEvent(eventOccurrence: EventOccurrence): VEvent
 }
