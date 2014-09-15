@@ -79,6 +79,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 		command.securityService.can(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns (true)
 
 		val tEventModule1Seminar1 = TimetableEvent(
+			uid="uuid1",
 			name="IN101S",
 			title="",
 			description="",
@@ -95,6 +96,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			year = AcademicYear(2012)
 		)
 		val tEventModule1Seminar2 = TimetableEvent(
+			uid="uuid2",
 			name="IN101S",
 			title="",
 			description="",
@@ -114,6 +116,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 		command.timetableFetchingService.getTimetableForModule("IN101") returns (Seq(
 			tEventModule1Seminar1, tEventModule1Seminar2,
 			TimetableEvent(
+				uid="uuid3",
 				name="IN101L",
 				title="",
 				description="",
@@ -132,6 +135,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 		))
 		command.timetableFetchingService.getTimetableForModule("IN102") returns (Seq(
 			TimetableEvent(
+				uid="uuid4",
 				name="IN102S",
 				title="",
 				description="",
