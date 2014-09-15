@@ -7,7 +7,7 @@
 	</div>
 	<#if event.staffUniversityIds?size gt 0>
 		Tutor<#if event.staffUniversityIds?size gt 1>s</#if>:
-		<@userlookup ids=event.staffUniversityIds universityId=true>
+		<@userlookup ids=event.staffUniversityIds lookupByUniversityId=true>
 			<#list returned_users?keys?sort as id> <#compress> <#-- intentional space -->
 				<#local returned_user=returned_users[id] />
 				<#if returned_user.foundUser>

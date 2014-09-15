@@ -21,6 +21,9 @@ import scala.collection.JavaConverters._
  *
  * When users is set, missing_ids will also be a sequence of user IDs
  * that couldn't be found.
+ *
+ * Set the boolean parameter lookupByUniversityId to true (default false)
+ * to search by university ID rather than usercode.
  */
 class UserLookupTag extends TemplateDirectiveModel {
 
@@ -33,24 +36,32 @@ class UserLookupTag extends TemplateDirectiveModel {
 
 		val wrapper = env.getObjectWrapper()
 
-		val user = unwrap(params.get("id")).asInstanceOf[String]
-		val users = unwrap(params.get("ids")).asInstanceOf[JList[String]]
-		val universityId = Option(unwrap(params.get("universityId")).asInstanceOf[JBoolean]).map { _.booleanValue() }.getOrElse(false)
+		val user = unwrap[String](params.get("id"))
+		val users = unwrap[JList[String]](params.get("ids"))
+		val lookupByUniversityId = unwrap[JBoolean](params.get("lookupByUniversityId")).exists { _.booleanValue() }
 
 		if (body == null) {
 			throw new TemplateException("UserLookupTag: must have a body", env);
 		}
 		
-		if (user != null) {
-			val u = (if (universityId) userLookup.getUserByWarwickUniId(user) else userLookup.getUserByUserId(user))
-			env.getCurrentNamespace().put("returned_user", wrapper.wrap(u))
-		} else if (users != null) {
-			val map =
-				if (universityId) userLookup.getUsersByWarwickUniIds(users)
-				else userLookup.getUsersByUserIds(users).asScala
+		if (user.nonEmpty) {
+			val userId = user.get
 
-			val missingUserIds = map.values.filterNot(_.isFoundUser()).map(_.getUserId)
-			env.getCurrentNamespace().put("returned_users", wrapper.wrap(map))
+			val returnedUser = (if (lookupByUniversityId) userLookup.getUserByWarwickUniId(userId) else userLookup.getUserByUserId(userId))
+			env.getCurrentNamespace().put("returned_user", wrapper.wrap(returnedUser))
+		} else if (users.nonEmpty) {
+			val userIds = users.get
+
+			val returnedUsers =
+				if (lookupByUniversityId) userLookup.getUsersByWarwickUniIds(userIds)
+				else userLookup.getUsersByUserIds(userIds).asScala
+
+			val missingUserIds =
+				returnedUsers.values
+					.filterNot(_.isFoundUser())
+					.map { user => if (lookupByUniversityId) user.getWarwickId else user.getUserId }
+
+			env.getCurrentNamespace().put("returned_users", wrapper.wrap(returnedUsers))
 			env.getCurrentNamespace().put("missing_ids", wrapper.wrap(missingUserIds))
 		} else {
 			throw new TemplateException("UserLookupTag: Either user or users must be specified", env)
@@ -60,9 +71,8 @@ class UserLookupTag extends TemplateDirectiveModel {
 
 	}
 
-	def unwrap(obj: Any) = {
-		if (obj == null) null
-		else DeepUnwrap.unwrap(obj.asInstanceOf[TemplateModel])
+	def unwrap[A](obj: Any): Option[A] = Option(obj).map { obj =>
+		DeepUnwrap.unwrap(obj.asInstanceOf[TemplateModel]).asInstanceOf[A]
 	}
 
 }

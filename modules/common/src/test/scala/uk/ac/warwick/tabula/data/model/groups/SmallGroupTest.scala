@@ -174,7 +174,8 @@ class SmallGroupTest extends TestBase with Mockito {
 		val group3 = Fixtures.smallGroup("group 20")
 		val group4 = Fixtures.smallGroup("Group 10")
 		val group5 = Fixtures.smallGroup("Group 9")
+		val group6 = Fixtures.smallGroup("Late group 1")
 
-		Seq(group1, group2, group3, group4, group5).sorted should be (Seq(group1, group2, group5, group4, group3))
+		Seq(group1, group2, group3, group4, group5, group6).sorted should be (Seq(group1, group2, group5, group4, group3, group6))
 	}
 }

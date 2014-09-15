@@ -24,6 +24,8 @@ class UserLookupTagTest extends TestBase with Mockito {
 	tag.userLookup = userLookup
 	
 	userLookup.registerUsers("cuscav", "cusebr")
+	userLookup.getUserByUserId("cuscav").setWarwickId("0672089")
+	userLookup.getUserByUserId("cusebr").setWarwickId("0672088")
 	
 	@Test def singleId = withUser("cuscav") {
 		val dept = Fixtures.department("in")
@@ -74,6 +76,62 @@ class UserLookupTagTest extends TestBase with Mockito {
 		DeepUnwrap.unwrap(env.getCurrentNamespace().get("returned_users")) should be (Map(
 			"cuscav" -> userLookup.getUserByUserId("cuscav"),
 			"cusebr" -> userLookup.getUserByUserId("cusebr")
+		))
+	}
+
+	@Test def singleUniversityId = withUser("cuscav") {
+		val dept = Fixtures.department("in")
+
+		// Use a SimpleHash as a workaround to wrapping things manually
+		val model = new SimpleHash
+		model.put("id", "0672089")
+		model.put("lookupByUniversityId", true)
+
+		val writer = new StringWriter
+
+		val env = new Environment(new Template("temp", new StringReader(""), null), model, writer)
+		val body = mock[TemplateDirectiveBody]
+
+		val params = new java.util.HashMap[String, TemplateModel]
+		params.put("id", model.get("id"))
+		params.put("lookupByUniversityId", model.get("lookupByUniversityId"))
+
+		tag.execute(env, params, null, body)
+
+		there was one(body).render(writer)
+
+		DeepUnwrap.unwrap(env.getCurrentNamespace().get("returned_user")) should be (userLookup.getUserByUserId("cuscav"))
+	}
+
+	@Test def multipleUniversityIds = withUser("cuscav") {
+		val dept = Fixtures.department("in")
+
+		// Use a SimpleHash as a workaround to wrapping things manually
+		val ids: JList[String] = JArrayList()
+		ids.add("0672089")
+		ids.add("0672088")
+
+		val model = new SimpleHash
+		model.put("ids", ids)
+		model.put("lookupByUniversityId", true)
+
+		val writer = new StringWriter
+
+		val env = new Environment(new Template("temp", new StringReader(""), null), model, writer)
+		val body = mock[TemplateDirectiveBody]
+
+		val params = new java.util.HashMap[String, TemplateModel]
+		params.put("ids", model.get("ids"))
+		params.put("lookupByUniversityId", model.get("lookupByUniversityId"))
+
+		tag.execute(env, params, null, body)
+
+		there was one(body).render(writer)
+
+		DeepUnwrap.unwrap(env.getCurrentNamespace().get("missing_ids")) should be (Seq())
+		DeepUnwrap.unwrap(env.getCurrentNamespace().get("returned_users")) should be (Map(
+			"0672089" -> userLookup.getUserByUserId("cuscav"),
+			"0672088" -> userLookup.getUserByUserId("cusebr")
 		))
 	}
 	
