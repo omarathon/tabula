@@ -15,8 +15,6 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
  * Service providing access to members and profiles.
  */
 trait RelationshipService {
-	def getPreviousRelationship(relationship: StudentRelationship): Option[StudentRelationship]
-
 	def allStudentRelationshipTypes: Seq[StudentRelationshipType]
 	def saveOrUpdate(relationshipType: StudentRelationshipType)
 	def delete(relationshipType: StudentRelationshipType)
@@ -281,18 +279,6 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 
 	def getStudentRelationshipById(id: String): Option[StudentRelationship] = relationshipDao.getStudentRelationshipById(id)
 
-	def getPreviousRelationship(relationship: StudentRelationship): Option[StudentRelationship] = {
-		val rels = relationshipDao.getAllPastAndPresentRelationships(relationship.relationshipType, relationship.studentCourseDetails)
-		val sortedRels = rels.sortBy { _.startDate }
-
-		// Get the element before the current relationship
-		val index = sortedRels.indexOf(relationship)
-		if (index > 0) {
-			Some(sortedRels(index-1)) // get the relationship before this one which started latest
-		} else {
-			None
-		}
-	}
 }
 
 trait RelationshipServiceComponent {

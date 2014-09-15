@@ -28,6 +28,7 @@ trait TutorFixture extends Mockito {
 
 	val newTutor = new StaffMember
 	newTutor.universityId = "0000001"
+
 	val oldTutor = new StaffMember
 	oldTutor.universityId = "0000002"
 

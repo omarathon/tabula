@@ -31,6 +31,7 @@ trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], 
 				change =>
 					change.modifiedRelationship.studentMember.map { student =>
 						val notification = Notification.init(new BulkStudentRelationshipNotification, apparentUser, change.modifiedRelationship)
+						notification.profileService = profileService // the auto-wired version is no good for testing
 						notification.oldAgentIds.value = change.oldAgents.map(_.universityId)
 						notification
 					}
@@ -54,6 +55,7 @@ trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], 
 				.map { case (oldAgent: Member, changes) =>
 				val relationships = changes.map { _._2 }
 				val notification = Notification.init(new BulkOldAgentRelationshipNotification, apparentUser, relationships)
+				notification.profileService = profileService // the auto-wired version is no good for testing
 				notification.oldAgentIds.value = Seq(oldAgent.universityId)
 				notification
 			}
@@ -68,6 +70,7 @@ trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], 
 				.map { case (agent, changes) =>
 					val relationships = changes.map { _.modifiedRelationship }.filter(_.endDate == null) // TAB-2486
 					Notification.init(new BulkNewAgentRelationshipNotification, apparentUser, relationships)
+
 					// can't set old agents as each tutee for the new agent will have a different set
 				}
 		} else Nil

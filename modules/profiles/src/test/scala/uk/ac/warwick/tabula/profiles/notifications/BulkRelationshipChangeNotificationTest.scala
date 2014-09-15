@@ -33,11 +33,6 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 		// set the service up to return all three relationships the student
 		service.getRelationships(Tutor, student) returns (rels)
 
-		// set the service up to return the appropriate previous relationship
-		service.getPreviousRelationship(rel0) returns None
-		service.getPreviousRelationship(rel1) returns Some(rel0)
-		service.getPreviousRelationship(rel2) returns Some(rel1)
-
 		profiles.getMemberByUniversityId("1") returns (Some(agent1))
 		profiles.getMemberByUniversityId("2") returns (Some(agent2))
 
