@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.data.model.notifications.meetingrecord
 
-import java.io.{OutputStream, ByteArrayInputStream, InputStream, ByteArrayOutputStream}
-import javax.activation.{DataSource, DataHandler}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
+import javax.activation.{DataHandler, DataSource}
 import javax.mail.Part
 import javax.mail.internet.{MimeBodyPart, MimeMultipart}
 
 import net.fortuna.ical4j.data.CalendarOutputter
-import net.fortuna.ical4j.model.{TimeZoneRegistryFactory, Calendar}
+import net.fortuna.ical4j.model.Calendar
 import net.fortuna.ical4j.model.property._
 import org.springframework.mail.javamail.MimeMessageHelper
 import uk.ac.warwick.spring.Wire
@@ -63,15 +63,10 @@ trait AddsIcalAttachmentToScheduledMeetingNotification extends HasNotificationAt
 		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))
 		cal.getProperties.add(CalScale.GREGORIAN)
 		cal.getProperties.add(new XProperty("X-PUBLISHED-TTL", "PT12H"))
-		cal.getProperties.add(new XProperty("X-WR-TIMEZONE", "Europe/London"))
-		cal.getProperties.add(new XProperty("X-LIC-LOCATION", "Europe/London"))
-		val vTimezone = TimeZoneRegistryFactory.getInstance.createRegistry.getTimeZone("Europe/London").getVTimeZone
-		cal.getComponents.add(vTimezone)
 
 		val vEvent = eventOccurrenceService.toVEvent(
 			item.entity.toEventOccurrence(TimetableEvent.Context.Staff).get
 		)
-		vEvent.getProperties.add(vTimezone.getTimeZoneId)
 
 		verb match {
 			case "deleted" =>
