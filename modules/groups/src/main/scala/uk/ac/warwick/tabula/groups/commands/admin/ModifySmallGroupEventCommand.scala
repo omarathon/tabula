@@ -55,7 +55,7 @@ trait ModifySmallGroupEventCommandState extends CurrentSITSAcademicYear {
 	var title: String = _
 	var tutors: JList[String] = JArrayList()
 
-	def weekRanges = Option(weeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse(Seq())
+	def weekRanges = Option(weeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse Seq()
 	def weekRanges_=(ranges: Seq[WeekRange]) {
 		weeks =
 			JHashSet(ranges
@@ -85,6 +85,7 @@ class CreateSmallGroupEventCommandInternal(val module: Module, val set: SmallGro
 		val event = new SmallGroupEvent(group)
 		copyTo(event)
 		smallGroupService.saveOrUpdate(event)
+		smallGroupService.generateSmallGroupEventOccurrences(event)
 		group.events.add(event)
 		smallGroupService.saveOrUpdate(group)
 		event
@@ -99,6 +100,7 @@ class EditSmallGroupEventCommandInternal(val module: Module, val set: SmallGroup
 	override def applyInternal() = transactional() {
 		copyTo(event)
 		smallGroupService.saveOrUpdate(event)
+		smallGroupService.generateSmallGroupEventOccurrences(event)
 		event
 	}
 }
@@ -109,10 +111,9 @@ abstract class ModifySmallGroupEventCommandInternal extends CommandInternal[Smal
 
 		Option(set.defaultLocation).foreach {
 			case NamedLocation(name) => location = name
-			case MapLocation(name, lid) => {
+			case MapLocation(name, lid) =>
 				location = name
 				locationId = lid
-			}
 		}
 
 		if (set.defaultTutors != null) tutors.addAll(set.defaultTutors.knownType.allIncludedIds.asJava)
@@ -123,10 +124,9 @@ abstract class ModifySmallGroupEventCommandInternal extends CommandInternal[Smal
 
 		Option(event.location).foreach {
 			case NamedLocation(name) => location = name
-			case MapLocation(name, lid) => {
+			case MapLocation(name, lid) =>
 				location = name
 				locationId = lid
-			}
 		}
 
 		weekRanges = event.weekRanges
@@ -179,7 +179,7 @@ trait ModifySmallGroupEventBinding extends BindListener {
 		}
 
 		// We reverse because removing from the back is better
-		indexesToRemove.reverse.foreach { tutors.remove(_) }
+		indexesToRemove.reverse.foreach { tutors.remove }
 	}
 }
 

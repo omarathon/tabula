@@ -31,6 +31,7 @@ trait SmallGroupService {
 	def getDepartmentSmallGroupSetById(id: String): Option[DepartmentSmallGroupSet]
 	def getDepartmentSmallGroupById(id: String): Option[DepartmentSmallGroup]
 	def getOrCreateSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int): SmallGroupEventOccurrence
+	def generateSmallGroupEventOccurrences(event: SmallGroupEvent): Seq[SmallGroupEventOccurrence]
 	def saveOrUpdate(smallGroupSet: SmallGroupSet)
 	def saveOrUpdate(smallGroup: SmallGroup)
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent)
@@ -84,6 +85,10 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			smallGroupDao.saveOrUpdate(newOccurrence)
 			newOccurrence
 		}
+
+	def generateSmallGroupEventOccurrences(event: SmallGroupEvent): Seq[SmallGroupEventOccurrence] = {
+		event.weekRanges.flatMap(_.toWeeks).map(getOrCreateSmallGroupEventOccurrence(event, _))
+	}
 
 	def saveOrUpdate(smallGroupSet: SmallGroupSet) = smallGroupDao.saveOrUpdate(smallGroupSet)
 	def saveOrUpdate(smallGroup: SmallGroup) = smallGroupDao.saveOrUpdate(smallGroup)
