@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
+import net.fortuna.ical4j.model.Calendar
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.property.{CalScale, Method, ProdId, Version, XProperty}
-import net.fortuna.ical4j.model.{Calendar, TimeZoneRegistryFactory}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
@@ -141,14 +141,9 @@ abstract class AbstractTimetableICalController
 		cal.getProperties.add(Method.PUBLISH)
 		cal.getProperties.add(new XProperty("X-PUBLISHED-TTL", "PT12H"))
 		cal.getProperties.add(new XProperty("X-WR-CALNAME", s"Tabula timetable - ${command.member.universityId}"))
-		cal.getProperties.add(new XProperty("X-WR-TIMEZONE", "Europe/London"))
-		cal.getProperties.add(new XProperty("X-LIC-LOCATION", "Europe/London"))
-		val vTimezone = TimeZoneRegistryFactory.getInstance.createRegistry.getTimeZone("Europe/London").getVTimeZone
-		cal.getComponents.add(vTimezone)
 
 		for (event <- timetableEvents) {
 			val vEvent: VEvent = eventOccurrenceService.toVEvent(event)
-			vEvent.getProperties.add(vTimezone.getTimeZoneId)
 			cal.getComponents.add(vEvent)
 		}
 

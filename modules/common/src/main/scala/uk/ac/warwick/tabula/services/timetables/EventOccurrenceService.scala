@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import net.fortuna.ical4j.model.component.VEvent
-import net.fortuna.ical4j.model.parameter
 import net.fortuna.ical4j.model.parameter.{Cn, Value}
 import net.fortuna.ical4j.model.property._
 import org.apache.commons.codec.digest.DigestUtils
@@ -76,9 +75,7 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 		}
 		val event: VEvent = new VEvent(toDateTime(eventOccurrence.start.toDateTime), toDateTime(end.toDateTime), eventOccurrence.title.maybeText.getOrElse(eventOccurrence.name).safeSubstring(0, 255))
 		event.getStartDate.getParameters.add(Value.DATE_TIME)
-		event.getStartDate.getParameters.add(new parameter.TzId("Europe/London"))
 		event.getEndDate.getParameters.add(Value.DATE_TIME)
-		event.getEndDate.getParameters.add(new parameter.TzId("Europe/London"))
 
 		if (eventOccurrence.description.hasText) {
 			event.getProperties.add(new Description(eventOccurrence.description))
@@ -111,7 +108,9 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 	}
 
 	private def toDateTime(dt: DateTime): net.fortuna.ical4j.model.DateTime = {
-		new net.fortuna.ical4j.model.DateTime(dt.getMillis)
+		val calUTC = new net.fortuna.ical4j.model.DateTime(true)
+		calUTC.setTime(dt.toDateTime(DateTimeZone.UTC).getMillis)
+		calUTC
 	}
 
 }
