@@ -41,7 +41,7 @@ object TimetableEvent {
 			location = Option(sge.location).map { _.name },
 			context = Some(sge.group.groupSet.module.code.toUpperCase),
 			comments = None,
-			staffUniversityIds = sge.tutors.knownType.members,
+			staffUniversityIds = sge.tutors.users.map { _.getWarwickId },
 			studentUniversityIds = sge.group.students.knownType.members,
 			year = sge.group.groupSet.academicYear)
 	}
@@ -60,7 +60,7 @@ object TimetableEvent {
 
 }
 
-@SerialVersionUID(2903326840601345835l) sealed abstract class TimetableEventType(val code: String, val displayName: String) extends Serializable
+@SerialVersionUID(2903326840601345835l) sealed abstract class TimetableEventType(val code: String, val displayName: String, val core: Boolean = true) extends Serializable
 
 object TimetableEventType {
 
@@ -69,7 +69,7 @@ object TimetableEventType {
 	case object Seminar extends TimetableEventType("SEM", "Seminar")
 	case object Induction extends TimetableEventType("IND", "Induction")
 	case object Meeting extends TimetableEventType("MEE", "Meeting")
-	case class Other(c: String) extends TimetableEventType(c, c)
+	case class Other(c: String) extends TimetableEventType(c, c, false)
 
 	// lame manual collection. Keep in sync with the case objects above
 	val members = Seq(Lecture, Practical, Seminar, Induction, Meeting)

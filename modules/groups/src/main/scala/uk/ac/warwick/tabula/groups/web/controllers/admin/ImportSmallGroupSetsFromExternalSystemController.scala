@@ -33,9 +33,16 @@ class ImportSmallGroupSetsFromExternalSystemController extends GroupsController 
 	@ModelAttribute("command") def command(@PathVariable department: Department, user: CurrentUser): ImportSmallGroupSetsFromExternalSystemCommand =
 		ImportSmallGroupSetsFromExternalSystemCommand(mandatory(department), mandatory(user))
 
-	// The initial load of page 1, where we select the items to import.
+	// Handling page to avoid extra long spinny time
 	@RequestMapping
 	def showForm(@ModelAttribute("command") command: ImportSmallGroupSetsFromExternalSystemCommand, errors: Errors) = {
+		Mav("admin/groups/import_loading",
+			"academicYear" -> command.academicYear
+		).crumbs(Breadcrumbs.Department(command.department))
+	}
+
+	@RequestMapping(method = Array(POST), params = Array("action=populate"))
+	def populate(@ModelAttribute("command") command: ImportSmallGroupSetsFromExternalSystemCommand, errors: Errors) = {
 		command.populate()
 		form(command, errors)
 	}
@@ -50,7 +57,7 @@ class ImportSmallGroupSetsFromExternalSystemController extends GroupsController 
 	// Change the academic year; restarts from scratch
 	@RequestMapping(method = Array(POST), params = Array("action=change-year"))
 	def changeYear(@ModelAttribute("command") command: ImportSmallGroupSetsFromExternalSystemCommand, errors: Errors) =
-		showForm(command, errors) // Run an initial populate() again
+		populate(command, errors) // Run an initial populate() again
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid @ModelAttribute("command") command: ImportSmallGroupSetsFromExternalSystemCommand, errors: Errors) =

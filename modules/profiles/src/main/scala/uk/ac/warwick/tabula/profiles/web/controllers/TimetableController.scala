@@ -23,7 +23,7 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 	type TimetableCommand = Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState
 
 	// re-use the event source, so it can cache lookups between requests
-	val studentTimetableEventSource = (new CombinedStudentTimetableEventSourceComponent
+	val studentTimetableEventSource: StudentTimetableEventSource = (new CombinedStudentTimetableEventSourceComponent
 		with SmallGroupEventTimetableEventSourceComponentImpl
 		with CombinedHttpTimetableFetchingServiceComponent
 		with AutowiringSmallGroupServiceComponent
@@ -33,7 +33,7 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 		with SystemClockComponent
 		).studentTimetableEventSource
 
-	val staffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
+	val staffTimetableEventSource: StaffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
 		with SmallGroupEventTimetableEventSourceComponentImpl
 		with CombinedHttpTimetableFetchingServiceComponent
 		with AutowiringSmallGroupServiceComponent
@@ -43,7 +43,7 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 		with SystemClockComponent
 		).staffTimetableEventSource
 
-	val scheduledMeetingEventSource = (new MeetingRecordServiceScheduledMeetingEventSourceComponent
+	val scheduledMeetingEventSource: ScheduledMeetingEventSource = (new MeetingRecordServiceScheduledMeetingEventSourceComponent
 		with AutowiringRelationshipServiceComponent
 		with AutowiringMeetingRecordServiceComponent
 		with AutowiringSecurityServiceComponent

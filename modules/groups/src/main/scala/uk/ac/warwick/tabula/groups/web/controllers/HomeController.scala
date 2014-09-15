@@ -81,7 +81,7 @@ object GroupsDisplayHelper {
 		val memberViewModules =	memberGroupSetsWithApplicableGroups.groupBy(_._1.module).map{
 			case(module,setData)=>{
 				val viewSets = setData.map{case(set,(groups,role))=>{
-					ViewSet(set,groups,role)
+					ViewSet(set,groups.sorted,role)
 				}}
 				ViewModule(module,viewSets,false)
 			}
