@@ -59,8 +59,8 @@ trait AddsIcalAttachmentToScheduledMeetingNotification extends HasNotificationAt
 
 		// Create ical
 		val cal = new Calendar
-		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))
 		cal.getProperties.add(Version.VERSION_2_0)
+		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))
 		cal.getProperties.add(CalScale.GREGORIAN)
 		cal.getProperties.add(new XProperty("X-PUBLISHED-TTL", "PT12H"))
 		cal.getProperties.add(new XProperty("X-WR-TIMEZONE", "Europe/London"))

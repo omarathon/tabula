@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupFormat, SmallGroupEvent
 import uk.ac.warwick.tabula.AcademicYear
 
 case class TimetableEvent(
+	uid: String,
 	name: String,
   title: String,
 	description: String,
@@ -30,7 +31,9 @@ object TimetableEvent {
 	}
 
 	def apply(sge: SmallGroupEvent): TimetableEvent = {
-		TimetableEvent(name = sge.group.groupSet.name,
+		TimetableEvent(
+			uid = sge.id,
+			name = sge.group.groupSet.name,
 			title = Option(sge.title).getOrElse(""),
 			description = s"${sge.group.groupSet.name}: ${sge.group.name}",
 			eventType = smallGroupFormatToTimetableEventType(sge.group.groupSet.format),
@@ -43,7 +46,8 @@ object TimetableEvent {
 			comments = None,
 			staffUniversityIds = sge.tutors.users.map { _.getWarwickId },
 			studentUniversityIds = sge.group.students.knownType.members,
-			year = sge.group.groupSet.academicYear)
+			year = sge.group.groupSet.academicYear
+		)
 	}
 
 	private def smallGroupFormatToTimetableEventType(sgf: SmallGroupFormat): TimetableEventType = sgf match {
@@ -91,6 +95,7 @@ object TimetableEventType {
 
 
 case class EventOccurrence(
+	uid: String,
 	name: String,
 	title: String,
 	description: String,
@@ -104,8 +109,9 @@ case class EventOccurrence(
 )
 
 object EventOccurrence {
-	def apply(timetableEvent: TimetableEvent, start: LocalDateTime, end: LocalDateTime): EventOccurrence = {
+	def apply(timetableEvent: TimetableEvent, start: LocalDateTime, end: LocalDateTime, uid: String): EventOccurrence = {
 		EventOccurrence(
+			uid,
 			timetableEvent.name,
 			timetableEvent.title,
 			timetableEvent.description,
@@ -121,6 +127,7 @@ object EventOccurrence {
 
 	def busy(occurrence: EventOccurrence): EventOccurrence = {
 		EventOccurrence(
+			occurrence.uid,
 			"",
 			"",
 			"",

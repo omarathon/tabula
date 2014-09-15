@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
+import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.profiles.commands.{PersonalTimetableCommandState, PublicStaffPersonalTimetableCommand, PublicStudentPersonalTimetableCommand, ViewStaffPersonalTimetableCommand, ViewStudentPersonalTimetableCommand}
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
 import uk.ac.warwick.tabula.services.timetables._
@@ -16,7 +17,7 @@ import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, A
 import uk.ac.warwick.tabula.timetables.EventOccurrence
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
-import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, ItemNotFoundException}
 
 abstract class AbstractTimetableController extends ProfilesController with AutowiringProfileServiceComponent {
 
@@ -55,11 +56,24 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 		case _ => throw new RuntimeException("Don't know how to render timetables for non-student or non-staff users")
 	}
 
-	protected def commandForTimetableHash(timetableHash: String): TimetableCommand =
+	protected def commandForTimetableHash(timetableHash: String): TimetableCommand = {
+		// Use a mocked up CurrentUser, as the actual current user is probably not logged in
+		def currentUser(m: Member) =
+			new CurrentUser(
+				realUser = m.asSsoUser.tap { _.setIsLoggedIn(true) },
+				apparentUser = m.asSsoUser.tap { _.setIsLoggedIn(true) },
+				profile = Some(m),
+				sysadmin = false,
+				masquerader = false,
+				god = false
+			)
+
 		profileService.getMemberByTimetableHash(timetableHash).map {
-			case student: StudentMember => PublicStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
-			case staff: StaffMember => PublicStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, user)
+			case student: StudentMember => PublicStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, currentUser(student))
+			case staff: StaffMember => PublicStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, currentUser(staff))
 		}.getOrElse(throw new ItemNotFoundException)
+	}
+
 }
 
 @Controller
@@ -135,8 +149,8 @@ abstract class AbstractTimetableICalController
 		val timetableEvents = command.apply()
 
 		val cal: Calendar = new Calendar
-		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))
 		cal.getProperties.add(Version.VERSION_2_0)
+		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))
 		cal.getProperties.add(CalScale.GREGORIAN)
 		cal.getProperties.add(Method.PUBLISH)
 		cal.getProperties.add(new XProperty("X-PUBLISHED-TTL", "PT12H"))

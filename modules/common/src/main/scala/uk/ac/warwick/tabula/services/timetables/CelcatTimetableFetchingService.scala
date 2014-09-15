@@ -156,6 +156,7 @@ object CelcatHttpTimetableFetchingService {
 				else Nil
 
 			Some(TimetableEvent(
+				uid = event.getUid.getValue,
 				name = summary,
 				"",
 				description = Option(event.getDescription).map { _.getValue }.filter { _.hasText }.getOrElse(summary),
@@ -309,6 +310,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 			case _ =>
 				val event = eventSeq.head
 				TimetableEvent(
+					event.uid,
 					event.name,
 					event.title,
 					event.description,

@@ -14,7 +14,7 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 	val user = mock[CurrentUser]
 	user.profile returns (Some(student))
 
-	val occurrence = EventOccurrence("", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, None, None, Nil)
+	val occurrence = EventOccurrence("", "", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, None, None, Nil)
 
 	val relationshipType = StudentRelationshipType("t", "t", "t", "t")
 	val relationships = Seq(StudentRelationship(Fixtures.staff(), relationshipType, student))

@@ -49,15 +49,17 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 			week <- weekRange.toWeeks
 		} yield week
 
-		val eventsInIntersectingWeeks = weeks.
-			filter(week => weekToDateConverter.intersectsWeek(dateRange, week, event.year)).
-			map {
-			week =>
-				EventOccurrence(event,
-					eventDateToLocalDate(week, event.startTime),
-					eventDateToLocalDate(week, event.endTime)
-				)
-		}
+		val eventsInIntersectingWeeks =
+			weeks
+				.filter(week => weekToDateConverter.intersectsWeek(dateRange, week, event.year))
+				.map { week =>
+					EventOccurrence(
+						event,
+						eventDateToLocalDate(week, event.startTime),
+						eventDateToLocalDate(week, event.endTime),
+						s"$week-${event.uid}" // TODO rather than UID swapping here, this should be a recurring event
+					)
+				}
 
 		// do not remove; import needed for sorting
 		// should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
@@ -87,10 +89,7 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 			event.getProperties.add(new Location(eventOccurrence.location.getOrElse("")))
 		}
 
-		val uid = DigestUtils.md5Hex(Seq(eventOccurrence.name, eventOccurrence.start.toString, eventOccurrence.end.toString,
-			eventOccurrence.location.getOrElse(""), eventOccurrence.context.getOrElse("")).mkString)
-
-		event.getProperties.add(new Uid(uid))
+		event.getProperties.add(new Uid(eventOccurrence.uid))
 		event.getProperties.add(Method.PUBLISH)
 		event.getProperties.add(Transp.OPAQUE)
 

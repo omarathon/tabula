@@ -56,6 +56,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 		END:VEVENT
 		 */
 		combined(0) should be (TimetableEvent(
+			"CT-1313406-6447-2013-09-30-R021@eng.warwick.ac.uk",
 			"ES186 - AMP/DAH/DJB/MVC/NGS",
 			"",
 			"Engineering Skills, Induction",
@@ -89,6 +90,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 		END:VEVENT
 		 */
 		combined(15) should be (TimetableEvent(
+			"CT-1313406-6147-2013-10-07-P521@eng.warwick.ac.uk",
 			"ES186 - SJL",
 			"",
 			"Engineering Skills, Support sessions for students without A-level Physics",
@@ -149,6 +151,7 @@ END:VCALENDAR
 
 		parsed should be ('defined)
 		parsed.get should be (TimetableEvent(
+			"CT-Clark-Andrew-20244-2014-10-01-@chem.warwick.ac.uk",
 			"Unavailable - Clark, Andrew",
 			"",
 			"Unavailable - Clark, Andrew",
