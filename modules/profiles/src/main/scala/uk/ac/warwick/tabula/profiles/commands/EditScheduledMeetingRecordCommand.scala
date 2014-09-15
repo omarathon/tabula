@@ -13,10 +13,7 @@ import uk.ac.warwick.tabula.services.{MeetingRecordServiceComponent, AutowiringM
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, FileAttachmentServiceComponent}
 
-case class ScheduledMeetingRecordResult(meetingRecord: ScheduledMeetingRecord, isRescheduled: Boolean) extends ToEntityReference {
-	override type Entity = AbstractMeetingRecord
-	override def toEntityReference = meetingRecord.toEntityReference
-}
+case class ScheduledMeetingRecordResult(meetingRecord: ScheduledMeetingRecord, isRescheduled: Boolean)
 
 object EditScheduledMeetingRecordCommand {
 	def apply(creator: Member, meetingRecord: ScheduledMeetingRecord) =
@@ -154,14 +151,16 @@ trait EditScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRe
 	}
 }
 
-trait EditScheduledMeetingRecordNotifications extends SchedulesNotifications[ScheduledMeetingRecordResult] {
+trait EditScheduledMeetingRecordNotifications extends SchedulesNotifications[ScheduledMeetingRecordResult, ScheduledMeetingRecord] {
 
-	override def scheduledNotifications(result: ScheduledMeetingRecordResult) = {
+	override def transformResult(result: ScheduledMeetingRecordResult) = Seq(result.meetingRecord)
+
+	override def scheduledNotifications(meetingRecord: ScheduledMeetingRecord) = {
 		Seq(
-			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderStudent", result.meetingRecord, result.meetingRecord.meetingDate.withTimeAtStartOfDay),
-			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderAgent", result.meetingRecord, result.meetingRecord.meetingDate.withTimeAtStartOfDay),
-			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", result.meetingRecord, result.meetingRecord.meetingDate),
-			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", result.meetingRecord, result.meetingRecord.meetingDate.plusDays(5))
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderStudent", meetingRecord, meetingRecord.meetingDate.withTimeAtStartOfDay),
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderAgent", meetingRecord, meetingRecord.meetingDate.withTimeAtStartOfDay),
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", meetingRecord, meetingRecord.meetingDate),
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", meetingRecord, meetingRecord.meetingDate.plusDays(5))
 		)
 	}
 

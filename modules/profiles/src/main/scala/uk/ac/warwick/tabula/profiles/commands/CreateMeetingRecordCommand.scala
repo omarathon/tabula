@@ -22,6 +22,8 @@ class CreateMeetingRecordCommand(creator: Member, relationship: StudentRelations
 		Notification.init(new NewMeetingRecordApprovalNotification, creator.asSsoUser, Seq(meeting), relationship)
 	)
 
+	override def transformResult(meetingRecord: MeetingRecord) = Seq(meetingRecord)
+
 	override def scheduledNotifications(result: MeetingRecord) = Seq(
 		new ScheduledNotification[MeetingRecord]("newMeetingRecordApproval", result, DateTime.now.plusWeeks(1))
 	)
