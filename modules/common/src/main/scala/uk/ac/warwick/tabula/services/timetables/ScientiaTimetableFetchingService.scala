@@ -123,11 +123,6 @@ object ScientiaHttpTimetableFetchingService {
 
 	def parseXml(xml: Elem, year:AcademicYear): Seq[TimetableEvent] =
 		xml \\ "Activity" map { activity =>
-			/*
-			DigestUtils.md5Hex(Seq(eventOccurrence.name, eventOccurrence.start.toString, eventOccurrence.end.toString,
--                       eventOccurrence.location.getOrElse(""), eventOccurrence.context.getOrElse("")).mkString)
-			 */
-
 			val name = (activity \\ "name").text
 
 			val startTime = new LocalTime((activity \\ "start").text)
