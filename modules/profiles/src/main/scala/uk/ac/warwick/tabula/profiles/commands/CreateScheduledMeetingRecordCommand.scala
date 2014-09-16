@@ -116,14 +116,16 @@ trait CreateScheduledMeetingRecordNotification extends Notifies[ScheduledMeeting
 	}
 }
 
-trait CreateScheduledMeetingRecordScheduledNotifications extends SchedulesNotifications[ScheduledMeetingRecord] {
+trait CreateScheduledMeetingRecordScheduledNotifications extends SchedulesNotifications[ScheduledMeetingRecordResult, ScheduledMeetingRecord] {
 
-	override def scheduledNotifications(result: ScheduledMeetingRecord) = {
+	override def transformResult(result: ScheduledMeetingRecordResult) = Seq(result.meetingRecord)
+
+	override def scheduledNotifications(meetingRecord: ScheduledMeetingRecord) = {
 		Seq(
-			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderStudent", result, result.meetingDate.withTimeAtStartOfDay),
-			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderAgent", result, result.meetingDate.withTimeAtStartOfDay),
-			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", result, result.meetingDate),
-			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", result, result.meetingDate.plusDays(5))
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderStudent", meetingRecord, meetingRecord.meetingDate.withTimeAtStartOfDay),
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderAgent", meetingRecord, meetingRecord.meetingDate.withTimeAtStartOfDay),
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", meetingRecord, meetingRecord.meetingDate),
+			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", meetingRecord, meetingRecord.meetingDate.plusDays(5))
 		)
 	}
 

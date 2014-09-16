@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.profiles.services.timetables
+package uk.ac.warwick.tabula.services.timetables
 
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -84,6 +84,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 				case events => {
 					val event = events.head
 					TimetableEvent(
+						event.uid,
 						events.flatMap { _.name.maybeText }.headOption.getOrElse(""),
 						events.flatMap { _.title.maybeText }.headOption.getOrElse(""),
 						events.flatMap { _.description.maybeText }.headOption.getOrElse(""),
@@ -96,6 +97,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 						event.context,
 						events.flatMap { _.comments }.headOption,
 						events.flatMap { _.staffUniversityIds }.distinct,
+						events.flatMap { _.studentUniversityIds }.distinct,
 						event.year
 					)
 				}

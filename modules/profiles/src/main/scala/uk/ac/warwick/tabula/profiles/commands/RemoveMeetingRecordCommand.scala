@@ -74,7 +74,7 @@ trait DeleteMeetingRecordCommandValidation extends SelfValidating with RemoveMee
 trait DeleteScheduledMeetingRecordNotification extends Notifies[AbstractMeetingRecord, ScheduledMeetingRecord] {
 	def emit(meeting: AbstractMeetingRecord) = {
 		meeting match {
-			case m: ScheduledMeetingRecord => {
+			case m: ScheduledMeetingRecord =>
 				val user = meeting.creator.asSsoUser
 				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("deleted"), user, m, m.relationship)
 				if(!m.creatorInRelationship) {
@@ -83,7 +83,6 @@ trait DeleteScheduledMeetingRecordNotification extends Notifies[AbstractMeetingR
 				} else {
 					Seq(inviteeNotification)
 				}
-			}
 			case _ => Nil
 		}
 	}
@@ -114,7 +113,7 @@ trait RestoreMeetingRecordCommandValidation extends SelfValidating with RemoveMe
 trait RestoreScheduledMeetingRecordNotification extends Notifies[AbstractMeetingRecord, ScheduledMeetingRecord] {
 	def emit(meeting: AbstractMeetingRecord) = {
 		meeting match {
-			case m: ScheduledMeetingRecord => {
+			case m: ScheduledMeetingRecord =>
 				val user = meeting.creator.asSsoUser
 				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("rescheduled"), user, m, m.relationship)
 				if(!m.creatorInRelationship) {
@@ -123,7 +122,6 @@ trait RestoreScheduledMeetingRecordNotification extends Notifies[AbstractMeeting
 				} else {
 					Seq(inviteeNotification)
 				}
-			}
 			case _ => Seq()
 		}
 	}

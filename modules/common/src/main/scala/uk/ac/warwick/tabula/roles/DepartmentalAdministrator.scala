@@ -32,6 +32,7 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Department.ArrangeRoutes,
 
 		Assignment.ImportFromExternalSystem,
+		SmallGroups.ImportFromExternalSystem,
 
 		FeedbackTemplate.Create,
 		FeedbackTemplate.Read,

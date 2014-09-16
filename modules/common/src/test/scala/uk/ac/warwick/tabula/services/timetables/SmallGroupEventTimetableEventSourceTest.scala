@@ -1,14 +1,13 @@
-package uk.ac.warwick.tabula.profiles.services.timetables
+package uk.ac.warwick.tabula.services.timetables
 
-import uk.ac.warwick.tabula.{Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{SmallGroupService, UserLookupService, SmallGroupServiceComponent, UserLookupComponent}
-import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.JavaImports.JArrayList
 import org.joda.time.LocalTime
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
+import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent, UserLookupComponent, UserLookupService}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.userlookup.User
 
 class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 

@@ -22,7 +22,7 @@
         </p>
     </div>
     <div class="modal-footer">
-    <input class="btn btn-info" type="submit" value="${setState}"> <a class="btn cancel-link" data-dismiss="modal" href="#">Cancel</a>
+    <input class="btn btn-info spinnable spinner-auto" type="submit" value="${setState}"> <a class="btn cancel-link" data-dismiss="modal" href="#">Cancel</a>
     </div>
     </@f.form>
 </#escape>

@@ -1,18 +1,19 @@
 package uk.ac.warwick.tabula.notifications
 
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.util.mail.WarwickMailSender
-import uk.ac.warwick.tabula.helpers.{Logging, UnicodeEmails}
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, Notification}
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.{RecipientNotificationListener, NotificationService, NotificationListener}
-import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
-import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
-import java.util.concurrent.{ExecutionException, TimeoutException, TimeUnit}
-import org.hibernate.ObjectNotFoundException
+import java.util.concurrent.{ExecutionException, TimeUnit, TimeoutException}
 import javax.mail.internet.MimeMessage
+
+import org.hibernate.ObjectNotFoundException
+import org.springframework.stereotype.Component
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
+import uk.ac.warwick.tabula.data.model.{HasNotificationAttachment, FreemarkerModel, Notification}
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.{Logging, UnicodeEmails}
+import uk.ac.warwick.tabula.services.{NotificationService, RecipientNotificationListener}
+import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
+import uk.ac.warwick.util.mail.WarwickMailSender
 
 @Component
 class EmailNotificationListener extends RecipientNotificationListener with UnicodeEmails with AutowiredTextRendererComponent with Logging {
@@ -71,6 +72,10 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 				body.append(mailFooter)
 				body.append(replyWarning)
 				message.setText(body.toString())
+
+				// TODO I'm sure this can be pattern matched. but I can't get around the type checking
+				if (notification.isInstanceOf[HasNotificationAttachment])
+					notification.asInstanceOf[HasNotificationAttachment].generateAttachments(message)
 			})
 		} catch {
 			// referenced entity probably missing, oh well.
@@ -88,7 +93,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 				service.save(recipientInfo)
 			} else if (recipientInfo.recipient.getEmail.hasText) {
 				generateMessage(recipientInfo) match {
-					case Some(message) => {
+					case Some(message) =>
 						val future = mailSender.send(message)
 						try {
 							val successful = future.get(30, TimeUnit.SECONDS)
@@ -98,25 +103,21 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 								service.save(recipientInfo)
 							}
 						} catch {
-							case e: TimeoutException => {
-								logger.info(s"Timeout waiting for message ${message} to be sent; cancelling to try again later", e)
+							case e: TimeoutException =>
+								logger.info(s"Timeout waiting for message $message to be sent; cancelling to try again later", e)
 								future.cancel(true)
-							}
-							case e@(_: ExecutionException | _: InterruptedException) => {
+							case e@(_: ExecutionException | _: InterruptedException) =>
 								logger.warn("Could not send email ${message}, will try later", e)
-							}
 						}
-					}
-					case None => {
-						logger.warn(s"Couldn't send email for Notification because object no longer exists: ${recipientInfo}")
+					case None =>
+						logger.warn(s"Couldn't send email for Notification because object no longer exists: $recipientInfo")
 
 						// TODO This is incorrect, really - we're not sending the email, we're cancelling the sending of the email
 						recipientInfo.emailSent = true
 						service.save(recipientInfo)
-					}
 				}
 			} else {
-				logger.warn(s"Couldn't send email for Notification because recipient has no email address: ${recipientInfo}")
+				logger.warn(s"Couldn't send email for Notification because recipient has no email address: $recipientInfo")
 
 				// TODO This is incorrect, really - we're not sending the email, we're cancelling the sending of the email
 				recipientInfo.emailSent = true

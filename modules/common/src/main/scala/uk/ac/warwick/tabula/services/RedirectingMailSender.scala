@@ -1,27 +1,27 @@
 package uk.ac.warwick.tabula.services
 
 import java.util.concurrent.Future
-import org.springframework.mail.SimpleMailMessage
-import javax.mail.internet.MimeMessage
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.util.concurrency.ImmediateFuture
-import uk.ac.warwick.util.mail.WarwickMailSender
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.Features
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
-import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import javax.mail.Message.RecipientType
-import javax.mail.internet.MimeMultipart
+import javax.mail.internet.{MimeMessage, MimeMultipart}
+
+import org.springframework.beans.factory.annotation.{Autowired, Value}
+import org.springframework.mail.SimpleMailMessage
+import uk.ac.warwick.tabula.Features
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.{Logging, UnicodeEmails}
+import uk.ac.warwick.util.mail.WarwickMailSender
+
+import scala.language.implicitConversions
 import scala.reflect.ClassTag
-import language.implicitConversions
 
 final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMailSender with Logging with UnicodeEmails {
 
 	@Autowired var features: Features = _
 
 	@Value("${redirect.test.emails.to}") var testEmailTo: String = _
+
+	val nonProductionMessage1 = "This is a copy of a message that isn't being sent to the real recipients ("
+	val nonProductionMessage2 = ") because it is being sent from a non-production server.\n\n-------\n\n"
 
 	override def createMimeMessage() = delegate.createMimeMessage()
 
@@ -34,14 +34,15 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
 				helper.setBcc(Array(): Array[String])
 				helper.setCc(Array(): Array[String])
 				
-				val oldText = message.getContent match {
-					case string: String => string
-					case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
+				message.getContent match {
+					case contentString: String =>
+						helper.setText(s"$nonProductionMessage1$oldTo$nonProductionMessage2$contentString")
+					case multipart: MimeMultipart =>
+						val bodyPart = multipart.getBodyPart(0)
+						val oldBodyContent = bodyPart.getContent.toString
+						bodyPart.setText(s"$nonProductionMessage1$oldTo$nonProductionMessage2$oldBodyContent")
 				}
-				
-				helper.setText("This is a copy of a message that isn't being sent to the real recipients (" + oldTo + ")  " +
-											 "because it is being sent from a non-production server.\n\n-------\n\n"
-											 + oldText)
+
 			}
 		} else message
 		
@@ -53,15 +54,15 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
 	}
 
 	override def send(simpleMessage: SimpleMailMessage): Future[JBoolean] = send(createMessage(delegate) { message =>
-		Option(simpleMessage.getFrom) map {message.setFrom(_)}
-		Option(simpleMessage.getReplyTo) map {message.setReplyTo(_)}
+		Option(simpleMessage.getFrom) map {message.setFrom}
+		Option(simpleMessage.getReplyTo) map {message.setReplyTo}
 		
-		Option(simpleMessage.getTo) map {message.setTo(_)}
+		Option(simpleMessage.getTo) map {message.setTo}
 		message.setCc(Option(simpleMessage.getCc).getOrElse(Array(): Array[String]))
 		message.setBcc(Option(simpleMessage.getBcc).getOrElse(Array(): Array[String]))
 		
-		Option(simpleMessage.getSubject) map {message.setSubject(_)}
-		Option(simpleMessage.getText) map {message.setText(_)}
+		Option(simpleMessage.getSubject) map {message.setSubject}
+		Option(simpleMessage.getText) map {message.setText}
 	})
 
 }

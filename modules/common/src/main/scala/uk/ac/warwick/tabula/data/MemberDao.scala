@@ -56,6 +56,7 @@ trait MemberDao {
 	def getDisability(code: String): Option[Disability]
 
 	def getMemberByTimetableHash(timetableHash: String): Option[Member]
+	def setTimetableHash(member: Member, timetableHash: String)
 
 }
 
@@ -382,7 +383,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime) = {
 		newStaleUniversityIds.grouped(Daoisms.MaxInClauseCount).foreach { staleIds =>
-			val sqlString = """
+			val hqlString = """
 				update
 					Member
 				set
@@ -391,7 +392,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					universityId in (:newStaleUniversityIds)
 				"""
 
-				session.newQuery(sqlString)
+				session.newQuery(hqlString)
 					.setParameter("importStart", importStart)
 					.setParameterList("newStaleUniversityIds", staleIds)
 					.executeUpdate()
@@ -408,6 +409,15 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		session.newCriteria[Member]
 		.add(is("timetableHash", timetableHash))
 		.uniqueResult
+	}
+
+	def setTimetableHash(member: Member, timetableHash: String) = member match {
+		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
+		case _ =>
+			session.newQuery("update Member set timetableHash = :timetableHash where universityId = :universityId")
+				.setParameter("timetableHash", timetableHash)
+				.setParameter("universityId", member.universityId)
+				.executeUpdate()
 	}
 }
 

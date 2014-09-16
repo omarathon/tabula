@@ -93,7 +93,7 @@ class SmallGroupSet
 	
 	@Column(name="allocation_method")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethodUserType")
-	var allocationMethod: SmallGroupAllocationMethod = _
+	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
 
 	@Column(name="self_group_switching")
 	var allowSelfGroupSwitching: Boolean = true

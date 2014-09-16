@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupFormat, SmallGroupEvent
 import uk.ac.warwick.tabula.AcademicYear
 
 case class TimetableEvent(
+	uid: String,
 	name: String,
   title: String,
 	description: String,
@@ -17,6 +18,7 @@ case class TimetableEvent(
 	context: Option[String],
 	comments: Option[String],
 	staffUniversityIds: Seq[String],
+	studentUniversityIds: Seq[String],
 	year: AcademicYear
 )
 
@@ -29,7 +31,9 @@ object TimetableEvent {
 	}
 
 	def apply(sge: SmallGroupEvent): TimetableEvent = {
-		TimetableEvent(name = sge.group.groupSet.name,
+		TimetableEvent(
+			uid = sge.id,
+			name = sge.group.groupSet.name,
 			title = Option(sge.title).getOrElse(""),
 			description = s"${sge.group.groupSet.name}: ${sge.group.name}",
 			eventType = smallGroupFormatToTimetableEventType(sge.group.groupSet.format),
@@ -40,8 +44,10 @@ object TimetableEvent {
 			location = Option(sge.location).map { _.name },
 			context = Some(sge.group.groupSet.module.code.toUpperCase),
 			comments = None,
-			staffUniversityIds = sge.tutors.knownType.members,
-			year = sge.group.groupSet.academicYear)
+			staffUniversityIds = sge.tutors.users.map { _.getWarwickId },
+			studentUniversityIds = sge.group.students.knownType.members,
+			year = sge.group.groupSet.academicYear
+		)
 	}
 
 	private def smallGroupFormatToTimetableEventType(sgf: SmallGroupFormat): TimetableEventType = sgf match {
@@ -58,7 +64,7 @@ object TimetableEvent {
 
 }
 
-@SerialVersionUID(2903326840601345835l) sealed abstract class TimetableEventType(val code: String, val displayName: String) extends Serializable
+@SerialVersionUID(2903326840601345835l) sealed abstract class TimetableEventType(val code: String, val displayName: String, val core: Boolean = true) extends Serializable
 
 object TimetableEventType {
 
@@ -67,7 +73,7 @@ object TimetableEventType {
 	case object Seminar extends TimetableEventType("SEM", "Seminar")
 	case object Induction extends TimetableEventType("IND", "Induction")
 	case object Meeting extends TimetableEventType("MEE", "Meeting")
-	case class Other(c: String) extends TimetableEventType(c, c)
+	case class Other(c: String) extends TimetableEventType(c, c, false)
 
 	// lame manual collection. Keep in sync with the case objects above
 	val members = Seq(Lecture, Practical, Seminar, Induction, Meeting)
@@ -89,6 +95,7 @@ object TimetableEventType {
 
 
 case class EventOccurrence(
+	uid: String,
 	name: String,
 	title: String,
 	description: String,
@@ -102,8 +109,9 @@ case class EventOccurrence(
 )
 
 object EventOccurrence {
-	def apply(timetableEvent: TimetableEvent, start: LocalDateTime, end: LocalDateTime): EventOccurrence = {
+	def apply(timetableEvent: TimetableEvent, start: LocalDateTime, end: LocalDateTime, uid: String): EventOccurrence = {
 		EventOccurrence(
+			uid,
 			timetableEvent.name,
 			timetableEvent.title,
 			timetableEvent.description,
@@ -119,6 +127,7 @@ object EventOccurrence {
 
 	def busy(occurrence: EventOccurrence): EventOccurrence = {
 		EventOccurrence(
+			occurrence.uid,
 			"",
 			"",
 			"",

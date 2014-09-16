@@ -1,6 +1,11 @@
-package uk.ac.warwick.tabula.profiles.services.timetables
+package uk.ac.warwick.tabula.services.timetables
 
 import dispatch.classic.Credentials
+import net.fortuna.ical4j.data.CalendarBuilder
+import net.fortuna.ical4j.model.Component
+import net.fortuna.ical4j.model.component.VEvent
+import net.fortuna.ical4j.util.CompatibilityHints
+import org.apache.commons.io.IOUtils
 import org.apache.http.auth.AuthScope
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula._
@@ -51,6 +56,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 		END:VEVENT
 		 */
 		combined(0) should be (TimetableEvent(
+			"CT-1313406-6447-2013-09-30-R021@eng.warwick.ac.uk",
 			"ES186 - AMP/DAH/DJB/MVC/NGS",
 			"",
 			"Engineering Skills, Induction",
@@ -62,6 +68,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 			Some("R021"),
 			Some("ES186"),
 			None,
+			Nil,
 			Nil,
 			AcademicYear.parse("13/14")
 		))
@@ -83,6 +90,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 		END:VEVENT
 		 */
 		combined(15) should be (TimetableEvent(
+			"CT-1313406-6147-2013-10-07-P521@eng.warwick.ac.uk",
 			"ES186 - SJL",
 			"",
 			"Engineering Skills, Support sessions for students without A-level Physics",
@@ -95,6 +103,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 			Some("ES186"),
 			None,
 			Nil,
+			Nil,
 			AcademicYear.parse("13/14")
 		))
 	}
@@ -106,8 +115,58 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 		val combined = service.combineIdenticalEvents(events).sortBy { event => (event.weekRanges.head.minWeek, event.day.jodaDayOfWeek, event.startTime.getMillisOfDay)}
 		combined.size should be (1)
 		combined.head.weekRanges should be (Seq(WeekRange(1), WeekRange(3, 5)))
+	}
 
+	@Test def unusualEvent() {
+		CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING, true)
+		CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_VALIDATION, true)
 
+		val builder = new CalendarBuilder
+		val cal = builder.build(IOUtils.toInputStream(
+			"""
+BEGIN:VCALENDAR
+BEGIN:VEVENT
+DTSTAMP:20140914T220100Z
+SEQUENCE:0
+TRANSP:OPAQUE
+LAST-MODIFIED:20140914T220100Z
+DTSTART;TZID=Europe/London:20141001T090500
+DTEND;TZID=Europe/London:20141001T185500
+SUMMARY:Unavailable - Clark, Andrew
+UID:CT-Clark-Andrew-20244-2014-10-01-@chem.warwick.ac.uk
+DESCRIPTION:
+CATEGORIES:
+RRULE:FREQ=WEEKLY;COUNT=52;BYDAY=WE
+END:VEVENT
+END:VCALENDAR
+			""".stripMargin.trim()))
+
+		val parsed =
+			CelcatHttpTimetableFetchingService.parseVEvent(
+				cal.getComponent(Component.VEVENT).asInstanceOf[VEvent],
+				Map(),
+				CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"),
+				service.termService
+			)
+
+		parsed should be ('defined)
+		parsed.get should be (TimetableEvent(
+			"CT-Clark-Andrew-20244-2014-10-01-@chem.warwick.ac.uk",
+			"Unavailable - Clark, Andrew",
+			"",
+			"Unavailable - Clark, Andrew",
+			TimetableEventType.Other("Unavailable"),
+			Seq(WeekRange(1, 52)),
+			DayOfWeek.Wednesday,
+			new LocalTime(9, 5),
+			new LocalTime(18, 55),
+			None,
+			None,
+			None,
+			Nil,
+			Nil,
+			AcademicYear.parse("14/15")
+		))
 	}
 
 }

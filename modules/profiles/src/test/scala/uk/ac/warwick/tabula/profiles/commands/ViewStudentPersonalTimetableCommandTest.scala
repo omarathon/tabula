@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.profiles.services.timetables._
+import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek}
+import uk.ac.warwick.tabula.services.timetables.{EventOccurrenceServiceComponent, EventOccurrenceService}
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, Mockito, TestBase}
 import org.joda.time.{Interval, LocalDate, LocalDateTime, LocalTime}
 import uk.ac.warwick.tabula.data.model.StudentMember
@@ -14,14 +15,14 @@ class ViewStudentPersonalTimetableCommandTest extends TestBase with Mockito{
 	val testStudent = new StudentMember
 	val user = mock[CurrentUser]
 
-	val event = TimetableEvent("","","",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,None,None,Nil, AcademicYear(2012))
+	val event = TimetableEvent("","","","",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,None,None,Nil,Nil, AcademicYear(2012))
 	val timetableEvents = Seq(event)
 
-	val occurrence = EventOccurrence("", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, None, None, Nil)
+	val occurrence = EventOccurrence("","", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, None, None, Nil)
 	val meetingOccurrences = Seq(occurrence)
 
-	val earlierEvent = EventOccurrence("","","",TimetableEventType.Induction,LocalDateTime.now.minusHours(1), LocalDateTime.now,None, None, None, Nil )
-	val laterEvent = EventOccurrence("","","",TimetableEventType.Induction,LocalDateTime.now.plusHours(1), LocalDateTime.now.plusHours(1),None, None, None, Nil )
+	val earlierEvent = EventOccurrence("","","","",TimetableEventType.Induction,LocalDateTime.now.minusHours(1), LocalDateTime.now,None, None, None, Nil )
+	val laterEvent = EventOccurrence("","","","",TimetableEventType.Induction,LocalDateTime.now.plusHours(1), LocalDateTime.now.plusHours(1),None, None, None, Nil )
 	val eventOccurences = Seq(laterEvent,earlierEvent) // deliberately put them the wrong way round so we can check sorting
 
 	val studentTimetableEventSource = mock[StudentTimetableEventSource]
