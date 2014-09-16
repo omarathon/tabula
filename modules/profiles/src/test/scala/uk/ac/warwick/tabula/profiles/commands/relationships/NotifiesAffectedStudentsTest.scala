@@ -57,7 +57,7 @@ class NotifiesAffectedStudentsTest extends TestBase with Mockito {
 			var relChanges = Seq[StudentRelationshipChange](change)
 
 			cmd.notifyNewAgent = true
-			cmd.notifyOldAgent = true
+			cmd.notifyOldAgents = true
 			cmd.notifyStudent = true
 
 			var notifications: Seq[Notification[StudentRelationship, Unit]] = cmd.emit(relChanges)

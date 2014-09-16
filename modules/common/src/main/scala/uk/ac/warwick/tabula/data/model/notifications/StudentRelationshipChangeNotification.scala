@@ -34,7 +34,9 @@ abstract class StudentRelationshipChangeNotification
 			"student" -> relationship.studentMember,
 			"newAgent" -> newAgent,
 			"relationshipType" -> relationship.relationshipType,
-			"path" -> url
+			"path" -> url,
+			"oldAgents" -> oldAgents
+
 		))
 	def actionRequired = false
 	def url: String = Routes.profile.view(relationship.studentMember.get)

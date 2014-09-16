@@ -22,7 +22,7 @@ trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], 
 	this: RelationshipChangingCommand =>
 		
 	var notifyStudent: Boolean = false
-	var notifyOldAgent: Boolean = false
+	var notifyOldAgents: Boolean = false
 	var notifyNewAgent: Boolean = false
 
 	def emit(relationshipChanges: Seq[StudentRelationshipChange]): Seq[Notification[StudentRelationship, Unit]] = {
@@ -38,7 +38,7 @@ trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], 
 			}
 		} else Nil
 
-		val oldAgentNotifications = if (notifyOldAgent) {
+		val oldAgentNotifications = if (notifyOldAgents) {
 		// We've got a sequence of modified relationships, each with a seq of old tutors.
 		// We need to group by old tutors, not by sets of old tutors - so first the
 		// changes are expanded so there's one for each oldAgent/modified relationship combination.

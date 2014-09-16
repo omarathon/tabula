@@ -67,7 +67,7 @@
 					</label>
 
 					<label class="checkbox <#if pageAction=="add">muted</#if>">
-						<input type="checkbox" name="notifyOldAgent" class="notifyOldAgent" <#if pageAction!="add">checked <#else> disabled </#if> />
+						<input type="checkbox" name="notifyOldAgents" class="notifyOldAgents" <#if pageAction!="add">checked <#else> disabled </#if> />
 						Old ${relationshipType.agentRole}
 					</label>
 

@@ -25,11 +25,11 @@ class EditStudentRelationshipCommand(
 	val relationshipType: StudentRelationshipType,
 	val currentAgents: Seq[Member], // from the profile screen, this is the agent being changed - otherwise existing agents
 	val currentUser: CurrentUser,
-	val removeOnly: Boolean // this is a remove action from the student profile screen
+	val remove: Boolean // this is a remove action from the student profile screen
 
 ) extends AbstractEditStudentRelationshipCommand with SelfValidating {
 
-	override def oldAgents = currentAgents
+	override def oldAgents: Seq[Member] = if (currentAgents == null) Seq[Member]() else currentAgents
 
 	var agent: Member = _
 
@@ -51,7 +51,7 @@ class EditStudentRelationshipCommand(
 
 	/** applyInternal actions 3 different things:
 		*
-		* 1. From the student profile page, a user removes an agent (removeOnly == true)
+		* 1. From the student profile page, a user removes an agent (remove == true)
 		* 2. From the student profile page, a user replaces a single specified agent (held in currentAgents) with another specified agent (agent)
 		* 3. Using drag-and-drop/spreadsheet upload, a user replaces all existing agents (held in currentAgents) with another specified agent (agent)
 		*
@@ -83,11 +83,11 @@ class EditStudentRelationshipCommand(
 				relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(agent))
 		}
 		else {
-			if (removeOnly) {
+			if (remove) {
 			// remove the relationship for the specified agent and return the ended relationship
 			val preexistingRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
 
-			val relationshipsToRemove: Seq[StudentRelationship] = preexistingRelationships.filter(rel => rel.agent == agent)
+			val relationshipsToRemove: Seq[StudentRelationship] = preexistingRelationships.filter(rel => rel.agentMember == Some(agent))
 			relationshipService.endStudentRelationships(relationshipsToRemove)
 			relationshipsToRemove
 			}
@@ -98,14 +98,20 @@ class EditStudentRelationshipCommand(
 		}
 	}
 
-	override def describe(d: Description) =
+	override def describe(d: Description) = {
+		val oldAgentsHere: Seq[Member] = oldAgents
+		val oldAgentString =
+			if (oldAgentsHere == null || oldAgentsHere.isEmpty ) ""
+			else {
+				val oldAgentUniIds = oldAgentsHere.map(_.universityId)
+				oldAgentUniIds.mkString(" ")
+			}
 		d.studentIds(Seq(studentCourseDetails.student.universityId)).properties(
 			"sprCode" -> studentCourseDetails.sprCode,
-			"oldAgents" -> oldAgents.map(_.universityId).mkString(" "),
-			"newAgent" -> Option(agent).fold("") {
-				_.universityId
-			}
+			"oldAgents" -> oldAgentString,
+			"newAgent" -> Option(agent).fold("") {_.universityId}
 		)
+	}
 
 	def emit(modifiedRelationships: Seq[StudentRelationship]) = {
 		val notifications = modifiedRelationships.flatMap(relationship => {

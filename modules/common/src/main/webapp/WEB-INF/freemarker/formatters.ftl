@@ -452,10 +452,8 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	</#if>
 </#macro>
 
-<#macro format_list list_of_strings>
-	<#list list_of_strings as item>
-		${item_index +1} ${item}<#if item_has_next>,</#if>
-	</#list>
+<#macro format_list_of_members list_of_strings>
+	<#list list_of_strings as item>${item.officialName}<#if item_has_next> and </#if></#list>
 </#macro>
 
 </#escape>

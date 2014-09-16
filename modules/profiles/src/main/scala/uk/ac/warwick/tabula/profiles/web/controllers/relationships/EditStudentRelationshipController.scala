@@ -40,7 +40,8 @@ class EditStudentRelationshipController extends BaseController {
 			@RequestParam(value="remove", required=false) remove: Boolean,
 			user: CurrentUser
 			) = {
-		val cmd = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Seq(currentAgent), user, Option(remove).getOrElse(false))
+		val currentAgents: Seq[Member] = if (currentAgent != null) Seq(currentAgent) else Seq()
+		val cmd = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, currentAgents, user, Option(remove).getOrElse(false))
 		cmd
 	}
 
@@ -67,5 +68,5 @@ class EditStudentRelationshipController extends BaseController {
 		}
 	}
 
-	def currentAgent(cmd: EditStudentRelationshipCommand) = cmd.currentAgents.headOption.getOrElse(throw new ItemNotFoundException)
+	def currentAgent(cmd: EditStudentRelationshipCommand): Option[Member] = cmd.currentAgents.headOption
 }
