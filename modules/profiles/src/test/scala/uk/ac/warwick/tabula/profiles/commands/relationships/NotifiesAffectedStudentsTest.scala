@@ -96,6 +96,7 @@ class NotifiesAffectedStudentsTest extends TestBase with Mockito {
 			var oldAgentNotification: BulkOldAgentRelationshipNotification = oldAgentNotifications.head
 			oldAgentNotification.recipients should be (oldAgents.map(_.asSsoUser))
 
+
 			// two modified relationships, each with one old agent
 			val oldAgentsForRel1 = Seq(staff4)
 			change = new StudentRelationshipChange(oldAgentsForRel1, rel1)

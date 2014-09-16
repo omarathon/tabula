@@ -2,12 +2,11 @@ package uk.ac.warwick.tabula.profiles.commands.relationships
 
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.{Mockito, TestBase}
-import org.mockito.Mockito._
-import uk.ac.warwick.tabula.commands.{DescriptionImpl, Description}
+import uk.ac.warwick.tabula.commands.{DescriptionImpl}
 import uk.ac.warwick.tabula.profiles.TutorFixture
 import uk.ac.warwick.tabula.NoCurrentUser
 import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, StaffMember, StudentRelationship, StudentRelationshipType}
-import uk.ac.warwick.tabula.data.model.notifications.{StudentRelationshipChangeToStudentNotification, StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToNewAgentNotification}
+import uk.ac.warwick.tabula.data.model.notifications.{StudentRelationshipChangeToStudentNotification, StudentRelationshipChangeToOldAgentNotification}
 
 class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 	
