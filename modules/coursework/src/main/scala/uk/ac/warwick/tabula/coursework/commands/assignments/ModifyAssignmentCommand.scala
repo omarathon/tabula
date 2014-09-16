@@ -22,7 +22,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		with SelfValidating
 		with SpecifiesGroupType
 		with CurrentSITSAcademicYear
-		with SchedulesNotifications[Assignment]
+		with SchedulesNotifications[Assignment, Assignment]
 		with AutowiringUserLookupComponent
 		with AutowiringAssignmentMembershipServiceComponent
 		with UpdatesStudentMembership {
@@ -152,6 +152,8 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 			assignmentMembershipService.getAssessmentGroup(template) orElse Some(template)
 		}).distinct.asJava
 	}
+
+	override def transformResult(assignment: Assignment) = Seq(assignment)
 
 	override def scheduledNotifications(assignment: Assignment) = {
 		// if the assignment doesn't collect submissions or is open ended then don't schedule any notifications about deadlines
