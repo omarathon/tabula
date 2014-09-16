@@ -21,7 +21,7 @@
 	</#if>
 
 	<#if assignment.closed && !isExtended>
-		<div class="alert alert-error">
+		<div class="alert alert-warning">
 			<h3>Submission date has passed</h3>
 			<p>
 				You can still submit to this assignment but your mark may be affected. 
@@ -37,8 +37,18 @@
 
 			<h4>Your submission was not accepted</h4>
 
-			<p>Some of the information in your submission was not accepted. Please check the errors in red below and submit again.</p>
+			<p>Some of the information in your submission was not accepted. Please check the errors in red below and re-submit the form.</p>
 		</div>
+
+		<script type="text/javascript">
+			jQuery(function($) {
+				$(".alert-error").each(function() {
+					$("html, body").animate({
+						scrollTop: $(this).offset().top - 35
+					}, 300);
+				});
+			});
+		</script>
 	</#if>
 	<@f.errors cssClass="error form-errors"></@f.errors>
 	
@@ -168,7 +178,7 @@
 		</p>
 		
 	<#elseif assignment.closed && !isExtended>
-		<div class="alert alert-error">
+		<div class="alert alert-warning">
 			<h3>Submission date has passed</h3>
 			
 			This assignment doesn't allow late submissions.
