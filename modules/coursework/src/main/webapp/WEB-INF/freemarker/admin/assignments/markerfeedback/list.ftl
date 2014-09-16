@@ -104,8 +104,8 @@
 </#macro>
 
 <#escape x as x?html>
-
-	<h1>Feedback for ${assignment.name}</h1>
+	<h1><@fmt.module_name assignment.module /></h1>
+	<h2>Feedback for ${assignment.name}</h2>
 
 	<div id="profile-modal" class="modal fade profile-subset"></div>
 
