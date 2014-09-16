@@ -98,11 +98,11 @@ class NotifiesAffectedStudentsTest extends TestBase with Mockito {
 
 
 			// two modified relationships, each with one old agent
-			val oldAgentsForRel1 = Seq(staff4)
+			var oldAgentsForRel1 = Seq(staff4)
 			change = new StudentRelationshipChange(oldAgentsForRel1, rel1)
 
-			val oldAgentsForRel3 = Seq(staff5)
-			val change2 = new StudentRelationshipChange(oldAgentsForRel3, rel3)
+			var oldAgentsForRel3 = Seq(staff5)
+			var change2 = new StudentRelationshipChange(oldAgentsForRel3, rel3)
 
 			relChanges = Seq[StudentRelationshipChange](change, change2)
 
@@ -124,6 +124,26 @@ class NotifiesAffectedStudentsTest extends TestBase with Mockito {
 			val oldAgentNotificationForStaff4: BulkOldAgentRelationshipNotification = oldAgentNotifications.filter(_.recipients.contains(staff4.asSsoUser)).head
 			oldAgentNotificationForStaff4.oldAgents should be (Seq(staff4))
 
+
+			// two modified relationships with same old agent
+			oldAgentsForRel1 = Seq(staff4)
+			change = new StudentRelationshipChange(oldAgentsForRel1, rel1)
+
+			oldAgentsForRel3 = Seq(staff4)
+			change2 = new StudentRelationshipChange(oldAgentsForRel3, rel3)
+
+			relChanges = Seq[StudentRelationshipChange](change, change2)
+
+			notifications = cmd.emit(relChanges)
+
+			notifications.size should be (5)
+
+			oldAgentNotifications = notifications.filter(_.isInstanceOf[BulkOldAgentRelationshipNotification]).asInstanceOf[Seq[BulkOldAgentRelationshipNotification]]
+			oldAgentNotifications.size should be (1)
+			oldAgentNotification = oldAgentNotifications.head
+			oldAgentNotification.recipients.size should be (1)
+			oldAgentNotification.recipients.head should be (staff4.asSsoUser)
+			oldAgentNotification.entities should be (Seq(rel1, rel3))
 		}
 
 	}
