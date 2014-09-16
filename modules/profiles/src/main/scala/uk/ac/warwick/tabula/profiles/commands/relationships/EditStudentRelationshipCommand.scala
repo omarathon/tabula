@@ -111,18 +111,24 @@ class EditStudentRelationshipCommand(
 		val notifications = modifiedRelationships.flatMap(relationship => {
 
 			val studentNotification: Option[Notification[StudentRelationship, Unit]] = if (notifyStudent) {
-				Some(Notification.init(new StudentRelationshipChangeToStudentNotification, currentUser.apparentUser, Seq(relationship)))
+				val notification = Notification.init(new StudentRelationshipChangeToStudentNotification, currentUser.apparentUser, Seq(relationship))
+				notification.oldAgentIds.value = currentAgents.map(_.universityId)
+				Some(notification)
 			} else None
 
 			val oldAgentNotifications = if (notifyOldAgents) {
 				currentAgents.map(oldAgent => {
-					Notification.init(new StudentRelationshipChangeToOldAgentNotification, currentUser.apparentUser, Seq(relationship))
+					val notification = Notification.init(new StudentRelationshipChangeToOldAgentNotification, currentUser.apparentUser, Seq(relationship))
+					notification.oldAgentIds.value = currentAgents.map(_.universityId)
+					notification
 				})
 			} else Nil
 
 			val newAgentNotification = if (notifyNewAgent) {
 				relationship.agentMember.map(newAgent => {
-					Notification.init(new StudentRelationshipChangeToNewAgentNotification, currentUser.apparentUser, Seq(relationship))
+					val notification = Notification.init(new StudentRelationshipChangeToNewAgentNotification, currentUser.apparentUser, Seq(relationship))
+					notification.oldAgentIds.value = currentAgents.map(_.universityId)
+					notification
 				})
 			} else None
 

@@ -26,6 +26,7 @@ class NotifiesAffectedStudentsTest extends TestBase with Mockito {
 		val staff2 = Fixtures.staff("1000002", "staff2", department)
 		val staff3 = Fixtures.staff("1000003", "staff3", department)
 		val staff4 = Fixtures.staff("1000004", "staff4", department)
+		val staff5 = Fixtures.staff("1000005", "staff5", department)
 
 		val rel1 = StudentRelationship(staff1, relationshipType, student1)
 		val rel2 = StudentRelationship(staff1, relationshipType, student2)
@@ -36,6 +37,8 @@ class NotifiesAffectedStudentsTest extends TestBase with Mockito {
 
 		profileService.getMemberByUniversityId("1000001", false, false) returns Some(staff1)
 		profileService.getMemberByUniversityId("1000002", false, false) returns Some(staff2)
+		profileService.getMemberByUniversityId("1000004", false, false) returns Some(staff4)
+		profileService.getMemberByUniversityId("1000005", false, false) returns Some(staff5)
 
 	}
 
@@ -94,11 +97,11 @@ class NotifiesAffectedStudentsTest extends TestBase with Mockito {
 			oldAgentNotification.recipients should be (oldAgents.map(_.asSsoUser))
 
 			// two modified relationships, each with one old agent
-			val oldAgentsForRel1 = Seq(staff3)
+			val oldAgentsForRel1 = Seq(staff4)
 			change = new StudentRelationshipChange(oldAgentsForRel1, rel1)
 
-			val oldAgentsForRel2 = Seq(staff4)
-			val change2 = new StudentRelationshipChange(oldAgentsForRel2, rel2)
+			val oldAgentsForRel3 = Seq(staff5)
+			val change2 = new StudentRelationshipChange(oldAgentsForRel3, rel3)
 
 			relChanges = Seq[StudentRelationshipChange](change, change2)
 
@@ -112,13 +115,13 @@ class NotifiesAffectedStudentsTest extends TestBase with Mockito {
 
 			studentNotifications = notifications.filter(_.isInstanceOf[BulkStudentRelationshipNotification]).asInstanceOf[Seq[BulkStudentRelationshipNotification]]
 			studentNotifications.size should be (2)
-			val studentNotificationForStudent1 = studentNotifications.filter(_.recipients.contains(student1)).head
-			studentNotificationForStudent1.oldAgents should be (Seq(staff3))
+			val studentNotificationForStudent1 = studentNotifications.filter(_.recipients.contains(student1.asSsoUser)).head
+			studentNotificationForStudent1.oldAgents should be (Seq(staff4))
 
 			oldAgentNotifications = notifications.filter(_.isInstanceOf[BulkOldAgentRelationshipNotification]).asInstanceOf[Seq[BulkOldAgentRelationshipNotification]]
 			oldAgentNotifications.size should be (2)
-			val oldAgentNotificationForStaff3: BulkOldAgentRelationshipNotification = oldAgentNotifications.filter(_.recipients.contains(staff1)).head
-			oldAgentNotificationForStaff3.oldAgents should be (Seq(staff3))
+			val oldAgentNotificationForStaff4: BulkOldAgentRelationshipNotification = oldAgentNotifications.filter(_.recipients.contains(staff4.asSsoUser)).head
+			oldAgentNotificationForStaff4.oldAgents should be (Seq(staff4))
 
 		}
 
