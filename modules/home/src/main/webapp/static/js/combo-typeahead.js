@@ -41,6 +41,35 @@
 					source: items,
 					items: allOptions.items,
 					minLength: allOptions.minLength,
+					matcher: function(item) {
+						var searchTerms = this.query.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/g);
+						if (searchTerms.length == 0) { return false; }
+
+						// Each word in search is a substring of item
+						var itemStripped = item.toLowerCase().replace(/[^a-z0-9\s]/g, '');
+
+						for (var i = 0; i < searchTerms.length; i++) {
+							if (itemStripped.indexOf(searchTerms[i]) == -1) {
+								return false;
+							}
+						}
+
+						return true;
+					},
+					highlighter: function(item) {
+						var searchTerms = this.query.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/g);
+
+						var itemParts = item.split(/\s+/); // FIXME will merge multiple spaces into one
+						for (var i = 0; i < itemParts.length; i++) {
+							for (var j = 0; j < searchTerms.length; j++) {
+								itemParts[i] = itemParts[i].replace(new RegExp('(' + searchTerms[j] + ')', 'ig'), function ($1, match) {
+									return '<strong>' + match + '</strong>';
+								});
+							}
+						}
+
+						return itemParts.join(' ');
+					},
 					updater: function(item) {
 						$this.find(':selected').prop('selected', false);
 
