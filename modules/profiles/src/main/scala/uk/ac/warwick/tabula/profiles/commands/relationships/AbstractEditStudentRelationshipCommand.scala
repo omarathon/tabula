@@ -11,11 +11,10 @@ abstract class AbstractEditStudentRelationshipCommand extends Command[Seq[Studen
 	var relationshipService = Wire[RelationshipService]
 
 	var notifyStudent: Boolean = false
-	var notifyOldAgent: Boolean = false
+	var notifyOldAgents: Boolean = false
 	var notifyNewAgent: Boolean = false
-
-	def oldAgent: Option[Member]
 
 	def applyInternal(): Seq[StudentRelationship]
 
+	def oldAgents: Seq[Member]
 }

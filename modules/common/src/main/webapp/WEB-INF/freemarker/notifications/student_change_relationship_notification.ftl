@@ -1,11 +1,4 @@
-<#if oldAgent?has_content && newAgent?has_content>
-	<#if oldAgent.universityId == newAgent.universityId>
-		You have been re-assigned ${newAgent.officialName} as a ${relationshipType.agentRole}.
-	<#else>
-		Your ${relationshipType.agentRole} has been changed from ${oldAgent.officialName} to ${newAgent.officialName}.
-	</#if>
-<#elseif oldAgent?has_content>
-${oldAgent.officialName} is no longer assigned as your ${relationshipType.agentRole}.
-<#elseif newAgent?has_content>
-You have been assigned ${newAgent.officialName} as a ${relationshipType.agentRole}.
+<#compress>
+<#if newAgent?has_content>You have been assigned ${newAgent.officialName} as a ${relationshipType.agentRole}.  </#if><#if oldAgents?size == 1><@fmt.format_list_of_members oldAgents/> is no longer your ${relationshipType.agentRole}.<#elseif oldAgents?has_content><@fmt.format_list_of_members oldAgents/> are no longer your ${relationshipType.agentRole}s.
 </#if>
+</#compress>

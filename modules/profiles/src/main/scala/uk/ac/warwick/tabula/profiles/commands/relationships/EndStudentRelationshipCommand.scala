@@ -21,7 +21,7 @@ class EndStudentRelationshipCommand(
 
 	var memberDao = Wire[MemberDao]
 
-	def oldAgent = relationship.agentMember
+	override def oldAgents = relationship.agentMember.toSeq
 
 	val relationshipType = relationship.relationshipType
 	val studentCourseDetails = relationship.studentCourseDetails
@@ -43,7 +43,7 @@ class EndStudentRelationshipCommand(
 	override def describe(d: Description) =
 		d.studentIds(Seq(studentCourseDetails.student.universityId)).properties(
 			"sprCode" -> studentCourseDetails.sprCode,
-			"oldAgent" -> oldAgent.fold("") { _.universityId }
+			"oldAgents" -> oldAgents.flatMap(_.universityId).mkString(" ")
 		)
 
 	def emit(relationships: Seq[StudentRelationship]): Seq[uk.ac.warwick.tabula.data.model.Notification[StudentRelationship,Unit]] = {
@@ -55,7 +55,7 @@ class EndStudentRelationshipCommand(
 					else None
 
 				val oldAgentNotification: Option[Notification[StudentRelationship, Unit]] =
-					if (notifyOldAgent)
+					if (notifyOldAgents)
 						Some(Notification.init(new StudentRelationshipChangeToOldAgentNotification, currentUser.apparentUser, Seq(relationship)))
 					else
 						None

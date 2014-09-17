@@ -15,8 +15,6 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
  * Service providing access to members and profiles.
  */
 trait RelationshipService {
-	def getPreviousRelationship(relationship: StudentRelationship): Option[StudentRelationship]
-
 	def allStudentRelationshipTypes: Seq[StudentRelationshipType]
 	def saveOrUpdate(relationshipType: StudentRelationshipType)
 	def delete(relationshipType: StudentRelationshipType)
@@ -57,6 +55,7 @@ trait RelationshipService {
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship]
+	def endStudentRelationships(relationships: Seq[StudentRelationship])
 }
 
 @Service(value = "relationshipService")
@@ -147,10 +146,19 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		// Don't need to do anything with existingRelationships, but need to handle the others
 
 		// End all relationships for agents not passed in
-		relationshipsToEnd.foreach { _.endDate = DateTime.now }
+		endStudentRelationships(relationshipsToEnd)
 
 		// Save new relationships for agents that don't already exist
 		saveStudentRelationships(relationshipType, studentCourseDetails, agentsToAdd)
+	}
+
+	def endStudentRelationships(relationships: Seq[StudentRelationship]) {
+		relationships.foreach {
+			rel => {
+				rel.endDate = DateTime.now
+				saveOrUpdate(rel)
+			}
+		}
 	}
 
 	def replaceStudentRelationshipsWithPercentages(
@@ -271,18 +279,6 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 
 	def getStudentRelationshipById(id: String): Option[StudentRelationship] = relationshipDao.getStudentRelationshipById(id)
 
-	def getPreviousRelationship(relationship: StudentRelationship): Option[StudentRelationship] = {
-		val rels = relationshipDao.getAllPastAndPresentRelationships(relationship.relationshipType, relationship.studentCourseDetails)
-		val sortedRels = rels.sortBy { _.startDate }
-
-		// Get the element before the current relationship
-		val index = sortedRels.indexOf(relationship)
-		if (index > 0) {
-			Some(sortedRels(index-1)) // get the relationship before this one which started latest
-		} else {
-			None
-		}
-	}
 }
 
 trait RelationshipServiceComponent {

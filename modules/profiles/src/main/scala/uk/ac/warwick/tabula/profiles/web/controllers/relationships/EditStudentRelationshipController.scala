@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser}
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
@@ -17,6 +17,11 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import javax.validation.Valid
 import org.springframework.validation.Errors
 
+/**
+ * This is the controller for the case where a single old student relationship is replaced with another
+ * through the Student Profile screen.  So although the student may have two existing tutors, only one
+ * will be replaced.
+ */
 @Controller
 @RequestMapping(Array("/{relationshipType}/{studentCourseDetails}"))
 class EditStudentRelationshipController extends BaseController {
@@ -35,7 +40,8 @@ class EditStudentRelationshipController extends BaseController {
 			@RequestParam(value="remove", required=false) remove: Boolean,
 			user: CurrentUser
 			) = {
-		val cmd = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Option(currentAgent), user, Option(remove).getOrElse(false))
+		val currentAgents: Seq[Member] = if (currentAgent != null) Seq(currentAgent) else Seq()
+		val cmd = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, currentAgents, user, Option(remove).getOrElse(false))
 		cmd
 	}
 
@@ -44,7 +50,7 @@ class EditStudentRelationshipController extends BaseController {
 	def editAgent(@ModelAttribute("editStudentRelationshipCommand") cmd: EditStudentRelationshipCommand, errors: Errors) = {
 		Mav("relationships/edit/view",
 			"studentCourseDetails" -> cmd.studentCourseDetails,
-			"agentToDisplay" -> cmd.currentAgent
+			"agentToDisplay" -> currentAgent(cmd)
 		).noLayout()
 	}
 
@@ -57,8 +63,10 @@ class EditStudentRelationshipController extends BaseController {
 
 			Mav("relationships/edit/view",
 				"student" -> cmd.studentCourseDetails.student,
-				"agentToDisplay" -> cmd.currentAgent
+				"agentToDisplay" -> currentAgent(cmd)
 			)
 		}
 	}
+
+	def currentAgent(cmd: EditStudentRelationshipCommand): Option[Member] = cmd.currentAgents.headOption
 }

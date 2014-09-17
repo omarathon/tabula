@@ -17,7 +17,7 @@
 				</label>
 
 				<label class="checkbox">
-					<input type="checkbox" name="notifyOldAgent" class="notifyOldAgent" checked />
+					<input type="checkbox" name="notifyOldAgents" class="notifyOldAgents" checked />
 					Old ${relationshipType.agentRole}s
 				</label>
 
