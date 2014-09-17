@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.profiles
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{RelationshipService, ProfileService}
 
 trait TutorFixture extends Mockito {
 
@@ -45,4 +45,9 @@ trait TutorFixture extends Mockito {
 	val relationshipOld = new MemberStudentRelationship
 	relationshipOld.studentMember = student
 	relationshipOld.agentMember = oldTutor
+
+	val relationshipService = smartMock[RelationshipService]
+	relationshipService.saveStudentRelationships(tutorRelationshipType, studentCourseDetails, List(newTutor)) returns Seq(StudentRelationship(newTutor, tutorRelationshipType, studentCourseDetails))
+	relationshipService.findCurrentRelationships(tutorRelationshipType, studentCourseDetails) returns Seq(relationshipOld)
+
 }

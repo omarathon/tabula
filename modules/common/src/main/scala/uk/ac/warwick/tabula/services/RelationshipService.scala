@@ -153,7 +153,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	}
 
 	def endStudentRelationships(relationships: Seq[StudentRelationship]) {
-		relationships.map {
+		relationships.foreach {
 			rel => {
 				rel.endDate = DateTime.now
 				saveOrUpdate(rel)

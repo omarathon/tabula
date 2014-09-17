@@ -10,11 +10,9 @@ import uk.ac.warwick.tabula.data.model.notifications.{StudentRelationshipChangeT
 
 class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 	
-	val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-
 	@Test
 	def describeShouldIncludeNewTutorAndStudent { new TutorFixture {
-		val command = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Seq(oldTutor), NoCurrentUser(), false)
+		val command = new EditStudentRelationshipCommand(studentCourseDetails, tutorRelationshipType, Seq(oldTutor), NoCurrentUser(), false)
 		command.agent = newTutor
 		val desc = new DescriptionImpl
 		command.describe(desc)
@@ -29,7 +27,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 
 	@Test
 	def emitShouldCreateNotificationToTutee() { new TutorFixture{
-		val command = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Seq(oldTutor), NoCurrentUser(), false)
+		val command = new EditStudentRelationshipCommand(studentCourseDetails, tutorRelationshipType, Seq(oldTutor), NoCurrentUser(), false)
 		command.agent = newTutor
 		command.notifyStudent = true
 
@@ -40,7 +38,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 
 	@Test
 	def emitShouldCreateNotificationToOldTutor() { new TutorFixture{
-		val command = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Seq(oldTutor), NoCurrentUser(), false)
+		val command = new EditStudentRelationshipCommand(studentCourseDetails, tutorRelationshipType, Seq(oldTutor), NoCurrentUser(), false)
 		command.agent = newTutor
 		command.notifyOldAgents = true
 
@@ -50,7 +48,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 
 	@Test
 	def emitShouldCreateNotificationToNewTutor() { new TutorFixture{
-		val command = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Seq(oldTutor), NoCurrentUser(), false)
+		val command = new EditStudentRelationshipCommand(studentCourseDetails, tutorRelationshipType, Seq(oldTutor), NoCurrentUser(), false)
 		command.agent = newTutor
 		command.notifyNewAgent = true
 
@@ -60,7 +58,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 
 	@Test
 	def emitShouldNotNotifyOldTutorIfTheyDontExist() { new TutorFixture{
-		val command = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Nil, NoCurrentUser(), false)
+		val command = new EditStudentRelationshipCommand(studentCourseDetails, tutorRelationshipType, Nil, NoCurrentUser(), false)
 		command.agent = newTutor
 		command.notifyNewAgent = true
 		command.notifyOldAgents = true
@@ -72,7 +70,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 
 	@Test
 	def emitShouldNotifyOnRemove() { new TutorFixture{
-		val command = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Seq(oldTutor), NoCurrentUser(), false)
+		val command = new EditStudentRelationshipCommand(studentCourseDetails, tutorRelationshipType, Seq(oldTutor), NoCurrentUser(), false)
 		command.agent = newTutor
 		command.notifyOldAgents = true
 		command.notifyStudent = true
@@ -84,45 +82,52 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test
-	def testApply() { new TutorFixture {
+	def testApplyNoExistingRels() { new TutorFixture {
 		// apply should return all the modified relationships
 
-		val relationshipService = smartMock[RelationshipService]
-		relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, List(newTutor)) returns Seq(StudentRelationship(newTutor, relationshipType, studentCourseDetails))
-		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns Seq(relationshipOld)
-
-		// SCENARIO - no existing relationships for the SCD - add a new tutor and get back the new relationship:
-		var command = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Seq(), NoCurrentUser(), false)
+		// no existing relationships for the SCD - add a new tutor and get back the new relationship:
+		val command = new EditStudentRelationshipCommand(studentCourseDetails, tutorRelationshipType, Seq(), NoCurrentUser(), false)
 		command.agent = newTutor
 
 		command.relationshipService = relationshipService
 
-		var rels = command.applyInternal
-		rels.size should be (1)
-		rels.head.agent should be (newTutor.universityId)
-		rels.head.studentMember should be (Some(studentCourseDetails.student))
+		val rels = command.applyInternal
+		rels.size should be(1)
+		rels.head.agent should be(newTutor.universityId)
+		rels.head.studentMember should be(Some(studentCourseDetails.student))
+	}}
 
+	@Test
+	def testApplyExistingRel() { new TutorFixture {
 
-		// SCENARIO - an existing relationship with a different tutor:
-		command = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Seq(oldTutor), NoCurrentUser(), false)
+		// an existing relationship with a different tutor:
+		val command = new EditStudentRelationshipCommand(studentCourseDetails, tutorRelationshipType, Seq(oldTutor), NoCurrentUser(), false)
 		command.agent = newTutor
 
 		command.relationshipService = relationshipService
 
-		rels = command.applyInternal
-		rels.size should be (1)
-		rels.head.agent should be (newTutor.universityId)
-		rels.head.studentMember should be (Some(studentCourseDetails.student))
+		val rels = command.applyInternal
+		rels.size should be(1)
+		rels.head.agent should be(newTutor.universityId)
+		rels.head.studentMember should be(Some(studentCourseDetails.student))
+	}}
 
-		// SCENARIO - replace an agent with themselves, ie do nothing
-		command = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Seq(oldTutor), NoCurrentUser(), false)
+	@Test
+	def testApplyReplaceWithSelf() { new TutorFixture {
+
+		// replace an agent with themselves, ie do nothing
+		val command = new EditStudentRelationshipCommand(studentCourseDetails, tutorRelationshipType, Seq(oldTutor), NoCurrentUser(), false)
 		command.agent = oldTutor
 		command.relationshipService = relationshipService
 
-		rels = command.applyInternal
-		rels.size should be (0)
+		val rels = command.applyInternal
+		rels.size should be(0)
+	}}
 
-		// SCENARIO - multiple old tutors, just replace one
+	@Test
+	def testApplyMultipleOldTutorsReplaceOne() { new TutorFixture {
+
+		// multiple old tutors, just replace one
 		val oldTutor2 = new StaffMember
 		oldTutor2.universityId = "00000022"
 
@@ -132,23 +137,30 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 		relationshipOld2.studentMember = student
 		relationshipOld2.agentMember = oldTutor2
 
-		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns Seq(relationshipOld, relationshipOld2)
+		relationshipService.findCurrentRelationships(tutorRelationshipType, studentCourseDetails) returns Seq(relationshipOld, relationshipOld2)
 
-		command = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Seq(oldTutor), NoCurrentUser(), false)
+		val command = new EditStudentRelationshipCommand(studentCourseDetails, tutorRelationshipType, Seq(oldTutor), NoCurrentUser(), false)
 		command.relationshipService = relationshipService
 		command.agent = newTutor
 
- 		val rels3 = command.applyInternal
+		val rels3 = command.applyInternal
 
 		// so we should have replaced oldTutor with newTutor and oldTutor2 should remain untouched
-		rels3.size should be (1)
-		rels3.head.agent should be (newTutor.universityId)
-		rels3.head.studentMember should be (Some(studentCourseDetails.student))
-		command.oldAgents should be (Seq(oldTutor))
+		rels3.size should be(1)
+		rels3.head.agent should be(newTutor.universityId)
+		rels3.head.studentMember should be(Some(studentCourseDetails.student))
+		command.oldAgents should be(Seq(oldTutor))
+	}}
 
-		// SCENARIO - multiple old tutors, replace them all
+	@Test
+	def testApplyMultipleOldTutorsReplaceAll() { new TutorFixture {
 
-		command = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, Seq(oldTutor, oldTutor2), NoCurrentUser(), false)
+		// multiple old tutors, replace them all
+
+		val oldTutor2 = new StaffMember
+		oldTutor2.universityId = "00000022"
+
+		val command = new EditStudentRelationshipCommand(studentCourseDetails, tutorRelationshipType, Seq(oldTutor, oldTutor2), NoCurrentUser(), false)
 		command.relationshipService = relationshipService
 		command.agent = newTutor
 

@@ -75,7 +75,6 @@ trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], 
 				}
 		} else Nil
 
-		val thing = studentNotifications ++ oldAgentNotifications ++ newAgentNotifications
-		thing
+		studentNotifications ++ oldAgentNotifications ++ newAgentNotifications
 	}
 }
