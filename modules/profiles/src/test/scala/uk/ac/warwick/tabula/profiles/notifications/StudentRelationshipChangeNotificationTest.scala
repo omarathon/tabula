@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.profiles.TutorFixture
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 import uk.ac.warwick.tabula.data.model.notifications.{StudentRelationshipChangeToNewAgentNotification, StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToStudentNotification}
 
-
 class StudentRelationshipChangeNotificationTest extends TestBase with Mockito with FreemarkerRendering with TutorFixture {
 
 	def createNewTutorNotification(relationship:StudentRelationship, actor:User, oldTutor: Option[Member]) = {
@@ -43,12 +42,14 @@ class StudentRelationshipChangeNotificationTest extends TestBase with Mockito wi
 	def urlIsProfilePage():Unit = new TutorFixture {
 		val n = createNewTutorNotification(relationship, actor, Some(oldTutor))
 		n.url should be("/profiles/view/student")
+		n.urlTitle should be ("view the student profile for Test Student")
 	}
 
 	@Test
 	def recipientsContainsSingleUser():Unit = new TutorFixture {
 		val n = createOldTutorNotification(relationship, actor, Some(oldTutor))
 		n.recipients should be (Seq(recipient))
+		n.urlTitle should be ("view the student profile for Test Student")
 	}
 
 	@Test
@@ -59,5 +60,7 @@ class StudentRelationshipChangeNotificationTest extends TestBase with Mockito wi
 		n.content.model("student") should be (Some(student))
 		n.content.model("path") should be ("/profiles/view/student")
 		n.content.model("newAgent") should be (Some(newTutor))
+		n.urlTitle should be ("view your student profile")
 	}
+
 }

@@ -44,14 +44,14 @@ abstract class StudentRelationshipChangeNotification
 
 
 trait RelationshipChangeAgent {
-	this : StudentRelationshipChangeNotification =>
+	self: StudentRelationshipChangeNotification =>
 
 	private def profileName = relationship.studentMember match {
-		case Some(sm) => " for " + sm.fullName
-		case None => ""
+		case Some(sm) if sm.fullName.nonEmpty => " for " + sm.fullName.get
+		case _ => ""
 	}
 
-	def urlTitle = s"view the student profile$profileName"
+	override def urlTitle = s"view the student profile$profileName"
 }
 
 @Entity
@@ -74,7 +74,7 @@ class StudentRelationshipChangeToOldAgentNotification extends StudentRelationshi
 @Entity
 @DiscriminatorValue("StudentRelationshipChangeToNewAgent")
 class StudentRelationshipChangeToNewAgentNotification extends StudentRelationshipChangeNotification
-	with RelationshipChangeAgent{
+	with RelationshipChangeAgent {
 
 	def templateLocation = StudentRelationshipChangeNotification.NewAgentTemplate
 	def recipients = relationship.agentMember.map { _.asSsoUser }.toSeq
