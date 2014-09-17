@@ -443,6 +443,17 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.getAssessmentComponents(chemistryDept, false) should be (Seq(ua1, ua2))
 		assignmentMembershipService.getAssessmentComponents(lawDept, true) should be (Seq(ua3))
 		assignmentMembershipService.getAssessmentComponents(Fixtures.department("cs"), true) should be (Seq())
+
+		val chemistrySubDept = Fixtures.department("ch-ug")
+		chemistrySubDept.parent = chemistryDept
+		chemistryDept.children.add(chemistrySubDept)
+
+		// Move CH101 from parent to child
+		chemistryDept.modules.remove(chemistryModule)
+		chemistrySubDept.modules.add(chemistryModule)
+
+		assignmentMembershipService.getAssessmentComponents(chemistryDept, false) should be (Seq())
+		assignmentMembershipService.getAssessmentComponents(chemistryDept, true) should be (Seq(ua1, ua2))
 	}
 
 	@Test def assessmentGroups() = transactional { tx =>
