@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.timetables
 
 import org.joda.time.{LocalTime, LocalDateTime}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupFormat, SmallGroupEvent, DayOfWeek, WeekRange}
+import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.AcademicYear
 
 case class TimetableEvent(
@@ -30,14 +30,17 @@ object TimetableEvent {
 		case object Staff extends Context
 	}
 
-	def apply(sge: SmallGroupEvent): TimetableEvent = {
+	def apply(sge: SmallGroupEvent) = eventForSmallGroupEventInWeeks(sge, sge.weekRanges)
+	def apply(sgo: SmallGroupEventOccurrence) = eventForSmallGroupEventInWeeks(sgo.event, Seq(WeekRange(sgo.week)))
+
+	private def eventForSmallGroupEventInWeeks(sge: SmallGroupEvent, weekRanges: Seq[WeekRange]): TimetableEvent =
 		TimetableEvent(
 			uid = sge.id,
 			name = sge.group.groupSet.name,
 			title = Option(sge.title).getOrElse(""),
 			description = s"${sge.group.groupSet.name}: ${sge.group.name}",
 			eventType = smallGroupFormatToTimetableEventType(sge.group.groupSet.format),
-			weekRanges = sge.weekRanges,
+			weekRanges = weekRanges,
 			day = sge.day,
 			startTime = sge.startTime,
 			endTime = sge.endTime,
@@ -48,7 +51,6 @@ object TimetableEvent {
 			studentUniversityIds = sge.group.students.knownType.members,
 			year = sge.group.groupSet.academicYear
 		)
-	}
 
 	private def smallGroupFormatToTimetableEventType(sgf: SmallGroupFormat): TimetableEventType = sgf match {
 		case SmallGroupFormat.Seminar => TimetableEventType.Seminar
