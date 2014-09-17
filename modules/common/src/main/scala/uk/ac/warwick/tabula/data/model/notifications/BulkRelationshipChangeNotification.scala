@@ -120,7 +120,9 @@ class BulkOldAgentRelationshipNotification extends BulkRelationshipChangeNotific
 
 	def urlTitle: String = s"view your ${relationshipType.studentRole}s"
 
-	def extraModel = Map()
+	def extraModel = Map(
+		"modifiedRelationships" -> entities
+	)
 }
 
 object BulkRelationshipChangeNotification {

@@ -32,10 +32,11 @@ trait TutorFixture extends Mockito {
 	val oldTutor = new StaffMember
 	oldTutor.universityId = "0000002"
 
-	val profileService = mock[ProfileService]
+	val profileService = smartMock[ProfileService]
 	profileService.getStudentBySprCode("student") returns Some(student)
 	profileService.getMemberByUniversityId("0000001") returns Some(newTutor)
 	profileService.getMemberByUniversityId("0000002") returns Some(oldTutor)
+	profileService.getMemberByUniversityId("0000002", false, false) returns Some(oldTutor)
 
 	val relationship = new MemberStudentRelationship
 	relationship.studentMember = student

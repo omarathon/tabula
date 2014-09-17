@@ -14,7 +14,6 @@ class StudentRelationshipChangeNotificationTest extends TestBase with Mockito wi
 
 	def createNewTutorNotification(relationship:StudentRelationship, actor:User, oldTutor: Option[Member]) = {
 		val n = new StudentRelationshipChangeToNewAgentNotification
-		n.profileService = smartMock[ProfileService]
 		n.agent = actor
 		n.oldAgentIds.value = Seq(oldTutor.get.universityId)
 		n.addItems(Seq(relationship))
@@ -55,6 +54,7 @@ class StudentRelationshipChangeNotificationTest extends TestBase with Mockito wi
 	@Test
 	def shouldCallTextRendererWithCorrectTemplate():Unit = new TutorFixture {
 		val n = createTuteeNotification(relationship, actor,  Some(oldTutor))
+		n.profileService = profileService
 		n.content.template should be ("/WEB-INF/freemarker/notifications/student_change_relationship_notification.ftl")
 		n.content.model("student") should be (Some(student))
 		n.content.model("path") should be ("/profiles/view/student")

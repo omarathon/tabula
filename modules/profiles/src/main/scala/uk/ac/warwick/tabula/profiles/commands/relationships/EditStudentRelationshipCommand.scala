@@ -78,7 +78,7 @@ class EditStudentRelationshipCommand(
 		else if (!currentAgents.contains(agent)) {
 				// we've been given a new agent -
 				// replace the current agents with the new one and return the new relationship
-				val relationshipsToReplace = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
+				val relationshipsToReplace = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails).filter(rel => currentAgents.contains(rel.agentMember.getOrElse(throw new ItemNotFoundException)))
 				relationshipService.endStudentRelationships(relationshipsToReplace)
 				relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(agent))
 		}
