@@ -32,7 +32,7 @@ trait AssignmentMembershipService {
 	 *  in conjunction with #getUpstreamAssessmentGroups.
 	 */
 	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
-	def getAssessmentComponents(department: Department): Seq[AssessmentComponent]
+	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
@@ -138,7 +138,7 @@ class AssignmentMembershipServiceImpl
 	/**
 	 * Gets assessment components for this department.
 	 */
-	def getAssessmentComponents(department: Department) = dao.getAssessmentComponents(department)
+	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean) = dao.getAssessmentComponents(department, includeSubDepartments)
 
 	def countPublishedFeedback(assignment: Assignment): Int = dao.countPublishedFeedback(assignment)
 
