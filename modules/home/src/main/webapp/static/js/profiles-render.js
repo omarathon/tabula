@@ -460,7 +460,15 @@
 					content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
 
 					if (event.location && event.location.length > 0) {
-						content = content + "<tr><th>Where</th><td>" + event.location + "</td></tr>";
+						content = content + "<tr><th>Where</th><td>";
+
+						if (event.locationId && event.locationId.length > 0) {
+							content = content + "<span class='map-location' data-lid='" + event.locationId + "'>" + event.location + "</span>";
+						} else {
+							content = content + event.location;
+						}
+
+						content = content + "</td></tr>";
 					}
 
 					if (event.tutorNames.length > 0){

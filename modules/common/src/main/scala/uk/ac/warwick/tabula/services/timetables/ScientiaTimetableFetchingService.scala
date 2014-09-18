@@ -8,7 +8,7 @@ import org.joda.time.LocalTime
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRangeListUserType}
+import uk.ac.warwick.tabula.data.model.groups.{NamedLocation, DayOfWeek, WeekRangeListUserType}
 import uk.ac.warwick.tabula.helpers.{Logging, ClockComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
@@ -133,7 +133,7 @@ object ScientiaHttpTimetableFetchingService {
 					// S+ has some (not all) rooms as "AB_AB1.2", where AB is a building code
 					// we're generally better off without this.
 					val removeBuildingNames = "^[^_]*_".r
-					Some(removeBuildingNames.replaceFirstIn(text,""))
+					Some(NamedLocation(removeBuildingNames.replaceFirstIn(text,"")))
 				}
 				case _ => None
 			}
@@ -142,7 +142,7 @@ object ScientiaHttpTimetableFetchingService {
 
 			val uid =
 				DigestUtils.md5Hex(
-					Seq(name, startTime.toString, endTime.toString, location.getOrElse(""), context.getOrElse("")).mkString
+					Seq(name, startTime.toString, endTime.toString, location.fold("") { _.name }, context.getOrElse("")).mkString
 				)
 
 			TimetableEvent(

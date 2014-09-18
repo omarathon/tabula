@@ -9,7 +9,7 @@ import org.apache.commons.io.IOUtils
 import org.apache.http.auth.AuthScope
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
+import uk.ac.warwick.tabula.data.model.groups.{NamedLocation, DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.services.permissions.CacheStrategyComponent
 import uk.ac.warwick.tabula.services.{TermServiceComponent, TermServiceImpl, UserLookupComponent}
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
@@ -65,7 +65,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 			DayOfWeek.Monday,
 			new LocalTime(11, 15),
 			new LocalTime(13, 0),
-			Some("R021"),
+			Some(NamedLocation("R021")),
 			Some("ES186"),
 			None,
 			Nil,
@@ -99,7 +99,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 			DayOfWeek.Monday,
 			new LocalTime(10, 0),
 			new LocalTime(11, 0),
-			Some("P521"),
+			Some(NamedLocation("P521")),
 			Some("ES186"),
 			None,
 			Nil,

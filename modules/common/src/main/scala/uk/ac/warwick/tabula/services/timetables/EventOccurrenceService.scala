@@ -83,7 +83,7 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 			event.getProperties.add(new Description(eventOccurrence.description))
 		}
 		if (eventOccurrence.location.nonEmpty) {
-			event.getProperties.add(new Location(eventOccurrence.location.getOrElse("")))
+			event.getProperties.add(new Location(eventOccurrence.location.fold("") { _.name }))
 		}
 
 		event.getProperties.add(new Uid(eventOccurrence.uid))

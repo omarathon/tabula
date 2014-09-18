@@ -16,7 +16,7 @@ import org.joda.time.{DateTime, DateTimeZone}
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek}
+import uk.ac.warwick.tabula.data.model.groups.{NamedLocation, WeekRange, DayOfWeek}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
@@ -165,7 +165,7 @@ object CelcatHttpTimetableFetchingService {
 				day = day,
 				startTime = start.toLocalTime,
 				endTime = end.toLocalTime,
-				location = Option(event.getLocation).flatMap { _.getValue.maybeText },
+				location = Option(event.getLocation).flatMap { _.getValue.maybeText }.map(NamedLocation),
 				comments = None,
 				context = moduleCode,
 				staffUniversityIds = staffIds,

@@ -40,13 +40,13 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			set
 		}
 
-		def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[String], tutorUsercodes: Seq[String]) = {
+		def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]) = {
 			val event = new SmallGroupEvent(group)
 			event.weekRanges = weeks
 			event.day = day
 			event.startTime = startTime
 			event.endTime = endTime
-			location.foreach { location => event.location = NamedLocation(location) }
+			location.foreach { location => event.location = location }
 			event.tutors.knownType.includedUserIds = tutorUsercodes
 
 			group.events.add(event)
@@ -88,7 +88,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			weekRanges=Seq(WeekRange(6, 10)),
 			day=DayOfWeek.Friday,
 			eventType=TimetableEventType.Seminar,
-			location=Some("CS1.04"),
+			location=Some(NamedLocation("CS1.04")),
 			context=Some("IN101"),
 			comments=None,
 			staffUniversityIds=Seq("1170047"),
@@ -105,7 +105,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			weekRanges=Seq(WeekRange(6, 10)),
 			day=DayOfWeek.Thursday,
 			eventType=TimetableEventType.Seminar,
-			location=Some("CS1.04"),
+			location=Some(NamedLocation("CS1.04")),
 			context=Some("IN101"),
 			comments=None,
 			staffUniversityIds=Seq("1170047"),
@@ -125,7 +125,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 				weekRanges=Seq(WeekRange(6, 10)),
 				day=DayOfWeek.Friday,
 				eventType=TimetableEventType.Lecture,
-				location=Some("L5"),
+				location=Some(NamedLocation("L5")),
 				context=Some("IN101"),
 				comments=None,
 				staffUniversityIds=Seq("1170047"),
@@ -144,7 +144,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 				weekRanges=Seq(WeekRange(6, 10)),
 				day=DayOfWeek.Thursday,
 				eventType=TimetableEventType.Seminar,
-				location=Some("CS1.04"),
+				location=Some(NamedLocation("CS1.04")),
 				context=Some("IN102"),
 				comments=None,
 				staffUniversityIds=Seq("1170047"),

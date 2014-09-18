@@ -18,3 +18,4 @@
 <@script "/static/js/app-comments.js" />
 <@script "/static/js/select-deselect-checkboxes.js" />
 <@script "/static/js/combo-typeahead.js" />
+<@script "/static/js/map-popups.js" />
