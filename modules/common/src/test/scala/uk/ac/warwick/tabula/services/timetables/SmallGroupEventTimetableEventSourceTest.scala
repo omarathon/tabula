@@ -52,7 +52,7 @@ class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 		tte.description should be("groupset name: group name")
 		tte.endTime should be(event.endTime)
 		tte.eventType should be(TimetableEventType.Practical)
-		tte.location should be(Some("location"))
+		tte.location should be(Some(NamedLocation("location")))
 		tte.context should be(Some("MODCODE"))
 		tte.name should be("groupset name")
 		tte.startTime should be (event.startTime)
