@@ -49,16 +49,18 @@
 					<div id="utility-container">
 						<div id="utility-bar">
 							<ul>
-								<li>
-								<#if user?? && user.loggedIn>
-									Signed in as ${user.fullName}
-									| <a href="/settings">Settings</a>
-									| <a href="http://warwick.ac.uk/tabula/faqs/" target="_blank">FAQs</a>
-									| <a class="sso-link" href="<@sso.logoutlink target="${rootUrl}" />">Sign out</a>
-								<#else>
-								    <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
+								<#if IS_SSO_PROTECTED!true>
+									<li>
+										<#if user?? && user.loggedIn>
+											Signed in as ${user.fullName}
+											| <a href="/settings">Settings</a>
+											| <a href="http://warwick.ac.uk/tabula/faqs/" target="_blank">FAQs</a>
+											| <a class="sso-link" href="<@sso.logoutlink target="${rootUrl}" />">Sign out</a>
+										<#else>
+											<a class="sso-link" href="<@sso.loginlink />">Sign in</a>
+										</#if>
+									</li>
 								</#if>
-								</li>
 							</ul>
 						</div>
 					</div>
@@ -204,14 +206,16 @@
 
 						<div id="footer-utility">
 							<ul>
-								<li id="sign-inout-link">
-				          			<#if user?? && user.loggedIn>
-										<a class="sso-link" href="<@sso.logoutlink target="${rootUrl}" />">Sign out</a>
-									<#else>
-									    <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
-									</#if>
-			          			</li>
-			          			<li class="spacer">|</li>
+								<#if IS_SSO_PROTECTED!true>
+									<li id="sign-inout-link">
+										<#if user?? && user.loggedIn>
+											<a class="sso-link" href="<@sso.logoutlink target="${rootUrl}" />">Sign out</a>
+										<#else>
+											<a class="sso-link" href="<@sso.loginlink />">Sign in</a>
+										</#if>
+									</li>
+			          				<li class="spacer">|</li>
+								</#if>
 			          			<li id="copyright-link"><a href="http://go.warwick.ac.uk/terms" title="Copyright Statement">&copy; <@warwick.copyright /></a></li>
 			          			<li class="spacer">|</li>
 			          			<li id="privacy-link"><a href="http://go.warwick.ac.uk/terms#privacy" title="Privacy statement">Privacy</a></li>

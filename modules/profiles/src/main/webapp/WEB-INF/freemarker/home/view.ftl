@@ -10,10 +10,12 @@
 		This is a service for managing student profiles, records and tutor information
 	</p>
 
-	<p class="alert">
-		You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
-		to see a personalised view.
-	</p>
+	<#if IS_SSO_PROTECTED!true>
+		<p class="alert">
+			You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
+			to see a personalised view.
+		</p>
+	</#if>
 <#else>
 	<#assign is_staff=searchProfilesCommand?has_content />
 	<#assign is_tutor=showMyStudents />

@@ -15,12 +15,14 @@
 <#if !user.loggedIn>
 	<p class="lead muted">
 		This is a service for managing coursework assignments and feedback
-	</p>	
-
-	<p class="alert">
-		You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
-		to see a personalised view.
 	</p>
+
+	<#if IS_SSO_PROTECTED!true>
+		<p class="alert">
+			You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
+			to see a personalised view.
+		</p>
+	</#if>
 </#if>
 
 <#assign isSelf = true />

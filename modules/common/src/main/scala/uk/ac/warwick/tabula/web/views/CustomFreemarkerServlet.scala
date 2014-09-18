@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletResponse
 import freemarker.template.TemplateModel
 import freemarker.template.Template
 import freemarker.ext.servlet.FreemarkerServlet
-import uk.ac.warwick.sso.client.SSOClientFilter
+import uk.ac.warwick.sso.client.{SSOConfiguration, SSOClientFilter}
 import freemarker.template.SimpleHash
 import freemarker.template.Configuration
 import javax.servlet.ServletConfig
@@ -62,6 +62,8 @@ class CustomFreemarkerServlet extends FreemarkerServlet() with Logging with Task
 			case t: String => res.setContentType(t)
 			case _ =>
 		}
+
+		model.put("IS_SSO_PROTECTED", Option(SSOConfiguration.getConfig).nonEmpty)
 
 		true
 	}
