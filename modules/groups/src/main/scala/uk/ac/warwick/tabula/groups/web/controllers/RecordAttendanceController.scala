@@ -106,7 +106,8 @@ class RecordAttendanceController extends GroupsController with AutowiringSmallGr
 
 		Mav("groups/attendance/additional",
 			"student" -> student,
-			"possibleReplacements" -> possibleReplacements
+			"possibleReplacements" -> possibleReplacements,
+			"week" -> week
 		).noLayout()
 	}
 

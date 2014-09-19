@@ -95,7 +95,7 @@ trait RemoveAdditionalStudent {
 			.filter { member => members.find { _.universityId == member.universityId }.isDefined }
 			.foreach { member =>
 				transactional() {
-					smallGroupService.deleteAttendance(member.universityId, event, week)
+					smallGroupService.deleteAttendance(member.universityId, event, week, true)
 				}
 
 				studentsState.remove(member.universityId)
@@ -157,6 +157,7 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 
 	def applyInternal() = {
 		val attendances = studentsState.asScala.flatMap { case (studentId, state) =>
+			println((studentId, state))
 			if (state == null) {
 				smallGroupService.deleteAttendance(studentId, event, week)
 				None

@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.profiles.services.timetables
+package uk.ac.warwick.tabula.services.timetables
 
 import uk.ac.warwick.util.cache.{CacheEntryFactory, Caches}
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
@@ -6,7 +6,7 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
-import uk.ac.warwick.tabula.profiles.services.timetables.TimetableCacheKey._
+import uk.ac.warwick.tabula.services.timetables.TimetableCacheKey._
 
 /**
  * A wrapper around a TimetableFetchingService that stores the resulting TimetableEvents in an ehCache disk-backed

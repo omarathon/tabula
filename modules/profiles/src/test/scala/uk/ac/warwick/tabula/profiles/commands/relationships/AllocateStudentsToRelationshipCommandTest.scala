@@ -161,22 +161,24 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 			// we're going to look to see if we need any edit commands for staff1 or staff2
 			var agentsToEdit = Set(staff1.asInstanceOf[Member], staff2.asInstanceOf[Member])
 
-			// we've already have a relationship from staff 2 to student 3.
-			// now add a relationship from staff 2 to student 4:
+			// we already have a relationship from staff 2 to student 3.
+
+			// now add a relationship from staff 2 to student 4 - first by creating the revised student set
 			val newStudentSet1 = Set(student3, student4)
 
-			// and assigning the new set to agent 2:
-			val newAgentMappingsMutable1 = scala.collection.mutable.Map[Member, Set[StudentMember]]()
-			newAgentMappingsMutable1(staff2) = newStudentSet1
-			val newAgentMappings1 = newAgentMappingsMutable1.toMap
+			// and then assigning that set to staff2:
+			val newAgentMappingsMutable = scala.collection.mutable.Map[Member, Set[StudentMember]]()
+			newAgentMappingsMutable(staff2) = newStudentSet1
+			val newAgentMappings = newAgentMappingsMutable.toMap
 
 			// now with that set of mappings we should just see a command for the new relationship coming back:
-			val editCommands1 = cmd.getEditStudentCommands(mappings, newAgentMappings1, agentsToEdit)
-			editCommands1.size should be (1)
-			editCommands1.map(_.oldAgent).head should be (None)
-			editCommands1.map(_.agent) should be (Set(staff2))
-			editCommands1.map(_.studentCourseDetails) should be (Set(student4.mostSignificantCourseDetails.head))
-			editCommands1.map(_.relationshipType) should be (Set(relationshipType))
+			val editCommands = cmd.getEditStudentCommands(mappings, newAgentMappings, agentsToEdit)
+			editCommands.size should be (1)
+			val editCommand = editCommands.head
+			editCommand.oldAgents.isEmpty should be (true)
+			editCommand.agent should be (staff2)
+			editCommand.studentCourseDetails should be (student4.mostSignificantCourseDetails.head)
+			editCommand.relationshipType should be (relationshipType)
 
 			// putting students 5, 6 and 7 in a set
 			val newStudentSet2 = Set(student5, student6, student7)
@@ -198,7 +200,7 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 			val editCommands3 = cmd.getEditStudentCommands(mappings, newAgentMappings2, Set(staff4.asInstanceOf[Member]))
 
 			editCommands3.size should be (3)
-			editCommands3.map(_.oldAgent).head should be (None)
+			editCommands3.flatMap(_.oldAgents).isEmpty should be (true)
 			editCommands3.map(_.agent) should be (Set(staff4))
 			editCommands3.map(_.studentCourseDetails) should be (Set(student5.mostSignificantCourseDetails.head, student6.mostSignificantCourseDetails.head, student7.mostSignificantCourseDetails.head))
 			editCommands3.map(_.relationshipType) should be (Set(relationshipType))

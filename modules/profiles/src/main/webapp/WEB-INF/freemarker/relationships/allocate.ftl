@@ -243,7 +243,7 @@
 				</div>
 
 						<div class="submit-buttons fix-footer">
-							<button type="submit" class="btn btn-primary">Save</button>
+							<button type="submit" class="btn btn-primary">Continue</button>
 							<a href="<@routes.home />" class="btn">Cancel</a> <#-- TODO better url -->
 						</div>
 

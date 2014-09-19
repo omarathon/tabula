@@ -162,7 +162,11 @@
 				<div class="alert alert-info">
 					<p>Tabula provides your timetable as a calendar feed with a "private address". Private Addresses are designed for your use only. They don't require any further authentication to get information from your timetable, so they're useful for getting your timetable into another calendar or application, or your mobile phone.</p>
 					<p>If you accidentally share the address with others, you can change the address by clicking the button below. All of the existing clients using this private address will break, and you will have to give them the new private address.</p>
-					<form class="form-inline" method="POST" action="<@routes.timetable_ical_regenerate />"><button type="submit" class="btn btn-primary">Generate a new private address</button></form>
+					<form class="form-inline double-submit-protection" method="POST" action="<@routes.timetable_ical_regenerate />">
+						<div class="submit-buttons">
+							<button type="submit" class="btn btn-primary">Generate a new private address</button>
+						</div>
+					</form>
 				</div>
 			</#if>
 

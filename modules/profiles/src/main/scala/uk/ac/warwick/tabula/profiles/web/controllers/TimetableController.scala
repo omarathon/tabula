@@ -1,31 +1,30 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
-import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.profiles.commands.{PublicStaffPersonalTimetableCommand, PersonalTimetableCommandState, ViewStaffPersonalTimetableCommand, PublicStudentPersonalTimetableCommand, ViewStudentPersonalTimetableCommandState, ViewStudentPersonalTimetableCommand}
-import uk.ac.warwick.tabula.data.model.{StaffMember, Member, StudentMember}
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.views.IcalView
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestParam, RequestMapping}
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.web.views.JSONView
-import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
-import uk.ac.warwick.tabula.profiles.services.timetables._
-import uk.ac.warwick.tabula.services.{TermAwareWeekToDateConverterComponent, AutowiringProfileServiceComponent, AutowiringTermServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringMeetingRecordServiceComponent, AutowiringRelationshipServiceComponent, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
-import uk.ac.warwick.tabula.helpers.SystemClockComponent
-import uk.ac.warwick.tabula.commands.Appliable
-import net.fortuna.ical4j.model.{TimeZoneRegistryFactory, Calendar}
-import net.fortuna.ical4j.model.property.{XProperty, Method, CalScale, Version, ProdId}
+import net.fortuna.ical4j.model.Calendar
 import net.fortuna.ical4j.model.component.VEvent
-import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+import net.fortuna.ical4j.model.property.{CalScale, Method, ProdId, Version, XProperty}
+import org.joda.time.DateTime
+import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
+import uk.ac.warwick.tabula.helpers.SystemClockComponent
+import uk.ac.warwick.tabula.helpers.Tap._
+import uk.ac.warwick.tabula.profiles.commands.{PersonalTimetableCommandState, PublicStaffPersonalTimetableCommand, PublicStudentPersonalTimetableCommand, ViewStaffPersonalTimetableCommand, ViewStudentPersonalTimetableCommand}
+import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
+import uk.ac.warwick.tabula.services.timetables._
+import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, AutowiringProfileServiceComponent, AutowiringRelationshipServiceComponent, AutowiringSecurityServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, AutowiringUserLookupComponent}
 import uk.ac.warwick.tabula.timetables.EventOccurrence
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
+import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, ItemNotFoundException}
 
 abstract class AbstractTimetableController extends ProfilesController with AutowiringProfileServiceComponent {
 
 	type TimetableCommand = Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState
 
 	// re-use the event source, so it can cache lookups between requests
-	val studentTimetableEventSource = (new CombinedStudentTimetableEventSourceComponent
+	val studentTimetableEventSource: StudentTimetableEventSource = (new CombinedStudentTimetableEventSourceComponent
 		with SmallGroupEventTimetableEventSourceComponentImpl
 		with CombinedHttpTimetableFetchingServiceComponent
 		with AutowiringSmallGroupServiceComponent
@@ -35,7 +34,7 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 		with SystemClockComponent
 		).studentTimetableEventSource
 
-	val staffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
+	val staffTimetableEventSource: StaffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
 		with SmallGroupEventTimetableEventSourceComponentImpl
 		with CombinedHttpTimetableFetchingServiceComponent
 		with AutowiringSmallGroupServiceComponent
@@ -45,7 +44,7 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 		with SystemClockComponent
 		).staffTimetableEventSource
 
-	val scheduledMeetingEventSource = (new MeetingRecordServiceScheduledMeetingEventSourceComponent
+	val scheduledMeetingEventSource: ScheduledMeetingEventSource = (new MeetingRecordServiceScheduledMeetingEventSourceComponent
 		with AutowiringRelationshipServiceComponent
 		with AutowiringMeetingRecordServiceComponent
 		with AutowiringSecurityServiceComponent
@@ -57,11 +56,24 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 		case _ => throw new RuntimeException("Don't know how to render timetables for non-student or non-staff users")
 	}
 
-	protected def commandForTimetableHash(timetableHash: String): TimetableCommand =
+	protected def commandForTimetableHash(timetableHash: String): TimetableCommand = {
+		// Use a mocked up CurrentUser, as the actual current user is probably not logged in
+		def currentUser(m: Member) =
+			new CurrentUser(
+				realUser = m.asSsoUser.tap { _.setIsLoggedIn(true) },
+				apparentUser = m.asSsoUser.tap { _.setIsLoggedIn(true) },
+				profile = Some(m),
+				sysadmin = false,
+				masquerader = false,
+				god = false
+			)
+
 		profileService.getMemberByTimetableHash(timetableHash).map {
-			case student: StudentMember => PublicStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
-			case staff: StaffMember => PublicStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, user)
+			case student: StudentMember => PublicStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, currentUser(student))
+			case staff: StaffMember => PublicStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, currentUser(staff))
 		}.getOrElse(throw new ItemNotFoundException)
+	}
+
 }
 
 @Controller
@@ -108,13 +120,12 @@ class TimetableController extends AbstractTimetableController with AutowiringUse
 
 abstract class AbstractTimetableICalController
 	extends AbstractTimetableController
-		with TermBasedEventOccurrenceComponent
-		with AutowiringTermServiceComponent
-		with TermAwareWeekToDateConverterComponent {
+		with AutowiringTermBasedEventOccurrenceServiceComponent
+		with AutowiringTermServiceComponent {
 
 	@RequestMapping
 	def getIcalFeed(@ModelAttribute("command") command: TimetableCommand): Mav = {
-		val year = AcademicYear.findAcademicYearContainingDate(DateTime.now, termService)
+		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		// Start from either 1 week ago, or the start of the current academic year, whichever is earlier
 		val start = {
@@ -138,20 +149,15 @@ abstract class AbstractTimetableICalController
 		val timetableEvents = command.apply()
 
 		val cal: Calendar = new Calendar
-		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))
 		cal.getProperties.add(Version.VERSION_2_0)
+		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))
 		cal.getProperties.add(CalScale.GREGORIAN)
 		cal.getProperties.add(Method.PUBLISH)
 		cal.getProperties.add(new XProperty("X-PUBLISHED-TTL", "PT12H"))
 		cal.getProperties.add(new XProperty("X-WR-CALNAME", s"Tabula timetable - ${command.member.universityId}"))
-		cal.getProperties.add(new XProperty("X-WR-TIMEZONE", "Europe/London"))
-		cal.getProperties.add(new XProperty("X-LIC-LOCATION", "Europe/London"))
-		val vTimezone = TimeZoneRegistryFactory.getInstance.createRegistry.getTimeZone("Europe/London").getVTimeZone
-		cal.getComponents.add(vTimezone)
 
 		for (event <- timetableEvents) {
 			val vEvent: VEvent = eventOccurrenceService.toVEvent(event)
-			vEvent.getProperties.add(vTimezone.getTimeZoneId)
 			cal.getComponents.add(vEvent)
 		}
 

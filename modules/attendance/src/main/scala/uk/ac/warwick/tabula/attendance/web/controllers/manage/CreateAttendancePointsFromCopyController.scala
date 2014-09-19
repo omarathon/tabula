@@ -30,7 +30,10 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 	@ModelAttribute("allDepartments")
 	def allDepartments(@PathVariable department: Department) = {
 		(Seq(mandatory(department)) ++ moduleAndDepartmentService.departmentsWithPermission(user, Permissions.MonitoringPoints.Manage))
-			.sortBy(_.name).distinct
+			.flatMap { dept =>
+				Seq(dept) ++ dept.children.asScala
+			}
+			.sortBy(_.code).distinct
 	}
 
 	@ModelAttribute("searchCommand")

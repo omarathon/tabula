@@ -63,6 +63,6 @@
 </#if>
 <#else>
 <p>Sorry, you don't have permission to see that.
-Try <a class="sso-link" href="<@sso.loginlink />">signing in</a>.
+<#if IS_SSO_PROTECTED!true>Try <a class="sso-link" href="<@sso.loginlink />">signing in</a>.</#if>
 </p>
 </#if>

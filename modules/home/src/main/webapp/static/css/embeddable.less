@@ -723,7 +723,7 @@ fieldset.internal {
 		float: right;
 	}
 
-	&.late { color: @red; }
+	&.late { color: @warningText; }
 	&.extended { color: @blue; }
 	&.not-open { color: #606060; }
 }
@@ -2150,4 +2150,60 @@ ul.nav-pills {
 
 .eventTitle {
 	font-weight:bold;
+}
+
+// CSS animations, from Animate.css http://daneden.me/animate
+.animated {
+	-webkit-animation-duration: 1s;
+	   -moz-animation-duration: 1s;
+	    -ms-animation-duration: 1s;
+	     -o-animation-duration: 1s;
+	        animation-duration: 1s;
+	-webkit-animation-fill-mode: both;
+	   -moz-animation-fill-mode: both;
+	    -ms-animation-fill-mode: both;
+	     -o-animation-fill-mode: both;
+	        animation-fill-mode: both;
+
+	&.infinite {
+		-webkit-animation-iteration-count: infinite;
+		   -moz-animation-iteration-count: infinite;
+		    -ms-animation-iteration-count: infinite;
+		     -o-animation-iteration-count: infinite;
+		        animation-iteration-count: infinite;
+	}
+}
+
+@-moz-keyframes flash {
+	0%, 33%, 67%, 100% { opacity: 1; }
+	17%, 50%, 83% { opacity: 0.1; }
+}
+@-webkit-keyframes flash {
+	0%, 33%, 67%, 100% { opacity: 1; }
+	17%, 50%, 83% { opacity: 0.1; }
+}
+@-o-keyframes flash {
+	0%, 33%, 67%, 100% { opacity: 1; }
+	17%, 50%, 83% { opacity: 0.1; }
+}
+@-ms-keyframes flash {
+	0%, 33%, 67%, 100% { opacity: 1; }
+	17%, 50%, 83% { opacity: 0.1; }
+}
+@keyframes flash {
+	0%, 33%, 67%, 100% { opacity: 1; }
+	17%, 50%, 83% { opacity: 0.1; }
+}
+
+.flash {
+	-webkit-animation-duration: 2s;
+	   -moz-animation-duration: 2s;
+	    -ms-animation-duration: 2s;
+	     -o-animation-duration: 2s;
+	        animation-duration: 2s;
+	-webkit-animation-name: flash;
+	   -moz-animation-name: flash;
+	    -ms-animation-name: flash;
+	     -o-animation-name: flash;
+			animation-name: flash;
 }

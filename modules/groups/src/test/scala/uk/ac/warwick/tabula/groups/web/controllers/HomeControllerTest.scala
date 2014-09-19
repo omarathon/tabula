@@ -133,7 +133,7 @@ class HomeControllerTest extends TestBase with Mockito{
 		viewModules.head.canManageGroups should be(false)
 		val viewSets = viewModules.head.setItems
 		viewSets.size should be(1)
-		viewSets.head.groups should be (Seq(group1, group2))
+		viewSets.head.groups should be (Seq(group1, group2).sorted)
 	}}
 
 	@Test
@@ -146,7 +146,7 @@ class HomeControllerTest extends TestBase with Mockito{
 		viewModules.size should be(1)
 		val viewSets = viewModules.head.setItems
 		viewSets.size should be(2)
-		viewSets.head.groups should be (Seq(group1, group2))
+		viewSets.head.groups should be (Seq(group1, group2).sorted)
 		viewSets.tail.head.groups should be (Seq(group3))
 	}}
 

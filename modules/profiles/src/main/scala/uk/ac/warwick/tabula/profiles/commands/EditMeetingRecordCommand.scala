@@ -44,6 +44,8 @@ class EditMeetingRecordCommand(meetingRecord: MeetingRecord)
 		Notification.init(new EditedMeetingRecordApprovalNotification, creator.asSsoUser, Seq(meeting), relationship)
 	)
 
+	override def transformResult(meetingRecord: MeetingRecord) = Seq(meetingRecord)
+
 	override def scheduledNotifications(result: MeetingRecord) = Seq(
 		new ScheduledNotification[MeetingRecord]("editedMeetingRecordApproval", result, DateTime.now.plusWeeks(1))
 	)

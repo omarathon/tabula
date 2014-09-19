@@ -10,7 +10,7 @@ first page of the form to setup a bunch of assignments from SITS.
 <#assign commandName="addAssignmentsCommand"/>
 <#assign command=addAssignmentsCommand />
 
-<h1>Setup assignments</h1>
+<@fmt.deptheader "Setup assignments" "for" department routes "setupSitsAssignments" "" />
 
 <#assign step=action!'select'/>
 
@@ -75,11 +75,20 @@ first page of the form to setup a bunch of assignments from SITS.
 		</@f.select>
 	<#else>
   	<@f.hidden path="academicYear"/>
+	<@f.hidden path="includeSubDepartments"/>
   	<span class="uneditable-value">
-  	<@spring.bind path="academicYear">${status.actualValue.label}</@spring.bind>
+  		<@spring.bind path="academicYear">${status.actualValue.label}</@spring.bind>
   	</span>
   </#if>
 </@form.labelled_row>
+
+<#if department.children?size gt 0>
+	<@form.labelled_row "includeSubDepartments" "">
+		<@f.label checkbox=true for="includeSubDepartmentsSelect">
+			<@f.checkbox path="includeSubDepartments" id="includeSubDepartmentsSelect" /> Include modules in sub-departments
+		</@f.label>
+	</@form.labelled_row>
+</#if>
 
 <#macro hidden_properties>
 	<@f.hidden path="upstreamAssignment" />
@@ -275,28 +284,30 @@ first page of the form to setup a bunch of assignments from SITS.
 
 	<div class="modal hide fade" id="set-dates-modal" tabindex="-1" role="dialog" aria-labelledby="set-options-label" aria-hidden="true">
 		<div class="modal-header">
-
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+			<h3>Set dates</h3>
 		</div>
 		<div class="modal-body">
 			<#-- this form is never submitted, it is just here for styling -->
-			<form class="form-horizontal">
+			<form class="form-horizontal dateTimePair">
 
 			<@spring.nestedPath path=commandName>
 			<@form.row>
 				<@form.label>Open date</@form.label>
 				<@form.field>
 					<@spring.bind path="defaultOpenDate">
-						<input type="text" id="modal-open-date" name="openDate" class="date-time-picker" value="${status.value}">
+						<input type="text" id="modal-open-date" name="openDate" class="date-time-picker startDateTime" value="${status.value}">
+						<input class="endoffset" type="hidden" data-end-offset="1209600000" />
 					</@spring.bind>
 				</@form.field>
 			</@form.row>
-			
+
 			<@form.labelled_row "defaultOpenEnded" "Open-ended">
 				<#assign popoverText>
 					<p>
 					   Check this box to mark the assignments as open-ended.
 				  </p>
-				  
+
 				  <ul>
 					   <li>Any close dates previously entered will have no effect.</li>
 					   <li>Allowing extensions and submission after the close date will have no effect.</li>
@@ -305,10 +316,10 @@ first page of the form to setup a bunch of assignments from SITS.
 					   <li>You will be able to publish feedback individually at any time.</li>
 					</ul>
 				</#assign>
-			
+
 				<label class="checkbox">
 					<@f.checkbox path="defaultOpenEnded" id="modal-open-ended" />
-					<a href="#" class="use-popover" 
+					<a href="#" class="use-popover"
 					   data-title="Open-ended assignments"
 					   data-html="true"
 					   data-trigger="hover"
@@ -322,7 +333,7 @@ first page of the form to setup a bunch of assignments from SITS.
 				<@form.label>Close date</@form.label>
 				<@form.field>
 					<@spring.bind path="defaultCloseDate">
-						<input type="text" id="modal-close-date" name="closeDate" class="date-time-picker" value="${status.value}">
+						<input type="text" id="modal-close-date" name="closeDate" class="date-time-picker endDateTime" value="${status.value}">
 					</@spring.bind>
 				</@form.field>
 			</@form.row>
@@ -335,19 +346,19 @@ first page of the form to setup a bunch of assignments from SITS.
       <button class="btn btn-primary">Set dates</button>
 		</div>
 	</div>
-	
+
 	<script type="text/javascript">
 		// Give a heads up if you're about to navigate away from your progress
-		jQuery(window).on('beforeunload.backattack', function() { 
-			return "If you leave this page without clicking either the Submit button or the Back button above it, you will lose your progress."; 
+		jQuery(window).on('beforeunload.backattack', function() {
+			return "If you leave this page without clicking either the Submit button or the Back button above it, you will lose your progress.";
 		});
-		
-		// Disable the heads up when we submit the form through the proper means 
+
+		// Disable the heads up when we submit the form through the proper means
 		jQuery('form').on('submit', function() {
 			jQuery(window).off('beforeunload.backattack');
 		});
 	</script>
-	
+
 </#if>
 
 <script type="text/javascript">

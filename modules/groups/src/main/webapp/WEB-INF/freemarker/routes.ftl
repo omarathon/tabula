@@ -90,4 +90,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro students_json set><@_u page="/module/${set.module.code}/groups/${set.id}/students/search.json" /></#macro>
 
+<#macro import_groups department><@_u page="/admin/department/${department.code}/import-groups" /></#macro>
+<#macro import_groups_for_year department academicYear><@import_groups department />?academicYear=${academicYear.startYear?c}</#macro>
+
 <#macro permissions scope><@_u page="/permissions/${scope.urlCategory}/${scope.urlSlug}" context="/admin" /></#macro>

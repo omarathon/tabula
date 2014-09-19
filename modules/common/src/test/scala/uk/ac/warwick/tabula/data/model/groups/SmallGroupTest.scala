@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import junit.framework.Test
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
@@ -10,6 +10,8 @@ import org.mockito.Matchers._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.SmallGroupService
+
+import scala.util.Random
 
 class SmallGroupTest extends TestBase with Mockito {
 
@@ -165,5 +167,21 @@ class SmallGroupTest extends TestBase with Mockito {
 
 		group.maxGroupSize = 0
 		group should not be('full)
+	}
+
+	@Test
+	def sortIsAlphanumeric(): Unit = {
+		val group1 = Fixtures.smallGroup("Group 1")
+		val group2 = Fixtures.smallGroup("group 2")
+		val group3 = Fixtures.smallGroup("group 20")
+		val group4 = Fixtures.smallGroup("Group 10")
+		val group5 = Fixtures.smallGroup("Group 9")
+		val group6 = Fixtures.smallGroup("Late group 1")
+
+		for (i <- 1 to 10) {
+			val shuffled = Random.shuffle(Seq(group1, group2, group3, group4, group5, group6))
+
+			shuffled.sorted should be (Seq(group1, group2, group5, group4, group3, group6))
+		}
 	}
 }

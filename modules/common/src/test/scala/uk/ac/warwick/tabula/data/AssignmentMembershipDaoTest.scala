@@ -113,6 +113,7 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 		val userLookup = new MockUserLookup
 		userLookup.registerUserObjects(user)
 
+		assignmentMembershipService.userLookup = userLookup
 		assignmentMembershipService.assignmentManualMembershipHelper.userLookup = userLookup
 	}
 

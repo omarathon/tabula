@@ -7,10 +7,12 @@
 </#if>	
 
 <#if !user.loggedIn>
-	<p>
-		You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
-		to see a personalised view.
-	</p>
+	<#if IS_SSO_PROTECTED!true>
+		<p>
+			You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
+			to see a personalised view.
+		</p>
+	</#if>
 <#else>
 	<ul id="home-list">
 		<#-- TODO can we guard this, or would it be too expensive to be worth the bother? -->

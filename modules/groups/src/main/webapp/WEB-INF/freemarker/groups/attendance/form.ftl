@@ -84,7 +84,7 @@
 					</@form.labelled_row>
 				</@modal.body>
 				<@modal.footer>
-					<button type="submit" class="btn btn-primary"><i class="icon-download"></i> Save as PDF</button>
+					<button type="submit" class="btn btn-primary"><i class="icon-download"></i> Save as PDF for printing</button>
 					<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
 				</@modal.footer>
 			</form>

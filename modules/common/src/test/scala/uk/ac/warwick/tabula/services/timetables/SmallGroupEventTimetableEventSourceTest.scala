@@ -1,14 +1,13 @@
-package uk.ac.warwick.tabula.profiles.services.timetables
+package uk.ac.warwick.tabula.services.timetables
 
-import uk.ac.warwick.tabula.{Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{SmallGroupService, UserLookupService, SmallGroupServiceComponent, UserLookupComponent}
-import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.JavaImports.JArrayList
 import org.joda.time.LocalTime
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
+import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent, UserLookupComponent, UserLookupService}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.userlookup.User
 
 class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 
@@ -45,6 +44,7 @@ class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 	def translatesFromSmallGroupEventToTimetableEvent(){
 		mockSmallGroupService.findSmallGroupsByStudent(any[User]) returns (Seq(group))
 		mockSmallGroupService.findSmallGroupEventsByTutor(any[User]) returns (Nil)
+		mockSmallGroupService.findManuallyAddedAttendance(any[String]) returns (Nil)
 	  val events = eventSource.eventsFor(student)
 		events.size should be (1)
 		val tte:TimetableEvent = events.head
@@ -52,7 +52,7 @@ class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 		tte.description should be("groupset name: group name")
 		tte.endTime should be(event.endTime)
 		tte.eventType should be(TimetableEventType.Practical)
-		tte.location should be(Some("location"))
+		tte.location should be(Some(NamedLocation("location")))
 		tte.context should be(Some("MODCODE"))
 		tte.name should be("groupset name")
 		tte.startTime should be (event.startTime)

@@ -1,6 +1,6 @@
 <#escape x as x?html>
 <#import "*/modal_macros.ftl" as modal />
-<form style="margin: 0;">
+<form action="" method="post" style="margin: 0;">
 	<@modal.header>
 		<h6>Add ${student.fullName} to ${event.group.groupSet.name}, ${event.group.name}</h6>
 	</@modal.header>
@@ -13,6 +13,8 @@
 		<p>If the student is attending this occurrence instead of another, select it from the dropdown below
 		to automatically authorise absence from the other group:</p>
 
+		<input type="hidden" name="action" value="refresh" />
+		<input type="hidden" name="additionalStudent" value="${student.universityId}" />
 		<input type="hidden" name="replacedEvent">
 		<input type="hidden" name="replacedWeek">
 

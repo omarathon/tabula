@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.data.model.notifications.meetingrecord
 
 import javax.persistence.{DiscriminatorValue, Entity}
+
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotification}
 
 @Entity
 @DiscriminatorValue(value="ScheduledMeetingRecordInvitee")
-class ScheduledMeetingRecordInviteeNotification
-	extends ScheduledMeetingRecordNotification with SingleRecipientNotification {
+class ScheduledMeetingRecordInviteeNotification extends ScheduledMeetingRecordNotification
+	with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification {
 
 	def this(theVerb: String) {
 		this()
@@ -40,4 +41,6 @@ class ScheduledMeetingRecordInviteeNotification
 	}
 
 	def actionRequired = false
+
 }
+

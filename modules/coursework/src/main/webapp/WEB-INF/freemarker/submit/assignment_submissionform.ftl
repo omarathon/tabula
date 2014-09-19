@@ -21,7 +21,7 @@
 	</#if>
 
 	<#if assignment.closed && !isExtended>
-		<div class="alert alert-error">
+		<div class="alert alert-warning">
 			<h3>Submission date has passed</h3>
 			<p>
 				You can still submit to this assignment but your mark may be affected. 
@@ -30,8 +30,27 @@
 	</#if>
 
 	<@f.form cssClass="submission-form double-submit-protection form-horizontal" enctype="multipart/form-data" method="post" action="${url('/coursework/module/${module.code}/${assignment.id}#submittop')}" modelAttribute="submitAssignmentCommand">
-	<@f.errors cssClass="error form-errors">
-	</@f.errors>
+
+	<#if errors.hasErrors()>
+		<div class="alert alert-error animated flash">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+
+			<h4>Your submission was not accepted</h4>
+
+			<p>Some of the information in your submission was not accepted. Please check the errors in red below and re-submit the form.</p>
+		</div>
+
+		<script type="text/javascript">
+			jQuery(function($) {
+				$(".alert-error").each(function() {
+					$("html, body").animate({
+						scrollTop: $(this).offset().top - 35
+					}, 300);
+				});
+			});
+		</script>
+	</#if>
+	<@f.errors cssClass="error form-errors"></@f.errors>
 	
 	<@form.row>
 	 <label class="control-label">Your University ID</label>
@@ -76,7 +95,7 @@
 		</p>
 		<p>
 			<@f.errors path="plagiarismDeclaration" cssClass="error" />
-			<label><@f.checkbox path="plagiarismDeclaration" /> I confirm that this assignment is all my own work</label>
+			<label><@f.checkbox path="plagiarismDeclaration" required="true" /> I confirm that this assignment is all my own work</label>
 		</p>
 	</@form.field>
 	</@form.row>
@@ -159,7 +178,7 @@
 		</p>
 		
 	<#elseif assignment.closed && !isExtended>
-		<div class="alert alert-error">
+		<div class="alert alert-warning">
 			<h3>Submission date has passed</h3>
 			
 			This assignment doesn't allow late submissions.

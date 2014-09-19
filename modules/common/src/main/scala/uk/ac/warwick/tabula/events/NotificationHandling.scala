@@ -13,7 +13,7 @@ trait NotificationHandling extends Logging {
 	var notificationService = Wire.auto[NotificationService]
 	var scheduledNotificationService = Wire.auto[ScheduledNotificationService]
 
-	def notify[A, B](cmd: Command[A])(f: => A): A = {
+	def notify[A, B, C](cmd: Command[A])(f: => A): A = {
 
 		val result = f
 
@@ -26,15 +26,19 @@ trait NotificationHandling extends Logging {
 		}
 
 		cmd match {
-			case sn: SchedulesNotifications[A] =>
+			case sn: SchedulesNotifications[A, C] =>
 
-				scheduledNotificationService.removeInvalidNotifications(result)
+				val notificationTargets = sn.transformResult(result)
 
-				for (scheduledNotification <- sn.scheduledNotifications(result)) {
-					if (scheduledNotification.scheduledDate.isBeforeNow) {
-						logger.warn("ScheduledNotification generated in the past, ignoring: " + scheduledNotification)
-					} else {
-						scheduledNotificationService.push(scheduledNotification)
+				for (target <- notificationTargets) {
+					scheduledNotificationService.removeInvalidNotifications(target)
+
+					for (scheduledNotification <- sn.scheduledNotifications(target)) {
+						if (scheduledNotification.scheduledDate.isBeforeNow) {
+							logger.warn("ScheduledNotification generated in the past, ignoring: " + scheduledNotification)
+						} else {
+							scheduledNotificationService.push(scheduledNotification)
+						}
 					}
 				}
 			case _ =>

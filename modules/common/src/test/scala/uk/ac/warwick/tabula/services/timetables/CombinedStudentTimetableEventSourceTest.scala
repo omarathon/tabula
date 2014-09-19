@@ -1,13 +1,11 @@
-package uk.ac.warwick.tabula.profiles.services.timetables
+package uk.ac.warwick.tabula.services.timetables
 
-import uk.ac.warwick.tabula.{AcademicYear, TestBase, Mockito}
+import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-import org.joda.time.LocalTime
-import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.JavaImports._
 
 class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 
@@ -15,10 +13,10 @@ class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 	student.universityId = "university ID"
 	val user = new User()
 
-	val ttEvent= TimetableEvent("From Timetable","", "",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,None,None,Nil,AcademicYear(2013))
+	val ttEvent= TimetableEvent("", "From Timetable","", "",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,None,None,Nil,Nil,AcademicYear(2013))
 	val timetableEvents = Seq(ttEvent)
 
-	val sgEvent= TimetableEvent("From Group","", "",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,None,None,Nil,AcademicYear(2013))
+	val sgEvent= TimetableEvent("", "From Group","", "",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,None,None,Nil,Nil,AcademicYear(2013))
 	val groupEvents = Seq(sgEvent)
 
 	val source = new CombinedStudentTimetableEventSourceComponent

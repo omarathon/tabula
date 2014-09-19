@@ -23,6 +23,11 @@ object HasSettings {
 		def value = h.getStringMapSetting(key, Map())
 		def value_=(v: Map[String,String]) { h.settings += key -> v }
 	}
+
+	protected case class StringSeqSetting(h: HasSettings)(key: String) {
+		def value = h.getStringSeqSetting(key, Seq())
+		def value_=(v:Seq[String]) { h.settings += key -> v }
+	}
 }
 
 trait HasSettings {
@@ -61,6 +66,8 @@ trait HasSettings {
 
 	def StringSetting = HasSettings.StringSetting(this) _
 	def StringMapSetting = HasSettings.StringMapSetting(this) _
+	def StringSeqSetting = HasSettings.StringSeqSetting(this) _
+
 	def IntSetting = HasSettings.IntSetting(this) _
 
 	protected def getStringSetting(key: String, default: => String): String = getStringSetting(key) getOrElse(default)
