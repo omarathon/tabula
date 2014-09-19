@@ -402,21 +402,23 @@
 		}
 		// relies on the variable "weeks" having been defined elsewhere, by using the WeekRangesDumperTag
 		function updateCalendarTitle(view,element){
-            var start = view.start.getTime();
-            var end = view.end.getTime();
-            var week = $.grep(weeks, function(week){
-                return (week.start >=start) && (week.end <= end);
-            });
-            if (week.length >0){
-                var decodedTitle = $("<div/>").html(week[0].desc).text();
-                view.title=decodedTitle;
-                view.calendar.updateTitle();
-            } // We should have an entry for every week; in the event that one's missing
-              // we'll just leave it blank. The day columns still have the date on them.
-            return true;
+			if (view.name == 'agendaWeek') {
+				var start = view.start.getTime();
+				var end = view.end.getTime();
+				var week = $.grep(weeks, function(week) {
+					return (week.start >= start) && (week.end <= end);
+				});
+				if (week.length > 0) {
+					var decodedTitle = $("<div/>").html(week[0].desc).text();
+					view.title = decodedTitle;
+					view.calendar.updateTitle();
+				} // We should have an entry for every week; in the event that one's missing
+				// we'll just leave it blank. The day columns still have the date on them.
+				return true;
+			}
 		}
 
-		function createCalendar(container,defaultViewName, studentId){
+		function createCalendar(container, defaultViewName, studentId, showViewSwitcher){
 			var showWeekends = (defaultViewName == "month");
 			var cal = $(container).fullCalendar({
 				events:getEvents(studentId, $(container)),
@@ -427,8 +429,9 @@
 				firstDay: 1, //monday
 				timeFormat: {
 					agendaWeek: '', // don't display time on event
+					agendaDay: '', // don't display time on event
 					// for all other views
-					'': 'h:mm{ - h:mm}'   //  5:00 - 6:30
+					'': 'HH:mm'   //  5:00 - 6:30
 				},
 				titleFormat: {
 					month: 'MMMM yyyy',
@@ -440,11 +443,12 @@
 					week: 'ddd d/M',
 					day: 'dddd d/M'
 				},
+				defaultEventMinutes: 30,
 				weekends:showWeekends,
 				viewRender:onViewUpdate,
 				header: {
 					left:   'title',
-					center: '',
+					center: (showViewSwitcher ? 'month,agendaWeek,agendaDay' : ''),
 					right:  'today prev,next'
 				},
 				eventAfterRender: function(event, element, view){
@@ -490,7 +494,7 @@
 		}
 
         $(".fullCalendar").each(function(index){
-    			createCalendar($(this),$(this).data('viewname'),$(this).data('studentid'));
+    			createCalendar($(this),$(this).data('viewname'),$(this).data('studentid'),$(this).data('showviewswitcher'));
     		});
     	});
 
