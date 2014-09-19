@@ -304,6 +304,10 @@
 			<excluded-url-pattern>/favicon.ico</excluded-url-pattern>
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 			<excluded-url-pattern>/test/*</excluded-url-pattern>
+
+			<!-- FIXME These should really be in profiles' filters-context.xml, but that'd require XML trickery -->
+			<excluded-url-pattern>/timetable/ical</excluded-url-pattern>
+			<excluded-url-pattern>/timetable/ical/*</excluded-url-pattern>
 		</mapping>
 		<mapping name="forceSysadmin">
 			<filter ref="forceLoginFilter" />

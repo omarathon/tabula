@@ -16,17 +16,19 @@ import org.joda.time.{DateTime, DateTimeZone}
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
+import uk.ac.warwick.tabula.data.model.groups.{NamedLocation, WeekRange, DayOfWeek}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
 import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringUserLookupComponent, TermServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.util.cache.{CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
+
+import CelcatHttpTimetableFetchingService._
 
 sealed abstract class FilenameGenerationStrategy
 object FilenameGenerationStrategy {
@@ -48,7 +50,8 @@ trait CelcatConfigurationComponent {
 case class CelcatDepartmentConfiguration(
 	baseUri: String,
 	excludedEventTypes: Seq[TimetableEventType] = Nil,
-	staffFilenameLookupStrategy: FilenameGenerationStrategy = FilenameGenerationStrategy.Default
+	staffFilenameLookupStrategy: FilenameGenerationStrategy = FilenameGenerationStrategy.Default,
+	staffListInBSV: Boolean = false
 )
 
 trait AutowiringCelcatConfigurationComponent extends CelcatConfigurationComponent {
@@ -58,9 +61,13 @@ trait AutowiringCelcatConfigurationComponent extends CelcatConfigurationComponen
 		val departmentConfiguration =	Map(
 			"ch" -> CelcatDepartmentConfiguration(
 				baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
-				staffFilenameLookupStrategy = FilenameGenerationStrategy.BSV
+				staffFilenameLookupStrategy = FilenameGenerationStrategy.BSV,
+				staffListInBSV = true
 			),
-			"es" -> CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/eng-timetables")
+			"es" -> CelcatDepartmentConfiguration(
+				baseUri = "https://www2.warwick.ac.uk/appdata/eng-timetables",
+				staffListInBSV = true
+			)
 		)
 		lazy val authScope = new AuthScope("www2.warwick.ac.uk", 443)
 		lazy val credentials = Credentials(Wire.property("${celcat.fetcher.username}"), Wire.property("${celcat.fetcher.password}"))
@@ -86,6 +93,98 @@ object CelcatHttpTimetableFetchingService {
 			delegate
 		}
 	}
+
+	def parseVEvent(event: VEvent, allStaff: Map[UniversityId, CelcatStaffInfo], config: CelcatDepartmentConfiguration, termService: TermService): Option[TimetableEvent] = {
+		val summary = Option(event.getSummary).fold("") { _.getValue }
+		val categories =
+			Option(event.getProperty(Property.CATEGORIES))
+				.collect { case c: Categories => c }
+				.map { c => c.getCategories.iterator().asScala.collect { case s: String => s }.filter { _.hasText }.toList }
+				.getOrElse(Nil)
+
+		val eventType = categories match {
+			case singleCategory :: Nil => TimetableEventType(singleCategory)
+
+			case categories if categories.exists { c => TimetableEventType(c).core } =>
+				categories.find { c => TimetableEventType(c).core }.map { c => TimetableEventType(c) }.get
+
+			case _ =>	summary.split(" - ", 2) match {
+				case Array(t, staffInfo) => TimetableEventType(t)
+				case Array(s) => TimetableEventType(s)
+			}
+		}
+
+		if (config.excludedEventTypes.contains(eventType) || eventType.code.toLowerCase.contains("on tabula")) None
+		else {
+			// Convert date/time to academic year, local times and week number
+			val start = toDateTime(event.getStartDate)
+			val end = toDateTime(event.getEndDate) match {
+				case null => start
+				case date => date
+			}
+
+			val day = DayOfWeek(start.getDayOfWeek)
+
+			val year = AcademicYear.findAcademicYearContainingDate(start, termService)
+
+			// Convert the date to an academic week number
+			val startWeek = termService.getAcademicWeekForAcademicYear(start, year)
+
+			// We support exactly one RRule of frequence weekly
+			val endWeek = event.getProperties(Property.RRULE).asScala.headOption.collect {
+				case rule: RRule if rule.getRecur.getFrequency == "WEEKLY" => rule
+			}.map { rule =>
+				startWeek + rule.getRecur.getCount - 1
+			}.getOrElse(startWeek)
+
+			val weekRange = WeekRange(startWeek, endWeek)
+
+			val moduleCode = summary.maybeText.collect { case r"([A-Za-z]{2}[0-9][0-9A-Za-z]{2})${m}.*" => m.toUpperCase() }
+
+			val staffIds: Seq[UniversityId] =
+				if (allStaff.nonEmpty)
+					summary.maybeText
+						.collect { case r"^.* - ((?:[^/0-9]+(?: (?:[0-9\\-]+,?)+)?/?)+)${namesOrInitials}" =>
+						namesOrInitials.split('/').toSeq
+							.collect { case r"([^/0-9]+)${nameOrInitial}(?: (?:[0-9\\-]+,?)+)?" => nameOrInitial }
+					}
+					.map { namesOrInitials =>
+						namesOrInitials.flatMap { nameOrInitial => allStaff.values.find { info =>
+							info.fullName == nameOrInitial || info.initials == nameOrInitial
+						}.map { _.universityId }}
+					}.getOrElse(Nil)
+				else Nil
+
+			Some(TimetableEvent(
+				uid = event.getUid.getValue,
+				name = summary,
+				"",
+				description = Option(event.getDescription).map { _.getValue }.filter { _.hasText }.getOrElse(summary),
+				eventType = eventType,
+				weekRanges = Seq(weekRange),
+				day = day,
+				startTime = start.toLocalTime,
+				endTime = end.toLocalTime,
+				location = Option(event.getLocation).flatMap { _.getValue.maybeText }.map(NamedLocation),
+				comments = None,
+				context = moduleCode,
+				staffUniversityIds = staffIds,
+				studentUniversityIds = Nil,
+				year = year
+			))
+		}
+	}
+
+	// Doesn't support all-day events
+	def toDateTime(property: DateProperty) =
+		if (property == null) null
+		else new DateTime(property.getDate, getTimeZone(property)).withZoneRetainFields(DateTimeZone.forID("Europe/London"))
+
+	def getTimeZone(property: DateProperty) =
+		if (property.getParameter(Parameter.VALUE) != null && (property.getParameter(Parameter.VALUE) == Value.DATE)) DateTimeZone.UTC
+		else if (property.getTimeZone != null) DateTimeZone.forTimeZone(property.getTimeZone)
+		else DateTimeZone.forID("Europe/London")
+
 }
 
 class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguration) extends StaffTimetableFetchingService with StudentTimetableFetchingService with Logging with DisposableBean {
@@ -117,18 +216,31 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		}
 	}
 
-	def getTimetableForStaff(universityId: UniversityId): Seq[TimetableEvent] = {
+	def findConfigForStaff(universityId: UniversityId): Option[CelcatDepartmentConfiguration] = {
 		userLookup.getUserByWarwickUniId(universityId) match {
-			case FoundUser(u) if u.getDepartmentCode.hasText => configs.get(u.getDepartmentCode.toLowerCase).map { config =>
-				val filename = config.staffFilenameLookupStrategy match {
-					case FilenameGenerationStrategy.Default => s"${u.getWarwickId}.ics"
-					case FilenameGenerationStrategy.BSV => lookupCelcatIDFromBSV(u.getWarwickId, config).map { id => s"$id.ics" }.getOrElse(s"${u.getWarwickId}.ics")
-				}
+			// User in a department with a config
+			case FoundUser(u) if u.getDepartmentCode.hasText && configs.contains(u.getDepartmentCode.toLowerCase) =>
+				configs.get(u.getDepartmentCode.toLowerCase)
 
-				doRequest(filename, config)
-			}.getOrElse(Nil)
-			case _ => Nil
+			// Look for a BSV-style config that contains the user
+			case FoundUser(u) =>
+				configs.values
+					.filter { _.staffFilenameLookupStrategy == FilenameGenerationStrategy.BSV }
+					.find { lookupCelcatIDFromBSV(u.getWarwickId, _).isDefined }
+
+			case _ => None
 		}
+	}
+
+	def getTimetableForStaff(universityId: UniversityId): Seq[TimetableEvent] = {
+		findConfigForStaff(universityId).map { config =>
+			val filename = config.staffFilenameLookupStrategy match {
+				case FilenameGenerationStrategy.Default => s"$universityId.ics"
+				case FilenameGenerationStrategy.BSV => lookupCelcatIDFromBSV(universityId, config).map { id => s"$id.ics" }.getOrElse(s"$universityId.ics")
+			}
+
+			doRequest(filename, config)
+		}.getOrElse(Nil)
 	}
 
 	type BSVCacheEntry = Seq[(UniversityId, CelcatStaffInfo)] with java.io.Serializable
@@ -167,7 +279,9 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 	def lookupCelcatIDFromBSV(universityId: UniversityId, config: CelcatDepartmentConfiguration) =
 		staffInfo(config).get(universityId).map { _.celcatId }
 
-	def staffInfo(config: CelcatDepartmentConfiguration) = bsvCache.get(config.baseUri).toMap
+	def staffInfo(config: CelcatDepartmentConfiguration): Map[UniversityId, CelcatStaffInfo] =
+		if (config.staffListInBSV) bsvCache.get(config.baseUri).toMap
+		else Map()
 
 	def doRequest(filename: String, config: CelcatDepartmentConfiguration): Seq[TimetableEvent] = {
 		// Add {universityId}.ics to the URL
@@ -196,6 +310,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 			case _ =>
 				val event = eventSeq.head
 				TimetableEvent(
+					event.uid,
 					event.name,
 					event.title,
 					event.description,
@@ -226,82 +341,9 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		val allStaff = staffInfo(config)
 
 		cal.getComponents(Component.VEVENT).asScala.collect { case event: VEvent => event }.flatMap { event =>
-			val eventType =
-				Option(event.getProperty(Property.CATEGORIES)).collect { case c: Categories if c.getCategories.size() == 1 => c }.map { c =>
-					TimetableEventType(c.getCategories.iterator().next().asInstanceOf[String])
-				}.orNull
-
-			if (config.excludedEventTypes.contains(eventType) || eventType.code.toLowerCase.contains("on tabula")) None
-			else {
-				// Convert date/time to academic year, local times and week number
-				val start = toDateTime(event.getStartDate)
-				val end = toDateTime(event.getEndDate) match {
-					case null => start
-					case date => date
-				}
-
-				val day = DayOfWeek(start.getDayOfWeek)
-
-				val year = AcademicYear.findAcademicYearContainingDate(start, termService)
-
-				// Convert the date to an academic week number
-				val startWeek = termService.getAcademicWeekForAcademicYear(start, year)
-
-				// We support exactly one RRule of frequence weekly
-				val endWeek = event.getProperties(Property.RRULE).asScala.headOption.collect {
-					case rule: RRule if rule.getRecur.getFrequency == "WEEKLY" => rule
-				}.map { rule =>
-					startWeek + rule.getRecur.getCount - 1
-				}.getOrElse(startWeek)
-
-				val weekRange = WeekRange(startWeek, endWeek)
-
-				val summary = Option(event.getSummary).fold("") { _.getValue }
-				val moduleCode = summary.maybeText.collect { case r"([A-Za-z]{2}[0-9][0-9A-Za-z]{2})${m}.*" => m.toUpperCase() }
-
-				val staffIds: Seq[UniversityId] =
-					if (allStaff.nonEmpty)
-						summary.maybeText
-							.collect { case r"^.* - ((?:[^/0-9]+(?: (?:[0-9\\-]+,?)+)?/?)+)${namesOrInitials}" =>
-								namesOrInitials.split('/').toSeq
-									.collect { case r"([^/0-9]+)${nameOrInitial}(?: (?:[0-9\\-]+,?)+)?" => nameOrInitial }
-							}
-							.map { namesOrInitials =>
-								namesOrInitials.flatMap { nameOrInitial => allStaff.values.find { info =>
-									info.fullName == nameOrInitial || info.initials == nameOrInitial
-								}.map { _.universityId }}
-							}.getOrElse(Nil)
-					else Nil
-
-				Some(TimetableEvent(
-					name = summary,
-					title = "",
-					description = Option(event.getDescription).fold("") { _.getValue },
-					eventType = eventType,
-					weekRanges = Seq(weekRange),
-					day = day,
-					startTime = start.toLocalTime,
-					endTime = end.toLocalTime,
-					location = Option(event.getLocation).flatMap { _.getValue.maybeText },
-					comments = None,
-					context = moduleCode,
-					staffUniversityIds = staffIds,
-					studentUniversityIds = Nil,
-					year = year
-				))
-			}
+			parseVEvent(event, allStaff, config, termService)
 		}
 	}
-
-	// Doesn't support all-day events
-	def toDateTime(property: DateProperty) =
-		if (property == null) null
-		else new DateTime(property.getDate, getTimeZone(property)).withZoneRetainFields(DateTimeZone.forID("Europe/London"))
-
-	def getTimeZone(property: DateProperty) =
-		if (property.getParameter(Parameter.VALUE) != null && (property.getParameter(Parameter.VALUE) == Value.DATE)) DateTimeZone.UTC
-		else if (property.getTimeZone != null) DateTimeZone.forTimeZone(property.getTimeZone)
-		else DateTimeZone.forID("Europe/London")
 }
 
 @SerialVersionUID(5445676324342l) case class CelcatStaffInfo(celcatId: String, universityId: UniversityId, initials: String, fullName: String) extends Serializable

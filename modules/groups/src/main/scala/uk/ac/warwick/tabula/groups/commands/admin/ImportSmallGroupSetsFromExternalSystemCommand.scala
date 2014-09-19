@@ -171,17 +171,24 @@ trait CommandSmallGroupSetGenerator extends SmallGroupSetGenerator {
 }
 
 trait SmallGroupEventGenerator {
-	def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[String], tutorUsercodes: Seq[String]): SmallGroupEvent
+	def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]): SmallGroupEvent
 }
 
 trait CommandSmallGroupEventGenerator extends SmallGroupEventGenerator {
-	def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[String], tutorUsercodes: Seq[String]) = {
+	def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]) = {
 		val command = ModifySmallGroupEventCommand.create(module, set, group)
 		command.weekRanges = weeks
 		command.day = day
 		command.startTime = startTime
 		command.endTime = endTime
-		location.foreach { command.location = _ }
+		location.collect {
+			case NamedLocation(name) => command.location = name
+
+			case MapLocation(name, locationId) =>
+				command.location = name
+				command.locationId = locationId
+		}
+
 		command.tutors.addAll(tutorUsercodes.asJavaCollection)
 
 		command.apply()

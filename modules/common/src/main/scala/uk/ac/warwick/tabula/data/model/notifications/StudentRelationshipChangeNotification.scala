@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications
 
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.FreemarkerModel
 import javax.persistence.{Entity, DiscriminatorValue}
@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 abstract class StudentRelationshipChangeNotification
 	extends Notification[StudentRelationship, Unit] with SingleItemNotification[StudentRelationship] {
 
-	var relationshipService = Wire[RelationshipService]
+	var profileService = Wire[ProfileService]
 
 	def templateLocation: String
 
@@ -24,19 +24,19 @@ abstract class StudentRelationshipChangeNotification
 		relationship.agentMember
 	}
 
-	def oldAgent = {
-		val previousRelationship = relationshipService.getPreviousRelationship(relationship)
-		previousRelationship.flatMap{ _.agentMember }
-	}
+	@transient val oldAgentIds = StringSeqSetting("oldAgents")
+
+	def oldAgents = oldAgentIds.value.flatMap { id => profileService.getMemberByUniversityId(id)}
 
 	def title: String = relationship.relationshipType.description + " change"
 	def content =
 		FreemarkerModel(templateLocation, Map(
 			"student" -> relationship.studentMember,
-			"oldAgent" -> oldAgent,
 			"newAgent" -> newAgent,
 			"relationshipType" -> relationship.relationshipType,
-			"path" -> url
+			"path" -> url,
+			"oldAgents" -> oldAgents
+
 		))
 	def actionRequired = false
 	def url: String = Routes.profile.view(relationship.studentMember.get)
@@ -44,14 +44,14 @@ abstract class StudentRelationshipChangeNotification
 
 
 trait RelationshipChangeAgent {
-	this : StudentRelationshipChangeNotification =>
+	self: StudentRelationshipChangeNotification =>
 
 	private def profileName = relationship.studentMember match {
-		case Some(sm) => " for " + sm.fullName
-		case None => ""
+		case Some(sm) if sm.fullName.nonEmpty => " for " + sm.fullName.get
+		case _ => ""
 	}
 
-	def urlTitle = s"view the student profile$profileName"
+	override def urlTitle = s"view the student profile$profileName"
 }
 
 @Entity
@@ -68,13 +68,13 @@ class StudentRelationshipChangeToOldAgentNotification extends StudentRelationshi
 	with RelationshipChangeAgent{
 
 	def templateLocation = StudentRelationshipChangeNotification.OldAgentTemplate
-	def recipients = oldAgent.map { _.asSsoUser }.toSeq
+	def recipients = oldAgents.map { _.asSsoUser }.toSeq
 }
 
 @Entity
 @DiscriminatorValue("StudentRelationshipChangeToNewAgent")
 class StudentRelationshipChangeToNewAgentNotification extends StudentRelationshipChangeNotification
-	with RelationshipChangeAgent{
+	with RelationshipChangeAgent {
 
 	def templateLocation = StudentRelationshipChangeNotification.NewAgentTemplate
 	def recipients = relationship.agentMember.map { _.asSsoUser }.toSeq

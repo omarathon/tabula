@@ -43,7 +43,7 @@ trait AssignmentMembershipDao {
 	 *  in conjunction with #getUpstreamAssessmentGroups.
 	 */
 	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
-	def getAssessmentComponents(department: Department): Seq[AssessmentComponent]
+	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
@@ -175,24 +175,29 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 			.seq filter isInteresting
 	}
 
-		/** Just gets components of type Assignment for modules in this department, not all components. */
-		def getAssessmentComponents(department: Department):Seq[AssessmentComponent] = {
+	/** Just gets components of type Assignment for modules in this department, not all components. */
+	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = {
+		// TAB-2676 Include modules in sub-departments optionally
+		def moduleCodes(d: Department): Seq[String] = d.modules.asScala.map { _.code }
+		def moduleCodesIncludingSubDepartments(d: Department): Seq[String] =
+			moduleCodes(d) ++ d.children.asScala.flatMap(moduleCodesIncludingSubDepartments)
 
-			val deptModuleCodes = department.modules.asScala.map {_.code}
+		val deptModuleCodes =
+			if (includeSubDepartments) moduleCodesIncludingSubDepartments(department)
+			else moduleCodes(department)
 
-			val allComponents:Seq[AssessmentComponent] = {
-				session.newQuery[AssessmentComponent]("""select ac from AssessmentComponent ac
-								where ac.departmentCode = :rootdeptcode
-								order by ac.moduleCode asc, ac.sequence asc""")
-								.setString("rootdeptcode", department.rootDepartment.code.toUpperCase)
-								.seq filter isInteresting
-			}
-
-			allComponents filter {
-				component => deptModuleCodes.contains(component.moduleCodeBasic.toLowerCase)
-			}
+		val allComponents:Seq[AssessmentComponent] = {
+			session.newQuery[AssessmentComponent]("""select ac from AssessmentComponent ac
+							where ac.departmentCode = :rootdeptcode
+							order by ac.moduleCode asc, ac.sequence asc""")
+							.setString("rootdeptcode", department.rootDepartment.code.toUpperCase)
+							.seq filter isInteresting
 		}
 
+		allComponents filter {
+			component => deptModuleCodes.contains(component.moduleCodeBasic.toLowerCase)
+		}
+	}
 
 
 	def countPublishedFeedback(assignment: Assignment): Int = {

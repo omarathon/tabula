@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.{NotificationHandling, EventHandling, Event, EventDescription}
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent, Features, RequestInfo, JavaImports}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, RequestInfo, JavaImports}
 import uk.ac.warwick.tabula.services.{CannotPerformWriteOperationException, MaintenanceModeService}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, RequiresPermissionsChecking, PermissionsChecking}
@@ -47,8 +47,9 @@ trait Notifies[A, B] {
 }
 
 
-trait SchedulesNotifications[A] {
-	def scheduledNotifications(result: A): Seq[ScheduledNotification[_]]
+trait SchedulesNotifications[A, B] {
+	def transformResult(commandResult: A): Seq[B]
+	def scheduledNotifications(notificationTarget: B): Seq[ScheduledNotification[_]]
 }
 
 
@@ -102,7 +103,7 @@ trait Command[A] extends Describable[A] with Appliable[A]
 	
 	private def benchmarkDescription = {
 		val event = Event.fromDescribable(this)
-		EventDescription.generateMessage(event, "command").toString
+		EventDescription.generateMessage(event, "command").toString()
 	}
 
 	/** 
@@ -158,11 +159,10 @@ object Command {
 	def getOrInitStopwatch() =
 		threadLocal.get match {
 			case Some(sw) => sw
-			case None => {
+			case None =>
 				val sw = StopWatch()
 				threadLocal.set(Some(sw))
-				sw		
-			}
+				sw
 		}
 	
 	def endStopwatching() { threadLocal.remove() }
@@ -452,7 +452,7 @@ abstract class Description {
 	}
 
 	// delegate equality to the underlying map
-	override def hashCode = map.hashCode
+	override def hashCode = map.hashCode()
 	override def equals(that: Any) = that match {
 		case d: Description => map.equals(d.map)
 		case _ => false

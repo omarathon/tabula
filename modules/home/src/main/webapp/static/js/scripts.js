@@ -739,6 +739,12 @@
 			$m.tabulaPrepareSpinners();
 		});
 
+		$(document).on("ajaxComplete", function(e, xhr) {
+			if (xhr.responseText.indexOf('<details') != -1) {
+				$('details').details();
+			}
+		});
+
 		/* When a .long-running link is clicked it will be
 		 * replaced with "Please wait" text, to tell the user to expect to
 		 * wait a few seconds.

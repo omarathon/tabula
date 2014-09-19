@@ -20,7 +20,7 @@
     <#if setState == "open"> Students will be notified via email that they can now sign up for these groups in Tabula. </#if>
     </p>
         <div class="control-group">
-            <input class="btn btn-info" type="submit" value="${setState?cap_first}">
+            <input class="btn btn-info spinnable spinner-auto" type="submit" value="${setState?cap_first}">
         </div>
 
     <div id="scroll-container">

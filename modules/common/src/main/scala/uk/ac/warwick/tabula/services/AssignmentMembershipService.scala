@@ -32,7 +32,7 @@ trait AssignmentMembershipService {
 	 *  in conjunction with #getUpstreamAssessmentGroups.
 	 */
 	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
-	def getAssessmentComponents(department: Department): Seq[AssessmentComponent]
+	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
@@ -78,8 +78,18 @@ class AssignmentMembershipServiceImpl
 			dao.getSITSEnrolledAssignments(user)
 				.filterNot { _.members.excludesUser(user) }
 
+		// TAB-1749 If we've been passed a non-primary usercode (e.g. WBS logins)
+		// then also get registrations for the primary usercode
+		val allManuallyEnrolled =
+			userLookup.getUserByWarwickUniId(user.getWarwickId) match {
+				case FoundUser(primaryUser) if primaryUser.getUserId != user.getUserId =>
+					assignmentManualMembershipHelper.findBy(primaryUser) ++ assignmentManualMembershipHelper.findBy(user)
+
+				case _ => assignmentManualMembershipHelper.findBy(user)
+			}
+
 		val manuallyEnrolled =
-			assignmentManualMembershipHelper.findBy(user)
+			allManuallyEnrolled
 				.filterNot { assignment => assignment.deleted || assignment.archived }
 
 		(autoEnrolled ++ manuallyEnrolled).distinct
@@ -128,7 +138,7 @@ class AssignmentMembershipServiceImpl
 	/**
 	 * Gets assessment components for this department.
 	 */
-	def getAssessmentComponents(department: Department) = dao.getAssessmentComponents(department)
+	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean) = dao.getAssessmentComponents(department, includeSubDepartments)
 
 	def countPublishedFeedback(assignment: Assignment): Int = dao.countPublishedFeedback(assignment)
 

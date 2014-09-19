@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import net.fortuna.ical4j.model.component.VEvent
-import net.fortuna.ical4j.model.parameter
 import net.fortuna.ical4j.model.parameter.{Cn, Value}
 import net.fortuna.ical4j.model.property._
 import org.apache.commons.codec.digest.DigestUtils
@@ -49,15 +48,17 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 			week <- weekRange.toWeeks
 		} yield week
 
-		val eventsInIntersectingWeeks = weeks.
-			filter(week => weekToDateConverter.intersectsWeek(dateRange, week, event.year)).
-			map {
-			week =>
-				EventOccurrence(event,
-					eventDateToLocalDate(week, event.startTime),
-					eventDateToLocalDate(week, event.endTime)
-				)
-		}
+		val eventsInIntersectingWeeks =
+			weeks
+				.filter(week => weekToDateConverter.intersectsWeek(dateRange, week, event.year))
+				.map { week =>
+					EventOccurrence(
+						event,
+						eventDateToLocalDate(week, event.startTime),
+						eventDateToLocalDate(week, event.endTime),
+						s"$week-${event.uid}" // TODO rather than UID swapping here, this should be a recurring event
+					)
+				}
 
 		// do not remove; import needed for sorting
 		// should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
@@ -76,21 +77,16 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 		}
 		val event: VEvent = new VEvent(toDateTime(eventOccurrence.start.toDateTime), toDateTime(end.toDateTime), eventOccurrence.title.maybeText.getOrElse(eventOccurrence.name).safeSubstring(0, 255))
 		event.getStartDate.getParameters.add(Value.DATE_TIME)
-		event.getStartDate.getParameters.add(new parameter.TzId("Europe/London"))
 		event.getEndDate.getParameters.add(Value.DATE_TIME)
-		event.getEndDate.getParameters.add(new parameter.TzId("Europe/London"))
 
 		if (eventOccurrence.description.hasText) {
 			event.getProperties.add(new Description(eventOccurrence.description))
 		}
 		if (eventOccurrence.location.nonEmpty) {
-			event.getProperties.add(new Location(eventOccurrence.location.getOrElse("")))
+			event.getProperties.add(new Location(eventOccurrence.location.fold("") { _.name }))
 		}
 
-		val uid = DigestUtils.md5Hex(Seq(eventOccurrence.name, eventOccurrence.start.toString, eventOccurrence.end.toString,
-			eventOccurrence.location.getOrElse(""), eventOccurrence.context.getOrElse("")).mkString)
-
-		event.getProperties.add(new Uid(uid))
+		event.getProperties.add(new Uid(eventOccurrence.uid))
 		event.getProperties.add(Method.PUBLISH)
 		event.getProperties.add(Transp.OPAQUE)
 
@@ -111,7 +107,9 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 	}
 
 	private def toDateTime(dt: DateTime): net.fortuna.ical4j.model.DateTime = {
-		new net.fortuna.ical4j.model.DateTime(dt.getMillis)
+		val calUTC = new net.fortuna.ical4j.model.DateTime(true)
+		calUTC.setTime(dt.toDateTime(DateTimeZone.UTC).getMillis)
+		calUTC
 	}
 
 }

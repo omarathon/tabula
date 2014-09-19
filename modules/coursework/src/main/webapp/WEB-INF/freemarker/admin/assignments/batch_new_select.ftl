@@ -10,7 +10,7 @@ first page of the form to setup a bunch of assignments from SITS.
 <#assign commandName="addAssignmentsCommand"/>
 <#assign command=addAssignmentsCommand />
 
-<h1>Setup assignments</h1>
+<@fmt.deptheader "Setup assignments" "for" department routes "setupSitsAssignments" "" />
 
 <#assign step=action!'select'/>
 
@@ -75,11 +75,20 @@ first page of the form to setup a bunch of assignments from SITS.
 		</@f.select>
 	<#else>
   	<@f.hidden path="academicYear"/>
+	<@f.hidden path="includeSubDepartments"/>
   	<span class="uneditable-value">
-  	<@spring.bind path="academicYear">${status.actualValue.label}</@spring.bind>
+  		<@spring.bind path="academicYear">${status.actualValue.label}</@spring.bind>
   	</span>
   </#if>
 </@form.labelled_row>
+
+<#if department.children?size gt 0>
+	<@form.labelled_row "includeSubDepartments" "">
+		<@f.label checkbox=true for="includeSubDepartmentsSelect">
+			<@f.checkbox path="includeSubDepartments" id="includeSubDepartmentsSelect" /> Include modules in sub-departments
+		</@f.label>
+	</@form.labelled_row>
+</#if>
 
 <#macro hidden_properties>
 	<@f.hidden path="upstreamAssignment" />

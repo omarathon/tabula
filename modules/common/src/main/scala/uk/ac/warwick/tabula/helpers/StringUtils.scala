@@ -19,6 +19,7 @@ trait StringUtils {
 		def maybeText: Option[String] = Option(string).filter(Utils.hasText)
 		def textOrEmpty: String = maybeText.getOrElse("")
 		def safeLowercase = Option(string).map { _.toLowerCase }.getOrElse("")
+		def safeLength = Option(string).fold(0) { _.length }
 		def safeContains(substring: String) = Option(string).exists(_.contains(substring))
 	}
 

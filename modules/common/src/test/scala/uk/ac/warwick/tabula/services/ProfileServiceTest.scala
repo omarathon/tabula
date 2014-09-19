@@ -340,8 +340,14 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 	@Test def regenerateEmptyTimetableHash {
 		val member = Fixtures.student()
 		member.timetableHash should be (null)
+
+		profileService.save(member)
+		session.flush()
+
 		profileService.regenerateTimetableHash(member)
-		member.timetableHash should not be (null)
+		session.clear()
+
+		profileService.getMemberByUniversityId(member.universityId).get.timetableHash should not be (null)
 	}
 
 	@Transactional
@@ -350,9 +356,15 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		val existingHash = "1234567"
 		member.timetableHash = existingHash
 		member.timetableHash should be (existingHash)
+
+		profileService.save(member)
+		session.flush()
+
 		profileService.regenerateTimetableHash(member)
-		member.timetableHash should not be (null)
-		member.timetableHash should not be (existingHash)
+		session.clear()
+
+		profileService.getMemberByUniversityId(member.universityId).get.timetableHash should not be (null)
+		profileService.getMemberByUniversityId(member.universityId).get.timetableHash should not be (existingHash)
 	}
 
 	@Test def getMemberByUser { transactional { tx =>

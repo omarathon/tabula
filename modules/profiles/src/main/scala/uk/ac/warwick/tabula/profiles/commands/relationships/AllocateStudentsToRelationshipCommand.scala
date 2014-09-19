@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.RelationshipService
@@ -231,7 +230,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	 * It is not currently possible to add non-member agents through the allocate screen,
 	 *  but existing relationships with non-member agents are preserved (except where the agent is replaced).
 	 */
-	final def applyInternal() = transactional() {
+	final def applyInternal(): Seq[StudentRelationshipChange] = transactional() {
 		val memberAgentsBefore = memberAgentMappingsBefore.keySet.toSet // .toSet to make it immutable and avoid type issues
 		val memberAgentsAfter = memberAgentMappingsAfter.keySet.toSet // .toSet to make it immutable and avoid type issues
 
@@ -249,13 +248,13 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 			 * sub-command to send notifications - we'll do that ourselves
 			 */
 			cmd.notifyStudent = false
-			cmd.notifyOldAgent = false
+			cmd.notifyOldAgents = false
 			cmd.notifyNewAgent = false
 
 			val modifiedRelationships = cmd.apply()
 
 			modifiedRelationships.map {
-				modifiedRelationship => StudentRelationshipChange(cmd.oldAgent, modifiedRelationship) }
+				modifiedRelationship => StudentRelationshipChange(cmd.oldAgents, modifiedRelationship) }
 		}
 
 		commandResults.flatten.toSeq
@@ -347,11 +346,11 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 			// and for each, get a command to edit the relationship for that student to change it to the agent
 			newStudentMembersForAgent.flatMap (	stu => {
 				stu.mostSignificantCourseDetails.map ( scd => {
-					val possibleExistingAgentForStudent = service.findCurrentRelationships(relationshipType, scd).flatMap {
+					val existingAgentsForStudent = service.findCurrentRelationships(relationshipType, scd).flatMap {
 						_.agentMember
-					}.headOption
+					}
 
-					val cmd = new EditStudentRelationshipCommand(scd, relationshipType, possibleExistingAgentForStudent, viewer, false)
+					val cmd = new EditStudentRelationshipCommand(scd, relationshipType, existingAgentsForStudent, viewer, false)
 					cmd.agent = agentToEdit
 					cmd.maintenanceMode = this.maintenanceMode // override default in case this is being called in a test
 					cmd.relationshipService = service // override default in case this is being called in a test
@@ -442,7 +441,3 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 }
 
-case class StudentRelationshipChange(
-	oldAgent: Option[Member],
-	modifiedRelationship: StudentRelationship
-)

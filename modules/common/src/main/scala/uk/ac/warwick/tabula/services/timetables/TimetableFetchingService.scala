@@ -84,6 +84,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 				case events => {
 					val event = events.head
 					TimetableEvent(
+						event.uid,
 						events.flatMap { _.name.maybeText }.headOption.getOrElse(""),
 						events.flatMap { _.title.maybeText }.headOption.getOrElse(""),
 						events.flatMap { _.description.maybeText }.headOption.getOrElse(""),

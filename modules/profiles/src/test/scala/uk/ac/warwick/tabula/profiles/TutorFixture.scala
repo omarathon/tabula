@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.profiles
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{RelationshipService, ProfileService}
 
 trait TutorFixture extends Mockito {
 
@@ -17,6 +17,8 @@ trait TutorFixture extends Mockito {
 
 	val student = new StudentMember
 	student.universityId = "student"
+	student.firstName = "Test"
+	student.lastName = "Student"
 
 	val studentCourseDetails = new StudentCourseDetails
 	studentCourseDetails.student = student
@@ -26,21 +28,17 @@ trait TutorFixture extends Mockito {
 	student.attachStudentCourseDetails(studentCourseDetails)
 	student.mostSignificantCourse = studentCourseDetails
 
-//	val courseDetails = new StudentCourseDetails()
-//	courseDetails.sprCode = "spr-123"
-//	courseDetails.mostSignificant = true
-//	courseDetails.department = department
-//	student.studentCourseDetails.add(courseDetails)
-
 	val newTutor = new StaffMember
 	newTutor.universityId = "0000001"
+
 	val oldTutor = new StaffMember
 	oldTutor.universityId = "0000002"
 
-	val profileService = mock[ProfileService]
+	val profileService = smartMock[ProfileService]
 	profileService.getStudentBySprCode("student") returns Some(student)
 	profileService.getMemberByUniversityId("0000001") returns Some(newTutor)
 	profileService.getMemberByUniversityId("0000002") returns Some(oldTutor)
+	profileService.getMemberByUniversityId("0000002", false, false) returns Some(oldTutor)
 
 	val relationship = new MemberStudentRelationship
 	relationship.studentMember = student
@@ -49,4 +47,9 @@ trait TutorFixture extends Mockito {
 	val relationshipOld = new MemberStudentRelationship
 	relationshipOld.studentMember = student
 	relationshipOld.agentMember = oldTutor
+
+	val relationshipService = smartMock[RelationshipService]
+	relationshipService.saveStudentRelationships(tutorRelationshipType, studentCourseDetails, List(newTutor)) returns Seq(StudentRelationship(newTutor, tutorRelationshipType, studentCourseDetails))
+	relationshipService.findCurrentRelationships(tutorRelationshipType, studentCourseDetails) returns Seq(relationshipOld)
+
 }

@@ -49,11 +49,12 @@ trait SmallGroupService {
 	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet]
 
 	def saveOrUpdateAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, state: AttendanceState, user: CurrentUser): SmallGroupEventAttendance
-	def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int): Unit
+	def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, isPermanent: Boolean = false): Unit
 	def findAttendanceByGroup(smallGroup: SmallGroup): Seq[SmallGroupEventOccurrence]
 	def getAttendanceNote(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendanceNote]
 	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote]
 	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence) : Option[SmallGroupEventAttendance]
+	def findManuallyAddedAttendance(studentId: String): Seq[SmallGroupEventAttendance]
 
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
 	def hasSmallGroups(module: Module): Boolean
@@ -137,12 +138,12 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		(groups ++ linkedGroups).distinct
 	}
 
-	def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int) {
+	def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, isPermanent: Boolean = false) {
 		for {
 			occurrence <- smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber)
 			attendance <- smallGroupDao.getAttendance(studentId, occurrence)
 		} {
-			if (attendance.replacesAttendance == null) {
+			if (!attendance.addedManually || isPermanent) {
 				occurrence.attendance.remove(attendance)
 				smallGroupDao.deleteAttendance(attendance)
 			} else {
@@ -209,6 +210,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence) : Option[SmallGroupEventAttendance] =
 		smallGroupDao.getAttendance(studentId, occurrence)
+
+	def findManuallyAddedAttendance(studentId: String): Seq[SmallGroupEventAttendance] =
+		smallGroupDao.findManuallyAddedAttendance(studentId)
 
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]) =
 		smallGroupDao.findAttendanceForStudentInModulesInWeeks(student, startWeek, endWeek, modules)

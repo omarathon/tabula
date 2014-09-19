@@ -11,8 +11,8 @@ import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupC
 import uk.ac.warwick.tabula.data.Transactions._
 
 object EditExtensionCommand {
-	def apply(mod: Module, ass: Assignment, uniId: String, sub: CurrentUser, action: String) =
-		new EditExtensionCommandInternal(mod, ass, uniId, sub, action)
+	def apply(module: Module, assignment: Assignment, uniId: String, currentUser: CurrentUser, action: String) =
+		new EditExtensionCommandInternal(module, assignment, uniId, currentUser, action)
 			with ComposableCommand[Extension]
 			with EditExtensionCommandPermissions
 			with ModifyExtensionCommandDescription
@@ -23,8 +23,8 @@ object EditExtensionCommand {
 			with HibernateExtensionPersistenceComponent
 }
 
-class EditExtensionCommandInternal(mod: Module, ass: Assignment, uniId: String, sub: CurrentUser, action: String)
-		extends ModifyExtensionCommand(mod, ass, uniId, sub, action) with ModifyExtensionCommandState  {
+class EditExtensionCommandInternal(module: Module, assignment: Assignment, uniId: String, currentUser: CurrentUser, action: String)
+		extends ModifyExtensionCommand(module, assignment, uniId, currentUser, action) with ModifyExtensionCommandState  {
 	self: ExtensionPersistenceComponent with UserLookupComponent =>
 
 	val e = assignment.findExtension(universityId)
@@ -92,10 +92,12 @@ trait EditExtensionCommandNotification extends Notifies[Extension, Option[Extens
 	}
 }
 
-trait EditExtensionCommandScheduledNotification extends SchedulesNotifications[Extension] {
+trait EditExtensionCommandScheduledNotification extends SchedulesNotifications[Extension, Extension] {
 	self: ModifyExtensionCommandState =>
 
-	def scheduledNotifications(extension: Extension) = {
+	override def transformResult(extension: Extension) = Seq(extension)
+
+	override def scheduledNotifications(extension: Extension) = {
 		if (extension.isManual || extension.approved) {
 			val assignment = extension.assignment
 			val dayOfDeadline = extension.expiryDate.withTime(0, 0, 0, 0)

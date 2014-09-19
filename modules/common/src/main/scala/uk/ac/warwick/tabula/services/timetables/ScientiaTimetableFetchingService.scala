@@ -2,12 +2,13 @@ package uk.ac.warwick.tabula.services.timetables
 
 import dispatch.classic.thread.ThreadSafeHttpClient
 import dispatch.classic.{url, thread, Http}
+import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.client.params.{CookiePolicy, ClientPNames}
 import org.joda.time.LocalTime
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRangeListUserType}
+import uk.ac.warwick.tabula.data.model.groups.{NamedLocation, DayOfWeek, WeekRangeListUserType}
 import uk.ac.warwick.tabula.helpers.{Logging, ClockComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
@@ -122,26 +123,41 @@ object ScientiaHttpTimetableFetchingService {
 
 	def parseXml(xml: Elem, year:AcademicYear): Seq[TimetableEvent] =
 		xml \\ "Activity" map { activity =>
+			val name = (activity \\ "name").text
+
+			val startTime = new LocalTime((activity \\ "start").text)
+			val endTime = new LocalTime((activity \\ "end").text)
+
+			val location = (activity \\ "room").text match {
+				case text if !text.isEmpty => {
+					// S+ has some (not all) rooms as "AB_AB1.2", where AB is a building code
+					// we're generally better off without this.
+					val removeBuildingNames = "^[^_]*_".r
+					Some(NamedLocation(removeBuildingNames.replaceFirstIn(text,"")))
+				}
+				case _ => None
+			}
+
+			val context = Option((activity \\ "module").text)
+
+			val uid =
+				DigestUtils.md5Hex(
+					Seq(name, startTime.toString, endTime.toString, location.fold("") { _.name }, context.getOrElse("")).mkString
+				)
+
 			TimetableEvent(
-				name = (activity \\ "name").text,
+				uid = uid,
+				name = name,
 				title = (activity \\ "title").text,
 				description = (activity \\ "description").text,
 				eventType = TimetableEventType((activity \\ "type").text),
 				weekRanges = new WeekRangeListUserType().convertToObject((activity \\ "weeks").text),
 				day = DayOfWeek.apply((activity \\ "day").text.toInt + 1),
-				startTime = new LocalTime((activity \\ "start").text),
-				endTime = new LocalTime((activity \\ "end").text),
-				location = (activity \\ "room").text match {
-					case text if !text.isEmpty => {
-						// S+ has some (not all) rooms as "AB_AB1.2", where AB is a building code
-						// we're generally better off without this.
-						val removeBuildingNames = "^[^_]*_".r
-						Some(removeBuildingNames.replaceFirstIn(text,""))
-					}
-					case _ => None
-				},
+				startTime = startTime,
+				endTime = endTime,
+				location = location,
 				comments = Option((activity \\ "comments").text).flatMap { _.maybeText },
-				context = Option((activity \\ "module").text),
+				context = context,
 				staffUniversityIds = (activity \\ "staffmember") map { _.text },
 				studentUniversityIds = (activity \\ "student") map { _.text },
 				year = year

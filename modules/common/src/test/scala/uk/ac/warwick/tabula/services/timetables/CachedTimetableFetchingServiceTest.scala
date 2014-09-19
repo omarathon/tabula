@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services.timetables
 import net.spy.memcached.transcoders.SerializingTranscoder
 import org.joda.time.{DateTime, LocalTime}
 import org.junit.Before
-import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
+import uk.ac.warwick.tabula.data.model.groups.{NamedLocation, DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.util.cache.HashMapCacheStore
@@ -13,7 +13,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 	private trait Fixture{
 
 		val studentId = "studentId"
-		val studentEvents = Seq(new TimetableEvent("test","test","test",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,None,None,Nil,Nil, AcademicYear(2013)))
+		val studentEvents = Seq(new TimetableEvent("test","test","test","test",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,None,None,Nil,Nil, AcademicYear(2013)))
 		val delegate = mock[CompleteTimetableFetchingService]
 
 		delegate.getTimetableForStudent(studentId) returns studentEvents
@@ -43,7 +43,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		// deliberately use the student ID to look up some staff events. The cache key should be the ID + the type of
 		// request (staff, student, room, etc) so we should get different results back for student and staff
 
-		val staffEvents = Seq(new TimetableEvent("test2", "test2","test2",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,None,None,Nil,Nil, AcademicYear(2013)))
+		val staffEvents = Seq(new TimetableEvent("test2", "test2", "test2","test2",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,None,None,Nil,Nil, AcademicYear(2013)))
 		delegate.getTimetableForStaff(studentId) returns staffEvents
 
 		cache.getTimetableForStudent(studentId)  should be(studentEvents)
@@ -68,6 +68,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		val transcoder: SerializingTranscoder = new SerializingTranscoder
 		val events = List(
 			TimetableEvent(
+				"event 1 uid",
 				"event 1 name",
 				"event 1 title",
 				"event 1 description",
@@ -76,7 +77,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 				DayOfWeek.Monday,
 				new LocalTime(16, 0),
 				new LocalTime(17, 0),
-				Some("event 1 location"),
+				Some(NamedLocation("event 1 location")),
 				Some("CS118"),
 				Some("Comments!"),
 				Seq("0672089", "0672088"),
@@ -84,6 +85,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 				AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 			),
 			TimetableEvent(
+				"event 2 uid",
 				"event 2 name",
 				"event 2 title",
 				"event 2 description",

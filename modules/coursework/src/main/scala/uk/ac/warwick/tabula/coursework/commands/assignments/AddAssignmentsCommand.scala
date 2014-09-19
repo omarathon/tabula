@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.{ SelfValidating, Description, Command }
+import scala.annotation.tailrec
 import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.{LazyMaps, LazyLists}
@@ -77,6 +78,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	// months, which means it will start defaulting to next year from about May (under the assumption that
 	// you would've done the current year's import long before then).
 	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now.plusMonths(3))
+	var includeSubDepartments: Boolean = false
 
 	// All the possible assignments, prepopulated from SITS.
 	var assignmentItems: JList[AssignmentItem] = LazyLists.create()
@@ -173,10 +175,19 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	def checkPermissions() = {
 		// check that all the selected items are part of this department. Otherwise you could post the IDs of
 		// unrelated assignments and do stuff with them.
-		// Use .exists() to see if there is at least one with a matching department code
-		val hasInvalidAssignments = assignmentItems.exists { (item) =>
-			item.upstreamAssignment.departmentCode.toLowerCase != department.code
+		// Use .exists() to see if there is at least one with a matching department code OR parent department code
+		@tailrec
+		def validDepartmentCodes(acc: Seq[String], d: Department): Seq[String] = {
+			if (!d.hasParent) acc :+ d.code
+			else validDepartmentCodes(acc :+ d.code, d.parent)
 		}
+
+		val deptCodes = validDepartmentCodes(Nil, department)
+
+		val hasInvalidAssignments = assignmentItems.exists { (item) =>
+			!deptCodes.exists(_ == item.upstreamAssignment.departmentCode.toLowerCase)
+		}
+
 		if (hasInvalidAssignments) {
 			logger.warn("Rejected request to setup assignments that aren't in this department")
 			throw new PermissionDeniedException(user, Permissions.Assignment.ImportFromExternalSystem, department)
@@ -242,7 +253,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 
 	def fetchAssignmentItems(): JList[AssignmentItem] = {
 		for {
-			upstreamAssignment <- assignmentMembershipService.getAssessmentComponents(department);
+			upstreamAssignment <- assignmentMembershipService.getAssessmentComponents(department, includeSubDepartments)
 			assessmentGroup <- assignmentMembershipService.getUpstreamAssessmentGroups(upstreamAssignment, academicYear).sortBy{ _.occurrence }
 		} yield {
 			val item = new AssignmentItem(

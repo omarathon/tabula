@@ -91,7 +91,7 @@
 	</#macro>
 	<#assign deptheaderroute = deptheaderroutemacro in routes />
 
-	<@fmt.deptheader "Import small groups from Syllabus+" "for" department routes "deptheaderroute" "with-settings" />
+	<@fmt.deptheader "Import small groups from Syllabus+" "for" department routes "deptheaderroute" "" />
 
 	<#assign post_url><@routes.import_groups department /></#assign>
 	<div class="fix-area">
@@ -186,12 +186,8 @@
 							$row.find('.collection-checkbox').attr('checked', checked);
 						}
 					})
-					.on('mousedown', 'a.name-edit-link', function(e){
-						// prevent td.selected toggling when clicking the edit link.
-						e.stopPropagation();
-					})
-					.on('mousedown', '.striped-section', function(e){
-						// prevent td.selected toggling when clicking the striped-section.
+					.on('mousedown', 'a.name-edit-link, .striped-section, input[type="checkbox"]', function(e){
+						// prevent td.selected toggling when clicking
 						e.stopPropagation();
 					});
 
