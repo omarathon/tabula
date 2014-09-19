@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.{AutowiringAssignmentServiceComponent, AssignmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.views.JSONView
-
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Controller
 @RequestMapping(value = Array("/api/assignmentpicker/query"))
@@ -40,7 +40,7 @@ class AssignmentSearchPickerCommand extends CommandInternal[Seq[Assignment]] {
 	var query: String = _
 
 	def applyInternal() = {
-		if (query.isEmpty) {
+		if (query.isEmptyOrWhitespace) {
 			Seq()
 		} else {
 			assignmentService.findAssignmentsByNameOrModule(query)
