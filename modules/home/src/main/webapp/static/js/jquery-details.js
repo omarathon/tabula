@@ -84,7 +84,7 @@
 				$summary.attr({
 					'role': 'button',
 					'aria-expanded': $details.prop('open')
-				}).on('click', function() {
+				}).off('click.details').on('click.details', function() {
 					// the value of the `open` property is the old value
 					var close = $details.prop('open');
 					$summary.attr('aria-expanded', !close);
@@ -109,8 +109,10 @@
 				    $detailsSummary = $('summary', $details).first(),
 				    // Do the same for the info within the `details` element
 				    $detailsNotSummary = $details.children(':not(summary)'),
-				    // This will be used later to look for direct child text nodes
-				    $detailsNotSummaryContents = $details.contents(':not(summary)');
+				// This will be used later to look for direct child text nodes
+					$detailsNotSummaryContents = $details.contents().filter(function() {
+				    	return this.nodeName.toLowerCase() !== 'summary';
+				    });
 
 				if (op === 'open') {
 					$details.prop('open', true);
@@ -145,11 +147,14 @@
 				toggleOpen($details, $detailsSummary, $detailsNotSummary);
 
 				// Add `role=button` and set the `tabindex` of the `summary` element to `0` to make it keyboard accessible
-				$detailsSummary.attr('role', 'button').noSelect().prop('tabIndex', 0).on('click', function() {
-					// Focus on the `summary` element
-					$detailsSummary.focus();
-					// Toggle the `open` and `aria-expanded` attributes and the `open` property of the `details` element and display the additional info
-					toggleOpen($details, $detailsSummary, $detailsNotSummary, true);
+				$detailsSummary.attr('role', 'button').noSelect().prop('tabIndex', 0).off('click.details').on('click.details', function(e) {
+					// Do not trigger on link or button elements
+					if (!$(e.target).parentsUntil($detailsSummary).add($(e.target)).is('a, button')) {
+						// Focus on the `summary` element
+						$detailsSummary.focus();
+						// Toggle the `open` and `aria-expanded` attributes and the `open` property of the `details` element and display the additional info
+						toggleOpen($details, $detailsSummary, $detailsNotSummary, true);
+					}
 				}).keyup(function(event) {
 					if (32 == event.keyCode || (13 == event.keyCode && !isOpera)) {
 						// Space or Enter is pressed — trigger the `click` event on the `summary` element
