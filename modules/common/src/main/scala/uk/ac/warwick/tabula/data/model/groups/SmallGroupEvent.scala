@@ -93,4 +93,6 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
     newEvent
   }
 
+	def allWeeks: Seq[WeekRange.Week] = weekRanges.flatMap(_.toWeeks)
+
 }

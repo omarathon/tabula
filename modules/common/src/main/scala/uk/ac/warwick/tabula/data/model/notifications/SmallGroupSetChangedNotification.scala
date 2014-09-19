@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 object SmallGroupSetChangedNotification {
-	val templateLocation = "/WEB-INF/freemarker/notifications/small_group_modified_notification.ftl"
+	val templateLocation = "/WEB-INF/freemarker/notifications/groups/small_group_modified_notification.ftl"
 }
 
 abstract class SmallGroupSetChangedNotification(recipientRole: UserRoleOnGroup)
