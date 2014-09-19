@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.profiles.commands.{PersonalTimetableCommandState, PublicStaffPersonalTimetableCommand, PublicStudentPersonalTimetableCommand, ViewStaffPersonalTimetableCommand, ViewStudentPersonalTimetableCommand}
+import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, AutowiringProfileServiceComponent, AutowiringRelationshipServiceComponent, AutowiringSecurityServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, AutowiringUserLookupComponent}
@@ -77,13 +78,13 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 }
 
 @Controller
-@RequestMapping(value = Array("/timetable"))
+@RequestMapping(value = Array("/timetable/api"))
 class TimetableController extends AbstractTimetableController with AutowiringUserLookupComponent {
 
 	@ModelAttribute("command")
 	def command(@RequestParam(value="whoFor") whoFor: Member) = commandForMember(whoFor)
 
-	@RequestMapping(value = Array("/api"))
+	@RequestMapping
 	def getEvents(
 		@RequestParam from: Long,
 		@RequestParam to: Long,
@@ -116,6 +117,35 @@ class TimetableController extends AbstractTimetableController with AutowiringUse
 			}
 		}
 	}
+}
+
+@Controller
+@RequestMapping(value = Array("/timetable"))
+class ViewMyTimetableController extends ProfilesController {
+	@RequestMapping def redirect(user: CurrentUser) =
+		user.profile match {
+			case Some(profile) => Redirect(Routes.profile.viewTimetable(profile))
+			case _ => Redirect(Routes.home)
+		}
+}
+
+@Controller
+@RequestMapping(value = Array("/timetable/{member}"))
+class TimetableForMemberController extends AbstractTimetableController with AutowiringUserLookupComponent {
+
+	@ModelAttribute("command")
+	def command(@PathVariable member: Member) = commandForMember(member)
+
+	@RequestMapping
+	def viewTimetable(@ModelAttribute("command") command: TimetableCommand, @PathVariable member: Member) = {
+		val isSelf = member.universityId == user.universityId
+
+		Mav("profile/view_timetable",
+			"profile" -> member,
+			"isSelf" -> isSelf
+		).crumbs(Breadcrumbs.Profile(member, isSelf))
+	}
+
 }
 
 abstract class AbstractTimetableICalController
