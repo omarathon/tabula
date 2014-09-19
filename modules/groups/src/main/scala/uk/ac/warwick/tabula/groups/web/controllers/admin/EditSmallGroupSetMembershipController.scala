@@ -34,7 +34,7 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
 			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
 			"assessmentGroups" -> cmd.assessmentGroups)
-			.crumbs(Breadcrumbs.Department(set.module.department), Breadcrumbs.Module(set.module))
+			.crumbs(Breadcrumbs.DepartmentForYear(set.module.department, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 
 	@RequestMapping(method = Array(GET, HEAD))
