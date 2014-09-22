@@ -48,6 +48,7 @@ trait RelationshipService {
 	def listAllStudentRelationshipTypesWithStudentMember(student: StudentMember): Seq[StudentRelationshipType]
 	def listAllStudentRelationshipTypesWithMember(agent: Member): Seq[StudentRelationshipType]
 	def listStudentRelationshipsWithMember(relationshipType: StudentRelationshipType, agent: Member): Seq[StudentRelationship]
+	def listStudentRelationshipsWithMemberInDepartment(relationshipType: StudentRelationshipType, agent: Member, department: Department): Seq[StudentRelationship]
 	def listAllStudentRelationshipsWithUniversityId(agentId: String): Seq[StudentRelationship]
 	def listStudentRelationshipsWithUniversityId(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
 	def listStudentsWithoutRelationship(relationshipType: StudentRelationshipType, department: Department): Seq[Member]
@@ -240,6 +241,12 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	def listStudentRelationshipsWithMember(relationshipType: StudentRelationshipType, agent: Member) = transactional(readOnly = true) {
 		relationshipDao.getRelationshipsByAgent(relationshipType, agent.universityId)
 			.filter(relationshipNotPermanentlyWithdrawn)
+	}
+
+	def listStudentRelationshipsWithMemberInDepartment(relationshipType: StudentRelationshipType, agent: Member, department: Department) = transactional(readOnly = true) {
+		relationshipDao.getRelationshipsByAgent(relationshipType, agent.universityId)
+			.filter(relationshipNotPermanentlyWithdrawn)
+			.filter(relationshipDepartmentFilterMatches(department))
 	}
 
 	def listAllStudentRelationshipsWithUniversityId(agentId: String) = transactional(readOnly = true) {
