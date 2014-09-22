@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services.timetables
 
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.{NamedLocation, Module}
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent, UserLookupComponent, UserLookupService}
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}

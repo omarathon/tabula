@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.groups.commands.admin
 
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.commands.DescriptionImpl
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.{NamedLocation, Location, Module}
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.groups.commands.admin.ImportSmallGroupSetsFromExternalSystemCommand.TimetabledSmallGroupEvent
 import uk.ac.warwick.tabula.permissions.Permissions

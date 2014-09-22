@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.groups
 
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, Department, UserGroup, Module}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
 import org.joda.time.LocalTime

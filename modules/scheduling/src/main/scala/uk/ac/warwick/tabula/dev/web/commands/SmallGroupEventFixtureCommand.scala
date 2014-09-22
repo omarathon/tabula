@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
 import uk.ac.warwick.tabula.commands.{Appliable, Unaudited, ComposableCommand, CommandInternal}
+import uk.ac.warwick.tabula.data.model.NamedLocation
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.{AutowiringSmallGroupDaoComponent, Daoisms, SmallGroupDaoComponent}
