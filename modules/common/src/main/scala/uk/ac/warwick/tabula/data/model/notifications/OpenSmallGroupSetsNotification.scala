@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.Student
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 
 object OpenSmallGroupSetsNotification {
-	@transient val templateLocation = "/WEB-INF/freemarker/notifications/open_small_group_student_notification.ftl"
+	@transient val templateLocation = "/WEB-INF/freemarker/notifications/groups/open_small_group_student_notification.ftl"
 }
 
 @Entity

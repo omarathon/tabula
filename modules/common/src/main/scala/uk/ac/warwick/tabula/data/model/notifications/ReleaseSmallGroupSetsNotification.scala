@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.web.Routes
 import javax.persistence.{DiscriminatorValue, Entity}
 
 object ReleaseSmallGroupSetsNotification {
-	val templateLocation = "/WEB-INF/freemarker/notifications/release_small_group_notification.ftl"
+	val templateLocation = "/WEB-INF/freemarker/notifications/groups/release_small_group_notification.ftl"
 }
 
 @Entity

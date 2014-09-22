@@ -1,29 +1,16 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Type}
-import javax.persistence._
-import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.AcademicYear
+import javax.persistence._
+
+import org.hibernate.annotations.{AccessType, Type}
+import org.joda.time.LocalTime
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import javax.persistence._
-import javax.persistence.FetchType._
-import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.data.model.permissions.SmallGroupGrantedRole
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import org.hibernate.`type`.StandardBasicTypes
-import java.sql.Types
-import uk.ac.warwick.util.termdates.Term.TermType
-import uk.ac.warwick.tabula.data.model.groups.WeekRange._
-import org.joda.time.LocalTime
-import javax.validation.constraints.NotNull
-import org.hibernate.annotations.BatchSize
 @Entity
 @AccessType("field")
 class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget with Serializable {
@@ -65,17 +52,12 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	private var _tutors: UserGroup = UserGroup.ofUsercodes
 	def tutors: UnspecifiedTypeUserGroup = {
 		smallGroupService match {
-			case Some(smallGroupService) => {
-				new UserGroupCacheManager(_tutors, smallGroupService.eventTutorsHelper)
-			}
+			case Some(sgs) =>
+				new UserGroupCacheManager(_tutors, sgs.eventTutorsHelper)
 			case _ => _tutors
 		}
 	}
 	def tutors_=(group: UserGroup) { _tutors = group }
-	
-	@OneToMany(mappedBy = "event", fetch = FetchType.LAZY, cascade=Array(CascadeType.ALL), orphanRemoval = true)
-	@BatchSize(size=50)
-	var occurrences: JSet[SmallGroupEventOccurrence] = JHashSet()
 	
 	def permissionsParents = Option(group).toStream
 	
@@ -110,5 +92,7 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 
     newEvent
   }
+
+	def allWeeks: Seq[WeekRange.Week] = weekRanges.flatMap(_.toWeeks)
 
 }
