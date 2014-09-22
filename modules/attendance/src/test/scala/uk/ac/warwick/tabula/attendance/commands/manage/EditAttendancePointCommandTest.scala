@@ -79,6 +79,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 			endWeek = 15
 		}
 		command.thisScheduledNotificationService = smartMock[ScheduledNotificationService]
+		command.attendanceMonitoringService.listAllSchemes(department) returns Seq(scheme, scheme2)
 	}
 
 	@Test
