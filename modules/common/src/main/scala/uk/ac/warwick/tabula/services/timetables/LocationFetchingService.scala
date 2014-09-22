@@ -114,7 +114,7 @@ private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) ext
 		Try(http.when(_==200)(req >:+ handler)) match {
 			case Success(locations)
 				if locations.size == 1 =>
-					MapLocation(locations.head.name, locations.head.lid)
+					MapLocation(locations.head.name, locations.head.locationId)
 
 			case Success(locations) =>
 				logger.info(s"Multiple locations returned for $name, returning NamedLocation")
@@ -139,15 +139,15 @@ object WAI2GoHttpLocationFetchingService {
 	}
 }
 
-case class WAI2GoLocation(name: String, sub: String, lid: String)
+case class WAI2GoLocation(name: String, subLocation: String, locationId: String)
 object WAI2GoLocation {
 	def fromProperties(properties: Map[String, Any]): Option[WAI2GoLocation] = {
 		val name = properties.get("name").collect { case s: String => s }
-		val lid = properties.get("lid").collect { case s: String => s }
-		val sub = properties.get("sub").collect { case s: String => s }
+		val locationId = properties.get("lid").collect { case s: String => s }
+		val subLocation = properties.get("sub").collect { case s: String => s }
 
-		if (name.nonEmpty && lid.nonEmpty) {
-			Some(WAI2GoLocation(name.get, sub.getOrElse(""), lid.get))
+		if (name.nonEmpty && locationId.nonEmpty) {
+			Some(WAI2GoLocation(name.get, subLocation.getOrElse(""), locationId.get))
 		} else {
 			None
 		}
