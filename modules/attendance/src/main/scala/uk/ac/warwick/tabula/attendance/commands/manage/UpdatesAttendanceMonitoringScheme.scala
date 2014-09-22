@@ -30,11 +30,13 @@ trait UpdatesAttendanceMonitoringScheme extends Logging {
 		}
 
 		// Custom scheduled notifications
-		schemes.groupBy(_.department).map{case(department, deptSchemes) =>
+		schemes.groupBy(_.department).map{case(department, _) =>
 
 			thisScheduledNotificationService.removeInvalidNotifications(department)
 
-			val notifications = deptSchemes.flatMap(_.points.asScala.map(_.endDate.plusDays(7).toDateTimeAtStartOfDay)).flatMap(notificationDate => {
+			val schemes = attendanceMonitoringService.listAllSchemes(department)
+
+			val notifications = schemes.flatMap(_.points.asScala.map(_.endDate.plusDays(7).toDateTimeAtStartOfDay)).flatMap(notificationDate => {
 				Seq(
 					new ScheduledNotification[Department]("AttendanceMonitoringUnrecordedPoints", department, notificationDate),
 					new ScheduledNotification[Department]("AttendanceMonitoringUnrecordedStudents", department, notificationDate)
