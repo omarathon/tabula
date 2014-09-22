@@ -52,7 +52,9 @@ class SmallGroupEventAttendanceReminderNotification
 
 	override def recipients: Seq[User] = {
 		val attendanceIds = item.entity.attendance.asScala.map(_.universityId)
-		if (event.group.students.users.map(_.getWarwickId).forall(attendanceIds.contains)) {
+		if (event.group.students.isEmpty || event.group.students.users.map(_.getWarwickId).forall(attendanceIds.contains)) {
+			Seq()
+		} else {
 			if (event.tutors.size > 0) {
 				event.tutors.users
 			} else {
@@ -61,7 +63,6 @@ class SmallGroupEventAttendanceReminderNotification
 					.getOrElse(throw new IllegalStateException("No such module"))
 					.managers.users
 			}
-		} else
-			Seq()
+		}
 	}
 }
