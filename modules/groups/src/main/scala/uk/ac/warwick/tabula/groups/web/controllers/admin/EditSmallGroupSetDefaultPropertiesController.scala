@@ -20,7 +20,7 @@ abstract class AbstractEditSmallGroupSetDefaultPropertiesController extends Smal
 
 	protected def render(set: SmallGroupSet) = {
 		Mav("admin/groups/events/defaults", "cancelUrl" -> postSaveRoute(set))
-			.crumbs(Breadcrumbs.Department(set.module.department), Breadcrumbs.Module(set.module))
+			.crumbs(Breadcrumbs.DepartmentForYear(set.module.department, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 
 	protected def postSaveRoute(set: SmallGroupSet): String

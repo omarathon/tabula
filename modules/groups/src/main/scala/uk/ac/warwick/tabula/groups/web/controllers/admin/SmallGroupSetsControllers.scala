@@ -68,7 +68,7 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 
 	@RequestMapping
 	def form(@ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand) = {
-		Mav("admin/groups/new").crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
+		Mav("admin/groups/new").crumbs(Breadcrumbs.DepartmentForYear(cmd.module.department, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
 	}
 
 	private def submit(cmd: CreateSmallGroupSetCommand, errors: Errors, route: SmallGroupSet => String) = {
@@ -114,7 +114,7 @@ class CreateSmallGroupSetEditPropertiesController extends SmallGroupSetsControll
 
 	@RequestMapping
 	def form(@ModelAttribute("createSmallGroupSetCommand") cmd: EditSmallGroupSetCommand) = {
-		Mav("admin/groups/new").crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
+		Mav("admin/groups/new").crumbs(Breadcrumbs.DepartmentForYear(cmd.module.department, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
 	}
 
 	private def submit(cmd: EditSmallGroupSetCommand, errors: Errors, route: SmallGroupSet => String) = {
@@ -160,7 +160,7 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 
 	@RequestMapping
 	def form(@ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand) = {
-		Mav("admin/groups/edit").crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
+		Mav("admin/groups/edit").crumbs(Breadcrumbs.DepartmentForYear(cmd.module.department, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
 	}
 
 	private def submit(cmd: EditSmallGroupSetCommand, errors: Errors, route: SmallGroupSet => String) = {
@@ -206,7 +206,7 @@ class DeleteSmallGroupSetController extends GroupsController {
 	@RequestMapping
 	def form(cmd: DeleteSmallGroupSetCommand) =
 		Mav("admin/groups/delete")
-		.crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
+		.crumbs(Breadcrumbs.DepartmentForYear(cmd.module.department, cmd.set.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.set.academicYear))
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid cmd: DeleteSmallGroupSetCommand, errors: Errors) =
