@@ -208,6 +208,14 @@
 					return false;
 				});
 
+				// show rejection comment box
+				$('input.reject').each( function() {
+					var $this = $(this);
+					var $form = $this.closest('form');
+					var $commentBox = $form.find('.rejection-comment');
+					$this.slideMoreOptions($commentBox, true);
+				});
+
 				// make modal links use ajax
 				$('section.meetings .meeting-record-toolbar, section.meetings details.meeting.normal').tabulaAjaxSubmit(function() {
 					document.location.reload(true);
