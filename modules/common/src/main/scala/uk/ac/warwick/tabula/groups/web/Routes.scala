@@ -24,7 +24,6 @@ object Routes {
 
 	object admin {
 		def apply(department: Department, year: AcademicYear): String = context + "/admin/department/%s/%s" format (encoded(department.code), year.startYear.toString)
-		def apply(set: SmallGroupSet): String = apply(set.module.department, set.academicYear) + s"#set-${set.id}"
 
 		def module(module: Module, year: AcademicYear): String = apply(module.department, year) + s"?moduleFilters=Module(${module.code})"
 
