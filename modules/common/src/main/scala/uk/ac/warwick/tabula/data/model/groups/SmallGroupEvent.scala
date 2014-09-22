@@ -52,7 +52,7 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	var startTime: LocalTime = _
 	var endTime: LocalTime = _
 
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.LocationUserType")
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.LocationUserType")
 	var location: Location = _
 	
 	var title: String = _

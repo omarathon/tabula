@@ -1,9 +1,8 @@
-package uk.ac.warwick.tabula.data.model.groups
+package uk.ac.warwick.tabula.data.model
 
 import java.sql.Types
 
 import org.hibernate.`type`.StandardBasicTypes
-import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 
 sealed abstract class Location extends Serializable {
 	def name: String

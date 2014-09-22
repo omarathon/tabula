@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model.groups
 
+import uk.ac.warwick.tabula.data.model.{MapLocation, NamedLocation}
 import uk.ac.warwick.tabula.{FieldAccessByReflection, PersistenceTestBase, AcademicYear}
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import org.springframework.transaction.annotation.Transactional

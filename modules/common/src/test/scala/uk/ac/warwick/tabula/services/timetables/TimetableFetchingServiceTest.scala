@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import org.joda.time.LocalTime
-import uk.ac.warwick.tabula.data.model.groups.{NamedLocation, DayOfWeek, WeekRange}
+import uk.ac.warwick.tabula.data.model.NamedLocation
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, TestBase}
 

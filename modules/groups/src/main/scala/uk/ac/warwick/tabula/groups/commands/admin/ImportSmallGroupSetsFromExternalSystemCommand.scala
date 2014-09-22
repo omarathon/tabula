@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Module, Department}
+import uk.ac.warwick.tabula.data.model.{Location, Module, Department}
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.{LazyLists, SystemClockComponent, FoundUser}
 import uk.ac.warwick.tabula.permissions.Permissions

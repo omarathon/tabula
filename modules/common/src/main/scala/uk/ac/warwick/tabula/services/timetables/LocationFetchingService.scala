@@ -5,7 +5,7 @@ import dispatch.classic.thread.ThreadSafeHttpClient
 import org.apache.http.client.params.{CookiePolicy, ClientPNames}
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.groups.{NamedLocation, MapLocation, Location}
+import uk.ac.warwick.tabula.data.model.{MapLocation, NamedLocation, Location}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
 import uk.ac.warwick.util.cache.{Caches, CacheEntryFactory}

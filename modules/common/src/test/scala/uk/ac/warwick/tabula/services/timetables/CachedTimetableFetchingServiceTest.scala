@@ -3,7 +3,8 @@ package uk.ac.warwick.tabula.services.timetables
 import net.spy.memcached.transcoders.SerializingTranscoder
 import org.joda.time.{DateTime, LocalTime}
 import org.junit.Before
-import uk.ac.warwick.tabula.data.model.groups.{NamedLocation, DayOfWeek, WeekRange}
+import uk.ac.warwick.tabula.data.model.NamedLocation
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.util.cache.HashMapCacheStore
