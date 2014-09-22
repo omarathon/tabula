@@ -5,14 +5,14 @@ import java.sql.Types
 import org.hibernate.`type`.StandardBasicTypes
 import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 
-sealed abstract class Location {
+sealed abstract class Location extends Serializable {
 	def name: String
 
 	override def toString = name
 }
 
-case class NamedLocation(val name: String) extends Location
-case class MapLocation(val name: String, val locationId: String) extends Location
+@SerialVersionUID(372489712389245l) case class NamedLocation(val name: String) extends Location
+@SerialVersionUID(372489712389246l) case class MapLocation(val name: String, val locationId: String) extends Location
 
 object Location {
 	def fromDatabase(value: String): Location =

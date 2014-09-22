@@ -25,10 +25,13 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 		lazy val authScope = new AuthScope("www2.warwick.ac.uk", 443)
 		lazy val credentials = Credentials("username", "password")
 		val cacheEnabled = false
-	}) with UserLookupComponent with TermServiceComponent with CacheStrategyComponent {
+	}) with UserLookupComponent with TermServiceComponent with CacheStrategyComponent with LocationFetchingServiceComponent {
 		val userLookup = new MockUserLookup
 		val termService = new TermServiceImpl
 		val cacheStrategy = CacheStrategy.InMemoryOnly
+		val locationFetchingService = new LocationFetchingService {
+			def locationFor(name: String) = NamedLocation(name)
+		}
 	}
 
 	@Test def parseICal() {
@@ -146,7 +149,8 @@ END:VCALENDAR
 				cal.getComponent(Component.VEVENT).asInstanceOf[VEvent],
 				Map(),
 				CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"),
-				service.termService
+				service.termService,
+				service.locationFetchingService
 			)
 
 		parsed should be ('defined)

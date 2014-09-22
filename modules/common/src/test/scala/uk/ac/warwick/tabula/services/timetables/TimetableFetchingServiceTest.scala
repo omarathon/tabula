@@ -10,7 +10,11 @@ import scala.xml.XML
 class TimetableFetchingServiceTest extends TestBase {
 	
 	@Test def parseXML() {
-		val events = ScientiaHttpTimetableFetchingService.parseXml(XML.loadString(TimetableEvents), AcademicYear(2012))
+		val locationFetchingService = new LocationFetchingService {
+			def locationFor(name: String) = NamedLocation(name)
+		}
+
+		val events = ScientiaHttpTimetableFetchingService.parseXml(XML.loadString(TimetableEvents), AcademicYear(2012), locationFetchingService)
 		events.size should be (10)
 		events(0) should be (TimetableEvent(
 			uid="9e7ffe91e86820288dfe96be978145eb",
