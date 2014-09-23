@@ -19,7 +19,7 @@ object Routes {
 	object profile {
 		def view(member: Member) = context + "/view/%s" format encoded(member.universityId)
 		def view(member: Member, meeting: AbstractMeetingRecord) = context + "/view/%s?meeting=%s" format (encoded(member.universityId), encoded(meeting.id))
-		def view(scyd: StudentCourseYearDetails, meeting: AbstractMeetingRecord) = context + "/view/course/%s/%s?meeting=%s" format (encoded(scyd.studentCourseDetails.scjCode.replace("/", "_")), encoded(scyd.academicYear.value.toString), encoded(meeting.id))
+		def view(scyd: StudentCourseYearDetails, meeting: AbstractMeetingRecord) = context + "/view/course/%s/%s?meeting=%s" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString), encoded(meeting.id))
 		def photo(member: Member) = context + "/view/photo/%s.jpg" format encoded(member.universityId)
 		def mine = context + "/view/me"
 
