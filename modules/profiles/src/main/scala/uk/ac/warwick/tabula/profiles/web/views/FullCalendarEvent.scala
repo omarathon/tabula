@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.web.views
 
 import org.joda.time.{DateTime, LocalDate}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
-import uk.ac.warwick.tabula.data.model.groups.MapLocation
+import uk.ac.warwick.tabula.data.model.MapLocation
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.helpers.{ConfigurableIntervalFormatter, IntervalFormatter}
 import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter.{IncludeDays, Hour12OptionalMins}

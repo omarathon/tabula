@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponen
 import uk.ac.warwick.tabula.services.timetables.TimetableCacheKey._
 
 /**
- * A wrapper around a TimetableFetchingService that stores the resulting TimetableEvents in an ehCache disk-backed
+ * A wrapper around a TimetableFetchingService that stores the resulting TimetableEvents in a
  * cache, thus allowing us not to thrash Syllabus+ too badly
  *
  */

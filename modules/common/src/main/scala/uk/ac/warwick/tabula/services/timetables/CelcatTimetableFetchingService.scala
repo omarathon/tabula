@@ -16,7 +16,7 @@ import org.joda.time.{DateTime, DateTimeZone}
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.groups.{NamedLocation, WeekRange, DayOfWeek}
+import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
@@ -85,7 +85,7 @@ object CelcatHttpTimetableFetchingService {
 	val cacheName = "CelcatTimetables"
 
 	def apply(celcatConfiguration: CelcatConfiguration): StudentTimetableFetchingService with StaffTimetableFetchingService = {
-		val delegate = new CelcatHttpTimetableFetchingService(celcatConfiguration) with AutowiringUserLookupComponent with AutowiringTermServiceComponent with AutowiringCacheStrategyComponent
+		val delegate = new CelcatHttpTimetableFetchingService(celcatConfiguration) with AutowiringUserLookupComponent with AutowiringTermServiceComponent with AutowiringCacheStrategyComponent with WAI2GoHttpLocationFetchingServiceComponent with AutowiringWAI2GoConfigurationComponent
 
 		if (celcatConfiguration.cacheEnabled) {
 			new CachedStaffAndStudentTimetableFetchingService(delegate, cacheName)
@@ -94,7 +94,7 @@ object CelcatHttpTimetableFetchingService {
 		}
 	}
 
-	def parseVEvent(event: VEvent, allStaff: Map[UniversityId, CelcatStaffInfo], config: CelcatDepartmentConfiguration, termService: TermService): Option[TimetableEvent] = {
+	def parseVEvent(event: VEvent, allStaff: Map[UniversityId, CelcatStaffInfo], config: CelcatDepartmentConfiguration, termService: TermService, locationFetchingService: LocationFetchingService): Option[TimetableEvent] = {
 		val summary = Option(event.getSummary).fold("") { _.getValue }
 		val categories =
 			Option(event.getProperty(Property.CATEGORIES))
@@ -165,7 +165,7 @@ object CelcatHttpTimetableFetchingService {
 				day = day,
 				startTime = start.toLocalTime,
 				endTime = end.toLocalTime,
-				location = Option(event.getLocation).flatMap { _.getValue.maybeText }.map(NamedLocation),
+				location = Option(event.getLocation).flatMap { _.getValue.maybeText }.map(locationFetchingService.locationFor),
 				comments = None,
 				context = moduleCode,
 				staffUniversityIds = staffIds,
@@ -188,7 +188,7 @@ object CelcatHttpTimetableFetchingService {
 }
 
 class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguration) extends StaffTimetableFetchingService with StudentTimetableFetchingService with Logging with DisposableBean {
-	self: UserLookupComponent with TermServiceComponent with CacheStrategyComponent =>
+	self: UserLookupComponent with TermServiceComponent with LocationFetchingServiceComponent with CacheStrategyComponent =>
 
 	lazy val configs = celcatConfiguration.departmentConfiguration
 
@@ -341,7 +341,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		val allStaff = staffInfo(config)
 
 		cal.getComponents(Component.VEVENT).asScala.collect { case event: VEvent => event }.flatMap { event =>
-			parseVEvent(event, allStaff, config, termService)
+			parseVEvent(event, allStaff, config, termService, locationFetchingService)
 		}
 	}
 }

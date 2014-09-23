@@ -246,7 +246,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	def listStudentRelationshipsWithMemberInDepartment(relationshipType: StudentRelationshipType, agent: Member, department: Department) = transactional(readOnly = true) {
 		relationshipDao.getRelationshipsByAgent(relationshipType, agent.universityId)
 			.filter(relationshipNotPermanentlyWithdrawn)
-			.filter(relationshipDepartmentFilterMatches(department))
+			.filter(r => r.studentCourseDetails.department == department.rootDepartment)
 	}
 
 	def listAllStudentRelationshipsWithUniversityId(agentId: String) = transactional(readOnly = true) {
