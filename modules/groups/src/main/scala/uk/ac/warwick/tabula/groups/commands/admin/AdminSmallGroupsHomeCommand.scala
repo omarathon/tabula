@@ -69,6 +69,7 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 				.filter { set => statusFilters.asScala.isEmpty || statusFilters.asScala.exists { _(set) } }
 				.filter { set => allocationMethodFilters.asScala.isEmpty || allocationMethodFilters.asScala.exists { _(set) } }
 				.filter { set => termFilters.asScala.isEmpty || termFilters.asScala.exists { _(set) } }
+				.sortBy(set => (set.module.code, set.name))
 
 		val setViews = sets.map { set =>
 			val progress = smallGroupSetWorkflowService.progress(set)
