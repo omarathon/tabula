@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import org.joda.time.DateTime
+
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.data.model.{Feedback, Assignment, MarkerFeedback, Module}
@@ -46,6 +48,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 			newFeedback.uploaderId = submitter.apparentId
 			newFeedback.universityId = uniNumber
 			newFeedback.released = false
+			newFeedback.createdDate = DateTime.now
 			newFeedback
 		})
 
@@ -60,6 +63,9 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 			duplicateAttachment.foreach(markerFeedback.removeAttachment)
 			markerFeedback.addAttachment(attachment)
 		}
+
+		parentFeedback.updatedDate = DateTime.now
+
 		session.saveOrUpdate(parentFeedback)
 		session.saveOrUpdate(markerFeedback)
 

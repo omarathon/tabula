@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
+import org.joda.time.DateTime
+
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
@@ -38,12 +40,11 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 
 	feedback match {
 		case Some(f) => copyFrom(f)
-		case None => {
+		case None =>
 			fields = {
 				val pairs = assignment.feedbackFields.map { field => field.id -> field.blankFormValue }
 				Map(pairs: _*).asJava
 			}
-		}
 	}
 
 	def applyInternal(): Feedback = {
@@ -54,6 +55,7 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 			newFeedback.uploaderId = currentUser.apparentId
 			newFeedback.universityId = student.getWarwickId
 			newFeedback.released = false
+			newFeedback.createdDate = DateTime.now
 			newFeedback
 		})
 
@@ -64,6 +66,8 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 			zipService.invalidateIndividualFeedbackZip(feedback)
 			zipService.invalidateFeedbackZip(assignment)
 		}
+
+		feedback.updatedDate = DateTime.now
 
 		feedbackService.saveOrUpdate(feedback)
 		feedback
@@ -99,7 +103,7 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 	def copyTo(feedback: Feedback) {
 		// save custom fields
 		feedback.customFormValues.addAll(fields.asScala.map {
-			case (_, formValue) => {
+			case (_, formValue) =>
 
 				def newValue = {
 					val newValue = new SavedFormValue()
@@ -117,7 +121,6 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 
 				formValue.persist(savedFormValue)
 				savedFormValue
-			}
 		}.toSet[SavedFormValue].asJava)
 
 		// save mark and grade
@@ -169,7 +172,7 @@ trait WriteToFormFields {
 	def saveFormFields(markerFeedback: MarkerFeedback) {
 		// save custom fields
 		markerFeedback.customFormValues = fields.asScala.map {
-			case (_, formValue) => {
+			case (_, formValue) =>
 
 				def newValue = {
 					val newValue = new SavedFormValue()
@@ -187,7 +190,6 @@ trait WriteToFormFields {
 
 				formValue.persist(savedFormValue)
 				savedFormValue
-			}
 		}.toSet[SavedFormValue].asJava
 	}
 

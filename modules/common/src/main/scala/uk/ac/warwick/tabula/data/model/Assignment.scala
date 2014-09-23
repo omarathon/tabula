@@ -394,8 +394,8 @@ class Assignment
 	def resubmittable(user: User) = submittable(user) && allowResubmission && (!isClosed || isWithinExtension(user))
 
 	def mostRecentFeedbackUpload = feedbacks.maxBy {
-		_.uploadedDate
-	}.uploadedDate
+		_.updatedDate
+	}.updatedDate
 
 	def addField(field: FormField) {
 		if (field.context == null) throw new IllegalArgumentException("Field with name " + field.name + " has no context specified")

@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import org.joda.time.DateTime
+
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.{Notification, Module, Feedback, Assignment}
 import uk.ac.warwick.tabula.data.Transactions._
@@ -21,7 +23,7 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded
 		assignment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId && (feedback.hasMark || feedback.hasGrade) } match {
-			case Some(feedback) => {
+			case Some(feedback) =>
 				val markChanged = feedback.actualMark match {
 					case Some(m) if m.toString != mark.actualMark => true
 					case _ => false
@@ -34,8 +36,7 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 					mark.isModified = true
 					mark.isPublished = feedback.released
 				}
-			}
-			case None => {}
+			case None =>
 		}
 	}
 
@@ -47,13 +48,19 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 				newFeedback.uploaderId = submitter.apparentId
 				newFeedback.universityId = universityId
 				newFeedback.released = false
+				newFeedback.createdDate = DateTime.now
 				newFeedback
 			})
+
 			feedback.actualMark = StringUtils.hasText(actualMark) match {
 				case true => Some(actualMark.toInt)
 				case false => None
 			}
+
 			feedback.actualGrade = Option(actualGrade)
+
+			feedback.updatedDate = DateTime.now
+
 			session.saveOrUpdate(feedback)
 
 			if (feedback.released && isModified) {
