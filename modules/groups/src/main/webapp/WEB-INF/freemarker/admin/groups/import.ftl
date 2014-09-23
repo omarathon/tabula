@@ -18,9 +18,9 @@
 			</#compress></#list>
 		</@userlookup>
 	</#if>
-	<#if (event.location)?has_content>
+	<#if ((event.location.name)!"")?has_content>
 		<div class="location">
-			Room: ${event.location}
+			Room: <@fmt.location event.location />
 		</div>
 	</#if>
 	<div class="running">

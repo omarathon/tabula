@@ -32,7 +32,7 @@ abstract class OldViewAgentsStudentsCommand(
 	self: RelationshipServiceComponent =>
 
 	def applyInternal() = {
-		val students = relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember)
+		val students = relationshipService.listStudentRelationshipsWithMemberInDepartment(relationshipType, agent, department).flatMap(_.studentMember)
 		buildData(students, academicYear)
 	}
 }

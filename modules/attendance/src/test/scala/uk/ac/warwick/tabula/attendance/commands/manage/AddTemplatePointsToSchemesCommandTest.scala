@@ -18,9 +18,9 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends AddTemplatePointsToSchemesCommandState with TermServiceComponent
 		with AttendanceMonitoringServiceComponent with ProfileServiceComponent {
-		val termService = mock[TermService]
-		val attendanceMonitoringService = mock[AttendanceMonitoringService]
-		val profileService = mock[ProfileService]
+		val termService = smartMock[TermService]
+		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		val profileService = smartMock[ProfileService]
 
 		templateScheme = new AttendanceMonitoringTemplate
 		templateScheme.pointStyle = AttendanceMonitoringPointStyle.Date
@@ -57,6 +57,7 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 
 		attendanceMonitoringService.generatePointsFromTemplateScheme(templateScheme, academicYear) returns points
 		profileService.getAllMembersWithUniversityIds(argThat(anything)) returns Nil
+		attendanceMonitoringService.listAllSchemes(department) returns Seq(scheme)
 
 	}
 

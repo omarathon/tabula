@@ -39,6 +39,7 @@ trait SmallGroupDao {
 
 	def getSmallGroupEventOccurrence(event: SmallGroupEvent, week: Int): Option[SmallGroupEventOccurrence]
 	def findSmallGroupOccurrencesByGroup(group: SmallGroup): Seq[SmallGroupEventOccurrence]
+	def findSmallGroupOccurrencesByEvent(event: SmallGroupEvent): Seq[SmallGroupEventOccurrence]
 	
 	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendance]
 	def deleteAttendance(attendance: SmallGroupEventAttendance): Unit
@@ -102,6 +103,12 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 			.add(is("event.group", group))
 			.addOrder(asc("week"))
 			.addOrder(asc("event.day"))
+			.seq
+
+	def findSmallGroupOccurrencesByEvent(event: SmallGroupEvent) =
+		session.newCriteria[SmallGroupEventOccurrence]
+			.add(is("event", event))
+			.addOrder(asc("week"))
 			.seq
 			
 	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendance] =

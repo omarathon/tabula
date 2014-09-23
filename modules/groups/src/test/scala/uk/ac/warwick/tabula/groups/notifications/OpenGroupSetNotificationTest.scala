@@ -47,7 +47,7 @@ class OpenGroupSetNotificationTest extends TestBase with Mockito {
 	def shouldCallTextRendererWithCorrectTemplate(): Unit = new SmallGroupFixture {
 		val n = createNotification(Seq(groupSet1), actor, recipient)
 		n.userLookup = userLookup
-		n.content.template should be ("/WEB-INF/freemarker/notifications/open_small_group_student_notification.ftl")
+		n.content.template should be ("/WEB-INF/freemarker/notifications/groups/open_small_group_student_notification.ftl")
 	}
 
 	@Test

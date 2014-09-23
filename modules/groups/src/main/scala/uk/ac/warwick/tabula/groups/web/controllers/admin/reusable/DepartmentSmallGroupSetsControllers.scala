@@ -97,7 +97,7 @@ class EditDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCont
 
 	@RequestMapping
 	def form(@ModelAttribute("editDepartmentSmallGroupSetCommand") cmd: EditDepartmentSmallGroupSetCommand, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet) = {
-		Mav("admin/groups/reusable/edit").crumbs(Breadcrumbs.Department(set.department))
+		Mav("admin/groups/reusable/edit").crumbs(Breadcrumbs.DepartmentForYear(set.department, set.academicYear))
 	}
 
 	@RequestMapping(method = Array(POST))

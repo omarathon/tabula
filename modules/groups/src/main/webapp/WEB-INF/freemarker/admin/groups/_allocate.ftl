@@ -201,7 +201,7 @@
 
 						<div class="submit-buttons fix-footer">
 							<input type="submit" class="btn btn-primary" value="Save">
-							<a href="<@routes.depthome module />" class="btn">Cancel</a>
+							<a href="<@routes.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>" class="btn">Cancel</a>
 						</div>
 					</@f.form>
 				</div>

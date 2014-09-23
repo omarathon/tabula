@@ -80,14 +80,16 @@
 			<div class="striped-section" data-name="${module_anchor(module)}">
 				<div class="clearfix">
 					<div class="btn-group section-manage-button">
-					  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
-					  <ul class="dropdown-menu pull-right">
-					  	<#if can_manage>
+						<#if can_manage>
+							<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
+							<ul class="dropdown-menu pull-right">
 								<li><a href="<@routes.moduleperms module />">
 									<i class="icon-user"></i> Edit module permissions
 								</a></li>
-							</#if>
-					  </ul>
+					  		</ul>
+						<#else>
+							<a class="btn btn-medium dropdown-toggle disabled" title="You do not have permission to manage this module"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
+						</#if>
 					</div>
 
 					<h2 class="section-title with-button"><@fmt.module_name module /></h2>
@@ -113,14 +115,16 @@
 			<div class="striped-section" data-name="${route_anchor(route)}">
 				<div class="clearfix">
 					<div class="btn-group section-manage-button">
-					  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
-					  <ul class="dropdown-menu pull-right">
-					  	<#if can_manage>
+						<#if can_manage>
+							<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
+							<ul class="dropdown-menu pull-right">
 								<li><a href="<@routes.routeperms route />">
 									<i class="icon-user"></i> Edit route permissions
 								</a></li>
-							</#if>
-					  </ul>
+							</ul>
+						<#else>
+							<a class="btn btn-medium dropdown-toggle disabled" title="You do not have permission to manage this route"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
+						</#if>
 					</div>
 
 					<h2 class="section-title with-button"><@fmt.route_name route true /></h2>

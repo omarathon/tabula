@@ -22,12 +22,30 @@ object GroupsBreadcrumbs {
 	}
 
 	/**
+	 * Special case breadcrumb for the department admin page, for a particular academic year.
+	 */
+	case class DepartmentForYear(val department: model.Department, val academicYear: AcademicYear) extends Abstract {
+		val title = department.name
+		val url = Some(Routes.admin(department, academicYear))
+	}
+
+	/**
 	 * Special case breadcrumb for a module admin page.
 	 * Text is the module code, showing the name as a tooltip on hover.
 	 */
 	case class Module(val module: model.Module) extends Abstract {
 		val title = module.code.toUpperCase
 		val url = Some(Routes.admin(module.department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
+		override val tooltip = module.name
+	}
+
+	/**
+	 * Special case breadcrumb for a module admin page.
+	 * Text is the module code, showing the name as a tooltip on hover.
+	 */
+	case class ModuleForYear(val module: model.Module, val academicYear: AcademicYear) extends Abstract {
+		val title = module.code.toUpperCase
+		val url = Some(Routes.admin.module(module, academicYear))
 		override val tooltip = module.name
 	}
 

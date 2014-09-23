@@ -15,7 +15,11 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 	<@_u page=p />
 </#compress></#macro>
 <#macro modulehome module><@_u page="/admin/module/${module.code}/" /></#macro>
-<#macro depthome module><@_u page="/admin/department/${module.department.code}/#module-${module.code}" /></#macro>
+<#macro depthome module academicYear=""><#compress>
+	<#local p>/admin/department/${module.department.code}/<#if academicYear?has_content>${academicYear.startYear?c}/</#if>?moduleFilters=Module(${module.code})</#local>
+	<@_u page=p />
+</#compress></#macro>
+
 <#macro moduleperms module><@_u page="/module/${module.code}/permissions" context="/admin" /></#macro>
 
 <#macro displaysettings department><@_u page="/department/${department.code}/settings/display" context="/admin" /></#macro>

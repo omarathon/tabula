@@ -83,7 +83,7 @@ trait PopulateEditSmallGroupsCommand extends PopulateOnForm {
 		groupNames.clear()
 		maxGroupSizes.clear()
 
-		groupNames.addAll(set.groups.asScala.map { _.name }.asJava)
+		groupNames.addAll(set.groups.asScala.sorted.map { _.name }.asJava)
 		maxGroupSizes.addAll(set.groups.asScala.map { group =>
 			val groupSize = group.maxGroupSize.getOrElse {
 				if (set.defaultMaxGroupSizeEnabled) set.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
@@ -123,8 +123,8 @@ trait EditSmallGroupsValidation extends SelfValidating {
 		}
 
 		groupNames.asScala.zipWithIndex.foreach { case (name, index) =>
-			if (!name.hasText) errors.rejectValue(s"groupNames[${index}]", "smallGroup.name.NotEmpty")
-			else if (name.orEmpty.length > 200) errors.rejectValue(s"groupNames[${index}]", "smallGroup.name.Length", Array[Object](200: JInteger), "")
+			if (!name.hasText) errors.rejectValue(s"groupNames[$index]", "smallGroup.name.NotEmpty")
+			else if (name.orEmpty.length > 200) errors.rejectValue(s"groupNames[$index]", "smallGroup.name.Length", Array[Object](200: JInteger), "")
 		}
 
 		if (groupNames.size() < set.groups.size()) {
@@ -144,7 +144,7 @@ trait EditSmallGroupsCommandRemoveTrailingEmptyGroups extends BindListener {
 
 	override def onBind(result: BindingResult) {
 		// If the last element of events is both a Creation and is empty, disregard it
-		while (!groupNames.isEmpty() && !groupNames.asScala.last.hasText) {
+		while (!groupNames.isEmpty && !groupNames.asScala.last.hasText) {
 			groupNames.remove(groupNames.asScala.last)
 		}
 	}

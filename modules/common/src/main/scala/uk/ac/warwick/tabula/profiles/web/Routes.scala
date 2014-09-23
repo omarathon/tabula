@@ -21,6 +21,8 @@ object Routes {
 		def view(member: Member, meeting: AbstractMeetingRecord) = context + "/view/%s?meeting=%s" format (encoded(member.universityId), encoded(meeting.id))
 		def photo(member: Member) = context + "/view/photo/%s.jpg" format encoded(member.universityId)
 		def mine = context + "/view/me"
+
+		def viewTimetable(member: Member) = context + "/timetable/%s" format encoded(member.universityId)
 	}
 	
 	def students(relationshipType: StudentRelationshipType) = context + "/%s/students" format encoded(relationshipType.urlPart)

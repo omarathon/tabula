@@ -39,7 +39,7 @@ abstract class AbstractAllocateStudentsToGroupsController extends GroupsControll
 	protected val renderPath: String
 
 	protected def render(set: SmallGroupSet) = {
-		Mav(renderPath).crumbs(Breadcrumbs.Department(set.module.department), Breadcrumbs.Module(set.module))
+		Mav(renderPath).crumbs(Breadcrumbs.DepartmentForYear(set.module.department, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 
 	protected def submit(cmd: AllocateStudentsToGroupsCommand, errors: Errors, set: SmallGroupSet, route: String, objects: Pair[String, _]*) = {
@@ -54,7 +54,7 @@ abstract class AbstractAllocateStudentsToGroupsController extends GroupsControll
 
 	@RequestMapping(method=Array(POST))
 	def saveAndExit(@Valid @ModelAttribute("command") cmd: AllocateStudentsToGroupsCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
-		submit(cmd, errors, set, Routes.admin(set.module.department, set.academicYear), "allocated" -> set.id)
+		submit(cmd, errors, set, Routes.admin.module(set.module, set.academicYear), "allocated" -> set.id)
 
 }
 

@@ -111,6 +111,12 @@ class SmallGroupEventEntityReference extends EntityReference[SmallGroupEvent] {
 	var entity: Entity = null
 }
 
+@Entity @DiscriminatorValue(value="smallGroupEventOccurrence")
+class SmallGroupEventOcurrenceEntityReference extends EntityReference[SmallGroupEventOccurrence] {
+	@ManyToOne
+	var entity: Entity = null
+}
+
 @Entity @DiscriminatorValue(value="departmentSmallGroupSet")
 class DepartmentSmallGroupSetEntityReference extends EntityReference[DepartmentSmallGroupSet] {
 	@ManyToOne

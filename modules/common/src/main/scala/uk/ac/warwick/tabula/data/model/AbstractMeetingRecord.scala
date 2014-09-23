@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
-import uk.ac.warwick.tabula.data.model.groups.NamedLocation
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml

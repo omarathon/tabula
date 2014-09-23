@@ -28,6 +28,7 @@ object ModifySmallGroupEventCommand {
 			with CreateSmallGroupEventDescription
 			with ModifySmallGroupEventValidation
 			with ModifySmallGroupEventBinding
+			with ModifySmallGroupEventScheduledNotifications
 			with AutowiringSmallGroupServiceComponent
 
 	def edit(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent): Command =
@@ -37,6 +38,7 @@ object ModifySmallGroupEventCommand {
 			with EditSmallGroupEventDescription
 			with ModifySmallGroupEventValidation
 			with ModifySmallGroupEventBinding
+			with ModifySmallGroupEventScheduledNotifications
 			with AutowiringSmallGroupServiceComponent
 }
 
@@ -55,7 +57,7 @@ trait ModifySmallGroupEventCommandState extends CurrentSITSAcademicYear {
 	var title: String = _
 	var tutors: JList[String] = JArrayList()
 
-	def weekRanges = Option(weeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse(Seq())
+	def weekRanges = Option(weeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse Seq()
 	def weekRanges_=(ranges: Seq[WeekRange]) {
 		weeks =
 			JHashSet(ranges
@@ -76,7 +78,9 @@ trait EditSmallGroupEventCommandState extends ModifySmallGroupEventCommandState 
 	def existingEvent = Some(event)
 }
 
-class CreateSmallGroupEventCommandInternal(val module: Module, val set: SmallGroupSet, val group: SmallGroup) extends ModifySmallGroupEventCommandInternal with CreateSmallGroupEventCommandState {
+class CreateSmallGroupEventCommandInternal(val module: Module, val set: SmallGroupSet, val group: SmallGroup)
+	extends ModifySmallGroupEventCommandInternal with CreateSmallGroupEventCommandState {
+
 	self: SmallGroupServiceComponent =>
 
 	copyFromDefaults(set)
@@ -85,6 +89,7 @@ class CreateSmallGroupEventCommandInternal(val module: Module, val set: SmallGro
 		val event = new SmallGroupEvent(group)
 		copyTo(event)
 		smallGroupService.saveOrUpdate(event)
+		smallGroupService.getOrCreateSmallGroupEventOccurrences(event)
 		group.events.add(event)
 		smallGroupService.saveOrUpdate(group)
 		event
@@ -99,20 +104,22 @@ class EditSmallGroupEventCommandInternal(val module: Module, val set: SmallGroup
 	override def applyInternal() = transactional() {
 		copyTo(event)
 		smallGroupService.saveOrUpdate(event)
+		smallGroupService.getOrCreateSmallGroupEventOccurrences(event)
 		event
 	}
 }
 
-abstract class ModifySmallGroupEventCommandInternal extends CommandInternal[SmallGroupEvent] with ModifySmallGroupEventCommandState {
+abstract class ModifySmallGroupEventCommandInternal
+	extends CommandInternal[SmallGroupEvent] with ModifySmallGroupEventCommandState {
+
 	def copyFromDefaults(set: SmallGroupSet) {
 		weekRanges = set.defaultWeekRanges
 
 		Option(set.defaultLocation).foreach {
 			case NamedLocation(name) => location = name
-			case MapLocation(name, lid) => {
+			case MapLocation(name, lid) =>
 				location = name
 				locationId = lid
-			}
 		}
 
 		if (set.defaultTutors != null) tutors.addAll(set.defaultTutors.knownType.allIncludedIds.asJava)
@@ -123,10 +130,9 @@ abstract class ModifySmallGroupEventCommandInternal extends CommandInternal[Smal
 
 		Option(event.location).foreach {
 			case NamedLocation(name) => location = name
-			case MapLocation(name, lid) => {
+			case MapLocation(name, lid) =>
 				location = name
 				locationId = lid
-			}
 		}
 
 		weekRanges = event.weekRanges
@@ -179,7 +185,7 @@ trait ModifySmallGroupEventBinding extends BindListener {
 		}
 
 		// We reverse because removing from the back is better
-		indexesToRemove.reverse.foreach { tutors.remove(_) }
+		indexesToRemove.reverse.foreach { tutors.remove }
 	}
 }
 
@@ -240,4 +246,37 @@ trait EditSmallGroupEventDescription extends Describable[SmallGroupEvent] {
 		d.smallGroupEvent(event)
 	}
 
+}
+
+trait ModifySmallGroupEventScheduledNotifications
+	extends SchedulesNotifications[SmallGroupEvent, SmallGroupEventOccurrence] {
+
+	self: SmallGroupServiceComponent =>
+
+	override def transformResult(event: SmallGroupEvent): Seq[SmallGroupEventOccurrence] =
+		// get all the occurrences (even the ones in invalid weeks) so they can be cleared
+		smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
+
+	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = {
+		// Only generate notifications for occurrences that are in valid weeks...
+		if (occurrence.event.allWeeks.contains(occurrence.week)) {
+			occurrence.dateTime.map(dt =>
+				// ... and have a valid date time
+				Seq(
+					new ScheduledNotification[SmallGroupEventOccurrence](
+						"SmallGroupEventAttendanceReminder",
+						occurrence,
+						dt.withTime(occurrence.event.endTime.getHourOfDay, occurrence.event.endTime.getMinuteOfHour, 0, 0)
+					),
+					new ScheduledNotification[SmallGroupEventOccurrence](
+						"SmallGroupEventAttendanceReminder",
+						occurrence,
+						dt.plusDays(7)
+					)
+				)
+			).getOrElse(Seq())
+		} else {
+			Seq()
+		}
+	}
 }
