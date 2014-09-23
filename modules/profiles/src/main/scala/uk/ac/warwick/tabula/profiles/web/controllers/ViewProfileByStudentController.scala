@@ -2,13 +2,17 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
+import uk.ac.warwick.tabula.services.AutowiringMeetingRecordServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.web.Routes
 
 @Controller
-class ViewProfileByStudentController extends ViewProfileController {
+class ViewProfileByStudentController
+	extends ViewProfileController
+	with AutowiringMeetingRecordServiceComponent {
 
 	@ModelAttribute("viewProfileCommand")
 	def viewProfileCommand(@PathVariable("member") member: Member) = member match {
@@ -22,20 +26,32 @@ class ViewProfileByStudentController extends ViewProfileController {
 		@PathVariable("member") member: Member,
 		@ModelAttribute("viewProfileCommand") profileCmd: Appliable[Member],
 		@RequestParam(value = "meeting", required = false) openMeetingId: String,
-		@RequestParam(defaultValue = "", required = false) agentId: String) = {
+		@RequestParam(defaultValue = "", required = false) agentId: String): Mav = {
 		val profiledMember = profileCmd.apply()
 
+		// used in pattern guard and in result, so use lazy val to evaluate only once
+		lazy val meetingForAnotherScyd: Option[(StudentCourseYearDetails, AbstractMeetingRecord)] = profiledMember.asInstanceOf[StudentMember].mostSignificantCourseDetails.map { s =>
+			val meeting = meetingRecordService.get(openMeetingId)
+			meeting.flatMap { m =>
+				val latestScyd = s.latestStudentCourseYearDetails
+				val meetingScyd = meetingRecordService.getAcademicYear(m).flatMap(studentCourseYearFromYear(s, _))
+			  meetingScyd.filter(_ != latestScyd).map((_, m))
+			}
+		} getOrElse(None)
+
 		profiledMember match {
-			case studentProfile: StudentMember => viewProfileForCourse(studentProfile.mostSignificantCourseDetails,
-				studentProfile.defaultYearDetails,
-				openMeetingId,
-				agentId,
-				studentProfile)
+			case studentProfile: StudentMember if meetingForAnotherScyd.isDefined =>
+				Redirect(Routes.profile.view(meetingForAnotherScyd.get._1, meetingForAnotherScyd.get._2))
+			case studentProfile: StudentMember =>
+				viewProfileForCourse(studentProfile.mostSignificantCourseDetails,
+						studentProfile.defaultYearDetails,
+						openMeetingId,
+						agentId,
+						studentProfile)
 			case staffProfile: StaffMember => viewProfileForStaff(staffProfile)
+			case _ => throw new ItemNotFoundException
 		}
 	}
-
-
 }
 
 @Controller
