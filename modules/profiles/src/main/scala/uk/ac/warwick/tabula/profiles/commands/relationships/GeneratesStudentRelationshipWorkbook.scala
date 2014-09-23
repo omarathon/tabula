@@ -17,19 +17,22 @@ trait GeneratesStudentRelationshipWorkbook {
 
 		val agentLookupRange = agentLookupSheetName + "!$A2:$B" + (allAgents.length + 1)
 
-		allAllocations.foreach { case (student, agents) =>
-			val row = sheet.createRow(sheet.getLastRowNum + 1)
+		allAllocations
+			// TAB-2677
+			.filter { case(_, agents) => agents.size <= 1 }
+			.foreach { case (student, agents) =>
+				val row = sheet.createRow(sheet.getLastRowNum + 1)
 
-			row.createCell(0).setCellValue(student.universityId)
-			row.createCell(1).setCellValue(student.fullName.getOrElse(""))
+				row.createCell(0).setCellValue(student.universityId)
+				row.createCell(1).setCellValue(student.fullName.getOrElse(""))
 
-			val agentNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown agent name
-			agents.headOption.flatMap { _.fullName }.foreach(agentNameCell.setCellValue)
+				val agentNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown agent name
+				agents.headOption.flatMap { _.fullName }.foreach(agentNameCell.setCellValue)
 
-			row.createCell(3).setCellFormula(
-				"IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
-			)
-		}
+				row.createCell(3).setCellFormula(
+					"IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
+				)
+			}
 
 		formatWorkbook(workbook, department, relationshipType)
 		workbook

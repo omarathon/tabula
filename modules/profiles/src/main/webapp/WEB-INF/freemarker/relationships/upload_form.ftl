@@ -25,8 +25,11 @@
 		<button type="submit" class="btn" name="template" value="true"><i class="icon-download"></i> Download a template spreadsheet</button>
 		<br />
 		This will be prefilled with the names and University ID numbers of students and their ${relationshipType.agentRole} (if they have one) in ${department.name}. In Excel you may need to <a href="http://office.microsoft.com/en-gb/excel-help/what-is-protected-view-RZ101665538.aspx?CTT=1&section=7">exit protected view</a> to edit the spreadsheet.
-		<br />
-		<strong>Note:</strong> This will include any changes made in the drag and drop tab. You can also <a href="<@routes.relationship_template department relationshipType />">download a template without these changes</a>.
+		<br /><br />
+		<div class="alert alert-info">
+			<p>This will include any changes made in the drag and drop tab. You can also <a href="<@routes.relationship_template department relationshipType />">download a template without these changes</a>.</p>
+			<p>Any students with multiple existing tutors will <strong>not</strong> be included in the spreadsheet, as only 1 tutor can be assigned per student using this method.</p>
+		</div>
 	</li>
 	<li><strong>Allocate students</strong> to ${relationshipType.agentRole}s using the dropdown menu in the <strong>${relationshipType.agentRole?cap_first} name</strong> column or by typing a ${relationshipType.agentRole}'s University ID into the <strong>agent_id</strong> column. The <strong>agent_id</strong> field will be updated with the University ID for that ${relationshipType.agentRole} if you use the dropdown.
 		Any students with an empty <strong>agent_id</strong> field will have their ${relationshipType.agentRole} removed, if they have one.</li>
