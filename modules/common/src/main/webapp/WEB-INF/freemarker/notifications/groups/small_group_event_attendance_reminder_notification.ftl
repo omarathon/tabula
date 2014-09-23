@@ -1,1 +1,1 @@
-${occurrence.event.group.groupSet.name} ${occurrence.event.group.name} needs attendance recording for the event at ${dateTimeFormatter.print(occurrence.dateTime)}
+${occurrence.event.group.groupSet.name} ${occurrence.event.group.name} needs attendance recording for the event at ${dateTimeFormatter.print(occurrence.dateTime)}.
