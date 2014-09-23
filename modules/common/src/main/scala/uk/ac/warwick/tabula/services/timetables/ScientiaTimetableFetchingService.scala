@@ -8,7 +8,7 @@ import org.joda.time.LocalTime
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.groups.{NamedLocation, DayOfWeek, WeekRangeListUserType}
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRangeListUserType}
 import uk.ac.warwick.tabula.helpers.{Logging, ClockComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
@@ -46,6 +46,8 @@ trait ScientiaHttpTimetableFetchingServiceComponent extends CompleteTimetableFet
 }
 
 private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: ScientiaConfiguration) extends CompleteTimetableFetchingService with Logging with DisposableBean {
+	self: LocationFetchingServiceComponent =>
+
 	import ScientiaHttpTimetableFetchingService._
 
 	lazy val perYearUris = scientiaConfiguration.perYearUris
@@ -79,7 +81,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 	// a dispatch response handler which reads XML from the response and parses it into a list of TimetableEvents
 	// the timetable response doesn't include its year, so we pass that in separately.
 	def handler(year:AcademicYear) = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
-		req <> { (node) => parseXml(node, year) }
+		req <> { (node) => parseXml(node, year, locationFetchingService) }
 	}
 
 	def getTimetableForStudent(universityId: String): Seq[TimetableEvent] = doRequest(studentUris, universityId)
@@ -111,7 +113,7 @@ object ScientiaHttpTimetableFetchingService {
 	val cacheName = "SyllabusPlusTimetables"
 
 	def apply(scientiaConfiguration: ScientiaConfiguration) = {
-		val service = new ScientiaHttpTimetableFetchingService(scientiaConfiguration)
+		val service = new ScientiaHttpTimetableFetchingService(scientiaConfiguration) with WAI2GoHttpLocationFetchingServiceComponent with AutowiringWAI2GoConfigurationComponent
 
 		if (scientiaConfiguration.perYearUris.exists(_._1.contains("stubTimetable"))) {
 			// don't cache if we're using the test stub - otherwise we won't see updates that the test setup makes
@@ -121,7 +123,7 @@ object ScientiaHttpTimetableFetchingService {
 		}
 	}
 
-	def parseXml(xml: Elem, year:AcademicYear): Seq[TimetableEvent] =
+	def parseXml(xml: Elem, year: AcademicYear, locationFetchingService: LocationFetchingService): Seq[TimetableEvent] =
 		xml \\ "Activity" map { activity =>
 			val name = (activity \\ "name").text
 
@@ -133,7 +135,7 @@ object ScientiaHttpTimetableFetchingService {
 					// S+ has some (not all) rooms as "AB_AB1.2", where AB is a building code
 					// we're generally better off without this.
 					val removeBuildingNames = "^[^_]*_".r
-					Some(NamedLocation(removeBuildingNames.replaceFirstIn(text,"")))
+					Some(locationFetchingService.locationFor(removeBuildingNames.replaceFirstIn(text,"")))
 				}
 				case _ => None
 			}

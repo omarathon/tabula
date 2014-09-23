@@ -26,7 +26,7 @@ class ViewAgentsStudentsCommandInternal(val department: Department, val academic
 		self: RelationshipServiceComponent with AttendanceMonitoringServiceComponent with TermServiceComponent =>
 
 		def applyInternal() = {
-			val students = relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember)
+			val students = relationshipService.listStudentRelationshipsWithMemberInDepartment(relationshipType, agent, department).flatMap(_.studentMember)
 			buildAttendanceResult(students.size, students, Option(department), academicYear)
 		}
 	}

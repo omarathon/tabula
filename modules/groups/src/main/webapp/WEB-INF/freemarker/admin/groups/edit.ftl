@@ -27,7 +27,7 @@
 			name="create"
 			value="Save"
 			/>
-		<a class="btn" href="<@routes.depthome module=smallGroupSet.module />">Cancel</a>
+		<a class="btn" href="<@routes.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>">Cancel</a>
 	</div>
 
 </@f.form>

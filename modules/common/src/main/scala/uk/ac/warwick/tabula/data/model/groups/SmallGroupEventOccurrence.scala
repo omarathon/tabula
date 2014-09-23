@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.data.model.groups
 import javax.persistence._
 
 import org.hibernate.annotations.{AccessType, BatchSize}
-import org.joda.time.LocalDate
+import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.GeneratedId
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.TermService
 
@@ -15,7 +15,9 @@ import uk.ac.warwick.tabula.services.TermService
 @Table(uniqueConstraints = Array(
 	new UniqueConstraint(columnNames = Array("event_id", "week"))
 ))
-class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with Serializable {
+class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with Serializable with ToEntityReference {
+
+	override type Entity = SmallGroupEventOccurrence
 
 	@transient var termService = Wire[TermService]
 
@@ -43,6 +45,9 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 		}
 	}
 
+	def dateTime: Option[DateTime] = date.map(_.toDateTime(event.startTime))
+
+	override def toEntityReference = new SmallGroupEventOcurrenceEntityReference().put(this)
 }
 
 object SmallGroupEventOccurrence {

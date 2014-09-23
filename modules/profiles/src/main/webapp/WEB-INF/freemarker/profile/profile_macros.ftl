@@ -134,10 +134,45 @@
 </section>
 </#macro>
 
+<#macro timetable_ical_modal profile>
+<div class="modal hide fade" id="timetable-ical-modal">
+	<@modal.header>
+		<h2>Subscribe to your timetable</h2>
+	</@modal.header>
+	<@modal.body>
+		<#if isSelf>
+			<div class="alert alert-info">
+				<p>Tabula provides your timetable as a calendar feed with a "private address". Private Addresses are designed for your use only. They don't require any further authentication to get information from your timetable, so they're useful for getting your timetable into another calendar or application, or your mobile phone.</p>
+				<p>If you accidentally share the address with others, you can change the address by clicking the button below. All of the existing clients using this private address will break, and you will have to give them the new private address.</p>
+				<form class="form-inline double-submit-protection" method="POST" action="<@routes.timetable_ical_regenerate />">
+					<div class="submit-buttons">
+						<button type="submit" class="btn btn-primary">Generate a new private address</button>
+					</div>
+				</form>
+			</div>
+		</#if>
+
+		<p>You can <a href="<@routes.timetable_ical profile />">click this link</a> to subscribe to your timetable in your default calendar application.</p>
+
+		<p>You can also copy the link and paste it into an external application, e.g. Google Calendar:</p>
+
+		<p><a href="<@routes.timetable_ical profile />"><@routes.timetable_ical profile false /></a></p>
+	</@modal.body>
+</div>
+</#macro>
+
+<#macro timetable_placeholder profile view_name="agendaWeek" show_view_switcher=false>
+	<div class='fullCalendar' data-viewname='${view_name}' data-studentid='${profile.universityId}' data-showviewswitcher="${show_view_switcher?string("true", "false")}"></div>
+</#macro>
 
 <#macro timetablePane profile>
 	<li id="timetable-pane" data-title="Timetable">
 		<section id="timetable-details" class="clearfix" >
+			<div class="pull-right">
+				<a href="<@routes.timetable profile />"><i class="icon-fullscreen"></i></a>
+				<a href="<@routes.timetable profile />">View full screen</a>
+			</div>
+
 			<h4>
 				Timetable
 				<#if profile.timetableHash?has_content && can.do("Profiles.Read.TimetablePrivateFeed", profile)>
@@ -149,34 +184,11 @@
 					</span>
 				</#if>
 			</h4>
-			<div class='fullCalendar' data-viewname='agendaWeek' data-studentid='${profile.universityId}'></div>
+			<@timetable_placeholder profile />
 		</section>
 	</li>
 	<#if profile.timetableHash?has_content>
-	<div class="modal hide fade" id="timetable-ical-modal">
-		<@modal.header>
-			<h2>Subscribe to your timetable</h2>
-		</@modal.header>
-		<@modal.body>
-			<#if isSelf>
-				<div class="alert alert-info">
-					<p>Tabula provides your timetable as a calendar feed with a "private address". Private Addresses are designed for your use only. They don't require any further authentication to get information from your timetable, so they're useful for getting your timetable into another calendar or application, or your mobile phone.</p>
-					<p>If you accidentally share the address with others, you can change the address by clicking the button below. All of the existing clients using this private address will break, and you will have to give them the new private address.</p>
-					<form class="form-inline double-submit-protection" method="POST" action="<@routes.timetable_ical_regenerate />">
-						<div class="submit-buttons">
-							<button type="submit" class="btn btn-primary">Generate a new private address</button>
-						</div>
-					</form>
-				</div>
-			</#if>
-
-			<p>You can <a href="<@routes.timetable_ical profile />">click this link</a> to subscribe to your timetable in your default calendar application.</p>
-
-			<p>You can also copy the link and paste it into an external application, e.g. Google Calendar:</p>
-
-			<p><a href="<@routes.timetable_ical profile />"><@routes.timetable_ical profile false /></a></p>
-		</@modal.body>
-	</div>
+		<@timetable_ical_modal profile />
 	</#if>
 </#macro>
 

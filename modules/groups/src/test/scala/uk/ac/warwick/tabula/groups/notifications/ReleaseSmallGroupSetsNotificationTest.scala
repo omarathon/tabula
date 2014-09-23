@@ -64,7 +64,7 @@ class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito{
   def shouldCallTextRendererWithCorrectTemplate():Unit = new SmallGroupFixture {
     val n = createNotification(group1, actor, recipient)
 		n.userLookup = userLookup
-    n.content.template should be ("/WEB-INF/freemarker/notifications/release_small_group_notification.ftl")
+    n.content.template should be ("/WEB-INF/freemarker/notifications/groups/release_small_group_notification.ftl")
   }
 
   @Test

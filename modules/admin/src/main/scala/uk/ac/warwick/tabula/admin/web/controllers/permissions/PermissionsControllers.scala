@@ -266,7 +266,7 @@ class AssignmentPermissionsController extends PermissionsControllerMethods[Assig
 @Controller @RequestMapping(value = Array("/permissions/smallgroupset/{target}"))
 class SmallGroupSetPermissionsController extends PermissionsControllerMethods[SmallGroupSet] {
 	@ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") set: SmallGroupSet) = Seq(
-		AdminLink("Manage", Routes.groups.admin(set))
+		AdminLink("Manage", Routes.groups.admin.module(set.module, set.academicYear))
 	)
 }
 

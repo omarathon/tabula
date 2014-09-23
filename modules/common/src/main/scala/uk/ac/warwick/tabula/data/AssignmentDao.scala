@@ -128,11 +128,11 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 
 	def findAssignmentsByNameOrModule(query: String) = {
 		session.newQuery[Assignment]("""select a from Assignment
-				a where a.name like :nameLike
-				or a.module.code like :nameLike
+				a where lower(a.name) like :nameLike
+				or lower(a.module.code) like :nameLike
 				order by createdDate desc
 																 """)
-			.setString("nameLike", "%" + query + "%")
+			.setString("nameLike", "%" + query.toLowerCase + "%")
 			.setMaxResults(MaxAssignmentsByName).seq
 	}
 

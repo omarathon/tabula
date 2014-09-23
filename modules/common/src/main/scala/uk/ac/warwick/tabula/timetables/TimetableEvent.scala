@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.timetables
 
 import org.joda.time.{LocalTime, LocalDateTime}
+import uk.ac.warwick.tabula.data.model.Location
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.AcademicYear
 

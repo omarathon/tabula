@@ -161,7 +161,7 @@ class SmallGroupSet
 	def defaultTutors: UnspecifiedTypeUserGroup = _defaultTutors // No need to wrap this in a cache
 	def defaultTutors_=(group: UserGroup) { _defaultTutors = group }
 
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.LocationUserType")
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.LocationUserType")
 	@Column(name = "default_location")
 	var defaultLocation: Location = _
 	

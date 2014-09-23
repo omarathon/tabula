@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.groups
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model.{NamedLocation, UserGroup}
 
 class SmallGroupEventTest extends TestBase with Mockito{
 

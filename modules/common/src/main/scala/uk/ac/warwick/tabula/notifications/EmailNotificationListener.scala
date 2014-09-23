@@ -28,7 +28,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 	var fromAddress: String = Wire.property("${mail.admin.to}")
 	val mailHeader = "Dear %s,\n\n"
 	val mailFooter = "\n\nThank you,\nTabula"
-	val replyWarning = "\n\nThis email was sent from an automated system, and replies to it will not reach a real person."
+	val replyWarning = "\n\nThis email was sent from an automated system and replies to it will not reach a real person."
 
 	def link(n: Notification[_,_]) = if (n.actionRequired) {
 		s"\n\nYou need to ${n.urlTitle}. Please visit ${topLevelUrl}${n.url}."
