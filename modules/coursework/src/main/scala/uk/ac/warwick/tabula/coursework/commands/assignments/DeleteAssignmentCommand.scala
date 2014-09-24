@@ -1,17 +1,14 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.data.model.Assignment
 import org.springframework.validation.Errors
-import org.springframework.validation.ValidationUtils
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.commands.{Command, Description, SchedulesNotifications, SelfValidating}
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.commands.SelfValidating
 
 
-class DeleteAssignmentCommand(val module: Module = null, val assignment: Assignment = null) extends Command[Unit] with SelfValidating {
+class DeleteAssignmentCommand(val module: Module = null, val assignment: Assignment = null)
+	extends Command[Assignment] with SelfValidating with SchedulesNotifications[Assignment, Assignment] {
 	
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Assignment.Delete, assignment)
@@ -44,9 +41,14 @@ class DeleteAssignmentCommand(val module: Module = null, val assignment: Assignm
 	}
 
 	override def applyInternal() = transactional() {
-		assignment.markDeleted
+		assignment.markDeleted()
+		assignment
 	}
 
 	override def describe(d: Description) = d.assignment(assignment)
+
+	override def transformResult(assignment: Assignment) = Seq(assignment)
+
+	override def scheduledNotifications(assignment: Assignment) = Seq()
 
 }

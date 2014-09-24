@@ -116,9 +116,9 @@ trait CreateScheduledMeetingRecordNotification extends Notifies[ScheduledMeeting
 	}
 }
 
-trait CreateScheduledMeetingRecordScheduledNotifications extends SchedulesNotifications[ScheduledMeetingRecordResult, ScheduledMeetingRecord] {
+trait CreateScheduledMeetingRecordScheduledNotifications extends SchedulesNotifications[ScheduledMeetingRecord, ScheduledMeetingRecord] {
 
-	override def transformResult(result: ScheduledMeetingRecordResult) = Seq(result.meetingRecord)
+	override def transformResult(meetingRecord: ScheduledMeetingRecord) = Seq(meetingRecord)
 
 	override def scheduledNotifications(meetingRecord: ScheduledMeetingRecord) = {
 		Seq(

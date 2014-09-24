@@ -163,11 +163,10 @@ trait AttendanceMonitoringPointValidation {
 		startWeek: Int,
 		endWeek: Int,
 		schemes: Seq[AttendanceMonitoringScheme],
-		global: Boolean = false,
-		excludePoint: Option[AttendanceMonitoringPoint] = None
+		global: Boolean = false
 	) = {
 		val allPoints = schemes.map(_.points.asScala).flatten
-		if (allPoints.exists(point => point != excludePoint && point.name == name && point.startWeek == startWeek && point.endWeek == endWeek)) {
+		if (allPoints.exists(point => point.name == name && point.startWeek == startWeek && point.endWeek == endWeek)) {
 			if (global) {
 				errors.reject("attendanceMonitoringPoint.name.weeks.exists.global", Array(name, startWeek.toString, endWeek.toString), null)
 			} else {
@@ -183,11 +182,10 @@ trait AttendanceMonitoringPointValidation {
 		startDate: LocalDate,
 		endDate: LocalDate,
 		schemes: Seq[AttendanceMonitoringScheme],
-		global: Boolean = false,
-		excludePoint: Option[AttendanceMonitoringPoint] = None
+		global: Boolean = false
 	) = {
 		val allPoints = schemes.map(_.points.asScala).flatten
-		if (allPoints.exists(point => point != excludePoint && point.name == name && point.startDate == startDate && point.endDate == endDate)) {
+		if (allPoints.exists(point => point.name == name && point.startDate == startDate && point.endDate == endDate)) {
 			if (global) {
 				errors.reject("attendanceMonitoringPoint.name.dates.exists.global", Array(name, startDate, endDate), null)
 			} else {
