@@ -203,7 +203,7 @@ class SmallGroupSet
 	}
 
 	def nameWithoutModulePrefix = {
-		if (name.startsWith(module.code.toUpperCase)) {
+		if (name.startsWith(module.code.toUpperCase + " ")) {
 			name.replaceFirst(module.code.toUpperCase + " ", "")
 		} else name
 	}
