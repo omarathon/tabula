@@ -53,17 +53,17 @@ trait CreateNewAttendancePointsFromCopyValidation extends SelfValidating with Ge
 	self: CreateNewAttendancePointsFromCopyCommandState with TermServiceComponent with AttendanceMonitoringServiceComponent =>
 
 	override def validate(errors: Errors) {
-		val points = getPoints(findPointsResult, schemes, pointStyle)
+		val points = getPoints(findPointsResult, schemes, pointStyle, addToScheme = false)
 		points.foreach(point => {
 			validateSchemePointStyles(errors, pointStyle, schemes.toSeq)
 
 			pointStyle match {
 				case AttendanceMonitoringPointStyle.Date =>
 					validateCanPointBeEditedByDate(errors, point.startDate, schemes.map{_.members.members}.flatten, academicYear, "")
-					validateDuplicateForDate(errors, point.name, point.startDate, point.endDate, schemes, global = true, excludePoint = Some(point))
+					validateDuplicateForDate(errors, point.name, point.startDate, point.endDate, schemes, global = true)
 				case AttendanceMonitoringPointStyle.Week =>
 					validateCanPointBeEditedByWeek(errors, point.startWeek, schemes.map{_.members.members}.flatten, academicYear, "")
-					validateDuplicateForWeek(errors, point.name, point.startWeek, point.endWeek, schemes, global = true, excludePoint = Some(point))
+					validateDuplicateForWeek(errors, point.name, point.startWeek, point.endWeek, schemes, global = true)
 			}
 		})
 	}
@@ -77,7 +77,8 @@ trait GetsPointsToCreate {
 	def getPoints(
 		findPointsResult: FindPointsResult,
 		schemes: Seq[AttendanceMonitoringScheme],
-		pointStyle: AttendanceMonitoringPointStyle
+		pointStyle: AttendanceMonitoringPointStyle,
+		addToScheme: Boolean = true
 	): Seq[AttendanceMonitoringPoint] = {
 		val oldPoints = findPointsResult.termGroupedOldPoints.flatMap(_._2).map(_.templatePoint).toSeq
 		val weekPoints = findPointsResult.termGroupedPoints.flatMap(_._2).map(_.templatePoint).toSeq
@@ -87,7 +88,8 @@ trait GetsPointsToCreate {
 			schemes.flatMap { scheme =>
 				oldPoints.map { oldPoint =>
 					val newPoint = new AttendanceMonitoringPoint
-					newPoint.scheme = scheme
+					if (addToScheme)
+						newPoint.scheme = scheme
 					newPoint.createdDate = DateTime.now
 					newPoint.updatedDate = DateTime.now
 					copyFromOldPoint(oldPoint, newPoint)
@@ -98,7 +100,10 @@ trait GetsPointsToCreate {
 			// Week points
 			schemes.flatMap { scheme =>
 				weekPoints.map { weekPoint =>
-					val newPoint = weekPoint.cloneTo(scheme)
+					val newPoint = addToScheme match {
+						case true => weekPoint.cloneTo(Option(scheme))
+						case false => weekPoint.cloneTo(None)
+					}
 					newPoint.createdDate = DateTime.now
 					newPoint.updatedDate = DateTime.now
 					newPoint
@@ -108,7 +113,10 @@ trait GetsPointsToCreate {
 			// Date points
 			schemes.flatMap { scheme =>
 				datePoints.map { datePoint =>
-					val newPoint = datePoint.cloneTo(scheme)
+					val newPoint = addToScheme match {
+						case true => datePoint.cloneTo(Option(scheme))
+						case false => datePoint.cloneTo(None)
+					}
 					newPoint.createdDate = DateTime.now
 					newPoint.updatedDate = DateTime.now
 					newPoint
