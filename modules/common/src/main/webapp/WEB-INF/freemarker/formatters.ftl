@@ -94,7 +94,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	<#if withFormatting>
 	<span class="mod-code">${groupset.module.code?upper_case}</span> <span class="group-name">${groupset.nameWithoutModulePrefix}</span>
 	<#else>
-	${groupset.module.code?upper_case} ${groupset.name}
+	${groupset.module.code?upper_case} ${groupset.nameWithoutModulePrefix}
 	</#if>
 </#compress></#macro>
 
