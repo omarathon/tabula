@@ -67,7 +67,7 @@ class EditAssignmentController extends CourseworkController {
 			form.apply()
 		}
 
-		showForm(form, true)
+		showForm(form, openDetails = true)
 	}
 
 	@InitBinder
