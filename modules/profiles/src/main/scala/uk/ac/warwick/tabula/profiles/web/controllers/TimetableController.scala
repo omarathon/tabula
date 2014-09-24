@@ -227,3 +227,11 @@ class LegacyTimetableICalController extends AbstractTimetableICalController {
 
 }
 
+@Controller
+@RequestMapping(value = Array("/timetable/{member}/ical", "/timetable/{member}/timetable.ics"))
+class TimetableICalForMemberController extends AbstractTimetableICalController {
+
+	@ModelAttribute("command")
+	def command(@PathVariable member: Member) = commandForMember(member)
+
+}
