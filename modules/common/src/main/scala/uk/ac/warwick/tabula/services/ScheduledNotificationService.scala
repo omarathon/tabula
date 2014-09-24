@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.{ToEntityReference, Notification, ScheduledNotification}
+import uk.ac.warwick.tabula.data.model.{CanBeDeleted, ToEntityReference, Notification, ScheduledNotification}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.{Daoisms, ScheduledNotificationDao}
 import uk.ac.warwick.tabula.helpers.{Logging, ReflectionHelper}
@@ -38,8 +38,10 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 		try {
 			val notificationClass = notificationMap(sn.notificationType)
 			val baseNotification: Notification[ToEntityReference, Unit] = notificationClass.newInstance()
-			val entity: ToEntityReference = sn.target.entity
-			Some(Notification.init(baseNotification, new AnonymousUser, entity))
+			sn.target.entity match {
+				case entity: CanBeDeleted if entity.deleted => None
+				case entity => Some(Notification.init(baseNotification, new AnonymousUser, entity))
+			}
 		} catch {
 			// Can happen if reference to an entity has since been deleted, e.g.
 			// a submission is resubmitted and the old submission is removed. Skip this notification.
@@ -64,7 +66,7 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 						rawSn =>
 							val sn = rawSn.asInstanceOf[ScheduledNotification[_ >: Null <: ToEntityReference]]
 
-							logger.info(s"Processing scheduled notification ${sn}")
+							logger.info(s"Processing scheduled notification $sn")
 							// Even if we threw an error above and didn't actually push a notification, still mark it as completed
 							sn.completed = true
 							session.saveOrUpdate(sn)
@@ -72,7 +74,7 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 							val notification = generateNotification(sn)
 							notification.foreach { notification =>
 								logger.info("Notification pushed - " + notification)
-								notification.preSave(true)
+								notification.preSave(newRecord = true)
 								session.saveOrUpdate(notification)
 							}
 

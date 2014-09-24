@@ -17,7 +17,8 @@ class DeleteAssignmentController extends CourseworkController {
 
 	validatesSelf[DeleteAssignmentCommand]
 
-	@ModelAttribute def formObject(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
+	@ModelAttribute
+	def formObject(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new DeleteAssignmentCommand(module, mandatory(assignment))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
