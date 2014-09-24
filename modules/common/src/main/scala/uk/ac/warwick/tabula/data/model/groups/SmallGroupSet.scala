@@ -81,6 +81,11 @@ class SmallGroupSet
 	var releasedToStudents: JBoolean = false
   @Column(name="released_to_tutors")
   var releasedToTutors: JBoolean = false
+
+	@Column(name="email_students")
+	var emailStudentsOnChange: JBoolean = true
+	@Column(name="email_tutors")
+	var emailTutorsOnChange: JBoolean = true
   
   def visibleToStudents = releasedToStudents || allocationMethod == SmallGroupAllocationMethod.StudentSignUp
 
