@@ -123,6 +123,24 @@ input.deleted {
 	}
 }
 
+#container .small-group-sets-list {
+	.mod-code, .group-name {
+		color: #93225f;
+		font-size: 100%;
+		font-weight: bold;
+	}
+	.group-name {
+		font-size: 85%;
+		font-weight: normal;
+		&:before {
+			color: #93225f;
+			content: '// ';
+			position: relative;
+			font-weight: bold;
+		}
+	}
+}
+
 .recordCheckpointForm .check-all {
 	background-color: lighten(@tabulaGreenLightTint, 5%);
 }
