@@ -103,8 +103,15 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
 			val releaseToStudents = notifyStudents && !groupToPublish.releasedToStudents
 			val releaseToTutors = notifyTutors && !groupToPublish.releasedToTutors
 			
-			if (releaseToStudents) groupToPublish.releasedToStudents = true
-			if (releaseToTutors) groupToPublish.releasedToTutors = true
+			if (releaseToStudents) {
+				groupToPublish.releasedToStudents = true
+				groupToPublish.emailStudentsOnChange = sendEmail
+			}
+			
+			if (releaseToTutors) {
+				groupToPublish.releasedToTutors = true
+				groupToPublish.emailTutorsOnChange = sendEmail
+			}
 			
 			ReleasedSmallGroupSet(groupToPublish, releaseToStudents, releaseToTutors)
 		})
