@@ -202,6 +202,12 @@ class SmallGroupSet
 		}
 	}
 
+	def nameWithoutModulePrefix = {
+		if (name.startsWith(module.code.toUpperCase)) {
+			name.replaceFirst(module.code.toUpperCase + " ", "")
+		} else name
+	}
+
 	def linked = allocationMethod == SmallGroupAllocationMethod.Linked
 	
 	def hasAllocated = groups.asScala exists { !_.students.isEmpty }

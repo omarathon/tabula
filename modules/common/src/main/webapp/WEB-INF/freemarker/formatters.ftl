@@ -92,7 +92,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 
 <#macro groupset_name groupset withFormatting=true><#compress>
 	<#if withFormatting>
-	<span class="mod-code">${groupset.module.code?upper_case}</span> <span class="group-name">${groupset.name}</span>
+	<span class="mod-code">${groupset.module.code?upper_case}</span> <span class="group-name">${groupset.nameWithoutModulePrefix}</span>
 	<#else>
 	${groupset.module.code?upper_case} ${groupset.name}
 	</#if>
