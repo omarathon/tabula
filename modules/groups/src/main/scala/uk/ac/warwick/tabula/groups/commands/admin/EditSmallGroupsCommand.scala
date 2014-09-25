@@ -83,7 +83,7 @@ trait PopulateEditSmallGroupsCommand extends PopulateOnForm {
 		groupNames.clear()
 		maxGroupSizes.clear()
 
-		groupNames.addAll(set.groups.asScala.sorted.map { _.name }.asJava)
+		groupNames.addAll(set.groups.asScala.map { _.name }.asJava)
 		maxGroupSizes.addAll(set.groups.asScala.map { group =>
 			val groupSize = group.maxGroupSize.getOrElse {
 				if (set.defaultMaxGroupSizeEnabled) set.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
