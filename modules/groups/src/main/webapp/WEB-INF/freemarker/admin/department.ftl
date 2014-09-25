@@ -172,265 +172,267 @@
 		})(jQuery);
 	</script>
 
-	<#-- Filtering -->
-	<div class="fix-area">
-		<div class="fix-header pad-when-fixed">
-			<@f.form commandName="adminCommand" action="${info.requestedUri.path}" method="GET" cssClass="form-inline">
-				<@f.errors cssClass="error form-errors" />
+	<#if hasGroups>
+		<#-- Filtering -->
+		<div class="fix-area">
+			<div class="fix-header pad-when-fixed">
+				<@f.form commandName="adminCommand" action="${info.requestedUri.path}" method="GET" cssClass="form-inline">
+					<@f.errors cssClass="error form-errors" />
 
-				<div class="small-groups-filter btn-group-group well well-small">
-					<button type="button" class="clear-all-filters btn btn-link">
-						<span class="icon-stack">
-							<i class="icon-filter"></i>
-							<i class="icon-ban-circle icon-stack-base"></i>
-						</span>
-					</button>
+					<div class="small-groups-filter btn-group-group well well-small">
+						<button type="button" class="clear-all-filters btn btn-link">
+							<span class="icon-stack">
+								<i class="icon-filter"></i>
+								<i class="icon-ban-circle icon-stack-base"></i>
+							</span>
+						</button>
 
-					<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="">
-						<@spring.bind path=path>
-							<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
-								<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
-									<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
-									<span class="caret"></span>
-								</a>
-								<div class="dropdown-menu filter-list">
-									<button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
-									<ul>
-										<#if allItems?has_content>
-											<#list allItems as item>
-												<#local isValid = (allItems?size == validItems?size)!true />
-												<#if !isValid>
-													<#list validItems as validItem>
-														<#if ((validItem.id)!0) == ((item.id)!0)>
-															<#local isValid = true />
-														</#if>
-													</#list>
-												</#if>
-												<li class="check-list-item" data-natural-sort="${item_index}">
-													<label class="checkbox <#if !isValid>disabled</#if>">
-														<#nested item isValid/>
-													</label>
-												</li>
-											</#list>
-										<#else>
-											<li><small class="muted" style="padding-left: 5px;">N/A for this department</small></li>
-										</#if>
-									</ul>
+						<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="">
+							<@spring.bind path=path>
+								<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
+									<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+										<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
+										<span class="caret"></span>
+									</a>
+									<div class="dropdown-menu filter-list">
+										<button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
+										<ul>
+											<#if allItems?has_content>
+												<#list allItems as item>
+													<#local isValid = (allItems?size == validItems?size)!true />
+													<#if !isValid>
+														<#list validItems as validItem>
+															<#if ((validItem.id)!0) == ((item.id)!0)>
+																<#local isValid = true />
+															</#if>
+														</#list>
+													</#if>
+													<li class="check-list-item" data-natural-sort="${item_index}">
+														<label class="checkbox <#if !isValid>disabled</#if>">
+															<#nested item isValid/>
+														</label>
+													</li>
+												</#list>
+											<#else>
+												<li><small class="muted" style="padding-left: 5px;">N/A for this department</small></li>
+											</#if>
+										</ul>
+									</div>
 								</div>
-							</div>
-						</@spring.bind>
-					</#macro>
+							</@spring.bind>
+						</#macro>
 
-					<#macro current_filter_value path placeholder><#compress>
-						<@spring.bind path=path>
-							<#if status.actualValue?has_content>
-								<#list status.actualValue as item><#nested item /><#if item_has_next>, </#if></#list>
-							<#else>
-								${placeholder}
-							</#if>
-						</@spring.bind>
-					</#compress></#macro>
+						<#macro current_filter_value path placeholder><#compress>
+							<@spring.bind path=path>
+								<#if status.actualValue?has_content>
+									<#list status.actualValue as item><#nested item /><#if item_has_next>, </#if></#list>
+								<#else>
+									${placeholder}
+								</#if>
+							</@spring.bind>
+						</#compress></#macro>
 
-					<#function contains_by_filter_name collection item>
-						<#list collection as c>
-							<#if c.name == item.name>
-								<#return true />
-							</#if>
-						</#list>
-						<#return false />
-					</#function>
+						<#function contains_by_filter_name collection item>
+							<#list collection as c>
+								<#if c.name == item.name>
+									<#return true />
+								</#if>
+							</#list>
+							<#return false />
+						</#function>
 
-					<#assign placeholder = "All modules" />
-					<#assign currentfilter><@current_filter_value "moduleFilters" placeholder; f>${f.module.code?upper_case}</@current_filter_value></#assign>
-					<@filter "moduleFilters" placeholder currentfilter allModuleFilters; f>
-						<input type="checkbox" name="${status.expression}"
-							   value="${f.name}"
-							   data-short-value="${f.description}"
-						${contains_by_filter_name(adminCommand.moduleFilters, f)?string('checked','')}>
-						${f.description}
-					</@filter>
+						<#assign placeholder = "All modules" />
+						<#assign currentfilter><@current_filter_value "moduleFilters" placeholder; f>${f.module.code?upper_case}</@current_filter_value></#assign>
+						<@filter "moduleFilters" placeholder currentfilter allModuleFilters; f>
+							<input type="checkbox" name="${status.expression}"
+								   value="${f.name}"
+								   data-short-value="${f.description}"
+							${contains_by_filter_name(adminCommand.moduleFilters, f)?string('checked','')}>
+							${f.description}
+						</@filter>
 
-					<#assign placeholder = "All statuses" />
-					<#assign currentfilter><@current_filter_value "statusFilters" placeholder; f>${f.description}</@current_filter_value></#assign>
-					<@filter "statusFilters" placeholder currentfilter allStatusFilters; f>
-						<input type="checkbox" name="${status.expression}"
-							   value="${f.name}"
-							   data-short-value="${f.description}"
-						${contains_by_filter_name(adminCommand.statusFilters, f)?string('checked','')}>
-						${f.description}
-					</@filter>
+						<#assign placeholder = "All statuses" />
+						<#assign currentfilter><@current_filter_value "statusFilters" placeholder; f>${f.description}</@current_filter_value></#assign>
+						<@filter "statusFilters" placeholder currentfilter allStatusFilters; f>
+							<input type="checkbox" name="${status.expression}"
+								   value="${f.name}"
+								   data-short-value="${f.description}"
+							${contains_by_filter_name(adminCommand.statusFilters, f)?string('checked','')}>
+							${f.description}
+						</@filter>
 
-					<#assign placeholder = "All allocation methods" />
-					<#assign currentfilter><@current_filter_value "allocationMethodFilters" placeholder; f>${f.description}</@current_filter_value></#assign>
-					<@filter "allocationMethodFilters" placeholder currentfilter allAllocationFilters; f>
-						<input type="checkbox" name="${status.expression}"
-							   value="${f.name}"
-							   data-short-value="${f.description}"
-						${contains_by_filter_name(adminCommand.allocationMethodFilters, f)?string('checked','')}>
-						${f.description}
-					</@filter>
+						<#assign placeholder = "All allocation methods" />
+						<#assign currentfilter><@current_filter_value "allocationMethodFilters" placeholder; f>${f.description}</@current_filter_value></#assign>
+						<@filter "allocationMethodFilters" placeholder currentfilter allAllocationFilters; f>
+							<input type="checkbox" name="${status.expression}"
+								   value="${f.name}"
+								   data-short-value="${f.description}"
+							${contains_by_filter_name(adminCommand.allocationMethodFilters, f)?string('checked','')}>
+							${f.description}
+						</@filter>
 
-					<#assign placeholder = "All terms" />
-					<#assign currentfilter><@current_filter_value "termFilters" placeholder; f>${f.description}</@current_filter_value></#assign>
-					<@filter "termFilters" placeholder currentfilter allTermFilters; f>
-						<input type="checkbox" name="${status.expression}"
-							   value="${f.name}"
-							   data-short-value="${f.description}"
-						${contains_by_filter_name(adminCommand.termFilters, f)?string('checked','')}>
-						${f.description}
-					</@filter>
-				</@f.form>
+						<#assign placeholder = "All terms" />
+						<#assign currentfilter><@current_filter_value "termFilters" placeholder; f>${f.description}</@current_filter_value></#assign>
+						<@filter "termFilters" placeholder currentfilter allTermFilters; f>
+							<input type="checkbox" name="${status.expression}"
+								   value="${f.name}"
+								   data-short-value="${f.description}"
+							${contains_by_filter_name(adminCommand.termFilters, f)?string('checked','')}>
+							${f.description}
+						</@filter>
+					</@f.form>
+				</div>
+			</div>
+
+			<div id="filter-results">
+				<#-- This is the big list of sets -->
+				<@components.sets_info sets sets?size lte 5 />
 			</div>
 		</div>
 
-		<div id="filter-results">
-			<#-- This is the big list of sets -->
-			<@components.sets_info sets sets?size lte 5 />
-		</div>
-	</div>
+		<div id="modal-container" class="modal fade"></div>
 
-	<div id="modal-container" class="modal fade"></div>
+		<script type="text/javascript">
+			jQuery(function($) {
+				$('.fix-area').fixHeaderFooter();
 
-<script type="text/javascript">
-	jQuery(function($) {
-		$('.fix-area').fixHeaderFooter();
+				var prependClearLink = function($list) {
+					if (!$list.find('input:checked').length) {
+						$list.find('.clear-this-filter').remove();
+					} else {
+						if (!$list.find('.clear-this-filter').length) {
+							$list.find('> ul').prepend(
+									$('<li />').addClass('clear-this-filter')
+											.append(
+											$('<button />').attr('type', 'button')
+													.addClass('btn btn-link')
+													.html('<i class="icon-ban-circle"></i> Clear selected items')
+													.on('click', function(e) {
+														$list.find('input:checked').each(function() {
+															var $checkbox = $(this);
+															$checkbox.prop('checked', false);
+															updateFilter($checkbox);
+														});
 
-		var prependClearLink = function($list) {
-			if (!$list.find('input:checked').length) {
-				$list.find('.clear-this-filter').remove();
-			} else {
-				if (!$list.find('.clear-this-filter').length) {
-					$list.find('> ul').prepend(
-							$('<li />').addClass('clear-this-filter')
-									.append(
-									$('<button />').attr('type', 'button')
-											.addClass('btn btn-link')
-											.html('<i class="icon-ban-circle"></i> Clear selected items')
-											.on('click', function(e) {
-												$list.find('input:checked').each(function() {
-													var $checkbox = $(this);
-													$checkbox.prop('checked', false);
-													updateFilter($checkbox);
-												});
+														doRequest($list.closest('form'));
+													})
+									)
+											.append($('<hr />'))
+							);
+						}
+					}
+				};
 
-												doRequest($list.closest('form'));
-											})
-							)
-									.append($('<hr />'))
-					);
+				var updateFilter = function($el) {
+					// Update the filter content
+					var $list = $el.closest('ul');
+					var shortValues = $list.find(':checked').map(function() { return $(this).data('short-value'); }).get();
+					var $fsv = $el.closest('.btn-group').find('.filter-short-values');
+					if (shortValues.length) {
+						$el.closest('.btn-group').removeClass('empty-filter');
+						$fsv.html($fsv.data("prefix") + shortValues.join(', '));
+					} else {
+						$el.closest('.btn-group').addClass('empty-filter');
+						$fsv.html($fsv.data('placeholder'));
+					}
+
+					updateClearAllButton($el);
+				};
+
+				var updateClearAllButton = function($el) {
+					var $filterList = $el.closest(".student-filter");
+
+					if ($filterList.find(".empty-filter").length == $filterList.find(".btn-group").length) {
+						$('.clear-all-filters').attr("disabled", "disabled");
+					} else {
+						$('.clear-all-filters').removeAttr("disabled");
+					}
 				}
-			}
-		};
 
-		var updateFilter = function($el) {
-			// Update the filter content
-			var $list = $el.closest('ul');
-			var shortValues = $list.find(':checked').map(function() { return $(this).data('short-value'); }).get();
-			var $fsv = $el.closest('.btn-group').find('.filter-short-values');
-			if (shortValues.length) {
-				$el.closest('.btn-group').removeClass('empty-filter');
-				$fsv.html($fsv.data("prefix") + shortValues.join(', '));
-			} else {
-				$el.closest('.btn-group').addClass('empty-filter');
-				$fsv.html($fsv.data('placeholder'));
-			}
+				var doRequest = function($form, preventPageReset) {
+					if (typeof history.pushState !== 'undefined')
+						history.pushState(null, null, $form.attr('action') + '?' + $form.serialize());
 
-			updateClearAllButton($el);
-		};
+					if ($form.data('request')) {
+						$form.data('request').abort();
+						$form.data('request', null);
+					}
 
-		var updateClearAllButton = function($el) {
-			var $filterList = $el.closest(".student-filter");
+					if (!preventPageReset) {
+						$form.find('input[name="page"]').val('1');
+					}
 
-			if ($filterList.find(".empty-filter").length == $filterList.find(".btn-group").length) {
-				$('.clear-all-filters').attr("disabled", "disabled");
-			} else {
-				$('.clear-all-filters').removeAttr("disabled");
-			}
-		}
+					$('#filter-results').addClass('loading');
+					$form.data('request', $.post($form.attr('action'), $form.serialize(), function(data) {
+						$('#filter-results').html(data);
 
-		var doRequest = function($form, preventPageReset) {
-			if (typeof history.pushState !== 'undefined')
-				history.pushState(null, null, $form.attr('action') + '?' + $form.serialize());
+						$form.data('request', null);
+						$('#filter-results').removeClass('loading');
 
-			if ($form.data('request')) {
-				$form.data('request').abort();
-				$form.data('request', null);
-			}
+						$('.use-wide-popover').tabulaPopover({
+							trigger: 'click',
+							container: '#container',
+							template: '<div class="popover wide"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
+						});
 
-			if (!preventPageReset) {
-				$form.find('input[name="page"]').val('1');
-			}
+						$('.use-tooltip').tooltip();
 
-			$('#filter-results').addClass('loading');
-			$form.data('request', $.post($form.attr('action'), $form.serialize(), function(data) {
-				$('#filter-results').html(data);
+						// callback for hooking in local changes to results
+						$(document).trigger("tabula.filterResultsChanged");
+					}));
+				};
+				window.doRequest = doRequest;
 
-				$form.data('request', null);
-				$('#filter-results').removeClass('loading');
-
-				$('.use-wide-popover').tabulaPopover({
-					trigger: 'click',
-					container: '#container',
-					template: '<div class="popover wide"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
-				});
-
-				$('.use-tooltip').tooltip();
-
-				// callback for hooking in local changes to results
-				$(document).trigger("tabula.filterResultsChanged");
-			}));
-		};
-		window.doRequest = doRequest;
-
-		$('#adminCommand input').on('change', function(e) {
-			// Load the new results
-			var $checkbox = $(this);
-			var $form = $checkbox.closest('form');
-
-			doRequest($form);
-			updateFilter($checkbox);
-		});
-
-		// Re-order elements inside the dropdown when opened
-		$('.filter-list').closest('.btn-group').find('.dropdown-toggle').on('click.dropdown.data-api', function(e) {
-			var $this = $(this);
-			if (!$this.closest('.btn-group').hasClass('open')) {
-				// Re-order before it's opened!
-				var $list = $this.closest('.btn-group').find('.filter-list');
-				var items = $list.find('li.check-list-item').get();
-
-				items.sort(function(a, b) {
-					var aChecked = $(a).find('input').is(':checked');
-					var bChecked = $(b).find('input').is(':checked');
-
-					if (aChecked && !bChecked) return -1;
-					else if (!aChecked && bChecked) return 1;
-					else return $(a).data('natural-sort') - $(b).data('natural-sort');
-				});
-
-				$.each(items, function(item, el) {
-					$list.find('> ul').append(el);
-				});
-
-				prependClearLink($list);
-			}
-		});
-
-		$('.clear-all-filters').on('click', function() {
-			$('.filter-list').each(function() {
-				var $list = $(this);
-
-				$list.find('input:checked').each(function() {
+				$('#adminCommand input').on('change', function(e) {
+					// Load the new results
 					var $checkbox = $(this);
-					$checkbox.prop('checked', false);
+					var $form = $checkbox.closest('form');
+
+					doRequest($form);
 					updateFilter($checkbox);
 				});
 
-				prependClearLink($list);
-			});
+				// Re-order elements inside the dropdown when opened
+				$('.filter-list').closest('.btn-group').find('.dropdown-toggle').on('click.dropdown.data-api', function(e) {
+					var $this = $(this);
+					if (!$this.closest('.btn-group').hasClass('open')) {
+						// Re-order before it's opened!
+						var $list = $this.closest('.btn-group').find('.filter-list');
+						var items = $list.find('li.check-list-item').get();
 
-			doRequest($('#adminCommand'));
-		});
-	});
-</script>
+						items.sort(function(a, b) {
+							var aChecked = $(a).find('input').is(':checked');
+							var bChecked = $(b).find('input').is(':checked');
+
+							if (aChecked && !bChecked) return -1;
+							else if (!aChecked && bChecked) return 1;
+							else return $(a).data('natural-sort') - $(b).data('natural-sort');
+						});
+
+						$.each(items, function(item, el) {
+							$list.find('> ul').append(el);
+						});
+
+						prependClearLink($list);
+					}
+				});
+
+				$('.clear-all-filters').on('click', function() {
+					$('.filter-list').each(function() {
+						var $list = $(this);
+
+						$list.find('input:checked').each(function() {
+							var $checkbox = $(this);
+							$checkbox.prop('checked', false);
+							updateFilter($checkbox);
+						});
+
+						prependClearLink($list);
+					});
+
+					doRequest($('#adminCommand'));
+				});
+			});
+		</script>
+	</#if>
 </#escape>
