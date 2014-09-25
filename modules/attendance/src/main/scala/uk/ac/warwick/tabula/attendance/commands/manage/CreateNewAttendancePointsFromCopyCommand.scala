@@ -92,7 +92,7 @@ trait GetsPointsToCreate {
 						newPoint.scheme = scheme
 					newPoint.createdDate = DateTime.now
 					newPoint.updatedDate = DateTime.now
-					copyFromOldPoint(oldPoint, newPoint)
+					copyFromOldPoint(oldPoint, newPoint, scheme)
 					newPoint
 				}
 			}
@@ -125,9 +125,9 @@ trait GetsPointsToCreate {
 		}
 	}
 
-	private def copyFromOldPoint(oldPoint: MonitoringPoint, newPoint: AttendanceMonitoringPoint): AttendanceMonitoringPoint = {
+	private def copyFromOldPoint(oldPoint: MonitoringPoint, newPoint: AttendanceMonitoringPoint, newScheme: AttendanceMonitoringScheme): AttendanceMonitoringPoint = {
 		newPoint.name = oldPoint.name
-		val weeksForYear = termService.getAcademicWeeksForYear(newPoint.scheme.academicYear.dateInTermOne).toMap
+		val weeksForYear = termService.getAcademicWeeksForYear(newScheme.academicYear.dateInTermOne).toMap
 		newPoint.startWeek = oldPoint.validFromWeek
 		newPoint.endWeek = oldPoint.requiredFromWeek
 		newPoint.startDate = weeksForYear(oldPoint.validFromWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
