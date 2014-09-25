@@ -53,8 +53,8 @@ trait ViewRelatedStudentsCommandState extends FiltersRelationships {
 	lazy val allCourses =
 		profileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, currentMember, Nil)
 			.flatMap(student => Option(student.mostSignificantCourse))
-	def allDepartments = allCourses.map(_.department).distinct
-	def allRoutes = allCourses.map(_.route).distinct
+	lazy val allDepartments = allCourses.flatMap(c => Option(c.department)).distinct
+	lazy val allRoutes = allCourses.flatMap(c => Option(c.route)).distinct
 }
 
 abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val relationshipType: StudentRelationshipType)

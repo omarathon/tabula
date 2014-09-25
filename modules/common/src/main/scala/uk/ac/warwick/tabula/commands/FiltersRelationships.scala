@@ -1,12 +1,10 @@
 package uk.ac.warwick.tabula.commands
 
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
+import uk.ac.warwick.tabula.data.ScalaRestriction
 import uk.ac.warwick.tabula.data.ScalaRestriction._
-import uk.ac.warwick.tabula.services.ProfileServiceComponent
+import uk.ac.warwick.tabula.data.model._
+
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 
 object FiltersRelationships {
 	val AliasPaths = Seq(
@@ -35,7 +33,7 @@ object FiltersRelationships {
 	val DefaultStudentsPerPage = FilterStudentsOrRelationships.DefaultStudentsPerPage
 }
 trait FiltersRelationships extends FilterStudentsOrRelationships {
-	import FiltersRelationships._
+	import uk.ac.warwick.tabula.commands.FiltersRelationships._
 
 	def routeRestriction: Option[ScalaRestriction] = inIfNotEmpty(
 		"route.code", routes.asScala.map {_.code},
@@ -53,9 +51,9 @@ trait FiltersRelationships extends FilterStudentsOrRelationships {
 	override def getAliasPaths(sitsTable: String) = AliasPaths(sitsTable)
 
 	// Do we need to consider out-of-department modules/routes or can we rely on users typing them in manually?
-	lazy val allModules: Seq[Module] = allDepartments.map(modulesForDepartmentAndSubDepartments(_)).flatten
+	lazy val allModules: Seq[Module] = allDepartments.map(modulesForDepartmentAndSubDepartments).flatten
 	lazy val allCourseTypes: Seq[CourseType] = CourseType.all
 	lazy val allSprStatuses: Seq[SitsStatus] = allDepartments.map(dept => profileService.allSprStatuses(dept.rootDepartment)).flatten.distinct
-	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = allDepartments.map(profileService.allModesOfAttendance(_)).flatten.distinct
+	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = allDepartments.map(profileService.allModesOfAttendance).flatten.distinct
 
 }
