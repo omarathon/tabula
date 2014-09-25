@@ -19,13 +19,13 @@
 			type="submit"
 			class="btn btn-success"
 			name="${ManageSmallGroupsMappingParameters.createAndAddGroups}"
-			value="Add groups"
+			value="Save and add groups"
 			/>
 		<input
 			type="submit"
 			class="btn btn-primary"
 			name="create"
-			value="Save"
+			value="Save and exit"
 			/>
 		<a class="btn" href="<@routes.depthome module=module />">Cancel</a>
 	</div>
