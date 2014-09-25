@@ -309,7 +309,9 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 			existingMR.studentCourseDetails.removeModuleRegistration(existingMR)
 			session.delete(existingMR)
 
-			smallGroupService.removeFromSmallGroups(existingMR)
+			if (features.autoGroupDeregistration) {
+				smallGroupService.removeFromSmallGroups(existingMR)
+			}
 		}
 	}
 
