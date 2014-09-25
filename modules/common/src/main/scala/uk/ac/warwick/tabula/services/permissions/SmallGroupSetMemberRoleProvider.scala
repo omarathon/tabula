@@ -20,7 +20,10 @@ class SmallGroupSetMemberRoleProvider extends RoleProvider {
 	private def getRoles(user: CurrentUser, sets: Seq[SmallGroupSet]) = {
 		val memberSets =
 			sets.toStream
-		  .filter { _.isStudentMember(user.apparentUser) }
+			.filter { set =>
+				set.visibleToStudents &&
+				set.isStudentMember(user.apparentUser)
+			}
 		  .distinct
 
 		val memberRoles: Stream[Role] = memberSets.map { set => 
