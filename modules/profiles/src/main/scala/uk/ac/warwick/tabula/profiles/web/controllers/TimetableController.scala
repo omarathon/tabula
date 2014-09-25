@@ -32,6 +32,7 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 		with AutowiringUserLookupComponent
 		with AutowiringScientiaConfigurationComponent
 		with AutowiringCelcatConfigurationComponent
+		with AutowiringSecurityServiceComponent
 		with SystemClockComponent
 		).studentTimetableEventSource
 
@@ -42,6 +43,7 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 		with AutowiringUserLookupComponent
 		with AutowiringScientiaConfigurationComponent
 		with AutowiringCelcatConfigurationComponent
+		with AutowiringSecurityServiceComponent
 		with SystemClockComponent
 		).staffTimetableEventSource
 

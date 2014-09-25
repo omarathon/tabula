@@ -51,7 +51,7 @@ class ViewStaffPersonalTimetableCommandImpl (
 		eventOccurrenceService.fromTimetableEvent(_, new Interval(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay))
 
 	def applyInternal(): Seq[EventOccurrence] = {
-		val timetableEvents = staffTimetableEventSource.eventsFor(staff)
+		val timetableEvents = staffTimetableEventSource.eventsFor(staff, currentUser, TimetableEvent.Context.Staff)
 		val occurrences =
 			timetableEvents.flatMap(eventsToOccurrences) ++
 				scheduledMeetingEventSource.occurrencesFor(staff, currentUser, TimetableEvent.Context.Staff)
