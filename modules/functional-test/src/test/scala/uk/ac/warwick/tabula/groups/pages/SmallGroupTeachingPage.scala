@@ -165,7 +165,10 @@ trait GroupSetList {
 	this: WebBrowser with EventuallyAjax with ShouldMatchers =>
 
 	def getGroupsetInfo(moduleCode: String, groupsetName: String)(implicit webdriver:WebDriver): Option[GroupSetInfoSummarySection] = {
-		val setInfoElements = findAll(className("set-info")).filter(_.underlying.findElement(By.className("colour-h6")).getText.trim == groupsetName)
+		val setInfoElements = findAll(className("set-info")).filter { el =>
+			el.underlying.findElement(By.className("colour-h6")).getText.trim == s"${moduleCode.toUpperCase} $groupsetName"
+		}
+
 		if (setInfoElements.isEmpty) {
 			None
 		}	else {
