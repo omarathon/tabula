@@ -80,11 +80,16 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 		transactional() {
 			benchmark("Import all group members") {
 				var registrations = List[UpstreamModuleRegistration]()
+				var notEmptyNoneGroups = List[UpstreamAssessmentGroup]()
+
 				var count = 0
 				assignmentImporter.allMembers { r =>
 					if (!registrations.isEmpty && r.differentGroup(registrations.head)) {
 						// This element r is for a new group, so save this group and start afresh
 						save(registrations)
+							.filter { uag => uag.assessmentGroup == AssessmentComponent.NoneAssessmentGroup }
+							.foreach { uag => notEmptyNoneGroups = notEmptyNoneGroups :+ uag }
+
 						registrations = Nil
 					}
 					registrations = registrations :+ r
@@ -96,12 +101,14 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 				// TAB-1265 Don't forget the very last bunch.
 				if (!registrations.isEmpty) {
 					save(registrations)
+						.filter { uag => uag.assessmentGroup == AssessmentComponent.NoneAssessmentGroup }
+						.foreach { uag => notEmptyNoneGroups = notEmptyNoneGroups :+ uag }
 				}
 
 				// Empty groups with no members
 				val emptyGroups = assignmentImporter.getEmptyAssessmentGroups
 				//logger.info("Found " + emptyGroups.size + " groups with no members, emptying...")
-				for (emptyGroup <- emptyGroups) {
+				for (emptyGroup <- emptyGroups.filterNot { group => notEmptyNoneGroups.exists { _.isEquivalentTo(group) } }) {
 					assignmentMembershipService.replaceMembers(emptyGroup, Nil)
 				}
 
@@ -115,12 +122,14 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	 * group, so save them (and reconcile it with any existing members we have in the
 	 * database).
 	 */
-	def save(group: Seq[UpstreamModuleRegistration]) {
-		group.headOption map { head =>
+	def save(group: Seq[UpstreamModuleRegistration]): Option[UpstreamAssessmentGroup] = {
+		group.headOption.map { head =>
 			val assessmentGroup = head.toUpstreamAssignmentGroup
 			// Convert ModuleRegistrations to simple uni ID strings.
 			val members = group.map{ mr => SprCode.getUniversityId(mr.sprCode)}.distinct
+
 			assignmentMembershipService.replaceMembers(assessmentGroup, members)
+			assessmentGroup
 		}
 	}
 
