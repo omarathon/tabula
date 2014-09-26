@@ -21,7 +21,7 @@ trait DeleteSmallGroupEventCommandState {
 class DeleteSmallGroupEventCommandInternal(val group: SmallGroup, val event: SmallGroupEvent) extends CommandInternal[SmallGroupEvent] with DeleteSmallGroupEventCommandState {
 
 	override def applyInternal() = {
-		group.events.remove(event)
+		group.removeEvent(event)
 		event
 	}
 

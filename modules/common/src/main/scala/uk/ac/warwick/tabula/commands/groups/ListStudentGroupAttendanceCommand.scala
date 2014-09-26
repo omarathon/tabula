@@ -53,7 +53,7 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 				group.groupSet.showAttendanceReports &&
 				group.groupSet.visibleToStudents &&
 				group.groupSet.academicYear == academicYear &&
-				group.events.asScala.nonEmpty
+				group.events.nonEmpty
 		}
 
 		val allInstances = groups.flatMap { group => allEventInstances(group, smallGroupService.findAttendanceByGroup(group)) }

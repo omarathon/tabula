@@ -1,6 +1,5 @@
 <#escape x as x?html>
 <input type="hidden" name="action" value="submit" id="action-input">
-<#assign groups = smallGroupSet.groups />
 
 <fieldset>
 	<@form.row>

@@ -33,7 +33,7 @@ class EventProperties(val event: SmallGroupEvent) {
 class GroupProperties(val module: Module, val set: SmallGroupSet, val group: SmallGroup) {
 	var events: JList[EventProperties] = JArrayList()
 
-	group.events.asScala.foreach { event =>
+	group.events.sorted.foreach { event =>
 		events.add(new EventProperties(event))
 	}
 }
@@ -49,7 +49,7 @@ trait PopulateEditSmallGroupEventsSubCommands {
 	self: EditSmallGroupEventsCommandState =>
 
 	groups.clear()
-	set.groups.asScala.foreach { group =>
+	set.groups.asScala.sorted.foreach { group =>
 		groups.put(group, new GroupProperties(module, set, group))
 	}
 }

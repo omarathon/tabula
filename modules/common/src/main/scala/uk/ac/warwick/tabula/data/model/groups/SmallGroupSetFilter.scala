@@ -49,7 +49,7 @@ object SmallGroupSetFilters {
 		}
 		case object NeedsEventsCreating extends SmallGroupSetFilter {
 			val description = "Needs events creating"
-			def apply(set: SmallGroupSet) = set.groups.asScala.forall { _.events.asScala.isEmpty }
+			def apply(set: SmallGroupSet) = set.groups.asScala.forall { _.events.isEmpty }
 		}
 		case object OpenForSignUp extends SmallGroupSetFilter {
 			val description = "Open for sign up"
@@ -94,7 +94,7 @@ object SmallGroupSetFilters {
 		override val getName = s"Term(${termName}, ${weekRange.minWeek}, ${weekRange.maxWeek})"
 		def apply(set: SmallGroupSet) =
 			set.groups.asScala
-				.flatMap { _.events.asScala }
+				.flatMap { _.events }
 				.flatMap { _.weekRanges }
 				.flatMap { _.toWeeks }
 				.exists(weekRange.toWeeks.contains)

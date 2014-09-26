@@ -8,13 +8,35 @@ import org.joda.time.LocalTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.StringUtils
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
+
+object SmallGroupEvent {
+
+	// Companion object is one of the places searched for an implicit Ordering, so
+	// this will be the default when ordering a list of small group events.
+	implicit val defaultOrdering = new Ordering[SmallGroupEvent] {
+		final val FirstInstanceOrdering = Ordering.by { event: SmallGroupEvent => (event.weekRanges.minBy { _.minWeek }.minWeek, event.day.jodaDayOfWeek, event.startTime.getMillisOfDay, event.endTime.getMillisOfDay) }
+
+		def compare(a: SmallGroupEvent, b: SmallGroupEvent) = {
+			val firstInstanceCompare = FirstInstanceOrdering.compare(a, b)
+			if (firstInstanceCompare != 0) firstInstanceCompare
+			else {
+				val titleCompare = StringUtils.AlphaNumericStringOrdering.compare(a.title, b.title)
+				if (titleCompare != 0) titleCompare else a.id compare b.id
+			}
+		}
+	}
+
+}
+
 @Entity
 @AccessType("field")
 class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget with Serializable {
-	
+	import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent._
+
 	@transient var permissionsService = Wire[PermissionsService]
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so

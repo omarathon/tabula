@@ -47,8 +47,8 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		event2.startTime = new LocalTime(15, 0)
 		event2.weekRanges = Seq(WeekRange(1), WeekRange(3), WeekRange(7))
 		
-		group.events.add(event1)
-		group.events.add(event2)
+		group.addEvent(event1)
+		group.addEvent(event2)
 		
 		userLookup.registerUsers("user1", "user2", "user3", "user4", "user5")
 		

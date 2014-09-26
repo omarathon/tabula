@@ -15,7 +15,7 @@ class SmallGroupTutorRoleProvider extends RoleProvider {
 
 	override def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = scope match {
 		case event: SmallGroupEvent => getRoles(user, Seq(event))
-		case group: SmallGroup => getRoles(user, group.events.asScala)
+		case group: SmallGroup => getRoles(user, group.events)
 		case _ => Stream.empty
 	}
 

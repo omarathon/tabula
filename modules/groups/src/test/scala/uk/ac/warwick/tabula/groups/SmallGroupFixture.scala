@@ -163,8 +163,10 @@ class SmallGroupBuilder(val template:SmallGroup = new SmallGroup){
   }
 
   def withEvents(events: Seq[SmallGroupEvent]):SmallGroupBuilder = {
-    template.events = events.asJava
-    events.foreach(_.group = template)
+		events.foreach { event =>
+			template.addEvent(event)
+			event.group = template
+		}
     this
   }
   def withStudents(members:UserGroup):SmallGroupBuilder = {

@@ -65,6 +65,10 @@ object TimetableEvent {
 		case SmallGroupFormat.Meeting => TimetableEventType.Meeting
 	}
 
+	// Companion object is one of the places searched for an implicit Ordering, so
+	// this will be the default when ordering a list of timetable events.
+	implicit val defaultOrdering = Ordering.by { event: TimetableEvent => (event.weekRanges.minBy { _.minWeek }.minWeek, event.day.jodaDayOfWeek, event.startTime.getMillisOfDay, event.endTime.getMillisOfDay, event.name, event.title, event.uid) }
+
 }
 
 @SerialVersionUID(2903326840601345835l) sealed abstract class TimetableEventType(val code: String, val displayName: String, val core: Boolean = true) extends Serializable
