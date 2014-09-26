@@ -18,7 +18,9 @@ object SmallGroupEvent {
 	// Companion object is one of the places searched for an implicit Ordering, so
 	// this will be the default when ordering a list of small group events.
 	implicit val defaultOrdering = new Ordering[SmallGroupEvent] {
-		final val FirstInstanceOrdering = Ordering.by { event: SmallGroupEvent => (event.weekRanges.minBy { _.minWeek }.minWeek, event.day.jodaDayOfWeek, event.startTime.getMillisOfDay, event.endTime.getMillisOfDay) }
+		final val FirstInstanceOrdering = Ordering.by { event: SmallGroupEvent =>
+			(Option(event.weekRanges).filter(_.nonEmpty).map { _.minBy { _.minWeek }.minWeek }, Option(event.day).map { _.jodaDayOfWeek }, Option(event.startTime).map { _.getMillisOfDay }, Option(event.endTime).map { _.getMillisOfDay })
+		}
 
 		def compare(a: SmallGroupEvent, b: SmallGroupEvent) = {
 			val firstInstanceCompare = FirstInstanceOrdering.compare(a, b)
