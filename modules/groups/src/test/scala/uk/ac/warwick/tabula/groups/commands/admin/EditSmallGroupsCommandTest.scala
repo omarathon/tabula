@@ -154,7 +154,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 	}
 
 	private trait ValidationFixture extends ExistingGroupsFixture {
-		val command = new EditSmallGroupsValidation with EditSmallGroupsCommandState with PopulateEditSmallGroupsCommand {
+		val command = new EditSmallGroupsValidation with EditSmallGroupsCommandState with PopulateEditSmallGroupsCommand with CommandTestSupport {
 			val module = ValidationFixture.this.module
 			val set = ValidationFixture.this.set
 		}

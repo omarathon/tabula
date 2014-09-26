@@ -1,18 +1,16 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import org.springframework.validation.{BindingResult, Errors}
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services.{SmallGroupService, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import scala.collection.JavaConverters._
-import EditSmallGroupEventsCommand._
 
 object EditSmallGroupEventsCommand {
 	def apply(module: Module, set: SmallGroupSet) =
@@ -26,15 +24,21 @@ object EditSmallGroupEventsCommand {
 			with PopulateEditSmallGroupEventsSubCommands
 }
 
-class EventProperties(val event: SmallGroupEvent) {
+class EventProperties(val event: SmallGroupEvent, smallGroupService: SmallGroupService) {
 	var delete: Boolean = false
+	def hasRecordedAttendance = {
+		smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
+			.exists { _.attendance.asScala.exists { attendance =>
+				attendance.state != AttendanceState.NotRecorded
+			}}
+	}
 }
 
-class GroupProperties(val module: Module, val set: SmallGroupSet, val group: SmallGroup) {
+class GroupProperties(val module: Module, val set: SmallGroupSet, val group: SmallGroup, smallGroupService: SmallGroupService) {
 	var events: JList[EventProperties] = JArrayList()
 
 	group.events.sorted.foreach { event =>
-		events.add(new EventProperties(event))
+		events.add(new EventProperties(event, smallGroupService))
 	}
 }
 
@@ -46,11 +50,11 @@ trait EditSmallGroupEventsCommandState {
 }
 
 trait PopulateEditSmallGroupEventsSubCommands {
-	self: EditSmallGroupEventsCommandState =>
+	self: EditSmallGroupEventsCommandState with SmallGroupServiceComponent =>
 
 	groups.clear()
 	set.groups.asScala.sorted.foreach { group =>
-		groups.put(group, new GroupProperties(module, set, group))
+		groups.put(group, new GroupProperties(module, set, group, smallGroupService))
 	}
 }
 
@@ -83,7 +87,21 @@ trait EditSmallGroupEventsValidation extends SelfValidating {
 	self: EditSmallGroupEventsCommandState =>
 
 	override def validate(errors: Errors) {
-		// TODO Do we need to validate whether we're allowed to delete, or is it always ok?
+		groups.asScala.foreach { case (group, props) =>
+			errors.pushNestedPath(s"groups[${group.id}]")
+
+			props.events.asScala.zipWithIndex.filter { case (props, _) => props.delete }.foreach { case (props, index) =>
+				errors.pushNestedPath(s"events[$index]")
+
+				if (props.hasRecordedAttendance) {
+					errors.rejectValue("delete", "smallGroupEvent.delete.hasAttendance")
+				}
+
+				errors.popNestedPath()
+			}
+
+			errors.popNestedPath()
+		}
 	}
 }
 
