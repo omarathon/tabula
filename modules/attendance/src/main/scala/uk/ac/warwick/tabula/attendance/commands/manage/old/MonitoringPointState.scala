@@ -38,7 +38,7 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm with SmallGroupSe
 
 	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
 
-	def moduleHasSmallGroups(module: Module) = smallGroupService.hasSmallGroups(module)
+	def moduleHasSmallGroups(module: Module) = smallGroupService.hasSmallGroups(module, academicYear)
 	def moduleHasAssignments(module: Module) = moduleAndDepartmentService.hasAssignments(module)
 
 	def copyTo(point: MonitoringPoint): MonitoringPoint = {
