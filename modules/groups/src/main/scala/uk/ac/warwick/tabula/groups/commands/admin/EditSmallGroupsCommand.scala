@@ -3,7 +3,9 @@ package uk.ac.warwick.tabula.groups.commands.admin
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.groups.SmallGroupAttendanceState
 import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -115,7 +117,7 @@ trait EditSmallGroupsDescription extends Describable[Seq[SmallGroup]] {
 }
 
 trait EditSmallGroupsValidation extends SelfValidating {
-	self: EditSmallGroupsCommandState =>
+	self: EditSmallGroupsCommandState with SmallGroupServiceComponent =>
 
 	override def validate(errors: Errors) {
 		if (set.allocationMethod == SmallGroupAllocationMethod.Linked) {
@@ -133,6 +135,18 @@ trait EditSmallGroupsValidation extends SelfValidating {
 
 				if (!group.students.isEmpty) {
 					errors.rejectValue(s"groupNames[${i - 1}]", "smallGroup.delete.notEmpty")
+				} else {
+					val hasAttendance =
+						group.events.asScala.exists { event =>
+							smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
+								.exists { _.attendance.asScala.exists { attendance =>
+								attendance.state != AttendanceState.NotRecorded
+							}}
+						}
+
+					if (hasAttendance) {
+						errors.rejectValue(s"groupNames[${i - 1}]", "smallGroupEvent.delete.hasAttendance")
+					}
 				}
 			}
 		}

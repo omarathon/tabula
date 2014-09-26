@@ -53,6 +53,8 @@ trait SmallGroupDao {
 
 	def getDepartmentSmallGroupSets(department: Department): Seq[DepartmentSmallGroupSet]
 	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear): Seq[DepartmentSmallGroupSet]
+
+	def delete(occurrence: SmallGroupEventOccurrence)
 }
 
 @Repository
@@ -190,4 +192,6 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 			.addOrder(asc("name"))
 			.seq
 	}
+
+	def delete(occurrence: SmallGroupEventOccurrence) = session.delete(occurrence)
 }
