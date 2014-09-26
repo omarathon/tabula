@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.{NotificationPriority, Notification}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands.Notifies
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
+import uk.ac.warwick.tabula.services.UserLookupComponent
 import uk.ac.warwick.tabula.data.model.notifications.{SmallGroupSetChangedTutorNotification, SmallGroupSetChangedStudentNotification, SmallGroupSetChangedNotification}
 
 trait SmallGroupSetCommand {
@@ -34,9 +34,9 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
 		val noEventsRemoved = previousEvents.forall(pe => currentEvents.exists(_.isEquivalentTo(pe)))
 		val noEventsAdded = currentEvents.forall(ce => previousEvents.exists(_.isEquivalentTo(ce)))
 		if (noEventsRemoved && noEventsAdded) {
-			// no events have changed (therefore no groups relevant to this tutor can have changed), but the allocations might have
-			val previousGroups = setBeforeUpdates.groups.asScala
-			val currentGroups = set.groups.asScala
+			// no events for this tutor have changed (therefore no groups relevant to this tutor can have changed), but the allocations might have
+			val previousGroups = setBeforeUpdates.groups.asScala.filter(_.events.exists(_.tutors.users.contains(tutor)))
+			val currentGroups = set.groups.asScala.filter(_.events.exists(_.tutors.users.contains(tutor)))
 			val allocationsUnchanged = previousGroups.forall(pg => currentGroups.exists(cg => cg == pg && cg.students.hasSameMembersAs(pg.students)))
 			!allocationsUnchanged
 		} else {
@@ -76,12 +76,11 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
 	def createNotification(set: SmallGroupSet, filteredGroups: Seq[SmallGroup], user: User, blankNotification: SmallGroupSetChangedNotification, sendEmail: Boolean) = {
 		filteredGroups.toSeq match {
 			case Nil => None
-			case groups => {
+			case groups =>
 				val n = Notification.init(blankNotification, apparentUser, groups, groups.head.groupSet)
 				n.recipientUserId = user.getUserId
 				if (!sendEmail) n.priority = NotificationPriority.Trivial
 				Some(n)
-			}
 		}
 	}
 
