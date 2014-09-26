@@ -137,7 +137,7 @@ trait EditSmallGroupsValidation extends SelfValidating {
 					errors.rejectValue(s"groupNames[${i - 1}]", "smallGroup.delete.notEmpty")
 				} else {
 					val hasAttendance =
-						group.events.asScala.exists { event =>
+						group.events.exists { event =>
 							smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
 								.exists { _.attendance.asScala.exists { attendance =>
 								attendance.state != AttendanceState.NotRecorded
