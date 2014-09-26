@@ -122,7 +122,7 @@ trait EditExtensionCommandScheduledNotification extends SchedulesNotifications[E
 
 			val feedbackNotifications = {
 				val daysToSend = Seq(-7, -1, 0)
-				val proposedTimes = for (day <- daysToSend) yield extension.expiryDate.plusDays(day)
+				val proposedTimes = for (day <- daysToSend) yield extension.feedbackDeadline.plusDays(day)
 
 				// Filter out all times that are in the past. This should only generate ScheduledNotifications for the future.
 				val allTimes = proposedTimes.filter(_.isAfterNow)
