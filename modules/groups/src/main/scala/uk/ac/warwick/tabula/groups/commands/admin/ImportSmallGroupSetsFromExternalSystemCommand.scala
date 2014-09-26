@@ -89,7 +89,7 @@ trait LookupEventsFromModuleTimetables {
 					.filter { event => event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar }
 					.groupBy { _.eventType }
 
-			events.toSeq.map { case (eventType, events) => new TimetabledSmallGroupEvent(module, eventType, events.sortBy { event => (event.weekRanges.minBy { _.minWeek }.minWeek, event.day.jodaDayOfWeek, event.startTime.getMillisOfDay) }) }
+			events.toSeq.map { case (eventType, events) => new TimetabledSmallGroupEvent(module, eventType, events.sorted) }
 		}.sortBy { e => (e.module.code, e.eventType.code) }
 
 }

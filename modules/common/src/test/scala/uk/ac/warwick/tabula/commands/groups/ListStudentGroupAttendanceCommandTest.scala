@@ -14,8 +14,8 @@ import uk.ac.warwick.util.termdates.Term
 class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 	
 	trait CommandTestSupport extends SmallGroupServiceComponent with TermServiceComponent {
-		val smallGroupService = mock[SmallGroupService]
-		val termService = mock[TermService]
+		val smallGroupService = smartMock[SmallGroupService]
+		val termService = smartMock[TermService]
 	}
 	
 	trait Fixture {
@@ -47,8 +47,8 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		event2.startTime = new LocalTime(15, 0)
 		event2.weekRanges = Seq(WeekRange(1), WeekRange(3), WeekRange(7))
 		
-		group.events.add(event1)
-		group.events.add(event2)
+		group.addEvent(event1)
+		group.addEvent(event2)
 		
 		userLookup.registerUsers("user1", "user2", "user3", "user4", "user5")
 		
@@ -76,6 +76,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		
 		// Everyone turned up for week 1
 		val occurrence1 = new SmallGroupEventOccurrence
+		occurrence1.id = "occurrence1"
 		occurrence1.event = event2
 		occurrence1.week = 1
 		attendance(occurrence1, user1, AttendanceState.Attended)
@@ -86,6 +87,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		
 		// User3 missed the first seminar in week 3, user4 missed the second
 		val occurrence2 = new SmallGroupEventOccurrence
+		occurrence2.id = "occurrence2"
 		occurrence2.event = event1
 		occurrence2.week = 3
 		attendance(occurrence2, user1, AttendanceState.Attended)
@@ -95,6 +97,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		attendance(occurrence2, user5, AttendanceState.MissedUnauthorised)
 		
 		val occurrence3 = new SmallGroupEventOccurrence
+		occurrence3.id = "occurrence3"
 		occurrence3.event = event2
 		occurrence3.week = 3
 		attendance(occurrence3, user1, AttendanceState.Attended)
@@ -131,7 +134,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		command.smallGroupService.findAttendanceByGroup(group) returns Seq(occurrence1, occurrence2, occurrence3)
 		command.smallGroupService.findAttendanceNotes(
 			Seq(user1).map(_.getWarwickId),
-			Seq(occurrence2, occurrence1, occurrence3)
+			Seq(occurrence1, occurrence3, occurrence2)
 		) returns Seq()
 		
 		command.termService.getAcademicWeekForAcademicYear(now, academicYear) returns 4
@@ -194,7 +197,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		command.smallGroupService.findAttendanceByGroup(group) returns Seq(occurrence1, occurrence2, occurrence3)
 		command.smallGroupService.findAttendanceNotes(
 			Seq(user3).map(_.getWarwickId),
-			Seq(occurrence2, occurrence1, occurrence3)
+			Seq(occurrence1, occurrence3, occurrence2)
 		) returns Seq()
 		
 		command.termService.getAcademicWeekForAcademicYear(now, academicYear) returns 4
@@ -257,7 +260,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		command.smallGroupService.findAttendanceByGroup(group) returns Seq(occurrence1, occurrence2, occurrence3)
 		command.smallGroupService.findAttendanceNotes(
 			Seq(user5).map(_.getWarwickId),
-			Seq(occurrence2, occurrence1, occurrence3)
+			Seq(occurrence1, occurrence3, occurrence2)
 		) returns Seq()
 		
 		command.termService.getAcademicWeekForAcademicYear(now, academicYear) returns 4

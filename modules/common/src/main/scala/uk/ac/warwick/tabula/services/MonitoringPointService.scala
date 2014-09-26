@@ -504,7 +504,7 @@ abstract class AbstractMonitoringPointGroupProfileService extends MonitoringPoin
 			val groups = smallGroupService.findSmallGroupsByStudent(MemberOrUser(studentMember).asUser)
 			val allOccurrenceWeeks = groups.filter(g => point.smallGroupEventModules.isEmpty || point.smallGroupEventModules.contains(g.groupSet.module))
 				.flatMap(group =>
-					group.events.asScala.flatMap(event =>
+					group.events.flatMap(event =>
 						event.weekRanges.flatMap(_.toWeeks)
 					)
 				)

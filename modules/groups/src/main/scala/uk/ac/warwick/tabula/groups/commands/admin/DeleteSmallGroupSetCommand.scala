@@ -44,7 +44,7 @@ class DeleteSmallGroupSetCommand(val module: Module, val set: SmallGroupSet)
 
 	override def transformResult(set: SmallGroupSet): Seq[SmallGroupEventOccurrence] =
 		set.groups.asScala.flatMap(
-			_.events.asScala.flatMap(service.getAllSmallGroupEventOccurrencesForEvent)
+			_.events.flatMap(service.getAllSmallGroupEventOccurrencesForEvent)
 		)
 
 	override def scheduledNotifications(notificationTarget: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = Seq()

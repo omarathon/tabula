@@ -137,11 +137,11 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
     val addedGroup =   new SmallGroupBuilder().copyOf(group1).withGroupName("addedGroup").withEvents(Seq(addedEvent)).build
 
     val event = new SmallGroupEventBuilder().build // tutor1 is not a tutor on this event
-    group1.events.add(event)
+    group1.addEvent(event)
     groupSet1.groups.add(addedGroup)
 
     groupSet1.groups.size should be(2)
-    group1.events.size() should be(2)
+    group1.events.size should be(2)
 
     val filteredView = command.tutorsEvents(groupSet1,tutor1)
     filteredView.groups.size should be(1)
@@ -156,7 +156,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
 			val test: User = new User("test")
 			test.setWarwickId("123")
 			group.students.add(test)
-			val tutor = group.events.asScala.head.tutors.users.head
+			val tutor = group.events.head.tutors.users.head
 			command.hasAffectedTutorsEvents(tutor) should be(true)
 	}}
 
