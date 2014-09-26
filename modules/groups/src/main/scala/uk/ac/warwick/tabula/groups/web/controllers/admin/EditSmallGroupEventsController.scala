@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.groups.commands.admin.EditSmallGroupEventsCommand
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
+import scala.collection.JavaConverters._
 
 abstract class AbstractEditSmallGroupEventsController extends GroupsController {
 
@@ -25,7 +26,7 @@ abstract class AbstractEditSmallGroupEventsController extends GroupsController {
 	protected def renderPath: String
 
 	protected def render(set: SmallGroupSet) = {
-		Mav(renderPath).crumbs(Breadcrumbs.DepartmentForYear(set.module.department, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+		Mav(renderPath, "groups" -> set.groups.asScala.sorted).crumbs(Breadcrumbs.DepartmentForYear(set.module.department, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 
 	@RequestMapping

@@ -27,7 +27,7 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 				smallGroupService.findSmallGroupsByStudent(user).filter {
 					group =>
 						!group.groupSet.deleted &&
-						!group.events.asScala.isEmpty &&
+						group.events.nonEmpty &&
 						(
 							// The set is visible to students; OR
 							group.groupSet.visibleToStudents ||
@@ -38,7 +38,7 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 				}
 
 			/* Include SGT teaching responsibilities for students (mainly PGR) */
-			val allEvents = studentsGroups.flatMap(group => group.events.asScala) ++ smallGroupService.findSmallGroupEventsByTutor(user)
+			val allEvents = studentsGroups.flatMap(group => group.events) ++ smallGroupService.findSmallGroupEventsByTutor(user)
 			val autoTimetableEvents = allEvents map smallGroupEventToTimetableEvent
 
 			// TAB-2682 Also include events that the student has been manually added to

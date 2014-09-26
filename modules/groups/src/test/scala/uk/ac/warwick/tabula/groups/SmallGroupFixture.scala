@@ -162,9 +162,12 @@ class SmallGroupBuilder(val template:SmallGroup = new SmallGroup){
     new SmallGroupBuilder(group.duplicateTo(group.groupSet))
   }
 
-  def withEvents(events: Seq[SmallGroupEvent]):SmallGroupBuilder = {
-    template.events = events.asJava
-    events.foreach(_.group = template)
+  def withEvents(events: Seq[SmallGroupEvent]): SmallGroupBuilder = {
+		template.events.foreach(template.removeEvent)
+		events.foreach { event =>
+			template.addEvent(event)
+			event.group = template
+		}
     this
   }
   def withStudents(members:UserGroup):SmallGroupBuilder = {

@@ -1,8 +1,10 @@
 <section id="module-registrations" class="clearfix">
-	<div class="pull-right">
-		<@routes.mrm_link studentCourseDetails studentCourseYearDetails />
-		View in MRM<img class="targetBlank" alt="" title="Link opens in a new window" src="/static/images/shim.gif"/> </a>
-	</div>
+	<#if user.staff>
+		<div class="pull-right">
+			<@routes.mrm_link studentCourseDetails studentCourseYearDetails />
+			View in MRM<img class="targetBlank" alt="" title="Link opens in a new window" src="/static/images/shim.gif"/> </a>
+		</div>
+	</#if>
 	
 	<h4>Modules</h4>
 	<p><span class="muted">Module Registration Status:</span>

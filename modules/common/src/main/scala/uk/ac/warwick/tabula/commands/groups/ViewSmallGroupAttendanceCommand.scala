@@ -67,7 +67,7 @@ object ViewSmallGroupAttendanceCommand {
 	}}
 	
 	def allEventInstances(group: SmallGroup, occurrences: Seq[SmallGroupEventOccurrence]) =
-		group.events.asScala.filter { !_.isUnscheduled }.flatMap { event =>
+		group.events.filter { !_.isUnscheduled }.flatMap { event =>
 			val allWeeks = event.weekRanges.flatMap { _.toWeeks }
 			allWeeks.map { week => 
 				val occurrence = occurrences.find { o =>

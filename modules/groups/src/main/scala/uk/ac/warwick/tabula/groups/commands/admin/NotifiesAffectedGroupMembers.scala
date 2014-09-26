@@ -29,8 +29,8 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
 	def hasAffectedTutorsEvents(tutor: User) = {
 		// can't use group.hasEquivalentEventsTo, because there might be a change to an event which this user is not a tutor of
 		// - so comparisons have to be at the event level rather than the group level
-		val previousEvents = setBeforeUpdates.groups.asScala.flatMap(_.events.asScala).filter(_.tutors.users.contains(tutor))
-		val currentEvents = set.groups.asScala.flatMap(_.events.asScala).filter(_.tutors.users.contains(tutor))
+		val previousEvents = setBeforeUpdates.groups.asScala.flatMap(_.events).filter(_.tutors.users.contains(tutor))
+		val currentEvents = set.groups.asScala.flatMap(_.events).filter(_.tutors.users.contains(tutor))
 		val noEventsRemoved = previousEvents.forall(pe => currentEvents.exists(_.isEquivalentTo(pe)))
 		val noEventsAdded = currentEvents.forall(ce => previousEvents.exists(_.isEquivalentTo(ce)))
 		if (noEventsRemoved && noEventsAdded) {
@@ -49,8 +49,8 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
 	 */
 	def tutorsEvents(set: SmallGroupSet, tutor: User) = {
 		val clone = set.duplicateTo(set.module)
-		for (group <- clone.groups.asScala) {
-			group.events = group.events.asScala.filter(_.tutors.users.contains(tutor)).asJava
+		for (clonedGroup <- clone.groups.asScala) {
+			clonedGroup.events.filterNot(_.tutors.users.contains(tutor)).foreach(clonedGroup.removeEvent)
 		}
 		clone.groups = clone.groups.asScala.filterNot(_.events.isEmpty).asJava
 		clone
@@ -87,7 +87,7 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
 
 	def emit(set: SmallGroupSet): Seq[Notification[SmallGroup, SmallGroupSet]] = {
 		val tutorNotifications = if (set.releasedToTutors) {
-			val allEvents = (setBeforeUpdates.groups.asScala ++ set.groups.asScala).flatMap(g => g.events.asScala)
+			val allEvents = (setBeforeUpdates.groups.asScala ++ set.groups.asScala).flatMap(g => g.events)
 			val allTutors = allEvents.flatMap(e => e.tutors.users).distinct
 			val affectedTutors = allTutors.filter(hasAffectedTutorsEvents)
 			affectedTutors.flatMap(createTutorNotification)

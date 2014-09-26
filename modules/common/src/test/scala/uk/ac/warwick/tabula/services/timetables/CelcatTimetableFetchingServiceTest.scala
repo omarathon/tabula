@@ -39,7 +39,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 		val events = service.parseICal(resourceAsStream("1313406.ics"), CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"))
 		events.size should be (142)
 
-		val combined = service.combineIdenticalEvents(events).sortBy { event => (event.weekRanges.head.minWeek, event.day.jodaDayOfWeek, event.startTime.getMillisOfDay)}
+		val combined = service.combineIdenticalEvents(events).sorted
 		combined.size should be (136)
 
 		// Check that the first few events are as expected
@@ -116,7 +116,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 		val events = service.parseICal(resourceAsStream("duplicates.ics"), CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"))
 		events.size should be (2)
 
-		val combined = service.combineIdenticalEvents(events).sortBy { event => (event.weekRanges.head.minWeek, event.day.jodaDayOfWeek, event.startTime.getMillisOfDay)}
+		val combined = service.combineIdenticalEvents(events).sorted
 		combined.size should be (1)
 		combined.head.weekRanges should be (Seq(WeekRange(1), WeekRange(3, 5)))
 	}

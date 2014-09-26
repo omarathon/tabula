@@ -83,8 +83,8 @@ class SmallGroupPersistenceTest extends PersistenceTestBase with FieldAccessByRe
 			event2.startTime = new LocalTime(13, 0) // 1pm
 			event2.endTime = event2.startTime.plusHours(1) // 2pm
 			
-			group1.events.add(event1)
-			group1.events.add(event2)
+			group1.addEvent(event1)
+			group1.addEvent(event2)
 			
 			session.saveOrUpdate(group1)
 			
@@ -101,8 +101,8 @@ class SmallGroupPersistenceTest extends PersistenceTestBase with FieldAccessByRe
 		val cs108 = service.getModuleByCode("cs108").get
 		val set1 = cs108.groupSets.get(0)
 		val group1 = set1.groups.get(0)
-		val event1 = group1.events.asScala.find(_.title == "Event 1").head
-		val event2 = group1.events.asScala.find(_.title == "Event 2").head
+		val event1 = group1.events.find(_.title == "Event 1").head
+		val event2 = group1.events.find(_.title == "Event 2").head
 		
 		// Check a few choice fields to check they're persisted right
 		set1.format should be (SmallGroupFormat.Seminar)

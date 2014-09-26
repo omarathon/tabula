@@ -30,7 +30,7 @@ class DeleteSmallGroupEventCommandInternal(val group: SmallGroup, val event: Sma
 
 	override def applyInternal() = transactional() {
 		smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event).foreach(smallGroupService.delete)
-		group.events.remove(event)
+		group.removeEvent(event)
 		event
 	}
 
