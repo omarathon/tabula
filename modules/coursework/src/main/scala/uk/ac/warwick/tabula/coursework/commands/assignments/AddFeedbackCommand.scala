@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import org.joda.time.DateTime
+
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.CurrentUser
@@ -23,6 +25,8 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 				newFeedback.uploaderId = submitter.apparentId
 				newFeedback.universityId = uniNumber
 				newFeedback.released = false
+				newFeedback.createdDate = DateTime.now
+				newFeedback.updatedDate = DateTime.now
 				newFeedback
 			})
 
@@ -37,10 +41,10 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 		}
 
 		// TODO should really do this in a more general place, like a save listener for Feedback objects
-		val updatedFeedback = if (items != null && !items.isEmpty()) {
+		val updatedFeedback = if (items != null && !items.isEmpty) {
 			val feedbacks = items.map { (item) =>
 				val feedback = saveFeedback(item.uniNumber, item.file)
-				feedback.foreach(zipService.invalidateIndividualFeedbackZip(_))
+				feedback.foreach(zipService.invalidateIndividualFeedbackZip)
 				feedback
 			}.toList.flatten
 			zipService.invalidateFeedbackZip(assignment)
@@ -58,13 +62,12 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 	override def validateExisting(item: FeedbackItem, errors: Errors) {
 		// warn if feedback for this student is already uploaded
 		assignment.feedbacks.find { feedback => feedback.universityId == item.uniNumber && feedback.hasAttachments } match {
-			case Some(feedback) => {
+			case Some(feedback) =>
 				// set warning flag for existing feedback and check if any existing files will be overwritten
 				item.submissionExists = true
 				item.isPublished = feedback.released
 				checkForDuplicateFiles(item, feedback)
-			}
-			case None => {}
+			case None =>
 		}
 	}
 
@@ -75,7 +78,7 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 		val withSameName = for (
 			attached <- item.file.attached;
 			feedback <- feedback.attachments
-			if (attached.name == feedback.name)
+			if attached.name == feedback.name
 		) yield new duplicatePair(attached, feedback)
 
 		item.duplicateFileNames = withSameName.filterNot(p => p.attached.isDataEqual(p.feedback)).map(_.attached.name).toSet

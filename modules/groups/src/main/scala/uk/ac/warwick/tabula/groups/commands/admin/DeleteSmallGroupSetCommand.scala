@@ -1,17 +1,17 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.commands.{SchedulesNotifications, SelfValidating, Command, Description}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventOccurrence, SmallGroupSet}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services.SmallGroupService
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.{ScheduledNotification, Module}
+import collection.JavaConverters._
 
-class DeleteSmallGroupSetCommand(val module: Module, val set: SmallGroupSet) extends Command[SmallGroupSet] with SelfValidating {
+class DeleteSmallGroupSetCommand(val module: Module, val set: SmallGroupSet)
+	extends Command[SmallGroupSet] with SelfValidating with SchedulesNotifications[SmallGroupSet, SmallGroupEventOccurrence] {
 	
 	mustBeLinked(set, module)
 	PermissionCheck(Permissions.SmallGroups.Delete, set)
@@ -42,4 +42,10 @@ class DeleteSmallGroupSetCommand(val module: Module, val set: SmallGroupSet) ext
 
 	override def describe(d: Description) = d.smallGroupSet(set)
 
+	override def transformResult(set: SmallGroupSet): Seq[SmallGroupEventOccurrence] =
+		set.groups.asScala.flatMap(
+			_.events.asScala.flatMap(service.getAllSmallGroupEventOccurrencesForEvent)
+		)
+
+	override def scheduledNotifications(notificationTarget: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = Seq()
 }

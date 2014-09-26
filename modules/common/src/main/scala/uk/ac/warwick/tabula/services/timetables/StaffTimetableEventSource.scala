@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.services.timetables
 
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 trait StaffTimetableEventSource {
-	def eventsFor(staff: StaffMember):Seq[TimetableEvent]
+	def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Seq[TimetableEvent]
 }
 trait StaffTimetableEventSourceComponent {
 	def staffTimetableEventSource: StaffTimetableEventSource
@@ -17,9 +18,9 @@ trait CombinedStaffTimetableEventSourceComponent extends StaffTimetableEventSour
 
 	class CombinedStaffTimetableEventSource() extends StaffTimetableEventSource {
 
-		def eventsFor(staff: StaffMember): Seq[TimetableEvent] = {
+		def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Seq[TimetableEvent] = {
 			timetableFetchingService.getTimetableForStaff(staff.universityId) ++
-				staffGroupEventSource.eventsFor(staff)
+				staffGroupEventSource.eventsFor(staff, currentUser, context)
 		}
 
 	}

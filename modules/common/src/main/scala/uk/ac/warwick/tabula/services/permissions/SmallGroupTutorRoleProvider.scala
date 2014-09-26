@@ -23,6 +23,7 @@ class SmallGroupTutorRoleProvider extends RoleProvider {
 		events.toStream
 		  .filter { _.tutors.includesUser(user.apparentUser) }
 		  .map { _.group }
+			.filter { _.groupSet.releasedToTutors }
 		  .distinct
 		  .map { group =>
 		 	  customRoleFor(group.groupSet.module.department)(SmallGroupTutorRoleDefinition, group).getOrElse(SmallGroupTutor(group)) 

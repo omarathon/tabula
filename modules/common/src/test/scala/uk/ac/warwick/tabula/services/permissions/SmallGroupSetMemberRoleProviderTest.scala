@@ -38,6 +38,7 @@ class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
 
 		val member = new CurrentUser(memberUser, memberUser)
 		groupSet.members.add(memberUser)
+		groupSet.releasedToStudents = true
 
 		val nonMemberUser = new User("nonMember")
 		nonMemberUser.setWarwickId("test2")

@@ -192,6 +192,8 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			    smallGroup <- smallGroupDao.findByModuleAndYear(modReg.module, modReg.academicYear)
 			    if smallGroup.students.includesUser(user)
 			} {
+				logger.info(s"Removing ${userId} from small group ${smallGroup} due to removed registration ${modReg}")
+
 				// Wrap this in a sub-command so that we can do auditing
 				userGroupDao.saveOrUpdate(removeFromGroupCommand(user, smallGroup).apply() match {
 					case group: UserGroupCacheManager => group.underlying.asInstanceOf[UserGroup]

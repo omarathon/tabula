@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.web.RoutesUtils
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs
  * are hardcoded and repeated.
- * 
+ *
  * For methods called "apply", you can leave out the "apply" and treat the object like a function.
  */
 object Routes {
@@ -15,18 +15,19 @@ object Routes {
 
 	def home = context + "/"
 	def search = context + "/search"
-		
+
 	object profile {
 		def view(member: Member) = context + "/view/%s" format encoded(member.universityId)
 		def view(member: Member, meeting: AbstractMeetingRecord) = context + "/view/%s?meeting=%s" format (encoded(member.universityId), encoded(meeting.id))
+		def view(scyd: StudentCourseYearDetails, meeting: AbstractMeetingRecord) = context + "/view/course/%s/%s?meeting=%s" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString), encoded(meeting.id))
 		def photo(member: Member) = context + "/view/photo/%s.jpg" format encoded(member.universityId)
 		def mine = context + "/view/me"
 
 		def viewTimetable(member: Member) = context + "/timetable/%s" format encoded(member.universityId)
 	}
-	
+
 	def students(relationshipType: StudentRelationshipType) = context + "/%s/students" format encoded(relationshipType.urlPart)
-		
+
 	object relationships {
 		def apply(department: Department, relationshipType: StudentRelationshipType) =
 			context + "/department/%s/%s" format (encoded(department.code), encoded(relationshipType.urlPart))
@@ -37,7 +38,7 @@ object Routes {
 		def template(department: Department, relationshipType: StudentRelationshipType) =
 			context + "/department/%s/%s/template" format (encoded(department.code), encoded(relationshipType.urlPart))
 	}
-	
+
 	object admin {
 		def apply(department: Department) = Routes.home // TODO https://repo.elab.warwick.ac.uk/projects/TAB/repos/tabula/pull-requests/145/overview?commentId=1012
 		def departmentPermissions(department: Department) = context + "/admin/department/%s/permissions" format encoded(department.code)

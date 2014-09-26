@@ -84,13 +84,12 @@
 	exports.SetupMeetingRecords = function() {
 		$(function() {
 			function scrollToOpenDetails() {
-				// prevent js errors when getNavigationHeight is undefined
-				if(window.getNavigationHeight != undefined){
-					$("details.open").each(function() {
-						$("html, body").animate({
-							scrollTop: $(this).offset().top - window.getNavigationHeight()
-						}, 300);
-					});
+				var $openMeetingDetails = $(".meetings details.open").first();
+				if ($openMeetingDetails.length) {
+					var offset = window.getNavigationHeight || 0;
+					$("html, body").animate({
+						scrollTop: $openMeetingDetails.offset().top - offset
+					}, 300);
 				}
 			}
 

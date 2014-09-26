@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 
 import net.fortuna.ical4j.model.Calendar
 import net.fortuna.ical4j.model.component.VEvent
-import net.fortuna.ical4j.model.property.{CalScale, Method, ProdId, Version, XProperty}
+import net.fortuna.ical4j.model.property._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
@@ -32,6 +32,7 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 		with AutowiringUserLookupComponent
 		with AutowiringScientiaConfigurationComponent
 		with AutowiringCelcatConfigurationComponent
+		with AutowiringSecurityServiceComponent
 		with SystemClockComponent
 		).studentTimetableEventSource
 
@@ -42,6 +43,7 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 		with AutowiringUserLookupComponent
 		with AutowiringScientiaConfigurationComponent
 		with AutowiringCelcatConfigurationComponent
+		with AutowiringSecurityServiceComponent
 		with SystemClockComponent
 		).staffTimetableEventSource
 
@@ -191,6 +193,19 @@ abstract class AbstractTimetableICalController
 			cal.getComponents.add(vEvent)
 		}
 
+		// TAB-2722 Empty calendars throw a validation exception
+		// Add Xmas day to get around this
+		if (timetableEvents.isEmpty) {
+			val xmasVEvent = new VEvent(
+				new net.fortuna.ical4j.model.DateTime(new DateTime(DateTime.now.getYear, 12, 25, 0, 0).getMillis),
+				new net.fortuna.ical4j.model.DateTime(new DateTime(DateTime.now.getYear, 12, 25, 0, 0).getMillis),
+				"Christmas day"
+			)
+			xmasVEvent.getProperties.add(new Organizer("MAILTO:no-reply@tabula.warwick.ac.uk"))
+			xmasVEvent.getProperties.add(new Uid("Tabula-Stub-Xmas"))
+			cal.getComponents.add(xmasVEvent)
+		}
+
 		Mav(new IcalView(cal), "filename" -> s"${command.member.universityId}.ics")
 	}
 
@@ -214,3 +229,11 @@ class LegacyTimetableICalController extends AbstractTimetableICalController {
 
 }
 
+@Controller
+@RequestMapping(value = Array("/timetable/{member}/ical", "/timetable/{member}/timetable.ics"))
+class TimetableICalForMemberController extends AbstractTimetableICalController {
+
+	@ModelAttribute("command")
+	def command(@PathVariable member: Member) = commandForMember(member)
+
+}

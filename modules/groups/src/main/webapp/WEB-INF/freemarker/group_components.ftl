@@ -90,7 +90,7 @@
 			<div class="clearfix">
 				<div class="section-title row-fluid">
 					<div class="span4 icon-container">
-						<span class="h6 colour-h6">${set.name}</span>
+						<span class="h6 colour-h6"><@fmt.groupset_name set /></span>
 					</div>
 
 					<div class="span1">

@@ -24,7 +24,8 @@ class OpenAllSmallGroupSetsController extends GroupsController {
 
 	@RequestMapping
 	def form(@ModelAttribute("setList") model: GroupsetListViewModel, @PathVariable department: Department, showFlash: Boolean = false) = {
-		val groupSets = department.modules.asScala.flatMap(_.groupSets.asScala).filter(_.allocationMethod == SmallGroupAllocationMethod.StudentSignUp)
+		val groupSets = department.modules.asScala.flatMap(_.groupSets.asScala)
+			.filter(groupset => groupset.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && !groupset.deleted)
 		Mav("admin/groups/bulk-open", "department" -> department, "groupSets" -> groupSets, "showFlash" -> showFlash, "setState" -> model.getName)
 		.crumbs(Breadcrumbs.Department(department))
 	}

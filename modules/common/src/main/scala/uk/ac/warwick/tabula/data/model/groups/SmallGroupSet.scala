@@ -81,6 +81,11 @@ class SmallGroupSet
 	var releasedToStudents: JBoolean = false
   @Column(name="released_to_tutors")
   var releasedToTutors: JBoolean = false
+
+	@Column(name="email_students")
+	var emailStudentsOnChange: JBoolean = true
+	@Column(name="email_tutors")
+	var emailTutorsOnChange: JBoolean = true
   
   def visibleToStudents = releasedToStudents || allocationMethod == SmallGroupAllocationMethod.StudentSignUp
 
@@ -200,6 +205,13 @@ class SmallGroupSet
 			// TAB-2296 we can't rely just on counts here
 			unallocatedStudents.size
 		}
+	}
+
+	def nameWithoutModulePrefix = {
+		val moduleCodePrefix = module.code.toUpperCase + " "
+		if (name.startsWith(moduleCodePrefix)) {
+			name.replaceFirst(moduleCodePrefix, "")
+		} else name
 	}
 
 	def linked = allocationMethod == SmallGroupAllocationMethod.Linked

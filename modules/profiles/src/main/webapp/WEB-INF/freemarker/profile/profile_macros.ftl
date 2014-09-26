@@ -108,7 +108,13 @@
 		</#list>
 		</div>
 
-		<#local ajaxRoute><@routes.listMeetings relationshipType studentCourseDetails.urlSafeId studentCourseYearDetails.academicYear/></#local>
+		<#local ajaxRoute>
+			<#if openMeetingId?has_content>
+				<@routes.listMeetingsTargetted relationshipType studentCourseDetails.urlSafeId studentCourseYearDetails.academicYear openMeetingId/>
+			<#else>
+				<@routes.listMeetings relationshipType studentCourseDetails.urlSafeId studentCourseYearDetails.academicYear/>
+			</#if>
+		</#local>
 		<#local ajaxTarget>meetings-target-${relationshipType.urlPart}-${studentCourseDetails.urlSafeId}-${studentCourseYearDetails.academicYear.startYear?c}</#local>
 		<div id="${ajaxTarget}"><i class="icon-spinner icon-spin"></i><em> Loading meetings&hellip;</em></div>
 		<script>

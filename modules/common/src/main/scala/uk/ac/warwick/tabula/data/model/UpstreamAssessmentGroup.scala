@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
+import org.apache.commons.lang3.builder.EqualsBuilder
 import org.hibernate.annotations.Type
 import javax.persistence.{Basic, Column, Entity, JoinColumn, OneToOne}
 import uk.ac.warwick.tabula.AcademicYear
@@ -38,6 +39,14 @@ class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
 	override def preSave(newRecord: Boolean) {
 		if (!members.universityIds) throw new IllegalStateException
 	}
+
+	def isEquivalentTo(other: UpstreamAssessmentGroup) =
+		new EqualsBuilder()
+			.append(moduleCode, other.moduleCode)
+			.append(assessmentGroup, other.assessmentGroup)
+			.append(occurrence, other.occurrence)
+			.append(academicYear, other.academicYear)
+			.isEquals()
 
 	override def toString = "%s %s g:%s o:%s" format (moduleCode, academicYear, assessmentGroup, occurrence)
 	

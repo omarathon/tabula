@@ -2,9 +2,9 @@ package uk.ac.warwick.tabula.groups.commands
 
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.commands.{Unaudited, ReadOnly}
+import uk.ac.warwick.tabula.groups.web.views.GroupsDisplayHelper
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewModules
-import uk.ac.warwick.tabula.groups.web.controllers.GroupsDisplayHelper
 import uk.ac.warwick.tabula.commands.ComposableCommand
 import uk.ac.warwick.tabula.services.SmallGroupServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringSmallGroupServiceComponent

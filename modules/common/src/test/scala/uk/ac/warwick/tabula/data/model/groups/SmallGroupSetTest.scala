@@ -129,5 +129,18 @@ class SmallGroupSetTest extends TestBase with Mockito{
 		set.allowSelfGroupSwitching should be (true)
 	}
 
+	@Test
+	def nameWithoutModulePrefix() {
+		val module = new Module()
+		module.code = "LA101"
+		val set = new SmallGroupSet()
+		set.module = module
+
+		set.name = "LA101 Seminars"
+		set.nameWithoutModulePrefix should be ("Seminars")
+
+		set.name = "some other seminars"
+		set.nameWithoutModulePrefix should be ("some other seminars")
+	}
 
 }
