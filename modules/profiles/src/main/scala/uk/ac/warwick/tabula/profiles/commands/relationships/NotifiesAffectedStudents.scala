@@ -42,15 +42,29 @@ trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], 
 		// We've got a sequence of modified relationships, each with a seq of old tutors.
 		// We need to group by old tutors, not by sets of old tutors - so first the
 		// changes are expanded so there's one for each oldAgent/modified relationship combination.
-			val changePerSingleOldAgent = (for (change <- relationshipChanges) yield {
+			val oldAgentAndRelSeq = (for (change <- relationshipChanges) yield {
 				for (oldAgent <- change.oldAgents) yield {
 					(oldAgent, change.modifiedRelationship)
 				}
 			}).flatten
 
-			// the new set of changes can then be grouped by old tutor so each old tutor gets just one notification
-			// for all the relationships where their relationship has been ended
-			changePerSingleOldAgent
+
+			var combosToRemove: Seq[(Member, StudentRelationship)] = Seq()
+
+			for (combo <- oldAgentAndRelSeq) {
+				// find the combos with the same agent as this old agent, the same student and an end date -
+				// don't notify those as it's a duplication
+				val dups = oldAgentAndRelSeq.filter(combo2 => combo._2.studentCourseDetails.scjCode == combo2._2.studentCourseDetails.scjCode &&
+					combo._2.agentMember == combo2._1 &&
+					combo._2.endDate != null)
+
+				dups.foreach (dup => combosToRemove = combosToRemove :+ dup)
+			}
+
+			val oldAgentAndRelWithDupsRemoved = oldAgentAndRelSeq.filterNot(elem => combosToRemove.contains(elem))
+
+
+			oldAgentAndRelWithDupsRemoved
 				.groupBy(_._1)
 				.map { case (oldAgent: Member, changes) =>
 				val relationships = changes.map { _._2 }

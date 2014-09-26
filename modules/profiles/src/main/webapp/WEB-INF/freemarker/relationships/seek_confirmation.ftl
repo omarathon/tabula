@@ -3,6 +3,7 @@
 	<#assign formDestination><@routes.relationship_allocate department relationshipType /></#assign>
 	<#assign mappingById=allocateStudentsToRelationshipCommand.mappingById />
 
+
 	<@spring.bind path="allocateStudentsToRelationshipCommand">
 		<#assign hasErrors=status.errors.allErrors?size gt 0 />
 	</@spring.bind>
@@ -103,20 +104,11 @@
 			</tr>
 			</thead>
 			<tbody>
-
-				<#list allocateStudentsToRelationshipCommand.newOrChangedMapping?keys as agent>
-					<#assign studentsForAgent = mappingById[agent.universityId]![] />
-
-					<#list studentsForAgent as student>
-						<#assign studentUniId = student.universityId></assign>
-						<#list allocateStudentsToRelationshipCommand.studentsWithTutorChanged as studentForTutor>
-							<#if studentUniId = studentForTutor.universityId>
-								<@displayStudentChange "newOrChangedMapping[${agent.universityId}][${student_index}]" student agent />
-							</#if>
-						</#list>
+				<#list allocateStudentsToRelationshipCommand.studentsWithTutorChanged as student>
+					<#list allocateStudentsToRelationshipCommand.agentsAfter(student) as agent>
+						<@displayStudentChange "newOrChangedMapping[${agent.universityId}][${student_index}]" student agent />
 					</#list>
 				</#list>
-
 			</tbody>
 		</table>
 		</#if>

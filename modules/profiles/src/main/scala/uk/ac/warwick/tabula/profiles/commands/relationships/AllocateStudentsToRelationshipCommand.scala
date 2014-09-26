@@ -123,6 +123,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 				val agent = agentMap._1
 				val studentsForAgentAfter = agentMap._2
 				val studentsForAgentBefore = if (memberAgentMappingsBefore.contains(agent)) memberAgentMappingsBefore(agent) else Set[StudentMember]()
+
 				val changedStudentsForAgent = (studentsForAgentBefore ++ studentsForAgentAfter) -- studentsForAgentBefore.intersect(studentsForAgentAfter)
 				if (!changedStudentsForAgent.isEmpty) {
 					mappingsNewOrChangedMutable(agent) = changedStudentsForAgent
@@ -288,6 +289,11 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		}
 	}
 
+	def agentsAfter(student: StudentMember): Seq[Member] = {
+		val agentMappingsAfterForStudent = memberAgentMappingsAfter.filter(mama => mama._2.contains(student))
+		agentMappingsAfterForStudent.keySet.toSeq
+	}
+
 	def getMemberAgentMappingsFromDatabase: AgentMap = {
 		val memberAgentMappingsFromDb = scala.collection.mutable.Map[Member, Set[StudentMember]]()
 
@@ -362,7 +368,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 	/**
 	 * getRemoveCommandsForChangedAgents: get the commands needed to remove the relationships for students who
-	 * are no longer attached to any tutor tutors with changed tutee sets
+	 * are no longer attached to any tutors with changed tutee sets
 	 */
 	def getRemoveCommandsForChangedAgents(memberAgentMappingsBefore: AgentMap,
 																				memberAgentMappingsAfter: AgentMap,
@@ -371,25 +377,31 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		val commands = for (agent <- changedMemberAgents) yield {
 			val studentsForAgentBefore = memberAgentMappingsBefore.getOrElse(agent, Set[StudentMember]())
 
-			// drop those students who don't feature at all in the after mapping
-			val studentsToDrop = studentsForAgentBefore.filterNot(memberAgentMappingsAfter.values.flatten.toSet)
+			val studentsForAgentAfter = memberAgentMappingsAfter.getOrElse(agent, Set[StudentMember]())
 
-			studentsToDrop.flatMap ( stu => {
-				stu.mostSignificantCourseDetails.map (scd => {
+			// drop those students who don't feature at all in the after mapping
+			val studentsToDropForAgent = studentsForAgentBefore.filterNot(studentsForAgentAfter)
+
+			studentsToDropForAgent.flatMap ( stu => {
+				stu.mostSignificantCourseDetails.map (scdToDropForAgent => {
 
 					// The next line assumes that there is a relationship for this scd and agent and that the agent is a member.
 					// These are fair assumptions since the data is derived from 'mapping' which is the current state of the db
 					// and which stores agents as staff members.
-					val rel = service.findCurrentRelationships(relationshipType, scd).filter(_.agentMember.getOrElse(throw new ItemNotFoundException).equals(agent)).head
 
-					val cmd = new EndStudentRelationshipCommand(rel, viewer)
-					cmd.maintenanceMode = this.maintenanceMode
-					cmd.relationshipService = service
-					cmd
+					val rels = service.findCurrentRelationships(relationshipType, scdToDropForAgent).filter(_.agentMember.getOrElse(throw new ItemNotFoundException).equals(agent))
+
+					val cmds = for (rel <- rels) yield {
+						val cmd = new EndStudentRelationshipCommand(rel, viewer)
+						cmd.maintenanceMode = this.maintenanceMode
+						cmd.relationshipService = service
+						cmd
+					}
+					cmds
 				})
 			})
 		}
-		commands.flatten
+		commands.flatten.flatten
 	}
 
 	def validateUploadedFile(result: BindingResult) {
