@@ -27,7 +27,7 @@ object SmallGroupEvent {
 			if (firstInstanceCompare != 0) firstInstanceCompare
 			else {
 				val titleCompare = StringUtils.AlphaNumericStringOrdering.compare(a.title, b.title)
-				if (titleCompare != 0) titleCompare else a.id compare b.id
+				if (titleCompare != 0) titleCompare else Ordering.by { event: SmallGroupEvent => Option(event.id) }.compare(a, b)
 			}
 		}
 	}
