@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
 import org.joda.time.LocalTime
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.{Mockito}
+import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.services.{UserGroupCacheManager, UserLookupService}
 import org.mockito.Mockito.when
 import java.util.UUID
@@ -33,6 +33,9 @@ trait SmallGroupFixture extends Mockito {
   val tutor2 = new User
   tutor2.setUserId("tutor2")
 
+	val tutor3 = new User
+	tutor3.setUserId("tutor3")
+
   val userLookup = mock[UserLookupService]
   when(userLookup.getUserByWarwickUniId(student1.getWarwickId)).thenReturn(student1)
   when(userLookup.getUserByWarwickUniId(student2.getWarwickId)).thenReturn(student2)
@@ -40,6 +43,7 @@ trait SmallGroupFixture extends Mockito {
 	when(userLookup.getUserByUserId(student2.getUserId)).thenReturn(student2)
   when(userLookup.getUserByUserId(tutor1.getUserId)).thenReturn(tutor1)
   when(userLookup.getUserByUserId(tutor2.getUserId)).thenReturn(tutor2)
+	when(userLookup.getUserByUserId(tutor3.getUserId)).thenReturn(tutor3)
   // UserGroup does batched lookups for users when resolving by UserId...
   when(userLookup.getUsersByUserIds(Seq(tutor1.getUserId,tutor2.getUserId).asJava)).thenReturn(Map("tutor1"->tutor1, "tutor2"->tutor2).asJava)
   
@@ -128,8 +132,8 @@ class SmallGroupSetBuilder(){
 		template.members = members
 		this
 	}
-  def withReleasedToStudents(b: Boolean): SmallGroupSetBuilder = {
-    template.releasedToStudents = b
+  def withReleasedToStudents(isReleased: Boolean): SmallGroupSetBuilder = {
+    template.releasedToStudents = isReleased
     this
   }
   def withId (id:String): SmallGroupSetBuilder  = {
