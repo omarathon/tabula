@@ -1,7 +1,7 @@
 You have been allocated the following small teaching groups:
 
 <#list groups as group>
-${group.groupSet.module.code?upper_case} ${group.groupSet.name} ${group.groupSet.format.description}  ${group.name}
+${group.groupSet.module.code?upper_case} ${group.groupSet.nameWithoutModulePrefix} ${group.name}
 <@fmt.p number=group.students.members?size singular="student"/>
 
 <#list group.events as event>
