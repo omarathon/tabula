@@ -78,9 +78,14 @@ class SmallGroup
 	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
 	@JoinColumn(name = "group_id")
 	@BatchSize(size=200)
-	private var _events: JList[SmallGroupEvent] = JArrayList()
+	private val _events: JList[SmallGroupEvent] = JArrayList()
+
 	def events = _events.asScala.sorted
-	private def events_=(e: Seq[SmallGroupEvent]) { _events = e.asJava }
+	private def events_=(e: Seq[SmallGroupEvent]) {
+		_events.clear()
+		_events.addAll(e.asJava)
+	}
+
 	def addEvent(event: SmallGroupEvent) = _events.add(event)
 	def removeEvent(event: SmallGroupEvent) = _events.remove(event)
 
