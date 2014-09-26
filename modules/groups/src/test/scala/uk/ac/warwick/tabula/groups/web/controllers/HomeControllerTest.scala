@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.groups.web.controllers
 
+import uk.ac.warwick.tabula.groups.web.views.GroupsDisplayHelper
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.groups.{SmallGroupBuilder, SmallGroupSetBuilder}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.{Manual, StudentSignUp}

@@ -157,7 +157,6 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 
 	def applyInternal() = {
 		val attendances = studentsState.asScala.flatMap { case (studentId, state) =>
-			println((studentId, state))
 			if (state == null) {
 				smallGroupService.deleteAttendance(studentId, event, week)
 				None

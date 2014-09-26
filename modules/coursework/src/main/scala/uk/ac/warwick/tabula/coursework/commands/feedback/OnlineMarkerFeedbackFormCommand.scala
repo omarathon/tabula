@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
+import org.joda.time.DateTime
+
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Feedback, MarkerFeedback, Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
@@ -48,6 +50,7 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 			newFeedback.uploaderId = currentUser.apparentId
 			newFeedback.universityId = student.getWarwickId
 			newFeedback.released = false
+			newFeedback.createdDate = DateTime.now
 			newFeedback
 		})
 
@@ -59,6 +62,8 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 
 		copyTo(markerFeedback)
 		markerFeedback.state = InProgress
+
+		parentFeedback.updatedDate = DateTime.now
 
 		feedbackService.saveOrUpdate(parentFeedback)
 		feedbackService.save(markerFeedback)
@@ -136,7 +141,7 @@ trait MarkerFeedbackStateCopy {
 			fileAttachmentService.deleteAttachments(filesToRemove)
 			markerFeedback.attachments = JArrayList[FileAttachment](filesToKeep)
 			val replicatedFiles = filesToReplicate.map ( _.duplicate() )
-			replicatedFiles.foreach(markerFeedback.addAttachment(_))
+			replicatedFiles.foreach(markerFeedback.addAttachment)
 		}
 		markerFeedback.addAttachments(file.attached.asScala)
 	}

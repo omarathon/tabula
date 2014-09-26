@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
+import org.joda.time.DateTime
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.CurrentUser
@@ -57,6 +59,7 @@ abstract class OnlineModerationCommand(module: Module, assignment: Assignment, s
 			newFeedback.uploaderId = user.getWarwickId
 			newFeedback.universityId = student.getWarwickId
 			newFeedback.released = false
+			newFeedback.createdDate = DateTime.now
 			newFeedback
 		})
 
@@ -73,7 +76,7 @@ abstract class OnlineModerationCommand(module: Module, assignment: Assignment, s
 				markerFeedback.foreach(_.state = Rejected)
 				copyModerationFieldsTo(secondMarkerFeedback)
 			}
-
+			parentFeedback.updatedDate = DateTime.now
 			feedbackService.saveOrUpdate(parentFeedback)
 			markerFeedback.foreach(feedbackService.save)
 		}

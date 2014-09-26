@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.groups.web.views
 
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{StudentNotAssignedToGroup, StudentAssignedToGroup, ViewSet}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.{Manual, StudentSignUp}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{StudentAssignedToGroup, StudentNotAssignedToGroup, ViewSet}
 
 class GroupsViewModelTest extends TestBase{
 

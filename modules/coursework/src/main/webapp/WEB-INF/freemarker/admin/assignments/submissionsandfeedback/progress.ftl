@@ -306,8 +306,8 @@
 											<#elseif feedback?? && feedback.hasOnlineFeedback>
 												Comments entered online
 											</#if>
-											<#if feedback.uploadedDate??><#compress>
-													<@fmt.date date=feedback.uploadedDate seconds=true capitalise=true shortMonth=true />
+											<#if feedback.updatedDate??><#compress>
+													<@fmt.date date=feedback.updatedDate seconds=true capitalise=true shortMonth=true />
 											</#compress></#if>
 										</#compress></#if>
 									</#compress></@stage>

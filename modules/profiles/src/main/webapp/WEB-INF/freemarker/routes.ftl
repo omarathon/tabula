@@ -99,3 +99,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro listmarkersubmissions assignment><@_u context="/coursework" page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/list"/></#macro>
 
 <#macro listMeetings relationshipType scjCode academicYear><@_u page="/view/meetings/${relationshipType.urlPart}/${scjCode}/${academicYear.startYear?c}"/></#macro>
+<#macro listMeetingsTargetted relationshipType scjCode academicYear meetingId><@_u page="/view/meetings/${relationshipType.urlPart}/${scjCode}/${academicYear.startYear?c}?meeting=${meetingId}"/></#macro>

@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import org.joda.time.DateTime
+
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
@@ -50,9 +52,11 @@ abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assi
 				newFeedback.uploaderId = user.getUserId
 				newFeedback.universityId = uniId
 				newFeedback.released = false
+				newFeedback.createdDate = DateTime.now
 				feedbackService.saveOrUpdate(newFeedback)
 				newFeedback
 			})
+			parentFeedback.updatedDate = DateTime.now
 			parentFeedback
 		}
 

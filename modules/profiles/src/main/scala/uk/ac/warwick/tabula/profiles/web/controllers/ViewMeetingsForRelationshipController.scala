@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{RequestParam, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.{ScheduledMeetingRecord, MeetingRecord, StudentCourseDetails, StudentRelationshipType}
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
@@ -19,8 +19,8 @@ class ViewMeetingsForRelationshipController
 	def home(
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable studentRelationshipType: StudentRelationshipType,
-		@PathVariable academicYear: AcademicYear
-	) = {
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam(value = "meeting", required = false) openMeetingId: String) = {
 		val meetings = ViewMeetingRecordCommand(
 			mandatory(studentCourseDetails),
 			optionalCurrentMember,
@@ -40,6 +40,7 @@ class ViewMeetingsForRelationshipController
 			"meetings" -> meetings,
 			"role" -> mandatory(studentRelationshipType),
 			"viewer" -> currentMember,
+			"openMeetingId" -> openMeetingId,
 			"meetingApprovalWillCreateCheckpoint" -> meetings.map {
 				case (meeting: MeetingRecord) => meeting.id -> (
 					monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)

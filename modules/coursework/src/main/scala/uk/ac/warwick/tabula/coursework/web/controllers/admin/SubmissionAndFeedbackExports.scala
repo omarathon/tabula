@@ -56,7 +56,7 @@ class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module
 			{
 				<submission>
 					{
-						item.coursework.enhancedSubmission map { item => item.submission.values.asScala.toSeq map fieldElement(item) } getOrElse(Nil)
+						item.coursework.enhancedSubmission map { item => item.submission.values.asScala.toSeq map fieldElement(item) } getOrElse Nil
 					}
 				</submission> % submissionData(item) % submissionStatusData(item)
 			}
@@ -143,33 +143,31 @@ class ExcelBuilder(val items: Seq[Student], val assignment: Assignment, val modu
 			cs
 		}
 		
-		val row = sheet.createRow(sheet.getLastRowNum() + 1)
+		val row = sheet.createRow(sheet.getLastRowNum + 1)
 		headers.zipWithIndex foreach {
-			case (header, index) => {
+			case (header, index) =>
 				val cell = row.createCell(index)
-				
+
 				if (index == 0) {
-					// University IDs have leading zeros and Excel would normally remove them. 
+					// University IDs have leading zeros and Excel would normally remove them.
 					// Set a manual data format to remove this possibility
 					cell.setCellStyle(plainCellStyle)
 				}
-				
+
 				itemData(item).get(header) match {
-					case Some(i: ReadableInstant) => {
-						cell.setCellValue(i.toInstant().toDate())
+					case Some(i: ReadableInstant) =>
+						cell.setCellValue(i.toInstant.toDate)
 						cell.setCellStyle(dateTimeStyle)
-					}
 					case Some(b: Boolean) => cell.setCellValue(b)
 					case Some(i: Int) => cell.setCellValue(i)
 					case Some(other) => cell.setCellValue(other.toString)
 					case None => ""
 				}
-			}
 		}
 	}
 	
 	def formatWorksheet(sheet: XSSFSheet) = {
-	    (0 to headers.size) map (sheet.autoSizeColumn(_))
+	    (0 to headers.size) map sheet.autoSizeColumn
 	}
 	
 	// trim the assignment name down to 20 characters. Excel sheet names must be 31 chars or less so
@@ -197,15 +195,13 @@ trait SubmissionAndFeedbackSpreadsheetExport extends SubmissionAndFeedbackExport
 		items foreach ( item => extraFields = extraFields ++ extraFieldData(item).keySet )
 		
 		// return core headers in insertion order (make it easier for parsers), followed by alpha-sorted field headers
-		(
-			prefix(identityFields, "student") ++
-			prefix(submissionFields, "submission") ++ 
-			prefix(extraFields.toList.sorted, "submission") ++ 
-			prefix(submissionStatusFields, "submission") ++ 
-			(if (assignment.markingWorkflow != null) prefix(markerFields, "marking") else Seq()) ++ 
-			prefix(plagiarismFields, "marking") ++ 
+		prefix(identityFields, "student") ++
+			prefix(submissionFields, "submission") ++
+			prefix(extraFields.toList.sorted, "submission") ++
+			prefix(submissionStatusFields, "submission") ++
+			(if (assignment.markingWorkflow != null) prefix(markerFields, "marking") else Seq()) ++
+			prefix(plagiarismFields, "marking") ++
 			prefix(feedbackFields, "feedback")
-		)
 	}
 	
 	protected def formatData(data: Option[Any]) = data match {
@@ -268,7 +264,7 @@ trait SubmissionAndFeedbackExport {
 		"university-id" -> item.user.getWarwickId
 	) ++ (if (module.department.showStudentName) Map("name" -> item.user.getFullName) else Map())
 	
-	protected def submissionData(item: Student): Map[String, Any] = item.coursework.enhancedSubmission match { 
+	protected def submissionData(student: Student): Map[String, Any] = student.coursework.enhancedSubmission match {
 		case Some(item) if item.submission.id.hasText => Map(
 			"submitted" -> true,
 			"id" -> item.submission.id,
@@ -280,14 +276,14 @@ trait SubmissionAndFeedbackExport {
 		)
 	}
 	
-	protected def submissionStatusData(item: Student): Map[String, Any] = item.coursework.enhancedSubmission match { 
+	protected def submissionStatusData(student: Student): Map[String, Any] = student.coursework.enhancedSubmission match {
 		case Some(item) => Map(
 			"late" -> item.submission.isLate, 
 			"within-extension" -> item.submission.isAuthorisedLate, 
 			"markable" -> (if (item.submission.id.hasText) item.submission.isReleasedForMarking else "")
 		)
-		case _ => item.coursework.enhancedExtension match {
-			case Some(item) => {
+		case _ => student.coursework.enhancedExtension match {
+			case Some(item) =>
 				val assignmentClosed = !assignment.openEnded && assignment.isClosed
 				val late = assignmentClosed && !item.within
 				val within = item.within
@@ -295,32 +291,31 @@ trait SubmissionAndFeedbackExport {
 					"late" -> late,
 					"within-extension" -> within
 				)
-			}
 			case _ => Map(
 				"late" -> (if (!assignment.openEnded && assignment.isClosed) true else false)
 			)
 		}
 	}
 	
-	protected def markerData(item: Student): Map[String, Any] = item.coursework.enhancedSubmission match { 
+	protected def markerData(student: Student): Map[String, Any] = student.coursework.enhancedSubmission match {
 		case Some(item) if item.submission.id.hasText => Map(
-			"first-marker" -> (item.submission.firstMarker map { _.getFullName } getOrElse("")),
-			"second-marker" -> (item.submission.secondMarker map { _.getFullName } getOrElse(""))
+			"first-marker" -> (item.submission.firstMarker map { _.getFullName } getOrElse ""),
+			"second-marker" -> (item.submission.secondMarker map { _.getFullName } getOrElse "")
 		)
 		case _ => Map()
 	}
 
-	protected def extraFieldData(item: Student): Map[String, Any] = {
+	protected def extraFieldData(student: Student): Map[String, Any] = {
 		var fieldDataMap = ListMap[String, String]()
-		
-		item.coursework.enhancedSubmission match {
+
+		student.coursework.enhancedSubmission match {
 			case Some(item) => item.submission.values.asScala foreach ( value =>
 				if (value.hasAttachments) {
 					val attachmentNames = value.attachments.asScala.map { file =>
 						(file.name, item.submission.zipFileName(file))
 					}
 					
-					if (!attachmentNames.isEmpty) {
+					if (attachmentNames.nonEmpty) {
 						val fileNames = attachmentNames.map { case (fileName, _) => fileName }.mkString(",")
 						val zipPaths = attachmentNames.map { case (_, zipPath) => zipPath }.mkString(",")
 						
@@ -337,26 +332,25 @@ trait SubmissionAndFeedbackExport {
 		fieldDataMap
 	}
 	
-	protected def plagiarismData(item: Student): Map[String, Any] = item.coursework.enhancedSubmission match {
+	protected def plagiarismData(student: Student): Map[String, Any] = student.coursework.enhancedSubmission match {
 		case Some(item) if item.submission.id.hasText =>
 			Map(
 				"suspected-plagiarised" -> item.submission.suspectPlagiarised
 			) ++ (item.submission.allAttachments.find(_.originalityReport != null) match {
-				case Some(a) => {
+				case Some(a) =>
 					val report = a.originalityReport
 					Map(
 						"similarity-percentage" -> report.overlap
 					)
-				}
 				case _ => Map()
 			})
 		case _ => Map()
 	}
 	
-	protected def feedbackData(item: Student): Map[String, Any] = item.coursework.enhancedFeedback match {
+	protected def feedbackData(student: Student): Map[String, Any] = student.coursework.enhancedFeedback match {
 		case Some(item) if item.feedback.id.hasText => Map(
 			"id" -> item.feedback.id, 
-			"uploaded" -> item.feedback.uploadedDate, 
+			"uploaded" -> item.feedback.createdDate,
 			"released" -> item.feedback.released, 
 			"mark" -> item.feedback.actualMark,
 			"grade" -> item.feedback.actualGrade,

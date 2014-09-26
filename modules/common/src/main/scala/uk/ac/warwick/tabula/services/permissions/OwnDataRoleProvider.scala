@@ -46,10 +46,10 @@ class OwnDataRoleProvider extends RoleProvider {
 					Stream(customRoleFor(department)(SettingsOwnerRoleDefinition, settings).getOrElse(SettingsOwner(settings)))
 				else Stream.empty
 
-			// You can view small groups that you are a member of
+			// You can view small groups that you are a member of as long as it's visible to students
 			case smallGroup: SmallGroup => {
 				val studentId = user.apparentUser.getWarwickId
-				if (studentId.hasText && smallGroup.students.includesUser(user.apparentUser)) 
+				if (studentId.hasText && smallGroup.groupSet.visibleToStudents && smallGroup.students.includesUser(user.apparentUser))
 					Stream(customRoleFor(smallGroup.groupSet.module.department)(SmallGroupMemberRoleDefinition, smallGroup).getOrElse(SmallGroupMember(smallGroup)))
 				else Stream.empty
 			}

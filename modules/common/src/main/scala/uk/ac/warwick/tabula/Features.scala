@@ -109,6 +109,7 @@ abstract class Features {
 	@Value("${features.smallGroupTeaching.crossModuleSmallGroups:true}") var smallGroupCrossModules = defaults.smallGroupCrossModules
 	@Value("${features.masqueradersCanWrite:false}") var masqueradersCanWrite = defaults.masqueradersCanWrite
 	@Value("${features.masqueradeElevatedPermissions:false}") var masqueradeElevatedPermissions = defaults.masqueradeElevatedPermissions
+	@Value("${features.profiles.autoGroupDeregistration:false}") var autoGroupDeregistration = defaults.autoGroupDeregistration
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -140,6 +141,11 @@ class FeaturesMessage {
 	// BeanProperty current required as Utils JsonMessageConverter uses Jackson
 	// without the Scala module.
 	@BeanProperty var emailStudents = false
+	@BeanProperty var xSendfile = true
+	@BeanProperty var activityStreams = true
+	@BeanProperty var masqueradersCanWrite = false
+	@BeanProperty var masqueradeElevatedPermissions = false
+
 	@BeanProperty var collectRatings = true
 	@BeanProperty var submissions = true
 	@BeanProperty var privacyStatement = true
@@ -150,42 +156,47 @@ class FeaturesMessage {
 	@BeanProperty var feedbackTemplates = true
 	@BeanProperty var markingWorkflows = true
 	@BeanProperty var markerFeedback = true
-	@BeanProperty var profiles = true
 	@BeanProperty var assignmentProgressTable = true
 	@BeanProperty var assignmentProgressTableByDefault = true
 	@BeanProperty var summativeFilter = true
 	@BeanProperty var dissertationFilter = true
+	@BeanProperty var disabilityRenderingInExtensions = true
+	@BeanProperty var newSeenSecondMarkingWorkflows = true
+
+	@BeanProperty var profiles = true
 	@BeanProperty var meetingRecordApproval = true
-	@BeanProperty var smallGroupTeaching = true
-	@BeanProperty var smallGroupTeachingStudentSignUp = true
-	@BeanProperty var smallGroupTeachingRandomAllocation = false
-	@BeanProperty var smallGroupTeachingSelfGroupSwitching = true
-	@BeanProperty var smallGroupTeachingTutorView = true
-	@BeanProperty var attendanceMonitoring = true
-	@BeanProperty var smallGroupAllocationFiltering = true
 	@BeanProperty var personalTutorAssignment = true
 	@BeanProperty var personalTutorAssignmentFiltering = true
 	@BeanProperty var arbitraryRelationships = true
 	@BeanProperty var personalTimetables = true
 	@BeanProperty var profilesMemberNotes = true
-	@BeanProperty var smallGroupTeachingRecordAttendance = true
-	@BeanProperty var attendanceMonitoringMeetingPointType = true
-	@BeanProperty var attendanceMonitoringReport = true
-	@BeanProperty var smallGroupTeachingLectures = true
 	@BeanProperty var courseworkInStudentProfile = true
-	@BeanProperty var attendanceMonitoringNote = true
 	@BeanProperty var visaInStudentProfile = true
 	@BeanProperty var scheduledMeetings = true
 	@BeanProperty var disabilityRenderingInProfiles = true
-	@BeanProperty var disabilityRenderingInExtensions = true
-	@BeanProperty var attendanceMonitoringSmallGroupPointType = true
 	@BeanProperty var includePastYears = true
-	@BeanProperty var attendanceMonitoringAssignmentSubmissionPointType = true
-	@BeanProperty var xSendfile = true
-	@BeanProperty var newSeenSecondMarkingWorkflows = true
-	@BeanProperty var activityStreams = true
 	@BeanProperty var showModuleResults = true
 	@BeanProperty var showAccreditedPriorLearning = true
+	@BeanProperty var autoGroupDeregistration = false
+
+	@BeanProperty var smallGroupTeaching = true
+	@BeanProperty var smallGroupTeachingStudentSignUp = true
+	@BeanProperty var smallGroupTeachingRandomAllocation = false
+	@BeanProperty var smallGroupTeachingSelfGroupSwitching = true
+	@BeanProperty var smallGroupTeachingTutorView = true
+	@BeanProperty var smallGroupAllocationFiltering = true
+	@BeanProperty var smallGroupTeachingRecordAttendance = true
+	@BeanProperty var smallGroupTeachingLectures = true
+	@BeanProperty var smallGroupCrossModules = true
+
+	@BeanProperty var attendanceMonitoring = true
+	@BeanProperty var attendanceMonitoringMeetingPointType = true
+	@BeanProperty var attendanceMonitoringReport = true
+	@BeanProperty var attendanceMonitoringNote = true
+	@BeanProperty var attendanceMonitoringSmallGroupPointType = true
+	@BeanProperty var attendanceMonitoringAssignmentSubmissionPointType = true
+	@BeanProperty var attendanceMonitoringAcademicYear2014 = true
+
 	@BeanProperty var schedulingAcademicInformationImport = true
 	@BeanProperty var schedulingProfilesImport = true
 	@BeanProperty var schedulingAssignmentsImport = true
@@ -200,10 +211,6 @@ class FeaturesMessage {
 	@BeanProperty var schedulingCleanupUnreferencedFiles = true
 	@BeanProperty var schedulingSanityCheckFilesystem = true
 	@BeanProperty var schedulingExportAttendanceToSits = true
-	@BeanProperty var attendanceMonitoringAcademicYear2014 = true
-	@BeanProperty var smallGroupCrossModules = true
-	@BeanProperty var masqueradersCanWrite = false
-	@BeanProperty var masqueradeElevatedPermissions = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

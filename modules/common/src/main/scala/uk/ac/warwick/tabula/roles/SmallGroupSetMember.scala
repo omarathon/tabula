@@ -10,6 +10,7 @@ case object SmallGroupSetMemberRoleDefinition extends UnassignableBuiltInRoleDef
 	override def description = "Member of a set of small groups"
 
 	GrantsScopedPermission(
+		Permissions.SmallGroups.Read,
 		Permissions.SmallGroups.AllocateSelf
 	)
 

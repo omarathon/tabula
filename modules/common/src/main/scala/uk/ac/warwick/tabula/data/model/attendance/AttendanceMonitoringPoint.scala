@@ -25,7 +25,7 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 	private var _startWeek: Int = _
 
 	def startWeek = {
-		if (scheme.pointStyle == AttendanceMonitoringPointStyle.Date) {
+		if (scheme != null && scheme.pointStyle == AttendanceMonitoringPointStyle.Date) {
 			throw new IllegalArgumentException
 		}
 		_startWeek
@@ -38,7 +38,7 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 	private var _endWeek: Int = _
 
 	def endWeek = {
-		if (scheme.pointStyle == AttendanceMonitoringPointStyle.Date) {
+		if (scheme != null && scheme.pointStyle == AttendanceMonitoringPointStyle.Date) {
 			throw new IllegalArgumentException
 		}
 		_endWeek
@@ -74,10 +74,12 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 	@Column(name = "updated_date")
 	var updatedDate: DateTime = _
 
-	def cloneTo(scheme: AttendanceMonitoringScheme): AttendanceMonitoringPoint = {
+	def cloneTo(scheme: Option[AttendanceMonitoringScheme]): AttendanceMonitoringPoint = {
 		val newPoint = new AttendanceMonitoringPoint
-		scheme.points.add(newPoint)
-		newPoint.scheme = scheme
+		scheme.foreach(s => {
+			s.points.add(newPoint)
+			newPoint.scheme = s
+		})
 		newPoint.name = this.name
 		newPoint.startWeek = _startWeek
 		newPoint.endWeek = _endWeek

@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import org.joda.time.DateTime
+
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.{Module, MarkerFeedback, Feedback, Assignment}
 import uk.ac.warwick.tabula.data.Transactions._
@@ -17,7 +19,7 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: C
 	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded
 		assignment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId} match {
-			case Some(feedback) => {
+			case Some(feedback) =>
 				if (assignment.isFirstMarker(submitter.apparentUser)
 					&& feedback.firstMarkerFeedback != null
 					&& (feedback.firstMarkerFeedback.hasMark || feedback.firstMarkerFeedback.hasGrade)
@@ -28,7 +30,6 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: C
 					&& (feedback.secondMarkerFeedback.hasMark || feedback.secondMarkerFeedback.hasGrade)
 				)
 					mark.isModified = true
-			}
 			case None =>
 		}
 	}
@@ -43,6 +44,7 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: C
 				newFeedback.uploaderId = submitter.apparentId
 				newFeedback.universityId = universityId
 				newFeedback.released = false
+				newFeedback.createdDate = DateTime.now
 				newFeedback
 			})
 
@@ -56,7 +58,11 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: C
 				case true => Some(actualMark.toInt)
 				case false => None
 			}
+
 			markerFeedback.grade = Option(actualGrade)
+
+			parentFeedback.updatedDate = DateTime.now
+
 			session.saveOrUpdate(parentFeedback)
 			session.saveOrUpdate(markerFeedback)
 			markerFeedback

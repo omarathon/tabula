@@ -14,13 +14,13 @@
 				type="submit"
 				class="btn btn-success"
 				name="${ManageSmallGroupsMappingParameters.createAndAllocate}"
-				value="Allocate students"
+				value="Save and allocate students"
 				/>
 			<input
 				type="submit"
 				class="btn btn-primary"
 				name="create"
-				value="Save"
+				value="Save and exit"
 				/>
 			<a class="btn" href="<@routes.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>">Cancel</a>
 		</div>

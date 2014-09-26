@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.CascadeType._
 import javax.persistence._
+import javax.validation.constraints.NotNull
 
 import org.hibernate.annotations.{AccessType, BatchSize, Type}
 import org.joda.time.DateTime
@@ -72,7 +73,11 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	var uploaderId: String = _
 
 	@Column(name = "uploaded_date")
-	var uploadedDate: DateTime = new DateTime
+	var createdDate: DateTime = new DateTime
+
+	@Column(name = "updated_date")
+	@NotNull
+	var updatedDate: DateTime = new DateTime
 
 	var universityId: String = _
 

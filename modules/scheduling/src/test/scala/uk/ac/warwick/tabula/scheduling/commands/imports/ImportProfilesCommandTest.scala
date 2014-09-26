@@ -6,7 +6,7 @@ import scala.language.implicitConversions
 import org.joda.time.DateTime
 import org.springframework.transaction.annotation.Transactional
 
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, PersistenceTestBase}
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.{MemberDaoImpl, ModuleRegistrationDaoImpl, StudentCourseDetailsDaoImpl, StudentCourseYearDetailsDaoImpl}
 import uk.ac.warwick.tabula.data.model.{ModuleRegistration, StudentCourseYearKey}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -85,6 +85,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 		val smallGroupService = smartMock[SmallGroupService]
 
 		val command = new ImportProfilesCommand
+		command.features = new FeaturesImpl
 		command.sessionFactory = sessionFactory
 		command.sitsAcademicYearService = sitsAcademicYearService
 		command.moduleRegistrationDao = mrDao
@@ -97,6 +98,8 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 	@Transactional
 	@Test def testDeleteOldModuleRegistrations() {
 		new Environment {
+			command.features.autoGroupDeregistration = true
+
 			// check that if the new MR matches the old, it will not be deleted:
 			command.deleteOldModuleRegistrations(Seq("abcde"), Seq(existingMr))
 			scd.moduleRegistrations.contains(existingMr) should be (true)

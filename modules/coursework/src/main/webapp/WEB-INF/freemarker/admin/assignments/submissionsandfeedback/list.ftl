@@ -134,7 +134,7 @@
 						</#if>
 
 						<th class="feedback">Files</th>
-						<th class="feedback">Uploaded</th>
+						<th class="feedback">Updated</th>
 						<#if assignment.collectMarks>
 							<th class="feedback">Mark</th>
 							<th class="feedback">Grade</th>
@@ -262,7 +262,7 @@
 							</td>
 							<td class="uploaded">
 								<#if student.coursework.enhancedFeedback?? && !student.coursework.enhancedFeedback.feedback.placeholder>
-									<@fmt.date date=student.coursework.enhancedFeedback.feedback.uploadedDate seconds=true capitalise=true shortMonth=true split=true />
+									<@fmt.date date=student.coursework.enhancedFeedback.feedback.updatedDate seconds=true capitalise=true shortMonth=true split=true />
 								</#if>
 							</td>
 
