@@ -78,7 +78,7 @@
 
 						<#list studentsForAgent as student>
 							<#assign studentUniId = student.universityId></assign>
-							<#list allocateStudentsToRelationshipCommand.studentsWithTutorAdded as studentForTutor>
+							<#list allocateStudentsToRelationshipCommand.studentsWithTutorAdded.keySet as studentForTutor>
 								<#if studentUniId = studentForTutor.universityId>
 									<@displayStudentChange "newOrChangedMapping[${agent.universityId}][${student_index}]" student agent />
 								</#if>
@@ -104,7 +104,7 @@
 			</tr>
 			</thead>
 			<tbody>
-				<#list allocateStudentsToRelationshipCommand.studentsWithTutorChanged as student>
+				<#list allocateStudentsToRelationshipCommand.studentsWithTutorChanged.keySet as student>
 					<#list allocateStudentsToRelationshipCommand.agentsAfter(student) as agent>
 						<@displayStudentChange "newOrChangedMapping[${agent.universityId}][${student_index}]" student agent />
 					</#list>
@@ -135,7 +135,7 @@
 						</tr>
 					</#macro>
 
-					<#list allocateStudentsToRelationshipCommand.studentsWithTutorRemoved as student>
+					<#list allocateStudentsToRelationshipCommand.studentsWithTutorRemoved.keySet as student>
 							<@agentRemoved student />
 					</#list>
 				</tbody>

@@ -48,20 +48,7 @@ trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], 
 				}
 			}).flatten
 
-
-			var combosToRemove: Seq[(Member, StudentRelationship)] = Seq()
-
-			for (combo <- oldAgentAndRelSeq) {
-				// find the combos with the same agent as this old agent, the same student and an end date -
-				// don't notify those as it's a duplication
-				val dups = oldAgentAndRelSeq.filter(combo2 => combo._2.studentCourseDetails.scjCode == combo2._2.studentCourseDetails.scjCode &&
-					combo._2.agentMember == combo2._1 &&
-					combo._2.endDate != null)
-
-				dups.foreach (dup => combosToRemove = combosToRemove :+ dup)
-			}
-
-			val oldAgentAndRelWithDupsRemoved = oldAgentAndRelSeq.filterNot(elem => combosToRemove.contains(elem))
+			val oldAgentAndRelWithDupsRemoved = oldAgentAndRelSeq.filterNot(elem => oldAgentAndRelSeq.contains(elem))
 
 
 			oldAgentAndRelWithDupsRemoved
