@@ -1,12 +1,9 @@
 package uk.ac.warwick.tabula.services.permissions
 
-import scala.collection.JavaConverters._
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.roles.{SmallGroupTutor, Marker, Role}
-import uk.ac.warwick.tabula.services.SmallGroupService
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.roles.SmallGroupTutor
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent}
 import uk.ac.warwick.tabula.roles.SmallGroupTutorRoleDefinition
 
@@ -26,7 +23,7 @@ class SmallGroupTutorRoleProvider extends RoleProvider {
 			.filter { _.groupSet.releasedToTutors }
 		  .distinct
 		  .map { group =>
-		 	  customRoleFor(group.groupSet.module.department)(SmallGroupTutorRoleDefinition, group).getOrElse(SmallGroupTutor(group)) 
+		 	  customRoleFor(group.groupSet.module.department)(SmallGroupTutorRoleDefinition, group).getOrElse(SmallGroupTutor(group))
 		 	}
 	
 	def rolesProvided = Set(classOf[SmallGroupTutor])

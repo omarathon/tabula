@@ -4,7 +4,8 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup}
-import uk.ac.warwick.tabula.services.SmallGroupService
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{SecurityService, SmallGroupService}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.permissions.Public
 
@@ -29,9 +30,20 @@ class TutorHomeCommandImpl(user: CurrentUser)
 	with Public {
 
 	var smallGroupService = Wire[SmallGroupService]
+	var securityService = Wire[SecurityService]
 
 	def applyInternal() =
 		smallGroupService.findSmallGroupsByTutor(user.apparentUser)
+			.filter { group =>
+				!group.groupSet.deleted &&
+				(
+					// The set is visible to tutors; OR
+					group.groupSet.releasedToTutors ||
+
+					// I have permission to view the membership of the set anyway
+					securityService.can(user, Permissions.SmallGroups.ReadMembership, group)
+				)
+			}
 			.groupBy { group => group.groupSet }
 			.groupBy { case (set, groups) => set.module }
 

@@ -620,14 +620,14 @@
 												<small><@fmt.p (group.students.size)!0 "student" "students" /></small>
 											</#if>
 										</h4>
-										
+
 										<#if features.smallGroupTeachingRecordAttendance && can.do('SmallGroupEvents.ViewRegister', group) && group.hasScheduledEvents && group.groupSet.collectAttendance>
-                    	<div class="pull-right">
-                    		<a href="<@routes.groupAttendance group />" class="btn btn-primary btn-small">
-                    			Attendance
-                    		</a>
-                    	</div>
-                    </#if>
+											<div class="pull-right">
+												<a href="<@routes.groupAttendance group />" class="btn btn-primary btn-small">
+													Attendance
+												</a>
+											</div>
+										</#if>
 
 										<#if setItem.viewerIsStudent
 												&& setItem.isStudentSignUp()
