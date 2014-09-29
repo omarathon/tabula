@@ -1,4 +1,5 @@
 <#include "prelude.ftl" />
+<#import "_profile_link.ftl" as pl />
 
 <#--
 
@@ -126,6 +127,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 
 	<#if hasMembers>
 		<div id="enrolment">
+			<div id="profile-modal" class="modal fade profile-subset"></div>
 			<table id="enrolment-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-orangeLight">
 				<thead>
 					<tr>
@@ -181,6 +183,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 							<td>
 								<#if item.universityId??>
 									${item.universityId}
+									<@pl.profile_link item.universityId />
 								<#else>
 									<span class="muted">Unknown</span>
 								</#if>
