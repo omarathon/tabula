@@ -86,9 +86,17 @@ jQuery(function($) {
 			var $activity = $(this).closest('.activity');
 			var notificationId = $activity.data('notification-id');
 
+			if ($activity.data('ajaxRequest')) {
+				// Double-click protection
+				return;
+			}
+
 //			console.log('remove', notificationId);
+			$activity.data('ajaxRequest', true);
 			$.post('/activity/dismiss/' + notificationId)
 				.then(function(data, textStatus, xhr) {
+					$activity.data('ajaxRequest', false);
+
 					var $undoNotice = $('<div>', {'class':'deleted-notice alert'}).html('Dismissed. ');
 					$undoNotice.append($('<a>', {href:'#'}).html('Undo').on('click', function() {
 						$activity.show();
@@ -99,6 +107,7 @@ jQuery(function($) {
 					$activity.before($undoNotice);
 					$activity.hide(); // though it's deleted, just hide it for now to make restoring easier.
 				}, function(xhr, textStatus, errorThrown) {
+					$activity.data('ajaxRequest', false);
 //					console.error(errorThrown);
 				});
 		});
