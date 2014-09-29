@@ -740,7 +740,7 @@
 		});
 
 		$(document).on("ajaxComplete", function(e, xhr) {
-			if (xhr.responseText.indexOf('<details') != -1) {
+			if (xhr.responseText && xhr.responseText.indexOf('<details') != -1) {
 				$('details').details();
 			}
 		});

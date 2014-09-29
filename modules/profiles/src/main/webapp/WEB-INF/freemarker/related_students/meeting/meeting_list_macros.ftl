@@ -1,10 +1,23 @@
 <#escape x as x?html>
 
 <#macro list studentCourseDetails meetings relationshipType viewerRelationshipTypes="">
-	<#assign can_read_meetings = can.do_with_selector("Profiles.MeetingRecord.Read", studentCourseDetails, relationshipType) />
-	<#assign can_create_meetings = can.do_with_selector("Profiles.MeetingRecord.Create", studentCourseDetails, relationshipType) />
-	<#assign existingRelationship = ((studentCourseDetails.relationships(relationshipType))![])?size gt 0 />
-	<#assign can_create_scheduled_meetings = can.do_with_selector("Profiles.ScheduledMeetingRecord.Create", studentCourseDetails, relationshipType) />
+	<#local can_read_meetings = can.do_with_selector("Profiles.MeetingRecord.Read", studentCourseDetails, relationshipType) />
+	<#local can_create_meetings = can.do_with_selector("Profiles.MeetingRecord.Create", studentCourseDetails, relationshipType) />
+	<#local existingRelationship = ((studentCourseDetails.relationships(relationshipType))![])?size gt 0 />
+	<#local is_student = ((viewer.universityId)!"")?length gt 0 && viewer.universityId == (studentCourseDetails.student.universityId)!"" />
+
+	<#local student_can_schedule_meetings = true />
+	<#if existingRelationship>
+		<#list studentCourseDetails.relationships(relationshipType) as relationship>
+			<#if relationship.agentMember??>
+				<#local student_can_schedule_meetings = student_can_schedule_meetings && relationship.agentMember.homeDepartment.studentsCanScheduleMeetings />
+			</#if>
+		</#list>
+	</#if>
+	<#local can_create_scheduled_meetings =
+		can.do_with_selector("Profiles.ScheduledMeetingRecord.Create", studentCourseDetails, relationshipType) &&
+		(!is_student || student_can_schedule_meetings)
+	/>
 
 	<section class="meetings ${relationshipType.id}-meetings" data-target-container="${relationshipType.id}-meetings">
 		<div class="list-controls">
@@ -18,11 +31,11 @@
 			<#if existingRelationship && can_create_scheduled_meetings && features.scheduledMeetings>
 				<a class="btn-like new" href="<@routes.create_scheduled_meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Schedule a meeting"><i class="icon-time"></i> Schedule</a>
 				<#if showIntro("scheduled-meetings", "anywhere")>
-					<#assign introText>
+					<#local introText>
 						<p>You can now schedule meetings in advance
 							<#if viewerRelationshipTypes?has_content> with your ${viewerRelationshipTypes}</#if>
 						</p>
-					</#assign>
+					</#local>
 					<a href="#"
 					   id="scheduled-meetings-intro"
 					   class="use-introductory auto"
@@ -42,16 +55,16 @@
 					<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
 				</div>
 				<#list meetings as meeting>
-					<#assign deletedClasses><#if meeting.deleted>deleted muted</#if></#assign>
-					<#assign pendingAction = meeting.pendingActionBy(viewer) />
-					<#assign pendingActionClasses><#if pendingAction>well</#if></#assign>
+					<#local deletedClasses><#if meeting.deleted>deleted muted</#if></#local>
+					<#local pendingAction = meeting.pendingActionBy(viewer) />
+					<#local pendingActionClasses><#if pendingAction>well</#if></#local>
 
 					<#if (openMeetingId?? && openMeetingId == meeting.id) || pendingAction>
-						<#assign openClass>open</#assign>
-						<#assign openAttribute>open="open"</#assign>
+						<#local openClass>open</#local>
+						<#local openAttribute>open="open"</#local>
 					<#else>
-						<#assign openClass></#assign>
-						<#assign openAttribute></#assign>
+						<#local openClass></#local>
+						<#local openAttribute></#local>
 					</#if>
 
 					<details class="meeting ${deletedClasses} ${pendingActionClasses} ${openClass!} <#if meeting.scheduled>scheduled<#else>normal</#if>" ${openAttribute!}>
@@ -66,7 +79,7 @@
 							<span class="title">${meeting.title!}</span>
 
 							<#if meeting.scheduled>
-								<#assign can_update_scheduled_meeting = can.do("Profiles.ScheduledMeetingRecord.Update", meeting) />
+								<#local can_update_scheduled_meeting = can.do("Profiles.ScheduledMeetingRecord.Update", meeting) />
 								<#local editUrl><@routes.edit_scheduled_meeting_record meeting studentCourseDetails.urlSafeId relationshipType /></#local>
 							<#else>
 								<#local editUrl><@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting /></#local>
@@ -89,7 +102,7 @@
 							</#if>
 
 							<#if meeting.attachments?? && meeting.attachments?size gt 0>
-								<#assign mrDownloadUrl><@routes.download_meeting_record_attachment relationshipType meeting /></#assign>
+								<#local mrDownloadUrl><@routes.download_meeting_record_attachment relationshipType meeting /></#local>
 								<@fmt.download_attachments meeting.attachments mrDownloadUrl "for this meeting record" "${meeting.title?url}" />
 							</#if>
 

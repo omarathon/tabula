@@ -2337,10 +2337,10 @@ h(document.body).bind("touchstart",function(x){if(h(x.target).closest("#search-c
 }function q(B){var x,z,A;
 z=h("#search-box");
 u.find("> li").not(".more-link").remove();
-$searchlink='<a title="View more search options" href="http://search.warwick.ac.uk/website" rel="nofollow">'+B.data("index-title")+"</a>";
+$searchlink='<a title="View more search options" href="//search.warwick.ac.uk/website" rel="nofollow">'+B.data("index-title")+"</a>";
 B.clone().empty().prependTo(u).addClass("active").append($searchlink);
 x=z.parent("form");
-x.attr("action","http://search.warwick.ac.uk/"+B.data("index-section"));
+x.attr("action","//search.warwick.ac.uk/"+B.data("index-section"));
 x.find("input[name=source]").remove();
 x.find("input[name=fileFormat]").remove();
 if(B.data("source")){x.prepend(h('<input type="hidden" name="source">').val(B.data("source")))

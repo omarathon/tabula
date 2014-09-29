@@ -43,6 +43,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 	var assignmentInfoView = department.assignmentInfoView
 	var weekNumberingSystem = department.weekNumberingSystem
 	var autoGroupDeregistration = department.autoGroupDeregistration
+	var studentsCanScheduleMeetings = department.studentsCanScheduleMeetings
 	var defaultGroupAllocationMethod = department.defaultGroupAllocationMethod.dbValue
 	var studentRelationshipDisplayed: JMap[String, JBoolean] =
 		JHashMap(department.studentRelationshipDisplayed.map {
@@ -65,6 +66,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 		department.turnitinSmallMatchPercentageLimit = turnitinSmallMatchPercentageLimit
 		department.assignmentInfoView = assignmentInfoView
 		department.autoGroupDeregistration = autoGroupDeregistration
+		department.studentsCanScheduleMeetings = studentsCanScheduleMeetings
 		department.defaultGroupAllocationMethod = SmallGroupAllocationMethod(defaultGroupAllocationMethod)
 		department.weekNumberingSystem = weekNumberingSystem
 		department.studentRelationshipDisplayed = studentRelationshipDisplayed.asScala.map {
