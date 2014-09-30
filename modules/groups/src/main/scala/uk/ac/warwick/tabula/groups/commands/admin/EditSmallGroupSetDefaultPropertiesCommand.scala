@@ -50,7 +50,7 @@ class EditSmallGroupSetDefaultPropertiesCommandInternal(val module: Module, val 
 		copyTo(set)
 
 		if (resetExistingEvents) {
-			set.groups.asScala.flatMap { _.events.asScala }.foreach { event =>
+			set.groups.asScala.flatMap { _.events }.foreach { event =>
 				event.weekRanges = set.defaultWeekRanges
 				event.location = set.defaultLocation
 				event.tutors.copyFrom(set.defaultTutors)

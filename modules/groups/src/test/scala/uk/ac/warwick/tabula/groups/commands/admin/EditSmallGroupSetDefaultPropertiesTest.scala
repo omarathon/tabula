@@ -61,9 +61,9 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
 		set.groups.add(group1)
 		set.groups.add(group2)
 
-		group1.events.add(event1)
-		group1.events.add(event2)
-		group2.events.add(event3)
+		group1.addEvent(event1)
+		group1.addEvent(event2)
+		group2.addEvent(event3)
 
 		command.resetExistingEvents = true
 

@@ -1,5 +1,6 @@
 <#escape x as x?html>
 <#import "*/modal_macros.ftl" as modal />
+<#import "*/_profile_link.ftl" as pl />
 
 <script type="text/javascript">
 (function ($) {
@@ -34,6 +35,7 @@
 		</div>
 	</div>
 
+	<div id="profile-modal" class="modal fade profile-subset"></div>
 	<div class="fix-area">
 		<h1>Record attendance</h1>
 		<h4><span class="muted">for</span>
@@ -234,6 +236,7 @@
 
 						<@fmt.member_photo student "tinythumbnail" true />
 						${student.fullName}
+						<@pl.profile_link student.universityId />
 
 						<#if added_manually>
 							<#assign popoverText>

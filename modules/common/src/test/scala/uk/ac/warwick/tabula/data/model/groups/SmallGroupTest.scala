@@ -53,27 +53,28 @@ class SmallGroupTest extends TestBase with Mockito {
   def hasEquivalentEventsToReturnsTrueForGroupsWithEquivalentEvents(){
 
     val group = newSmallGroupWithMockedServices
-    group.events = JArrayList(event)
+    group.addEvent(event)
     val group2 = newSmallGroupWithMockedServices
-    group2.events = JArrayList(equivalentEvent)
+    group2.addEvent(equivalentEvent)
     group.hasEquivalentEventsTo(group2) should be (true)
   }
 
   @Test
   def hasEquivalentEventsToReturnsFalseForGroupsWithNonEquivalentEvents(){
     val group = newSmallGroupWithMockedServices
-    group.events = JArrayList(event)
+    group.addEvent(event)
     val group2 = newSmallGroupWithMockedServices
-    group2.events = JArrayList(notEquivalentEvent)
+    group2.addEvent(notEquivalentEvent)
     group.hasEquivalentEventsTo(group2) should be (false)
   }
 
   @Test
   def hasEquivalentEventsToReturnsFalseForGroupsWithSubsetOfEvents(){
     val group = newSmallGroupWithMockedServices
-    group.events = JArrayList(event)
+    group.addEvent(event)
     val group2 = newSmallGroupWithMockedServices
-    group2.events = JArrayList(event,notEquivalentEvent)
+    group2.addEvent(event)
+		group2.addEvent(notEquivalentEvent)
     group.hasEquivalentEventsTo(group2) should be (false)
   }
 
@@ -104,7 +105,7 @@ class SmallGroupTest extends TestBase with Mockito {
 
     source.deleted = false
     source.id = "123"
-    source.events = JArrayList(event)
+    source.addEvent(event)
     source.maxGroupSize = 12
 
     val targetSet = new SmallGroupSet
@@ -124,7 +125,7 @@ class SmallGroupTest extends TestBase with Mockito {
     target.students should not be(source.students)
 		target.students.hasSameMembersAs(source.students) should be(true)
     target.events.size should be(1)
-    target.events.asScala.head should be(clonedEvent)
+    target.events.head should be(clonedEvent)
 
   }
 

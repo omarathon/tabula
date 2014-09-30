@@ -28,7 +28,7 @@ class SmallGroupEventFixtureCommand extends CommandInternal[SmallGroupEvent] wit
 			val group = set.groups.asScala(groupNumber - 1)
 			val event = new SmallGroupEvent()
 			event.group = group
-			group.events.add(event)
+			group.addEvent(event)
 			event.day = DayOfWeek.members.find(_.name == day).getOrElse(DayOfWeek.Monday)
 			event.startTime = start
 			event.weekRanges = Seq(WeekRange.fromString(weekRange))

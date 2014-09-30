@@ -49,7 +49,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			location.foreach { location => event.location = location }
 			event.tutors.knownType.includedUserIds = tutorUsercodes
 
-			group.events.add(event)
+			group.addEvent(event)
 			event
 		}
 	}
@@ -185,7 +185,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 		group1.students.knownType.includedUserIds should be (Seq("0000001", "0000002", "0000003"))
 		group1.events.size should be (1)
 
-		val group1event = group1.events.get(0)
+		val group1event = group1.events.head
 		group1event.weekRanges should be (Seq(WeekRange(6, 10)))
 		group1event.day should be (DayOfWeek.Friday)
 		group1event.startTime should be (new LocalTime(12, 0))
@@ -197,7 +197,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 		group2.name = "Group 2"
 		group2.students.knownType.includedUserIds should be (Seq("0000004", "0000005", "0000006"))
 
-		val group2event = group2.events.get(0)
+		val group2event = group2.events.head
 		group2event.weekRanges should be (Seq(WeekRange(6, 10)))
 		group2event.day should be (DayOfWeek.Thursday)
 		group2event.startTime should be (new LocalTime(12, 0))

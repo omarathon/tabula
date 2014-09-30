@@ -111,7 +111,7 @@ class ViewSmallGroupsForPointCommandInternal(val student: StudentMember, val poi
 			scd.freshStudentCourseYearDetails.find(_.academicYear == point.scheme.academicYear).map(scyd =>
 				scyd.moduleRegistrations.map{moduleRegistration =>
 					ViewSmallGroupsForPointCommandResult.Module(
-						smallGroupService.hasSmallGroups(moduleRegistration.module),
+						smallGroupService.hasSmallGroups(moduleRegistration.module, moduleRegistration.academicYear),
 						moduleRegistration.module.code.toUpperCase,
 						moduleRegistration.module.name,
 						moduleRegistration.module.department.name,

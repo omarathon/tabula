@@ -31,7 +31,7 @@ class UserGroupMembershipHelperTest extends AppContextTestBase {
 			event.day = DayOfWeek.Thursday
 			for (tutor <- tutors) event.tutors.knownType.addUserId(tutor)
 			event.group = group
-      group.events.add(event)
+      group.addEvent(event)
 			event
 		}
 

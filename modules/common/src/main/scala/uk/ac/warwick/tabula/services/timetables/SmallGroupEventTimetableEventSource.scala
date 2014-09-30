@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{SecurityServiceComponent, UserLookupComponent, SmallGroupServiceComponent}
+import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.timetables.TimetableEvent
@@ -27,7 +28,7 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 				smallGroupService.findSmallGroupsByStudent(user).filter {
 					group =>
 						!group.groupSet.deleted &&
-						!group.events.asScala.isEmpty &&
+						group.events.nonEmpty &&
 						(
 							// The set is visible to students; OR
 							group.groupSet.visibleToStudents ||
@@ -38,7 +39,7 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 				}
 
 			/* Include SGT teaching responsibilities for students (mainly PGR) */
-			val allEvents = studentsGroups.flatMap(group => group.events.asScala) ++ smallGroupService.findSmallGroupEventsByTutor(user)
+			val allEvents = studentsGroups.flatMap(group => group.events).filterNot(_.isUnscheduled) ++ tutorEvents(user, currentUser)
 			val autoTimetableEvents = allEvents map smallGroupEventToTimetableEvent
 
 			// TAB-2682 Also include events that the student has been manually added to
@@ -55,20 +56,22 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 			autoTimetableEvents ++ manualTimetableEvents
 		}
 
+		def tutorEvents(user: User, currentUser: CurrentUser) = smallGroupService.findSmallGroupEventsByTutor(user).filter {
+			event =>
+				!event.group.groupSet.deleted &&
+				!event.isUnscheduled &&
+				(
+					// The set is visible to tutors; OR
+					event.group.groupSet.releasedToTutors ||
+
+					// I have permission to view the membership of the set anyway
+					securityService.can(currentUser, Permissions.SmallGroups.ReadMembership, event)
+				)
+		}
+
 		def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Seq[TimetableEvent] = {
 			val user = userLookup.getUserByUserId(staff.userId)
-			val allEvents = smallGroupService.findSmallGroupEventsByTutor(user).filter {
-				event =>
-					!event.group.groupSet.deleted &&
-					(
-						// The set is visible to tutors; OR
-						event.group.groupSet.releasedToTutors ||
-
-						// I have permission to view the membership of the set anyway
-						securityService.can(currentUser, Permissions.SmallGroups.ReadMembership, event)
-					)
-			}
-			allEvents map smallGroupEventToTimetableEvent
+			tutorEvents(user, currentUser) map smallGroupEventToTimetableEvent
 		}
 
 		def smallGroupEventToTimetableEvent(sge: SmallGroupEvent): TimetableEvent = {

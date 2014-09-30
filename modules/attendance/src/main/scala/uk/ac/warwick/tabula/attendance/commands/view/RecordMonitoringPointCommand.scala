@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands.view
 
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -27,7 +28,7 @@ object RecordMonitoringPointCommand {
 			with RecordMonitoringPointPermissions
 			with RecordMonitoringPointCommandState
 			with PopulateRecordMonitoringPointCommand
-			with SetFilteredPointsOnRecordMonitoringPointCommand
+			with SetFilterPointsResultOnRecordMonitoringPointCommand
 }
 
 
@@ -44,12 +45,13 @@ class RecordMonitoringPointCommandInternal(val department: Department, val acade
 
 }
 
-trait SetFilteredPointsOnRecordMonitoringPointCommand {
+trait SetFilterPointsResultOnRecordMonitoringPointCommand {
 
 	self: RecordMonitoringPointCommandState =>
 
-	def setFilteredPoints(points: Map[String, Seq[GroupedPoint]]) = {
-		filteredPoints = points
+	def setFilteredPoints(result: FilterMonitoringPointsCommandResult) = {
+		filteredPoints = result.pointMap
+		studentDatas = result.studentDatas
 	}
 }
 
@@ -121,6 +123,7 @@ trait RecordMonitoringPointCommandState {
 	def user: CurrentUser
 
 	var filteredPoints: Map[String, Seq[GroupedPoint]] = _
+	var studentDatas: Seq[AttendanceMonitoringStudentData] = _
 
 	lazy val pointsToRecord = filteredPoints.values.flatten
 		.find(p => p.templatePoint.id == templatePoint.id)
@@ -129,7 +132,10 @@ trait RecordMonitoringPointCommandState {
 
 	lazy val studentMap: Map[AttendanceMonitoringPoint, Seq[StudentMember]] =
 		pointsToRecord.map { point =>
-			point -> profileService.getAllMembersWithUniversityIds(point.scheme.members.members).flatMap {
+			point -> profileService.getAllMembersWithUniversityIds(
+				point.scheme.members.members
+					.filter(universityId => studentDatas.exists(universityId == _.universityId))
+			).flatMap {
 				case student: StudentMember => Option(student)
 				case _ => None
 			}

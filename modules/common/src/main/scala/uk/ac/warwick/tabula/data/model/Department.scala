@@ -105,6 +105,9 @@ class Department extends GeneratedId
 	def autoGroupDeregistration = getBooleanSetting(Settings.AutoGroupDeregistration, default = true)
 	def autoGroupDeregistration_=(dereg: Boolean) { settings += (Settings.AutoGroupDeregistration -> dereg) }
 
+	def studentsCanScheduleMeetings = getBooleanSetting(Settings.StudentsCanScheduleMeetings, default = true)
+	def studentsCanScheduleMeetings_=(canDo: Boolean) { settings += (Settings.StudentsCanScheduleMeetings -> canDo) }
+
 	def getStudentRelationshipSource(relationshipType: StudentRelationshipType) =
 		getStringMapSetting(Settings.StudentRelationshipSource)
 			.flatMap {
@@ -358,6 +361,8 @@ object Department {
     val DefaultGroupAllocationMethod = "defaultGroupAllocationMethod"
 
     val AutoGroupDeregistration = "autoGroupDeregistration"
+
+		val StudentsCanScheduleMeetings = "studentsCanScheduleMeetings"
 	}
 }
 

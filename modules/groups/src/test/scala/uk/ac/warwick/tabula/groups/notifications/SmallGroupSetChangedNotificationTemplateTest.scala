@@ -26,7 +26,7 @@ class SmallGroupSetChangedNotificationTemplateTest extends TestBase with Freemar
         .withStartTime(new LocalTime(12,0,0,0))
         .withLocation("TEST").build
       event.group = group1
-      group1.events.add(event)
+      group1.addEvent(event)
 
 
       implicit val config = newFreemarkerConfiguration(JHashMap(
