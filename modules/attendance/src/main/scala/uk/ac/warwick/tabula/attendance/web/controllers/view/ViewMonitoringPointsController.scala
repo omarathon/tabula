@@ -1,13 +1,12 @@
 package uk.ac.warwick.tabula.attendance.web.controllers.view
 
-import org.springframework.web.bind.annotation.{RequestMapping, PathVariable, ModelAttribute}
 import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.attendance.commands.view.{FilterMonitoringPointsCommand, FilterMonitoringPointsCommandResult}
+import uk.ac.warwick.tabula.attendance.web.controllers.{AttendanceController, HasMonthNames}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.attendance.web.controllers.{HasMonthNames, AttendanceController}
-import uk.ac.warwick.tabula.attendance.commands.view.FilterMonitoringPointsCommand
-import uk.ac.warwick.tabula.attendance.commands.GroupedPoint
 
 @Controller
 @RequestMapping(value=Array("/view/{department}/{academicYear}/points"))
@@ -19,11 +18,11 @@ class ViewMonitoringPointsController extends AttendanceController with HasMonthN
 
 	@RequestMapping
 	def home(
-		@ModelAttribute("filterCommand") filterCommand: Appliable[Map[String, Seq[GroupedPoint]]],
+		@ModelAttribute("filterCommand") filterCommand: Appliable[FilterMonitoringPointsCommandResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {
-		val filterResult = filterCommand.apply()
+		val filterResult = filterCommand.apply().pointMap
 		if (ajax) {
 			Mav("view/_points_results",
 				"filterResult" -> filterResult
