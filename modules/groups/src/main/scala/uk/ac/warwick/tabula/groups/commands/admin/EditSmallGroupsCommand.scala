@@ -69,6 +69,14 @@ class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet)
 		if (groupNames.size() < set.groups.size()) {
 			for (i <- set.groups.size() until groupNames.size() by -1) {
 				val group = set.groups.get(i - 1)
+
+				group.events.foreach {
+					event => smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event).filterNot(
+					 eventOccurrence => eventOccurrence.attendance.asScala.exists {
+						attendance => attendance.state != AttendanceState.NotRecorded
+						}).foreach(smallGroupService.delete)
+				}
+
 				set.groups.remove(group)
 			}
 		}
