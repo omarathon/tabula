@@ -19,7 +19,7 @@
 	</#local>
 
 	<a href="#"
-	   title="What's this?"
+	   title="Students"
 	   class="use-popover"
 	   data-title="Students"
 	   data-trigger="hover"
@@ -327,6 +327,9 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				container: '#container',
 				template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
 			}).click(function(){ return false; });
+
+			// ensure that the close handler for any popovers still work
+			$('#container').on('click', '.close', function() { $enrolment.find('.use-popover').popover('hide') });
 
 			<#-- FIXME: temporary pop-out hiding. Do this properly at source in SBTWO idscripts -->
 			setTimeout(function() { $('.sb-table-wrapper-popout').remove() }, 500);
