@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands.view
 
+import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
 import uk.ac.warwick.tabula.{Fixtures, CurrentUser, AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
@@ -12,7 +13,7 @@ import uk.ac.warwick.tabula.JavaImports.JHashMap
 import uk.ac.warwick.tabula.data.convert.{MemberUniversityIdConverter, AttendanceMonitoringPointIdConverter}
 import org.springframework.core.convert.support.GenericConversionService
 import org.springframework.web.bind.WebDataBinder
-import org.joda.time.DateTime
+import org.joda.time.{LocalDate, DateTime}
 import uk.ac.warwick.util.termdates.TermImpl
 import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.util.termdates.Term.TermType
@@ -82,26 +83,37 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 				"Spring" -> Seq(GroupedPoint(point2, Seq(), Seq()))
 			)
 	}
+
+	trait StudentDatasFixture extends Fixture {
+		val thisStudentDatas =
+			Seq(
+				AttendanceMonitoringStudentData(student1.universityId, "", new LocalDate),
+				AttendanceMonitoringStudentData(student2.universityId, "", new LocalDate),
+				AttendanceMonitoringStudentData(student3.universityId, "", new LocalDate)
+			)
+	}
 	
 	@Test
-	def statePointsToRecord() {	new StateFixture { new FilteredPointsFixture {
+	def statePointsToRecord() {	new StateFixture with FilteredPointsFixture with StudentDatasFixture {
 		state.filteredPoints = thisFilteredPoints
+		state.studentDatas = thisStudentDatas
 		val result = state.pointsToRecord
 		result.contains(point1) should be {true}
 		result.contains(point2) should be {true}
-	}}}
+	}}
 
 	@Test
-	def stateStudentMap() {	new StateFixture { new FilteredPointsFixture {
-			state.filteredPoints = thisFilteredPoints
-			val result = state.studentMap
-			result(point1).contains(student1) should be {true}
-			result(point1).contains(student2) should be {true}
-			result(point1).contains(student3) should be {false}
-			result(point2).contains(student1) should be {false}
-			result(point2).contains(student2) should be {true}
-			result(point2).contains(student3) should be {true}
-	}}}
+	def stateStudentMap() {	new StateFixture with FilteredPointsFixture with StudentDatasFixture {
+		state.filteredPoints = thisFilteredPoints
+		state.studentDatas = thisStudentDatas
+		val result = state.studentMap
+		result(point1).contains(student1) should be {true}
+		result(point1).contains(student2) should be {true}
+		result(point1).contains(student3) should be {false}
+		result(point2).contains(student1) should be {false}
+		result(point2).contains(student2) should be {true}
+		result(point2).contains(student3) should be {true}
+	}}
 
 	trait PopulateFixture extends Fixture {
 		val populate = new PopulateRecordMonitoringPointCommand with RecordMonitoringPointCommandState with CommandStateTestSupport {
@@ -120,14 +132,15 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def populate() { new PopulateFixture { new FilteredPointsFixture {
+	def populate() { new PopulateFixture with FilteredPointsFixture with StudentDatasFixture {
 		populate.filteredPoints = thisFilteredPoints
+		populate.studentDatas = thisStudentDatas
 		populate.populate()
 		val result = populate.checkpointMap.asScala.mapValues(_.asScala.toMap).toMap
 		result(student1).keys.size should be (1)
 		result(student2).keys.size should be (2)
 		result(student3).keys.size should be (1)
-	}}}
+	}}
 
 	trait ValidatorFixture extends Fixture {
 		val validator = new RecordMonitoringPointValidation with RecordMonitoringPointCommandState with CommandStateTestSupport {

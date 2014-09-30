@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands.view
 
 import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -14,13 +15,18 @@ import org.hibernate.criterion.Order._
 import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.JavaImports._
 
+case class FilterMonitoringPointsCommandResult(
+	studentDatas: Seq[AttendanceMonitoringStudentData],
+	pointMap: Map[String, Seq[GroupedPoint]]
+)
+
 object FilterMonitoringPointsCommand {
 	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
 		new FilterMonitoringPointsCommandInternal(department, academicYear, user)
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
-			with ComposableCommand[Map[String, Seq[GroupedPoint]]]
+			with ComposableCommand[FilterMonitoringPointsCommandResult]
 			with FilterMonitoringPointsPermissions
 			with FilterMonitoringPointsCommandState
 			with OnBindFilterMonitoringPointsCommand
@@ -28,14 +34,14 @@ object FilterMonitoringPointsCommand {
 }
 
 class FilterMonitoringPointsCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser)
-	extends CommandInternal[Map[String, Seq[GroupedPoint]]] with GroupsPoints with TaskBenchmarking {
+	extends CommandInternal[FilterMonitoringPointsCommandResult] with GroupsPoints with TaskBenchmarking {
 
 	self: ProfileServiceComponent with FilterMonitoringPointsCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent =>
 
 	override def applyInternal() = {
 		if (serializeFilter.isEmpty) {
 			filterTooVague = true
-			Map()
+			FilterMonitoringPointsCommandResult(Seq(), Map())
 		} else {
 			val studentDatas = benchmarkTask("profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments") {
 				profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments(
@@ -46,14 +52,17 @@ class FilterMonitoringPointsCommandInternal(val department: Department, val acad
 
 			if (studentDatas.size > MaxStudentsFromFilter) {
 				filterTooVague = true
-				Map()
+				FilterMonitoringPointsCommandResult(Seq(), Map())
 			} else {
 				val points = benchmarkTask("List all students points") {
 					studentDatas.flatMap { studentData =>
 						attendanceMonitoringService.listStudentsPoints(studentData, department, academicYear)
 					}.distinct
 				}
-				groupByMonth(points, groupSimilar = true) ++ groupByTerm(points, groupSimilar = true)
+				FilterMonitoringPointsCommandResult(
+					studentDatas,
+					groupByMonth(points, groupSimilar = true) ++ groupByTerm(points, groupSimilar = true)
+				)
 			}
 		}
 	}
