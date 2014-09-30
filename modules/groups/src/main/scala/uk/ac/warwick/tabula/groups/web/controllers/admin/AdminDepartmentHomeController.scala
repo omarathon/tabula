@@ -26,8 +26,7 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController wi
 
 	@ModelAttribute("allocated") def allocatedSet(@RequestParam(value="allocated", required=false) set: SmallGroupSet) = set
 
-	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
-	def adminDepartment(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable("department") department: Department, user: CurrentUser) = {
+	private def process(cmd: AdminSmallGroupsHomeCommand, department: Department, view: String) = {
 		val info = cmd.apply()
 
 		val hasModules = info.modulesWithPermission.nonEmpty
@@ -51,36 +50,16 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController wi
 			"allTermFilters" -> SmallGroupSetFilters.allTermFilters(cmd.academicYear, termService)
 		)
 
-		Mav("admin/department", model)
+		Mav(view, model)
 	}
+
+	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
+	def adminDepartment(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable("department") department: Department, user: CurrentUser) =
+		process(cmd, department, "admin/department")
 
 	@RequestMapping
-	def loadSets(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable("department") department: Department, user: CurrentUser) = {
-		val info = cmd.apply()
-
-		val hasModules = info.modulesWithPermission.nonEmpty
-		val hasGroups = info.setsWithPermission.nonEmpty
-		val hasGroupAttendance = info.setsWithPermission.exists { _.set.showAttendanceReports }
-
-		val model = Map(
-			"department" -> department,
-			"canAdminDepartment" -> info.canAdminDepartment,
-			"modules" -> info.modulesWithPermission,
-			"sets" -> info.setsWithPermission,
-			"hasUnreleasedGroupsets" -> info.setsWithPermission.exists { !_.set.fullyReleased },
-			"hasOpenableGroupsets" -> info.setsWithPermission.exists { sv => (!sv.set.openForSignups) && sv.set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp },
-			"hasCloseableGroupsets" -> info.setsWithPermission.exists { sv => sv.set.openForSignups && sv.set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp },
-			"hasModules" -> hasModules,
-			"hasGroups" -> hasGroups,
-			"hasGroupAttendance" -> hasGroupAttendance,
-			"allStatusFilters" -> SmallGroupSetFilters.Status.all,
-			"allModuleFilters" -> SmallGroupSetFilters.allModuleFilters(info.modulesWithPermission),
-			"allAllocationFilters" -> SmallGroupSetFilters.AllocationMethod.all(info.departmentSmallGroupSets),
-			"allTermFilters" -> SmallGroupSetFilters.allTermFilters(cmd.academicYear, termService)
-		)
-
-		Mav("admin/department-noLayout", model).noLayout()
-	}
+	def loadSets(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable("department") department: Department, user: CurrentUser) =
+		process(cmd, department, "admin/department-noLayout")
 }
 
 @Controller
