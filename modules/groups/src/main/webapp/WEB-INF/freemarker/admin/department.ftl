@@ -284,9 +284,36 @@
 				</div>
 			</div>
 
-			<div id="filter-results">
-				<#-- This is the big list of sets -->
-				<@components.sets_info sets sets?size lte 5 />
+			<div class="small-group-sets-list">
+				<#-- List of students modal -->
+				<div id="students-list-modal" class="modal fade"></div>
+				<div id="profile-modal" class="modal fade profile-subset"></div>
+
+				<#-- Immediately start waiting for collapsibles to load - don't wait to wire this handler in, because we initialise collapsibles before the DOM has loaded below -->
+				<script type="text/javascript">
+					(function($) {
+						var processContainer = function($container) {
+							Groups.zebraStripeGroups($container);
+							Groups.wireModalButtons($container);
+							$container.mapPopups();
+							AjaxPopup.wireAjaxPopupLinks($container);
+							$container.find('.use-tooltip').tooltip();
+							$container.find('.use-popover').tabulaPopover({
+								trigger: 'click',
+								container: '#container'
+							});
+						};
+
+						$(document.body).on('loaded.collapsible', '.set-info', function() {
+							var $set = $(this);
+							processContainer($set);
+						});
+					})(jQuery);
+				</script>
+
+				<div id="filter-results">
+					<i class="icon-spinner icon-spin"></i> Loading&hellip;
+				</div>
 			</div>
 		</div>
 
@@ -432,6 +459,8 @@
 
 					doRequest($('#adminCommand'));
 				});
+
+				doRequest($('#adminCommand'));
 			});
 		</script>
 	</#if>

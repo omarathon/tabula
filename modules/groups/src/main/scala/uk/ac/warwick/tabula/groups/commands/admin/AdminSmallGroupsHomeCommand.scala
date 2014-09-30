@@ -17,15 +17,15 @@ import uk.ac.warwick.tabula.JavaImports._
 case class AdminSmallGroupsHomeInformation(
 	canAdminDepartment: Boolean,
 	modulesWithPermission: Seq[Module],
-	setsWithPermission: Seq[ViewSetWithProgress],
+	setsWithPermission: Seq[ViewSetMethods],
 	departmentSmallGroupSets: Seq[DepartmentSmallGroupSet]
 )
 
 object AdminSmallGroupsHomeCommand {
 	val RequiredPermission = Permissions.Module.ManageSmallGroups
 
-	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
-		new AdminSmallGroupsHomeCommandInternal(department, academicYear, user)
+	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser, calculateProgress: Boolean) =
+		new AdminSmallGroupsHomeCommandInternal(department, academicYear, user, calculateProgress)
 			with AdminSmallGroupsHomePermissionsRestrictedState
 			with AdminSmallGroupsHomeCommandPermissions
 			with AutowiringModuleAndDepartmentServiceComponent
@@ -54,15 +54,15 @@ trait AdminSmallGroupsHomePermissionsRestrictedState {
 	lazy val modulesWithPermission = moduleAndDepartmentService.modulesWithPermission(user, RequiredPermission, department)
 }
 
-class AdminSmallGroupsHomeCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser) extends CommandInternal[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState {
+class AdminSmallGroupsHomeCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser, val calculateProgress: Boolean) extends CommandInternal[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState with TaskBenchmarking {
 	self: AdminSmallGroupsHomePermissionsRestrictedState with SmallGroupServiceComponent with SecurityServiceComponent with SmallGroupSetWorkflowServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal() = benchmarkTask("Build small groups admin home info") {
 		val modules =
 			if (canManageDepartment) department.modules.asScala
 			else modulesWithPermission
 
-		val sets =
+		val sets = benchmarkTask("Fetch, filter and sort sets") {
 			smallGroupService.getSmallGroupSets(department, academicYear)
 				.filter { set => securityService.can(user, RequiredPermission, set) }
 				.filter { set => moduleFilters.asScala.isEmpty || moduleFilters.asScala.exists { _(set) } }
@@ -70,19 +70,27 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 				.filter { set => allocationMethodFilters.asScala.isEmpty || allocationMethodFilters.asScala.exists { _(set) } }
 				.filter { set => termFilters.asScala.isEmpty || termFilters.asScala.exists { _(set) } }
 				.sortBy(set => (set.module.code, set.nameWithoutModulePrefix))
-
-		val setViews = sets.map { set =>
-			val progress = smallGroupSetWorkflowService.progress(set)
-
-			ViewSetWithProgress(
-				set = set,
-				groups = set.groups.asScala.sorted,
-				viewerRole = Tutor,
-				progress = SetProgress(progress.percentage, progress.cssClass, progress.messageCode),
-				nextStage = progress.nextStage,
-				stages = progress.stages
-			)
 		}
+
+		val setViews: Seq[ViewSetMethods] =
+			if (calculateProgress) benchmarkTask("Fetch progress information for sets") { sets.map { set =>
+				val progress = smallGroupSetWorkflowService.progress(set)
+
+				ViewSetWithProgress(
+					set = set,
+					groups = set.groups.asScala.sorted,
+					viewerRole = Tutor,
+					progress = SetProgress(progress.percentage, progress.cssClass, progress.messageCode),
+					nextStage = progress.nextStage,
+					stages = progress.stages
+				)
+			}} else { sets.map { set =>
+				ViewSet(
+					set = set,
+					groups = set.groups.asScala.sorted,
+					viewerRole = Tutor
+				)
+			}}
 
 		AdminSmallGroupsHomeInformation(
 			canAdminDepartment = canManageDepartment,

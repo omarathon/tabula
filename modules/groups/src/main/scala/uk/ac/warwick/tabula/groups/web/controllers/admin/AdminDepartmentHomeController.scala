@@ -26,7 +26,7 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController wi
 
 	@ModelAttribute("allocated") def allocatedSet(@RequestParam(value="allocated", required=false) set: SmallGroupSet) = set
 
-	@RequestMapping
+	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
 	def adminDepartment(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable("department") department: Department, user: CurrentUser) = {
 		val info = cmd.apply()
 
@@ -51,8 +51,35 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController wi
 			"allTermFilters" -> SmallGroupSetFilters.allTermFilters(cmd.academicYear, termService)
 		)
 
-		if (ajax) Mav("admin/department-noLayout", model).noLayout()
-		else Mav("admin/department", model)
+		Mav("admin/department", model)
+	}
+
+	@RequestMapping
+	def loadSets(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable("department") department: Department, user: CurrentUser) = {
+		val info = cmd.apply()
+
+		val hasModules = info.modulesWithPermission.nonEmpty
+		val hasGroups = info.setsWithPermission.nonEmpty
+		val hasGroupAttendance = info.setsWithPermission.exists { _.set.showAttendanceReports }
+
+		val model = Map(
+			"department" -> department,
+			"canAdminDepartment" -> info.canAdminDepartment,
+			"modules" -> info.modulesWithPermission,
+			"sets" -> info.setsWithPermission,
+			"hasUnreleasedGroupsets" -> info.setsWithPermission.exists { !_.set.fullyReleased },
+			"hasOpenableGroupsets" -> info.setsWithPermission.exists { sv => (!sv.set.openForSignups) && sv.set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp },
+			"hasCloseableGroupsets" -> info.setsWithPermission.exists { sv => sv.set.openForSignups && sv.set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp },
+			"hasModules" -> hasModules,
+			"hasGroups" -> hasGroups,
+			"hasGroupAttendance" -> hasGroupAttendance,
+			"allStatusFilters" -> SmallGroupSetFilters.Status.all,
+			"allModuleFilters" -> SmallGroupSetFilters.allModuleFilters(info.modulesWithPermission),
+			"allAllocationFilters" -> SmallGroupSetFilters.AllocationMethod.all(info.departmentSmallGroupSets),
+			"allTermFilters" -> SmallGroupSetFilters.allTermFilters(cmd.academicYear, termService)
+		)
+
+		Mav("admin/department-noLayout", model).noLayout()
 	}
 }
 
@@ -61,7 +88,7 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController wi
 class AdminDepartmentHomeController extends AbstractAdminDepartmentHomeController {
 
 	@ModelAttribute("adminCommand") def command(@PathVariable("department") dept: Department, user: CurrentUser): AdminSmallGroupsHomeCommand =
-		AdminSmallGroupsHomeCommand(mandatory(dept), AcademicYear.guessSITSAcademicYearByDate(DateTime.now), user)
+		AdminSmallGroupsHomeCommand(mandatory(dept), AcademicYear.guessSITSAcademicYearByDate(DateTime.now), user, calculateProgress = ajax)
 
 }
 
@@ -70,6 +97,6 @@ class AdminDepartmentHomeController extends AbstractAdminDepartmentHomeControlle
 class AdminDepartmentHomeForYearController extends AbstractAdminDepartmentHomeController {
 
 	@ModelAttribute("adminCommand") def command(@PathVariable("department") dept: Department, @PathVariable("academicYear") academicYear: AcademicYear, user: CurrentUser): AdminSmallGroupsHomeCommand =
-		AdminSmallGroupsHomeCommand(mandatory(dept), mandatory(academicYear), user)
+		AdminSmallGroupsHomeCommand(mandatory(dept), mandatory(academicYear), user, calculateProgress = ajax)
 
 }
