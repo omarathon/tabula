@@ -43,7 +43,7 @@
 					</span>
 				</button>
 
-				<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="">
+				<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
 					<@spring.bind path=path>
 						<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
 							<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
@@ -53,6 +53,11 @@
 							<div class="dropdown-menu filter-list">
 								<button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
 								<ul>
+									<#if customPicker?has_content>
+										<li>
+											${customPicker}
+										</li>
+									</#if>
 									<#if allItems?has_content>
 										<#list allItems as item>
 											<#local isValid = (allItems?size == validItems?size)!true />
@@ -106,7 +111,13 @@
 
 				<#assign placeholder = "All routes" />
 				<#assign currentfilter><@current_filter_value "routes" placeholder; route>${route.code?upper_case}</@current_filter_value></#assign>
-				<@filter "routes" placeholder currentfilter filterCommand.allRoutes filterCommand.visibleRoutes; route, isValid>
+				<#assign routesCustomPicker>
+					<div class="route-search input-append">
+						<input class="route-search-query route prevent-reload" type="text" value="" placeholder="Search for a route" />
+						<span class="add-on"><i class="icon-search"></i></span>
+					</div>
+				</#assign>
+				<@filter path="routes" placeholder=placeholder currentFilter=currentfilter allItems=filterCommand.allRoutes validItems=filterCommand.visibleRoutes customPicker=routesCustomPicker; route, isValid>
 					<input type="checkbox" name="${status.expression}" value="${route.code}" data-short-value="${route.code?upper_case}" ${contains_by_code(filterCommand.routes, route)?string('checked','')} <#if !isValid>disabled</#if>>
 					<@fmt.route_name route false />
 				</@filter>
@@ -135,8 +146,14 @@
 				</@filter>
 
 				<#assign placeholder = "All modules" />
+				<#assign modulesCustomPicker>
+					<div class="module-search input-append">
+						<input class="module-search-query module prevent-reload" type="text" value="" placeholder="Search for a module" />
+						<span class="add-on"><i class="icon-search"></i></span>
+					</div>
+				</#assign>
 				<#assign currentfilter><@current_filter_value "modules" placeholder; module>${module.code?upper_case}</@current_filter_value></#assign>
-				<@filter "modules" placeholder currentfilter filterCommand.allModules; module>
+				<@filter path="modules" placeholder=placeholder currentFilter=currentfilter allItems=filterCommand.allModules customPicker=modulesCustomPicker; module>
 					<input type="checkbox" name="${status.expression}"
 						   value="${module.code}"
 						   data-short-value="${module.code?upper_case}"
@@ -267,11 +284,14 @@
 
 		$('#${filterCommandName} input').on('change', function(e) {
 			// Load the new results
-			var $checkbox = $(this);
-			var $form = $checkbox.closest('form');
+			var $input = $(this);
+
+			if ($input.is('.prevent-reload')) return;
+
+			var $form = $input.closest('form');
 
 			doRequest($form);
-			updateFilter($checkbox);
+			updateFilter($input);
 		});
 
 		// Re-order elements inside the dropdown when opened
@@ -314,5 +334,58 @@
 
 			doRequest($('#${filterCommandName}'));
 		});
+
+		var updateFilterFromPicker = function($picker, name, value, shortValue) {
+			if (value === undefined || value.length === 0)
+				return;
+
+			shortValue = shortValue || value;
+
+			var $ul = $picker.closest('ul');
+
+			var $li = $ul.find('input[value="' + value + '"]').closest('li');
+			if ($li.length) {
+				$li.find('input').prop('checked', true);
+				if ($ul.find('li.check-list-item:first').find('input').val() !== value) {
+					$li.insertBefore($ul.find('li.check-list-item:first'));
+				}
+			} else {
+				$li = $('<li/>').addClass('check-list-item').append(
+					$('<label/>').addClass('checkbox').append(
+						$('<input/>').attr({
+							'type':'checkbox',
+							'name':name,
+							'value':value,
+							'checked':true
+						}).data('short-value', shortValue)
+					).append(
+						$picker.val()
+					)
+				).insertBefore($ul.find('li.check-list-item:first'));
+			}
+
+			doRequest($picker.closest('form'));
+			updateFilter($picker);
+		};
+
+		$('.route-search-query').on('change', function(){
+			var $picker = $(this);
+			if ($picker.data('routecode') === undefined || $picker.data('routecode').length === 0)
+				return;
+
+			updateFilterFromPicker($picker, 'routes', $picker.data('routecode'), $picker.data('routecode').toUpperCase());
+
+			$picker.data('routecode','').val('');
+		}).routePicker({});
+
+		$('.module-search-query').on('change', function(){
+			var $picker = $(this);
+			if ($picker.data('modulecode') === undefined || $picker.data('modulecode').length === 0)
+				return;
+
+			updateFilterFromPicker($picker, 'modules', $picker.data('modulecode'), $picker.data('modulecode').toUpperCase());
+
+			$picker.data('modulecode','').val('');
+		}).modulePicker({});
 	});
 </script>
