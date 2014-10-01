@@ -56,7 +56,9 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 	protected def commandForMember(whoFor: Member): TimetableCommand = whoFor match {
 		case student: StudentMember => ViewStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
 		case staff: StaffMember => ViewStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, user)
-		case _ => throw new RuntimeException("Don't know how to render timetables for non-student or non-staff users")
+		case _ =>
+			logger.error(s"Don't know how to render timetables for non-student or non-staff users (${whoFor.universityId}, ${whoFor.userType})")
+			throw new ItemNotFoundException
 	}
 
 	protected def commandForTimetableHash(timetableHash: String): TimetableCommand = {

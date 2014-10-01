@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.commands.groups
 
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.ItemNotFoundException
+import org.joda.time.{LocalDateTime, DateTime}
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, MemberOrUser, ReadOnly, TaskBenchmarking, Unaudited}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupEventAttendanceNote, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, AutowiringUserLookupComponent, SmallGroupServiceComponent, TermServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
@@ -50,6 +50,7 @@ object ViewSmallGroupAttendanceCommand {
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringUserLookupComponent
+			with TermAwareWeekToDateConverterComponent
 			with ReadOnly with Unaudited {
 		override lazy val eventName = "ViewSmallGroupAttendance"
 	}
@@ -67,7 +68,7 @@ object ViewSmallGroupAttendanceCommand {
 	}}
 	
 	def allEventInstances(group: SmallGroup, occurrences: Seq[SmallGroupEventOccurrence]) =
-		group.events.asScala.filter { !_.isUnscheduled }.flatMap { event =>
+		group.events.filter { !_.isUnscheduled }.flatMap { event =>
 			val allWeeks = event.weekRanges.flatMap { _.toWeeks }
 			allWeeks.map { week => 
 				val occurrence = occurrences.find { o =>
@@ -101,7 +102,7 @@ object ViewSmallGroupAttendanceCommand {
 
 class ViewSmallGroupAttendanceCommand(val group: SmallGroup) 
 	extends CommandInternal[ViewSmallGroupAttendanceCommand.SmallGroupAttendanceInformation] with ViewSmallGroupAttendanceState with TaskBenchmarking {
-	self: SmallGroupServiceComponent with TermServiceComponent with UserLookupComponent =>
+	self: SmallGroupServiceComponent with UserLookupComponent with WeekToDateConverterComponent =>
 		
 	import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand._
 	
@@ -140,12 +141,13 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 			attendanceNotes
 		)
 	}
-	
-	lazy val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, group.groupSet.academicYear)
-	
+
 	private def isLate(instance: EventInstance): Boolean = instance match {
-		case (_, week: SmallGroupEventOccurrence.WeekNumber) =>
-			week < currentAcademicWeek // only late if week is in the past
+		case (event, week: SmallGroupEventOccurrence.WeekNumber) =>
+			// Get the actual end date of the event in this week
+			weekToDateConverter.toLocalDatetime(week, event.day, event.endTime, event.group.groupSet.academicYear).map { eventDateTime =>
+				eventDateTime.isBefore(LocalDateTime.now())
+			}.getOrElse(false)
 	}
 	
 }

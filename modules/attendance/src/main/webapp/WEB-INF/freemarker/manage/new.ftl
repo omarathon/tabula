@@ -33,7 +33,7 @@
 		type="submit"
 		class="btn btn-success use-tooltip"
 		name="${ManageSchemeMappingParameters.createAndAddStudents}"
-		value="Add students"
+		value="Save and add students"
 		title="Select which students this scheme should apply to"
 		data-container="body"
 	/>
@@ -41,7 +41,7 @@
 		type="submit"
 		class="btn btn-primary use-tooltip"
 		name="create"
-		value="Save"
+		value="Save and exit"
 		title="Save your blank scheme and add students and points to it later"
 		data-container="body"
 	/>

@@ -193,6 +193,20 @@
 					<@f.errors path="studentRelationshipDisplayed" cssClass="error" />
 				</@form.field>
 			</@form.row>
+
+			<@form.row>
+				<@form.label></@form.label>
+				<@form.field>
+					<@form.label checkbox=true>
+						<@f.checkbox path="studentsCanScheduleMeetings" id="studentsCanScheduleMeetings" />
+						Students can schedule meetings
+					</@form.label>
+					<@f.errors path="studentsCanScheduleMeetings" cssClass="error" />
+					<div class="help-block">
+						If unchecked, students won't be able to schedule meetings with a tutor, supervisor or other relationship agent in this department.
+					</div>
+				</@form.field>
+			</@form.row>
 		</fieldset>
 	</#if>
 

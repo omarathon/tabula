@@ -1,11 +1,10 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.commands.{ReadOnly, Unaudited, Command}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions.Permissions
 import scala.collection.immutable.TreeMap
@@ -26,7 +25,7 @@ object SortableAgentIdentifier{
 }
 
 class ViewStudentRelationshipsCommand(val department: Department, val relationshipType: StudentRelationshipType)
-	extends Command[RelationshipGraph] with Unaudited {
+	extends Command[RelationshipGraph] with Unaudited with ReadOnly {
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
 
@@ -44,7 +43,12 @@ class ViewStudentRelationshipsCommand(val department: Department, val relationsh
 		val unsortedAgentRelationshipsByStaffDept = relationshipService.listStudentRelationshipsByStaffDepartment(relationshipType, department)
 
 		// combine the two and remove the dups
-		val unsortedAgentRelationships = (unsortedAgentRelationshipsByStudentDept ++unsortedAgentRelationshipsByStaffDept).distinct
+		val unsortedAgentRelationships =
+			(unsortedAgentRelationshipsByStudentDept ++ unsortedAgentRelationshipsByStaffDept)
+				// TAB-2723 treat relationships between the same agent and student as identical
+				.groupBy { rel => (rel.agent, rel.studentId) }
+				.map { case (_, rels) => rels.maxBy { rel => rel.startDate.getMillis } }
+				.toSeq
 
 		// group into map by agent lastname, or id if the lastname is unavailable
 		val groupedAgentRelationships = unsortedAgentRelationships.groupBy(r=>SortableAgentIdentifier(r))
@@ -70,7 +74,7 @@ class ViewStudentRelationshipsCommand(val department: Department, val relationsh
 }
 
 class MissingStudentRelationshipCommand(val department: Department, val relationshipType: StudentRelationshipType)
-	extends Command[(Int, Seq[Member])] with Unaudited {
+	extends Command[(Int, Seq[Member])] with Unaudited with ReadOnly {
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
 

@@ -73,7 +73,7 @@
 				</span>
 			</button>
 
-			<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="">
+			<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
 				<@spring.bind path=path>
 					<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
 						<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
@@ -83,6 +83,11 @@
 						<div class="dropdown-menu filter-list">
 							<button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
 							<ul>
+								<#if customPicker?has_content>
+									<li>
+										<#noescape>${customPicker}</#noescape>
+									</li>
+								</#if>
 								<#if allItems?has_content>
 									<#list allItems as item>
 										<#local isValid = (allItems?size == validItems?size)!true />
@@ -137,6 +142,12 @@
 			<#-- Non-standard drop-down for routes -->
 			<#assign placeholder = "All routes" />
 			<#assign currentFilter><@current_filter_value "findCommand.routes" placeholder; route>${route.code?upper_case}</@current_filter_value></#assign>
+			<#assign routesCustomPicker>
+				<div class="route-search input-append">
+					<input class="route-search-query route prevent-reload" type="text" value="" placeholder="Search for a route" />
+					<span class="add-on"><i class="icon-search"></i></span>
+				</div>
+			</#assign>
 			<@spring.bind path="findCommand.routes">
 				<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
 					<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
@@ -147,10 +158,7 @@
 						<button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
 						<ul>
 							<li>
-								<div class="route-search input-append">
-									<input class="route-search-query route" type="text" value="" placeholder="Search for a route" />
-									<span class="add-on"><i class="icon-search"></i></span>
-								</div>
+								<#noescape>${routesCustomPicker}</#noescape>
 							</li>
 							<#macro routeLi route route_index>
 								<li class="check-list-item" data-natural-sort="${route_index}">
@@ -199,8 +207,14 @@
 			</@filter>
 
 			<#assign placeholder = "All modules" />
+			<#assign modulesCustomPicker>
+				<div class="module-search input-append">
+					<input class="module-search-query module prevent-reload" type="text" value="" placeholder="Search for a module" />
+					<span class="add-on"><i class="icon-search"></i></span>
+				</div>
+			</#assign>
 			<#assign currentfilter><@current_filter_value "findCommand.modules" placeholder; module>${module.code?upper_case}</@current_filter_value></#assign>
-			<@filter "findCommand.modules" placeholder currentfilter findCommand.allModules; module>
+			<@filter path="findCommand.modules" placeholder=placeholder currentFilter=currentfilter allItems=findCommand.allModules customPicker=modulesCustomPicker; module>
 				<input type="checkbox" name="${status.expression}"
 					   value="${module.code}"
 					   data-short-value="${module.code?upper_case}"

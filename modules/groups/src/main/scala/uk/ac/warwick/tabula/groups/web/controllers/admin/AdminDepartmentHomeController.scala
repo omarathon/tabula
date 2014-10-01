@@ -26,8 +26,7 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController wi
 
 	@ModelAttribute("allocated") def allocatedSet(@RequestParam(value="allocated", required=false) set: SmallGroupSet) = set
 
-	@RequestMapping
-	def adminDepartment(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable("department") department: Department, user: CurrentUser) = {
+	private def process(cmd: AdminSmallGroupsHomeCommand, department: Department, view: String) = {
 		val info = cmd.apply()
 
 		val hasModules = info.modulesWithPermission.nonEmpty
@@ -51,9 +50,16 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController wi
 			"allTermFilters" -> SmallGroupSetFilters.allTermFilters(cmd.academicYear, termService)
 		)
 
-		if (ajax) Mav("admin/department-noLayout", model).noLayout()
-		else Mav("admin/department", model)
+		Mav(view, model)
 	}
+
+	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
+	def adminDepartment(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable("department") department: Department, user: CurrentUser) =
+		process(cmd, department, "admin/department")
+
+	@RequestMapping
+	def loadSets(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable("department") department: Department, user: CurrentUser) =
+		process(cmd, department, "admin/department-noLayout")
 }
 
 @Controller
@@ -61,7 +67,7 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController wi
 class AdminDepartmentHomeController extends AbstractAdminDepartmentHomeController {
 
 	@ModelAttribute("adminCommand") def command(@PathVariable("department") dept: Department, user: CurrentUser): AdminSmallGroupsHomeCommand =
-		AdminSmallGroupsHomeCommand(mandatory(dept), AcademicYear.guessSITSAcademicYearByDate(DateTime.now), user)
+		AdminSmallGroupsHomeCommand(mandatory(dept), AcademicYear.guessSITSAcademicYearByDate(DateTime.now), user, calculateProgress = ajax)
 
 }
 
@@ -70,6 +76,6 @@ class AdminDepartmentHomeController extends AbstractAdminDepartmentHomeControlle
 class AdminDepartmentHomeForYearController extends AbstractAdminDepartmentHomeController {
 
 	@ModelAttribute("adminCommand") def command(@PathVariable("department") dept: Department, @PathVariable("academicYear") academicYear: AcademicYear, user: CurrentUser): AdminSmallGroupsHomeCommand =
-		AdminSmallGroupsHomeCommand(mandatory(dept), mandatory(academicYear), user)
+		AdminSmallGroupsHomeCommand(mandatory(dept), mandatory(academicYear), user, calculateProgress = ajax)
 
 }

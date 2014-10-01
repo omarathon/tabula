@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.commands.groups
 
-import org.joda.time.{DateMidnight, DateTime, DateTimeConstants}
+import org.joda.time.{LocalDateTime, DateMidnight, DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand._
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, TaskBenchmarking, Unaudited}
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEventAttendanceNote, SmallGroupEventOccurrence, WeekRange}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, SmallGroupServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.util.termdates.Term
 
@@ -33,13 +33,14 @@ object ListStudentGroupAttendanceCommand {
 			with ListStudentGroupAttendanceCommandPermissions
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringTermServiceComponent
+			with TermAwareWeekToDateConverterComponent
 			with ReadOnly with Unaudited
 }
 
 class ListStudentGroupAttendanceCommandInternal(val member: Member, val academicYear: AcademicYear)
 	extends CommandInternal[StudentGroupAttendance]
 		with ListStudentGroupAttendanceCommandState with TaskBenchmarking {
-	self: SmallGroupServiceComponent with TermServiceComponent =>
+	self: SmallGroupServiceComponent with TermServiceComponent with WeekToDateConverterComponent =>
 
 	implicit val defaultOrderingForGroup = Ordering.by { group: SmallGroup => (group.groupSet.module.code, group.groupSet.name, group.name, group.id) }
 	implicit val defaultOrderingForDateTime = Ordering.by[DateTime, Long] ( _.getMillis )
@@ -53,7 +54,7 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 				group.groupSet.showAttendanceReports &&
 				group.groupSet.visibleToStudents &&
 				group.groupSet.academicYear == academicYear &&
-				group.events.asScala.nonEmpty
+				group.events.nonEmpty
 		}
 
 		val allInstances = groups.flatMap { group => allEventInstances(group, smallGroupService.findAttendanceByGroup(group)) }
@@ -111,11 +112,12 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 		}.toSeq:_*)
 	}
 
-	lazy val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, academicYear)
-
 	private def isLate(instance: EventInstance): Boolean = instance match {
-		case (_, week: SmallGroupEventOccurrence.WeekNumber) =>
-			week < currentAcademicWeek // only late if week is in the past
+		case (event, week: SmallGroupEventOccurrence.WeekNumber) =>
+			// Get the actual end date of the event in this week
+			weekToDateConverter.toLocalDatetime(week, event.day, event.endTime, event.group.groupSet.academicYear).map { eventDateTime =>
+				eventDateTime.isBefore(LocalDateTime.now())
+			}.getOrElse(false)
 	}
 }
 

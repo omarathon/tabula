@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.attendance.web.controllers.view
 
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.attendance.web.controllers.{AttendanceController, HasMonthNames}
-import uk.ac.warwick.tabula.attendance.commands.GroupedPoint
-import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable, SelfValidating}
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.attendance.commands.view.{SetFilteredPointsOnRecordMonitoringPointCommand, RecordMonitoringPointCommand, FilterMonitoringPointsCommand}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint}
 import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.attendance.commands.view.{FilterMonitoringPointsCommand, FilterMonitoringPointsCommandResult, RecordMonitoringPointCommand, SetFilterPointsResultOnRecordMonitoringPointCommand}
 import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.attendance.web.controllers.{AttendanceController, HasMonthNames}
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint}
 
 @Controller
 @RequestMapping(value=Array("/view/{department}/{academicYear}/points/{templatePoint}/record"))
@@ -26,9 +25,9 @@ class RecordMonitoringPointController extends AttendanceController with HasMonth
 
 	@RequestMapping(method = Array(GET))
 	def form(
-		@ModelAttribute("filterCommand") filterCommand: Appliable[Map[String, Seq[GroupedPoint]]],
+		@ModelAttribute("filterCommand") filterCommand: Appliable[FilterMonitoringPointsCommandResult],
 		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]]
-			with PopulateOnForm with SetFilteredPointsOnRecordMonitoringPointCommand,
+			with PopulateOnForm with SetFilterPointsResultOnRecordMonitoringPointCommand,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {
@@ -51,9 +50,9 @@ class RecordMonitoringPointController extends AttendanceController with HasMonth
 
 	@RequestMapping(method = Array(POST))
 	def post(
-		@ModelAttribute("filterCommand") filterCommand: Appliable[Map[String, Seq[GroupedPoint]]],
+		@ModelAttribute("filterCommand") filterCommand: Appliable[FilterMonitoringPointsCommandResult],
 		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]]
-			with SetFilteredPointsOnRecordMonitoringPointCommand with SelfValidating,
+			with SetFilterPointsResultOnRecordMonitoringPointCommand with SelfValidating,
 		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear

@@ -1,7 +1,9 @@
 package uk.ac.warwick.tabula.helpers
 
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.{Fixtures, TestBase}
 import org.junit.Test
+
+import scala.util.Random
 
 class StringUtilsTest extends TestBase with StringUtils {
 	
@@ -35,4 +37,23 @@ class StringUtilsTest extends TestBase with StringUtils {
 		whitespace.textOrEmpty should be ("")
 		nullString.textOrEmpty should be ("")
 	}
+
+	@Test def compareAlphaNumeric {
+		val s1 = "Group 1"
+		val s2 = "group 2"
+		val s3 = "group 20"
+		val s4 = "Group 10"
+		val s5 = "Group 9"
+		val s6 = "Late group 1"
+		val s7 = "1"
+		val s8 = "10"
+		val s9 = "2"
+
+		for (i <- 1 to 10) {
+			val shuffled = Random.shuffle(Seq(s1, s2, s3, s4, s5, s6, s7, s8, s9))
+
+			shuffled.sorted(StringUtils.AlphaNumericStringOrdering) should be (Seq(s7, s9, s8, s1, s2, s5, s4, s3, s6))
+		}
+	}
+
 }

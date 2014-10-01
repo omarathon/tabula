@@ -32,6 +32,7 @@
 											<@f.hidden path="delete" id="group${group_index}_event${event_index}_delete" />
 
 											<@components.eventShortDetails event.event />
+											<@form.errors path="delete" />
 
 											<#assign popoverContent><@components.eventDetails event.event /></#assign>
 											<a class="use-popover"
@@ -47,12 +48,20 @@
 
 												<a class="btn btn-mini btn-info" href="${editEventUrl}">Edit</a>
 
-												<button type="button" class="btn btn-danger btn-mini" data-toggle="delete" data-value="true" data-target="#group${group_index}_event${event_index}_delete">
-													<i class="icon-remove"></i>
-												</button>
+												<#if event.hasRecordedAttendance>
+													<button type="button" class="btn btn-danger btn-mini disabled use-tooltip" title="This event can't be deleted as there is attendance recorded against it">
+														<i class="icon-remove"></i>
+													</button>
+												<#else>
+													<button type="button" class="btn btn-danger btn-mini" data-toggle="delete" data-value="true" data-target="#group${group_index}_event${event_index}_delete">
+														<i class="icon-remove"></i>
+													</button>
+												</#if>
+
 												<button type="button" class="btn btn-info btn-mini" data-toggle="delete" data-value="false" data-target="#group${group_index}_event${event_index}_delete">
 													<i class="icon-undo"></i>
 												</button>
+
 											</div>
 										</li>
 									</@spring.nestedPath>

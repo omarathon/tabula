@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
 import org.joda.time.LocalDate
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringPoint, AttendanceMonitoringPointType}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, MeetingFormat, StudentRelationshipType}
@@ -13,6 +14,7 @@ trait AttendancePointCommandState {
 	self: TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent =>
 
 	def pointStyle: AttendanceMonitoringPointStyle
+	def academicYear: AcademicYear
 
 	// Bind variables
 
@@ -126,7 +128,7 @@ trait AttendancePointCommandState {
 		point
 	}
 
-	def moduleHasSmallGroups(module: Module) = smallGroupService.hasSmallGroups(module)
+	def moduleHasSmallGroups(module: Module) = smallGroupService.hasSmallGroups(module, academicYear)
 	def moduleHasAssignments(module: Module) = moduleAndDepartmentService.hasAssignments(module)
 
 }

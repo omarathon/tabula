@@ -118,8 +118,8 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 		val event1 = Fixtures.smallGroupEvent("Event 1")
 		val event2 = Fixtures.smallGroupEvent("Event 2")
 
-		group1.events.add(event1)
-		group2.events.add(event2)
+		group1.addEvent(event1)
+		group2.addEvent(event2)
 
 		{
 			val p = service.progress(set)

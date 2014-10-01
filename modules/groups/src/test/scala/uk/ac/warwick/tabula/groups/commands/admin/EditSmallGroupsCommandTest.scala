@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.groups.commands.admin
 
 import org.springframework.validation.{BindException, BindingResult}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet, SmallGroup}
+import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.{ItemNotFoundException, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 
 class EditSmallGroupsCommandTest extends TestBase with Mockito {
 
@@ -154,7 +155,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 	}
 
 	private trait ValidationFixture extends ExistingGroupsFixture {
-		val command = new EditSmallGroupsValidation with EditSmallGroupsCommandState with PopulateEditSmallGroupsCommand {
+		val command = new EditSmallGroupsValidation with EditSmallGroupsCommandState with PopulateEditSmallGroupsCommand with CommandTestSupport {
 			val module = ValidationFixture.this.module
 			val set = ValidationFixture.this.set
 		}
@@ -233,6 +234,55 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("groupNames[3]")
 		errors.getFieldError.getCodes should contain ("smallGroup.delete.notEmpty")
+	}}
+
+	@Test def validateCantRemoveWhenAttendaneRecorded { new ValidationFixture {
+		val event = Fixtures.smallGroupEvent("An Event")
+		groupD.addEvent(event)
+
+		command.groupNames.remove(3)
+
+		val eventOccurrence = new SmallGroupEventOccurrence
+		eventOccurrence.event = event
+
+		val missedAuthorisedAttendance = new SmallGroupEventAttendance
+		missedAuthorisedAttendance.occurrence = eventOccurrence
+		missedAuthorisedAttendance.state = AttendanceState.MissedAuthorised
+
+		eventOccurrence.attendance.add(missedAuthorisedAttendance)
+
+		command.smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event) returns (Seq(eventOccurrence))
+
+		val errors = new BindException(command, "command")
+		command.validate(errors)
+
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getFieldError.getField should be ("groupNames[3]")
+		errors.getFieldError.getCodes should contain ("smallGroupEvent.delete.hasAttendance")
+	}}
+
+	@Test def validateCanRemoveWhenAttendaneNotRecorded { new ValidationFixture {
+		val event = Fixtures.smallGroupEvent("An Event")
+		groupD.addEvent(event)
+
+		command.groupNames.remove(3)
+
+		val eventOccurrence = new SmallGroupEventOccurrence
+		eventOccurrence.event = event
+
+		val notRecordedAttendance = new SmallGroupEventAttendance
+		notRecordedAttendance.occurrence = eventOccurrence
+		notRecordedAttendance.state = AttendanceState.NotRecorded
+
+		eventOccurrence.attendance.add(notRecordedAttendance)
+
+		command.smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event) returns (Seq(eventOccurrence))
+
+		val errors = new BindException(command, "command")
+		command.validate(errors)
+
+		errors.hasErrors should be (false)
 	}}
 
 	@Test def describe { new Fixture {

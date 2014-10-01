@@ -50,9 +50,12 @@ trait SmallGroupDao {
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
 
 	def hasSmallGroups(module: Module): Boolean
+	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean
 
 	def getDepartmentSmallGroupSets(department: Department): Seq[DepartmentSmallGroupSet]
 	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear): Seq[DepartmentSmallGroupSet]
+
+	def delete(occurrence: SmallGroupEventOccurrence)
 }
 
 @Repository
@@ -168,6 +171,16 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 	def hasSmallGroups(module: Module): Boolean = {
 		session.newCriteria[SmallGroupSet]
 			.add(is("module", module))
+			.add(is("deleted", false))
+			.project[Number](Projections.rowCount())
+			.uniqueResult.get.intValue() > 0
+	}
+
+	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean = {
+		session.newCriteria[SmallGroupSet]
+			.add(is("module", module))
+			.add(is("deleted", false))
+			.add(is("academicYear", academicYear))
 			.project[Number](Projections.rowCount())
 			.uniqueResult.get.intValue() > 0
 	}
@@ -190,4 +203,6 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 			.addOrder(asc("name"))
 			.seq
 	}
+
+	def delete(occurrence: SmallGroupEventOccurrence) = session.delete(occurrence)
 }

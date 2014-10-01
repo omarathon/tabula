@@ -72,6 +72,7 @@ trait AddsIcalAttachmentToScheduledMeetingNotification extends HasNotificationAt
 			case "deleted" =>
 				cal.getProperties.add(Method.CANCEL)
 				vEvent.getProperties.add(Status.VEVENT_CANCELLED)
+				vEvent.getProperties.add(new Sequence(1))
 			case ("rescheduled"|"updated") =>
 				cal.getProperties.add(Method.PUBLISH)
 				vEvent.getProperties.add(Status.VEVENT_CONFIRMED)
