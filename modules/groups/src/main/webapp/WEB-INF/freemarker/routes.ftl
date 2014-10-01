@@ -19,6 +19,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 	<#local p>/admin/department/${module.department.code}/<#if academicYear?has_content>${academicYear.startYear?c}/</#if>?moduleFilters=Module(${module.code})</#local>
 	<@_u page=p />
 </#compress></#macro>
+<#macro single_set_info set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/" /></#macro>
 
 <#macro moduleperms module><@_u page="/module/${module.code}/permissions" context="/admin" /></#macro>
 
