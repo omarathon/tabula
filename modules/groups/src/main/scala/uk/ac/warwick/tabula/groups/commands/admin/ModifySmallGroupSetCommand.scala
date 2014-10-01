@@ -42,10 +42,14 @@ trait ModifySmallGroupSetCommandState extends CurrentSITSAcademicYear {
 	def module: Module
 	def existingSet: Option[SmallGroupSet]
 
-	def updatingExistingLink(set: SmallGroupSet) = (allocationMethod == SmallGroupAllocationMethod.Linked
+	def updatingExistingLink(set: SmallGroupSet) =
+		(allocationMethod == SmallGroupAllocationMethod.Linked
+		&& set.allocationMethod == SmallGroupAllocationMethod.Linked
 		&& linkedDepartmentSmallGroupSet != set.linkedDepartmentSmallGroupSet)
 
-	def creatingNewLink(set: SmallGroupSet) = allocationMethod == SmallGroupAllocationMethod.Linked && set.allocationMethod != SmallGroupAllocationMethod.Linked
+	def creatingNewLink(set: SmallGroupSet) =
+		(allocationMethod == SmallGroupAllocationMethod.Linked
+		&& set.allocationMethod != SmallGroupAllocationMethod.Linked)
 
 	var name: String = _
 
@@ -69,7 +73,6 @@ trait CreateSmallGroupSetCommandState extends ModifySmallGroupSetCommandState {
 trait EditSmallGroupSetCommandState extends ModifySmallGroupSetCommandState {
 	def set: SmallGroupSet
 	def existingSet = Some(set)
-
 }
 
 class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmallGroupSetCommandInternal with CreateSmallGroupSetCommandState {
