@@ -405,6 +405,7 @@ var ModulePicker = function (options) {
 			if (item != undefined) {
 				i = $(that.options.item);
 				i.attr('data-moduleid', item.id);
+				i.attr('data-modulecode', item.code);
 				i.find('div.name').html(that.highlighter(item.code.toUpperCase() + ' ' + item.name));
 				i.find('div.department').html(item.department);
 				if (options.checkGroups) {
@@ -456,6 +457,7 @@ var ModulePicker = function (options) {
 	var oldSelect = $typeahead.select;
 	$typeahead.select = function () {
 		this.$element.data('moduleid', this.$menu.find('.active').data('moduleid'));
+		this.$element.data('modulecode', this.$menu.find('.active').data('modulecode'));
 		this.$element.data('hasgroups', this.$menu.find('.active').data('hasgroups'));
 		this.$element.data('hasassignments', this.$menu.find('.active').data('hasassignments'));
 		return oldSelect.call($typeahead);

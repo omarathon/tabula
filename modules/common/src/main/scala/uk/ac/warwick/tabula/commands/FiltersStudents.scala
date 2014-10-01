@@ -55,13 +55,16 @@ trait FiltersStudents extends FilterStudentsOrRelationships {
 
 	override def getAliasPaths(sitsTable: String) = AliasPaths(sitsTable)
 
-	// Do we need to consider out-of-department modules/routes or can we rely on users typing them in manually?
-	lazy val allModules: Seq[Module] = modulesForDepartmentAndSubDepartments(mandatory(department))
+	lazy val allModules: Seq[Module] = ((modulesForDepartmentAndSubDepartments(mandatory(department)) match {
+		case Nil => modulesForDepartmentAndSubDepartments(mandatory(department.rootDepartment))
+		case modules => modules
+	}) ++ modules.asScala).distinct.sorted
+	lazy val allRoutes: Seq[Route] = ((routesForDepartmentAndSubDepartments(mandatory(department)) match {
+		case Nil => routesForDepartmentAndSubDepartments(mandatory(department.rootDepartment))
+		case routes => routes
+	}) ++ routes.asScala).distinct.sorted(Route.DegreeTypeOrdering)
+
 	lazy val allCourseTypes: Seq[CourseType] = mandatory(department).filterRule.courseTypes
-	lazy val allRoutes: Seq[Route] = routesForDepartmentAndSubDepartments(mandatory(department)) match {
-		case Nil => routesForDepartmentAndSubDepartments(mandatory(department.rootDepartment)).sorted(Route.DegreeTypeOrdering)
-		case routes => routes.sorted(Route.DegreeTypeOrdering)
-	}
 	lazy val allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(mandatory(department).rootDepartment)
 	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = profileService.allModesOfAttendance(mandatory(department).rootDepartment)
 }
