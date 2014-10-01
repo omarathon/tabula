@@ -32,7 +32,7 @@ class NotifiesAffectedStudentsTest extends TestBase with Mockito {
 		val rel2 = StudentRelationship(staff1, relationshipType, student2)
 		val rel3 = StudentRelationship(staff2, relationshipType, student3)
 
-		var service = smartMock[RelationshipService]
+		var relationshipService = smartMock[RelationshipService]
 		var profileService = smartMock[ProfileService]
 
 		profileService.getMemberByUniversityId("1000001", false, false) returns Some(staff1)

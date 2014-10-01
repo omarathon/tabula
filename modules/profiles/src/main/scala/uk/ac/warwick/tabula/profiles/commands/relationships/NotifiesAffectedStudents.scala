@@ -14,7 +14,7 @@ trait RelationshipChangingCommand {
 	val relationshipType: StudentRelationshipType
 	val apparentUser: User
 	
-	var service: RelationshipService
+	var relationshipService: RelationshipService
 	var profileService: ProfileService
 }
 
