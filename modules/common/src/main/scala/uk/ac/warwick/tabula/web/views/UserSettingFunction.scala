@@ -27,9 +27,9 @@ class UserSettingFunction extends TemplateMethodModelEx {
 		
 		val currentUser = RequestInfo.fromThread.get.user
 		
-		(userSettings.getByUserId(currentUser.apparentId) match {
+		userSettings.getByUserId(currentUser.apparentId) match {
 			case Some(settings) => settings.string(setting)
 			case _ => null
-		})
+		}
 	}
 }

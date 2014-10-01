@@ -404,7 +404,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 <#macro bulk_email emails title subject limit=500>
 	<#local separator = ";" />
 	<#if user?? && userSetting('bulkEmailSeparator')?has_content>
-		<#assign separator = userSetting('bulkEmailSeparator') />
+		<#local separator = userSetting('bulkEmailSeparator') />
 	</#if>
 
 	<#if emails?size gt 0>
