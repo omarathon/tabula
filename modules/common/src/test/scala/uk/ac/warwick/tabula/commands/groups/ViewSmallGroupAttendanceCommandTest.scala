@@ -1,15 +1,17 @@
 package uk.ac.warwick.tabula.commands.groups
 
-import org.joda.time.{DateTime, LocalTime}
+import org.joda.time.{LocalDateTime, DateTimeConstants, DateTime, LocalTime}
 import uk.ac.warwick.tabula.{AcademicYear, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.tabula.commands.groups.SmallGroupAttendanceState._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEvent, SmallGroupEventAttendance, SmallGroupEventOccurrence, SmallGroupSet, WeekRange}
 import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
-import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent, TermService, TermServiceComponent, UserGroupCacheManager, UserLookupComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 
 class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
+
+	val baseLocalDateTime = new DateTime(2014, DateTimeConstants.OCTOBER, 19, 9, 18, 33, 0)
 	
 	trait BaseFixture {
 		val mockUserLookup = new MockUserLookup
@@ -19,9 +21,9 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 			case ug: UserGroup => ug.userLookup = mockUserLookup
 		}
 		
-		trait CommandTestSupport extends SmallGroupServiceComponent with TermServiceComponent with UserLookupComponent {
+		trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent with WeekToDateConverterComponent {
 			val smallGroupService = mock[SmallGroupService]
-			val termService = mock[TermService]
+			val weekToDateConverter = smartMock[WeekToDateConverter]
 			val userLookup = mockUserLookup
 		}
 	}
@@ -37,11 +39,13 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		val event1 = new SmallGroupEvent(group)
 		event1.day = DayOfWeek.Monday
 		event1.startTime = new LocalTime(11, 0)
+		event1.endTime = new LocalTime(12, 0)
 		event1.weekRanges = Seq(WeekRange(2, 4))
 		
 		val event2 = new SmallGroupEvent(group)
 		event2.day = DayOfWeek.Monday
 		event2.startTime = new LocalTime(15, 0)
+		event2.endTime = new LocalTime(16, 0)
 		event2.weekRanges = Seq(WeekRange(1), WeekRange(3), WeekRange(7))
 		
 		group.addEvent(event1)
@@ -49,7 +53,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 	}
 	
 	@Test
-	def commandApplyNoData() { new Fixture() {
+	def commandApplyNoData() = withFakeTime(baseLocalDateTime) { new Fixture() {
 		val command = new ViewSmallGroupAttendanceCommand(group) with CommandTestSupport
 		
 		command.smallGroupService.findAttendanceByGroup(group) returns Seq()
@@ -69,7 +73,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 	}}
 	
 	@Test
-	def commandApply() { new Fixture() {
+	def commandApply() = withFakeTime(baseLocalDateTime) { new Fixture() {
 		mockUserLookup.registerUsers("user1", "user2", "user3", "user4", "user5")
 		
 		val user1 = mockUserLookup.getUserByUserId("user1")
@@ -122,8 +126,26 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 			Seq(user1, user2, user3, user4, user5).map(_.getWarwickId),
 			Seq(occurrence1, occurrence2, occurrence3)
 		) returns Seq()
-		command.termService.getAcademicWeekForAcademicYear(any[DateTime], any[AcademicYear]) returns 4
-		
+
+		command.weekToDateConverter.toLocalDatetime(1, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns (
+			Some(new LocalDateTime(2014, DateTimeConstants.SEPTEMBER, 29, 16, 0))
+		)
+		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
+			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 16, 0))
+		)
+		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
+			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
+		)
+		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns (
+			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 16, 0))
+		)
+		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
+			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
+		)
+		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns (
+			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
+		)
+
 		val info = command.applyInternal()
 		
 		info.instances should be (Seq(
@@ -189,7 +211,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 	}}
 	
 	@Test
-	def tab1534() { new BaseFixture {
+	def tab1534() = withFakeTime(baseLocalDateTime) { new BaseFixture {
 		// An intricacy of the way that SortedMap works means that if you have two 
 		// keys with an identical sort order, they'll get merged into a single key.
 		// This means that we risk students with the same name getting merged into one.
@@ -203,6 +225,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		val event = new SmallGroupEvent(group)
 		event.day = DayOfWeek.Monday
 		event.startTime = new LocalTime(11, 0)
+		event.endTime = new LocalTime(12, 0)
 		event.weekRanges = Seq(WeekRange(2, 4))
 		
 		group.addEvent(event)
@@ -235,8 +258,17 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 			any[Seq[String]],
 			any[Seq[SmallGroupEventOccurrence]]
 		) returns Seq()
-		command.termService.getAcademicWeekForAcademicYear(any[DateTime], any[AcademicYear]) returns 4
-		
+
+		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
+			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 12, 0))
+		)
+		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
+			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
+		)
+		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
+			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
+		)
+
 		val info = command.applyInternal()
 		info.attendance.keySet.size should be (3) // If it's 2, we're bad
 	}}
