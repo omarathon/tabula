@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.termdates.Term.TermType
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 
 object ModifySmallGroupSetCommand {
 	def create(module: Module) =
@@ -41,6 +42,11 @@ trait ModifySmallGroupSetCommandState extends CurrentSITSAcademicYear {
 	def module: Module
 	def existingSet: Option[SmallGroupSet]
 
+	def updatingExistingLink(set: SmallGroupSet) = (allocationMethod == SmallGroupAllocationMethod.Linked
+		&& linkedDepartmentSmallGroupSet != set.linkedDepartmentSmallGroupSet)
+
+	def creatingNewLink(set: SmallGroupSet) = allocationMethod == SmallGroupAllocationMethod.Linked && set.allocationMethod != SmallGroupAllocationMethod.Linked
+
 	var name: String = _
 
 	var format: SmallGroupFormat = _
@@ -63,6 +69,7 @@ trait CreateSmallGroupSetCommandState extends ModifySmallGroupSetCommandState {
 trait EditSmallGroupSetCommandState extends ModifySmallGroupSetCommandState {
 	def set: SmallGroupSet
 	def existingSet = Some(set)
+
 }
 
 class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmallGroupSetCommandInternal with CreateSmallGroupSetCommandState {
@@ -148,8 +155,17 @@ class EditSmallGroupSetCommandInternal(val module: Module, val set: SmallGroupSe
 	copyFrom(set)
 
 	override def applyInternal() = transactional() {
-		if (linkedDepartmentSmallGroupSet != set.linkedDepartmentSmallGroupSet) {
+		if (updatingExistingLink(set) || creatingNewLink(set)) {
 			copyTo(set)
+
+			set.groups.asScala.foreach {
+				group => group.events.foreach {
+					event => smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event).filterNot(
+						eventOccurrence => eventOccurrence.attendance.asScala.exists {
+							attendance => attendance.state != AttendanceState.NotRecorded
+						}).foreach(smallGroupService.delete)
+				}
+			}
 
 			set.groups.clear()
 			linkedDepartmentSmallGroupSet.groups.asScala.foreach { linkedGroup =>
@@ -196,7 +212,7 @@ abstract class ModifySmallGroupSetCommandInternal extends CommandInternal[SmallG
 }
 
 trait ModifySmallGroupSetValidation extends SelfValidating {
-	self: ModifySmallGroupSetCommandState =>
+	self: ModifySmallGroupSetCommandState with SmallGroupServiceComponent =>
 
 	override def validate(errors: Errors) {
 		if (!name.hasText) errors.rejectValue("name", "smallGroupSet.name.NotEmpty")
@@ -208,6 +224,11 @@ trait ModifySmallGroupSetValidation extends SelfValidating {
 		existingSet.foreach { set =>
 			if (academicYear != set.academicYear) errors.rejectValue("academicYear", "smallGroupSet.academicYear.cantBeChanged")
 
+			if ((updatingExistingLink(set) || creatingNewLink(set)) && hasAttendance(set)
+				&& hasAttendance(set)) {
+				errors.rejectValue("allocationMethod", "smallGroupEvent.allocationMethod.hasAttendance")
+			}
+
 			if (set.releasedToStudents || set.releasedToTutors) {
 				// Can't unlink or link a released set
 				if (set.linked && allocationMethod != SmallGroupAllocationMethod.Linked) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.released")
@@ -215,6 +236,18 @@ trait ModifySmallGroupSetValidation extends SelfValidating {
 			}
 		}
 	}
+
+	def hasAttendance(set: SmallGroupSet) = {
+		set.groups.asScala.exists (
+			group => group.events.exists { event =>
+				smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
+					.exists { _.attendance.asScala.exists { attendance =>
+					attendance.state != AttendanceState.NotRecorded
+				}
+			}}
+		)
+	}
+
 }
 
 trait CreateSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
