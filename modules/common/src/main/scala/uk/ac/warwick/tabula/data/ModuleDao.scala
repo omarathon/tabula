@@ -3,12 +3,18 @@ import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.{Order, Projections}
 import org.joda.time.DateTime.now
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{RouteTeachingInformation, ModuleTeachingInformation, Assignment, Module}
 
 trait ModuleDao {
 	def allModules: Seq[Module]
 	def saveOrUpdate(module: Module)
+	def saveOrUpdate(teachingInfo: ModuleTeachingInformation)
+	def delete(teachingInfo: ModuleTeachingInformation)
+	def saveOrUpdate(teachingInfo: RouteTeachingInformation)
+	def delete(teachingInfo: RouteTeachingInformation)
 	def getByCode(code: String): Option[Module]
+	def getTeachingInformationByModuleCodeAndDepartmentCode(moduleCode: String, departmentCode: String): Option[ModuleTeachingInformation]
+	def getTeachingInformationByRouteCodeAndDepartmentCode(routeCode: String, departmentCode: String): Option[RouteTeachingInformation]
 	def getById(id: String): Option[Module]
 	def stampMissingFromImport(newStaleModuleCodes: Seq[String])
 	def hasAssignments(module: Module): Boolean
@@ -26,9 +32,29 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 			.distinct
 
 	def saveOrUpdate(module: Module) = session.saveOrUpdate(module)
+	def saveOrUpdate(teachingInfo: ModuleTeachingInformation) = session.saveOrUpdate(teachingInfo)
+	def delete(teachingInfo: ModuleTeachingInformation) = session.delete(teachingInfo)
+	def saveOrUpdate(teachingInfo: RouteTeachingInformation) = session.saveOrUpdate(teachingInfo)
+	def delete(teachingInfo: RouteTeachingInformation) = session.delete(teachingInfo)
 
 	def getByCode(code: String) = 
 		session.newQuery[Module]("from Module m where code = :code").setString("code", code).uniqueResult
+
+	def getTeachingInformationByModuleCodeAndDepartmentCode(moduleCode: String, departmentCode: String) =
+		session.newCriteria[ModuleTeachingInformation]
+			.createAlias("module", "module")
+			.createAlias("department", "department")
+			.add(is("module.code", moduleCode.toLowerCase()))
+			.add(is("department.code", departmentCode.toLowerCase()))
+			.uniqueResult
+
+	def getTeachingInformationByRouteCodeAndDepartmentCode(routeCode: String, departmentCode: String) =
+		session.newCriteria[RouteTeachingInformation]
+			.createAlias("route", "route")
+			.createAlias("department", "department")
+			.add(is("route.code", routeCode.toLowerCase()))
+			.add(is("department.code", departmentCode.toLowerCase()))
+			.uniqueResult
 	
 	def getById(id: String) = getById[Module](id)
 

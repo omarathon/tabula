@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.scheduling.services._
 import uk.ac.warwick.tabula.system.permissions._
 import uk.ac.warwick.tabula.services._
+import scala.collection.JavaConverters._
 import ImportAcademicInformationCommand._
 
 object ImportAcademicInformationCommand {
@@ -16,7 +17,9 @@ object ImportAcademicInformationCommand {
 			with ComposableCommand[ImportAcademicInformationResults]
 			with ImportDepartments
 			with ImportModules
+			with ImportModuleTeachingDepartments
 			with ImportRoutes
+			with ImportRouteTeachingDepartments
 			with ImportCourses
 			with ImportSitsStatuses
 			with ImportModesOfAttendance
@@ -41,7 +44,9 @@ object ImportAcademicInformationCommand {
 	case class ImportAcademicInformationResults(
 		departments: ImportResult,
 		modules: ImportResult,
+		moduleTeachingDepartments: ImportResult,
 		routes: ImportResult,
+		routeTeachingDepartments: ImportResult,
 		courses: ImportResult,
 		sitsStatuses: ImportResult,
 		modesOfAttendance: ImportResult,
@@ -62,8 +67,19 @@ object ImportAcademicInformationCommand {
 		module.code = m.code
 		module.name = m.name
 		// TODO TAB-87 check child department rules and maybe sort it into a child department instead
-		module.department = dept
+		module.adminDepartment = dept
 		module
+	}
+
+	def newModuleTeachingDepartmentFrom(i: ModuleTeachingDepartmentInfo, moduleAndDepartmentService: ModuleAndDepartmentService): ModuleTeachingInformation = {
+		val info = new ModuleTeachingInformation
+
+		// Don't try and handle badly specified codes, just let the .get fail
+		info.module = moduleAndDepartmentService.getModuleByCode(i.code).get
+		info.department = moduleAndDepartmentService.getDepartmentByCode(i.departmentCode).get
+		info.percentage = i.percentage
+
+		info
 	}
 
 	def newDepartmentFrom(d: DepartmentInfo, moduleAndDepartmentService: ModuleAndDepartmentService): Department = {
@@ -86,15 +102,28 @@ object ImportAcademicInformationCommand {
 		route.code = r.code
 		route.name = r.name
 		route.degreeType = r.degreeType
-		route.department = dept
+		route.adminDepartment = dept
 		route
+	}
+
+	def newRouteTeachingDepartmentFrom(i: RouteTeachingDepartmentInfo, moduleAndDepartmentService: ModuleAndDepartmentService): RouteTeachingInformation = {
+		val info = new RouteTeachingInformation
+
+		// Don't try and handle badly specified codes, just let the .get fail
+		info.route = moduleAndDepartmentService.getRouteByCode(i.code).get
+		info.department = moduleAndDepartmentService.getDepartmentByCode(i.departmentCode).get
+		info.percentage = i.percentage
+
+		info
 	}
 }
 
 class ImportAcademicInformationCommandInternal extends CommandInternal[ImportAcademicInformationResults] with TaskBenchmarking {
 	self: ImportDepartments with
 		  ImportModules with
+			ImportModuleTeachingDepartments with
 		  ImportRoutes with
+			ImportRouteTeachingDepartments with
 		  ImportCourses with
 		  ImportSitsStatuses with
 		  ImportModesOfAttendance with
@@ -106,7 +135,9 @@ class ImportAcademicInformationCommandInternal extends CommandInternal[ImportAca
 		ImportAcademicInformationResults(
 			departments = benchmarkTask("Import departments") { importDepartments() },
 			modules = benchmarkTask("Import modules") { importModules() },
+			moduleTeachingDepartments = benchmarkTask("Import module teaching departments") { importModuleTeachingDepartments() },
 			routes = benchmarkTask("Import routes") { importRoutes() },
+			routeTeachingDepartments = benchmarkTask("Import route teaching departments") { importRouteTeachingDepartments() },
 			courses = benchmarkTask("Import courses") { importCourses() },
 			sitsStatuses = benchmarkTask("Import SITS status codes") { importSitsStatuses() },
 			modesOfAttendance = benchmarkTask("Import modes of attendance") { importModesOfAttendance() },
@@ -206,6 +237,62 @@ trait ImportModules {
 	}
 }
 
+trait ImportModuleTeachingDepartments {
+	self: ModuleAndDepartmentServiceComponent with ModuleImporterComponent with Logging =>
+
+	def importModuleTeachingDepartments(): ImportResult = {
+		logger.info("Importing module teaching departments")
+
+		val results = for (module <- moduleAndDepartmentService.allModules) yield {
+			importModuleTeachingDepartments(moduleImporter.getModuleTeachingDepartments(module.code), module)
+		}
+
+		combineResults(results)
+	}
+
+	def importModuleTeachingDepartments(module: Module): ImportResult = {
+		importModuleTeachingDepartments(moduleImporter.getModuleTeachingDepartments(module.code), module)
+	}
+
+	def importModuleTeachingDepartments(moduleTeachingDepartments: Seq[ModuleTeachingDepartmentInfo], module: Module): ImportResult = {
+		val seenDepartments = moduleTeachingDepartments.map { _.departmentCode }.flatMap(moduleAndDepartmentService.getDepartmentByCode)
+
+		val deletions =
+			module.teachingInfo.asScala
+				.filterNot { info => seenDepartments.contains(info.department) }
+				.map { info =>
+					moduleAndDepartmentService.delete(info)
+					ImportResult(deleted = 1)
+				}
+
+		val additions =
+			moduleTeachingDepartments.map { info =>
+				moduleAndDepartmentService.getModuleTeachingInformation(info.code.toLowerCase(), info.departmentCode.toLowerCase()) match {
+					case None => {
+						debug(s"Teaching info for ${info.departmentCode} on ${info.code} not found in database, so inserting")
+						moduleAndDepartmentService.saveOrUpdate(newModuleTeachingDepartmentFrom(info, moduleAndDepartmentService))
+
+						ImportResult(added = 1)
+					}
+					case Some(teachingInfo) => {
+						// Update percentage if it changes
+						if (teachingInfo.percentage != info.percentage) {
+							logger.info(s"Updating percentage of ${teachingInfo} to ${info.percentage}")
+							teachingInfo.percentage = info.percentage
+							moduleAndDepartmentService.saveOrUpdate(teachingInfo)
+
+							ImportResult(changed = 1)
+						} else {
+							ImportResult()
+						}
+					}
+				}
+			}
+
+		combineResults((deletions ++ additions).toSeq)
+	}
+}
+
 trait ImportRoutes {
 	self: ModuleAndDepartmentServiceComponent with CourseAndRouteServiceComponent with ModuleImporterComponent with Logging =>
 
@@ -243,6 +330,62 @@ trait ImportRoutes {
 		}
 
 		combineResults(results)
+	}
+}
+
+trait ImportRouteTeachingDepartments {
+	self: ModuleAndDepartmentServiceComponent with ModuleImporterComponent with Logging =>
+
+	def importRouteTeachingDepartments(): ImportResult = {
+		logger.info("Importing route teaching departments")
+
+		val results = for (route <- moduleAndDepartmentService.allRoutes) yield {
+			importRouteTeachingDepartments(moduleImporter.getRouteTeachingDepartments(route.code), route)
+		}
+
+		combineResults(results)
+	}
+
+	def importRouteTeachingDepartments(route: Route): ImportResult = {
+		importRouteTeachingDepartments(moduleImporter.getRouteTeachingDepartments(route.code), route)
+	}
+
+	def importRouteTeachingDepartments(routeTeachingDepartments: Seq[RouteTeachingDepartmentInfo], route: Route): ImportResult = {
+		val seenDepartments = routeTeachingDepartments.map { _.departmentCode }.flatMap(moduleAndDepartmentService.getDepartmentByCode)
+
+		val deletions =
+			route.teachingInfo.asScala
+				.filterNot { info => seenDepartments.contains(info.department) }
+				.map { info =>
+					moduleAndDepartmentService.delete(info)
+					ImportResult(deleted = 1)
+				}
+
+		val additions =
+			routeTeachingDepartments.map { info =>
+				moduleAndDepartmentService.getRouteTeachingInformation(info.code.toLowerCase(), info.departmentCode.toLowerCase()) match {
+					case None => {
+						debug(s"Teaching info for ${info.departmentCode} on ${info.code} not found in database, so inserting")
+						moduleAndDepartmentService.saveOrUpdate(newRouteTeachingDepartmentFrom(info, moduleAndDepartmentService))
+
+						ImportResult(added = 1)
+					}
+					case Some(teachingInfo) => {
+						// Update percentage if it changes
+						if (teachingInfo.percentage != info.percentage) {
+							logger.info(s"Updating percentage of ${teachingInfo} to ${info.percentage}")
+							teachingInfo.percentage = info.percentage
+							moduleAndDepartmentService.saveOrUpdate(teachingInfo)
+
+							ImportResult(changed = 1)
+						} else {
+							ImportResult()
+						}
+					}
+				}
+			}
+
+		combineResults((deletions ++ additions).toSeq)
 	}
 }
 

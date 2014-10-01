@@ -86,7 +86,7 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 	def findSetsByDepartmentAndYear(department: Department, year: AcademicYear) =
 		session.newCriteria[SmallGroupSet]
 			.createAlias("module", "module")
-			.add(is("module.department", department))
+			.add(is("module.adminDepartment", department))
 			.add(is("academicYear", year))
 			.add(is("deleted", false))
 			.addOrder(asc("archived"))

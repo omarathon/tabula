@@ -19,13 +19,13 @@ import org.joda.time.DateTime
 @Entity
 @NamedQueries(Array(
 	new NamedQuery(name = "module.code", query = "select m from Module m where code = :code"),
-	new NamedQuery(name = "module.department", query = "select m from Module m where department = :department")))
+	new NamedQuery(name = "module.department", query = "select m from Module m where adminDepartment = :department")))
 class Module extends GeneratedId with PermissionsTarget with Serializable {
 
-	def this(code: String = null, department: Department = null) {
+	def this(code: String = null, adminDepartment: Department = null) {
 		this()
 		this.code = code
-		this.department = department
+		this.adminDepartment = adminDepartment
 	}
 
 	var code: String = _
@@ -43,9 +43,21 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "department_id")
-	var department: Department = _
+	var adminDepartment: Department = _
 
-	def permissionsParents = Option(department).toStream
+	@deprecated("TAB-2589 to be explicit, this should use adminDepartment or teachingDepartments", "84")
+	def department = adminDepartment
+
+	@deprecated("TAB-2589 to be explicit, this should use adminDepartment or teachingDepartments", "84")
+	def department_=(d: Department) { adminDepartment = d }
+
+	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
+	var teachingInfo: JSet[ModuleTeachingInformation] = JHashSet()
+
+	def teachingDepartments = teachingInfo.asScala.map { _.department } + adminDepartment
+
+	def permissionsParents = Option(adminDepartment).toStream
 	override def humanReadableId = code.toUpperCase() + " " + name
 	override def urlSlug = code
 

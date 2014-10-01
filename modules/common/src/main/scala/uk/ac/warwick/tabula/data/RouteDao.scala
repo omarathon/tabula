@@ -50,7 +50,7 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 				set
 					r.missingFromImportSince = :now
 				where
-					r.department = :department and
+					r.adminDepartment = :department and
 					r.missingFromImportSince is null
 		"""
 		

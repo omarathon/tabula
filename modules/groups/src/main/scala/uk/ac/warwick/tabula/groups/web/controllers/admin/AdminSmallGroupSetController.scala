@@ -43,7 +43,7 @@ class AdminSmallGroupSetController extends GroupsController with AutowiringSmall
 		)
 
 		if (ajax) Mav("admin/module/single_set-noLayout", model).noLayout()
-		else Mav("admin/module/single_set", model).crumbs(Breadcrumbs.DepartmentForYear(set.module.department, set.academicYear), Breadcrumbs.Module(set.module))
+		else Mav("admin/module/single_set", model).crumbs(Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear), Breadcrumbs.Module(set.module))
 	}
 
 }

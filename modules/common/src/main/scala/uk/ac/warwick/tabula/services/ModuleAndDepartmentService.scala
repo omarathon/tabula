@@ -68,6 +68,14 @@ class ModuleAndDepartmentService extends Logging {
 		moduleDao.getById(id)
 	}
 
+	def getModuleTeachingInformation(moduleCode: String, departmentCode: String) = transactional(readOnly = true) {
+		moduleDao.getTeachingInformationByModuleCodeAndDepartmentCode(moduleCode, departmentCode)
+	}
+
+	def getRouteTeachingInformation(routeCode: String, departmentCode: String) = transactional(readOnly = true) {
+		moduleDao.getTeachingInformationByRouteCodeAndDepartmentCode(routeCode, departmentCode)
+	}
+
 	def getRouteByCode(code: String) = transactional(readOnly = true) {
 		routeDao.getByCode(code)
 	}
@@ -90,7 +98,7 @@ class ModuleAndDepartmentService extends Logging {
 			.filter { module => securityService.can(user, permission, module) }
 
 	def modulesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Module] =
-		modulesWithPermission(user, permission).filter { _.department == dept }
+		modulesWithPermission(user, permission).filter { _.adminDepartment == dept }
 
 	def modulesInDepartmentsWithPermission(user: CurrentUser, permission: Permission) = {
 		departmentsWithPermission(user, permission) flatMap (dept => dept.modules.asScala)
@@ -104,7 +112,7 @@ class ModuleAndDepartmentService extends Logging {
 			.filter { route => securityService.can(user, permission, route) }
 
 	def routesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route] =
-		routesWithPermission(user, permission).filter { _.department == dept }
+		routesWithPermission(user, permission).filter { _.adminDepartment == dept }
 
 	def routesInDepartmentsWithPermission(user: CurrentUser, permission: Permission) = {
 		departmentsWithPermission(user, permission) flatMap (dept => dept.routes.asScala)
@@ -167,6 +175,22 @@ class ModuleAndDepartmentService extends Logging {
 	
 	def saveOrUpdate(module: Module) = transactional() {
 		moduleDao.saveOrUpdate(module)
+	}
+
+	def saveOrUpdate(teachingInfo: ModuleTeachingInformation) = transactional() {
+		moduleDao.saveOrUpdate(teachingInfo)
+	}
+
+	def delete(teachingInfo: ModuleTeachingInformation) = transactional() {
+		moduleDao.delete(teachingInfo)
+	}
+
+	def saveOrUpdate(teachingInfo: RouteTeachingInformation) = transactional() {
+		moduleDao.saveOrUpdate(teachingInfo)
+	}
+
+	def delete(teachingInfo: RouteTeachingInformation) = transactional() {
+		moduleDao.delete(teachingInfo)
 	}
 	
 	def stampMissingModules(seenCodes: Seq[String]) = transactional() {

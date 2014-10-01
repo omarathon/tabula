@@ -44,12 +44,24 @@ class Department extends GeneratedId
 	var children:JSet[Department] = JHashSet()
 
 	@ManyToOne(fetch = FetchType.LAZY, optional=true)
-	var parent:Department = null
+	var parent: Department = null
 
 	// No orphanRemoval as it makes it difficult to move modules between Departments.
-	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
+	@OneToMany(mappedBy="adminDepartment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
 	@BatchSize(size=200)
-	var modules:JList[Module] = JArrayList()
+	var modules: JList[Module] = JArrayList()
+
+	@OneToMany(mappedBy="adminDepartment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
+	@BatchSize(size=200)
+	var routes:JList[Route] = JArrayList()
+
+	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
+	var moduleTeachingInfo: JSet[ModuleTeachingInformation] = JHashSet()
+
+	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
+	var routeTeachingInfo: JSet[RouteTeachingInformation] = JHashSet()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
@@ -63,10 +75,6 @@ class Department extends GeneratedId
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
 	@BatchSize(size=200)
 	var customRoleDefinitions:JList[CustomRoleDefinition] = JArrayList()
-
-	@OneToMany(mappedBy="department", fetch = FetchType.LAZY)
-	@BatchSize(size=200)
-	var routes:JList[Route] = JArrayList()
 
 	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse false
 	def collectFeedbackRatings_= (collect: Boolean) = settings += (Settings.CollectFeedbackRatings -> collect)
@@ -325,7 +333,7 @@ object Department {
 		val name = "DepartmentRoutes"
 		val courseTypes = CourseType.all
 		def matches(member: Member, department: Option[Department]) = member match {
-			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.exists{r => department.exists(_ == r.department)}
+			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.exists{r => department.exists(_ == r.adminDepartment)}
 			case _ => false
 		}
 	}
