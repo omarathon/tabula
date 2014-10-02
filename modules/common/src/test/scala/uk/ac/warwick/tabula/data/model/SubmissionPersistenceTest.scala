@@ -32,7 +32,7 @@ class SubmissionPersistenceTest extends PersistenceTestBase {
         	val value = SavedFormValue.withAttachments(submission, "upload", Set(attachment))
         	submission.values.add(value)
 
-        	session.save(assignment.module.department)
+        	session.save(assignment.module.adminDepartment)
         	session.save(assignment.module)
         	session.save(assignment)
         	session.save(submission)

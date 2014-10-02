@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.services.permissions
-import scala.collection.JavaConversions._
+
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model._
@@ -15,7 +15,7 @@ class AssignmentSubmitterRoleProvider extends RoleProvider {
 		scope match {
 			case assignment: Assignment => 
 				if (assignment.canSubmit(user.apparentUser)) 
-					Stream(customRoleFor(assignment.module.department)(AssignmentSubmitterRoleDefinition, assignment).getOrElse(AssignmentSubmitter(assignment)))
+					Stream(customRoleFor(assignment.module.adminDepartment)(AssignmentSubmitterRoleDefinition, assignment).getOrElse(AssignmentSubmitter(assignment)))
 				else Stream.empty
 			
 			// AssignmentSubmitter is only checked at the assignment level

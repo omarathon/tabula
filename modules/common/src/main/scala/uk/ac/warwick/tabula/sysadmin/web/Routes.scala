@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.sysadmin.web
 
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplate
 import uk.ac.warwick.tabula.web.RoutesUtils
-import uk.ac.warwick.tabula.services.jobs.JobInstance
 
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs

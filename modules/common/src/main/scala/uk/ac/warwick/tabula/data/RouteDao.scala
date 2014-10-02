@@ -5,7 +5,7 @@ import org.hibernate.criterion.Restrictions._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Department, Route}
+import uk.ac.warwick.tabula.data.model.{RouteTeachingInformation, Department, Route}
 
 trait RouteDaoComponent {
 	val routeDao: RouteDao
@@ -23,6 +23,9 @@ trait RouteDao {
 	def findByDepartment(department:Department):Seq[Route]
 	def stampMissingRows(dept: Department, seenCodes: Seq[String]): Int
 	def findRoutesNamedLike(query: String): Seq[Route]
+	def saveOrUpdate(teachingInfo: RouteTeachingInformation)
+	def delete(teachingInfo: RouteTeachingInformation)
+	def getTeachingInformationByRouteCodeAndDepartmentCode(routeCode: String, departmentCode: String): Option[RouteTeachingInformation]
 }
 
 @Repository
@@ -72,5 +75,16 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 			)
 			.setMaxResults(20).seq.sorted(Route.DegreeTypeOrdering)
 	}
+
+	def saveOrUpdate(teachingInfo: RouteTeachingInformation) = session.saveOrUpdate(teachingInfo)
+	def delete(teachingInfo: RouteTeachingInformation) = session.delete(teachingInfo)
+
+	def getTeachingInformationByRouteCodeAndDepartmentCode(routeCode: String, departmentCode: String) =
+		session.newCriteria[RouteTeachingInformation]
+			.createAlias("route", "route")
+			.createAlias("department", "department")
+			.add(is("route.code", routeCode.toLowerCase()))
+			.add(is("department.code", departmentCode.toLowerCase()))
+			.uniqueResult
 
 }

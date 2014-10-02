@@ -29,7 +29,7 @@ trait MarkingWorkflowWorld extends TestFixtures {
 	addFeedback(assignment)
 
 	var markingWorkflow = new SeenSecondMarkingWorkflow()
-	markingWorkflow.department = assignment.module.department
+	markingWorkflow.department = assignment.module.adminDepartment
 	markingWorkflow.firstMarkers = makeUserGroup("cuslaj", "cuscav")
 	markingWorkflow.secondMarkers = makeUserGroup("cuslat", "cuday")
 	assignment.markingWorkflow = markingWorkflow

@@ -233,9 +233,9 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 }
 
 trait PermissionsDaoComponent {
-	var permissionsDao:PermissionsDao
+	def permissionsDao: PermissionsDao
 }
 
 trait AutowiringPermissionsDaoComponent extends PermissionsDaoComponent {
-	var permissionsDao = Wire[PermissionsDao]
+	val permissionsDao = Wire[PermissionsDao]
 }

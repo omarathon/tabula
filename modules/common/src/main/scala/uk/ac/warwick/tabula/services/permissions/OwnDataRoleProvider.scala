@@ -13,7 +13,6 @@ import uk.ac.warwick.tabula.roles.SettingsOwner
 import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 
 /**
  * A special multi-purpose role provider that provides users access to their own data, generally this isn't an explicit permission.
@@ -47,12 +46,11 @@ class OwnDataRoleProvider extends RoleProvider {
 				else Stream.empty
 
 			// You can view small groups that you are a member of as long as it's visible to students
-			case smallGroup: SmallGroup => {
+			case smallGroup: SmallGroup =>
 				val studentId = user.apparentUser.getWarwickId
 				if (studentId.hasText && smallGroup.groupSet.visibleToStudents && smallGroup.students.includesUser(user.apparentUser))
-					Stream(customRoleFor(smallGroup.groupSet.module.department)(SmallGroupMemberRoleDefinition, smallGroup).getOrElse(SmallGroupMember(smallGroup)))
+					Stream(customRoleFor(smallGroup.groupSet.module.adminDepartment)(SmallGroupMemberRoleDefinition, smallGroup).getOrElse(SmallGroupMember(smallGroup)))
 				else Stream.empty
-			}
 
 			// You can change your own scheduled meeting
 			case meeting: ScheduledMeetingRecord =>

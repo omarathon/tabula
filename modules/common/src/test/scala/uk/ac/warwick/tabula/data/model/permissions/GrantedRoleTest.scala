@@ -8,7 +8,7 @@ class GrantedRoleTest extends TestBase {
 	
 	val dept = Fixtures.department("in")
 	val module = Fixtures.module("in101")
-	module.department = dept
+	module.adminDepartment = dept
 	
 	val assignment = Fixtures.assignment("assignment")
 	val member = Fixtures.staff()

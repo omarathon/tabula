@@ -105,7 +105,7 @@ class DownloadSingleSubmissionController extends CourseworkController {
 		val moduleCode = cmd.assignment.module.code
 		val user = userLookup.getUserByUserId(cmd.submission.userId)
 
-		val userIdentifier = if(!cmd.assignment.module.department.showStudentName || (user==null || !user.isInstanceOf[AnonymousUser])) {
+		val userIdentifier = if(!cmd.assignment.module.adminDepartment.showStudentName || (user==null || !user.isInstanceOf[AnonymousUser])) {
 			cmd.submission.universityId
 		} else {
 			s"${user.getFullName} - ${cmd.submission.universityId}"
@@ -140,7 +140,7 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 		val moduleCode = cmd.assignment.module.code
 		val user = userLookup.getUserByUserId(cmd.submission.userId)
 
-		val userIdentifier = if(!cmd.assignment.module.department.showStudentName || (user==null || !user.isInstanceOf[AnonymousUser])) {
+		val userIdentifier = if(!cmd.assignment.module.adminDepartment.showStudentName || (user==null || !user.isInstanceOf[AnonymousUser])) {
 			cmd.submission.universityId
 		} else {
 			s"${user.getFullName} - ${cmd.submission.universityId}"

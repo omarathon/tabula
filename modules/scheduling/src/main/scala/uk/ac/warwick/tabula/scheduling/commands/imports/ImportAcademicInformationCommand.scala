@@ -106,11 +106,11 @@ object ImportAcademicInformationCommand {
 		route
 	}
 
-	def newRouteTeachingDepartmentFrom(i: RouteTeachingDepartmentInfo, moduleAndDepartmentService: ModuleAndDepartmentService): RouteTeachingInformation = {
+	def newRouteTeachingDepartmentFrom(i: RouteTeachingDepartmentInfo, courseAndRouteService: CourseAndRouteService, moduleAndDepartmentService: ModuleAndDepartmentService): RouteTeachingInformation = {
 		val info = new RouteTeachingInformation
 
 		// Don't try and handle badly specified codes, just let the .get fail
-		info.route = moduleAndDepartmentService.getRouteByCode(i.code).get
+		info.route = courseAndRouteService.getRouteByCode(i.code).get
 		info.department = moduleAndDepartmentService.getDepartmentByCode(i.departmentCode).get
 		info.percentage = i.percentage
 
@@ -334,12 +334,12 @@ trait ImportRoutes {
 }
 
 trait ImportRouteTeachingDepartments {
-	self: ModuleAndDepartmentServiceComponent with ModuleImporterComponent with Logging =>
+	self: CourseAndRouteServiceComponent with ModuleAndDepartmentServiceComponent with ModuleImporterComponent with Logging =>
 
 	def importRouteTeachingDepartments(): ImportResult = {
 		logger.info("Importing route teaching departments")
 
-		val results = for (route <- moduleAndDepartmentService.allRoutes) yield {
+		val results = for (route <- courseAndRouteService.allRoutes) yield {
 			importRouteTeachingDepartments(moduleImporter.getRouteTeachingDepartments(route.code), route)
 		}
 
@@ -357,16 +357,16 @@ trait ImportRouteTeachingDepartments {
 			route.teachingInfo.asScala
 				.filterNot { info => seenDepartments.contains(info.department) }
 				.map { info =>
-					moduleAndDepartmentService.delete(info)
+					courseAndRouteService.delete(info)
 					ImportResult(deleted = 1)
 				}
 
 		val additions =
 			routeTeachingDepartments.map { info =>
-				moduleAndDepartmentService.getRouteTeachingInformation(info.code.toLowerCase(), info.departmentCode.toLowerCase()) match {
+				courseAndRouteService.getRouteTeachingInformation(info.code.toLowerCase(), info.departmentCode.toLowerCase()) match {
 					case None => {
 						debug(s"Teaching info for ${info.departmentCode} on ${info.code} not found in database, so inserting")
-						moduleAndDepartmentService.saveOrUpdate(newRouteTeachingDepartmentFrom(info, moduleAndDepartmentService))
+						courseAndRouteService.saveOrUpdate(newRouteTeachingDepartmentFrom(info, courseAndRouteService, moduleAndDepartmentService))
 
 						ImportResult(added = 1)
 					}
@@ -375,7 +375,7 @@ trait ImportRouteTeachingDepartments {
 						if (teachingInfo.percentage != info.percentage) {
 							logger.info(s"Updating percentage of ${teachingInfo} to ${info.percentage}")
 							teachingInfo.percentage = info.percentage
-							moduleAndDepartmentService.saveOrUpdate(teachingInfo)
+							courseAndRouteService.saveOrUpdate(teachingInfo)
 
 							ImportResult(changed = 1)
 						} else {

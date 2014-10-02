@@ -30,7 +30,7 @@ class RouteCreationFixtureCommand extends CommandInternal[Route] {
 		transactional() {
 			val dept = moduleAndDepartmentService.getDepartmentByCode(departmentCode).get
 			val r = new Route
-			r.department = dept
+			r.adminDepartment = dept
 			r.active = true
 			r.code = routeCode
 			r.degreeType = DegreeType.fromCode(degreeType)
