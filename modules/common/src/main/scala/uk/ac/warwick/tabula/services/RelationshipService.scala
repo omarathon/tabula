@@ -52,7 +52,6 @@ trait RelationshipService {
 	def listAllStudentRelationshipsWithUniversityId(agentId: String): Seq[StudentRelationship]
 	def listStudentRelationshipsWithUniversityId(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
 	def listStudentsWithoutRelationship(relationshipType: StudentRelationshipType, department: Department): Seq[Member]
-	def countStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): (Int, Int)
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship]
@@ -206,7 +205,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 
 	def expectedToHaveRelationship(relationshipType: StudentRelationshipType, department: Department)(member: StudentMember) = {
 		member.freshStudentCourseDetails
-		.filter(scd => Option(scd.route).exists(_.department == department)) // there needs to be an SCD for the right department ...
+		.filter(scd => Option(scd.route).exists( route => route.department == department || route.department == department.rootDepartment)) // there needs to be an SCD for the right department ...
 		.filter(!_.permanentlyWithdrawn) // that's not permanently withdrawn ...
 		.filter(relationshipType.isExpected) // and has a course of the type that is expected to have this kind of relationship
 		.nonEmpty
@@ -264,17 +263,6 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 			.filter(studentDepartmentFilterMatches(department))
 			.filter(expectedToHaveRelationship(relationshipType, department))
   }
-
-  def countStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): (Int, Int) =
-		transactional(readOnly = true) {
-
-		val matchingStudents =
-			relationshipDao.getStudentsByRelationshipAndDepartment(relationshipType, department.rootDepartment)
-				.filter(studentDepartmentFilterMatches(department))
-				.filter(studentNotPermanentlyWithdrawn)
-
-		(profileService.countStudentsByDepartment(department), matchingStudents.size)
-	}
 
   def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int = transactional(readOnly = true) {
 		relationshipDao.countStudentsByRelationship(relationshipType).intValue
