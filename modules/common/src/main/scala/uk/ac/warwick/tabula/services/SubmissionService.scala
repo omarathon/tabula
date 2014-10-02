@@ -11,6 +11,7 @@ import uk.ac.warwick.spring.Wire
 trait SubmissionService {
 	def saveSubmission(submission: Submission)
 	def getSubmissionByUniId(assignment: Assignment, uniId: String): Option[Submission]
+	def getSubmissionsByAssignment(assignment: Assignment): Seq[Submission]
 	def getSubmission(id: String): Option[Submission]
 
 	def delete(submission: Submission): Unit
@@ -34,6 +35,11 @@ class SubmissionServiceImpl extends SubmissionService with Daoisms with Logging 
 			.add(is("assignment", assignment))
 			.add(is("universityId", uniId))
 			.uniqueResult
+	}
+
+	def getSubmissionsByAssignment(assignment: Assignment) : Seq[Submission] = {
+		session.newCriteria[Submission]
+			.add(is("assignment", assignment)).seq			
 	}
 
 	def getSubmission(id: String) = getById[Submission](id)
