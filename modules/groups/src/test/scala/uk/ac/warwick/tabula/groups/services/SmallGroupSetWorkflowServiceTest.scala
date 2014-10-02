@@ -85,7 +85,7 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 		{
 			val p = service.progress(set)
 			p.stages should be (ListMap(
-				"AddGroups" -> StageProgress(AddGroups, started = true, "workflow.smallGroupSet.AddGroups.added", Good, completed = true, preconditionsMet = true),
+				"AddGroups" -> StageProgress(AddGroups, started = true, "workflow.smallGroupSet.AddGroups.added", Warning, completed = true, preconditionsMet = true),
 				"AddStudents" -> StageProgress(AddStudents, started = false, "workflow.smallGroupSet.AddStudents.empty", Danger, completed = false, preconditionsMet = true),
 				"AddEvents" -> StageProgress(AddEvents, started = false, "workflow.smallGroupSet.AddEvents.empty", Danger, completed = false, preconditionsMet = true),
 				"SendNotifications" -> StageProgress(SendNotifications, started = false, "workflow.smallGroupSet.SendNotifications.notSent", Warning, completed = false, preconditionsMet = false)
@@ -93,7 +93,7 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 			p.percentage should be (25)
 			p.nextStage should be (Some(AddStudents))
 			p.messageCode should be ("workflow.smallGroupSet.AddGroups.added")
-			p.cssClass should be ("success")
+			p.cssClass should be ("warning")
 		}
 
 		// Add some students
@@ -103,15 +103,15 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 		{
 			val p = service.progress(set)
 			p.stages should be (ListMap(
-				"AddGroups" -> StageProgress(AddGroups, started = true, "workflow.smallGroupSet.AddGroups.added", Good, completed = true, preconditionsMet = true),
-				"AddStudents" -> StageProgress(AddStudents, started = true, "workflow.smallGroupSet.AddStudents.hasStudents", Good, completed = true, preconditionsMet = true),
+				"AddGroups" -> StageProgress(AddGroups, started = true, "workflow.smallGroupSet.AddGroups.added", Warning, completed = true, preconditionsMet = true),
+				"AddStudents" -> StageProgress(AddStudents, started = true, "workflow.smallGroupSet.AddStudents.hasStudents", Warning, completed = true, preconditionsMet = true),
 				"AddEvents" -> StageProgress(AddEvents, started = false, "workflow.smallGroupSet.AddEvents.empty", Danger, completed = false, preconditionsMet = true),
 				"SendNotifications" -> StageProgress(SendNotifications, started = false, "workflow.smallGroupSet.SendNotifications.notSent", Warning, completed = false, preconditionsMet = false)
 			))
 			p.percentage should be (50)
 			p.nextStage should be (Some(AddEvents))
 			p.messageCode should be ("workflow.smallGroupSet.AddStudents.hasStudents")
-			p.cssClass should be ("success")
+			p.cssClass should be ("warning")
 		}
 
 		// Add some events
@@ -124,15 +124,15 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 		{
 			val p = service.progress(set)
 			p.stages should be (ListMap(
-				"AddGroups" -> StageProgress(AddGroups, started = true, "workflow.smallGroupSet.AddGroups.added", Good, completed = true, preconditionsMet = true),
-				"AddStudents" -> StageProgress(AddStudents, started = true, "workflow.smallGroupSet.AddStudents.hasStudents", Good, completed = true, preconditionsMet = true),
-				"AddEvents" -> StageProgress(AddEvents, started = true, "workflow.smallGroupSet.AddEvents.added", Good, completed = true, preconditionsMet = true),
+				"AddGroups" -> StageProgress(AddGroups, started = true, "workflow.smallGroupSet.AddGroups.added", Warning, completed = true, preconditionsMet = true),
+				"AddStudents" -> StageProgress(AddStudents, started = true, "workflow.smallGroupSet.AddStudents.hasStudents", Warning, completed = true, preconditionsMet = true),
+				"AddEvents" -> StageProgress(AddEvents, started = true, "workflow.smallGroupSet.AddEvents.added", Warning, completed = true, preconditionsMet = true),
 				"SendNotifications" -> StageProgress(SendNotifications, started = false, "workflow.smallGroupSet.SendNotifications.notSent", Warning, completed = false, preconditionsMet = true)
 			))
 			p.percentage should be (75)
 			p.nextStage should be (Some(SendNotifications))
 			p.messageCode should be ("workflow.smallGroupSet.AddEvents.added")
-			p.cssClass should be ("success")
+			p.cssClass should be ("warning")
 		}
 
 		// Release
@@ -142,9 +142,9 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 		{
 			val p = service.progress(set)
 			p.stages should be (ListMap(
-				"AddGroups" -> StageProgress(AddGroups, started = true, "workflow.smallGroupSet.AddGroups.added", Good, completed = true, preconditionsMet = true),
-				"AddStudents" -> StageProgress(AddStudents, started = true, "workflow.smallGroupSet.AddStudents.hasStudents", Good, completed = true, preconditionsMet = true),
-				"AddEvents" -> StageProgress(AddEvents, started = true, "workflow.smallGroupSet.AddEvents.added", Good, completed = true, preconditionsMet = true),
+				"AddGroups" -> StageProgress(AddGroups, started = true, "workflow.smallGroupSet.AddGroups.added", Warning, completed = true, preconditionsMet = true),
+				"AddStudents" -> StageProgress(AddStudents, started = true, "workflow.smallGroupSet.AddStudents.hasStudents", Warning, completed = true, preconditionsMet = true),
+				"AddEvents" -> StageProgress(AddEvents, started = true, "workflow.smallGroupSet.AddEvents.added", Warning, completed = true, preconditionsMet = true),
 				"SendNotifications" -> StageProgress(SendNotifications, started = true, "workflow.smallGroupSet.SendNotifications.fullyReleased", Good, completed = true, preconditionsMet = true)
 			))
 			p.percentage should be (100)
@@ -155,4 +155,5 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 
 		// TODO fuller example would be nice
 	}
+
 }
