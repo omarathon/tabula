@@ -17,7 +17,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 	val module = Fixtures.module("in101", "Introduction to Web Development")
 	val assignment = Fixtures.assignment("Programming Test")
 	assignment.module = module
-	module.department = department
+	module.adminDepartment = department
 	
 	val service = new CourseworkWorkflowService
 	service.features = Features.empty

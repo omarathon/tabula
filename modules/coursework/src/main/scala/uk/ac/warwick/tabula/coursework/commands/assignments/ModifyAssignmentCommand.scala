@@ -100,7 +100,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 			copyNonspecificFrom(prefillAssignment)
 		} else {
 			if (prefillFromRecent) {
-				for (a <- service.recentAssignment(module.department)) {
+				for (a <- service.recentAssignment(module.adminDepartment)) {
 					copyNonspecificFrom(a)
 					_prefilled = true
 				}

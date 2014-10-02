@@ -14,14 +14,12 @@ import org.xhtmlrenderer.pdf.{ITextImageElement, ITextFSImage, ITextRenderer}
 import java.io.OutputStream
 import uk.ac.warwick.spring.Wire
 
+trait PdfGenerator {
+	def renderTemplate(templateId: String, model: Any,out:OutputStream)
+}
 
 trait PDFGeneratorComponent {
 	def pdfGenerator: PdfGenerator
-
-	trait PdfGenerator {
-		def renderTemplate(templateId: String, model: Any,out:OutputStream)
-	}
-
 }
 
 trait FreemarkerXHTMLPDFGeneratorComponent extends PDFGeneratorComponent {

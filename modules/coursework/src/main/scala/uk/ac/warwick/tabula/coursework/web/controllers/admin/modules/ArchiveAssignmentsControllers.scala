@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.CurrentUser
 class ArchiveModuleAssignmentsController extends CourseworkController with UnarchivedAssignmentsMap {
 
 	@ModelAttribute
-	def archiveAssignmentsCommand(@PathVariable("module") module: Module) = ArchiveAssignmentsCommand(module.department, Seq(module))
+	def archiveAssignmentsCommand(@PathVariable("module") module: Module) = ArchiveAssignmentsCommand(module.adminDepartment, Seq(module))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable("module") module: Module, cmd: ArchiveAssignmentsCommand) = {

@@ -70,7 +70,7 @@ class AdminModuleHomeController extends CourseworkController {
 		val module = cmd.apply()
 		
 		if (ajax) Mav("admin/modules/admin_partial").noLayout()
-		else Mav("admin/modules/admin").crumbs(Breadcrumbs.Department(module.department))
+		else Mav("admin/modules/admin").crumbs(Breadcrumbs.Department(module.adminDepartment))
 	}
 }
 

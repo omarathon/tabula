@@ -12,7 +12,7 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 	val module = Fixtures.module("in101", "Introduction to Web Development")
 	val set = Fixtures.smallGroupSet("IN101 Seminars")
 	set.module = module
-	module.department = department
+	module.adminDepartment = department
 
 	val service = new SmallGroupSetWorkflowService
 

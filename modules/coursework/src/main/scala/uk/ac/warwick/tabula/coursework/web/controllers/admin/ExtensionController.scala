@@ -61,7 +61,7 @@ class ListExtensionsForAssignmentController extends ExtensionController {
 
 	// Add the common breadcrumbs to the model
 	def crumbed(mav: Mav, module: Module)
-	= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+	= mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 
 	@ModelAttribute
 	def listCommand(

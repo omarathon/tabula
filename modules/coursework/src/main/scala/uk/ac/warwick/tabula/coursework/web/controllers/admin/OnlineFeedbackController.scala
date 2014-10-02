@@ -44,7 +44,7 @@ class OnlineFeedbackController extends CourseworkController with MarkerFeedbackC
 			"onlineMarkingUrls" -> feedbackGraphs.map{ graph =>
 				graph.student.getUserId -> Routes.admin.assignment.onlineFeedback(assignment)
 			}.toMap
-		).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Online marking for ${assignment.name}"))
+		).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Online marking for ${assignment.name}"))
 	}
 
 
@@ -83,7 +83,7 @@ class OnlineMarkerFeedbackController extends CourseworkController with MarkerFee
 			"onlineMarkingUrls" -> feedbackGraphs.map{ graph =>
 				graph.student.getUserId -> assignment.markingWorkflow.onlineMarkingUrl(assignment, command.marker, graph.student.getUserId)
 			}.toMap
-		).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Online marking for ${assignment.name}"))
+		).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Online marking for ${assignment.name}"))
 	}
 }
 

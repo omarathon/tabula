@@ -35,7 +35,7 @@ class EditAssignmentController extends CourseworkController {
 
 		val couldDelete = canDelete(module, assignment)
 		Mav("admin/assignments/edit",
-			"department" -> module.department,
+			"department" -> module.adminDepartment,
 			"module" -> module,
 			"assignment" -> assignment,
 			"academicYear" -> assignment.academicYear,
@@ -45,7 +45,7 @@ class EditAssignmentController extends CourseworkController {
 			"assessmentGroups" -> form.assessmentGroups,
 			"maxWordCount" -> Assignment.MaximumWordCount,
 			"openDetails" -> openDetails)
-			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+			.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 	}
 
 	@RequestMapping(method = Array(RequestMethod.POST), params = Array("action=submit"))

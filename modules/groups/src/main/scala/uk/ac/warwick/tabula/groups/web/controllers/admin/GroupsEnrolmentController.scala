@@ -32,7 +32,7 @@ class GroupsEnrolmentController extends GroupsController {
 		form.afterBind()
 
 		Mav("admin/groups/enrolment",
-			"department" -> form.module.department,
+			"department" -> form.module.adminDepartment,
 			"module" -> form.module,
 			"availableUpstreamGroups" -> form.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,

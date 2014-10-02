@@ -82,7 +82,7 @@ class ApplicationTest extends AppContextTestBase with FieldAccessByReflection{
     @Transactional @Test def getModules = {
       val modules = session.createCriteria(classOf[Module]).setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE).list
       modules.size should be (4)
-      modules(0).asInstanceOf[Module].department.name should be ("Computer Science")
+      modules(0).asInstanceOf[Module].adminDepartment.name should be ("Computer Science")
     }
 
 }

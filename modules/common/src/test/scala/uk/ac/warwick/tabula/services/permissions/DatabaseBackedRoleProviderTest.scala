@@ -26,7 +26,7 @@ class DatabaseBackedRoleProviderTest extends TestBase with Mockito {
 	
 	val dept = Fixtures.department("in")
 	val module = Fixtures.module("in101")
-	module.department = dept
+	module.adminDepartment = dept
 	
 	@Test def getRoles = withUser("cuscav") {
 		val gr1 = new DepartmentGrantedRole(dept, DepartmentalAdministratorRoleDefinition)

@@ -3,17 +3,13 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin.assignments
 import scala.collection.JavaConversions._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
-import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import javax.servlet.http.HttpServletResponse
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import org.springframework.web.bind.annotation.RequestMethod
 import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.commands.ReadOnly
@@ -45,7 +41,7 @@ class AssignmentPickerController extends CourseworkController {
 			"moduleName" -> assignment.module.name,
 			"moduleCode" -> assignment.module.code)
 
-		val assignmentsJson = assignments.map(assignmentToJson(_))
+		val assignmentsJson = assignments.map(assignmentToJson)
 		assignmentsJson
 	}
 
@@ -58,5 +54,5 @@ class AssignmentPickerCommand(module: Module) extends Command[Seq[Assignment]] w
 	
 	var searchTerm: String = ""
 		
-	def applyInternal() = assignmentService.getAssignmentsByName(searchTerm, module.department)
+	def applyInternal() = assignmentService.getAssignmentsByName(searchTerm, module.adminDepartment)
 }

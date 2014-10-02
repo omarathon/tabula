@@ -22,7 +22,7 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 
 		val module = Fixtures.module("in101", "Introduction to Scala")
 		module.id = "moduleId"
-		module.department = department
+		module.adminDepartment = department
 
 		val set = new SmallGroupSet(module)
 		set.id = "existingId"

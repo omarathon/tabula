@@ -20,7 +20,7 @@ class ModulePermissionControllerTest extends TestBase with Mockito {
 	trait Fixture {
 		val department = Fixtures.department("in")
 		val module = Fixtures.module("in101")
-		module.department = department
+		module.adminDepartment = department
 
 		val userLookup = new MockUserLookup
 		Seq(listController, addController, removeController).foreach { controller => controller.userLookup = userLookup }

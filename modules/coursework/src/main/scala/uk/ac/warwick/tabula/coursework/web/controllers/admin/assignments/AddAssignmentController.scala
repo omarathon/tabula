@@ -76,7 +76,7 @@ class AddAssignmentController extends CourseworkController {
 		val module = form.module
 
 		Mav("admin/assignments/new",
-			"department" -> module.department,
+			"department" -> module.adminDepartment,
 			"module" -> module,
 			"academicYear" -> form.academicYear,
 			"availableUpstreamGroups" -> form.availableUpstreamGroups,
@@ -84,7 +84,7 @@ class AddAssignmentController extends CourseworkController {
 			"assessmentGroups" -> form.assessmentGroups,
 			"collectSubmissions" -> form.collectSubmissions,
 			"maxWordCount" -> Assignment.MaximumWordCount)
-			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+			.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 	}
 
 	@InitBinder

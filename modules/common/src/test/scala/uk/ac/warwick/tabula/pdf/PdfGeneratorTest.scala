@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.web.views.{TextRenderer, TextRendererComponent}
 
 class PdfGeneratorTest extends TestBase{
 
-	val pdfGenerator = (new FreemarkerXHTMLPDFGeneratorComponent with TextRendererComponent{
+	val pdfGenerator: PdfGenerator = (new FreemarkerXHTMLPDFGeneratorComponent with TextRendererComponent {
 		def textRenderer:TextRenderer = new TextRenderer {
 			def renderTemplate(templateId: String, model: Any): String = {
 				templateId match {
