@@ -86,6 +86,17 @@
 					$group.find('label').attr('for', $name.attr('id')).text((index + 1) + '.');
 				});
 			});
+
+			// Stop 'Enter' from submitting the form
+			$('input[name^="groupNames"]').closest('form')
+					.off('keyup.inputSubmitProtection keypress.inputSubmitProtection')
+					.on('keyup.inputSubmitProtection keypress.inputSubmitProtection', function(e){
+						var code = e.keyCode || e.which;
+						if (code  == 13) {
+							e.preventDefault();
+							return false;
+						}
+					});
 		});
 	</script>
 </#escape>

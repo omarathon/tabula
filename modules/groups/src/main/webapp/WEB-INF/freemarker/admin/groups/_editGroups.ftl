@@ -165,6 +165,17 @@
 
 				// Set up radios to enable/disable max students per group field
 				$("input:radio[name='defaultMaxGroupSizeEnabled']").radioControlled();
+
+				// Stop 'Enter' from submitting the form
+				$('input[name^="groupNames"]').closest('form')
+						.off('keyup.inputSubmitProtection keypress.inputSubmitProtection')
+						.on('keyup.inputSubmitProtection keypress.inputSubmitProtection', function(e){
+							var code = e.keyCode || e.which;
+							if (code  == 13) {
+								e.preventDefault();
+								return false;
+							}
+						});
 			});
 		</script>
 	</#if>
