@@ -4,7 +4,7 @@ import javax.persistence.CascadeType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
 
-import org.hibernate.annotations.{BatchSize, AccessType, Filter, FilterDef}
+import org.hibernate.annotations.{BatchSize, AccessType}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
@@ -15,7 +15,6 @@ import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupSer
 import scala.collection.JavaConverters._
 
 object DepartmentSmallGroup {
-	final val NotDeletedFilter = "notDeleted"
 
 	// For sorting a collection by group name. Either pass to the sort function,
 	// or expose as an implicit val.
@@ -26,13 +25,10 @@ object DepartmentSmallGroup {
 	implicit val defaultOrdering = NameOrdering
 }
 
-@FilterDef(name = DepartmentSmallGroup.NotDeletedFilter, defaultCondition = "deleted = 0")
-@Filter(name = DepartmentSmallGroup.NotDeletedFilter)
 @Entity
 @AccessType("field")
 class DepartmentSmallGroup
 	extends GeneratedId
-	with CanBeDeleted
 	with ToString
 	with PermissionsTarget
 	with Serializable

@@ -4,11 +4,11 @@ import org.joda.time.DateTime
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.{Appliable, Describable, DescriptionImpl, SelfValidating}
-import uk.ac.warwick.tabula.data.model.{AssessmentType, AssessmentComponent}
-import uk.ac.warwick.tabula.data.model.groups.{WeekRange, SmallGroupAllocationMethod, SmallGroupFormat, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 
 class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
@@ -161,16 +161,18 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 	}
 
 	private trait ValidationFixture extends Fixture {
-		val command = new ModifySmallGroupSetValidation with ModifySmallGroupSetCommandState {
+		val command = new ModifySmallGroupSetValidation with ModifySmallGroupSetCommandState with SmallGroupServiceComponent {
 			val module = ValidationFixture.this.module
 			val existingSet = None
+			val smallGroupService = mock[SmallGroupService]
 		}
 	}
 
 	private trait ValidationFixtureExistingSet extends ExistingSetFixture {
-		val command = new ModifySmallGroupSetValidation with ModifySmallGroupSetCommandState {
+		val command = new ModifySmallGroupSetValidation with ModifySmallGroupSetCommandState with SmallGroupServiceComponent {
 			val module = ValidationFixtureExistingSet.this.module
 			val existingSet = Some(ValidationFixtureExistingSet.this.set)
+			val smallGroupService = mock[SmallGroupService]
 		}
 	}
 
@@ -285,6 +287,82 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
 		set.allocationMethod = SmallGroupAllocationMethod.Linked
 		set.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("Another set")
+
+		val errors = new BindException(command, "command")
+		command.validate(errors)
+
+		errors.hasErrors should be (false)
+	}}
+
+	@Test def validateCantChangeLinkIfAttendanceRecorded { new ValidationFixtureExistingSet {
+		command.name = "That's not my name"
+		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.format = SmallGroupFormat.Seminar
+		command.allocationMethod = SmallGroupAllocationMethod.Linked
+		command.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("A set")
+
+		set.allocationMethod = SmallGroupAllocationMethod.Linked
+		set.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("Another set")
+		set.collectAttendance = true
+
+		val group = Fixtures.smallGroup("A Group")
+		val event = Fixtures.smallGroupEvent("An Event")
+		group.addEvent(event)
+
+		val eventOccurrence = new SmallGroupEventOccurrence
+		eventOccurrence.event = event
+
+		val notRecordedAttendance = new SmallGroupEventAttendance
+		notRecordedAttendance.occurrence = eventOccurrence
+		notRecordedAttendance.state = AttendanceState.NotRecorded
+		eventOccurrence.attendance.add(notRecordedAttendance)
+
+		val eventOccurrence2 = new SmallGroupEventOccurrence
+		eventOccurrence2.event = event
+
+		val missedAuthorisedAttendance = new SmallGroupEventAttendance
+		missedAuthorisedAttendance.occurrence = eventOccurrence2
+		missedAuthorisedAttendance.state = AttendanceState.MissedAuthorised
+		eventOccurrence.attendance.add(missedAuthorisedAttendance)
+
+		command.smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event) returns (Seq(eventOccurrence, eventOccurrence2))
+
+		set.groups.add(group)
+
+		val errors = new BindException(command, "command")
+		command.validate(errors)
+
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getFieldError.getField should be ("allocationMethod")
+		errors.getFieldError.getCodes should contain ("smallGroupEvent.allocationMethod.hasAttendance")
+	}}
+
+	@Test def validateCanCreateLinkWhenAttendanceNotRecorded { new ValidationFixtureExistingSet {
+		command.name = "That's not my name"
+		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.format = SmallGroupFormat.Seminar
+		command.allocationMethod = SmallGroupAllocationMethod.Linked
+		command.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("A set")
+
+		set.allocationMethod = SmallGroupAllocationMethod.Manual
+		set.collectAttendance = true
+
+		val group = Fixtures.smallGroup("A Group")
+		val event = Fixtures.smallGroupEvent("An Event")
+		group.addEvent(event)
+
+		val eventOccurrence = new SmallGroupEventOccurrence
+		eventOccurrence.event = event
+
+		val notRecordedAttendance = new SmallGroupEventAttendance
+		notRecordedAttendance.occurrence = eventOccurrence
+		notRecordedAttendance.state = AttendanceState.NotRecorded
+		eventOccurrence.attendance.add(notRecordedAttendance)
+
+		command.smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event) returns (Seq(eventOccurrence))
+
+		set.groups.add(group)
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)

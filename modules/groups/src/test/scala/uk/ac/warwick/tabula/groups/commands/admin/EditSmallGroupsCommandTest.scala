@@ -236,7 +236,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getCodes should contain ("smallGroup.delete.notEmpty")
 	}}
 
-	@Test def validateCantRemoveWhenAttendaneRecorded { new ValidationFixture {
+	@Test def validateCantRemoveWhenAttendanceRecorded { new ValidationFixture {
 		val event = Fixtures.smallGroupEvent("An Event")
 		groupD.addEvent(event)
 

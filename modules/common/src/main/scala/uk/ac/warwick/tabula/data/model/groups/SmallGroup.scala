@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.groups
 import javax.persistence.CascadeType._
 import javax.persistence._
 
-import org.hibernate.annotations.{AccessType, BatchSize, Filter, FilterDef}
+import org.hibernate.annotations.{AccessType, BatchSize}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
@@ -17,7 +17,6 @@ import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupSer
 import scala.collection.JavaConverters._
 
 object SmallGroup {
-	final val NotDeletedFilter = "notDeleted"
 	final val DefaultGroupSize = 15
 	object Settings {
 		val MaxGroupSize = "MaxGroupSize"
@@ -40,13 +39,10 @@ object SmallGroup {
 /**
  * Represents a single small teaching group within a group set.
  */
-@FilterDef(name = SmallGroup.NotDeletedFilter, defaultCondition = "deleted = 0")
-@Filter(name = SmallGroup.NotDeletedFilter)
 @Entity
 @AccessType("field")
 class SmallGroup
 		extends GeneratedId
-		with CanBeDeleted
 		with ToString
 		with PermissionsTarget
 		with HasSettings
