@@ -41,7 +41,7 @@ abstract class AgentPointRecordCommand(
 
 	def populate() = {
 		val students = benchmarkTask("Get relationships with current user") {
-			relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember)
+			relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember).distinct
 		}
 		benchmarkTask("Populate grouped points") {
 			populateGroupedPoints(students, templateMonitoringPoint) match {
@@ -87,7 +87,7 @@ trait AgentPointRecordPermissions extends RequiresPermissionsChecking with Permi
 		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), agent)
 		p.PermissionCheckAll(
 			Permissions.MonitoringPoints.Record,
-			relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember)
+			relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember).distinct
 		)
 	}
 }
