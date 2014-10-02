@@ -50,7 +50,7 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController wi
 			"allTermFilters" -> SmallGroupSetFilters.allTermFilters(cmd.academicYear, termService)
 		)
 
-		Mav(view, model).noLayoutIf(ajax)
+		Mav(view, model)
 	}
 
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
@@ -59,7 +59,7 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController wi
 
 	@RequestMapping
 	def loadSets(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable("department") department: Department, user: CurrentUser) =
-		process(cmd, department, "admin/department-noLayout")
+		process(cmd, department, "admin/department-noLayout").noLayout()
 }
 
 @Controller
