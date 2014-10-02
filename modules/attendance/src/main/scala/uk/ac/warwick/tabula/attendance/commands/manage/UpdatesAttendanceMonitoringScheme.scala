@@ -37,8 +37,11 @@ trait UpdatesAttendanceMonitoringScheme extends Logging {
 			val schemes = attendanceMonitoringService.listAllSchemes(department)
 
 			val notifications = schemes.flatMap(s =>
-				s.points.asScala.map(p =>
-					p.endDate.plusDays(7).toDateTimeAtStartOfDay
+				s.points.asScala.flatMap(p =>
+					Seq(
+						p.endDate.plusDays(3).toDateTimeAtStartOfDay,
+						p.endDate.plusDays(6).toDateTimeAtStartOfDay
+					)
 				)
 			).flatMap(notificationDate => {
 				Seq(

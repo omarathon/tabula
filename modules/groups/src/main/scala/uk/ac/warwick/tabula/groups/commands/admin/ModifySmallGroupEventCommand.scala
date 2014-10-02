@@ -271,7 +271,12 @@ trait ModifySmallGroupEventScheduledNotifications
 					new ScheduledNotification[SmallGroupEventOccurrence](
 						"SmallGroupEventAttendanceReminder",
 						occurrence,
-						dt.plusDays(7)
+						dt.plusDays(3)
+					),
+					new ScheduledNotification[SmallGroupEventOccurrence](
+						"SmallGroupEventAttendanceReminder",
+						occurrence,
+						dt.plusDays(6)
 					)
 				)
 			).getOrElse(Seq())
