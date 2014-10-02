@@ -8,8 +8,6 @@
 		<#assign hasErrors=status.errors.allErrors?size gt 0 />
 	</@spring.bind>
 	
-	<#assign hasRows =  allocateStudentsToRelationshipCommand.newOrChangedMapping?keys?has_content />
-
 	<@f.form method="post" action=formDestination commandName="allocateStudentsToRelationshipCommand">
 		<@f.hidden name="confirmed" value="confirmed"/>
 		<@f.hidden path="spreadsheet"/>
@@ -34,13 +32,13 @@
 			</#list>
 		</#list>
 
-		<#macro displayStudentChange path student agent>
+		<#macro displayStudentChange studentID studentFullName agent>
 		<tr>
 			<td>
-			${(student.universityId)!}
+			${(studentID)!}
 			</td>
 			<td>
-			${(student.fullName)!}
+			${(studentFullName)!}
 			</td>
 			<td>
 			${(agent.universityId)!}
@@ -52,7 +50,7 @@
 		</#macro>
 
 		<#if allocateStudentsToRelationshipCommand.studentsWithTutorAdded?size gt 0>
-			<!-- display the students with tutors that have been added -->
+			<#-- display the students with tutors that have been added -->
 			<h2 class="relationship-change-detail">Students newly given ${relationshipType.description?lower_case}s</h2>
 
 			<table class="table table-bordered table-condensed table-striped">
@@ -66,14 +64,14 @@
 				</thead>
 				<tbody>
 
-					<!-- 3 levels of lists?? really?
+					<#-- 3 levels of lists?? really?
 						first iterates through all the agents with changed mappings
 						second iterates through all the students for that agent
 						third iterates through studentsWithTutorAdded looking for matches
 						TODO: - factor this logic out into the currently overburdened command (TAB-2609)
 					-->
 
-					<#list allocateStudentsToRelationshipCommand.newOrChangedMapping?keys as agent>
+<#--					<#list allocateStudentsToRelationshipCommand.newOrChangedMapping?keys as agent>
 						<#assign studentsForAgent = mappingById[agent.universityId]![] />
 
 						<#list studentsForAgent as student>
@@ -83,6 +81,12 @@
 									<@displayStudentChange "newOrChangedMapping[${agent.universityId}][${student_index}]" student agent />
 								</#if>
 							</#list>
+						</#list>
+					</#list>-->
+
+					<#list added?keys as student>
+						<#list added[student] as tutor>
+							<@displayStudentChange student studentNameMap[student] tutor />
 						</#list>
 					</#list>
 
@@ -104,9 +108,9 @@
 			</tr>
 			</thead>
 			<tbody>
-				<#list allocateStudentsToRelationshipCommand.studentsWithTutorChanged.keySet as student>
-					<#list allocateStudentsToRelationshipCommand.agentsAfter(student) as agent>
-						<@displayStudentChange "newOrChangedMapping[${agent.universityId}][${student_index}]" student agent />
+				<#list changed?keys as student>
+					<#list changed[student] as tutor>
+						<@displayStudentChange student studentNameMap[student] tutor />
 					</#list>
 				</#list>
 			</tbody>
@@ -135,7 +139,7 @@
 						</tr>
 					</#macro>
 
-					<#list allocateStudentsToRelationshipCommand.studentsWithTutorRemoved.keySet as student>
+					<#list allocateStudentsToRelationshipCommand.studentsWithTutorRemoved?keys as student>
 							<@agentRemoved student />
 					</#list>
 				</tbody>

@@ -71,6 +71,8 @@ abstract class StudentRelationship extends GeneratedId with Serializable with To
 	override def toString = super.toString + ToString.forProps("agent" -> agent, "relationshipType" -> relationshipType, "student" -> studentId)
 
 	def toEntityReference = new StudentRelationshipEntityReference().put(this)
+
+	def isCurrent = endDate == null || endDate.isAfterNow
 }
 
 @Entity

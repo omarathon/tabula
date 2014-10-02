@@ -1,13 +1,10 @@
 package uk.ac.warwick.tabula.data.model.notifications
 
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.spring.Wire
 import javax.persistence.{Entity, DiscriminatorValue}
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.profiles.commands.relationships.StudentRelationshipChange
 
 abstract class BulkRelationshipChangeNotification extends Notification[StudentRelationship, Unit] {
 	@transient val templateLocation: String
@@ -46,31 +43,25 @@ abstract class BulkRelationshipChangeNotification extends Notification[StudentRe
  */
 @Entity
 @DiscriminatorValue(value="BulkStudentRelationship")
-class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotification with SingleItemNotification[StudentRelationship] {
+class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotification {
 	@transient val templateLocation = BulkRelationshipChangeNotification.StudentTemplate
 
-	def modifiedRelationship = item.entity
+	def title: String = s"${relationshipType.agentRole.capitalize} allocation"
 
-	def title: String = s"${modifiedRelationship.relationshipType.agentRole.capitalize} allocation"
+	def newAgents = entities.filter(_.isCurrent).flatMap(_.agentMember)
 
-	def newAgent =
-		if (modifiedRelationship.endDate != null && modifiedRelationship.endDate.isBeforeNow) None
-		else modifiedRelationship.agentMember
+	def student = entities(0).studentCourseDetails.student
+	def recipients = Seq(student.asSsoUser)
 
-	def recipients = modifiedRelationship.studentMember.map { _.asSsoUser }.toSeq
-		
-	def url: String = {
-		val student = modifiedRelationship.studentMember.getOrElse(throw new IllegalStateException("No student"))
-		Routes.profile.view(student)
-	}
+	def url: String = Routes.profile.view(student)
 
 	def urlTitle: String = "view this information on your student profile"
 
 	def extraModel = Map(
-		"modifiedRelationship" -> modifiedRelationship,
-		"student" -> modifiedRelationship.studentMember,
+		"modifiedRelationships" -> entities,
+		"student" -> student,
 		"oldAgents" -> oldAgents,
-		"newAgent" -> newAgent
+		"newAgents" -> newAgents
 	)
 	
 }

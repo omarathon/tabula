@@ -104,12 +104,14 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 	// students who have only had tutors removed and no new tutors added
 	lazy val studentsWithTutorRemoved = studentTutorMapping.filter { case (student, tutorInfo) =>
-		tutorInfo.tutorsBefore != tutorInfo.tutorsAfter && tutorInfo.tutorsAfter.subsetOf(tutorInfo.tutorsBefore)
+		tutorInfo.tutorsBefore != tutorInfo.tutorsAfter &&
+		tutorInfo.tutorsAfter.subsetOf(tutorInfo.tutorsBefore)
 	}
 
 	// students who have only had tutors added and no tutors removed
 	lazy val studentsWithTutorAdded = studentTutorMapping.filter { case (student, tutorInfo) =>
-		tutorInfo.tutorsBefore != tutorInfo.tutorsAfter && tutorInfo.tutorsBefore.subsetOf(tutorInfo.tutorsAfter)
+		tutorInfo.tutorsBefore != tutorInfo.tutorsAfter &&
+		tutorInfo.tutorsBefore.subsetOf(tutorInfo.tutorsAfter)
 	}
 
 	// everyone else
