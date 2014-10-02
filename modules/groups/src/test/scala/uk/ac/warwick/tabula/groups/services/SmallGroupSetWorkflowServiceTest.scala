@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.groups.services
 
+import uk.ac.warwick.tabula.data.model.{UserGroup, UnspecifiedTypeUserGroup}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, AssignmentMembershipService}
 import scala.collection.immutable.ListMap
 
 // scalastyle:off magic.number
@@ -15,6 +16,12 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 	module.department = department
 
 	val service = new SmallGroupSetWorkflowService
+	val userLookup = new MockUserLookup
+
+	private def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
+		case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
+		case ug: UserGroup => ug.userLookup = userLookup
+	}
 
 	@Test def stagesForAssignment() {
 		import SmallGroupSetWorkflowStages._
@@ -75,9 +82,14 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 			p.cssClass should be ("danger")
 		}
 
+		wireUserLookup(set.members)
+
 		// Add some groups
 		val group1 = Fixtures.smallGroup("Group 1")
+		wireUserLookup(group1.students)
+
 		val group2 = Fixtures.smallGroup("Group 2")
+		wireUserLookup(group2.students)
 
 		set.groups.add(group1)
 		set.groups.add(group2)
@@ -139,13 +151,40 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 		set.releasedToStudents = true
 		set.releasedToTutors = true
 
+		userLookup.registerUsers("user1", "user2", "user3")
+		val user1 = userLookup.getUserByUserId("user1")
+		val user2 = userLookup.getUserByUserId("user2")
+		val user3 = userLookup.getUserByUserId("user3")
+
+		set.membershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Some(set.members)) returns (Seq(user1, user2, user3))
+		group1.students.add(user1)
+		group2.students.add(user2)
+
 		{
 			val p = service.progress(set)
 			p.stages should be (ListMap(
 				"AddGroups" -> StageProgress(AddGroups, started = true, "workflow.smallGroupSet.AddGroups.added", Warning, completed = true, preconditionsMet = true),
 				"AddStudents" -> StageProgress(AddStudents, started = true, "workflow.smallGroupSet.AddStudents.hasStudents", Warning, completed = true, preconditionsMet = true),
 				"AddEvents" -> StageProgress(AddEvents, started = true, "workflow.smallGroupSet.AddEvents.added", Warning, completed = true, preconditionsMet = true),
-				"SendNotifications" -> StageProgress(SendNotifications, started = true, "workflow.smallGroupSet.SendNotifications.fullyReleased", Good, completed = true, preconditionsMet = true)
+				"SendNotifications" -> StageProgress(SendNotifications, started = true, "workflow.smallGroupSet.SendNotifications.fullyReleased", Good, completed = true, preconditionsMet = true),
+				"AllocateAfterNotifications" -> StageProgress(AllocateAfterNotifications, started = true, "workflow.smallGroupSet.SendNotifications.fullyReleased", Warning, completed = false, preconditionsMet = true)
+			))
+			p.percentage should be (100)
+			p.nextStage should be (Some(AllocateAfterNotifications))
+			p.messageCode should be ("workflow.smallGroupSet.SendNotifications.fullyReleased")
+			p.cssClass should be ("warning")
+		}
+
+		group1.students.add(user3)
+
+		{
+			val p = service.progress(set)
+			p.stages should be (ListMap(
+				"AddGroups" -> StageProgress(AddGroups, started = true, "workflow.smallGroupSet.AddGroups.added", Warning, completed = true, preconditionsMet = true),
+				"AddStudents" -> StageProgress(AddStudents, started = true, "workflow.smallGroupSet.AddStudents.hasStudents", Warning, completed = true, preconditionsMet = true),
+				"AddEvents" -> StageProgress(AddEvents, started = true, "workflow.smallGroupSet.AddEvents.added", Warning, completed = true, preconditionsMet = true),
+				"SendNotifications" -> StageProgress(SendNotifications, started = true, "workflow.smallGroupSet.SendNotifications.fullyReleased", Good, completed = true, preconditionsMet = true),
+				"AllocateAfterNotifications" -> StageProgress(AllocateAfterNotifications, started = true, "workflow.smallGroupSet.SendNotifications.fullyReleased", Good, completed = true, preconditionsMet = true)
 			))
 			p.percentage should be (100)
 			p.nextStage should be (None)

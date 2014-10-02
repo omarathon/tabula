@@ -25,6 +25,9 @@ class SmallGroupSetWorkflowService {
 		}
 
 		stages = stages ++ Seq(SendNotifications)
+		if (set.fullyReleased) {
+			stages = stages ++ Seq(AllocateAfterNotifications)
+		}
 
 		stages
 	}
@@ -167,6 +170,17 @@ object SmallGroupSetWorkflowStages {
 				StageProgress(SendNotifications, started = false, messageCode = "workflow.smallGroupSet.SendNotifications.notSent", health = Warning)
 
 		override def preconditions = Seq(Seq(CloseSignUp), Seq(AllocateStudents), Seq(AddGroups, AddStudents, AddEvents))
+	}
+
+	case object AllocateAfterNotifications extends SmallGroupSetWorkflowStage {
+		def actionCode = "workflow.smallGroupSet.AllocateStudents.action"
+		def progress(set: SmallGroupSet) =
+			if (set.unallocatedStudentsCount == 0)
+				StageProgress(AllocateAfterNotifications, started = true, messageCode = "workflow.smallGroupSet.SendNotifications.fullyReleased", health = Good, completed = true)
+			else
+				StageProgress(AllocateAfterNotifications, started = true, messageCode = "workflow.smallGroupSet.SendNotifications.fullyReleased", health = Warning)
+
+		override def preconditions = Seq(Seq(SendNotifications))
 	}
 }
 

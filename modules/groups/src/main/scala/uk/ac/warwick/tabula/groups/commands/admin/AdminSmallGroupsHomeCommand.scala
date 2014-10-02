@@ -69,21 +69,29 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 				.filter { set => statusFilters.asScala.isEmpty || statusFilters.asScala.exists { _(set) } }
 				.filter { set => allocationMethodFilters.asScala.isEmpty || allocationMethodFilters.asScala.exists { _(set) } }
 				.filter { set => termFilters.asScala.isEmpty || termFilters.asScala.exists { _(set) } }
-				.sortBy(set => (set.module.code, set.nameWithoutModulePrefix))
+				.sortBy(set => (set.archived, set.module.code, set.nameWithoutModulePrefix))
 		}
 
 		val setViews: Seq[ViewSetMethods] =
 			if (calculateProgress) benchmarkTask("Fetch progress information for sets") { sets.map { set =>
-				val progress = smallGroupSetWorkflowService.progress(set)
+				if (set.archived) {
+					ViewSet(
+						set = set,
+						groups = set.groups.asScala.sorted,
+						viewerRole = Tutor
+					)
+				} else {
+					val progress = smallGroupSetWorkflowService.progress(set)
 
-				ViewSetWithProgress(
-					set = set,
-					groups = set.groups.asScala.sorted,
-					viewerRole = Tutor,
-					progress = SetProgress(progress.percentage, progress.cssClass, progress.messageCode),
-					nextStage = progress.nextStage,
-					stages = progress.stages
-				)
+					ViewSetWithProgress(
+						set = set,
+						groups = set.groups.asScala.sorted,
+						viewerRole = Tutor,
+						progress = SetProgress(progress.percentage, progress.cssClass, progress.messageCode),
+						nextStage = progress.nextStage,
+						stages = progress.stages
+					)
+				}
 			}} else { sets.map { set =>
 				ViewSet(
 					set = set,

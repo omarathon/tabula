@@ -87,48 +87,52 @@
 						</#if>
 					</div>
 
-					<div class="span2 progress-container">
-						<#local progressTooltip><@spring.message code=setItem.progress.messageCode /></#local>
+					<#if !set.archived>
+						<div class="span2 progress-container">
+							<#local progressTooltip><@spring.message code=setItem.progress.messageCode /></#local>
 
-						<dl class="progress progress-${setItem.progress.t} use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;" data-container="body">
-							<dt class="bar" style="width: <#if setItem.progress.percentage == 0>10<#else>${setItem.progress.percentage}</#if>%;"></dt>
-						</dl>
-					</div>
+							<dl class="progress progress-${setItem.progress.t} use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;" data-container="body">
+								<dt class="bar" style="width: <#if setItem.progress.percentage == 0>10<#else>${setItem.progress.percentage}</#if>%;"></dt>
+							</dl>
+						</div>
 
-					<div class="span4 next-action">
-						<#if setItem.nextStage??>
-							<#local nextStageUrl="" />
-							<#local nextStageModal="" />
-							<#if setItem.nextStage.actionCode == "workflow.smallGroupSet.AddGroups.action">
-								<#local nextStageUrl><@routes.editsetgroups set /></#local>
-							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AddStudents.action">
-								<#local nextStageUrl><@routes.editsetstudents set /></#local>
-							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AddEvents.action">
-								<#local nextStageUrl><@routes.editsetevents set /></#local>
-							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AllocateStudents.action">
-								<#local nextStageUrl><@routes.editsetallocate set /></#local>
-							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.OpenSignUp.action">
-								<#local nextStageUrl><@routes.openset set /></#local>
-								<#local nextStageModal = "#modal-container" />
-							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.CloseSignUp.action">
-								<#local nextStageUrl><@routes.closeset set /></#local>
-								<#local nextStageModal = "#modal-container" />
-							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.SendNotifications.action">
-								<#local nextStageUrl><@routes.releaseset set /></#local>
-								<#local nextStageModal = "#modal-container" />
-							</#if>
+						<div class="span4 next-action">
+							<#if setItem.nextStage??>
+								<#local nextStageUrl="" />
+								<#local nextStageModal="" />
+								<#if setItem.nextStage.actionCode == "workflow.smallGroupSet.AddGroups.action">
+									<#local nextStageUrl><@routes.editsetgroups set /></#local>
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AddStudents.action">
+									<#local nextStageUrl><@routes.editsetstudents set /></#local>
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AddEvents.action">
+									<#local nextStageUrl><@routes.editsetevents set /></#local>
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AllocateStudents.action">
+									<#local nextStageUrl><@routes.editsetallocate set /></#local>
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.OpenSignUp.action">
+									<#local nextStageUrl><@routes.openset set /></#local>
+									<#local nextStageModal = "#modal-container" />
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.CloseSignUp.action">
+									<#local nextStageUrl><@routes.closeset set /></#local>
+									<#local nextStageModal = "#modal-container" />
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.SendNotifications.action">
+									<#local nextStageUrl><@routes.releaseset set /></#local>
+									<#local nextStageModal = "#modal-container" />
+								</#if>
 
-							<#if nextStageUrl?has_content>
-								<a href="${nextStageUrl}"<#if nextStageModal?has_content> data-toggle="modal" data-target="${nextStageModal}" data-container="body"</#if>>
+								<#if nextStageUrl?has_content>
+									<a href="${nextStageUrl}"<#if nextStageModal?has_content> data-toggle="modal" data-target="${nextStageModal}" data-container="body"</#if>>
+										<@spring.message code=setItem.nextStage.actionCode />
+									</a>
+								<#else>
 									<@spring.message code=setItem.nextStage.actionCode />
-								</a>
-							<#else>
-								<@spring.message code=setItem.nextStage.actionCode />
+								</#if>
+							<#elseif setItem.progress.percentage == 100>
+								Complete
 							</#if>
-						<#elseif setItem.progress.percentage == 100>
-							Complete
-						</#if>
-					</div>
+						</div>
+					<#else>
+						<div class="span6"></div>
+					</#if>
 
 					<div class="span1">
 						<div class="btn-group pull-right">
