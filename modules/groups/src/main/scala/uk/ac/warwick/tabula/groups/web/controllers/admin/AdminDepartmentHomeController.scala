@@ -50,7 +50,7 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController wi
 			"allTermFilters" -> SmallGroupSetFilters.allTermFilters(cmd.academicYear, termService)
 		)
 
-		Mav(view, model)
+		Mav(view, model).noLayoutIf(ajax)
 	}
 
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
