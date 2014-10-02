@@ -46,6 +46,7 @@
 				<small>Select students by route, year of study etc.</small>
 			</span>
 		</summary>
+		<div>
 
 		<p>Use the filters to add students to this set of small groups:</p>
 
@@ -194,6 +195,7 @@
 				showRemoveButton=true
 			/>
 		</#if>
+		</div>
 	</details>
 
 

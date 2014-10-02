@@ -58,6 +58,7 @@
 			</span>
 
 		</summary>
+		<div>
 
 		<p>Use the filters to add students to this scheme:</p>
 
@@ -255,6 +256,7 @@
 				showRemoveButton=true
 			/>
 		</#if>
+		</div>
 	</details>
 
 	<details class="manually-added" <#if expandManual>open</#if>>
