@@ -66,7 +66,7 @@ trait AutowiringCelcatConfigurationComponent extends CelcatConfigurationComponen
 			),
 			"es" -> CelcatDepartmentConfiguration(
 				baseUri = "https://www2.warwick.ac.uk/appdata/eng-timetables",
-				staffListInBSV = true
+				staffListInBSV = false
 			)
 		)
 		lazy val authScope = new AuthScope("www2.warwick.ac.uk", 443)
@@ -280,8 +280,15 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		staffInfo(config).get(universityId).map { _.celcatId }
 
 	def staffInfo(config: CelcatDepartmentConfiguration): Map[UniversityId, CelcatStaffInfo] =
-		if (config.staffListInBSV) bsvCache.get(config.baseUri).toMap
-		else Map()
+		if (config.staffListInBSV) {
+			try {
+				bsvCache.get(config.baseUri).toMap
+			} catch {
+				case e: CacheEntryUpdateException =>
+					logger.error("Couldn't fetch staff BSV file for " + config.baseUri, e)
+					Map()
+			}
+		} else Map()
 
 	def doRequest(filename: String, config: CelcatDepartmentConfiguration): Seq[TimetableEvent] = {
 		// Add {universityId}.ics to the URL
