@@ -103,7 +103,6 @@ class SmallGroupTest extends TestBase with Mockito {
 		studentsGroup.addUserId("test user")
     source.students = studentsGroup
 
-    source.deleted = false
     source.id = "123"
     source.addEvent(event)
     source.maxGroupSize = 12
