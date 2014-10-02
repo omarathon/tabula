@@ -264,41 +264,43 @@
 			</span>
 		</summary>
 
-		<p style="margin-bottom: 1em;">
-			<input style="margin-right: 8px;" class="btn" type="submit" name="${ManageSchemeMappingParameters.manuallyAddForm}" value="Add students manually" />
-			<@fmt.p editMembershipCommandResult.includedStudentIds?size "student" />
-			added manually and
-			<@fmt.p editMembershipCommandResult.excludedStudentIds?size "student" />
-			removed manually
-		</p>
+		<div class="students">
+			<p style="margin-bottom: 1em;">
+				<input style="margin-right: 8px;" class="btn" type="submit" name="${ManageSchemeMappingParameters.manuallyAddForm}" value="Add students manually" />
+				<@fmt.p editMembershipCommandResult.includedStudentIds?size "student" />
+				added manually and
+				<@fmt.p editMembershipCommandResult.excludedStudentIds?size "student" />
+				removed manually
+			</p>
 
-		<#if (addUsersResult.missingMembers?size > 0 || addUsersResult.noPermissionMembers?size > 0)>
-			<div class="alert alert-warning">
-				<#if (addUsersResult.missingMembers?size > 0)>
-					The following students could not be added as they were not found:
-					<ul>
-						<#list addUsersResult.missingMembers as member>
-							<li>${member}</li>
-						</#list>
-					</ul>
-				</#if>
-				<#if (addUsersResult.noPermissionMembers?size > 0)>
-					The following students could not be added as you do not have permission to manage their attendance:
-					<ul>
-						<#list addUsersResult.noPermissionMembers as member>
-							<li>${member.fullName} (${member.universityId})</li>
-						</#list>
-					</ul>
-				</#if>
-			</div>
-		</#if>
+			<#if (addUsersResult.missingMembers?size > 0 || addUsersResult.noPermissionMembers?size > 0)>
+				<div class="alert alert-warning">
+					<#if (addUsersResult.missingMembers?size > 0)>
+						The following students could not be added as they were not found:
+						<ul>
+							<#list addUsersResult.missingMembers as member>
+								<li>${member}</li>
+							</#list>
+						</ul>
+					</#if>
+					<#if (addUsersResult.noPermissionMembers?size > 0)>
+						The following students could not be added as you do not have permission to manage their attendance:
+						<ul>
+							<#list addUsersResult.noPermissionMembers as member>
+								<li>${member.fullName} (${member.universityId})</li>
+							</#list>
+						</ul>
+					</#if>
+				</div>
+			</#if>
 
-		<@attendance_macros.manageStudentTable
-			membershipItems=editMembershipCommandResult.membershipItems
-			checkboxName="resetStudentIds"
-			checkAll=true
-			showResetButton=true
-		/>
+			<@attendance_macros.manageStudentTable
+				membershipItems=editMembershipCommandResult.membershipItems
+				checkboxName="resetStudentIds"
+				checkAll=true
+				showResetButton=true
+			/>
+		</div>
 
 	</details>
 
