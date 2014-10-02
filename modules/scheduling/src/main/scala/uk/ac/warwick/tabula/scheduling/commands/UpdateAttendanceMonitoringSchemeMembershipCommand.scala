@@ -31,14 +31,16 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 
 	self: FeaturesComponent with AttendanceMonitoringServiceComponent with UpdateAttendanceMonitoringSchemeMembershipCommandState with TaskBenchmarking =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal() = {
 		if (features.attendanceMonitoringAcademicYear2014) {
 
-			val schemesToUpdate = attendanceMonitoringService.listSchemesForMembershipUpdate
+			val schemesToUpdate = transactional(readOnly = true) {
+				attendanceMonitoringService.listSchemesForMembershipUpdate
+			}
 
 			logger.info(s"${schemesToUpdate.size} schemes need membership updating")
 
-			val studentsToUpdate = schemesToUpdate.flatMap{scheme => {
+			val studentsToUpdate = schemesToUpdate.flatMap { scheme => transactional() {
 
 				deserializeFilter(scheme.memberQuery)
 				val staticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments") {
@@ -49,24 +51,30 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 					)
 				}
 				scheme.members.staticUserIds = staticStudentIds
+
 				attendanceMonitoringService.saveOrUpdate(scheme)
 
 				scheme.members.members.map((_, (scheme.department, scheme.academicYear)))
 
-			}}.groupBy(_._1).map{case(universityId, groupedStudentData) => universityId -> groupedStudentData.map(_._2).distinct}
+			}
+			}.groupBy(_._1).map { case (universityId, groupedStudentData) => universityId -> groupedStudentData.map(_._2).distinct}
 
 			logger.info(s"Updating ${studentsToUpdate.size} student checkpoint totals")
 
 			benchmark("updateCheckpointTotals") {
-				profileService.getAllMembersWithUniversityIds(studentsToUpdate.keys.toSeq).map {
-					case student: StudentMember =>
-						val studentDeptAndYears = studentsToUpdate(student.universityId)
-						studentDeptAndYears.foreach{case(dept, academicYear) =>
-							attendanceMonitoringService.updateCheckpointTotal(student, dept, academicYear)
-						}
-
-					case _ =>
+				val studentMembers = transactional(readOnly = true){
+					profileService.getAllMembersWithUniversityIds(studentsToUpdate.keys.toSeq).flatMap {
+						case student: StudentMember => Option(student)
+						case _ => None
+					}
 				}
+
+				studentMembers.foreach(student => transactional() {
+					val studentDeptAndYears = studentsToUpdate(student.universityId)
+					studentDeptAndYears.foreach { case (dept, academicYear) =>
+						attendanceMonitoringService.updateCheckpointTotal(student, dept, academicYear)
+					}
+				})
 			}
 
 			schemesToUpdate
