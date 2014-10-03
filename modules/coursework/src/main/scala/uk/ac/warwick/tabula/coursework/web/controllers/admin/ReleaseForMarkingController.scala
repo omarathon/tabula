@@ -25,7 +25,7 @@ class ReleaseForMarkingController extends CourseworkController {
 
 	def confirmView(assignment: Assignment) = Mav("admin/assignments/submissionsandfeedback/release-submission",
 		"assignment" -> assignment)
-		.crumbs(Breadcrumbs.Department(assignment.module.department), Breadcrumbs.Module(assignment.module))
+		.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment), Breadcrumbs.Module(assignment.module))
 
 	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 

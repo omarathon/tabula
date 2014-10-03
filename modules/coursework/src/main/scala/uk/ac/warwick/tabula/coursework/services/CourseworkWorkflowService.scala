@@ -21,7 +21,7 @@ class CourseworkWorkflowService {
 		if (assignment.collectSubmissions) {
 			stages = stages ++ Seq(Submission)
 			
-			if (features.turnitin && assignment.module.department.plagiarismDetectionEnabled) {
+			if (features.turnitin && assignment.module.adminDepartment.plagiarismDetectionEnabled) {
 				stages = stages ++ Seq(CheckForPlagiarism)
 			}
 			

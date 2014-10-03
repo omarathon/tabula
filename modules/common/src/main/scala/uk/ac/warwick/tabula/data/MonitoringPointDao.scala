@@ -466,7 +466,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def hasAnyPointSets(department: Department): Boolean = {
 		session.newCriteria[MonitoringPointSet]
 			.createAlias("route", "r")
-			.add(is("r.department", department))
+			.add(is("r.adminDepartment", department))
 			.project[Number](Projections.rowCount())
 			.uniqueResult.get.intValue() > 0
 	}

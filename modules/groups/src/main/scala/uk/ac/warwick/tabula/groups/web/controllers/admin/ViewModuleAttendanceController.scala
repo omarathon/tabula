@@ -31,7 +31,7 @@ class ViewModuleAttendanceController extends GroupsController {
 		else 
 			Mav("groups/attendance/view_module", 
 				"sets" -> sets
-			).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+			).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 	}
 
 }

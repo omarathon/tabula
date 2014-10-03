@@ -30,9 +30,9 @@ class MarkerRoleProviderTest extends TestBase {
 	
 	val dept = Fixtures.department("dept", "department")
 	
-	mod1.department = dept
-	mod2.department = dept
-	mod3.department = dept
+	mod1.adminDepartment = dept
+	mod2.adminDepartment = dept
+	mod3.adminDepartment = dept
 	
 	assignmentIsMarker1.module = mod1
 	assignmentIsMarker2.module = mod2

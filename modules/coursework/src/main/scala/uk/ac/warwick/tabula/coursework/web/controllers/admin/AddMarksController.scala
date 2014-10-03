@@ -30,7 +30,7 @@ class AddMarksController extends CourseworkController {
 		new AdminAddMarksCommand(module, assignment, user)
 
 	// Add the common breadcrumbs to the model.
-	def crumbed(mav: Mav, module: Module) = mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+	def crumbed(mav: Mav, module: Module) = mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def viewMarkUploadForm(

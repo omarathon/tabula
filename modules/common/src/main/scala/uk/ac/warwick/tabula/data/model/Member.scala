@@ -190,7 +190,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	def isStaff = userType == MemberUserType.Staff
 	def isStudent = userType == MemberUserType.Student
 	def isRelationshipAgent(relationshipType: StudentRelationshipType) = {
-		!relationshipService.listStudentRelationshipsWithMember(relationshipType, this).isEmpty
+		relationshipService.listStudentRelationshipsWithMember(relationshipType, this).nonEmpty
 	}
 
 	// Overridden in StudentMember
@@ -281,7 +281,7 @@ class StudentMember extends Member with StudentProperties {
 	override def affiliatedDepartments: Stream[Department] = {
 		val sprDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.department)).toStream
 		val sceDepartments = freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails).flatMap(scyd => Option(scyd.enrolmentDepartment)).toStream
-		val routeDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.route)).flatMap(route => Option(route.department)).toStream
+		val routeDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.route)).flatMap(route => Option(route.adminDepartment)).toStream
 
 		(Option(homeDepartment).toStream #:::
 				sprDepartments #:::
@@ -297,7 +297,7 @@ class StudentMember extends Member with StudentProperties {
 	 * For each department, enumerate any sub-departments that the member matches
 	 */
 	override def touchedDepartments = {
-		def moduleDepts = registeredModulesByYear(None).map(_.department).toStream
+		def moduleDepts = registeredModulesByYear(None).map(_.adminDepartment).toStream
 
 		val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct
 		topLevelDepts flatMap(_.subDepartmentsContaining(this))

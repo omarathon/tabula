@@ -31,7 +31,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 	val module = Fixtures.module("in101", "Introduction to Web Development")
 	val assignment = Fixtures.assignment("Programming Test")
 	assignment.module = module
-	module.department = department
+	module.adminDepartment = department
 
 	@Test def of() {
 		CourseworkFilters.of("NotReleasedForMarking") match {

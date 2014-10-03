@@ -37,18 +37,15 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 
 	def roleDefinition = Option(customRoleDefinition) getOrElse builtInRoleDefinition
 	def roleDefinition_= (definition: RoleDefinition) = definition match {
-		case customDefinition: CustomRoleDefinition => {
+		case customDefinition: CustomRoleDefinition =>
 			customRoleDefinition = customDefinition
 			builtInRoleDefinition = null
-		}
-		case builtInDefinition: BuiltInRoleDefinition => {
+		case builtInDefinition: BuiltInRoleDefinition =>
 			customRoleDefinition = null
 			builtInRoleDefinition = builtInDefinition
-		}
-		case _ => {
+		case _ =>
 			customRoleDefinition = null
 			builtInRoleDefinition = null
-		}
 	}
 
 	/**
@@ -65,7 +62,7 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	 * Build a Role from this definition 
 	 */
 	def build() = RoleBuilder.build(replaceableRoleDefinition, Option(scope), replaceableRoleDefinition.getName)
-	def mayGrant(target: Permission) = Option(replaceableRoleDefinition) map { _.mayGrant(target) } getOrElse (false)
+	def mayGrant(target: Permission) = Option(replaceableRoleDefinition).fold(false) { _.mayGrant(target) }
 	
 	/**
 	 * Provides a route to Department from the scope, so that we can look for custom definitions.
@@ -78,7 +75,7 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	def replaceableRoleDefinition = scopeDepartment.flatMap { _.replacedRoleDefinitionFor(roleDefinition) }.getOrElse(roleDefinition)
 
 	// If hibernate sets users to null, make a new empty usergroup
-	override def postLoad {
+	override def postLoad() {
 		ensureUsers
 	}
 
@@ -156,7 +153,7 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	def permissions(scope: Option[PermissionsTarget]) =
 		delegate.permissions(Some(null)).map { 
 			case (perm, Some(null)) => (perm, None)
-			case (perm, scope) => (perm, scope)
+			case (perm, s) => (perm, s)
 		}
 
 	def subRoles(scope: Option[PermissionsTarget]) = delegate.subRoles(scope)
@@ -194,7 +191,7 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	@ForeignKey(name="none")
 	var scope: Module = _
 	
-	def scopeDepartment = Some(scope.department)
+	def scopeDepartment = Some(scope.adminDepartment)
 }
 @Entity @DiscriminatorValue("Route") class RouteGrantedRole extends GrantedRole[Route] {
 	def this(route: Route, definition: RoleDefinition) = {
@@ -208,7 +205,7 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	@ForeignKey(name="none")
 	var scope: Route = _
 	
-	def scopeDepartment = Some(scope.department)
+	def scopeDepartment = Some(scope.adminDepartment)
 }
 @Entity @DiscriminatorValue("Member") class MemberGrantedRole extends GrantedRole[Member] {
 	def this(member: Member, definition: RoleDefinition) = {
@@ -240,7 +237,7 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	@ForeignKey(name="none")
 	var scope: Assignment = _
 	
-	def scopeDepartment = Some(scope.module.department)
+	def scopeDepartment = Some(scope.module.adminDepartment)
 }
 @Entity @DiscriminatorValue("SmallGroup") class SmallGroupGrantedRole extends GrantedRole[SmallGroup] {
 	def this(group: SmallGroup, definition: RoleDefinition) = {
@@ -254,7 +251,7 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	@ForeignKey(name="none")
 	var scope: SmallGroup = _
 	
-	def scopeDepartment = Some(scope.groupSet.module.department)
+	def scopeDepartment = Some(scope.groupSet.module.adminDepartment)
 }
 @Entity @DiscriminatorValue("SmallGroupSet") class SmallGroupSetGrantedRole extends GrantedRole[SmallGroupSet] {
 	def this(groupset: SmallGroupSet, definition: RoleDefinition) = {
@@ -268,7 +265,7 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	@ForeignKey(name="none")
 	var scope: SmallGroupSet = _
 
-	def scopeDepartment = Some(scope.module.department)
+	def scopeDepartment = Some(scope.module.adminDepartment)
 }
 @Entity @DiscriminatorValue("SmallGroupEvent") class SmallGroupEventGrantedRole extends GrantedRole[SmallGroupEvent] {
 	def this(event: SmallGroupEvent, definition: RoleDefinition) = {
@@ -282,5 +279,5 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	@ForeignKey(name="none")
 	var scope: SmallGroupEvent = _
 	
-	def scopeDepartment = Some(scope.group.groupSet.module.department)
+	def scopeDepartment = Some(scope.group.groupSet.module.adminDepartment)
 }

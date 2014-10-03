@@ -46,7 +46,7 @@ class AssignMarkersController extends CourseworkController {
 		markers.map { markerId =>
 			val assignedStudents: Seq[Student] = markerMap.get(markerId) match {
 				case Some(usergroup: UserGroup) => usergroup.users.map{ student =>
-					val displayValue = module.department.showStudentName match {
+					val displayValue = module.adminDepartment.showStudentName match {
 						case true => student.getFullName
 						case false => student.getWarwickId
 					}
@@ -74,7 +74,7 @@ class AssignMarkersController extends CourseworkController {
 		@PathVariable assignment: Assignment
 	) = {
 		val members = assignmentMembershipService.determineMembershipUsers(assignment).map{s =>
-			val displayValue = module.department.showStudentName match {
+			val displayValue = module.adminDepartment.showStudentName match {
 				case true => s.getFullName
 				case false => s.getWarwickId
 			}
@@ -88,7 +88,7 @@ class AssignMarkersController extends CourseworkController {
 			"hasSecondMarker" -> assignment.markingWorkflow.hasSecondMarker,
 			"firstMarkerUnassignedStudents" -> firstMarkerUnassignedStudents,
 			"secondMarkerUnassignedStudents" -> secondMarkerUnassignedStudents
-		).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+		).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 	}
 
 	@RequestMapping(method = Array(POST))

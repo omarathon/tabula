@@ -24,7 +24,7 @@ class AddModuleCommandInternal(val department: Department) extends CommandIntern
 
 	def applyInternal() = transactional() {
 		val module = new Module()
-		module.department = department
+		module.adminDepartment = department
 		module.name = name
 		module.code = sanitisedCode
 

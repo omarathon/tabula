@@ -24,7 +24,7 @@ class RoutePickerController extends BaseController {
 					"id" -> route.id,
 					"code" -> route.code,
 					"name" -> route.name,
-					"department" -> route.department.name
+					"department" -> route.adminDepartment.name
 				))
 			)
 		)

@@ -32,7 +32,7 @@ object Routes {
 		}
 
 		object module {
-			def apply(module: Module) = department(module.department) + "#module-" + encoded(module.code)
+			def apply(module: Module) = department(module.adminDepartment) + "#module-" + encoded(module.code)
 		}
 
 		object assignment {

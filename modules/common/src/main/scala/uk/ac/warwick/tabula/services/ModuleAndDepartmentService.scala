@@ -9,17 +9,12 @@ import uk.ac.warwick.tabula.data.DepartmentDao
 import uk.ac.warwick.tabula.data.ModuleDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
-import uk.ac.warwick.tabula.roles.RouteManagerRoleDefinition
-import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.RouteDao
 
 /**
  * Handles data about modules and departments
@@ -28,7 +23,6 @@ import uk.ac.warwick.tabula.data.RouteDao
 class ModuleAndDepartmentService extends Logging {
 
 	@Autowired var moduleDao: ModuleDao = _
-	@Autowired var routeDao: RouteDao = _
 	@Autowired var departmentDao: DepartmentDao = _
 	@Autowired var userLookup: UserLookupService = _
 	@Autowired var securityService: SecurityService = _
@@ -42,11 +36,6 @@ class ModuleAndDepartmentService extends Logging {
 	def allModules = transactional(readOnly = true) {
 		moduleDao.allModules
 	}
-
-	def allRoutes = transactional(readOnly = true) {
-		routeDao.allRoutes
-	}
-
 
 	def getDepartmentByCode(code: String) = transactional(readOnly = true) {
 		departmentDao.getByCode(code)
@@ -68,12 +57,8 @@ class ModuleAndDepartmentService extends Logging {
 		moduleDao.getById(id)
 	}
 
-	def getRouteByCode(code: String) = transactional(readOnly = true) {
-		routeDao.getByCode(code)
-	}
-
-	def getRouteById(id: String) = transactional(readOnly = true) {
-		routeDao.getById(id)
+	def getModuleTeachingInformation(moduleCode: String, departmentCode: String) = transactional(readOnly = true) {
+		moduleDao.getTeachingInformationByModuleCodeAndDepartmentCode(moduleCode, departmentCode)
 	}
 
 	// We may have a granted role that's overridden later, so we also need to do a security service check as well
@@ -90,7 +75,7 @@ class ModuleAndDepartmentService extends Logging {
 			.filter { module => securityService.can(user, permission, module) }
 
 	def modulesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Module] =
-		modulesWithPermission(user, permission).filter { _.department == dept }
+		modulesWithPermission(user, permission).filter { _.adminDepartment == dept }
 
 	def modulesInDepartmentsWithPermission(user: CurrentUser, permission: Permission) = {
 		departmentsWithPermission(user, permission) flatMap (dept => dept.modules.asScala)
@@ -98,67 +83,33 @@ class ModuleAndDepartmentService extends Logging {
 	def modulesInDepartmentWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Module] = {
 		if (departmentsWithPermission(user, permission) contains dept) dept.modules.asScala.toSet else Set()
 	}
-	
-	def routesWithPermission(user: CurrentUser, permission: Permission): Set[Route] =
-		permissionsService.getAllPermissionDefinitionsFor[Route](user, permission)
-			.filter { route => securityService.can(user, permission, route) }
-
-	def routesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route] =
-		routesWithPermission(user, permission).filter { _.department == dept }
-
-	def routesInDepartmentsWithPermission(user: CurrentUser, permission: Permission) = {
-		departmentsWithPermission(user, permission) flatMap (dept => dept.routes.asScala)
-	}
-	def routesInDepartmentWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route] = {
-		if (departmentsWithPermission(user, permission) contains dept) dept.routes.asScala.toSet else Set()
-	}
-
-	private def getRole[A <: PermissionsTarget : ClassTag](target: A, defn: RoleDefinition) =
-		permissionsService.getGrantedRole(target, defn) match {
-			case Some(role) => role
-			case _ => GrantedRole(target, defn)
-		}
 
 	def addOwner(dept: Department, owner: String) = transactional() {
-		val role = getRole(dept, DepartmentalAdministratorRoleDefinition)
+		val role = permissionsService.getOrCreateGrantedRole(dept, DepartmentalAdministratorRoleDefinition)
 		role.users.knownType.addUserId(owner)
 		permissionsService.saveOrUpdate(role)
 		permissionsService.clearCachesForUser((owner, classTag[Department]))
 	}
 
 	def removeOwner(dept: Department, owner: String) = transactional() {
-		val role = getRole(dept, DepartmentalAdministratorRoleDefinition)
+		val role = permissionsService.getOrCreateGrantedRole(dept, DepartmentalAdministratorRoleDefinition)
 		role.users.knownType.removeUserId(owner)
 		permissionsService.saveOrUpdate(role)
 		permissionsService.clearCachesForUser((owner, classTag[Department]))
 	}
 
 	def addModuleManager(module: Module, owner: String) = transactional() {
-		val role = getRole(module, ModuleManagerRoleDefinition)
+		val role = permissionsService.getOrCreateGrantedRole(module, ModuleManagerRoleDefinition)
 		role.users.knownType.addUserId(owner)
 		permissionsService.saveOrUpdate(role)
 		permissionsService.clearCachesForUser((owner, classTag[Module]))
 	}
 
 	def removeModuleManager(module: Module, owner: String) = transactional() {
-		val role = getRole(module, ModuleManagerRoleDefinition)
+		val role = permissionsService.getOrCreateGrantedRole(module, ModuleManagerRoleDefinition)
 		role.users.knownType.removeUserId(owner)
 		permissionsService.saveOrUpdate(role)
 		permissionsService.clearCachesForUser((owner, classTag[Module]))
-	}
-
-	def addRouteManager(route: Route, owner: String) = transactional() {
-		val role = getRole(route, RouteManagerRoleDefinition)
-		role.users.knownType.addUserId(owner)
-		permissionsService.saveOrUpdate(role)
-		permissionsService.clearCachesForUser((owner, classTag[Route]))
-	}
-
-	def removeRouteManager(route: Route, owner: String) = transactional() {
-		val role = getRole(route, RouteManagerRoleDefinition)
-		role.users.knownType.removeUserId(owner)
-		permissionsService.saveOrUpdate(role)
-		permissionsService.clearCachesForUser((owner, classTag[Route]))
 	}
 
 	def save(dept: Department) = transactional() {
@@ -168,13 +119,17 @@ class ModuleAndDepartmentService extends Logging {
 	def saveOrUpdate(module: Module) = transactional() {
 		moduleDao.saveOrUpdate(module)
 	}
+
+	def saveOrUpdate(teachingInfo: ModuleTeachingInformation) = transactional() {
+		moduleDao.saveOrUpdate(teachingInfo)
+	}
+
+	def delete(teachingInfo: ModuleTeachingInformation) = transactional() {
+		moduleDao.delete(teachingInfo)
+	}
 	
 	def stampMissingModules(seenCodes: Seq[String]) = transactional() {
 		moduleDao.stampMissingFromImport(moduleDao.allModules.map(_.code) filterNot seenCodes.contains)
-	}
-	
-	def stampMissingRoutes(dept: Department, seenCodes: Seq[String]) = transactional() {
-		routeDao.stampMissingRows(dept, seenCodes)
 	}
 
 	def hasAssignments(module: Module): Boolean = {

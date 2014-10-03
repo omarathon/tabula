@@ -21,7 +21,7 @@ class MarkedPlagiarisedNotification extends NotificationWithTarget[Submission, A
 
 	def recipients = {
 		val moduleManagers = module.managers
-		val departmentAdmins = module.department.owners
+		val departmentAdmins = module.adminDepartment.owners
 
 		moduleManagers.users ++ departmentAdmins.users
 	}

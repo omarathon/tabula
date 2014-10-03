@@ -111,7 +111,7 @@ trait CreateMonitoringPointDescription extends Describable[MonitoringPoint] {
 
 trait CreateMonitoringPointState extends MonitoringPointState with CanPointBeChanged {
 	def set: MonitoringPointSet
-	val dept = set.route.department
+	val dept = set.route.adminDepartment
 	monitoringPoints.addAll(set.points)
 }
 

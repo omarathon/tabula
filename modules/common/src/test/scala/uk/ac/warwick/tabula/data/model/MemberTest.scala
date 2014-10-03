@@ -51,8 +51,8 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		// add module registrations
 		val mod1 = new Module("cs101")
 		val mod2 = new Module("cs102")
-		mod1.department = extDept
-		mod2.department = homeDept
+		mod1.adminDepartment = extDept
+		mod2.adminDepartment = homeDept
 		val modReg1 = new ModuleRegistration(studentCourseDetails, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
 		val modReg2 = new ModuleRegistration(studentCourseDetails, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013), "A")
 		studentCourseDetails.addModuleRegistration(modReg1)
@@ -68,7 +68,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		val routeDept = new Department
 		routeDept.code = "ch"
 		val route = new Route
-		route.department = routeDept
+		route.adminDepartment = routeDept
 		member.mostSignificantCourseDetails.get.route = route
 		member.attachStudentCourseDetails(studentCourseDetails)
 
@@ -76,7 +76,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		member.touchedDepartments should be (Stream(homeDept, courseDept, routeDept, extDept))
 
 		// reset route to home, and check it appears only once
-		route.department = homeDept
+		route.adminDepartment = homeDept
 		member.mostSignificantCourseDetails.get.route = route
 
 		member.affiliatedDepartments should be (Stream(homeDept, courseDept))

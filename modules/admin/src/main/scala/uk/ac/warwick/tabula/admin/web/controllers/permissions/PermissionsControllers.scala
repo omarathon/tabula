@@ -244,7 +244,7 @@ class DepartmentPermissionsController extends PermissionsControllerMethods[Depar
 class ModulePermissionsController extends PermissionsControllerMethods[Module] {
 	@ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") module: Module) = Seq(
 		AdminLink("Coursework Management", Routes.coursework.admin.module(module)),
-		AdminLink("Small Group Teaching", Routes.groups.admin(module.department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
+		AdminLink("Small Group Teaching", Routes.groups.admin(module.adminDepartment, AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
 		AdminLink("Administration & Permissions", Routes.admin.module(module))
 	)
 }

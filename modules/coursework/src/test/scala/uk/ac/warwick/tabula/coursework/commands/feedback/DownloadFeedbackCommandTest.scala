@@ -49,7 +49,7 @@ class DownloadFeedbackCommandTest extends AppContextTestBase {
 		val feedback = new Feedback("0123456")
 
 		department.postLoad // force legacy settings
-		module.department = department
+		module.adminDepartment = department
 		assignment.module = module
 		assignment.addFeedback(feedback)
 

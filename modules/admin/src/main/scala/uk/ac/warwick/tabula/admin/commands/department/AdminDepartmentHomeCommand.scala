@@ -4,8 +4,7 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.{Route, Module, Department}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited, ReadOnly}
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, SecurityServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSecurityServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
@@ -14,6 +13,7 @@ object AdminDepartmentHomeCommand {
 		new AdminDepartmentHomeCommandInternal(department, user)
 				with AutowiringSecurityServiceComponent
 				with AutowiringModuleAndDepartmentServiceComponent
+				with AutowiringCourseAndRouteServiceComponent
 				with AdminDepartmentHomeCommandPermissions
 				with ComposableCommand[(Seq[Module], Seq[Route])]
 				with ReadOnly with Unaudited
@@ -21,7 +21,7 @@ object AdminDepartmentHomeCommand {
 
 class AdminDepartmentHomeCommandInternal(val department: Department, val user: CurrentUser)
 	extends CommandInternal[(Seq[Module], Seq[Route])] with AdminDepartmentHomeCommandState {
-	self: SecurityServiceComponent with ModuleAndDepartmentServiceComponent =>
+	self: SecurityServiceComponent with ModuleAndDepartmentServiceComponent with CourseAndRouteServiceComponent =>
 
 	lazy val modules: Seq[Module] =
 		if (securityService.can(user, Permissions.Module.Administer, department)) {
@@ -41,13 +41,13 @@ class AdminDepartmentHomeCommandInternal(val department: Department, val user: C
 }
 
 trait AdminDepartmentHomeCommandState {
-	self: ModuleAndDepartmentServiceComponent =>
+	self: ModuleAndDepartmentServiceComponent with CourseAndRouteServiceComponent =>
 
 	def department: Department
 	def user: CurrentUser
 
 	lazy val modulesWithPermission = moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer, department)
-	lazy val routesWithPermission = moduleAndDepartmentService.routesWithPermission(user, Permissions.Route.Administer, department)
+	lazy val routesWithPermission = courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department)
 }
 
 trait AdminDepartmentHomeCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

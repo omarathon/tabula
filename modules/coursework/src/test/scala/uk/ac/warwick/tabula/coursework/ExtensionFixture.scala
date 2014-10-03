@@ -46,7 +46,7 @@ trait ExtensionFixture extends Mockito{
 	val module = new Module {
 		override lazy val managers = new UserGroup()
 	}
-	module.department = department
+	module.adminDepartment = department
 	module.code = "xxx"
 	val assignment = new Assignment
 	assignment.id = "123"

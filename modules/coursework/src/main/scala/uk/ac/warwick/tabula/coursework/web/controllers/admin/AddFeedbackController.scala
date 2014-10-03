@@ -28,10 +28,10 @@ class AddFeedbackController extends CourseworkController {
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute form: AddFeedbackCommand) = {
 		Mav("admin/assignments/feedback/form",
-			"department" -> form.module.department,
+			"department" -> form.module.adminDepartment,
 			"module" -> form.module,
 			"assignment" -> form.assignment)
-			.crumbs(Breadcrumbs.Department(form.module.department), Breadcrumbs.Module(form.module))
+			.crumbs(Breadcrumbs.Department(form.module.adminDepartment), Breadcrumbs.Module(form.module))
 	}
 
 	@RequestMapping(method = Array(POST))

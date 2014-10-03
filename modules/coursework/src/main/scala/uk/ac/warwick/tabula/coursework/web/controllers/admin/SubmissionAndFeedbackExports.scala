@@ -242,7 +242,7 @@ trait SubmissionAndFeedbackExport {
 	// This Seq specifies the core field order
 	val baseFields = Seq("module-code", "id", "open-date", "open-ended", "close-date")
 	val identityFields = 
-		if (module.department.showStudentName) Seq("university-id", "name")
+		if (module.adminDepartment.showStudentName) Seq("university-id", "name")
 		else Seq("university-id")
 	
 	val submissionFields = Seq("id", "time", "downloaded")
@@ -262,7 +262,7 @@ trait SubmissionAndFeedbackExport {
 	
 	protected def identityData(item: Student): Map[String, Any] = Map(
 		"university-id" -> item.user.getWarwickId
-	) ++ (if (module.department.showStudentName) Map("name" -> item.user.getFullName) else Map())
+	) ++ (if (module.adminDepartment.showStudentName) Map("name" -> item.user.getFullName) else Map())
 	
 	protected def submissionData(student: Student): Map[String, Any] = student.coursework.enhancedSubmission match {
 		case Some(item) if item.submission.id.hasText => Map(

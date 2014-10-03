@@ -51,7 +51,7 @@ class RateFeedbackCommandTest extends TestBase {
 		feedback.ratingPrompt = None
 		feedback.assignment = assignment
 		assignment.module = module
-		module.department = department
+		module.adminDepartment = department
 		(feedback, assignment, module, department)
 	}
 }

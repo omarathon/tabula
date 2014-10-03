@@ -145,7 +145,7 @@ class SecurityServiceTest extends TestBase with Mockito {
 	@Test def higherScopeMatch() {
 		val module = new Module
 		val department = new Department
-		module.department = department
+		module.adminDepartment = department
 		
 		val currentUser = new CurrentUser(user, user)
 		

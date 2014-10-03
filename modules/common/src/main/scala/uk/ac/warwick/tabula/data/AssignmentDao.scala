@@ -96,7 +96,7 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 	def getAssignments(department: Department, year: AcademicYear): Seq[Assignment] = {
 		val assignments = session.newCriteria[Assignment]
 			.createAlias("module", "m")
-			.add(is("m.department", department))
+			.add(is("m.adminDepartment", department))
 			.add(is("academicYear", year))
 			.add(is("deleted", false))
 			.add(is("archived", false))
@@ -107,7 +107,7 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 	def recentAssignment(department: Department) = {
 		session.newCriteria[Assignment]
 			.createAlias("module", "m")
-			.add(is("m.department", department))
+			.add(is("m.adminDepartment", department))
 			.add(isNotNull("createdDate"))
 			.addOrder(desc("createdDate"))
 			.setMaxResults(1)
@@ -117,7 +117,7 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 	def getAssignmentsByName(partialName: String, department: Department) = {
 
 		session.newQuery[Assignment]("""select a from Assignment a
-				where a.module.department = :dept
+				where a.module.adminDepartment = :dept
 				and a.name like :nameLike
 				order by createdDate desc
 																 """)
