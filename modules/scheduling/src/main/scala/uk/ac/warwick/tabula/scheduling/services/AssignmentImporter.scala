@@ -212,7 +212,7 @@ object AssignmentImporter {
 		from module_registration mr
 		join module m on m.module_code = mr.module_code
 		where academic_year_code in (:academic_year_code) and mr.assessment_group is null
-	union
+	union all
 		select mad.module_code, seq, mad.name, mad.assessment_group, m.department_code, assessment_code
 		from module_assessment_details mad
 		join module m on (m.module_code = mad.module_code and m.in_use = 'Y')
@@ -229,7 +229,7 @@ object AssignmentImporter {
 		join module_assessment_details mad on mad.module_code = mav.module_code
 		join module m on (m.module_code = mad.module_code and m.in_use = 'Y')
 		where academic_year_code in (:academic_year_code)
-	union
+	union all
 		select distinct mav.academic_year_code, mav.module_code, mav_occurrence, mad.assessment_group
 		from module_availability mav
 		join module_assessment_details mad on mad.module_code = mav.module_code
@@ -274,7 +274,7 @@ object AssignmentImporter {
 		    and mav.mav_occurrence = mr.mav_occurrence
 		where mav.academic_year_code in (:academic_year_code)
 		  and mr.module_code is null)
-		union
+		union all
 		(select distinct
 			  mav.module_code,
 			  mav.academic_year_code,

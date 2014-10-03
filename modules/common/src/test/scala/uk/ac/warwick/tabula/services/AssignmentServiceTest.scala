@@ -431,14 +431,34 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.getAssessmentComponents(Fixtures.module("la101")) should be (Seq(ua3))
 		assignmentMembershipService.getAssessmentComponents(Fixtures.module("cs101")) should be (Seq())
 
-
-		val chemistryDept = Fixtures.department("ch")
+		val chemistryDept = Fixtures.department("chem") // dept code irrelephant
 		val chemistryModule = Fixtures.module("ch101")
 		chemistryDept.modules.add(chemistryModule)
 
-		val lawDept = Fixtures.department("la")
-		val lawModules = Seq(Fixtures.module("la101"), Fixtures.module("la102"))
-		lawDept.modules.addAll(lawModules.asJava)
+		session.save(chemistryDept)
+		session.save(chemistryModule)
+
+		val lawDept = Fixtures.department("law") // dept code irrelephant
+		val lawModule1 = Fixtures.module("la101")
+		val lawModule2 = Fixtures.module("la102")
+		lawDept.modules.add(lawModule1)
+		lawDept.modules.add(lawModule2)
+
+		session.save(lawDept)
+		session.save(lawModule1)
+		session.save(lawModule2)
+
+		ua1.module = chemistryModule
+		ua2.module = chemistryModule
+		ua3.module = lawModule1
+		ua4.module = lawModule1
+
+		assignmentMembershipService.save(ua1) should be (ua1)
+		assignmentMembershipService.save(ua2) should be (ua2)
+		assignmentMembershipService.save(ua3) should be (ua3)
+		assignmentMembershipService.save(ua4) should be (ua4)
+
+		session.flush()
 
 		assignmentMembershipService.getAssessmentComponents(chemistryDept, false) should be (Seq(ua1, ua2))
 		assignmentMembershipService.getAssessmentComponents(lawDept, true) should be (Seq(ua3))
