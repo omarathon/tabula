@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.groups.commands.admin
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.groups.SmallGroupAttendanceState
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroup, SmallGroupSet}
@@ -14,6 +13,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import EditSmallGroupsCommand._
 
 object EditSmallGroupsCommand {
 	def apply(module: Module, set: SmallGroupSet) =
@@ -24,15 +24,38 @@ object EditSmallGroupsCommand {
 			with EditSmallGroupsDescription
 			with PopulateEditSmallGroupsCommand
 			with EditSmallGroupsCommandRemoveTrailingEmptyGroups
-			with AutowiringSmallGroupServiceComponent
+			with AutowiringSmallGroupServiceComponent {
+			populate()
+		}
+
+	trait GroupProperties {
+		def module: Module
+		def set: SmallGroupSet
+
+		var name: String = _
+		var maxGroupSize: Int = _
+	}
+
+	class NewGroupProperties(val module: Module, val set: SmallGroupSet) extends GroupProperties {
+		maxGroupSize = if (set.defaultMaxGroupSizeEnabled) set.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
+	}
+
+	class ExistingGroupProperties(val module: Module, val set: SmallGroupSet, val group: SmallGroup) extends GroupProperties {
+		name = group.name
+		maxGroupSize = group.maxGroupSize.getOrElse {
+			if (set.defaultMaxGroupSizeEnabled) set.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
+		}
+
+		var delete: Boolean = false
+	}
 }
 
 trait EditSmallGroupsCommandState {
 	def module: Module
 	def set: SmallGroupSet
 
-	var groupNames: JList[String] = LazyLists.create()
-	var maxGroupSizes: JList[JInteger] = LazyLists.create(() => 0)
+	var existingGroups: JMap[String, ExistingGroupProperties] = JHashMap()
+	var newGroups: JList[NewGroupProperties] = LazyLists.create { () => new NewGroupProperties(module, set) }
 	var defaultMaxGroupSizeEnabled: Boolean = false
 	var defaultMaxGroupSize: Int = SmallGroup.DefaultGroupSize
 }
@@ -44,40 +67,42 @@ class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet)
 		set.defaultMaxGroupSizeEnabled = defaultMaxGroupSizeEnabled
 		if (defaultMaxGroupSizeEnabled) set.defaultMaxGroupSize = defaultMaxGroupSize
 
-		groupNames.asScala.zipWithIndex.foreach { case (name, i) =>
-			val group =
-				if (set.groups.size() > i) {
-					// Edit an existing group
-					set.groups.get(i)
-				} else {
-					// Add a new group
-					val group = new SmallGroup(set)
-					set.groups.add(group)
-
-					group
-				}
-
-			group.name = name
+		// Manage existing groups
+		existingGroups.asScala.values.filterNot { _.delete }.foreach { props =>
+			val group = props.group
+			group.name = props.name
 
 			if (defaultMaxGroupSizeEnabled) {
-				group.maxGroupSize = maxGroupSizes.get(i)
+				group.maxGroupSize = props.maxGroupSize
 			} else {
 				group.removeMaxGroupSize()
 			}
 		}
 
-		if (groupNames.size() < set.groups.size()) {
-			for (i <- set.groups.size() until groupNames.size() by -1) {
-				val group = set.groups.get(i - 1)
+		existingGroups.asScala.values.filter { _.delete }.foreach { props =>
+			val group = props.group
 
-				group.events.foreach {
-					event => smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event).filterNot(
-					 eventOccurrence => eventOccurrence.attendance.asScala.exists {
+			group.events.foreach {
+				event => smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event).filterNot(
+					eventOccurrence => eventOccurrence.attendance.asScala.exists {
 						attendance => attendance.state != AttendanceState.NotRecorded
-						}).foreach(smallGroupService.delete)
-				}
+					}).foreach(smallGroupService.delete)
+			}
 
-				set.groups.remove(group)
+			set.groups.remove(group)
+		}
+
+		// Create new groups
+		newGroups.asScala.foreach { props =>
+			val group = new SmallGroup(set)
+			set.groups.add(group)
+
+			group.name = props.name
+
+			if (defaultMaxGroupSizeEnabled) {
+				group.maxGroupSize = props.maxGroupSize
+			} else {
+				group.removeMaxGroupSize()
 			}
 		}
 
@@ -86,21 +111,17 @@ class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet)
 	}
 }
 
-trait PopulateEditSmallGroupsCommand extends PopulateOnForm {
+trait PopulateEditSmallGroupsCommand {
 	self: EditSmallGroupsCommandState =>
 
-	override def populate() {
-		groupNames.clear()
-		maxGroupSizes.clear()
+	def populate() {
+		existingGroups.clear()
+		newGroups.clear()
 
-		groupNames.addAll(set.groups.asScala.map { _.name }.asJava)
-		maxGroupSizes.addAll(set.groups.asScala.map { group =>
-			val groupSize = group.maxGroupSize.getOrElse {
-				if (set.defaultMaxGroupSizeEnabled) set.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
-			}
+		set.groups.asScala.sorted.foreach { group =>
+			existingGroups.put(group.id, new ExistingGroupProperties(module, set, group))
+		}
 
-			groupSize: JInteger
-		}.asJava)
 		defaultMaxGroupSizeEnabled = set.defaultMaxGroupSizeEnabled
 		defaultMaxGroupSize = set.defaultMaxGroupSize
 	}
@@ -132,17 +153,19 @@ trait EditSmallGroupsValidation extends SelfValidating {
 			errors.reject("smallGroupSet.linked")
 		}
 
-		groupNames.asScala.zipWithIndex.foreach { case (name, index) =>
-			if (!name.hasText) errors.rejectValue(s"groupNames[$index]", "smallGroup.name.NotEmpty")
-			else if (name.orEmpty.length > 200) errors.rejectValue(s"groupNames[$index]", "smallGroup.name.Length", Array[Object](200: JInteger), "")
+		def validateGroupProperties(props: GroupProperties) {
+			if (!props.name.hasText) errors.rejectValue("name", "smallGroup.name.NotEmpty")
+			else if (props.name.orEmpty.length > 200) errors.rejectValue("name", "smallGroup.name.Length", Array[Object](200: JInteger), "")
 		}
 
-		if (groupNames.size() < set.groups.size()) {
-			for (i <- set.groups.size() until groupNames.size() by -1) {
-				val group = set.groups.get(i - 1)
+		existingGroups.asScala.foreach { case (id, props) =>
+			errors.pushNestedPath(s"existingGroups[$id]")
+
+			if (props.delete) {
+				val group = props.group
 
 				if (!group.students.isEmpty) {
-					errors.rejectValue(s"groupNames[${i - 1}]", "smallGroup.delete.notEmpty")
+					errors.rejectValue("delete", "smallGroup.delete.notEmpty")
 				} else {
 					val hasAttendance =
 						group.events.exists { event =>
@@ -153,10 +176,20 @@ trait EditSmallGroupsValidation extends SelfValidating {
 						}
 
 					if (hasAttendance) {
-						errors.rejectValue(s"groupNames[${i - 1}]", "smallGroupEvent.delete.hasAttendance")
+						errors.rejectValue("delete", "smallGroupEvent.delete.hasAttendance")
 					}
 				}
+			} else {
+				validateGroupProperties(props)
 			}
+
+			errors.popNestedPath()
+		}
+
+		newGroups.asScala.zipWithIndex.foreach { case (props, index) =>
+			errors.pushNestedPath(s"newGroups[$index]")
+			validateGroupProperties(props)
+			errors.popNestedPath()
 		}
 	}
 }
@@ -166,8 +199,8 @@ trait EditSmallGroupsCommandRemoveTrailingEmptyGroups extends BindListener {
 
 	override def onBind(result: BindingResult) {
 		// If the last element of events is both a Creation and is empty, disregard it
-		while (!groupNames.isEmpty && !groupNames.asScala.last.hasText) {
-			groupNames.remove(groupNames.asScala.last)
+		while (!newGroups.isEmpty && !newGroups.asScala.last.name.hasText) {
+			newGroups.remove(newGroups.asScala.last)
 		}
 	}
 }

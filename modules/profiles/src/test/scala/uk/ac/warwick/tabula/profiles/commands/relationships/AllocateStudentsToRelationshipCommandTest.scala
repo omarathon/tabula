@@ -6,8 +6,8 @@ import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.events.EventHandling
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.services.{MaintenanceModeService, MaintenanceModeServiceImpl, RelationshipService, ProfileService}
-import uk.ac.warwick.tabula.data.model.{StudentMember, Member, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.services.{MaintenanceModeService, RelationshipService, ProfileService}
+import uk.ac.warwick.tabula.data.model.{StudentRelationship, StudentRelationshipType}
 import org.springframework.validation.BindException
 
 class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
@@ -15,7 +15,7 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 	EventHandling.enabled = false
 
 	trait Environment {
-		val service = smartMock[RelationshipService]
+		val relationshipService = smartMock[RelationshipService]
 		val profileService = smartMock[ProfileService]
 
 		val department = Fixtures.department("in", "IT Services")
@@ -34,42 +34,91 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 		val staff3 = Fixtures.staff("1000003", "staff3", department)
 		val staff4 = Fixtures.staff("1000004", "staff4", department)
 
-		val rel1 = StudentRelationship(staff1, relationshipType, student1)
-		val rel2 = StudentRelationship(staff1, relationshipType, student2)
-		val rel3 = StudentRelationship(staff2, relationshipType, student3)
+		val rel11 = StudentRelationship(staff1, relationshipType, student1)
+		val rel12 = StudentRelationship(staff1, relationshipType, student2)
+		val rel23 = StudentRelationship(staff2, relationshipType, student3)
 
-		Seq(staff1, staff2, staff3).foreach { staff =>
-			profileService.getMemberByUniversityId(staff.universityId) returns (Some(staff))
-			profileService.getAllMembersWithUserId(staff.userId) returns (Seq(staff))
+		Seq(rel11, rel12, rel23).foreach { rel =>
+			relationshipService.getCurrentRelationship(relationshipType, rel.studentMember.get, rel.agentMember.get) returns Some(rel)
+		}
+
+		Seq(staff1, staff2, staff3, staff4).foreach { staff =>
+			profileService.getMemberByUniversityId(staff.universityId) returns Some(staff)
+			profileService.getAllMembersWithUserId(staff.userId) returns Seq(staff)
 		}
 
 		Seq(student1, student2, student3, student4, student5, student6, student7).foreach { student =>
-			profileService.getStudentBySprCode(student.universityId + "/1") returns (Some(student))
-			profileService.getMemberByUniversityId(student.universityId) returns (Some(student))
+			profileService.getStudentBySprCode(student.universityId + "/1") returns Some(student)
+			profileService.getMemberByUniversityId(student.universityId) returns Some(student)
 			student.mostSignificantCourseDetails.get.department = department
 		}
 
-		service.listStudentRelationshipsByDepartment(relationshipType, department) returns (Seq(rel1, rel2, rel3))
-		service.listStudentsWithoutRelationship(relationshipType, department) returns (Seq(student4, student5, student6, student7))
+		relationshipService.listStudentRelationshipsByDepartment(relationshipType, department) returns Seq(rel11, rel12, rel23)
+		relationshipService.listStudentsWithoutRelationship(relationshipType, department) returns Seq(student4, student5, student6, student7)
 
-		service.findCurrentRelationships(relationshipType, student1.mostSignificantCourseDetails.get)	returns (Seq(rel1))
-		service.findCurrentRelationships(relationshipType, student2.mostSignificantCourseDetails.get)	returns (Seq(rel2))
-		service.findCurrentRelationships(relationshipType, student3.mostSignificantCourseDetails.get)	returns (Seq(rel3))
-		service.findCurrentRelationships(relationshipType, student4.mostSignificantCourseDetails.get)	returns (Seq())
-		service.findCurrentRelationships(relationshipType, student5.mostSignificantCourseDetails.get)	returns (Seq())
-		service.findCurrentRelationships(relationshipType, student6.mostSignificantCourseDetails.get)	returns (Seq())
-		service.findCurrentRelationships(relationshipType, student7.mostSignificantCourseDetails.get)	returns (Seq())
+		relationshipService.findCurrentRelationships(relationshipType, student1.mostSignificantCourseDetails.get)	returns Seq(rel11)
+		relationshipService.findCurrentRelationships(relationshipType, student2.mostSignificantCourseDetails.get)	returns Seq(rel12)
+		relationshipService.findCurrentRelationships(relationshipType, student3.mostSignificantCourseDetails.get)	returns Seq(rel23)
+		relationshipService.findCurrentRelationships(relationshipType, student4.mostSignificantCourseDetails.get)	returns Seq()
+		relationshipService.findCurrentRelationships(relationshipType, student5.mostSignificantCourseDetails.get)	returns Seq()
+		relationshipService.findCurrentRelationships(relationshipType, student6.mostSignificantCourseDetails.get)	returns Seq()
+		relationshipService.findCurrentRelationships(relationshipType, student7.mostSignificantCourseDetails.get)	returns Seq()
+
 
 		val maintenanceModeService = mock[MaintenanceModeService]
 		maintenanceModeService.enabled returns false
 
 		val cmd = new AllocateStudentsToRelationshipCommand(department, relationshipType, currentUser)
-		cmd.service = service
+		cmd.relationshipService = relationshipService
 		cmd.profileService = profileService
 		cmd.maintenanceMode = maintenanceModeService
 	}
 
-	@Test def itWorks = withUser("boombastic") {
+	trait NoChangeScenario extends Environment {
+		cmd.populate()
+	}
+
+	trait AddScenario extends Environment {
+		cmd.populate()
+		cmd.mapping.put(staff4, JList(student4))
+		cmd.mapping.put(staff3, JList(student5))
+	}
+
+	trait RemoveScenario extends Environment {
+		cmd.populate()
+		cmd.mapping.get(staff2).removeAll(Seq(student3).asJavaCollection)
+	}
+
+	trait SwapScenario extends Environment {
+		cmd.populate()
+		cmd.mapping.get(staff2).removeAll(Seq(student3).asJavaCollection)
+		cmd.mapping.get(staff1).addAll(Seq(student3).asJavaCollection)
+	}
+
+	trait MultipleRelationshipScenario extends Environment {
+		val rel21 = StudentRelationship(staff2, relationshipType, student1)
+		val rel41 = StudentRelationship(staff4, relationshipType, student1)
+
+		relationshipService.listStudentRelationshipsByDepartment(relationshipType, department) returns Seq(rel11, rel12, rel23, rel21, rel41)
+		relationshipService.findCurrentRelationships(relationshipType, student1.mostSignificantCourseDetails.get)	returns Seq(rel11, rel21, rel41)
+
+		Seq(rel21, rel41).foreach { rel =>
+			relationshipService.getCurrentRelationship(relationshipType, rel.studentMember.get, rel.agentMember.get) returns Some(rel)
+		}
+
+		cmd.populate()
+		cmd.sort()
+	}
+
+	trait RemoveFromMultipleScenario extends MultipleRelationshipScenario {
+		cmd.mapping.get(staff1).removeAll(Seq(student1).asJavaCollection)
+	}
+
+	trait AddToMultipleScenario extends MultipleRelationshipScenario {
+		cmd.mapping.get(staff3).addAll(Seq(student1).asJavaCollection)
+	}
+
+	@Test def populatesData() = withUser("boombastic") {
 		new Environment {
 			cmd.unallocated should be(JList())
 			cmd.mapping should be(JMap())
@@ -95,192 +144,190 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 		}
 	}
 
-	@Test def testGetMemberAgentMappingBefore = withUser("boombastic") {
+	@Test def validateStudentTutorMappingNoChanges() = withUser("boombastic") {
 		new Environment {
-			val agentMappings = cmd.getMemberAgentMappingsFromDatabase
-			agentMappings.size should be (2)
-			agentMappings.get(staff1) should be (Some(Set(student1, student2)))
-			agentMappings.get(staff2) should be (Some(Set(student3)))
-		}
-	}
-
-	@Test def testGetRemoveCommandsForDroppedAgents = withUser("boombastic") {
-		new Environment {
-			val droppedAgents1 = Set[Member]()
-			var removeCommands1 = cmd.getRemoveCommandsForDroppedAgents(droppedAgents1)
-			removeCommands1.size should be (0)
-
-			service.listStudentRelationshipsWithMember(relationshipType, staff1) returns (Seq(rel1, rel2))
-			service.listStudentRelationshipsWithMember(relationshipType, staff2) returns (Seq(rel3))
-
-			val droppedAgents = Set(staff1.asInstanceOf[Member], staff2.asInstanceOf[Member])
-
-			var removeCommands = cmd.getRemoveCommandsForDroppedAgents(droppedAgents)
-			removeCommands.size should be (3)
-			removeCommands.map(_.relationship).toSet should be (Set(rel1, rel2, rel3))
-			removeCommands.head.relationshipType should be (relationshipType)
-
-			removeCommands = cmd.getRemoveCommandsForDroppedAgents(Set(staff2.asInstanceOf[Member]))
-			removeCommands.size should be (1)
-			removeCommands.map(_.relationship).toSeq should be (Seq(rel3))
-
-		}
-	}
-
-	@Test def testGetRemoveCommandsForChangedAgents = withUser("boombastic") {
-		new Environment {
-			val changedAgents = Set(staff1.asInstanceOf[Member], staff2.asInstanceOf[Member])
-			val mappings = cmd.getMemberAgentMappingsFromDatabase
-
-			// with no changes we should get no commands back
-			var removeCommands = cmd.getRemoveCommandsForChangedAgents(mappings, mappings, changedAgents)
-
-			// swap round students 2 and 3 - that shouldn't result in any drop commands, only edit commands (which incorporate dropping)
-			val newStudentSetForStaff1 = Set(student1, student3)
-			val newStudentSetForStaff2 = Set(student2)
-
-			val newAgentMappingsMutable = scala.collection.mutable.Map[Member, Set[StudentMember]]()
-			newAgentMappingsMutable(staff1) = newStudentSetForStaff1
-			newAgentMappingsMutable(staff2) = newStudentSetForStaff2
-			val newAgentMappings = newAgentMappingsMutable.toMap
-
-			removeCommands = cmd.getRemoveCommandsForChangedAgents(mappings, newAgentMappings, changedAgents)
-			removeCommands.size should be (0)
-
-		}
-	}
-
-
-	@Test def testGetEditCommands = withUser("boombastic") {
-		new Environment {
-			val mappings = cmd.getMemberAgentMappingsFromDatabase
-
-			service.listStudentRelationshipsWithMember(relationshipType, staff1) returns (Seq(rel1, rel2))
-			service.listStudentRelationshipsWithMember(relationshipType, staff2) returns (Seq(rel3))
-
-			// we're going to look to see if we need any edit commands for staff1 or staff2
-			var agentsToEdit = Set(staff1.asInstanceOf[Member], staff2.asInstanceOf[Member])
-
-			// we already have a relationship from staff 2 to student 3.
-
-			// now add a relationship from staff 2 to student 4 - first by creating the revised student set
-			val newStudentSet1 = Set(student3, student4)
-
-			// and then assigning that set to staff2:
-			val newAgentMappingsMutable = scala.collection.mutable.Map[Member, Set[StudentMember]]()
-			newAgentMappingsMutable(staff2) = newStudentSet1
-			val newAgentMappings = newAgentMappingsMutable.toMap
-
-			// now with that set of mappings we should just see a command for the new relationship coming back:
-			val editCommands = cmd.getEditStudentCommands(mappings, newAgentMappings, agentsToEdit)
-			editCommands.size should be (1)
-			val editCommand = editCommands.head
-			editCommand.oldAgents.isEmpty should be (true)
-			editCommand.agent should be (staff2)
-			editCommand.studentCourseDetails should be (student4.mostSignificantCourseDetails.head)
-			editCommand.relationshipType should be (relationshipType)
-
-			// putting students 5, 6 and 7 in a set
-			val newStudentSet2 = Set(student5, student6, student7)
-
-			// and assigning that set, perversely and irrelevantly, to agent 4
-			val newAgentMappingsMutable2 = scala.collection.mutable.Map[Member, Set[StudentMember]]()
-			newAgentMappingsMutable2(staff4) = newStudentSet2
-			val newAgentMappings2 = newAgentMappingsMutable2.toMap
-
-			// now with that set of mappings and the unconnected agents, we should see no commands coming back:
-			val editCommands2 = cmd.getEditStudentCommands(mappings, newAgentMappings2, agentsToEdit)
-			editCommands2.size should be (0)
-
-			// now, more sensibly, get the edit commands for staff 4 which should return commands we can inspect:
-			service.findCurrentRelationships(relationshipType, student5.mostSignificantCourseDetails.head) returns Seq()
-			service.findCurrentRelationships(relationshipType, student6.mostSignificantCourseDetails.head) returns Seq()
-			service.findCurrentRelationships(relationshipType, student7.mostSignificantCourseDetails.head) returns Seq()
-
-			val editCommands3 = cmd.getEditStudentCommands(mappings, newAgentMappings2, Set(staff4.asInstanceOf[Member]))
-
-			editCommands3.size should be (3)
-			editCommands3.flatMap(_.oldAgents).isEmpty should be (true)
-			editCommands3.map(_.agent) should be (Set(staff4))
-			editCommands3.map(_.studentCourseDetails) should be (Set(student5.mostSignificantCourseDetails.head, student6.mostSignificantCourseDetails.head, student7.mostSignificantCourseDetails.head))
-			editCommands3.map(_.relationshipType) should be (Set(relationshipType))
-
-		}
-	}
-
-	@Test def testApplyInternal = withUser("boombastic") {
-		new Environment {
-
-			// set up 'mapping' in the command as if from the db
 			cmd.populate()
-			cmd.sort()
-
-			// set up 3 new relationships to add
-			val rel41 = StudentRelationship(staff1, relationshipType, student4)
-			val rel35 = StudentRelationship(staff3, relationshipType, student5)
-			val rel37 = StudentRelationship(staff3, relationshipType, student7)
-
-			service.saveStudentRelationships(relationshipType, student4.mostSignificantCourseDetails.head, Seq(staff1)) returns (Seq(rel41))
-			service.saveStudentRelationships(relationshipType, student5.mostSignificantCourseDetails.head, Seq(staff3)) returns (Seq(rel35))
-			service.saveStudentRelationships(relationshipType, student7.mostSignificantCourseDetails.head, Seq(staff3)) returns (Seq(rel37))
-
-			cmd.additionalAgents = JArrayList(staff3.userId)
-			cmd.onBind(new BindException(cmd, "cmd"))
-
-			// add relationships staff1 -> student4 and staff3 -> students 5 and 7
-			cmd.mapping.get(staff1).addAll(Seq(student4).asJavaCollection)
-			cmd.mapping.get(staff3).addAll(Seq(student5, student7).asJavaCollection)
-
-			cmd.onBind(new BindException(cmd, "cmd"))
-
-			val commandResults = cmd.applyInternal()
-			commandResults.size should be (3)
-			commandResults.map(_.modifiedRelationship).toSet should be (Set(rel41, rel35, rel37))
+			cmd.studentTutorMapping.isEmpty should be {true}
 		}
 	}
 
-	@Test def testChangeStudentsForAgent = withUser("boombastic") {
-		new Environment {
-			// set up a new relationship to add
-			val rel14 = StudentRelationship(staff1, relationshipType, student4)
-			service.saveStudentRelationships(relationshipType, student4.mostSignificantCourseDetails.head, Seq(staff1)) returns (Seq(rel14))
+	@Test def validateStateAddRel() = withUser("boombastic") {
+		new AddScenario {
 
-			// set up 'mapping' in the command as if from the db
-			cmd.populate()
-			cmd.sort()
+			cmd.studentTutorMapping.size should be (2)
+			cmd.studentTutorMapping(student4).tutorsBefore should be (Set())
+			cmd.studentTutorMapping(student4).tutorsAfter should be (Set(staff4))
+			cmd.studentTutorMapping(student4).oldTutors should be (Set())
+			cmd.studentTutorMapping(student4).newTutors should be (Set(staff4))
 
-			cmd.onBind(new BindException(cmd, "cmd"))
+			cmd.studentTutorMapping(student5).tutorsBefore should be (Set())
+			cmd.studentTutorMapping(student5).tutorsAfter should be (Set(staff3))
+			cmd.studentTutorMapping(student5).oldTutors should be (Set())
+			cmd.studentTutorMapping(student5).newTutors should be (Set(staff3))
 
-			// pre-existing relationships are staff 1 -> student 1, staff2 -> student 1, staff 3 -> student 2
-			// now change staff 1 to map to student 4 instead of student 1:
-			cmd.mapping.get(staff1).addAll(Seq(student4).asJavaCollection)
-			cmd.mapping.get(staff1).removeAll(Seq(student1).asJavaCollection)
-
-			cmd.onBind(new BindException(cmd, "cmd"))
-
-			val commandResults = cmd.applyInternal()
-			commandResults.size should be (2) // one to remove, one to add
-			commandResults.map(_.modifiedRelationship).toSet should be (Set(rel1, rel14))
+			cmd.studentsWithTutorRemoved.size should be (0)
+			cmd.studentsWithTutorAdded.size should be (2)
+			cmd.studentsWithTutorChanged.size should be (0)
 		}
 	}
 
-	@Test def testRemoveAgent = withUser("boombastic") {
-		new Environment {
-			service.listStudentRelationshipsWithMember(relationshipType, staff1) returns (Seq(rel1))
+	@Test def validateStateRemoveRel() = withUser("boombastic") {
+		new RemoveScenario {
 
-			// set up 'mapping' in the command as if from the db
-			cmd.populate()
-			cmd.sort()
+			cmd.studentTutorMapping.size should be (1)
+			cmd.studentTutorMapping(student3).tutorsBefore should be (Set(staff2))
+			cmd.studentTutorMapping(student3).tutorsAfter should be (Set())
+			cmd.studentTutorMapping(student3).oldTutors should be (Set(staff2))
+			cmd.studentTutorMapping(student3).newTutors should be (Set())
 
-			cmd.onBind(new BindException(cmd, "cmd"))
+			cmd.studentsWithTutorRemoved.size should be (1)
+			cmd.studentsWithTutorAdded.size should be (0)
+			cmd.studentsWithTutorChanged.size should be (0)
 
-			cmd.mapping.remove(staff1)
+		}
+	}
 
-			cmd.onBind(new BindException(cmd, "cmd"))
+	@Test def validateStateSwapTutor() = withUser("boombastic") {
+		new SwapScenario {
+			cmd.studentTutorMapping.size should be (1)
+			cmd.studentTutorMapping(student3).tutorsBefore should be (Set(staff2))
+			cmd.studentTutorMapping(student3).tutorsAfter should be (Set(staff1))
+			cmd.studentTutorMapping(student3).oldTutors should be (Set(staff2))
+			cmd.studentTutorMapping(student3).newTutors should be (Set(staff1))
 
-			val commandResults = cmd.applyInternal()
-			commandResults.size should be (1)
-			commandResults.map(_.modifiedRelationship).toSet should be (Set(rel1))
+			cmd.studentsWithTutorRemoved.size should be (0)
+			cmd.studentsWithTutorAdded.size should be (0)
+			cmd.studentsWithTutorChanged.size should be (1)
+		}
+	}
+
+	// student 1 has three tutors to start - we remove one and expect to find two left
+	@Test def validateStateRemoveFromMultiple() = withUser("boombastic") {
+		new RemoveFromMultipleScenario {
+			cmd.studentTutorMapping.size should be (1)
+			cmd.studentTutorMapping(student1).tutorsBefore should be (Set(staff1, staff2, staff4))
+			cmd.studentTutorMapping(student1).tutorsAfter should be (Set(staff2, staff4))
+			cmd.studentTutorMapping(student1).oldTutors should be (Set(staff1))
+			cmd.studentTutorMapping(student1).newTutors should be (Set())
+
+			cmd.studentsWithTutorRemoved.size should be (1)
+			cmd.studentsWithTutorAdded.size should be (0)
+			cmd.studentsWithTutorChanged.size should be (0)
+		}
+	}
+
+	// student 1 has three tutors to start - we add a fourth
+	@Test def validateStateAddToMultiple() = withUser("boombastic") {
+		new AddToMultipleScenario {
+			cmd.studentTutorMapping.size should be (1)
+			cmd.studentTutorMapping(student1).tutorsBefore should be (Set(staff1, staff2, staff4))
+			cmd.studentTutorMapping(student1).tutorsAfter should be (Set(staff1, staff2, staff3, staff4))
+			cmd.studentTutorMapping(student1).oldTutors should be (Set())
+			cmd.studentTutorMapping(student1).newTutors should be (Set(staff3))
+
+			cmd.studentsWithTutorRemoved.size should be (0)
+			cmd.studentsWithTutorAdded.size should be (1)
+			cmd.studentsWithTutorChanged.size should be (0)
+		}
+	}
+
+	@Test def validateEndCommandsNoChange() = withUser("boombastic") {
+		new NoChangeScenario {
+			cmd.getEndStudentRelationshipCommands.size should be (0)
+		}
+	}
+
+	@Test def validateEndCommandsAdd() = withUser("boombastic") {
+		new AddScenario {
+			cmd.getEndStudentRelationshipCommands.size should be (0)
+		}
+	}
+
+	@Test def validateEndCommandsRemove() = withUser("boombastic") {
+		new RemoveScenario {
+			val endCommands = cmd.getEndStudentRelationshipCommands
+			endCommands.size should be (1)
+			endCommands.head.relationship should be (rel23)
+		}
+	}
+
+	@Test def validateEndCommandsSwap() = withUser("boombastic") {
+		new SwapScenario {
+			val endCommands = cmd.getEndStudentRelationshipCommands
+			endCommands.size should be (0)
+		}
+	}
+
+	@Test def validateEndCommandsRemoveMulti() = withUser("boombastic") {
+		new RemoveFromMultipleScenario {
+			val endCommands = cmd.getEndStudentRelationshipCommands
+			endCommands.size should be (1)
+			endCommands.head.relationship should be (rel11)
+
+		}
+	}
+
+	@Test def validateEndCommandsAddMulti() = withUser("boombastic") {
+		new AddToMultipleScenario  {
+			cmd.getEndStudentRelationshipCommands.size should be (0)
+		}
+	}
+
+	@Test def validateEditCommandsNoChange() = withUser("boombastic") {
+		new NoChangeScenario {
+			cmd.getEditStudentRelationshipCommands.size should be (0)
+		}
+	}
+
+	@Test def validateEditCommandsAdd() = withUser("boombastic") {
+		new AddScenario {
+			val editCommands = cmd.getEditStudentRelationshipCommands
+			editCommands.size should be (2)
+
+			editCommands.exists(editCommand =>
+				editCommand.agent == staff4 &&
+				editCommand.studentCourseDetails == student4.mostSignificantCourseDetails.get &&
+				editCommand.oldAgents.isEmpty
+			) should be { true }
+
+			editCommands.exists(editCommand =>
+				editCommand.agent == staff3 &&
+					editCommand.studentCourseDetails == student5.mostSignificantCourseDetails.get &&
+					editCommand.oldAgents.isEmpty
+			) should be { true }
+		}
+	}
+
+	@Test def validateEditCommandsRemove() = withUser("boombastic") {
+		new RemoveScenario {
+			cmd.getEditStudentRelationshipCommands.size should be (0)
+		}
+	}
+
+	@Test def validateEditCommandsSwap() = withUser("boombastic") {
+		new SwapScenario {
+			val editCommand = cmd.getEditStudentRelationshipCommands.head
+
+			editCommand.agent should be(staff1)
+			editCommand.studentCourseDetails should be(student3.mostSignificantCourseDetails.get)
+			editCommand.oldAgents should be (Seq(staff2))
+		}
+	}
+
+	@Test def validateEditCommandsRemoveMulti() = withUser("boombastic") {
+		new RemoveFromMultipleScenario {
+			cmd.getEditStudentRelationshipCommands.size should be (0)
+		}
+	}
+
+	@Test def validateEditCommandsAddMulti() = withUser("boombastic") {
+		new AddToMultipleScenario  {
+			val editCommand = cmd.getEditStudentRelationshipCommands.head
+
+			editCommand.agent should be (staff3)
+			editCommand.studentCourseDetails should be (student1.mostSignificantCourseDetails.get)
+			editCommand.oldAgents.isEmpty should be {true}
+
 		}
 	}
 
