@@ -50,13 +50,19 @@ class EndStudentRelationshipCommand(
 		val notifications = relationships.flatMap {
 			relationship => {
 				val studentNotification: Option[Notification[StudentRelationship, Unit]] =
-					if (notifyStudent)
-						Some(Notification.init(new StudentRelationshipChangeToStudentNotification, currentUser.apparentUser, Seq(relationship)))
+					if (notifyStudent) {
+						val notification = Notification.init(new StudentRelationshipChangeToStudentNotification, currentUser.apparentUser, Seq(relationship))
+						notification.oldAgentIds.value = oldAgents.map(_.universityId)
+						Some(notification)
+					}
 					else None
 
 				val oldAgentNotification: Option[Notification[StudentRelationship, Unit]] =
-					if (notifyOldAgents)
-						Some(Notification.init(new StudentRelationshipChangeToOldAgentNotification, currentUser.apparentUser, Seq(relationship)))
+					if (notifyOldAgents) {
+						val notification = Notification.init(new StudentRelationshipChangeToOldAgentNotification, currentUser.apparentUser, Seq(relationship))
+						notification.oldAgentIds.value = oldAgents.map(_.universityId)
+						Some(notification)
+					}
 					else
 						None
 

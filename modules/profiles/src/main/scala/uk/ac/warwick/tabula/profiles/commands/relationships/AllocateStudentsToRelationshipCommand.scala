@@ -7,10 +7,8 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.services.SecurityService
+import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, SecurityService}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.spring.Wire
@@ -20,6 +18,12 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.profiles.services.docconversion.RawStudentRelationshipExtractor
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.helpers.ReverseMapHelper.reverseMap
+
+case class TutorInfoForStudent(tutorsBefore: Set[Member], tutorsAfter: Set[Member]) {
+	def oldTutors = tutorsBefore -- tutorsAfter
+	def newTutors = tutorsAfter -- tutorsBefore
+}
 
 class AllocateStudentsToRelationshipCommand(val department: Department, val relationshipType: StudentRelationshipType, val viewer: CurrentUser)
 	extends Command[Seq[StudentRelationshipChange]]
@@ -28,9 +32,8 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		with BindListener
 		with RelationshipChangingCommand
 		with MemberCollectionHelper
-		with NotifiesAffectedStudents {
-
-	type AgentMap = Map[Member, Set[StudentMember]]
+		with NotifiesAffectedStudents
+		with FetchesRelationshipMappings {
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), mandatory(department))
 
@@ -43,36 +46,77 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		throw new ItemNotFoundException()
 	}
 
+	var securityService = Wire[SecurityService]
+	var relationshipService = Wire[RelationshipService]
+	var profileService = Wire[ProfileService]
+	var relationshipExtractor = Wire[RawStudentRelationshipExtractor]
+
 	// Sort members by last name, first name
 	implicit val defaultOrderingForMember = Ordering.by { m: Member => (Option(m.lastName), Option(m.firstName), Option(m.universityId)) }
 
 	val apparentUser = viewer.apparentUser
 
-	var service = Wire[RelationshipService]
-	var profileService = Wire[ProfileService]
-	var securityService = Wire[SecurityService]
-
-	var relationshipExtractor = Wire[RawStudentRelationshipExtractor]
-
 	var additionalAgents: JList[String] = JArrayList()
 
 	var previouslyAllocatedMapping: JMap[Member, JList[Member]] = _ // populated by hidden field in form
 
-	var memberAgentMappingsBefore: AgentMap = _
-	var studentsBefore: Set[StudentMember] = _
+	lazy val memberAgentMappingsAfter: Map[Member, Set[StudentMember]] = mapping.asScala.map {
+		case (key, value) => (key, value.asScala.toSet)
+	}.map {
+		case (key, value) => (key, value.collect { case s: StudentMember => s})
+	}.toMap // .toMap to make it immutable and avoid type issues
 
-	var memberAgentMappingsAfter: AgentMap = _
-	var studentsAfter: Set[StudentMember] = _
+	lazy val studentTutorMapping: Map[StudentMember, TutorInfoForStudent] = {
+		val studentTutorsAfterMap = reverseMap(memberAgentMappingsAfter)
 
-	var studentsWithTutorRemoved: Set[StudentMember] = _
-	var studentsWithTutorAdded: Set[StudentMember] = _
-	var studentsWithTutorChanged: Set[StudentMember] = _
+		val studentTutorsBeforeMap = {
+			val allMappings = getStudentAgentMappings(department, relationshipType)
+			if (spreadsheet)
+				// for the spreadsheet, only look at students who appear in the spreadsheet - everyone else should stay the same
+				allMappings.filter { case (student, agents) => studentTutorsAfterMap.contains(student) }
+			else
+				allMappings
+		}
 
-	var studentsWithTutorChangedOrAdded: Set[StudentMember] = _
+		def hasTutorChange(student: StudentMember): Boolean = {
+			val oldTutors = studentTutorsBeforeMap.get(student)
+			val newTutors = studentTutorsAfterMap.get(student)
 
-	var newOrChangedMapping: AgentMap = _
+			oldTutors != newTutors
+		}
 
-	var hasChanges: Boolean = _
+		val allStudents = studentTutorsBeforeMap.keySet ++ studentTutorsAfterMap.keySet
+
+		// make data set - only include students with changes
+		val result = for (student <- allStudents; if hasTutorChange(student)) yield {
+			student -> TutorInfoForStudent(studentTutorsBeforeMap.get(student).toSeq.flatten.toSet, studentTutorsAfterMap.get(student).toSeq.flatten.toSet)
+		}
+
+		result.toMap
+	}
+
+	// students who have only had tutors removed and no new tutors added
+	lazy val studentsWithTutorRemoved = studentTutorMapping.filter { case (student, tutorInfo) =>
+		tutorInfo.tutorsBefore != tutorInfo.tutorsAfter &&
+		tutorInfo.tutorsAfter.subsetOf(tutorInfo.tutorsBefore)
+	}
+
+	// students who have only had tutors added and no tutors removed
+	lazy val studentsWithTutorAdded = studentTutorMapping.filter { case (student, tutorInfo) =>
+		tutorInfo.tutorsBefore != tutorInfo.tutorsAfter &&
+		tutorInfo.tutorsBefore.subsetOf(tutorInfo.tutorsAfter)
+	}
+
+	// everyone else
+	lazy val studentsWithTutorChanged = studentTutorMapping.filter { case (student, tutorInfo) =>
+		val students = studentTutorMapping.keySet -- (studentsWithTutorRemoved.keySet ++ studentsWithTutorAdded.keySet)
+		students.contains(student)
+	}
+
+
+	lazy val studentsWithTutorChangedOrAdded = studentsWithTutorChanged ++ studentsWithTutorAdded
+
+	def hasChanges = studentsWithTutorRemoved.nonEmpty || studentsWithTutorAdded.nonEmpty || studentsWithTutorChanged.nonEmpty
 
 	var spreadsheet: Boolean = _
 
@@ -81,6 +125,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 		initialiseData()
 	}
+
 
 	def initialiseData() {
 		removeBlankAgents()
@@ -93,42 +138,6 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		}
 			.foreach { member =>
 			if (!mapping.containsKey(member)) mapping.put(member, JArrayList())
-		}
-
-		memberAgentMappingsAfter = mapping.asScala.map {
-			case (key, value) => (key, value.asScala.toSet)
-		}.map {
-			case (key, value) => (key, value.collect { case s: StudentMember => s})
-		}.toMap // .toMap to make it immutable and avoid type issues
-
-		studentsAfter = memberAgentMappingsAfter.values.flatten.toSet
-
-		memberAgentMappingsBefore = getMemberAgentMappingsBefore
-		studentsBefore = memberAgentMappingsBefore.values.flatten.toSet
-
-		studentsWithTutorRemoved = studentsBefore.filterNot(memberAgentMappingsAfter.values.flatten.toSet)
-		studentsWithTutorAdded = studentsAfter.filterNot(memberAgentMappingsBefore.values.flatten.toSet)
-		studentsWithTutorChanged = studentsBefore.intersect(studentsAfter).filter(isTutorChanged)
-
-		studentsWithTutorChangedOrAdded = studentsWithTutorChanged ++ studentsWithTutorAdded
-
-		newOrChangedMapping = getNewOrChangedMapping
-
-		hasChanges = (studentsWithTutorRemoved.size + studentsWithTutorAdded.size + studentsWithTutorChanged.size) > 0
-
-		def getNewOrChangedMapping: AgentMap = {
-			val mappingsNewOrChangedMutable = scala.collection.mutable.Map[Member, Set[StudentMember]]()
-
-			for (agentMap <- memberAgentMappingsAfter) {
-				val agent = agentMap._1
-				val studentsForAgentAfter = agentMap._2
-				val studentsForAgentBefore = if (memberAgentMappingsBefore.contains(agent)) memberAgentMappingsBefore(agent) else Set[StudentMember]()
-				val changedStudentsForAgent = (studentsForAgentBefore ++ studentsForAgentAfter) -- studentsForAgentBefore.intersect(studentsForAgentAfter)
-				if (!changedStudentsForAgent.isEmpty) {
-					mappingsNewOrChangedMutable(agent) = changedStudentsForAgent
-				}
-			}
-			mappingsNewOrChangedMutable.toMap
 		}
 
 		def removeBlankAgents() {
@@ -156,7 +165,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 	// Populate 'mapping' with existing relationships between agents and students, from the database.
 	def populateMapping() {
-		service
+		relationshipService
 			.listStudentRelationshipsByDepartment(relationshipType, department) // get all relationships by dept
 			.groupBy(_.agent) // group into map by agent university id
 			.foreach { case (agent, students) =>
@@ -174,7 +183,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	def populateUnallocated() {
 		unallocated.clear()
 		unallocated.addAll(
-			service
+			relationshipService
 				.listStudentsWithoutRelationship(relationshipType, department)
 				.asJavaCollection
 		)
@@ -230,19 +239,12 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	 * It is not currently possible to add non-member agents through the allocate screen,
 	 *  but existing relationships with non-member agents are preserved (except where the agent is replaced).
 	 */
+
 	final def applyInternal(): Seq[StudentRelationshipChange] = transactional() {
-		val memberAgentsBefore = memberAgentMappingsBefore.keySet.toSet // .toSet to make it immutable and avoid type issues
-		val memberAgentsAfter = memberAgentMappingsAfter.keySet.toSet // .toSet to make it immutable and avoid type issues
+		val endCommands = getEndStudentRelationshipCommands
+		val editCommands = getEditStudentRelationshipCommands
 
-		val newMemberAgents = memberAgentsAfter.filterNot(memberAgentsBefore)
-		val droppedMemberAgents = memberAgentsBefore.filterNot(memberAgentsAfter)
-		val changedMemberAgents = memberAgentsAfter.intersect(memberAgentsBefore).filterNot(agent => memberAgentMappingsBefore.get(agent).equals(memberAgentMappingsAfter.get(agent)))
-
-		val removeCommandsForDroppedAgents = getRemoveCommandsForDroppedAgents(droppedMemberAgents)
-		val removeCommandsForChangedAgents = getRemoveCommandsForChangedAgents(memberAgentMappingsBefore, memberAgentMappingsAfter, changedMemberAgents)
-		val editCommands = getEditStudentCommands(memberAgentMappingsBefore, memberAgentMappingsAfter, newMemberAgents ++ changedMemberAgents)
-
-		val commandResults = (editCommands ++ removeCommandsForChangedAgents ++ removeCommandsForDroppedAgents).map { cmd =>
+		val commandResults = (editCommands ++ endCommands).map { cmd =>
 			/*
 			 * Defensively code against these defaults changing in future. We do NOT want the
 			 * sub-command to send notifications - we'll do that ourselves
@@ -260,136 +262,34 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		commandResults.flatten.toSeq
 	}
 
-	def isTutorChanged(student: StudentMember): Boolean = {
-		val tutorsBefore = memberAgentMappingsBefore.filter(agentMap => agentMap._2.contains(student)).keySet
-		val tutorsAfter = memberAgentMappingsAfter.filter(agentMap => agentMap._2.contains(student)).keySet
-		tutorsBefore != tutorsAfter
-	}
-
-	def getMemberAgentMappingsBefore: AgentMap = {
-		if (spreadsheet) {
-			// spreadsheet upload - we only want the students who are included in the input data set (studentsAfter) to be included in comparisons
-			assert(studentsAfter != null)
-			val mappingsBeforeMutable = scala.collection.mutable.Map[Member, Set[StudentMember]]()
-
-			for (agentMap <- getMemberAgentMappingsFromDatabase) {
-				val agent = agentMap._1
-				val students = agentMap._2 match {
-					case studentSet: Set[StudentMember] => studentSet.filter(studentsAfter.contains(_))
-					case _ => Set[StudentMember]()
-				}
-
-				if (!students.isEmpty) mappingsBeforeMutable(agent) = students
-			}
-			mappingsBeforeMutable.toMap
-		}
-		else {
-			getMemberAgentMappingsFromDatabase
-		}
-	}
-
-	def getMemberAgentMappingsFromDatabase: AgentMap = {
-		val memberAgentMappingsFromDb = scala.collection.mutable.Map[Member, Set[StudentMember]]()
-
-		service
-			.listStudentRelationshipsByDepartment(relationshipType, department) // get all relationships by dept
-			.groupBy(_.agent) // group into map by agent university id
-			.foreach { case (agent, students) =>
-			if (agent.forall(_.isDigit)) {
-				profileService.getMemberByUniversityId(agent) match {
-					case Some(member) =>
-						memberAgentMappingsFromDb(member) = students.flatMap(_.studentMember).toSet
-					case _ => // the agent isn't a member
-				}
-			}
-		}
-		memberAgentMappingsFromDb.toMap // convert to immutable map
-	}
-
-	// get the commands needed to remove the relationships of this type for dropped agents:
-	def getRemoveCommandsForDroppedAgents(droppedAgents: Set[Member]): Set[EndStudentRelationshipCommand] = {
-		for (
-			agent <- droppedAgents;
-			relationship <- service.listStudentRelationshipsWithMember(relationshipType, agent)
-		) yield {
-			val cmd = new EndStudentRelationshipCommand(relationship, viewer)
-			cmd.maintenanceMode = this.maintenanceMode
-			cmd.relationshipService = service
+	def getEndStudentRelationshipCommands: Set[EndStudentRelationshipCommand] = {
+		val commands = for {
+			(student, tutorInfo) <- studentsWithTutorRemoved
+			retiringAgent <- tutorInfo.oldTutors
+			rel <- relationshipService.getCurrentRelationship(relationshipType, student, retiringAgent)
+			scd <- student.mostSignificantCourseDetails
+		} yield {
+			val cmd = new EndStudentRelationshipCommand(rel, viewer)
+			cmd.maintenanceMode = this.maintenanceMode // override default in case this is being called in a test
 			cmd
 		}
+		commands.toSet
 	}
 
-	/**
-	 * 	getEditStudentCommands
-	 *
-	 * for each member of agentsToEdit, work out which of their relationships are new and
-	 * get the commands needed to add or replace them
-	 *
-	 */
-	def getEditStudentCommands(memberAgentMappingsBefore: AgentMap,
-															memberAgentMappingsAfter: AgentMap,
-															agentsToEdit: Set[Member]): Set[EditStudentRelationshipCommand] = {
-
-		def getStudentsForAgent(agentMap: AgentMap, agent: Member) = agentMap.get(agent) match {
-			case Some(students: Set[StudentMember]) => students
-			case _ => Set[StudentMember]()
+	def getEditStudentRelationshipCommands: Set[EditStudentRelationshipCommand] = {
+		val commands = for {
+			(student, tutorInfo) <- studentsWithTutorChangedOrAdded
+			newAgent <- tutorInfo.newTutors
+			scd <- student.mostSignificantCourseDetails
+		} yield
+		{
+			val cmd = new EditStudentRelationshipCommand(scd, relationshipType, tutorInfo.oldTutors.toSeq, viewer, remove=false)
+			cmd.agent = newAgent
+			cmd.maintenanceMode = this.maintenanceMode // override default in case this is being called in a test
+			cmd.relationshipService = relationshipService // override default in case this is being called in a test
+			cmd
 		}
-
-		(for (agentToEdit <- agentsToEdit) yield {
-
-			// get the old and new student sets for the agent
-			val studentsBefore = getStudentsForAgent(memberAgentMappingsBefore, agentToEdit)
-			val studentsAfter = getStudentsForAgent(memberAgentMappingsAfter, agentToEdit)
-
-			val newStudentMembersForAgent = studentsAfter.filterNot(studentsBefore)
-
-			// and for each, get a command to edit the relationship for that student to change it to the agent
-			newStudentMembersForAgent.flatMap (	stu => {
-				stu.mostSignificantCourseDetails.map ( scd => {
-					val existingAgentsForStudent = service.findCurrentRelationships(relationshipType, scd).flatMap {
-						_.agentMember
-					}
-
-					val cmd = new EditStudentRelationshipCommand(scd, relationshipType, existingAgentsForStudent, viewer, false)
-					cmd.agent = agentToEdit
-					cmd.maintenanceMode = this.maintenanceMode // override default in case this is being called in a test
-					cmd.relationshipService = service // override default in case this is being called in a test
-					cmd
-				})
-			})
-		}).flatten
-	}
-
-	/**
-	 * getRemoveCommandsForChangedAgents: get the commands needed to remove the relationships for students who
-	 * are no longer attached to any tutor tutors with changed tutee sets
-	 */
-	def getRemoveCommandsForChangedAgents(memberAgentMappingsBefore: AgentMap,
-																				memberAgentMappingsAfter: AgentMap,
-																				changedMemberAgents: Set[Member]): Set[EndStudentRelationshipCommand] = {
-
-		val commands = for (agent <- changedMemberAgents) yield {
-			val studentsForAgentBefore = memberAgentMappingsBefore.getOrElse(agent, Set[StudentMember]())
-
-			// drop those students who don't feature at all in the after mapping
-			val studentsToDrop = studentsForAgentBefore.filterNot(memberAgentMappingsAfter.values.flatten.toSet)
-
-			studentsToDrop.flatMap ( stu => {
-				stu.mostSignificantCourseDetails.map (scd => {
-
-					// The next line assumes that there is a relationship for this scd and agent and that the agent is a member.
-					// These are fair assumptions since the data is derived from 'mapping' which is the current state of the db
-					// and which stores agents as staff members.
-					val rel = service.findCurrentRelationships(relationshipType, scd).filter(_.agentMember.getOrElse(throw new ItemNotFoundException).equals(agent)).head
-
-					val cmd = new EndStudentRelationshipCommand(rel, viewer)
-					cmd.maintenanceMode = this.maintenanceMode
-					cmd.relationshipService = service
-					cmd
-				})
-			})
-		}
-		commands.flatten
+		commands.toSet
 	}
 
 	def validateUploadedFile(result: BindingResult) {
@@ -441,3 +341,16 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 }
 
+
+trait FetchesRelationshipMappings {
+	var relationshipService: RelationshipService
+
+	def getStudentAgentMappings(department: Department, relationshipType: StudentRelationshipType) : Map[StudentMember, Set[Member]] =
+		relationshipService
+			.listStudentRelationshipsByDepartment(relationshipType, department) // get all relationships by dept
+			.groupBy(_.studentCourseDetails.student) // group into map by student university id
+			.map { case (student, rels) =>
+				(student, rels.flatMap(_.agentMember).toSet)
+			}
+
+}

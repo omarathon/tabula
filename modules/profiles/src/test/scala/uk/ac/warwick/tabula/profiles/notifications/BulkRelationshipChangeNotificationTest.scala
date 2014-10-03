@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.{Fixtures, TestBase, Mockito}
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 import uk.ac.warwick.tabula.data.model._
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.notifications.{BulkStudentRelationshipNotification, BulkOldAgentRelationshipNotification}
+import uk.ac.warwick.tabula.data.model.notifications.BulkStudentRelationshipNotification
 
 class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 
@@ -18,10 +18,12 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 	val agent0 = Fixtures.member(userType=MemberUserType.Staff ,universityId="0")
 	val agent1 = Fixtures.member(userType=MemberUserType.Staff ,universityId="1")
 	val agent2 = Fixtures.member(userType=MemberUserType.Staff ,universityId="2")
+	val agent3 = Fixtures.member(userType=MemberUserType.Staff ,universityId="3")
 
 	val rel0 = relationship(agent0, new DateTime(2013,1,20, 12,0))
 	val rel1 = relationship(agent1, new DateTime(2013,1,10, 12,0))
 	val rel2 = relationship(agent2, new DateTime(2013,1,1, 12,0))
+	val rel3 = relationship(agent3, new DateTime(2013,1,1, 12,0))
 
 	val rels = Seq(rel0, rel1, rel2)
 
@@ -31,15 +33,16 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 
 	trait Environment {
 		// set the service up to return all three relationships the student
-		service.getRelationships(Tutor, student) returns (rels)
+		service.getRelationships(Tutor, student) returns rels
 
-		profiles.getMemberByUniversityId("1") returns (Some(agent1))
-		profiles.getMemberByUniversityId("2") returns (Some(agent2))
-
+		profiles.getMemberByUniversityId("0") returns Some(agent0)
+		profiles.getMemberByUniversityId("1") returns Some(agent1)
+		profiles.getMemberByUniversityId("2") returns Some(agent2)
+		profiles.getMemberByUniversityId("3") returns Some(agent3)
 	}
 
 	@Test
-	def studentNotification() {
+	def studentNotificationRelEnded() {
 		new Environment {
 			val notification = new BulkStudentRelationshipNotification
 			notification.relationshipService = service
@@ -49,14 +52,38 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 			notification.oldAgentIds.value = Seq(agent2.universityId)
 			notification.oldAgents should be (Seq(agent2))
 
-			notification.newAgent should be (None) // rel1 is ended, so there should be no new agent
-
-			val notification2 = new BulkStudentRelationshipNotification
-			notification2.relationshipService = service
-			notification2.addItems(Seq(rel2))
-			notification2.newAgent.get.universityId should be ("2")	// rel2 is not ended, so the new agent for the notification is the agent of the relationship
+			notification.newAgents.isEmpty should be {true} // rel1 is ended, so there should be no new agent
 		}
 	}
+
+	@Test
+	def studentNotificationNewAgent() {
+		new Environment {
+			val notification = new BulkStudentRelationshipNotification
+			notification.relationshipService = service
+			notification.profileService = profiles
+
+			notification.addItems(Seq(rel2))
+			notification.newAgents.head.universityId should be ("2")	// rel2 is not ended, so the new agent for the notification is the agent of the relationship
+		}
+	}
+
+	@Test
+	def studentNotificationMultipleAgentsAddedAndRemoved() {
+		new Environment {
+			val notification = new BulkStudentRelationshipNotification
+			notification.relationshipService = service
+			notification.profileService = profiles
+
+			notification.addItems(Seq(rel2, rel3))
+			notification.oldAgentIds.value = Seq(agent0.universityId, agent1.universityId)
+
+			notification.newAgents.size should be (2)
+			notification.oldAgents.size should be (2)
+
+		}
+	}
+
 
 	// create a relationship between spr code "student/1" and the given agent, of relationship type Tutor
 	def relationship(agent: Member, startDate: DateTime): MemberStudentRelationship = {

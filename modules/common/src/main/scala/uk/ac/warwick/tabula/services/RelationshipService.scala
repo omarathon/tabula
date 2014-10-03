@@ -26,6 +26,8 @@ trait RelationshipService {
 	def saveOrUpdate(relationship: StudentRelationship)
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
+	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship]
+
 	def getRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def saveStudentRelationships(
 		relationshipType: StudentRelationshipType,
@@ -81,6 +83,10 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional() {
 		relationshipDao.getCurrentRelationships(relationshipType, student)
+	}
+
+	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship] = transactional() {
+		relationshipDao.getCurrentRelationship(relationshipType, student, agent)
 	}
 
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{Member, Department, StudentRelationshipType}
 import uk.ac.warwick.tabula.profiles.commands.relationships.{TransientStudentRelationshipTemplateCommand, AllocateStudentsToRelationshipCommand}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 import scala.collection.JavaConverters._
+import scala.collection.immutable.ListMap
 
 /**
  * Allocates students to relationships in a department.
@@ -64,7 +65,15 @@ class AllocateStudentsToRelationshipController extends ProfilesController {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
-			Mav("relationships/seek_confirmation")
+
+			val changed = cmd.studentsWithTutorChanged.map { case (student, tutorInfo) => (student.universityId , tutorInfo.tutorsAfter.toSeq) }
+			val added = cmd.studentsWithTutorAdded.map { case (student, tutorInfo) => (student.universityId , tutorInfo.tutorsAfter.toSeq) }
+
+			Mav("relationships/seek_confirmation",
+				"studentNameMap" -> cmd.studentsWithTutorChangedOrAdded.map { case (student, tutorInfo) => (student.universityId, student.fullName)},
+				"changed" -> changed,
+				"added" -> added
+			)
 		}
 	}
 

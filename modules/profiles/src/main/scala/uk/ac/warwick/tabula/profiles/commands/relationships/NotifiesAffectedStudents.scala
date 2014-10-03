@@ -1,11 +1,9 @@
 package uk.ac.warwick.tabula.profiles.commands.relationships
 
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands.Notifies
-import uk.ac.warwick.tabula.data.model.{Member, StudentMember, Notification, Department, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{Member, Notification, Department, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.notifications.{BulkOldAgentRelationshipNotification, BulkNewAgentRelationshipNotification, BulkStudentRelationshipNotification}
 
@@ -14,7 +12,7 @@ trait RelationshipChangingCommand {
 	val relationshipType: StudentRelationshipType
 	val apparentUser: User
 	
-	var service: RelationshipService
+	var relationshipService: RelationshipService
 	var profileService: ProfileService
 }
 
@@ -26,15 +24,30 @@ trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], 
 	var notifyNewAgent: Boolean = false
 
 	def emit(relationshipChanges: Seq[StudentRelationshipChange]): Seq[Notification[StudentRelationship, Unit]] = {
+
 		val studentNotifications = if (notifyStudent) {
-			relationshipChanges.flatMap {
-				change =>
-					change.modifiedRelationship.studentMember.map { student =>
-						val notification = Notification.init(new BulkStudentRelationshipNotification, apparentUser, change.modifiedRelationship)
-						notification.profileService = profileService // the auto-wired version is no good for testing
-						notification.oldAgentIds.value = change.oldAgents.map(_.universityId)
-						notification
-					}
+			relationshipChanges
+				.groupBy(_.modifiedRelationship.studentCourseDetails.student)
+				.map { case (student, changes) =>
+					val relationships = changes.map(_.modifiedRelationship)
+					val notification = Notification.init(new BulkStudentRelationshipNotification, apparentUser, relationships)
+					notification.profileService = profileService // the auto-wired version is no good for testing
+					notification.oldAgentIds.value = changes.flatMap(_.oldAgents).distinct.map(_.universityId)
+					notification
+			}
+		} else Nil
+
+		val newAgentNotifications = if (notifyNewAgent) {
+			relationshipChanges
+				.groupBy(_.modifiedRelationship.agent)
+				.filter { case (agent, changes) => agent.forall(_.isDigit) }
+				.flatMap { case (agent, changes) => profileService.getMemberByUniversityId(agent) map { (_, changes) } }
+				.map { case (agent, changes) =>
+				val relationships = changes.map { _.modifiedRelationship }.filter(_.endDate == null) // TAB-2486
+				val notification = Notification.init(new BulkNewAgentRelationshipNotification, apparentUser, relationships)
+				notification.profileService = profileService // the auto-wired version is no good for testing
+				notification
+				// can't set old agents as each tutee for the new agent will have a different set
 			}
 		} else Nil
 
@@ -42,17 +55,16 @@ trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], 
 		// We've got a sequence of modified relationships, each with a seq of old tutors.
 		// We need to group by old tutors, not by sets of old tutors - so first the
 		// changes are expanded so there's one for each oldAgent/modified relationship combination.
-			val changePerSingleOldAgent = (for (change <- relationshipChanges) yield {
-				for (oldAgent <- change.oldAgents) yield {
-					(oldAgent, change.modifiedRelationship)
-				}
-			}).flatten
 
-			// the new set of changes can then be grouped by old tutor so each old tutor gets just one notification
-			// for all the relationships where their relationship has been ended
-			changePerSingleOldAgent
-				.groupBy(_._1)
-				.map { case (oldAgent: Member, changes) =>
+			val oldAgentAndRelSeq = for (
+				change <- relationshipChanges;
+				oldAgent <- change.oldAgents
+			) yield (oldAgent, change.modifiedRelationship)
+
+
+			oldAgentAndRelSeq
+				.groupBy(_._1) // group by old agent
+				.map { case (oldAgent, changes) =>
 				val relationships = changes.map { _._2 }
 				val notification = Notification.init(new BulkOldAgentRelationshipNotification, apparentUser, relationships)
 				notification.profileService = profileService // the auto-wired version is no good for testing
@@ -62,19 +74,6 @@ trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], 
 
 		} else Nil
 
-		val newAgentNotifications = if (notifyNewAgent) {
-			relationshipChanges
-				.groupBy(_.modifiedRelationship.agent)
-				.filter { case (agent, changes) => agent.forall(_.isDigit) }
-				.flatMap { case (agent, changes) => profileService.getMemberByUniversityId(agent) map { (_, changes) } }
-				.map { case (agent, changes) =>
-					val relationships = changes.map { _.modifiedRelationship }.filter(_.endDate == null) // TAB-2486
-					Notification.init(new BulkNewAgentRelationshipNotification, apparentUser, relationships)
-
-					// can't set old agents as each tutee for the new agent will have a different set
-				}
-		} else Nil
-
-		studentNotifications ++ oldAgentNotifications ++ newAgentNotifications
+		studentNotifications.toSeq ++ oldAgentNotifications ++ newAgentNotifications
 	}
 }
