@@ -3,6 +3,8 @@ package uk.ac.warwick.tabula.data
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model._
 import org.hibernate.criterion.{Order, Restrictions}
+import org.hibernate.criterion.Order._
+import org.hibernate.criterion.Restrictions._
 import uk.ac.warwick.tabula.AcademicYear
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
@@ -187,11 +189,20 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 			else moduleCodes(department)
 
 		val allComponents:Seq[AssessmentComponent] = {
-			session.newQuery[AssessmentComponent]("""select ac from AssessmentComponent ac
-							where ac.departmentCode = :rootdeptcode
-							order by ac.moduleCode asc, ac.sequence asc""")
-							.setString("rootdeptcode", department.rootDepartment.code.toUpperCase)
-							.seq filter isInteresting
+			val allModuleCodes = deptModuleCodes.filter(_.length == 5).map { _.toUpperCase() }
+
+			if (allModuleCodes.isEmpty) Nil
+			else {
+				val c = session.newCriteria[AssessmentComponent]
+				val moduleCodeRestriction =
+					ScalaRestriction.startsWithIfNotEmpty(
+						"moduleCode",
+						allModuleCodes
+					)
+				moduleCodeRestriction.foreach(c.add)
+
+				c.addOrder(asc("moduleCode")).addOrder(asc("sequence")).seq filter isInteresting
+			}
 		}
 
 		allComponents filter {
