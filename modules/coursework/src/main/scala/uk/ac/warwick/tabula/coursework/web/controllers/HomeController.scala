@@ -63,7 +63,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.StudentCourseworkFul
 					"assignmentsForMarking" -> info.assignmentsForMarking,
 					"ownedDepartments" -> info.ownedDepartments,
 					"ownedModule" -> info.ownedModules,
-					"ownedModuleDepartments" -> info.ownedModules.map { _.department },
+					"ownedModuleDepartments" -> info.ownedModules.map { _.adminDepartment },
 					"activities" -> info.activities,
 					"ajax" -> ajax)
 			case _ => Mav("home/view")

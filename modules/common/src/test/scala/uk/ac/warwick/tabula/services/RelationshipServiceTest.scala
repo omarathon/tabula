@@ -268,11 +268,11 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		session.save(ugCourse)
 
 		val route1 = Fixtures.route("UXXX", "Some route")
-		route1.department = dept1
+		route1.adminDepartment = dept1
 		session.save(route1)
 
 		val route2 = Fixtures.route("UYYY", "Some other route")
-		route2.department = dept2
+		route2.adminDepartment = dept2
 		session.save(route2)
 
 		session.flush()
@@ -359,11 +359,11 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		session.saveOrUpdate(pgrCourse)
 
 		val route1 = Fixtures.route("UXXX", "Some route")
-		route1.department = dept1
+		route1.adminDepartment = dept1
 		session.save(route1)
 
 		val route2 = Fixtures.route("UYYY", "Some other route")
-		route2.department = dept2
+		route2.adminDepartment = dept2
 		session.save(route2)
 
 		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)

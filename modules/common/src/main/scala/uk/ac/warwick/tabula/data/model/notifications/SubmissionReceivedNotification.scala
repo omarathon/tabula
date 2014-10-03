@@ -75,7 +75,7 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 			roleGrantedUsers ++ explicitlyGrantedUsers
 		}
 
-		val allAdmins = usersWithPermission(assignment) ++ usersWithPermission(module) ++ usersWithPermission(module.department)
+		val allAdmins = usersWithPermission(assignment) ++ usersWithPermission(module) ++ usersWithPermission(module.adminDepartment)
 		allAdmins.toSeq
 			.filter { user => securityService.can(new CurrentUser(user, user), requiredPermission, submission) }
 			.filter(canEmailUser)

@@ -31,31 +31,31 @@ object Routes {
 		def sortRoutes(department: Department) = context + "/department/%s/sort-routes" format (encoded(department.code))
 
 		object customRoles {
-			def apply(department: Department) = s"${context}/department/${encoded(department.code)}/customroles/list"
-			def add(department: Department) = s"${context}/department/${encoded(department.code)}/customroles/list"
-			def edit(definition: CustomRoleDefinition) = s"${context}/department/${encoded(definition.department.code)}/customroles/${encoded(definition.id)}/edit"
-			def delete(definition: CustomRoleDefinition) = s"${context}/department/${encoded(definition.department.code)}/customroles/${encoded(definition.id)}/delete"
+			def apply(department: Department) = s"$context/department/${encoded(department.code)}/customroles/list"
+			def add(department: Department) = s"$context/department/${encoded(department.code)}/customroles/list"
+			def edit(definition: CustomRoleDefinition) = s"$context/department/${encoded(definition.department.code)}/customroles/${encoded(definition.id)}/edit"
+			def delete(definition: CustomRoleDefinition) = s"$context/department/${encoded(definition.department.code)}/customroles/${encoded(definition.id)}/delete"
 
-			def overrides(definition: CustomRoleDefinition) = s"${context}/department/${encoded(definition.department.code)}/customroles/${encoded(definition.id)}/overrides/list"
-			def addOverride(definition: CustomRoleDefinition) = s"${context}/department/${encoded(definition.department.code)}/customroles/${encoded(definition.id)}/overrides/add"
-			def deleteOverride(roleOverride: RoleOverride) = s"${context}/department/${encoded(roleOverride.customRoleDefinition.department.code)}/customroles/${encoded(roleOverride.customRoleDefinition.id)}/overrides/${encoded(roleOverride.id)}/delete"
+			def overrides(definition: CustomRoleDefinition) = s"$context/department/${encoded(definition.department.code)}/customroles/${encoded(definition.id)}/overrides/list"
+			def addOverride(definition: CustomRoleDefinition) = s"$context/department/${encoded(definition.department.code)}/customroles/${encoded(definition.id)}/overrides/add"
+			def deleteOverride(roleOverride: RoleOverride) = s"$context/department/${encoded(roleOverride.customRoleDefinition.department.code)}/customroles/${encoded(roleOverride.customRoleDefinition.id)}/overrides/${encoded(roleOverride.id)}/delete"
 		}
 	}
 
 	object module {
-		def apply(module: Module) = department(module.department) + "#module-" + encoded(module.code)
+		def apply(module: Module) = department(module.adminDepartment) + "#module-" + encoded(module.code)
 
 		def permissions(module: Module) = context + "/module/%s/permissions" format (encoded(module.code))
 	}
 
 	object route {
-		def apply(route: Route) = department(route.department) + "#route-" + encoded(route.code)
+		def apply(route: Route) = department(route.adminDepartment) + "#route-" + encoded(route.code)
 
 		def permissions(route: Route) = context + "/route/%s/permissions" format (encoded(route.code))
 	}
 
 	object permissions {
 		def apply[A <: PermissionsTarget](target: A) =
-			s"${context}/permissions/${encoded(target.urlCategory)}/${encoded(target.urlSlug)}"
+			s"$context/permissions/${encoded(target.urlCategory)}/${encoded(target.urlSlug)}"
 	}
 }

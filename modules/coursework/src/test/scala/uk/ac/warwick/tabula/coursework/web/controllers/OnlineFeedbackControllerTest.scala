@@ -15,7 +15,7 @@ class OnlineFeedbackControllerTest extends TestBase {
 		val department = new Department
 		department.code = "hr"
 		val module = new Module
-		module.department = department
+		module.adminDepartment = department
 		module.code = "hrn101"
 		val assignment = new Assignment
 		assignment.module = module
@@ -46,7 +46,7 @@ class OnlineFeedbackFormControllerTest extends TestBase with Mockito {
 		val department = new Department
 		department.code = "hr"
 		val module = new Module
-		module.department = department
+		module.adminDepartment = department
 		module.code = "hrn101"
 		val assignment = new Assignment
 		assignment.module = module

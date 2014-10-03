@@ -30,7 +30,7 @@ class DeleteSubmissionsAndFeedback extends CourseworkController {
 		Mav("admin/assignments/submissionsandfeedback/delete",
 			"assignment" -> assignment)
 			.crumbs(
-					Breadcrumbs.Department(assignment.module.department), 
+					Breadcrumbs.Department(assignment.module.adminDepartment),
 					Breadcrumbs.Module(assignment.module))
 
 	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))

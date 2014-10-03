@@ -19,7 +19,7 @@ class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
 		val userLookup = mock[UserLookupService]
 		val groupSet = new SmallGroupSet
 		groupSet.module = Fixtures.module("in101")
-		groupSet.module.department = Fixtures.department("in")
+		groupSet.module.adminDepartment = Fixtures.department("in")
 
 		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
 			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)

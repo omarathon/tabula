@@ -27,7 +27,7 @@ class ModulePickerController extends BaseController {
 					"id" -> result.module.id,
 					"code" -> result.module.code,
 					"name" -> result.module.name,
-					"department" -> result.module.department.name,
+					"department" -> result.module.adminDepartment.name,
 					"hasSmallGroups" -> result.hasSmallGroups,
 					"hasAssignments" -> result.hasAssignments
 				))

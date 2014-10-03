@@ -23,7 +23,7 @@ class SmallGroupTutorRoleProvider extends RoleProvider {
 			.filter { _.groupSet.releasedToTutors }
 		  .distinct
 		  .map { group =>
-		 	  customRoleFor(group.groupSet.module.department)(SmallGroupTutorRoleDefinition, group).getOrElse(SmallGroupTutor(group))
+		 	  customRoleFor(group.groupSet.module.adminDepartment)(SmallGroupTutorRoleDefinition, group).getOrElse(SmallGroupTutor(group))
 		 	}
 	
 	def rolesProvided = Set(classOf[SmallGroupTutor])

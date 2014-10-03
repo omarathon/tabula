@@ -59,7 +59,7 @@ class CommandTest extends TestBase {
 		val department = Fixtures.department("in", "IT Services")
 		val module = Fixtures.module("in101", "Introduction to Web Develoment")
 		module.id = "moduleId"
-		module.department = department
+		module.adminDepartment = department
 		
 		val assignment = Fixtures.assignment("my assignment")
 		assignment.id = "assignmentId"

@@ -18,7 +18,7 @@ class OpenSmallGroupSetController extends GroupsController {
 		@PathVariable("set") set: SmallGroupSet,
 		@PathVariable action: SmallGroupSetSelfSignUpState
 	): Appliable[Seq[SmallGroupSet]] with OpenSmallGroupSetState =
-		OpenSmallGroupSetCommand(module.department, Seq(set), user.apparentUser, action)
+		OpenSmallGroupSetCommand(module.adminDepartment, Seq(set), user.apparentUser, action)
 
 	@RequestMapping
 	def form(@ModelAttribute("openGroupSetCommand") cmd: Appliable[Seq[SmallGroupSet]]) =

@@ -66,7 +66,7 @@ class EditSmallGroupSetMembershipCommandInternal(val module: Module, val set: Sm
 	}
 
 	override def applyInternal() = transactional() {
-		if (module.department.autoGroupDeregistration) {
+		if (module.adminDepartment.autoGroupDeregistration) {
 			autoDeregister { () =>
 				copyTo(set)
 				set

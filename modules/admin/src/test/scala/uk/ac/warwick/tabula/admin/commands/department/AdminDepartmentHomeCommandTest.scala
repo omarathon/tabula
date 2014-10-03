@@ -11,8 +11,9 @@ import uk.ac.warwick.tabula.events.EventListener
 
 class AdminDepartmentHomeCommandTest extends TestBase with Mockito with FunctionalContextTesting {
 
-	trait CommandTestSupport extends AdminDepartmentHomeCommandState with ModuleAndDepartmentServiceComponent with SecurityServiceComponent {
+	trait CommandTestSupport extends AdminDepartmentHomeCommandState with ModuleAndDepartmentServiceComponent with CourseAndRouteServiceComponent with SecurityServiceComponent {
 		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
+		val courseAndRouteService = mock[CourseAndRouteService]
 		val securityService = mock[SecurityService]
 	}
 
@@ -25,7 +26,7 @@ class AdminDepartmentHomeCommandTest extends TestBase with Mockito with Function
 
 		Seq(mod1, mod2, mod3).foreach { mod =>
 			department.modules.add(mod)
-			mod.department = department
+			mod.adminDepartment = department
 		}
 
 		val route1 = Fixtures.route("i100")
@@ -34,7 +35,7 @@ class AdminDepartmentHomeCommandTest extends TestBase with Mockito with Function
 
 		Seq(route1, route2, route3).foreach { route =>
 			department.routes.add(route)
-			route.department = department
+			route.adminDepartment = department
 		}
 
 		val user = mock[CurrentUser]
@@ -55,22 +56,22 @@ class AdminDepartmentHomeCommandTest extends TestBase with Mockito with Function
 
 	trait ModuleManagerFixture extends Fixture {
 		command.moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer, department) returns (Set(mod3, mod1))
-		command.moduleAndDepartmentService.routesWithPermission(user, Permissions.Route.Administer, department) returns (Set.empty)
+		command.courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department) returns (Set.empty)
 	}
 
 	trait RouteManagerFixture extends Fixture {
-		command.moduleAndDepartmentService.routesWithPermission(user, Permissions.Route.Administer, department) returns (Set(route3, route1))
+		command.courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department) returns (Set(route3, route1))
 		command.moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer, department) returns (Set.empty)
 	}
 
 	trait ModuleAndRouteManagerFixture extends Fixture {
 		command.moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer, department) returns (Set(mod3, mod1))
-		command.moduleAndDepartmentService.routesWithPermission(user, Permissions.Route.Administer, department) returns (Set(route3, route1))
+		command.courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department) returns (Set(route3, route1))
 	}
 
 	trait NoPermissionsFixture extends Fixture {
 		command.moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer, department) returns (Set.empty)
-		command.moduleAndDepartmentService.routesWithPermission(user, Permissions.Route.Administer, department) returns (Set.empty)
+		command.courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department) returns (Set.empty)
 	}
 
 	@Test def applyNoPerms { new NoPermissionsFixture {
@@ -167,6 +168,10 @@ object AdminDepartmentHomeCommandTest {
 		bean(){
 			val service = mock[ModuleAndDepartmentService]
 			service.modulesWithPermission(any[CurrentUser], any[Permission], any[Department]) returns (Set.empty)
+			service
+		}
+		bean(){
+			val service = mock[CourseAndRouteService]
 			service.routesWithPermission(any[CurrentUser], any[Permission], any[Department]) returns (Set.empty)
 			service
 		}

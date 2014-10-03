@@ -28,7 +28,7 @@ trait ModulePermissionControllerMethods extends AdminController {
 
 	def form(module: Module): Mav = {
 		Mav("admin/modules/permissions", "module" -> module)
-			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+			.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 	}
 
 	def form(module: Module, usercodes: Seq[String], role: Option[RoleDefinition], action: String): Mav = {
@@ -38,7 +38,7 @@ trait ModulePermissionControllerMethods extends AdminController {
 				"users" -> users,
 				"role" -> role,
 				"action" -> action)
-			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+			.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 	}
 }
 

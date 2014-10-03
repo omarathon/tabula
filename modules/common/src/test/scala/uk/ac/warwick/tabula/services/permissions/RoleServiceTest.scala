@@ -56,7 +56,7 @@ class RoleServiceTest extends TestBase with Mockito {
 
 		val dept = Fixtures.department("in")
 		val module = Fixtures.module("in101")
-		module.department = dept
+		module.adminDepartment = dept
 
 		val service = new RoleServiceImpl()
 		service.roleProviders = Array(provider1, provider2, provider3, provider4)
@@ -83,7 +83,7 @@ class RoleServiceTest extends TestBase with Mockito {
 
 		val dept = Fixtures.department("in")
 		val module = Fixtures.module("in101")
-		module.department = dept
+		module.adminDepartment = dept
 
 		val service = new RoleServiceImpl()
 		service.roleProviders = Array(provider)
@@ -151,7 +151,7 @@ class RoleServiceTest extends TestBase with Mockito {
 
 		val dept = Fixtures.department("in")
 		val module = Fixtures.module("in101")
-		module.department = dept
+		module.adminDepartment = dept
 
 		val service = new RoleServiceImpl()
 		service.permissionsProviders = Array(provider1, provider2)

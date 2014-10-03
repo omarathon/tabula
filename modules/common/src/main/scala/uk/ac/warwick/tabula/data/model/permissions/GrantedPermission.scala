@@ -38,7 +38,7 @@ abstract class GrantedPermission[A <: PermissionsTarget] extends GeneratedId wit
 	var scope: A
 	
 	// If hibernate sets users to null, make a new empty usergroup
-	override def postLoad {
+	override def postLoad() {
 		ensureUsers
 	}
 

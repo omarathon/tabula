@@ -73,7 +73,7 @@ trait SmallGroupFixture extends Mockito {
     val mod = new Module
     mod.code=moduleCode
     mod.name="Test module " + moduleCode
-    mod.department = department
+    mod.adminDepartment = department
     mod.groupSets = JArrayList()
 
 

@@ -69,7 +69,7 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 				format(ranges.asScala.toSeq.asInstanceOf[Seq[WeekRange]], dayOfWeek, year, numberingSystem(dept))
 
 			case Seq(event: SmallGroupEvent) =>
-				format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(event.group.groupSet.module.department))
+				format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(event.group.groupSet.module.adminDepartment))
 
 			case _ => throw new IllegalArgumentException("Bad args: " + args)
 		}
@@ -249,7 +249,7 @@ class WeekRangeSelectFormatterTag extends TemplateMethodModelEx with KnowsUserNu
 		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {
 			case Seq(event: SmallGroupEvent) =>
-				format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(user,()=>Option(event.group.groupSet.module.department)))
+				format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(user,()=>Option(event.group.groupSet.module.adminDepartment)))
 
 			case _ => throw new IllegalArgumentException("Bad args: " + args)
 		}

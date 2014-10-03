@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.Role
-import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.roles.StudentRelationshipAgent
 import uk.ac.warwick.tabula.roles.StudentRelationshipAgentRoleDefinition
@@ -17,7 +16,7 @@ class StudentRelationshipAgentRoleProvider extends RoleProvider {
 	var relationshipService = Wire[RelationshipService]
 
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = scope match {
-		case member: model.Member => {
+		case member: model.Member =>
 			relationshipService
 				.listAllStudentRelationshipsWithUniversityId(user.universityId)
 				.toStream
@@ -33,7 +32,7 @@ class StudentRelationshipAgentRoleProvider extends RoleProvider {
 						student.mostSignificantCourseDetails
 							.toSeq
 							.flatMap { scd =>
-								Option(scd.latestStudentCourseYearDetails.enrolmentDepartment).toSeq ++ Option(scd.route).flatMap { r => Option(r.department) }.toSeq
+								Option(scd.latestStudentCourseYearDetails.enrolmentDepartment).toSeq ++ Option(scd.route).flatMap { r => Option(r.adminDepartment) }.toSeq
 							}
 
 					studentDepartment
@@ -41,7 +40,6 @@ class StudentRelationshipAgentRoleProvider extends RoleProvider {
 						.headOption
 						.getOrElse { StudentRelationshipAgent(member, relationshipType) }
 				}
-		}
 
 		// We don't need to check for the StudentRelationshipAgent role on any other scopes
 		case _ => Stream.empty

@@ -5,17 +5,17 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.userlookup.Group
 import collection.JavaConversions._
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{CourseAndRouteService, UserLookupService, ModuleAndDepartmentService}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.web._
 import uk.ac.warwick.tabula.web.controllers._
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.permissions.Permissions
 
 @Controller class HomeController extends BaseController {
 	
 	var moduleService = Wire[ModuleAndDepartmentService]
+	var routeService = Wire[CourseAndRouteService]
 
 	hideDeletedItems
 
@@ -26,7 +26,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 				moduleService.departmentsWithPermission(user, Permissions.Module.Administer).nonEmpty ||
 				moduleService.departmentsWithPermission(user, Permissions.Route.Administer).nonEmpty ||
 				moduleService.modulesWithPermission(user, Permissions.Module.Administer).nonEmpty ||
-				moduleService.routesWithPermission(user, Permissions.Route.Administer).nonEmpty
+				routeService.routesWithPermission(user, Permissions.Route.Administer).nonEmpty
 			)
 		
 	  	Mav("home/view", 

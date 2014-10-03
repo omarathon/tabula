@@ -99,8 +99,8 @@ class SortModulesCommandTest extends TestBase with Mockito {
 
 		command.applyInternal()
 
-		mod1.department should be (ugDepartment)
-		mod2.department should be (pgDepartment)
+		mod1.adminDepartment should be (ugDepartment)
+		mod2.adminDepartment should be (pgDepartment)
 
 		department.modules.asScala should be ('empty)
 		ugDepartment.modules.asScala.toSet should be (Set(mod1, mod3, mod4, mod5))

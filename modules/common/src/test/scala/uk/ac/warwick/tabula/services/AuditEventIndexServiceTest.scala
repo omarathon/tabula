@@ -255,7 +255,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 		val module = new Module
 		module.id = "367a9abd-adda-c0c0-b0b0-000000000000"
 		module.assignments = List(assignment)
-		module.department = dept
+		module.adminDepartment = dept
 
 		val beforeJsonData = json.writeValueAsString(Map(
 					"assignment" -> assignment.id,

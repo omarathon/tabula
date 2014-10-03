@@ -20,7 +20,7 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
 	trait Fixture {
 		val department = Fixtures.department("in")
 		val route = Fixtures.route("i100")
-		route.department = department
+		route.adminDepartment = department
 
 		val userLookup = new MockUserLookup
 		Seq(listController, addController, removeController).foreach { controller => controller.userLookup = userLookup }

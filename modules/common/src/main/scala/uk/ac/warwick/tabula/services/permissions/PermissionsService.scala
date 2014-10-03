@@ -37,6 +37,8 @@ trait PermissionsService {
 	def delete(roleDefinition: CustomRoleDefinition)
 
 	def getCustomRoleDefinitionById(id: String): Option[CustomRoleDefinition]
+
+	def getOrCreateGrantedRole[A <: PermissionsTarget : ClassTag](target: A, defn: RoleDefinition): GrantedRole[A]
 	
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): Option[GrantedRole[A]]
 	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]]
@@ -110,9 +112,9 @@ abstract class AbstractPermissionsService extends PermissionsService {
 	override def onReceive(item: Any) {	
 		item match {
 			case copy: PermissionsCacheBusterMessage if Option(copy.usercode).isDefined =>
-				clearCachesForUser((copy.usercode, copy.classTag), false)
+				clearCachesForUser((copy.usercode, copy.classTag), propagate = false)
 			case copy: PermissionsCacheBusterMessage =>
-				clearCachesForWebgroups((copy.webgroups, copy.classTag), false)
+				clearCachesForWebgroups((copy.webgroups, copy.classTag), propagate = false)
 			case _ =>
 		}
 	}
@@ -163,6 +165,12 @@ abstract class AbstractPermissionsService extends PermissionsService {
 	}
 	
 	def getCustomRoleDefinitionById(id: String) = permissionsDao.getCustomRoleDefinitionById(id)
+
+	def getOrCreateGrantedRole[A <: PermissionsTarget : ClassTag](target: A, defn: RoleDefinition) =
+		getGrantedRole(target, defn) match {
+			case Some(role) => role
+			case _ => GrantedRole(target, defn)
+		}
 	
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): Option[GrantedRole[A]] = 
 		transactional(readOnly = true) {
@@ -217,7 +225,7 @@ abstract class AbstractPermissionsService extends PermissionsService {
 				GrantedRolesForUserCache.get((user.apparentId, classTag[A])).asScala
 
 				// Get all roles backed by one of the webgroups,
-				++ (GrantedRolesForGroupCache.get((groupNames, classTag[A])).asScala)
+				++ GrantedRolesForGroupCache.get((groupNames, classTag[A])).asScala
 			).toStream
 				// For sanity's sake, filter by the users including the user
 				.filter { _.users.includesUser(user.apparentUser) }
@@ -233,7 +241,7 @@ abstract class AbstractPermissionsService extends PermissionsService {
 				GrantedPermissionsForUserCache.get((user.apparentId, classTag[A])).asScala
 
 				// Get all permissions backed by one of the webgroups,
-				++ (GrantedPermissionsForGroupCache.get((groupNames, classTag[A])).asScala )
+				++ GrantedPermissionsForGroupCache.get((groupNames, classTag[A])).asScala
 			).toStream
 				// For sanity's sake, filter by the users including the user
 				.filter { _.users.includesUser(user.apparentUser) }
@@ -257,12 +265,11 @@ abstract class AbstractPermissionsService extends PermissionsService {
 	def ensureUserGroupFor[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): UnspecifiedTypeUserGroup = transactional() {
 		getGrantedRole(scope, roleDefinition) match {
 			case Some(role) => role.users
-			case _ => {
+			case _ =>
 				val role = GrantedRole(scope, roleDefinition)
 
 				permissionsDao.saveOrUpdate(role)
 				role.users
-			}
 		}
 	}
 
@@ -320,7 +327,7 @@ trait GrantedRolesForUserCache { self: PermissionsDaoComponent with CacheStrateg
 		}
 		def shouldBeCached(ids: JArrayList[String]) = true
 
-		override def isSupportsMultiLookups() = false
+		override def isSupportsMultiLookups = false
 		def create(cacheKeys: JList[(String, ClassTag[_ <: PermissionsTarget])]): JMap[(String, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] = {
 			throw new UnsupportedOperationException("Multi lookups not supported")
 		}

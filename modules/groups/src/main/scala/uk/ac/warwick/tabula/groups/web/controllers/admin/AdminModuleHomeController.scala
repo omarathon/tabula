@@ -35,7 +35,7 @@ class AdminModuleHomeController extends GroupsController {
 
 		val data = ViewModules(
 			moduleItems,
-			canManageDepartment=securityService.can(user, Permissions.Module.ManageSmallGroups, module.department)
+			canManageDepartment=securityService.can(user, Permissions.Module.ManageSmallGroups, module.adminDepartment)
 		)
 
 		if (ajax) Mav("admin/module/sets_partial", "data" -> data ).noLayout()

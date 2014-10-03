@@ -99,11 +99,11 @@ class DepartmentTest extends TestBase with Mockito {
 		val otherDepartment = new Department
 		val ugRoute = new Route().tap(r => {
 			r.degreeType = DegreeType.Undergraduate
-			r.department = department
+			r.adminDepartment = department
 		})
 		val pgRoute = new Route().tap(r => {
 			r.degreeType = DegreeType.Postgraduate
-			r.department = otherDepartment
+			r.adminDepartment = otherDepartment
 		})
 		val undergraduate = new StudentMember().tap(m=>{
 			val scd = new StudentCourseDetails().tap(s=>{

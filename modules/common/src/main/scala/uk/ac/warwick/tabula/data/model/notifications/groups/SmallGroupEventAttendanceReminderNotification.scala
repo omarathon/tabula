@@ -25,8 +25,8 @@ class SmallGroupEventAttendanceReminderNotification
 
 	override def urlTitle = "record attendance for these seminars"
 
-	override def url = Routes.tutor.mygroups
-
+	override def url = Routes.tutor.registerForWeek(event, item.entity.week)
+		
 	@transient
 	final lazy val event = item.entity.event
 

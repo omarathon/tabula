@@ -24,7 +24,7 @@ class RequestAssignmentAccessNotification
 	def url = Routes.admin.assignment.edit(assignment)
 	def urlTitle = "review which students are enrolled on the assignment"
 
-	def recipients = assignment.module.department.owners.users
+	def recipients = assignment.module.adminDepartment.owners.users
 		.filter(admin => admin.isFoundUser && admin.getEmail.hasText).toSeq
 
 	priority = Warning

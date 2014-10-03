@@ -277,7 +277,7 @@ object CourseworkFilters {
 				item.submission.hasOriginalityReport.booleanValue()
 			}) getOrElse(false)
 		}
-		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.module.department.plagiarismDetectionEnabled
+		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
 	}
 	
 	case object NotCheckedForPlagiarism extends ParameterlessCourseworkFilter {
@@ -287,7 +287,7 @@ object CourseworkFilters {
 				!item.submission.hasOriginalityReport.booleanValue()
 			}) getOrElse(false)
 		}
-		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.module.department.plagiarismDetectionEnabled
+		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
 	}
 	
 	case object MarkedPlagiarised extends ParameterlessCourseworkFilter {
@@ -346,7 +346,7 @@ object CourseworkFilters {
 				}
 			}
 		}
-		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.module.department.plagiarismDetectionEnabled
+		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
 	}
 	
 	case object NoFeedback extends ParameterlessCourseworkFilter {

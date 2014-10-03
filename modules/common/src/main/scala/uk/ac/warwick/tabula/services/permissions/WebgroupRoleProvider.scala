@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.roles.{BuiltInRole, Role, Sysadmin}
+import uk.ac.warwick.tabula.roles.{BuiltInRole, Role}
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.userlookup.webgroups.GroupServiceException
