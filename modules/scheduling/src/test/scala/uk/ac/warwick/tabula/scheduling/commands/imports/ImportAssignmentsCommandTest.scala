@@ -8,7 +8,7 @@ import org.junit.runner.RunWith
 
 import uk.ac.warwick.tabula.{AcademicYear, CustomHamcrestMatchers, Mockito}
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, AssignmentMembershipService}
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.scheduling.services.UpstreamModuleRegistration
 
@@ -19,11 +19,15 @@ class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Moc
 		val mockSession = smartMock[Session]
 		val importer = smartMock[AssignmentImporter]
 		val membershipService = smartMock[AssignmentMembershipService]
+		val moduleService = smartMock[ModuleAndDepartmentService]
 		val command = new ImportAssignmentsCommand {
 			def session = mockSession
 		}
 		command.assignmentImporter = importer
 		command.assignmentMembershipService = membershipService
+		command.moduleAndDepartmentService = moduleService
+
+		moduleService.getModuleByCode(any[String]) returns (None) // Not necessary for this to work
 
 		val registrations: Seq[UpstreamModuleRegistration]
 

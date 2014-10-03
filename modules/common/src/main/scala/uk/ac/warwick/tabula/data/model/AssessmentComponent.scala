@@ -25,9 +25,17 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 	@transient var membershipService = Wire.auto[AssignmentMembershipService]
 
 	/**
-	 * Lowercase module code, with CATS. e.g. in304-15
+	 * Uppercase module code, with CATS. e.g. IN304-15
 	 */
 	var moduleCode: String = _
+
+	/**
+	 * An OPTIONAL link to a Tabula representation of a Module.
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "module_id")
+	var module: Module = _
+
 	/**
 	 * Assessment group the assignment is in. Is mostly a meaningless
 	 * character but will map to a corresponding student module registratation

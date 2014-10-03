@@ -180,36 +180,23 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 	/** Just gets components of type Assignment for modules in this department, not all components. */
 	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = {
 		// TAB-2676 Include modules in sub-departments optionally
-		def moduleCodes(d: Department): Seq[String] = d.modules.asScala.map { _.code }
-		def moduleCodesIncludingSubDepartments(d: Department): Seq[String] =
-			moduleCodes(d) ++ d.children.asScala.flatMap(moduleCodesIncludingSubDepartments)
+		def modules(d: Department): Seq[Module] = d.modules.asScala
+		def modulesIncludingSubDepartments(d: Department): Seq[Module] =
+			modules(d) ++ d.children.asScala.flatMap(modulesIncludingSubDepartments)
 
-		val deptModuleCodes =
-			if (includeSubDepartments) moduleCodesIncludingSubDepartments(department)
-			else moduleCodes(department)
+		val deptModules =
+			if (includeSubDepartments) modulesIncludingSubDepartments(department)
+			else modules(department)
 
-		val allComponents:Seq[AssessmentComponent] = {
-			val allModuleCodes = deptModuleCodes.filter(_.length == 5).map { _.toUpperCase() }
-
-			if (allModuleCodes.isEmpty) Nil
-			else {
-				val c = session.newCriteria[AssessmentComponent]
-				val moduleCodeRestriction =
-					ScalaRestriction.startsWithIfNotEmpty(
-						"moduleCode",
-						allModuleCodes
-					)
-				moduleCodeRestriction.foreach(c.add)
-
-				c.addOrder(asc("moduleCode")).addOrder(asc("sequence")).seq filter isInteresting
-			}
-		}
-
-		allComponents filter {
-			component => deptModuleCodes.contains(component.moduleCodeBasic.toLowerCase)
+		if (deptModules.isEmpty) Nil
+		else {
+			session.newCriteria[AssessmentComponent]
+				.add(safeIn("module", deptModules))
+				.addOrder(asc("moduleCode"))
+				.addOrder(asc("sequence"))
+				.seq filter isInteresting
 		}
 	}
-
 
 	def countPublishedFeedback(assignment: Assignment): Int = {
 		session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = 1""")
