@@ -382,7 +382,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		ptRelType.expectedUG = true
 		relationshipService.saveOrUpdate(ptRelType)
 
-		relationshipService.expectedToHaveRelationship(ptRelType, dept1)(m1) should be (true)
+		relationshipService.studentDepartmentMatchesAndExpectedToHaveRelationship(ptRelType, dept1)(m1) should be (true)
 
 		val m2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2, sprStatus=sprWithdrawnStatus)
 		m2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
@@ -394,12 +394,12 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 
 		session.saveOrUpdate(scd2)
 
-		relationshipService.expectedToHaveRelationship(ptRelType, dept2)(m2) should be (false)
+		relationshipService.studentDepartmentMatchesAndExpectedToHaveRelationship(ptRelType, dept2)(m2) should be (false)
 
 		// TAB-1712
 		scd2.route = null
 		session.saveOrUpdate(scd2)
-		relationshipService.expectedToHaveRelationship(ptRelType, dept2)(m2) should be (false)
+		relationshipService.studentDepartmentMatchesAndExpectedToHaveRelationship(ptRelType, dept2)(m2) should be (false)
 	}
 
 	@Transactional

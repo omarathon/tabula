@@ -203,7 +203,8 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 
 	def studentNotPermanentlyWithdrawn(member: StudentMember) = !member.permanentlyWithdrawn
 
-	def expectedToHaveRelationship(relationshipType: StudentRelationshipType, department: Department)(member: StudentMember) = {
+	def studentDepartmentMatchesAndExpectedToHaveRelationship(relationshipType: StudentRelationshipType, department: Department)(member: StudentMember) = {
+		department.filterRule.matches(member, Option(department)) &&
 		member.freshStudentCourseDetails
 		.filter(scd => Option(scd.route).exists( route => route.department == department || route.department == department.rootDepartment)) // there needs to be an SCD for the right department ...
 		.filter(!_.permanentlyWithdrawn) // that's not permanently withdrawn ...
@@ -260,8 +261,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 
   def listStudentsWithoutRelationship(relationshipType: StudentRelationshipType, department: Department) = transactional(readOnly = true) {
 		relationshipDao.getStudentsWithoutRelationshipByDepartment(relationshipType, department.rootDepartment)
-			.filter(studentDepartmentFilterMatches(department))
-			.filter(expectedToHaveRelationship(relationshipType, department))
+			.filter(studentDepartmentMatchesAndExpectedToHaveRelationship(relationshipType, department))
   }
 
   def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int = transactional(readOnly = true) {
