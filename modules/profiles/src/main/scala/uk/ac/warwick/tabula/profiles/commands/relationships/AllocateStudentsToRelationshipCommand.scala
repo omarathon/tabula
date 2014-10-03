@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.profiles.commands.relationships
 
+import uk.ac.warwick.tabula.helpers.ReverseMapHelper
+
 import scala.collection.JavaConverters._
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.commands.{GroupsObjectsWithFileUpload, MemberCollectionHelper, SelfValidating, Command, Description}
@@ -32,7 +34,8 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		with RelationshipChangingCommand
 		with MemberCollectionHelper
 		with NotifiesAffectedStudents
-		with FetchesRelationshipMappings {
+		with FetchesRelationshipMappings
+		with ReverseMapHelper[Member, StudentMember] {
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), mandatory(department))
 
@@ -66,15 +69,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	}.toMap // .toMap to make it immutable and avoid type issues
 
 	lazy val studentTutorMapping: Map[StudentMember, TutorInfoForStudent] = {
-		val studentTutorsAfterMap = {
-			val studentTutorPairs = memberAgentMappingsAfter.map { case (agent, students) =>
-				students.map( (_,agent) ).toSeq
-			}.flatten
-
-			studentTutorPairs.groupBy(_._1).map {
-				case (student, agents) => (student, agents.map(_._2).toSet)
-			}
-		}
+		val studentTutorsAfterMap = reverseMap(memberAgentMappingsAfter)
 
 		val studentTutorsBeforeMap = {
 			val allMappings = getStudentAgentMappings(department, relationshipType)

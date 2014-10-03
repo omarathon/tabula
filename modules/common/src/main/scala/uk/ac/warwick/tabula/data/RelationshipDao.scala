@@ -112,18 +112,17 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 	}
 
 	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship] = {
-		session.newCriteria[StudentRelationship]
+		session.newCriteria[MemberStudentRelationship]
 			.createAlias("studentCourseDetails", "scd")
 			.add(is("scd.student", student))
 			.add(is("relationshipType", relationshipType))
-			.add(is("agent", agent.universityId))
+			.add(is("_agentMember.universityId", agent.universityId))
 			.add( Restrictions.or(
 				Restrictions.isNull("endDate"),
 				Restrictions.ge("endDate", new DateTime())
 			))
 			.uniqueResult
 	}
-
 
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = {
 		session.newCriteria[StudentRelationship]
