@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.services.{SmallGroupService, AutowiringSmallGroupSer
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import scala.collection.JavaConverters._
+import EditSmallGroupEventsCommand._
 
 object EditSmallGroupEventsCommand {
 	def apply(module: Module, set: SmallGroupSet) =
@@ -22,23 +23,23 @@ object EditSmallGroupEventsCommand {
 			with Unaudited
 			with AutowiringSmallGroupServiceComponent
 			with PopulateEditSmallGroupEventsSubCommands
-}
 
-class EventProperties(val event: SmallGroupEvent, smallGroupService: SmallGroupService) {
-	var delete: Boolean = false
-	def hasRecordedAttendance = {
-		smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
-			.exists { _.attendance.asScala.exists { attendance =>
+	class EventProperties(val event: SmallGroupEvent, smallGroupService: SmallGroupService) {
+		var delete: Boolean = false
+		def hasRecordedAttendance = {
+			smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
+				.exists { _.attendance.asScala.exists { attendance =>
 				attendance.state != AttendanceState.NotRecorded
 			}}
+		}
 	}
-}
 
-class GroupProperties(val module: Module, val set: SmallGroupSet, val group: SmallGroup, smallGroupService: SmallGroupService) {
-	var events: JList[EventProperties] = JArrayList()
+	class GroupProperties(val module: Module, val set: SmallGroupSet, val group: SmallGroup, smallGroupService: SmallGroupService) {
+		var events: JList[EventProperties] = JArrayList()
 
-	group.events.sorted.foreach { event =>
-		events.add(new EventProperties(event, smallGroupService))
+		group.events.sorted.foreach { event =>
+			events.add(new EventProperties(event, smallGroupService))
+		}
 	}
 }
 

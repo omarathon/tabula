@@ -1,4 +1,23 @@
 <#escape x as x?html>
+	<style type="text/css">
+		.existing-group.deleted label {
+			text-decoration: line-through;
+			color: @grayLight;
+		}
+
+		.existing-group.deleted .help-inline {
+			text-decoration: none;
+		}
+
+		.existing-group.deleted input {
+			cursor: not-allowed;
+			background-color: #eee !important;
+			text-decoration: line-through;
+		}
+
+		.help-inline.hidden { display: none !important; }
+	</style>
+
 	<#if smallGroupSet.linked>
 		<@form.row>
 			<p>There are <@fmt.p smallGroupSet.groups?size "group" /> in ${smallGroupSet.name} (from ${smallGroupSet.linkedDepartmentSmallGroupSet.name}).</p>
@@ -43,27 +62,66 @@
 			</@form.field>
 		</@form.row>
 
-		<#list command.groupNames as group>
-			<@form.labelled_row "groupNames[${group_index}]" "${group_index + 1}.">
-				<@f.input path="groupNames[${group_index}]" cssClass="text" />
-				&nbsp;
-				<span class="max-group-size-options">
-					<@f.input path="maxGroupSizes[${group_index}]" type="number" min="0" cssClass="text input-mini" />
-				</span>
-				&nbsp;
-				<button type="button" class="btn btn-danger" data-toggle="remove"><i class="icon-remove"></i></button>
-			</@form.labelled_row>
+		<#macro fields index is_new=false no_remove_button=false>
+			<#local cssClass><#compress>
+				<#if is_new>
+					new-group
+				<#else>
+					existing-group
+					<@spring.bind path="delete">
+						<#if status.actualValue>deleted</#if>
+					</@spring.bind>
+				</#if>
+			</#compress></#local>
+
+			<@form.row path="name" cssClass=cssClass>
+				<@form.label for="${index}-name">
+					${index}.
+				</@form.label>
+
+				<@form.field>
+					<@f.input path="name" id="${index}-name" cssClass="text" />
+					&nbsp;
+					<span class="max-group-size-options">
+						<@f.input id="${index}-maxGroupSize" path="maxGroupSize" type="number" min="0" cssClass="text input-mini" />
+					</span>
+					<#if !no_remove_button>
+						&nbsp;
+						<#if is_new>
+							<button type="button" class="btn btn-danger" data-toggle="remove"><i class="icon-remove"></i></button>
+						<#else>
+							<@f.hidden path="delete" />
+							<button type="button" class="btn btn-danger" data-toggle="mark-deleted"><i class="icon-remove"></i></button>
+							<button type="button" class="btn btn-info" data-toggle="undo-deleted"><i class="icon-undo"></i></button>
+							<span class="help-inline hidden"><small>
+								Click "Save and add students" or "Save and exit" to delete this group and any events associated to it
+							</small></span>
+						</#if>
+					</#if>
+
+					<@form.errors "name" />
+					<@form.errors "maxGroupSize" />
+					<#if !is_new>
+						<@form.errors "delete" />
+					</#if>
+				</@form.field>
+			</@form.row>
+		</#macro>
+
+		<#list smallGroupSet.groups as group>
+			<@spring.nestedPath path="existingGroups[${group.id}]">
+				<@fields index=(group_index + 1) />
+			</@spring.nestedPath>
+		</#list>
+		<#list command.newGroups as newGroup>
+			<@spring.nestedPath path="newGroups[${newGroup_index}]">
+				<@fields index=(smallGroupSet.groups?size + newGroup_index + 1) is_new=true />
+			</@spring.nestedPath>
 		</#list>
 
-		<#assign group_index = command.groupNames?size />
-
-		<@form.labelled_row "groupNames[${group_index}]" "${group_index + 1}.">
-			<@f.input path="groupNames[${group_index}]" cssClass="text" />
-			&nbsp;
-			<span class="max-group-size-options">
-				<@f.input path="maxGroupSizes[${group_index}]" type="number" min="0" value="15" cssClass="text input-mini" />
-			</span>
-		</@form.labelled_row>
+		<@spring.nestedPath path="newGroups[${command.newGroups?size}]">
+			<@fields index=(smallGroupSet.groups?size + command.newGroups?size + 1) is_new=true no_remove_button=true />
+		</@spring.nestedPath>
 
 		<@form.row>
 			<@form.field>
@@ -115,10 +173,12 @@
 					var $button = $(this);
 					var $group = $button.closest('.control-group').prev('.control-group');
 
+					var offset = $('.control-group.existing-group').length;
+
 					var $clone = $group.clone();
 
 					var index = parseInt(/\[(\d+)\]/.exec($clone.find('input[type="text"]').attr('name'))[1]);
-					$clone.find('label').text((index + 1) + ".");
+					$clone.find('label').text((index + offset + 1) + ".");
 
 					$clone.insertBefore($group);
 					$clone.find('.controls')
@@ -127,14 +187,14 @@
 
 					var nextIndex = index + 1;
 					var $name = $group.find('input[type="text"]');
-					$name.attr('name', 'groupNames[' + nextIndex + ']');
-					$name.attr('id', 'groupNames' + nextIndex);
+					$name.attr('name', 'newGroups[' + nextIndex + '].name');
+					$name.attr('id', (nextIndex + offset + 1) + '-name');
 
 					var $max = $group.find('input[type="number"]');
-					$max.attr('name', 'maxGroupSizes[' + nextIndex + ']');
-					$max.attr('id', 'maxGroupSizes' + nextIndex);
+					$max.attr('name', 'newGroups[' + nextIndex + '].maxGroupSize');
+					$max.attr('id', (nextIndex + offset + 1) + '-maxGroupSize');
 
-					$group.find('label').attr('for', $name.attr('id')).text((nextIndex + 1) + '.');
+					$group.find('label').attr('for', $name.attr('id')).text((nextIndex + offset + 1) + '.');
 
 					$name.val('').focus();
 					$button.attr('disabled', 'disabled');
@@ -147,19 +207,20 @@
 					$group.remove();
 
 					// Re-order all of the groups
-					var groups = $('input[name^="groupNames"]').closest('.control-group');
+					var groups = $('.control-group.new-group');
+					var offset = $('.control-group.existing-group').length;
 					groups.each(function(index) {
 						var $group = $(this);
 
 						var $name = $group.find('input[type="text"]');
-						$name.attr('name', 'groupNames[' + index + ']');
-						$name.attr('id', 'groupNames' + index);
+						$name.attr('name', 'newGroups[' + index + '].name');
+						$name.attr('id', (index + offset + 1) + '-name');
 
 						var $max = $group.find('input[type="number"]');
-						$max.attr('name', 'maxGroupSizes[' + index + ']');
-						$max.attr('id', 'maxGroupSizes' + index);
+						$max.attr('name', 'newGroups[' + index + '].maxGroupSize');
+						$max.attr('id', (index + offset + 1) + '-maxGroupSize');
 
-						$group.find('label').attr('for', $name.attr('id')).text((index + 1) + '.');
+						$group.find('label').attr('for', $name.attr('id')).text((index + offset + 1) + '.');
 					});
 				});
 
@@ -167,7 +228,7 @@
 				$("input:radio[name='defaultMaxGroupSizeEnabled']").radioControlled();
 
 				// Stop 'Enter' from submitting the form
-				$('input[name^="groupNames"]').closest('form')
+				$('input[name$=".name"]').closest('form')
 						.off('keyup.inputSubmitProtection keypress.inputSubmitProtection')
 						.on('keyup.inputSubmitProtection keypress.inputSubmitProtection', function(e){
 							var code = e.keyCode || e.which;
@@ -176,6 +237,40 @@
 								return false;
 							}
 						});
+
+				$('.existing-group').each(function() {
+					var $this = $(this);
+
+					var $deleteButton = $this.find('.btn-danger');
+					var $undoButton = $this.find('.btn-info');
+					var $helpBlock = $this.find('.help-inline');
+					var $hiddenField = $this.find('input[name$="delete"]');
+
+					var handleButtonDisplay = function() {
+						if ($this.is('.deleted')) {
+							$deleteButton.hide();
+							$undoButton.show();
+							$helpBlock.removeClass('hidden');
+						} else {
+							$deleteButton.show();
+							$undoButton.hide();
+							$helpBlock.addClass('hidden');
+						}
+					};
+					handleButtonDisplay();
+
+					$deleteButton.on('click', function() {
+						$this.addClass('deleted');
+						$hiddenField.val('true');
+						handleButtonDisplay();
+					});
+
+					$undoButton.on('click', function() {
+						$this.removeClass('deleted');
+						$hiddenField.val('false');
+						handleButtonDisplay();
+					});
+				});
 			});
 		</script>
 	</#if>
