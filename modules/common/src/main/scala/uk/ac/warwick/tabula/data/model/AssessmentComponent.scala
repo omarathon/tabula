@@ -88,7 +88,9 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 
 	def needsUpdatingFrom(other: AssessmentComponent) = (
 		this.name != other.name ||
-		this.departmentCode != other.departmentCode)
+		this.departmentCode != other.departmentCode ||
+		this.module != other.module
+	)
 
 	override def preSave(newRecord: Boolean) {
 		ensureNotNull("name", name)
@@ -104,6 +106,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 		assessmentGroup = other.assessmentGroup
 		sequence = other.sequence
 		departmentCode = other.departmentCode
+		module = other.module
 		name = other.name
 		assessmentType = other.assessmentType
 	}
