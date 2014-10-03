@@ -32,7 +32,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 	/**
 	 * An OPTIONAL link to a Tabula representation of a Module.
 	 */
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, optional = true)
 	@JoinColumn(name = "module_id")
 	var module: Module = _
 
