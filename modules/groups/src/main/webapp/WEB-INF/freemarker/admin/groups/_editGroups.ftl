@@ -94,7 +94,7 @@
 							<button type="button" class="btn btn-danger" data-toggle="mark-deleted"><i class="icon-remove"></i></button>
 							<button type="button" class="btn btn-info" data-toggle="undo-deleted"><i class="icon-undo"></i></button>
 							<span class="help-inline hidden"><small>
-								Click "Save and add students" or "Save and exit" to delete this group and any events associated to it
+								Click "Save and add students" or "Save and exit" to delete this group and any events associated with it
 							</small></span>
 						</#if>
 					</#if>
