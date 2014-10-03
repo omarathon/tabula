@@ -30,7 +30,7 @@ abstract class AgentViewCommand(val agent: Member, val relationshipType: Student
 
 	def applyInternal() = {
 		val students = benchmarkTask("Get relationships with current user") {
-			relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember)
+			relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember).distinct
 		}
 		val studentPointsData = benchmarkTask("Build student data") { buildData(students, academicYear) }
 		val groupedPoints = benchmarkTask("Group similar points") { groupSimilarPointsByTerm(

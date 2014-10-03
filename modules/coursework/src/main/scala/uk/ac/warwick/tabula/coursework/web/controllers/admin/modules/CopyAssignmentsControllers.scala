@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 class CopyModuleAssignmentsController extends CourseworkController with UnarchivedAssignmentsMap {
 
 	@ModelAttribute
-	def copyAssignmentsCommand(@PathVariable("module") module: Module) = CopyAssignmentsCommand(module.department, Seq(module))
+	def copyAssignmentsCommand(@PathVariable("module") module: Module) = CopyAssignmentsCommand(module.adminDepartment, Seq(module))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable("module") module: Module, cmd: CopyAssignmentsCommand) = {

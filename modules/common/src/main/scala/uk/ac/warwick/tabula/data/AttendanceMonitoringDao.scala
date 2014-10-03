@@ -167,7 +167,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 		session.newCriteria[MonitoringPointSet]
 			.createAlias("route", "route")
 			.add(is("academicYear", academicYear))
-			.add(is("route.department", department))
+			.add(is("route.adminDepartment", department))
 			.seq
 	}
 
@@ -284,7 +284,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 		val query = session.newCriteria[MonitoringPoint]
 			.createAlias("pointSet", "pointSet")
 			.createAlias("pointSet.route", "route")
-			.add(is("route.department", department))
+			.add(is("route.adminDepartment", department))
 			.add(is("pointSet.academicYear", academicYear))
 
 		if (sets.nonEmpty)

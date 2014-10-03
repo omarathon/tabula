@@ -35,7 +35,7 @@ trait ViewMonitoringPointSetState extends GroupMonitoringPointsByTerm {
 	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 	// Just used to access week render setting
-	var department: Department = set.route.department
+	var department: Department = set.route.adminDepartment
 
 	def academicYearToUse = set.academicYear
 

@@ -14,7 +14,7 @@ class TutorHomeCommandTest extends TestBase with Mockito {
 			set.releasedToTutors = true
 
 			val module = new Module
-			module.department = department
+			module.adminDepartment = department
 			set.module = module
 			for (group <- groups) group.groupSet = set
 

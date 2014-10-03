@@ -30,7 +30,7 @@ class AddAssignmentCommandContextTest extends AppContextTestBase {
 			session.save(dept)
 
 			val module = new Module
-			module.department = dept
+			module.adminDepartment = dept
 			modules.saveOrUpdate(module)
 			session.flush() // get out of my car, get into my database
 

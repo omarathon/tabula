@@ -179,14 +179,14 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 	 * - fourth is latest publish date
 	 */
 	def getFeedbackCount(assignment: Assignment): FeedbackCount =  {
+		
 		val times: Seq[FeedbackCount] = for {
-			student <- assignmentMembershipService.determineMembershipUsers(assignment)
-			submission <- submissionService.getSubmissionByUniId(assignment, student.getWarwickId)
-			feedback <- feedbackService.getFeedbackByUniId(assignment, student.getWarwickId)
+			submission <- submissionService.getSubmissionsByAssignment(assignment)
+			feedback <- feedbackService.getFeedbackByUniId(assignment, submission.universityId)
 			if feedback.released
 			submissionEventDate <- Option(submission.submittedDate)
 			publishEventDate <- Option(feedback.releasedDate).orElse {
-				auditEventQueryMethods.publishFeedbackForStudent(assignment, student).headOption.map { _.eventDate }
+				auditEventQueryMethods.publishFeedbackForStudent(assignment, feedback.universityId).headOption.map { _.eventDate }
 			}
 			assignmentCloseDate <- Option(assignment.closeDate)
 		} yield {

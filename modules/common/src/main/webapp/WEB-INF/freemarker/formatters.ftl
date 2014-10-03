@@ -288,6 +288,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 				<#local title>Download a zip file of attachments<#if context?has_content> ${context}</#if></#local>
 				<@download_link filePath="${page}attachments/${zipFilename}.zip" mimeType="application/zip" title="${title}" text="Download files as zip" />
 			</summary>
+			<div>
 
 			<#list attachments as attachment>
 				<#local title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#local>
@@ -295,6 +296,8 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 					<@download_link filePath="${page}attachment/${attachment.name?url}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
 				</div>
 			</#list>
+
+			</div>
 		</details>
 	</#if>
 </#macro>

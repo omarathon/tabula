@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.Role
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.helpers.Logging
-import scala.collection.immutable.ListMap
 import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.data.model.Department
@@ -103,7 +102,7 @@ class RoleServiceImpl extends RoleService with Logging {
 			if (scope == null) Stream.empty
 			else {
 				val results = providers.toStream map { provider => (provider, provider.getPermissionsFor(user, scope)) }
-				val (hasResults, noResults) = results.partition { !_._2.isEmpty }
+				val (hasResults, noResults) = results.partition { _._2.nonEmpty }
 
 				val stream = hasResults flatMap { _._2 }
 				
@@ -134,7 +133,7 @@ class RoleServiceImpl extends RoleService with Logging {
 			if (scope == null) Stream.empty
 			else {
 				val results = providers.toStream map { provider => (provider, provider.getRolesFor(user, scope)) }
-				val (hasResults, noResults) = results.partition { !_._2.isEmpty }
+				val (hasResults, noResults) = results.partition { _._2.nonEmpty }
 
 				val stream = hasResults flatMap { _._2 }
 				val next = scope.permissionsParents flatMap { streamScoped((noResults #::: (hasResults filter { _._1.isExhaustive })) map {_._1}, _) }
@@ -156,7 +155,7 @@ class RoleServiceImpl extends RoleService with Logging {
 			case _ => Seq()
 		}
 		
-		allRoles contains(role)
+		allRoles contains role
 	}
 
 }

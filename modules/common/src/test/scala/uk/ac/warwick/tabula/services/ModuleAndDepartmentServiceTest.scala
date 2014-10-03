@@ -30,10 +30,6 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 		moduleDao.sessionFactory = sessionFactory
 		service.moduleDao = moduleDao
 
-		val routeDao = new RouteDaoImpl
-		routeDao.sessionFactory = sessionFactory
-		service.routeDao = routeDao
-
 		val permsDao = new PermissionsDaoImpl
 		permsDao.sessionFactory = sessionFactory
 
@@ -67,22 +63,16 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 		val cs240 = service.getModuleByCode("cs240").get
 		val cs241 = service.getModuleByCode("cs241").get
 		val cs242 = service.getModuleByCode("cs242").get
-		
-		val g500 = service.getRouteByCode("g500").get
-		val g503 = service.getRouteByCode("g503").get
-		val g900 = service.getRouteByCode("g900").get
-		val g901 = service.getRouteByCode("g901").get
-		
+
 		service.allDepartments should be (Seq(ch, cs, cssub1, cssub2))
 		service.allModules should be (Seq(cs108, cs240, cs241, cs242))
-		service.allRoutes should be (Seq(g500, g503, g900, g901))
-		
+
 		// behaviour of child/parent departments
 		cs.children.asScala.toSet should be (Set(cssub1, cssub2))
 		cssub1.parent should be (cs)
 		cssub2.parent should be (cs)
 		ch.children.isEmpty should be (true)
-		cs241.department should be (cssub1)
+		cs241.adminDepartment should be (cssub1)
 		
 		service.getDepartmentByCode("ch") should be (Some(ch))
 		service.getDepartmentById(ch.id) should be (Some(ch))
@@ -97,12 +87,7 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 		service.getModuleById(cs108.id) should be (Some(cs108))
 		service.getModuleByCode("wibble") should be (None)
 		service.getModuleById("wibble") should be (None)
-		
-		service.getRouteByCode("g500") should be (Some(g500))
-		service.getRouteById(g500.id) should be (Some(g500))
-		service.getRouteByCode("wibble") should be (None)
-		service.getRouteById("wibble") should be (None)
-		
+
 		withUser("cusebr") {
 			userLookupService.registerUserObjects(currentUser.apparentUser)
 
@@ -116,47 +101,24 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 			service.modulesInDepartmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set())
 			service.modulesInDepartmentWithPermission(currentUser, Permissions.Module.ManageAssignments, cs) should be (Set())
 			service.modulesInDepartmentWithPermission(currentUser, Permissions.Module.ManageAssignments, ch) should be (Set())
-			service.routesInDepartmentsWithPermission(currentUser, Permissions.MonitoringPoints.Manage) should be (Set())
-			service.routesInDepartmentWithPermission(currentUser, Permissions.MonitoringPoints.Manage, cs) should be (Set())
-			service.routesInDepartmentWithPermission(currentUser, Permissions.MonitoringPoints.Manage, ch) should be (Set())
-			
+
 			service.addOwner(cs, "cuscav")
 			service.departmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set(cs))
 			service.modulesInDepartmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set(cs108, cs240))
 			service.modulesInDepartmentWithPermission(currentUser, Permissions.Module.ManageAssignments, cs) should be (Set(cs108, cs240))
 			service.modulesInDepartmentWithPermission(currentUser, Permissions.Module.ManageAssignments, ch) should be (Set())
-			service.routesInDepartmentsWithPermission(currentUser, Permissions.MonitoringPoints.Manage) should be (Set(g500, g503))
-			service.routesInDepartmentWithPermission(currentUser, Permissions.MonitoringPoints.Manage, cs) should be (Set(g500, g503))
-			service.routesInDepartmentWithPermission(currentUser, Permissions.MonitoringPoints.Manage, ch) should be (Set())
-			
+
 			service.removeOwner(cs, "cuscav")
 			service.departmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set())
 			
 			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set())
 			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments, cs) should be (Set())
 			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments, ch) should be (Set())
-			
-			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage) should be (Set())
-			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage, cs) should be (Set())
-			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage, ch) should be (Set())
-			
+
 			service.addModuleManager(cs108, "cuscav")
 			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set(cs108))
 			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments, cs) should be (Set(cs108))
 			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments, ch) should be (Set())
-			
-			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage) should be (Set())
-			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage, cs) should be (Set())
-			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage, ch) should be (Set())
-			
-			service.addRouteManager(g503, "cuscav")
-			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set(cs108))
-			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments, cs) should be (Set(cs108))
-			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments, ch) should be (Set())
-			
-			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage) should be (Set(g503))
-			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage, cs) should be (Set(g503))
-			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage, ch) should be (Set())
 		}
 	}
 

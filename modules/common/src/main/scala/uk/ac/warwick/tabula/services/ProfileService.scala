@@ -296,7 +296,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 			new ScalaRestriction(
 				org.hibernate.criterion.Restrictions.or(
 					Daoisms.is("studentCourseYearDetails.enrolmentDepartment", queryDepartment),
-					Daoisms.is("route.department", queryDepartment),
+					Daoisms.is("route.adminDepartment", queryDepartment),
 					Daoisms.is("homeDepartment", queryDepartment)
 				)
 			),

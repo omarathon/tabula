@@ -65,7 +65,7 @@ class SubmitToTurnitinJob extends Job
 			val id = job.getString("assignment")
 			assignmentService.getAssignmentById(id) getOrElse (throw obsoleteJob)
 		}
-		val department = assignment.module.department
+		val department = assignment.module.adminDepartment
 		val classId = classIdFor(assignment, api.classPrefix)
 		val assignmentId = assignmentIdFor(assignment)
 		val className = classNameFor(assignment)

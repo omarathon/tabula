@@ -25,8 +25,8 @@ class SmallGroupEventAttendanceReminderNotification
 
 	override def urlTitle = "record attendance for these seminars"
 
-	override def url = Routes.tutor.mygroups
-
+	override def url = Routes.tutor.registerForWeek(event, item.entity.week)
+		
 	@transient
 	final lazy val event = item.entity.event
 
@@ -34,7 +34,7 @@ class SmallGroupEventAttendanceReminderNotification
 	final lazy val referenceDate = item.entity.dateTime.getOrElse(throw new IllegalArgumentException("Tried to create notification for occurrence with no date time"))
 
 	override final def onPreSave(newRecord: Boolean) {
-		priority = if (Days.daysBetween(created, referenceDate).getDays >= 7) {
+		priority = if (Days.daysBetween(created, referenceDate).getDays >= 5) {
 			Critical
 		} else {
 			Warning

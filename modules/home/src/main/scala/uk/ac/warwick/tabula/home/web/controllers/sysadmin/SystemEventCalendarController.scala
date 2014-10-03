@@ -42,7 +42,7 @@ class SystemEventCalendarController extends BaseSysadminController {
 					val totalCount = count(assignments)
 
 					val countsByDepartment =
-						assignments.groupBy { case (assignment, _) => assignment.module.department.rootDepartment }
+						assignments.groupBy { case (assignment, _) => assignment.module.adminDepartment.rootDepartment }
 							.map { case (department, assignments) =>
 								(department, assignments.length, count(assignments))
 							}
@@ -117,7 +117,7 @@ object FullCalendarEvent {
 			end = assignment.closeDate.getMillis / 1000,
 			formattedCloseDate = shortTimeFormat.print(assignment.closeDate),
 			description = s"${membershipInfo.totalCount} enrolled students (${membershipInfo.sitsCount} from SITS${if (membershipInfo.usedExcludeCount > 0) s"after ${membershipInfo.usedExcludeCount} removed manually" else "" }${if (membershipInfo.usedIncludeCount > 0) s", plus ${membershipInfo.usedIncludeCount} added manually" else ""})",
-			context = assignment.module.department.rootDepartment.name
+			context = assignment.module.adminDepartment.rootDepartment.name
 		)
 	}
 }

@@ -59,6 +59,7 @@
 		<#if (allCompletedMarkerFeedback?? && allCompletedMarkerFeedback?size == 1)>
 		<details class="control-group second-marker-notes">
 			<summary class="controls"><strong>Second Marker Notes </strong><span>add further comments about the first marker feedback</span></summary>
+			<div>
 			<div class="control-group">
 				<label class="control-label"></label>
 				<div class="controls">
@@ -71,6 +72,7 @@
 			<@form.labelled_row "rejectionComments" "Notes">
 				<@f.textarea path="rejectionComments" cssClass="big-textarea" />
 			</@form.labelled_row>
+			</div>
 		</details>
 
 		</#if>

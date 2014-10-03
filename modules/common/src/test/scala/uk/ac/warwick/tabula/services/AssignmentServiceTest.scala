@@ -53,7 +53,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 	@Transactional @Test def recentAssignment() {
 		val assignment = newDeepAssignment()
-		val department = assignment.module.department
+		val department = assignment.module.adminDepartment
 
 		session.save(department)
 		session.save(assignment.module)
@@ -100,7 +100,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		feedbackTextField.position = 0
 		feedbackTextField.context = FormFieldContext.Feedback
 
-		session.save(assignment.module.department)
+		session.save(assignment.module.adminDepartment)
 		session.save(assignment.module)
 		session.save(assignment)
 
@@ -477,7 +477,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.save(upstreamAssignment) should be (upstreamAssignment)
 
 		val assignment = newDeepAssignment("ch101")
-		val department = assignment.module.department
+		val department = assignment.module.adminDepartment
 
 		session.save(department)
 		session.save(assignment.module)
@@ -501,7 +501,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 	@Test def submissions() = transactional { tx =>
 		val assignment = newDeepAssignment()
-		val department = assignment.module.department
+		val department = assignment.module.adminDepartment
 
 		session.save(department)
 		session.save(assignment.module)
@@ -533,7 +533,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 	@Test def extensions() = transactional { tx =>
 		val assignment = newDeepAssignment()
-		val department = assignment.module.department
+		val department = assignment.module.adminDepartment
 
 		session.save(department)
 		session.save(assignment.module)
@@ -587,7 +587,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignment1.assignmentMembershipService = assignmentMembershipService
 		wireUserLookup(assignment1.members)
 
-		val department1 = assignment1.module.department
+		val department1 = assignment1.module.adminDepartment
 
 		session.save(department1)
 		session.save(assignment1.module)
@@ -599,7 +599,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignment2.assignmentMembershipService = assignmentMembershipService
 		wireUserLookup(assignment2.members)
 
-		val department2 = assignment2.module.department
+		val department2 = assignment2.module.adminDepartment
 
 		session.save(department2)
 		assignmentService.save(assignment2)

@@ -59,7 +59,7 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController wi
 
 	@RequestMapping
 	def loadSets(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable("department") department: Department, user: CurrentUser) =
-		process(cmd, department, "admin/department-noLayout")
+		process(cmd, department, "admin/department-noLayout").noLayout()
 }
 
 @Controller

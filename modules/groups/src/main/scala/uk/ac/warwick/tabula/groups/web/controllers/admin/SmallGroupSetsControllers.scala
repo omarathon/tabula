@@ -61,14 +61,14 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 	type CreateSmallGroupSetCommand = Appliable[SmallGroupSet] with CreateSmallGroupSetCommandState
 
 	@ModelAttribute("departmentSmallGroupSets") def departmentSmallGroupSets(@PathVariable("module") module: Module, @RequestParam(value="academicYear", required=false) academicYear: AcademicYear) =
-		smallGroupService.getDepartmentSmallGroupSets(module.department, Option(academicYear).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
+		smallGroupService.getDepartmentSmallGroupSets(module.adminDepartment, Option(academicYear).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
 	
 	@ModelAttribute("createSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module): CreateSmallGroupSetCommand =
 		ModifySmallGroupSetCommand.create(module)
 
 	@RequestMapping
 	def form(@ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand) = {
-		Mav("admin/groups/new").crumbs(Breadcrumbs.DepartmentForYear(cmd.module.department, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
+		Mav("admin/groups/new").crumbs(Breadcrumbs.DepartmentForYear(cmd.module.adminDepartment, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
 	}
 
 	private def submit(cmd: CreateSmallGroupSetCommand, errors: Errors, route: SmallGroupSet => String) = {
@@ -81,7 +81,7 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 
 	@RequestMapping(method = Array(POST), params=Array("action!=refresh"))
 	def saveAndExit(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand, errors: Errors) =
-		submit(cmd, errors, { _ => Routes.admin(cmd.module.department, cmd.academicYear) })
+		submit(cmd, errors, { _ => Routes.admin(cmd.module.adminDepartment, cmd.academicYear) })
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddStudents, "action!=refresh"))
 	def submitAndAddStudents(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: CreateSmallGroupSetCommand, errors: Errors) =
@@ -107,14 +107,14 @@ class CreateSmallGroupSetEditPropertiesController extends SmallGroupSetsControll
 	type EditSmallGroupSetCommand = Appliable[SmallGroupSet] with EditSmallGroupSetCommandState
 
 	@ModelAttribute("departmentSmallGroupSets") def departmentSmallGroupSets(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet, @RequestParam(value="academicYear", required=false) academicYear: AcademicYear) =
-		smallGroupService.getDepartmentSmallGroupSets(module.department, Option(academicYear).getOrElse(set.academicYear))
+		smallGroupService.getDepartmentSmallGroupSets(module.adminDepartment, Option(academicYear).getOrElse(set.academicYear))
 
 	@ModelAttribute("createSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
 		ModifySmallGroupSetCommand.edit(module, set)
 
 	@RequestMapping
 	def form(@ModelAttribute("createSmallGroupSetCommand") cmd: EditSmallGroupSetCommand) = {
-		Mav("admin/groups/new").crumbs(Breadcrumbs.DepartmentForYear(cmd.module.department, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
+		Mav("admin/groups/new").crumbs(Breadcrumbs.DepartmentForYear(cmd.module.adminDepartment, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
 	}
 
 	private def submit(cmd: EditSmallGroupSetCommand, errors: Errors, route: SmallGroupSet => String) = {
@@ -127,7 +127,7 @@ class CreateSmallGroupSetEditPropertiesController extends SmallGroupSetsControll
 
 	@RequestMapping(method = Array(POST), params=Array("action!=refresh"))
 	def saveAndExit(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors) =
-		submit(cmd, errors, { _ => Routes.admin(cmd.module.department, cmd.academicYear) })
+		submit(cmd, errors, { _ => Routes.admin(cmd.module.adminDepartment, cmd.academicYear) })
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddStudents, "action!=refresh"))
 	def submitAndAddStudents(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors) =
@@ -153,14 +153,14 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	type EditSmallGroupSetCommand = Appliable[SmallGroupSet] with EditSmallGroupSetCommandState
 
 	@ModelAttribute("departmentSmallGroupSets") def departmentSmallGroupSets(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet, @RequestParam(value="academicYear", required=false) academicYear: AcademicYear) =
-		smallGroupService.getDepartmentSmallGroupSets(module.department, Option(academicYear).getOrElse(set.academicYear))
+		smallGroupService.getDepartmentSmallGroupSets(module.adminDepartment, Option(academicYear).getOrElse(set.academicYear))
 	
 	@ModelAttribute("editSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
 		ModifySmallGroupSetCommand.edit(module, set)
 
 	@RequestMapping
 	def form(@ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand) = {
-		Mav("admin/groups/edit").crumbs(Breadcrumbs.DepartmentForYear(cmd.module.department, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
+		Mav("admin/groups/edit").crumbs(Breadcrumbs.DepartmentForYear(cmd.module.adminDepartment, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
 	}
 
 	private def submit(cmd: EditSmallGroupSetCommand, errors: Errors, route: SmallGroupSet => String) = {
@@ -173,7 +173,7 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 
 	@RequestMapping(method = Array(POST), params=Array("action!=refresh"))
 	def saveAndExit(@Valid @ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors) =
-		submit(cmd, errors, { _ => Routes.admin(cmd.module.department, cmd.academicYear) })
+		submit(cmd, errors, { _ => Routes.admin(cmd.module.adminDepartment, cmd.academicYear) })
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddStudents, "action!=refresh"))
 	def submitAndAddStudents(@Valid @ModelAttribute("editSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors) =
@@ -206,14 +206,14 @@ class DeleteSmallGroupSetController extends GroupsController {
 	@RequestMapping
 	def form(cmd: DeleteSmallGroupSetCommand) =
 		Mav("admin/groups/delete")
-		.crumbs(Breadcrumbs.DepartmentForYear(cmd.module.department, cmd.set.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.set.academicYear))
+		.crumbs(Breadcrumbs.DepartmentForYear(cmd.module.adminDepartment, cmd.set.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.set.academicYear))
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid cmd: DeleteSmallGroupSetCommand, errors: Errors) =
 		if (errors.hasErrors) form(cmd)
 		else {
 			val set = cmd.apply()
-			Redirect(Routes.admin(cmd.module.department, set.academicYear))
+			Redirect(Routes.admin(cmd.module.adminDepartment, set.academicYear))
 		}
 	
 }

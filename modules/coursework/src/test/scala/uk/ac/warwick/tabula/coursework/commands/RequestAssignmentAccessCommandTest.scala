@@ -63,7 +63,7 @@ trait AssignmentFixture extends Mockito{
 
 	department.permissionsService = permissionsService
 	val module = new Module
-	module.department = department
+	module.adminDepartment = department
 	val assignment = new Assignment
 	assignment.addDefaultFields()
 	assignment.module = module

@@ -13,7 +13,7 @@ class MarkerRoleProvider extends RoleProvider {
 	
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = {
 		def getRoles(assignments: Seq[Assignment]) = assignments.toStream.filter { _.isMarker(user.apparentUser) }.map { assignment =>
-			customRoleFor(assignment.module.department)(MarkerRoleDefinition, assignment).getOrElse(Marker(assignment))
+			customRoleFor(assignment.module.adminDepartment)(MarkerRoleDefinition, assignment).getOrElse(Marker(assignment))
 		} 
 		
 		scope match {

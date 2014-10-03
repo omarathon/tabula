@@ -25,7 +25,7 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 		set.route = new Route
 		val dept = new Department
 		dept.relationshipService = mock[RelationshipService]
-		set.route.department = dept
+		set.route.adminDepartment = dept
 		val monitoringPoint = new MonitoringPoint
 		monitoringPoint.id = "1"
 		val existingName = "Point 1"

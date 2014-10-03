@@ -6,17 +6,18 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
 import org.joda.time.DateTime
+import scala.collection.JavaConverters._
 
 @Entity
 @NamedQueries(Array(
 	new NamedQuery(name = "route.code", query = "select r from Route r where code = :code"),
-	new NamedQuery(name = "route.department", query = "select r from Route r where department = :department")))
+	new NamedQuery(name = "route.department", query = "select r from Route r where adminDepartment = :department")))
 class Route extends GeneratedId with Serializable with PermissionsTarget {
 
-	def this(code: String = null, department: Department = null) {
+	def this(code: String = null, adminDepartment: Department = null) {
 		this()
 		this.code = code
-		this.department = department
+		this.adminDepartment = adminDepartment
 	}
 
 	@Column(unique=true)
@@ -26,7 +27,19 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "department_id")
-	var department: Department = _
+	var adminDepartment: Department = _
+
+	@deprecated("TAB-2589 to be explicit, this should use adminDepartment or teachingDepartments", "84")
+	def department = adminDepartment
+
+	@deprecated("TAB-2589 to be explicit, this should use adminDepartment or teachingDepartments", "84")
+	def department_=(d: Department) { adminDepartment = d }
+
+	@OneToMany(mappedBy = "route", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
+	var teachingInfo: JSet[RouteTeachingInformation] = JHashSet()
+
+	def teachingDepartments = teachingInfo.asScala.map { _.department } + adminDepartment
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.DegreeTypeUserType")
 	var degreeType: DegreeType = _
@@ -35,7 +48,7 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 
 	override def toString = "Route[" + code + "]"
 	
-	def permissionsParents = Stream(department)
+	def permissionsParents = Option(adminDepartment).toStream
 	override def humanReadableId = code.toUpperCase() + " " + name
 	override def urlSlug = code
 

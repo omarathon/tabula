@@ -382,7 +382,7 @@ abstract class Description {
 	 * Record module, plus department.
 	 */
 	def module(module: Module) = {
-		if (module.department != null) department(module.department)
+		if (module.adminDepartment != null) department(module.adminDepartment)
 		property("module" -> module.id)
 	}
 
@@ -395,7 +395,7 @@ abstract class Description {
 	}
 
 	def route(route: Route) = {
-		if (route.department != null) department(route.department)
+		if (route.adminDepartment != null) department(route.adminDepartment)
 		property("route", route.code)
 	}
 

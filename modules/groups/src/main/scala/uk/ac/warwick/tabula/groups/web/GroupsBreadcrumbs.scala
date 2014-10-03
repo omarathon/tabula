@@ -35,7 +35,7 @@ object GroupsBreadcrumbs {
 	 */
 	case class Module(val module: model.Module) extends Abstract {
 		val title = module.code.toUpperCase
-		val url = Some(Routes.admin(module.department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
+		val url = Some(Routes.admin(module.adminDepartment, AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
 		override val tooltip = module.name
 	}
 

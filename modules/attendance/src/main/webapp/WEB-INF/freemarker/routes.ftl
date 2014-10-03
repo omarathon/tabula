@@ -163,7 +163,7 @@
 	<#local filterQuery><#if filterQuery?has_content>?${filterQuery}</#if></#local>
 	<@_u page="/view/${department.code}/${academicYearString}/points${filterQuery}"/>
 </#macro>
-<#macro viewRecordPoints department academicYearString point queryString returnTo><@_u page="/view/${department.code}/${academicYearString}/points/${point.id}/record?returnTo=${returnTo?url}&${queryString}"/></#macro>
+<#macro viewRecordPoints department academicYearString point queryString returnTo><@_u page="/view/${department.code}/${academicYearString}/points/${point.id}/record?returnTo=${returnTo?url}&hasBeenFiltered=true&${queryString}"/></#macro>
 
 <#macro viewAgentsHome department academicYearString><@_u page="/view/${department.code}/${academicYearString}/agents"/></#macro>
 <#macro viewAgents department academicYearString relationshipType><@_u page="/view/${department.code}/${academicYearString}/agents/${relationshipType.urlPart}"/></#macro>

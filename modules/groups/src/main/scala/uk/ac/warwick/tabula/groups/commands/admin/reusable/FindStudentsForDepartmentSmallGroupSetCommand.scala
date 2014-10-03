@@ -44,9 +44,10 @@ class FindStudentsForDepartmentSmallGroupSetCommandInternal(val department: Depa
 	self: FiltersStudents with ProfileServiceComponent with UserLookupComponent =>
 
 	override def applyInternal() = {
-		if (serializeFilter.isEmpty) {
+		if (!doFind && (serializeFilter.isEmpty || findStudents.isEmpty)) {
 			FindStudentsForDepartmentSmallGroupSetCommandResult(staticStudentIds, Seq())
 		} else {
+			doFind = true
 			staticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments") {
 				profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
 					department = department,
@@ -143,6 +144,7 @@ trait FindStudentsForDepartmentSmallGroupSetCommandState {
 	var staticStudentIds: JList[String] = LazyLists.create()
 	var filterQueryString: String = ""
 	var linkToSits = true
+	var findStudents: String = ""
 	var doFind: Boolean = false
 
 	// Filter properties

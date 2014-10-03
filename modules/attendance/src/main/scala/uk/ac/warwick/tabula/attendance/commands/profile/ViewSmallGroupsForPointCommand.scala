@@ -114,7 +114,7 @@ class ViewSmallGroupsForPointCommandInternal(val student: StudentMember, val poi
 						smallGroupService.hasSmallGroups(moduleRegistration.module, moduleRegistration.academicYear),
 						moduleRegistration.module.code.toUpperCase,
 						moduleRegistration.module.name,
-						moduleRegistration.module.department.name,
+						moduleRegistration.module.adminDepartment.name,
 						moduleRegistration.cats.toString,
 						Option(moduleRegistration.selectionStatus).map(_.description).getOrElse("")
 					)

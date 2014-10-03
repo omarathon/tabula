@@ -36,13 +36,13 @@ class ExtensionRequestController extends CourseworkController{
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, module:Module)
-		= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+		= mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 
 	@RequestMapping(method=Array(HEAD,GET))
 	def showForm(@ModelAttribute("command") cmd: Appliable[Extension] with RequestExtensionCommandState): Mav = {
 		val (assignment, module) = (cmd.assignment, cmd.module)
 
-		if (!module.department.canRequestExtension) {
+		if (!module.adminDepartment.canRequestExtension) {
 			logger.info("Rejecting access to extension request screen as department does not allow extension requests")
 			throw new PermissionDeniedException(user, Permissions.Extension.MakeRequest, assignment)
 		} else {
@@ -57,9 +57,9 @@ class ExtensionRequestController extends CourseworkController{
 					"module" -> module,
 					"assignment" -> assignment,
 					"isClosed" -> assignment.isClosed,
-					"department" -> module.department,
+					"department" -> module.adminDepartment,
 					"isModification" -> isModification,
-					"existingRequest" -> existingRequest.getOrElse(null),
+					"existingRequest" -> existingRequest.orNull,
 					"command" -> cmd,
 					"returnTo" -> getReturnTo("/coursework" + Routes.assignment(assignment))
 				)

@@ -23,7 +23,7 @@ abstract class ExtensionRequestRespondedNotification(val verbed: String) extends
 		"path" ->  url
 	))
 
-	def recipients = assignment.module.department.extensionManagers.users.filterNot(_ == agent)
+	def recipients = assignment.module.adminDepartment.extensionManagers.users.filterNot(_ == agent)
 	def actionRequired = false
 }
 

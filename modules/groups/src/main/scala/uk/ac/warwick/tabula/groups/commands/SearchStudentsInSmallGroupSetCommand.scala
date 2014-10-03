@@ -56,8 +56,8 @@ class SearchStudentsInSmallGroupSetCommandInternal(val module: Module, val set: 
 		}
 
 	def allUniversityIdsInSet = {
-		// Include the university IDs of any users in any SmallGroupSet within this module
-		module.groupSets.asScala.flatMap { set =>
+		// Include the university IDs of any users in any SmallGroupSet within this module for the relevant academic year
+		module.groupSets.asScala.filter(_.academicYear == set.academicYear).flatMap { set =>
 			set.members.knownType.members ++ set.groups.asScala.flatMap { group =>
 				group.students.users.map(_.getWarwickId) ++
 					smallGroupService.findAttendanceByGroup(group).flatMap(_.attendance.asScala.toSeq.map(_.universityId))

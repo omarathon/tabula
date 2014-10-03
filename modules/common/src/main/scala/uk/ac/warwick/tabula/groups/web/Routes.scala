@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.groups.web
 
-import java.net.URLEncoder
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence.WeekNumber
 import uk.ac.warwick.tabula.data.model.{Module, Department}
-import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, DepartmentSmallGroupSet, SmallGroupSet}
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
@@ -20,6 +19,7 @@ object Routes {
 
 	object tutor {
 		def mygroups = context + "/tutor"
+		def registerForWeek (event: SmallGroupEvent, week: WeekNumber): String = context + "/event/%s/register?week=%s" format (encoded(event.id), encoded(week.toString))
 	}
 
 	object admin {

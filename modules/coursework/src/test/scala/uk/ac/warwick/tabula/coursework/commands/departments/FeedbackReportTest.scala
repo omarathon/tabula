@@ -23,9 +23,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 
 	@Test
 	def simpleGetFeedbackTest() {
-		val userOne = new User(idFormat(1))
-		userOne.setWarwickId(idFormat(1))
-		val publishes = auditEventQueryMethods.publishFeedbackForStudent(assignmentOne, userOne)
+		val publishes = auditEventQueryMethods.publishFeedbackForStudent(assignmentOne, idFormat(1))
 		publishes.size should be (1)
 	}
 
@@ -41,6 +39,17 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 		report.getFeedbackCount(assignmentSix) should be (FeedbackCount(65,8, dateTime(2013, 7, 16), dateTime(2013, 8, 1))) // 65 on time - 8 late
 	}
 
+	@Test
+	def outstandingFeedbackCountTest() {
+		val report = getTestFeedbackReport
+		
+		assignmentOne.feedbacks.get(9).released = false
+		report.getFeedbackCount(assignmentOne) should be (FeedbackCount(9,0, dateTime(2013, 3, 25), dateTime(2013, 3, 25))) // 10 on time
+		val outstandingFeedbackCount = assignmentOne.submissions.size() - report.getFeedbackCount(assignmentOne).onTime
+		outstandingFeedbackCount should be (1)
+	}
+	
+	
 
 	/**
 	 * Checks that the dissertation feedback is counted as on time
