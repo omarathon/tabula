@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.profiles.commands.relationships
 
-import uk.ac.warwick.tabula.helpers.ReverseMapHelper
-
 import scala.collection.JavaConverters._
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.commands.{GroupsObjectsWithFileUpload, MemberCollectionHelper, SelfValidating, Command, Description}
@@ -20,6 +18,7 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.profiles.services.docconversion.RawStudentRelationshipExtractor
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.helpers.ReverseMapHelper.reverseMap
 
 case class TutorInfoForStudent(tutorsBefore: Set[Member], tutorsAfter: Set[Member]) {
 	def oldTutors = tutorsBefore -- tutorsAfter
@@ -34,8 +33,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		with RelationshipChangingCommand
 		with MemberCollectionHelper
 		with NotifiesAffectedStudents
-		with FetchesRelationshipMappings
-		with ReverseMapHelper[Member, StudentMember] {
+		with FetchesRelationshipMappings {
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), mandatory(department))
 
@@ -118,7 +116,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 	lazy val studentsWithTutorChangedOrAdded = studentsWithTutorChanged ++ studentsWithTutorAdded
 
-	def hasChanges = (studentsWithTutorRemoved.size + studentsWithTutorAdded.size + studentsWithTutorChanged.size) > 0
+	def hasChanges = studentsWithTutorRemoved.nonEmpty || studentsWithTutorAdded.nonEmpty || studentsWithTutorChanged.nonEmpty
 
 	var spreadsheet: Boolean = _
 
@@ -265,12 +263,12 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	}
 
 	def getEndStudentRelationshipCommands: Set[EndStudentRelationshipCommand] = {
-		val commands = for (
-			(student, tutorInfo) <- studentsWithTutorRemoved;
-			retiringAgent <- tutorInfo.oldTutors;
-			rel <- relationshipService.getCurrentRelationship(relationshipType, student, retiringAgent);
+		val commands = for {
+			(student, tutorInfo) <- studentsWithTutorRemoved
+			retiringAgent <- tutorInfo.oldTutors
+			rel <- relationshipService.getCurrentRelationship(relationshipType, student, retiringAgent)
 			scd <- student.mostSignificantCourseDetails
-		) yield {
+		} yield {
 			val cmd = new EndStudentRelationshipCommand(rel, viewer)
 			cmd.maintenanceMode = this.maintenanceMode // override default in case this is being called in a test
 			cmd
@@ -279,11 +277,11 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	}
 
 	def getEditStudentRelationshipCommands: Set[EditStudentRelationshipCommand] = {
-		val commands = for (
-			(student, tutorInfo) <- studentsWithTutorChangedOrAdded;
-			newAgent <- tutorInfo.newTutors;
+		val commands = for {
+			(student, tutorInfo) <- studentsWithTutorChangedOrAdded
+			newAgent <- tutorInfo.newTutors
 			scd <- student.mostSignificantCourseDetails
-		) yield
+		} yield
 		{
 			val cmd = new EditStudentRelationshipCommand(scd, relationshipType, tutorInfo.oldTutors.toSeq, viewer, remove=false)
 			cmd.agent = newAgent

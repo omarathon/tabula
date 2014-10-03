@@ -66,7 +66,6 @@ class AllocateStudentsToRelationshipController extends ProfilesController {
 			form(cmd)
 		} else {
 
-			//: ListMap[String, Seq[Member]]
 			val changed = cmd.studentsWithTutorChanged.map { case (student, tutorInfo) => (student.universityId , tutorInfo.tutorsAfter.toSeq) }
 			val added = cmd.studentsWithTutorAdded.map { case (student, tutorInfo) => (student.universityId , tutorInfo.tutorsAfter.toSeq) }
 
