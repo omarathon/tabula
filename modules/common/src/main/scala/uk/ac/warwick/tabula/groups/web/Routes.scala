@@ -25,7 +25,7 @@ object Routes {
 	object admin {
 		def apply(department: Department, year: AcademicYear): String = context + "/admin/department/%s/%s" format (encoded(department.code), year.startYear.toString)
 
-		def module(module: Module, year: AcademicYear): String = apply(module.department, year) + s"?moduleFilters=Module(${module.code})"
+		def module(module: Module, year: AcademicYear): String = apply(module.adminDepartment, year) + s"?moduleFilters=Module(${module.code})"
 
 		def release(department: Department) = context + "/admin/department/%s/groups/release" format (encoded(department.code))
 		def selfsignup(department: Department, action: String) = context + "/admin/department/%s/groups/selfsignup/%s" format (encoded(department.code), encoded(action))

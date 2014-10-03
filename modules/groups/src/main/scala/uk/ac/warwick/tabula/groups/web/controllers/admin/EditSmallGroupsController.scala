@@ -15,7 +15,7 @@ abstract class AbstractEditSmallGroupsController extends GroupsController {
 
 	validatesSelf[SelfValidating]
 
-	type EditSmallGroupsCommand = Appliable[Seq[SmallGroup]] with PopulateOnForm
+	type EditSmallGroupsCommand = Appliable[Seq[SmallGroup]]
 
 	@ModelAttribute("ManageSmallGroupsMappingParameters") def params = ManageSmallGroupsMappingParameters
 
@@ -32,10 +32,7 @@ abstract class AbstractEditSmallGroupsController extends GroupsController {
 	def form(
 		@PathVariable("smallGroupSet") set: SmallGroupSet,
 		@ModelAttribute("command") cmd: EditSmallGroupsCommand
-	) = {
-		cmd.populate()
-		render(set)
-	}
+	) = render(set)
 
 	protected def submit(cmd: EditSmallGroupsCommand, errors: Errors, set: SmallGroupSet, route: String) = {
 		if (errors.hasErrors) {
