@@ -18,7 +18,7 @@ class TimetableFetchingServiceTest extends TestBase {
 		val events = ScientiaHttpTimetableFetchingService.parseXml(XML.loadString(TimetableEvents), AcademicYear(2012), locationFetchingService)
 		events.size should be (10)
 		events(0) should be (TimetableEvent(
-			uid="9e7ffe91e86820288dfe96be978145eb",
+			uid="945ff0ef192ccb9d328be90c9268873a",
 			name="CS132L",
 			title="",
 			description="",
