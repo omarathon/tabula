@@ -187,6 +187,11 @@ class SmallGroupSet
 			membershipService.determineMembershipUsers(upstreamAssessmentGroups, Some(members))
 		}
 
+	def allStudentIds =
+		Option(linkedDepartmentSmallGroupSet).map { _.allStudentIds }.getOrElse {
+			membershipService.determineMembershipIds(upstreamAssessmentGroups, Some(members))
+		}
+
 	def allStudentsCount =
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudentsCount }.getOrElse {
 			membershipService.countMembershipWithUniversityIdGroup(upstreamAssessmentGroups, Some(members))
@@ -202,8 +207,37 @@ class SmallGroupSet
 	
 	def unallocatedStudentsCount = {
 		Option(linkedDepartmentSmallGroupSet).map { _.unallocatedStudentsCount }.getOrElse {
-			// TAB-2296 we can't rely just on counts here
-			unallocatedStudents.size
+			if (groups.asScala.forall { _.students.universityIds } && members.universityIds) {
+				// Efficiency
+				val allocatedStudentIds = groups.asScala.flatMap { _.students.knownType.members }
+
+				(allStudentIds diff allocatedStudentIds).size
+			} else {
+				// TAB-2296 we can't rely just on counts here
+				unallocatedStudents.size
+			}
+		}
+	}
+
+	def studentsNotInMembership = {
+		Option(linkedDepartmentSmallGroupSet).map { _.studentsNotInMembership }.getOrElse {
+			val allocatedStudents = groups.asScala.flatMap { _.students.users }
+
+			allocatedStudents diff allStudents
+		}
+	}
+
+	def studentsNotInMembershipCount = {
+		Option(linkedDepartmentSmallGroupSet).map { _.studentsNotInMembershipCount }.getOrElse {
+			if (groups.asScala.forall { _.students.universityIds } && members.universityIds) {
+				// Efficiency
+				val allocatedStudentIds = groups.asScala.flatMap { _.students.knownType.members }
+
+				(allocatedStudentIds diff allStudentIds).size
+			} else {
+				// TAB-2296 we can't rely just on counts here
+				studentsNotInMembership.size
+			}
 		}
 	}
 

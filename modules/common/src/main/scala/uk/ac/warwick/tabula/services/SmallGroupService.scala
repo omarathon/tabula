@@ -42,6 +42,7 @@ trait SmallGroupService {
 	def saveOrUpdate(attendance: SmallGroupEventAttendance)
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent]
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup]
+	def removeUserFromGroup(user: User, smallGroup: SmallGroup)
 	def removeFromSmallGroups(moduleRegistration: ModuleRegistration)
 
 	def getSmallGroupSets(department: Department, year: AcademicYear): Seq[SmallGroupSet]
@@ -204,6 +205,13 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 				})
 			}
 		}
+	}
+
+	def removeUserFromGroup(user: User, smallGroup: SmallGroup) {
+		userGroupDao.saveOrUpdate(removeFromGroupCommand(user, smallGroup).apply() match {
+			case group: UserGroupCacheManager => group.underlying.asInstanceOf[UserGroup]
+			case group: UnspecifiedTypeUserGroup => group.asInstanceOf[UserGroup]
+		})
 	}
 	
 	private def removeFromGroupCommand(user: User, smallGroup: SmallGroup): Appliable[UnspecifiedTypeUserGroup] = {
