@@ -12,7 +12,8 @@
 	<p>Check the box next to each student below to deregister them from the small group.</p>
 
 	<div class="fix-area">
-		<@f.form>
+		<#assign submitUrl><@routes.deregisteredStudents smallGroupSet /></#assign>
+		<@f.form method="post" action="${submitUrl}" commandName="command">
 			<table class="table table-bordered table-striped table-condensed table-hover table-checkable">
 				<thead>
 					<tr>
