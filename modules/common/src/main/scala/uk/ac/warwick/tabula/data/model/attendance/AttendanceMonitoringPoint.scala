@@ -95,8 +95,9 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 				newPoint.smallGroupEventQuantity = smallGroupEventQuantity
 				newPoint.smallGroupEventModules = smallGroupEventModules
 			case AttendanceMonitoringPointType.AssignmentSubmission =>
-				newPoint.assignmentSubmissionIsSpecificAssignments = assignmentSubmissionIsSpecificAssignments
-				newPoint.assignmentSubmissionQuantity = assignmentSubmissionQuantity
+				newPoint.assignmentSubmissionType = assignmentSubmissionType
+				newPoint.assignmentSubmissionTypeAnyQuantity = assignmentSubmissionTypeAnyQuantity
+				newPoint.assignmentSubmissionTypeModulesQuantity = assignmentSubmissionTypeModulesQuantity
 				newPoint.assignmentSubmissionModules = assignmentSubmissionModules
 				newPoint.assignmentSubmissionAssignments = assignmentSubmissionAssignments
 				newPoint.assignmentSubmissionIsDisjunction = assignmentSubmissionIsDisjunction
@@ -160,13 +161,38 @@ trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehavio
 
 	// Setting for MonitoringPointType.AssignmentSubmission
 
-	def assignmentSubmissionIsSpecificAssignments = getBooleanSetting(Settings.AssignmentSubmissionIsSpecificAssignments) getOrElse true
-	def assignmentSubmissionIsSpecificAssignments_= (allow: Boolean) = settings += (Settings.AssignmentSubmissionIsSpecificAssignments -> allow)
+	def assignmentSubmissionType: String = getStringSetting(Settings.AssignmentSubmissionType) match {
+		case Some(stringType) => stringType
+		// Where this isn't defined, fall back to the old version
+		case None => getBooleanSetting(Settings.AssignmentSubmissionIsSpecificAssignments) match {
+			case None => // The new default
+				Settings.AssignmentSubmissionTypes.Any
+			case Some(true) =>
+				Settings.AssignmentSubmissionTypes.Assignments
+			case Some(false) =>
+				Settings.AssignmentSubmissionTypes.Modules
+		}
+	}
+	def assignmentSubmissionType_= (stringType: String): Unit = stringType match {
+		case (Settings.AssignmentSubmissionTypes.Any | Settings.AssignmentSubmissionTypes.Assignments | Settings.AssignmentSubmissionTypes.Modules) =>
+			settings += (Settings.AssignmentSubmissionType -> stringType)
+		case _ => throw new IllegalArgumentException("No such assignmentSubmissionType")
+	}
 
-	def assignmentSubmissionQuantity = getIntSetting(Settings.AssignmentSubmissionQuantity, 0)
-	def assignmentSubmissionQuantity_= (quantity: Int): Unit = settings += (Settings.AssignmentSubmissionQuantity -> quantity)
-	def assignmentSubmissionQuantity_= (quantity: JInteger): Unit = {
-		assignmentSubmissionQuantity = quantity match {
+	def assignmentSubmissionTypeAnyQuantity = getIntSetting(Settings.AssignmentSubmissionTypeAnyQuantity, 0)
+	def assignmentSubmissionTypeAnyQuantity_= (quantity: Int): Unit = settings += (Settings.AssignmentSubmissionTypeAnyQuantity -> quantity)
+	def assignmentSubmissionTypeAnyQuantity_= (quantity: JInteger): Unit = {
+		assignmentSubmissionTypeAnyQuantity = quantity match {
+			case q: JInteger => q.intValue
+			case _ => 0
+		}
+	}
+
+
+	def assignmentSubmissionTypeModulesQuantity = getIntSetting(Settings.AssignmentSubmissionTypeModulesQuantity, 0)
+	def assignmentSubmissionTypeModulesQuantity_= (quantity: Int): Unit = settings += (Settings.AssignmentSubmissionTypeModulesQuantity -> quantity)
+	def assignmentSubmissionTypeModulesQuantity_= (quantity: JInteger): Unit = {
+		assignmentSubmissionTypeModulesQuantity = quantity match {
 			case q: JInteger => q.intValue
 			case _ => 0
 		}
@@ -206,8 +232,15 @@ object AttendanceMonitoringPoint {
 		val SmallGroupEventQuantity = "smallGroupEventQuantity"
 		val SmallGroupEventModules = "smallGroupEventModules"
 
+		val AssignmentSubmissionType = "assignmentSubmissionType"
+		object AssignmentSubmissionTypes {
+			val Any = "any"
+			val Modules = "modules"
+			val Assignments = "assignments"
+		}
 		val AssignmentSubmissionIsSpecificAssignments = "assignmentSubmissionIsSpecificAssignments"
-		val AssignmentSubmissionQuantity = "assignmentSubmissionQuantity"
+		val AssignmentSubmissionTypeAnyQuantity = "assignmentSubmissionAnyQuantity"
+		val AssignmentSubmissionTypeModulesQuantity = "assignmentSubmissionQuantity"
 		val AssignmentSubmissionModules = "assignmentSubmissionModules"
 		val AssignmentSubmissionAssignments = "assignmentSubmissionAssignments"
 		val AssignmentSubmissionIsDisjunction = "assignmentSubmissionIsDisjunction"

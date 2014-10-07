@@ -155,20 +155,59 @@
 
 <div class="pointTypeOption assignmentSubmission row-fluid" <#if ((command.pointType.dbValue)!'null') != 'assignmentSubmission'>style="display:none"</#if>>
 
-	<@form.labelled_row "specificAssignments" "Assignments">
+	<@form.labelled_row "assignmentSubmissionType" "Assignments">
 		<@form.label clazz="radio" checkbox=true>
-			<input name="isSpecificAssignments" type="radio" value="false" <#if !command.isSpecificAssignments()>checked</#if>>
+			<@f.radiobutton path="assignmentSubmissionType" value="any" />
+			Any module or assignment
+			<@fmt.help_popover id="isSpecificAssignmentsFalse" content="Submission to any assignment for any module with a close date between the start and end dates will count towards this monitoring point" />
+		</@form.label>
+		<@form.label clazz="radio" checkbox=true>
+			<@f.radiobutton path="assignmentSubmissionType" value="modules" />
 			By module
 			<@fmt.help_popover id="isSpecificAssignmentsFalse" content="Submission to any assignment for the specified modules with a close date between the start and end dates will count towards this monitoring point" />
 		</@form.label>
 		<@form.label clazz="radio" checkbox=true>
-			<input name="isSpecificAssignments" type="radio" value="true" <#if command.isSpecificAssignments()>checked</#if>>
+			<@f.radiobutton path="assignmentSubmissionType" value="assignments" />
 			Specific assignments
 			<@fmt.help_popover id="isSpecificAssignmentsTrue" content="Submissions to the specified assignments that have a close date between the start and end dates will count towards this monitoring point" />
 		</@form.label>
 	</@form.labelled_row>
 
-	<div class="isSpecificAssignments" <#if !command.isSpecificAssignments()>style="display:none"</#if>>
+	<div class="assignmentSubmissionType-any" <#if command.assignmentSubmissionType != 'any'>style="display:none"</#if>>
+		<@form.labelled_row "assignmentSubmissionTypeAnyQuantity" "Number of assignments">
+			<input class="input-mini" type="text" <#if (command.assignmentSubmissionTypeAnyQuantity?? && command.assignmentSubmissionTypeAnyQuantity > 0)>value="${command.assignmentSubmissionTypeAnyQuantity}"</#if> name="assignmentSubmissionTypeAnyQuantity" />
+			<@fmt.help_popover id="assignmentSubmissionTypeAnyQuantity" content="The student must submit coursework to this many assignments for any module with a close date between the start and end dates in order to meet this monitoring point" />
+		</@form.labelled_row>
+	</div>
+
+	<div class="assignmentSubmissionType-modules" <#if command.assignmentSubmissionType != 'modules'>style="display:none"</#if>>
+		<div class="module-choice">
+			<@form.labelled_row "assignmentSubmissionModules" "">
+				<div class="module-search input-append">
+					<input class="module-search-query assignment" type="text" value="" placeholder="Search for a module"/>
+					<span class="add-on"><i class="icon-search"></i></span>
+				</div>
+				<div class="modules-list">
+					<input type="hidden" name="_assignmentSubmissionModules" value="false" />
+					<ol>
+						<#list command.assignmentSubmissionModules![] as module>
+							<li>
+								<input type="hidden" name="assignmentSubmissionModules" value="${module.id}" />
+								<#if command.moduleHasAssignments(module)><i class="icon-fixed-width"></i><#else><i class="icon-fixed-width icon-exclamation-sign" title="This module has no assignments set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger btn-mini"><i class="icon-remove"></i></button>
+							</li>
+						</#list>
+					</ol>
+				</div>
+			</@form.labelled_row>
+		</div>
+
+		<@form.labelled_row "assignmentSubmissionTypeModulesQuantity" "Number of assignments">
+			<input class="input-mini" type="text" <#if (command.assignmentSubmissionTypeModulesQuantity?? && command.assignmentSubmissionTypeModulesQuantity > 0)>value="${command.assignmentSubmissionTypeModulesQuantity}"</#if> name="assignmentSubmissionTypeModulesQuantity" />
+			<@fmt.help_popover id="assignmentSubmissionTypeModulesQuantity" content="The student must submit coursework to this many assignments for any of the specified modules with a close date between the start and end dates in order to meet this monitoring point" />
+		</@form.labelled_row>
+	</div>
+
+	<div class="assignmentSubmissionType-assignments" <#if command.assignmentSubmissionType != 'assignments'>style="display:none"</#if>>
 		<div class="assignment-choice">
 			<@form.labelled_row "assignmentSubmissionAssignments" "">
 				<div class="assignment-search input-append">
@@ -203,33 +242,6 @@
 		</div>
 	</div>
 
-	<div class="modules" <#if command.isSpecificAssignments()>style="display:none"</#if>>
-		<div class="module-choice">
-			<@form.labelled_row "assignmentSubmissionModules" "">
-				<div class="module-search input-append">
-					<input class="module-search-query assignment" type="text" value="" placeholder="Search for a module"/>
-					<span class="add-on"><i class="icon-search"></i></span>
-				</div>
-				<div class="modules-list">
-					<input type="hidden" name="_assignmentSubmissionModules" value="false" />
-					<ol>
-						<#list command.assignmentSubmissionModules![] as module>
-							<li>
-								<input type="hidden" name="assignmentSubmissionModules" value="${module.id}" />
-								<#if command.moduleHasAssignments(module)><i class="icon-fixed-width"></i><#else><i class="icon-fixed-width icon-exclamation-sign" title="This module has no assignments set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger btn-mini"><i class="icon-remove"></i></button>
-							</li>
-						</#list>
-					</ol>
-				</div>
-			</@form.labelled_row>
-		</div>
-
-		<@form.labelled_row "assignmentSubmissionQuantity" "Number of assignments">
-			<input class="input-mini" type="text" <#if (command.assignmentSubmissionQuantity?? && command.assignmentSubmissionQuantity > 0)>value="${command.assignmentSubmissionQuantity}"</#if> name="assignmentSubmissionQuantity" />
-			<@fmt.help_popover id="assignmentSubmissionQuantity" content="The student must submit coursework to this many assignments for any of the specified modules with a close date between the start and end dates in order to meet this monitoring point" />
-		</@form.labelled_row>
-	</div>
-
 </div>
 
 <@spring.bind path="command">
@@ -246,17 +258,13 @@
 <script>
 	jQuery(function($) {
 		// Show relavant extra options when changing assignment type
-		var $specificAssignmentInput = $('form input[name=isSpecificAssignments]');
+		var $specificAssignmentInput = $('form input[name=assignmentSubmissionType]');
 		if ($specificAssignmentInput.length > 0) {
 			var showAssignmentOptions = function() {
-				var value = $('form input[name=isSpecificAssignments]:checked').val();
-				if (value && value === "true") {
-					$('.pointTypeOption.assignmentSubmission .isSpecificAssignments').show();
-					$('.pointTypeOption.assignmentSubmission .modules').hide();
-				} else {
-					$('.pointTypeOption.assignmentSubmission .isSpecificAssignments').hide();
-					$('.pointTypeOption.assignmentSubmission .modules').show();
-				}
+				var value = $('form input[name=assignmentSubmissionType]:checked').val();
+				$('.pointTypeOption.assignmentSubmission [class^=assignmentSubmissionType-]').hide();
+				$('.pointTypeOption.assignmentSubmission .assignmentSubmissionType-' + value).show();
+
 			};
 			$specificAssignmentInput.on('click', showAssignmentOptions);
 			showAssignmentOptions();
