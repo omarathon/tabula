@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.commands.ReadOnly
  * Generates a list of students on small group, for displaying to
  * owners or tutors of that group.
  */
-class ListGroupStudentsCommand(val group: SmallGroup) extends Command[Seq[MemberOrUser]] with Unaudited with ReadOnly {
+class ListSmallGroupStudentsCommand(val group: SmallGroup) extends Command[Seq[MemberOrUser]] with Unaudited with ReadOnly {
 
 	var profileService = Wire[ProfileService]
 

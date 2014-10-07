@@ -7,7 +7,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup}
 import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
 
-class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
+class ListSmallGroupSetUnallocatedStudentsCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends ProfileServiceComponent {
 		var profileService = mock[ProfileService]
@@ -101,7 +101,7 @@ class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 
 	@Test
 	def emptyGroups() = withUser("snow") { new Fixture() {
-		var command = new ListGroupUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
+		var command = new ListSmallGroupSetUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
 		command.profileService = profileService
 		val info = command.applyInternal()
 
@@ -115,7 +115,7 @@ class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 	def oneStudentInAGroup() = withUser("cutrue") { new Fixture() {
 		group1.students.add(user1)
 
-		var command = new ListGroupUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
+		var command = new ListSmallGroupSetUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
 		command.profileService = profileService
 		val info = command.applyInternal()
 
@@ -128,7 +128,7 @@ class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 	@Test
 	def checkCurrentUserIsInGroup() = withUser("cutrue") { new Fixture() {
 		val fakeCurrentUser = new CurrentUser(user8, user8)
-		var command = new ListGroupUnallocatedStudentsCommandInternal(set, fakeCurrentUser) with CommandTestSupport
+		var command = new ListSmallGroupSetUnallocatedStudentsCommandInternal(set, fakeCurrentUser) with CommandTestSupport
 		command.profileService = profileService
 
 		val info = command.applyInternal()
@@ -148,7 +148,7 @@ class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 			group1.students.add(user6)
 			group1.students.add(user7)
 
-			var command = new ListGroupUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
+			var command = new ListSmallGroupSetUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
 			command.profileService = profileService
 			val info = command.applyInternal()
 
@@ -170,7 +170,7 @@ class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 			group1.students.add(user5)
 			group2.students.add(user6)
 
-			var command = new ListGroupUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
+			var command = new ListSmallGroupSetUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
 			command.profileService = profileService
 			val info = command.applyInternal()
 
