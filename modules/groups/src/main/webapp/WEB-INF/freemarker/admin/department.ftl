@@ -74,14 +74,14 @@
 							</@fmt.permission_button>
 						</li>
 					</#if>
-					<li ${hasUnreleasedGroupsets?string(''," class='disabled use-tooltip' title='All modules already notified' ")} >
+					<li ${hasUnreleasedGroupsets?string(''," class='disabled use-tooltip' title='All modules already published' ")} >
 						<#assign notify_url><@routes.batchnotify department /></#assign>
 						<@fmt.permission_button
 							permission='SmallGroups.Update'
 							scope=department
-							action_descr='notify students and staff'
+							action_descr='publish groups to students and staff'
 							href=notify_url>
-							<i class="icon-envelope-alt icon-fixed-width"></i> Notify
+							<i class="icon-envelope-alt icon-fixed-width"></i> Publish
 						</@fmt.permission_button>
 					</li>
 
