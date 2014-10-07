@@ -79,6 +79,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro relationshipPhoto profile relationship><@_u page="/view/photo/${profile.universityId}/${relationship.relationshipType.dbValue}/${relationship.agent}.jpg" context="/profiles" /></#macro>
 
 <#macro studentslist group><@_u page="/group/${group.id}/studentspopup" /></#macro>
+<#macro studentsinsetlist groupset><@_u page="/${groupset.id}/studentspopup" /></#macro>
 <#macro unallocatedstudentslist groupset><@_u page="/${groupset.id}/unallocatedstudentspopup" /></#macro>
 
 <#macro crossmodulegroups department><@_u page="/admin/department/${department.code}/groups/reusable"  /></#macro>

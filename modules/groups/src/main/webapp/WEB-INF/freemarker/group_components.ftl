@@ -119,7 +119,7 @@
 									<#local nextStageModal = "#modal-container" />
 								</#if>
 
-								<#if nextStageUrl?has_content>
+								<#if nextStageUrl?has_content && can.do('SmallGroups.Update', set)>
 									<a href="${nextStageUrl}"<#if nextStageModal?has_content> data-toggle="modal" data-target="${nextStageModal}" data-container="body"</#if>>
 										<@spring.message code=setItem.nextStage.actionCode />
 									</a>
@@ -329,19 +329,32 @@
 <#macro single_set_inner setItem>
 	<#local set = setItem.set />
 	<#local has_groups = setItem.groups?size gt 0 />
+	<#local can_update_groups = can.do('SmallGroups.Update', set) />
 
 	<#-- Overall info -->
 	<div class="row-fluid">
 		<div class="span2">
-			<a href="<@routes.editsetgroups set />"><@fmt.p setItem.groups?size "group" /></a>
+			<#if can_update_groups>
+				<a href="<@routes.editsetgroups set />"><@fmt.p setItem.groups?size "group" /></a>
+			<#else>
+				<@fmt.p setItem.groups?size "group" />
+			</#if>
 		</div>
 		<div class="span2">
-			<a href="<@routes.editsetstudents set />"><@fmt.p set.allStudentsCount "student" /></a>
+			<#if can_update_groups>
+				<a href="<@routes.editsetstudents set />"><@fmt.p set.allStudentsCount "student" /></a>
+			<#else>
+				<a href="<@routes.studentsinsetlist set />" class="ajax-modal" data-target="#students-list-modal"><@fmt.p set.allStudentsCount "student" /></a>
+			</#if>
 		</div>
 		<div class="span8">
 			<#local unallocatedSize = set.unallocatedStudentsCount />
 			<#if unallocatedSize gt 0>
-				<a href="<@routes.editsetallocate set />"><@fmt.p unallocatedSize "unallocated student" /></a>
+				<#if can_update_groups>
+					<a href="<@routes.editsetallocate set />"><@fmt.p unallocatedSize "unallocated student" /></a>
+				<#else>
+					<a href="<@routes.unallocatedstudentslist set />" class="ajax-modal" data-target="#students-list-modal"><@fmt.p unallocatedSize "unallocated student" /></a>
+				</#if>
 			</#if>
 		</div>
 	</div>
