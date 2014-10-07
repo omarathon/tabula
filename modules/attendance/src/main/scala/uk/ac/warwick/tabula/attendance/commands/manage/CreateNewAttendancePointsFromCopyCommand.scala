@@ -147,10 +147,9 @@ trait GetsPointsToCreate {
 				newPoint.smallGroupEventQuantity = oldPoint.smallGroupEventQuantity
 				newPoint.smallGroupEventModules = oldPoint.smallGroupEventModules
 			case MonitoringPointType.AssignmentSubmission =>
-				oldPoint.assignmentSubmissionIsSpecificAssignments match {
-					case true => newPoint.assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments
-					case false => newPoint.assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules
-				}
+				newPoint.assignmentSubmissionType =
+					if (oldPoint.assignmentSubmissionIsSpecificAssignments) AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments
+					else AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules
 				newPoint.assignmentSubmissionTypeModulesQuantity = oldPoint.assignmentSubmissionQuantity
 				newPoint.assignmentSubmissionModules = oldPoint.assignmentSubmissionModules
 				newPoint.assignmentSubmissionAssignments = oldPoint.assignmentSubmissionAssignments
