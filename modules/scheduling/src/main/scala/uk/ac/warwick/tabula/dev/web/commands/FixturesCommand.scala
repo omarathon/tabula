@@ -44,6 +44,11 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		val subDept = moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestSubDepartment.code).get
 		val subSubDept = moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestSubSubDepartment.code).get
 
+		val module1 = moduleAndDepartmentService.getModuleByCode(Fixtures.TestModule1.code).get
+		val module2 = moduleAndDepartmentService.getModuleByCode(Fixtures.TestModule2.code).get
+		val module3 = moduleAndDepartmentService.getModuleByCode(Fixtures.TestModule3.code).get
+		val module4 = moduleAndDepartmentService.getModuleByCode(Fixtures.TestModule4.code).get
+
 		// Two department admins, first is a UserAccessManager
 		val cmd = GrantRoleCommand(department)
 
@@ -75,6 +80,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		upstreamAssignment.departmentCode = "XXX"
 		upstreamAssignment.sequence = "A"
 		upstreamAssignment.moduleCode = "XXX101-30"
+		upstreamAssignment.module = module1
 		upstreamAssignment.name = "Assignment from SITS"
 		upstreamAssignment.assessmentType = AssessmentType.Assignment
 		session.save(upstreamAssignment)

@@ -255,16 +255,16 @@
 									</#if>
 								</#if>
 
-								<li ${set.fullyReleased?string(" class='disabled use-tooltip' title='Already notified' ",'')} >
+								<li ${set.fullyReleased?string(" class='disabled use-tooltip' title='Already published' ",'')} >
 									<#local notifyset_url><@routes.releaseset set /></#local>
 									<@fmt.permission_button
 									permission='SmallGroups.Update'
 									scope=set
-									action_descr='notify students and staff'
+									action_descr='publish groups to students and staff'
 									href=notifyset_url
 									classes='notify-group-link'
 									data_attr='data-toggle=modal data-target=#modal-container data-container=body'>
-										<i class="icon-envelope-alt icon-fixed-width"></i> Notify
+										<i class="icon-envelope-alt icon-fixed-width"></i> Publish
 									</@fmt.permission_button>
 								</li>
 
@@ -286,7 +286,7 @@
 									</a>
 								</li>
 
-								<li<#if set.releasedToStudents || set.releasedToTutors> class="disabled use-tooltip" data-container="body" title="Can't delete small groups where students or tutors have been notified"</#if>>
+								<li<#if set.releasedToStudents || set.releasedToTutors> class="disabled use-tooltip" data-container="body" title="Can't delete small groups that have been published to students or tutors"</#if>>
 									<#local delete_url><@routes.deleteset set /></#local>
 									<@fmt.permission_button
 										permission='SmallGroups.Delete'
@@ -677,17 +677,17 @@
 								 <#-- not released at all -->
 								  <#if (!groupSet.releasedToStudents && !groupSet.releasedToTutors)>
 								<p class="alert">
-									<i class="icon-info-sign"></i> Notifications have not been sent for these groups
+									<i class="icon-info-sign"></i> These groups have not been published
 								</p>
 								 <#-- only released to tutors-->
 								 <#elseif (!groupSet.releasedToStudents && groupSet.releasedToTutors)>
 								  <p class="alert">
-									   <i class="icon-info-sign"></i> Notifications have not been sent to students for these groups
+									   <i class="icon-info-sign"></i> These groups have been published to tutors, but not students
 								   </p>
 								  <#-- only released to students-->
 								  <#elseif (groupSet.releasedToStudents && !groupSet.releasedToTutors)>
 									  <p class="alert">
-										  <i class="icon-info-sign"></i> Notifications have not been sent to tutors for these groups
+										  <i class="icon-info-sign"></i> These groups have been published to students, but not tutors
 									  </p>
 								 </#if>
 							</#if>
@@ -753,16 +753,16 @@
 																				<i class="icon-random icon-fixed-width"></i> Allocate students
 													            </@fmt.permission_button>
                                     </li>
-                                    <li ${groupSet.fullyReleased?string(" class='disabled use-tooltip' title='Already notified' ",'')} >
+                                    <li ${groupSet.fullyReleased?string(" class='disabled use-tooltip' title='Already published' ",'')} >
                                     	<#local notifyset_url><@routes.releaseset groupSet /></#local>
 																			<@fmt.permission_button 
 																				permission='SmallGroups.Update' 
 																				scope=groupSet 
-																				action_descr='notify students and staff' 
+																				action_descr='publish groups to students and staff'
 																				href=notifyset_url
 																				classes='notify-group-link'
 																				data_attr='data-toggle=modal data-target=#modal-container data-container=body'>
-																				<i class="icon-envelope-alt icon-fixed-width"></i> Notify
+																				<i class="icon-envelope-alt icon-fixed-width"></i> Publish
 													            </@fmt.permission_button>
 													          </li>
                                         
