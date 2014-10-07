@@ -55,6 +55,7 @@ trait AssignmentMembershipService {
 	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): AssignmentMembershipInfo
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User]
 	def determineMembershipUsers(assignment: Assignment): Seq[User]
+	def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[String]
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean
 }
@@ -196,6 +197,18 @@ trait AssignmentMembershipMethods extends Logging {
 	 */
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User] = {
 		determineMembership(upstream, others).items filter notExclude map toUser filter notNull filter notAnonymous
+	}
+
+	def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[String] = {
+		others.foreach { g => assert(g.universityIds) }
+		for (group <- upstream) assert(group.members.universityIds)
+
+		val sitsUsers = upstream.flatMap { _.members.members }.distinct.toSeq
+
+		val includes = others.map(_.knownType.members).getOrElse(Nil)
+		val excludes = others.map(_.knownType.excludedUserIds).getOrElse(Nil)
+
+		(sitsUsers ++ includes).distinct diff excludes.distinct
 	}
 
 	/**

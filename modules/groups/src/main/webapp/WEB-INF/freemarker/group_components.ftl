@@ -120,14 +120,22 @@
 								</#if>
 
 								<#if nextStageUrl?has_content && can.do('SmallGroups.Update', set)>
-									<a href="${nextStageUrl}"<#if nextStageModal?has_content> data-toggle="modal" data-target="${nextStageModal}" data-container="body"</#if>>
+									<a href="${nextStageUrl}"<#if nextStageModal?has_content> data-toggle="modal" data-target="${nextStageModal}" data-container="body"</#if>><#compress>
 										<@spring.message code=setItem.nextStage.actionCode />
-									</a>
+									</#compress></a>
 								<#else>
 									<@spring.message code=setItem.nextStage.actionCode />
 								</#if>
 							<#elseif setItem.progress.percentage == 100>
 								Complete
+							</#if>
+
+							<#local notInMembershipCount = set.studentsNotInMembershipCount />
+
+							<#if notInMembershipCount gt 0>
+								<#local tooltip><@fmt.p notInMembershipCount "student has" "students have" /> deregistered</#local>
+
+								<a href="<@routes.deregisteredStudents set />" class="use-tooltip warning" style="display: inline;" title="${tooltip}"><i class="icon-warning-sign warning"></i></a>
 							</#if>
 						</div>
 					<#else>
@@ -349,12 +357,20 @@
 		</div>
 		<div class="span8">
 			<#local unallocatedSize = set.unallocatedStudentsCount />
+			<#local notInMembershipCount = set.studentsNotInMembershipCount />
+
 			<#if unallocatedSize gt 0>
 				<#if can_update_groups>
 					<a href="<@routes.editsetallocate set />"><@fmt.p unallocatedSize "unallocated student" /></a>
+					<#if notInMembershipCount gt 0><br></#if>
 				<#else>
 					<a href="<@routes.unallocatedstudentslist set />" class="ajax-modal" data-target="#students-list-modal"><@fmt.p unallocatedSize "unallocated student" /></a>
 				</#if>
+			</#if>
+
+			<#if notInMembershipCount gt 0 && can_update_groups>
+				<a href="<@routes.deregisteredStudents set />"><@fmt.p notInMembershipCount "student has" "students have" /> deregistered</a>
+				<i class="icon-warning-sign warning"></i>
 			</#if>
 		</div>
 	</div>

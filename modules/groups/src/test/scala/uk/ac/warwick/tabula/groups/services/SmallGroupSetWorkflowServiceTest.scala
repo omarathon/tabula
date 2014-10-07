@@ -157,6 +157,7 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 		val user3 = userLookup.getUserByUserId("user3")
 
 		set.membershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Some(set.members)) returns (Seq(user1, user2, user3))
+		set.membershipService.determineMembershipIds(set.upstreamAssessmentGroups, Some(set.members)) returns (Seq(user1.getWarwickId, user2.getWarwickId, user3.getWarwickId))
 		group1.students.add(user1)
 		group2.students.add(user2)
 
