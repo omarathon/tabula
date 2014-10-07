@@ -107,6 +107,7 @@ class SandboxModuleImporter extends ModuleImporter {
 }
 
 object ModuleImporter {
+	var sitsSchema: String = Wire.property("${schema.sits}")
 
 	final val GetDepartmentsSql = """
 		select 
@@ -137,10 +138,10 @@ object ModuleImporter {
 		  group by substr(mod.mod_code,0,5)
 		"""
 
-	final val GetModuleTeachingDepartmentsSql =	"""
+	final val GetModuleTeachingDepartmentsSql =	f"""
 		select substr(top.top_code, 0, 5) as code, top.dpt_code as department_code, min(top.top_perc) as percentage
-			from intuit.cam_top top
-				join intuit.ins_mod mod
+			from $sitsSchema.cam_top top
+				join $sitsSchema.ins_mod mod
 					on mod.mod_code = top.mod_code and
 						 mod.mod_iuse = 'Y' and
 						 mod.mot_code not in ('S-', 'D')
