@@ -135,7 +135,7 @@
 							<#if notInMembershipCount gt 0>
 								<#local tooltip><@fmt.p notInMembershipCount "student has" "students have" /> deregistered</#local>
 
-								<i class="icon-warning-sign use-tooltip" title="${tooltip}"></i>
+								<a href="<@routes.deregisteredStudents set />" class="use-tooltip warning" style="display: inline;" title="${tooltip}"><i class="icon-warning-sign warning"></i></a>
 							</#if>
 						</div>
 					<#else>
@@ -357,6 +357,7 @@
 
 			<#if notInMembershipCount gt 0>
 				<a href="<@routes.deregisteredStudents set />"><@fmt.p notInMembershipCount "student has" "students have" /> deregistered</a>
+				<i class="icon-warning-sign warning"></i>
 			</#if>
 		</div>
 	</div>
