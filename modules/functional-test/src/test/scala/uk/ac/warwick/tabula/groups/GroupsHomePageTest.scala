@@ -62,8 +62,11 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 		Then("The page should be the small group teaching page")
 				breadCrumbsMatch(Seq("Small Group Teaching"))
 
-		And("The page should display at least one set")
+		// wait for sets to load ajaxically
+		eventuallyAjax {
+			And("The page should display at least one set")
 			findAll(className("set-info")).toList should not be (Nil)
+		}
 	}
 
 	it should "be able to open batches of groups" in {
