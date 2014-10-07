@@ -30,7 +30,7 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
 		val command = new FindStudentsForDepartmentSmallGroupSetCommandInternal(department, set) with CommandTestSupport
 	}
 
-	@Test	def apply { new CommandFixture {
+	@Test	def apply() { new CommandFixture {
 		command.routes.add(new Route(){ this.code = "a100" })
 
 		command.profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
@@ -46,6 +46,9 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
 		command.includedStudentIds.add(student3.universityId)
 		command.excludedStudentIds.add(student2.universityId)
 
+		// Enable searching
+		command.findStudents = "submit"
+
 		val result = command.applyInternal()
 		// 2 results from search, even with 1 removed
 		result.membershipItems.size should be (2)
@@ -60,7 +63,7 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
 		result.staticStudentIds.asScala should be (Seq(student1.universityId, student2.universityId))
 	}}
 
-	@Test def populate { new Fixture {
+	@Test def populate() { new Fixture {
 		val (d, s) = (department, set)
 		val command = new PopulateFindStudentsForDepartmentSmallGroupSetCommand with FindStudentsForDepartmentSmallGroupSetCommandState with FiltersStudents with DeserializesFilterImpl {
 			val department = d
@@ -93,7 +96,7 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
 		command.sprStatuses.asScala should be (Seq(currentStatus))
 	}}
 
-	@Test def permissions { new Fixture {
+	@Test def permissions() { new Fixture {
 		val (theDepartment, theSet) = (department, set)
 		val command = new FindStudentsForDepartmentSmallGroupSetPermissions with FindStudentsForDepartmentSmallGroupSetCommandState {
 			val department = theDepartment
@@ -106,7 +109,7 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
 		there was one(checking).PermissionCheck(Permissions.SmallGroups.Update, set)
 	}}
 
-	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {
+	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment() {
 		val command = new FindStudentsForDepartmentSmallGroupSetPermissions with FindStudentsForDepartmentSmallGroupSetCommandState {
 			val department = null
 			val set = new DepartmentSmallGroupSet
@@ -116,7 +119,7 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
 		command.permissionsCheck(checking)
 	}
 
-	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
+	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet() {
 		val command = new FindStudentsForDepartmentSmallGroupSetPermissions with FindStudentsForDepartmentSmallGroupSetCommandState {
 			val department = Fixtures.department("in")
 			val set = null
@@ -126,7 +129,7 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
 		command.permissionsCheck(checking)
 	}
 
-	@Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
+	@Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet() {
 		val command = new FindStudentsForDepartmentSmallGroupSetPermissions with FindStudentsForDepartmentSmallGroupSetCommandState {
 			val department = Fixtures.department("in")
 			department.id = "set id"
@@ -138,7 +141,7 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
 		command.permissionsCheck(checking)
 	}
 
-	@Test def wires { new Fixture {
+	@Test def wires() { new Fixture {
 		val command = FindStudentsForDepartmentSmallGroupSetCommand(department, set)
 
 		command should be (anInstanceOf[Appliable[FindStudentsForDepartmentSmallGroupSetCommandResult]])

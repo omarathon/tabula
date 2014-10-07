@@ -32,7 +32,7 @@ abstract class StudentRelationshipChangeNotification
 	def content =
 		FreemarkerModel(templateLocation, Map(
 			"student" -> relationship.studentMember,
-			"newAgent" -> newAgent,
+			"newAgents" -> newAgent.toSeq,
 			"relationshipType" -> relationship.relationshipType,
 			"path" -> url,
 			"oldAgents" -> oldAgents

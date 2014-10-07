@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.scheduling.services
 
-import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import javax.sql.DataSource
-import javax.annotation.Resource
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import java.sql.ResultSet
 import collection.JavaConverters._
@@ -12,7 +10,6 @@ import org.springframework.jdbc.core.SqlParameter
 import java.sql.Types
 import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
 import uk.ac.warwick.tabula.data.model.DegreeType
-import javax.annotation.Resource
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -21,14 +18,18 @@ import uk.ac.warwick.tabula.sandbox.SandboxData
 
 case class DepartmentInfo(val name: String, val code: String, val faculty: String, val parentCode:Option[String] = None, val filterName:Option[String] = None)
 case class ModuleInfo(val name: String, val code: String, val group: String)
+case class ModuleTeachingDepartmentInfo(val code: String, val departmentCode: String, val percentage: JBigDecimal)
 case class RouteInfo(val name: String, val code: String, val degreeType: DegreeType)
+case class RouteTeachingDepartmentInfo(val code: String, val departmentCode: String, val percentage: JBigDecimal)
 
 /**
  * Retrieves department and module information from an external location.
  */
 trait ModuleImporter {
 	def getModules(deptCode: String): Seq[ModuleInfo]
+	def getModuleTeachingDepartments(moduleCode: String): Seq[ModuleTeachingDepartmentInfo]
 	def getRoutes(deptCode: String): Seq[RouteInfo]
+	def getRouteTeachingDepartments(routeCode: String): Seq[RouteTeachingDepartmentInfo]
 	def getDepartments(): Seq[DepartmentInfo]
 }
 
@@ -44,15 +45,25 @@ class ModuleImporterImpl extends ModuleImporter with Logging {
 
 	lazy val departmentInfoMappingQuery = new DepartmentInfoMappingQuery(membership)
 	lazy val moduleInfoMappingQuery = new ModuleInfoMappingQuery(sits)
+	lazy val moduleTeachingDepartmentMappingQuery = new ModuleTeachingDepartmentInfoMappingQuery(sits)
 	lazy val routeInfoMappingQuery = new RouteInfoMappingQuery(sits)
+	lazy val routeTeachingDepartmentMappingQuery = new RouteTeachingDepartmentInfoMappingQuery(sits)
 
 	def getDepartments(): Seq[DepartmentInfo] = departmentInfoMappingQuery.execute.asScala
 	
 	def getModules(deptCode: String): Seq[ModuleInfo] = moduleInfoMappingQuery.executeByNamedParam(JMap(
 		"department_code" -> deptCode.toUpperCase
 	)).asScala
+
+	def getModuleTeachingDepartments(moduleCode: String): Seq[ModuleTeachingDepartmentInfo] = moduleTeachingDepartmentMappingQuery.executeByNamedParam(JMap(
+		"module_code" -> moduleCode.toUpperCase
+	)).asScala
 	
 	def getRoutes(deptCode: String): Seq[RouteInfo] = routeInfoMappingQuery.execute(deptCode.toUpperCase).asScala
+
+	def getRouteTeachingDepartments(routeCode: String): Seq[RouteTeachingDepartmentInfo] = routeTeachingDepartmentMappingQuery.executeByNamedParam(JMap(
+		"route_code" -> routeCode.toUpperCase
+	)).asScala
 }
 
 @Profile(Array("sandbox")) @Service
@@ -63,13 +74,40 @@ class SandboxModuleImporter extends ModuleImporter {
 	
 	def getModules(deptCode: String): Seq[ModuleInfo] = 
 		SandboxData.Departments(deptCode).modules.toSeq map { case (code, m) => ModuleInfo(m.name, m.code, deptCode + "-" + m.code) }
+
+	def getModuleTeachingDepartments(moduleCode: String): Seq[ModuleTeachingDepartmentInfo] =
+		SandboxData.Departments.values
+			.find { department =>
+				department.modules.keys.toSeq.contains(moduleCode)
+			}
+			.toSeq
+			.flatMap { department =>
+				department.modules
+					.find { case (code, _) => code == moduleCode }
+					.toSeq
+					.map { case (code, m) => ModuleTeachingDepartmentInfo(code, department.code, JBigDecimal(Some(100))) }
+			}
 	
 	def getRoutes(deptCode: String): Seq[RouteInfo] = 
 		SandboxData.Departments(deptCode).routes.toSeq map { case (code, r) => RouteInfo(r.name, r.code, r.degreeType) }
+
+	def getRouteTeachingDepartments(routeCode: String): Seq[RouteTeachingDepartmentInfo] =
+		SandboxData.Departments.values
+			.find { department =>
+				department.routes.keys.toSeq.contains(routeCode)
+			}
+			.toSeq
+			.flatMap { department =>
+				department.routes
+					.find { case (code, _) => code == routeCode }
+					.toSeq
+					.map { case (code, r) => RouteTeachingDepartmentInfo(code, department.code, JBigDecimal(Some(100))) }
+			}
 	
 }
 
 object ModuleImporter {
+	var sitsSchema: String = Wire.property("${schema.sits}")
 
 	final val GetDepartmentsSql = """
 		select 
@@ -99,6 +137,21 @@ object ModuleImporter {
 		    mod.mot_code not in ('S-', 'D')
 		  group by substr(mod.mod_code,0,5)
 		"""
+
+	final val GetModuleTeachingDepartmentsSql =	f"""
+		select substr(top.top_code, 0, 5) as code, top.dpt_code as department_code, min(top.top_perc) as percentage
+			from $sitsSchema.cam_top top
+				join $sitsSchema.ins_mod mod
+					on mod.mod_code = top.mod_code and
+						 mod.mod_iuse = 'Y' and
+						 mod.mot_code not in ('S-', 'D')
+
+			where
+	  		substr(top.top_code, 0, 5) = :module_code and
+				top.top_iuse = 'Y'
+			group by
+				substr(top.top_code, 0, 5), top.dpt_code
+		"""
 		
 	final val GetRoutesSql = """
 		select 
@@ -110,6 +163,16 @@ object ModuleImporter {
 		  pwy.pwy_pwgc = :department_code and
 		  pwy.pwy_iuse = 'Y' and
 		  pwy.pwy_pwtc in ('UG', 'PG', 'PGCE', 'IS')
+		"""
+
+	final val GetRouteTeachingDepartmentsSql = """
+		select
+			psd.psd_pwyc as code,
+	 		psd.psd_dptc as department_code,
+			psd.psd_perc as percentage
+	 	from ins_psd psd
+	 	where
+	 		psd.psd_pwyc = :route_code
 		"""
 
 	class DepartmentInfoMappingQuery(ds: DataSource) extends MappingSqlQuery[DepartmentInfo](ds, GetDepartmentsSql) {
@@ -133,6 +196,18 @@ object ModuleImporter {
 				deptCode + "-" + moduleCode)
 		}
 	}
+
+	class ModuleTeachingDepartmentInfoMappingQuery(ds: DataSource) extends MappingSqlQueryWithParameters[ModuleTeachingDepartmentInfo](ds, GetModuleTeachingDepartmentsSql) {
+		declareParameter(new SqlParameter("module_code", Types.VARCHAR))
+		compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
+			ModuleTeachingDepartmentInfo(
+				rs.getString("code").toLowerCase.safeTrim,
+				rs.getString("department_code").toLowerCase.safeTrim,
+				rs.getBigDecimal("percentage")
+			)
+		}
+	}
 	
 	class RouteInfoMappingQuery(ds: DataSource) extends MappingSqlQuery[RouteInfo](ds, GetRoutesSql) {
 		declareParameter(new SqlParameter("department_code", Types.VARCHAR))
@@ -143,6 +218,18 @@ object ModuleImporter {
 				rs.getString("name").safeTrim,
 				routeCode,
 				DegreeType.fromCode(rs.getString("degree_type").safeTrim))
+		}
+	}
+
+	class RouteTeachingDepartmentInfoMappingQuery(ds: DataSource) extends MappingSqlQueryWithParameters[RouteTeachingDepartmentInfo](ds, GetRouteTeachingDepartmentsSql) {
+		declareParameter(new SqlParameter("route_code", Types.VARCHAR))
+		compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
+			RouteTeachingDepartmentInfo(
+				rs.getString("code").toLowerCase.safeTrim,
+				rs.getString("department_code").toLowerCase.safeTrim,
+				rs.getBigDecimal("percentage")
+			)
 		}
 	}
 

@@ -99,8 +99,8 @@ class SortRoutesCommandTest extends TestBase with Mockito {
 
 		command.applyInternal()
 
-		route1.department should be (ugDepartment)
-		route2.department should be (pgDepartment)
+		route1.adminDepartment should be (ugDepartment)
+		route2.adminDepartment should be (pgDepartment)
 
 		department.routes.asScala should be ('empty)
 		ugDepartment.routes.asScala.toSet should be (Set(route1, route3, route4, route5))

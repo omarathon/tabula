@@ -91,7 +91,7 @@ trait AllocateStudentsToGroupsFileUploadSupport extends GroupsObjectsWithFileUpl
 			.filter(_.groupId != null)
 			.groupBy{ x => smallGroupService.getSmallGroupById(x.groupId).orNull }
 			.mapValues{ values =>
-			values.map(item => allocateUsers.find(item.universityId == _.getWarwickId).getOrElse(null)).asJava
+			values.map(item => allocateUsers.find(item.universityId == _.getWarwickId).orNull).asJava
 		}
 	}
 }
@@ -119,6 +119,10 @@ trait AllocateStudentsToGroupsDescription extends Describable[SmallGroupSet] {
 
 	override def describe(d: Description) {
 		d.smallGroupSet(set)
+	}
+
+	override def describeResult(d: Description, set: SmallGroupSet) = {
+		d.property("allocation", set.groups.asScala.map(g => g.id -> g.students.users.map(_.getUserId)))
 	}
 
 }
@@ -163,11 +167,11 @@ trait AllocateStudentsToGroupsViewHelpers extends MemberCollectionHelper {
 	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.
 	// Do not modify the returned value!
 	def mappingById =
-		(mapping.asScala
-			.filter { case (group, users) => group != null && users != null }
+		mapping.asScala
+			.filter { case (group, users) => group != null && users != null}
 			.map {
 			case (group, users) => (group.id, users)
-		}).toMap
+		}.toMap
 
 	// For use by Freemarker to get a simple map of university IDs to Member objects - permissions aware!
 	lazy val membersById = loadMembersById
@@ -175,7 +179,7 @@ trait AllocateStudentsToGroupsViewHelpers extends MemberCollectionHelper {
 	def loadMembersById = {
 		def validUser(user: User) = user.isFoundUser && user.getWarwickId.hasText
 
-		val allUsers = (unallocated.asScala ++ (for ((group, users) <- mapping.asScala) yield users.asScala).flatten)
+		val allUsers = unallocated.asScala ++ (for ((group, users) <- mapping.asScala) yield users.asScala).flatten
 		val allUniversityIds = allUsers.filter(validUser).map { _.getWarwickId }
 		val members = profileService.getAllMembersWithUniversityIds(allUniversityIds)
 			.filter(member => securityService.can(viewer, Permissions.Profiles.Read.Core, member))

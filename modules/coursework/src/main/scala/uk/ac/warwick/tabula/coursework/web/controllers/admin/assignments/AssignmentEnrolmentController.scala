@@ -33,7 +33,7 @@ class AssignmentEnrolmentController extends CourseworkController with Logging{
 
 		logger.info(s"Assignment Enrolment includeCount: ${form.membershipInfo.includeCount}")
 		Mav("admin/assignments/enrolment",
-			"department" -> form.module.department,
+			"department" -> form.module.adminDepartment,
 			"module" -> form.module,
 			"academicYear" -> form.academicYear,
 			"availableUpstreamGroups" -> form.availableUpstreamGroups,

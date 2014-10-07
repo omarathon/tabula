@@ -56,7 +56,7 @@ trait Public extends PermissionsChecking
 
 trait PermissionsCheckingMethods extends Logging {
 	def mustBeLinked(module: Module, department: Department) =
-		if (mandatory(module).department.id != mandatory(department).id) {
+		if (mandatory(module).adminDepartment.id != mandatory(department).id) {
 			logger.info("Not displaying module as it doesn't belong to specified department")
 			throw new ItemNotFoundException(module)
 		}
@@ -161,13 +161,13 @@ trait PermissionsCheckingMethods extends Logging {
 	 */
 	def permittedByChecks(securityService: SecurityService, user: CurrentUser, target: PermissionsChecking) {
 		Assert.isTrue(
-			!target.permissionsAnyChecks.isEmpty || !target.permissionsAllChecks.isEmpty || target.isInstanceOf[Public],
+			target.permissionsAnyChecks.nonEmpty || target.permissionsAllChecks.nonEmpty || target.isInstanceOf[Public],
 			"Bind target " + target.getClass + " must specify permissions or extend Public"
 		)
 
 		// securityService.check() throws on *any* missing permission
 		for (check <- target.permissionsAllChecks; scope <- check._2) (check._1, scope) match {
-			case (permission: Permission, Some(scope)) => securityService.check(user, permission, scope)
+			case (permission: Permission, Some(s)) => securityService.check(user, permission, s)
 			case (permission: ScopelessPermission, _) => securityService.check(user, permission)
 			case _ =>
 				logger.warn("Permissions check throwing item not found - this should be caught in command (" + target + ")")
@@ -175,13 +175,12 @@ trait PermissionsCheckingMethods extends Logging {
 		}
 
 		// securityService.can() wrapped in exists() only throws if no perms match
-		if (!target.permissionsAnyChecks.isEmpty && !target.permissionsAnyChecks.exists { check => check._2 exists { scope => (check._1, scope) match {
-			case (permission: Permission, Some(scope)) => securityService.can(user, permission, scope)
+		if (target.permissionsAnyChecks.nonEmpty && !target.permissionsAnyChecks.exists { check => check._2 exists { scope => (check._1, scope) match {
+			case (permission: Permission, Some(s)) => securityService.can(user, permission, s)
 			case (permission: ScopelessPermission, _) => securityService.can(user, permission)
-			case _ => {
+			case _ =>
 				logger.warn("Permissions check throwing item not found - this should be caught in command (" + target + ")")
 				throw new ItemNotFoundException()
-			}
 		}}}) {
 			val exception =
 				target.permissionsAnyChecks

@@ -6,7 +6,7 @@ import Tap.tap
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Department}
 import uk.ac.warwick.tabula.attendance.commands.{HomeCommandState, HomeCommand}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, ModuleAndDepartmentService, RelationshipServiceComponent, ModuleAndDepartmentServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.attendance.commands.HomeInformation
 
 class HomeControllerTest extends TestBase with Mockito{
@@ -21,11 +21,12 @@ class HomeControllerTest extends TestBase with Mockito{
 		)
 		
 		val command = new HomeCommand(null) with Appliable[HomeInformation] with HomeCommandState with ModuleAndDepartmentServiceComponent
-			with ProfileServiceComponent with RelationshipServiceComponent {
+			with CourseAndRouteServiceComponent with ProfileServiceComponent with RelationshipServiceComponent {
 
 			var relationshipService: RelationshipService = _
 			var profileService: ProfileService = _
 			var moduleAndDepartmentService: ModuleAndDepartmentService = _
+			var courseAndRouteService: CourseAndRouteService = _
 
 			def apply() = info
 		}

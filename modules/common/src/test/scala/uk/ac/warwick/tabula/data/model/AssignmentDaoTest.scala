@@ -14,10 +14,10 @@ class AssignmentDaoTest extends PersistenceTestBase {
 		session.save(dept)
 
 		val module1InDept = Fixtures.module("in101")
-		module1InDept.department = dept
+		module1InDept.adminDepartment = dept
 
 		val module2InDept = Fixtures.module("in102")
-		module2InDept.department = dept
+		module2InDept.adminDepartment = dept
 
 		session.save(module1InDept)
 		session.save(module2InDept)
@@ -80,8 +80,8 @@ class AssignmentDaoTest extends PersistenceTestBase {
 				module2InDept.id should not be (null)
 				moduleNotInDept.id should not be (null)
 				dept.id should not be (null)
-				module1InDept.department should be (dept)
-				module2InDept.department should be (dept)
+				module1InDept.adminDepartment should be (dept)
+				module2InDept.adminDepartment should be (dept)
 				assignment1.module should be (module1InDept)
 				assignment2.module should be (module2InDept)
 			}

@@ -15,7 +15,7 @@ abstract class AbstractEditSmallGroupsController extends GroupsController {
 
 	validatesSelf[SelfValidating]
 
-	type EditSmallGroupsCommand = Appliable[Seq[SmallGroup]] with PopulateOnForm
+	type EditSmallGroupsCommand = Appliable[Seq[SmallGroup]]
 
 	@ModelAttribute("ManageSmallGroupsMappingParameters") def params = ManageSmallGroupsMappingParameters
 
@@ -25,17 +25,14 @@ abstract class AbstractEditSmallGroupsController extends GroupsController {
 	protected def renderPath: String
 
 	protected def render(set: SmallGroupSet) = {
-		Mav(renderPath).crumbs(Breadcrumbs.DepartmentForYear(set.module.department, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+		Mav(renderPath).crumbs(Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(
 		@PathVariable("smallGroupSet") set: SmallGroupSet,
 		@ModelAttribute("command") cmd: EditSmallGroupsCommand
-	) = {
-		cmd.populate()
-		render(set)
-	}
+	) = render(set)
 
 	protected def submit(cmd: EditSmallGroupsCommand, errors: Errors, set: SmallGroupSet, route: String) = {
 		if (errors.hasErrors) {
@@ -51,7 +48,7 @@ abstract class AbstractEditSmallGroupsController extends GroupsController {
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin(set.module.department, set.academicYear))
+	) = submit(cmd, errors, set, Routes.admin(set.module.adminDepartment, set.academicYear))
 
 }
 

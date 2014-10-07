@@ -46,13 +46,13 @@ object ScalaRestriction {
 		
 	def inIfNotEmpty(property: String, collection: Iterable[Any], aliases: (String, String)*): Option[ScalaRestriction] =
 		if (collection.isEmpty) None
-		else Some(addAliases(new ScalaRestriction(in(property, collection.asJavaCollection)), aliases: _*))
+		else Some(addAliases(new ScalaRestriction(in(property, collection.toSeq.distinct.asJavaCollection)), aliases: _*))
 		
 	def startsWithIfNotEmpty(property: String, collection: Iterable[String], aliases: (String, String)*): Option[ScalaRestriction] =
 		if (collection.isEmpty) None
 		else {
 			val criterion = disjunction()
-			collection.foreach { prefix =>
+			collection.toSeq.distinct.foreach { prefix =>
 				criterion.add(like(property, prefix + "%"))
 			}
 			

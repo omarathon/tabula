@@ -505,8 +505,6 @@ $(function(){
 												$checkbox.prop('checked', false);
 												updateFilter($checkbox);
 											});
-
-											doRequest($list.closest('form'));
 										})
 								)
 								.append($('<hr />'))
@@ -555,8 +553,9 @@ $(function(){
 
 			$('.student-filter input').on('change', function() {
 				// Load the new results
-				var $checkbox = $(this);
-				updateFilter($checkbox);
+				var $input = $(this);
+				if ($input.is('.prevent-reload')) return;
+				updateFilter($input);
 			});
 
 			// Re-order elements inside the dropdown when opened
@@ -598,26 +597,57 @@ $(function(){
 				});
 			});
 
-			$('.route-search-query').on('change', function(){
-				var $this = $(this);
-				if ($this.data('routecode') === undefined || $this.data('routecode').length === 0)
+			var updateFilterFromPicker = function($picker, name, value, shortValue) {
+				if (value === undefined || value.length === 0)
 					return;
 
-				$('<li/>').addClass('check-list-item').append(
-					$('<label/>').addClass('checkbox').append(
-						$('<input/>').attr({
-							'type':'checkbox',
-							'name':'routes',
-							'value':$this.data('routecode'),
-							'checked':true
-						}).data('short-value',$this.data('routecode').toUpperCase())
-					).append(
-						$this.val()
-					)
-				).insertBefore($this.closest('ul').find('li.check-list-item:first'));
-				$this.data('routecode','').val('');
-				updateFilter($this);
+				shortValue = shortValue || value;
+
+				var $ul = $picker.closest('ul');
+
+				var $li = $ul.find('input[value="' + value + '"]').closest('li');
+				if ($li.length) {
+					$li.find('input').prop('checked', true);
+					if ($ul.find('li.check-list-item:first').find('input').val() !== value) {
+						$li.insertBefore($ul.find('li.check-list-item:first'));
+					}
+				} else {
+					$li = $('<li/>').addClass('check-list-item').append(
+						$('<label/>').addClass('checkbox').append(
+							$('<input/>').attr({
+								'type':'checkbox',
+								'name':name,
+								'value':value,
+								'checked':true
+							}).data('short-value', shortValue)
+						).append(
+							$picker.val()
+						)
+					).insertBefore($ul.find('li.check-list-item:first'));
+				}
+
+				updateFilter($picker);
+			};
+
+			$('.route-search-query').on('change', function(){
+				var $picker = $(this);
+				if ($picker.data('routecode') === undefined || $picker.data('routecode').length === 0)
+					return;
+
+				updateFilterFromPicker($picker, 'routes', $picker.data('routecode'), $picker.data('routecode').toUpperCase());
+
+				$picker.data('routecode','').val('');
 			}).routePicker({});
+
+			$('.module-search-query').on('change', function(){
+				var $picker = $(this);
+				if ($picker.data('modulecode') === undefined || $picker.data('modulecode').length === 0)
+					return;
+
+				updateFilterFromPicker($picker, 'modules', $picker.data('modulecode'), $picker.data('modulecode').toUpperCase());
+
+				$picker.data('modulecode','').val('');
+			}).modulePicker({});
 		}
 	})();
 

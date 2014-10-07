@@ -33,8 +33,9 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 		p.PermissionCheck(Permissions.ImportSystemData)
 	}
 
-	var assignmentImporter = Wire.auto[AssignmentImporter]
-	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
+	var assignmentImporter = Wire[AssignmentImporter]
+	var assignmentMembershipService = Wire[AssignmentMembershipService]
+	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 	
 	val ImportGroupSize = 100
 
@@ -54,6 +55,11 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 					// Some SITS data is bad, but try to carry on.
 					assignment.name = "Assessment Component"
 				}
+
+				moduleAndDepartmentService.getModuleByCode(assignment.moduleCodeBasic.toLowerCase).foreach { module =>
+					assignment.module = module
+				}
+
 				assignmentMembershipService.save(assignment)
 			}
 		}

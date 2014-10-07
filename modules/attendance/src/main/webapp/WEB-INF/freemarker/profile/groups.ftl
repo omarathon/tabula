@@ -115,6 +115,7 @@
 			<summary>
 				<span class="legend">Project groups, Seminars</span>
 			</summary>
+			<div>
 
 			<#macro instanceFormat instance academicYear department><#compress>
 				<#local event = instance._1() />
@@ -216,6 +217,7 @@
 					<@groupsInATerm term />
 				</#list>
 			</#if>
+			</div>
 		</details>
 
 	</#if>

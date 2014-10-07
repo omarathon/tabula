@@ -28,7 +28,7 @@ trait RoutePermissionControllerMethods extends AdminController {
 
 	def form(route: Route): Mav = {
 		Mav("admin/routes/permissions", "route" -> route)
-			.crumbs(Breadcrumbs.Department(route.department), Breadcrumbs.Route(route))
+			.crumbs(Breadcrumbs.Department(route.adminDepartment), Breadcrumbs.Route(route))
 	}
 
 	def form(route: Route, usercodes: Seq[String], role: Option[RoleDefinition], action: String): Mav = {
@@ -38,7 +38,7 @@ trait RoutePermissionControllerMethods extends AdminController {
 				"users" -> users,
 				"role" -> role,
 				"action" -> action)
-			.crumbs(Breadcrumbs.Department(route.department), Breadcrumbs.Route(route))
+			.crumbs(Breadcrumbs.Department(route.adminDepartment), Breadcrumbs.Route(route))
 	}
 }
 

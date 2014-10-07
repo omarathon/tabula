@@ -78,21 +78,20 @@ trait ReportWorld extends TestBase with Mockito {
 		auditEvents.filter(event => {event.userId == user.getUserId && event.assignmentId.get == assignment.id})
 	}}
 
-	auditEventQueryMethods.publishFeedbackForStudent(any[Assignment], any[User]) answers {argsObj => {
+	auditEventQueryMethods.publishFeedbackForStudent(any[Assignment], any[String]) answers {argsObj => {
 		val args = argsObj.asInstanceOf[Array[_]]
 		val assignment = args(0).asInstanceOf[Assignment]
-		val user = args(1).asInstanceOf[User]
-		auditEvents.filter(event => {event.students.contains(user.getWarwickId) && event.assignmentId.get == assignment.id})
+		val warwickId = args(1).asInstanceOf[String]
+		auditEvents.filter(event => {event.students.contains(warwickId) && event.assignmentId.get == assignment.id})
 	}}
 
 
 	var submissionService = mock[SubmissionService]
-	submissionService.getSubmissionByUniId(any[Assignment], any[String]) answers { argsObj => {
-		val args = argsObj.asInstanceOf[Array[_]]
-		val assignment = args(0).asInstanceOf[Assignment]
-		val userId = args(1).asInstanceOf[String]
-		assignment.submissions.find(_.universityId == userId)
-	}}
+	submissionService.getSubmissionsByAssignment(any[Assignment]) answers { assignmentObj =>
+		val assignment = assignmentObj.asInstanceOf[Assignment]
+		assignment.submissions
+	}
+		
 
 	var feedbackService = mock[FeedbackService]
 	feedbackService.getFeedbackByUniId(any[Assignment], any[String]) answers { argsObj => {
@@ -148,7 +147,8 @@ trait ReportWorld extends TestBase with Mockito {
 
 		assignment
 	}
-
+	
+	
 
 	def addFeedback(assignment:Assignment) {
 		withFakeTime(dateTime(2013, 3, 13)) {

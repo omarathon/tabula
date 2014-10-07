@@ -59,7 +59,7 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	def list(@Valid command: SubmissionAndFeedbackCommand, errors: Errors) = {
 		val (assignment, module) = (command.assignment, command.module)
 
-		module.department.assignmentInfoView match {
+		module.adminDepartment.assignmentInfoView match {
 			case Assignment.Settings.InfoViewType.Summary =>
 				Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
 			case Assignment.Settings.InfoViewType.Table =>
@@ -80,13 +80,13 @@ class SubmissionAndFeedbackController extends CourseworkController {
 		else {
 			if (errors.hasErrors) {
 				Mav("admin/assignments/submissionsandfeedback/progress")
-					.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment progress for ${assignment.name}"))
+					.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment progress for ${assignment.name}"))
 			} else {
 				val results = command.apply()
 
 				Mav("admin/assignments/submissionsandfeedback/progress",
 					resultMap(results)
-				).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment progress for ${assignment.name}"))
+				).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment progress for ${assignment.name}"))
 			}
 		}
 	}
@@ -97,13 +97,13 @@ class SubmissionAndFeedbackController extends CourseworkController {
 
 		if (errors.hasErrors) {
 			Mav("admin/assignments/submissionsandfeedback/list")
-				.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
+				.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
 		} else {
 			val results = command.apply()
 
 			Mav("admin/assignments/submissionsandfeedback/list",
 				resultMap(results)
-			).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
+			).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
 		}
 	}
 

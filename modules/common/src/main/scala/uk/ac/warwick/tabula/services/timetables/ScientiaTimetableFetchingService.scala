@@ -70,7 +70,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
+			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
 		}
 	}
 
@@ -92,7 +92,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 
 	def doRequest(uris: Seq[(String, AcademicYear)], param: String):Seq[TimetableEvent] = {
 		// fetch the events from each of the supplied URIs, and flatmap them to make one big list of events
-		uris.flatMap{case (uri, year) => {
+		uris.flatMap{case (uri, year) =>
 			// add ?p0={param} to the URL's get parameters
 			val req = url(uri) <<? Map("p0" -> param)
 			// execute the request.
@@ -103,7 +103,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 				case Success(ev)=>ev
 				case _ => Nil
 			}
-		}}
+		}
 	}
 
 }
@@ -131,20 +131,28 @@ object ScientiaHttpTimetableFetchingService {
 			val endTime = new LocalTime((activity \\ "end").text)
 
 			val location = (activity \\ "room").text match {
-				case text if !text.isEmpty => {
+				case text if !text.isEmpty =>
 					// S+ has some (not all) rooms as "AB_AB1.2", where AB is a building code
 					// we're generally better off without this.
 					val removeBuildingNames = "^[^_]*_".r
 					Some(locationFetchingService.locationFor(removeBuildingNames.replaceFirstIn(text,"")))
-				}
 				case _ => None
 			}
 
 			val context = Option((activity \\ "module").text)
 
+			val dayOfWeek = DayOfWeek.apply((activity \\ "day").text.toInt + 1)
+
 			val uid =
 				DigestUtils.md5Hex(
-					Seq(name, startTime.toString, endTime.toString, location.fold("") { _.name }, context.getOrElse("")).mkString
+					Seq(
+						name,
+						startTime.toString,
+						endTime.toString,
+						dayOfWeek.toString,
+						location.fold("") { _.name },
+						context.getOrElse("")
+					).mkString
 				)
 
 			TimetableEvent(
@@ -154,7 +162,7 @@ object ScientiaHttpTimetableFetchingService {
 				description = (activity \\ "description").text,
 				eventType = TimetableEventType((activity \\ "type").text),
 				weekRanges = new WeekRangeListUserType().convertToObject((activity \\ "weeks").text),
-				day = DayOfWeek.apply((activity \\ "day").text.toInt + 1),
+				day = dayOfWeek,
 				startTime = startTime,
 				endTime = endTime,
 				location = location,

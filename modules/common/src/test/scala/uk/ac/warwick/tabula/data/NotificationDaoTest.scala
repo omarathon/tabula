@@ -95,7 +95,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		val module = Fixtures.module("in101")
 		val department = Fixtures.department("in")
-		module.department = department
+		module.adminDepartment = department
 
 		val permissionsService = mock[PermissionsService]
 		module.permissionsService = permissionsService

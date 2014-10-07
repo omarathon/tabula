@@ -26,11 +26,11 @@ class DeleteAssignmentController extends CourseworkController {
 		val (module, assignment) = (form.module, form.assignment)
 
 		Mav("admin/assignments/delete",
-			"department" -> module.department,
+			"department" -> module.adminDepartment,
 			"module" -> module,
 			"assignment" -> assignment,
 			"maxWordCount" -> Assignment.MaximumWordCount)
-			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+			.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 	}
 
 	@RequestMapping(method = Array(RequestMethod.POST))

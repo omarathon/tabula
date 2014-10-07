@@ -288,6 +288,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 				<#local title>Download a zip file of attachments<#if context?has_content> ${context}</#if></#local>
 				<@download_link filePath="${page}attachments/${zipFilename}.zip" mimeType="application/zip" title="${title}" text="Download files as zip" />
 			</summary>
+			<div>
 
 			<#list attachments as attachment>
 				<#local title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#local>
@@ -295,6 +296,8 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 					<@download_link filePath="${page}attachment/${attachment.name?url}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
 				</div>
 			</#list>
+
+			</div>
 		</details>
 	</#if>
 </#macro>
@@ -404,7 +407,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 <#macro bulk_email emails title subject limit=500>
 	<#local separator = ";" />
 	<#if user?? && userSetting('bulkEmailSeparator')?has_content>
-		<#assign separator = userSetting('bulkEmailSeparator') />
+		<#local separator = userSetting('bulkEmailSeparator') />
 	</#if>
 
 	<#if emails?size gt 0>
@@ -460,9 +463,14 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	</#if>
 </#macro>
 
-<#macro format_list_of_members list_of_strings><#compress>
-	<#list list_of_strings as item>${item.officialName}<#if item_has_next> and </#if></#list>
-</#compress></#macro>
+<#macro format_list_of_members members><#compress>
+	<#list members as item><#--
+-->		${item.officialName}<#--
+-->		<#if item_has_next><#--
+-->			<#if item_index == members?size -2>and<#else>,</#if><#--
+-->		</#if><#--
+-->	</#list><#--
+--></#compress></#macro>
 
 </#escape>
 

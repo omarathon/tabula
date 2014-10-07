@@ -65,12 +65,6 @@ trait JavaImports {
 	 */
 	protected implicit def ToJBigDecimal(bd: Option[BigDecimal]) = (bd map (bd => new java.math.BigDecimal(bd.toDouble, MathContext.DECIMAL128))).orNull
 	
-	def toJLinkedHashMap[K, V](smap: SortedMap[K, V]) = {
-		val map = new java.util.LinkedHashMap[K, V]
-		map.putAll(smap.asJava)
-		map
-	}
-	
 	/**
 	 * Allows you to create an empty Java ArrayList, useful as an initial
 	 * value for a variable that needs a mutable JList.
@@ -145,6 +139,30 @@ trait JavaImports {
 		
 		def apply[K, V](orig: JMap[K, V]): java.util.HashMap[K, V] = {
 			val map = new java.util.HashMap[K, V]()
+			if (!orig.isEmpty) map.putAll(orig)
+			map
+		}
+	}
+
+	/**
+	 * Allows you to create an empty Java HashMap, useful as an initial
+	 * value for a variable that needs a mutable JMap.
+	 */
+	object JLinkedHashMap {
+		def apply[K, V](elements: (K, V)*): java.util.LinkedHashMap[K, V] = {
+			val map = new java.util.LinkedHashMap[K, V]()
+			elements foreach { case (key, value) => map.put(key, value) }
+			map
+		}
+
+		def apply[K, V](orig: Map[K, V]): java.util.LinkedHashMap[K, V] = {
+			val map = new java.util.LinkedHashMap[K, V]()
+			if (!orig.isEmpty) map.putAll(orig.toMap.asJava)
+			map
+		}
+
+		def apply[K, V](orig: JMap[K, V]): java.util.LinkedHashMap[K, V] = {
+			val map = new java.util.LinkedHashMap[K, V]()
 			if (!orig.isEmpty) map.putAll(orig)
 			map
 		}

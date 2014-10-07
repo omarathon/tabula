@@ -53,7 +53,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 	@Transactional @Test def recentAssignment() {
 		val assignment = newDeepAssignment()
-		val department = assignment.module.department
+		val department = assignment.module.adminDepartment
 
 		session.save(department)
 		session.save(assignment.module)
@@ -100,7 +100,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		feedbackTextField.position = 0
 		feedbackTextField.context = FormFieldContext.Feedback
 
-		session.save(assignment.module.department)
+		session.save(assignment.module.adminDepartment)
 		session.save(assignment.module)
 		session.save(assignment)
 
@@ -431,14 +431,34 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.getAssessmentComponents(Fixtures.module("la101")) should be (Seq(ua3))
 		assignmentMembershipService.getAssessmentComponents(Fixtures.module("cs101")) should be (Seq())
 
-
-		val chemistryDept = Fixtures.department("ch")
+		val chemistryDept = Fixtures.department("chem") // dept code irrelephant
 		val chemistryModule = Fixtures.module("ch101")
 		chemistryDept.modules.add(chemistryModule)
 
-		val lawDept = Fixtures.department("la")
-		val lawModules = Seq(Fixtures.module("la101"), Fixtures.module("la102"))
-		lawDept.modules.addAll(lawModules.asJava)
+		session.save(chemistryDept)
+		session.save(chemistryModule)
+
+		val lawDept = Fixtures.department("law") // dept code irrelephant
+		val lawModule1 = Fixtures.module("la101")
+		val lawModule2 = Fixtures.module("la102")
+		lawDept.modules.add(lawModule1)
+		lawDept.modules.add(lawModule2)
+
+		session.save(lawDept)
+		session.save(lawModule1)
+		session.save(lawModule2)
+
+		ua1.module = chemistryModule
+		ua2.module = chemistryModule
+		ua3.module = lawModule1
+		ua4.module = lawModule1
+
+		assignmentMembershipService.save(ua1) should be (ua1)
+		assignmentMembershipService.save(ua2) should be (ua2)
+		assignmentMembershipService.save(ua3) should be (ua3)
+		assignmentMembershipService.save(ua4) should be (ua4)
+
+		session.flush()
 
 		assignmentMembershipService.getAssessmentComponents(chemistryDept, false) should be (Seq(ua1, ua2))
 		assignmentMembershipService.getAssessmentComponents(lawDept, true) should be (Seq(ua3))
@@ -477,7 +497,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.save(upstreamAssignment) should be (upstreamAssignment)
 
 		val assignment = newDeepAssignment("ch101")
-		val department = assignment.module.department
+		val department = assignment.module.adminDepartment
 
 		session.save(department)
 		session.save(assignment.module)
@@ -501,7 +521,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 	@Test def submissions() = transactional { tx =>
 		val assignment = newDeepAssignment()
-		val department = assignment.module.department
+		val department = assignment.module.adminDepartment
 
 		session.save(department)
 		session.save(assignment.module)
@@ -533,7 +553,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 	@Test def extensions() = transactional { tx =>
 		val assignment = newDeepAssignment()
-		val department = assignment.module.department
+		val department = assignment.module.adminDepartment
 
 		session.save(department)
 		session.save(assignment.module)
@@ -587,7 +607,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignment1.assignmentMembershipService = assignmentMembershipService
 		wireUserLookup(assignment1.members)
 
-		val department1 = assignment1.module.department
+		val department1 = assignment1.module.adminDepartment
 
 		session.save(department1)
 		session.save(assignment1.module)
@@ -599,7 +619,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignment2.assignmentMembershipService = assignmentMembershipService
 		wireUserLookup(assignment2.members)
 
-		val department2 = assignment2.module.department
+		val department2 = assignment2.module.adminDepartment
 
 		session.save(department2)
 		assignmentService.save(assignment2)

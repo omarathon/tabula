@@ -35,7 +35,7 @@ class AddModuleControllerTest extends TestBase with Mockito {
 		val command = mock[Appliable[Module]]
 
 		val module = Fixtures.module("in101")
-		module.department = department
+		module.adminDepartment = department
 
 		command.apply() returns (module)
 

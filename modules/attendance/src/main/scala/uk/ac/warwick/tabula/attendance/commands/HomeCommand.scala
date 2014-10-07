@@ -21,12 +21,13 @@ object HomeCommand {
 		new HomeCommand(user)
 		with Command[HomeInformation]
 		with AutowiringModuleAndDepartmentServiceComponent
+		with AutowiringCourseAndRouteServiceComponent
 		with AutowiringRelationshipServiceComponent
 		with Public with ReadOnly with Unaudited
 }
 
 abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeInformation] with HomeCommandState {
-	self: ModuleAndDepartmentServiceComponent with RelationshipServiceComponent =>
+	self: ModuleAndDepartmentServiceComponent with CourseAndRouteServiceComponent with RelationshipServiceComponent =>
 
 	override def applyInternal() = {
 		val optionalCurrentMember = user.profile
@@ -43,13 +44,13 @@ abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeIn
 		val viewDepartments = moduleAndDepartmentService.departmentsWithPermission(user, Permissions.MonitoringPoints.View)
 		val manageDepartments = moduleAndDepartmentService.departmentsWithPermission(user, Permissions.MonitoringPoints.Manage)
 		
-		val viewRoutes = moduleAndDepartmentService.routesWithPermission(user, Permissions.MonitoringPoints.View)
-		val manageRoutes = moduleAndDepartmentService.routesWithPermission(user, Permissions.MonitoringPoints.Manage)
+		val viewRoutes = courseAndRouteService.routesWithPermission(user, Permissions.MonitoringPoints.View)
+		val manageRoutes = courseAndRouteService.routesWithPermission(user, Permissions.MonitoringPoints.Manage)
 		
 		def withSubDepartments(d: Department) = (Set(d) ++ d.children.asScala.toSet).filter(_.routes.asScala.size > 0)
 		
-		val allViewDepartments = (viewDepartments ++ viewRoutes.map { _.department }).map(withSubDepartments).flatten
-		val allManageDepartments = (manageDepartments ++ manageRoutes.map { _.department }).map(withSubDepartments).flatten
+		val allViewDepartments = (viewDepartments ++ viewRoutes.map { _.adminDepartment }).map(withSubDepartments).flatten
+		val allManageDepartments = (manageDepartments ++ manageRoutes.map { _.adminDepartment }).map(withSubDepartments).flatten
 		
 		// TODO we might want to distinguish between a "Manage department" and a "Manage route" like we do in coursework with modules
 		// These return Sets so no need to distinct the result

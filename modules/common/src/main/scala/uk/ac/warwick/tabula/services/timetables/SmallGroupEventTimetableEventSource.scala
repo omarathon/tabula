@@ -21,42 +21,45 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 
 	class SmallGroupEventTimetableEventSourceImpl extends StudentTimetableEventSource with StaffTimetableEventSource {
 
-		def eventsFor(student: StudentMember, currentUser: CurrentUser, context: TimetableEvent.Context): Seq[TimetableEvent] = {
-			val user = userLookup.getUserByUserId(student.userId)
+		def eventsFor(student: StudentMember, currentUser: CurrentUser, context: TimetableEvent.Context): Seq[TimetableEvent] =
+			eventsFor(userLookup.getUserByUserId(student.userId), currentUser)
 
-			val studentsGroups =
-				smallGroupService.findSmallGroupsByStudent(user).filter {
-					group =>
-						!group.groupSet.deleted &&
-						group.events.nonEmpty &&
-						(
-							// The set is visible to students; OR
-							group.groupSet.visibleToStudents ||
+		def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Seq[TimetableEvent] =
+			eventsFor(userLookup.getUserByUserId(staff.userId), currentUser)
 
-							// I have permission to view the membership of the set anyway
-							securityService.can(currentUser, Permissions.SmallGroups.ReadMembership, group)
-						)
-				}
-
-			/* Include SGT teaching responsibilities for students (mainly PGR) */
-			val allEvents = studentsGroups.flatMap(group => group.events).filterNot(_.isUnscheduled) ++ tutorEvents(user, currentUser)
+		private def eventsFor(user: User, currentUser: CurrentUser) = {
+			/* Include SGT teaching responsibilities for students (mainly PGR) and students for staff (e.g. Chemistry) */
+			val allEvents = studentEvents(user, currentUser) ++ tutorEvents(user, currentUser)
 			val autoTimetableEvents = allEvents map smallGroupEventToTimetableEvent
 
 			// TAB-2682 Also include events that the student has been manually added to
 			val manualTimetableEvents = smallGroupService.findManuallyAddedAttendance(user.getWarwickId)
 				.filter { a =>
-					val groupSet = a.occurrence.event.group.groupSet
+				val groupSet = a.occurrence.event.group.groupSet
 
-					!groupSet.deleted && groupSet.visibleToStudents
-				}
+				!groupSet.deleted && groupSet.visibleToStudents
+			}
 				.map { a =>
-					TimetableEvent(a.occurrence)
-				}
+				TimetableEvent(a.occurrence)
+			}
 
 			autoTimetableEvents ++ manualTimetableEvents
 		}
 
-		def tutorEvents(user: User, currentUser: CurrentUser) = smallGroupService.findSmallGroupEventsByTutor(user).filter {
+		private def studentEvents(user: User, currentUser: CurrentUser) = smallGroupService.findSmallGroupsByStudent(user).filter {
+			group =>
+				!group.groupSet.deleted &&
+				group.events.nonEmpty &&
+				(
+					// The set is visible to students; OR
+					group.groupSet.visibleToStudents ||
+
+					// I have permission to view the membership of the set anyway
+					securityService.can(currentUser, Permissions.SmallGroups.ReadMembership, group)
+				)
+		}.flatMap(group => group.events).filterNot(_.isUnscheduled)
+
+		private def tutorEvents(user: User, currentUser: CurrentUser) = smallGroupService.findSmallGroupEventsByTutor(user).filter {
 			event =>
 				!event.group.groupSet.deleted &&
 				!event.isUnscheduled &&
@@ -69,12 +72,7 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 				)
 		}
 
-		def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Seq[TimetableEvent] = {
-			val user = userLookup.getUserByUserId(staff.userId)
-			tutorEvents(user, currentUser) map smallGroupEventToTimetableEvent
-		}
-
-		def smallGroupEventToTimetableEvent(sge: SmallGroupEvent): TimetableEvent = {
+		private def smallGroupEventToTimetableEvent(sge: SmallGroupEvent): TimetableEvent = {
 			TimetableEvent(sge)
 		}
 	}

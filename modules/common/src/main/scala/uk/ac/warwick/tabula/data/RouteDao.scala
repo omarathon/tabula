@@ -5,7 +5,7 @@ import org.hibernate.criterion.Restrictions._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Department, Route}
+import uk.ac.warwick.tabula.data.model.{RouteTeachingInformation, Department, Route}
 
 trait RouteDaoComponent {
 	val routeDao: RouteDao
@@ -23,6 +23,9 @@ trait RouteDao {
 	def findByDepartment(department:Department):Seq[Route]
 	def stampMissingRows(dept: Department, seenCodes: Seq[String]): Int
 	def findRoutesNamedLike(query: String): Seq[Route]
+	def saveOrUpdate(teachingInfo: RouteTeachingInformation)
+	def delete(teachingInfo: RouteTeachingInformation)
+	def getTeachingInformationByRouteCodeAndDepartmentCode(routeCode: String, departmentCode: String): Option[RouteTeachingInformation]
 }
 
 @Repository
@@ -42,7 +45,7 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 	def getById(id: String) = getById[Route](id)
 
 	def findByDepartment(department:Department) =
-		session.newQuery[Route]("from Route r where department = :dept").setEntity("dept",department).seq
+		session.newQuery[Route]("from Route r where adminDepartment = :dept").setEntity("dept",department).seq
 	
 	def stampMissingRows(dept: Department, seenCodes: Seq[String]) = {
 		val hql = """
@@ -50,7 +53,7 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 				set
 					r.missingFromImportSince = :now
 				where
-					r.department = :department and
+					r.adminDepartment = :department and
 					r.missingFromImportSince is null
 		"""
 		
@@ -72,5 +75,16 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 			)
 			.setMaxResults(20).seq.sorted(Route.DegreeTypeOrdering)
 	}
+
+	def saveOrUpdate(teachingInfo: RouteTeachingInformation) = session.saveOrUpdate(teachingInfo)
+	def delete(teachingInfo: RouteTeachingInformation) = session.delete(teachingInfo)
+
+	def getTeachingInformationByRouteCodeAndDepartmentCode(routeCode: String, departmentCode: String) =
+		session.newCriteria[RouteTeachingInformation]
+			.createAlias("route", "route")
+			.createAlias("department", "department")
+			.add(is("route.code", routeCode.toLowerCase()))
+			.add(is("department.code", departmentCode.toLowerCase()))
+			.uniqueResult
 
 }

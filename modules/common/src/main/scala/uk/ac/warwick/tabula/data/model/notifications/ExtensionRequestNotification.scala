@@ -47,7 +47,7 @@ abstract class ExtensionRequestNotification extends ExtensionNotification {
 		"moduleManagers" -> assignment.module.managers.users
 	) ++ profileInfo)
 
-	def recipients = assignment.module.department.extensionManagers.users
+	def recipients = assignment.module.adminDepartment.extensionManagers.users
 }
 
 @Entity

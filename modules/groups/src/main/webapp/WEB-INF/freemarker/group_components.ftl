@@ -39,44 +39,16 @@
 </#macro>
 
 <#macro sets_info sets expand_by_default>
-	<div class="small-group-sets-list">
-		<#-- List of students modal -->
-		<div id="students-list-modal" class="modal fade"></div>
-		<div id="profile-modal" class="modal fade profile-subset"></div>
+	<#list sets as setItem>
+		<@single_set setItem expand_by_default />
 
-		<#-- Immediately start waiting for collapsibles to load - don't wait to wire this handler in, because we initialise collapsibles before the DOM has loaded below -->
-		<script type="text/javascript">
-			(function($) {
-				var processContainer = function($container) {
-					Groups.zebraStripeGroups($container);
-					Groups.wireModalButtons($container);
-					Groups.wireMapLocations($container);
-					AjaxPopup.wireAjaxPopupLinks($container);
-					$container.find('.use-tooltip').tooltip();
-					$container.find('.use-popover').tabulaPopover({
-						trigger: 'click',
-						container: '#container'
-					});
-				};
-
-				$(document.body).on('loaded.collapsible', '.set-info', function() {
-					var $set = $(this);
-					processContainer($set);
-				});
-			})(jQuery);
-		</script>
-
-		<#list sets as setItem>
-			<@single_set setItem expand_by_default />
-
-			<#if !expand_by_default>
+		<#if !expand_by_default>
 			<#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
-				<script type="text/javascript">
-					GlobalScripts.initCollapsible(jQuery('#${set_anchor(setItem.set)}'));
-				</script>
-			</#if>
-		</#list>
-	</div>
+			<script type="text/javascript">
+				GlobalScripts.initCollapsible(jQuery('#${set_anchor(setItem.set)}'));
+			</script>
+		</#if>
+	</#list>
 </#macro>
 
 <#macro single_set setItem expand_by_default=true>
@@ -86,6 +58,10 @@
 
 	<span id="${set_anchor(set)}-container">
 		<div id="${set_anchor(set)}" class="set-info striped-section collapsible<#if expand_by_default> expanded</#if><#if set.archived> archived</#if>"
+			<#if !expand_by_default>
+				data-populate=".striped-section-contents"
+				data-href="<@routes.single_set_info set />"
+			</#if>
 			 data-name="${set_anchor(set)}">
 			<div class="clearfix">
 				<div class="section-title row-fluid">
@@ -111,48 +87,52 @@
 						</#if>
 					</div>
 
-					<div class="span2 progress-container">
-						<#local progressTooltip><@spring.message code=setItem.progress.messageCode /></#local>
+					<#if !set.archived>
+						<div class="span2 progress-container">
+							<#local progressTooltip><@spring.message code=setItem.progress.messageCode /></#local>
 
-						<dl class="progress progress-${setItem.progress.t} use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;" data-container="body">
-							<dt class="bar" style="width: <#if setItem.progress.percentage == 0>10<#else>${setItem.progress.percentage}</#if>%;"></dt>
-						</dl>
-					</div>
+							<dl class="progress progress-${setItem.progress.t} use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;" data-container="body">
+								<dt class="bar" style="width: <#if setItem.progress.percentage == 0>10<#else>${setItem.progress.percentage}</#if>%;"></dt>
+							</dl>
+						</div>
 
-					<div class="span4 next-action">
-						<#if setItem.nextStage??>
-							<#local nextStageUrl="" />
-							<#local nextStageModal="" />
-							<#if setItem.nextStage.actionCode == "workflow.smallGroupSet.AddGroups.action">
-								<#local nextStageUrl><@routes.editsetgroups set /></#local>
-							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AddStudents.action">
-								<#local nextStageUrl><@routes.editsetstudents set /></#local>
-							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AddEvents.action">
-								<#local nextStageUrl><@routes.editsetevents set /></#local>
-							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AllocateStudents.action">
-								<#local nextStageUrl><@routes.editsetallocate set /></#local>
-							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.OpenSignUp.action">
-								<#local nextStageUrl><@routes.openset set /></#local>
-								<#local nextStageModal = "#modal-container" />
-							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.CloseSignUp.action">
-								<#local nextStageUrl><@routes.closeset set /></#local>
-								<#local nextStageModal = "#modal-container" />
-							<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.SendNotifications.action">
-								<#local nextStageUrl><@routes.releaseset set /></#local>
-								<#local nextStageModal = "#modal-container" />
-							</#if>
+						<div class="span4 next-action">
+							<#if setItem.nextStage??>
+								<#local nextStageUrl="" />
+								<#local nextStageModal="" />
+								<#if setItem.nextStage.actionCode == "workflow.smallGroupSet.AddGroups.action">
+									<#local nextStageUrl><@routes.editsetgroups set /></#local>
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AddStudents.action">
+									<#local nextStageUrl><@routes.editsetstudents set /></#local>
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AddEvents.action">
+									<#local nextStageUrl><@routes.editsetevents set /></#local>
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AllocateStudents.action">
+									<#local nextStageUrl><@routes.editsetallocate set /></#local>
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.OpenSignUp.action">
+									<#local nextStageUrl><@routes.openset set /></#local>
+									<#local nextStageModal = "#modal-container" />
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.CloseSignUp.action">
+									<#local nextStageUrl><@routes.closeset set /></#local>
+									<#local nextStageModal = "#modal-container" />
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.SendNotifications.action">
+									<#local nextStageUrl><@routes.releaseset set /></#local>
+									<#local nextStageModal = "#modal-container" />
+								</#if>
 
-							<#if nextStageUrl?has_content>
-								<a href="${nextStageUrl}"<#if nextStageModal?has_content> data-toggle="modal" data-target="${nextStageModal}" data-container="body"</#if>>
+								<#if nextStageUrl?has_content>
+									<a href="${nextStageUrl}"<#if nextStageModal?has_content> data-toggle="modal" data-target="${nextStageModal}" data-container="body"</#if>>
+										<@spring.message code=setItem.nextStage.actionCode />
+									</a>
+								<#else>
 									<@spring.message code=setItem.nextStage.actionCode />
-								</a>
-							<#else>
-								<@spring.message code=setItem.nextStage.actionCode />
+								</#if>
+							<#elseif setItem.progress.percentage == 100>
+								Complete
 							</#if>
-						<#elseif setItem.progress.percentage == 100>
-							Complete
-						</#if>
-					</div>
+						</div>
+					<#else>
+						<div class="span6"></div>
+					</#if>
 
 					<div class="span1">
 						<div class="btn-group pull-right">
@@ -231,16 +211,6 @@
 									</ul>
 								</li>
 
-								<#--<li>
-									<#local allocateset_url><@routes.allocateset set /></#local>
-									<@fmt.permission_button
-									permission='SmallGroups.Allocate'
-									scope=set
-									action_descr='allocate students'
-									href=allocateset_url>
-										<i class="icon-random icon-fixed-width"></i> Allocate students
-									</@fmt.permission_button>
-								</li>-->
 								<li class="divider"></li>
 
 								<#if features.smallGroupTeachingStudentSignUp>
@@ -347,71 +317,80 @@
 				</div>
 
 				<div class="striped-section-contents">
-					<#-- Overall info -->
-					<div class="row-fluid">
-						<div class="span2">
-							<a href="<@routes.editsetgroups set />"><@fmt.p setItem.groups?size "group" /></a>
-						</div>
-						<div class="span2">
-							<a href="<@routes.editsetstudents set />"><@fmt.p set.allStudentsCount "student" /></a>
-						</div>
-						<div class="span8">
-							<#local unallocatedSize = set.unallocatedStudentsCount />
-							<#if unallocatedSize gt 0>
-								<a href="<@routes.editsetallocate set />"><@fmt.p unallocatedSize "unallocated student" /></a>
-							</#if>
-						</div>
-					</div>
-
-					<#if has_groups>
-						<#list setItem.groups as group>
-							<#local showAttendanceButton = features.smallGroupTeachingRecordAttendance && can.do('SmallGroupEvents.ViewRegister', group) && group.hasScheduledEvents && group.groupSet.collectAttendance />
-
-							<div class="item-info row-fluid group-${group.id}" >
-								<div class="span2">
-									<h4 class="name">
-										${group.name!""}
-									</h4>
-								</div>
-								<div class="span2">
-									<#if setItem.canViewMembers && ((group.students.size)!0) gt 0>
-										<a href="<@routes.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
-											<@fmt.p (group.students.size)!0 "student" "students" />
-										</a>
-									<#else>
-										<@fmt.p (group.students.size)!0 "student" "students" />
-									</#if>
-								</div>
-
-								<div class="${showAttendanceButton?string("span6", "span8")}">
-									<ul class="unstyled margin-fix">
-										<#list group.events as event>
-											<li class="clearfix">
-												<@eventShortDetails event />
-
-												<#local popoverContent><@eventDetails event /></#local>
-												<a class="use-popover"
-												   data-html="true"
-												   data-content="${popoverContent?html}"><i class="icon-question-sign"></i></a>
-											</li>
-										</#list>
-									</ul>
-								</div>
-
-								<#if showAttendanceButton>
-									<div class="span2">
-										<a href="<@routes.groupAttendance group />" class="btn btn-primary btn-mini pull-right">
-											Attendance
-										</a>
-									</div>
-								</#if>
-							</div>
-						</#list>
+					<#if expand_by_default>
+						<@single_set_inner setItem />
 					</#if>
 				</div>
 			</div>
 		</div> <!-- module-info striped-section-->
 	</span>
+</#macro>
+
+<#macro single_set_inner setItem>
+	<#local set = setItem.set />
+	<#local has_groups = setItem.groups?size gt 0 />
+
+	<#-- Overall info -->
+	<div class="row-fluid">
+		<div class="span2">
+			<a href="<@routes.editsetgroups set />"><@fmt.p setItem.groups?size "group" /></a>
+		</div>
+		<div class="span2">
+			<a href="<@routes.editsetstudents set />"><@fmt.p set.allStudentsCount "student" /></a>
+		</div>
+		<div class="span8">
+			<#local unallocatedSize = set.unallocatedStudentsCount />
+			<#if unallocatedSize gt 0>
+				<a href="<@routes.editsetallocate set />"><@fmt.p unallocatedSize "unallocated student" /></a>
+			</#if>
+		</div>
+	</div>
+
+	<#if has_groups>
+		<#list setItem.groups as group>
+			<#local showAttendanceButton = features.smallGroupTeachingRecordAttendance && can.do('SmallGroupEvents.ViewRegister', group) && group.hasScheduledEvents && group.groupSet.collectAttendance />
+
+		<div class="item-info row-fluid group-${group.id}" >
+			<div class="span2">
+				<h4 class="name">
+				${group.name!""}
+				</h4>
+			</div>
+			<div class="span2">
+				<#if setItem.canViewMembers && ((group.students.size)!0) gt 0>
+					<a href="<@routes.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
+						<@fmt.p (group.students.size)!0 "student" "students" />
+					</a>
+				<#else>
+					<@fmt.p (group.students.size)!0 "student" "students" />
+				</#if>
+			</div>
+
+			<div class="${showAttendanceButton?string("span6", "span8")}">
+				<ul class="unstyled margin-fix">
+					<#list group.events as event>
+						<li class="clearfix">
+							<@eventShortDetails event />
+
+							<#local popoverContent><@eventDetails event /></#local>
+							<a class="use-popover"
+							   data-html="true"
+							   data-content="${popoverContent?html}"><i class="icon-question-sign"></i></a>
+						</li>
+					</#list>
+				</ul>
+			</div>
+
+			<#if showAttendanceButton>
+				<div class="span2">
+					<a href="<@routes.groupAttendance group />" class="btn btn-primary btn-mini pull-right">
+						Attendance
+					</a>
+				</div>
+			</#if>
+		</div>
+		</#list>
+	</#if>
 </#macro>
 
 <#-- module_info: takes a GroupsViewModel.ViewModules and renders out
@@ -432,7 +411,7 @@
 			var $module = jQuery(this);
 			Groups.zebraStripeGroups($module);
 			Groups.wireModalButtons($module);
-			Groups.wireMapLocations($module);
+			$module.mapPopups();
 			AjaxPopup.wireAjaxPopupLinks($module);
 			$module.find('.use-tooltip').tooltip();
 			$module.find('.use-popover').tabulaPopover({

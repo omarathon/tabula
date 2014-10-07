@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.{ItemNotFoundException, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.helpers.Tap._
 
 class EditSmallGroupsCommandTest extends TestBase with Mockito {
 
@@ -28,10 +29,10 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 	}
 
 	private trait ExistingGroupsFixture extends Fixture {
-		val groupA = Fixtures.smallGroup("Group A")
-		val groupB = Fixtures.smallGroup("Group B")
-		val groupC = Fixtures.smallGroup("Group C")
-		val groupD = Fixtures.smallGroup("Group D")
+		val groupA = Fixtures.smallGroup("Group A").tap { _.id = "groupAid" }
+		val groupB = Fixtures.smallGroup("Group B").tap { _.id = "groupBid" }
+		val groupC = Fixtures.smallGroup("Group C").tap { _.id = "groupCid" }
+		val groupD = Fixtures.smallGroup("Group D").tap { _.id = "groupDid" }
 
 		set.groups.add(groupA)
 		set.groups.add(groupB)
@@ -59,23 +60,23 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def populate { new CommandFixture {
-		set.groups.add(Fixtures.smallGroup("Group A"))
-		set.groups.add(Fixtures.smallGroup("Group B"))
+		set.groups.add(Fixtures.smallGroup("Group A").tap { _.id = "groupAId" })
+		set.groups.add(Fixtures.smallGroup("Group B").tap { _.id = "groupBId" })
 		set.defaultMaxGroupSize = 8
 		set.defaultMaxGroupSizeEnabled = true
 
 		command.populate()
 
-		command.groupNames.asScala should be (Seq("Group A", "Group B"))
-		command.maxGroupSizes.asScala should be (Seq(8, 8))
+		command.existingGroups.values().asScala.map { _.name }.toSet should be (Set("Group A", "Group B"))
+		command.existingGroups.values().asScala.map { _.maxGroupSize }.toSet should be (Set(8, 8))
 	}}
 
 	@Test def create { new CommandFixture {
 		command.populate()
-		command.groupNames.add("Group A")
-		command.groupNames.add("Group B")
-		command.maxGroupSizes.add(15)
-		command.maxGroupSizes.add(15)
+		command.newGroups.get(0).name = "Group A"
+		command.newGroups.get(0).maxGroupSize = 15
+		command.newGroups.get(1).name = "Group B"
+		command.newGroups.get(1).maxGroupSize = 15
 		command.defaultMaxGroupSizeEnabled = true
 
 		val groups = command.applyInternal()
@@ -91,9 +92,9 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def edit { new CommandWithExistingFixture {
-		command.groupNames.asScala should be (Seq("Group A", "Group B", "Group C", "Group D"))
-		command.groupNames.set(1, "Edited group")
-		command.groupNames.set(3, "")
+		command.existingGroups.asScala.values.map { _.name }.toSet should be (Set("Group A", "Group B", "Group C", "Group D"))
+		command.existingGroups.get(groupB.id).name = "Edited group"
+		command.existingGroups.get(groupD.id).delete = true
 
 		command.onBind(mock[BindingResult])
 
@@ -170,7 +171,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def validationAddNewPasses { new ValidationFixture {
-		command.groupNames.add("Group E")
+		command.newGroups.get(0).name = "Group E"
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -179,8 +180,8 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def validationEditPasses { new ValidationFixture {
-		command.groupNames.set(1, "Edited group")
-		command.groupNames.remove(3)
+		command.existingGroups.get(groupB.id).name = "Edited group"
+		command.existingGroups.get(groupD.id).delete = true
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -200,47 +201,47 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def validateNoName { new ValidationFixture {
-		command.groupNames.set(1, "             ")
+		command.existingGroups.get(groupB.id).name = "             "
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
 		errors.hasErrors should be (true)
 		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("groupNames[1]")
+		errors.getFieldError.getField should be ("existingGroups[groupBid].name")
 		errors.getFieldError.getCodes should contain ("smallGroup.name.NotEmpty")
 	}}
 
 	@Test def validateNameTooLong { new ValidationFixture {
-		command.groupNames.set(1, (1 to 300).map { _ => "a" }.mkString(""))
+		command.existingGroups.get(groupB.id).name = (1 to 300).map { _ => "a" }.mkString("")
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
 		errors.hasErrors should be (true)
 		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("groupNames[1]")
+		errors.getFieldError.getField should be ("existingGroups[groupBid].name")
 		errors.getFieldError.getCodes should contain ("smallGroup.name.Length")
 	}}
 
 	@Test def validateCantRemoveNonEmpty { new ValidationFixture {
 		groupD.students.add(new User("cuscav") {{ setWarwickId("0672089") }})
-		command.groupNames.remove(3)
+		command.existingGroups.get(groupD.id).delete = true
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
 		errors.hasErrors should be (true)
 		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("groupNames[3]")
+		errors.getFieldError.getField should be ("existingGroups[groupDid].delete")
 		errors.getFieldError.getCodes should contain ("smallGroup.delete.notEmpty")
 	}}
 
-	@Test def validateCantRemoveWhenAttendaneRecorded { new ValidationFixture {
+	@Test def validateCantRemoveWhenAttendanceRecorded { new ValidationFixture {
 		val event = Fixtures.smallGroupEvent("An Event")
 		groupD.addEvent(event)
 
-		command.groupNames.remove(3)
+		command.existingGroups.get(groupD.id).delete = true
 
 		val eventOccurrence = new SmallGroupEventOccurrence
 		eventOccurrence.event = event
@@ -258,7 +259,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 
 		errors.hasErrors should be (true)
 		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("groupNames[3]")
+		errors.getFieldError.getField should be ("existingGroups[groupDid].delete")
 		errors.getFieldError.getCodes should contain ("smallGroupEvent.delete.hasAttendance")
 	}}
 
@@ -266,7 +267,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 		val event = Fixtures.smallGroupEvent("An Event")
 		groupD.addEvent(event)
 
-		command.groupNames.remove(3)
+		command.existingGroups.get(groupD.id).delete = true
 
 		val eventOccurrence = new SmallGroupEventOccurrence
 		eventOccurrence.event = event
@@ -310,7 +311,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 		command should be (anInstanceOf[EditSmallGroupsPermissions])
 		command should be (anInstanceOf[EditSmallGroupsCommandState])
 		command should be (anInstanceOf[SelfValidating])
-		command should be (anInstanceOf[PopulateOnForm])
+		command should be (anInstanceOf[PopulateEditSmallGroupsCommand])
 		command should be (anInstanceOf[BindListener])
 	}}
 

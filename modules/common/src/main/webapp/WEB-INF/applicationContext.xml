@@ -555,7 +555,7 @@
 	</beans>
 
 	<beans profile="dev,sandbox,production">
-		<!-- EhCaches -->
+		<!-- Caches -->
 		<bean id="userGroupCacheBean"
 			  class="uk.ac.warwick.tabula.services.UserGroupMembershipCacheBean"
 			  abstract="true" />

@@ -33,6 +33,7 @@ trait RelationshipDao {
 	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
+	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
@@ -108,6 +109,19 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			Restrictions.ge("endDate", new DateTime())
 		))
 			.seq
+	}
+
+	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship] = {
+		session.newCriteria[MemberStudentRelationship]
+			.createAlias("studentCourseDetails", "scd")
+			.add(is("scd.student", student))
+			.add(is("relationshipType", relationshipType))
+			.add(is("_agentMember.universityId", agent.universityId))
+			.add( Restrictions.or(
+				Restrictions.isNull("endDate"),
+				Restrictions.ge("endDate", new DateTime())
+			))
+			.uniqueResult
 	}
 
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = {

@@ -25,9 +25,17 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 	@transient var membershipService = Wire.auto[AssignmentMembershipService]
 
 	/**
-	 * Lowercase module code, with CATS. e.g. in304-15
+	 * Uppercase module code, with CATS. e.g. IN304-15
 	 */
 	var moduleCode: String = _
+
+	/**
+	 * An OPTIONAL link to a Tabula representation of a Module.
+	 */
+	@ManyToOne(fetch = FetchType.LAZY, optional = true)
+	@JoinColumn(name = "module_id")
+	var module: Module = _
+
 	/**
 	 * Assessment group the assignment is in. Is mostly a meaningless
 	 * character but will map to a corresponding student module registratation
@@ -80,7 +88,9 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 
 	def needsUpdatingFrom(other: AssessmentComponent) = (
 		this.name != other.name ||
-		this.departmentCode != other.departmentCode)
+		this.departmentCode != other.departmentCode ||
+		this.module != other.module
+	)
 
 	override def preSave(newRecord: Boolean) {
 		ensureNotNull("name", name)
@@ -96,6 +106,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 		assessmentGroup = other.assessmentGroup
 		sequence = other.sequence
 		departmentCode = other.departmentCode
+		module = other.module
 		name = other.name
 		assessmentType = other.assessmentType
 	}

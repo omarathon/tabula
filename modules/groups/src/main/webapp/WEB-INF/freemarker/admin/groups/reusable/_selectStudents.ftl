@@ -46,6 +46,7 @@
 				<small>Select students by route, year of study etc.</small>
 			</span>
 		</summary>
+		<div>
 
 		<p>Use the filters to add students to this set of small groups:</p>
 
@@ -194,6 +195,7 @@
 				showRemoveButton=true
 			/>
 		</#if>
+		</div>
 	</details>
 
 
@@ -203,6 +205,7 @@
 				<small>Add a list of students by university ID or username</small>
 			</span>
 		</summary>
+		<div>
 
 		<p style="margin-bottom: 1em;">
 			<input style="margin-right: 8px;" class="btn" type="submit" name="${ManageDepartmentSmallGroupsMappingParameters.manuallyAddForm}" value="Add students manually" />
@@ -229,6 +232,8 @@
 			checkAll=true
 			showResetButton=true
 		/>
+
+		</div>
 	</details>
 
 	<input type="hidden" name="returnTo" value="${returnTo}">

@@ -86,11 +86,14 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		)
 	).transformAll(toParsedAuditEvents)
 
+
+	def publishFeedbackForStudent(assignment: Assignment, student: User): Seq[AuditEvent] = 
+		publishFeedbackForStudent(assignment, student.getWarwickId)
 	
-	def publishFeedbackForStudent(assignment: Assignment, student: User): Seq[AuditEvent] = search(
+	def publishFeedbackForStudent(assignment: Assignment, warwickId: String): Seq[AuditEvent] = search(
 		query = all(
 			termQuery("eventType", "PublishFeedback"),
-			termQuery("students", student.getWarwickId),
+			termQuery("students", warwickId),
 			assignmentRangeRestriction(assignment)
 		)
 	).transformAll(toParsedAuditEvents)
