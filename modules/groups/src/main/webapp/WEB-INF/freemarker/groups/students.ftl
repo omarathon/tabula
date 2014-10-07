@@ -6,7 +6,7 @@
 	<#if command.group??>
 		<h3>Students in ${command.group.name}</h3>
 	<#else>
-		<h3>Students not in ${command.smallGroupSet.name}</h3>
+		<h3>Students <#if unallocated!false>not </#if>in ${command.smallGroupSet.name}</h3>
 	</#if>
 
 </div>
