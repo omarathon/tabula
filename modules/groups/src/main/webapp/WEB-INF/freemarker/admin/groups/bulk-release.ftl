@@ -1,12 +1,12 @@
 <#escape x as x?html>
-<h1>Notify groups in ${department.name}</h1>
+<h1>Publish groups in ${department.name}</h1>
 <#if info.requestParameters.batchReleaseSuccess??>
 <div class="alert alert-success">
-    Small group notifications have been sent
+    These small group allocations have been published
 </div>
 </#if>
     <@f.form method="post" action="" commandName="moduleList" cssClass="form-horizonatal form-tiny">
-    	<p>Notify these people via email that these groups are ready to view in Tabula:</p>
+    	<p>Publish these groups so they are shown in Tabula to:</p>
         <@form.row "notifyStudents">
 			<label class="checkbox">
 				<@f.checkbox path="notifyStudents"/>Students
@@ -21,12 +21,12 @@
 		<@form.row "sendEmail">
 			<@form.label checkbox=true>
 				<@f.checkbox path="sendEmail" />
-				Send an email with this notification
+				Send an email about this and any future changes to group allocation
 			</@form.label>
 		</@form.row>
 
         <div class="control-group">
-            <input class="btn btn-info" type="submit" value="Notify">
+            <input class="btn btn-info" type="submit" value="Publish">
         </div>
 
     <div id="scroll-container">
@@ -41,7 +41,7 @@
         </thead>
         <tbody >
             <#list modules as module>
-            <tr ${module.hasUnreleasedGroupSets?string("","class='use-tooltip' title='Notifications about groups for this module have already been sent'")} data-container="#tooltip-container">
+            <tr ${module.hasUnreleasedGroupSets?string("","class='use-tooltip' title='Groups for this module have already been published'")} data-container="#tooltip-container">
                 <td>
                    <@f.checkbox
                    class=module.hasUnreleasedGroupSets?string('collection-checkbox','')
