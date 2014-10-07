@@ -1,18 +1,14 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
 import uk.ac.warwick.tabula.TestBase
-import org.junit.Test
 import uk.ac.warwick.tabula.coursework.commands.assignments._
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.web.controllers.TestControllerOverrides
-import org.junit.Ignore
 import uk.ac.warwick.tabula.services.{SubmissionService, SubmissionServiceComponent, FeedbackServiceComponent, FeedbackService}
 import uk.ac.warwick.tabula.coursework.commands.{CurrentUserSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommandInternal}
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.coursework.commands.StudentSubmissionAndFeedbackCommand._
 
@@ -33,6 +29,7 @@ class AssignmentControllerTest extends TestBase with Mockito {
 		feedbackService.getFeedbackByUniId(assignment, "0123456") returns Some(feedback) thenThrows new Error("I TOLD YOU ABOUT STAIRS BRO")
 
 		val submissionService = smartMock[SubmissionService]
+		submissionService.getSubmissionByUniId(assignment, "0123456") returns None
 
 		val infoCommand = new StudentSubmissionAndFeedbackCommandInternal(module, assignment) with CurrentUserSubmissionAndFeedbackCommandState with FeedbackServiceComponent with SubmissionServiceComponent with Appliable[StudentSubmissionInformation] {
 			def currentUser = user
@@ -42,15 +39,14 @@ class AssignmentControllerTest extends TestBase with Mockito {
 			def apply() = applyInternal()
 		}
 	}
-	
-	@Ignore
+
 	@Test
-	def feedbackAccess {
+	def feedbackAccess() {
 		withUser("cusebr", "0123456") {
 			new Fixtures {
 				val user = currentUser
 				val mav = controller.view(infoCommand, form, errors)
-				withClue(mav) { mav.map should contain key ("feedback") }
+				withClue(mav) { mav.map should contain key "feedback" }
 			}
 		}
 	}
