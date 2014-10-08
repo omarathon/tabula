@@ -119,22 +119,25 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 
 	// Returns None if marking is completed for the current workflow or if no workflow exists - i.e. not in the middle of a workflow
 	def getCurrentWorkflowFeedbackPosition: Option[FeedbackPosition] = {
-		val workflow = assignment.markingWorkflow
-		if (workflow == null)
-			None
-		else if (workflow.hasThirdMarker && thirdMarkerFeedback != null && thirdMarkerFeedback.state == MarkingState.MarkingCompleted)
-			None
-		else if (workflow.hasThirdMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
-			Option(ThirdFeedback)
-		else if (workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
-			None
-		else if (workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.Rejected)
-			Option(FirstFeedback)
-		else if (workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
-			Option(SecondFeedback)
-		else if (firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
-			None
-		else Option(FirstFeedback)
+
+		def markingCompleted(workflow: MarkingWorkflow) = {
+			(workflow.hasThirdMarker && thirdMarkerFeedback != null && thirdMarkerFeedback.state == MarkingState.MarkingCompleted) ||
+			(!workflow.hasThirdMarker && workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted) ||
+			(!workflow.hasThirdMarker && !workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
+		}
+
+		Option(assignment.markingWorkflow)
+			.filterNot(markingCompleted)
+			.map { workflow =>
+				if (workflow.hasThirdMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
+					ThirdFeedback
+				else if (workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.Rejected)
+					FirstFeedback
+				else if (workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
+					SecondFeedback
+				else
+					FirstFeedback
+			}
 	}
 
 	def getCurrentWorkflowFeedback: Option[MarkerFeedback] = {
