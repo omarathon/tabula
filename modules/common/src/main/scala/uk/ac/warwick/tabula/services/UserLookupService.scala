@@ -50,7 +50,13 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 	
 	var profileService = Wire[ProfileService]
 
-	override def getUserByUserId(id: String) = filterApplicantUsers(super.getUserByUserId(id))
+	override def getUserByUserId(id: String) = super.getUserByUserId(id) match {
+		case anon: AnonymousUser => {
+			anon.setUserId(id)
+			anon
+		}
+		case user => filterApplicantUsers(user)
+	}
 
 	override def getUserByWarwickUniId(id: UniversityId) =
 		getUserByWarwickUniId(id, true)
@@ -101,6 +107,7 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 	private def filterApplicantUsers(user: User) = user.getExtraProperty("urn:websignon:usertype") match {
 		case "Applicant" => {
 			val result = new AnonymousUser()
+			result.setUserId(user.getUserId)
 			result.setWarwickId(user.getWarwickId)
 			result
 		}

@@ -85,13 +85,25 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 
 	def listen(recipientInfo: RecipientNotificationInfo) = {
 		if (!recipientInfo.emailSent) {
-			if (recipientInfo.notification.priority < Notification.PriorityEmailThreshold) {
-				logger.info(s"Not sending email as notification priority ${recipientInfo.notification.priority} below threshold")
-
+			def cancelSendingEmail() {
 				// TODO This is incorrect, really - we're not sending the email, we're cancelling the sending of the email
 				recipientInfo.emailSent = true
 				service.save(recipientInfo)
-			} else if (recipientInfo.recipient.getEmail.hasText) {
+			}
+
+			if (recipientInfo.notification.priority < Notification.PriorityEmailThreshold) {
+				logger.info(s"Not sending email as notification priority ${recipientInfo.notification.priority} below threshold")
+
+				cancelSendingEmail()
+			} else if (!recipientInfo.recipient.isFoundUser) {
+				logger.error(s"Couldn't send email for Notification because usercode didn't match a user: $recipientInfo")
+
+				cancelSendingEmail()
+			} else if (recipientInfo.recipient.getEmail.isEmptyOrWhitespace) {
+				logger.warn(s"Couldn't send email for Notification because recipient has no email address: $recipientInfo")
+
+				cancelSendingEmail()
+			} else {
 				generateMessage(recipientInfo) match {
 					case Some(message) =>
 						val future = mailSender.send(message)
@@ -112,16 +124,8 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 					case None =>
 						logger.warn(s"Couldn't send email for Notification because object no longer exists: $recipientInfo")
 
-						// TODO This is incorrect, really - we're not sending the email, we're cancelling the sending of the email
-						recipientInfo.emailSent = true
-						service.save(recipientInfo)
+						cancelSendingEmail()
 				}
-			} else {
-				logger.warn(s"Couldn't send email for Notification because recipient has no email address: $recipientInfo")
-
-				// TODO This is incorrect, really - we're not sending the email, we're cancelling the sending of the email
-				recipientInfo.emailSent = true
-				service.save(recipientInfo)
 			}
 		}
 	}
