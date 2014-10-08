@@ -836,7 +836,11 @@
 		// sticky table headers
 		//$('table.sticky-table-headers').fixedHeaderTable('show');
 
-
+		// Form dirty checking
+		$('form.dirty-check').areYouSure({'addRemoveFieldsMarksDirty':true, 'renamedFieldsMarksDirty':true});
+		$('a.dirty-check-ignore').on('click', function() {
+			$('form.dirty-check').trigger('reinitialize.areYouSure');
+		});
 
 		// If we're on OS X, replace all kbd.keyboard-control-key with Cmd instead of Ctrl
 		if (navigator.platform.indexOf('Mac') != -1) {

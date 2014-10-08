@@ -24,7 +24,13 @@ exports.wireModalButtons = function($container) {
 window.Groups = jQuery.extend(window.Groups, exports);
 
 $(function(){
-    
+	$('.fix-area').fixHeaderFooter();
+	$('#action-submit').closest('form').on('click', '.update-only', function() {
+		$('#action-submit').val('update');
+		$('#action-submit').closest('form').find('[type=submit]').attr('disabled', true);
+		$(this).attr('disabled', false);
+	});
+
     // Zebra striping on lists of modules/groups
     $('.module-info').each(function(i, module) { 
         exports.zebraStripeGroups($(module));
@@ -179,7 +185,6 @@ $(function() {
 // Re-usable small groups
 $(function() {
 	if ($('.add-student-to-set').length > 0) {
-		$('.fix-area').fixHeaderFooter();
 		$('details').on('open.details close.details', function() {
 			setTimeout(function() {
 				$(window).trigger('resize');

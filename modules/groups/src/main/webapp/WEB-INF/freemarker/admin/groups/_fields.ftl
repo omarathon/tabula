@@ -1,5 +1,5 @@
 <#escape x as x?html>
-	<input type="hidden" name="action" value="submit" id="action-input">
+	<input type="hidden" name="action" value="submit" id="action-submit">
 
 	<fieldset>
 		<@form.labelled_row "format" "Type">
@@ -19,7 +19,7 @@
 				jQuery(function($) {
 					$('#academicYear').on('change', function(e) {
 						var $form = $(this).closest('form');
-						$('#action-input').val('refresh');
+						$('#action-submit').val('refresh');
 
 						$form.submit();
 					});

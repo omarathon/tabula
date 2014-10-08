@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.groups.commands.admin.EditSmallGroupsCommand
+import uk.ac.warwick.tabula.groups.commands.admin.{PopulateEditSmallGroupsCommand, EditSmallGroupsCommand}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
 
@@ -15,7 +15,7 @@ abstract class AbstractEditSmallGroupsController extends GroupsController {
 
 	validatesSelf[SelfValidating]
 
-	type EditSmallGroupsCommand = Appliable[Seq[SmallGroup]]
+	type EditSmallGroupsCommand = Appliable[Seq[SmallGroup]] with PopulateEditSmallGroupsCommand
 
 	@ModelAttribute("ManageSmallGroupsMappingParameters") def params = ManageSmallGroupsMappingParameters
 
@@ -24,8 +24,8 @@ abstract class AbstractEditSmallGroupsController extends GroupsController {
 
 	protected def renderPath: String
 
-	protected def render(set: SmallGroupSet) = {
-		Mav(renderPath).crumbs(Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+	protected def render(set: SmallGroupSet, model: Pair[String, _]*) = {
+		Mav(renderPath, model:_*).crumbs(Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 
 	@RequestMapping(method = Array(GET, HEAD))
@@ -43,8 +43,22 @@ abstract class AbstractEditSmallGroupsController extends GroupsController {
 		}
 	}
 
-	@RequestMapping(method = Array(POST))
+	@RequestMapping(method = Array(POST), params = Array("action=update"))
 	def save(
+		@Valid @ModelAttribute("command") cmd: EditSmallGroupsCommand,
+		errors: Errors,
+		@PathVariable("smallGroupSet") set: SmallGroupSet
+	) = {
+		if (!errors.hasErrors) {
+			cmd.apply()
+			cmd.populate()
+		}
+
+		render(set, "saved" -> true)
+	}
+
+	@RequestMapping(method = Array(POST))
+	def saveAndExit(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
@@ -58,28 +72,28 @@ class CreateSmallGroupSetAddGroupsController extends AbstractEditSmallGroupsCont
 
 	override val renderPath = "admin/groups/newgroups"
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndEditProperties))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndEditProperties, "action!=update"))
 	def saveAndEditProperties(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
 	) = submit(cmd, errors, set, Routes.admin.create(set))
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddStudents))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddStudents, "action!=update"))
 	def saveAndAddStudents(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
 	) = submit(cmd, errors, set, Routes.admin.createAddStudents(set))
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddEvents))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddEvents, "action!=update"))
 	def saveAndAddEvents(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
 	) = submit(cmd, errors, set, Routes.admin.createAddEvents(set))
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAllocate))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAllocate, "action!=update"))
 	def saveAndAddAllocate(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupsCommand,
 		errors: Errors,
@@ -94,28 +108,28 @@ class EditSmallGroupSetAddGroupsController extends AbstractEditSmallGroupsContro
 
 	override val renderPath = "admin/groups/editgroups"
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndEditProperties))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndEditProperties, "action!=update"))
 	def saveAndEditProperties(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
 	) = submit(cmd, errors, set, Routes.admin.edit(set))
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddStudents))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddStudents, "action!=update"))
 	def saveAndAddStudents(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
 	) = submit(cmd, errors, set, Routes.admin.editAddStudents(set))
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddEvents))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddEvents, "action!=update"))
 	def saveAndAddEvents(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
 	) = submit(cmd, errors, set, Routes.admin.editAddEvents(set))
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAllocate))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAllocate, "action!=update"))
 	def saveAndAddAllocate(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupsCommand,
 		errors: Errors,

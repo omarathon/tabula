@@ -4,17 +4,22 @@
 <h1>Create small groups</h1>
 <h4><span class="muted">for</span> <@fmt.module_name module /></h4>
 
-<@f.form method="post" action="${url('/groups/admin/module/${module.code}/groups/new')}" commandName="createSmallGroupSetCommand" cssClass="form-horizontal">
+<div class="fix-area">
+<@f.form method="post" action="${url('/groups/admin/module/${module.code}/groups/new')}" commandName="createSmallGroupSetCommand" cssClass="form-horizontal dirty-check">
 
-	<#assign fakeSet = {'linked':false, 'groups':[]} />
-	<@components.set_wizard true 'properties' fakeSet />
+	<#if smallGroupSet??>
+		<@components.set_wizard true 'properties' smallGroupSet />
+	<#else>
+		<#assign fakeSet = {'linked':false, 'groups':[]} />
+		<@components.set_wizard true 'properties' fakeSet />
+	</#if>
 
 	<@f.errors cssClass="error form-errors" />
 	
 	<#assign newRecord=true />
 	<#include "_fields.ftl" />
 	
-	<div class="submit-buttons">
+	<div class="submit-buttons fix-footer">
 		<input
 			type="submit"
 			class="btn btn-success"
@@ -27,10 +32,11 @@
 			name="create"
 			value="Save and exit"
 			/>
-		<a class="btn" href="<@routes.depthome module=module />">Cancel</a>
+		<a class="btn dirty-check-ignore" href="<@routes.depthome module=module />">Cancel</a>
 	</div>
 
 </@f.form>
+</div>
 
 <script type="text/javascript">
 	jQuery(function($) {
