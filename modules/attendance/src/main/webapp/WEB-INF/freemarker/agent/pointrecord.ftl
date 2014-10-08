@@ -62,7 +62,7 @@
 
 						<div class="pull-right" style="display: none;">
 							<span class="checkAllMessage">
-								Check all
+								Record all attendance
 								<#assign popoverContent>
 									<p><i class="icon-minus icon-fixed-width"></i> Not recorded</p>
 									<p><i class="icon-remove icon-fixed-width unauthorised"></i> Missed (unauthorised)</p>
@@ -137,7 +137,21 @@
 					<#list command.checkpointMap?keys?sort_by("lastName") as student>
 						<#list mapGet(command.checkpointMap, student)?keys as point>
 							<div class="row-fluid item-info">
-								<div class="span12">
+								<div class="span8">
+									<#if numberOfStudents <= 50>
+										<@fmt.member_photo student "tinythumbnail" true />
+									</#if>
+									${student.fullName}&nbsp;<@pl.profile_link student.universityId />
+									<#if mapGet(command.hasReportedMap, student)>
+										<br/><span class="hint">A checkpoint cannot be set as this student's attendance data has already been submitted for this period.</span>
+									</#if>
+									<@spring.bind path="command.checkpointMap[${student.universityId}][${point.id}]">
+										<#if status.error>
+											<div class="text-error"><@f.errors path="command.checkpointMap[${student.universityId}][${point.id}]" cssClass="error"/></div>
+										</#if>
+									</@spring.bind>
+								</div>
+								<div class="span4">
 									<div class="pull-right">
 										<#if mapGet(command.hasReportedMap, student)>
 											<@attendance_macros.checkpointLabel
@@ -184,19 +198,6 @@
 											<i class="icon-fixed-width"></i>
 										</#if>
 									</div>
-
-									<#if numberOfStudents <= 50>
-										<@fmt.member_photo student "tinythumbnail" true />
-									</#if>
-									${student.fullName}&nbsp;<@pl.profile_link student.universityId />
-									<#if mapGet(command.hasReportedMap, student)>
-										<br/><span class="hint">A checkpoint cannot be set as this student's attendance data has already been submitted for this period.</span>
-									</#if>
-									<@spring.bind path="command.checkpointMap[${student.universityId}][${point.id}]">
-										<#if status.error>
-											<div class="text-error"><@f.errors path="command.checkpointMap[${student.universityId}][${point.id}]" cssClass="error"/></div>
-										</#if>
-									</@spring.bind>
 								</div>
 								<script>
 									AttendanceRecording.createButtonGroup('#checkpointMap-${student.universityId}-${point.id}');
