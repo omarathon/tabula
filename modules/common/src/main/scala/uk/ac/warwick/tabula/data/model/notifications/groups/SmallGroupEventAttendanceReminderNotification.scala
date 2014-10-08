@@ -43,6 +43,7 @@ class SmallGroupEventAttendanceReminderNotification
 
 	override def title = s"${event.group.groupSet.format.description} attendance needs recording"
 
+	@transient
 	final val FreemarkerTemplate = "/WEB-INF/freemarker/notifications/groups/small_group_event_attendance_reminder_notification.ftl"
 
 	override def content: FreemarkerModel = FreemarkerModel(FreemarkerTemplate, Map(
