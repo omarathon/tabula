@@ -117,7 +117,7 @@ var FlexiPicker = function (options) {
 	// Disable browser autocomplete dropdowns, it gets in the way.
 	$element.attr('autocomplete', 'off');
 
-	var $spinner = $('<div />').addClass('spinner-container');//.attr('style', 'position: absolute; top: 15px; left: 15px; margin-left: 220px;');
+	var $spinner = $('<div />').addClass('spinner-container');
 	$element.before($spinner);
 
 	this.includeUsers = options.includeUsers !== false;
