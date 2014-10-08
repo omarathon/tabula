@@ -117,6 +117,9 @@ var FlexiPicker = function (options) {
 	// Disable browser autocomplete dropdowns, it gets in the way.
 	$element.attr('autocomplete', 'off');
 
+	var $spinner = $('<div />').addClass('spinner-container');//.attr('style', 'position: absolute; top: 15px; left: 15px; margin-left: 220px;');
+	$element.before($spinner);
+
 	this.includeUsers = options.includeUsers !== false;
 	this.includeGroups = options.includeGroups || false;
 	this.includeEmail = options.includeEmail || false;
@@ -134,7 +137,9 @@ var FlexiPicker = function (options) {
 	var $typeahead = new TabulaTypeahead({
 		element: $element,
 		source: function (query, process) {
+			$spinner.spin('small');
 			self.search(query).done(function (results) {
+				$spinner.spin(false);
 				process(results);
 			});
 		},
