@@ -25,6 +25,7 @@ class ListMarkerFeedbackController  extends CourseworkController {
 		val completedFeedback = markerFeedbackCollections.completedFeedback
 		val rejectedFeedback = markerFeedbackCollections.rejectedFeedback
 
+
 		val maxFeedbackCount = Math.max(
 			rejectedFeedback.map(_.feedbacks.size).reduceOption(_ max _).getOrElse(0),
 			Math.max(
@@ -50,7 +51,7 @@ class ListMarkerFeedbackController  extends CourseworkController {
 			"hasFirstMarkerFeedback" -> hasFirstMarkerFeedback,
 			"hasSecondMarkerFeedback" -> hasSecondMarkerFeedback,
 			"hasOriginalityReport" -> hasOriginalityReport
-		)
+		).crumbs(Breadcrumbs.Department(assignment.module.adminDepartment), Breadcrumbs.Module(assignment.module))
 	}
 
 }
