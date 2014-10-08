@@ -119,15 +119,23 @@
 									<#local nextStageModal = "#modal-container" />
 								</#if>
 
-								<#if nextStageUrl?has_content>
-									<a href="${nextStageUrl}"<#if nextStageModal?has_content> data-toggle="modal" data-target="${nextStageModal}" data-container="body"</#if>>
+								<#if nextStageUrl?has_content && can.do('SmallGroups.Update', set)>
+									<a href="${nextStageUrl}"<#if nextStageModal?has_content> data-toggle="modal" data-target="${nextStageModal}" data-container="body"</#if>><#compress>
 										<@spring.message code=setItem.nextStage.actionCode />
-									</a>
+									</#compress></a>
 								<#else>
 									<@spring.message code=setItem.nextStage.actionCode />
 								</#if>
 							<#elseif setItem.progress.percentage == 100>
 								Complete
+							</#if>
+
+							<#local notInMembershipCount = set.studentsNotInMembershipCount />
+
+							<#if notInMembershipCount gt 0>
+								<#local tooltip><@fmt.p notInMembershipCount "student has" "students have" /> deregistered</#local>
+
+								<a href="<@routes.deregisteredStudents set />" class="use-tooltip warning" style="display: inline;" title="${tooltip}"><i class="icon-warning-sign warning"></i></a>
 							</#if>
 						</div>
 					<#else>
@@ -247,16 +255,16 @@
 									</#if>
 								</#if>
 
-								<li ${set.fullyReleased?string(" class='disabled use-tooltip' title='Already notified' ",'')} >
+								<li ${set.fullyReleased?string(" class='disabled use-tooltip' title='Already published' ",'')} >
 									<#local notifyset_url><@routes.releaseset set /></#local>
 									<@fmt.permission_button
 									permission='SmallGroups.Update'
 									scope=set
-									action_descr='notify students and staff'
+									action_descr='publish groups to students and staff'
 									href=notifyset_url
 									classes='notify-group-link'
 									data_attr='data-toggle=modal data-target=#modal-container data-container=body'>
-										<i class="icon-envelope-alt icon-fixed-width"></i> Notify
+										<i class="icon-envelope-alt icon-fixed-width"></i> Publish
 									</@fmt.permission_button>
 								</li>
 
@@ -278,7 +286,7 @@
 									</a>
 								</li>
 
-								<li<#if set.releasedToStudents || set.releasedToTutors> class="disabled use-tooltip" data-container="body" title="Can't delete small groups where students or tutors have been notified"</#if>>
+								<li<#if set.releasedToStudents || set.releasedToTutors> class="disabled use-tooltip" data-container="body" title="Can't delete small groups that have been published to students or tutors"</#if>>
 									<#local delete_url><@routes.deleteset set /></#local>
 									<@fmt.permission_button
 										permission='SmallGroups.Delete'
@@ -329,19 +337,40 @@
 <#macro single_set_inner setItem>
 	<#local set = setItem.set />
 	<#local has_groups = setItem.groups?size gt 0 />
+	<#local can_update_groups = can.do('SmallGroups.Update', set) />
 
 	<#-- Overall info -->
 	<div class="row-fluid">
 		<div class="span2">
-			<a href="<@routes.editsetgroups set />"><@fmt.p setItem.groups?size "group" /></a>
+			<#if can_update_groups>
+				<a href="<@routes.editsetgroups set />"><@fmt.p setItem.groups?size "group" /></a>
+			<#else>
+				<@fmt.p setItem.groups?size "group" />
+			</#if>
 		</div>
 		<div class="span2">
-			<a href="<@routes.editsetstudents set />"><@fmt.p set.allStudentsCount "student" /></a>
+			<#if can_update_groups>
+				<a href="<@routes.editsetstudents set />"><@fmt.p set.allStudentsCount "student" /></a>
+			<#else>
+				<a href="<@routes.studentsinsetlist set />" class="ajax-modal" data-target="#students-list-modal"><@fmt.p set.allStudentsCount "student" /></a>
+			</#if>
 		</div>
 		<div class="span8">
 			<#local unallocatedSize = set.unallocatedStudentsCount />
+			<#local notInMembershipCount = set.studentsNotInMembershipCount />
+
 			<#if unallocatedSize gt 0>
-				<a href="<@routes.editsetallocate set />"><@fmt.p unallocatedSize "unallocated student" /></a>
+				<#if can_update_groups>
+					<a href="<@routes.editsetallocate set />"><@fmt.p unallocatedSize "unallocated student" /></a>
+					<#if notInMembershipCount gt 0><br></#if>
+				<#else>
+					<a href="<@routes.unallocatedstudentslist set />" class="ajax-modal" data-target="#students-list-modal"><@fmt.p unallocatedSize "unallocated student" /></a>
+				</#if>
+			</#if>
+
+			<#if notInMembershipCount gt 0 && can_update_groups>
+				<a href="<@routes.deregisteredStudents set />"><@fmt.p notInMembershipCount "student has" "students have" /> deregistered</a>
+				<i class="icon-warning-sign warning"></i>
 			</#if>
 		</div>
 	</div>
@@ -661,17 +690,17 @@
 								 <#-- not released at all -->
 								  <#if (!groupSet.releasedToStudents && !groupSet.releasedToTutors)>
 								<p class="alert">
-									<i class="icon-info-sign"></i> Notifications have not been sent for these groups
+									<i class="icon-info-sign"></i> These groups have not been published
 								</p>
 								 <#-- only released to tutors-->
 								 <#elseif (!groupSet.releasedToStudents && groupSet.releasedToTutors)>
 								  <p class="alert">
-									   <i class="icon-info-sign"></i> Notifications have not been sent to students for these groups
+									   <i class="icon-info-sign"></i> These groups have been published to tutors, but not students
 								   </p>
 								  <#-- only released to students-->
 								  <#elseif (groupSet.releasedToStudents && !groupSet.releasedToTutors)>
 									  <p class="alert">
-										  <i class="icon-info-sign"></i> Notifications have not been sent to tutors for these groups
+										  <i class="icon-info-sign"></i> These groups have been published to students, but not tutors
 									  </p>
 								 </#if>
 							</#if>
@@ -737,16 +766,16 @@
 																				<i class="icon-random icon-fixed-width"></i> Allocate students
 													            </@fmt.permission_button>
                                     </li>
-                                    <li ${groupSet.fullyReleased?string(" class='disabled use-tooltip' title='Already notified' ",'')} >
+                                    <li ${groupSet.fullyReleased?string(" class='disabled use-tooltip' title='Already published' ",'')} >
                                     	<#local notifyset_url><@routes.releaseset groupSet /></#local>
 																			<@fmt.permission_button 
 																				permission='SmallGroups.Update' 
 																				scope=groupSet 
-																				action_descr='notify students and staff' 
+																				action_descr='publish groups to students and staff'
 																				href=notifyset_url
 																				classes='notify-group-link'
 																				data_attr='data-toggle=modal data-target=#modal-container data-container=body'>
-																				<i class="icon-envelope-alt icon-fixed-width"></i> Notify
+																				<i class="icon-envelope-alt icon-fixed-width"></i> Publish
 													            </@fmt.permission_button>
 													          </li>
                                         

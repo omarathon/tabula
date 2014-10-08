@@ -96,6 +96,7 @@ class DepartmentSmallGroupSet
 	def isStudentMember(user: User) = members.includesUser(user)
 
 	def allStudents = members.users
+	def allStudentIds = if (members.universityIds) members.knownType.members else allStudents.map { _.getWarwickId }
 	def allStudentsCount = members.size
 
 	def unallocatedStudents = {
@@ -107,6 +108,17 @@ class DepartmentSmallGroupSet
 	def unallocatedStudentsCount = {
 		// TAB-2296 we can't rely just on counts here
 		unallocatedStudents.size
+	}
+
+	def studentsNotInMembership = {
+		val allocatedStudents = groups.asScala.flatMap { _.students.users }
+
+		allocatedStudents diff allStudents
+	}
+
+	def studentsNotInMembershipCount = {
+		// TAB-2296 we can't rely just on counts here
+		studentsNotInMembership.size
 	}
 
 	def hasAllocated = groups.asScala.exists { !_.students.isEmpty }

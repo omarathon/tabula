@@ -79,6 +79,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro relationshipPhoto profile relationship><@_u page="/view/photo/${profile.universityId}/${relationship.relationshipType.dbValue}/${relationship.agent}.jpg" context="/profiles" /></#macro>
 
 <#macro studentslist group><@_u page="/group/${group.id}/studentspopup" /></#macro>
+<#macro studentsinsetlist groupset><@_u page="/${groupset.id}/studentspopup" /></#macro>
 <#macro unallocatedstudentslist groupset><@_u page="/${groupset.id}/unallocatedstudentspopup" /></#macro>
 
 <#macro crossmodulegroups department><@_u page="/admin/department/${department.code}/groups/reusable"  /></#macro>
@@ -99,3 +100,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro import_groups_for_year department academicYear><@import_groups department />?academicYear=${academicYear.startYear?c}</#macro>
 
 <#macro permissions scope><@_u page="/permissions/${scope.urlCategory}/${scope.urlSlug}" context="/admin" /></#macro>
+
+<#macro deregisteredStudents set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/deregistered" /></#macro>

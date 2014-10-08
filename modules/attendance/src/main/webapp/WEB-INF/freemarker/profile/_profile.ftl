@@ -52,7 +52,7 @@
 									<#list groupedPointMap[term] as pointPair>
 										<#assign point = pointPair._1() />
 										<tr class="point">
-											<td class="point" title="${point.name} (<@fmt.monitoringPointWeeksFormat point.startWeek point.endWeek point.scheme.academicYear point.scheme.department />)">
+											<td class="point">
 												${point.name}
 												(<a class="use-tooltip" data-html="true" title="
 													<@fmt.wholeWeekDateFormat

@@ -97,7 +97,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
 		there was one(checking).PermissionCheck(Permissions.SmallGroups.Update, set)
 	}}
 
-	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {
+	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoModule {
 		val command = new EditSmallGroupSetDefaultPropertiesPermissions with EditSmallGroupSetDefaultPropertiesCommandState {
 			val module = null
 			val set = new SmallGroupSet

@@ -14,18 +14,18 @@ case class UnallocatedStudentsInformation (
   showTutors: Boolean
 )
 
-object ListGroupUnallocatedStudentsCommand {
+object ListSmallGroupSetUnallocatedStudentsCommand {
 	def apply(smallGroupSet: SmallGroupSet, user: CurrentUser) = {
-		new ListGroupUnallocatedStudentsCommandInternal(smallGroupSet, user)
+		new ListSmallGroupSetUnallocatedStudentsCommandInternal(smallGroupSet, user)
 			with ComposableCommand[UnallocatedStudentsInformation]
 			with AutowiringProfileServiceComponent
-			with ListGroupUnallocatedStudentsCommandPermissions
+			with ListSmallGroupSetUnallocatedStudentsCommandPermissions
 			with Unaudited with ReadOnly
 	}
 }
 
-class ListGroupUnallocatedStudentsCommandInternal(val smallGroupSet: SmallGroupSet, val user: CurrentUser)
-	extends CommandInternal[UnallocatedStudentsInformation] with ListGroupUnallocatedStudentsCommandState  {
+class ListSmallGroupSetUnallocatedStudentsCommandInternal(val smallGroupSet: SmallGroupSet, val user: CurrentUser)
+	extends CommandInternal[UnallocatedStudentsInformation] with ListSmallGroupSetUnallocatedStudentsCommandState  {
 	self:ProfileServiceComponent =>
 
 		override def applyInternal() = {
@@ -42,13 +42,13 @@ class ListGroupUnallocatedStudentsCommandInternal(val smallGroupSet: SmallGroupS
 			}
 }
 
-trait ListGroupUnallocatedStudentsCommandState {
+trait ListSmallGroupSetUnallocatedStudentsCommandState {
 	val user: CurrentUser
 	val smallGroupSet: SmallGroupSet
 }
 
-trait ListGroupUnallocatedStudentsCommandPermissions extends RequiresPermissionsChecking {
-	self:ListGroupUnallocatedStudentsCommandState =>
+trait ListSmallGroupSetUnallocatedStudentsCommandPermissions extends RequiresPermissionsChecking {
+	self:ListSmallGroupSetUnallocatedStudentsCommandState =>
 		def permissionsCheck(p: PermissionsChecking) {
 			p.PermissionCheck(Permissions.SmallGroups.ReadMembership, smallGroupSet)
 		}
