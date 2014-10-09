@@ -128,6 +128,19 @@ class SortModulesCommandTest extends TestBase with Mockito {
 		errors.hasErrors should be (false)
 	}}
 
+	@Test def validateLeaveRootDeptEmpty { new ValidationFixture {
+		val errors = new BindException(command, "command")
+
+		// Move remaining root department modules into in-ug
+		command.mapping.get(ugDepartment).add(mod1)
+		command.mapping.get(ugDepartment).add(mod2)
+		command.mapping.remove(department)
+
+		command.validate(errors)
+
+		errors.hasErrors should be (false)
+	}}
+
 	@Test def rejectUnrelatedDepartments { new ValidationFixture {
 		command.mapping.put(Fixtures.department("other"), JArrayList())
 
