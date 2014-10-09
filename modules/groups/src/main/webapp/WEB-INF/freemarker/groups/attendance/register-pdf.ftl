@@ -57,7 +57,7 @@
 <body>
 	<div id="header">
 		<img src="/static/images/logo-full-black.png" style="width: 30%; float: right;" />
-		<h1>${set.module.code?upper_case} <span class="hide-smallscreen">${set.nameWithoutModulePrefix}</span>, ${group.name}</h1>
+		<h1>${set.module.code?upper_case} ${set.nameWithoutModulePrefix}, ${group.name}</h1>
 		<h2 class="sgt-event-details">${event.day.name} <@fmt.time event.startTime /> - <@fmt.time event.endTime />, Week ${week} (${formattedEventDate})</h2>
 
 		<br style="clear: both;" />
