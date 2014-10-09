@@ -27,13 +27,13 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
 
 	protected def renderPath: String
 
-	protected def render(set: SmallGroupSet, cmd: EditSmallGroupSetMembershipCommand) = {
-		Mav(renderPath,
+	protected def render(set: SmallGroupSet, cmd: EditSmallGroupSetMembershipCommand, model: Map[String, _] = Map()) = {
+		Mav(renderPath, model ++ Map(
 			"department" -> cmd.module.adminDepartment,
 			"module" -> cmd.module,
 			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
-			"assessmentGroups" -> cmd.assessmentGroups)
+			"assessmentGroups" -> cmd.assessmentGroups))
 			.crumbs(Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 
@@ -56,7 +56,10 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
 			cmd.apply()
 		}
 
-		form(set, cmd)
+		cmd.copyGroupsFrom(set)
+		cmd.afterBind()
+
+		render(set, cmd, Map("saved" -> true))
 	}
 
 	protected def submit(cmd: EditSmallGroupSetMembershipCommand, errors: Errors, set: SmallGroupSet, route: String) = {

@@ -208,6 +208,7 @@
 								<include>jquery-radiocontrolled.js</include>
 								<include>jquery-scrolltofixed.js</include>
 								<include>jquery-fixheaderfooter.js</include>
+								<include>jquery.are-you-sure.js</include>
 								<include>userpicker.js</include>
 								<include>flexipicker.js</include>
 								<include>ajax-popup.js</include>

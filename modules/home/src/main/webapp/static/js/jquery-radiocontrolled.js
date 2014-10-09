@@ -90,6 +90,10 @@ jQuery.fn.radioControlled = function(options) {
 
 	// Set initial state
 	$controllers.trigger('change');
+
+	// Reset dirty state
+	$controllers.closest('form.dirty-check').trigger('reinitialize.areYouSure');
+
 	fireEvents = true;
 }
 

@@ -12,6 +12,7 @@
 <@script "/static/js/jquery-radiocontrolled.js" />
 <@script "/static/js/jquery-scrolltofixed.js" />
 <@script "/static/js/jquery-fixheaderfooter.js" />
+<@script "/static/js/jquery.are-you-sure.js" />
 <@script "/static/js/userpicker.js" />
 <@script "/static/js/flexipicker.js" />
 <@script "/static/js/ajax-popup.js" />

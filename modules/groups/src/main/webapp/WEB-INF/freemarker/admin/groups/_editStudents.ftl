@@ -81,11 +81,7 @@
 
 	<script type="text/javascript">
 		jQuery(function ($) {
-			$('#action-submit').closest('form').on('click', '.update-only', function() {
-				$('#action-submit').val('update');
-				$('#action-submit').closest('form').find('[type=submit]').attr('disabled', true);
-				$(this).attr('disabled', false);
-			});
+
 		});
 	</script>
 </#escape>

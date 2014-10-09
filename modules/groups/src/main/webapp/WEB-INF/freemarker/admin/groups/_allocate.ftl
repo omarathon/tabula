@@ -76,7 +76,7 @@
 				</@spring.hasBindErrors>
 
 				<div class="fix-area">
-					<@f.form method="post" action="${submitUrl}" commandName="command" cssClass="allocateStudentsToGroupsCommand">
+					<@f.form method="post" action="${submitUrl}" commandName="command" class="form-horizontal allocateStudentsToGroupsCommand dirty-check">
 						<div class="tabula-dnd"
 							 data-item-name="student"
 							 data-text-selector=".name h6"
@@ -201,7 +201,7 @@
 
 						<div class="submit-buttons fix-footer">
 							<input type="submit" class="btn btn-primary" value="Save">
-							<a href="<@routes.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>" class="btn">Cancel</a>
+							<a href="<@routes.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>" class="btn dirty-check-ignore">Cancel</a>
 						</div>
 					</@f.form>
 				</div>
@@ -209,7 +209,7 @@
 
 			<div class="tab-pane" id="allocategroups-tab2">
 
-				<@f.form method="post" enctype="multipart/form-data" action="${submitUrl}" commandName="command">
+				<@f.form method="post" enctype="multipart/form-data" action="${submitUrl}" commandName="command" cssClass="dirty-check">
 
 					<p>You can allocate students to groups using a spreadsheet.</p>
 

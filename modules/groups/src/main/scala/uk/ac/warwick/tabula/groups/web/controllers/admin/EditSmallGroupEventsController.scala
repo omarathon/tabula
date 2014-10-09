@@ -25,8 +25,8 @@ abstract class AbstractEditSmallGroupEventsController extends GroupsController {
 
 	protected def renderPath: String
 
-	protected def render(set: SmallGroupSet) = {
-		Mav(renderPath, "groups" -> set.groups.asScala.sorted).crumbs(Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+	protected def render(set: SmallGroupSet, model: Map[String, _] = Map()) = {
+		Mav(renderPath, model ++ Map("groups" -> set.groups.asScala.sorted)).crumbs(Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 
 	@RequestMapping
@@ -44,8 +44,19 @@ abstract class AbstractEditSmallGroupEventsController extends GroupsController {
 		}
 	}
 
-	@RequestMapping(method = Array(POST), params=Array("action!=refresh"))
+	@RequestMapping(method = Array(POST), params=Array("action=update"))
 	def save(
+		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
+		errors: Errors,
+		@PathVariable("smallGroupSet") set: SmallGroupSet
+	) = {
+		if (!errors.hasErrors) cmd.apply()
+
+		render(set, Map("saved" -> true))
+	}
+
+	@RequestMapping(method = Array(POST), params=Array("action!=refresh", "action!=update"))
+	def saveAndExit(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
@@ -59,28 +70,28 @@ class CreateSmallGroupSetAddEventsController extends AbstractEditSmallGroupEvent
 
 	override val renderPath = "admin/groups/newevents"
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndEditProperties, "action!=refresh"))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndEditProperties, "action!=refresh", "action!=update"))
 	def saveAndEditProperties(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
 	) = submit(cmd, errors, set, Routes.admin.create(set))
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddStudents, "action!=refresh"))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddStudents, "action!=refresh", "action!=update"))
 	def saveAndAddStudents(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
 	) = submit(cmd, errors, set, Routes.admin.createAddStudents(set))
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddGroups, "action!=refresh"))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddGroups, "action!=refresh", "action!=update"))
 	def saveAndAddGroups(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
 	) = submit(cmd, errors, set, Routes.admin.createAddGroups(set))
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAllocate, "action!=refresh"))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAllocate, "action!=refresh", "action!=update"))
 	def saveAndAddAllocate(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
@@ -95,28 +106,28 @@ class EditSmallGroupSetAddEventsController extends AbstractEditSmallGroupEventsC
 
 	override val renderPath = "admin/groups/editevents"
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndEditProperties, "action!=refresh"))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndEditProperties, "action!=refresh", "action!=update"))
 	def saveAndEditProperties(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
 	) = submit(cmd, errors, set, Routes.admin.edit(set))
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddStudents, "action!=refresh"))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddStudents, "action!=refresh", "action!=update"))
 	def saveAndAddStudents(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
 	) = submit(cmd, errors, set, Routes.admin.editAddStudents(set))
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddGroups, "action!=refresh"))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddGroups, "action!=refresh", "action!=update"))
 	def saveAndAddGroups(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
 	) = submit(cmd, errors, set, Routes.admin.editAddGroups(set))
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAllocate, "action!=refresh"))
+	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAllocate, "action!=refresh", "action!=update"))
 	def saveAndAddAllocate(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,

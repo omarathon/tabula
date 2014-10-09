@@ -207,9 +207,12 @@ Method calls (after initialising):
             self.randomise();
         });
 
-        // trigger resize event for headerfooter fixing plugin
         $el.on('changed.tabula', function() {
+			// trigger resize event for headerfooter fixing plugin
             $(window).resize();
+
+			// Trigger dirty checking rescan
+			$(this).closest('form.dirty-check').trigger('rescan.areYouSure');
         });
 
         // Automatically disabled/enabled buttons
@@ -442,6 +445,8 @@ Method calls (after initialising):
         // Initialise all dependent widgets.
         $el.find(sortables).trigger('changed.tabula');
 
+		// Reinitialize dirty checking
+		$el.closest('form.dirty-check').trigger('reinitialize.areYouSure');
     };
 
     // The jQ plugin itself is a basic adapter around DragAndDrop
