@@ -3,9 +3,9 @@
 	<div id="profile-modal" class="modal fade profile-subset"></div>
 
 	<h1>
-		Attendance for ${set.name}
+		Attendance for ${set.module.code?upper_case} <span class="hide-smallscreen">${set.nameWithoutModulePrefix}</span>
 	</h1>
-	
+
 	<@components.single_groupset_attendance set groups />
 	
 	<#-- List of students modal -->
