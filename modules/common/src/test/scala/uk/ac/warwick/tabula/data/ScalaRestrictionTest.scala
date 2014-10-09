@@ -1,9 +1,6 @@
 package uk.ac.warwick.tabula.data
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.commands.FiltersStudentsBase
-import uk.ac.warwick.tabula.services.ProfileServiceComponent
-import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.{Fixtures, AcademicYear, TestBase}
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 
