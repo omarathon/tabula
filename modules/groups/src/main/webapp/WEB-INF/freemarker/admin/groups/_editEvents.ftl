@@ -1,5 +1,5 @@
 <#escape x as x?html>
-<input type="hidden" name="action" value="submit" id="action-input">
+<input type="hidden" name="action" value="submit" id="action-submit">
 
 <fieldset>
 	<@form.row>
@@ -38,17 +38,13 @@
 
 <script type="text/javascript">
 	jQuery(function($) {
-		$('#action-input').closest('form').on('click', '.update-only', function() {
-			$('#action-input').val('update');
-		});
-
 		<#-- controller detects action=refresh and does a bind without submit -->
 		$('.modal.refresh-form').on('hide', function(e) {
 			// Ignore events that are something ELSE hiding and being propagated up!
 			if (!$(e.target).hasClass('modal')) return;
 
-			$('#action-input').val('refresh');
-			$('#action-input').closest('form').submit();
+			$('#action-submit').val('refresh');
+			$('#action-submit').closest('form').submit();
 		});
 
 		// Open the first modal with an error in it

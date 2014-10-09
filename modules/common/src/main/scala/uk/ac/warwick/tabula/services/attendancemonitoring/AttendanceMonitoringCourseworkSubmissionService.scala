@@ -74,14 +74,14 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
 	}
 
 	private def isAssignmentOrModuleValidForPoint(point: AttendanceMonitoringPoint, assignment: Assignment) = {
-		if (point.assignmentSubmissionIsSpecificAssignments)
-			point.assignmentSubmissionAssignments.contains(assignment)
-		else
-			point.assignmentSubmissionModules.contains(assignment.module)
+		point.assignmentSubmissionType == AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Any ||
+			point.assignmentSubmissionType == AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments && point.assignmentSubmissionAssignments.contains(assignment) ||
+			point.assignmentSubmissionType == AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules && point.assignmentSubmissionModules.contains(assignment.module)
+
 	}
 
 	private def checkQuantity(point: AttendanceMonitoringPoint, submission: Submission, studentMember: StudentMember): Boolean = {
-		if (point.assignmentSubmissionIsSpecificAssignments) {
+		if (point.assignmentSubmissionType == AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments) {
 			if (point.assignmentSubmissionIsDisjunction) {
 				true
 			} else {
@@ -94,20 +94,28 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
 				point.assignmentSubmissionAssignments.forall(a => submissions.exists(s => s.assignment == a))
 			}
 		} else {
-			if (point.assignmentSubmissionQuantity == 1) {
-				true
+			def allSubmissions = {
+				assignmentService.getSubmissionsForAssignmentsBetweenDates(
+					studentMember.universityId,
+					point.startDate.toDateTimeAtStartOfDay,
+					point.endDate.plusDays(1).toDateTimeAtStartOfDay
+				).filterNot(_.isLate).filterNot(
+					s => s.assignment == submission.assignment
+				) ++ Seq(submission)
+			}
+			if (point.assignmentSubmissionType == AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules) {
+				if (point.assignmentSubmissionTypeModulesQuantity == 1) {
+					true
+				} else {
+					val submissions = allSubmissions.filter(s => point.assignmentSubmissionModules.contains(s.assignment.module))
+					submissions.size >= point.assignmentSubmissionTypeModulesQuantity
+				}
 			} else {
-				val submissions = (
-					assignmentService.getSubmissionsForAssignmentsBetweenDates(
-						studentMember.universityId,
-						point.startDate.toDateTimeAtStartOfDay,
-						point.endDate.plusDays(1).toDateTimeAtStartOfDay
-					).filterNot(_.isLate).filterNot(
-						s => s.assignment == submission.assignment
-					) ++ Seq(submission)
-				).filter(s => point.assignmentSubmissionModules.contains(s.assignment.module))
-
-				submissions.size >= point.assignmentSubmissionQuantity
+				if (point.assignmentSubmissionTypeAnyQuantity == 1) {
+					true
+				} else {
+					allSubmissions.size >= point.assignmentSubmissionTypeAnyQuantity
+				}
 			}
 		}
 	}

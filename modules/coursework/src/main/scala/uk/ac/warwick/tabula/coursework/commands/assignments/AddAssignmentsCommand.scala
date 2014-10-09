@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.{ SelfValidating, Description, Command }
-import scala.annotation.tailrec
+import scala.collection.JavaConverters._
+import scala.collection.convert.Wrappers.MapWrapper
 import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.{LazyMaps, LazyLists}
@@ -83,13 +83,13 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	// All the possible assignments, prepopulated from SITS.
 	var assignmentItems: JList[AssignmentItem] = LazyLists.create()
 
-	private def includedItems = assignmentItems.filter { _.include }
+	private def includedItems = assignmentItems.asScala.filter { _.include }
 
 	/**
 	 * options which are referenced by key by AssignmentItem.optionsId
 	 */
 	var optionsMap: JMap[String, SharedAssignmentPropertiesForm] =
-		LazyMaps.create { key: String => new SharedAssignmentPropertiesForm }
+		new MapWrapper(LazyMaps.create { key: String => new SharedAssignmentPropertiesForm })
 
 	// just for prepopulating the date form fields.
 	@WithinYears(maxPast = 3, maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
@@ -105,7 +105,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 
 	override def applyInternal() {
 		transactional() {
-			for (item <- assignmentItems if item.include) {
+			for (item <- assignmentItems.asScala if item.include) {
 				val assignment = new Assignment()
 				assignment.addDefaultFields()
 				assignment.academicYear = academicYear
@@ -176,16 +176,16 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 		// check that all the selected items are part of this department. Otherwise you could post the IDs of
 		// unrelated assignments and do stuff with them.
 		// Use .exists() to see if there is at least one with a matching department code OR parent department code
-		@tailrec
-		def validDepartmentCodes(acc: Seq[String], d: Department): Seq[String] = {
-			if (!d.hasParent) acc :+ d.code
-			else validDepartmentCodes(acc :+ d.code, d.parent)
-		}
+		def modules(d: Department): Seq[Module] = d.modules.asScala
+		def modulesIncludingSubDepartments(d: Department): Seq[Module] =
+			modules(d) ++ d.children.asScala.flatMap(modulesIncludingSubDepartments)
 
-		val deptCodes = validDepartmentCodes(Nil, department)
+		val deptModules =
+			if (includeSubDepartments) modulesIncludingSubDepartments(department)
+			else modules(department)
 
-		val hasInvalidAssignments = assignmentItems.exists { (item) =>
-			!deptCodes.exists(_ == item.upstreamAssignment.departmentCode.toLowerCase)
+		val hasInvalidAssignments = assignmentItems.asScala.exists { (item) =>
+			!deptModules.contains(item.upstreamAssignment.module)
 		}
 
 		if (hasInvalidAssignments) {
@@ -241,7 +241,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 
 	def afterBind() {
 		// re-attach UpstreamAssessmentGroup objects based on the other properties
-		for (item <- assignmentItems if item.assessmentGroup == null) {
+		for (item <- assignmentItems.asScala if item.assessmentGroup == null) {
 			item.assessmentGroup = assignmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
 				this.academicYear = academicYear
 				this.occurrence = item.occurrence
@@ -263,7 +263,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 			item.assessmentGroup = Some(assessmentGroup)
 			item
 		}
-	}
+	}.asJava
 
 	/**
 	 * Determines whether this component should have its checkbox checked

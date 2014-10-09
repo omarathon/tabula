@@ -117,28 +117,34 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 		else throw new IllegalArgumentException
 	}
 
+	// Returns None if marking is completed for the current workflow or if no workflow exists - i.e. not in the middle of a workflow
 	def getCurrentWorkflowFeedbackPosition: Option[FeedbackPosition] = {
-		val workflow = assignment.markingWorkflow
-		if (workflow.hasThirdMarker && thirdMarkerFeedback != null && thirdMarkerFeedback.state == MarkingState.MarkingCompleted)
-			None
-		else if (workflow.hasThirdMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
-			Some(ThirdFeedback)
-		else if (workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
-			None
-		else if (workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.Rejected)
-			Some(FirstFeedback)
-		else if (workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
-			Some(SecondFeedback)
-		else if (firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
-			None
-		else Some(FirstFeedback)
+
+		def markingCompleted(workflow: MarkingWorkflow) = {
+			(workflow.hasThirdMarker && thirdMarkerFeedback != null && thirdMarkerFeedback.state == MarkingState.MarkingCompleted) ||
+			(!workflow.hasThirdMarker && workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted) ||
+			(!workflow.hasThirdMarker && !workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
+		}
+
+		Option(assignment.markingWorkflow)
+			.filterNot(markingCompleted)
+			.map { workflow =>
+				if (workflow.hasThirdMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
+					ThirdFeedback
+				else if (workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.Rejected)
+					FirstFeedback
+				else if (workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
+					SecondFeedback
+				else
+					FirstFeedback
+			}
 	}
 
 	def getCurrentWorkflowFeedback: Option[MarkerFeedback] = {
 		getCurrentWorkflowFeedbackPosition match {
-			case Some(FirstFeedback) => Some(retrieveFirstMarkerFeedback)
-			case Some(SecondFeedback) => Some(retrieveSecondMarkerFeedback)
-			case Some(ThirdFeedback) => Some(retrieveThirdMarkerFeedback)
+			case Some(FirstFeedback) => Option(retrieveFirstMarkerFeedback)
+			case Some(SecondFeedback) => Option(retrieveSecondMarkerFeedback)
+			case Some(ThirdFeedback) => Option(retrieveThirdMarkerFeedback)
 			case _ => None
 		}
 	}
@@ -186,8 +192,8 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 		})
 	}
 
-	// if the feedback has no marks or attachments then it is a placeholder for marker feedback
-	def isPlaceholder = !(hasMarkOrGrade || hasAttachments || hasOnlineFeedback)
+	// The current workflow position isn't None so this must be a placeholder
+	def isPlaceholder = getCurrentWorkflowFeedbackPosition.isDefined
 
 	def hasMarkOrGrade = hasMark || hasGrade
 
@@ -250,9 +256,9 @@ object Feedback {
 object FeedbackPosition {
 	def getPreviousPosition(position: Option[FeedbackPosition]): Option[FeedbackPosition] = position match {
 		case Some(FirstFeedback) => None
-		case Some(SecondFeedback) => Some(FirstFeedback)
-		case Some(ThirdFeedback) => Some(SecondFeedback)
-		case None => Some(ThirdFeedback)
+		case Some(SecondFeedback) => Option(FirstFeedback)
+		case Some(ThirdFeedback) => Option(SecondFeedback)
+		case None => Option(ThirdFeedback)
 	}
 }
 

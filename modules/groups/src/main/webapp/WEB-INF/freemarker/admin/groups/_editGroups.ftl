@@ -198,6 +198,7 @@
 
 					$name.val('').focus();
 					$button.attr('disabled', 'disabled');
+					$button.closest('form.dirty-check').trigger('rescan.areYouSure');
 				});
 
 				$(document.body).on('click', 'button[data-toggle="remove"]', function() {
@@ -222,6 +223,7 @@
 
 						$group.find('label').attr('for', $name.attr('id')).text((index + offset + 1) + '.');
 					});
+					$button.closest('form.dirty-check').trigger('rescan.areYouSure');
 				});
 
 				// Set up radios to enable/disable max students per group field
@@ -262,12 +264,14 @@
 					$deleteButton.on('click', function() {
 						$this.addClass('deleted');
 						$hiddenField.val('true');
+						$this.closest('form.dirty-check').trigger('checkform.areYouSure');
 						handleButtonDisplay();
 					});
 
 					$undoButton.on('click', function() {
 						$this.removeClass('deleted');
 						$hiddenField.val('false');
+						$this.closest('form.dirty-check').trigger('checkform.areYouSure');
 						handleButtonDisplay();
 					});
 				});

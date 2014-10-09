@@ -77,7 +77,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 		val upstreamAssignment = new AssessmentComponent
 		upstreamAssignment.assessmentGroup = "A"
-		upstreamAssignment.departmentCode = "XXX"
 		upstreamAssignment.sequence = "A"
 		upstreamAssignment.moduleCode = "XXX101-30"
 		upstreamAssignment.module = module1
@@ -204,14 +203,15 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		department.showStudentName = true
 		transactional() {
 			session.newCriteria[AssessmentComponent]
-				.add(Restrictions.in("departmentCode", JList("xxx","XXX")))
+				.createAlias("module", "module")
+				.add(Restrictions.ilike("module.code", "xxx%"))
 				.list
-				.foreach { ua => session.delete(ua); }
+				.foreach { ua => session.delete(ua) }
 
 			session.newCriteria[UpstreamAssessmentGroup]
 				.add(Restrictions.like("moduleCode", "XXX%"))
 				.seq
-				.foreach { uag => session.delete(uag); }
+				.foreach { uag => session.delete(uag) }
 		}
 
 		// Import a new, better department

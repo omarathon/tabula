@@ -7,16 +7,16 @@
 
 
     <div class="modal-header">
-        <h3>Notify</h3>
+        <h3>Publish</h3>
     </div>
 
     <#-- Have to manually remove the 20px margin from the form (added by default bootstrap form styles)-->
     <@f.form method="post" action="${submitAction}" commandName="releaseGroupSetCommand" cssClass="form-horizonatal form-tiny" style="margin-bottom:0">
 
     <div class="modal-body">
-        <p>Notify these people that ${smallGroupSet.name} allocations are ready to view in Tabula:</p>
+        <p>Publish allocations for ${smallGroupSet.name} so they are shown in Tabula to:</p>
         <@form.row "notifyStudents">
-            <label class='checkbox ${smallGroupSet.releasedToStudents?string("disabled use-tooltip' title='Already notified'","'") }>
+            <label class='checkbox ${smallGroupSet.releasedToStudents?string("disabled use-tooltip' title='Already published'","'") }>
                 <@f.checkbox path="notifyStudents" disabled="${smallGroupSet.releasedToStudents?string}"/>Students
             </label>
         </@form.row>
@@ -29,13 +29,12 @@
         <@form.row "sendEmail">
         	<@form.label checkbox=true>
 				<@f.checkbox path="sendEmail" />
-				Send an email with this notification
+				Send an email about this and any future changes to group allocation
         	</@form.label>
         </@form.row>
-        <p>They will automatically be notified of any further changes made to these groups.</p>
     </div>
     <div class="modal-footer">
-    <input class="btn btn-info" type="submit" value="Notify"> <a class="btn cancel-link" data-dismiss="modal" href="#">Cancel</a>
+    <input class="btn btn-info" type="submit" value="Publish"> <a class="btn cancel-link" data-dismiss="modal" href="#">Cancel</a>
     </div>
     </@f.form>
 </#escape>

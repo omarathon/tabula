@@ -25,6 +25,10 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 		dept.modules.add(module1)
 		dept.modules.add(module2)
 
+		session.save(dept)
+		session.save(module1)
+		session.save(module2)
+
 		val assignment1 = Fixtures.assignment("assignment 1")
 		assignment1.assignmentMembershipService = assignmentMembershipService
 
@@ -50,7 +54,7 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 		assignment2AC.moduleCode = "in101-10"
 		assignment2AC.assessmentGroup = "A"
 		assignment2AC.sequence = "A02"
-		assignment2AC.departmentCode = "in"
+		assignment2AC.module = module1
 		assignment2AC.assessmentType = AssessmentType.Assignment
 		assignment2AC.name = "Cool Essay"
 
@@ -70,12 +74,15 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 		assignment2.assessmentGroups.add(assessmentGroup2)
 		assignment2.academicYear = new AcademicYear(2010)
 
+		session.save(assignment2AC)
+		session.save(upstreamGroup2)
+
 		// assessment component enrolment for assignment 3 AND manually enrolled
 		val assignment3AC = new AssessmentComponent
 		assignment3AC.moduleCode = "in102-10"
 		assignment3AC.assessmentGroup = "A"
 		assignment3AC.sequence = "A01"
-		assignment3AC.departmentCode = "in"
+		assignment3AC.module = module2
 		assignment3AC.assessmentType = AssessmentType.Assignment
 		assignment3AC.name = "Cool Stuff"
 
@@ -95,6 +102,9 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 		assignment3.assessmentGroups.add(assessmentGroup3)
 		assignment3.academicYear = new AcademicYear(2010)
 		assignment3.members.knownType.addUserId("cuscav")
+
+		session.save(assignment3AC)
+		session.save(upstreamGroup3)
 
 		// assessment component enrolment for assignment 4 but manually excluded
 		val assessmentGroup4 = new AssessmentGroup

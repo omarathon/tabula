@@ -26,11 +26,19 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 
 		val student = Fixtures.student("1234")
 
+		val module1 = Fixtures.module("aa101")
+		module1.id = "aa101"
+		val module2 = Fixtures.module("aa202")
+		module2.id = "aa202"
+		mockModuleAndDepartmentService.getModuleById(module1.id) returns Option(module1)
+		mockModuleAndDepartmentService.getModuleById(module2.id) returns Option(module2)
+
 		val assignment = new Assignment
 		assignment.openDate = new DateTime().minusDays(1)
 		assignment.closeDate = new DateTime().plusMonths(1)
 		assignment.openEnded = false
 		assignment.academicYear = AcademicYear(2014)
+		assignment.module = module1
 
 		val submission = new Submission
 		submission.userId = student.userId
@@ -42,23 +50,17 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 
 		mockProfileService.getMemberByUniversityId(student.universityId) returns Option(student)
 
-		val module1 = Fixtures.module("aa101")
-		module1.id = "aa101"
-		val module2 = Fixtures.module("aa202")
-		module2.id = "aa202"
-		mockModuleAndDepartmentService.getModuleById(module1.id) returns Option(module1)
-		mockModuleAndDepartmentService.getModuleById(module2.id) returns Option(module2)
-
 		mockAssignmentService.getAssignmentById(assignment.id) returns Option(assignment)
 
 		val assignmentPoint = new AttendanceMonitoringPoint
 		assignmentPoint.startDate = assignment.closeDate.minusDays(2).toLocalDate
 		assignmentPoint.endDate = assignment.closeDate.plusDays(1).toLocalDate
 		assignmentPoint.pointType = AttendanceMonitoringPointType.AssignmentSubmission
-		assignmentPoint.assignmentSubmissionQuantity = 1
+		assignmentPoint.assignmentSubmissionTypeModulesQuantity = 1
 		assignmentPoint.assignmentSubmissionIsDisjunction = true
 		assignmentPoint.assignmentSubmissionAssignments = Seq(new Assignment, assignment)
-		assignmentPoint.assignmentSubmissionModules = Seq()
+		assignmentPoint.assignmentSubmissionModules = Seq(module1)
+		assignmentPoint.assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments
 
 		assignmentPoint.assignmentService = mockAssignmentService
 		assignmentPoint.moduleAndDepartmentService = mockModuleAndDepartmentService
@@ -68,6 +70,12 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 		mockAttendanceMonitoringService.studentAlreadyReportedThisTerm(student, assignmentPoint) returns false
 		mockAttendanceMonitoringService.setAttendance(student, Map(assignmentPoint -> AttendanceState.Attended), student.userId, autocreated = true) returns
 			Seq(Fixtures.attendanceMonitoringCheckpoint(assignmentPoint, student, AttendanceState.Attended))
+
+		mockAssignmentService.getSubmissionsForAssignmentsBetweenDates(
+			student.universityId,
+			assignmentPoint.startDate.toDateTimeAtStartOfDay,
+			assignmentPoint.endDate.plusDays(1).toDateTimeAtStartOfDay
+		) returns Seq()
 	}
 
 	@Test
@@ -80,7 +88,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 
 	@Test
 	def updatesCheckpointSpecificModule() { new Fixture {
-		assignmentPoint.assignmentSubmissionIsSpecificAssignments = false
+		assignmentPoint.assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules
 		assignmentPoint.assignmentSubmissionModules = Seq(module1)
 		assignment.module = module1
 
@@ -117,7 +125,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 	@Test
 	def wrongModule() { new Fixture {
 		assignmentPoint.assignmentSubmissionModules = Seq(module2)
-		assignmentPoint.assignmentSubmissionIsSpecificAssignments = false
+		assignmentPoint.assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules
 		service.getCheckpoints(submission).size should be (0)
 	}}
 
@@ -140,8 +148,15 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 
 	@Test
 	def notEnough() { new Fixture {
-		assignmentPoint.assignmentSubmissionQuantity = 2
-		assignmentPoint.assignmentSubmissionIsSpecificAssignments = false
+		assignmentPoint.assignmentSubmissionTypeModulesQuantity = 2
+		assignmentPoint.assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules
+		service.getCheckpoints(submission).size should be (0)
+	}}
+
+	@Test
+	def notEnoughForAny() { new Fixture {
+		assignmentPoint.assignmentSubmissionTypeAnyQuantity = 2
+		assignmentPoint.assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Any
 		service.getCheckpoints(submission).size should be (0)
 	}}
 

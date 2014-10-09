@@ -327,7 +327,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		val checkpointMap = getCheckpoints(points, student, withFlush = true)
 		val allCheckpoints = checkpointMap.map(_._2)
 
-		val unrecorded = points.diff(checkpointMap.keys.toSeq).count(_.startDate.isBefore(DateTime.now.toLocalDate))
+		val unrecorded = points.diff(checkpointMap.keys.toSeq).count(_.endDate.isBefore(DateTime.now.toLocalDate))
 		val missedUnauthorised = allCheckpoints.count(_.state == AttendanceState.MissedUnauthorised)
 		val missedAuthorised = allCheckpoints.count(_.state == AttendanceState.MissedAuthorised)
 		val attended = allCheckpoints.count(_.state == AttendanceState.Attended)

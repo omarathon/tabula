@@ -76,9 +76,10 @@ class AssignmentMembershipServiceTest extends TestBase with Mockito {
 
 		service.isStudentMember(user, Nil, Some(notInGroup)) should be (false)
 
-		val upstream1 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment("in", 101))
-		val upstream2 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment("in", 101))
-		val upstream3 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment("in", 101))
+		val module = Fixtures.module("in101")
+		val upstream1 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment(module, 101))
+		val upstream2 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment(module, 101))
+		val upstream3 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment(module, 101))
 		val upstreams = Seq(upstream1, upstream2, upstream3)
 
 		service.isStudentMember(user, upstreams, None) should be (false)

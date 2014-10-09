@@ -136,8 +136,9 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		new Fixture {
 			validator.validateTypeAssignmentSubmission(
 				errors,
-				isSpecificAssignments = true,
-				assignmentSubmissionQuantity = 0,
+				assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments,
+				assignmentSubmissionTypeAnyQuantity = 0,
+				assignmentSubmissionTypeModulesQuantity = 0,
 				assignmentSubmissionModules = JHashSet(),
 				assignmentSubmissionAssignments = JHashSet()
 			)
@@ -146,8 +147,9 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		new Fixture {
 			validator.validateTypeAssignmentSubmission(
 				errors,
-				isSpecificAssignments = true,
-				assignmentSubmissionQuantity = 0,
+				assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments,
+				assignmentSubmissionTypeAnyQuantity = 0,
+				assignmentSubmissionTypeModulesQuantity = 0,
 				assignmentSubmissionModules = JHashSet(),
 				assignmentSubmissionAssignments = JHashSet(Fixtures.assignment("assignment"))
 			)
@@ -156,25 +158,52 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		new Fixture {
 			validator.validateTypeAssignmentSubmission(
 				errors,
-				isSpecificAssignments = false,
-				assignmentSubmissionQuantity = 0,
+				assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules,
+				assignmentSubmissionTypeAnyQuantity = 0,
+				assignmentSubmissionTypeModulesQuantity = 0,
 				assignmentSubmissionModules = JHashSet(),
 				assignmentSubmissionAssignments = JHashSet()
 			)
-			errors.hasFieldErrors("assignmentSubmissionQuantity") should be {true}
+			errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {true}
 			errors.hasFieldErrors("assignmentSubmissionModules") should be {true}
 		}
 		new Fixture {
 			validator.validateTypeAssignmentSubmission(
 				errors,
-				isSpecificAssignments = false,
-				assignmentSubmissionQuantity = 1,
+				assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules,
+				assignmentSubmissionTypeAnyQuantity = 0,
+				assignmentSubmissionTypeModulesQuantity = 1,
 				assignmentSubmissionModules = JHashSet(Fixtures.module("a100")),
 				assignmentSubmissionAssignments = JHashSet()
 			)
-			errors.hasFieldErrors("assignmentSubmissionQuantity") should be {false}
+			errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {false}
 			errors.hasFieldErrors("assignmentSubmissionModules") should be {false}
 		}
+		new Fixture {
+			validator.validateTypeAssignmentSubmission(
+				errors,
+				assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Any,
+				assignmentSubmissionTypeAnyQuantity = 0,
+				assignmentSubmissionTypeModulesQuantity = 0,
+				assignmentSubmissionModules = JHashSet(),
+				assignmentSubmissionAssignments = JHashSet()
+			)
+			errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {false}
+			errors.hasFieldErrors("assignmentSubmissionTypeAnyQuantity") should be {true}
+		}
+		new Fixture {
+			validator.validateTypeAssignmentSubmission(
+				errors,
+				assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Any,
+				assignmentSubmissionTypeAnyQuantity = 1,
+				assignmentSubmissionTypeModulesQuantity = 0,
+				assignmentSubmissionModules = JHashSet(),
+				assignmentSubmissionAssignments = JHashSet()
+			)
+			errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {false}
+			errors.hasFieldErrors("assignmentSubmissionTypeAnyQuantity") should be {false}
+		}
+
 	}
 
 	@Test
@@ -379,12 +408,12 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		existingAssignmentPoint.assignmentService.getAssignmentById("1") returns Option(assignment)
 
 		new Fixture {
-			existingAssignmentPoint.assignmentSubmissionIsSpecificAssignments = true
+			existingAssignmentPoint.assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments
 			validator.validateOverlapAssignment(
 				errors,
 				existingAssignmentPoint.startDate,
 				existingAssignmentPoint.endDate,
-				isSpecificAssignments = true,
+				assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments,
 				assignmentSubmissionModules = Set(module).asJava,
 				assignmentSubmissionAssignments = Set(assignment).asJava,
 				isAssignmentSubmissionDisjunction = true,
@@ -395,12 +424,12 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		}
 
 		new Fixture {
-			existingAssignmentPoint.assignmentSubmissionIsSpecificAssignments = false
+			existingAssignmentPoint.assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules
 			validator.validateOverlapAssignment(
 				errors,
 				existingAssignmentPoint.startDate,
 				existingAssignmentPoint.endDate,
-				isSpecificAssignments = false,
+				assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules,
 				assignmentSubmissionModules = Set(module).asJava,
 				assignmentSubmissionAssignments = Set(assignment).asJava,
 				isAssignmentSubmissionDisjunction = true,
@@ -411,12 +440,12 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		}
 
 		new Fixture {
-			existingAssignmentPoint.assignmentSubmissionIsSpecificAssignments = true
+			existingAssignmentPoint.assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments
 			validator.validateOverlapAssignment(
 				errors,
 				existingAssignmentPoint.startDate,
 				existingAssignmentPoint.endDate,
-				isSpecificAssignments = false,
+				assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules,
 				assignmentSubmissionModules = Set(module).asJava,
 				assignmentSubmissionAssignments = Set(assignment).asJava,
 				isAssignmentSubmissionDisjunction = true,

@@ -108,24 +108,33 @@ trait AttendanceMonitoringPointValidation {
 
 	def validateTypeAssignmentSubmission(
 		errors: Errors,
-		isSpecificAssignments: Boolean,
-		assignmentSubmissionQuantity: JInteger,
+		assignmentSubmissionType: String,
+		assignmentSubmissionTypeAnyQuantity: JInteger,
+		assignmentSubmissionTypeModulesQuantity: JInteger,
 		assignmentSubmissionModules: JSet[Module],
 		assignmentSubmissionAssignments: JSet[Assignment]
 	) {
 
-		if (isSpecificAssignments) {
-			if (assignmentSubmissionAssignments == null || assignmentSubmissionAssignments.isEmpty) {
-				errors.rejectValue("assignmentSubmissionAssignments", "attendanceMonitoringPoint.assingmentSubmissionType.assignmentSubmissionAssignments.empty")
-			}
-		} else {
-			if (assignmentSubmissionQuantity < 1) {
-				errors.rejectValue("assignmentSubmissionQuantity", "attendanceMonitoringPoint.pointType.quantity")
-			}
+		assignmentSubmissionType match {
+			case AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Any =>
+				if (assignmentSubmissionTypeAnyQuantity == null || assignmentSubmissionTypeAnyQuantity < 1) {
+					errors.rejectValue("assignmentSubmissionTypeAnyQuantity", "attendanceMonitoringPoint.pointType.quantity")
+				}
+			case AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules =>
+				if (assignmentSubmissionTypeModulesQuantity == null || assignmentSubmissionTypeModulesQuantity < 1) {
+					errors.rejectValue("assignmentSubmissionTypeModulesQuantity", "attendanceMonitoringPoint.pointType.quantity")
+				}
 
-			if (assignmentSubmissionModules == null || assignmentSubmissionModules.isEmpty) {
-				errors.rejectValue("assignmentSubmissionModules", "attendanceMonitoringPoint.assingmentSubmissionType.assignmentSubmissionModules.empty")
-			}
+				if (assignmentSubmissionModules == null || assignmentSubmissionModules.isEmpty) {
+					errors.rejectValue("assignmentSubmissionModules", "attendanceMonitoringPoint.assingmentSubmissionType.assignmentSubmissionModules.empty")
+				}
+			case AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments =>
+				if (assignmentSubmissionAssignments == null || assignmentSubmissionAssignments.isEmpty) {
+					errors.rejectValue("assignmentSubmissionAssignments", "attendanceMonitoringPoint.assingmentSubmissionType.assignmentSubmissionAssignments.empty")
+				}
+			case _ =>
+				errors.rejectValue("assignmentSubmissionType", "attendanceMonitoringPoint.assingmentSubmissionType.assingmentSubmissionType.invalid")
+
 		}
 	}
 	
@@ -323,7 +332,7 @@ trait AttendanceMonitoringPointValidation {
 		errors: Errors,
 		startDate: LocalDate,
 		endDate: LocalDate,
-		isSpecificAssignments: Boolean,
+		assignmentSubmissionType: String,
 		assignmentSubmissionModules: JSet[Module],
 		assignmentSubmissionAssignments: JSet[Assignment],
 		isAssignmentSubmissionDisjunction: Boolean,
@@ -333,7 +342,7 @@ trait AttendanceMonitoringPointValidation {
 		if (allPoints.exists(point =>
 			point.pointType == AttendanceMonitoringPointType.AssignmentSubmission &&
 				datesOverlap(point, startDate, endDate) &&
-				assignmentOverlap(point, isSpecificAssignments, assignmentSubmissionModules, assignmentSubmissionAssignments, isAssignmentSubmissionDisjunction)
+				assignmentOverlap(point, assignmentSubmissionType, assignmentSubmissionModules, assignmentSubmissionAssignments, isAssignmentSubmissionDisjunction)
 		)) {
 			errors.reject("attendanceMonitoringPoint.overlaps")
 		}
@@ -343,7 +352,7 @@ trait AttendanceMonitoringPointValidation {
 		errors: Errors,
 		startDate: LocalDate,
 		endDate: LocalDate,
-		isSpecificAssignments: Boolean,
+		assignmentSubmissionType: String,
 		assignmentSubmissionModules: JSet[Module],
 		assignmentSubmissionAssignments: JSet[Assignment],
 		isAssignmentSubmissionDisjunction: Boolean,
@@ -354,7 +363,7 @@ trait AttendanceMonitoringPointValidation {
 			point.id != p.id &&
 				p.pointType == AttendanceMonitoringPointType.AssignmentSubmission &&
 				datesOverlap(p, startDate, endDate) &&
-				assignmentOverlap(p, isSpecificAssignments, assignmentSubmissionModules, assignmentSubmissionAssignments, isAssignmentSubmissionDisjunction)
+				assignmentOverlap(p, assignmentSubmissionType, assignmentSubmissionModules, assignmentSubmissionAssignments, isAssignmentSubmissionDisjunction)
 		)) {
 			errors.reject("attendanceMonitoringPoint.overlaps")
 			true
@@ -368,18 +377,28 @@ trait AttendanceMonitoringPointValidation {
 
 	private def assignmentOverlap(
 		point: AttendanceMonitoringPoint,
-		isSpecificAssignments: Boolean,
+		assignmentSubmissionType: String,
 		assignmentSubmissionModules: JSet[Module],
 		assignmentSubmissionAssignments: JSet[Assignment],
 		isAssignmentSubmissionDisjunction: Boolean
 	): Boolean = {
-		if (isSpecificAssignments && point.assignmentSubmissionIsSpecificAssignments) {
-			isAssignmentSubmissionDisjunction && point.assignmentSubmissionIsDisjunction && point.assignmentSubmissionAssignments.exists(assignmentSubmissionAssignments.asScala.contains) ||
-				!isAssignmentSubmissionDisjunction && !point.assignmentSubmissionIsDisjunction && point.assignmentSubmissionAssignments.forall(assignmentSubmissionAssignments.asScala.contains)
-		} else if (!isSpecificAssignments && !point.assignmentSubmissionIsSpecificAssignments) {
+		if (
+			assignmentSubmissionType == AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Any ||
+			point.assignmentSubmissionType == AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Any
+		) {
+			// 'Any' overlaps with everything
+			true
+		} else if (assignmentSubmissionType != point.assignmentSubmissionType) {
+			// Different types never overlap (if not 'Any')
+			false
+		} else if (assignmentSubmissionType == AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules) {
+			// Is the same module in each point
 			point.assignmentSubmissionModules.exists(assignmentSubmissionModules.asScala.contains)
 		} else {
-			false
+			// Are they both 'any' and have the same assignment in each
+			isAssignmentSubmissionDisjunction && point.assignmentSubmissionIsDisjunction && point.assignmentSubmissionAssignments.exists(assignmentSubmissionAssignments.asScala.contains) ||
+			// Or are they both 'all' and have identical assignments
+				!isAssignmentSubmissionDisjunction && !point.assignmentSubmissionIsDisjunction && point.assignmentSubmissionAssignments.forall(assignmentSubmissionAssignments.asScala.contains)
 		}
 	}
 }

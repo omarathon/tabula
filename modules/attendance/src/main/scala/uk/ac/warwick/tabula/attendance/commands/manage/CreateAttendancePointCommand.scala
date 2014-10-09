@@ -121,8 +121,9 @@ trait CreateAttendancePointValidation extends SelfValidating with AttendanceMoni
 				case AttendanceMonitoringPointType.AssignmentSubmission =>
 					validateTypeAssignmentSubmission(
 						errors,
-						isSpecificAssignments,
-						assignmentSubmissionQuantity,
+						assignmentSubmissionType,
+						assignmentSubmissionTypeAnyQuantity,
+						assignmentSubmissionTypeModulesQuantity,
 						assignmentSubmissionModules,
 						assignmentSubmissionAssignments
 					)
@@ -130,7 +131,7 @@ trait CreateAttendancePointValidation extends SelfValidating with AttendanceMoni
 						errors,
 						startDate,
 						endDate,
-						isSpecificAssignments,
+						assignmentSubmissionType,
 						assignmentSubmissionModules,
 						assignmentSubmissionAssignments,
 						isAssignmentSubmissionDisjunction,

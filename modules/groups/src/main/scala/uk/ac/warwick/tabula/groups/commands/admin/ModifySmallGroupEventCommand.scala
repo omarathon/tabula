@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.JavaConverters._
 import ModifySmallGroupEventCommand._
+import uk.ac.warwick.tabula.validators.UsercodeListValidator
 
 object ModifySmallGroupEventCommand {
 	type Command = Appliable[SmallGroupEvent] with SelfValidating with BindListener with ModifySmallGroupEventCommandState
@@ -201,6 +202,9 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 			if (startTime == null) errors.rejectValue("startTime", "smallGroupEvent.startTime.NotEmpty")
 
 			if (endTime == null) errors.rejectValue("endTime", "smallGroupEvent.endTime.NotEmpty")
+		} else {
+			val tutorsValidator = new UsercodeListValidator(tutors, "tutors")
+			tutorsValidator.validate(errors)
 		}
 
 		if (endTime != null && endTime.isBefore(startTime)) errors.rejectValue("endTime", "smallGroupEvent.endTime.beforeStartTime")

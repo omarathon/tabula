@@ -37,8 +37,9 @@ trait AttendancePointCommandState {
 	var smallGroupEventModules: JSet[Module] = JHashSet()
 	var isAnySmallGroupEventModules: Boolean = true
 
-	var isSpecificAssignments: Boolean = true
-	var assignmentSubmissionQuantity: JInteger = 1
+	var assignmentSubmissionType: String = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Any
+	var assignmentSubmissionTypeAnyQuantity: JInteger = 1
+	var assignmentSubmissionTypeModulesQuantity: JInteger = 1
 	var assignmentSubmissionModules: JSet[Module] = JHashSet()
 	var assignmentSubmissionAssignments: JSet[Assignment] = JHashSet()
 	var isAssignmentSubmissionDisjunction: Boolean = false
@@ -75,8 +76,9 @@ trait AttendancePointCommandState {
 					}
 				}
 			case AttendanceMonitoringPointType.AssignmentSubmission =>
-				point.assignmentSubmissionIsSpecificAssignments = isSpecificAssignments
-				point.assignmentSubmissionQuantity = assignmentSubmissionQuantity.toInt
+				point.assignmentSubmissionType = assignmentSubmissionType
+				point.assignmentSubmissionTypeAnyQuantity = Option(assignmentSubmissionTypeAnyQuantity).getOrElse(JInteger(Option(0))).toInt
+				point.assignmentSubmissionTypeModulesQuantity = Option(assignmentSubmissionTypeModulesQuantity).getOrElse(JInteger(Option(0))).toInt
 				point.assignmentSubmissionModules = assignmentSubmissionModules match {
 					case modules: JSet[Module] => modules.asScala.toSeq
 					case _ => Seq()
@@ -116,8 +118,9 @@ trait AttendancePointCommandState {
 				smallGroupEventQuantityAll = point.smallGroupEventQuantity == 0
 				isAnySmallGroupEventModules = point.smallGroupEventModules.size == 0
 			case AttendanceMonitoringPointType.AssignmentSubmission =>
-				isSpecificAssignments = point.assignmentSubmissionIsSpecificAssignments
-				assignmentSubmissionQuantity = point.assignmentSubmissionQuantity
+				assignmentSubmissionType = point.assignmentSubmissionType
+				assignmentSubmissionTypeAnyQuantity = point.assignmentSubmissionTypeAnyQuantity
+				assignmentSubmissionTypeModulesQuantity = point.assignmentSubmissionTypeModulesQuantity
 				assignmentSubmissionModules.clear()
 				assignmentSubmissionModules.addAll(point.assignmentSubmissionModules.asJava)
 				assignmentSubmissionAssignments.clear()

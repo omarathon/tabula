@@ -43,7 +43,8 @@ class SmallGroupEventAttendanceReminderNotification
 
 	override def title = s"${event.group.groupSet.format.description} attendance needs recording"
 
-	final def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/groups/small_group_event_attendance_reminder_notification.ftl"
+	@transient
+	final val FreemarkerTemplate = "/WEB-INF/freemarker/notifications/groups/small_group_event_attendance_reminder_notification.ftl"
 
 	override def content: FreemarkerModel = FreemarkerModel(FreemarkerTemplate, Map(
 		"occurrence" -> item.entity,
@@ -55,14 +56,7 @@ class SmallGroupEventAttendanceReminderNotification
 		if (event.group.students.isEmpty || event.group.students.users.map(_.getWarwickId).forall(attendanceIds.contains)) {
 			Seq()
 		} else {
-			if (event.tutors.size > 0) {
-				event.tutors.users
-			} else {
-				val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
-				moduleAndDepartmentService.getModuleByCode(event.group.groupSet.module.code)
-					.getOrElse(throw new IllegalStateException("No such module"))
-					.managers.users
-			}
+			event.tutors.users // TAB-2830 If there are no tutors, just don't send the email
 		}
 	}
 }

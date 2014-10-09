@@ -61,7 +61,7 @@ abstract class SetMonitoringCheckpointForStudentCommand(
 					}.map{case (_, checkpoint) => describeCheckpoint(checkpoint)}.getOrElse("")
 				}
 			}.toMap}.toMap
-		attendanceNotes = monitoringPointService.findAttendanceNotes(Seq(student), Seq(monitoringPoint)).groupBy(_.student).map{
+		attendanceNotes = monitoringPointService.findAttendanceNotes(Seq(student), Seq(monitoringPoint)).groupBy(_.student).collect { case (s: StudentMember, pointMap) => (s, pointMap) }.map {
 			case (s, pointMap) => s -> pointMap.groupBy(_.point).map{
 				case (point, notes) => point -> notes.head
 			}

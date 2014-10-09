@@ -60,8 +60,7 @@ trait SortModulesCommandValidation extends SelfValidating {
 
 	def validate(errors: Errors) {
 		val mappingMap = mapping.asScala
-		val allDepartments = mappingMap.keys
-		val currentModules = allDepartments.map(_.modules.asScala).flatten.toList
+		val currentModules = departments.map(_.modules.asScala).flatten.toList
 		val newModules = mappingMap.values.map(_.asScala).flatten.toList.filter(validModule)
 
 		/* These next errors shouldn't really be possible from the UI unless there's a bug. */

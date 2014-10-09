@@ -23,7 +23,6 @@ class AssessmentComponentCreationFixtureCommandInternal extends CommandInternal[
 		ac.module = moduleAndDepartmentService.getModuleByCode(ac.moduleCodeBasic.toLowerCase()).get
 		ac.assessmentGroup = assessmentGroup
 		ac.sequence = sequence
-		ac.departmentCode = departmentCode.maybeText.getOrElse("[A-Za-z]+".r.findFirstIn(moduleCode).get)
 		ac.assessmentType = assessmentType
 		ac.name = name
 
