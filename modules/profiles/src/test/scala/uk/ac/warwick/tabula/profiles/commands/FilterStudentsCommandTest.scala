@@ -126,7 +126,6 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 			Seq(Seq(mod2, mod3), Seq(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
 		).get
 
-/*		val modRestriction = new ScalaRestriction(Restrictions.in("moduleRegistration.module", JArrayList(mod2, mod3))) */
 		modRestriction.alias("mostSignificantCourse", "studentCourseDetails")
 		modRestriction.alias("studentCourseDetails._moduleRegistrations", "moduleRegistration")
 
