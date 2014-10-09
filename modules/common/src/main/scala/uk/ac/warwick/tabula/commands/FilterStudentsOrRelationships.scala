@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.commands
 
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.{ScalaRestriction, ScalaOrder}
 import uk.ac.warwick.tabula.services.ProfileServiceComponent
 import scala.collection.JavaConverters._
@@ -44,8 +46,9 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 		getAliasPaths("studentCourseYearDetails") : _*
 	)
 
-	def registeredModulesRestriction: Option[ScalaRestriction] = inIfNotEmpty(
-		"moduleRegistration.module", modules.asScala,
+	def registeredModulesRestriction: Option[ScalaRestriction] = inIfNotEmptyMultipleProperties(
+		Seq("moduleRegistration.module", "moduleRegistration.academicYear"),
+		Seq(modules.asScala, Seq(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
 		getAliasPaths("moduleRegistration") : _*
 	)
 
