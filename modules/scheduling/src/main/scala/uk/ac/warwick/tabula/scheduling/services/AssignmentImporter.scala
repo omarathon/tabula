@@ -158,7 +158,6 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 			a.sequence = "A01"
 			a.name = "Coursework"
 			a.assessmentGroup = "A"
-			a.departmentCode = d.code.toUpperCase
 			a.assessmentType = AssessmentType.Assignment
 			a
 		}
@@ -304,7 +303,6 @@ object AssignmentImporter {
 			a.sequence = rs.getString("seq")
 			a.name = rs.getString("name")
 			a.assessmentGroup = rs.getString("assessment_group")
-			a.departmentCode = rs.getString("department_code")
 			a.assessmentType = AssessmentType(rs.getString("assessment_code"))
 			a
 		}

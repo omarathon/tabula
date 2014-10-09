@@ -77,7 +77,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 		val upstreamAssignment = new AssessmentComponent
 		upstreamAssignment.assessmentGroup = "A"
-		upstreamAssignment.departmentCode = "XXX"
 		upstreamAssignment.sequence = "A"
 		upstreamAssignment.moduleCode = "XXX101-30"
 		upstreamAssignment.module = module1

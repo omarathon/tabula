@@ -222,8 +222,11 @@ class AssignmentServiceTest extends PersistenceTestBase {
 	}
 
 	@Transactional @Test def updateAssessmentComponent() {
+		val module = new Module("ch101")
+		session.save(module)
+
 		val upstream = new AssessmentComponent
-		upstream.departmentCode = "ch"
+		upstream.module = module
 		upstream.moduleCode = "ch101"
 		upstream.sequence = "A01"
 		upstream.assessmentGroup = "A"
@@ -233,7 +236,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.save(upstream)
 
 		val upstream2 = new AssessmentComponent
-		upstream2.departmentCode = "ch"
+		upstream2.module = module
 		upstream2.moduleCode = "ch101"
 		upstream2.sequence = "A01"
 		upstream2.assessmentGroup = "A"
@@ -353,8 +356,11 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.save(group)
 		session.flush()
 
+		val module = new Module("la155")
+		session.save(module)
+
 		val ua = new AssessmentComponent
-		ua.departmentCode = "LA"
+		ua.module = module
 		ua.moduleCode = "LA155-10"
 		ua.sequence = "A01"
 		ua.assessmentGroup = "A"
@@ -384,8 +390,25 @@ class AssignmentServiceTest extends PersistenceTestBase {
 	}
 
 	@Test def upstreamAssignments() = transactional { tx =>
+		val chemistryDept = Fixtures.department("chem") // dept code irrelephant
+		val chemistryModule = Fixtures.module("ch101")
+		chemistryDept.modules.add(chemistryModule)
+
+		session.save(chemistryDept)
+		session.save(chemistryModule)
+
+		val lawDept = Fixtures.department("law") // dept code irrelephant
+		val lawModule1 = Fixtures.module("la101")
+		val lawModule2 = Fixtures.module("la102")
+		lawDept.modules.add(lawModule1)
+		lawDept.modules.add(lawModule2)
+
+		session.save(lawDept)
+		session.save(lawModule1)
+		session.save(lawModule2)
+
 		val ua1 = new AssessmentComponent
-		ua1.departmentCode = "CH"
+		ua1.module = chemistryModule
 		ua1.moduleCode = "CH101-10"
 		ua1.sequence = "A01"
 		ua1.assessmentGroup = "A"
@@ -393,7 +416,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		ua1.name = "Egg plants"
 
 		val ua2 = new AssessmentComponent
-		ua2.departmentCode = "CH"
+		ua2.module = chemistryModule
 		ua2.moduleCode = "CH101-20"
 		ua2.sequence = "A02"
 		ua2.assessmentGroup = "A"
@@ -401,7 +424,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		ua2.name = "Egg plants"
 
 		val ua3 = new AssessmentComponent
-		ua3.departmentCode = "LA"
+		ua3.module = lawModule1
 		ua3.moduleCode = "LA101-10"
 		ua3.sequence = "A01"
 		ua3.assessmentGroup = "A"
@@ -409,7 +432,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		ua3.name = "Egg plants"
 
 		val ua4 = new AssessmentComponent
-		ua4.departmentCode = "LA"
+		ua4.module = lawModule1
 		ua4.moduleCode = "LA101-10"
 		ua4.sequence = "A02"
 		ua4.assessmentGroup = "B"
@@ -430,28 +453,6 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.getAssessmentComponents(Fixtures.module("ch101")) should be (Seq(ua1, ua2))
 		assignmentMembershipService.getAssessmentComponents(Fixtures.module("la101")) should be (Seq(ua3))
 		assignmentMembershipService.getAssessmentComponents(Fixtures.module("cs101")) should be (Seq())
-
-		val chemistryDept = Fixtures.department("chem") // dept code irrelephant
-		val chemistryModule = Fixtures.module("ch101")
-		chemistryDept.modules.add(chemistryModule)
-
-		session.save(chemistryDept)
-		session.save(chemistryModule)
-
-		val lawDept = Fixtures.department("law") // dept code irrelephant
-		val lawModule1 = Fixtures.module("la101")
-		val lawModule2 = Fixtures.module("la102")
-		lawDept.modules.add(lawModule1)
-		lawDept.modules.add(lawModule2)
-
-		session.save(lawDept)
-		session.save(lawModule1)
-		session.save(lawModule2)
-
-		ua1.module = chemistryModule
-		ua2.module = chemistryModule
-		ua3.module = lawModule1
-		ua4.module = lawModule1
 
 		assignmentMembershipService.save(ua1) should be (ua1)
 		assignmentMembershipService.save(ua2) should be (ua2)
@@ -477,6 +478,13 @@ class AssignmentServiceTest extends PersistenceTestBase {
 	}
 
 	@Test def assessmentGroups() = transactional { tx =>
+		val assignment = newDeepAssignment("ch101")
+		val module = assignment.module
+		val department = module.adminDepartment
+
+		session.save(department)
+		session.save(module)
+
 		val upstreamGroup = new UpstreamAssessmentGroup
 		upstreamGroup.moduleCode = "ch101-10"
 		upstreamGroup.occurrence = "A"
@@ -487,7 +495,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.save(upstreamGroup)
 
 		val upstreamAssignment = new AssessmentComponent
-		upstreamAssignment.departmentCode = "ch"
+		upstreamAssignment.module = module
 		upstreamAssignment.moduleCode = "ch101-10"
 		upstreamAssignment.sequence = "A01"
 		upstreamAssignment.assessmentGroup = "A"
@@ -496,11 +504,6 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 		assignmentMembershipService.save(upstreamAssignment) should be (upstreamAssignment)
 
-		val assignment = newDeepAssignment("ch101")
-		val department = assignment.module.adminDepartment
-
-		session.save(department)
-		session.save(assignment.module)
 		assignmentService.save(assignment)
 
 		val group = new AssessmentGroup
@@ -625,7 +628,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentService.save(assignment2)
 
 		val up1 = new AssessmentComponent
-		up1.departmentCode = "ch"
+		up1.module = assignment1.module
 		up1.moduleCode = "ch101"
 		up1.sequence = "A01"
 		up1.assessmentGroup = "A"
@@ -635,7 +638,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val upstream1 = assignmentMembershipService.save(up1)
 
 		val up2 = new AssessmentComponent
-		up2.departmentCode = "ch"
+		up2.module = assignment1.module
 		up2.moduleCode = "ch101"
 		up2.sequence = "A02"
 		up2.assessmentGroup = "B"
@@ -645,7 +648,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val upstream2 = assignmentMembershipService.save(up2)
 
 		val up3 = new AssessmentComponent
-		up3.departmentCode = "ch"
+		up3.module = assignment1.module
 		up3.moduleCode = "ch101"
 		up3.sequence = "A03"
 		up3.assessmentGroup = "C"
