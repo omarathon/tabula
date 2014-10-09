@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.{FeaturesComponent, AutowiringFeaturesComponent, CurrentUser, ItemNotFoundException}
-import org.joda.time.DateTime
+import org.joda.time.{LocalDateTime, DateTime}
 import RecordAttendanceCommand._
 
 object RecordAttendanceCommand {
@@ -32,6 +32,7 @@ object RecordAttendanceCommand {
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringProfileServiceComponent
+			with TermAwareWeekToDateConverterComponent
 			with AutowiringTermServiceComponent
 			with AutowiringMonitoringPointGroupProfileServiceComponent
 			with AutowiringAttendanceMonitoringEventAttendanceServiceComponent
@@ -225,13 +226,13 @@ trait RecordAttendanceState {
 }
 
 trait SmallGroupEventInFutureCheck {
-	self: RecordAttendanceState with TermServiceComponent =>
+	self: RecordAttendanceState with WeekToDateConverterComponent =>
 	
 	lazy val isFutureEvent = {
-		val academicYear = event.group.groupSet.academicYear
-		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, academicYear)
-		
-		currentAcademicWeek < week
+		// Get the actual end date of the event in this week
+		weekToDateConverter.toLocalDatetime(week, event.day, event.startTime, event.group.groupSet.academicYear).map { eventDateTime =>
+			eventDateTime.isAfter(LocalDateTime.now())
+		}.getOrElse(false)
 	}
 }
 

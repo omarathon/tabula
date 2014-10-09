@@ -3,15 +3,15 @@ package uk.ac.warwick.tabula.groups.commands
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence
 
 object AttendanceNoteAttachmentCommand {
-	def apply(student: StudentMember, occurrence: SmallGroupEventOccurrence, user: CurrentUser) =
-		new AttendanceNoteAttachmentCommand(student, occurrence, user)
+	def apply(member: Member, occurrence: SmallGroupEventOccurrence, user: CurrentUser) =
+		new AttendanceNoteAttachmentCommand(member, occurrence, user)
 		with ComposableCommand[Option[RenderableFile]]
 		with ApplyWithCallback[Option[RenderableFile]]
 		with AutowiringSmallGroupServiceComponent
@@ -21,13 +21,13 @@ object AttendanceNoteAttachmentCommand {
 		with AttendanceNoteAttachmentDescription
 }
 
-class AttendanceNoteAttachmentCommand(val student: StudentMember, val occurrence: SmallGroupEventOccurrence, val user: CurrentUser)
+class AttendanceNoteAttachmentCommand(val member: Member, val occurrence: SmallGroupEventOccurrence, val user: CurrentUser)
 	extends CommandInternal[Option[RenderableFile]] with HasCallback[Option[RenderableFile]] {
 
 	self: SmallGroupServiceComponent =>
 
 	def applyInternal() = {
-		val result = smallGroupService.getAttendanceNote(student.universityId, occurrence).flatMap{ note =>
+		val result = smallGroupService.getAttendanceNote(member.universityId, occurrence).flatMap{ note =>
 			Option(note.attachment).map{ attachment =>
 				new RenderableAttachment(attachment)
 			}
@@ -43,7 +43,7 @@ trait AttendanceNoteAttachmentPermissions extends RequiresPermissionsChecking wi
 	self: AttendanceNoteCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.SmallGroupEvents.ViewRegister, student)
+		p.PermissionCheck(Permissions.SmallGroupEvents.ViewRegister, member)
 	}
 }
 
@@ -53,7 +53,7 @@ trait AttendanceNoteAttachmentDescription extends Describable[Option[RenderableF
 	override lazy val eventName = "DownloadAttendanceNoteAttachment"
 
 	override def describe(d: Description) {
-		d.studentIds(Seq(student.universityId))
+		d.studentIds(Seq(member.universityId))
 		d.smallGroupEventOccurrence(occurrence)
 	}
 }

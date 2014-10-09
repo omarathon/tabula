@@ -15,7 +15,7 @@ abstract class AttendanceNote extends GeneratedId with FormattedHtml {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "student_id")
-	var student: StudentMember = _
+	var student: Member = _
 
 	var updatedDate: DateTime = _
 
