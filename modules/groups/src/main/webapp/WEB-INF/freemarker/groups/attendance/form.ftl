@@ -39,7 +39,7 @@
 	<div class="fix-area">
 		<h1>Record attendance</h1>
 		<h4><span class="muted">for</span>
-			${command.event.group.groupSet.name},
+			${command.event.group.groupSet.module.code?upper_case}<span class="hide-smallscreen"> ${command.event.group.groupSet.nameWithoutModulePrefix}</span>,
 			${command.event.group.name}</h4>
 
 		<div id="print-modal" class="modal hide fade">
