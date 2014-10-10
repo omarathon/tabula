@@ -305,7 +305,7 @@
 						</#if>
 					</#list>
 
-					<div class="fix-footer submit-buttons">
+					<div class="submit-buttons">
 						<div class="pull-right">
 							<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
 							<a class="btn" href="${returnTo}">Cancel</a>
