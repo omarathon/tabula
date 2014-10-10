@@ -149,6 +149,12 @@
 											</div>
 										</div>
 									</div>
+									<#if command.unallocatedPermWithdrawnCount gt 0>
+										<p>There <@fmt.p number=command.unallocatedPermWithdrawnCount singular="is" plural="are" shownumber=false />
+											<@fmt.p command.unallocatedPermWithdrawnCount "unallocated student" /> who
+											<@fmt.p number=command.unallocatedPermWithdrawnCount singular="is" plural="are" shownumber=false />
+											permanently withdrawn and so cannot be allocated.</p>
+									</#if>
 								</div>
 								<div class="span2">
 								<#-- I, for one, welcome our new jumbo icon overlords -->

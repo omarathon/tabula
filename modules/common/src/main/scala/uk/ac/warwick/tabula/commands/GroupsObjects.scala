@@ -17,6 +17,8 @@ trait GroupsObjects[A >: Null, B >: Null] extends PopulateOnForm {
 	
 	var unallocated: JList[A] = LazyLists.create { () => null } // grower, not a shower
 
+	var unallocatedPermWithdrawnCount: Int = 0
+
 	def populate(): Unit
 	def sort(): Unit
 }

@@ -149,6 +149,7 @@ trait PopulateAllocateStudentsToGroupsCommand extends PopulateOnForm {
 
 		unallocated.clear()
 		unallocated.addAll(removePermanentlyWithdrawn(set.unallocatedStudents).asJava)
+		unallocatedPermWithdrawnCount = set.unallocatedStudents.distinct.size - unallocated.size
 	}
 
 	def removePermanentlyWithdrawn(users: Seq[User]) = {
