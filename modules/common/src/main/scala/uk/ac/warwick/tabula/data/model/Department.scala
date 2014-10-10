@@ -194,7 +194,6 @@ class Department extends GeneratedId
 		extensionManagers.copyFrom(other.extensionManagers)
 	}
 
-	// If hibernate sets owners to null, make a new empty usergroup
 	override def postLoad {
 		ensureSettings
 	}

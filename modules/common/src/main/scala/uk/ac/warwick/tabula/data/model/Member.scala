@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
+
 import scala.collection.JavaConverters._
 import javax.persistence._
 import javax.persistence.CascadeType._
@@ -31,11 +33,16 @@ import org.hibernate.annotations.Filter
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringCheckpointTotal
+import Member.Settings
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
 	final val ActiveOnlyFilter = "activeOnly"
 	final val FreshOnlyFilter = "freshMemberOnly"
+
+	object Settings {
+		val PhotoOptOut = "photoOptOut"
+	}
 }
 
 /**
@@ -62,7 +69,15 @@ object Member {
 		name="userType",
 		discriminatorType=DiscriminatorType.STRING
 )
-abstract class Member extends MemberProperties with ToString with HibernateVersioned with PermissionsTarget with Logging with Serializable {
+abstract class Member
+	extends MemberProperties
+		with HasSettings
+		with PostLoadBehaviour
+		with ToString
+		with HibernateVersioned
+		with PermissionsTarget
+		with Logging
+		with Serializable {
 
 	@transient
 	var profileService = Wire[ProfileService with StaffAssistantsHelpers]
@@ -139,6 +154,13 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	@ForeignKey(name="none")
 	@BatchSize(size=200)
 	var grantedRoles:JList[MemberGrantedRole] = JArrayList()
+
+	override def postLoad {
+		ensureSettings
+	}
+
+	def photoOptOut = getBooleanSetting(Settings.PhotoOptOut, default = false)
+	def photoOptOut_=(optOut: Boolean) { settings += (Settings.PhotoOptOut -> optOut) }
 
 	def asSsoUser = {
 		val u = new User
@@ -447,7 +469,10 @@ trait MemberProperties extends StringId {
 
 	@OneToOne(fetch = FetchType.LAZY, cascade=Array(ALL))
 	@JoinColumn(name = "PHOTO_ID")
-	var photo: FileAttachment = _
+	var _photo: FileAttachment = _
+
+	def photo = if (photoOptOut) null else _photo
+	def photo_=(attachment: FileAttachment) { _photo = attachment }
 
 	var inUseFlag: String = _
 
@@ -477,6 +502,7 @@ trait MemberProperties extends StringId {
 	var timetableHash: String = _
 
 	def phoneNumberPermissions: Seq[Permission]
+	def photoOptOut: Boolean
 
 }
 

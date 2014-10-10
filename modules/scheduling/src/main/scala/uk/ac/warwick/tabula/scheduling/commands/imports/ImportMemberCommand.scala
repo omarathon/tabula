@@ -131,7 +131,7 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 
 	private def copyPhotoIfModified(property: String, photoOption: () => Option[Array[Byte]], memberBean: BeanWrapper): Boolean = {
 		val memberLastUpdated = memberBean.getPropertyValue("lastUpdatedDate").asInstanceOf[DateTime]
-		val existingPhoto = memberBean.getPropertyValue("photo").asInstanceOf[FileAttachment]
+		val existingPhoto = memberBean.getPropertyValue("_photo").asInstanceOf[FileAttachment]
 
 		/*
 		 * We copy the photo if:
@@ -140,7 +140,10 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 		 * - There is no last updated date from Membership; or
 		 * - The last updated date for the Member is before or on the same day as the last updated date from Membership
 		 */
-		val fetchPhoto = if (existingPhoto == null || !existingPhoto.hasData) {
+		val fetchPhoto = if (memberBean.getPropertyValue("photoOptOut").asInstanceOf[Boolean]) {
+			logger.info(s"Not fetching photo for $universityId as they have opted out")
+			false
+		} else if (existingPhoto == null || !existingPhoto.hasData) {
 			logger.info(s"Fetching photo for $universityId as we have no existing photo stored")
 			true
 		} else if (memberLastUpdated == null) {
@@ -185,6 +188,8 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 		fileDao.savePermanent(photo)
 		photo
 	}
+
+	override def photoOptOut = false
 
 }
 
