@@ -51,8 +51,11 @@
 		</div>
 	</div>
 
-
-	<div class="tabbable">
+	<#assign defaultView = "gadget" />
+	<#if user?? && userSetting('profilesDefaultView')?has_content>
+		<#assign defaultView = userSetting('profilesDefaultView') />
+	</#if>
+	<div class="tabbable" data-default-view="${defaultView}">
 
 	<#assign showTimetablePane=features.personalTimetables
 		&& can.do("Profiles.Read.Timetable", profile)
