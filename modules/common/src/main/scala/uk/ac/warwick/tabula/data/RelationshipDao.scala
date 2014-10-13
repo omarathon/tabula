@@ -272,7 +272,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]=
 		if (relationshipType == null) Nil
 		else session.newQuery[StudentMember]("""
-			select distinct student
+			select student
 			from
 				StudentCourseDetails scd
 			where
@@ -286,7 +286,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 																				 """)
 			.setEntity("department", department)
 			.setEntity("relationshipType", relationshipType)
-			.seq
+			.seq.distinct
 
 
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number =
