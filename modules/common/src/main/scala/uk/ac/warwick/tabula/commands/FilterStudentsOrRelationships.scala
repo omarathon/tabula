@@ -46,7 +46,6 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 		getAliasPaths("studentCourseYearDetails") : _*
 	)
 
-	//Seq(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 	def registeredModulesRestriction(year: AcademicYear): Option[ScalaRestriction] = inIfNotEmptyMultipleProperties(
 		Seq("moduleRegistration.module", "moduleRegistration.academicYear"),
 		Seq(modules.asScala, Seq(year)),
