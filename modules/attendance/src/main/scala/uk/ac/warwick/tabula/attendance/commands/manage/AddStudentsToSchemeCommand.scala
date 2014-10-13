@@ -35,7 +35,7 @@ class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme,
 	self: AddStudentsToSchemeCommandState with AttendanceMonitoringServiceComponent	with ProfileServiceComponent =>
 
 	override def applyInternal() = {
-		if (linkToSits) {
+		if (doFind && linkToSits) {
 			scheme.members.staticUserIds = staticStudentIds.asScala
 			scheme.members.includedUserIds = includedStudentIds.asScala
 			scheme.members.excludedUserIds = excludedStudentIds.asScala
@@ -138,4 +138,5 @@ trait AddStudentsToSchemeCommandState {
 	var staticStudentIds: JList[String] = LazyLists.create()
 	var filterQueryString: String = ""
 	var linkToSits: Boolean = _
+	var doFind: Boolean = _
 }
