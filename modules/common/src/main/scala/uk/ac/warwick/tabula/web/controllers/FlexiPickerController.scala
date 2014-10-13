@@ -58,6 +58,8 @@ class FlexiPickerController extends BaseController {
 
 object FlexiPickerController {
 	type FlexiPickerResult = List[Map[String, String]]
+
+	val NewStarterUserTypeString = "New Starter"
 	
 	object FlexiPickerCommand {
 		def apply() = 
@@ -162,12 +164,13 @@ object FlexiPickerController {
 		private def isValidUser(user: User) =
 			user.isFoundUser && {
 				val hasUniversityIdIfNecessary = (!universityId || user.getWarwickId.hasText)
+				val isNotNewStarter = user.getUserType != NewStarterUserTypeString
 				val isTabulaMemberIfNecessary = hasUniversityIdIfNecessary && (!tabulaMembersOnly || {
 						if (universityId) profileService.getMemberByUniversityId(user.getWarwickId).isDefined
 						else profileService.getMemberByUser(user, true).isDefined
 				})
 				
-				hasUniversityIdIfNecessary && isTabulaMemberIfNecessary
+				hasUniversityIdIfNecessary && isTabulaMemberIfNecessary && isNotNewStarter
 			}
 
 		private def searchGroups: FlexiPickerResult = {
