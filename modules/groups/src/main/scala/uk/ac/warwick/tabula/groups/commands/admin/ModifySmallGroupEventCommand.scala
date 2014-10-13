@@ -262,8 +262,8 @@ trait ModifySmallGroupEventScheduledNotifications
 		smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
 
 	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = {
-		// Only generate notifications for occurrences that are in valid weeks...
-		if (occurrence.event.allWeeks.contains(occurrence.week)) {
+		// Only generate notifications for sets that collect attendance and occurrences that are in valid weeks...
+		if (occurrence.event.group.groupSet.collectAttendance && occurrence.event.allWeeks.contains(occurrence.week)) {
 			occurrence.dateTime.map(dt =>
 				// ... and have a valid date time
 				Seq(
