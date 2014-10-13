@@ -29,8 +29,8 @@ class MasqueradeCommandInternal(val user: CurrentUser) extends CommandInternal[O
 	def applyInternal() = {
 		if (action == "remove") Some(newCookie(null))
 		else userLookup.getUserByUserId(usercode) match {
-			case FoundUser(user) => Some(newCookie(usercode))
-			case NoUser(user) => None
+			case FoundUser(u) => Some(newCookie(usercode))
+			case NoUser(u) => None
 		}
 	}
 
@@ -54,16 +54,15 @@ trait MasqueradeCommandValidation extends SelfValidating {
 	def validate(errors: Errors) {
 		if (action != "remove") {
 			userLookup.getUserByUserId(usercode) match {
-				case FoundUser(u) => {
+				case FoundUser(u) =>
 					val realUser = new CurrentUser(user.realUser, user.realUser)
 
 					if (!securityService.can(realUser, Permissions.Masquerade, PermissionsTarget.Global)) {
-						profileService.getMemberByUser(u, true, false) match {
+						profileService.getMemberByUser(u, disableFilter = true, eagerLoad = false) match {
 							case Some(profile) if securityService.can(realUser, Permissions.Masquerade, profile) =>
 							case _ => errors.rejectValue("usercode", "masquerade.noPermission")
 						}
 					}
-				}
 				case NoUser(user) => errors.rejectValue("usercode", "userId.notfound")
 			}
 		}
