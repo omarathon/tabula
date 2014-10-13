@@ -51,11 +51,14 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 		val moaFT = Fixtures.modeOfAttendance("F", "FT", "Full time")
 		val moaPT = Fixtures.modeOfAttendance("P", "PT", "Part time")
+
+		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+
 	}
 
 	@Test
 	def bindLoadsNonWithdrawnStatuses() { new Fixture {
-		val command = new FilterStudentsCommand(department) with CommandTestSupport
+		val command = new FilterStudentsCommand(department, year) with CommandTestSupport
 
 		command.profileService.allSprStatuses(department) returns Seq(sprF, sprP)
 
@@ -68,7 +71,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 	@Test
 	def commandApplyDefaults() { new Fixture {
-		val command = new FilterStudentsCommand(department) with CommandTestSupport
+		val command = new FilterStudentsCommand(department, year) with CommandTestSupport
 		command.applyInternal()
 
 		val expectedRestrictions = Seq()
@@ -84,7 +87,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 	@Test
 	def commandApplyComplicated() { new Fixture {
-		val command = new FilterStudentsCommand(department) with CommandTestSupport
+		val command = new FilterStudentsCommand(department, year) with CommandTestSupport
 
 		command.studentsPerPage = 10
 		command.page = 3
@@ -149,7 +152,8 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 	@Test
 	def commandApplyDefaultsWithAliasedSort() { new Fixture {
-		val command = new FilterStudentsCommand(department) with CommandTestSupport
+
+		val command = new FilterStudentsCommand(department, year) with CommandTestSupport
 		command.sortOrder = JArrayList(Order.desc("studentCourseYearDetails.yearOfStudy"))
 
 		command.applyInternal()

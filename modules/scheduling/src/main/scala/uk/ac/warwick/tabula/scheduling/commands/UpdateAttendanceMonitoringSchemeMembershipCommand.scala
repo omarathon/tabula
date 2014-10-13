@@ -41,12 +41,11 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 			logger.info(s"${schemesToUpdate.size} schemes need membership updating")
 
 			val studentsToUpdate = schemesToUpdate.flatMap { scheme => transactional() {
-
 				deserializeFilter(scheme.memberQuery)
 				val staticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments") {
 					profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
 						department = scheme.department,
-						restrictions = buildRestrictions(),
+						restrictions = buildRestrictions(scheme.academicYear),
 						orders = buildOrders()
 					)
 				}

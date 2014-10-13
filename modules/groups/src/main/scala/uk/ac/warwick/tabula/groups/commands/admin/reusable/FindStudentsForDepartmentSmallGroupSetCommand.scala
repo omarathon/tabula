@@ -2,6 +2,8 @@ package uk.ac.warwick.tabula.groups.commands.admin.reusable
 
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order._
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.commands._
@@ -48,10 +50,12 @@ class FindStudentsForDepartmentSmallGroupSetCommandInternal(val department: Depa
 			FindStudentsForDepartmentSmallGroupSetCommandResult(staticStudentIds, Seq())
 		} else {
 			doFind = true
+			val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+
 			staticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments") {
 				profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
 					department = department,
-					restrictions = buildRestrictions(),
+					restrictions = buildRestrictions(year),
 					orders = buildOrders()
 				).filter(userLookup.getUserByWarwickUniId(_).isFoundUser)
 			}.asJava

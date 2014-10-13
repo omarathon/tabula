@@ -46,9 +46,10 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 		getAliasPaths("studentCourseYearDetails") : _*
 	)
 
-	def registeredModulesRestriction: Option[ScalaRestriction] = inIfNotEmptyMultipleProperties(
+	//Seq(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+	def registeredModulesRestriction(year: AcademicYear): Option[ScalaRestriction] = inIfNotEmptyMultipleProperties(
 		Seq("moduleRegistration.module", "moduleRegistration.academicYear"),
-		Seq(modules.asScala, Seq(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
+		Seq(modules.asScala, Seq(year)),
 		getAliasPaths("moduleRegistration") : _*
 	)
 
@@ -66,14 +67,14 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 		getAliasPaths("department") : _*
 	)
 
-	protected def buildRestrictions(): Seq[ScalaRestriction] = {
+	protected def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] = {
 		Seq(
 				courseTypeRestriction,
 				routeRestriction,
 				attendanceRestriction,
 				yearOfStudyRestriction,
 				sprStatusRestriction,
-				registeredModulesRestriction,
+				registeredModulesRestriction(year),
 				tier4Restriction,
 				visitingRestriction
 		).flatten

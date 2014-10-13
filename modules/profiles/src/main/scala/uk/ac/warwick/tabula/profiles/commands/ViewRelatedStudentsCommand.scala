@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.profiles.commands
 
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model._
@@ -62,7 +64,8 @@ abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val
 	self: ProfileServiceComponent =>
 
 	def applyInternal(): Seq[StudentMember] =  {
-		profileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, currentMember, buildRestrictions())
+		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		profileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, currentMember, buildRestrictions(year))
 	}
 
 	def onBind(result: BindingResult) {

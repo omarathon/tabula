@@ -61,7 +61,7 @@ abstract class ViewMonitoringPointsCommand(val department: Department, val acade
 		} else {
 			students = profileService.findAllStudentsByRestrictions(
 				department = department,
-				restrictions = buildRestrictions(),
+				restrictions = buildRestrictions(academicYear),
 				orders = buildOrders()
 			)
 		}
