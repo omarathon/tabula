@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.admin
 
+import org.joda.time.DateTime
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
@@ -21,8 +22,8 @@ class FilterStudentsController extends ProfilesController {
 	validatesSelf[SelfValidating]
 	
 	@ModelAttribute("filterStudentsCommand")
-	def command(@PathVariable department: Department, @PathVariable year: AcademicYear) =
-		FilterStudentsCommand(department, year)
+	def command(@PathVariable department: Department) =
+		FilterStudentsCommand(department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		
 	@RequestMapping
 	def filter(@Valid @ModelAttribute("filterStudentsCommand") cmd: Appliable[FilterStudentsResults], errors: Errors, @PathVariable department: Department) = {
