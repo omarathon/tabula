@@ -874,34 +874,6 @@ class AssignmentServiceTest extends PersistenceTestBase {
 	}}
 
 	@Transactional
-	@Test def countFullFeedback() {
-		val assignment = assignmentService.getAssignmentById("1").get
-		assignment.id should not be null
-
-		def createFeedback(numberOfAttachments:Int=0, mark:Option[Int]=None, grade:Option[String]=None) = {
-			val feedback = new Feedback()
-			for (i <- Range(0,numberOfAttachments)) {
-				val attachment1 = new FileAttachment()
-				feedback.addAttachment(attachment1)
-			}
-			assignment.addFeedback(feedback)
-			feedback.actualMark = mark
-			feedback.actualGrade = grade
-			feedbackService.saveOrUpdate(feedback)
-			feedback
-		}
-
-		createFeedback(numberOfAttachments=7)
-		createFeedback(mark=Some(23))
-		createFeedback(mark=Some(23), grade=Some("A"))
-		createFeedback()
-
-		// Multiple attachments shouldn't increase the count, and
-		// feedback with no attachments should be included.
-		feedbackService.countFullFeedback(assignment) should be (3)
-	}
-
-	@Transactional
 	@Test def submissionsForAssignmentsBetweenDates() {
 		val universityId = "1234"
 
