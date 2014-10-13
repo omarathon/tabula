@@ -5,8 +5,6 @@
 <script type="text/javascript">
 (function ($) {
 	$(function() {
-		$('.fix-area').fixHeaderFooter();
-
 		$('.select-all').change(function(e) {
 			$('.attendees').selectDeselectCheckboxes(this);
 		});
@@ -305,7 +303,7 @@
 						</#if>
 					</#list>
 
-					<div class="submit-buttons">
+					<div class="fix-footer submit-buttons">
 						<div class="pull-right">
 							<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
 							<a class="btn" href="${returnTo}">Cancel</a>

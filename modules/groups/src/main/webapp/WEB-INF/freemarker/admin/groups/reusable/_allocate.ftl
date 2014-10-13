@@ -222,8 +222,6 @@
 				return $('#groupslist').outerHeight();
 			});
 
-			var fixHeaderFooter = $('.fix-area').fixHeaderFooter();
-
 			$(window).scroll(function() {
 				fixHeaderFooter.fixDirectionIcon();
 				fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column

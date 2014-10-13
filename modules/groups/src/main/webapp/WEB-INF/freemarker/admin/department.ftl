@@ -321,7 +321,6 @@
 
 		<script type="text/javascript">
 			jQuery(function($) {
-				$('.fix-area').fixHeaderFooter();
 
 				var prependClearLink = function($list) {
 					if (!$list.find('input:checked').length) {
