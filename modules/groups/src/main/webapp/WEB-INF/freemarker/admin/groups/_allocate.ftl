@@ -76,7 +76,7 @@
 				</@spring.hasBindErrors>
 
 				<div class="fix-area">
-					<@f.form method="post" action="${submitUrl}" commandName="command" cssClass="allocateStudentsToGroupsCommand">
+					<@f.form method="post" action="${submitUrl}" commandName="command" class="form-horizontal allocateStudentsToGroupsCommand dirty-check">
 						<div class="tabula-dnd"
 							 data-item-name="student"
 							 data-text-selector=".name h6"
@@ -149,6 +149,12 @@
 											</div>
 										</div>
 									</div>
+									<#if command.unallocatedPermWithdrawnCount gt 0>
+										<p>There <@fmt.p number=command.unallocatedPermWithdrawnCount singular="is" plural="are" shownumber=false />
+											<@fmt.p command.unallocatedPermWithdrawnCount "unallocated student" /> who
+											<@fmt.p number=command.unallocatedPermWithdrawnCount singular="is" plural="are" shownumber=false />
+											permanently withdrawn and so cannot be allocated.</p>
+									</#if>
 								</div>
 								<div class="span2">
 								<#-- I, for one, welcome our new jumbo icon overlords -->
@@ -201,7 +207,7 @@
 
 						<div class="submit-buttons fix-footer">
 							<input type="submit" class="btn btn-primary" value="Save">
-							<a href="<@routes.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>" class="btn">Cancel</a>
+							<a href="<@routes.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>" class="btn dirty-check-ignore">Cancel</a>
 						</div>
 					</@f.form>
 				</div>
@@ -209,7 +215,7 @@
 
 			<div class="tab-pane" id="allocategroups-tab2">
 
-				<@f.form method="post" enctype="multipart/form-data" action="${submitUrl}" commandName="command">
+				<@f.form method="post" enctype="multipart/form-data" action="${submitUrl}" commandName="command" cssClass="dirty-check">
 
 					<p>You can allocate students to groups using a spreadsheet.</p>
 

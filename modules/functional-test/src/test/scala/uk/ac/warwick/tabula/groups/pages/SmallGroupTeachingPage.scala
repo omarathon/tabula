@@ -51,9 +51,8 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 	}
 
 	def goToEditGroups: EditSmallGroupSetGroupsPage = {
-
 		val propsPage = goToEditProperties
-		propsPage.submitAndAddGroups()
+		propsPage.goToEditGroups()
 
 		val groupsPage = new EditSmallGroupSetGroupsPage()
 		// HACK: the module name is the module code in uppercase in the test data. Should really pass it around separately
@@ -62,8 +61,8 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 	}
 
 	def goToEditStudents: EditSmallGroupSetStudentsPage = {
-		val groupsPage = goToEditGroups
-		groupsPage.submitAndAddStudents()
+		val propsPage = goToEditProperties
+		propsPage.goToEditStudents()
 
 		val studentsPage = new EditSmallGroupSetStudentsPage()
 		// HACK: the module name is the module code in uppercase in the test data. Should really pass it around separately
@@ -72,8 +71,8 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 	}
 
 	def goToEditEvents: EditSmallGroupSetEventsPage = {
-		val studentsPage = goToEditStudents
-		studentsPage.submitAndAddEvents()
+		val propsPage = goToEditProperties
+		propsPage.goToEditEvents()
 
 		val eventsPage = new EditSmallGroupSetEventsPage()
 		// HACK: the module name is the module code in uppercase in the test data. Should really pass it around separately
@@ -82,8 +81,8 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 	}
 
 	def goToAllocate = {
-		val eventsPage = goToEditEvents
-		eventsPage.submitAndAllocate()
+		val propsPage = goToEditProperties
+		propsPage.goToAllocate()
 
 		val allocatePage = new AllocateStudentsToGroupsPage()
 		allocatePage.isCurrentPage(moduleCode.toUpperCase())

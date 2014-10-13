@@ -71,22 +71,30 @@ class AddAssignmentsCommandTest extends AppContextTestBase {
 	
 	case class MyFixtures() {
 		val department = Fixtures.department(code="ls", name="Life Sciences")
-        val upstream1 = Fixtures.upstreamAssignment(departmentCode="ls", number=1)
-        val upstream2 = Fixtures.upstreamAssignment(departmentCode="ls", number=2)
-        val upstream3 = Fixtures.upstreamAssignment(departmentCode="ls", number=3)
-        val assessmentGroup1 = Fixtures.assessmentGroup(upstream1)
-        val assessmentGroup3 = Fixtures.assessmentGroup(upstream3)
-        val module1 = Fixtures.module(code="ls101")
-        val module3 = Fixtures.module(code="ls103")
-        
-        session.save(department)
-        session.save(upstream1)
-        session.save(upstream2)
-        session.save(upstream3)
-        session.save(assessmentGroup1)
-        session.save(assessmentGroup3)
-        session.save(module1)
-        session.save(module3)
+		val module1 = Fixtures.module(code="ls101")
+		val module2 = Fixtures.module(code="ls102")
+		val module3 = Fixtures.module(code="ls103")
+
+		val upstream1 = Fixtures.upstreamAssignment(module=module1, number=1)
+		val upstream2 = Fixtures.upstreamAssignment(module=module2, number=2)
+		val upstream3 = Fixtures.upstreamAssignment(module=module3, number=3)
+		val assessmentGroup1 = Fixtures.assessmentGroup(upstream1)
+		val assessmentGroup3 = Fixtures.assessmentGroup(upstream3)
+
+		department.modules.add(module1)
+		department.modules.add(module2)
+		department.modules.add(module3)
+
+		session.save(department)
+		session.save(module1)
+		session.save(module2)
+		session.save(module3)
+
+		session.save(upstream1)
+		session.save(upstream2)
+		session.save(upstream3)
+		session.save(assessmentGroup1)
+		session.save(assessmentGroup3)
 	}
 	
 	def item(assignment: AssessmentComponent, include: Boolean, optionsId: String, openEnded: Boolean = false) = {

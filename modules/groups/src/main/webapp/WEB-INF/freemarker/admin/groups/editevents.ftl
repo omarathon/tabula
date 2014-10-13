@@ -3,26 +3,34 @@
 	<h1>Edit small groups</h1>
 	<h4><span class="muted">for</span> <@fmt.module_name module /></h4>
 
-	<@f.form id="editEvents" method="POST" commandName="command" class="form-horizontal">
-		<@components.set_wizard false 'events' smallGroupSet />
-
-		<#assign is_edit = true />
-		<#include "_editEvents.ftl" />
-
-		<div class="submit-buttons">
-			<input
-				type="submit"
-				class="btn btn-success"
-				name="${ManageSmallGroupsMappingParameters.editAndAllocate}"
-				value="Save and allocate students"
-				/>
-			<input
-				type="submit"
-				class="btn btn-primary"
-				name="create"
-				value="Save and exit"
-				/>
-			<a class="btn" href="<@routes.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>">Cancel</a>
+	<#if saved!false>
+		<div class="alert alert-success">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			Events saved for ${smallGroupSet.name}.
 		</div>
-	</@f.form>
+	</#if>
+
+	<div class="fix-area">
+		<@f.form id="editEvents" method="POST" commandName="command" class="form-horizontal">
+			<@components.set_wizard false 'events' smallGroupSet />
+
+			<#assign is_edit = true />
+			<#include "_editEvents.ftl" />
+
+			<div class="submit-buttons fix-footer">
+				<input
+					type="submit"
+					class="btn btn-success update-only"
+					value="Save"
+					/>
+				<input
+					type="submit"
+					class="btn btn-primary"
+					name="create"
+					value="Save and exit"
+					/>
+				<a class="btn" href="<@routes.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>">Cancel</a>
+			</div>
+		</@f.form>
+	</div>
 </#escape>

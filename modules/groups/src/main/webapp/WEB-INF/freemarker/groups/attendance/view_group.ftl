@@ -3,7 +3,7 @@
 	<div id="profile-modal" class="modal fade profile-subset"></div>
 
 	<h1>
-		${group.groupSet.name}, ${group.name}
+		${group.groupSet.module.code?upper_case}<span class="hide-smallscreen"> ${group.groupSet.nameWithoutModulePrefix}</span>, ${group.name}
 		<#if can.do("SmallGroups.ReadMembership", group)>
 			<a href="<@routes.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
 				<small><@fmt.p (group.students.size)!0 "student" "students" /></small>

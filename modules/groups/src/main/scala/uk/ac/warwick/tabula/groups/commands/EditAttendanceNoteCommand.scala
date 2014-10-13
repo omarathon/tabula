@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.groups.commands
 
-import uk.ac.warwick.tabula.data.model.{AbsenceType, FileAttachment, StudentMember}
+import uk.ac.warwick.tabula.data.model.{AbsenceType, FileAttachment, Member}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -11,11 +11,10 @@ import org.springframework.validation.{Errors, BindingResult}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEventAttendance, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import java.lang.IllegalArgumentException
 
 object EditAttendanceNoteCommand {
-	def apply(student: StudentMember, occurrence: SmallGroupEventOccurrence, user: CurrentUser, customStateStringOption: Option[String]) =
-		new EditAttendanceNoteCommand(student, occurrence, user, customStateStringOption)
+	def apply(member: Member, occurrence: SmallGroupEventOccurrence, user: CurrentUser, customStateStringOption: Option[String]) =
+		new EditAttendanceNoteCommand(member, occurrence, user, customStateStringOption)
 		with ComposableCommand[SmallGroupEventAttendanceNote]
 		with AttendanceNotePermissions
 		with AttendanceNoteDescription
@@ -27,7 +26,7 @@ object EditAttendanceNoteCommand {
 }
 
 abstract class EditAttendanceNoteCommand(
-	val student: StudentMember,
+	val member: Member,
 	val occurrence: SmallGroupEventOccurrence,
 	val user: CurrentUser,
 	val customStateStringOption: Option[String]
@@ -43,14 +42,14 @@ abstract class EditAttendanceNoteCommand(
 
 	def onBind(result: BindingResult) {
 		file.onBind(result)
-		attendanceNote = smallGroupService.getAttendanceNote(student.universityId, occurrence).getOrElse({
+		attendanceNote = smallGroupService.getAttendanceNote(member.universityId, occurrence).getOrElse({
 			isNew = true
 			val newNote = new SmallGroupEventAttendanceNote
-			newNote.student = student
+			newNote.student = member
 			newNote.occurrence = occurrence
 			newNote
 		})
-		attendance = smallGroupService.getAttendance(student.universityId, occurrence).getOrElse(null)
+		attendance = smallGroupService.getAttendance(member.universityId, occurrence).getOrElse(null)
 		customStateStringOption.map(stateString => {
 			try {
 				customState = AttendanceState.fromCode(stateString)
@@ -97,7 +96,7 @@ trait AttendanceNoteDescription extends Describable[SmallGroupEventAttendanceNot
 	override lazy val eventName = "UpdateAttendanceNote"
 
 	override def describe(d: Description) {
-		d.studentIds(Seq(student.universityId))
+		d.studentIds(Seq(member.universityId))
 		d.smallGroupEventOccurrence(occurrence)
 	}
 
@@ -116,7 +115,7 @@ trait AttendanceNotePermissions extends RequiresPermissionsChecking with Permiss
 }
 
 trait AttendanceNoteCommandState {
-	def student: StudentMember
+	def member: Member
 	def occurrence: SmallGroupEventOccurrence
 
 	var attendanceNote: SmallGroupEventAttendanceNote = _

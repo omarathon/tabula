@@ -30,7 +30,7 @@ object FiltersStudents {
 		"department" -> Seq(
 			"mostSignificantCourse" -> "studentCourseDetails",
 			"studentCourseDetails.route" -> "route",
-			"route.department" -> "department"
+			"route.adminDepartment" -> "department"
 		)
 	).toMap
 

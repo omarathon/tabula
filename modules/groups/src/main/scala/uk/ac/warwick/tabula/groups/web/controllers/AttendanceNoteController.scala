@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.groups.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
+import uk.ac.warwick.tabula.data.model.{Member, AbsenceType}
 import uk.ac.warwick.tabula.commands.{SelfValidating, ApplyWithCallback, PopulateOnForm, Appliable}
 import org.springframework.validation.Errors
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
@@ -25,11 +25,11 @@ class AttendanceNoteController extends GroupsController {
 
 	@RequestMapping
 	def home(
-		@PathVariable student: StudentMember,
+		@PathVariable("student") member: Member,
 		@PathVariable occurrence: SmallGroupEventOccurrence
 	) = {
-		val attendanceNote = smallGroupService.getAttendanceNote(student.universityId, occurrence).getOrElse(throw new ItemNotFoundException())
-		val attendance = smallGroupService.getAttendance(student.universityId, occurrence).getOrElse(null)
+		val attendanceNote = smallGroupService.getAttendanceNote(member.universityId, occurrence).getOrElse(throw new ItemNotFoundException())
+		val attendance = smallGroupService.getAttendance(member.universityId, occurrence).getOrElse(null)
 		Mav("groups/attendance/view_note",
 			"attendanceNote" -> attendanceNote,
 			"attendance" -> attendance,
@@ -48,8 +48,8 @@ class AttendanceNoteAttachmentController extends GroupsController {
 	@Autowired var fileServer: FileServer = _
 
 	@ModelAttribute("command")
-	def command(@PathVariable student: StudentMember, @PathVariable occurrence: SmallGroupEventOccurrence) =
-		AttendanceNoteAttachmentCommand(student, occurrence, user)
+	def command(@PathVariable("student") member: Member, @PathVariable occurrence: SmallGroupEventOccurrence) =
+		AttendanceNoteAttachmentCommand(member, occurrence, user)
 
 	@RequestMapping
 	def get(@ModelAttribute("command") cmd: ApplyWithCallback[Option[RenderableFile]])
@@ -69,11 +69,11 @@ class EditAttendanceNoteController extends GroupsController {
 
 	@ModelAttribute("command")
 	def command(
-		@PathVariable student: StudentMember,
+		@PathVariable("student") member: Member,
 		@PathVariable occurrence: SmallGroupEventOccurrence,
 		@RequestParam(value="state", required=false) state: String
 	) =
-		EditAttendanceNoteCommand(student, occurrence, user, Option(state))
+		EditAttendanceNoteCommand(member, occurrence, user, Option(state))
 
 	@RequestMapping(method=Array(GET, HEAD), params=Array("isIframe"))
 	def getIframe(
@@ -86,7 +86,7 @@ class EditAttendanceNoteController extends GroupsController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def get(
 		@ModelAttribute("command") cmd: Appliable[SmallGroupEventAttendanceNote] with PopulateOnForm,
-		@PathVariable student: StudentMember
+		@PathVariable("student") member: Member
 	) = {
 		cmd.populate()
 		form(cmd)

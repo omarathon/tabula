@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.groups.commands
 
-import org.joda.time.DateTime
+import org.joda.time.{LocalDateTime, DateTime}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
@@ -20,12 +20,12 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 
 	// Implements the dependencies declared by the command
 	trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent
-	with ProfileServiceComponent with TermServiceComponent with MonitoringPointGroupProfileServiceComponent
+	with ProfileServiceComponent with WeekToDateConverterComponent with MonitoringPointGroupProfileServiceComponent
 	with FeaturesComponent with AttendanceMonitoringEventAttendanceServiceComponent {
 		val smallGroupService = mock[SmallGroupService]
 		val userLookup = mock[UserLookupService]
 		val profileService = mock[ProfileService]
-		val termService = mock[TermService]
+		val weekToDateConverter = mock[WeekToDateConverter]
 		val monitoringPointGroupProfileService = mock[MonitoringPointGroupProfileService]
 		val attendanceMonitoringEventAttendanceService = smartMock[AttendanceMonitoringEventAttendanceService]
 		val features = emptyFeatures
@@ -81,10 +81,9 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		val week = 1
 
 		val command = new RecordAttendanceCommand(event, week, currentUser) with CommandTestSupport with RecordAttendanceCommandValidation with SmallGroupEventInFutureCheck 
-		
-		// Current week is 1, so allowed to record
-		command.termService.getAcademicWeekForAcademicYear(isA[DateTime], isEq(set.academicYear)) returns 1
-		
+
+		command.weekToDateConverter.toLocalDatetime(week, event.day, event.startTime, set.academicYear) returns (Some(LocalDateTime.now().minusWeeks(1)))
+
 		command.userLookup.getUserByWarwickUniId(invalidUser.getWarwickId) returns invalidUser
 		command.userLookup.getUserByWarwickUniId(missingUser.getWarwickId) returns missingUser
 		command.userLookup.getUserByWarwickUniId(validUser.getWarwickId) returns validUser

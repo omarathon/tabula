@@ -5,8 +5,34 @@ import org.openqa.selenium.WebDriver
 import uk.ac.warwick.tabula.BreadcrumbsMatcher
 import org.openqa.selenium.support.ui.Select
 
+trait EditSmallGroupSetProgressWizardLinks {
+	self: WebBrowser =>
 
-class EditSmallGroupSetPropertiesPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher{
+	implicit def webDriver: WebDriver
+
+	def goToEditProperties() {
+		click on linkText("Properties")
+	}
+
+	def goToEditGroups() {
+		click on linkText("Groups")
+	}
+
+	def goToEditStudents() {
+		click on linkText("Students")
+	}
+
+	def goToEditEvents() {
+		click on linkText("Events")
+	}
+
+	def goToAllocate() {
+		click on linkText("Allocation")
+	}
+
+}
+
+class EditSmallGroupSetPropertiesPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
 
 	def isCurrentPage(moduleName:String){
 		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
@@ -19,13 +45,13 @@ class EditSmallGroupSetPropertiesPage (implicit val webDriver:WebDriver) extends
 		click on cssSelector("input.btn-primary")
 	}
 
-	def submitAndAddGroups() {
+	def save() {
 		click on cssSelector("input.btn-success")
 	}
 
 }
 
-class EditSmallGroupSetGroupsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher{
+class EditSmallGroupSetGroupsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
 
 	def isCurrentPage(moduleName:String){
 		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
@@ -38,13 +64,13 @@ class EditSmallGroupSetGroupsPage (implicit val webDriver:WebDriver) extends Web
 		click on cssSelector("input.btn-primary")
 	}
 
-	def submitAndAddStudents() {
+	def save() {
 		click on cssSelector("input.btn-success")
 	}
 
 }
 
-class EditSmallGroupSetStudentsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher{
+class EditSmallGroupSetStudentsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
 
 	def isCurrentPage(moduleName:String){
 		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
@@ -57,13 +83,13 @@ class EditSmallGroupSetStudentsPage (implicit val webDriver:WebDriver) extends W
 		click on cssSelector("input.btn-primary")
 	}
 
-	def submitAndAddEvents() {
+	def save() {
 		click on cssSelector("input.btn-success")
 	}
 
 }
 
-class EditSmallGroupSetEventsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher{
+class EditSmallGroupSetEventsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
 
 	def isCurrentPage(moduleName:String){
 		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
@@ -76,13 +102,13 @@ class EditSmallGroupSetEventsPage (implicit val webDriver:WebDriver) extends Web
 		click on cssSelector("input.btn-primary")
 	}
 
-	def submitAndAllocate() {
+	def save() {
 		click on cssSelector("input.btn-success")
 	}
 
 }
 
-class AllocateStudentsToGroupsPage(implicit val webDriver:WebDriver)extends WebBrowser with BreadcrumbsMatcher {
+class AllocateStudentsToGroupsPage(implicit val webDriver:WebDriver)extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
 	def isCurrentPage(moduleName:String){
 		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
 		val heading =find(cssSelector("#main-content h1")).get

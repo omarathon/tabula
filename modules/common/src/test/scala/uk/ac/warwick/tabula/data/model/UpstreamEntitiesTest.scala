@@ -28,7 +28,6 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			law.moduleCode = "la155-10"
 			law.assessmentGroup = "A"
 			law.sequence = "A02"
-			law.departmentCode = "la"
 			law.assessmentType = AssessmentType.Assignment
 			law.name = "Cool Essay"
 

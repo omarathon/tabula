@@ -25,7 +25,7 @@ object FiltersRelationships {
 		),
 		"department" -> Seq(
 			"route" -> "route",
-			"route.department" -> "department"
+			"route.adminDepartment" -> "department"
 		)
 	).toMap
 

@@ -112,6 +112,8 @@ trait AttendanceFilterExtras extends FiltersStudents {
 	final val UNAUTHORISED = "Missed (unauthorised)"
 	final val AUTHORISED = "Missed (authorised)"
 	final val UNRECORDED = "Unrecorded"
+	final val UNAUTHORISED3 = "Missed (unauthorised) 3 or more"
+	final val UNAUTHORISED6 = "Missed (unauthorised) 6 or more"
 
 	// For Attendance Monitoring, we shouldn't consider sub-departments
 	// but we will use the root department if the current dept has no routes at all
@@ -125,7 +127,9 @@ trait AttendanceFilterExtras extends FiltersStudents {
 		"Visiting",
 		UNAUTHORISED,
 		AUTHORISED,
-		UNRECORDED
+		UNRECORDED,
+		UNAUTHORISED3,
+		UNAUTHORISED6
 	)
 
 	override def getAliasPaths(table: String) = {
@@ -141,7 +145,9 @@ trait AttendanceFilterExtras extends FiltersStudents {
 			attendanceCheckpointTotalsRestriction,
 			unrecordedAttendanceRestriction,
 			authorisedAttendanceRestriction,
-			unauthorisedAttendanceRestriction
+			unauthorisedAttendanceRestriction,
+			unauthorisedAttendance3Restriction,
+			unauthorisedAttendance6Restriction
 		).flatten
 	}
 
@@ -179,6 +185,24 @@ trait AttendanceFilterExtras extends FiltersStudents {
 		case true => ScalaRestriction.gt(
 			"attendanceCheckpointTotals.unauthorised",
 			0,
+			getAliasPaths("attendanceCheckpointTotals"): _*
+		)
+	}
+
+	def unauthorisedAttendance3Restriction: Option[ScalaRestriction] = otherCriteria.contains(UNAUTHORISED3) match {
+		case false => None
+		case true => ScalaRestriction.gt(
+			"attendanceCheckpointTotals.unauthorised",
+			2,
+			getAliasPaths("attendanceCheckpointTotals"): _*
+		)
+	}
+
+	def unauthorisedAttendance6Restriction: Option[ScalaRestriction] = otherCriteria.contains(UNAUTHORISED6) match {
+		case false => None
+		case true => ScalaRestriction.gt(
+			"attendanceCheckpointTotals.unauthorised",
+			5,
 			getAliasPaths("attendanceCheckpointTotals"): _*
 		)
 	}

@@ -114,11 +114,11 @@ object Fixtures extends Mockito {
 		s
 	}
 
-	def upstreamAssignment(departmentCode:String, number:Int) = {
+	def upstreamAssignment(module: Module, number: Int) = {
 		val a = new AssessmentComponent
 		a.name = "Assignment %d" format number
-		a.departmentCode = departmentCode.toUpperCase
-		a.moduleCode = "%s1%02d-30" format (departmentCode.toUpperCase, number)
+		a.module = module
+		a.moduleCode = "%s-30" format (module.code.toUpperCase())
 		a.assessmentGroup = "A"
 		a.sequence = "A%02d" format number
 		a.assessmentType = AssessmentType.Assignment
