@@ -143,8 +143,8 @@ trait MeetingRecordModal {
 
 	// cancel sync
 	@RequestMapping(method = Array(POST), params = Array("!submit", "!modal"))
-	def cancel(@PathVariable("student") student: Member) = {
-		Redirect(Routes.profile.view(student))
+	def cancel(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) = {
+		Redirect(Routes.profile.view(studentCourseDetails.student))
 	}
 
 	// submit sync
