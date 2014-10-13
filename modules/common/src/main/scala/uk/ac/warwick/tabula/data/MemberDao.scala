@@ -202,12 +202,12 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 	}
 
 	def listUpdatedSince(startDate: DateTime, max: Int) =
-		session.newQuery[Member]( """select distinct staffOrStudent from Member staffOrStudent
+		session.newQuery[Member]( """select staffOrStudent from Member staffOrStudent
 			where staffOrStudent.lastUpdatedDate > :lastUpdated
 			order by lastUpdatedDate asc
 		""")
 			.setParameter("lastUpdated", startDate)
-			.setMaxResults(max).seq
+			.setMaxResults(max).seq.distinct
 
 	def listUpdatedSince(startDate: DateTime) = {
 		val scrollable = session.newCriteria[Member]

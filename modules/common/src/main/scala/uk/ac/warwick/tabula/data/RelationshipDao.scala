@@ -239,7 +239,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 		if (relationshipType == null) Seq()
 		else session.newQuery[StudentMember]("""
 			select
-				distinct sm
+				sm
 			from
 				StudentMember sm
 				inner join sm.studentCourseDetails as scd
@@ -263,7 +263,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 																				 """)
 			.setEntity("department", department)
 			.setEntity("relationshipType", relationshipType)
-			.seq
+			.seq.distinct
 
 	/**
 	 * n.b. this will only return students with a direct relationship to a department. For sub-department memberships,
