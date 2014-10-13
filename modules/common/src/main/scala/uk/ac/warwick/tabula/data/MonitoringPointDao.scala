@@ -191,7 +191,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 		val partionedUniversityIdsWithIndex = students.map{_.universityId}.grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
 		val queryString = """
-			select distinct student, mps
+			select student, mps
 			from MonitoringPointSet mps, Route r, StudentCourseDetails scd, StudentCourseYearDetails scyd, StudentMember student
 			where r = mps.route
 			and scd.route = r.code
@@ -209,13 +209,14 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 		val query = session.newQuery[Array[java.lang.Object]](queryString)
 			.setParameter("academicYear", academicYear)
+
 		partionedUniversityIdsWithIndex.foreach{
 			case (ids, index) => {
 				query.setParameterList("universityIds" + index.toString, ids)
 			}
 		}
 
-		query.seq.map{ objArray =>
+		query.seq.distinct.map{ objArray =>
 			objArray(0).asInstanceOf[StudentMember] -> objArray(1).asInstanceOf[MonitoringPointSet]
 		}.toMap
 	}
@@ -254,6 +255,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			.setString("name", point.name.toLowerCase)
 			.setString("validFromWeek", point.validFromWeek.toString)
 			.setString("requiredFromWeek", point.requiredFromWeek.toString)
+
+
+
 		partionedUniversityIdsWithIndex.foreach{
 			case (ids, index) => {
 				query.setParameterList("universityIds" + index.toString, ids)
