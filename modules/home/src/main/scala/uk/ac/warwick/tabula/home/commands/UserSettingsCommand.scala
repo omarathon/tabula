@@ -29,11 +29,13 @@ class UserSettingsCommand(val user: CurrentUser, val settings: UserSettings) ext
 	var alertsSubmission = settings.alertsSubmission
 	var weekNumberingSystem = settings.weekNumberingSystem
 	var bulkEmailSeparator = settings.bulkEmailSeparator
+	var profilesDefaultView = settings.profilesDefaultView
 		
 	override def applyInternal() = transactional() {
 		settings.alertsSubmission = alertsSubmission
 		settings.weekNumberingSystem = if (weekNumberingSystem.hasText) weekNumberingSystem else null
 		settings.bulkEmailSeparator = bulkEmailSeparator
+		settings.profilesDefaultView = profilesDefaultView
 
 		userSettingsService.save(user, settings)
 	}

@@ -13,9 +13,9 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
+import uk.ac.warwick.tabula.web.views.JSONView
 
 @Controller
-@RequestMapping(Array("/settings"))
 class UserSettingsController extends BaseController {
 
 	validatesSelf[SelfValidating]
@@ -37,9 +37,8 @@ class UserSettingsController extends BaseController {
 			case None => UserSettingsCommand(user, new UserSettings(user.apparentId))
 		}
 	}
-
 	
-	@RequestMapping(method=Array(GET, HEAD))
+	@RequestMapping(value = Array("/settings"), method = Array(GET, HEAD))
 	def viewSettings(user: CurrentUser, @ModelAttribute("userSettingsCommand") command: Appliable[Unit], errors:Errors) = {
 		Mav("usersettings/form",
 			"isCourseworkModuleManager" -> !moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments).isEmpty,
@@ -47,7 +46,7 @@ class UserSettingsController extends BaseController {
 		)
 	}
 
-	@RequestMapping(method=Array(POST))
+	@RequestMapping(value = Array("/settings"), method=Array(POST))
 	def saveSettings(@ModelAttribute("userSettingsCommand") @Valid command: Appliable[Unit], errors:Errors) = {
 		if (errors.hasErrors){
 			viewSettings(user, command, errors)
@@ -56,5 +55,41 @@ class UserSettingsController extends BaseController {
 			command.apply()
 			Redirect("/home")
 		}
+	}
+
+	@RequestMapping(value = Array("/settings.json"), method = Array(GET, HEAD))
+	def viewSettingsJson(user: CurrentUser) = {
+		val usersettings =
+			getUserSettings(user) match {
+				case Some(setting) => JSONUserSettings(setting)
+				case None => JSONUserSettings(new UserSettings(user.apparentId))
+			}
+
+		Mav(new JSONView(usersettings))
+	}
+
+	@RequestMapping(value = Array("/settings.json"), method=Array(POST))
+	def saveSettingsJson(@ModelAttribute("userSettingsCommand") @Valid command: Appliable[Unit], errors: Errors) = {
+		if (!errors.hasErrors) command.apply()
+
+		viewSettingsJson(user)
+	}
+}
+
+case class JSONUserSettings(
+	alertsSubmission: String,
+	weekNumberingSystem: String,
+	bulkEmailSeparator: String,
+	profilesDefaultView: String
+)
+
+object JSONUserSettings {
+	def apply(u: UserSettings): JSONUserSettings = {
+		JSONUserSettings(
+			alertsSubmission = u.alertsSubmission,
+			weekNumberingSystem = u.weekNumberingSystem,
+			bulkEmailSeparator = u.bulkEmailSeparator,
+			profilesDefaultView = u.profilesDefaultView
+		)
 	}
 }
