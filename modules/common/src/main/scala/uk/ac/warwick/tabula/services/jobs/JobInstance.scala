@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.services.jobs
 
-import collection.mutable
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.JavaImports._
+
+import scala.collection.JavaConverters._
 
 /**
  * Interface for a Job to update its status in the database.
