@@ -1,18 +1,16 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.{PersistenceTestBase, TestBase, AppContextTestBase}
-import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.events.Event
-import org.springframework.transaction.annotation.Transactional
-import org.joda.time.DateTime
 import org.hibernate.dialect.HSQLDialect
+import org.joda.time.DateTime
+import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.data.SessionComponent
+import uk.ac.warwick.tabula.events.Event
 
 // scalastyle:off magic.number
 class AuditEventServiceTest extends PersistenceTestBase {
 	
-	val service =new AuditEventServiceImpl with SessionComponent {
+	val service = new AuditEventServiceImpl with SessionComponent {
 		def session = sessionFactory.getCurrentSession
 	}
 	service.dialect = new HSQLDialect
@@ -20,7 +18,7 @@ class AuditEventServiceTest extends PersistenceTestBase {
 	val now = new DateTime()
 
 	@Transactional
-	@Test def getByIds {
+	@Test def getByIds() {
 		for (i <- Range(0, 1020)) {
 			val event = new Event(s"id$i", "DownloadFeedback", "cusebr", "cusebr", Map(), now.plusSeconds(i))
 			service.save(event, "before")
@@ -34,7 +32,7 @@ class AuditEventServiceTest extends PersistenceTestBase {
 	}
 
 	@Transactional
-	@Test def listEvents {
+	@Test def listEvents() {
 		for (i <- Range(1, 30)) {
 			val event = new Event("1138-9962-1813-4938", "Bite" + i, "cusebr", "cusebr", Map(), now.plusSeconds(i))
 			service.save(event, "pre")

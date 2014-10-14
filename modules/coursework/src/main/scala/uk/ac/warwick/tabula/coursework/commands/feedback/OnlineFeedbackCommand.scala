@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
+import uk.ac.warwick.tabula.data.model.MarkingState.Rejected
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object OnlineFeedbackCommand {
@@ -85,17 +85,16 @@ abstract class OnlineMarkerFeedbackCommand(val module: Module, val assignment: A
 			val feedback = feedbackService.getFeedbackByUniId(assignment, submission.universityId)
 			val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(submission.universityId, marker)
 
-			val (hasFeedback, hasCompletedFeedback, hasRejectedFeedback) = markerFeedback match {
-				case Some(mf) =>
-					(mf.hasContent, mf.state == MarkingCompleted,  mf.state == Rejected)
-				case None => (false, false, false)
-			}
+			val hasUncompletedFeedback = markerFeedback.exists(_.hasContent)
+			// if the parent feedback isn't a placeholder then marking is completed
+			val hasCompletedFeedback = feedback.exists(!_.isPlaceholder)
+			val hasRejectedFeedback = markerFeedback.exists(_.state == Rejected)
 
 			val hasPublishedFeedback = feedback match {
 				case Some(f) => f.released.booleanValue
 				case None => false
 			}
-			new StudentFeedbackGraph(student, hasSubmission, hasFeedback, hasPublishedFeedback, hasCompletedFeedback, hasRejectedFeedback)
+			new StudentFeedbackGraph(student, hasSubmission, hasUncompletedFeedback, hasPublishedFeedback, hasCompletedFeedback, hasRejectedFeedback)
 		}
 	}
 }
@@ -120,7 +119,7 @@ trait OnlineFeedbackState {
 case class StudentFeedbackGraph(
 	student: User,
 	hasSubmission: Boolean,
-	hasFeedback: Boolean,
+	hasUncompletedFeedback: Boolean,
 	hasPublishedFeedback: Boolean,
 	hasCompletedFeedback: Boolean,
 	hasRejectedFeedback: Boolean

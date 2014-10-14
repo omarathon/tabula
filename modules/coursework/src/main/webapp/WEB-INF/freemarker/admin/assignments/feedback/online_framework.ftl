@@ -39,7 +39,7 @@
 				<div class="label label-success">Published</div>
 			<#elseif graph.hasCompletedFeedback>
 				<div class="label label-success">Marking completed</div>
-			<#elseif graph.hasFeedback>
+			<#elseif graph.hasUncompletedFeedback>
 				<div class="label label-warning marked">Marked</div>
 			<#elseif graph.hasRejectedFeedback>
 				<div class="label label-important">Rejected</div>
