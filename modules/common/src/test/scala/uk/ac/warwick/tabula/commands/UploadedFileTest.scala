@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.commands
 
 import org.springframework.mock.web.MockMultipartFile
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.{TestBase, Mockito, AppContextTestBase}
-import uk.ac.warwick.tabula.data.FileDao
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.FileDao
+import uk.ac.warwick.tabula.{Mockito, TestBase}
 
 
 class UploadedFileTest extends TestBase with Mockito{
@@ -16,7 +16,7 @@ class UploadedFileTest extends TestBase with Mockito{
 	val multiAppleDouble = new MockMultipartFile("file", "._thing.doc", "text/plain", "aaaaaaaaaaaa".getBytes)
 	
 	@Test // HFC-375
-	def ignoreEmptyMultipartFiles {
+	def ignoreEmptyMultipartFiles() {
 		val uploadedFile = new UploadedFile
 		uploadedFile.fileDao = smartMock[FileDao]
 		uploadedFile.upload = JArrayList(multi1, multiEmpty)
@@ -27,24 +27,24 @@ class UploadedFileTest extends TestBase with Mockito{
 	}
 	
 	@Test
-	def hasUploads {
+	def uploads() {
 		val uploadedFile = new UploadedFile
 		uploadedFile.upload = JArrayList()
-		uploadedFile.hasUploads should be (false)
+		uploadedFile.hasUploads should be {false}
 		uploadedFile.uploadOrEmpty should be (JArrayList())
 		
 		uploadedFile.upload = JArrayList(multiEmpty)
-		uploadedFile.hasUploads should be (false)
+		uploadedFile.hasUploads should be {false}
 		uploadedFile.uploadOrEmpty should be (JArrayList())
 		
 		uploadedFile.upload = JArrayList(multi1)
-		uploadedFile.hasUploads should be (true)
+		uploadedFile.hasUploads should be {true}
 		uploadedFile.uploadOrEmpty should be (JArrayList(multi1))
 	}
 
 
 	@Test // TAB-48
-	def ignoreSystemFiles {
+	def ignoreSystemFiles() {
 		val uploadedFile = new UploadedFile
 		uploadedFile.disallowedFilenames = List("thumbs.db")
 		uploadedFile.fileDao = smartMock[FileDao]
@@ -57,7 +57,7 @@ class UploadedFileTest extends TestBase with Mockito{
 	
 	
 	@Test // TAB-48
-	def ignoreAppleDouble {
+	def ignoreAppleDouble() {
 		val uploadedFile = new UploadedFile
 		uploadedFile.disallowedPrefixes = List("._")
 		uploadedFile.fileDao = smartMock[FileDao]
@@ -69,7 +69,7 @@ class UploadedFileTest extends TestBase with Mockito{
 	}
 
 	@Test
-	def customDisallowed {
+	def customDisallowed() {
 		val uploadedFile = new UploadedFile
 		uploadedFile.fileDao = smartMock[FileDao]
 		uploadedFile.disallowedPrefixes = List()
