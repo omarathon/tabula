@@ -61,7 +61,9 @@ class SmallGroupEventAttendanceReminderNotification
 			Seq()
 		} else {
 			var users: Seq[User] = Seq()
+
 			val settings = new SmallGroupEventAttendanceReminderNotificationSettings(departmentSettings)
+			val notifyAllGroups = !settings.notifyFirstNonEmptyGroupOnly.value
 
 			val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 			val module =
@@ -69,27 +71,27 @@ class SmallGroupEventAttendanceReminderNotification
 					.getOrElse(throw new IllegalStateException("No such module"))
 
 			if (settings.notifyNamedUsers.value && settings.notifyNamedUsersFirst.value) {
-				users = users ++ settings.namedUsers.value
+				users ++= settings.namedUsers.value
 			}
 
-			if (settings.notifyTutors.value && (users.isEmpty || !settings.notifyFirstNonEmptyGroupOnly.value)) {
-				users = users ++ event.tutors.users
+			if (settings.notifyTutors.value && (users.isEmpty || notifyAllGroups)) {
+				users ++= event.tutors.users
 			}
 
-			if (settings.notifyModuleAssistants.value && (users.isEmpty || !settings.notifyFirstNonEmptyGroupOnly.value)) {
-				users = users ++ module.assistants.users
+			if (settings.notifyModuleAssistants.value && (users.isEmpty || notifyAllGroups)) {
+				users ++= module.assistants.users
 			}
 
-			if (settings.notifyModuleManagers.value && (users.isEmpty || !settings.notifyFirstNonEmptyGroupOnly.value)) {
-				users = users ++ module.managers.users
+			if (settings.notifyModuleManagers.value && (users.isEmpty || notifyAllGroups)) {
+				users ++= module.managers.users
 			}
 
-			if (settings.notifyDepartmentAdministrators.value && (users.isEmpty || !settings.notifyFirstNonEmptyGroupOnly.value)) {
-				users = users ++ module.adminDepartment.owners.users
+			if (settings.notifyDepartmentAdministrators.value && (users.isEmpty || notifyAllGroups)) {
+				users ++= module.adminDepartment.owners.users
 			}
 
-			if (settings.notifyNamedUsers.value && !settings.notifyNamedUsersFirst.value && (users.isEmpty || !settings.notifyFirstNonEmptyGroupOnly.value)) {
-				users = users ++ settings.namedUsers.value
+			if (settings.notifyNamedUsers.value && !settings.notifyNamedUsersFirst.value && (users.isEmpty || notifyAllGroups)) {
+				users ++= settings.namedUsers.value
 			}
 
 			users.distinct
