@@ -165,7 +165,7 @@
 								<div class="span5">
 									<h3 class="smallscreen-only">Groups</h3>
 									<div id="groupslist" class="groups fix-on-scroll">
-										<#list smallGroupSet.groups?sort_by("name") as group>
+										<#list command.sortedGroups as group>
 											<#assign existingStudents = mappingById[group.id]![] />
 											<div class="drag-target well clearfix group-${group.id}">
 												<div class="group-header">
