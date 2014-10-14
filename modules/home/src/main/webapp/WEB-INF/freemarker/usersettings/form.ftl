@@ -64,6 +64,18 @@
 		</@form.field>
 	</@form.row>
 
+	<@form.row>
+		<@form.label>Notifications</@form.label>
+		<@form.field>
+			<@form.label checkbox=true>
+				<@f.checkbox path="smallGroupEventAttendanceReminderEnabled" />
+				Small group attendance notifications
+			</@form.label>
+
+			<div class="help-block">Uncheck the box next to a notification type to opt-out of receiving notifications of this type.</div>
+		</@form.field>
+	</@form.row>
+
 <div class="submit-buttons">
 	<input type="submit" value="Save" class="btn btn-primary">
 	<a class="btn" href="${url('/')}">Cancel</a>
