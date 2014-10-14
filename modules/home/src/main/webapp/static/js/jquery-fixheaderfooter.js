@@ -162,7 +162,7 @@
                 return $fm.offset().top;
             },
             fixed: function() {
-                if (!$f.children(':first-child').is(selFooterShadow)) $f.prepend('<hr class="' + selFooterShadow.substring(1) + '">');
+                if (!$f.childrenfixHeaderFooter(':first-child').is(selFooterShadow)) $f.prepend('<hr class="' + selFooterShadow.substring(1) + '">');
             },
             unfixed: function() {
                 $f.children(':first-child').remove(selFooterShadow);

@@ -24,7 +24,8 @@ exports.wireModalButtons = function($container) {
 window.Groups = jQuery.extend(window.Groups, exports);
 
 $(function(){
-	var fixHeaderFooter = $('.fix-area').fixHeaderFooter();
+	exports.fixHeaderFooter = $('.fix-area').fixHeaderFooter();
+	window.Groups = jQuery.extend(window.Groups, exports);
 	$('#action-submit').closest('form').on('click', '.update-only', function() {
 		$('#action-submit').val('update');
 		$('#action-submit').closest('form').find('[type=submit]').attr('disabled', true);
