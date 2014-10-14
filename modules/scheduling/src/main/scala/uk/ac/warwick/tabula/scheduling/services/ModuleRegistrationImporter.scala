@@ -1,25 +1,24 @@
 package uk.ac.warwick.tabula.scheduling.services
 
-import java.sql.ResultSet
-import java.sql.Types
-import scala.collection.JavaConversions._
-import scala.collection.immutable.HashMap
+import java.sql.{ResultSet, Types}
+import javax.sql.DataSource
+
+import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
 import org.springframework.stereotype.Service
-import javax.sql.DataSource
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.MemberDaoImpl
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModuleRegistrationsCommand
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import org.joda.time.DateTime
-import java.math.BigDecimal
+
+import scala.collection.JavaConversions._
+import scala.collection.immutable.HashMap
 
 /**
  * Import module registration data from SITS.
@@ -33,7 +32,7 @@ trait ModuleRegistrationImporter {
 @Profile(Array("dev", "test", "production"))
 @Service
 class ModuleRegistrationImporterImpl extends ModuleRegistrationImporter with TaskBenchmarking {
-	import ModuleRegistrationImporter._
+	import uk.ac.warwick.tabula.scheduling.services.ModuleRegistrationImporter._
 
 	var sits = Wire[DataSource]("sitsDataSource")
 	
@@ -235,14 +234,14 @@ object ModuleRegistrationImporter {
 }
 
 case class ModuleRegistrationRow(
-	val scjCode: String,
-	val sitsModuleCode: String,
-	val cats: java.math.BigDecimal,
-	val assessmentGroup: String,
-	val selectionStatusCode: String,
-	val occurrence: String,
-	val academicYear: String,
+	scjCode: String,
+	sitsModuleCode: String,
+	cats: java.math.BigDecimal,
+	assessmentGroup: String,
+	selectionStatusCode: String,
+	occurrence: String,
+	academicYear: String,
 	var agreedMark: Option[java.math.BigDecimal],
-	val agreedGrade: String
+	agreedGrade: String
 ) {
 }
