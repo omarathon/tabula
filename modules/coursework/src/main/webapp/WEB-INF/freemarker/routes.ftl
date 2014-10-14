@@ -101,6 +101,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro archiveDepartmentsAssignments department><@_u page="/admin/department/${department.code}/archive-assignments" /></#macro>
 
 <#macro displaysettings department><@_u page="/department/${department.code}/settings/display" context="/admin" /></#macro>
+<#macro notificationsettings department><@_u page="/department/${department.code}/settings/notification" context="/admin" /></#macro>
 
 <#macro assignment_in_profile assignment student><@_u page="/module/${assignment.module.code}/${assignment.id}/${student.universityId}"/></#macro>
 

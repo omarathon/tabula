@@ -21,8 +21,8 @@ abstract class ScheduledMeetingRecordNotification
 
 	def meeting = item.entity
 
-	def verbSetting = StringSetting("verb")
-	def verb = verbSetting.value.get
+	def verbSetting = StringSetting("verb", "")
+	def verb = verbSetting.value
 
 	def studentNotFoundMessage = "Student member for SCJ code " + meeting.relationship.studentCourseDetails.scjCode + " not found"
 	def agentNotFoundMessage = "Agent member for code " + meeting.relationship.agent + " not found"

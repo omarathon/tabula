@@ -12,8 +12,8 @@ class TurnitinClassDeletedNotification
 
 	def title = "Turnitin check has not completed successfully for %s - %s" format (assignment.module.code.toUpperCase, assignment.name)
 
-	@transient val className = StringSetting("className")
-	@transient val classId = StringSetting("classId")
+	@transient val className = StringSetting("className", "")
+	@transient val classId = StringSetting("classId", "")
 
 	def content = FreemarkerModel("/WEB-INF/freemarker/emails/turnitinclassdeleted.ftl", Map(
 		"assignment" -> assignment,
@@ -26,7 +26,7 @@ class TurnitinClassDeletedNotification
 	def recipient = agent
 
 	override def onPreSave(newRecord: Boolean) {
-		Assert.isTrue(className.value.isDefined, "className must be set")
-		Assert.isTrue(classId.value.isDefined, "classId must be set")
+		Assert.isTrue(className.isDefined, "className must be set")
+		Assert.isTrue(classId.isDefined, "classId must be set")
 	}
 }

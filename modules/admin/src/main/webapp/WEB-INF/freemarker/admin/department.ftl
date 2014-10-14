@@ -21,38 +21,47 @@
 			</a>
 			<ul class="dropdown-menu pull-right">
 				<li><a href="<@routes.deptperms department/>">
-					<i class="icon-user"></i> Edit departmental permissions
+					<i class="icon-user icon-fixed-width"></i> Edit departmental permissions
 				</a></li>
+
+				<li class="divider"></li>
 
 				<#if modules?has_content || departmentRoutes?has_content || !department.children?has_content>
 					<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}">
-						<i class="icon-list-alt"></i> Settings</a>
+						<i class="icon-list-alt icon-fixed-width"></i> Display settings</a>
 					</li>
+					<li><a href="<@routes.notificationsettings department />?returnTo=${(info.requestedUri!"")?url}">
+						<i class="icon-envelope icon-fixed-width"></i> Notification settings</a>
+					</li>
+
+					<li class="divider"></li>
 				</#if>
 
 				<#if can.do("Department.Create", department)>
 					<li><a href="<@routes.createsubdepartment department />">
-						<i class="icon-plus"></i> Create sub-department</a>
+						<i class="icon-plus icon-fixed-width"></i> Create sub-department</a>
 					</li>
 				</#if>
 				<#if can.do("Department.Update", department)>
 					<li><a href="<@routes.editdepartment department />">
-						<i class="icon-plus"></i> Edit department</a>
+						<i class="icon-plus icon-fixed-width"></i> Edit department</a>
 					</li>
 				</#if>
 				<#if can.do("Module.Create", department)>
 					<li><a href="<@routes.createmodule department />">
-						<i class="icon-plus"></i> Create module</a>
+						<i class="icon-plus icon-fixed-width"></i> Create module</a>
 					</li>
 				</#if>
 				<#if department.children?has_content && can.do("Department.ArrangeModules", department)>
+					<li class="divider"></li>
+
 					<li><a href="<@routes.sortmodules department />">
-						<i class="icon-random"></i> Arrange modules</a>
+						<i class="icon-random icon-fixed-width"></i> Arrange modules</a>
 					</li>
 				</#if>
 				<#if department.children?has_content && can.do("Department.ArrangeRoutes", department)>
 					<li><a href="<@routes.sortroutes department />">
-						<i class="icon-random"></i> Arrange routes</a>
+						<i class="icon-random icon-fixed-width"></i> Arrange routes</a>
 					</li>
 				</#if>
 			</ul>

@@ -24,6 +24,16 @@
 							<i class="icon-list-alt icon-fixed-width"></i> Department settings
 						</@fmt.permission_button>
 					</li>
+					<li>
+						<#assign settings_url><@routes.notificationsettings department />?returnTo=${(info.requestedUri!"")?url}</#assign>
+						<@fmt.permission_button
+							permission='Department.ManageNotificationSettings'
+							scope=department
+							action_descr='manage department notification settings'
+							href=settings_url>
+							<i class="icon-envelope icon-fixed-width"></i> Notification settings
+						</@fmt.permission_button>
+					</li>
 
 					<li class="divider"></li>
 
@@ -34,7 +44,7 @@
 						scope=department
 						action_descr='import small groups from Syllabus+'
 						href=import_url>
-							<i class="icon-cloud-download"></i> Create small groups from Syllabus+
+							<i class="icon-cloud-download icon-fixed-width"></i> Create small groups from Syllabus+
 						</@fmt.permission_button>
 					</li>
 					<#if features.smallGroupCrossModules>

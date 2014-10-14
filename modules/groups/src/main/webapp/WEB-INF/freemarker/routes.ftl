@@ -24,6 +24,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro moduleperms module><@_u page="/module/${module.code}/permissions" context="/admin" /></#macro>
 
 <#macro displaysettings department><@_u page="/department/${department.code}/settings/display" context="/admin" /></#macro>
+<#macro notificationsettings department><@_u page="/department/${department.code}/settings/notification" context="/admin" /></#macro>
 <#macro batchnotify department><@_u page="/admin/department/${department.code}/groups/release"  /></#macro>
 <#macro batchopen department><@_u page="/admin/department/${department.code}/groups/selfsignup/open"  /></#macro>
 <#macro batchclose department><@_u page="/admin/department/${department.code}/groups/selfsignup/close"  /></#macro>

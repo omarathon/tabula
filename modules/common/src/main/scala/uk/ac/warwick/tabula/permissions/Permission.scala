@@ -153,6 +153,7 @@ object Permissions {
 		case object ArrangeRoutes extends Permission("Sort routes into sub-departments")
 		case object ManageExtensionSettings extends Permission("Manage extension settings")
 		case object ManageDisplaySettings extends Permission("Manage display settings")
+		case object ManageNotificationSettings extends Permission("Manage notification settings")
 		case object DownloadFeedbackReport extends Permission("Generate a feedback report")
 		case object ManageProfiles extends Permission("Manage student profiles")
 		case object Create extends Permission("Add a sub-department")

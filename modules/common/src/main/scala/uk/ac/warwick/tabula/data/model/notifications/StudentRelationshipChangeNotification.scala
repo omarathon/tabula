@@ -24,7 +24,7 @@ abstract class StudentRelationshipChangeNotification
 		relationship.agentMember
 	}
 
-	@transient val oldAgentIds = StringSeqSetting("oldAgents")
+	@transient val oldAgentIds = StringSeqSetting("oldAgents", Nil)
 
 	def oldAgents = oldAgentIds.value.flatMap { id => profileService.getMemberByUniversityId(id)}
 

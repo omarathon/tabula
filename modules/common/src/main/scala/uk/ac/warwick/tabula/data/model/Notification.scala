@@ -7,11 +7,12 @@ import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.util.Assert
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.UserLookupComponent
+import uk.ac.warwick.tabula.services.{UserSettingsService, UserLookupComponent}
 import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
@@ -270,4 +271,34 @@ trait SingleRecipientNotification {
 
 trait HasNotificationAttachment {
 	def generateAttachments(helper: MimeMessageHelper): Unit
+}
+
+trait NotificationSettings extends NestedSettings {
+	def enabled = BooleanSetting("enabled", default = true)
+}
+
+trait HasNotificationSettings {
+	self: HasSettings =>
+
+	def notificationSettings(notificationType: String): NotificationSettings =
+		new NestedSettings(this, "notifications." + notificationType) with NotificationSettings
+}
+
+trait ConfigurableNotification {
+	self: Notification[_, _] =>
+
+	@transient private val userSettingsService = Wire[UserSettingsService]
+
+	protected def departmentSettings = configuringDepartment.notificationSettings(notificationType)
+	protected def userSettings(u: User) = userSettingsService.getByUserId(u.getUserId).map { _.notificationSettings(notificationType) }
+
+	private def enabledForDepartment: Boolean = departmentSettings.enabled.value
+	private def enabledForUser(u: User): Boolean = userSettings(u).fold(true) { _.enabled.value }
+
+	// The department related to the notification's entity - i.e. the one that configures this notification
+	def configuringDepartment: Department
+	private def notificationType = getClass.getAnnotation(classOf[DiscriminatorValue]).value
+
+	final def recipients: Seq[User] = if (enabledForDepartment) allRecipients.filter(enabledForUser) else Seq()
+	def allRecipients: Seq[User]
 }
