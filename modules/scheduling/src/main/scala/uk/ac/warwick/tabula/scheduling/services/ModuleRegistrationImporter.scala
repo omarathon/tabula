@@ -145,7 +145,7 @@ object ModuleRegistrationImporter {
 					join $sitsSchema.srs_vco vco 
 						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
 
-					join $sitsSchema.ins_smr smr
+					left join $sitsSchema.ins_smr smr
 						on smo.spr_code = smr.spr_code
 						and smo.ayr_code = smr.ayr_code
 						and smo.mod_code = smr.mod_code
@@ -174,7 +174,7 @@ object ModuleRegistrationImporter {
 					join $sitsSchema.srs_vco vco 
 						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
 
-					join $sitsSchema.ins_smr smr
+					left join $sitsSchema.ins_smr smr
 						on smo.spr_code = smr.spr_code
 						and smo.ayr_code = smr.ayr_code
 						and smo.mod_code = smr.mod_code
