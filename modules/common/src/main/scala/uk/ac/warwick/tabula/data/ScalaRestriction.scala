@@ -43,11 +43,28 @@ object ScalaRestriction {
 	def isIfTicked(property: String, value: Any, ticked: Boolean, aliases: (String, String)*): Option[ScalaRestriction] =
 		if (!ticked) None
 		else Some(addAliases(new ScalaRestriction(Daoisms.is(property, value)), aliases: _*))
-		
+
+	// if the collection is empty, don't return any restriction - else return the restriction that the property must be in the collection
 	def inIfNotEmpty(property: String, collection: Iterable[Any], aliases: (String, String)*): Option[ScalaRestriction] =
 		if (collection.isEmpty) None
 		else Some(addAliases(new ScalaRestriction(in(property, collection.toSeq.distinct.asJavaCollection)), aliases: _*))
-		
+
+	// If *any* of the properties are empty, don't return any restriction.
+	// This was written for the case of module registrations, where we should only check the
+	// module registration year if there are modules to restrict by
+	def inIfNotEmptyMultipleProperties(properties: Seq[String], collections: Seq[Iterable[Any]], aliases: (String, String)*): Option[ScalaRestriction] = {
+		val criterion = conjunction()
+		(properties, collections).zipped.foreach { (property, collection) =>
+			if (collection.nonEmpty) {
+				criterion.add(in(property, collection.toSeq.distinct.asJavaCollection))
+			}
+		}
+		if (!collections.exists(coll => coll.isEmpty)) // if all the collections are non-empty
+			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
+		else
+			None
+	}
+
 	def startsWithIfNotEmpty(property: String, collection: Iterable[String], aliases: (String, String)*): Option[ScalaRestriction] =
 		if (collection.isEmpty) None
 		else {
@@ -68,6 +85,8 @@ object ScalaRestriction {
 
 			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
 		}
+
+
 
 	def gt(property: String, value: Any, aliases: (String, String)*): Option[ScalaRestriction] =
 		Some(addAliases(new ScalaRestriction(Restrictions.gt(property, value)), aliases: _*))

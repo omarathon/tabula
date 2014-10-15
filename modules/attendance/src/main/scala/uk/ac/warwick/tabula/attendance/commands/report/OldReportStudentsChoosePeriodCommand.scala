@@ -69,7 +69,7 @@ abstract class OldReportStudentsChoosePeriodCommand(val department: Department, 
 	def onBind(result: BindingResult) = {
 		allStudents = profileService.findAllStudentsByRestrictions(
 			department = department,
-			restrictions = buildRestrictions(),
+			restrictions = buildRestrictions(academicYear),
 			orders = buildOrders()
 		)
 		availablePeriods = getAvailablePeriods(allStudents, academicYear)

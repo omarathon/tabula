@@ -68,7 +68,7 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
 	lazy val allStudents = benchmarkTask("profileService.findAllStudentsByRestrictions") {
 		profileService.findAllStudentsByRestrictions(
 			department = department,
-			restrictions = buildRestrictions()
+			restrictions = buildRestrictions(academicYear)
 		).sortBy(s => (s.lastName, s.firstName))
 	}
 

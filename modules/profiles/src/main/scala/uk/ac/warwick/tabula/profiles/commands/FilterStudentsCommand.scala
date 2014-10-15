@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.commands.{FiltersStudents, CommandInternal, ReadOnly, Unaudited, ComposableCommand}
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
@@ -25,19 +26,19 @@ case class FilterStudentsResults(
 )
 
 object FilterStudentsCommand {
-	def apply(department: Department) =
-		new FilterStudentsCommand(department)
+	def apply(department: Department, year: AcademicYear) =
+		new FilterStudentsCommand(department, year)
 			with ComposableCommand[FilterStudentsResults]
 			with FilterStudentsPermissions
 			with AutowiringProfileServiceComponent
 			with ReadOnly with Unaudited
 }
 
-abstract class FilterStudentsCommand(val department: Department) extends CommandInternal[FilterStudentsResults] with FilterStudentsState with BindListener {
+abstract class FilterStudentsCommand(val department: Department, val year: AcademicYear) extends CommandInternal[FilterStudentsResults] with FilterStudentsState with BindListener {
 	self: ProfileServiceComponent =>
 
 	def applyInternal() = {
-		val restrictions = buildRestrictions()
+		val restrictions = buildRestrictions(year)
 
 		val totalResults = profileService.countStudentsByRestrictions(
 			department = department,

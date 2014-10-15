@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.TestBase
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent}
 import uk.ac.warwick.tabula.data.model.{StudentMember, CourseType}
 import scala.collection.JavaConverters._
 import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.data.{ScalaRestriction, ScalaOrder}
+import uk.ac.warwick.tabula.data.ScalaRestriction._
 import org.mockito.ArgumentMatcher
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Restrictions
@@ -51,11 +51,14 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 		val moaFT = Fixtures.modeOfAttendance("F", "FT", "Full time")
 		val moaPT = Fixtures.modeOfAttendance("P", "PT", "Part time")
+
+		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+
 	}
 
 	@Test
 	def bindLoadsNonWithdrawnStatuses() { new Fixture {
-		val command = new FilterStudentsCommand(department) with CommandTestSupport
+		val command = new FilterStudentsCommand(department, year) with CommandTestSupport
 
 		command.profileService.allSprStatuses(department) returns Seq(sprF, sprP)
 
@@ -68,7 +71,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 	@Test
 	def commandApplyDefaults() { new Fixture {
-		val command = new FilterStudentsCommand(department) with CommandTestSupport
+		val command = new FilterStudentsCommand(department, year) with CommandTestSupport
 		command.applyInternal()
 
 		val expectedRestrictions = Seq()
@@ -84,7 +87,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 	@Test
 	def commandApplyComplicated() { new Fixture {
-		val command = new FilterStudentsCommand(department) with CommandTestSupport
+		val command = new FilterStudentsCommand(department, year) with CommandTestSupport
 
 		command.studentsPerPage = 10
 		command.page = 3
@@ -120,7 +123,12 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		val sprRestriction = new ScalaRestriction(Restrictions.in("studentCourseDetails.statusOnRoute", JArrayList(sprP)))
 		sprRestriction.alias("mostSignificantCourse", "studentCourseDetails")
 
-		val modRestriction = new ScalaRestriction(Restrictions.in("moduleRegistration.module", JArrayList(mod2, mod3)))
+		// no need to test ScalaRestriction.inIfNotEmptyMultipleProperties - it's tested in ScalaRestrictionTest
+		val modRestriction = inIfNotEmptyMultipleProperties(
+			Seq("moduleRegistration.module", "moduleRegistration.academicYear"),
+			Seq(Seq(mod2, mod3), Seq(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
+		).get
+
 		modRestriction.alias("mostSignificantCourse", "studentCourseDetails")
 		modRestriction.alias("studentCourseDetails._moduleRegistrations", "moduleRegistration")
 
@@ -144,7 +152,8 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 	@Test
 	def commandApplyDefaultsWithAliasedSort() { new Fixture {
-		val command = new FilterStudentsCommand(department) with CommandTestSupport
+
+		val command = new FilterStudentsCommand(department, year) with CommandTestSupport
 		command.sortOrder = JArrayList(Order.desc("studentCourseYearDetails.yearOfStudy"))
 
 		command.applyInternal()

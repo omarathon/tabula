@@ -54,7 +54,8 @@ class FindStudentsForSchemeCommandInternal(val scheme: AttendanceMonitoringSchem
 			staticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments") {
 				profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
 					department = department,
-					restrictions = buildRestrictions(),
+					restrictions = buildRestrictions(scheme.academicYear),
+
 					orders = buildOrders()
 				).filter(userLookup.getUserByWarwickUniId(_).isFoundUser)
 			}.asJava
