@@ -79,7 +79,7 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 		customFormValues.find( _.name == field.name )
 	}
 
-	def hasContent = hasMarkOrGrade || hasFeedback
+	def hasContent = hasMarkOrGrade || hasFeedback || hasComments
 
 	def hasMarkOrGrade = hasMark || hasGrade
 
