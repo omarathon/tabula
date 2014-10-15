@@ -50,7 +50,7 @@ class FindStudentsForDepartmentSmallGroupSetCommandInternal(val department: Depa
 			FindStudentsForDepartmentSmallGroupSetCommandResult(staticStudentIds, Seq())
 		} else {
 			doFind = true
-			val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+			val year = set.academicYear
 
 			staticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments") {
 				profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
