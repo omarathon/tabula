@@ -2,59 +2,57 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import java.io.FileInputStream
 import java.util.zip.ZipInputStream
+
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
-import uk.ac.warwick.tabula.data.model.Submission
-import uk.ac.warwick.tabula.services.Zips
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.userlookup.AnonymousUser
-import org.junit.Before
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module, Submission}
+import uk.ac.warwick.tabula.services.{UserLookupService, ZipService, Zips}
+import uk.ac.warwick.tabula.{Features, Mockito, TestBase}
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-class DownloadSubmissionsCommandTest extends AppContextTestBase with Mockito {
+class DownloadSubmissionsCommandTest extends TestBase with Mockito {
 
-	var userDatabase= Seq(new User())
-	var userLookup: UserLookupService = _
-
-	@Before def before {
-		userLookup = mock[UserLookupService]
-
-		userLookup.getUserByUserId(any[String]) answers { id =>
-			userDatabase find {_.getUserId == id} getOrElse (new AnonymousUser())
-		}
-		userLookup.getUserByWarwickUniId(any[String]) answers { id =>
-			userDatabase find {_.getWarwickId == id} getOrElse (new AnonymousUser())
-		}
+	var userDatabase = Seq(new User())
+	var userLookup: UserLookupService = smartMock[UserLookupService]
+	userLookup.getUserByUserId(any[String]) answers { id =>
+		userDatabase find {_.getUserId == id} getOrElse new AnonymousUser()
+	}
+	userLookup.getUserByWarwickUniId(any[String]) answers { id =>
+		userDatabase find {_.getWarwickId == id} getOrElse new AnonymousUser()
 	}
 
-
-	@Test def test():Unit = transactional{ts=>
+	@Test def test() {
 		val assignment = new Assignment
-		assignment.module = new Module(code="ph105", adminDepartment=new Department)
+		assignment.module = new Module(code = "ph105", adminDepartment = new Department)
 
 		val cmd = new DownloadSubmissionsCommand(assignment.module, assignment)
 
-		cmd.submissions = JArrayList(
+		val submissions = JArrayList(
 			newSubmission(cmd.assignment),
 			newSubmission(cmd.assignment),
 			newSubmission(cmd.assignment)
 		)
-		cmd.apply { zip =>
+
+		cmd.zipService = new ZipService
+		cmd.zipService.userLookup = userLookup
+		cmd.zipService.features = Features.empty
+		cmd.zipService.zipDir = createTemporaryDirectory()
+
+		cmd.submissions = submissions
+
+		cmd.callback = { zip =>
 			val stream = new ZipInputStream(new FileInputStream(zip.file.get))
 			val items = Zips.map(stream) { item =>
 				item.getName
 			}
 			items.size should be (0)
 		}
+
+		cmd.applyInternal()
 	}
 
 
-	def newSubmission(a:Assignment, values:JSet[SavedFormValue]=null) = {
+	private def newSubmission(a: Assignment, values: JSet[SavedFormValue] = null) = {
 		val s = new Submission
 		s.assignment = a
 		if (values != null) s.values = values
