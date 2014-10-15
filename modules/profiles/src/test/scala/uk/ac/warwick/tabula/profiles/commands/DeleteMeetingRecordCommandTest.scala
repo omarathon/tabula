@@ -1,67 +1,33 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import org.joda.time.DateTimeConstants
-import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.data.model.StaffMember
-import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.services.{MeetingRecordService, MeetingRecordServiceComponent}
-import org.junit.Before
-import uk.ac.warwick.tabula.data.model.MeetingRecord
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import org.specs.mock.JMocker.{expect => expecting}
-import uk.ac.warwick.tabula.data.model.ExternalStudentRelationship
-import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, MeetingRecord, StaffMember, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.services.{MeetingRecordService, MeetingRecordServiceComponent}
 
-class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
+class DeleteMeetingRecordCommandTest extends TestBase with Mockito {
 
 	val someTime = dateTime(2013, DateTimeConstants.APRIL)
-	val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
+	val mockMeetingRecordService: MeetingRecordService = smartMock[MeetingRecordService]
 	val student = Fixtures.student()
-	var creator: StaffMember = _
-	var relationship: StudentRelationship = _
-	var meeting: MeetingRecord = _
+	var creator: StaffMember = Fixtures.staff("9876543", "staffmember")
+	val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+	var relationship: StudentRelationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
 
-	val user = mock[CurrentUser]
+	val user = smartMock[CurrentUser]
 	user.universityId returns "9876543"
-
-	@Before
-	def setUp() {
-		transactional { tx => session.save(student) }
-		
-		creator = transactional { tx =>
-			val m = new StaffMember("9876543")
-			m.userId = "staffmember"
-			session.save(m)
-			m
-		}
-
-		relationship = transactional { tx =>
-			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-			session.save(relationshipType)
-			
-			val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
-
-			session.save(relationship)
-			relationship
-		}
-
-		meeting = transactional { tx =>
-			val mr = new MeetingRecord
-			mr.creator = creator
-			mr.relationship = relationship
-			session.save(mr)
-			mr
-		}
+	
+	trait Fixture {
+		val meeting = new MeetingRecord
+		meeting.creator = creator
+		meeting.relationship = relationship
 	}
 
-	@Transactional
 	@Test
-	def testDeleted() {
+	def testDeleted() { new Fixture {
 		var deleted: Boolean = meeting.deleted
-		deleted should be (false)
+		deleted should be {false}
 
 		val cmd = new DeleteMeetingRecordCommand(meeting, user) with MeetingRecordServiceComponent {
 			val meetingRecordService: MeetingRecordService = mock[MeetingRecordService]
@@ -69,12 +35,11 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		cmd.applyInternal()
 
 		deleted = meeting.deleted
-		deleted should be (true)
-	}
+		deleted should be {true}
+	}}
 
-	@Transactional
 	@Test
-	def testRestore() {
+	def testRestore() { new Fixture {
 		meeting.deleted = true
 
 		val cmd = new RestoreMeetingRecordCommand(meeting, user) with MeetingRecordServiceComponent {
@@ -83,18 +48,12 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		cmd.applyInternal()
 
 		val deleted: Boolean = meeting.deleted
-		deleted should be (false)
+		deleted should be {false}
+	}}
 
-	}
-
-	@Transactional
 	@Test
-	def testPurge() {
+	def testPurge() { new Fixture {
 		meeting.deleted = true
-		val id = meeting.id
-
-		val meetingFromSession = session.get(classOf[MeetingRecord], id).asInstanceOf[MeetingRecord]
-		meetingFromSession.id should be (id)
 
 		val cmd = new PurgeMeetingRecordCommand(meeting, user) with MeetingRecordServiceComponent {
 			val meetingRecordService: MeetingRecordService = mockMeetingRecordService
@@ -106,5 +65,5 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 			one(mockMeetingRecordService).purge(meeting)
 		}
 
-	}
+	}}
 }
