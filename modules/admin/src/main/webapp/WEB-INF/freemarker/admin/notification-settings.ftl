@@ -64,7 +64,7 @@
 						</ul>
 
 						<p>These notifications can be sent to all the selected groups of people, or only to the first group
-						   with someone in it (e.g. Module Managers will only be notified if an event has no tutor.</p>
+						   with someone in it (e.g. Module Managers will only be notified if an event has no tutor).</p>
 
 						<@form.label checkbox=true>
 							<@f.radiobutton path="smallGroupEventAttendanceReminderNotifyFirstNonEmptyGroupOnly" value="false" />
