@@ -1,64 +1,61 @@
 package uk.ac.warwick.tabula.profiles.commands
 
+import org.hibernate.{Session, SessionFactory}
 import org.joda.time.DateTimeConstants
 import org.springframework.web.multipart.MultipartFile
-import uk.ac.warwick.tabula.Mockito
-import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.data.model.MeetingFormat._
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.data.model.StaffMember
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
-import uk.ac.warwick.tabula.data.model.ExternalStudentRelationship
-import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.data.model.MeetingFormat._
+import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, FileAttachment, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.{FileDao, MeetingRecordDao}
+import uk.ac.warwick.tabula.services.MonitoringPointMeetingRelationshipTermService
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordService
 
 
-class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
+class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 
 	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)
 
-	@Transactional
 	@Test
 	def validMeeting() = withUser("cusdx") { withFakeTime(aprilFool) {
+		val meetingRecordDao = smartMock[MeetingRecordDao]
+		val fileDao = smartMock[FileDao]
+		val monitoringPointMeetingRelationshipTermService = smartMock[MonitoringPointMeetingRelationshipTermService]
+		val attendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
 
-		val creator = transactional { tx =>
-			val m = new StaffMember("9876543")
-			m.userId = "staffmember"
-			session.save(m)
-			m
-		}
+		val creator = Fixtures.staff("9876543", "staffmember")
+		val student = Fixtures.student(universityId="1170836", userId="studentmember")
 
-		val student = transactional { tx =>
-			val m = Fixtures.student(universityId="1170836", userId="studentmember")
-			session.save(m)
-			m
-		}
+		val relationship = ExternalStudentRelationship(
+			"Professor A Tutor",
+			StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"),
+			student
+		)
 
-		val relationship = transactional { tx =>
-			val relationship = ExternalStudentRelationship("Professor A Tutor", StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"), student)
-			session.save(relationship)
-			relationship
-		}
-
-		val createMeetingRecordCommand = new CreateMeetingRecordCommand(creator, relationship, false)
-		createMeetingRecordCommand.title = "Title"
-		createMeetingRecordCommand.format = FaceToFace
-		createMeetingRecordCommand.meetingDateTime  = dateTime(3903, DateTimeConstants.MARCH) // it's the future
-		createMeetingRecordCommand.description = "Lovely words"
-
-		// add a file
 		val uploadedFile =  new UploadedFile
-		val mpFile = mock[MultipartFile]
+		val mpFile = smartMock[MultipartFile]
 		uploadedFile.upload.add(mpFile)
 
 		val fileAttach = new FileAttachment
 		fileAttach.name = "Beltane"
 		uploadedFile.attached.add(fileAttach)
 
+		val createMeetingRecordCommand = new CreateMeetingRecordCommand(creator, relationship, false)
+		createMeetingRecordCommand.meetingRecordDao = meetingRecordDao
+		createMeetingRecordCommand.fileDao = fileDao
+		createMeetingRecordCommand.monitoringPointMeetingRelationshipTermService = monitoringPointMeetingRelationshipTermService
+		createMeetingRecordCommand.attendanceMonitoringMeetingRecordService = attendanceMonitoringMeetingRecordService
+		createMeetingRecordCommand.features = Features.empty
+		createMeetingRecordCommand.sessionFactory = smartMock[SessionFactory]
+		createMeetingRecordCommand.sessionFactory.getCurrentSession returns smartMock[Session]
+
+		createMeetingRecordCommand.title = "Title"
+		createMeetingRecordCommand.format = FaceToFace
+		createMeetingRecordCommand.meetingDateTime  = dateTime(3903, DateTimeConstants.MARCH) // it's the future
+		createMeetingRecordCommand.description = "Lovely words"
 		createMeetingRecordCommand.file = uploadedFile
 
-		val meeting = transactional { tx => createMeetingRecordCommand.applyInternal() }
+		val meeting = createMeetingRecordCommand.applyInternal()
 
 		// test to see if DownloadMeetingRecordFilesCommand.apply() can be used to get the file
 		val downloadCommand = new DownloadMeetingRecordFilesCommand(meeting)
