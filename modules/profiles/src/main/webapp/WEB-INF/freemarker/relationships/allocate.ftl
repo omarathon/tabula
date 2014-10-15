@@ -23,8 +23,13 @@
 </#macro>
 
 <#escape x as x?html>
-	<h1>Allocate students</h1>
-	<h4><span class="muted">to</span> ${relationshipType.description}s</h4>
+
+	<#macro deptheaderroutemacro dept>
+		<@routes.relationship_allocate dept relationshipType />
+	</#macro>
+	<#assign deptheaderroute = deptheaderroutemacro in routes/>
+
+	<@fmt.deptheader "Allocate students" "to ${relationshipType.description}s" department routes "deptheaderroute" "with-settings" />
 
 	<noscript>
 		<div class="alert">This page requires Javascript.</div>
