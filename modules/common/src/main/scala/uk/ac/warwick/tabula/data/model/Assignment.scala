@@ -559,14 +559,11 @@ class Assignment
 		}
 	}
 
-	def getMarkerFeedbackForCurrentPosition(uniId: String, user: User): Option[MarkerFeedback] = {
-		val parentFeedback = feedbacks.find(_.universityId == uniId)
-		parentFeedback.flatMap {
-			f => f.getCurrentWorkflowFeedbackPosition.flatMap {
-				p => getMarkerFeedbackForPositionInFeedback(uniId, user, p, f)
-			}
-		}
-	}
+	def getMarkerFeedbackForCurrentPosition(uniId: String, user: User): Option[MarkerFeedback] = for {
+		feedback <- feedbacks.find(_.universityId == uniId)
+		position <- feedback.getCurrentWorkflowFeedbackPosition
+		markerFeedback <- getMarkerFeedbackForPositionInFeedback(uniId, user, position, feedback)
+	} yield markerFeedback
 
 	def getLatestCompletedMarkerFeedback(uniId: String, user: User): Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.universityId == uniId)
