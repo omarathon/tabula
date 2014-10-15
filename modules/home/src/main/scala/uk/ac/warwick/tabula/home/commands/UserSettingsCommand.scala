@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{CommandInternal, Describable, ComposableCommand, Description, SelfValidating}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.UserSettings
+import uk.ac.warwick.tabula.data.model.notifications.groups.SmallGroupEventAttendanceReminderNotificationSettings
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringUserSettingsServiceComponent, UserSettingsServiceComponent}
@@ -14,7 +15,7 @@ object UserSettingsCommand {
 
 	def apply(user: CurrentUser, settings: UserSettings) =
 		new UserSettingsCommand(user, settings)
-		with ComposableCommand[Unit]
+		with ComposableCommand[UserSettings]
 		with UserSettingsPermission
 		with UserSettingsCommandValidation
 		with UserSettingsDescription
@@ -22,22 +23,26 @@ object UserSettingsCommand {
 		with AutowiringUserSettingsServiceComponent
 }
 
-class UserSettingsCommand(val user: CurrentUser, val settings: UserSettings) extends CommandInternal[Unit] {
-
+class UserSettingsCommand(val user: CurrentUser, val settings: UserSettings) extends CommandInternal[UserSettings] {
 	self: UserSettingsServiceComponent =>
 	
 	var alertsSubmission = settings.alertsSubmission
 	var weekNumberingSystem = settings.weekNumberingSystem
 	var bulkEmailSeparator = settings.bulkEmailSeparator
 	var profilesDefaultView = settings.profilesDefaultView
+
+	lazy val smallGroupEventAttendanceReminderSettings = new SmallGroupEventAttendanceReminderNotificationSettings(settings.notificationSettings("SmallGroupEventAttendanceReminder"))
+	var smallGroupEventAttendanceReminderEnabled = smallGroupEventAttendanceReminderSettings.enabled.value
 		
 	override def applyInternal() = transactional() {
 		settings.alertsSubmission = alertsSubmission
 		settings.weekNumberingSystem = if (weekNumberingSystem.hasText) weekNumberingSystem else null
 		settings.bulkEmailSeparator = bulkEmailSeparator
 		settings.profilesDefaultView = profilesDefaultView
+		smallGroupEventAttendanceReminderSettings.enabled.value = smallGroupEventAttendanceReminderEnabled
 
 		userSettingsService.save(user, settings)
+		settings
 	}
 
 }
@@ -54,14 +59,16 @@ trait UserSettingsCommandValidation extends SelfValidating {
 
 }
 
-trait UserSettingsDescription extends Describable[Unit] {
+trait UserSettingsDescription extends Describable[UserSettings] {
 
 	self: UserSettingsCommandState =>
 
-	override def describe(d:Description) {
+	override def describe(d: Description) {
 		d.properties("user" -> user.apparentId)
 	}
 
+	override def describeResult(d: Description, result: UserSettings) =
+		d.properties("user" -> user.apparentId, "settings" -> result)
 }
 
 trait UserSettingsPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {

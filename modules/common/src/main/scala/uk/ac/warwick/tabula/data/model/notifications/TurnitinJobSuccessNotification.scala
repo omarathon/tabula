@@ -9,7 +9,7 @@ class TurnitinJobSuccessNotification
 	extends TurnitinReportNotification
 	with SingleRecipientNotification {
 
-	@transient val failedUploads = StringMapSetting("failedUploads")
+	@transient val failedUploads = StringMapSetting("failedUploads", Map())
 
 	def title = "Turnitin check finished for %s - %s" format (assignment.module.code.toUpperCase, assignment.name)
 

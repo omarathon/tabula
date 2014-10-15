@@ -1,6 +1,7 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#escape x as x?html>
-<h1>Settings for ${department.name}</h1>
+	<@fmt.deptheader "Settings" "for" department routes "displaysettings" "" />
+
 <@f.form method="post" class="form-horizontal department-settings-form" action="" commandName="displaySettingsCommand">
 	<@form.row>
 		<@form.label>Week numbering system</@form.label>

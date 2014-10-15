@@ -18,6 +18,8 @@ import uk.ac.warwick.tabula.web.views.JSONView
 @Controller
 class UserSettingsController extends BaseController {
 
+	type UserSettingsCommand = Appliable[UserSettings]
+
 	validatesSelf[SelfValidating]
 	
 	hideDeletedItems
@@ -30,7 +32,7 @@ class UserSettingsController extends BaseController {
 		
 		
 	@ModelAttribute("userSettingsCommand")
-	def command(user: CurrentUser) = {
+	def command(user: CurrentUser): UserSettingsCommand = {
 		val usersettings = getUserSettings(user)
 		usersettings match { 
 			case Some(setting) => UserSettingsCommand(user, setting)
@@ -39,7 +41,7 @@ class UserSettingsController extends BaseController {
 	}
 	
 	@RequestMapping(value = Array("/settings"), method = Array(GET, HEAD))
-	def viewSettings(user: CurrentUser, @ModelAttribute("userSettingsCommand") command: Appliable[Unit], errors:Errors) = {
+	def viewSettings(user: CurrentUser, @ModelAttribute("userSettingsCommand") command: UserSettingsCommand, errors:Errors) = {
 		Mav("usersettings/form",
 			"isCourseworkModuleManager" -> !moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments).isEmpty,
 			"isDepartmentalAdmin" -> !moduleService.departmentsWithPermission(user, Permissions.Module.ManageAssignments).isEmpty
@@ -47,7 +49,7 @@ class UserSettingsController extends BaseController {
 	}
 
 	@RequestMapping(value = Array("/settings"), method=Array(POST))
-	def saveSettings(@ModelAttribute("userSettingsCommand") @Valid command: Appliable[Unit], errors:Errors) = {
+	def saveSettings(@ModelAttribute("userSettingsCommand") @Valid command: UserSettingsCommand, errors:Errors) = {
 		if (errors.hasErrors){
 			viewSettings(user, command, errors)
 		}
@@ -69,7 +71,7 @@ class UserSettingsController extends BaseController {
 	}
 
 	@RequestMapping(value = Array("/settings.json"), method=Array(POST))
-	def saveSettingsJson(@ModelAttribute("userSettingsCommand") @Valid command: Appliable[Unit], errors: Errors) = {
+	def saveSettingsJson(@ModelAttribute("userSettingsCommand") @Valid command: UserSettingsCommand, errors: Errors) = {
 		if (!errors.hasErrors) command.apply()
 
 		viewSettingsJson(user)
