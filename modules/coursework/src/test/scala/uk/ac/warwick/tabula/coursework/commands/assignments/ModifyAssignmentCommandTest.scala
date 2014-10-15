@@ -1,26 +1,27 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.collection.mutable.ListBuffer
-import org.joda.time.DateTimeConstants
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeConstants}
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.{CurrentUser, Fixtures, AppContextTestBase, Mockito}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.commands.CurrentSITSAcademicYear
+import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.ExtensionState.Unreviewed
+import uk.ac.warwick.tabula.data.model.{UpstreamAssessmentGroup, Notification, UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.events.EventListener
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
-import uk.ac.warwick.tabula.services.{UserGroupCacheManager, NotificationService, UserLookupService}
+
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, Notification, UserGroup}
-import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
-import org.junit.Before
-import uk.ac.warwick.tabula.coursework.web.Routes.admin.assignment.extension
+import scala.collection.mutable.ListBuffer
 
 // scalastyle:off magic.number
-class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
+class ModifyAssignmentCommandTest extends TestBase with Mockito {
 
 	var userDatabase = Seq(
-		("0000000","aaslat","aaaaa"),
-		("0000001","baslat","aaaab")
-	) map { case(warwickId,userId,code) =>
+		("0000000", "aaslat", "aaaaa"),
+		("0000001", "baslat", "aaaab")
+	) map { case(warwickId, userId, code) =>
 		val user = new User(code)
 		user.setWarwickId(warwickId)
 		user.setUserId(userId)
@@ -29,182 +30,35 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 		user
 	}
 
-	var userLookup: UserLookupService = _
+	var userLookup: UserLookupService = smartMock[UserLookupService]
+	userLookup.getUsersByUserIds(any[JList[String]]) answers { case ids: JList[String @unchecked] =>
+		val users = ids.asScala.map(id=>(id,new User(id)))
+		JHashMap(users:_*)
+	}
 
-	@Before def before {
+	userLookup.getUserByUserId(any[String]) answers { id =>
+		userDatabase find {_.getUserId == id} getOrElse new AnonymousUser
+	}
+	userLookup.getUserByWarwickUniId(any[String]) answers { id =>
+		userDatabase find {_.getWarwickId == id} getOrElse new AnonymousUser
+	}
 
-		userLookup = mock[UserLookupService]
+	class MockNotificationService extends NotificationService {
+		var notifications: ListBuffer[Notification[_,_]] = new ListBuffer[Notification[_,_]]()
 
-		userLookup.getUsersByUserIds(any[JList[String]]) answers { case ids: JList[String @unchecked] =>
-			val users = ids.asScala.map(id=>(id,new User(id)))
-			JHashMap(users:_*)
+		override def push(n: Notification[_,_]) {
+			notifications += n
 		}
-
-		userLookup.getUserByUserId(any[String]) answers { id =>
-			userDatabase find {_.getUserId == id} getOrElse (new AnonymousUser)
-		}
-		userLookup.getUserByWarwickUniId(any[String]) answers { id =>
-			userDatabase find {_.getWarwickId == id} getOrElse (new AnonymousUser)
-		}
 	}
 
-
-	@Test def validateNullDates = transactional { t =>
-	// TAB-236
-		val f = MyFixtures()
-
-		val cmd = new AddAssignmentCommand(f.module)
-		var errors = new BindException(cmd, "command")
-		cmd.openEnded = false
-
-		// Both null two errors
-		cmd.openDate = null
-		cmd.closeDate = null
-		cmd.validate(errors)
-		errors.getErrorCount() should be (2)
-
-		// open null one error
-		errors = new BindException(cmd, "command")
-		cmd.openDate = null
-		cmd.closeDate = new DateTime(2012, DateTimeConstants.JANUARY, 10, 0, 0)
-		cmd.validate(errors)
-		errors.getErrorCount() should be (1)
-
-		// Close null one error
-		errors = new BindException(cmd, "command")
-		cmd.openDate = new DateTime(2012, DateTimeConstants.JANUARY, 10, 0, 0)
-		cmd.closeDate = null
-		cmd.validate(errors)
-		errors.getErrorCount() should be (1)
-
-		// But if we're open ended then no error
-		errors = new BindException(cmd, "command")
-		cmd.openEnded = true
-		cmd.validate(errors)
-		errors.getErrorCount() should be (0)
-
-	}
-
-	@Test def validateCloseDate = transactional { t =>
-	// TAB-236
-		val f = MyFixtures()
-
-		val cmd = new AddAssignmentCommand(f.module)
-		val errors = new BindException(cmd, "command")
-
-		// No error, close date after open date
-		cmd.openDate = new DateTime(2012, DateTimeConstants.JANUARY, 10, 0, 0)
-		cmd.closeDate = cmd.openDate.plusDays(1)
-		cmd.validate(errors)
-		errors.getErrorCount() should be (0)
-
-		// Close date is before open date; but open ended so still no error
-		cmd.closeDate = cmd.openDate.minusDays(1)
-		cmd.openEnded = true
-		cmd.validate(errors)
-		errors.getErrorCount() should be (0)
-
-		// But if we're not open ended
-		cmd.openEnded = false
-		cmd.validate(errors)
-		errors.getErrorCount() should be (1)
-		withClue("correct error code") { errors.getGlobalError().getCode() should be ("closeDate.early") }
-	}
-
-	@Test def validateName = transactional { t =>
-	// TAB-1263
-		val f = MyFixtures()
-
-		val cmd = new AddAssignmentCommand(f.module)
-		var errors = new BindException(cmd, "command")
-
-		// No error, different name
-		cmd.name = "New assignment"
-		cmd.validate(errors)
-		errors.getErrorCount() should be (0)
-
-		// Error, existing name
-		cmd.name = "test"
-		cmd.validate(errors)
-		errors.getErrorCount() should not be (0)
-		withClue("correct error code") { errors.getFieldErrors("name").asScala.map(_.getCode).head should be ("name.duplicate.assignment") }
-
-		// Archive existing, should stop error
-		f.module.assignments.get(0).archived = true
-		session.save(f.module)
-		session.save(f.assignment)
-		errors = new BindException(cmd, "command")
-
-		cmd.name = "test"
-		cmd.validate(errors)
-		errors.getErrorCount() should be (0)
-	}
-
-	@Test def includeAndExcludeUsers = transactional {
-		t =>
-			val f = MyFixtures()
-			val cmd = new EditAssignmentCommand(f.module, f.assignment, f.currentUser)
-			cmd.userLookup = userLookup
-
-			def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
-				case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
-				case ug: UserGroup => ug.userLookup = userLookup
-			}
-
-			wireUserLookup(cmd.members)
-
-			// have one user, add a new one and check re-add does nothing
-			cmd.members.add(new User("aaslat"))
-			cmd.includeUsers = JList("baslat", "aaslat")
-			cmd.afterBind()
-			cmd.members.users.size should be(2)
-			cmd.members.excludes.size should be(0)
-
-			// remove one
-			cmd.excludeUsers = JList("aaslat")
-			cmd.afterBind()
-			cmd.members.users.size should be(1)
-			cmd.members.excludes.size should be(0)
-
-			// now exclude (blacklist) it
-			cmd.excludeUsers = JList("aaslat")
-			cmd.afterBind()
-			cmd.members.users.size should be(1)
-			cmd.members.excludes.size should be(1)
-
-			// now unexclude it
-			cmd.includeUsers = JList("aaslat")
-			cmd.afterBind()
-			cmd.members.users.size should be(1)
-			cmd.members.excludes.size should be(0)
-	}
-
-	@Test def purgeExtensionRequests = transactional {
-		t =>
-			// hbm2ddl generates a swathe of conflicting foreign key constraints for entity_id, so ignore for this test
-			session.createSQLQuery("SET DATABASE REFERENTIAL INTEGRITY FALSE").executeUpdate()
-
-			val f = MyFixtures()
-			f.assignment.extensions.size should be (2)
-			f.assignment.countUnapprovedExtensions should be (1)
-
-			val cmd = new EditAssignmentCommand(f.module, f.assignment, f.currentUser)
-			cmd.allowExtensions = false
-			cmd.notificationService = new MockNotificationService()
-			val ns = cmd.notificationService.asInstanceOf[MockNotificationService]
-			val ass = cmd.apply()
-			session.flush // for the ExtensionService to get correctly updated count
-			ass.countUnapprovedExtensions should be (0)
-			ns.notifications.size should be (2)
-			ns.notifications.map(_.verb).toSeq.sorted should be (Seq("reject", "respond").sorted)
-	}
-
-	case class MyFixtures() {
+	trait Fixture extends CurrentSITSAcademicYear {
 		val user = new User("cusxad")
 		val currentUser = new CurrentUser(user, user)
 		val module = Fixtures.module(code="ls101")
 		val assignment = Fixtures.assignment("test")
+		assignment.academicYear = academicYear
 		assignment.closeDate = DateTime.now.plusDays(30)
+		assignment.members = UserGroup.ofUsercodes
 		val extension1 = new Extension
 		val extension2 = new Extension
 		val sometime = new DateTime().minusWeeks(1)
@@ -230,19 +84,164 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 		assignment.module = module
 
 		module.assignments.add(assignment)
-		session.save(module)
-		session.save(assignment)
-		session.save(extension1)
-		session.save(extension2)
-		session.flush // need to flush so ExtensionService can see the result
+
+		val mockAssignmentService = smartMock[AssignmentService]
+		assignment.assignmentService = mockAssignmentService
+		mockAssignmentService.getAssignmentByNameYearModule(assignment.name, assignment.academicYear, assignment.module) returns Seq(assignment)
+
+		val mockAssignmentMembershipService = smartMock[AssignmentMembershipService]
+		assignment.assignmentMembershipService = mockAssignmentMembershipService
+		mockAssignmentMembershipService.determineMembershipUsers(any[Seq[UpstreamAssessmentGroup]], any[Option[UnspecifiedTypeUserGroup]]) returns Seq()
+
+		val mockExtensionService = smartMock[ExtensionService]
+		assignment.extensionService = mockExtensionService
+		mockExtensionService.countUnapprovedExtensions(assignment) returns 1
+		mockExtensionService.getUnapprovedExtensions(assignment) returns Seq(extension1)
 	}
 
-	class MockNotificationService extends NotificationService {
-		var notifications: ListBuffer[Notification[_,_]] = new ListBuffer[Notification[_,_]]()
+	@Test def validateNullDates() { new Fixture {
+		val cmd = new AddAssignmentCommand(module)
+		var errors = new BindException(cmd, "command")
+		cmd.openEnded = false
 
-		override def push(n: Notification[_,_]) {
-			notifications += n
+		// Both null two errors
+		cmd.openDate = null
+		cmd.closeDate = null
+		cmd.validate(errors)
+		errors.getErrorCount should be (2)
+
+		// open null one error
+		errors = new BindException(cmd, "command")
+		cmd.openDate = null
+		cmd.closeDate = new DateTime(2012, DateTimeConstants.JANUARY, 10, 0, 0)
+		cmd.validate(errors)
+		errors.getErrorCount should be (1)
+
+		// Close null one error
+		errors = new BindException(cmd, "command")
+		cmd.openDate = new DateTime(2012, DateTimeConstants.JANUARY, 10, 0, 0)
+		cmd.closeDate = null
+		cmd.validate(errors)
+		errors.getErrorCount should be (1)
+
+		// But if we're open ended then no error
+		errors = new BindException(cmd, "command")
+		cmd.openEnded = true
+		cmd.validate(errors)
+		errors.getErrorCount should be (0)
+
+	}}
+
+	@Test def validateCloseDate() { new Fixture {
+		val cmd = new AddAssignmentCommand(module)
+		val errors = new BindException(cmd, "command")
+
+		// No error, close date after open date
+		cmd.openDate = new DateTime(2012, DateTimeConstants.JANUARY, 10, 0, 0)
+		cmd.closeDate = cmd.openDate.plusDays(1)
+		cmd.validate(errors)
+		errors.getErrorCount should be (0)
+
+		// Close date is before open date; but open ended so still no error
+		cmd.closeDate = cmd.openDate.minusDays(1)
+		cmd.openEnded = true
+		cmd.validate(errors)
+		errors.getErrorCount should be (0)
+
+		// But if we're not open ended
+		cmd.openEnded = false
+		cmd.validate(errors)
+		errors.getErrorCount should be (1)
+		withClue("correct error code") { errors.getGlobalError.getCode should be ("closeDate.early") }
+	}}
+
+	@Test def validateName() { new Fixture {
+		// TAB-1263
+		val cmd = new AddAssignmentCommand(module)
+		cmd.service = mockAssignmentService
+		cmd.service.getAssignmentByNameYearModule("New assignment", academicYear, module) returns Seq()
+
+		var errors = new BindException(cmd, "command")
+
+		// No error, different name
+		cmd.name = "New assignment"
+		cmd.validate(errors)
+		errors.getErrorCount should be (0)
+
+		// Error, existing name
+		cmd.name = "test"
+		cmd.validate(errors)
+		errors.getErrorCount should not be 0
+		withClue("correct error code") { errors.getFieldErrors("name").asScala.map(_.getCode).head should be ("name.duplicate.assignment") }
+
+		// Archive existing, should stop error
+		module.assignments.get(0).archived = true
+		errors = new BindException(cmd, "command")
+
+		cmd.name = "test"
+		cmd.validate(errors)
+		errors.getErrorCount should be (0)
+	}}
+
+	@Test def includeAndExcludeUsers() { new Fixture {
+		val cmd = new EditAssignmentCommand(module, assignment, currentUser)
+		cmd.service = mockAssignmentService
+		cmd.assignmentMembershipService = mockAssignmentMembershipService
+		cmd.userLookup = userLookup
+
+		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
+			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
+			case ug: UserGroup => ug.userLookup = userLookup
 		}
-	}
+
+		wireUserLookup(cmd.members)
+
+		// have one user, add a new one and check re-add does nothing
+		cmd.members.add(new User("aaslat"))
+		cmd.includeUsers = JList("baslat", "aaslat")
+		cmd.afterBind()
+		cmd.members.users.size should be(2)
+		cmd.members.excludes.size should be(0)
+
+		// remove one
+		cmd.excludeUsers = JList("aaslat")
+		cmd.afterBind()
+		cmd.members.users.size should be(1)
+		cmd.members.excludes.size should be(0)
+
+		// now exclude (blacklist) it
+		cmd.excludeUsers = JList("aaslat")
+		cmd.afterBind()
+		cmd.members.users.size should be(1)
+		cmd.members.excludes.size should be(1)
+
+		// now unexclude it
+		cmd.includeUsers = JList("aaslat")
+		cmd.afterBind()
+		cmd.members.users.size should be(1)
+		cmd.members.excludes.size should be(0)
+	}}
+
+	@Test def purgeExtensionRequests() { new Fixture {
+		assignment.extensions.size should be (2)
+		assignment.countUnapprovedExtensions should be (1)
+
+		val cmd = new EditAssignmentCommand(module, assignment, currentUser)
+
+		cmd.service = mockAssignmentService
+		cmd.assignmentMembershipService = mockAssignmentMembershipService
+		cmd.maintenanceMode = smartMock[MaintenanceModeService]
+		cmd.listener = smartMock[EventListener]
+		cmd.scheduledNotificationService = smartMock[ScheduledNotificationService]
+
+		cmd.allowExtensions = false
+		cmd.notificationService = new MockNotificationService()
+		val ns = cmd.notificationService.asInstanceOf[MockNotificationService]
+		val ass = cmd.apply()
+		if (extension1.state != Unreviewed) mockExtensionService.countUnapprovedExtensions(assignment) returns 0
+		ass.countUnapprovedExtensions should be (0)
+		ns.notifications.size should be (2)
+		ns.notifications.map(_.verb).toSeq.sorted should be (Seq("reject", "respond").sorted)
+	}}
 
 }
