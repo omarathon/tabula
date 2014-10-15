@@ -41,7 +41,7 @@ class AttendanceNoteController extends AttendanceController {
 		)
 
 		val pointsCheckpointsMap = monitoringPointService.getCheckpoints(Seq(point), student)
-		if (!pointsCheckpointsMap.isEmpty) mav.addObjects("checkpoint" -> pointsCheckpointsMap.head._2)
+		if (pointsCheckpointsMap.nonEmpty) mav.addObjects("checkpoint" -> pointsCheckpointsMap.head._2)
 
 		mav.noLayoutIf(ajax)
 
@@ -87,29 +87,32 @@ class EditAttendanceNoteController extends AttendanceController {
 	@RequestMapping(method=Array(GET, HEAD), params=Array("isIframe"))
 	def getIframe(
 		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
-		@PathVariable student: StudentMember
+		@PathVariable student: StudentMember,
+		@PathVariable academicYear: AcademicYear
 	) = {
 		cmd.populate()
-		form(cmd, student, isIframe = true)
+		form(cmd, student, academicYear, isIframe = true)
 	}
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def get(
 		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
-		@PathVariable student: StudentMember
+		@PathVariable student: StudentMember,
+		@PathVariable academicYear: AcademicYear
 	) = {
 		cmd.populate()
-		form(cmd, student)
+		form(cmd, student, academicYear)
 	}
 
 	private def form(
 		cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
 		student: StudentMember,
+		academicYear: AcademicYear,
 		isIframe: Boolean = false
 	) = {
 		val mav = Mav("note/edit_note",
 			"allAbsenceTypes" -> AbsenceType.values,
-			"returnTo" -> getReturnTo(Routes.old.department.viewStudent(currentMember.homeDepartment, student)),
+			"returnTo" -> getReturnTo(Routes.View.student(student.homeDepartment, academicYear, student)),
 			"isModal" -> ajax,
 			"isIframe" -> isIframe
 		)
@@ -125,10 +128,11 @@ class EditAttendanceNoteController extends AttendanceController {
 	def submitIframe(
 		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
 		errors: Errors,
-		@PathVariable student: StudentMember
+		@PathVariable student: StudentMember,
+		@PathVariable academicYear: AcademicYear
 	) = {
 		if (errors.hasErrors) {
-			form(cmd, student, isIframe = true)
+			form(cmd, student, academicYear, isIframe = true)
 		} else {
 			cmd.apply()
 			Mav("note/edit_note", "success" -> true, "isIframe" -> true, "allAbsenceTypes" -> AbsenceType.values)
@@ -139,13 +143,14 @@ class EditAttendanceNoteController extends AttendanceController {
 	def submit(
 		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
 		errors: Errors,
-		@PathVariable student: StudentMember
+		@PathVariable student: StudentMember,
+		@PathVariable academicYear: AcademicYear
 	) = {
 		if (errors.hasErrors) {
-			form(cmd, student)
+			form(cmd, student, academicYear)
 		} else {
 			cmd.apply()
-			Redirect(Routes.old.department.viewStudent(currentMember.homeDepartment, student))
+			Redirect(Routes.View.student(student.homeDepartment, academicYear, student))
 		}
 	}
 
