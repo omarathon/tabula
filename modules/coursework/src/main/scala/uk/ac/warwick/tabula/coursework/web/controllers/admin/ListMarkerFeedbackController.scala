@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.ListMarkerFeedbackCommand
@@ -20,38 +21,43 @@ class ListMarkerFeedbackController  extends CourseworkController {
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def list(@ModelAttribute("command") command: Appliable[MarkerFeedbackCollections], @PathVariable assignment: Assignment): Mav = {
-		val markerFeedbackCollections = command.apply()
-		val inProgressFeedback = markerFeedbackCollections.inProgressFeedback
-		val completedFeedback = markerFeedbackCollections.completedFeedback
-		val rejectedFeedback = markerFeedbackCollections.rejectedFeedback
+
+		if(assignment.markingWorkflow == null) {
+			Mav("errors/no_workflow", "assignmentUrl" -> Routes.admin.assignment.submissionsandfeedback.summary(assignment))
+		} else {
+			val markerFeedbackCollections = command.apply()
+			val inProgressFeedback = markerFeedbackCollections.inProgressFeedback
+			val completedFeedback = markerFeedbackCollections.completedFeedback
+			val rejectedFeedback = markerFeedbackCollections.rejectedFeedback
 
 
-		val maxFeedbackCount = Math.max(
-			rejectedFeedback.map(_.feedbacks.size).reduceOption(_ max _).getOrElse(0),
-			Math.max(
-				inProgressFeedback.map(_.feedbacks.size).reduceOption(_ max _).getOrElse(0),
-				completedFeedback.map(_.feedbacks.size).reduceOption(_ max _).getOrElse(0)
+			val maxFeedbackCount = Math.max(
+				rejectedFeedback.map(_.feedbacks.size).reduceOption(_ max _).getOrElse(0),
+				Math.max(
+					inProgressFeedback.map(_.feedbacks.size).reduceOption(_ max _).getOrElse(0),
+					completedFeedback.map(_.feedbacks.size).reduceOption(_ max _).getOrElse(0)
+				)
 			)
-		)
-		val hasFirstMarkerFeedback = maxFeedbackCount > 1
-		val hasSecondMarkerFeedback = maxFeedbackCount > 2
+			val hasFirstMarkerFeedback = maxFeedbackCount > 1
+			val hasSecondMarkerFeedback = maxFeedbackCount > 2
 
-		val hasOriginalityReport =
-			Seq(inProgressFeedback, completedFeedback, rejectedFeedback)
-				.exists { _.exists { _.submission.hasOriginalityReport }}
+			val hasOriginalityReport =
+				Seq(inProgressFeedback, completedFeedback, rejectedFeedback)
+					.exists { _.exists { _.submission.hasOriginalityReport }}
 
-		Mav("admin/assignments/markerfeedback/list",
-			"assignment" -> assignment,
-			"inProgressFeedback" -> inProgressFeedback,
-			"completedFeedback" -> completedFeedback,
-			"rejectedFeedback" -> rejectedFeedback,
-			"firstMarkerRoleName" -> assignment.markingWorkflow.firstMarkerRoleName,
-			"secondMarkerRoleName" -> assignment.markingWorkflow.secondMarkerRoleName,
-			"thirdMarkerRoleName" -> assignment.markingWorkflow.thirdMarkerRoleName,
-			"hasFirstMarkerFeedback" -> hasFirstMarkerFeedback,
-			"hasSecondMarkerFeedback" -> hasSecondMarkerFeedback,
-			"hasOriginalityReport" -> hasOriginalityReport
-		).crumbs(Breadcrumbs.Department(assignment.module.adminDepartment), Breadcrumbs.Module(assignment.module))
+			Mav("admin/assignments/markerfeedback/list",
+				"assignment" -> assignment,
+				"inProgressFeedback" -> inProgressFeedback,
+				"completedFeedback" -> completedFeedback,
+				"rejectedFeedback" -> rejectedFeedback,
+				"firstMarkerRoleName" -> assignment.markingWorkflow.firstMarkerRoleName,
+				"secondMarkerRoleName" -> assignment.markingWorkflow.secondMarkerRoleName,
+				"thirdMarkerRoleName" -> assignment.markingWorkflow.thirdMarkerRoleName,
+				"hasFirstMarkerFeedback" -> hasFirstMarkerFeedback,
+				"hasSecondMarkerFeedback" -> hasSecondMarkerFeedback,
+				"hasOriginalityReport" -> hasOriginalityReport
+			).crumbs(Breadcrumbs.Department(assignment.module.adminDepartment), Breadcrumbs.Module(assignment.module))
+		}
 	}
 
 }
