@@ -1,23 +1,21 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin.assignments
 
-import uk.ac.warwick.tabula.coursework.commands.assignments.AddAssignmentsCommand
-import uk.ac.warwick.tabula
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.data.model.Department
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ ModelAttribute, RequestMapping }
-import org.joda.time.DateTime
-import collection.JavaConversions._
-import org.springframework.validation.Errors
 import javax.validation.Valid
-import org.springframework.web.bind.WebDataBinder
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.coursework.web.Routes
-import org.springframework.web.bind.annotation.RequestMethod._
+
+import org.joda.time.DateTime
+import org.springframework.stereotype.Controller
+import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.PermissionDeniedException
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.coursework.commands.assignments.{AddAssignmentsCommand, AddAssignmentsCommandOnBind, AddAssignmentsValidation, PopulatesAddAssignmentsCommand}
+import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.data.model.{Assignment, Department}
+import uk.ac.warwick.tabula.web.Mav
+
+import scala.collection.JavaConversions._
 
 /**
  * Controller that handles the multi-step process of creating many assignments from SITS data.
@@ -35,66 +33,85 @@ import uk.ac.warwick.tabula.CurrentUser
 @RequestMapping(value = Array("/admin/department/{department}/setup-assignments"))
 class AddAssignmentsController extends CourseworkController {
 
-	validatesSelf[AddAssignmentsCommand]
+	type AddAssignmentsCommand = Appliable[Seq[Assignment]]
+		with PopulatesAddAssignmentsCommand with AddAssignmentsCommandOnBind with AddAssignmentsValidation
+
+	validatesSelf[SelfValidating]
+
+	@ModelAttribute("command")
+	def command(@PathVariable department: Department) =
+		AddAssignmentsCommand(mandatory(department), user)
+
+	@ModelAttribute("academicYearChoices")
+	def academicYearChoices: JList[AcademicYear] =
+		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
 
 	// The initial load of page 1, where we select the items to import.
 	@RequestMapping(method = Array(GET))
-	def selectionForm(@ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = {
-		cmd.afterBind()
-		cmd.populateWithItems()
-		getMav(cmd).addObjects("action" -> "select")
+	def selectionForm(
+		@ModelAttribute("command") cmd: AddAssignmentsCommand,
+		errors: Errors,
+		@PathVariable department: Department
+	): Mav = {
+		cmd.populate()
+		getMav(department).addObjects("action" -> "select")
 	}
 
 	// Change the academic year; restarts from scratch
 	@RequestMapping(method = Array(POST), params = Array("action=change-year"))
-	def changeYear(@ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = selectionForm(cmd, errors)
+	def changeYear(
+		@ModelAttribute("command") cmd: AddAssignmentsCommand,
+		errors: Errors,
+		@PathVariable department: Department
+	): Mav =
+		selectionForm(cmd, errors, department)
 
 	// Reloads page 1 with a POST, to show any updated information if necessary.
 	@RequestMapping(method = Array(POST), params = Array("action=refresh-select"))
-	def refreshSelectionForm(@ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = {
-		cmd.afterBind()
-//		cmd.populateWithMissingItems()
-		getMav(cmd).addObjects("action" -> "select")
+	def refreshSelectionForm(
+		@ModelAttribute("command") cmd: AddAssignmentsCommand,
+		errors: Errors,
+		@PathVariable department: Department
+	): Mav = {
+		getMav(department).addObjects("action" -> "select")
 	}
 
 	// Loads page 2 where we set options on all the assignments.
 	@RequestMapping(method = Array(POST), params = Array("action=options"))
-	def optionsForm(@ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = {
-		cmd.afterBind()
+	def optionsForm(
+		@ModelAttribute("command") cmd: AddAssignmentsCommand,
+		errors: Errors,
+		@PathVariable department: Department
+	): Mav = {
 		cmd.validateNames(errors)
-		getMav(cmd).addObjects("action" -> "options")
+		getMav(department).addObjects("action" -> "options")
 	}
 
 	// Do validation and return as a chunk of HTML errors.
 	@RequestMapping(method = Array(POST), params = Array("action=validate"))
-	def ajaxValidation(@Valid @ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = {
+	def ajaxValidation(@Valid @ModelAttribute("command") cmd: AddAssignmentsCommand, errors: Errors): Mav = {
 		Mav("admin/assignments/batch_new_validation").noLayout()
 	}
 
 	// Final step where we actually do the work.
 	@RequestMapping(method = Array(POST), params = Array("action=submit"))
-	def submit(@Valid @ModelAttribute cmd: AddAssignmentsCommand, errors: Errors): Mav = {
-		cmd.afterBind()
-		if (errors.hasErrors()) {
-			optionsForm(cmd, errors)
+	def submit(
+		@Valid @ModelAttribute("command") cmd: AddAssignmentsCommand,
+		errors: Errors,
+		@PathVariable department: Department
+	): Mav = {
+		if (errors.hasErrors) {
+			optionsForm(cmd, errors, department)
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin.department(cmd.department))
+			Redirect(Routes.admin.department(department))
 		}
 	}
 
-	@ModelAttribute("academicYearChoices") def academicYearChoices: JList[AcademicYear] = {
-		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
-	}
-
-	@ModelAttribute def cmd(department: Department, user: CurrentUser) = {
-		new AddAssignmentsCommand(mandatory(department), user)
-	}
-
 	// The shared Mav for most of the request mappings
-	def getMav(cmd: AddAssignmentsCommand) = {
+	def getMav(department: Department) = {
 		Mav("admin/assignments/batch_new_select")
-			.crumbs(Breadcrumbs.Department(cmd.department))
+			.crumbs(Breadcrumbs.Department(department))
 	}
 
 }
