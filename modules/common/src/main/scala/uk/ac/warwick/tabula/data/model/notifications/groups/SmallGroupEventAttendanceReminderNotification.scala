@@ -53,7 +53,7 @@ class SmallGroupEventAttendanceReminderNotification
 
 	override def recipients: Seq[User] = {
 		val attendanceIds = item.entity.attendance.asScala.map(_.universityId)
-		if (event.group.students.isEmpty || event.group.students.users.map(_.getWarwickId).forall(attendanceIds.contains)) {
+		if (!event.group.groupSet.collectAttendance || event.group.students.isEmpty || event.group.students.users.map(_.getWarwickId).forall(attendanceIds.contains)) {
 			Seq()
 		} else {
 			event.tutors.users // TAB-2830 If there are no tutors, just don't send the email

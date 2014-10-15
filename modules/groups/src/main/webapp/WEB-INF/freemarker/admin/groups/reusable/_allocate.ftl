@@ -146,7 +146,7 @@
 								<div class="span5">
 									<h3 class="smallscreen-only">Groups</h3>
 									<div id="groupslist" class="groups fix-on-scroll">
-										<#list smallGroupSet.groups as group>
+										<#list command.sortedGroups as group>
 											<#assign existingStudents = mappingById[group.id]![] />
 											<div class="drag-target well clearfix group-${group.id}">
 												<div class="group-header">
@@ -222,11 +222,9 @@
 				return $('#groupslist').outerHeight();
 			});
 
-			var fixHeaderFooter = $('.fix-area').fixHeaderFooter();
-
 			$(window).scroll(function() {
-				fixHeaderFooter.fixDirectionIcon();
-				fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
+				Groups.fixHeaderFooter.fixDirectionIcon();
+				Groups.fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
 			});
 
 			// When the return list has changed, make sure the filter is re-run
