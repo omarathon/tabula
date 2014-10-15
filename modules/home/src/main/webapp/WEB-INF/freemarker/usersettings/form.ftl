@@ -1,4 +1,17 @@
 <#escape x as x?html>
+<style type="text/css">
+	.tabula-page #main-content p.radio-aligned {
+		margin-left: 20px;
+		padding-top: 5px;
+	}
+
+	.tabula-page #main-content label.checkbox.radio-aligned input[type="checkbox"] {
+		margin-left: 0;
+		margin-right: 6px;
+		vertical-align: text-bottom;
+	}
+</style>
+
 <h1>User settings for ${user.firstName}</h1>
 <@f.form method="post" class="form-horizontal" action="${url('/settings')}" commandName="userSettingsCommand">
 	
@@ -67,12 +80,12 @@
 	<@form.row>
 		<@form.label>Notifications</@form.label>
 		<@form.field>
-			<@form.label checkbox=true>
-				<@f.checkbox path="smallGroupEventAttendanceReminderEnabled" />
-				Small group attendance notifications
-			</@form.label>
+			<p class="radio-aligned">Send me notifications about:</p>
 
-			<div class="help-block">Uncheck the box next to a notification type to opt-out of receiving notifications of this type.</div>
+			<@form.label checkbox=true clazz="radio-aligned">
+				<@f.checkbox path="smallGroupEventAttendanceReminderEnabled" />
+				Small group attendance
+			</@form.label>
 		</@form.field>
 	</@form.row>
 
