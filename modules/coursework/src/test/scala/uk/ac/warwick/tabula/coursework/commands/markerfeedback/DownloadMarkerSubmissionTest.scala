@@ -1,19 +1,19 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.{Mockito, AppContextTestBase}
+import java.io.{ByteArrayInputStream, FileInputStream, FileOutputStream}
 import java.util.zip.ZipInputStream
-import java.io.{ByteArrayInputStream, FileInputStream}
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import org.junit.Before
-import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmissionsCommand
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.util.FileCopyUtils
-import java.io.FileOutputStream
-import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
-class DownloadMarkerSubmissionTest extends AppContextTestBase with MarkingWorkflowWorld with Mockito {
+import org.junit.Before
+import org.springframework.util.FileCopyUtils
+import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmissionsCommand
+import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.{Features, Mockito, TestBase}
+
+import scala.collection.JavaConversions._
+
+class DownloadMarkerSubmissionTest extends TestBase with MarkingWorkflowWorld with Mockito {
 
   @Before
   def setup() {
@@ -35,12 +35,15 @@ class DownloadMarkerSubmissionTest extends AppContextTestBase with MarkingWorkfl
 		assignment.markingWorkflow.userLookup = mockUserLookup
   }
 
-	trait CommandTestSupport extends AutowiringZipServiceComponent with AssignmentServiceComponent with StateServiceComponent {
-		val assignmentService = mock[AssignmentService]
-		val stateService = mock[StateService]
+	trait CommandTestSupport extends ZipServiceComponent with AssignmentServiceComponent with StateServiceComponent {
+		val assignmentService = smartMock[AssignmentService]
+		val stateService = smartMock[StateService]
+		val zipService = new ZipService
+		zipService.userLookup = mockUserLookup
+		zipService.features = Features.empty
+		zipService.zipDir = createTemporaryDirectory()
 	}
 
-  @Transactional
   @Test
   def downloadSubmissionsTest() {
     withUser("cuslaj") {
