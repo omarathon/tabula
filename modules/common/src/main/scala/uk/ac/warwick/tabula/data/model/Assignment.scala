@@ -445,8 +445,7 @@ class Assignment
 	// feedback that has been been through the marking process (not placeholders for marker feedback)
 	def fullFeedback = feedbacks.filterNot(_.isPlaceholder).toSeq
 
-	// safer to use in overview pages like the department homepage as does not require the feedback list to be inflated
-	def countFullFeedback = feedbackService.countFullFeedback(this)
+	def countFullFeedback = fullFeedback.size
 
 	def hasFullFeedback = countFullFeedback > 0
 
@@ -560,14 +559,11 @@ class Assignment
 		}
 	}
 
-	def getMarkerFeedbackForCurrentPosition(uniId: String, user: User): Option[MarkerFeedback] = {
-		val parentFeedback = feedbacks.find(_.universityId == uniId)
-		parentFeedback.flatMap {
-			f => f.getCurrentWorkflowFeedbackPosition.flatMap {
-				p => getMarkerFeedbackForPositionInFeedback(uniId, user, p, f)
-			}
-		}
-	}
+	def getMarkerFeedbackForCurrentPosition(uniId: String, user: User): Option[MarkerFeedback] = for {
+		feedback <- feedbacks.find(_.universityId == uniId)
+		position <- feedback.getCurrentWorkflowFeedbackPosition
+		markerFeedback <- getMarkerFeedbackForPositionInFeedback(uniId, user, position, feedback)
+	} yield markerFeedback
 
 	def getLatestCompletedMarkerFeedback(uniId: String, user: User): Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.universityId == uniId)

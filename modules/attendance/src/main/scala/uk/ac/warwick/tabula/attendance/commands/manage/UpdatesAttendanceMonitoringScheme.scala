@@ -23,7 +23,7 @@ trait UpdatesAttendanceMonitoringScheme extends Logging {
 
 		schemes.groupBy(s => (s.department, s.academicYear)).map{case((department, academicYear), groupedSchemes) =>
 			attendanceMonitoringService.updateCheckpointTotalsAsync(
-				groupedSchemes.flatMap(_.members.members).distinct.map(allStudents),
+				groupedSchemes.flatMap(_.members.members).distinct.flatMap(allStudents.get),
 				department,
 				academicYear
 			)

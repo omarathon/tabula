@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
-import uk.ac.warwick.tabula.{MockUserLookup, Fixtures, CurrentUser, Mockito, TestBase}
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.services.{UserLookupComponent, ProfileService, ProfileServiceComponent}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.data._
@@ -30,6 +31,7 @@ class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
 	trait Fixture {
 		val scheme = new AttendanceMonitoringScheme
 		scheme.department = new Department
+		scheme.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 		val student1 = Fixtures.student(universityId = "1234", userId = "1234")
 		val student2 = Fixtures.student(universityId = "2345", userId = "2345")
 		val student3 = Fixtures.student(universityId = "3456", userId = "3456")

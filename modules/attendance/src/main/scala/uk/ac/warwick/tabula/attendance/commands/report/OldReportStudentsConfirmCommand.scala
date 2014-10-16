@@ -49,7 +49,7 @@ abstract class OldReportStudentsConfirmCommand(val department: Department, val c
 		// Find the students matching the filter
 		allStudents = profileService.findAllStudentsByRestrictions(
 			department = department,
-			restrictions = buildRestrictions(),
+			restrictions = buildRestrictions(academicYear),
 			orders = buildOrders()
 		)
 		// Find the available monitoring periods for those students

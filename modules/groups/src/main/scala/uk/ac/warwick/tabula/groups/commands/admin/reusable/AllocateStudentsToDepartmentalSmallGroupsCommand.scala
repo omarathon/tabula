@@ -99,6 +99,7 @@ trait AllocateStudentsToDepartmentalSmallGroupsCommandState {
 	def department: Department
 	def set: DepartmentSmallGroupSet
 	def viewer: CurrentUser
+	var sortedDeptGroups: JList[DepartmentSmallGroup] = JArrayList()
 }
 
 trait AllocateStudentsToDepartmentalSmallGroupsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -139,6 +140,7 @@ trait PopulateAllocateStudentsToDepartmentalSmallGroupsCommand extends PopulateO
 		for (group <- set.groups.asScala)
 			mapping.put(group, JArrayList(group.students.users.toList))
 
+		sortedDeptGroups = set.groups.asScala.sorted.asJava
 		unallocated.clear()
 		unallocated.addAll(set.unallocatedStudents.asJava)
 	}

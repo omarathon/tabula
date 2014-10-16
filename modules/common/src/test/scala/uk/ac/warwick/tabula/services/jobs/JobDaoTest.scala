@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.services.jobs
 
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.spring.Wire
 import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.jobs.TestingJob
 
 // scalastyle:off magic.number
@@ -10,7 +9,7 @@ class JobDaoTest extends AppContextTestBase with HasJobDao {
 	
 	@Autowired var service: JobService = _
 	
-	@Test def crud = transactional { t =>
+	@Test def crud() = transactional { t =>
 		val inst1 = service.add(None, TestingJob("job1"))
 		val inst2 = service.add(None, TestingJob("job2"))
 		val inst3 = service.add(None, TestingJob("job3"))
@@ -31,7 +30,7 @@ class JobDaoTest extends AppContextTestBase with HasJobDao {
 		
 		val inst = jobDao.getById(inst1.id).get
 		
-		jobDao.findOutstandingInstances(5).contains(inst) should be (true)
+		jobDao.findOutstandingInstances(5).contains(inst) should be {true}
 		
 		inst.started = true
 		jobDao.update(inst)
@@ -39,20 +38,20 @@ class JobDaoTest extends AppContextTestBase with HasJobDao {
 		jobDao.findOutstandingInstance(inst1) should be (None)
 		
 		jobDao.findOutstandingInstances(5).length should be (4)
-		jobDao.findOutstandingInstances(5).contains(inst) should be (false)
+		jobDao.findOutstandingInstances(5).contains(inst) should be {false}
 		
 		jobDao.unfinishedInstances.length should be (5)
-		jobDao.unfinishedInstances.contains(inst) should be (true)
+		jobDao.unfinishedInstances.contains(inst) should be {true}
 		jobDao.listRecent(0, 5).length should be (0)
-		jobDao.listRecent(0, 5).contains(inst) should be (false)
+		jobDao.listRecent(0, 5).contains(inst) should be {false}
 		
 		inst.finished = true
 		jobDao.update(inst)
 		
 		jobDao.unfinishedInstances.length should be (4)
-		jobDao.unfinishedInstances.contains(inst) should be (false)
+		jobDao.unfinishedInstances.contains(inst) should be {false}
 		jobDao.listRecent(0, 5).length should be (1)
-		jobDao.listRecent(0, 5).contains(inst) should be (true)
+		jobDao.listRecent(0, 5).contains(inst) should be {true}
 	}
 
 }

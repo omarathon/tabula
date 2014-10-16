@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{Appliable, Command, Description, ReadOnly}
-import uk.ac.warwick.tabula.data.model.{Department, Member, StudentMember}
+import uk.ac.warwick.tabula.data.model.{StaffMember, Department, Member, StudentMember}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.scheduling.commands.CleanupUnreferencedFilesCommand
 import uk.ac.warwick.tabula.scheduling.commands.SanityCheckFilesystemCommand
@@ -199,7 +199,8 @@ class ImportSingleProfileController extends BaseSysadminController {
 
 		member match {
 			case stu: StudentMember => command.refresh(stu)
-			case _ => throw new IllegalArgumentException("Tried to refresh a non-student member - not implemented yet")
+			case staff: StaffMember => command.refresh(staff)
+			case _ => throw new IllegalArgumentException("Tried to refresh a non-staff/student member - not implemented yet")
 		}
 
 		// Redirect cross-context

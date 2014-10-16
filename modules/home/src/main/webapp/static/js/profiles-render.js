@@ -501,16 +501,26 @@
 		}
 
         $(".fullCalendar").each(function(index){
-    			createCalendar($(this),$(this).data('viewname'),$(this).data('studentid'),$(this).data('showviewswitcher'));
-    		});
-    	});
-
-		$(function(){
-			$('#timetable-pane h4 a').on('click', function(e){
-				e.preventDefault();
-				$('#timetable-ical-modal').modal('show');
-			});
+			createCalendar($(this),$(this).data('viewname'),$(this).data('studentid'),$(this).data('showviewswitcher'));
 		});
+	});
+
+	$(function(){
+		$('#timetable-pane h4 a').on('click', function(e){
+			e.preventDefault();
+			$('#timetable-ical-modal').modal('show');
+		});
+	});
+
+	// Save user preferences for default profile view
+	$(function() {
+		$(document).on('tabbablechanged', function(e, options) {
+			if (typeof(options) === 'object' && typeof(options.layout) !== 'undefined') {
+				// Update the default view
+				$.post('/settings.json', {'profilesDefaultView': options.layout});
+			}
+		});
+	});
 
 	// take anything we've attached to "exports" and add it to the global "Profiles"
 	// we use extend() to add to any existing variable rather than clobber it

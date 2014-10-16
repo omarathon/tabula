@@ -33,11 +33,21 @@
 					<li>
 						<#assign settings_url><@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}</#assign>
 						<@fmt.permission_button
-						permission='Department.ManageDisplaySettings'
-						scope=department
-						action_descr='manage department settings'
-						href=settings_url>
-							<i class="icon-list-alt"></i> Department settings
+							permission='Department.ManageDisplaySettings'
+							scope=department
+							action_descr='manage department settings'
+							href=settings_url>
+							<i class="icon-list-alt icon-fixed-width"></i> Department settings
+						</@fmt.permission_button>
+					</li>
+					<li>
+						<#assign settings_url><@routes.notificationsettings department />?returnTo=${(info.requestedUri!"")?url}</#assign>
+						<@fmt.permission_button
+							permission='Department.ManageNotificationSettings'
+							scope=department
+							action_descr='manage department notification settings'
+							href=settings_url>
+							<i class="icon-envelope icon-fixed-width"></i> Notification settings
 						</@fmt.permission_button>
 					</li>
 
@@ -50,7 +60,7 @@
 						scope=department
 						action_descr='setup assignments from SITS'
 						href=setup_Url>
-							<i class="icon-cloud-download"></i> Create assignments from SITS
+							<i class="icon-cloud-download icon-fixed-width"></i> Create assignments from SITS
 						</@fmt.permission_button>
 					</li>
 
@@ -61,7 +71,7 @@
 						scope=department
 						action_descr='copy existing assignments'
 						href=copy_url>
-							<i class="icon-share-alt"></i> Create assignments from previous
+							<i class="icon-share-alt icon-fixed-width"></i> Create assignments from previous
 						</@fmt.permission_button>
 					</li>
 
@@ -72,7 +82,7 @@
 						scope=department
 						action_descr='archive existing assignments'
 						href=archive_url>
-							<i class="icon-folder-close"></i> Archive assignments
+							<i class="icon-folder-close icon-fixed-width"></i> Archive assignments
 						</@fmt.permission_button>
 					</li>
 
@@ -81,14 +91,14 @@
 						<li>
 							<#assign extensions_url><@routes.extensionsettings department /></#assign>
 							<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
-								<i class="icon-list-alt"></i> Extension settings
+								<i class="icon-list-alt icon-fixed-width"></i> Extension settings
 							</@fmt.permission_button>
 						</li>
 
 						<li>
 							<#assign extensions_url><@routes.manage_extensions department /></#assign>
 							<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
-								<i class="icon-calendar"></i> Manage extensions
+								<i class="icon-calendar icon-fixed-width"></i> Manage extensions
 							</@fmt.permission_button>
 						</li>
 					</#if>
@@ -98,7 +108,7 @@
 						<li>
 							<#assign markingflow_url><@routes.markingworkflowlist department /></#assign>
 							<@fmt.permission_button permission='MarkingWorkflow.Read' scope=department action_descr='manage marking workflows' href=markingflow_url>
-								<i class="icon-check"></i> Marking workflows
+								<i class="icon-check icon-fixed-width"></i> Marking workflows
 							</@fmt.permission_button>
 						</li>
 					</#if>
@@ -109,7 +119,7 @@
 						<li>
 							<#assign feedback_url><@routes.feedbacktemplates department /></#assign>
 							<@fmt.permission_button permission='FeedbackTemplate.Create' scope=department action_descr='create feedback template' href=feedback_url>
-								<i class="icon-comment"></i> Feedback templates
+								<i class="icon-comment icon-fixed-width"></i> Feedback templates
 							</@fmt.permission_button>
 						</li>
 					</#if>
@@ -118,7 +128,7 @@
 						<#assign feedbackrep_url><@routes.feedbackreport department /></#assign>
 						<@fmt.permission_button permission='Department.DownloadFeedbackReport' scope=department action_descr='generate a feedback report' href=feedbackrep_url
 						data_attr='data-container=body data-toggle=modal data-target=#feedback-report-modal'>
-							<i class="icon-book"></i> Feedback report
+							<i class="icon-book icon-fixed-width"></i> Feedback report
 						</@fmt.permission_button>
 
 					<#-- Run this script inline to allow us to build the modal and load the URL before the rest of the page has loaded -->

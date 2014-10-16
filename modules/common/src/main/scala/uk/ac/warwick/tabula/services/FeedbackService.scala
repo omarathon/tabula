@@ -22,7 +22,6 @@ import uk.ac.warwick.spring.Wire
 trait FeedbackService {
 	def getStudentFeedback(assignment: Assignment, warwickId: String): Option[Feedback]
 	def countPublishedFeedback(assignment: Assignment): Int
-	def countFullFeedback(assignment: Assignment): Int
 	def getUsersForFeedback(assignment: Assignment): Seq[Pair[String, User]]
 	def getFeedbackByUniId(assignment: Assignment, uniId: String): Option[Feedback]
 	def getMarkerFeedbackById(markerFeedbackId: String): Option[MarkerFeedback]
@@ -55,15 +54,6 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 	def countPublishedFeedback(assignment: Assignment): Int = {
 		session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = 1""")
 			.setString("assignmentId", assignment.id)
-			.uniqueResult
-			.asInstanceOf[Number].intValue
-	}
-
-	def countFullFeedback(assignment: Assignment): Int = {
-		session.createQuery("""select count(distinct f.id) from Feedback f left join f.attachments a
-			where f.assignment = :assignment
-			and not (actualMark is null and actualGrade is null and f.attachments is empty)""")
-			.setEntity("assignment", assignment)
 			.uniqueResult
 			.asInstanceOf[Number].intValue
 	}

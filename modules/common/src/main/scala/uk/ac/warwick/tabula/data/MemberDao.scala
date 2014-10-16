@@ -186,7 +186,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.list
 
 		val courseMatches = session.newQuery[StudentMember]( """
-				select distinct student
+				select student
         	from
           	StudentCourseDetails scd
           where
@@ -194,7 +194,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
         		scd.student.lastUpdatedDate > :lastUpdated and
             scd.statusOnRoute.code not like 'P%' """)
 			.setEntity("department", department)
-			.setParameter("lastUpdated", startDate).seq
+			.setParameter("lastUpdated", startDate).seq.distinct
 
 		// do not remove; import needed for sorting
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
@@ -202,12 +202,12 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 	}
 
 	def listUpdatedSince(startDate: DateTime, max: Int) =
-		session.newQuery[Member]( """select distinct staffOrStudent from Member staffOrStudent
+		session.newQuery[Member]( """select staffOrStudent from Member staffOrStudent
 			where staffOrStudent.lastUpdatedDate > :lastUpdated
 			order by lastUpdatedDate asc
 		""")
 			.setParameter("lastUpdated", startDate)
-			.setMaxResults(max).seq
+			.setMaxResults(max).seq.distinct
 
 	def listUpdatedSince(startDate: DateTime) = {
 		val scrollable = session.newCriteria[Member]
@@ -262,7 +262,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		else {
 
 			val s = session.newQuery[StudentMember]("""
-			select distinct student
+			select student
 			from
 				StudentCourseDetails scd
 			where
@@ -272,7 +272,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.statusOnRoute.code not like 'P%'
 			""")
-			.setEntity("department", department).seq
+			.setEntity("department", department).seq.distinct
 			s
 		}
 

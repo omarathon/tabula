@@ -1,62 +1,62 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.BindException
-import javax.persistence.Entity
-import javax.persistence.NamedQueries
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Feedback
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.FileDao
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, FileAttachment}
+import uk.ac.warwick.tabula.services.{UserLookupService, ZipService}
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 
-class DownloadFeedbackCommandTest extends AppContextTestBase {
+class DownloadFeedbackCommandTest extends TestBase with Mockito {
 
-	@Transactional
-	@Test def applyCommand = withUser("custard") {
-		val feedback = session.load(classOf[Feedback], MyFixtures().feedback.id).asInstanceOf[Feedback]
+	trait Fixture {
+		var userDatabase = Seq(new User())
+		var userLookup: UserLookupService = smartMock[UserLookupService]
+		userLookup.getUserByUserId(any[String]) answers { id =>
+			userDatabase find {_.getUserId == id} getOrElse new AnonymousUser()
+		}
+		userLookup.getUserByWarwickUniId(any[String]) answers { id =>
+			userDatabase find {_.getWarwickId == id} getOrElse new AnonymousUser()
+		}
 
-		feedback.assignment.feedbacks.size should be (1)
-		session.isDirty should be (false)
-
-		// check that we can dirty and un-dirty it harmlessly
-		feedback.assignment.fileExtensions = Seq(".doc")
-		session.isDirty should be (true)
-		feedback.assignment.fileExtensions = Seq()
-		session.isDirty should be (false)
-
-		val command = new DownloadFeedbackCommand(feedback.assignment.module, feedback.assignment, feedback)
-		command.filename = "0123456-feedback.doc"
-
-		val errors = new BindException(command, "command")
-		withClue(errors) { errors.hasErrors should be (false) }
-		command.apply should be (None)
-		session.isDirty should be (false) // BECAUSE THIS IS A READ-OP
-}
-
-	case class MyFixtures() {
 		val department = Fixtures.department(code="ls", name="Life Sciences")
 		val module = Fixtures.module(code="ls101")
 		val assignment = new Assignment
 		val feedback = new Feedback("0123456")
+		feedback.id = "123"
 
 		department.postLoad // force legacy settings
 		module.adminDepartment = department
 		assignment.module = module
 		assignment.addFeedback(feedback)
 
-		session.save(department)
-		session.save(module)
-		session.save(assignment)
-		session.flush()
-		session.clear()
+		val attachment = new FileAttachment
+		attachment.id = "123"
+		attachment.fileDao = smartMock[FileDao]
+		attachment.fileDao.getData(attachment.id) returns Option(createTemporaryFile())
+		attachment.name = "0123456-feedback.doc"
+		feedback.attachments.add(attachment)
 	}
+
+	@Test def applyCommand() { new Fixture { withUser("custard") {
+		feedback.assignment.feedbacks.size should be (1)
+
+		val command = new DownloadFeedbackCommand(feedback.assignment.module, feedback.assignment, feedback)
+		command.zip = new ZipService
+		command.zip.userLookup = userLookup
+		command.zip.features = Features.empty
+		command.zip.zipDir = createTemporaryDirectory()
+
+		command.filename = attachment.name
+
+		val errors = new BindException(command, "command")
+		withClue(errors) { errors.hasErrors should be {false} }
+
+		command.applyInternal().get.filename should be (attachment.name)
+
+		command.filename = null
+		command.applyInternal().get.file.isDefined should be {true}
+	}}}
+
 }

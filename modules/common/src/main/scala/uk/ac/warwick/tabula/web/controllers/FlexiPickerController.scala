@@ -1,34 +1,24 @@
 package uk.ac.warwick.tabula.web.controllers
 
-import FlexiPickerController._
-import java.io.UnsupportedEncodingException
-import java.io.Writer
+import java.io.{UnsupportedEncodingException, Writer}
+import java.net.URLEncoder
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.userlookup.webgroups.{GroupNotFoundException, GroupServiceException}
-import java.net.URLEncoder
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import collection.JavaConversions._
-import uk.ac.warwick.userlookup.Group
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.permissions._
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
-import uk.ac.warwick.tabula.commands.ComposableCommand
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
-import uk.ac.warwick.tabula.commands.CommandInternal
-import uk.ac.warwick.tabula.services.UserLookupComponent
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.services.ProfileServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringUserLookupComponent, ProfileServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.FlexiPickerController._
+import uk.ac.warwick.userlookup.{Group, User}
+import uk.ac.warwick.userlookup.webgroups.{GroupNotFoundException, GroupServiceException}
+
+import scala.collection.JavaConversions._
 
 
 @Controller
@@ -46,7 +36,7 @@ class FlexiPickerController extends BaseController {
 		var results: FlexiPickerResult = null
 
 		if (form.hasQuery && form.query.trim.length > 2) {
-			results = form.apply
+			results = form.apply()
 		}
 
 		json.writeValue(out, Map("data" -> Map("results" -> results)))
@@ -58,6 +48,8 @@ class FlexiPickerController extends BaseController {
 
 object FlexiPickerController {
 	type FlexiPickerResult = List[Map[String, String]]
+
+	val NewStarterUserTypeString = "New Starter"
 	
 	object FlexiPickerCommand {
 		def apply() = 
@@ -114,7 +106,7 @@ object FlexiPickerController {
 				users = doSearchUsers(terms)
 			}
 
-			users.filter(isValidUser).map(createItemFor(_))
+			users.filter(isValidUser).map(createItemFor)
 		}
 
 		/**
@@ -161,13 +153,14 @@ object FlexiPickerController {
 
 		private def isValidUser(user: User) =
 			user.isFoundUser && {
-				val hasUniversityIdIfNecessary = (!universityId || user.getWarwickId.hasText)
+				val hasUniversityIdIfNecessary = !universityId || user.getWarwickId.hasText
+				val isNotNewStarter = user.getUserType != NewStarterUserTypeString
 				val isTabulaMemberIfNecessary = hasUniversityIdIfNecessary && (!tabulaMembersOnly || {
 						if (universityId) profileService.getMemberByUniversityId(user.getWarwickId).isDefined
-						else profileService.getMemberByUser(user, true).isDefined
+						else profileService.getMemberByUser(user, disableFilter = true).isDefined
 				})
 				
-				hasUniversityIdIfNecessary && isTabulaMemberIfNecessary
+				hasUniversityIdIfNecessary && isTabulaMemberIfNecessary && isNotNewStarter
 			}
 
 		private def searchGroups: FlexiPickerResult = {
@@ -177,15 +170,12 @@ object FlexiPickerController {
 					list = doGroupSearch()
 				}
 				catch {
-					case e: GroupServiceException => {
+					case e: GroupServiceException =>
 						logger.error("Failed to look up group names", e)
-					}
-					case e: UnsupportedEncodingException => {
+					case e: UnsupportedEncodingException =>
 						throw new IllegalStateException("UTF-8 Does Not Exist??")
-					}
-					case e: GroupNotFoundException => {
+					case e: GroupNotFoundException =>
 						logger.debug("Group didn't exist")
-					}
 				}
 			}
 			list
@@ -202,7 +192,7 @@ object FlexiPickerController {
 			else {
 				val groupQuery = URLEncoder.encode(query.trim, "UTF-8")
 				val groups: List[Group] = userLookup.getGroupService.getGroupsForQuery(groupQuery).toList
-				outList = groups.map(createItemFor(_))
+				outList = groups.map(createItemFor)
 			}
 
 			outList

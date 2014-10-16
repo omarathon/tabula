@@ -5,8 +5,6 @@
 <script type="text/javascript">
 (function ($) {
 	$(function() {
-		$('.fix-area').fixHeaderFooter();
-
 		$('.select-all').change(function(e) {
 			$('.attendees').selectDeselectCheckboxes(this);
 		});

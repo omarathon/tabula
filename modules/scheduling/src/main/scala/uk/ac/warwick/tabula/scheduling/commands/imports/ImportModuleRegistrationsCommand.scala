@@ -42,18 +42,17 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 
 	override def applyInternal(): Option[ModuleRegistration] = transactional() ({
 		tabulaModule match {
-			case None => {
+			case None =>
 				logger.warn("No stem module for " + modRegRow.sitsModuleCode + " found in Tabula for " + scjCode + " - maybe it hasn't been imported yet?")
 				None
-			}
-			case Some(module: Module) => {
+			case Some(module: Module) =>
 				logger.debug("Importing module registration for student " + scjCode + ", module " + modRegRow.sitsModuleCode)
 
 				studentCourseDetailsDao.getByScjCode(scjCode) match {
 					case None =>
 						logger.warn("Can't record module registration - could not find a StudentCourseDetails for " + scjCode)
 						None
-					case Some(scd: StudentCourseDetails) => {
+					case Some(scd: StudentCourseDetails) =>
 						val scd = studentCourseDetailsDao.getByScjCode(scjCode).getOrElse(
 							throw new IllegalStateException("Can't record module registration - could not find a StudentCourseDetails for " + scjCode)
 						)
@@ -82,9 +81,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 						}
 
 						Some(moduleRegistration)
-					}
 				}
-			}
 		}
 	})
 
@@ -110,20 +107,18 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 		val oldValue = destinationBean.getPropertyValue(property)
 
 		agreedMark match {
-			case Some(mark: java.math.BigDecimal) => {
+			case Some(mark: java.math.BigDecimal) =>
 				if (oldValue != mark) {
 					destinationBean.setPropertyValue(property, mark)
 					true
 				}
 				else false
-			}
-			case None => {
+			case None =>
 				if (oldValue != null) {
 					destinationBean.setPropertyValue(property, null)
 					true
 				}
 				else false
-			}
 		}
 	}
 

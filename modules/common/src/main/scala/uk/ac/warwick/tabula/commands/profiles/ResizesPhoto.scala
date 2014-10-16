@@ -25,16 +25,14 @@ trait ResizesPhoto {
 	var size: String = ACTUAL_SIZE
 
 	def render(member: Option[Member]): RenderableFile =
-		member map { m =>
-			val photo = new Photo(m.photo)
-			photo.inputStream match {
-				case null => resized(DefaultPhoto, DefaultModified)
-				case _ => resized(photo, m.lastUpdatedDate)
+		member
+			.flatMap { m =>
+				Option(m.photo)
+					.map { attachment => (m, new Photo(attachment)) }
+					.filter { case (_, photo) => Option(photo.inputStream).nonEmpty }
 			}
-		} getOrElse {
-			resized(DefaultPhoto, DefaultModified)
-		}
-
+			.map { case (m, photo) => resized(photo, m.lastUpdatedDate) }
+			.getOrElse { resized(DefaultPhoto, DefaultModified) }
 
 	def resized(renderable: RenderableFile, lastModified: DateTime): RenderableFile = size match {
 		case THUMBNAIL_SIZE => resized(renderable, lastModified, 170)

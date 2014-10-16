@@ -935,14 +935,14 @@
 				$t.find('.gadget, .tab-content, .tab-pane, .active').removeClass('gadget tab-content tab-pane active');
 			}
 
-			$(document).on('tabbablechanged', function(e, callback) {
+			$(document).on('tabbablechanged', function(e, options) {
 				$('.tooltip').remove();
 				$t.show().find('.tab-container i, .layout-tools i').tooltip();
-				if (typeof(callback) == typeof(Function)) callback();
+				if (typeof(options) === 'object' && typeof(options.callback) == typeof(Function)) options.callback();
 			});
 
 			// layout options
-			$t.on('click', '.layout-tools .icon-folder-close', function() { // tabify
+			var tabLayout = function() { // tabify
 				reset();
 				var $tabContainer = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
 				var $tabs = $tabContainer.find('ul');
@@ -963,10 +963,11 @@
 					handle: '.icon-move',
 					placeholder: 'tabbable-placeholder'
 				}).show().find('li:first > a').tab('show');
-				$t.trigger('tabbablechanged', function() { $('.tabbable').tabOverflow(); });
-			});
+				$t.trigger('tabbablechanged', {'callback': function() { $('.tabbable').tabOverflow(); }, 'layout': 'tabbed'});
+			};
+			$t.on('click', '.layout-tools .icon-folder-close', tabLayout);
 
-			$t.on('click', '.layout-tools .icon-th-large', function() { // gadgetify
+			var gadgetLayout = function() { // gadgetify
 				reset();
 				var $cols = $('<div class="cols row-fluid"><ol class="ex-panes span6" /><ol class="ex-panes span6" /></div>');
 				var paneCount = $panes.children('li').length;
@@ -994,13 +995,15 @@
 					connectWith: '.span6'
 				});
 
-				$t.trigger('tabbablechanged');
-			});
+				$t.trigger('tabbablechanged', {'layout': 'gadget'});
+			};
+			$t.on('click', '.layout-tools .icon-th-large', gadgetLayout);
 
-			$t.on('click', '.layout-tools .icon-reorder', function() { // listify
+			var listLayout = function() { // listify
 				reset();
-				$t.trigger('tabbablechanged');
-			});
+				$t.trigger('tabbablechanged', {'layout': 'list'});
+			};
+			$t.on('click', '.layout-tools .icon-reorder', listLayout);
 
 			// tab controls
 			$t.on("click", ".tab-container .icon-resize-small", function(e) {
@@ -1041,8 +1044,20 @@
 				$t.trigger('tabbablechanged');
 			});
 
-			// default to gadgets
-			$t.find('.layout-tools .icon-th-large').click();
+			// default view
+			switch ($t.data('default-view')) {
+				case 'tabbed':
+					tabLayout();
+					break;
+
+				case 'list':
+					listLayout();
+					break;
+
+				case 'gadget':
+				default:
+					gadgetLayout();
+			}
 		}
 
 		// drag and drop containers

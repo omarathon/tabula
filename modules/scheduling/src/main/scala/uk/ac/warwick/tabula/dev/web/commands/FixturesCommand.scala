@@ -202,11 +202,9 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		// make sure we can see names, as uni ids are not exposed in the fixtures
 		department.showStudentName = true
 		transactional() {
-			session.newCriteria[AssessmentComponent]
-				.createAlias("module", "module")
-				.add(Restrictions.ilike("module.code", "xxx%"))
-				.list
-				.foreach { ua => session.delete(ua) }
+			session.newQuery("delete from AssessmentComponent where moduleCode like :codePrefix")
+				.setString("codePrefix", "XXX%")
+				.executeUpdate()
 
 			session.newCriteria[UpstreamAssessmentGroup]
 				.add(Restrictions.like("moduleCode", "XXX%"))

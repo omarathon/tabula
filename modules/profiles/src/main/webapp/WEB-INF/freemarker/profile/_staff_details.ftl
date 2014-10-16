@@ -4,7 +4,11 @@
 
 <#import "../related_students/related_students_macros.ftl" as relationships />
 
-<div class="tabbable">
+<#assign defaultView = "gadget" />
+<#if user?? && userSetting('profilesDefaultView')?has_content>
+	<#assign defaultView = userSetting('profilesDefaultView') />
+</#if>
+<div class="tabbable" data-default-view="${defaultView}">
 
 	<ol class="panes">
 		<#-- The url for staff only shows groups for current user - if staff profiles become viewable by more people this needs to change -->

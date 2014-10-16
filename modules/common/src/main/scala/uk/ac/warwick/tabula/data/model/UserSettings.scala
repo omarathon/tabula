@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.apache.commons.codec.digest.DigestUtils
 
 @Entity
-class UserSettings extends GeneratedId with SettingsMap with PermissionsTarget {
+class UserSettings extends GeneratedId with SettingsMap with HasNotificationSettings with PermissionsTarget {
 	import UserSettings._
 
 	@Column(unique = true)
@@ -26,6 +26,9 @@ class UserSettings extends GeneratedId with SettingsMap with PermissionsTarget {
 	
 	def bulkEmailSeparator = getStringSetting(Settings.BulkEmailSeparator) getOrElse(DefaultBulkEmailSeparator)
 	def bulkEmailSeparator_= (separator: String) = settings += (Settings.BulkEmailSeparator -> separator)
+
+	def profilesDefaultView = getStringSetting(Settings.ProfilesDefaultView) getOrElse(DefaultProfilesDefaultView)
+	def profilesDefaultView_= (view: String) = settings += (Settings.ProfilesDefaultView -> view)
 	
 	def string(key: String) = getStringSetting(key).orNull
 		
@@ -45,12 +48,15 @@ object UserSettings {
 	val AlertsNoSubmissions = "none"
 		
 	val DefaultBulkEmailSeparator = ";"
+
+	val DefaultProfilesDefaultView = "gadget"
 	
 	object Settings {
 		val AlertsSubmission = "alertsSubmission"
 		val HiddenIntros = "hiddenIntros"
 		val WeekNumberingSystem = "weekNumberSystem"
 		val BulkEmailSeparator = "bulkEmailSeparator"
+		val ProfilesDefaultView = "profilesDefaultView"
 			
 		def hiddenIntroHash(mappedPage: String, setting: String) = {
 			val popover = mappedPage + ":" + setting

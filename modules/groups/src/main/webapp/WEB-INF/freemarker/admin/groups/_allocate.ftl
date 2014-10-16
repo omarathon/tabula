@@ -149,6 +149,12 @@
 											</div>
 										</div>
 									</div>
+									<#if command.unallocatedPermWithdrawnCount gt 0>
+										<p>There <@fmt.p number=command.unallocatedPermWithdrawnCount singular="is" plural="are" shownumber=false />
+											<@fmt.p command.unallocatedPermWithdrawnCount "unallocated student" /> who
+											<@fmt.p number=command.unallocatedPermWithdrawnCount singular="is" plural="are" shownumber=false />
+											permanently withdrawn and so cannot be allocated.</p>
+									</#if>
 								</div>
 								<div class="span2">
 								<#-- I, for one, welcome our new jumbo icon overlords -->
@@ -159,7 +165,7 @@
 								<div class="span5">
 									<h3 class="smallscreen-only">Groups</h3>
 									<div id="groupslist" class="groups fix-on-scroll">
-										<#list smallGroupSet.groups?sort_by("name") as group>
+										<#list command.sortedGroups as group>
 											<#assign existingStudents = mappingById[group.id]![] />
 											<div class="drag-target well clearfix group-${group.id}">
 												<div class="group-header">
@@ -242,11 +248,9 @@
 				return $('#groupslist').outerHeight();
 			});
 
-			var fixHeaderFooter = $('.fix-area').fixHeaderFooter();
-
 			$(window).scroll(function() {
-				fixHeaderFooter.fixDirectionIcon();
-				fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
+				Groups.fixHeaderFooter.fixDirectionIcon();
+				Groups.fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
 			});
 
 			// When the return list has changed, make sure the filter is re-run

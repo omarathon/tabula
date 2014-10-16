@@ -43,7 +43,7 @@ abstract class ViewStudentsCommand(val department: Department, val academicYearO
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)
 
 		if (sortOrder.asScala.exists(o => o.getPropertyName == "missedMonitoringPoints")) {
-			val filteredUniversityIds = profileService.findAllUniversityIdsByRestrictions(department, buildRestrictions())
+			val filteredUniversityIds = profileService.findAllUniversityIdsByRestrictions(department, buildRestrictions(academicYear))
 			val sortedStudents = monitoringPointService.studentsByMissedCount(
 				filteredUniversityIds,
 				academicYear,
@@ -53,7 +53,7 @@ abstract class ViewStudentsCommand(val department: Department, val academicYearO
 			)
 			ViewStudentsResults(buildData(sortedStudents.map(_._1), academicYear, missedCounts = sortedStudents), filteredUniversityIds.size)
 		} else if (sortOrder.asScala.exists(o => o.getPropertyName == "unrecordedMonitoringPoints")) {
-			val filteredUniversityIds = profileService.findAllUniversityIdsByRestrictions(department, buildRestrictions())
+			val filteredUniversityIds = profileService.findAllUniversityIdsByRestrictions(department, buildRestrictions(academicYear))
 			val sortedStudents = monitoringPointService.studentsByUnrecordedCount (
 				filteredUniversityIds,
 				academicYear,
@@ -68,12 +68,12 @@ abstract class ViewStudentsCommand(val department: Department, val academicYearO
 		} else {
 			val totalResults = profileService.countStudentsByRestrictions(
 				department = department,
-				restrictions = buildRestrictions()
+				restrictions = buildRestrictions(academicYear)
 			)
 
 			val (offset, students) = profileService.findStudentsByRestrictions(
 				department = department,
-				restrictions = buildRestrictions(),
+				restrictions = buildRestrictions(academicYear),
 				orders = buildOrders(),
 				maxResults = studentsPerPage,
 				startResult = studentsPerPage * (page-1)

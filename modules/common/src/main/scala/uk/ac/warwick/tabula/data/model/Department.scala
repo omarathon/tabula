@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Entity @AccessType("field")
 class Department extends GeneratedId
-	with PostLoadBehaviour with HasSettings with PermissionsTarget with Serializable with ToEntityReference {
+	with PostLoadBehaviour with HasSettings with HasNotificationSettings with PermissionsTarget with Serializable with ToEntityReference {
 
 	import Department._
 
@@ -194,7 +194,6 @@ class Department extends GeneratedId
 		extensionManagers.copyFrom(other.extensionManagers)
 	}
 
-	// If hibernate sets owners to null, make a new empty usergroup
 	override def postLoad {
 		ensureSettings
 	}

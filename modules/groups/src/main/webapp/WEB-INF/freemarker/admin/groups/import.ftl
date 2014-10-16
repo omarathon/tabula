@@ -144,7 +144,6 @@
 
 	<script type="text/javascript">
 		jQuery(function($){
-			$('.fix-area').fixHeaderFooter();
 			var $form = $('#import-form');
 
 			// reload page when academic field dropdown changes, as it changes the contents of the list.

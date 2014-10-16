@@ -46,7 +46,7 @@ abstract class SetMonitoringCheckpointCommand(
 		val students = benchmarkTask("Get students matching the filter") {
 			profileService.findAllStudentsByRestrictions(
 				department = department,
-				restrictions = buildRestrictions(),
+				restrictions = buildRestrictions(templateMonitoringPoint.pointSet.academicYear),
 				orders = buildOrders()
 			)
 		}

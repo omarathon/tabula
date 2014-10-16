@@ -23,7 +23,8 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 					go to Path("/coursework/admin/module/" + moduleCode.toLowerCase + "/assignments/" + assignmentId + "/feedback/online")
 
 					Then("I see the table of students")
-					pageSource contains s"Online marking for $assignmentName" should be(true)
+					pageSource contains s"Online marking" should be (true)
+					pageSource contains s"$assignmentName ($moduleCode)" should be (true)
 					findAll(cssSelector(".content-container")).size should be(2)
 					pageSource contains P.Student1.usercode should be(true)
 					pageSource contains P.Student2.usercode should be(true)
@@ -39,7 +40,8 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 				go to Path("/coursework/admin/module/" + moduleCode.toLowerCase + "/assignments/" + assignmentId + "/feedback/online")
 
 				Then("I see the table of students")
-				pageSource contains s"Online marking for $assignmentName" should be(true)
+				pageSource contains s"Online marking" should be (true)
+				pageSource contains s"$assignmentName ($moduleCode)" should be (true)
 				findAll(cssSelector(".content-container")).size should be(1)
 				pageSource contains P.Student3.usercode should be(true)
 			}

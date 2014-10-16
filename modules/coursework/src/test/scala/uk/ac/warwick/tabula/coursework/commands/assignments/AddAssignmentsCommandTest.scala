@@ -1,76 +1,19 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.collection.JavaConversions._
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model._
-import org.springframework.web.bind.WebDataBinder
 import org.springframework.beans.MutablePropertyValues
-import uk.ac.warwick.tabula.system.{NoAutoGrownNestedPaths, CustomDataBinder}
+import org.springframework.validation.BindException
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.{CustomDataBinder, NoAutoGrownNestedPaths}
+
+import scala.collection.JavaConversions._
 
 //scalastyle:off magic.number
-class AddAssignmentsCommandTest extends AppContextTestBase {
-	
-	@Transactional
-	@Test def applyCommand = withUser("cuscav") {
-		val f = MyFixtures()
-		
-		val cmd = new AddAssignmentsCommand(f.department, currentUser)
-		cmd.academicYear = new AcademicYear(2012)
-		cmd.assignmentItems = Seq(
-			item(f.upstream1, true, "A"),
-			item(f.upstream2, false, null),
-			item(f.upstream3, true, "A", true)
-		)
-		cmd.optionsMap = Map(
-			"A" -> new SharedAssignmentPropertiesForm
-		)
-		
-		// check validation
-		val errors = new BindException(cmd, "command")
-		cmd.validate(errors)
-		errors.hasErrors should be (false)
-		
-		cmd.apply
-		
-		val query1 = session.createQuery("from Assignment where module=:module")
-		query1.setEntity("module", f.module1)
-		val result1 = query1.uniqueResult().asInstanceOf[Assignment]
-		result1.name should be ("Assignment 1")
-		
-		//check the default fields were added.
-		withClue("Expecting attachment field.") { result1.attachmentField should be ('defined) }
-		withClue("Expecting comment field.") { result1.commentField should be ('defined) }
-		withClue("Expected not open ended") { assert(result1.openEnded === false) }
-		
-		val query2 = session.createQuery("from Assignment where module=:module")
-		query2.setEntity("module", f.module3)
-		val result2 = query2.uniqueResult().asInstanceOf[Assignment]
-		result2.name should be ("Assignment 3")
-		
-		//check the default fields were added.
-		withClue("Expecting attachment field.") { result2.attachmentField should be ('defined) }
-		withClue("Expecting comment field.") { result2.commentField should be ('defined) }
-		withClue("Expected open ended") { assert(result2.openEnded === true) }
-	} 
+class AddAssignmentsCommandTest extends TestBase with Mockito {
 
-	@Test
-	def optionsMapBinding() {
-		val command = new AddAssignmentsCommand(null, null)
-		val binder = new CustomDataBinder(command, "cmd") with NoAutoGrownNestedPaths
-		val pvs = new MutablePropertyValues()
-
-		pvs.add("optionsMap[A].allowExtensions", true)
-		binder.bind(pvs)
-
-		command.optionsMap("A").allowExtensions.booleanValue should be (true)
-	}
-	
-	case class MyFixtures() {
-		val department = Fixtures.department(code="ls", name="Life Sciences")
+	trait Fixture {
+		val thisDepartment = Fixtures.department(code="ls", name="Life Sciences")
 		val module1 = Fixtures.module(code="ls101")
 		val module2 = Fixtures.module(code="ls102")
 		val module3 = Fixtures.module(code="ls103")
@@ -81,23 +24,100 @@ class AddAssignmentsCommandTest extends AppContextTestBase {
 		val assessmentGroup1 = Fixtures.assessmentGroup(upstream1)
 		val assessmentGroup3 = Fixtures.assessmentGroup(upstream3)
 
-		department.modules.add(module1)
-		department.modules.add(module2)
-		department.modules.add(module3)
+		thisDepartment.modules.add(module1)
+		thisDepartment.modules.add(module2)
+		thisDepartment.modules.add(module3)
 
-		session.save(department)
-		session.save(module1)
-		session.save(module2)
-		session.save(module3)
+		val thisModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
+		val thisAssignmentService = smartMock[AssignmentService]
+		val thisAssignmentMembershipService = smartMock[AssignmentMembershipService]
 
-		session.save(upstream1)
-		session.save(upstream2)
-		session.save(upstream3)
-		session.save(assessmentGroup1)
-		session.save(assessmentGroup3)
+		thisModuleAndDepartmentService.getModuleByCode(module1.code) returns Option(module1)
+		thisModuleAndDepartmentService.getModuleByCode(module2.code) returns Option(module2)
+		thisModuleAndDepartmentService.getModuleByCode(module3.code) returns Option(module3)
+
+		thisAssignmentService.getAssignmentByNameYearModule(any[String], any[AcademicYear], any[Module]) returns Seq()
 	}
+
+	@Test def validate(): Unit = new Fixture { withUser("cuscav") {
+		val validator = new AddAssignmentsValidation with AddAssignmentsCommandState
+			with ModuleAndDepartmentServiceComponent with AssignmentServiceComponent {
+
+			val department = thisDepartment
+			val user = currentUser
+			val moduleAndDepartmentService = thisModuleAndDepartmentService
+			val assignmentService = thisAssignmentService
+		}
+
+		validator.academicYear = new AcademicYear(2012)
+		validator.assignmentItems = Seq(
+			item(upstream1, include = true, optionsId = "A"),
+			item(upstream2, include = false, optionsId = null),
+			item(upstream3, include = true, "A", openEnded = true)
+		)
+		validator.optionsMap = Map(
+			"A" -> new SharedAssignmentPropertiesForm
+		)
+
+		val errors = new BindException(validator, "command")
+		validator.validate(errors)
+		errors.hasErrors should be {false}
+	}}
 	
-	def item(assignment: AssessmentComponent, include: Boolean, optionsId: String, openEnded: Boolean = false) = {
+	@Test def applyCommand() { new Fixture { withUser("cuscav") {
+		val cmd = new AddAssignmentsCommandInternal(thisDepartment, currentUser) with AddAssignmentsCommandState
+			with ModuleAndDepartmentServiceComponent with AssignmentServiceComponent with AssignmentMembershipServiceComponent {
+			val moduleAndDepartmentService = thisModuleAndDepartmentService
+			val assignmentService = thisAssignmentService
+			val assignmentMembershipService = thisAssignmentMembershipService
+		}
+
+		cmd.academicYear = new AcademicYear(2012)
+		cmd.assignmentItems = Seq(
+			item(upstream1, include = true, optionsId = "A"),
+			item(upstream2, include = false, optionsId = null),
+			item(upstream3, include = true, "A", openEnded = true)
+		)
+		cmd.optionsMap = Map(
+			"A" -> new SharedAssignmentPropertiesForm
+		)
+
+		val result = cmd.applyInternal()
+
+		result.exists(_.module == module1) should be {true}
+		val module1result = result.find(_.module == module1).get
+		module1result.name should be ("Assignment 1")
+		//check the default fields were added.
+		withClue("Expecting attachment field.") { module1result.attachmentField should be ('defined) }
+		withClue("Expecting comment field.") { module1result.commentField should be ('defined) }
+		withClue("Expected not open ended") { assert(module1result.openEnded === false) }
+
+		result.exists(_.module == module3) should be {true}
+		val module3result = result.find(_.module == module3).get
+		module3result.name should be ("Assignment 3")
+		//check the default fields were added.
+		withClue("Expecting attachment field.") { module3result.attachmentField should be ('defined) }
+		withClue("Expecting comment field.") { module3result.commentField should be ('defined) }
+		withClue("Expected open ended") { assert(module3result.openEnded === true) }
+	}}}
+
+	@Test	def optionsMapBinding() { new Fixture {
+		val cmd = new AddAssignmentsCommandInternal(null, null) with AddAssignmentsCommandState
+			with ModuleAndDepartmentServiceComponent with AssignmentServiceComponent with AssignmentMembershipServiceComponent {
+			val moduleAndDepartmentService = thisModuleAndDepartmentService
+			val assignmentService = thisAssignmentService
+			val assignmentMembershipService = thisAssignmentMembershipService
+		}
+		val binder = new CustomDataBinder(cmd, "cmd") with NoAutoGrownNestedPaths
+		val pvs = new MutablePropertyValues()
+
+		pvs.add("optionsMap[A].allowExtensions", true)
+		binder.bind(pvs)
+
+		cmd.optionsMap("A").allowExtensions.booleanValue should be (right = true)
+	}}
+	
+	private def item(assignment: AssessmentComponent, include: Boolean, optionsId: String, openEnded: Boolean = false) = {
 		val item = new AssignmentItem(include, "A", assignment)
 		item.optionsId = optionsId
 		item.openDate  = dateTime(2012, 9)

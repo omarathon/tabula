@@ -16,7 +16,7 @@ abstract class BulkRelationshipChangeNotification extends Notification[StudentRe
 
 	def verb: String = "change"
 
-	@transient val oldAgentIds = StringSeqSetting("oldAgents")
+	@transient val oldAgentIds = StringSeqSetting("oldAgents", Nil)
 
 	def oldAgents = oldAgentIds.value.flatMap {
 		id => profileService.getMemberByUniversityId(id)

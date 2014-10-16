@@ -103,6 +103,9 @@ trait AllocateStudentsToGroupsCommandState extends SmallGroupSetCommand {
 	def apparentUser = viewer.apparentUser
 
 	def isStudentSignup = set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp
+
+	var sortedGroups: JList[SmallGroup] = JArrayList()
+	var unallocatedPermWithdrawnCount: Int = 0
 }
 
 trait AllocateStudentsToGroupsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -147,8 +150,10 @@ trait PopulateAllocateStudentsToGroupsCommand extends PopulateOnForm {
 		for (group <- set.groups.asScala)
 			mapping.put(group, JArrayList(group.students.users.toList))
 
+		sortedGroups = set.groups.asScala.sorted.asJava
 		unallocated.clear()
 		unallocated.addAll(removePermanentlyWithdrawn(set.unallocatedStudents).asJava)
+		unallocatedPermWithdrawnCount = set.unallocatedStudents.distinct.size - unallocated.size
 	}
 
 	def removePermanentlyWithdrawn(users: Seq[User]) = {

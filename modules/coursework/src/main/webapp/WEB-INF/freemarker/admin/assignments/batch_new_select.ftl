@@ -7,8 +7,7 @@ first page of the form to setup a bunch of assignments from SITS.
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 
-<#assign commandName="addAssignmentsCommand"/>
-<#assign command=addAssignmentsCommand />
+<#assign commandName="command"/>
 
 <@fmt.deptheader "Setup assignments" "for" department routes "setupSitsAssignments" "" />
 
@@ -228,7 +227,7 @@ first page of the form to setup a bunch of assignments from SITS.
 <#elseif step='options'>
 <div id="options-buttons">
 
-<button class="btn btn-large btn-block use-tooltip" data-action="refresh-select" title="Go back to change your assignment choices, without losing your work so far.">&larr; Back</button>
+<button class="btn btn-large btn-block use-tooltip" data-container="body" data-action="refresh-select" title="Go back to change your assignment choices, without losing your work so far.">&larr; Back</button>
 <button id="batch-add-submit-button" class="btn btn-large btn-primary btn-block" data-action="submit">Submit</button>
 
 <div id="selected-count">0 selected</div>
