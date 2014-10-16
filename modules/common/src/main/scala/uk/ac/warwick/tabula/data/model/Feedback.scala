@@ -193,7 +193,9 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	}
 
 	// The current workflow position isn't None so this must be a placeholder
-	def isPlaceholder = getCurrentWorkflowFeedbackPosition.isDefined
+	def isPlaceholder = getCurrentWorkflowFeedbackPosition.isDefined || !hasConent
+
+	def hasConent = hasMarkOrGrade || hasAttachments || hasOnlineFeedback
 
 	def hasMarkOrGrade = hasMark || hasGrade
 
