@@ -68,6 +68,7 @@ class AssignmentTest extends TestBase {
 		assignment.fullFeedback should be ('empty)
 
 		feedback.firstMarkerFeedback = new MarkerFeedback { state = MarkingCompleted }
+		feedback.actualMark = Option(41)
 		assignment.fullFeedback.size should be (1)
 	}
 
