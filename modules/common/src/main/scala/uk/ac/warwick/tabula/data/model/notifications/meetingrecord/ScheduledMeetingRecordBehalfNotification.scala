@@ -16,7 +16,7 @@ class ScheduledMeetingRecordBehalfNotification
 	}
 
 	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_behalf_notification.ftl"
-	def title = s"Meeting $verb on your behalf"
+	def title = s"Meeting $verb on your behalf by ${agent.getFullName}"
 
 	def student = meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)).asSsoUser
 

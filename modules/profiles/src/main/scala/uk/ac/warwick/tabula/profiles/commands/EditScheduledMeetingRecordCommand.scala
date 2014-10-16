@@ -16,8 +16,8 @@ import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, 
 case class ScheduledMeetingRecordResult(meetingRecord: ScheduledMeetingRecord, isRescheduled: Boolean)
 
 object EditScheduledMeetingRecordCommand {
-	def apply(creator: Member, meetingRecord: ScheduledMeetingRecord) =
-		new EditScheduledMeetingRecordCommand(creator, meetingRecord)
+	def apply(editor: Member, meetingRecord: ScheduledMeetingRecord) =
+		new EditScheduledMeetingRecordCommand(editor, meetingRecord)
 			with ComposableCommand[ScheduledMeetingRecordResult]
 			with EditScheduledMeetingRecordPermissions
 			with EditScheduledMeetingRecordState
@@ -42,7 +42,7 @@ trait EditScheduledMeetingRecordCommandPopulate	extends PopulateOnForm {
 	}
 }
 
-class EditScheduledMeetingRecordCommand (val creator: Member, val meetingRecord: ScheduledMeetingRecord)
+class EditScheduledMeetingRecordCommand (val editor: Member, val meetingRecord: ScheduledMeetingRecord)
 	extends CommandInternal[ScheduledMeetingRecordResult] with EditScheduledMeetingRecordState with BindListener {
 
 	self: MeetingRecordServiceComponent with FileAttachmentServiceComponent =>
@@ -88,14 +88,14 @@ trait EditScheduledMeetingRecordCommandValidation extends SelfValidating with Sc
 	self: EditScheduledMeetingRecordState with MeetingRecordServiceComponent =>
 	override def validate(errors: Errors) {
 		sharedValidation(errors, title, meetingDate)
-		meetingRecordService.listScheduled(Set(meetingRecord.relationship), Some(creator)).foreach(
+		meetingRecordService.listScheduled(Set(meetingRecord.relationship), Some(editor)).foreach(
 			m => if (m.meetingDate == meetingDate && m.id != meetingRecord.id) errors.rejectValue("meetingDate", "meetingRecord.date.duplicate")
 		)
 	}
 }
 
 trait EditScheduledMeetingRecordState {
-	def creator: Member
+	def editor: Member
 	def meetingRecord: ScheduledMeetingRecord
 
 	var title: String = _
@@ -127,22 +127,24 @@ trait EditScheduledMeetingRecordDescription extends Describable[ScheduledMeeting
 	override def describe(d: Description) {
 		meetingRecord.relationship.studentMember.map { d.member }
 		d.properties(
-			"creator" -> creator.universityId,
+			"creator" -> editor.universityId,
 			"relationship" -> meetingRecord.relationship.relationshipType.toString()
 		)
 	}
 }
 
 trait EditScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRecordResult, ScheduledMeetingRecord] {
+	self: EditScheduledMeetingRecordState =>
+
 	def emit(result: ScheduledMeetingRecordResult) = {
 		val meeting = result.meetingRecord
-		val user = meeting.creator.asSsoUser
+		val user = editor.asSsoUser
 		val verb =
 			if (result.isRescheduled) "rescheduled"
 			else "updated"
 
 		val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification(verb), user, meeting, meeting.relationship)
-		if(!meeting.creatorInRelationship) {
+		if(!meeting.universityIdInRelationship(user.getWarwickId)) {
 			val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification(verb), user, meeting, meeting.relationship)
 			Seq(inviteeNotification, behalfNotification)
 		} else {
