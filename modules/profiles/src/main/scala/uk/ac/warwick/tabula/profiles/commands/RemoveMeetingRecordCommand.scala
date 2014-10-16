@@ -17,7 +17,7 @@ trait RemoveMeetingRecordPermissions extends RequiresPermissionsChecking with Pe
 			case (m: MeetingRecord) =>
 				p.PermissionCheck(Permissions.Profiles.MeetingRecord.Delete(meetingRecord.relationship.relationshipType), meetingRecord)
 			case (m: ScheduledMeetingRecord) =>
-				p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Delete, meetingRecord)
+				p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Delete(meetingRecord.relationship.relationshipType), meetingRecord)
 		}
 	}
 }

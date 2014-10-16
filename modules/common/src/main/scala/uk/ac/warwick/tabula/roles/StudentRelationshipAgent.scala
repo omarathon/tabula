@@ -37,6 +37,7 @@ case class StudentRelationshipAgentRoleDefinition(relationshipType: PermissionsS
 		Profiles.MeetingRecord.Delete(relationshipType),
 
 		Profiles.ScheduledMeetingRecord.Create(relationshipType),
+		Profiles.ScheduledMeetingRecord.Update(relationshipType),
 
 		SmallGroups.Read,
 		Profiles.Read.SmallGroups,
