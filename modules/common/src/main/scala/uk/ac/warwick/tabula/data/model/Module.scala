@@ -114,7 +114,7 @@ object Module extends Logging {
 		case ModuleCatsPattern(module, _) => Option(module)
 		case ModuleCodeOnlyPattern(module) => Option(module)
 		case _ => {
-			logger.info("Module name" + fullModuleName + " did not fit expected cats pattern")
+			logger.warn(s"Module name ${fullModuleName} did not fit expected CATS pattern")
 			None
 		}
 	}
