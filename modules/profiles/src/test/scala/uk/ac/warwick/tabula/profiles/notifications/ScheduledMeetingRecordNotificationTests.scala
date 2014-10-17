@@ -7,8 +7,14 @@ import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
 trait ScheduledMeetingRecordNotificationFixture {
 	val admin = Fixtures.staff("1170836", "cuslaj")
+	admin.firstName = "Some"
+	admin.lastName = "Admin"
 	val staff = Fixtures.staff("9517535", "mctutor")
+	staff.firstName = "Mc"
+	staff.lastName = "Tutor"
 	val student = Fixtures.student("1234567", "youth")
+	student.firstName = "A"
+	student.lastName = "Youth"
 	val relationshipType = StudentRelationshipType("tutor", "tutor", "tutor", "tutee")
 	val relationship = StudentRelationship(staff, relationshipType, student)
 
@@ -44,9 +50,9 @@ class CreateScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 		val notifications = notifier.emit(scheduledMeeting(admin))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
-		notifications(0).title should be ("Meeting created")
+		notifications(0).title should be (s"Meeting created by ${staff.fullName.get}")
 		notifications(1).recipients.head should be { staff.asSsoUser }
-		notifications(1).title should be ("Meeting created on your behalf")
+		notifications(1).title should be (s"Meeting created on your behalf by ${admin.fullName.get}")
 	}}
 }
 
@@ -133,17 +139,17 @@ class EditScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 		val notifications = notifier.emit(scheduledMeetingResult(staff))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
-		notifications(0).title should be ("Meeting updated")
+		notifications(0).title should be (s"Meeting updated by ${staff.fullName.get}")
 		notifications(1).recipients.head should be { staff.asSsoUser }
-		notifications(1).title should be ("Meeting updated on your behalf")
+		notifications(1).title should be (s"Meeting updated on your behalf by ${admin.fullName.get}")
 
 
 		val notifications2 = notifier.emit(scheduledMeetingResult(staff, isRescheduled = true))
 		notifications2.length should be {2}
 		notifications2(0).recipients.head should be { student.asSsoUser }
-		notifications2(0).title should be ("Meeting rescheduled")
+		notifications2(0).title should be (s"Meeting rescheduled by ${staff.fullName.get}")
 		notifications2(1).recipients.head should be { staff.asSsoUser }
-		notifications2(1).title should be ("Meeting rescheduled on your behalf")
+		notifications2(1).title should be (s"Meeting rescheduled on your behalf by ${admin.fullName.get}")
 	}
 
 	@Test
@@ -155,17 +161,17 @@ class EditScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 		val notifications = notifier.emit(scheduledMeetingResult(student))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
-		notifications(0).title should be ("Meeting updated")
+		notifications(0).title should be (s"Meeting updated by ${staff.fullName.get}")
 		notifications(1).recipients.head should be { staff.asSsoUser }
-		notifications(1).title should be ("Meeting updated on your behalf")
+		notifications(1).title should be (s"Meeting updated on your behalf by ${admin.fullName.get}")
 
 
 		val notifications2 = notifier.emit(scheduledMeetingResult(student, isRescheduled = true))
 		notifications2.length should be {2}
 		notifications2(0).recipients.head should be { student.asSsoUser }
-		notifications2(0).title should be ("Meeting rescheduled")
+		notifications2(0).title should be (s"Meeting rescheduled by ${staff.fullName.get}")
 		notifications2(1).recipients.head should be { staff.asSsoUser }
-		notifications2(1).title should be ("Meeting rescheduled on your behalf")
+		notifications2(1).title should be (s"Meeting rescheduled on your behalf by ${admin.fullName.get}")
 	}
 
 	@Test
@@ -177,17 +183,17 @@ class EditScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 		val notifications = notifier.emit(scheduledMeetingResult(admin))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
-		notifications(0).title should be ("Meeting updated")
+		notifications(0).title should be (s"Meeting updated by ${staff.fullName.get}")
 		notifications(1).recipients.head should be { staff.asSsoUser }
-		notifications(1).title should be ("Meeting updated on your behalf")
+		notifications(1).title should be (s"Meeting updated on your behalf by ${admin.fullName.get}")
 
 
 		val notifications2 = notifier.emit(scheduledMeetingResult(admin, isRescheduled = true))
 		notifications2.length should be {2}
 		notifications2(0).recipients.head should be { student.asSsoUser }
-		notifications2(0).title should be ("Meeting rescheduled")
+		notifications2(0).title should be (s"Meeting rescheduled by ${staff.fullName.get}")
 		notifications2(1).recipients.head should be { staff.asSsoUser }
-		notifications2(1).title should be ("Meeting rescheduled on your behalf")
+		notifications2(1).title should be (s"Meeting rescheduled on your behalf by ${admin.fullName.get}")
 	}
 }
 
@@ -268,9 +274,9 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 		val notifications = notifier.emit(scheduledMeeting(student))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
-		notifications(0).title should be ("Meeting deleted")
+		notifications(0).title should be (s"Meeting deleted by ${staff.fullName.get}")
 		notifications(1).recipients.head should be { staff.asSsoUser }
-		notifications(1).title should be ("Meeting deleted on your behalf")
+		notifications(1).title should be (s"Meeting deleted on your behalf by ${admin.fullName.get}")
 	}}
 
 	@Test
@@ -282,9 +288,9 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 		val notifications = notifier.emit(scheduledMeeting(staff))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
-		notifications(0).title should be ("Meeting deleted")
+		notifications(0).title should be (s"Meeting deleted by ${staff.fullName.get}")
 		notifications(1).recipients.head should be { staff.asSsoUser }
-		notifications(1).title should be ("Meeting deleted on your behalf")
+		notifications(1).title should be (s"Meeting deleted on your behalf by ${admin.fullName.get}")
 	}}
 
 	@Test
@@ -296,9 +302,9 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 		val notifications = notifier.emit(scheduledMeeting(admin))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
-		notifications(0).title should be ("Meeting deleted")
+		notifications(0).title should be (s"Meeting deleted by ${staff.fullName.get}")
 		notifications(1).recipients.head should be { staff.asSsoUser }
-		notifications(1).title should be ("Meeting deleted on your behalf")
+		notifications(1).title should be (s"Meeting deleted on your behalf by ${admin.fullName.get}")
 	}}
 }
 
@@ -379,9 +385,9 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
 		val notifications = notifier.emit(scheduledMeeting(student))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
-		notifications(0).title should be ("Meeting rescheduled")
+		notifications(0).title should be (s"Meeting rescheduled by ${staff.fullName.get}")
 		notifications(1).recipients.head should be { staff.asSsoUser }
-		notifications(1).title should be ("Meeting rescheduled on your behalf")
+		notifications(1).title should be (s"Meeting rescheduled on your behalf by ${admin.fullName.get}")
 	}}
 
 	@Test
@@ -393,9 +399,9 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
 		val notifications = notifier.emit(scheduledMeeting(staff))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
-		notifications(0).title should be ("Meeting rescheduled")
+		notifications(0).title should be (s"Meeting rescheduled by ${staff.fullName.get}")
 		notifications(1).recipients.head should be { staff.asSsoUser }
-		notifications(1).title should be ("Meeting rescheduled on your behalf")
+		notifications(1).title should be (s"Meeting rescheduled on your behalf by ${admin.fullName.get}")
 	}}
 
 	@Test
@@ -407,9 +413,9 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
 		val notifications = notifier.emit(scheduledMeeting(admin))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
-		notifications(0).title should be ("Meeting rescheduled")
+		notifications(0).title should be (s"Meeting rescheduled by ${staff.fullName.get}")
 		notifications(1).recipients.head should be { staff.asSsoUser }
-		notifications(1).title should be ("Meeting rescheduled on your behalf")
+		notifications(1).title should be (s"Meeting rescheduled on your behalf by ${admin.fullName.get}")
 	}}
 
 }
