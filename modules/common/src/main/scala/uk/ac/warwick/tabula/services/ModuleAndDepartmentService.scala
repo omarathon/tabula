@@ -50,7 +50,7 @@ class ModuleAndDepartmentService extends Logging {
 	}
 
 	def getModuleBySitsCode(sitsModuleCode: String) = transactional(readOnly = true) {
-		moduleDao.getByCode(Module.stripCats(sitsModuleCode).toLowerCase)
+		moduleDao.getByCode(Module.stripCats(sitsModuleCode).getOrElse("").toLowerCase)
 	}
 
 	def getModuleById(id: String) = transactional(readOnly = true) {
