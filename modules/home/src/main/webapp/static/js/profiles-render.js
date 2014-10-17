@@ -241,7 +241,7 @@
 						var $mb = $m.find(".modal-body").empty();
 						var iframeMarkup = "<iframe frameBorder='0' scrolling='no' style='height:100%;width:100%;' id='modal-content'></iframe>";
 						$(iframeMarkup)
-							.on('load', iframeHandler)
+							.off('load').on('load', iframeHandler)
 							.attr("src", targetUrl + "?iframe")
 							.appendTo($mb);
 					}).fail(function() {
@@ -265,7 +265,7 @@
 					e.preventDefault();
 					// reattach the load handler and submit the inner form in the iframe
 					$m.find('iframe')
-						.on('load', iframeHandler)
+						.off('load').on('load', iframeHandler)
 						.contents().find('form').submit();
 
 					// hide the iframe, so we don't get a FOUC
