@@ -52,12 +52,6 @@ class OwnDataRoleProvider extends RoleProvider {
 					Stream(customRoleFor(smallGroup.groupSet.module.adminDepartment)(SmallGroupMemberRoleDefinition, smallGroup).getOrElse(SmallGroupMember(smallGroup)))
 				else Stream.empty
 
-			// You can change your own scheduled meeting
-			case meeting: ScheduledMeetingRecord =>
-				if (user.apparentId.hasText && meeting.creator.userId == user.apparentId)
-					Stream(customRoleFor(department)(ScheduledMeetingRecordCreatorRoleDefinition, meeting).getOrElse(ScheduledMeetingRecordCreator(meeting)))
-				else Stream.empty
-
 			// TAB-2122
 			case note: MemberNote =>
 				if (user.apparentId.hasText && note.creator.getUserId == user.apparentId)

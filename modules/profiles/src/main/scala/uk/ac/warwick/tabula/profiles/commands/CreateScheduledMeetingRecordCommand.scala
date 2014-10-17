@@ -107,7 +107,7 @@ trait CreateScheduledMeetingRecordNotification extends Notifies[ScheduledMeeting
 	def emit(meeting: ScheduledMeetingRecord) = {
 		val user = meeting.creator.asSsoUser
 		val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("created"), user, meeting, meeting.relationship)
-		if(!meeting.creatorInRelationship) {
+		if(!meeting.universityIdInRelationship(user.getWarwickId)) {
 			val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification("created"), user, meeting, meeting.relationship)
 			Seq(inviteeNotification, behalfNotification)
 		} else {

@@ -17,7 +17,7 @@ trait RemoveMeetingRecordPermissions extends RequiresPermissionsChecking with Pe
 			case (m: MeetingRecord) =>
 				p.PermissionCheck(Permissions.Profiles.MeetingRecord.Delete(meetingRecord.relationship.relationshipType), meetingRecord)
 			case (m: ScheduledMeetingRecord) =>
-				p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Delete, meetingRecord)
+				p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Delete(meetingRecord.relationship.relationshipType), meetingRecord)
 		}
 	}
 }
@@ -72,13 +72,15 @@ trait DeleteMeetingRecordCommandValidation extends SelfValidating with RemoveMee
 }
 
 trait DeleteScheduledMeetingRecordNotification extends Notifies[AbstractMeetingRecord, ScheduledMeetingRecord] {
+
+	self: RemoveMeetingRecordState =>
+
 	def emit(meeting: AbstractMeetingRecord) = {
 		meeting match {
 			case m: ScheduledMeetingRecord =>
-				val user = meeting.creator.asSsoUser
-				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("deleted"), user, m, m.relationship)
-				if(!m.creatorInRelationship) {
-					val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification("deleted"), user, m, m.relationship)
+				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("deleted"), user.apparentUser, m, m.relationship)
+				if(!m.universityIdInRelationship(user.universityId)) {
+					val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification("deleted"), user.apparentUser, m, m.relationship)
 					Seq(inviteeNotification, behalfNotification)
 				} else {
 					Seq(inviteeNotification)
@@ -111,13 +113,15 @@ trait RestoreMeetingRecordCommandValidation extends SelfValidating with RemoveMe
 }
 
 trait RestoreScheduledMeetingRecordNotification extends Notifies[AbstractMeetingRecord, ScheduledMeetingRecord] {
+
+	self: RemoveMeetingRecordState =>
+
 	def emit(meeting: AbstractMeetingRecord) = {
 		meeting match {
 			case m: ScheduledMeetingRecord =>
-				val user = meeting.creator.asSsoUser
-				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("rescheduled"), user, m, m.relationship)
-				if(!m.creatorInRelationship) {
-					val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification("rescheduled"), user, m, m.relationship)
+				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("rescheduled"), user.apparentUser, m, m.relationship)
+				if(!m.universityIdInRelationship(user.universityId)) {
+					val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification("rescheduled"), user.apparentUser, m, m.relationship)
 					Seq(inviteeNotification, behalfNotification)
 				} else {
 					Seq(inviteeNotification)
