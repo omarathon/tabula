@@ -670,6 +670,14 @@ class Assignment
 			submissionIds ++ feedbackIds
 	}
 
+	def needsFeedbackPublishing = {
+		if (openEnded || !collectSubmissions) {
+			false
+		} else {
+			submissions.asScala.exists(s => !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
+		}
+	}
+
 	def toEntityReference = new AssignmentEntityReference().put(this)
 
 }

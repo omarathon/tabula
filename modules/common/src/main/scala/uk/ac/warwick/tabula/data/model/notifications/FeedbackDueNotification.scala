@@ -54,10 +54,14 @@ class FeedbackDueGeneralNotification
 	override final def title = s"${assignment.module.code.toUpperCase} feedback due"
 
 	override final def recipients = {
-		val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
-		moduleAndDepartmentService.getModuleByCode(assignment.module.code)
-			.getOrElse(throw new IllegalStateException("No such module"))
-			.managers.users
+		if (assignment.needsFeedbackPublishing) {
+			val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+			moduleAndDepartmentService.getModuleByCode(assignment.module.code)
+				.getOrElse(throw new IllegalStateException("No such module"))
+				.managers.users
+		} else {
+			Seq()
+		}
 	}
 
 	override final def deadline = assignment.feedbackDeadline.getOrElse(throw new IllegalStateException("No feedback deadline for open-ended assignments"))
