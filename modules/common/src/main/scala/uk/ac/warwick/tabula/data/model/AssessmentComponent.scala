@@ -87,7 +87,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 	/**
 	 * Returns moduleCode without CATS. e.g. in304
 	 */
-	def moduleCodeBasic: String = Module.stripCats(moduleCode).get
+	def moduleCodeBasic: String = Module.stripCats(moduleCode).getOrElse(throw new IllegalArgumentException(s"${moduleCode} did not fit expected CATS pattern"))
 
 	/**
 	 * Returns the CATS as a string if it's present, e.g. 50
