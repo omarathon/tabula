@@ -156,13 +156,13 @@ class Assignment
 	@transient
 	lazy val workingDaysHelper = new WorkingDaysHelperImpl
 
-	def feedbackDeadline: Option[LocalDate] = if (openEnded) {
+	def feedbackDeadline: Option[LocalDate] = if (openEnded || dissertation) {
 		None
 	} else {
 		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
 	}
 
-	def feedbackDeadlineWorkingDaysAway: Option[Int] = if (openEnded) {
+	def feedbackDeadlineWorkingDaysAway: Option[Int] = if (openEnded || dissertation) {
 		None
 	} else {
 		val now = LocalDate.now
