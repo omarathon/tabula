@@ -297,12 +297,17 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 				org.hibernate.criterion.Restrictions.or(
 					Daoisms.is("studentCourseYearDetails.enrolmentDepartment", queryDepartment),
 					Daoisms.is("route.adminDepartment", queryDepartment),
-					Daoisms.is("homeDepartment", queryDepartment)
+					Daoisms.is("homeDepartment", queryDepartment),
+					org.hibernate.criterion.Restrictions.and(
+						Daoisms.is("route.teachingDepartmentsActive", true),
+						Daoisms.is("teachingInfo.department", queryDepartment)
+					)
 				)
 			),
 			Seq(
 				FiltersStudents.AliasPaths("studentCourseYearDetails"),
-				FiltersStudents.AliasPaths("route")
+				FiltersStudents.AliasPaths("route"),
+				FiltersStudents.AliasPaths("teachingInfo")
 			).flatten : _*
 		)
 
