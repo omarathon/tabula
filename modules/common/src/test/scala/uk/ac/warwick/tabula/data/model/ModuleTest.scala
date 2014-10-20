@@ -1,19 +1,16 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.TestBase
-import org.junit.Test
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.PersistenceTestBase
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.TestBase
 
-class ModuleTest extends PersistenceTestBase {
+class ModuleTest extends TestBase {
 	@Test def stripCats {
-		Module.stripCats("md101-15") should be ("md101")
-		Module.stripCats("md105-5") should be ("md105")
-		Module.stripCats("md105-7.5") should be ("md105")
-		Module.stripCats("md105") should be ("md105")
-		intercept[IllegalArgumentException] { Module.stripCats("what the feck!") }
+		Module.stripCats("md101-15") should be (Some("md101"))
+		Module.stripCats("md105-5")  should be (Some("md105"))
+		Module.stripCats("md105-7.5")  should be (Some("md105"))
+		Module.stripCats("md105")  should be (Some("md105"))
+		Module.stripCats("what the feck!") should be (None)
 	}
 
 	@Test def extractCats {
