@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula
 
+import java.math
+
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceMonitoringScheme, AttendanceState, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, MonitoringCheckpoint, AttendanceState, MonitoringPoint}
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.MonitoringPointService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.userlookup.User
@@ -338,6 +340,17 @@ object Fixtures extends Mockito {
 		checkpoint.student = student
 		checkpoint.state = state
 		checkpoint
+	}
+
+	def routeTeachingInformation(route: Route, departments: Seq[Department]): Seq[RouteTeachingInformation] = {
+		val percentage = new math.BigDecimal(100 / departments.size)
+		departments.map(dept => {
+			val rti = new RouteTeachingInformation
+			rti.route = route
+			rti.department = dept
+			rti.percentage = percentage
+			rti
+		})
 	}
 
 }

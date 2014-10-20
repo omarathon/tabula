@@ -303,7 +303,7 @@ class StudentMember extends Member with StudentProperties {
 	override def affiliatedDepartments: Stream[Department] = {
 		val sprDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.department)).toStream
 		val sceDepartments = freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails).flatMap(scyd => Option(scyd.enrolmentDepartment)).toStream
-		val routeDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.route)).flatMap(route => Option(route.adminDepartment)).toStream
+		val routeDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.route)).flatMap(route => route.teachingDepartments).toStream
 
 		(Option(homeDepartment).toStream #:::
 				sprDepartments #:::

@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, PersistenceTestBase}
-import uk.ac.warwick.tabula.services.{StaffAssistantsHelpers, ProfileService, RelationshipService, RelationshipServiceImpl}
-import uk.ac.warwick.tabula.data.MemberDaoImpl
 import org.junit.Before
-import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
-import uk.ac.warwick.tabula.data.StudentCourseDetailsDaoImpl
+import uk.ac.warwick.tabula.data.{MemberDaoImpl, StudentCourseDetailsDaoImpl}
+import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, StaffAssistantsHelpers}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, PersistenceTestBase}
+
+import scala.collection.JavaConverters._
 
 class MemberTest extends PersistenceTestBase with Mockito {
 
@@ -81,6 +81,17 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		member.affiliatedDepartments should be (Stream(homeDept, courseDept))
 		member.touchedDepartments should be (Stream(homeDept, courseDept, extDept))
+
+		// check teaching departments aren't included
+		val teachingDepartment = new Department
+		teachingDepartment.code = "td"
+		route.teachingInfo = Fixtures.routeTeachingInformation(route, Seq(homeDept, teachingDepartment)).toSet.asJava
+		route.teachingDepartmentsActive = false
+		member.affiliatedDepartments should be (Stream(homeDept, courseDept))
+
+		// check teaching departments are included when the flag is true
+		route.teachingDepartmentsActive = true
+		member.affiliatedDepartments should be (Stream(homeDept, courseDept, teachingDepartment))
 	}
 
 	@Test def testModuleRegistrations {

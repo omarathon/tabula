@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 @Entity
 @NamedQueries(Array(
@@ -39,7 +40,11 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 	@BatchSize(size=200)
 	var teachingInfo: JSet[RouteTeachingInformation] = JHashSet()
 
-	def teachingDepartments = teachingInfo.asScala.map { _.department } + adminDepartment
+	def teachingDepartments: mutable.Set[Department] =
+		if (teachingDepartmentsActive)
+			teachingInfo.asScala.map { _.department } + adminDepartment
+		else
+			mutable.Set(adminDepartment)
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.DegreeTypeUserType")
 	var degreeType: DegreeType = _
@@ -49,7 +54,7 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 	override def toString = "Route[" + code + "]"
 	
 	def permissionsParents = Option(adminDepartment).toStream
-	override def humanReadableId = code.toUpperCase() + " " + name
+	override def humanReadableId = code.toUpperCase + " " + name
 	override def urlSlug = code
 
 	@OneToMany(mappedBy="route", fetch = FetchType.LAZY)
@@ -57,6 +62,8 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 	var monitoringPointSets: JList[MonitoringPointSet] = JArrayList()
 	
 	var missingFromImportSince: DateTime = _
+
+	var teachingDepartmentsActive: Boolean = false
 
 }
 
