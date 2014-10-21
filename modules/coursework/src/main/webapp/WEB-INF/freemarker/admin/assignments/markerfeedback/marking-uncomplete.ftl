@@ -16,7 +16,6 @@
 
 	<p>
 		<strong><@fmt.p markingUncompletedCommand.completedMarkerFeedback?size "student" /></strong> submissions will be no longer listed as completed.
-		If there are still changes that have to be made for these submissions then click cancel to return to the feedback list.
 	</p>
 
 	<#list students as uniId>
