@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, FormValue}
+import uk.ac.warwick.tabula.data.model.forms.{StringFormValue, SavedFormValue, FormValue}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.{AutowiringSavedFormValueDaoComponent, SavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -36,7 +36,7 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 
 	self: FeedbackServiceComponent with SavedFormValueDaoComponent with FileAttachmentServiceComponent with ZipServiceComponent =>
 
-	def feedback = assignment.findFullFeedback(student.getWarwickId)
+	def feedback = assignment.findFeedback(student.getWarwickId)
 
 	feedback match {
 		case Some(f) => copyFrom(f)
@@ -213,6 +213,11 @@ trait OnlineFeedbackStudentState {
 	var fields: JMap[String, FormValue] = _
 	var file:UploadedFile = new UploadedFile
 	var attachedFiles:JList[FileAttachment] = _
+
+	private def fieldHasVaue = fields.asScala.exists{ case (_, value: StringFormValue) => value.value.hasText }
+	private def hasFile = Option(attachedFiles).exists(!_.isEmpty) || Option(file).exists(!_.attachedOrEmpty.isEmpty)
+
+	def hasContent = mark.hasText || grade.hasText || hasFile || fieldHasVaue
 }
 
 trait OnlineFeedbackFormDescription[A] extends Describable[A] {

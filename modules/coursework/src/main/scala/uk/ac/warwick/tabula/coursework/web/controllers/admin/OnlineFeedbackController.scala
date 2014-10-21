@@ -46,8 +46,7 @@ class OnlineFeedbackController extends CourseworkController with MarkerFeedbackC
 			}.toMap
 		).crumbs(
 				Breadcrumbs.Department(module.adminDepartment),
-				Breadcrumbs.Module(module),
-				Breadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment)), "")
+				Breadcrumbs.Module(module)
 			)
 	}
 
