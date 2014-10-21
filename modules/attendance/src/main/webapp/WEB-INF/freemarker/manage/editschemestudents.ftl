@@ -51,11 +51,23 @@
 
 			<input
 				type="submit"
-				class="btn btn-primary spinnable spinner-auto"
-				name="persist"
+				class="btn btn-success use-tooltip spinnable spinner-auto"
+				name="${ManageSchemeMappingParameters.createAndAddPoints}"
 				value="Save"
+				title="Select which monitoring points this scheme should use"
+				data-container="body"
 				data-loading-text="Saving&hellip;"
 			/>
+			<input
+				type="submit"
+				class="btn btn-primary use-tooltip spinnable spinner-auto"
+				name="persist"
+				value="Save and exit"
+				title="Save your scheme"
+				data-container="body"
+				data-loading-text="Saving&hellip;"
+			/>
+
 			<a class="btn" href="<@routes.manageHomeForYear scheme.department scheme.academicYear.startYear?c />">Cancel</a>
 		</div>
 
