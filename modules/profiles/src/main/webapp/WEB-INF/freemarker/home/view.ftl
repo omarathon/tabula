@@ -75,8 +75,8 @@
 				</p>
 			</#if>
 			
-			<#if currentUserDepartment??>
-			<#list currentUserDepartment as dept>
+			<#if searchDepartments??>
+			<#list searchDepartments as dept>
 				<h2><a href="<@routes.filter_students dept />">All students in ${dept.name}</a></h2>
 			</#list>
 			</#if>
