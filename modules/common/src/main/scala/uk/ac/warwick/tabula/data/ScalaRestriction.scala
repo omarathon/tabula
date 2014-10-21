@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data
 
 import org.hibernate.criterion.{Restrictions, Criterion}
 import org.hibernate.criterion.Restrictions._
+import org.hibernate.sql.JoinType
 import scala.collection.mutable
 import scala.collection.JavaConverters._
 import org.apache.commons.lang3.builder.EqualsBuilder
@@ -37,22 +38,22 @@ class ScalaRestriction(val underlying: Criterion) extends Aliasable {
 object ScalaRestriction {
 	import Aliasable._
 	
-	def is(property: String, value: Any, aliases: (String, String)*): Option[ScalaRestriction] = 
+	def is(property: String, value: Any, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		Some(addAliases(new ScalaRestriction(Daoisms.is(property, value)), aliases: _*))
 
-	def isIfTicked(property: String, value: Any, ticked: Boolean, aliases: (String, String)*): Option[ScalaRestriction] =
+	def isIfTicked(property: String, value: Any, ticked: Boolean, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		if (!ticked) None
 		else Some(addAliases(new ScalaRestriction(Daoisms.is(property, value)), aliases: _*))
 
 	// if the collection is empty, don't return any restriction - else return the restriction that the property must be in the collection
-	def inIfNotEmpty(property: String, collection: Iterable[Any], aliases: (String, String)*): Option[ScalaRestriction] =
+	def inIfNotEmpty(property: String, collection: Iterable[Any], aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		if (collection.isEmpty) None
 		else Some(addAliases(new ScalaRestriction(in(property, collection.toSeq.distinct.asJavaCollection)), aliases: _*))
 
 	// If *any* of the properties are empty, don't return any restriction.
 	// This was written for the case of module registrations, where we should only check the
 	// module registration year if there are modules to restrict by
-	def inIfNotEmptyMultipleProperties(properties: Seq[String], collections: Seq[Iterable[Any]], aliases: (String, String)*): Option[ScalaRestriction] = {
+	def inIfNotEmptyMultipleProperties(properties: Seq[String], collections: Seq[Iterable[Any]], aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] = {
 		val criterion = conjunction()
 		(properties, collections).zipped.foreach { (property, collection) =>
 			if (collection.nonEmpty) {
@@ -65,7 +66,7 @@ object ScalaRestriction {
 			None
 	}
 
-	def startsWithIfNotEmpty(property: String, collection: Iterable[String], aliases: (String, String)*): Option[ScalaRestriction] =
+	def startsWithIfNotEmpty(property: String, collection: Iterable[String], aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		if (collection.isEmpty) None
 		else {
 			val criterion = disjunction()
@@ -76,7 +77,7 @@ object ScalaRestriction {
 			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
 		}
 
-	def atLeastOneIsTrue(property1: String, property2: String, ticked: Boolean, aliases: (String, String)*) =
+	def atLeastOneIsTrue(property1: String, property2: String, ticked: Boolean, aliases: (String, AliasAndJoinType)*) =
 		if (!ticked) None
 		else {
 			val criterion = disjunction()
@@ -88,21 +89,21 @@ object ScalaRestriction {
 
 
 
-	def gt(property: String, value: Any, aliases: (String, String)*): Option[ScalaRestriction] =
+	def gt(property: String, value: Any, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		Some(addAliases(new ScalaRestriction(Restrictions.gt(property, value)), aliases: _*))
 
-	def lt(property: String, value: Any, aliases: (String, String)*): Option[ScalaRestriction] =
+	def lt(property: String, value: Any, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		Some(addAliases(new ScalaRestriction(Restrictions.lt(property, value)), aliases: _*))
 }
 
 trait Aliasable {
-	final val aliases: mutable.Map[String, String] = mutable.Map()
+	final val aliases: mutable.Map[String, AliasAndJoinType] = mutable.Map()
 	
-	def alias(property: String, alias: String) = {
-		aliases.put(property, alias) match {
-			case Some(other) if other != alias => 
+	def alias(property: String, aliasAndJoinType: AliasAndJoinType) = {
+		aliases.put(property, aliasAndJoinType) match {
+			case Some(other) if other.alias != aliasAndJoinType.alias =>
 				// non-duplicate
-				throw new IllegalArgumentException("Tried to alias %s to %s, but it is already aliased to %s!".format(property, alias, other))
+				throw new IllegalArgumentException("Tried to alias %s to %s, but it is already aliased to %s!".format(property, aliasAndJoinType.alias, other))
 			case _ =>
 		}
 		this
@@ -110,8 +111,10 @@ trait Aliasable {
 }
 
 object Aliasable {
-	def addAliases[A <: Aliasable](aliasable: A, aliases: (String, String)*): A = {
+	def addAliases[A <: Aliasable](aliasable: A, aliases: (String, AliasAndJoinType)*): A = {
 		aliases.foreach { case (property, alias) => aliasable.alias(property, alias) }
 		aliasable
 	}
 }
+
+case class AliasAndJoinType(alias: String, joinType: JoinType = JoinType.INNER_JOIN)

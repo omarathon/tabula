@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.commands
 
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.{ScalaRestriction, ScalaOrder}
+import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaRestriction, ScalaOrder}
 import uk.ac.warwick.tabula.services.ProfileServiceComponent
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -19,7 +18,7 @@ object FilterStudentsOrRelationships {
 
 trait FilterStudentsOrRelationships extends FiltersStudentsBase with PermissionsCheckingMethods with ProfileServiceComponent {
 
-	def getAliasPaths(sitsTable: String): Seq[(String, String)]
+	def getAliasPaths(sitsTable: String): Seq[(String, AliasAndJoinType)]
 
 	protected def buildOrders(): Seq[ScalaOrder] =
 		(sortOrder.asScala ++ defaultOrder).map { underlying =>

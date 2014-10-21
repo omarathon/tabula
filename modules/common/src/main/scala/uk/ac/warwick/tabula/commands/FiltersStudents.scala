@@ -1,36 +1,42 @@
 package uk.ac.warwick.tabula.commands
 
+import org.hibernate.sql.JoinType
 import uk.ac.warwick.tabula.data.model.{Module, SitsStatus, ModeOfAttendance, Route, CourseType, Department}
-import uk.ac.warwick.tabula.data.ScalaRestriction
+import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaRestriction}
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 
 import scala.collection.JavaConverters._
 
 object FiltersStudents {
-	val AliasPaths = Seq(
+	val AliasPaths: Map[String, Seq[(String, AliasAndJoinType)]] = Seq(
 		"studentCourseDetails" -> Seq(
-			"mostSignificantCourse" -> "studentCourseDetails"
+			"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails")
 		),
 		"studentCourseYearDetails" -> Seq(
-			"mostSignificantCourse" -> "studentCourseDetails",
-			"studentCourseDetails.latestStudentCourseYearDetails" -> "studentCourseYearDetails"
+			"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails"),
+			"studentCourseDetails.latestStudentCourseYearDetails" -> AliasAndJoinType("studentCourseYearDetails")
 		),
 		"moduleRegistration" -> Seq(
-			"mostSignificantCourse" -> "studentCourseDetails",
-			"studentCourseDetails._moduleRegistrations" -> "moduleRegistration"
+			"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails"),
+			"studentCourseDetails._moduleRegistrations" -> AliasAndJoinType("moduleRegistration")
 		),
 		"course" -> Seq(
-			"mostSignificantCourse" -> "studentCourseDetails",
-			"studentCourseDetails.course" -> "course"
+			"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails"),
+			"studentCourseDetails.course" -> AliasAndJoinType("course")
 		),
 		"route" -> Seq(
-			"mostSignificantCourse" -> "studentCourseDetails",
-			"studentCourseDetails.route" -> "route"
+			"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails"),
+			"studentCourseDetails.route" -> AliasAndJoinType("route")
 		),
 		"department" -> Seq(
-			"mostSignificantCourse" -> "studentCourseDetails",
-			"studentCourseDetails.route" -> "route",
-			"route.adminDepartment" -> "department"
+			"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails"),
+			"studentCourseDetails.route" -> AliasAndJoinType("route"),
+			"route.adminDepartment" -> AliasAndJoinType("department")
+		),
+		"teachingInfo" -> Seq(
+			"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails"),
+			"studentCourseDetails.route" -> AliasAndJoinType("route"),
+			"route.teachingInfo" -> AliasAndJoinType("teachingInfo", JoinType.LEFT_OUTER_JOIN)
 		)
 	).toMap
 
