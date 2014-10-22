@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.helpers.Logging
 
 @Entity
 @NamedQueries(Array(
@@ -94,7 +95,7 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
   }
 }
 
-object Module {
+object Module extends Logging {
 
 	// <modulecode> "-" <cats>
 	// where cats can be a decimal number.
@@ -109,10 +110,13 @@ object Module {
 		case _ => groupName
 	}
 
-	def stripCats(fullModuleName: String): String = fullModuleName match {
-		case ModuleCatsPattern(module, _) => module
-		case ModuleCodeOnlyPattern(module) => module
-		case _ => throw new IllegalArgumentException(fullModuleName + " didn't match pattern")
+	def stripCats(fullModuleName: String): Option[String] = fullModuleName match {
+		case ModuleCatsPattern(module, _) => Option(module)
+		case ModuleCodeOnlyPattern(module) => Option(module)
+		case _ => {
+			logger.warn(s"Module name ${fullModuleName} did not fit expected module code pattern")
+			None
+		}
 	}
 
 	def extractCats(fullModuleName: String): Option[String] = fullModuleName match {

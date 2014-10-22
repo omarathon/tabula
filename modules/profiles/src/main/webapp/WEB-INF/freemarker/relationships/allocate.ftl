@@ -225,7 +225,7 @@
 												<#local count = existing_students?size />
 												<span class="drag-count">${count}</span> <span class="drag-counted" data-singular="student" data-plural="students">student<#if count != 1>s</#if></span>
 
-												<a id="show-list-${university_id}" class="show-list" title="View students" data-container=".agent-${university_id}" data-title="${popoverHeader}" data-placement="left"><i class="icon-question-sign"></i></a>
+												<a id="show-list-${university_id}" class="show-list" title="View students" data-container=".agent-${university_id}" data-title="${popoverHeader}" data-placement="left"><i class="icon-edit"></i></a>
 											</div>
 										</div>
 

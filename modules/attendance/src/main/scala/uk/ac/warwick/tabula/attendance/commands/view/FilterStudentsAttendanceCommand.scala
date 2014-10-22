@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.attendance.commands.old.AutowiringSecurityServicePermissionsAwareRoutes
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.ScalaRestriction
+import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaRestriction}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
@@ -135,7 +135,7 @@ trait AttendanceFilterExtras extends FiltersStudents {
 	override def getAliasPaths(table: String) = {
 		(FiltersStudents.AliasPaths ++ Map(
 			"attendanceCheckpointTotals" -> Seq(
-				"attendanceCheckpointTotals" -> "attendanceCheckpointTotals"
+				"attendanceCheckpointTotals" -> AliasAndJoinType("attendanceCheckpointTotals")
 			)
 		))(table)
 	}

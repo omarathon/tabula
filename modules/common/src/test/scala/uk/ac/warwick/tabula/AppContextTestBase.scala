@@ -1,20 +1,19 @@
 package uk.ac.warwick.tabula
 
-import org.junit.runner.RunWith
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-import org.springframework.beans.factory.annotation.Autowired
+import javax.sql.DataSource
+
 import org.hibernate.{Session, SessionFactory}
+import org.junit.Before
+import org.junit.runner.RunWith
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory
+import org.springframework.test.context.{ActiveProfiles, ContextConfiguration}
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.transaction._
 import org.springframework.transaction.support._
-import org.junit.Before
-import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory
-import javax.sql.DataSource
-import uk.ac.warwick.tabula.commands.Command
-import java.lang.reflect.Modifier
-import scala.language.implicitConversions
 import uk.ac.warwick.tabula.data.Transactions
+
+import scala.language.implicitConversions
 
 @RunWith(classOf[SpringJUnit4ClassRunner])
 @ContextConfiguration(locations=Array("/WEB-INF/applicationContext-lazyinit.xml"))
@@ -40,7 +39,7 @@ abstract class PersistenceTestBase extends TestBase with ContextSetup with Trans
 trait ContextSetup {
 	@Autowired var beans: AbstractAutowireCapableBeanFactory =_
 	
-	@Before def setupCtx {
+	@Before def setupCtx() {
 		
 	}
 }
@@ -67,7 +66,7 @@ trait TransactionalTesting {
 
 	def flushing[A](s:Session)(f: =>A):A= {
 		val a = f
-		s.flush
+		s.flush()
 		a
 	}
 }

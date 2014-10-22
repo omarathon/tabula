@@ -1,25 +1,18 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, PersistenceTestBase}
-import uk.ac.warwick.tabula.services.{StaffAssistantsHelpers, ProfileService, RelationshipService, RelationshipServiceImpl}
-import uk.ac.warwick.tabula.data.MemberDaoImpl
 import org.junit.Before
-import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
-import uk.ac.warwick.tabula.data.StudentCourseDetailsDaoImpl
+import uk.ac.warwick.tabula.data.{MemberDaoImpl, StudentCourseDetailsDaoImpl}
+import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, StaffAssistantsHelpers}
+import uk.ac.warwick.tabula._
 
-class MemberTest extends PersistenceTestBase with Mockito {
+import scala.collection.JavaConverters._
 
-	val profileService = mock[ProfileService with StaffAssistantsHelpers]
-	val relationshipService = mock[RelationshipService]
-	val memberDao = new MemberDaoImpl
-	val studentCourseDetailsDao = new StudentCourseDetailsDaoImpl
+class MemberTest extends TestBase with Mockito {
 
-	@Before def setup() {
-		memberDao.sessionFactory = sessionFactory
-		studentCourseDetailsDao.sessionFactory = sessionFactory
-	}
+	val profileService = smartMock[ProfileService with StaffAssistantsHelpers]
+	val relationshipService = smartMock[RelationshipService]
 
-	@Test def testAffiliatedDepartments {
+	@Test def testAffiliatedDepartments() {
 		val member = new StudentMember
 		member.universityId = "01234567"
 
@@ -43,7 +36,6 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		val studentCourseDetails = new StudentCourseDetails(member, "2222222/2")
 		studentCourseDetails.department = courseDept
 		studentCourseDetails.mostSignificant = true
-		studentCourseDetails.relationshipService = relationshipService
 
 		member.attachStudentCourseDetails(studentCourseDetails)
 		member.mostSignificantCourse = studentCourseDetails
@@ -81,9 +73,20 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		member.affiliatedDepartments should be (Stream(homeDept, courseDept))
 		member.touchedDepartments should be (Stream(homeDept, courseDept, extDept))
+
+		// check teaching departments aren't included
+		val teachingDepartment = new Department
+		teachingDepartment.code = "td"
+		route.teachingInfo = Fixtures.routeTeachingInformation(route, Seq(homeDept, teachingDepartment)).toSet.asJava
+		route.teachingDepartmentsActive = false
+		member.affiliatedDepartments should be (Stream(homeDept, courseDept))
+
+		// check teaching departments are included when the flag is true
+		route.teachingDepartmentsActive = true
+		member.affiliatedDepartments should be (Stream(homeDept, courseDept, teachingDepartment))
 	}
 
-	@Test def testModuleRegistrations {
+	@Test def testModuleRegistrations() {
 		val member = new StudentMember
 		member.universityId = "01234567"
 
@@ -119,7 +122,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		member.moduleRegistrationsByYear(Some(AcademicYear(2012))) should be (Set(modReg1, modReg3))
 	}
 
-	@Test def nullUsers {
+	@Test def nullUsers() {
 		val member = new StaffMember
 		member.fullName should be (None)
 
@@ -133,11 +136,11 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		member.fullName should be (Some("Sonny"))
 	}
 
-	@Test def fromCurrentUser = withUser("cuscav", "0672089") {
+	@Test def fromCurrentUser() = withUser("cuscav", "0672089") {
 		currentUser.realUser.setFirstName("Mat")
 		currentUser.realUser.setLastName("Mannion")
 		currentUser.realUser.setEmail("M.Mannion@warwick.ac.uk")
-		currentUser.realUser.setStaff(true)
+		currentUser.realUser.setStaff{true}
 
 		val member = new RuntimeMember(currentUser)
 		member.userType should be (MemberUserType.Staff)
@@ -148,8 +151,8 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		member.fullName should be (Some("Mat Mannion"))
 		member.email should be ("M.Mannion@warwick.ac.uk")
 		member.description should be ("")
-		member.isStaff should be (true)
-		member.isStudent should be (false)
+		member.isStaff should be {true}
+		member.isStudent should be {false}
 
 		val user = member.asSsoUser
 		user.getUserId should be ("cuscav")
@@ -158,19 +161,19 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		user.getLastName should be ("Mannion")
 		user.getFullName should be ("Mat Mannion")
 		user.getEmail should be ("M.Mannion@warwick.ac.uk")
-		user.getDepartment should be (null)
-		user.getDepartmentCode should be (null)
-		user.isFoundUser should be (true)
-		user.isVerified should be (true)
+		user.getDepartment should be {null}
+		user.getDepartmentCode should be {null}
+		user.isFoundUser should be {true}
+		user.isVerified should be {true}
 		user.getUserType should be ("Staff")
-		user.isStaff should be (true)
-		user.isStudent should be (false)
+		user.isStaff should be {true}
+		user.isStudent should be {false}
 		user.getExtraProperty("urn:websignon:usertype") should be ("Staff")
 		Option(user.getExtraProperty("urn:websignon:timestamp")) should be ('defined)
 		user.getExtraProperty("urn:websignon:usersource") should be ("Tabula")
 	}
 
-	@Test def description = {
+	@Test def description() = {
 		val dept = Fixtures.department("in", "IT Services")
 
 		val staff = new StaffMember
@@ -192,25 +195,51 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		student.homeDepartment = dept
 		student.mostSignificantCourse = studentCourseDetails
 
-		val desc = student.description
 		student.description should be ("Undergraduate student, MEng Computer Science, IT Services")
 	}
 
-	@Test def isRelationshipAgent {
+	@Test def relationshipAgent() {
 		val staff = new StaffMember
 		staff.profileService = profileService
 		staff.relationshipService = relationshipService
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
-		relationshipService.listStudentRelationshipsWithMember(relationshipType, staff) returns (Seq())
-		staff.isRelationshipAgent(relationshipType) should be (false)
+		relationshipService.listStudentRelationshipsWithMember(relationshipType, staff) returns Seq()
+		staff.isRelationshipAgent(relationshipType) should be {false}
 
-		relationshipService.listStudentRelationshipsWithMember(relationshipType, staff) returns (Seq(StudentRelationship(staff, relationshipType, Fixtures.student())))
-		staff.isRelationshipAgent(relationshipType) should be (true)
+		relationshipService.listStudentRelationshipsWithMember(relationshipType, staff) returns Seq(StudentRelationship(staff, relationshipType, Fixtures.student()))
+		staff.isRelationshipAgent(relationshipType) should be {true}
 	}
 
-	@Test def deleteFileAttachmentOnDelete = transactional { tx =>
+	@Test def freshOrStaleSCYDTest() = {
+		val studentMember = Fixtures.student()
+		val year = studentMember.mostSignificantCourseDetails.get.latestStudentCourseYearDetails.academicYear
+		val studentCourseYearDetails = studentMember.freshOrStaleStudentCourseYearDetails(year).head
+		val latestCourseYearDetails =  studentMember.mostSignificantCourseDetails.get.latestStudentCourseYearDetails
+
+		studentCourseYearDetails should be (latestCourseYearDetails)
+	}
+
+	@Test def testVisaProperties() = {
+		val studentMember = Fixtures.student()
+		studentMember.casUsed.get should be {false}
+		studentMember.hasTier4Visa.get should be {false}
+	}
+
+}
+
+class MemberPersistenceTest extends PersistenceTestBase with Mockito {
+
+	val memberDao = new MemberDaoImpl
+	val studentCourseDetailsDao = new StudentCourseDetailsDaoImpl
+
+	@Before def setup() {
+		memberDao.sessionFactory = sessionFactory
+		studentCourseDetailsDao.sessionFactory = sessionFactory
+	}
+
+	@Test def deleteFileAttachmentOnDelete() = transactional { tx =>
 		// TAB-667
 		val orphanAttachment =flushing(session){
 			val attachment = new FileAttachment
@@ -232,9 +261,9 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		}
 
 		// Ensure everything's been persisted
-		orphanAttachment.id should not be (null)
-		member.id should not be (null)
-		memberAttachment.id should not be (null)
+		orphanAttachment.id should not be {null}
+		member.id should not be {null}
+		memberAttachment.id should not be {null}
 
 		// Can fetch everything from db
 		flushing(session){
@@ -249,12 +278,12 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		// Ensure we can't fetch the FeedbackTemplate or attachment, but all the other objects are returned
 		flushing(session){
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
-			session.get(classOf[Member], member.id) should be (null)
-			session.get(classOf[FileAttachment], memberAttachment.id) should be (null)
+			session.get(classOf[Member], member.id) should be {null}
+			session.get(classOf[FileAttachment], memberAttachment.id) should be {null}
 		}
 	}
 
-	@Test def testPermanentlyWithdrawn = transactional { tx =>
+	@Test def testPermanentlyWithdrawn() = transactional { tx =>
 
 		val dept1 = Fixtures.department("ms", "Motorsport")
 		session.save(dept1)
@@ -268,66 +297,49 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		val status3 = Fixtures.sitsStatus("F", "Fully Enrolled", "Definitely not permanently withdrawn at all")
 		session.save(status3)
 
-		session.flush
+		session.flush()
 
 		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1, status1)
 		memberDao.saveOrUpdate(stu1)
-		session.flush
+		session.flush()
 
-		stu1.permanentlyWithdrawn should be (true)
+		stu1.permanentlyWithdrawn should be {true}
 
 		val stu2 = Fixtures.student(universityId = "2000001", userId="student", department=dept1, courseDepartment=dept1, status2)
 		memberDao.saveOrUpdate(stu2)
-		session.flush
+		session.flush()
 
-		stu2.permanentlyWithdrawn should be (true)
+		stu2.permanentlyWithdrawn should be {true}
 
 		val stu3 = Fixtures.student(universityId = "3000001", userId="student", department=dept1, courseDepartment=dept1, status3)
 		memberDao.saveOrUpdate(stu3)
-		session.flush
+		session.flush()
 
-		stu3.permanentlyWithdrawn should be (false)
+		stu3.permanentlyWithdrawn should be {false}
 
 		// the student fixture comes with one free studentCourseDetails - add another to stu1:
 		val stu1_scd2 = Fixtures.studentCourseDetails(stu1, dept1, null, "1000001/2")
 		stu1_scd2.statusOnRoute = status2
 		memberDao.saveOrUpdate(stu1)
 		studentCourseDetailsDao.saveOrUpdate(stu1_scd2)
-		session.flush
+		session.flush()
 
-		stu1.permanentlyWithdrawn should be (true)
+		stu1.permanentlyWithdrawn should be {true}
 
 		// add an SCD with a null status - shouldn't come back as permanently withdrawn:
 		val stu1_scd3 = Fixtures.studentCourseDetails(stu1, dept1, null, "1000001/3")
 		memberDao.saveOrUpdate(stu1)
 		studentCourseDetailsDao.saveOrUpdate(stu1_scd3)
-		session.flush
+		session.flush()
 
-		stu1.permanentlyWithdrawn should be (false)
+		stu1.permanentlyWithdrawn should be {false}
 
 		// and now set the null status to fully enrolled:
 		stu1_scd3.statusOnRoute = status3
 		studentCourseDetailsDao.saveOrUpdate(stu1_scd3)
-		session.flush
+		session.flush()
 
-		stu1.permanentlyWithdrawn should be (false)
-	}
-
-	@Test def freshOrStaleSCYDTest =  {
-
-		val studentMember = Fixtures.student()
-		val year = studentMember.mostSignificantCourseDetails.get.latestStudentCourseYearDetails.academicYear
-		val studentCourseYearDetails = studentMember.freshOrStaleStudentCourseYearDetails(year).head
-		val latestCourseYearDetails =  studentMember.mostSignificantCourseDetails.get.latestStudentCourseYearDetails
-
-		studentCourseYearDetails should be (latestCourseYearDetails)
-
-	}
-
-	@Test def testVisaProperties =  {
-		val studentMember = Fixtures.student()
-		studentMember.casUsed.get should be (false)
-		studentMember.hasTier4Visa.get should be (false)
+		stu1.permanentlyWithdrawn should be {false}
 	}
 
 }

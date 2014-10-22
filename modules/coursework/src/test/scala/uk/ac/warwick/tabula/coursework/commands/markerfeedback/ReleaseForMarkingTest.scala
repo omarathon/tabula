@@ -1,27 +1,26 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.{MockUserLookup, AppContextTestBase}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model._
-import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.coursework.commands.assignments.ReleaseForMarkingCommand
-import uk.ac.warwick.tabula.services.{FeedbackService, StateService, AssignmentService, FeedbackServiceComponent, StateServiceComponent, AssignmentServiceComponent}
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.Mockito
-import collection.JavaConverters._
+import uk.ac.warwick.tabula.coursework.commands.assignments.ReleaseForMarkingCommand
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services.{AssignmentService, AssignmentServiceComponent, FeedbackService, FeedbackServiceComponent, StateService, StateServiceComponent}
+import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
 
-class ReleaseForMarkingTest extends AppContextTestBase with Mockito {
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+
+class ReleaseForMarkingTest extends TestBase with Mockito {
 
 	trait TestSupport extends AssignmentServiceComponent with StateServiceComponent with FeedbackServiceComponent {
 
-		val assignmentService = mock[AssignmentService]
-		val stateService = mock[StateService]
-		val feedbackService = mock[FeedbackService]
+		val assignmentService = smartMock[AssignmentService]
+		val stateService = smartMock[StateService]
+		val feedbackService = smartMock[FeedbackService]
 		def apply(): List[Feedback] = List()
 	}
 
-	@Transactional @Test
+	@Test
 	def testIsReleased() {
 		withUser("cuslaj") {
 
@@ -34,7 +33,6 @@ class ReleaseForMarkingTest extends AppContextTestBase with Mockito {
 			assignment.firstMarkers = Seq(
 				FirstMarkersMap(assignment, "marker-uni-id", allStudentsUserGroup)
 			).asJava
-			session.save(assignment)
 
 			generateSubmission(assignment, "0678022")
 			generateSubmission(assignment, "1170836")
@@ -59,7 +57,7 @@ class ReleaseForMarkingTest extends AppContextTestBase with Mockito {
 	}
 
 
-	def generateSubmission(assignment:Assignment, uniId: String) {
+	private def generateSubmission(assignment:Assignment, uniId: String) {
 		val submission = new Submission()
 		submission.assignment = assignment
 		submission.universityId = uniId

@@ -156,13 +156,13 @@ class Assignment
 	@transient
 	lazy val workingDaysHelper = new WorkingDaysHelperImpl
 
-	def feedbackDeadline: Option[LocalDate] = if (openEnded) {
+	def feedbackDeadline: Option[LocalDate] = if (openEnded || dissertation) {
 		None
 	} else {
 		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
 	}
 
-	def feedbackDeadlineWorkingDaysAway: Option[Int] = if (openEnded) {
+	def feedbackDeadlineWorkingDaysAway: Option[Int] = if (openEnded || dissertation) {
 		None
 	} else {
 		val now = LocalDate.now
@@ -668,6 +668,14 @@ class Assignment
 			val feedbackIds = fullFeedback.map { _.universityId }.toSet
 
 			submissionIds ++ feedbackIds
+	}
+
+	def needsFeedbackPublishing = {
+		if (openEnded || !collectSubmissions) {
+			false
+		} else {
+			submissions.asScala.exists(s => !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
+		}
 	}
 
 	def toEntityReference = new AssignmentEntityReference().put(this)

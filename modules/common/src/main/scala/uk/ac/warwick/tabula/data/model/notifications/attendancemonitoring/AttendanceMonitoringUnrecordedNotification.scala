@@ -59,7 +59,7 @@ class AttendanceMonitoringUnrecordedPointsNotification
 	override def content: FreemarkerModel = FreemarkerModel(FreemarkerTemplate, Map(
 		"department" -> department,
 		"academicYear" -> academicYear,
-		"points" -> unrecordedPoints
+		"points" -> unrecordedPoints.groupBy(p => (p.name, p.startDate, p.endDate)).map{case(_, groupedPoints) => groupedPoints.head}
 	))
 
 	override final def recipients: Seq[User] = {

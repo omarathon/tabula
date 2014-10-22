@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent}
 import uk.ac.warwick.tabula.data.model.{StudentMember, CourseType}
 import scala.collection.JavaConverters._
 import org.hibernate.criterion.Order
-import uk.ac.warwick.tabula.data.{ScalaRestriction, ScalaOrder}
+import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaRestriction, ScalaOrder}
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 import org.mockito.ArgumentMatcher
 import uk.ac.warwick.tabula.JavaImports._
@@ -106,22 +106,22 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 				.add(Restrictions.like("course.code", "U%"))
 				.add(Restrictions.like("course.code", "N%"))
 		)
-		courseTypeRestriction.alias("mostSignificantCourse", "studentCourseDetails")
-		courseTypeRestriction.alias("studentCourseDetails.course", "course")
+		courseTypeRestriction.alias("mostSignificantCourse", AliasAndJoinType("studentCourseDetails"))
+		courseTypeRestriction.alias("studentCourseDetails.course", AliasAndJoinType("course"))
 
 		val routeRestriction = new ScalaRestriction(Restrictions.in("studentCourseDetails.route.code", JArrayList(route1.code, route3.code)))
-		routeRestriction.alias("mostSignificantCourse", "studentCourseDetails")
+		routeRestriction.alias("mostSignificantCourse", AliasAndJoinType("studentCourseDetails"))
 
 		val moaRestriction = new ScalaRestriction(Restrictions.in("studentCourseYearDetails.modeOfAttendance", JArrayList(moaFT)))
-		moaRestriction.alias("mostSignificantCourse", "studentCourseDetails")
-		moaRestriction.alias("studentCourseDetails.latestStudentCourseYearDetails", "studentCourseYearDetails")
+		moaRestriction.alias("mostSignificantCourse", AliasAndJoinType("studentCourseDetails"))
+		moaRestriction.alias("studentCourseDetails.latestStudentCourseYearDetails", AliasAndJoinType("studentCourseYearDetails"))
 
 		val yosRestriction = new ScalaRestriction(Restrictions.in("studentCourseYearDetails.yearOfStudy", JArrayList(1, 5)))
-		yosRestriction.alias("mostSignificantCourse", "studentCourseDetails")
-		yosRestriction.alias("studentCourseDetails.latestStudentCourseYearDetails", "studentCourseYearDetails")
+		yosRestriction.alias("mostSignificantCourse", AliasAndJoinType("studentCourseDetails"))
+		yosRestriction.alias("studentCourseDetails.latestStudentCourseYearDetails", AliasAndJoinType("studentCourseYearDetails"))
 
 		val sprRestriction = new ScalaRestriction(Restrictions.in("studentCourseDetails.statusOnRoute", JArrayList(sprP)))
-		sprRestriction.alias("mostSignificantCourse", "studentCourseDetails")
+		sprRestriction.alias("mostSignificantCourse", AliasAndJoinType("studentCourseDetails"))
 
 		// no need to test ScalaRestriction.inIfNotEmptyMultipleProperties - it's tested in ScalaRestrictionTest
 		val modRestriction = inIfNotEmptyMultipleProperties(
@@ -129,8 +129,8 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 			Seq(Seq(mod2, mod3), Seq(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
 		).get
 
-		modRestriction.alias("mostSignificantCourse", "studentCourseDetails")
-		modRestriction.alias("studentCourseDetails._moduleRegistrations", "moduleRegistration")
+		modRestriction.alias("mostSignificantCourse", AliasAndJoinType("studentCourseDetails"))
+		modRestriction.alias("studentCourseDetails._moduleRegistrations", AliasAndJoinType("moduleRegistration"))
 
 		val expectedRestrictions = Seq(
 			courseTypeRestriction,
@@ -163,8 +163,8 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		val expectedOrders = Seq(
 			ScalaOrder(
 				Order.desc("studentCourseYearDetails.yearOfStudy"),
-				"mostSignificantCourse" -> "studentCourseDetails",
-				"studentCourseDetails.latestStudentCourseYearDetails" -> "studentCourseYearDetails"
+				"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails"),
+				"studentCourseDetails.latestStudentCourseYearDetails" -> AliasAndJoinType("studentCourseYearDetails")
 			),
 			ScalaOrder.asc("lastName"),
 			ScalaOrder.asc("firstName")

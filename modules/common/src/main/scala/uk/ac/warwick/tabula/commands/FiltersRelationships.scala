@@ -1,31 +1,31 @@
 package uk.ac.warwick.tabula.commands
 
-import uk.ac.warwick.tabula.data.ScalaRestriction
+import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaRestriction}
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 import uk.ac.warwick.tabula.data.model._
 
 import scala.collection.JavaConverters._
 
 object FiltersRelationships {
-	val AliasPaths = Seq(
+	val AliasPaths: Map[String, Seq[(String, AliasAndJoinType)]] = Seq(
 		"studentCourseYearDetails" -> Seq(
-			"latestStudentCourseYearDetails" -> "studentCourseYearDetails"
+			"latestStudentCourseYearDetails" -> AliasAndJoinType("studentCourseYearDetails")
 		),
 		"moduleRegistration" -> Seq(
-			"_moduleRegistrations" -> "moduleRegistration"
+			"_moduleRegistrations" -> AliasAndJoinType("moduleRegistration")
 		),
 		"course" -> Seq(
-			"course" -> "course"
+			"course" -> AliasAndJoinType("course")
 		),
 		"route" -> Seq(
-			"route" -> "route"
+			"route" -> AliasAndJoinType("route")
 		),
 		"statusOnRoute" -> Seq(
-			"statusOnRoute" -> "statusOnRoute"
+			"statusOnRoute" -> AliasAndJoinType("statusOnRoute")
 		),
 		"department" -> Seq(
-			"route" -> "route",
-			"route.adminDepartment" -> "department"
+			"route" -> AliasAndJoinType("route"),
+			"route.adminDepartment" -> AliasAndJoinType("department")
 		)
 	).toMap
 

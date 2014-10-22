@@ -93,15 +93,15 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 
 			if (recipientInfo.notification.priority < Notification.PriorityEmailThreshold) {
 				logger.info(s"Not sending email as notification priority ${recipientInfo.notification.priority} below threshold")
-
 				cancelSendingEmail()
 			} else if (!recipientInfo.recipient.isFoundUser) {
 				logger.error(s"Couldn't send email for Notification because usercode didn't match a user: $recipientInfo")
-
 				cancelSendingEmail()
 			} else if (recipientInfo.recipient.getEmail.isEmptyOrWhitespace) {
 				logger.warn(s"Couldn't send email for Notification because recipient has no email address: $recipientInfo")
-
+				cancelSendingEmail()
+			} else if(recipientInfo.recipient.isLoginDisabled) {
+				logger.warn(s"Couldn't send email for Notification because recipients login is disabed: $recipientInfo")
 				cancelSendingEmail()
 			} else {
 				generateMessage(recipientInfo) match {

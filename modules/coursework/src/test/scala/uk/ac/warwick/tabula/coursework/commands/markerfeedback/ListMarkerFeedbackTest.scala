@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.{MockUserLookup, Mockito, AppContextTestBase}
-import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.commands.assignments.ListMarkerFeedbackCommand
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.UserLookupComponent
+import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
+
+import scala.collection.JavaConversions._
 
 
-class ListMarkerFeedbackTest extends AppContextTestBase with MarkingWorkflowWorld with Mockito {
+class ListMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with Mockito {
 
 	trait CommandTestSupport extends UserLookupComponent {
 		val userLookup = new MockUserLookup
@@ -16,7 +16,7 @@ class ListMarkerFeedbackTest extends AppContextTestBase with MarkingWorkflowWorl
 
 	assignment.markingWorkflow.userLookup = mockUserLookup
 
-	@Transactional @Test
+	@Test
 	def firstMarkerTest() {
 		withUser("cuslaj") {
 			val command =	new ListMarkerFeedbackCommand(assignment, assignment.module, currentUser) with CommandTestSupport
@@ -34,7 +34,7 @@ class ListMarkerFeedbackTest extends AppContextTestBase with MarkingWorkflowWorl
 		}
 	}
 
-	@Transactional @Test
+	@Test
 	def secondMarkerTest() {
 		assignment.feedbacks.foreach{feedback =>
 			val fmFeedback = feedback.retrieveFirstMarkerFeedback

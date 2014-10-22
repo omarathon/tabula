@@ -1,14 +1,16 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
 
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.{MockUserLookup, TestFixtures}
 import uk.ac.warwick.tabula.JavaImports._
-import collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services.ZipService
+import uk.ac.warwick.tabula.{Features, MockUserLookup, TestHelpers}
 import uk.ac.warwick.userlookup.User
 
+import scala.collection.JavaConverters._
+
 // reusable environment for marking workflow tests
-trait MarkingWorkflowWorld extends TestFixtures {
+trait MarkingWorkflowWorld extends TestHelpers {
 
 	val mockUserLookup = new MockUserLookup
 
@@ -49,6 +51,11 @@ trait MarkingWorkflowWorld extends TestFixtures {
 	).asJava)
 
 	assignment.secondMarkers = secondMarkers
+
+	val zipService = new ZipService
+	zipService.userLookup = mockUserLookup
+	zipService.features = Features.empty
+	zipService.zipDir = createTemporaryDirectory()
 
 	def addFeedback(assignment:Assignment){
 		val feedback = assignment.submissions.asScala.map{ s =>

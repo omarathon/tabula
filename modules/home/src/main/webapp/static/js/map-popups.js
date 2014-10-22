@@ -7,7 +7,7 @@
 				var $el = $(this);
 				if ($el.data('map-wired')) return;
 
-				var mapUrl = '//campus.warwick.ac.uk/?lite=1&search=' + encodeURIComponent($el.text()) + '&lid=' + encodeURIComponent($el.data('lid'));
+				var mapUrl = '//campus.warwick.ac.uk/?lite=1&search=' + encodeURIComponent($el.text()) + '&slid=' + encodeURIComponent($el.data('lid'));
 
 				var $icon =
 					$('<i />').addClass('icon-map-marker');

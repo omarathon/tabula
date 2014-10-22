@@ -266,7 +266,7 @@
 				<#if checkboxName?has_content>
 					<th style="width: 65px; padding-right: 5px;" <#if checkAll>class="for-check-all"</#if>>
 						<#if showRemoveButton>
-							<input class="btn btn-warning hideOnClosed btn-small use-tooltip"
+							<input class="btn btn-warning btn-small use-tooltip"
 							  <#if findCommandResult.membershipItems?size == 0>disabled</#if>
 							  type="submit"
 							  name="${ManageSchemeMappingParameters.manuallyExclude}"
@@ -276,7 +276,7 @@
 							/>
 						</#if>
 						<#if (showResetButton && (editMembershipCommandResult.includedStudentIds?size > 0 || editMembershipCommandResult.excludedStudentIds?size > 0))>
-							<input class="btn btn-warning hideOnClosed btn-small use-tooltip"
+							<input class="btn btn-warning btn-small use-tooltip"
 								   type="submit"
 								   style="float: right; padding-left: 5px; padding-right: 5px; margin-left: 5px;"
 								   name="${ManageSchemeMappingParameters.resetMembership}"

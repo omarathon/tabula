@@ -5,7 +5,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder
 import org.apache.commons.lang3.builder.EqualsBuilder
 import org.hibernate.criterion.Order
 import org.apache.commons.lang3.builder.ToStringStyle
-import scala.collection.mutable
 
 class ScalaOrder(val underlying: Order) extends Aliasable {
 	def apply[A](c: ScalaCriteria[A]) = c.addOrder(this)
@@ -35,12 +34,12 @@ class ScalaOrder(val underlying: Order) extends Aliasable {
 object ScalaOrder {
 	import Aliasable._
 	
-	def apply(underlying: Order, aliases: (String, String)*) = 
+	def apply(underlying: Order, aliases: (String, AliasAndJoinType)*) =
 		addAliases(new ScalaOrder(underlying), aliases: _*)
 	
-	def asc(property: String, aliases: (String, String)*): ScalaOrder = 
+	def asc(property: String, aliases: (String, AliasAndJoinType)*): ScalaOrder =
 		addAliases(new ScalaOrder(Order.asc(property)), aliases: _*)
 		
-	def desc(property: String, aliases: (String, String)*): ScalaOrder = 
+	def desc(property: String, aliases: (String, AliasAndJoinType)*): ScalaOrder =
 		addAliases(new ScalaOrder(Order.desc(property)), aliases: _*)
 }

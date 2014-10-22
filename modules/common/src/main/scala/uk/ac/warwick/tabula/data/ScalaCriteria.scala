@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.criterion._
+import org.hibernate.sql.JoinType
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.transform.DistinctRootEntityResultTransformer
@@ -19,20 +20,20 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
 
 	def add(criterion: Criterion) = chainable { c.add(criterion) }
 	def add(restriction: ScalaRestriction) = chainable {
-		restriction.aliases.foreach { case (property, alias) => createAlias(property, alias) }
+		restriction.aliases.foreach { case (property, aliasAndJoinType) => createAlias(property, aliasAndJoinType.alias, aliasAndJoinType.joinType) }
 		c.add(restriction.underlying)
 	}
 	def addOrder(order: Order) = chainable { c.addOrder(order) }
 	def addOrder(order: ScalaOrder) = chainable {
-		order.aliases.foreach { case (property, alias) => createAlias(property, alias) }
+		order.aliases.foreach { case (property, aliasAndJoinType) => createAlias(property, aliasAndJoinType.alias, aliasAndJoinType.joinType) }
 		c.addOrder(order.underlying)
 	}
 	def setMaxResults(i: Int) = chainable { c.setMaxResults(i) }
 	def setFirstResult(i: Int) = chainable { c.setFirstResult(i) }
 	def setFetchMode(associationPath: String, mode: FetchMode) = chainable { c.setFetchMode(associationPath, mode) }
-	def createAlias(property: String, alias: String) = chainable {
+	def createAlias(property: String, alias: String, joinType: JoinType = JoinType.INNER_JOIN) = chainable {
 		aliases.put(property, alias) match {
-			case None => c.createAlias(property, alias)
+			case None => c.createAlias(property, alias, joinType)
 			case Some(existing) if existing == alias => // duplicate
 			case Some(other) => throw new IllegalArgumentException("Tried to alias %s to %s, but it is already aliased to %s!".format(property, alias, other))
 		}

@@ -15,9 +15,9 @@ class ScheduledMeetingRecordInviteeNotification extends ScheduledMeetingRecordNo
 	}
 
 	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_invitee_notification.ftl"
-	def title = s"Meeting $verb"
+	def title = s"Meeting $verb by ${actor.getFullName}"
 
-	def actor = if (meeting.creatorInRelationship) {
+	def actor = if (meeting.universityIdInRelationship(agent.getWarwickId)) {
 		agent
 	} else {
 		// meeting was scheduled by someone else on the relationship agents behalf so actor is them
@@ -33,7 +33,7 @@ class ScheduledMeetingRecordInviteeNotification extends ScheduledMeetingRecordNo
 	))
 
 	def recipient = {
-		if (meeting.creator.universityId == meeting.relationship.studentId) {
+		if (actor.getWarwickId == meeting.relationship.studentId) {
 			meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage)).asSsoUser
 		} else {
 			meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)).asSsoUser
