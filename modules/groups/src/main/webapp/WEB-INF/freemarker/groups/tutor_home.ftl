@@ -1,7 +1,12 @@
 <#import "../group_components.ftl" as components />
 <#escape x as x?html>
 
-<h1>My small groups</h1>
+<#if ajax>
+	<h4>My small groups</h4>
+<#else>
+	<h1>My small groups</h1>
+</#if>
+
 
 <#if updatedOccurrence??>
 <div class="alert alert-success">
