@@ -17,16 +17,16 @@ class MeetingRecordRejectedNotification
 	def meeting = approval.meetingRecord
 	def relationship = meeting.relationship
 
-	def verb = "reject"
+	def verb = "return"
 	def actionRequired = true
 
-	def title = "Meeting record rejected"
+	def title = "Meeting record returned with comments"
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
 		"actor" -> agent,
 		"role"->agentRole,
 		"dateFormatter" -> dateOnlyFormatter,
 		"meetingRecord" -> approval.meetingRecord,
-		"verbed" -> "rejected",
+		"verbed" -> "returned",
 		"reason" -> approval.comments
 	))
 
