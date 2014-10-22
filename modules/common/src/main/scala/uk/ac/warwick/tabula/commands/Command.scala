@@ -334,7 +334,7 @@ abstract class Description {
    * Record a collection of SmallGroupSets
    */
   def smallGroupSetCollection(smallGroupSets: Seq[SmallGroupSet]) = {
-    property("smallGroupSets" -> smallGroupSets.map(_.id).mkString)
+    property("smallGroupSets" -> smallGroupSets.map(_.id).mkString(","))
     this
   }
 
