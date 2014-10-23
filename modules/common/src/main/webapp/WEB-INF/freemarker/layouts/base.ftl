@@ -28,7 +28,7 @@
 			</#if>
 			<#if (user.masquerading)!false>
 				<div id="masquerade-notice" class="sysadmin-only-content">
-					Masquerading as <strong>${user.apparentUser.fullName}</strong>. <a href="<@url page="/masquerade" context="/admin"/>">Change</a>
+					Masquerading as <strong>${user.apparentUser.fullName}</strong>. <a href="<@url page="/masquerade?returnTo=${info.requestedUri}" context="/admin"/>">Change</a>
 				</div>
 			</#if>
 			<#-- Change this to header-medium or header-large as necessary - large is for homepages only -->
