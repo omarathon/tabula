@@ -33,7 +33,7 @@ trait SitsStudentRowCourseDetails
 	var awardCode = rs.getString("award_code")
 
 	// tutor data also needs some work before it can be persisted, so store it in local variables for now:
-	var tutorUniId = rs.getString("spr_tutor1")
+	var tutorUniId = if(departmentCode == "PX") rs.getString("spr_tutor1") else rs.getString("scj_tutor1").substring(2)
 
 	// this is the key and is not included in StudentCourseProperties, so just storing it in a var:
 	var scjCode: String = rs.getString("scj_code")
