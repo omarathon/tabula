@@ -1,20 +1,15 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.AccessType
-import javax.persistence._
-import javax.persistence.CascadeType._
-import javax.persistence.FetchType._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import org.hibernate.`type`.StandardBasicTypes
-import org.hibernate.annotations.Type
 import java.sql.Types
-import uk.ac.warwick.tabula.permissions.PermissionsSelector
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import java.net.URLEncoder
+import javax.persistence._
 import javax.validation.constraints.NotNull
-import uk.ac.warwick.tabula.services.RelationshipService
+
+import org.hibernate.`type`.StandardBasicTypes
+import org.hibernate.annotations.{AccessType, Type}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.permissions.{PermissionsSelector, PermissionsTarget}
+import uk.ac.warwick.tabula.services.RelationshipService
 
 @Entity @AccessType("field")
 class StudentRelationshipType extends PermissionsTarget with PermissionsSelector[StudentRelationshipType] with IdEquality {
@@ -82,21 +77,34 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 	 * whether it is hidden when empty, or displayed with a prompt to add.
 	 */
 	def displayIfEmpty(studentCourseDetails: StudentCourseDetails): Boolean = {
-			studentCourseDetails.courseType match {
-			case Some(CourseType.UG) => expectedUG
-			case Some(CourseType.PGT) => expectedPGT
-			case Some(CourseType.PGR) => expectedPGR
+		studentCourseDetails.courseType match {
+			case Some(courseType: CourseType) => courseType match {
+				case CourseType.UG =>
+					studentCourseDetails.department.getStudentRelationshipExpected(this, courseType).getOrElse(expectedUG.booleanValue)
+				case CourseType.PGT =>
+					studentCourseDetails.department.getStudentRelationshipExpected(this, courseType).getOrElse(expectedPGT.booleanValue)
+				case CourseType.PGR =>
+					studentCourseDetails.department.getStudentRelationshipExpected(this, courseType).getOrElse(expectedPGR.booleanValue)
+				case _ => false
+			}
 			case _ => false
 		}
 	}
 
 	def isExpected(studentCourseDetails: StudentCourseDetails): Boolean = displayIfEmpty(studentCourseDetails)
 
+	def isDefaultExpected(courseType: CourseType): Boolean = courseType match {
+		case CourseType.UG => expectedUG.booleanValue
+		case CourseType.PGT => expectedPGT.booleanValue
+		case CourseType.PGR => expectedPGR.booleanValue
+		case _ => false
+	}
+
 	/**
 	 * If the source is anything other than local, then this relationship type is read-only
 	 */
 	def readOnly(department: Department) =
-		(department.getStudentRelationshipSource(this) != StudentRelationshipSource.Local)
+		department.getStudentRelationshipSource(this) != StudentRelationshipSource.Local
 
 
 

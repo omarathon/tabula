@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.admin.web.controllers.department
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping, PathVariable}
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{CourseType, Department}
 import org.springframework.validation.Errors
 import javax.validation.Valid
 import uk.ac.warwick.tabula.admin.commands.department.DisplaySettingsCommand
@@ -23,7 +23,8 @@ class DisplaySettingsController extends AdminController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("displaySettingsCommand")
-	def displaySettingsCommand(@PathVariable("dept") dept:Department): DisplaySettingsCommand = DisplaySettingsCommand(mandatory(dept))
+	def displaySettingsCommand(@PathVariable("dept") dept:Department): DisplaySettingsCommand =
+		DisplaySettingsCommand(mandatory(dept))
 
 	@ModelAttribute("allRelationshipTypes") def allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 
@@ -34,10 +35,11 @@ class DisplaySettingsController extends AdminController {
 	}
 	
 	private def viewSettings(dept: Department) =
-			crumbed(Mav("admin/display-settings",
-				"department" -> dept,
-				"returnTo" -> getReturnTo("")
-			), dept)
+		crumbed(Mav("admin/display-settings",
+			"department" -> dept,
+			"expectedCourseTypes" -> Seq(CourseType.UG, CourseType.PGT, CourseType.PGR),
+			"returnTo" -> getReturnTo("")
+		), dept)
 
 	@RequestMapping(method=Array(POST))
 	def saveSettings(
