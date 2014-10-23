@@ -185,14 +185,43 @@
 				<@form.label>Display</@form.label>
 				<@form.field>
 					<#list allRelationshipTypes as relationshipType>
-						<@form.label checkbox=true>
-							<@f.checkbox path="studentRelationshipDisplayed[${relationshipType.id}]" id="studentRelationshipDisplayed_${relationshipType.id}" />
-							${relationshipType.description}
-						</@form.label>
+						<div class="studentRelationshipDisplayed">
+							<@form.label checkbox=true>
+								<@f.checkbox path="studentRelationshipDisplayed[${relationshipType.id}]" id="studentRelationshipDisplayed_${relationshipType.id}" />
+								${relationshipType.description}
+							</@form.label>
+							<div class="studentRelationshipExpected" style="margin-left: 32px;">
+								<div class="help-block">
+									<small>Show when empty to students of type</small>
+								</div>
+								<#list expectedCourseTypes as courseType>
+									<@form.label checkbox=true>
+										<@f.checkbox
+											path="studentRelationshipExpected[${relationshipType.urlPart}][${courseType.code}]"
+											id="studentRelationshipExpected_${relationshipType.urlPart}_${courseType.code}"
+											disabled="${(!displaySettingsCommand.studentRelationshipDisplayed[relationshipType.id])?string}"
+										/>
+										${courseType.description}
+									</@form.label>
+								</#list>
+							</div>
+						</div>
 					</#list>
 
 					<@f.errors path="studentRelationshipDisplayed" cssClass="error" />
 				</@form.field>
+				<script>
+					jQuery(function($){
+						$('#relationship-options input[name^=studentRelationshipDisplayed]').on('change', function(){
+							var $this = $(this);
+							if ($this.is(':checked')) {
+								$this.closest('.studentRelationshipDisplayed').find('.studentRelationshipExpected input').attr('disabled', false);
+							} else {
+								$this.closest('.studentRelationshipDisplayed').find('.studentRelationshipExpected input').attr('disabled', true);
+							}
+						});
+					});
+				</script>
 			</@form.row>
 
 			<@form.row>
