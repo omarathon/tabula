@@ -51,7 +51,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 			case (id, bString) => id -> java.lang.Boolean.valueOf(bString)
 		})
 	var studentRelationshipExpected: JMap[StudentRelationshipType, JMap[CourseType, JBoolean]] =
-		LazyMaps.create{relationshipType: StudentRelationshipType => JHashMap(): JMap[CourseType, JBoolean] }.asJava
+		LazyMaps.create{_: StudentRelationshipType => JMap[CourseType, JBoolean]() }.asJava
 
 	def populate() {
 		relationshipService.allStudentRelationshipTypes.foreach { relationshipType => {

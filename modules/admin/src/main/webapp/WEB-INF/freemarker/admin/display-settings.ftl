@@ -214,11 +214,8 @@
 					jQuery(function($){
 						$('#relationship-options input[name^=studentRelationshipDisplayed]').on('change', function(){
 							var $this = $(this);
-							if ($this.is(':checked')) {
-								$this.closest('.studentRelationshipDisplayed').find('.studentRelationshipExpected input').attr('disabled', false);
-							} else {
-								$this.closest('.studentRelationshipDisplayed').find('.studentRelationshipExpected input').attr('disabled', true);
-							}
+							var disableInput = !$this.is(':checked');
+							$this.closest('.studentRelationshipDisplayed').find('.studentRelationshipExpected input').prop('disabled', disableInput);
 						});
 					});
 				</script>
