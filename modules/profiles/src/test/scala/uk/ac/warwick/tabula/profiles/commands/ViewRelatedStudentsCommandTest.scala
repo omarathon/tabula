@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.ScalaRestriction
 
 class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 
-	val member = new StaffMember("test")
+	val staffMember = new StaffMember("test")
 
 	trait Fixture {
 		val testDepartment = new Department
@@ -36,15 +36,6 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 		courseDetails2.department = testDepartment
 		courseDetails2.route = testRoute2
 		courseDetails2.course = course
-
-		val member1, member2, member3, member4  = new StudentMember()
-
-		member1.mostSignificantCourse = courseDetails1
-		member2.mostSignificantCourse = courseDetails1
-		member3.mostSignificantCourse = courseDetails2
-		// member4 has no most significant course
-
-		val members = Seq(member1, member2, member3, member4)
 	}
 
 	@Test
@@ -53,15 +44,15 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		val restrictions : Seq[ScalaRestriction] = Seq()
 
-		mockProfileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, member, restrictions) returns members
+		mockProfileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staffMember, restrictions) returns Seq(courseDetails1, courseDetails2)
 
-		val command = new ViewRelatedStudentsCommandInternal(member, relationshipType) with ProfileServiceComponent {
+		val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent {
 			var profileService = mockProfileService
 		}
 
 		val result = command.applyInternal()
 
-		result should be (members)
+		result should be (Seq(courseDetails1, courseDetails2))
 	}}
 
 	@Test
@@ -71,15 +62,15 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 		val restrictions : Seq[ScalaRestriction] = Seq()
 		val relationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
 
-		mockProfileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, member, restrictions) returns members
+		mockProfileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staffMember, restrictions) returns Seq(courseDetails1, courseDetails2)
 
-		val command = new ViewRelatedStudentsCommandInternal(member, relationshipType) with ProfileServiceComponent {
+		val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent {
 			var profileService = mockProfileService
 		}
 
 		val result = command.applyInternal()
 
-		result should be (members)
+		result should be (Seq(courseDetails1, courseDetails2))
 
 	}}
 	
@@ -89,13 +80,13 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 		
 		val relationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
 		
-		mockProfileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, member, Nil) returns members
+		mockProfileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staffMember, Nil) returns Seq(courseDetails1, courseDetails2)
 		
-		val command = new ViewRelatedStudentsCommandInternal(member, relationshipType) with ProfileServiceComponent {
+		val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent {
 			var profileService = mockProfileService
 		}
 		
-		command.allCourses should be (Seq(courseDetails1, courseDetails1, courseDetails2))
+		command.allCourses should be (Seq(courseDetails1, courseDetails2))
 		command.allDepartments should be (Seq(testDepartment))
 		command.allRoutes should be (Seq(testRoute1, testRoute2))
 	}}
