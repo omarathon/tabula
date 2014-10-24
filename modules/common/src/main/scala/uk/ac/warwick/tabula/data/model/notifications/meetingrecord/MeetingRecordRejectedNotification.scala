@@ -11,7 +11,7 @@ class MeetingRecordRejectedNotification
 	with MeetingRecordNotificationTrait
 	with SingleItemNotification[MeetingRecordApproval] {
 
-	priority = NotificationPriority.Critical
+	priority = NotificationPriority.Warning
 
 	def approval = item.entity
 	def meeting = approval.meetingRecord
