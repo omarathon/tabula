@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.groups.controllers
 
-import junit.framework.Test
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.tabula.groups.web.controllers.admin.ReleaseSmallGroupSetController
 import uk.ac.warwick.tabula.groups.web.controllers.admin.ReleaseAllSmallGroupSetsController
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
@@ -16,7 +15,6 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.groups.commands.admin.ReleaseSmallGroupSetCommand
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewModule, ViewSet}
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
-import scala.collection.mutable
 import uk.ac.warwick.tabula.groups.commands.admin.ReleasedSmallGroupSet
 
 class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
@@ -26,7 +24,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
     withUser("test") {
       val set = new SmallGroupSet
       val controller = new ReleaseSmallGroupSetController
-      controller.getReleaseGroupSetCommand(set) should not be (null)
+      controller.getReleaseGroupSetCommand(set) should not be null
     }
   }
 
@@ -45,7 +43,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
     withUser("test") {
       val controller = new ReleaseSmallGroupSetController
 			val cmd = mock[ReleaseSmallGroupSetCommand]
-      when(cmd.apply()).thenReturn(Seq(ReleasedSmallGroupSet(new SmallGroupSet(), true, true)))
+      when(cmd.apply()).thenReturn(Seq(ReleasedSmallGroupSet(new SmallGroupSet(), releasedToStudents = true, releasedToTutors = true)))
 
       controller.submit(cmd).viewName should be("admin/groups/single_groupset")
 
@@ -60,7 +58,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
 			val cmd = mock[ReleaseSmallGroupSetCommand]
 			val set = new SmallGroupSet()
 			set.module = new Module()
-			cmd.apply() returns (Seq(ReleasedSmallGroupSet(set, true, true)))
+			cmd.apply() returns Seq(ReleasedSmallGroupSet(set, releasedToStudents = true, releasedToTutors = true))
 			cmd.describeOutcome returns Some("hello")
 			val context = controller.submit(cmd).map
 
@@ -74,26 +72,30 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
 
 	@Test
   def moduleListViewModelConvertsModulesToGroupSets() {
-    val mod1 = new Module()
-    mod1.groupSets = Seq(new SmallGroupSet, new SmallGroupSet).asJava
-    val mod2 = new Module()
-    mod2.groupSets = Seq(new SmallGroupSet, new SmallGroupSet).asJava
 
-    val viewModel = new ReleaseAllSmallGroupSetsController().newViewModel
+		def newGroupSetFor2014 = new SmallGroupSet { academicYear = AcademicYear(2014)}
+		def newGroupSetFor2015 = new SmallGroupSet { academicYear = AcademicYear(2015)}
+
+    val mod1 = new Module()
+    mod1.groupSets = Seq(newGroupSetFor2014, newGroupSetFor2014).asJava
+    val mod2 = new Module()
+    mod2.groupSets = Seq(newGroupSetFor2014, newGroupSetFor2014, newGroupSetFor2015).asJava
+
+    val viewModel = new ReleaseAllSmallGroupSetsController().newViewModel(AcademicYear(2014))
     viewModel.checkedModules = JArrayList(mod1, mod2)
 
-    viewModel.smallGroupSets().size should be(4)
+    viewModel.smallGroupSets().size should be(4) // ignore groups from previous years
   }
 
   @Test
   def batchControllerCreatesViewModel() {
-    new ReleaseAllSmallGroupSetsController().newViewModel() should not be null
+    new ReleaseAllSmallGroupSetsController().newViewModel(AcademicYear(2014)) should not be null
   }
 
   @Test
   def batchControllerShowsFormWithDepartment() {
     val controller = new ReleaseAllSmallGroupSetsController()
-    val model = controller.newViewModel()
+    val model = controller.newViewModel(AcademicYear(2014))
     val department = new Department
     department.code = "xyz"
     val mav = controller.form(model, department)
@@ -108,11 +110,12 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
       val dept = new Department {
         code = "xx"
       }
+			val year = AcademicYear(2014)
       val controller = new ReleaseAllSmallGroupSetsController()
       val command = mock[Appliable[Seq[ReleasedSmallGroupSet]]]
       val model = mock[controller.ModuleListViewModel]
       when(model.createCommand(any[User])).thenReturn(command)
-      controller.submit(model, dept)
+      controller.submit(model, dept, year)
       verify(command, times(1)).apply()
     }
   }
@@ -126,11 +129,12 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
       val model = mock[controller.ModuleListViewModel]
       val department = new Department
       department.code = "xyz"
+			val year = AcademicYear(2014)
       when(model.createCommand(any[User])).thenReturn(command)
 
-      val formView = controller.submit(model, department)
+      val formView = controller.submit(model, department, year)
 
-      formView.viewName should be("redirect:/groups/admin/department/xyz/groups/release")
+      formView.viewName should be("redirect:/groups/admin/department/xyz/groups/release/2014")
       formView.map.get("batchReleaseSuccess") should be(Some(true))
     }
   }

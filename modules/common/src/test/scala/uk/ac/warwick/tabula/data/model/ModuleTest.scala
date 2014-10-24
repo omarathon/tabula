@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.data.model
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.{AcademicYear, TestBase}
 
 class ModuleTest extends TestBase {
 	@Test def stripCats {
@@ -27,6 +28,9 @@ class ModuleTest extends TestBase {
 
   @Test
   def hasUnreleasedGroupSetsReturnsTrueIfAtLeastOneSetIsUnreleased(){
+
+		val thisAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+
     val fullyReleased = new SmallGroupSet
     fullyReleased.releasedToStudents = true
     fullyReleased.releasedToTutors = true
@@ -35,14 +39,20 @@ class ModuleTest extends TestBase {
     partReleased.releasedToStudents = false
     partReleased.releasedToTutors = true
 
+		val partReleasedOld = new SmallGroupSet
+		partReleasedOld.academicYear = AcademicYear(1066)
+		partReleasedOld.releasedToStudents = false
+		partReleasedOld.releasedToTutors = true
+
     val modFullyReleased = new Module()
-    modFullyReleased.groupSets = Seq(fullyReleased).asJava
-    modFullyReleased.hasUnreleasedGroupSets should be(false)
+    modFullyReleased.groupSets = Seq(fullyReleased, partReleasedOld).asJava
+    modFullyReleased.hasUnreleasedGroupSets(thisAcademicYear) should be(false)
+		modFullyReleased.hasUnreleasedGroupSets(AcademicYear(1066)) should be(true)
 
     val modPartReleased = new Module()
     modPartReleased.groupSets = Seq(fullyReleased,partReleased).asJava
 
-    modPartReleased.hasUnreleasedGroupSets should be (true)
+    modPartReleased.hasUnreleasedGroupSets(thisAcademicYear) should be (true)
   }
 
 	@Test

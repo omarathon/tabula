@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import scala.collection.JavaConverters._
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
@@ -34,6 +34,7 @@ abstract class AbstractAdminDepartmentHomeController extends GroupsController wi
 		val hasGroupAttendance = info.setsWithPermission.exists { _.set.showAttendanceReports }
 
 		val model = Map(
+			"viewedAcademicYear" -> cmd.academicYear,
 			"department" -> department,
 			"canAdminDepartment" -> info.canAdminDepartment,
 			"modules" -> info.modulesWithPermission,
