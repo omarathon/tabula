@@ -41,16 +41,16 @@
         </thead>
         <tbody >
             <#list modules as module>
-            <tr ${module.hasUnreleasedGroupSets?string("","class='use-tooltip' title='Groups for this module have already been published'")} data-container="#tooltip-container">
+            <tr ${module.hasUnreleasedGroupSets(academicYear)?string("","class='use-tooltip' title='Groups for this module have already been published'")} data-container="#tooltip-container">
                 <td>
                    <@f.checkbox
-                   class=module.hasUnreleasedGroupSets?string('collection-checkbox','')
+                   class=module.hasUnreleasedGroupSets(academicYear)?string('collection-checkbox','')
                    path="checkedModules"
-                   disabled=(!module.hasUnreleasedGroupSets)?string
+                   disabled=(!module.hasUnreleasedGroupSets(academicYear))?string
                    value=module.code/>
                 </td>
                 <td>
-                    <span class="${module.hasUnreleasedGroupSets?string('','muted')}">
+                    <span class="${module.hasUnreleasedGroupSets(academicYear)?string('','muted')}">
                         <@fmt.module_name module false />
                     </span>
                 </td>
