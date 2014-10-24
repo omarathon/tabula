@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.JavaConversions.{asScalaBuffer, seqAsJavaList}
 import org.hibernate.FetchMode
-import org.hibernate.criterion.{DetachedCriteria, Order, Property, Restrictions, Projections}
-import org.joda.time.{LocalDate, DateTime}
+import org.hibernate.criterion.{DetachedCriteria, Projections, Property, Restrictions}
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, _}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
-import uk.ac.warwick.tabula.data.model.MemberStudentRelationship
+import collection.JavaConverters._
 
 case class AttendanceMonitoringStudentData(universityId: String, userId: String, scdBeginDate: LocalDate)
 
@@ -41,11 +40,11 @@ trait MemberDao {
 	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
 	def findAllStudentDataByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[AttendanceMonitoringStudentData]
 	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember]
-	def getStudentsByAgentRelationshipAndRestrictions(
+	def getSCDsByAgentRelationshipAndRestrictions(
 		relationshipType: StudentRelationshipType,
 		agentId: String,
 		restrictions: Seq[ScalaRestriction]
-	): Seq[StudentMember]
+	): Seq[StudentCourseDetails]
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]): Int
 	
 	def getAllModesOfAttendance(department: Department): Seq[ModeOfAttendance]
@@ -62,9 +61,9 @@ trait MemberDao {
 
 @Repository
 class MemberDaoImpl extends MemberDao with Daoisms with Logging {
-	import Restrictions._
-	import Order._
-	import Projections._
+	import org.hibernate.criterion.Order._
+	import org.hibernate.criterion.Projections._
+	import org.hibernate.criterion.Restrictions._
 
 
 	def saveOrUpdate(member: Member) = member match {
@@ -198,7 +197,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 		// do not remove; import needed for sorting
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-		(homeDepartmentMatches ++ courseMatches).distinct.sortBy(_.lastUpdatedDate)
+		(homeDepartmentMatches.asScala ++ courseMatches).distinct.sortBy(_.lastUpdatedDate)
 	}
 
 	def listUpdatedSince(startDate: DateTime, max: Int) =
@@ -326,11 +325,11 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		c.setMaxResults(maxResults).setFirstResult(startResult).distinct.seq
 	}
 
-	def getStudentsByAgentRelationshipAndRestrictions(
+	def getSCDsByAgentRelationshipAndRestrictions(
 		relationshipType: StudentRelationshipType,
 		agentId: String,
 		restrictions: Seq[ScalaRestriction]
-	): Seq[StudentMember] = {
+	): Seq[StudentCourseDetails] = {
 		if (relationshipType == null) Nil
 		else {
 			val d = DetachedCriteria.forClass(classOf[MemberStudentRelationship])
@@ -344,8 +343,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 			val c = session.newCriteria[StudentCourseDetails]
 			restrictions.foreach { _.apply(c) }
-			c.add(Property.forName("scjCode").in(d))
-			c.project[StudentMember](Projections.groupProperty("student")).seq
+			c.add(Property.forName("scjCode").in(d)).seq
 		}
 	}
 

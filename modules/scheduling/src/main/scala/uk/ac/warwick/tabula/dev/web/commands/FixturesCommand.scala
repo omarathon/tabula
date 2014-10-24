@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, RelationshipService}
+import uk.ac.warwick.tabula.services.{SmallGroupService, ModuleAndDepartmentService, RelationshipService}
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformationCommand
 import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
@@ -35,6 +35,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	var memberDao = Wire[MemberDao]
 	var monitoringPointDao = Wire[MonitoringPointDao]
 	var attendanceMonitoringDao = Wire[AttendanceMonitoringDao]
+	var smallGroupService = Wire[SmallGroupService]
 	var permissionsService = Wire[PermissionsService]
 
 	def applyInternal() {
@@ -143,6 +144,10 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 				for (total <- attendanceMonitoringDao.getAllCheckpointTotals(dept)) {
 					session.delete(total)
+				}
+
+				for (set <- smallGroupService.getAllSmallGroupSets(dept)) {
+					session.delete(set)
 				}
 
 			  for (student <- scds.map{ _.student}.distinct) {

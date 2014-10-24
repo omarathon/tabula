@@ -4,7 +4,7 @@
 <div id="relationships">
 	<h1>My ${relationshipType.studentRole}s</h1>
 
-	<#if students?has_content>
+	<#if studentCourseDetails?has_content>
  		<#assign submitUrl>/profiles/${relationshipType.urlPart}/students</#assign>
 		<#assign filterCommand = viewRelatedStudentsCommand />
 		<#assign filterCommandName = "viewRelatedStudentsCommand" />
