@@ -265,8 +265,8 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		memberDao.getStudentsByDepartment(dept2).size should be (1)
 		relationshipDao.getStudentsByRelationshipAndDepartment(relationshipType, dept1).size should be (1)
 
-		memberDao.getStudentsByAgentRelationshipAndRestrictions(relationshipType, staff1.universityId, Seq()).size should be (2)
-		memberDao.getStudentsByAgentRelationshipAndRestrictions(relationshipType, staff2.universityId, Seq()).size should be (1)
+		memberDao.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staff1.universityId, Seq()).size should be (2)
+		memberDao.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staff2.universityId, Seq()).size should be (1)
 	}
 
 	@Test def studentsByAgentRelationshipMultiScds = transactional { tx =>
@@ -311,7 +311,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 
 		memberDao.getStudentsByDepartment(dept).size should be (2)
 
-		memberDao.getStudentsByAgentRelationshipAndRestrictions(relationshipType, staff.universityId, Seq()).size should be (2)
+		memberDao.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staff.universityId, Seq()).size should be (2)
 	}
 
 }
