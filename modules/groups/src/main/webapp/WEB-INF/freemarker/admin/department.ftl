@@ -84,8 +84,9 @@
 							</@fmt.permission_button>
 						</li>
 					</#if>
+
 					<li ${hasUnreleasedGroupsets?string(''," class='disabled use-tooltip' title='All modules already published' ")} >
-						<#assign notify_url><@routes.batchnotify department /></#assign>
+						<#assign notify_url><@routes.batchnotify department viewedAcademicYear /></#assign>
 						<@fmt.permission_button
 							permission='SmallGroups.Update'
 							scope=department
