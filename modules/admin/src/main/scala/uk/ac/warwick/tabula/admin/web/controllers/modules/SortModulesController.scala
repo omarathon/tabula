@@ -46,8 +46,8 @@ class SortModulesController extends AdminController {
 	}
 		
 	private def form(@ModelAttribute("sortModulesCommand") cmd: SortModulesCommand): Mav = {
-		if (!cmd.department.hasChildren) {
-			// Sorting is done from the POV of the top department.
+		if (!cmd.department.hasChildren && cmd.department.hasParent) {
+			// Sorting is done from the POV of the parent department.
 			Redirect(Routes.department.sortModules(cmd.department.parent))
 		} else {
 			Mav("admin/modules/arrange/form")
