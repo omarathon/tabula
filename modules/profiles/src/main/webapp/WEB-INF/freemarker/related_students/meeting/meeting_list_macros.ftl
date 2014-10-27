@@ -166,10 +166,10 @@
 	</div>
 	<#elseif meeting.pendingRevisionBy(viewer)>
 	<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
-	<div class="pending-action alert alert-error">
+	<div class="pending-action alert alert-warning">
 		<#list meeting.rejectedApprovals as rejectedApproval>
 			<div class="rejection">
-				<p>This record has not been approved by ${rejectedApproval.approver.fullName} because:</p>
+				<p>This record has been returned with comments by ${rejectedApproval.approver.fullName} because:</p>
 				<blockquote class="reason">${rejectedApproval.comments}</blockquote>
 				<p>Please edit the record and submit it for approval again.</p>
 			</div>

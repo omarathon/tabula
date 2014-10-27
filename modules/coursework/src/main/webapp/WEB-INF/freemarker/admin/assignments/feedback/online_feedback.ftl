@@ -28,6 +28,9 @@
 	</#assign>
 	<@f.form cssClass="form-horizontal double-submit-protection"
 			method="post" enctype="multipart/form-data" commandName="command" action="${submit_url}">
+
+		<@f.errors cssClass="error form-errors" />
+
 		<div class="alert alert-success hide"></div>
 		<#list assignment.feedbackFields as field>
 			<div class="feedback-field">

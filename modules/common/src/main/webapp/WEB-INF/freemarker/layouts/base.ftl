@@ -28,7 +28,7 @@
 			</#if>
 			<#if (user.masquerading)!false>
 				<div id="masquerade-notice" class="sysadmin-only-content">
-					Masquerading as <strong>${user.apparentUser.fullName}</strong>. <a href="<@url page="/masquerade" context="/admin"/>">Change</a>
+					Masquerading as <strong>${user.apparentUser.fullName}</strong>. <a href="<@url page="/masquerade?returnTo=${info.requestedUri}" context="/admin"/>">Change</a>
 				</div>
 			</#if>
 			<#-- Change this to header-medium or header-large as necessary - large is for homepages only -->
@@ -55,6 +55,7 @@
 											Signed in as ${user.fullName}
 											| <a href="/settings">Settings</a>
 											| <a href="http://warwick.ac.uk/tabula/faqs/" target="_blank">FAQs</a>
+											| <a href="http://warwick.ac.uk/tabula/whatsnew/" target="_blank">What's new?</a>
 											| <a class="sso-link" href="<@sso.logoutlink target="${rootUrl}" />">Sign out</a>
 										<#else>
 											<a class="sso-link" href="<@sso.loginlink />">Sign in</a>
@@ -224,6 +225,8 @@
 			          			<li class="spacer subtle">|</li>
 			          			<li id="faqs-link"><a href="http://warwick.ac.uk/tabula/faqs/" target="_blank">FAQs</a></li>
 			          			<li class="spacer subtle">|</li>
+								<li id="whatsnew-link"><a href="http://warwick.ac.uk/tabula/whatsnew/" target="_blank">What's new?</a></li>
+								<li class="spacer subtle">|</li>
 			          			<li class="subtle">
 			          				App last built <@warwick.formatDate value=appBuildDate pattern="d MMMM yyyy HH:mm" />
 			          			</li>

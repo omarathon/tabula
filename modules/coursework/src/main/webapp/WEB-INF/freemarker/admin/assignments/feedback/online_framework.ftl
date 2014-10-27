@@ -47,7 +47,7 @@
 			</dt>
 			<dd style="display: none;" class="table-content-container" data-contentid="${markingId(u)}">
 				<div id="content-${markingId(u)}" class="content-container" data-contentid="${markingId(u)}">
-					<p>No data is currently available.</p>
+					<p>No data is currently available. Please check that you are signed in.</p>
 				</div>
 			</dd>
 		</dl>

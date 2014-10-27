@@ -16,15 +16,10 @@ import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.BindingResult
 
 
-// Don't need this, unless there is specific state on the command which the controller needs access to.
-//
-//trait ViewRelatedStudentsCommand extends ComposableCommand[Seq[StudentRelationship]]  {
-//	this:ViewRelatedStudentsCommandInternal=>
-//}
 object ViewRelatedStudentsCommand{
-	def apply(currentMember: Member, relationshipType: StudentRelationshipType): Command[Seq[StudentMember]] = {
+	def apply(currentMember: Member, relationshipType: StudentRelationshipType): Command[Seq[StudentCourseDetails]] = {
 		new ViewRelatedStudentsCommandInternal(currentMember, relationshipType)
-			with ComposableCommand[Seq[StudentMember]]
+			with ComposableCommand[Seq[StudentCourseDetails]]
 			with AutowiringProfileServiceComponent
 			with ViewRelatedStudentsCommandPermissions
 			with Unaudited with ReadOnly
@@ -53,19 +48,18 @@ trait ViewRelatedStudentsCommandState extends FiltersRelationships {
 	var modules: JList[Module] = JArrayList()
 	
 	lazy val allCourses =
-		profileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, currentMember, Nil)
-			.flatMap(student => Option(student.mostSignificantCourse))
+		profileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, currentMember, Nil)
 	lazy val allDepartments = allCourses.flatMap(c => Option(c.department)).distinct
 	lazy val allRoutes = allCourses.flatMap(c => Option(c.route)).distinct
 }
 
 abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val relationshipType: StudentRelationshipType)
-	extends CommandInternal[Seq[StudentMember]] with TaskBenchmarking with ViewRelatedStudentsCommandState with BindListener {
+	extends CommandInternal[Seq[StudentCourseDetails]] with TaskBenchmarking with ViewRelatedStudentsCommandState with BindListener {
 	self: ProfileServiceComponent =>
 
-	def applyInternal(): Seq[StudentMember] =  {
+	def applyInternal(): Seq[StudentCourseDetails] =  {
 		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
-		profileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, currentMember, buildRestrictions(year))
+		profileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, currentMember, buildRestrictions(year))
 	}
 
 	def onBind(result: BindingResult) {

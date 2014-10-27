@@ -255,6 +255,8 @@
 				onlyShowCheckboxForStatic=true
 				showRemoveButton=true
 			/>
+		<#elseif (findCommand.findStudents?has_content)>
+			<p style="padding-bottom: 20px;">No students were found.</p>
 		</#if>
 		</div>
 	</details>

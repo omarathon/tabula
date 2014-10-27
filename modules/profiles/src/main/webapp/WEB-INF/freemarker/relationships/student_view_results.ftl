@@ -1,9 +1,9 @@
 <#import "../related_students/related_students_macros.ftl" as student_macros />
 
 <#escape x as x?html>
-	<#if students?has_content>
+	<#if studentCourseDetails?has_content>
 
-		<@student_macros.table students />
+		<@student_macros.table studentCourseDetails />
 
 		<p>
 			<@fmt.bulk_email_students students=students />

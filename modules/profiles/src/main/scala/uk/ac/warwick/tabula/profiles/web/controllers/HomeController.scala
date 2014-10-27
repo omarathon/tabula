@@ -34,10 +34,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 				"isPGR" -> user.isPGR,
 				"smallGroups" -> info.smallGroups,
 				"adminDepartments" -> info.adminDepartments,
-				"currentUserDepartment" -> (
-					departmentService.getDepartmentByCode(user.departmentCode)
-						++ departmentService.departmentsWithPermission(user, Permissions.Profiles.ViewSearchResults)
-					).toSet
+				"searchDepartments" -> departmentService.departmentsWithPermission(user, Permissions.Profiles.Search)
 			)
 		} else if (optionalCurrentMember.filter(_.userType == Student).isDefined) {
 			Redirect(Routes.profile.view(currentMember))

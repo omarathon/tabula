@@ -35,6 +35,10 @@ abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignm
 
 	override def validate(errors: Errors) {
 
+		if(!hasContent) {
+			errors.reject("feedback.empty")
+		}
+
 		// Individually validate all the custom fields
 		if(fields != null){
 			assignment.feedbackFields.foreach { field =>

@@ -426,8 +426,13 @@
 			e.stopPropagation();
 		});
 
+		// TAB-2920
+		$items.on('hidden', function(e){
+			e.stopPropagation();
+		});
+
 		// Click away to dismiss
-		$('html').on('click', function(e) {
+		$('html').on('click.popoverDismiss', function(e) {
 			// if clicking anywhere other than the popover itself
 			if ($(e.target).closest('.popover').length === 0 && $(e.target).closest('.use-popover').length === 0) {
 				$items.popover('hide');

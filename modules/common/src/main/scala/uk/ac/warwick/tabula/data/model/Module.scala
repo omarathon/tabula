@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
+import uk.ac.warwick.tabula.AcademicYear
+
 import scala.util.matching.Regex
 import org.hibernate.annotations.{BatchSize, AccessType, ForeignKey}
 import javax.persistence._
@@ -89,8 +91,8 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 
 
   // true if at least one of this module's SmallGroupSets has not been released to //both students and staff.
-  def hasUnreleasedGroupSets():Boolean = {
-    val allGroupSets = groupSets.asScala
+  def hasUnreleasedGroupSets(academicYear: AcademicYear) : Boolean = {
+    val allGroupSets = groupSets.asScala.filter(_.academicYear == academicYear)
     allGroupSets.exists(!_.fullyReleased)
   }
 }

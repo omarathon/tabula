@@ -49,10 +49,21 @@
 
 	<input
 		type="submit"
-		class="btn btn-primary"
-		name="create"
+		class="btn btn-success use-tooltip"
+		name="${ManageSchemeMappingParameters.createAndAddStudents}"
 		value="Save"
+		title="Select which students this scheme should apply to"
+		data-container="body"
 	/>
+	<input
+		type="submit"
+		class="btn btn-primary use-tooltip"
+		name="create"
+		value="Save and exit"
+		title="Save your scheme"
+		data-container="body"
+	/>
+
 	<a class="btn" href="<@routes.manageHomeForYear command.scheme.department command.scheme.academicYear.startYear?c />">Cancel</a>
 
 </@f.form>
