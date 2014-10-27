@@ -65,7 +65,7 @@ class SortRoutesControllerTest extends TestBase with Mockito {
 	@Test def formOnLoneDepartment() { new Fixture {
 		val command = new CountingCommand(Fixtures.department("xx"))
 		val mav = controller.showForm(command)
-		mav.viewName should be ("admin/modules/arrange/form")
+		mav.viewName should be ("admin/routes/arrange/form")
 		mav.toModel should be ('empty)
 
 		command.populateCount should be (1)
