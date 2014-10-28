@@ -2,6 +2,10 @@
 	<#import "*/group_components.ftl" as components />
 	<#assign academicYear=smallGroupSet.academicYear />
 
+	<#-- List of students modal -->
+	<div id="students-list-modal" class="modal fade"></div>
+	<div id="profile-modal" class="modal fade profile-subset"></div>
+
 	<div class="striped-section-contents">
 		<#list groups as group>
 			<@spring.nestedPath path="groups[${group.id}]">
@@ -10,7 +14,13 @@
 						<div class="span10 groupDetail">
 							<h3 class="name inline-block">
 								${group.name!""}
-								<small><@fmt.p (group.students.size)!0 "student" "students" /></small>
+								<#if ((group.students.size)!0) gt 0>
+									<a href="<@routes.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
+										<small><@fmt.p (group.students.size)!0 "student" "students" /></small>
+									</a>
+								<#else>
+									<small><@fmt.p (group.students.size)!0 "student" "students" /></small>
+								</#if>
 							</h3>
 						</div>
 						<div class="span2">
