@@ -444,6 +444,17 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	<@bulk_email emails title subject />
 </#macro>
 
+<#macro bulk_email_group group title="Email these users" subject="">
+	<#local emails = [] />
+	<#list group.users as user>
+		<#if user.email??>
+			<#local emails = emails + [user.email] />
+		</#if>
+	</#list>
+
+	<@bulk_email emails title subject />
+</#macro>
+
 <#macro help_popover id title="" content="">
 	<a class="use-popover"
 	   id="popover-${id}"
