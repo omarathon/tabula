@@ -1,7 +1,11 @@
 <#escape x as x?html>
 	<#import "*/group_components.ftl" as components />
 
-	<h1>Edit event</h1>
+	<div class="pull-right">
+		<@fmt.bulk_email_group smallGroup.students "Email the students attending this event" />
+	</div>
+
+	<h1 class="with-settings">Edit event</h1>
 	<h4><span class="muted">for</span> ${smallGroup.name}</h4>
 
 	<@f.form method="post" action="" commandName="editSmallGroupEventCommand" cssClass="form-horizontal">
