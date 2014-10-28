@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.data.model.{StudentMember, Department, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, StudentMember, Department, StudentRelationshipType}
 import uk.ac.warwick.tabula.profiles.commands.{ViewRelatedStudentsCommand, MissingStudentRelationshipCommand, ViewStudentRelationshipsCommand}
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.web.Mav
@@ -66,8 +66,17 @@ class ViewStudentRelationshipStudentsController extends ProfilesController {
 		ViewRelatedStudentsCommand(currentMember, relationshipType)
 
 	@RequestMapping
-	def view(@ModelAttribute("viewRelatedStudentsCommand") viewRelatedStudentsCommand: Appliable[Seq[StudentMember]]): Mav = {
-		if(ajax) Mav("relationships/student_view_results", "students" -> viewRelatedStudentsCommand.apply).noLayout()
-		else Mav("relationships/student_view", "students" -> viewRelatedStudentsCommand.apply)
+	def view(@ModelAttribute("viewRelatedStudentsCommand") viewRelatedStudentsCommand: Appliable[Seq[StudentCourseDetails]]): Mav = {
+		val results = viewRelatedStudentsCommand.apply()
+		if(ajax)
+			Mav("relationships/student_view_results",
+				"studentCourseDetails" -> results,
+				"students" -> results.map(_.student).distinct
+			).noLayout()
+		else
+			Mav("relationships/student_view",
+				"studentCourseDetails" -> results,
+				"students" -> results.map(_.student).distinct
+			)
 	}
 }

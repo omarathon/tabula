@@ -1,27 +1,19 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand._
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.SortedMap
 
-import uk.ac.warwick.tabula.commands.CommandInternal
-import uk.ac.warwick.tabula.commands.ComposableCommand
-import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import ViewSmallGroupAttendanceCommand._
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
-import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
-
 object ViewModuleAttendanceCommand {
-	def apply(module: Module) =
-		new ViewModuleAttendanceCommand(module)
+	def apply(module: Module, academicYear: AcademicYear) =
+		new ViewModuleAttendanceCommand(module, academicYear)
 			with ComposableCommand[SortedMap[SmallGroupSet, SortedMap[SmallGroup, SmallGroupAttendanceInformation]]]
 			with ViewModuleAttendancePermissions
 			with ReadOnly with Unaudited {
@@ -29,18 +21,19 @@ object ViewModuleAttendanceCommand {
 	}
 }
 
-class ViewModuleAttendanceCommand(val module: Module)
+class ViewModuleAttendanceCommand(val module: Module, val academicYear: AcademicYear)
 	extends CommandInternal[SortedMap[SmallGroupSet, SortedMap[SmallGroup, SmallGroupAttendanceInformation]]] with ViewModuleAttendanceState {
 	
 	override def applyInternal() = {
-		SortedMap(module.groupSets.asScala.filter { _.showAttendanceReports }.map { set =>
-			(set -> ViewSmallGroupSetAttendanceCommand(set).apply())
-		}.toSeq:_*)
+		SortedMap(module.groupSets.asScala.filter(s => s.academicYear == academicYear && s.showAttendanceReports).map(set =>
+			set -> ViewSmallGroupSetAttendanceCommand(set).apply()
+		).toSeq:_*)
 	}
 	
 }
 
 trait ViewModuleAttendancePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+
 	self: ViewModuleAttendanceState =>
 	
 	override def permissionsCheck(p: PermissionsChecking) {
@@ -50,4 +43,5 @@ trait ViewModuleAttendancePermissions extends RequiresPermissionsChecking with P
 
 trait ViewModuleAttendanceState {
 	def module: Module
+	def academicYear: AcademicYear
 }

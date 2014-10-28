@@ -1,47 +1,59 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.data.model.{Department, Module}
+import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSecurityServiceComponent, ModuleAndDepartmentServiceComponent, SecurityServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.collection.JavaConverters._
-import scala.collection.immutable.SortedMap
-import uk.ac.warwick.tabula.commands.CommandInternal
-import uk.ac.warwick.tabula.commands.ComposableCommand
-import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import ViewSmallGroupAttendanceCommand._
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
-import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentServiceComponent
-import uk.ac.warwick.tabula.services.SecurityServiceComponent
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.services.AutowiringSecurityServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceComponent
-import uk.ac.warwick.tabula.data.model.Department
 
 object ViewDepartmentAttendanceCommand {
-	def apply(department: Department, user: CurrentUser) =
-		new AdminDepartmentHomeCommand(department, user)
-			with ViewRegisterPermissionDefinition
-			with AdminDepartmentHomePermissions
+	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
+		new ViewDepartmentAttendanceCommandInternal(department, academicYear, user)
 			with AutowiringSecurityServiceComponent
 			with AutowiringModuleAndDepartmentServiceComponent
-			with NonEmptyModuleFilter
 			with ComposableCommand[Seq[Module]]
+			with ViewDepartmentAttendancePermission
+			with ViewDepartmentAttendanceCommandState
 			with ReadOnly with Unaudited {
 		override lazy val eventName = "ViewDepartmentAttendance"
 	}
 }
 
-trait ViewRegisterPermissionDefinition extends AdminDepartmentHomePermissionDefinition {
-	val requiredPermission = Permissions.SmallGroupEvents.ViewRegister
+class ViewDepartmentAttendanceCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser)
+	extends CommandInternal[Seq[Module]] {
+
+	self: SecurityServiceComponent with ModuleAndDepartmentServiceComponent  =>
+
+	override def applyInternal(): Seq[Module] = {
+		val modules =
+			if (securityService.can(user, Permissions.SmallGroupEvents.ViewRegister, department)) {
+				department.modules.asScala
+			} else {
+				moduleAndDepartmentService.modulesWithPermission(user, Permissions.SmallGroupEvents.ViewRegister, department).toSeq
+			}
+
+		modules
+			.filter(m => m.groupSets.asScala.exists(g => g.academicYear == academicYear && g.showAttendanceReports ))
+			.sortBy(m => (m.groupSets.isEmpty, m.code))
+	}
 }
 
-trait NonEmptyModuleFilter extends ModuleFilter {
-	def moduleFilter(module: Module) = module.groupSets.asScala.exists { _.showAttendanceReports }
+trait ViewDepartmentAttendancePermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+
+	self: ViewDepartmentAttendanceCommandState =>
+
+	override def permissionsCheck(p:PermissionsChecking) = {
+		p.PermissionCheckAny(department.modules.asScala.map(
+			CheckablePermission(Permissions.SmallGroupEvents.ViewRegister, _)
+		))
+	}
+}
+
+trait ViewDepartmentAttendanceCommandState {
+	def department: Department
+	def academicYear: AcademicYear
+	def user: CurrentUser
 }

@@ -1,21 +1,21 @@
 <#escape x as x?html>
 
-<#macro row student>
+<#macro row studentCourseDetails>
 <tr class="related_student">
 	<td>
-		<@fmt.member_photo student "tinythumbnail" />
+		<@fmt.member_photo studentCourseDetails.student "tinythumbnail" />
 	</td>
-	<td><h6>${student.firstName}</h6></td>
-	<td><h6>${student.lastName}</h6></td>
-	<td><a class="profile-link" href="<@routes.profile student />">${student.universityId}</a></td>
-	<td>${student.groupName!""}</td>
-	<td>${(student.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!""}</td>
-	<td>${(student.mostSignificantCourseDetails.route.name)!""}</td>
+	<td><h6>${studentCourseDetails.student.firstName}</h6></td>
+	<td><h6>${studentCourseDetails.student.lastName}</h6></td>
+	<td><a class="profile-link" href="/profiles/view/course/${studentCourseDetails.urlSafeId}">${studentCourseDetails.student.universityId}</a></td>
+	<td>${studentCourseDetails.student.groupName!""}</td>
+	<td>${(studentCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!""}</td>
+	<td>${(studentCourseDetails.route.name)!""}</td>
 </tr>
 </#macro>
 
 <#-- Print out a table of students/agents.-->
-<#macro table students>
+<#macro table studentCourseDetails>
 <table class="related_students table table-bordered table-striped table-condensed tabula-purple">
 	<thead>
 	<tr>
@@ -30,7 +30,7 @@
 	</thead>
 
 	<tbody>
-		<#list students as item>
+		<#list studentCourseDetails as item>
 				<@row item />
 		</#list>
 	</tbody>

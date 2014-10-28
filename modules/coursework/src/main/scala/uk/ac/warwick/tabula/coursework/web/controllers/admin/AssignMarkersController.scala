@@ -81,8 +81,8 @@ class AssignMarkersController extends CourseworkController {
 			new Student(displayValue, s.getUserId)
 		}
 
-		val firstMarkerUnassignedStudents = members.toList filterNot firstMarkers.map(_.students).flatten.contains
-		val secondMarkerUnassignedStudents = members.toList filterNot secondMarkers.map(_.students).flatten.contains
+		val firstMarkerUnassignedStudents = members.toList.filterNot(firstMarkers.map(_.students).flatten.contains).sortBy(_.displayValue)
+		val secondMarkerUnassignedStudents = members.toList.filterNot(secondMarkers.map(_.students).flatten.contains).sortBy(_.displayValue)
 
 		Mav("admin/assignments/assignmarkers/form",
 			"hasSecondMarker" -> assignment.markingWorkflow.hasSecondMarker,

@@ -1048,7 +1048,7 @@
   </#list>
 </#macro>
 
-<#macro department_attendance department modules>
+<#macro department_attendance department modules academicYear>
 	<div class="small-group-modules-list">
 	<#list modules as module>
 		<span id="${module_anchor(module)}-container">
@@ -1063,7 +1063,7 @@
 			<a id="${module_anchor(module)}"></a>
 			<div class="striped-section collapsible"
 				 data-populate=".striped-section-contents"
-				 data-href="<@routes.moduleAttendance module />"
+				 data-href="<@routes.moduleAttendanceInYear module academicYear/>"
 				 data-name="${module_anchor(module)}">
 				<div class="clearfix">		
 					<h2 class="section-title with-button"><@fmt.module_name module /></h2>

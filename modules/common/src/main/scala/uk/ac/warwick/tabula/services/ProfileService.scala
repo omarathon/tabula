@@ -55,11 +55,11 @@ trait ProfileService {
 	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[StudentMember]
 	def findAllUniversityIdsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
 	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction]): Seq[AttendanceMonitoringStudentData]
-	def getStudentsByAgentRelationshipAndRestrictions(
+	def getSCDsByAgentRelationshipAndRestrictions(
 		relationshipType: StudentRelationshipType,
 		agent: Member,
 		restrictions: Seq[ScalaRestriction]
-	): Seq[StudentMember]
+	): Seq[StudentCourseDetails]
 	def findAllUniversityIdsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Seq[String]
 	def findStaffMembersWithAssistant(user: User): Seq[StaffMember]
 	def allModesOfAttendance(department: Department): Seq[ModeOfAttendance]
@@ -276,12 +276,12 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		}
 	}
 
-	def getStudentsByAgentRelationshipAndRestrictions(
+	def getSCDsByAgentRelationshipAndRestrictions(
 		relationshipType: StudentRelationshipType,
 		agent: Member,
 		restrictions: Seq[ScalaRestriction]
-	): Seq[StudentMember] = transactional(readOnly = true) {
-		memberDao.getStudentsByAgentRelationshipAndRestrictions(relationshipType, agent.id, restrictions)
+	): Seq[StudentCourseDetails] = transactional(readOnly = true) {
+		memberDao.getSCDsByAgentRelationshipAndRestrictions(relationshipType, agent.id, restrictions)
 	}
 
 	private def affiliatedDepartmentsRestriction(department: Department, restrictions: Seq[ScalaRestriction]) = {

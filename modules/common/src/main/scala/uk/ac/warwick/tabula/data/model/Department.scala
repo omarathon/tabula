@@ -143,6 +143,13 @@ class Department extends GeneratedId
 		studentRelationshipDisplayed = studentRelationshipDisplayed + (relationshipType.id -> isDisplayed.toString)
 	}
 
+	def getStudentRelationshipExpected(relationshipType: StudentRelationshipType, courseType: CourseType): Option[Boolean] =
+		getStringMapSetting(Settings.StudentRelationshipExpected).flatMap(_.get(s"${relationshipType.id}-${courseType.code}").map(_.toBoolean))
+	def setStudentRelationshipExpected(relationshipType: StudentRelationshipType, courseType: CourseType, isExpected: Boolean): Unit =
+		settings += (Settings.StudentRelationshipExpected ->
+			(getStringMapSetting(Settings.StudentRelationshipExpected).getOrElse(Map()) + (s"${relationshipType.id}-${courseType.code}" -> isExpected.toString))
+		)
+
 	@transient
 	var relationshipService = Wire[RelationshipService]
 
@@ -362,6 +369,7 @@ object Department {
 
 		val StudentRelationshipSource = "studentRelationshipSource"
 		val StudentRelationshipDisplayed = "studentRelationshipDisplayed"
+		val StudentRelationshipExpected = "studentRelationshipExpected"
 
 		val WeekNumberingSystem = "weekNumberSystem"
 
