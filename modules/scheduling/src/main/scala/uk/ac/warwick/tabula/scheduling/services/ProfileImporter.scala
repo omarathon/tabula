@@ -168,6 +168,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			"scj_status_code" -> "C",
 			"level_code" -> ((member.universityId.toLong % 3) + 1).toString,
 			"spr_tutor1" -> null,
+			"scj_tutor1" -> null,
 			"scj_code" -> "%s/1".format(member.universityId),
 			"begin_date" -> member.startDate.toDateTimeAtStartOfDay(),
 			"end_date" -> member.endDate.toDateTimeAtStartOfDay(),
