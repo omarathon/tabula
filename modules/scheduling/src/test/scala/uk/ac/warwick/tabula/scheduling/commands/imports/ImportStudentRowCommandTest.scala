@@ -123,9 +123,9 @@ trait MockedResultSet extends Mockito {
 	rs.getString("homeDepartmentCode") returns ("PH")
 	rs.getString("department_code") returns ("PH")
 	rs.getString("scj_code") returns ("0672089/2")
-	rs.getDate("begin_date") returns Date.valueOf("2011-05-12")
-	rs.getDate("end_date") returns Date.valueOf("2014-05-12")
-	rs.getDate("expected_end_date") returns Date.valueOf("2015-05-12")
+	rs.getDate("begin_date") returns new Date(DateTime.now.minusYears(2).getMillis)
+	rs.getDate("end_date") returns new Date(DateTime.now.plusYears(1).getMillis)
+	rs.getDate("expected_end_date") returns new Date(DateTime.now.plusYears(2).getMillis)
 	rs.getInt("sce_sequence_number") returns (1)
 	rs.getString("enrolment_status_code") returns ("F")
 	rs.getString("mode_of_attendance_code") returns ("P")
@@ -263,9 +263,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			// now test some stuff
 			studentCourseDetails.scjCode should be ("0672089/2")
-			studentCourseDetails.beginDate.toString should be ("2011-05-12")
-			studentCourseDetails.endDate.toString should be ("2014-05-12")
-			studentCourseDetails.expectedEndDate.toString should be ("2015-05-12")
+			studentCourseDetails.beginDate should be (row.beginDate)
+			studentCourseDetails.endDate should be (row.endDate)
+			studentCourseDetails.expectedEndDate should be (row.expectedEndDate)
 
 			studentCourseDetails.freshStudentCourseYearDetails.size should be (1)
 
@@ -331,9 +331,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 					scd.department.code should be ("ph")
 					scd.route.code should be ("c100")
 					scd.sprCode should be ("0672089/2")
-					scd.beginDate.toString should be ("2011-05-12")
-					scd.endDate.toString should be ("2014-05-12")
-					scd.expectedEndDate.toString should be ("2015-05-12")
+					scd.beginDate should be (row.beginDate)
+					scd.endDate should be (row.endDate)
+					scd.expectedEndDate should be (row.expectedEndDate)
 
 					val scyd = scd.freshStudentCourseYearDetails.head
 					scyd.yearOfStudy should be (3)
