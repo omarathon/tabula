@@ -70,7 +70,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 							membershipInfos.map { m =>
 								val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
 
-								val user = userLookup.getUserByWarwickUniIdUncached(warwickId, true) match {
+								val user = userLookup.getUserByWarwickUniIdUncached(warwickId, skipMemberLookup = true) match {
 									case FoundUser(u) => u
 									case _ => userLookup.getUserByUserId(usercode)
 								}
@@ -90,7 +90,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					benchmarkTask("Update members") {
 					// each apply has its own transaction
 						transactional() {
-							importMemberCommands map { _.apply }
+							importMemberCommands map { _.apply() }
 							session.flush()
 						}
 					}
@@ -133,7 +133,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 			logger.warn("Timestamping missing rows.  Found "
 					+ importRowTracker.universityIdsSeen.size + " students, "
 					+ importRowTracker.scjCodesSeen.size + " studentCourseDetails, "
-					+ importRowTracker.studentCourseYearDetailsSeen.size + " studentCourseYearDetails.");
+					+ importRowTracker.studentCourseYearDetailsSeen.size + " studentCourseYearDetails.")
 
 			// make sure any rows we've got for this student in the db which we haven't seen in this import are recorded as missing
 			logger.warn("Timestamping missing students")
@@ -157,7 +157,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 		logger.info("Saving or updating module registrations")
 
 		val newModuleRegistrations = benchmarkTask("Save or update module registrations") {
-			(importModRegCommands map {_.apply }).flatten
+			(importModRegCommands map {_.apply() }).flatten
 		}
 
 		val usercodesProcessed: Seq[String] = membershipInfo map { _.member.usercode }
@@ -178,7 +178,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 		val importAccreditedPriorLearningCommands = accreditedPriorLearningImporter.getAccreditedPriorLearning(membershipInfo, users)
 
-		(importAccreditedPriorLearningCommands map {_.apply }).flatten
+		(importAccreditedPriorLearningCommands map {_.apply() }).flatten
 	}
 
 
@@ -238,7 +238,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	def refresh(member: Member) {
 		transactional() {
 			val warwickId = member.universityId
-			val user = userLookup.getUserByWarwickUniIdUncached(member.universityId, true) match {
+			val user = userLookup.getUserByWarwickUniIdUncached(member.universityId, skipMemberLookup = true) match {
 				case FoundUser(u) => u
 				case _ => userLookup.getUserByUserId(member.userId)
 			}
@@ -246,23 +246,23 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 			val importCommandFactory = new ImportCommandFactory
 
 			profileImporter.membershipInfoForIndividual(member) match {
-				case Some(membInfo: MembershipInformation) => {
+				case Some(membInfo: MembershipInformation) =>
 
 					// retrieve details for this student from SITS and store the information in Tabula
 					val importMemberCommands = profileImporter.getMemberDetails(List(membInfo), Map(warwickId -> user), importCommandFactory)
 					if (importMemberCommands.isEmpty) logger.warn("Refreshing student " + membInfo.member.universityId + " but found no data to import.")
-					val members = importMemberCommands map { _.apply }
+					val members = importMemberCommands map { _.apply() }
 
 					// update missingFromSitsSince field in this student's member and course records:
 					updateMissingForIndividual(member, importCommandFactory.rowTracker)
 
-					session.flush
+					session.flush()
 
 					updateVisa(importMemberCommands)
 
 					// re-import module registrations and delete old module and group registrations:
 					val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(warwickId -> user))
-					val newAccreditedPriorLearning = updateAccreditedPriorLearning(List(membInfo), Map(warwickId -> user))
+					updateAccreditedPriorLearning(List(membInfo), Map(warwickId -> user))
 					rationaliseRelationships(importMemberCommands)
 
 					// TAB-1435 refresh profile index
@@ -272,7 +272,6 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					for (modReg <- newModuleRegistrations) session.evict(modReg)
 
 					logger.info("Data refreshed for " + member.universityId)
-				}
 				case None => logger.warn("Student is no longer in uow_current_members in membership - not updating")
 			}
 		}
@@ -289,7 +288,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	 */
 	def updateMissingForIndividual(member: Member, importRowTracker: ImportRowTracker) {
 		member match {
-			case stu: StudentMember => {
+			case stu: StudentMember =>
 
 				// update missingFromImportSince on member
 				if (stu.missingFromImportSince != null && importRowTracker.universityIdsSeen.contains(stu.universityId)) {
@@ -333,8 +332,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 						}
 					}
 				}
-			}
-			case _ => {}
+			case _ =>
 		}
 	}
 

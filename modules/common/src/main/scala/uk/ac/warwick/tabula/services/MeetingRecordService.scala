@@ -56,7 +56,7 @@ abstract class AbstractMeetingRecordService extends MeetingRecordService {
 	}
 	def purge(meeting: AbstractMeetingRecord): Unit = meetingRecordDao.purge(meeting)
 	def getAcademicYear(meeting: AbstractMeetingRecord, termService: TermService): Option[AcademicYear] = Some(AcademicYear.findAcademicYearContainingDate(meeting.meetingDate, termService))
-  def getAcademicYear(id: String, termService: TermService): Option[AcademicYear] = Option(id).flatMap(get(_)).flatMap(getAcademicYear(_, termService))
+  def getAcademicYear(id: String, termService: TermService): Option[AcademicYear] = Option(id).flatMap(get).flatMap(getAcademicYear(_, termService))
 	def migrate(from: StudentRelationship, to: StudentRelationship): Unit =
 		meetingRecordDao.migrate(from, to)
 }
