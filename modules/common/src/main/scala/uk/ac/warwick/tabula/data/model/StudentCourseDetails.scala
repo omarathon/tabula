@@ -178,6 +178,8 @@ class StudentCourseDetails
 
 	def hasAccreditedPriorLearning = !accreditedPriorLearning.isEmpty
 
+	def isEnded = endDate != null && endDate.isBefore(DateTime.now.toLocalDate)
+
 }
 
 // properties for a student on a course which come direct from SITS - those that need to be

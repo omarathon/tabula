@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import org.joda.time.DateTime
+import org.springframework.validation.BindException
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.{Command, Description}
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, ModuleRegistrationDaoImpl, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
@@ -111,6 +112,12 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 							updateAccreditedPriorLearning(membershipInfos, users)
 						}
 					}
+
+					benchmarkTask("Rationalise relationships") {
+						transactional() {
+							rationaliseRelationships(importMemberCommands)
+						}
+					}
 				}
 			}
 		}
@@ -201,6 +208,26 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 		session.clear()
 	}
 
+	def rationaliseRelationships(rowCommands: Seq[ImportMemberCommand]): Unit = {
+		logger.info("Updating relationships")
+
+		val members = rowCommands.map(_.universityId).distinct.flatMap(u => memberDao.getByUniversityId(u))
+
+		members.collect {
+			case student: StudentMember =>
+				val expireCommand = ExpireRelationshipsOnOldCoursesCommand(student)
+				val expireCommandErrors = new BindException(expireCommand, "expireCommand")
+				expireCommand.validate(expireCommandErrors)
+				if (!expireCommandErrors.hasErrors) {
+					logger.info(s"Expiring old relationships for ${student.universityId}")
+					expireCommand.apply()
+				}
+		}
+
+		session.flush()
+		session.clear()
+	}
+
 	def refresh(member: Member) {
 		transactional() {
 			val warwickId = member.universityId
@@ -229,6 +256,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					// re-import module registrations and delete old module and group registrations:
 					val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(warwickId -> user))
 					val newAccreditedPriorLearning = updateAccreditedPriorLearning(List(membInfo), Map(warwickId -> user))
+					rationaliseRelationships(importMemberCommands)
 
 					// TAB-1435 refresh profile index
 					profileIndexService.indexItemsWithoutNewTransaction(members.flatMap { m => profileService.getMemberByUniversityId(m.universityId) })
