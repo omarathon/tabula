@@ -98,7 +98,9 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 			endRelationships()
 		}
 		else {
-			captureTutor(studentCourseDetails)
+			if (row.endDate == null || row.endDate.isAfter(DateTime.now.toLocalDate)) {
+				captureTutor(studentCourseDetails)
+			}
 
 			if (row.scjCode != null && row.scjStatusCode != null && !row.scjStatusCode.startsWith("P"))
 				new ImportSupervisorsForStudentCommand(studentCourseDetails).apply()
