@@ -213,7 +213,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 		val members = rowCommands.map(_.universityId).distinct.flatMap(u => memberDao.getByUniversityId(u))
 
-		members.collect {
+		members.foreach {
 			case student: StudentMember =>
 				val expireCommand = ExpireRelationshipsOnOldCoursesCommand(student)
 				val expireCommandErrors = new BindException(expireCommand, "expireCommand")
@@ -221,6 +221,13 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				if (!expireCommandErrors.hasErrors) {
 					logger.info(s"Expiring old relationships for ${student.universityId}")
 					expireCommand.apply()
+				}
+				val migrateCommand = MigrateMeetingRecordsFromOldRelationshipsCommand(student)
+				val migrateCommandErrors = new BindException(migrateCommand, "migrateCommand")
+				migrateCommand.validate(migrateCommandErrors)
+				if (!migrateCommandErrors.hasErrors) {
+					logger.info(s"Migrating meetings from old relationships for ${student.universityId}")
+					migrateCommand.apply()
 				}
 		}
 

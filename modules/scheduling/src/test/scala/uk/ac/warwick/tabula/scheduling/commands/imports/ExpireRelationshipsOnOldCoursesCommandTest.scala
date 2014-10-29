@@ -2,9 +2,9 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import org.joda.time.DateTime
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.{StudentMember, Member, StudentRelationship, StudentRelationshipType}
-import uk.ac.warwick.tabula.{Mockito, TestBase, Fixtures}
+import uk.ac.warwick.tabula.data.model.{StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.services.{RelationshipService, RelationshipServiceComponent}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 
