@@ -19,6 +19,7 @@ class StudentRelationshipAgentRoleProvider extends RoleProvider
 				// lists all of the tutors current relationships to this student (expired relationships and withdrawn students ignored)
 				.getCurrentRelationships(student, user.apparentId)
 				.toStream
+				.filterNot(_.isTerminated)
 				// gather all of the distinct relationship types
 				.map { rel => rel.relationshipType }
 				.distinct
@@ -45,6 +46,7 @@ class HistoricStudentRelationshipAgentRoleProvider extends RoleProvider
 			relationshipService
 				.getAllPastAndPresentRelationships(student)
 				.toStream
+				.filterNot(_.isTerminated)
 				.filter(_.agent == user.apparentUser.getWarwickId)
 				.map(_.relationshipType).distinct
 				.map(relType => {
