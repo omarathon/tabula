@@ -99,11 +99,12 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 
 object Module extends Logging {
 
+	private val ModuleCodePatternString = "(?i)([a-z]{2}[a-z0-9][a-z0-9.][a-z0-9])"
 	// <modulecode> "-" <cats>
 	// where cats can be a decimal number.
-	private val ModuleCatsPattern = new Regex("""(.+?)-(\d+(?:\.\d+)?)""")
+	private val ModuleCatsPattern = new Regex(ModuleCodePatternString + """-(\d+(?:\.\d+)?)""")
 
-	private val ModuleCodeOnlyPattern = new Regex("""([a-zA-Z0-9]+)""")
+	private val ModuleCodeOnlyPattern = new Regex(ModuleCodePatternString)
 
 	private val WebgroupPattern = new Regex("""(.+?)-(.+)""")
 
@@ -112,16 +113,18 @@ object Module extends Logging {
 		case _ => groupName
 	}
 
-	def stripCats(fullModuleName: String): Option[String] = fullModuleName match {
-		case ModuleCatsPattern(module, _) => Option(module)
-		case ModuleCodeOnlyPattern(module) => Option(module)
-		case _ => {
-			logger.warn(s"Module name ${fullModuleName} did not fit expected module code pattern")
-			None
+	def stripCats(fullModuleName: String): Option[String] = {
+		fullModuleName.replaceAll("\\s+", "") match {
+			case ModuleCatsPattern(module, _) => Option(module)
+			case ModuleCodeOnlyPattern(module) => Option(module)
+			case _ => {
+				logger.warn(s"Module name ${fullModuleName} did not fit expected module code pattern")
+				None
+			}
 		}
 	}
 
-	def extractCats(fullModuleName: String): Option[String] = fullModuleName match {
+	def extractCats(fullModuleName: String): Option[String] = fullModuleName.replaceAll("\\s+", "") match {
 		case ModuleCatsPattern(_, cats) => Some(cats)
 		case ModuleCodeOnlyPattern(_) => None
 		case _ => None
