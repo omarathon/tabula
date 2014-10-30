@@ -239,6 +239,7 @@ object Fixtures extends Mockito {
 		scd.statusOnRoute = sprStatus
 
 		val scyd = studentCourseYearDetails()
+		scyd.enrolmentDepartment = courseDepartment
 		scyd.studentCourseDetails = scd
 		scd.addStudentCourseYearDetails(scyd)
 		scd.latestStudentCourseYearDetails = scyd

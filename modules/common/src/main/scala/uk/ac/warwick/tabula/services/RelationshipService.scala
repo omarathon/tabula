@@ -27,6 +27,7 @@ trait RelationshipService {
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship]
+	def getCurrentRelationships(student: StudentMember, agentId: String): Seq[StudentRelationship]
 
 	def getRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def saveStudentRelationships(
@@ -77,7 +78,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	def saveOrUpdate(relationshipType: StudentRelationshipType) = relationshipDao.saveOrUpdate(relationshipType)
 	def delete(relationshipType: StudentRelationshipType) = relationshipDao.delete(relationshipType)
 
-	def findCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = transactional() {
+	def findCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = transactional(){
 		relationshipDao.getCurrentRelationships(relationshipType, scd)
 	}
 
@@ -87,6 +88,10 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 
 	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship] = transactional() {
 		relationshipDao.getCurrentRelationship(relationshipType, student, agent)
+	}
+
+	def getCurrentRelationships(student: StudentMember, agentId: String): Seq[StudentRelationship] = transactional() {
+		relationshipDao.getCurrentRelationships(student, agentId).filter(relationshipNotPermanentlyWithdrawn)
 	}
 
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {

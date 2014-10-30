@@ -107,23 +107,6 @@
 			</div>
 		</#list>
 		</div>
-
-		<#local ajaxRoute>
-			<#if openMeetingId?has_content>
-				<@routes.listMeetingsTargetted relationshipType studentCourseDetails.urlSafeId studentCourseYearDetails.academicYear openMeetingId/>
-			<#else>
-				<@routes.listMeetings relationshipType studentCourseDetails.urlSafeId studentCourseYearDetails.academicYear/>
-			</#if>
-		</#local>
-		<#local ajaxTarget>meetings-target-${relationshipType.urlPart}-${studentCourseDetails.urlSafeId}-${studentCourseYearDetails.academicYear.startYear?c}</#local>
-		<div id="${ajaxTarget}"><i class="icon-spinner icon-spin"></i><em> Loading meetings&hellip;</em></div>
-		<script>
-			jQuery(function($){
-				$.get('${ajaxRoute}', function(data){
-					$('#${ajaxTarget}').empty().html(data);
-				});
-			});
-		</script>
 	<#else>
 		<h4>${relationshipType.agentRole?cap_first}</h4>
 		<p class="text-warning"><i class="icon-warning-sign"></i> No ${relationshipType.agentRole} details are recorded in Tabula for the current year.</p>
@@ -137,6 +120,22 @@
 			</a>
 		</#if>
 	</#if>
+	<#local ajaxRoute>
+		<#if openMeetingId?has_content>
+			<@routes.listMeetingsTargetted relationshipType studentCourseDetails.urlSafeId studentCourseYearDetails.academicYear openMeetingId/>
+		<#else>
+			<@routes.listMeetings relationshipType studentCourseDetails.urlSafeId studentCourseYearDetails.academicYear/>
+		</#if>
+	</#local>
+	<#local ajaxTarget>meetings-target-${relationshipType.urlPart}-${studentCourseDetails.urlSafeId}-${studentCourseYearDetails.academicYear.startYear?c}</#local>
+	<div id="${ajaxTarget}"><i class="icon-spinner icon-spin"></i><em> Loading meetings&hellip;</em></div>
+	<script>
+		jQuery(function($){
+			$.get('${ajaxRoute}', function(data){
+				$('#${ajaxTarget}').empty().html(data);
+			});
+		});
+	</script>
 </section>
 </#macro>
 
