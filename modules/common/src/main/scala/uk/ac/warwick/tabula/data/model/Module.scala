@@ -1,23 +1,21 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.AcademicYear
-
-import scala.util.matching.Regex
-import org.hibernate.annotations.{BatchSize, AccessType, ForeignKey}
 import javax.persistence._
-import javax.validation.constraints._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.permissions.ModuleGrantedRole
-import uk.ac.warwick.tabula.roles.ModuleAssistantRoleDefinition
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.system.permissions.Restricted
+
+import org.hibernate.annotations.{BatchSize, ForeignKey}
 import org.joda.time.DateTime
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.permissions.ModuleGrantedRole
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.roles.{ModuleAssistantRoleDefinition, ModuleManagerRoleDefinition}
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+
+import scala.collection.JavaConverters._
+import scala.util.matching.Regex
 
 @Entity
 @NamedQueries(Array(
@@ -61,7 +59,7 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 	def teachingDepartments = teachingInfo.asScala.map { _.department } + adminDepartment
 
 	def permissionsParents = Option(adminDepartment).toStream
-	override def humanReadableId = code.toUpperCase() + " " + name
+	override def humanReadableId = code.toUpperCase + " " + name
 	override def urlSlug = code
 
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
@@ -117,10 +115,9 @@ object Module extends Logging {
 		fullModuleName.replaceAll("\\s+", "") match {
 			case ModuleCatsPattern(module, _) => Option(module)
 			case ModuleCodeOnlyPattern(module) => Option(module)
-			case _ => {
-				logger.warn(s"Module name ${fullModuleName} did not fit expected module code pattern")
+			case _ =>
+				logger.warn(s"Module name $fullModuleName did not fit expected module code pattern")
 				None
-			}
 		}
 	}
 
