@@ -24,10 +24,12 @@ trait MeetingRecordService {
 	def listScheduled(rel: Set[StudentRelationship], currentMember: Option[Member]): Seq[ScheduledMeetingRecord]
 	def listAll(rel: Set[StudentRelationship], currentMember: Option[Member]): Seq[AbstractMeetingRecord]
 	def list(rel: StudentRelationship): Seq[MeetingRecord]
+	def listAll(rel: StudentRelationship): Seq[AbstractMeetingRecord]
 	def get(id: String): Option[AbstractMeetingRecord]
 	def purge(meeting: AbstractMeetingRecord): Unit
 	def getAcademicYear(meeting: AbstractMeetingRecord, termService: TermService): Option[AcademicYear]
 	def getAcademicYear(id: String, termService: TermService): Option[AcademicYear]
+	def migrate(from: StudentRelationship, to: StudentRelationship): Unit
 }
 
 
@@ -45,13 +47,18 @@ abstract class AbstractMeetingRecordService extends MeetingRecordService {
 	def listAll(rel: Set[StudentRelationship], currentMember: Option[Member]): Seq[AbstractMeetingRecord] = {
 		(meetingRecordDao.list(rel, currentMember) ++ meetingRecordDao.listScheduled(rel, currentMember)).sorted
 	}
+	def listAll(rel: StudentRelationship): Seq[AbstractMeetingRecord] = {
+		(meetingRecordDao.list(rel) ++ meetingRecordDao.listScheduled(rel)).sorted
+	}
 	def get(id: String): Option[AbstractMeetingRecord] =  Option(id) match {
 		case Some(uid) if uid.nonEmpty => meetingRecordDao.get(uid)
 		case _ => None
 	}
 	def purge(meeting: AbstractMeetingRecord): Unit = meetingRecordDao.purge(meeting)
 	def getAcademicYear(meeting: AbstractMeetingRecord, termService: TermService): Option[AcademicYear] = Some(AcademicYear.findAcademicYearContainingDate(meeting.meetingDate, termService))
-  def getAcademicYear(id: String, termService: TermService): Option[AcademicYear] = Option(id).flatMap(get(_)).flatMap(getAcademicYear(_, termService))
+  def getAcademicYear(id: String, termService: TermService): Option[AcademicYear] = Option(id).flatMap(get).flatMap(getAcademicYear(_, termService))
+	def migrate(from: StudentRelationship, to: StudentRelationship): Unit =
+		meetingRecordDao.migrate(from, to)
 }
 
 @Service("meetingRecordService")

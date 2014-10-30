@@ -13,8 +13,10 @@ trait MeetingRecordDao {
 	def listScheduled(rel: Set[StudentRelationship], currentUser: Option[Member]): Seq[ScheduledMeetingRecord]
 	def list(rel: Set[StudentRelationship], currentUser: Option[Member]): Seq[MeetingRecord]
 	def list(rel: StudentRelationship): Seq[MeetingRecord]
+	def listScheduled(rel: StudentRelationship): Seq[ScheduledMeetingRecord]
 	def get(id: String): Option[AbstractMeetingRecord]
 	def purge(meeting: AbstractMeetingRecord): Unit
+	def migrate(from: StudentRelationship, to: StudentRelationship): Unit
 }
 
 @Repository
@@ -67,12 +69,32 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 			.seq
 	}
 
+	def listScheduled(rel: StudentRelationship): Seq[ScheduledMeetingRecord] = {
+		session.newCriteria[ScheduledMeetingRecord]
+			.add(Restrictions.eq("relationship", rel))
+			.add(is("deleted", false))
+			.addOrder(Order.desc("meetingDate"))
+			.addOrder(Order.desc("lastUpdatedDate"))
+			.seq
+	}
+
 
 	def get(id: String) = getById[AbstractMeetingRecord](id)
 
 	def purge(meeting: AbstractMeetingRecord): Unit = {
 		session.delete(meeting)
 		session.flush()
+	}
+
+	def migrate(from: StudentRelationship, to: StudentRelationship) = {
+		session.newQuery("""
+			update AbstractMeetingRecord
+			set relationship = :to
+	 		where relationship = :from
+		""")
+			.setParameter("from", from)
+			.setParameter("to", to)
+			.executeUpdate()
 	}
 }
 
