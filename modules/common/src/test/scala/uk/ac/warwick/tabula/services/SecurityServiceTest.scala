@@ -207,6 +207,32 @@ class SecurityServiceTest extends TestBase with Mockito {
 			permissions, currentUser, Permissions.Department.DownloadFeedbackReport, new Module
 		) should be (securityService.Continue)
 	}
+
+	@Test def lowerScope() {
+		val module = new Module
+		val department = new Department
+		module.adminDepartment = department
+
+		val currentUser = new CurrentUser(user, user)
+
+		val securityService = new SecurityService
+		val permissions: Seq[(Permission, Option[PermissionsTarget])] = Seq(
+			Permissions.Department.DownloadFeedbackReport -> Some(module),
+			Permissions.Department.ManageDisplaySettings -> Some(department)
+		)
+
+		securityService.checkPermissions(
+			permissions, currentUser, Permissions.Department.DownloadFeedbackReport, module
+		) should be (securityService.Allow)
+
+		securityService.checkPermissions(
+			permissions, currentUser, Permissions.Department.ManageDisplaySettings, module
+		) should be (securityService.Allow)
+
+		securityService.checkPermissions(
+			permissions, currentUser, Permissions.Department.DownloadFeedbackReport, department
+		) should be (securityService.Continue)
+	}
 	
 	@Test def runtimeMemberDenied() {
 		val currentUser = new CurrentUser(user, user)

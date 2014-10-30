@@ -25,7 +25,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro displaysettings department><@_u page="/department/${department.code}/settings/display" context="/admin" /></#macro>
 <#macro notificationsettings department><@_u page="/department/${department.code}/settings/notification" context="/admin" /></#macro>
-<#macro batchnotify department><@_u page="/admin/department/${department.code}/groups/release"  /></#macro>
+<#macro batchnotify department academicYear><@_u page="/admin/department/${department.code}/groups/release/${academicYear.startYear?c}"  /></#macro>
 <#macro batchopen department><@_u page="/admin/department/${department.code}/groups/selfsignup/open"  /></#macro>
 <#macro batchclose department><@_u page="/admin/department/${department.code}/groups/selfsignup/close"  /></#macro>
 
@@ -67,7 +67,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro groupAttendance group><@_u page="/group/${group.id}/attendance" /></#macro>
 <#macro setAttendance set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/attendance" /></#macro>
 <#macro moduleAttendance module><@_u page="/admin/module/${module.code}/attendance" /></#macro>
-<#macro departmentAttendance department><@_u page="/admin/department/${department.code}/attendance" /></#macro>
+<#macro moduleAttendanceInYear module academicYear><@_u page="/admin/module/${module.code}/${academicYear.startYear?c}/attendance" /></#macro>
+<#macro departmentAttendance department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/attendance" /></#macro>
 <#macro viewNote student occurrence returnTo=""><@_u page="/note/${student.universityId}/${occurrence.id}/?returnTo=${returnTo}" /></#macro>
 <#macro editNote student occurrence returnTo="">
 	<#local returnTo><#if returnTo?has_content>?returnTo=${returnTo}</#if></#local>

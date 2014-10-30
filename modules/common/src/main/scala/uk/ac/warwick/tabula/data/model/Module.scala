@@ -1,21 +1,21 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.util.matching.Regex
-import org.hibernate.annotations.{BatchSize, AccessType, ForeignKey}
 import javax.persistence._
-import javax.validation.constraints._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.permissions.ModuleGrantedRole
-import uk.ac.warwick.tabula.roles.ModuleAssistantRoleDefinition
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.system.permissions.Restricted
+
+import org.hibernate.annotations.{BatchSize, ForeignKey}
 import org.joda.time.DateTime
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.permissions.ModuleGrantedRole
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.roles.{ModuleAssistantRoleDefinition, ModuleManagerRoleDefinition}
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+
+import scala.collection.JavaConverters._
+import scala.util.matching.Regex
 
 @Entity
 @NamedQueries(Array(
@@ -59,7 +59,7 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 	def teachingDepartments = teachingInfo.asScala.map { _.department } + adminDepartment
 
 	def permissionsParents = Option(adminDepartment).toStream
-	override def humanReadableId = code.toUpperCase() + " " + name
+	override def humanReadableId = code.toUpperCase + " " + name
 	override def urlSlug = code
 
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
@@ -89,19 +89,20 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 
 
   // true if at least one of this module's SmallGroupSets has not been released to //both students and staff.
-  def hasUnreleasedGroupSets():Boolean = {
-    val allGroupSets = groupSets.asScala
+  def hasUnreleasedGroupSets(academicYear: AcademicYear) : Boolean = {
+    val allGroupSets = groupSets.asScala.filter(_.academicYear == academicYear)
     allGroupSets.exists(!_.fullyReleased)
   }
 }
 
 object Module extends Logging {
 
+	private val ModuleCodePatternString = "(?i)([a-z]{2}[a-z0-9][a-z0-9.][a-z0-9])"
 	// <modulecode> "-" <cats>
 	// where cats can be a decimal number.
-	private val ModuleCatsPattern = new Regex("""(.+?)-(\d+(?:\.\d+)?)""")
+	private val ModuleCatsPattern = new Regex(ModuleCodePatternString + """-(\d+(?:\.\d+)?)""")
 
-	private val ModuleCodeOnlyPattern = new Regex("""([a-zA-Z0-9]+)""")
+	private val ModuleCodeOnlyPattern = new Regex(ModuleCodePatternString)
 
 	private val WebgroupPattern = new Regex("""(.+?)-(.+)""")
 
@@ -110,16 +111,17 @@ object Module extends Logging {
 		case _ => groupName
 	}
 
-	def stripCats(fullModuleName: String): Option[String] = fullModuleName match {
-		case ModuleCatsPattern(module, _) => Option(module)
-		case ModuleCodeOnlyPattern(module) => Option(module)
-		case _ => {
-			logger.warn(s"Module name ${fullModuleName} did not fit expected module code pattern")
-			None
+	def stripCats(fullModuleName: String): Option[String] = {
+		fullModuleName.replaceAll("\\s+", "") match {
+			case ModuleCatsPattern(module, _) => Option(module)
+			case ModuleCodeOnlyPattern(module) => Option(module)
+			case _ =>
+				logger.warn(s"Module name $fullModuleName did not fit expected module code pattern")
+				None
 		}
 	}
 
-	def extractCats(fullModuleName: String): Option[String] = fullModuleName match {
+	def extractCats(fullModuleName: String): Option[String] = fullModuleName.replaceAll("\\s+", "") match {
 		case ModuleCatsPattern(_, cats) => Some(cats)
 		case ModuleCodeOnlyPattern(_) => None
 		case _ => None

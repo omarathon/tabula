@@ -81,26 +81,26 @@ Method calls (after initialising):
     var DataName = "tabula-dnd";
 
     var DragAndDrop = function(element, options) {
-    		var $el = $(element);
+    	var $el = $(element);
 
-    		if (options && typeof(options) === 'object') this.options = options;
-    		else this.options = {};
+    	if (options && typeof(options) === 'object') this.options = options;
+    	else this.options = {};
 
-    		// Allow data- attributes to be set as options, but override-able by any passed to the method
-    		//
-            // n.b. calling $el.data() may cause problems with HTMLUnit tests that try and select the element that $el
-            // refers to by its ID.
-            // If this causes test failures, then extract each required option manually with $data("option-name") - see
-            // jquery-filteredlist.js for an example
-    		this.options = $.extend({}, $el.data(), this.options);
+		// Allow data- attributes to be set as options, but override-able by any passed to the method
+		//
+		// n.b. calling $el.data() may cause problems with HTMLUnit tests that try and select the element that $el
+		// refers to by its ID.
+		// If this causes test failures, then extract each required option manually with $data("option-name") - see
+		// jquery-filteredlist.js for an example
+		this.options = $.extend({}, $el.data(), this.options);
 
-				var itemName = this.options.itemName || 'item';
-				var textSelector = this.options.textSelector;
+		var itemName = this.options.itemName || 'item';
+		var textSelector = this.options.textSelector;
 
-				var useHandle = this.options.useHandle;
-				if (typeof(useHandle) === 'undefined') useHandle = true;
+		var useHandle = this.options.useHandle;
+		if (typeof(useHandle) === 'undefined') useHandle = true;
 
-				var handleClass = this.options.handle || '.handle';
+		var handleClass = this.options.handle || '.handle';
 
         var sortables = '.drag-list';
         var selectables = this.options.selectables || sortables;
@@ -240,14 +240,16 @@ Method calls (after initialising):
         	});
         });
 
-				var deleteLinkHtml;
-				if (this.options.removeTooltip) deleteLinkHtml = ' <a href="#" class="delete" data-toggle="tooltip" title="' + this.options.removeTooltip + '"><i class="icon-remove icon-large"></i></a>';
-        else deleteLinkHtml = ' <a href="#" class="delete"><i class="icon-remove icon-large"></i> Remove</a>';
+		var deleteLinkHtml;
+		if (this.options.removeTooltip)
+			deleteLinkHtml = ' <a href="#" class="delete" data-toggle="tooltip" title="' + this.options.removeTooltip + '"><i class="icon-remove icon-large"></i></a>';
+        else
+			deleteLinkHtml = ' <a href="#" class="delete"><i class="icon-remove icon-large"></i> Remove</a>';
 
-				var popoverGenerator = function() {
+		var popoverGenerator = function() {
             var customHeader = $(this).data('pre') || ''; // data-pre attribute
             var prelude = $(this).data('prelude') || '';
-            var lis = $(this)
+            var LIs = $(this)
                 .closest('.drag-target')
                 .find(sortables)
                 .find('li')
@@ -264,7 +266,7 @@ Method calls (after initialising):
                     return '<li data-item-id="'+id+'">'+text+'</li>';
                 })
                 .toArray();
-            return customHeader + prelude + '<ul>'+lis.join('')+'</ul>';
+            return customHeader + prelude + '<ul>'+LIs.join('')+'</ul>';
         };
 
         // A button to show the list in a popover.
@@ -304,9 +306,11 @@ Method calls (after initialising):
 	        });
 		});
 
-        // Handle buttons inside the .show-list popover by attaching it to .drag-target,
+        // Handle buttons inside the .show-list popover by attaching it to #main-content,
         // so we don't have to remember to bind events to popovers as they come and go.
-        $el.find('.drag-target').on('click', '.delete', function(e) {
+		// As the popover is in #main-content, rather than inside the drag-target, use the
+		// 'creator' data attribute of the tabulaPopover to get back to the original link
+        $('#main-content').on('click.draganddrop-popover', '.delete', function() {
             var $link = $(this);
             // the popover list item
             var $li = $link.closest('li');
@@ -316,12 +320,16 @@ Method calls (after initialising):
 
             // the underlying list item
             var $realLi = $li
+				.closest('.popover')
+				.data('creator')
                 .closest('.drag-target')
                 .find('input')
                 .filter(function(){ return this.value === id; })
                 .closest('li');
 
-            returnItem($realLi);
+			// As the click handler is scoped to the whole document,
+			// check that the LI is inside this DnD before returning
+			if ($el.has($realLi).length > 0) returnItem($realLi);
             return false;
         });
 

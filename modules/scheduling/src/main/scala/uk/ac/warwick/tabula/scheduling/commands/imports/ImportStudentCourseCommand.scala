@@ -74,13 +74,12 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 				studentCourseDetailsDao.saveOrUpdate(studentCourseDetails)
 			}
 			catch {
-				case exception: ConstraintViolationException => {
+				case exception: ConstraintViolationException =>
 					logger.warn("Couldn't update course details for SCJ "
 						+ studentCourseDetails.scjCode + ", SPR " + studentCourseDetails.sprCode
 						+ ".  Might be invalid data in SITS - working on the assumption "
 						+ "there shouldn't be multiple SPR codes for one current SCJ code")
-					exception.printStackTrace
-				}
+					exception.printStackTrace()
 			}
 		}
 
@@ -98,7 +97,9 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 			endRelationships()
 		}
 		else {
-			captureTutor(studentCourseDetails)
+			if (row.endDate == null || row.endDate.isAfter(DateTime.now.toLocalDate)) {
+				captureTutor(studentCourseDetails)
+			}
 
 			if (row.scjCode != null && row.scjStatusCode != null && !row.scjStatusCode.startsWith("P"))
 				new ImportSupervisorsForStudentCommand(studentCourseDetails).apply()
@@ -140,7 +141,7 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 				.filter { relType => dept.getStudentRelationshipSource(relType) == StudentRelationshipSource.SITS }
 				.foreach { relationshipType =>
 					// only save the personal tutor if we can match the ID with a staff member in Tabula
-					val member = memberDao.getByUniversityId(row.tutorUniId) match {
+					memberDao.getByUniversityId(row.tutorUniId) match {
 						case Some(mem: Member) =>
 							logger.info("Got a personal tutor from SITS! SprCode: " + row.sprCode + ", tutorUniId: " + row.tutorUniId)
 
@@ -161,7 +162,7 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 
 	def endRelationships() {
 		if (row.endDate != null) {
-			val endDateFromSits = row.endDate.toDateTimeAtCurrentTime()
+			val endDateFromSits = row.endDate.toDateTimeAtCurrentTime
 			val threeMonthsAgo = DateTime.now().minusMonths(3)
 			if (endDateFromSits.isBefore(threeMonthsAgo)) {
 				relationshipService.getAllCurrentRelationships(stuMem)

@@ -351,15 +351,16 @@ trait ImportRouteTeachingDepartments {
 	}
 
 	def importRouteTeachingDepartments(routeTeachingDepartments: Seq[RouteTeachingDepartmentInfo], route: Route): ImportResult = {
-		val seenDepartments = routeTeachingDepartments.map { _.departmentCode }.flatMap(moduleAndDepartmentService.getDepartmentByCode)
-
-		val deletions =
-			route.teachingInfo.asScala
-				.filterNot { info => seenDepartments.contains(info.department) }
-				.map { info =>
-					courseAndRouteService.delete(info)
-					ImportResult(deleted = 1)
-				}
+		// TAB-2943
+//		val seenDepartments = routeTeachingDepartments.map { _.departmentCode }.flatMap(moduleAndDepartmentService.getDepartmentByCode)
+//
+//		val deletions =
+//			route.teachingInfo.asScala
+//				.filterNot { info => seenDepartments.contains(info.department) }
+//				.map { info =>
+//					courseAndRouteService.delete(info)
+//					ImportResult(deleted = 1)
+//				}
 
 		val additions =
 			routeTeachingDepartments.map { info =>
@@ -385,7 +386,7 @@ trait ImportRouteTeachingDepartments {
 				}
 			}
 
-		combineResults((deletions ++ additions).toSeq)
+		combineResults(additions.toSeq)
 	}
 }
 

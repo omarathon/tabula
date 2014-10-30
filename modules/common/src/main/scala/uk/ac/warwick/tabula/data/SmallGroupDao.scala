@@ -35,6 +35,7 @@ trait SmallGroupDao {
 	def saveOrUpdate(smallGroup: DepartmentSmallGroup)
 
 	def findSetsByDepartmentAndYear(department: Department, year: AcademicYear): Seq[SmallGroupSet]
+	def findAllSetsByDepartment(department: Department): Seq[SmallGroupSet]
 	def findByModuleAndYear(module: Module, year: AcademicYear): Seq[SmallGroup]
 
 	def getSmallGroupEventOccurrence(event: SmallGroupEvent, week: Int): Option[SmallGroupEventOccurrence]
@@ -91,6 +92,12 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 			.add(is("deleted", false))
 			.addOrder(asc("archived"))
 			.addOrder(asc("name"))
+			.seq
+
+	def findAllSetsByDepartment(department: Department) =
+		session.newCriteria[SmallGroupSet]
+			.createAlias("module", "module")
+			.add(is("module.adminDepartment", department))
 			.seq
 
 	def findByModuleAndYear(module: Module, year: AcademicYear) =

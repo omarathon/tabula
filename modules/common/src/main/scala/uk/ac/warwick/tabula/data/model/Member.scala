@@ -333,11 +333,12 @@ class StudentMember extends Member with StudentProperties {
 	def registeredSmallGroups: Stream[SmallGroup] = smallGroupService.findSmallGroupsByStudent(asSsoUser).toStream
 
 	override def permissionsParents: Stream[PermissionsTarget] = {
-		val departments: Stream[PermissionsTarget] = touchedDepartments
+		val departments: Stream[PermissionsTarget] = affiliatedDepartments.flatMap(_.subDepartmentsContaining(this))
+		val modules: Stream[PermissionsTarget] = registeredModulesByYear(None).toStream
 		val smallGroups: Stream[PermissionsTarget] = registeredSmallGroups
 		val currentRoute: Stream[PermissionsTarget] = mostSignificantCourseDetails.map { _.route }.toStream
 
-		departments #::: smallGroups #::: currentRoute
+		departments #::: modules #::: smallGroups #::: currentRoute
 	}
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
