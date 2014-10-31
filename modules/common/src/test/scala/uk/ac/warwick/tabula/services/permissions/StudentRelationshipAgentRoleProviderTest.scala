@@ -15,7 +15,7 @@ trait StudentRelationshipRoleTestBase extends TestBase with Mockito {
 	val staff = Fixtures.staff(universityId = "0123456", userId = "cuslaj")
 	val oldStaff = Fixtures.staff(universityId = "7891011", userId = "cusxad")
 
-	val relService = mock[RelationshipService]
+	val relService = smartMock[RelationshipService]
 
 	val personalTutor = StudentRelationshipType("1", "tutor", "personal tutor", "personal tutee")
 	val rel = StudentRelationship(staff, personalTutor, student)
@@ -28,8 +28,8 @@ class StudentRelationshipAgentRoleProviderTest extends StudentRelationshipRoleTe
 	val provider = new StudentRelationshipAgentRoleProvider {
 		this.relationshipService = relService
 	}
-	relService.getCurrentRelationships(student, "cuslaj") returns Seq(rel)
-	relService.getCurrentRelationships(student, "cusxad") returns Nil
+	relService.getCurrentRelationships(student, staff.universityId) returns Seq(rel)
+	relService.getCurrentRelationships(student, oldStaff.universityId) returns Nil
 	relService.listAllStudentRelationshipsWithUniversityId("0123456") returns Nil
 
 	@Test
