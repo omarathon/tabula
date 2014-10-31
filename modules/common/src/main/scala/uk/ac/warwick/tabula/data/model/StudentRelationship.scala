@@ -51,8 +51,8 @@ abstract class StudentRelationship extends GeneratedId with Serializable with To
 
 	// set to true when you don't want permissions to be granted as a result of this relationship - for when a student and the agent fall out
 	// at time of writing (2014-10-30) this isn't set anywhere in the app so do this directly in the database
-	@Column(name = "isTerminated")
-	var terminated: Boolean = _
+	@Column(name = "terminated")
+	var explicitlyTerminated: Boolean = _
 	
 	var percentage: JBigDecimal = null
 

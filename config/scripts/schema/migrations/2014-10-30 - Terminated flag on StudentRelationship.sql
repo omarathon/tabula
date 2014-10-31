@@ -1,1 +1,1 @@
-alter table StudentRelationship add isTerminated number(1, 0) default 0;
+alter table StudentRelationship add terminated number(1, 0) default 0;
