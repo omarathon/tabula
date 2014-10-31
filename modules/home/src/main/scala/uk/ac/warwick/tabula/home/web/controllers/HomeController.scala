@@ -1,21 +1,18 @@
 package uk.ac.warwick.tabula.home.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.userlookup.Group
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.services.{CourseAndRouteService, UserLookupService, ModuleAndDepartmentService}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.web._
-import uk.ac.warwick.tabula.web.controllers._
-import org.springframework.web.bind.annotation.RequestMapping
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.services.{CourseAndRouteService, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.web.controllers._
 
 @Controller class HomeController extends BaseController {
 	
 	var moduleService = Wire[ModuleAndDepartmentService]
 	var routeService = Wire[CourseAndRouteService]
+	var permissionsService = Wire[PermissionsService]
 
 	hideDeletedItems
 
@@ -28,10 +25,17 @@ import uk.ac.warwick.tabula.permissions.Permissions
 				moduleService.modulesWithPermission(user, Permissions.Module.Administer).nonEmpty ||
 				routeService.routesWithPermission(user, Permissions.Route.Administer).nonEmpty
 			)
+
+		val canViewProfiles =
+			user.isStaff ||
+			user.isStudent ||
+			permissionsService.getAllPermissionDefinitionsFor(user, Permissions.Profiles.ViewSearchResults).nonEmpty
 		
-	  	Mav("home/view", 
-	  		"ajax" -> ajax,
+	  Mav("home/view",
+	  	"ajax" -> ajax,
 			"canAdmin" -> canAdmin,
-			"jumbotron" -> true).noLayoutIf(ajax) // All hail our new Jumbotron overlords
+			"canViewProfiles" -> canViewProfiles,
+			"jumbotron" -> true
+		).noLayoutIf(ajax) // All hail our new Jumbotron overlords
 	}
 }
