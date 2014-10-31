@@ -17,7 +17,7 @@ class StudentRelationshipAgentRoleProvider extends RoleProvider
 		case student: StudentMember =>
 			relationshipService
 				// lists all of the tutors current relationships to this student (expired relationships and withdrawn students ignored)
-				.getCurrentRelationships(student, user.apparentId)
+				.getCurrentRelationships(student, user.apparentUser.getWarwickId)
 				.toStream
 				.filterNot(_.explicitlyTerminated)
 				// gather all of the distinct relationship types
