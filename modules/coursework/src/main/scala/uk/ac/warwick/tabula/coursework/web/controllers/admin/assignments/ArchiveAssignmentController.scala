@@ -1,28 +1,27 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin.assignments
 
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.web.Mav
-import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.coursework.commands.assignments.ArchiveAssignmentCommand
-import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Module
+import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.coursework.commands.assignments.{ArchiveAssignmentCommand, ArchiveAssignmentCommandInternal}
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/archive"))
 class ArchiveAssignmentController extends CourseworkController {
 
-	@ModelAttribute("command") def model(module: Module, assignment: Assignment) = new ArchiveAssignmentCommand(module, assignment)
+	@ModelAttribute("command") def model(module: Module, assignment: Assignment) =
+		ArchiveAssignmentCommand(module, assignment)
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def confirmation(@ModelAttribute("command") cmd: ArchiveAssignmentCommand) = {
+	def confirmation(@ModelAttribute("command") cmd: ArchiveAssignmentCommandInternal) = {
 		Mav("admin/assignments/archive").noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method = Array(POST))
-	def apply(@ModelAttribute("command") cmd: ArchiveAssignmentCommand) = {
-		cmd.apply();
+	def apply(@ModelAttribute("command") cmd: Appliable[Assignment]) = {
+		cmd.apply()
 		Mav("ajax_success").noLayoutIf(ajax) // should be AJAX, otherwise you'll just get a terse success response.
 	}
 
