@@ -31,12 +31,12 @@ trait RoleProvider {
 		department.flatMap { d => 
 			customRoleFor(d)(definition, scope)
 		}
-	
+
 	protected def customRoleFor[A <: PermissionsTarget](department: Department)(originalDefinition: RoleDefinition, scope: A): Option[Role] =
 		department.replacedRoleDefinitionFor(originalDefinition).map { customDefinition => {
 			originalDefinition match {
-				case originalSelectorRoleDefinition: SelectorBuiltInRoleDefinition[A] => customDefinition.baseRoleDefinition match {
-					case customBaseSelectorRoleDefinition: SelectorBuiltInRoleDefinition[A] =>
+				case originalSelectorRoleDefinition: SelectorBuiltInRoleDefinition[A @unchecked] => customDefinition.baseRoleDefinition match {
+					case customBaseSelectorRoleDefinition: SelectorBuiltInRoleDefinition[A @unchecked] =>
 						val correctedBaseSelectorDefinition = customBaseSelectorRoleDefinition.duplicate(Option(originalSelectorRoleDefinition.selector))
 						customDefinition.baseRoleDefinition = correctedBaseSelectorDefinition
 					case _ =>
