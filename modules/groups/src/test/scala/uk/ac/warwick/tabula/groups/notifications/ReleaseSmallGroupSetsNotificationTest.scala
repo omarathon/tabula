@@ -25,19 +25,19 @@ class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito{
   @Test
   def titleIncludesGroupFormat(){new SmallGroupFixture {
     val n =  createNotification(group1, actor, recipient)
-    n.title should be("Lab allocation")
+    n.title should be("LA101 lab allocation")
   }}
 
   @Test
   def titleJoinsMultipleGroupSetsNicely(){ new SmallGroupFixture{
     val n = createMultiGroupNotification(Seq(group1,group2, group3),actor, recipient)
-    n.title should be ("Lab, Seminar and Tutorial allocation")
+    n.title should be ("LA101, LA102 and LA103 lab, seminar and tutorial allocations")
   }}
 
   @Test
   def titleRemovesDuplicateFormats(){ new SmallGroupFixture{
     val n = createMultiGroupNotification(Seq(group1,group2, group3, group4, group5),actor, recipient)
-    n.title should be ("Lab, Seminar and Tutorial allocation")
+    n.title should be ("LA101, LA102, LA103, LA104 and LA105 lab, seminar and tutorial allocations")
   }}
 
   @Test(expected = classOf[IllegalArgumentException])
