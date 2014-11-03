@@ -80,6 +80,13 @@ case class StudentRelationshipAgentRoleDefinition(relationshipType: PermissionsS
 	)
 	final def canDelegateThisRolesPermissions: JavaImports.JBoolean = true
 
+	def duplicate(selectorOption: Option[PermissionsSelector[StudentRelationshipType]]): SelectorBuiltInRoleDefinition[StudentRelationshipType] =
+		selectorOption.map{ selector =>
+			StudentRelationshipAgentRoleDefinition(selector)
+		}.getOrElse(
+			StudentRelationshipAgentRoleDefinition(relationshipType)
+		)
+
 }
 
 /**
@@ -100,5 +107,12 @@ case class HistoricStudentRelationshipAgentRoleDefinition(relationshipType: Perm
 		StudentRelationshipAgent.profileReadOnlyPermissions(relationshipType):_*
 	)
 	final def canDelegateThisRolesPermissions: JavaImports.JBoolean = true
+
+	def duplicate(selectorOption: Option[PermissionsSelector[StudentRelationshipType]]): SelectorBuiltInRoleDefinition[StudentRelationshipType] =
+		selectorOption.map{ selector =>
+			HistoricStudentRelationshipAgentRoleDefinition(selector)
+		}.getOrElse(
+			HistoricStudentRelationshipAgentRoleDefinition(relationshipType)
+		)
 
 }

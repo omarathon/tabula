@@ -4,14 +4,12 @@ import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.roles.Role
+import uk.ac.warwick.tabula.roles._
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.roles.RoleDefinition
-import uk.ac.warwick.tabula.roles.RoleBuilder
 
 /**
  * Provides a stream of roles that apply for a particular user on a particular scope. The role service
@@ -33,11 +31,22 @@ trait RoleProvider {
 		department.flatMap { d => 
 			customRoleFor(d)(definition, scope)
 		}
-	
-	protected def customRoleFor[A <: PermissionsTarget](department: Department)(definition: RoleDefinition, scope: A): Option[Role] = 
-		department.replacedRoleDefinitionFor(definition).map { definition =>
-			RoleBuilder.build(definition, Some(scope), definition.getName)
-		}
+
+	protected def customRoleFor[A <: PermissionsTarget](department: Department)(originalDefinition: RoleDefinition, scope: A): Option[Role] =
+		department.replacedRoleDefinitionFor(originalDefinition).map { customDefinition => {
+			originalDefinition match {
+				case originalSelectorRoleDefinition: SelectorBuiltInRoleDefinition[A @unchecked] => customDefinition.baseRoleDefinition match {
+					case customBaseSelectorRoleDefinition: SelectorBuiltInRoleDefinition[A @unchecked] =>
+						val correctedBaseSelectorDefinition = customBaseSelectorRoleDefinition.duplicate(Option(originalSelectorRoleDefinition.selector))
+						customDefinition.baseRoleDefinition = correctedBaseSelectorDefinition
+					case _ =>
+				}
+				case _ =>
+			}
+			RoleBuilder.build(customDefinition, Some(scope), customDefinition.getName)
+		}}
+
+
 }
 
 /**
