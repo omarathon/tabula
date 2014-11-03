@@ -13,10 +13,10 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 			go to groupsPage.url
 
 		When("I click on the 'Actions' dropdown for module xxx01/Test Lab")
-			val editPage = groupsPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
+			val editPage = groupsPage.getGroupsetInfo("xxx01", "Test Lab").get.goToEditProperties
 
 		Then("The page is the edit properties page")
-			editPage.isCurrentPage("xxx101")
+			editPage.isCurrentPage("xxx01")
 
 	}
 
@@ -29,9 +29,9 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 		When("I log in as admin")
 			signIn as(P.Admin1)  to (Path("/groups"))
 
-		And(" I view the edit properties page for xxx101/Test Lab")
+		And(" I view the edit properties page for xxx01/Test Lab")
 			go to groupsetSummaryPage.url
-			val editProperties = groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
+			val editProperties = groupsetSummaryPage.getGroupsetInfo("xxx01", "Test Lab").get.goToEditProperties
 
 		Then("I should see the options to show/hide tutor name")
 			checkbox("studentsCanSeeTutorName") should not be (null)
@@ -46,7 +46,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 			groupsetSummaryPage should be('currentPage)
 
 		When("I navigate to the edit properties page again")
-			groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
+			groupsetSummaryPage.getGroupsetInfo("xxx01", "Test Lab").get.goToEditProperties
 
 		Then("The checkboxes should still be checked")
 			checkbox("studentsCanSeeTutorName").value should be("true")
@@ -60,9 +60,9 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 		When("I log in as admin")
 			signIn as(P.Admin1)  to (Path("/groups"))
 
-		And("I view the edit groups page for xxx101/Test Lab")
+		And("I view the edit groups page for xxx01/Test Lab")
 			go to groupsetSummaryPage.url
-			val editGroups = groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditGroups
+			val editGroups = groupsetSummaryPage.getGroupsetInfo("xxx01", "Test Lab").get.goToEditGroups
 
 		Then("I should see the options to set a default maximum group size")
 			radioButton("defaultMaxGroupSizeEnabled") should not be (null)
@@ -78,7 +78,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 			groupsetSummaryPage should be('currentPage)
 
 		When("I navigate to the edit groups page again")
-		  groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditGroups
+		  groupsetSummaryPage.getGroupsetInfo("xxx01", "Test Lab").get.goToEditGroups
 
 		Then("Group size should still be limited")
 			radioButtonGroup("defaultMaxGroupSizeEnabled").value should be("true")
@@ -95,7 +95,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 			groupsetSummaryPage should be('currentPage)
 
 		When("I navigate to the edit groups page again")
-			groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditGroups
+			groupsetSummaryPage.getGroupsetInfo("xxx01", "Test Lab").get.goToEditGroups
 
 		Then("Group size should be unlimited")
 		radioButtonGroup("defaultMaxGroupSizeEnabled").value should be("false")

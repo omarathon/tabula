@@ -20,11 +20,11 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		go to Path("/scheduling/fixtures/setup")
 
 		val assessmentFuture = future {
-			And("There is an assessment component for module xxx101")
-			createAssessmentComponent("XXX", "XXX101-15", "Cool essay")
+			And("There is an assessment component for module xxx01")
+			createAssessmentComponent("XXX", "XXX01-15", "Cool essay")
 
-			And("There is an upstream assessment group for xxx101 with students1-4 in it")
-			createUpstreamAssessmentGroup("XXX101-15", Seq(P.Student1.warwickId, P.Student2.warwickId, P.Student3.warwickId, P.Student4.warwickId))
+			And("There is an upstream assessment group for xxx01 with students1-4 in it")
+			createUpstreamAssessmentGroup("XXX01-15", Seq(P.Student1.warwickId, P.Student2.warwickId, P.Student3.warwickId, P.Student4.warwickId))
 		}
 
 		And("student1-4 are members")

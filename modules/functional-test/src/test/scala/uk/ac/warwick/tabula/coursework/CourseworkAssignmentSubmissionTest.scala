@@ -6,7 +6,7 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 	
 	// TAB-413, TAB-415
 	"Student" should "be able to submit assignment after validation errors without re-uploading file" in {
-		withAssignment("xxx101", "Fully featured assignment") { assignmentId =>
+		withAssignment("xxx01", "Fully featured assignment") { assignmentId =>
 			as(P.Student1) {
 				click on linkText("Fully featured assignment")
 				currentUrl should endWith(assignmentId + "/")
@@ -37,8 +37,8 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 	}
 	
 	"Student" should "be able to submit assignment" in {
-		withAssignment("xxx101", "Fully featured assignment") { assignmentId =>
-			submitAssignment(P.Student1, "xxx101", "Fully featured assignment", assignmentId, "/file1.txt")
+		withAssignment("xxx01", "Fully featured assignment") { assignmentId =>
+			submitAssignment(P.Student1, "xxx01", "Fully featured assignment", assignmentId, "/file1.txt")
 		}
 	}
 

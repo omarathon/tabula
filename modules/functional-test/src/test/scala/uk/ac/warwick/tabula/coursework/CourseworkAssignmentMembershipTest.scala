@@ -5,14 +5,14 @@ import uk.ac.warwick.tabula.BrowserTest
 class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixtures {
 
 	"Student" should "not be able to submit if not enrolled" in {
-		withAssignment("xxx101", "Fully featured assignment") { assignmentId =>
+		withAssignment("xxx01", "Fully featured assignment") { assignmentId =>
 		// Student1 and Student2 are enrolled by default
 			as(P.Student3) {
 				// Not on the coursework homepage
 				linkText("Fully featured assignment").findElement should be (None)
 
 				// Use the assignment ID to mock up a URL
-				go to Path("/coursework/module/xxx101/" + assignmentId + "/")
+				go to Path("/coursework/module/xxx01/" + assignmentId + "/")
 
 				pageSource contains "You're not enrolled" should be (true)
 
@@ -32,12 +32,12 @@ class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixt
 			radioButtonGroup("restrictSubmissions").value = "false"
 		}
 
-		withAssignment("xxx101", "Fully featured assignment", assignmentSettings) { assignmentId =>
+		withAssignment("xxx01", "Fully featured assignment", assignmentSettings) { assignmentId =>
 			// Student1 is enrolled
-			submitAssignment(P.Student1, "xxx101", "Fully featured assignment", assignmentId, "/file1.txt", mustBeEnrolled = true)
+			submitAssignment(P.Student1, "xxx01", "Fully featured assignment", assignmentId, "/file1.txt", mustBeEnrolled = true)
 
 			// Student 3 is not enrolled but can submit anyway
-			submitAssignment(P.Student3, "xxx101", "Fully featured assignment", assignmentId, "/file2.txt", mustBeEnrolled = false)
+			submitAssignment(P.Student3, "xxx01", "Fully featured assignment", assignmentId, "/file2.txt", mustBeEnrolled = false)
 		}
 	}
 
@@ -63,14 +63,14 @@ class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixt
 			click on id("assignmentComment")
 		}
 
-		withAssignment("xxx101", "Fully featured assignment", assignmentSettings, Nil) { assignmentId =>
+		withAssignment("xxx01", "Fully featured assignment", assignmentSettings, Nil) { assignmentId =>
 			// Student 3 is enrolled via SITS and can submit
-			submitAssignment(P.Student3, "xxx101", "Fully featured assignment", assignmentId, "/file1.txt", true)
+			submitAssignment(P.Student3, "xxx01", "Fully featured assignment", assignmentId, "/file1.txt", true)
 
 			// Student 5 isn't in the SITS group. Poor Student5
 			as(P.Student5) {
 				// Use the assignment ID to mock up a URL
-				go to Path("/coursework/module/xxx101/" + assignmentId + "/")
+				go to Path("/coursework/module/xxx01/" + assignmentId + "/")
 
 				pageSource contains "You're not enrolled" should be (true)
 			}

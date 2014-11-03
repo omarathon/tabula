@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.{Download, BrowserTest}
 import org.joda.time.DateTime
 
 class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
-	final val moduleCode = "XXX101"
+	final val moduleCode = "XXX01"
 	final val assignmentName = "Online marking for Dummies"
 
 	private def setup(assignmentId: String) {
