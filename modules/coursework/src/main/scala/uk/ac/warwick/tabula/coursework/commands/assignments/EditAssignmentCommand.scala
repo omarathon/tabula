@@ -10,9 +10,6 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.notifications.ExtensionRequestRejectedNotification
-
-
 
 class EditAssignmentCommand(module: Module = null, val assignment: Assignment = null, user: CurrentUser)
 	extends ModifyAssignmentCommand(module) with NotificationHandling {

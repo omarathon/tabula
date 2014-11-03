@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.groups.SmallGroupFixture
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.groups.web.Routes
-import uk.ac.warwick.tabula.data.model.notifications.SmallGroupSetChangedTutorNotification
 import uk.ac.warwick.tabula.data.model.Notification
 
 class SmallGroupSetChangedNotificationTest extends TestBase with Mockito {

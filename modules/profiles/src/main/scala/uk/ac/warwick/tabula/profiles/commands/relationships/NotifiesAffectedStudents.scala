@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.data.model.{Member, Notification, Department, Studen
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.notifications.BulkOldAgentRelationshipNotification
 
 trait RelationshipChangingCommand {
 	val department: Department

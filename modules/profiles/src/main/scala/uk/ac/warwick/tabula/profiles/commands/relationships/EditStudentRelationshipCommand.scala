@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.notifications.StudentRelationshipChangeToNewAgentNotification
 
 /**
  * Command to edit the relationship for the StudentCourseDetails passed in, passing 

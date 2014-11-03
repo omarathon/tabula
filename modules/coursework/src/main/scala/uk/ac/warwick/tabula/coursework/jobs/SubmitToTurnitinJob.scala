@@ -18,7 +18,6 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.jobs._
 import uk.ac.warwick.tabula.services.OriginalityReportService
 import language.implicitConversions
-import uk.ac.warwick.tabula.data.model.notifications.TurnitinJobSuccessNotification
 
 object SubmitToTurnitinJob {
 	val identifier = "turnitin-submit"

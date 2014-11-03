@@ -7,7 +7,6 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands.Notifies
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserLookupComponent
-import uk.ac.warwick.tabula.data.model.notifications.SmallGroupSetChangedTutorNotification
 
 trait SmallGroupSetCommand {
 	def set: SmallGroupSet

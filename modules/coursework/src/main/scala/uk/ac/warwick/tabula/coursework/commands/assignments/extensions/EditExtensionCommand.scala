@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.{ScheduledNotification, Assignment, Module, Notification}
-import uk.ac.warwick.tabula.data.model.notifications.ExtensionRequestRejectedNotification
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.data.Transactions._
