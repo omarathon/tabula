@@ -26,7 +26,7 @@ class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 	@Test
 	def titleIncludesModuleAndAssignmentName(){ new ModeratorRejectedNotificationFixture {
 		val n =  createNotification(marker2, marker1, mf1)
-		n.title should be("Feedback rejected by the moderator for HERON101 - Test assignment")
+		n.title should be("HERON101: Feedback for student1 for \"Test assignment\" has been rejected by the moderator")
 	} }
 
 	@Test

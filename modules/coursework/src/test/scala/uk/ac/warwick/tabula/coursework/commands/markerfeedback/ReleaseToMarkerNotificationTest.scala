@@ -26,7 +26,7 @@ class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
 	@Test
 	def titleIncludesModuleAndAssignmentName(){ new ReleaseNotificationFixture {
 		val n =  createNotification(marker1, marker2, Seq(mf1, mf2), testAssignment, isFirstMarker = true)
-		n.title should be("Submissions released for HERON101 - Test assignment")
+		n.title should be("HERON101: Submissions for \"Test assignment\" have been released for marking")
 	} }
 
 	@Test
