@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.profiles.commands.relationships
 
 import uk.ac.warwick.tabula.commands.Notifies
+import uk.ac.warwick.tabula.data.model.notifications.profiles.{BulkOldAgentRelationshipNotification, BulkNewAgentRelationshipNotification, BulkStudentRelationshipNotification}
 import uk.ac.warwick.tabula.data.model.{Member, Notification, Department, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.notifications.{BulkOldAgentRelationshipNotification, BulkNewAgentRelationshipNotification, BulkStudentRelationshipNotification}
+import uk.ac.warwick.tabula.data.model.notifications.BulkOldAgentRelationshipNotification
 
 trait RelationshipChangingCommand {
 	val department: Department

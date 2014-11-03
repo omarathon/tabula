@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.notifications.groups.OpenSmallGroupSetsNotification
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -10,7 +11,6 @@ import uk.ac.warwick.tabula.services.{UserGroupCacheManager, UserLookupService, 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
 import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup, Department}
-import uk.ac.warwick.tabula.data.model.notifications.OpenSmallGroupSetsNotification
 
 class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 

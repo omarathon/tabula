@@ -2,11 +2,11 @@ package uk.ac.warwick.tabula.groups.notifications
 
 
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
+import uk.ac.warwick.tabula.data.model.notifications.groups.ReleaseSmallGroupSetsNotification
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.groups.SmallGroupFixture
 import uk.ac.warwick.tabula.groups.web.Routes
-import uk.ac.warwick.tabula.data.model.notifications.ReleaseSmallGroupSetsNotification
 import uk.ac.warwick.tabula.data.model.Notification
 
 class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito{

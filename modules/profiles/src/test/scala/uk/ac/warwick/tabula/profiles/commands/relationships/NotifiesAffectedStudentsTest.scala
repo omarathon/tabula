@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.profiles.commands.relationships
 
-import uk.ac.warwick.tabula.data.model.notifications.{BulkStudentRelationshipNotification, BulkNewAgentRelationshipNotification, BulkOldAgentRelationshipNotification, StudentRelationshipChangeNotification}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.{BulkOldAgentRelationshipNotification, BulkNewAgentRelationshipNotification, BulkStudentRelationshipNotification}
+import uk.ac.warwick.tabula.data.model.notifications.StudentRelationshipChangeNotification
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentRelationship, StudentRelationshipType, Notification}
 import uk.ac.warwick.tabula.services.{RelationshipService, ProfileService}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}

@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
+import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.{Notification, ModeratedMarkingWorkflow, Assignment, MarkerFeedback}
-import uk.ac.warwick.tabula.data.model.notifications.ReleaseToMarkerNotification
 
 class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
 

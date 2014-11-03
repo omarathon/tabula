@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{ExtensionRequestRejectedNotification, ExtensionRequestRespondedRejectNotification}
 import uk.ac.warwick.tabula.data.model.{Notification, Assignment, Module}
 import uk.ac.warwick.tabula.commands.Description
 import org.springframework.validation.Errors
@@ -9,7 +10,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.notifications.{ExtensionRequestRespondedRejectNotification, ExtensionRequestRejectedNotification}
+import uk.ac.warwick.tabula.data.model.notifications.ExtensionRequestRejectedNotification
 
 
 

@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.groups.commands.admin
 
 import uk.ac.warwick.tabula.commands.{Appliable, Notifies, Command, Description}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup}
+import uk.ac.warwick.tabula.data.model.notifications.groups.ReleaseSmallGroupSetsNotification
 import uk.ac.warwick.tabula.data.model.{NotificationPriority, Notification}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
@@ -10,7 +11,6 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.notifications.ReleaseSmallGroupSetsNotification
 
 trait ReleaseSmallGroupSetCommand extends Appliable[Seq[ReleasedSmallGroupSet]] {
 	def describeOutcome:Option[String]
