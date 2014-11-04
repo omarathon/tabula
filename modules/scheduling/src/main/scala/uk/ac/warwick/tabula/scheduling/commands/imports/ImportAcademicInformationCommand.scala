@@ -261,6 +261,7 @@ trait ImportModuleTeachingDepartments {
 			module.teachingInfo.asScala
 				.filterNot { info => seenDepartments.contains(info.department) }
 				.map { info =>
+					module.teachingInfo.remove(info)
 					moduleAndDepartmentService.delete(info)
 					ImportResult(deleted = 1)
 				}
@@ -358,6 +359,7 @@ trait ImportRouteTeachingDepartments {
 //			route.teachingInfo.asScala
 //				.filterNot { info => seenDepartments.contains(info.department) }
 //				.map { info =>
+//					route.teachingInfo.remove(info)
 //					courseAndRouteService.delete(info)
 //					ImportResult(deleted = 1)
 //				}
