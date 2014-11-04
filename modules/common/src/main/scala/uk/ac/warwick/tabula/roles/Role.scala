@@ -106,6 +106,8 @@ abstract class SelectorBuiltInRoleDefinition[A <: PermissionsSelector[A]](val se
 		.build()
 		
 	override def toString() = "%s(%s)".format(super.toString(), selector)
+
+	def duplicate(selector: Option[PermissionsSelector[A]]): SelectorBuiltInRoleDefinition[A]
 }
 
 object SelectorBuiltInRoleDefinition {

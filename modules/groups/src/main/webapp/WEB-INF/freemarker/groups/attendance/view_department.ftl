@@ -25,7 +25,11 @@
 		</div>
 	</div>
 
-	<@fmt.deptheader "Attendance" "for" department routes "departmentAttendance" "with-settings" />
+	<#macro deptheaderroutemacro dept>
+		<@routes.departmentAttendance dept adminCommand.academicYear />
+	</#macro>
+	<#assign deptheaderroute = deptheaderroutemacro in routes/>
+	<@fmt.deptheader "Attendance" "for" department routes "deptheaderroute" "with-settings" />
 
 	<#if !modules?has_content>
 		<p class="alert alert-info empty-hint"><i class="icon-lightbulb"></i> This department doesn't have any groups set up.</p>

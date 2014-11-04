@@ -42,10 +42,10 @@
 			<li><h2><a href="<@url page="/" context="/profiles" />">My Student Profile</a></h2>
 				<span class="hint">View your student information</span>
 			</li>
-		<#elseif canViewProfiles>
+		<#--<#elseif canViewProfiles>
 			<li><h2><a href="<@url page="/" context="/profiles" />">Profiles</a></h2>
 				<span class="hint">View staff and student information</span>
-			</li>
+			</li>-->
 		</#if>
 		
 		<#if features.attendanceMonitoring>
