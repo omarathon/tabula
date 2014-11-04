@@ -106,22 +106,22 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 				.add(Restrictions.like("course.code", "U%"))
 				.add(Restrictions.like("course.code", "N%"))
 		)
-		courseTypeRestriction.alias("mostSignificantCourse", AliasAndJoinType("studentCourseDetails"))
-		courseTypeRestriction.alias("studentCourseDetails.course", AliasAndJoinType("course"))
+		courseTypeRestriction.alias("mostSignificantCourse", AliasAndJoinType("mostSignificantCourse"))
+		courseTypeRestriction.alias("mostSignificantCourse.course", AliasAndJoinType("course"))
 
-		val routeRestriction = new ScalaRestriction(Restrictions.in("studentCourseDetails.route.code", JArrayList(route1.code, route3.code)))
-		routeRestriction.alias("mostSignificantCourse", AliasAndJoinType("studentCourseDetails"))
+		val routeRestriction = new ScalaRestriction(Restrictions.in("mostSignificantCourse.route.code", JArrayList(route1.code, route3.code)))
+		routeRestriction.alias("mostSignificantCourse", AliasAndJoinType("mostSignificantCourse"))
 
 		val moaRestriction = new ScalaRestriction(Restrictions.in("studentCourseYearDetails.modeOfAttendance", JArrayList(moaFT)))
-		moaRestriction.alias("mostSignificantCourse", AliasAndJoinType("studentCourseDetails"))
-		moaRestriction.alias("studentCourseDetails.latestStudentCourseYearDetails", AliasAndJoinType("studentCourseYearDetails"))
+		moaRestriction.alias("mostSignificantCourse", AliasAndJoinType("mostSignificantCourse"))
+		moaRestriction.alias("mostSignificantCourse.studentCourseYearDetails", AliasAndJoinType("studentCourseYearDetails"))
 
 		val yosRestriction = new ScalaRestriction(Restrictions.in("studentCourseYearDetails.yearOfStudy", JArrayList(1, 5)))
-		yosRestriction.alias("mostSignificantCourse", AliasAndJoinType("studentCourseDetails"))
-		yosRestriction.alias("studentCourseDetails.latestStudentCourseYearDetails", AliasAndJoinType("studentCourseYearDetails"))
+		yosRestriction.alias("mostSignificantCourse", AliasAndJoinType("mostSignificantCourse"))
+		yosRestriction.alias("mostSignificantCourse.studentCourseYearDetails", AliasAndJoinType("studentCourseYearDetails"))
 
-		val sprRestriction = new ScalaRestriction(Restrictions.in("studentCourseDetails.statusOnRoute", JArrayList(sprP)))
-		sprRestriction.alias("mostSignificantCourse", AliasAndJoinType("studentCourseDetails"))
+		val sprRestriction = new ScalaRestriction(Restrictions.in("mostSignificantCourse.statusOnRoute", JArrayList(sprP)))
+		sprRestriction.alias("mostSignificantCourse", AliasAndJoinType("mostSignificantCourse"))
 
 		// no need to test ScalaRestriction.inIfNotEmptyMultipleProperties - it's tested in ScalaRestrictionTest
 		val modRestriction = inIfNotEmptyMultipleProperties(
@@ -129,8 +129,8 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 			Seq(Seq(mod2, mod3), Seq(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
 		).get
 
-		modRestriction.alias("mostSignificantCourse", AliasAndJoinType("studentCourseDetails"))
-		modRestriction.alias("studentCourseDetails._moduleRegistrations", AliasAndJoinType("moduleRegistration"))
+		modRestriction.alias("mostSignificantCourse", AliasAndJoinType("mostSignificantCourse"))
+		modRestriction.alias("mostSignificantCourse._moduleRegistrations", AliasAndJoinType("moduleRegistration"))
 
 		val expectedRestrictions = Seq(
 			courseTypeRestriction,
@@ -139,7 +139,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 			yosRestriction,
 			sprRestriction,
 			modRestriction
-		)
+		) ++ command.latestStudentCourseYearDetailsForYearRestrictions(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 
 		there was one(command.profileService).findStudentsByRestrictions(
 			isEq(department),
@@ -163,8 +163,8 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		val expectedOrders = Seq(
 			ScalaOrder(
 				Order.desc("studentCourseYearDetails.yearOfStudy"),
-				"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails"),
-				"studentCourseDetails.latestStudentCourseYearDetails" -> AliasAndJoinType("studentCourseYearDetails")
+				"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
+				"mostSignificantCourse.studentCourseYearDetails" -> AliasAndJoinType("studentCourseYearDetails")
 			),
 			ScalaOrder.asc("lastName"),
 			ScalaOrder.asc("firstName")
