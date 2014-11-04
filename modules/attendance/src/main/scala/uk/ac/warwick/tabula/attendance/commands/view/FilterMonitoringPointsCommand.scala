@@ -46,7 +46,8 @@ class FilterMonitoringPointsCommandInternal(val department: Department, val acad
 			val studentDatas = benchmarkTask("profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments") {
 				profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments(
 					department = department,
-					restrictions = buildRestrictions(academicYear)
+					restrictions = buildRestrictions(academicYear),
+					academicYear = academicYear
 				)
 			}
 

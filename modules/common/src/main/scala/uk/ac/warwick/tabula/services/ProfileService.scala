@@ -54,7 +54,7 @@ trait ProfileService {
 	): (Int, Seq[StudentMember])
 	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[StudentMember]
 	def findAllUniversityIdsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
-	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction]): Seq[AttendanceMonitoringStudentData]
+	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
 	def getSCDsByAgentRelationshipAndRestrictions(
 		relationshipType: StudentRelationshipType,
 		agent: Member,
@@ -348,7 +348,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		}
 	}
 
-	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction]): Seq[AttendanceMonitoringStudentData] = {
+	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {
 		val allRestrictions = affiliatedDepartmentsRestriction(department, restrictions)
 
 		if (department.hasParent) {
@@ -358,7 +358,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 				.filter(_.mostSignificantCourseDetails.isDefined)
 				.map(student => AttendanceMonitoringStudentData(student.universityId, student.userId, student.mostSignificantCourse.beginDate))
 		}	else {
-			memberDao.findAllStudentDataByRestrictions(allRestrictions)
+			memberDao.findAllStudentDataByRestrictions(allRestrictions, academicYear: AcademicYear)
 		}
 	}
 
