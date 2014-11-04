@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.notifications.groups.{SmallGroupSetChangedTutorNotification, SmallGroupSetChangedStudentNotification, SmallGroupSetChangedNotification}
 import uk.ac.warwick.tabula.data.model.{NotificationPriority, Notification}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands.Notifies
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserLookupComponent
-import uk.ac.warwick.tabula.data.model.notifications.{SmallGroupSetChangedTutorNotification, SmallGroupSetChangedStudentNotification, SmallGroupSetChangedNotification}
 
 trait SmallGroupSetCommand {
 	def set: SmallGroupSet

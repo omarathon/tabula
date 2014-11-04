@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
 import uk.ac.warwick.tabula.services.{FeedbackServiceComponent, AutowiringFeedbackServiceComponent, AutowiringUserLookupComponent, UserLookupComponent, AutowiringStateServiceComponent, StateServiceComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
@@ -10,7 +11,6 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{ReleasedState, FeedbackReleasedNotifier}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.notifications.ReleaseToMarkerNotification
 import scala.collection.mutable
 import uk.ac.warwick.tabula.system.BindListener
 

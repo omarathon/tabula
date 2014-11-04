@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.data.model.notifications.coursework.MarkedPlagiarisedNotification
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -9,8 +10,6 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.{Notification, Submission, Assignment}
 import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, SubmissionServiceComponent}
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, SuspectPlagiarised}
-
-import uk.ac.warwick.tabula.data.model.notifications.MarkedPlagiarisedNotification
 import uk.ac.warwick.userlookup.User
 
 object PlagiarismInvestigationCommand {

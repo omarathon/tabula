@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.groups.notifications
 
+import uk.ac.warwick.tabula.data.model.notifications.groups.OpenSmallGroupSetsNotification
 import uk.ac.warwick.tabula.{FreemarkerTestHelpers, TestBase}
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.groups.SmallGroupFixture
 import uk.ac.warwick.tabula.JavaImports.JHashMap
 import org.mockito.Mockito._
 import org.mockito.Matchers._
-import uk.ac.warwick.tabula.data.model.notifications.OpenSmallGroupSetsNotification
 
 class OpenGroupSetNotificationTemplateTest extends TestBase with FreemarkerTestHelpers with FreemarkerRendering {
 

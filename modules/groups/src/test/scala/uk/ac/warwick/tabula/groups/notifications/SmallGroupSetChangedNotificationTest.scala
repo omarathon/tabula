@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.groups.notifications
 
+import uk.ac.warwick.tabula.data.model.notifications.groups.{SmallGroupSetChangedTutorNotification, SmallGroupSetChangedStudentNotification, SmallGroupSetChangedNotification}
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.groups.SmallGroupFixture
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.groups.web.Routes
-import uk.ac.warwick.tabula.data.model.notifications.{SmallGroupSetChangedTutorNotification, SmallGroupSetChangedStudentNotification, SmallGroupSetChangedNotification}
 import uk.ac.warwick.tabula.data.model.Notification
 
 class SmallGroupSetChangedNotificationTest extends TestBase with Mockito {
@@ -39,7 +39,7 @@ class SmallGroupSetChangedNotificationTest extends TestBase with Mockito {
   @Test
   def titleIsHardcoded(){new SmallGroupFixture {
     val n =  createStudentNotification(groupSet1, actor, recipient)
-    n.title should be("Changes to small group allocation")
+    n.title should be("LA101: Your lab allocation has changed")
   }}
 
   @Test

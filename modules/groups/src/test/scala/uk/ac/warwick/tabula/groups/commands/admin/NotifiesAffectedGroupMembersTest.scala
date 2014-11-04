@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
+import uk.ac.warwick.tabula.data.model.notifications.groups.SmallGroupSetChangedNotification
 import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
@@ -8,7 +9,6 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.tabula.data.model.notifications.SmallGroupSetChangedNotification
 
 
 class NotifiesAffectedGroupMembersTest extends TestBase {

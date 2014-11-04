@@ -5,6 +5,8 @@ import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
 sealed abstract class SmallGroupFormat(val code: String, val description: String) {
+	def plural = description + "s"
+
 	// For Spring, the silly bum
 	def getCode = code
 	def getDescription = description
@@ -17,7 +19,7 @@ object SmallGroupFormat {
 	case object Lab extends SmallGroupFormat("lab", "Lab")
 	case object Tutorial extends SmallGroupFormat("tutorial", "Tutorial")
 	case object Project extends SmallGroupFormat("project", "Project group")
-	case object Example extends SmallGroupFormat("example", "Example Class")
+	case object Example extends SmallGroupFormat("example", "Example Class") { override def plural = "Example Classes" }
 	case object Workshop extends SmallGroupFormat("workshop", "Workshop")
 	case object Lecture extends SmallGroupFormat("lecture", "Lecture")
 	case object Meeting extends SmallGroupFormat("meeting", "Meeting")

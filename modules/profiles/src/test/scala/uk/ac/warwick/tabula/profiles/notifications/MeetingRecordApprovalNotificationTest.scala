@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.notifications
 
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.NewMeetingRecordApprovalNotification
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.NewMeetingRecordApprovalNotification
 import uk.ac.warwick.tabula.data.model.{Notification, MeetingRecord, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.services.ProfileService

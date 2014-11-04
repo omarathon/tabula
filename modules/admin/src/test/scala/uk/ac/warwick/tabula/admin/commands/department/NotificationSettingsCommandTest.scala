@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.admin.commands.department
 
 import uk.ac.warwick.tabula.commands.{Appliable, Description}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.notifications.groups.SmallGroupEventAttendanceReminderNotificationSettings
+import uk.ac.warwick.tabula.data.model.notifications.groups.reminders.SmallGroupEventAttendanceReminderNotificationSettings
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking

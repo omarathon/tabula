@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import uk.ac.warwick.tabula.commands.{Notifies, Command, Description, ReadOnly}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.SubmissionReceiptNotification
 import uk.ac.warwick.tabula.data.model.{Notification, Submission, Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.tabula.permissions._
 import language.implicitConversions
-import uk.ac.warwick.tabula.data.model.notifications.SubmissionReceiptNotification
 
 /**
  * Send an email confirming the receipt of a submission to the student

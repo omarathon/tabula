@@ -6,8 +6,8 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.tabula.data.model.StudentRelationship
+import uk.ac.warwick.tabula.data.model.notifications.profiles.{StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToStudentNotification}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.notifications.{StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToStudentNotification}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MemberDao
 

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
 
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.Transactions._
@@ -9,7 +10,6 @@ import uk.ac.warwick.tabula.commands.{Notifies, Description, UploadedFile}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.notifications.FeedbackChangeNotification
 
 class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
 	extends UploadFeedbackCommand[Seq[Feedback]](module, assignment, submitter) with Notifies[Seq[Feedback], Feedback] {
