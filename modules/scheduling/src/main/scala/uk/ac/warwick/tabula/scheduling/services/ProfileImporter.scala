@@ -169,6 +169,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			"level_code" -> ((member.universityId.toLong % 3) + 1).toString,
 			"spr_tutor1" -> null,
 			"scj_tutor1" -> null,
+			"scj_transfer_reason_code" -> null,
 			"scj_code" -> "%s/1".format(member.universityId),
 			"begin_date" -> member.startDate.toDateTimeAtStartOfDay(),
 			"end_date" -> member.endDate.toDateTimeAtStartOfDay(),
@@ -368,6 +369,7 @@ object ProfileImporter extends Logging {
 			scj.scj_udfa as most_signif_indicator,
 			scj.scj_stac as scj_status_code,
 	 		scj.scj_prsc as scj_tutor1,
+			scj.scj_rftc as scj_transfer_reason_code,
 
 			sce.sce_sfcc as funding_source,
 			sce.sce_stac as enrolment_status_code,
