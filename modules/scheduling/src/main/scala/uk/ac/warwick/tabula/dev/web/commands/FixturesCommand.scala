@@ -79,7 +79,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		val upstreamAssignment = new AssessmentComponent
 		upstreamAssignment.assessmentGroup = "A"
 		upstreamAssignment.sequence = "A"
-		upstreamAssignment.moduleCode = "XXX101-30"
+		upstreamAssignment.moduleCode = "XXX01-30"
 		upstreamAssignment.module = module1
 		upstreamAssignment.name = "Assignment from SITS"
 		upstreamAssignment.assessmentType = AssessmentType.Assignment
@@ -87,7 +87,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 		val upstreamAssessmentGroup = new UpstreamAssessmentGroup
 		upstreamAssessmentGroup.academicYear = new AcademicYear(new DateTime().getYear)
-		upstreamAssessmentGroup.moduleCode = "XXX101-30"
+		upstreamAssessmentGroup.moduleCode = "XXX01-30"
 		upstreamAssessmentGroup.assessmentGroup = "A"
 		upstreamAssessmentGroup.occurrence = "A"
 		session.save(upstreamAssessmentGroup)
@@ -291,10 +291,10 @@ object Fixtures {
 	val TestSubDepartment = DepartmentInfo("Test Services - Undergraduates", "xxx-ug", null,Some("xxx"),Some("UG"))
 	val TestSubSubDepartment = DepartmentInfo("Test Services - Freshers", "xxx-ug1", null,Some("xxx-ug"),Some("UG,Y1"))
 
-	val TestModule1 = ModuleInfo("Test Module 1", "xxx101", "xxx-xxx101")
-	val TestModule2 = ModuleInfo("Test Module 2", "xxx102", "xxx-xxx102")
-	val TestModule3 = ModuleInfo("Test Module 3", "xxx103", "xxx-xxx103")
-	val TestModule4 = ModuleInfo("Test Module 3","xxx-ug-104","xxx-ug-xxx-ug-104")
+	val TestModule1 = ModuleInfo("Test Module 1", "xxx01", "xxx-xxx01")
+	val TestModule2 = ModuleInfo("Test Module 2", "xxx02", "xxx-xxx02")
+	val TestModule3 = ModuleInfo("Test Module 3", "xxx03", "xxx-xxx03")
+	val TestModule4 = ModuleInfo("Test Module 3","xxx04","xxx-ug-xxx-ug-104")
 
 
 	val TestAdmin1 = "tabula-functest-admin1"

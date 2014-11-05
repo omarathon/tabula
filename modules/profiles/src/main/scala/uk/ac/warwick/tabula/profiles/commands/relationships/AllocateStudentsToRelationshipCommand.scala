@@ -303,7 +303,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	}
 
 	def extractDataFromFile(file: FileAttachment, result: BindingResult) = {
-		val allocations = relationshipExtractor.readXSSFExcelFile(file.dataStream, relationshipType, Some(department))
+		val allocations = relationshipExtractor.readXSSFExcelFile(file.dataStream, relationshipType, department)
 
 		// Put any errors into the BindingResult
 		allocations.foreach { case (row, _, errors) =>

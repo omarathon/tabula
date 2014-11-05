@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.admin.web.Routes
 import uk.ac.warwick.tabula.data.model.{Route, Department}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.BaseController
 import javax.validation.Valid
 import uk.ac.warwick.tabula.admin.web.controllers.AdminController
 import uk.ac.warwick.tabula.admin.commands.routes.{SortRoutesCommandState, SortRoutesCommand}
@@ -38,7 +37,7 @@ class SortRoutesController extends AdminController {
 	@RequestMapping(method=Array(POST))
 	def submit(@Valid @ModelAttribute("sortRoutesCommand") cmd: SortRoutesCommand, errors: Errors): Mav = {
 		cmd.sort()
-		if (errors.hasErrors()) {
+		if (errors.hasErrors) {
 			form(cmd)
 		} else {
 			cmd.apply()
@@ -47,8 +46,8 @@ class SortRoutesController extends AdminController {
 	}
 		
 	private def form(@ModelAttribute("sortRoutesCommand") cmd: SortRoutesCommand): Mav = {
-		if (cmd.department.hasParent) {
-			// Sorting is done from the POV of the top department.
+		if (!cmd.department.hasChildren && cmd.department.hasParent) {
+			// Sorting is done from the POV of the parent department.
 			Redirect(Routes.department.sortRoutes(cmd.department.parent))
 		} else {
 			Mav("admin/routes/arrange/form")

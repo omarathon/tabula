@@ -161,7 +161,20 @@
 	
 <#elseif !submission??>
 
-	<#if !assignment.collectSubmissions>
+	<#if assignment.archived>
+		<p>
+			This assignment is no longer collecting submissions through Tabula because it has been archived.
+		</p>
+
+		<h3>Expecting your feedback?</h3>
+
+		<p>
+			Sorry, but there doesn't seem to be anything here for you.
+			If you've been told to come here to retrieve your feedback
+			or submit your assignment then you'll need to get in touch directly with your
+			course/module convenor as the assignment has now been archived.
+		</p>
+	<#elseif !assignment.collectSubmissions>
 		<p>
 			This assignment isn't collecting submissions through this system, but you may get
 			an email to retrieve your feedback from here.
@@ -176,28 +189,14 @@
 			course/module convenor to see why it hasn't been published yet. 
 			When it's published you'll receive an automated email.
 		</p>
-		
+	<#elseif !assignment.opened>
+		<p>This assignment isn't open yet - it will open <@fmt.date date=assignment.openDate at=true />.</p>
 	<#elseif assignment.closed && !isExtended>
 		<div class="alert alert-warning">
 			<h3>Submission date has passed</h3>
 			
 			This assignment doesn't allow late submissions.
 		</div>
-	<#elseif !assignment.opened>
-		<p>This assignment isn't open yet - it will open <@fmt.date date=assignment.openDate at=true />.</p>
-	<#elseif assignment.archived>
-		<p>
-			This assignment is no longer collecting submissions through Tabula because it has been archived.
-		</p>
-		
-		<h3>Expecting your feedback?</h3>
-		
-		<p>
-			Sorry, but there doesn't seem to be anything here for you. 
-			If you've been told to come here to retrieve your feedback 
-			or submit your assignment then you'll need to get in touch directly with your 
-			course/module convenor as the assignment has now been archived.
-		</p>
 	</#if>
 	
 </#if>

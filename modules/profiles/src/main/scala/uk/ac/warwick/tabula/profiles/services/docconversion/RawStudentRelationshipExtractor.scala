@@ -1,28 +1,14 @@
 package uk.ac.warwick.tabula.profiles.services.docconversion
 
-import java.io.ByteArrayInputStream
-import scala.collection.JavaConverters._
-import org.apache.poi.openxml4j.opc.OPCPackage
-import org.apache.poi.xssf.eventusermodel.XSSFReader
-import org.apache.poi.xssf.model.SharedStringsTable
-import org.springframework.stereotype.Service
-import org.xml.sax.InputSource
-import org.xml.sax.helpers.XMLReaderFactory
-import uk.ac.warwick.tabula.JavaImports._
-import java.io.FileInputStream
 import java.io.InputStream
-import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable
-import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
-import org.apache.poi.xssf.model.StylesTable
-import uk.ac.warwick.tabula.helpers.Logging
-import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler
-import org.apache.poi.ss.util.CellReference
-import uk.ac.warwick.tabula.data.model.{Department, Member, StudentMember, StudentRelationshipType}
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.UniversityId
-import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
-import uk.ac.warwick.tabula.services.ProfileService
+
+import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.UniversityId
+import uk.ac.warwick.tabula.data.model.{Department, Member, StudentMember, StudentRelationshipType}
+import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.ProfileService
 
 object RawStudentRelationshipExtractor {
 	type RowData = Map[String, String]
@@ -35,18 +21,18 @@ object RawStudentRelationshipExtractor {
 }
 
 class RawStudentRelationshipRow(relationshipType: StudentRelationshipType, val rowData: Map[String, String]) {
-	import RawStudentRelationshipExtractor._
+	import uk.ac.warwick.tabula.profiles.services.docconversion.RawStudentRelationshipExtractor._
 
 	var profileService = Wire[ProfileService]
 
-	def extractStudent(department: Option[Department]): (Option[StudentMember], Option[ErrorCode]) = {
-		def validateCourseDetails(student: StudentMember): Option[ErrorCode] = {
+	def extractStudent(department: Department): (Option[StudentMember], Option[ErrorCode]) = {
+		def validateCourseAndDepartmentDetails(student: StudentMember): Option[ErrorCode] = {
 			student.mostSignificantCourseDetails match {
 				case Some(scd) if scd.department == null =>
 					Some("student_id" -> "profiles.relationship.allocate.student.noDepartment")
-				case Some(scd) if department.isDefined && scd.department != department.get =>
+				case Some(scd) if !student.affiliatedDepartments.contains(department) =>
 					Some("student_id" -> "profiles.relationship.allocate.student.wrongDepartment")
-				case Some(scd) if relationshipType.readOnly(scd.department) =>
+				case Some(scd) if relationshipType.readOnly(scd.department) || relationshipType.readOnly(department) =>
 					Some("student_id" -> "profiles.relationship.allocate.student.readOnlyDepartment")
 				case Some(scd) => None
 				case None => Some("student_id" -> "profiles.relationship.allocate.student.noCourseDetails")
@@ -59,7 +45,7 @@ class RawStudentRelationshipRow(relationshipType: StudentRelationshipType, val r
 
 				profileService.getMemberByUniversityId(studentId) match {
 					case Some(student: StudentMember) =>
-						(Some(student), validateCourseDetails(student))
+						(Some(student), validateCourseAndDepartmentDetails(student))
 
 					case Some(member) => // non-student member
 						(None, Some("student_id" -> "profiles.relationship.allocate.universityId.notStudent"))
@@ -90,12 +76,12 @@ class RawStudentRelationshipRow(relationshipType: StudentRelationshipType, val r
 
 @Service
 class RawStudentRelationshipExtractor {
-	import RawStudentRelationshipExtractor._
+	import uk.ac.warwick.tabula.profiles.services.docconversion.RawStudentRelationshipExtractor._
 
 	/**
 	 * Method for reading in a xlsx spreadsheet and converting it into a list of relationships
 	 */
-	def readXSSFExcelFile(file: InputStream, relationshipType: StudentRelationshipType, department: Option[Department]): Seq[ParsedRow] =
+	def readXSSFExcelFile(file: InputStream, relationshipType: StudentRelationshipType, department: Department): Seq[ParsedRow] =
 		SpreadsheetHelpers.parseXSSFExcelFile(file)
 			.map { rowData => new RawStudentRelationshipRow(relationshipType, rowData) }
 			.filter { _.isValid } // Ignore blank rows

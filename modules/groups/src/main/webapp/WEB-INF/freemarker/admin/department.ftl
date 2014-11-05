@@ -99,7 +99,7 @@
 					<li class="divider"></li>
 
 					<li<#if !hasGroupAttendance> class="disabled"</#if>>
-						<a href="<@routes.departmentAttendance department />"><i class="icon-group icon-fixed-width"></i> View attendance</a>
+						<a href="<@routes.departmentAttendance department adminCommand.academicYear />"><i class="icon-group icon-fixed-width"></i> View attendance</a>
 					</li>
 				</ul>
 			</div>

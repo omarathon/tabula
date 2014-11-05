@@ -1,44 +1,31 @@
 package uk.ac.warwick.tabula.services.permissions
 
 import org.springframework.stereotype.Component
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType, StudentMember}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.roles.Role
-import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.roles.StudentRelationshipAgent
-import uk.ac.warwick.tabula.roles.StudentRelationshipAgentRoleDefinition
+import uk.ac.warwick.tabula.roles._
+import uk.ac.warwick.tabula.services.{RelationshipServiceComponent, AutowiringRelationshipServiceComponent}
 
 @Component
-class StudentRelationshipAgentRoleProvider extends RoleProvider {
+class StudentRelationshipAgentRoleProvider extends RoleProvider
+	with AutowiringRelationshipServiceComponent
+	with CustomRolesForAdminDepartments {
 
-	var relationshipService = Wire[RelationshipService]
 
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = scope match {
-		case member: model.Member =>
+		case student: StudentMember =>
 			relationshipService
-				.listAllStudentRelationshipsWithUniversityId(user.universityId)
+				// lists all of the tutors current relationships to this student (expired relationships and withdrawn students ignored)
+				.getCurrentRelationships(student, user.apparentUser.getWarwickId)
 				.toStream
-				.filter { _.studentId == member.universityId }
-				.flatMap { rel => rel.studentMember.map { student => (rel.relationshipType, student) } }
+				.filterNot(_.explicitlyTerminated)
+				// gather all of the distinct relationship types
+				.map { rel => rel.relationshipType }
 				.distinct
-				.map { case (relationshipType, student) => 
-					/*
-					 * Check the student department for custom roles only, not the agent department,
-					 * as that's what we're performing operations on.
-					 */
-					val studentDepartment = 
-						student.mostSignificantCourseDetails
-							.toSeq
-							.flatMap { scd =>
-								Option(scd.latestStudentCourseYearDetails.enrolmentDepartment).toSeq ++ Option(scd.route).flatMap { r => Option(r.adminDepartment) }.toSeq
-							}
-
-					studentDepartment
-						.flatMap { customRoleFor(_)(StudentRelationshipAgentRoleDefinition(relationshipType), member) }
-						.headOption
-						.getOrElse { StudentRelationshipAgent(member, relationshipType) }
+				.map { relationshipType =>
+					val custom = customRoles(student, relationshipType, StudentRelationshipAgentRoleDefinition(relationshipType))
+					custom.headOption.getOrElse { StudentRelationshipAgent(student, relationshipType) }
 				}
 
 		// We don't need to check for the StudentRelationshipAgent role on any other scopes
@@ -46,5 +33,52 @@ class StudentRelationshipAgentRoleProvider extends RoleProvider {
 	}
 
 	def rolesProvided = Set(classOf[StudentRelationshipAgent])
-	
+
+}
+
+@Component
+class HistoricStudentRelationshipAgentRoleProvider extends RoleProvider
+	with AutowiringRelationshipServiceComponent
+	with CustomRolesForAdminDepartments {
+
+	override def getRolesFor(user: CurrentUser, scope: PermissionsTarget) : Stream[Role] = scope match {
+		case student: StudentMember =>
+			relationshipService
+				.getAllPastAndPresentRelationships(student)
+				.toStream
+				.filterNot(_.explicitlyTerminated)
+				.filter(_.agent == user.apparentUser.getWarwickId)
+				.map(_.relationshipType).distinct
+				.map(relType => {
+				// for each type of relationship return the first department override we find or the inbuild role
+				val custom = customRoles(student, relType, HistoricStudentRelationshipAgentRoleDefinition(relType))
+				custom.headOption.getOrElse(HistoricStudentRelationshipAgent(student, relType))
+			})
+
+		// Member is the only valid scope for this Role
+		case _ => Stream.empty
+	}
+
+	override def rolesProvided = Set(classOf[HistoricStudentRelationshipAgent])
+
+}
+
+trait CustomRolesForAdminDepartments {
+
+	this : RoleProvider with RelationshipServiceComponent =>
+
+	// departments to check for custom roles
+	private def studentsAdminDepartments(student: StudentMember): Seq[Department] = {
+		student.mostSignificantCourseDetails.map(scd => {
+			Option(scd.latestStudentCourseYearDetails.enrolmentDepartment).toSeq ++
+			Option(scd.route).flatMap { r => Option(r.adminDepartment)}.toSeq
+		}).getOrElse(Nil)
+	}
+
+	// returns department overrides for the specified definition for all of the students admin departments
+	def customRoles(student: StudentMember, relType: StudentRelationshipType, definition: RoleDefinition) = for {
+		department <- studentsAdminDepartments(student)
+		customRole <- customRoleFor(department)(definition, student)
+	} yield customRole
+
 }

@@ -25,7 +25,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 		findAll(className("module-info")).size should be (3)
 
 		Then("I should be able to click on the Manage button")
-		val modInfo = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == "XXX101").next.underlying
+		val modInfo = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == "XXX01").next.underlying
 		click on (modInfo.findElement(By.partialLinkText("Manage")))
 
 		And("I should see the permissions menu option")
@@ -102,14 +102,14 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 	}
 
 	"Department admin" should "be able to add module managers" in {
-		withRoleInElement("xxx101", ".modulemanager-table", Seq(P.ModuleManager1.usercode, P.ModuleManager2.usercode)) {
+		withRoleInElement("xxx01", ".modulemanager-table", Seq(P.ModuleManager1.usercode, P.ModuleManager2.usercode)) {
 			// Nothing to do, the with() tests enough
 		}
 	}
 
 	"Department admin" should "be able to remove a module manager" in {
 		implicit val currentElement = ".modulemanager-table"
-		withRoleInElement("xxx101", currentElement, Seq(P.ModuleManager1.usercode, P.ModuleManager2.usercode)) {
+		withRoleInElement("xxx01", currentElement, Seq(P.ModuleManager1.usercode, P.ModuleManager2.usercode)) {
 
 			When("I should see at least one user that I can remove")
 			changedUsers
@@ -131,7 +131,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 	}
 
 	"Module manager" should "be able to see only modules they can manage" in {
-		withRoleInElement("xxx101", ".modulemanager-table", Seq(P.ModuleManager1.usercode, P.ModuleManager2.usercode)) {
+		withRoleInElement("xxx01", ".modulemanager-table", Seq(P.ModuleManager1.usercode, P.ModuleManager2.usercode)) {
 			as(P.ModuleManager1) {
 				When("I go to the admin page")
 				click on linkText("Go to the Test Services admin page")
@@ -140,7 +140,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 				findAll(className("module-info")).size should be (1)
 
 				When("I click on the Manage button")
-				val modInfo = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == "XXX101").next.underlying
+				val modInfo = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == "XXX01").next.underlying
 				click on (modInfo.findElement(By.partialLinkText("Manage")))
 
 				Then("I should see the permissions menu option")
@@ -154,14 +154,14 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 
 
 	"Module manager" should "be able to add module assistants" in {
-		withRoleInElement("xxx101", ".moduleassistant-table", Seq(P.Marker1.usercode, P.Marker2.usercode)) {
+		withRoleInElement("xxx01", ".moduleassistant-table", Seq(P.Marker1.usercode, P.Marker2.usercode)) {
 			// Nothing to do, the with() tests enough
 		}
 	}
 
 	"Module manager" should "be able to remove a module assistant" in {
 		implicit val currentElement = ".moduleassistant-table"
-		withRoleInElement("xxx101", currentElement, Seq(P.Marker1.usercode, P.Marker2.usercode)) {
+		withRoleInElement("xxx01", currentElement, Seq(P.Marker1.usercode, P.Marker2.usercode)) {
 
 			When("I should see at least one user that I can remove")
 			changedUsers

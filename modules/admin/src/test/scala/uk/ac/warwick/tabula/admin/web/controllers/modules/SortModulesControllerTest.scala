@@ -11,7 +11,7 @@ class SortModulesControllerTest extends TestBase with Mockito {
 
 	val controller = new SortModulesController
 
-	@Test def createsCommand {
+	@Test def createsCommand() {
 		val department = Fixtures.department("in")
 
 		val command = controller.command(department)
@@ -19,7 +19,7 @@ class SortModulesControllerTest extends TestBase with Mockito {
 		command should be (anInstanceOf[Appliable[Unit]])
 	}
 
-	@Test(expected = classOf[ItemNotFoundException]) def requiresDepartment {
+	@Test(expected = classOf[ItemNotFoundException]) def requiresDepartment() {
 		controller.command(null)
 	}
 
@@ -35,15 +35,13 @@ class SortModulesControllerTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val department = Fixtures.department("in")
+		val subDepartment = Fixtures.department("in-ug")
+		department.children.add(subDepartment)
+		subDepartment.parent = department
+	}
+
+	@Test def formOnParent() { new Fixture {
 		val command = new CountingCommand(department)
-	}
-
-	trait ParentFixture extends Fixture {
-		val parent = Fixtures.department("in-parent")
-		department.parent = parent
-	}
-
-	@Test def form { new Fixture {
 		val mav = controller.showForm(command)
 		mav.viewName should be ("admin/modules/arrange/form")
 		mav.toModel should be ('empty)
@@ -53,9 +51,10 @@ class SortModulesControllerTest extends TestBase with Mockito {
 		command.applyCount should be (0)
 	}}
 
-	@Test def formWithParent { new ParentFixture {
+	@Test def formOnChild() { new Fixture {
+		val command = new CountingCommand(subDepartment)
 		val mav = controller.showForm(command)
-		mav.viewName should be (s"redirect:${Routes.department.sortModules(parent)}")
+		mav.viewName should be (s"redirect:${Routes.department.sortModules(department)}")
 		mav.toModel should be ('empty)
 
 		command.populateCount should be (1)
@@ -63,7 +62,19 @@ class SortModulesControllerTest extends TestBase with Mockito {
 		command.applyCount should be (0)
 	}}
 
-	@Test def submit { new Fixture {
+	@Test def formOnLoneDepartment() { new Fixture {
+		val command = new CountingCommand(Fixtures.department("xx"))
+		val mav = controller.showForm(command)
+		mav.viewName should be ("admin/modules/arrange/form")
+		mav.toModel should be ('empty)
+
+		command.populateCount should be (1)
+		command.sortCount should be (1)
+		command.applyCount should be (0)
+	}}
+
+	@Test def submitParent() { new Fixture {
+		val command = new CountingCommand(department)
 		val errors = new BindException(command, "command")
 
 		val mav = controller.submit(command, errors)
@@ -75,7 +86,8 @@ class SortModulesControllerTest extends TestBase with Mockito {
 		command.applyCount should be (1)
 	}}
 
-	@Test def submitValidationErrors { new Fixture {
+	@Test def submitValidationErrors() { new Fixture {
+		val command = new CountingCommand(department)
 		val errors = new BindException(command, "command")
 		errors.reject("fail")
 

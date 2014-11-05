@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Member, Module}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventOccurrence, SmallGroupEvent, SmallGroupSet}
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
@@ -91,6 +91,9 @@ trait SearchStudentsInSmallGroupSetPermissions extends RequiresPermissionsChecki
 	self: SearchStudentsInSmallGroupSetCommandState =>
 	def permissionsCheck(p: PermissionsChecking) {
 		mustBeLinked(mandatory(set), mandatory(module))
-		p.PermissionCheck(Permissions.SmallGroupEvents.ViewRegister, mandatory(set))
+		p.PermissionCheckAny(
+			Seq(CheckablePermission(Permissions.SmallGroupEvents.ViewRegister, mandatory(set))) ++
+				mandatory(set).groups.asScala.map{group => CheckablePermission(Permissions.SmallGroupEvents.ViewRegister, group)}
+		)
 	}
 }

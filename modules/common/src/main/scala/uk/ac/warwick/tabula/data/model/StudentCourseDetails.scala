@@ -64,7 +64,7 @@ class StudentCourseDetails
 	@BatchSize(size=200)
 	private val _moduleRegistrations: JSet[ModuleRegistration] = JHashSet()
 
-	def moduleRegistrations = _moduleRegistrations.asScala.toSeq.sortBy { reg => (reg.module.code) }
+	def moduleRegistrations = _moduleRegistrations.asScala.toSeq.sortBy { reg => reg.module.code }
 	def addModuleRegistration(moduleRegistration: ModuleRegistration) = _moduleRegistrations.add(moduleRegistration)
 	def removeModuleRegistration(moduleRegistration: ModuleRegistration) = _moduleRegistrations.remove(moduleRegistration)
 	def clearModuleRegistrations() = _moduleRegistrations.clear()
@@ -74,7 +74,7 @@ class StudentCourseDetails
 	def moduleRegistrationsByYear(year: Option[AcademicYear]): Seq[ModuleRegistration] =
 		moduleRegistrations.collect {
 			case modReg if year.isEmpty => modReg
-			case modReg if modReg.academicYear == year.getOrElse(null) => modReg
+			case modReg if modReg.academicYear == year.orNull => modReg
 		}
 
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
@@ -86,7 +86,7 @@ class StudentCourseDetails
 	def accreditedPriorLearningByYear(year: Option[AcademicYear]): Seq[AccreditedPriorLearning] =
 		accreditedPriorLearning.collect {
 			case apl if year.isEmpty => apl
-			case apl if apl.academicYear == year.getOrElse(null) => apl
+			case apl if apl.academicYear == year.orNull => apl
 		}
 
 	def toStringProps = Seq(
@@ -96,9 +96,7 @@ class StudentCourseDetails
 	def permissionsParents = Stream(Option(student), Option(route)).flatten.append(moduleRegistrations.map(_.module).toStream)
 
 	def hasCurrentEnrolment: Boolean = {
-		Option(latestStudentCourseYearDetails).map { scyd =>
-			!scyd.enrolmentStatus.code.startsWith("P")
-		}.getOrElse(false)
+		Option(latestStudentCourseYearDetails).exists(scyd => !scyd.enrolmentStatus.code.startsWith("P"))
 	}
 
 	// The reason this method isn't on SitsStatus is that P* can have a meaning other than
@@ -128,7 +126,7 @@ class StudentCourseDetails
 	def relationships(relationshipType: StudentRelationshipType) =
 		relationshipService.findCurrentRelationships(relationshipType, this)
 
-	def hasRelationship(relationshipType: StudentRelationshipType) = !relationships(relationshipType).isEmpty
+	def hasRelationship(relationshipType: StudentRelationshipType) = relationships(relationshipType).nonEmpty
 
 	def compare(that:StudentCourseDetails): Int = {
 		this.scjCode.compare(that.scjCode)
@@ -143,7 +141,7 @@ class StudentCourseDetails
 		latestStudentCourseYearDetails = freshStudentCourseYearDetails.max
 	}
 
-	def isFresh = (missingFromImportSince == null)
+	def isFresh = missingFromImportSince == null
 
 	// use these methods ONLY for tests, as they don't automagically update latestStudentCourseYearDetails
 	def addStudentCourseYearDetails(scyd: StudentCourseYearDetails) = studentCourseYearDetails.add(scyd)
@@ -176,7 +174,9 @@ class StudentCourseDetails
 		}
 	}
 
-	def hasAccreditedPriorLearning = !accreditedPriorLearning.isEmpty
+	def hasAccreditedPriorLearning = accreditedPriorLearning.nonEmpty
+
+	def isEnded = endDate != null && endDate.isBefore(DateTime.now.toLocalDate)
 
 }
 
