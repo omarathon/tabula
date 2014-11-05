@@ -57,17 +57,17 @@
 
 										<tbody>
 											<#list students as studentRelationship>
-												<#assign student = studentRelationship.studentMember />
+												<#assign studentCourseDetails = studentRelationship.studentCourseDetails />
 												<tr class="student">
-													<td><h6>${student.firstName}</h6></td>
-													<td><h6>${student.lastName}</h6></td>
-													<td><a class="profile-link" href="<@routes.profile student />">${student.universityId}</a></td>
-													<td>${student.groupName!""}</td>
+													<td><h6>${studentCourseDetails.student.firstName}</h6></td>
+													<td><h6>${studentCourseDetails.student.lastName}</h6></td>
+													<td><a class="profile-link" href="/profiles/view/course/${studentCourseDetails.urlSafeId}">${studentCourseDetails.student.universityId}</a></td>
+													<td>${studentCourseDetails.student.groupName!""}</td>
 													<td>
-														${(student.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}
+														${(studentCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}
 													</td>
 													<td>
-														${(student.mostSignificantCourseDetails.route.name)!""}
+														${(studentCourseDetails.course.name)!""}
 													</td>
 												</tr>
 											</#list>
