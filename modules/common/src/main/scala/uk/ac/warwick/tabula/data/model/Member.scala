@@ -499,8 +499,11 @@ trait MemberProperties extends StringId {
 	@Restricted(Array("Profiles.Read.MobileNumber"))
 	var mobileNumber: String = _
 
+	@Restricted(Array("Profiles.Read.TimetablePrivateFeed"))
 	@Column(name = "timetable_hash")
 	var timetableHash: String = _
+
+	var deceased: Boolean = _
 
 	def phoneNumberPermissions: Seq[Permission]
 	def photoOptOut: Boolean

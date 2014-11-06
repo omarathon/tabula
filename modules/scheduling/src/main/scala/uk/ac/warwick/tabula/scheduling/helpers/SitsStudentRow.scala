@@ -17,6 +17,10 @@ class SitsStudentRow(val rs: ResultSet)
 		with HasResultSet {
 
 	val disabilityCode = rs.getString("disability")
+	val deceased = rs.getString("mst_type") match {
+		case "D" | "d" => true
+		case _ => false
+	}
 }
 
 // this trait holds data from the result set which will be used by ImportStudentCourseCommand to create
