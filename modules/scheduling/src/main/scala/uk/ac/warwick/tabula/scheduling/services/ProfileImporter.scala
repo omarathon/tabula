@@ -183,7 +183,8 @@ class SandboxProfileImporter extends ProfileImporter {
 			"sce_sequence_number" -> 1,
 			"enrolment_department_code" -> member.departmentCode.toUpperCase,
 			"mod_reg_status" -> "CON",
-			"disability" -> "A"
+			"disability" -> "A",
+			"mst_type" -> "L"
 		))
 		ImportStudentRowCommand(
 			mac,
@@ -379,12 +380,14 @@ object ProfileImporter extends Logging {
 			sce.sce_seq2 as sce_sequence_number,
 			sce.sce_dptc as enrolment_department_code,
 
-			ssn.ssn_mrgs as mod_reg_status
+			ssn.ssn_mrgs as mod_reg_status,
+
+			mst.mst_type as mst_type
 
 		from $sitsSchema.ins_stu stu
 
 			join $sitsSchema.ins_spr spr
-				on stu.stu_code = spr_stuc
+				on stu.stu_code = spr.spr_stuc
 
 			join $sitsSchema.srs_scj scj
 				on spr.spr_code = scj.scj_sprc
@@ -399,6 +402,15 @@ object ProfileImporter extends Logging {
 								where sce.sce_scjc = sce2.sce_scjc
 								and sce2.sce_ayrc = sce.sce_ayrc
 					)
+
+			join $sitsSchema.srs_mst mst
+	 			on stu.stu_code = mst.mst_adid
+		 		and mst.mst_code =
+		 			(
+						select max(mst2.mst_code)
+							from $sitsSchema.srs_mst mst2
+			 					where mst.mst_adid = mst2.mst_adid
+	 				)
 
 			left outer join $sitsSchema.srs_crs crs
 				on sce.sce_crsc = crs.crs_code

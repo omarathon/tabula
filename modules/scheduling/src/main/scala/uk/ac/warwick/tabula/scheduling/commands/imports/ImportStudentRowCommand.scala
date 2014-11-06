@@ -50,6 +50,7 @@ class ImportStudentRowCommandInternal(
 	this.mobileNumber = resultSet.getString("mobile_number")
 
 	val row = new SitsStudentRow(resultSet)
+	this.deceased = row.deceased
 
 	override def applyInternal(): Member = {
 		transactional() {
@@ -107,7 +108,7 @@ class ImportStudentRowCommandInternal(
 	}
 
 	private val basicStudentProperties = Set(
-		"nationality", "mobileNumber", "disability"
+		"nationality", "mobileNumber", "disability", "deceased"
 	)
 
 	private def copyStudentProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
