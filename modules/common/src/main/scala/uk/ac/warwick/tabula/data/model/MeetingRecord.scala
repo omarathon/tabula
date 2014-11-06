@@ -1,12 +1,18 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence._
 import javax.persistence.CascadeType._
+import javax.persistence._
+
 import org.hibernate.annotations.BatchSize
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
-import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType, EventOccurrence}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.SecurityService
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
+
+import scala.collection.JavaConverters._
 
 object MeetingRecord {
 	val DefaultMeetingTimeOfDay = 12 // Should be used for legacy meetings (where isRealTime is false)
@@ -24,6 +30,9 @@ class MeetingRecord extends AbstractMeetingRecord {
 		this.creator = creator
 		this.relationship = relationship
 	}
+
+	@transient
+	var securityService = Wire[SecurityService]
 
 	@Column(name="real_time")
 	var isRealTime: Boolean = true
@@ -43,7 +52,7 @@ class MeetingRecord extends AbstractMeetingRecord {
 	var approvals: JList[MeetingRecordApproval] = JArrayList()
 
 	// true if the specified user needs to perform a workflow action on this meeting record
-	def pendingActionBy(member: Member): Boolean = pendingApprovalBy(member) || pendingRevisionBy(member)
+	def pendingActionBy(user: CurrentUser): Boolean = pendingApprovalBy(user) || pendingRevisionBy(user)
 
 	// if there are no approvals with a state of approved return true - otherwise, all approvals need to be true
 	def isApproved = !approvals.asScala.exists(approval => !(approval.state == Approved))
@@ -53,14 +62,19 @@ class MeetingRecord extends AbstractMeetingRecord {
 
 	def isPendingApproval = approvals.asScala.exists(approval => approval.state == Pending)
 	def pendingApprovals = approvals.asScala.filter(_.state == Pending)
-	def pendingApprovalBy(member: Member): Boolean = pendingApprovals.exists(_.approver == member)
+	def pendingApprovalBy(user: CurrentUser): Boolean =
+		isPendingApproval && (
+			securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, this) ||
+				securityService.can(user, Permissions.Profiles.MeetingRecord.ApproveAny, this)
+			)
+
 	def pendingApprovers:List[Member] = pendingApprovals.map(_.approver).toList
 
 	def isRejected =  approvals.asScala.exists(approval => approval.state == Rejected)
 	def rejectedApprovals = approvals.asScala.filter(_.state == Rejected)
 	def rejectedBy(member: Member): Boolean = rejectedApprovals.exists(_.approver == member)
 	// people who have had a draft version rejected
-	def pendingRevisionBy(member: Member) = isRejected && member == creator
+	def pendingRevisionBy(user: CurrentUser) = isRejected && user.universityId == creator.universityId
 
 	// End of workflow definitions
 }

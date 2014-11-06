@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import org.joda.time.DateTimeConstants
-import uk.ac.warwick.tabula.services.{ScheduledNotificationService, NotificationService, MaintenanceModeService, ProfileService}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{PersistenceTestBase, Mockito, CurrentUser}
 import org.junit.Before
@@ -26,6 +26,7 @@ trait MeetingRecordTests extends PersistenceTestBase with Mockito {
 	maintenanceModeService.enabled returns false
 	val notificationService = smartMock[NotificationService]
 	val scheduledNotificationService = smartMock[ScheduledNotificationService]
+	val securityService = smartMock[SecurityService]
 	val mockSession = smartMock[Session]
 
 	var student:StudentMember = _
@@ -65,6 +66,7 @@ trait MeetingRecordTests extends PersistenceTestBase with Mockito {
 			mr.format = FaceToFace
 			mr.meetingDate = aprilFool
 			mr.description = "Lovely words"
+			mr.securityService = securityService
 
 			val approval = new MeetingRecordApproval
 			approval.approver = relationship.studentMember.get

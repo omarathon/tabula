@@ -4,7 +4,7 @@
 	<#local can_read_meetings = can.do_with_selector("Profiles.MeetingRecord.Read", studentCourseDetails, relationshipType) />
 	<#local can_create_meetings = can.do_with_selector("Profiles.MeetingRecord.Create", studentCourseDetails, relationshipType) />
 	<#local existingRelationship = ((studentCourseDetails.relationships(relationshipType))![])?size gt 0 />
-	<#local is_student = ((viewer.universityId)!"")?length gt 0 && viewer.universityId == (studentCourseDetails.student.universityId)!"" />
+	<#local is_student = ((viewerUser.universityId)!"")?length gt 0 && viewerUser.universityId == (studentCourseDetails.student.universityId)!"" />
 
 	<#local student_can_schedule_meetings = true />
 	<#if existingRelationship>
@@ -25,7 +25,7 @@
 				<h5>Record of meetings</h5>
 			</#if>
 
-			<#if can_create_meetings>
+			<#if existingRelationship && can_create_meetings>
 				<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Create a new record"><i class="icon-edit"></i> New record</a>
 			</#if>
 			<#if existingRelationship && can_create_scheduled_meetings && features.scheduledMeetings>
@@ -56,7 +56,7 @@
 				</div>
 				<#list meetings as meeting>
 					<#local deletedClasses><#if meeting.deleted>deleted muted</#if></#local>
-					<#local pendingAction = meeting.pendingActionBy(viewer) />
+					<#local pendingAction = meeting.pendingActionBy(viewerUser) />
 					<#local pendingActionClasses><#if pendingAction>well</#if></#local>
 
 					<#if (openMeetingId?? && openMeetingId == meeting.id) || pendingAction>
@@ -84,7 +84,7 @@
 							<#else>
 								<#local editUrl><@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting /></#local>
 							</#if>
-							<#if ((meeting.scheduled && can_update_scheduled_meeting) || (!meeting.scheduled && viewer.universityId! == meeting.creator.universityId && !meeting.approved))>
+							<#if ((meeting.scheduled && can_update_scheduled_meeting) || (!meeting.scheduled && viewerUser.universityId! == meeting.creator.universityId && !meeting.approved))>
 								<div class="meeting-record-toolbar">
 									<a href="${editUrl}" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
 									<a href="<@routes.delete_meeting_record meeting />" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
@@ -120,12 +120,12 @@
 </#macro>
 
 <#macro meetingState meeting studentCourseDetails>
-	<#if meeting.pendingApproval && !meeting.pendingApprovalBy(viewer)>
+	<#if meeting.pendingApproval && !meeting.pendingApprovalBy(viewerUser)>
 	<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
 	<div class="alert alert-info">
 		This meeting record needs to be approved by <#list meeting.pendingApprovers as approver>${approver.fullName}<#if approver_has_next>, </#if></#list>.
 	</div>
-	<#elseif meeting.pendingApprovalBy(viewer)>
+	<#elseif meeting.pendingApprovalBy(viewerUser)>
 	<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
 	<div class="pending-action alert alert-warning">
 		This record needs your approval. Please review, then approve or return it with comments.
@@ -155,16 +155,16 @@
 				</@form.field>
 			</@form.row>
 		</div>
-		<button type="submit" class="btn btn-primary">Submit</button>
+		<button type="submit" class="btn btn-primary spinnable spinner-auto">Submit</button>
 	</form>
-	<#elseif meeting.rejectedBy(viewer)>
+	<#elseif meeting.rejectedBy(viewerMember)>
 	<small class="muted">Pending revision. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
 	<div class="alert alert-error">
 		<div class="rejection">
 			<p>You sent this record back to the other party, who will review the record and submit it for approval again.</p>
 		</div>
 	</div>
-	<#elseif meeting.pendingRevisionBy(viewer)>
+	<#elseif meeting.pendingRevisionBy(viewerUser)>
 	<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
 	<div class="pending-action alert alert-warning">
 		<#list meeting.rejectedApprovals as rejectedApproval>
@@ -184,12 +184,12 @@
 </#macro>
 
 <#macro scheduledMeetingState meeting studentCourseDetails>
-	<#if meeting.pendingAction && !meeting.pendingActionBy(viewer)>
+	<#if meeting.pendingAction && !meeting.pendingActionBy(viewerUser)>
 	<small class="muted">Pending confirmation. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
 	<div class="alert alert-info">
 		${meeting.creator.fullName} needs to confirm that this meeting took place.
 	</div>
-	<#elseif meeting.pendingActionBy(viewer)>
+	<#elseif meeting.pendingActionBy(viewerUser)>
 		<small class="muted">Pending confirmation. ${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
 		<div class="alert alert-warning">
 			Please confirm whether this scheduled meeting took place.

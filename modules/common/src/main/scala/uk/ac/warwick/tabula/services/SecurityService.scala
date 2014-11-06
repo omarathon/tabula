@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.services
+
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._

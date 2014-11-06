@@ -96,7 +96,7 @@
 							</a>
 						</#if>
 					</h5>
-					<#if agent.universityId == viewer.universityId!>
+					<#if agent.universityId == viewerUser.universityId!>
 						<span class="muted">(you)</span>
 					<#else>
 						<#if agent.email??>
