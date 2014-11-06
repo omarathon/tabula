@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.profiles.commands
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, MeetingRecord, MeetingRecordApproval, StudentRelationshipType}
 import uk.ac.warwick.tabula.data.{MeetingRecordDao, MeetingRecordDaoComponent}
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.services.{SecurityService, SecurityServiceComponent, MonitoringPointMeetingRelationshipTermService, MonitoringPointMeetingRelationshipTermServiceComponent}
 import uk.ac.warwick.tabula._
@@ -21,6 +22,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val student = Fixtures.student(universityId = "0123456")
+		val studentCurrentUser = new CurrentUser(student.asSsoUser, student.asSsoUser)
 		
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
@@ -32,8 +34,9 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
 		meetingRecord.approvals.add(proposedApproval)
 
-		val cmd = new ApproveMeetingRecordCommand(meetingRecord, new CurrentUser(student.asSsoUser, student.asSsoUser)) with CommandTestSupport
+		val cmd = new ApproveMeetingRecordCommand(meetingRecord, studentCurrentUser) with CommandTestSupport
 		cmd.features.attendanceMonitoringMeetingPointType returns true
+		cmd.securityService.can(studentCurrentUser, Permissions.Profiles.MeetingRecord.Approve, proposedApproval) returns true
 	}
 
 	@Test

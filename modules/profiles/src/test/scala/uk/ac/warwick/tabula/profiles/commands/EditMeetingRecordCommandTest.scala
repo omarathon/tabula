@@ -31,7 +31,7 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 
 		meeting.isPendingApproval should be {true}
 		val studentCurrentUser = new CurrentUser(student.asSsoUser, student.asSsoUser)
-		meeting.securityService.can(studentCurrentUser, Permissions.Profiles.MeetingRecord.Approve, meeting) returns true
+		meeting.securityService.can(studentCurrentUser, Permissions.Profiles.MeetingRecord.Approve, meeting.approvals.get(0)) returns true
 		meeting.pendingApprovalBy(studentCurrentUser) should be {true}
 	}}
 
@@ -63,6 +63,7 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 		// Validation prompts them for a rejection comment. They rant about herons and reject.
 		val heronRant = "There is no mention of herons in the meeting record. I distinctly remember LOADS of herons in my face."
 		approvalCmd.rejectionComments = heronRant
+		approvalCmd.securityService.can(studentCurrentUser, Permissions.Profiles.MeetingRecord.Approve, meeting.approvals.get(0)) returns true
 		var approval = transactional { tx => approvalCmd.applyInternal() }.approvals.get(0)
 		approval.state should be (Rejected)
 		approval.comments should be (heronRant)
@@ -84,11 +85,11 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 		editCmd.description = "The meeting room was full of angry herons. It was truly harrowing."
 		val meeting2 = transactional { tx => editCmd.apply() }
 		meeting2.isPendingApproval should be {true}
-		meeting2.securityService.can(studentCurrentUser, Permissions.Profiles.MeetingRecord.Approve, meeting2) returns true
+		meeting2.securityService.can(studentCurrentUser, Permissions.Profiles.MeetingRecord.Approve, meeting2.approvals.get(0)) returns true
 		meeting2.pendingApprovalBy(studentCurrentUser) should be {true}
 
 		// The student is now happy with the record and approves it
-		approvalCmd = new ApproveMeetingRecordCommand(meeting, new CurrentUser(student.asSsoUser, student.asSsoUser))
+		approvalCmd = new ApproveMeetingRecordCommand(meeting, studentCurrentUser)
 			with ApproveMeetingRecordState with MeetingRecordDaoComponent with SecurityServiceComponent
 			with ApproveMeetingRecordValidation with MonitoringPointMeetingRelationshipTermServiceComponent 
 			with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent {
@@ -100,6 +101,7 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 			}
 		approvalCmd.approved = true
 		approvalCmd.rejectionComments = null
+		approvalCmd.securityService.can(studentCurrentUser, Permissions.Profiles.MeetingRecord.Approve, meeting2.approvals.get(0)) returns true
 		approval = transactional { tx => approvalCmd.applyInternal() }.approvals.get(0)
 		meeting2.isApproved should be {true}
 		// Fin
