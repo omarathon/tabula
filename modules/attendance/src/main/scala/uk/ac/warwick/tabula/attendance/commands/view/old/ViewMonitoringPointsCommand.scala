@@ -41,8 +41,13 @@ abstract class ViewMonitoringPointsCommand(val department: Department, val acade
 	def onBind(result: BindingResult) {
 		// Add all non-withdrawn codes to SPR statuses by default
 		if (!hasBeenFiltered) {
-			allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach { sprStatuses.add }
+			if (academicYear == AcademicYear.guessSITSAcademicYearByDate(DateTime.now)) {
+				allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T")}.foreach(sprStatuses.add)
+			} else {
+				otherCriteria.add("Enrolled for year or course completed")
+			}
 		}
+
 		// Filter chosen routes by those that the user has permission to see
 		routes = (routes.asScala.toSet & visibleRoutes).toSeq.asJava
 

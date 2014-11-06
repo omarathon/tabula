@@ -12,20 +12,20 @@ import uk.ac.warwick.tabula.scheduling.helpers.{SitsStudentRow, ImportRowTracker
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: StudentCourseDetails, importRowTracker: ImportRowTracker)
 	extends Command[StudentCourseYearDetails] with Logging with Daoisms
 	with Unaudited with PropertyCopying {
 	import ImportMemberHelpers._
 
-	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
-	var profileService = Wire.auto[ProfileService]
-	var studentCourseYearDetailsDao = Wire.auto[StudentCourseYearDetailsDao]
+	var modeOfAttendanceImporter = Wire[ModeOfAttendanceImporter]
+	var profileService = Wire[ProfileService]
+	var studentCourseYearDetailsDao = Wire[StudentCourseYearDetailsDao]
 
 	val sceSequenceNumber = row.sceSequenceNumber
 
 	override def applyInternal(): StudentCourseYearDetails = {
-
 		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKeyStaleOrFresh(
 			studentCourseDetails,
 			sceSequenceNumber)
@@ -71,8 +71,9 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 		copyObjectProperty("enrolmentDepartment", row.enrolmentDepartmentCode, studentCourseYearBean, toDepartment(row.enrolmentDepartmentCode)) |
 		copyObjectProperty("enrolmentStatus", row.enrolmentStatusCode, studentCourseYearBean, toSitsStatus(row.enrolmentStatusCode)) |
 		copyModeOfAttendance(row.modeOfAttendanceCode, studentCourseYearBean) |
-		copyModuleRegistrationStatus(row.moduleRegistrationStatusCode, studentCourseYearBean)|
-		copyAcademicYear("academicYear", row.academicYearString, studentCourseYearBean)
+		copyModuleRegistrationStatus(row.moduleRegistrationStatusCode, studentCourseYearBean) |
+		copyAcademicYear("academicYear", row.academicYearString, studentCourseYearBean) |
+		copyEnrolledOrCompleted("enrolledOrCompleted", row.reasonForTransferCode, row.enrolmentStatusCode, studentCourseYearBean)
 	}
 
 	private def copyModeOfAttendance(code: String, studentCourseYearBean: BeanWrapper) = {
@@ -139,6 +140,20 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 			memberBean.setPropertyValue(property, toAcademicYear(acYearString))
 			true
 		}
+	}
+
+	private def copyEnrolledOrCompleted(property: String, reasonForTransferCode: String, enrolmentStatusCode: String, memberBean: BeanWrapper) = {
+		val oldValue = memberBean.getPropertyValue(property)
+
+		// EnrolledOrCompleted if SCE is not permanently withdrawn OR SCJ reason for transfer code is successful
+		val newValue = !enrolmentStatusCode.safeStartsWith("P") || reasonForTransferCode.safeStartsWith("S")
+
+		if (oldValue != newValue) {
+			logger.debug(s"Detected property change for $property: $oldValue -> $newValue; setting value")
+
+			memberBean.setPropertyValue(property, newValue)
+			true
+		} else false
 	}
 
 	private def toModeOfAttendance(code: String) = {

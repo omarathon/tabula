@@ -17,13 +17,13 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 	extends Command[StudentCourseDetails] with Logging with Daoisms
 	with Unaudited with PropertyCopying {
 
-	var memberDao = Wire.auto[MemberDao]
-	var relationshipService = Wire.auto[RelationshipService]
-	var studentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
-	var courseAndRouteService = Wire.auto[CourseAndRouteService]
-	var awardService = Wire.auto[AwardService]
-	var courseImporter = Wire.auto[CourseImporter]
-	var awardImporter = Wire.auto[AwardImporter]
+	var memberDao = Wire[MemberDao]
+	var relationshipService = Wire[RelationshipService]
+	var studentCourseDetailsDao = Wire[StudentCourseDetailsDao]
+	var courseAndRouteService = Wire[CourseAndRouteService]
+	var awardService = Wire[AwardService]
+	var courseImporter = Wire[CourseImporter]
+	var awardImporter = Wire[AwardImporter]
 
 	override def applyInternal(): StudentCourseDetails = {
 
@@ -114,7 +114,8 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 		"expectedEndDate",
 		"courseYearLength",
 		"mostSignificant",
-		"levelCode"
+		"levelCode",
+		"reasonForTransferCode"
 	)
 
 	private def copyStudentCourseProperties(rowBean: BeanWrapper, studentCourseDetailsBean: BeanWrapper) = {

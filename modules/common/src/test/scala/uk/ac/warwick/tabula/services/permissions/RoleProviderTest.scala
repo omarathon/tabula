@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.{PermissionsSelector, PermissionsTarget}
 import uk.ac.warwick.tabula.roles._
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
+import scala.language.reflectiveCalls
 
 class RoleProviderTest extends TestBase with Mockito {
 
