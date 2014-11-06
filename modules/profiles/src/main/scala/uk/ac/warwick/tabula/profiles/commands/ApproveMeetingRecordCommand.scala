@@ -82,9 +82,8 @@ trait ApproveMeetingRecordPermission extends RequiresPermissionsChecking with Pe
 	self: ApproveMeetingRecordState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheckAny(Seq(
-			CheckablePermission(Permissions.Profiles.MeetingRecord.Approve, meeting),
-			CheckablePermission(Permissions.Profiles.MeetingRecord.ApproveAny, meeting)
+		p.PermissionCheckAny(meeting.approvals.asScala.map(approval =>
+			CheckablePermission(Permissions.Profiles.MeetingRecord.Approve, approval)
 		))
 	}
 }
@@ -121,8 +120,5 @@ trait ApproveMeetingRecordState {
 	var rejectionComments: String =_
 
 	lazy val approvals: Seq[MeetingRecordApproval] =
-		if (securityService.can(user, Permissions.Profiles.MeetingRecord.ApproveAny, meeting))
-			meeting.approvals.asScala.toSeq
-		else
-			meeting.approvals.asScala.filter(_.approver.universityId == user.universityId).toSeq
+		meeting.approvals.asScala.filter(approval => securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, approval)).toSeq
 }

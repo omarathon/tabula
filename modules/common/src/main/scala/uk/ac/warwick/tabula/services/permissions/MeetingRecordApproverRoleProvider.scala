@@ -15,8 +15,8 @@ class MeetingRecordApproverRoleProvider extends RoleProvider {
 			case meeting: MeetingRecord =>
 				meeting.approvals.asScala.find(_.approver.universityId == user.universityId).map(approval => {
 					Stream(
-						customRoleFor(approval.approver.homeDepartment)(MeetingRecordApproverRoleDefinition, meeting)
-							.getOrElse(MeetingRecordApprover(meeting))
+						customRoleFor(approval.approver.homeDepartment)(MeetingRecordApproverRoleDefinition, approval)
+							.getOrElse(MeetingRecordApprover(approval))
 					)
 				}).getOrElse(Stream.empty)
 			// MeetingRecordApprover is only checked at the meeting level
