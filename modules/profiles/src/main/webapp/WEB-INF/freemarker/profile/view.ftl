@@ -7,6 +7,14 @@
 	<hr class="full-width" />
 </#if>
 
+<#if profile.deceased>
+	<div class="alert alert-danger">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+
+		<h4>This student has been recorded centrally as being deceased</h4>
+	</div>
+</#if>
+
 <#if can.do("RolesAndPermissions.Create", profile)>
 	<div class="pull-right">
 		<#assign permissions_url><@routes.permissions profile /></#assign>
