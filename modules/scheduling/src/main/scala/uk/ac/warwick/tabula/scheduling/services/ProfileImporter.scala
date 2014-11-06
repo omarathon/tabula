@@ -403,6 +403,15 @@ object ProfileImporter extends Logging {
 								and sce2.sce_ayrc = sce.sce_ayrc
 					)
 
+			join $sitsSchema.srs_mst mst
+	 			on stu.stu_code = mst.mst_adid
+		 		and mst.mst_code =
+		 			(
+						select max(mst2.mst_code)
+							from $sitsSchema.srs_mst mst2
+			 					where mst.mst_adid = mst2.mst_adid
+	 				)
+
 			left outer join $sitsSchema.srs_crs crs
 				on sce.sce_crsc = crs.crs_code
 
@@ -418,9 +427,6 @@ object ProfileImporter extends Logging {
 
 			left outer join $sitsSchema.ins_prs prs
 				on spr.prs_code = prs.prs_code
-
-			left outer join $sitsSchema.srs_mst mst
-	 			on stu.stu_code = mst.mst_adid
 
 		where stu.stu_code = :universityId
 		order by stu.stu_code
