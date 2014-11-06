@@ -11,7 +11,7 @@
 	<div class="alert alert-danger">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
 
-		<h4>This student has been recorded centrally as being deceased</h4>
+		<h4>This student is recorded as deceased</h4>
 	</div>
 </#if>
 
