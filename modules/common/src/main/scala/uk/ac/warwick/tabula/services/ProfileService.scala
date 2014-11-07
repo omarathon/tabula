@@ -355,8 +355,17 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 			// TODO this sucks. Would be better if you could get ScalaRestrictions from a filter rule and add them to allRestrictions
 			memberDao.findStudentsByRestrictions(allRestrictions, Seq(), Int.MaxValue, 0)
 				.filter(studentDepartmentFilterMatches(department))
-				.filter(_.mostSignificantCourseDetails.isDefined)
-				.map(student => AttendanceMonitoringStudentData(student.universityId, student.userId, student.mostSignificantCourse.beginDate))
+				.flatMap(student => {
+					val beginDates = student.freshStudentCourseDetails.filter(_.freshStudentCourseYearDetails.exists(_.academicYear == academicYear)).map(_.beginDate)
+					if (beginDates.nonEmpty) {
+						// do not remove; import needed for sorting
+						// should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+						import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+						Option(AttendanceMonitoringStudentData(student.universityId, student.userId, beginDates.min))
+					} else {
+						None
+					}
+				})
 		}	else {
 			memberDao.findAllStudentDataByRestrictions(allRestrictions, academicYear: AcademicYear)
 		}
