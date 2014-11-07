@@ -3,6 +3,6 @@
 
 <script>
 	if (typeof Profiles !== "undefined") { // Only call once loaded into the main page
-		Profiles.SetupMeetingRecords();
+		Profiles.SetupMeetingRecords(".${role.id}-meetings");
 	}
 </script>

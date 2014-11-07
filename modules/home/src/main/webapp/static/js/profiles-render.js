@@ -81,10 +81,12 @@
 
 
 	// MEETING RECORD STUFF
-	exports.SetupMeetingRecords = function() {
+	exports.SetupMeetingRecords = function(containerSelector) {
+		var $meetingsSection = (containerSelector != undefined && containerSelector.length > 0) ? $(containerSelector) : $('section.meetings');
+
 		$(function() {
 			function scrollToOpenDetails() {
-				var $openMeetingDetails = $(".meetings details.open").first();
+				var $openMeetingDetails = $("details.open", $meetingsSection).first();
 				if ($openMeetingDetails.length) {
 					var offset = window.getNavigationHeight || 0;
 					$("html, body").animate({
@@ -151,7 +153,7 @@
 			function decorateMeetingRecords(){
 
 				// delete meeting records
-				$('a.delete-meeting-record').on('click', function() {
+				$('a.delete-meeting-record', $meetingsSection).on('click', function() {
 					var $this = $(this);
 					var $details = $this.closest('details');
 
@@ -173,7 +175,7 @@
 				});
 
 				// restore meeting records
-				$('a.restore-meeting-record').on('click', function() {
+				$('a.restore-meeting-record', $meetingsSection).on('click', function() {
 					var $this = $(this);
 					var $details = $this.closest('details');
 
@@ -191,7 +193,7 @@
 				});
 
 				// purge meeting records
-				$('a.purge-meeting-record').on('click', function() {
+				$('a.purge-meeting-record', $meetingsSection).on('click', function() {
 					var $this = $(this);
 					var $details = $this.closest('details');
 
@@ -208,7 +210,7 @@
 				});
 
 				// show rejection comment box
-				$('input.reject').each( function() {
+				$('input.reject', $meetingsSection).each( function() {
 					var $this = $(this);
 					var $form = $this.closest('form');
 					var $commentBox = $form.find('.rejection-comment');
@@ -216,7 +218,7 @@
 				});
 
 				// make modal links use ajax
-				$('section.meetings .meeting-record-toolbar, section.meetings details.meeting.normal').tabulaAjaxSubmit(function() {
+				$('.meeting-record-toolbar, details.meeting.normal', $meetingsSection).tabulaAjaxSubmit(function() {
 					document.location.reload(true);
 				});
 
@@ -253,8 +255,7 @@
 					});
 				};
 
-				var meetingsSection = $("section.meetings");
-				$(".new, .edit-meeting-record", meetingsSection).on("click", function() {
+				$(".new, .edit-meeting-record", $meetingsSection).on("click", function() {
 					var $this = $(this);
 					getModal($this, $this.attr("href"));
 
@@ -274,7 +275,7 @@
 
 				// Scheduled meetings
 
-				meetingsSection.find('form.scheduled-action').on('submit', function(event){
+				$('form.scheduled-action', $meetingsSection).on('submit', function(event){
 					event.preventDefault();
 					var $this = $(this), checkedInput = $this.find('input:checked');
 					$this.find('div.ajaxErrors').hide();
