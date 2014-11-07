@@ -6,16 +6,15 @@ import uk.ac.warwick.tabula.attendance.AttendanceFixture
 
 class AttendanceViewPointsTest extends AttendanceFixture with GivenWhenThen{
 
-	 "A Member of staff" should "see the View Students page" in {
+	 "A Member of staff" should "see the View Points page" in {
 		 Given("I am logged in as Admin1")
 		 signIn as P.Admin1 to Path("/")
 
 		 When("I go to /attendance/view/xxx/2013/points")
 		 go to Path("/attendance/view/xxx/2013/points")
 
-		 Then("I see the page, but no points")
+		 Then("I see the page")
 		 pageSource should include("View monitoring points")
-		 className("monitoring-points").findElement should be (None)
 
 		 When("I filter only Undergraduate")
 		 click on id("command").webElement.findElement(By.className("filter-short-values"))
