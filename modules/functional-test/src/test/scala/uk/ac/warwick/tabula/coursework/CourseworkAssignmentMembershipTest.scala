@@ -17,10 +17,10 @@ class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixt
 				pageSource contains "You're not enrolled" should be (true)
 
 				// Let's request enrolment
-				click on className("btn")
+				click on cssSelector("form .btn")
 
 				pageSource contains "Thanks, we've sent a message to a department administrator" should be (true)
-				className("btn").webElement.getAttribute("class") contains "disabled" should be (true)
+				cssSelector("#main-content .btn").webElement.getAttribute("class") contains "disabled" should be (true)
 			}
 		}
 	}
