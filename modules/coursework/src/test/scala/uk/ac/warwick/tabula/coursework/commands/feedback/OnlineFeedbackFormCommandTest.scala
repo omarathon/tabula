@@ -35,7 +35,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 		savedFormValue.name = Assignment.defaultFeedbackTextFieldName
 		savedFormValue.value = heronRamble
 
-		val command = new OnlineFeedbackFormCommand(module, assignment, student, currentUser)
+		val command = new OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser)
 			with OnlineFeedbackFormCommandTestSupport
 	}
 
@@ -101,7 +101,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 
 			assignment.feedbacks = Seq(existingFeedback)
 
-			val command2 = new OnlineFeedbackFormCommand(module, assignment, student, currentUser)
+			val command2 = new OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser)
 				with OnlineFeedbackFormCommandTestSupport
 			command2.mark should be("55")
 			command2.grade should be("2:2")

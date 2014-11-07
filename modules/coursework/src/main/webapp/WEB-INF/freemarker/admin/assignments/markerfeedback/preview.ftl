@@ -9,7 +9,7 @@
 <#assign hasGlobalErrors=status.errors.globalErrors?size gt 0 />
 </@spring.bind>
 
-<@f.form method="post" class="double-submit-protection"  action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/feedback')}" commandName=commandName>
+<@f.form method="post" class="double-submit-protection"  action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/feedback')}" commandName=commandName>
 <input type="hidden" name="batch" value="true">
 
 <h1>Submit feedback for ${assignment.name}</h1>
@@ -174,7 +174,7 @@
 <input type="hidden" name="confirm" value="true">
 <input class="btn btn-primary" type="submit" value="Confirm">
 </#if>
-	<a class="btn" href="<@routes.listmarkersubmissions assignment />">Cancel</a>
+	<a class="btn" href="<@routes.listmarkersubmissions assignment marker />">Cancel</a>
 </div>
 </@f.form>
 

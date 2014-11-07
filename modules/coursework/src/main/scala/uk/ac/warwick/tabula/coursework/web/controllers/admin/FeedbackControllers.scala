@@ -78,7 +78,7 @@ class DownloadAllFeedbackController extends CourseworkController {
 		new DownloadSelectedFeedbackCommand(module, assignment)
 
 	@RequestMapping
-	def getSelected(command: DownloadSelectedFeedbackCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+	def getSelected(command: DownloadSelectedFeedbackCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
@@ -86,7 +86,7 @@ class DownloadAllFeedbackController extends CourseworkController {
 }
 
 @Controller
-@RequestMapping( value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{feedbackId}/{filename}"))
+@RequestMapping( value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{feedbackId}/{filename}"))
 class DownloadMarkerFeedbackController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
@@ -98,6 +98,7 @@ class DownloadMarkerFeedbackController extends CourseworkController {
 		@PathVariable assignment: Assignment,
 		@PathVariable feedbackId: String,
 		@PathVariable filename: String,
+		@PathVariable marker: User,
 		req: HttpServletRequest,
 		res: HttpServletResponse
 	) = {
@@ -117,17 +118,18 @@ class DownloadMarkerFeebackFilesController extends BaseController {
 
 	@ModelAttribute def command( @PathVariable module: Module,
 															 @PathVariable assignment: Assignment,
-															 @PathVariable markerFeedback: String)
+															 @PathVariable markerFeedback: String,
+															 @PathVariable marker: User)
 	= new DownloadMarkerFeedbackFilesCommand(module, assignment, markerFeedback)
 
 	// the difference between the RequestMapping paths for these two methods is a bit subtle - the first has
 	// attachments plural, the second has attachments singular.
-	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachments/*"))
-	def getAll(command: DownloadMarkerFeedbackFilesCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{markerFeedback}/attachments/*"))
+	def getAll(command: DownloadMarkerFeedbackFilesCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		getOne(command, null)
 	}
 
-	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachment/{filename}"))
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{markerFeedback}/attachment/{filename}"))
 	def getOne(command: DownloadMarkerFeedbackFilesCommand, @PathVariable("filename") filename: String)
 						(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		// specify callback so that audit logging happens around file serving
@@ -141,7 +143,7 @@ class DownloadMarkerFeebackFilesController extends BaseController {
 
 
 @Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/{position}/feedbacks.zip"))
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/{position}/feedbacks.zip"))
 class DownloadFirstMarkersFeedbackController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
@@ -151,13 +153,14 @@ class DownloadFirstMarkersFeedbackController extends CourseworkController {
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
 		@PathVariable position: String,
-		currentUser:CurrentUser
+		@PathVariable marker: User,
+		user: CurrentUser
 	) = {
 		val feedbackPosition = position match {
 			case "firstmarker" => FirstFeedback
 			case "secondmarker" => SecondFeedback
 		}
-		DownloadMarkersFeedbackForPositionCommand(module, assignment, currentUser, feedbackPosition)
+		DownloadMarkersFeedbackForPositionCommand(module, assignment, marker, user, feedbackPosition)
 	}
 
 	@RequestMapping

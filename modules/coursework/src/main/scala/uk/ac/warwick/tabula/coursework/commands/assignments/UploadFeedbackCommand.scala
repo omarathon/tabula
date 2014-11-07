@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConversions._
 import scala.util.matching.Regex
 import org.springframework.validation.{BindingResult, Errors}
 import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
@@ -72,7 +73,7 @@ class ExtractFeedbackZip(cmd: UploadFeedbackCommand[_]) extends Command[Unit] {
  * so we could check that this is no longer being accessed by anyone, and then
  * remove all the code in here that handles it, to simplify it a little.
  */
-abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assignment, val submitter: CurrentUser)
+abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assignment, val submitter: User)
 	extends Command[A] with Daoisms with Logging with BindListener {
 	
 	// Permissions checks delegated to implementing classes FOR THE MOMENT
@@ -208,7 +209,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 			// match potential module codes found in file path
 			val allModuleCodes = moduleCodePattern.findAllIn(filename).matchData.map { _.subgroups(0)}.toList
 			
-			if(!allModuleCodes.isEmpty){
+			if(allModuleCodes.nonEmpty){
 				// the potential module code doesn't match this assignment's module code
 				if (!allModuleCodes.distinct.head.equals(assignment.module.code)){
 					moduleMismatchFiles.add(new ProblemFile(filename, file))
@@ -240,7 +241,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 					f.name = filenameOf(name)
 					f.uploadedData = new ZipEntryInputStream(zip, entry)
 					f.uploadedDataLength = entry.getSize
-					f.uploadedBy = submitter.userId
+					f.uploadedBy = submitter.getUserId
 					fileDao.saveTemporary(f)
 					(name, f)
 				}

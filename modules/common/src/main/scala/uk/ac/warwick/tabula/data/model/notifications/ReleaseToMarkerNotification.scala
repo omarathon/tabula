@@ -51,11 +51,10 @@ class ReleaseToMarkerNotification
 			"numReleasedFeedbacks" -> items.size,
 			"workflowVerb" -> workflowVerb
 		))
-	def url: String = Routes.admin.assignment.markerFeedback(assignment)
+	def url: String = Routes.admin.assignment.markerFeedback(assignment, recipient)
 	def urlTitle = s"$workflowVerb this feedback"
 
 	priority = Warning
 	def actionRequired = true
-
 }
 

@@ -80,6 +80,7 @@ trait MarkingUncompletedState {
 
 	val assignment: Assignment
 	val module: Module
+	val user: User
 
 	var students: JList[String] = JArrayList()
 	var completedMarkerFeedback: JList[MarkerFeedback] = JArrayList()

@@ -60,7 +60,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	def firstMarkerFinished() {
 		withUser("cuslaj") {
 
-			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser)
+			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
 			command.stateService = stateService
 			command.students = List("9876004", "0270954", "9170726")
 			command.onBind(null)
@@ -88,7 +88,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		inContext[MarkingCompletedTest.Ctx] {
 		withUser("cuday"){
 
-			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser)
+			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
 			command.stateService = stateService
 			command.students = List("0672088", "0672089")
 			setFirstMarkerFeedbackState(MarkingState.MarkingCompleted)
@@ -124,7 +124,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		inContext[MarkingCompletedTest.Ctx] {
 			withUser("cuslaj") {
 
-				val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser)
+				val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
 
 				assignment.feedbacks.map(addMarkerFeedback(_, ThirdFeedback))
 				assignment.feedbacks.map(addMarkerFeedback(_, SecondFeedback))
@@ -184,6 +184,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 
 		val notifier = new SecondMarkerReleaseNotifier with MarkingCompletedState with ReleasedState with UserAware with UserLookupComponent with Logging {
 			val user = marker1
+			val submitter = new CurrentUser(marker1, marker1)
 			val assignment = testAssignment
 			val module = new Module
 			newReleasedFeedback = List(mf1, mf2, mf3, mf4)

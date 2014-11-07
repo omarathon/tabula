@@ -4,7 +4,6 @@ import org.joda.time.DateTime
 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{UserAware, Notifies, Appliable, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
@@ -18,8 +17,8 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.notifications.ModeratorRejectedNotification
 
 object OnlineModerationCommand {
-	def apply(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser) =
-		new OnlineModerationCommand(module, assignment, student, currentUser)
+	def apply(module: Module, assignment: Assignment, student: User, marker: User) =
+		new OnlineModerationCommand(module, assignment, student, marker)
 			with ComposableCommand[MarkerFeedback]
 			with OnlineFeedbackFormPermissions
 			with MarkerFeedbackStateCopy
@@ -37,16 +36,16 @@ object OnlineModerationCommand {
 			}
 }
 
-abstract class OnlineModerationCommand(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser)
-	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, currentUser)
+abstract class OnlineModerationCommand(module: Module, assignment: Assignment, student: User, marker: User)
+	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] with ModerationState with UserAware {
 
 	self: FeedbackServiceComponent with FileAttachmentServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy
 		with FinaliseFeedbackComponent =>
 
-	val user = currentUser.apparentUser
+	val user = marker
 
-	def markerFeedback = assignment.getMarkerFeedback(student.getWarwickId, user, SecondFeedback)
+	def markerFeedback = assignment.getMarkerFeedback(student.getWarwickId, marker, SecondFeedback)
 
 	copyState(markerFeedback, copyModerationFieldsFrom)
 
@@ -56,7 +55,7 @@ abstract class OnlineModerationCommand(module: Module, assignment: Assignment, s
 		val parentFeedback = assignment.feedbacks.asScala.find(_.universityId == student.getWarwickId).getOrElse({
 			val newFeedback = new Feedback
 			newFeedback.assignment = assignment
-			newFeedback.uploaderId = user.getWarwickId
+			newFeedback.uploaderId = marker.getWarwickId
 			newFeedback.universityId = student.getWarwickId
 			newFeedback.released = false
 			newFeedback.createdDate = DateTime.now

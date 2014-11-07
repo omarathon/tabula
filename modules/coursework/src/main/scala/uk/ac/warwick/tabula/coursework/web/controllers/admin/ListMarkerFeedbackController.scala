@@ -2,25 +2,29 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.ListMarkerFeedbackCommand
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.coursework.helpers.MarkerFeedbackCollections
+import uk.ac.warwick.userlookup.User
 
 @Controller
-@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/list"))
-class ListMarkerFeedbackController  extends CourseworkController {
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/list"))
+class ListMarkerFeedbackController extends CourseworkController {
 
 	@ModelAttribute("command")
-	def createCommand(@PathVariable assignment: Assignment, @PathVariable module: Module, user: CurrentUser) =
-		ListMarkerFeedbackCommand(assignment, module, user)
+	def createCommand(@PathVariable assignment: Assignment,
+										@PathVariable module: Module,
+										@PathVariable marker: User,
+										submitter: CurrentUser) =
+		ListMarkerFeedbackCommand(assignment, module, marker, submitter)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def list(@ModelAttribute("command") command: Appliable[MarkerFeedbackCollections], @PathVariable assignment: Assignment): Mav = {
+	def list(@ModelAttribute("command") command: Appliable[MarkerFeedbackCollections], @PathVariable assignment: Assignment, @PathVariable marker: User): Mav = {
 
 		if(assignment.markingWorkflow == null) {
 			Mav("errors/no_workflow", "assignmentUrl" -> Routes.admin.assignment.submissionsandfeedback.summary(assignment))
@@ -55,9 +59,20 @@ class ListMarkerFeedbackController  extends CourseworkController {
 				"thirdMarkerRoleName" -> assignment.markingWorkflow.thirdMarkerRoleName,
 				"hasFirstMarkerFeedback" -> hasFirstMarkerFeedback,
 				"hasSecondMarkerFeedback" -> hasSecondMarkerFeedback,
-				"hasOriginalityReport" -> hasOriginalityReport
-			).crumbs(Breadcrumbs.Department(assignment.module.adminDepartment), Breadcrumbs.Module(assignment.module))
+				"hasOriginalityReport" -> hasOriginalityReport,
+				"marker" -> marker
+			)
 		}
 	}
 
+}
+
+// Redirects users trying to access a marking workflow using the old style URL
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/list"))
+class ListCurrentUsersMarkerFeedbackController extends CourseworkController {
+	@RequestMapping
+	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
+		Routes.admin.assignment.markerFeedback(assignment, currentUser.apparentUser)
+	}
 }

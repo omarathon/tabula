@@ -31,7 +31,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 	 * TAB-535
 	 */
 	@Test def duplicateFileNamesInParent() = withUser("cuscav") {
-		val cmd = new AddMarkerFeedbackCommand(module, assignment, currentUser)
+		val cmd = new AddMarkerFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
 		cmd.userLookup = userLookup
 		
 		cmd.uniNumber = "1010101"
@@ -66,7 +66,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 	}
 	
 	@Test def duplicateFileNames() = withUser("cuscav") {
-		val cmd = new AddMarkerFeedbackCommand(module, assignment, currentUser)
+		val cmd = new AddMarkerFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
 		cmd.userLookup = userLookup
 		
 		cmd.uniNumber = "1010101"

@@ -183,6 +183,8 @@ object Permissions {
 		case object ImportFromExternalSystem extends Permission("Import assignments from SITS")
 		case object Archive extends Permission("Archive an assignment")
 
+		case object MarkOnBehalf extends Permission("Mark submissions on behalf of a marker")
+
 		case object Create extends Permission("Add an assignment")
 		case object Read extends Permission("View an assignment's settings")
 		case object Update extends Permission("Edit an assignment")

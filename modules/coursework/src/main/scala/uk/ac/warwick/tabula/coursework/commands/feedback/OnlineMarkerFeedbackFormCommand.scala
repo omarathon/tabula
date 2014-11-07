@@ -4,7 +4,6 @@ import org.joda.time.DateTime
 
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Feedback, MarkerFeedback, Assignment, Module}
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.services.{ZipServiceComponent, FileAttachmentServiceComponent, FeedbackServiceComponent, AutowiringZipServiceComponent, AutowiringFileAttachmentServiceComponent, AutowiringFeedbackServiceComponent}
 import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
@@ -14,8 +13,8 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.userlookup.User
 
 object OnlineMarkerFeedbackFormCommand {
-	def apply(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser) =
-		new OnlineMarkerFeedbackFormCommand(module, assignment, student, currentUser)
+	def apply(module: Module, assignment: Assignment, student: User, marker: User) =
+		new OnlineMarkerFeedbackFormCommand(module, assignment, student, marker)
 			with ComposableCommand[MarkerFeedback]
 			with MarkerFeedbackStateCopy
 			with OnlineFeedbackFormPermissions
@@ -30,14 +29,14 @@ object OnlineMarkerFeedbackFormCommand {
 		}
 }
 
-abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser)
-	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, currentUser)
+abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assignment, student: User, marker: User)
+	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] {
 
 	self: FeedbackServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy =>
 
-	def markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(student.getWarwickId, currentUser.apparentUser)
-	def allMarkerFeedbacks = assignment.getAllMarkerFeedbacks(student.getWarwickId, currentUser.apparentUser)
+	def markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(student.getWarwickId, marker)
+	def allMarkerFeedbacks = assignment.getAllMarkerFeedbacks(student.getWarwickId, marker)
 
 	if (markerFeedback.isDefined) copyState(markerFeedback)
 
@@ -47,7 +46,7 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 		val parentFeedback = assignment.feedbacks.asScala.find(_.universityId == student.getWarwickId).getOrElse({
 			val newFeedback = new Feedback
 			newFeedback.assignment = assignment
-			newFeedback.uploaderId = currentUser.apparentId
+			newFeedback.uploaderId = marker.getUserId
 			newFeedback.universityId = student.getWarwickId
 			newFeedback.released = false
 			newFeedback.createdDate = DateTime.now

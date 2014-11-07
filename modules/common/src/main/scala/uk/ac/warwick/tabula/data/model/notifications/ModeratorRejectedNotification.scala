@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications
 
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleItemNotification, Notification, MarkerFeedback}
+import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import javax.persistence.{DiscriminatorValue, Entity}
@@ -17,6 +18,7 @@ object ModeratorRejectedNotification {
 @DiscriminatorValue(value="ModeratorRejected")
 class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 	with SingleItemNotification[MarkerFeedback]
+	with SingleRecipientNotification
 	with AutowiringUserLookupComponent {
 
 	def markerFeedback = item.entity
@@ -41,9 +43,10 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 			"adjustedGrade" -> rejectionFeedback.grade
 		))
 
-	def url: String = Routes.admin.assignment.markerFeedback(assignment)
+	def url: String = Routes.admin.assignment.markerFeedback(assignment, recipient)
 	def urlTitle = "update the feedback and submit it for moderation again"
 
 	// the recepient is the first marker
-	def recipients = rejectedFeedback.getMarkerUsercode.map(userId => userLookup.getUserByUserId(userId)).toSeq
+	def recipient = rejectedFeedback.getMarkerUsercode.map(userId => userLookup.getUserByUserId(userId))
+		.getOrElse(throw new ItemNotFoundException(s"The recipient doesn't exist"))
 }

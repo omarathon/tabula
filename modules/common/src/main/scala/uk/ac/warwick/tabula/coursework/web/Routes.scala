@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.web
 
 import uk.ac.warwick.tabula.data.model.{Module, MarkingWorkflow, Department, Assignment}
 import uk.ac.warwick.tabula.web.RoutesUtils
+import uk.ac.warwick.userlookup.User
 
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs
@@ -37,7 +38,7 @@ object Routes {
 
 		object assignment {
 			object markerFeedback {
-				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/list"
+				def apply(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}/list"
 			}
 
 			object onlineFeedback {
@@ -45,15 +46,15 @@ object Routes {
 			}
 
 			object onlineMarkerFeedback {
-				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/feedback/online"
+				def apply(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}/feedback/online"
 			}
 
 			object onlineModeration {
-				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/feedback/online/moderation"
+				def apply(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}/feedback/online/moderation"
 			}
 
 			object onlineSecondMarker {
-				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/feedback/online/secondmarker"
+				def apply(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}/feedback/online/secondmarker"
 			}
 
 			def create(module: Module) = context + "/admin/module/%s/assignments/new" format encoded(module.code)
@@ -82,7 +83,7 @@ object Routes {
 				// def detail doesn't use assignmentroot since assignmentroot includes the assignment ID in the middle, but
 				// it needs to be on the end for managing extension requests across department so that
 				// it can be passed as a unique contentId when toggling rows (jquery-expandingTable.js)
-				def detail (assignment: Assignment) = context + "/admin/module/%s/assignments/extensions/detail" format (encoded(assignment.module.code))
+				def detail (assignment: Assignment) = context + "/admin/module/%s/assignments/extensions/detail" format encoded(assignment.module.code)
 				def revoke (assignment: Assignment, universityId: String) = assignmentroot(assignment) + "/extensions/revoke/" + universityId
 			}
 		}

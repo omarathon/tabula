@@ -1,31 +1,35 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.{Module, MarkerFeedback, Feedback, Assignment}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.util.StringUtils
 
-class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: CurrentUser, val firstMarker:Boolean)
-	extends AddMarksCommand[List[MarkerFeedback]](module, assignment, submitter){
+class MarkerAddMarksCommand(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser, val firstMarker:Boolean)
+	extends AddMarksCommand[List[MarkerFeedback]](module, assignment, marker){
 
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Marks.Create, assignment)
+	if(submitter.apparentUser != marker) {
+		PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
+	}
 
 	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded
 		assignment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId} match {
 			case Some(feedback) =>
-				if (assignment.isFirstMarker(submitter.apparentUser)
+				if (assignment.isFirstMarker(marker)
 					&& feedback.firstMarkerFeedback != null
 					&& (feedback.firstMarkerFeedback.hasMark || feedback.firstMarkerFeedback.hasGrade)
 				)
 					mark.isModified = true
-				else if (assignment.isSecondMarker(submitter.apparentUser)
+				else if (assignment.isSecondMarker(marker)
 					&& feedback.secondMarkerFeedback != null
 					&& (feedback.secondMarkerFeedback.hasMark || feedback.secondMarkerFeedback.hasGrade)
 				)
@@ -41,7 +45,7 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: C
 			val parentFeedback = assignment.feedbacks.find(_.universityId == universityId).getOrElse({
 				val newFeedback = new Feedback
 				newFeedback.assignment = assignment
-				newFeedback.uploaderId = submitter.apparentId
+				newFeedback.uploaderId = marker.getUserId
 				newFeedback.universityId = universityId
 				newFeedback.released = false
 				newFeedback.createdDate = DateTime.now

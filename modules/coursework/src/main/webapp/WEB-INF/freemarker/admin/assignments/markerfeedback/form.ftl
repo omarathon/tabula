@@ -1,7 +1,7 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
-<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/feedback')}" commandName="addMarkerFeedbackCommand">
+<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/feedback')}" commandName="addMarkerFeedbackCommand">
 <input type="hidden" name="batch" value="true">
 <h1>Submit feedback for ${assignment.name}</h1>
 <p>

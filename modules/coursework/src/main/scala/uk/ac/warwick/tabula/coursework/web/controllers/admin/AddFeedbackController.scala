@@ -7,14 +7,11 @@ import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.AddFeedbackCommand
 import javax.validation.Valid
-import uk.ac.warwick.tabula.ItemNotFoundException
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.web.Mav
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
-import org.springframework.web.bind.annotation.RequestMethod._
 import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Controller
@@ -23,7 +20,7 @@ class AddFeedbackController extends CourseworkController {
 
 	@ModelAttribute
 	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
-		new AddFeedbackCommand(module, assignment, user)
+		new AddFeedbackCommand(module, assignment, user.apparentUser, user)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute form: AddFeedbackCommand) = {
@@ -42,7 +39,7 @@ class AddFeedbackController extends CourseworkController {
 			if (errors.hasErrors) {
 				showForm(form)
 			} else {
-				form.apply
+				form.apply()
 				Mav("redirect:" + Routes.admin.module(form.module))
 			}
 		}

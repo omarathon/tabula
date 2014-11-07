@@ -104,6 +104,7 @@ abstract class ViewProfileController extends ProfilesController {
 			"viewer" -> currentMember,
 			"isSelf" -> isSelf,
 			"isStaff" -> profiledMember.isStaff,
+			"marker" -> profiledMember.asSsoUser,
 			"smallGroups" -> smallGroups,
 			"marking" -> marking
 		).crumbs(Breadcrumbs.Profile(profiledMember, isSelf))

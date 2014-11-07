@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.validation.{BindingResult, Errors}
@@ -15,8 +16,8 @@ import scala.collection.mutable
 import uk.ac.warwick.tabula.system.BindListener
 
 object MarkingCompletedCommand {
-	def apply(module: Module, assignment: Assignment, user: User) =
-		new MarkingCompletedCommand(module, assignment, user)
+	def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser) =
+		new MarkingCompletedCommand(module, assignment, marker, submitter)
 			with ComposableCommand[Unit]
 			with MarkingCompletedCommandPermissions
 			with MarkingCompletedDescription
@@ -26,7 +27,7 @@ object MarkingCompletedCommand {
 			with AutowiringFeedbackServiceComponent
 }
 
-abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User)
+abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User, val submitter: CurrentUser)
 	extends CommandInternal[Unit] with Appliable[Unit] with SelfValidating with UserAware with MarkingCompletedState with ReleasedState with BindListener {
 
 	self: StateServiceComponent with FeedbackServiceComponent =>
@@ -63,7 +64,7 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 		}
 
 		val feedbackToFinalise = feedbackForRelease.filter(!nextMarkerFeedback(_).isDefined)
-		if (!feedbackToFinalise.isEmpty)
+		if (feedbackToFinalise.nonEmpty)
 			finaliseFeedback(feedbackToFinalise)
 	}
 
@@ -87,6 +88,9 @@ trait MarkingCompletedCommandPermissions extends RequiresPermissionsChecking {
 	self: MarkingCompletedState =>
 	def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.Feedback.Create, assignment)
+		if(submitter.apparentUser != marker) {
+			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
+		}
 	}
 }
 
@@ -106,6 +110,7 @@ trait MarkingCompletedDescription extends Describable[Unit] {
 }
 
 trait MarkingCompletedState {
+	self : UserAware =>
 
 	import uk.ac.warwick.tabula.JavaImports._
 
@@ -121,6 +126,8 @@ trait MarkingCompletedState {
 
 	var onlineMarking: Boolean = false
 	var confirm: Boolean = false
+	val marker = user
+	val submitter: CurrentUser
 }
 
 trait SecondMarkerReleaseNotifier extends FeedbackReleasedNotifier[Unit] {

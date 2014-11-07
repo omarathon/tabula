@@ -23,9 +23,9 @@ class ModeratedMarkingWorkflow extends MarkingWorkflow with NoThirdMarker with A
 			case None => throw new ItemNotFoundException
 			case Some(submission) =>
 				if (submission.isReleasedToSecondMarker && getStudentsSecondMarker(assignment, submission.universityId).exists(_ == marker.getUserId))
-					Routes.coursework.admin.assignment.onlineModeration(assignment)
+					Routes.coursework.admin.assignment.onlineModeration(assignment, marker)
 				else
-					Routes.coursework.admin.assignment.onlineMarkerFeedback(assignment)
+					Routes.coursework.admin.assignment.onlineMarkerFeedback(assignment, marker)
 		}
 
 	}

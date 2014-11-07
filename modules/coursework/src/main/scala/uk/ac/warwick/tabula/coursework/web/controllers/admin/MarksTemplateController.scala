@@ -8,7 +8,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, RequestMapping}
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
@@ -19,6 +18,7 @@ import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.tabula.services.FeedbackService
+import uk.ac.warwick.userlookup.User
 
 class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignment) extends Command[XSSFWorkbook] with ReadOnly with Unaudited {
 	import MarksTemplateCommand._
@@ -44,7 +44,7 @@ class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignmen
 			val feedbacks = feedbackService.getStudentFeedback(assignment, member)
 			feedbacks.foreach { feedback =>
 			  feedback.actualMark.foreach(marksCell.setCellValue(_))
-			  feedback.actualGrade.foreach(gradesCell.setCellValue(_))
+			  feedback.actualGrade.foreach(gradesCell.setCellValue)
 			}
 		}
 
@@ -87,7 +87,7 @@ class MarksTemplateController extends CourseworkController {
 
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 	
-	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable(value = "assignment") assignment: Assignment) =
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable(value="assignment") assignment: Assignment) =
 		new GenerateMarksTemplateCommand(module, assignment)
 
 	@RequestMapping(method = Array(HEAD, GET))
@@ -99,18 +99,18 @@ class MarksTemplateController extends CourseworkController {
 
 
 @Controller
-@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/marks-template"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/marks-template"))
 class MarkerMarksTemplateController extends CourseworkController {
 	import MarksTemplateCommand._
 
 	var assignmentService = Wire.auto[AssignmentService]
 
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment) =
+	@ModelAttribute def command(@PathVariable module: Module, @PathVariable(value="assignment") assignment: Assignment) =
 		new GenerateMarksTemplateCommand(module, assignment)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(cmd: GenerateMarksTemplateCommand, currentUser: CurrentUser) = {
-		cmd.members = cmd.assignment.getMarkersSubmissions(currentUser.apparentUser).map(_.universityId)
+	def generateMarksTemplate(cmd: GenerateMarksTemplateCommand, @PathVariable(value="marker") marker: User) = {
+		cmd.members = cmd.assignment.getMarkersSubmissions(marker).map(_.universityId)
 		new ExcelView(safeAssignmentName(cmd.assignment) + " marks.xlsx", cmd.apply())
 	}
 }

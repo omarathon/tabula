@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.data.model.{Feedback, Assignment, MarkerFeedback, Module}
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{UploadedFile, Description}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.helpers.LazyLists
@@ -13,21 +14,24 @@ import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.Errors
 
 
-class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter: CurrentUser)
-	extends UploadFeedbackCommand[List[MarkerFeedback]](module, assignment, submitter)  {
+class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: User, submitter: CurrentUser)
+	extends UploadFeedbackCommand[List[MarkerFeedback]](module, assignment, marker)  {
 	
 	PermissionCheck(Permissions.Feedback.Create, assignment)
+	if(submitter.apparentUser != marker) {
+		PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
+	}
 
 	// list to contain feedback files that are not for a student you should be marking
 	var invalidStudents: JList[FeedbackItem] = LazyLists.create()
 	// list to contain feedback files that are  for a student that has already been completed
 	var markedStudents: JList[FeedbackItem] = LazyLists.create()
 
-	val submissions = assignment.getMarkersSubmissions(submitter.apparentUser)
+	val submissions = assignment.getMarkersSubmissions(marker)
 
 	def processStudents() {
 		val markedSubmissions = submissions.filter{ submission =>
-			val markerFeedback =  assignment.getMarkerFeedbackForCurrentPosition(submission.universityId, submitter.apparentUser)
+			val markerFeedback =  assignment.getMarkerFeedbackForCurrentPosition(submission.universityId, marker)
 			markerFeedback match {
 				case Some(f) if f.state != MarkingCompleted => true
 				case _ => false
@@ -45,7 +49,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 		val parentFeedback = assignment.feedbacks.find(_.universityId == uniNumber).getOrElse({
 			val newFeedback = new Feedback
 			newFeedback.assignment = assignment
-			newFeedback.uploaderId = submitter.apparentId
+			newFeedback.uploaderId = marker.getUserId
 			newFeedback.universityId = uniNumber
 			newFeedback.released = false
 			newFeedback.createdDate = DateTime.now

@@ -30,7 +30,7 @@ class OnlineFeedbackController extends CourseworkController with MarkerFeedbackC
 		val feedbackGraphs = command.apply()
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
-		val markerFeedbackCollections = getMarkerFeedbackCollections(assignment, module, user, userLookup)
+		val markerFeedbackCollections = getMarkerFeedbackCollections(assignment, module, user.apparentUser, userLookup)
 
 		Mav("admin/assignments/feedback/online_framework",
 			"showMarkingCompleted" -> false,
@@ -50,17 +50,15 @@ class OnlineFeedbackController extends CourseworkController with MarkerFeedbackC
 			)
 	}
 
-
-
 }
 
 @Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/online"))
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/online"))
 class OnlineMarkerFeedbackController extends CourseworkController with MarkerFeedbackCollecting with AutowiringUserLookupComponent {
 
 	@ModelAttribute
-	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
-		OnlineMarkerFeedbackCommand(module, assignment, currentUser.apparentUser)
+	def command(@PathVariable module: Module, @PathVariable assignment: Assignment,  @PathVariable marker: User) =
+		OnlineMarkerFeedbackCommand(module, assignment, marker)
 
 	@RequestMapping
 	def showTable(@ModelAttribute command: OnlineMarkerFeedbackCommand, errors: Errors): Mav = {
@@ -68,7 +66,7 @@ class OnlineMarkerFeedbackController extends CourseworkController with MarkerFee
 		val feedbackGraphs = command.apply()
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
-		val markerFeedbackCollections = getMarkerFeedbackCollections(assignment, module, user, userLookup)
+		val markerFeedbackCollections = getMarkerFeedbackCollections(assignment, module, command.marker, userLookup)
 
 		// will need to take into account Seen Second Marking also
 		val showMarkingCompleted =
@@ -87,10 +85,8 @@ class OnlineMarkerFeedbackController extends CourseworkController with MarkerFee
 				graph.student.getUserId -> assignment.markingWorkflow.onlineMarkingUrl(assignment, command.marker, graph.student.getUserId)
 			}.toMap
 		).crumbs(
-				Breadcrumbs.Department(module.adminDepartment),
-				Breadcrumbs.Module(module),
-				Breadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment)), "")
-			)
+			Breadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment, command.marker)), "")
+		)
 	}
 }
 
@@ -103,7 +99,7 @@ class OnlineFeedbackFormController extends CourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable student: User, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
-		OnlineFeedbackFormCommand(module, assignment, student, currentUser)
+		OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineFeedbackFormCommand, errors: Errors): Mav = {
@@ -125,14 +121,14 @@ class OnlineFeedbackFormController extends CourseworkController {
 }
 
 @Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/online/{student}"))
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/online/{student}"))
 class OnlineMarkerFeedbackFormController extends CourseworkController {
 
 	validatesSelf[OnlineMarkerFeedbackFormCommand]
 
 	@ModelAttribute("command")
-	def command(@PathVariable student: User, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
-		OnlineMarkerFeedbackFormCommand(module, assignment, student, currentUser)
+	def command(@PathVariable student: User, @PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable marker: User) =
+		OnlineMarkerFeedbackFormCommand(module, assignment, student, marker)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineMarkerFeedbackFormCommand, errors: Errors): Mav = {
@@ -141,7 +137,7 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 
 		val parentFeedback = command.allMarkerFeedbacks.head.feedback
 		val isRejected = command.allMarkerFeedbacks.exists(_.state == Rejected)
-		val isCurrentUserFeebackEntry = parentFeedback.getCurrentWorkflowFeedback.exists(_.getMarkerUser == command.currentUser.apparentUser)
+		val isCurrentUserFeebackEntry = parentFeedback.getCurrentWorkflowFeedback.exists(_.getMarkerUser == command.marker)
 		val allCompletedMarkerFeedback = parentFeedback.getAllCompletedMarkerFeedback
 
 

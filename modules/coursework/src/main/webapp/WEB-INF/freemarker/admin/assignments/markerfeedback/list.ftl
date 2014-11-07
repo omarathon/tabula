@@ -50,7 +50,8 @@
 						<#if feedback_index < lastIndex>
 							<#local attachments=feedback.attachments />
 							<#if attachments?size gt 0>
-								<a class="btn long-running" href="<@routes.downloadMarkerFeedback assignment feedback />">
+								<a class="btn long-running" href="<@routes.downloadMarkerFeedback assignment feedback marker />">
+								<a class="btn long-running" href="<@routes.downloadMarkerFeedback assignment feedback marker />">
 									<i class="icon-download"></i>
 									${attachments?size}
 									<#if attachments?size == 1> file<#else> files</#if>
@@ -73,7 +74,7 @@
 				<td>
 					<#local attachments=thisFeedback.attachments />
 					<#if attachments?size gt 0>
-						<a class="btn long-running" href="<@routes.downloadMarkerFeedback assignment thisFeedback />">
+						<a class="btn long-running" href="<@routes.downloadMarkerFeedback assignment thisFeedback marker />">
 							<i class="icon-download"></i>
 							${attachments?size}
 							<#if attachments?size == 1> file<#else> files</#if>
@@ -126,7 +127,7 @@
 		</#if>
 		<a class="btn use-tooltip ${disabledClass}"
 		   title="Download a zip of submissions due to be marked. Note that submissions with a status of 'Marking completed' will not be included in this zip"
-		   href="<@routes.downloadmarkersubmissions assignment=assignment />"
+		   href="<@routes.downloadmarkersubmissions assignment=assignment marker=marker />"
 		   data-container="body"
 		>
 			<i class="icon-download"></i> Download submissions (${feedbackToDoCount})
@@ -139,19 +140,19 @@
 				</a>
 				<ul class="dropdown-menu">
 					<li>
-						<a href="<@routes.downloadfirstmarkerfeedback assignment=assignment />">
+						<a href="<@routes.downloadfirstmarkerfeedback assignment=assignment marker=marker />">
 							<i class="icon-download"></i> Download ${firstMarkerRoleName} feedback
 						</a>
 					</li>
 					<li>
-						<a href="<@routes.downloadsecondmarkerfeedback assignment=assignment />">
+						<a href="<@routes.downloadsecondmarkerfeedback assignment=assignment  marker=marker />">
 							<i class="icon-download"></i> Download ${secondMarkerRoleName} feedback
 						</a>
 					</li>
 				</ul>
 			</div>
 		<#elseif hasFirstMarkerFeedback>
-			<a class="btn" href="<@routes.downloadfirstmarkerfeedback assignment=assignment />">
+			<a class="btn" href="<@routes.downloadfirstmarkerfeedback assignment=assignment marker=marker />">
 				<i class="icon-download"></i> Download ${firstMarkerRoleName} feedback
 			</a>
 		</#if>
@@ -162,16 +163,18 @@
 			</a>
 			<ul class="dropdown-menu">
 				<li>
-					<a class="${disabledClass}" href="<@routes.uploadmarkerfeedback assignment=assignment />">
+					<a class="${disabledClass}" href="<@routes.uploadmarkerfeedback assignment=assignment marker=marker/>">
 						<i class="icon-upload"></i> Upload attachments
 					</a>
-					<a class="${disabledClass}" href="<@routes.markeraddmarks assignment=assignment />">
+				</li>
+				<li>
+					<a class="${disabledClass}" href="<@routes.markeraddmarks assignment=assignment marker=marker/>">
 						<i class="icon-plus"></i> Add Marks
 					</a>
 				</li>
 			</ul>
 		</div>
-		<a class="btn ${disabledClass}" href="<@routes.markerOnlinefeedback assignment />">
+		<a class="btn ${disabledClass}" href="<@routes.markerOnlinefeedback assignment marker />">
 			<i class="icon-edit"></i> Online feedback
 		</a>
 		<div class="btn-group">
@@ -184,7 +187,7 @@
 					<a class="use-tooltip form-post"
 					   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point."
 					   data-container="body"
-					   href="<@routes.markingCompleted assignment />"
+					   href="<@routes.markingCompleted assignment marker />"
 					   id="marking-complete-button">
 						<i class="icon-ok"></i> Marking completed
 					</a>
@@ -193,7 +196,7 @@
 					<a class="use-tooltip form-post"
 					   title="Unfinalise marks and feedback. Note that this can only be done if feedback has not been released for this student."
 					   data-container="body"
-					   href="<@routes.markingUncompleted assignment />"
+					   href="<@routes.markingUncompleted assignment marker />"
 					   id="marking-uncomplete-button">
 						<i class="icon-remove"></i> Marking uncompleted
 					</a>
