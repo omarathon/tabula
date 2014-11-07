@@ -1,13 +1,12 @@
 package uk.ac.warwick.tabula.profiles.notifications
 
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.{StudentRelationshipChangeToNewAgentNotification, StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToStudentNotification}
+import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.{Member, StudentRelationship}
-import org.mockito.Mockito._
 import uk.ac.warwick.tabula.profiles.TutorFixture
-import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
-import uk.ac.warwick.tabula.data.model.notifications.{StudentRelationshipChangeToNewAgentNotification, StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToStudentNotification}
+import uk.ac.warwick.tabula.services.ProfileService
 
 class StudentRelationshipChangeNotificationTest extends TestBase with Mockito with FreemarkerRendering with TutorFixture {
 

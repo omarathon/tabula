@@ -214,13 +214,19 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	}
 
 	def listStudentsPoints(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
-		student.mostSignificantCourseDetails.fold(Seq[AttendanceMonitoringPoint]())(scd => {
-			val currentCourseStartDate = scd.beginDate
+		val beginDates = student.freshStudentCourseDetails.filter(_.freshStudentCourseYearDetails.exists(_.academicYear == academicYear)).map(_.beginDate)
+		if (beginDates.nonEmpty) {
+			// do not remove; import needed for sorting
+			// should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+			import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+			val beginDate = beginDates.min
 			val schemes = findSchemesForStudent(student.universityId, student.userId, departmentOption, academicYear)
 			schemes.flatMap(_.points.asScala).filter(p =>
-				p.startDate.isAfter(currentCourseStartDate) || p.startDate.isEqual(currentCourseStartDate)
+				p.startDate.isAfter(beginDate) || p.startDate.isEqual(beginDate)
 			)
-		})
+		} else {
+			Seq()
+		}
 	}
 
 	def listStudentsPoints(studentData: AttendanceMonitoringStudentData, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {

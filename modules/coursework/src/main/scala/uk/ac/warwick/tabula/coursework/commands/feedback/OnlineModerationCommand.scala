@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.model.notifications.coursework.ModeratorRejectedNotification
 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model._
@@ -14,7 +15,6 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.coursework.commands.assignments.FinaliseFeedbackCommand
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.notifications.ModeratorRejectedNotification
 
 object OnlineModerationCommand {
 	def apply(module: Module, assignment: Assignment, student: User, marker: User) =

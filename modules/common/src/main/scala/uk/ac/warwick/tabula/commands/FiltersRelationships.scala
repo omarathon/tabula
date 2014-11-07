@@ -9,7 +9,7 @@ import scala.collection.JavaConverters._
 object FiltersRelationships {
 	val AliasPaths: Map[String, Seq[(String, AliasAndJoinType)]] = Seq(
 		"studentCourseYearDetails" -> Seq(
-			"latestStudentCourseYearDetails" -> AliasAndJoinType("studentCourseYearDetails")
+			"studentCourseYearDetails" -> AliasAndJoinType("studentCourseYearDetails")
 		),
 		"moduleRegistration" -> Seq(
 			"_moduleRegistrations" -> AliasAndJoinType("moduleRegistration")

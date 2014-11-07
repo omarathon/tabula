@@ -1,7 +1,9 @@
 package uk.ac.warwick.tabula.commands
 
+import org.hibernate.criterion.{Property, Restrictions, Projections, DetachedCriteria}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaRestriction, ScalaOrder}
+import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
+import uk.ac.warwick.tabula.data.{Daoisms, AliasAndJoinType, ScalaRestriction, ScalaOrder}
 import uk.ac.warwick.tabula.services.ProfileServiceComponent
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -65,19 +67,46 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 		getAliasPaths("department") : _*
 	)
 
+	def enrolledOrCompletedRestriction: Option[ScalaRestriction] = isIfTicked(
+		"studentCourseYearDetails.enrolledOrCompleted",
+		true,
+		otherCriteria.contains("Enrolled for year or course completed"),
+		getAliasPaths("studentCourseYearDetails") : _*
+	)
+
 	protected def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] = {
-		Seq(
-				courseTypeRestriction,
-				routeRestriction,
-				attendanceRestriction,
-				yearOfStudyRestriction,
-				sprStatusRestriction,
-				registeredModulesRestriction(year),
-				tier4Restriction,
-				visitingRestriction
+		val restrictions = Seq(
+			courseTypeRestriction,
+			routeRestriction,
+			attendanceRestriction,
+			yearOfStudyRestriction,
+			sprStatusRestriction,
+			registeredModulesRestriction(year),
+			tier4Restriction,
+			visitingRestriction,
+			enrolledOrCompletedRestriction
 		).flatten
+
+		if (restrictions.exists { _.aliases.contains("mostSignificantCourse.studentCourseYearDetails") }) {
+			// We need to restrict the studentCourseYearDetails to the latest one by year
+			restrictions ++ latestStudentCourseYearDetailsForYearRestrictions(year)
+		} else restrictions
+	}
+
+	def latestStudentCourseYearDetailsForYearRestrictions(year: AcademicYear): Seq[ScalaRestriction] = {
+		val latestYearDetailsForYear =
+			DetachedCriteria.forClass(classOf[StudentCourseYearDetails], "latestSCYD")
+				.setProjection(Projections.max("latestSCYD.sceSequenceNumber"))
+				.add(Daoisms.is("latestSCYD.academicYear", year))
+				.add(Restrictions.eqProperty("latestSCYD.studentCourseDetails.scjCode", "mostSignificantCourse.scjCode"))
+
+		// We need to restrict the studentCourseYearDetails to the latest one by year
+		Seq(
+			new ScalaRestriction(Daoisms.isSubquery("studentCourseYearDetails.sceSequenceNumber", latestYearDetailsForYear)),
+			new ScalaRestriction(Daoisms.is("studentCourseYearDetails.academicYear", year))
+		)
 	}
 
 	lazy val allYearsOfStudy: Seq[Int] = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
-	lazy val allOtherCriteria: Seq[String] = Seq("Tier 4 only", "Visiting")
+	lazy val allOtherCriteria: Seq[String] = Seq("Tier 4 only", "Visiting", "Enrolled for year or course completed")
 }

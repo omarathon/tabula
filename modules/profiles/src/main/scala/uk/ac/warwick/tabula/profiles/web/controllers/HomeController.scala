@@ -24,7 +24,9 @@ import uk.ac.warwick.tabula.permissions.Permissions
 	def createCommand(user: CurrentUser) = ProfilesHomeCommand(user, optionalCurrentMember)
 
 	@RequestMapping(Array("/")) def home(@ModelAttribute("command") cmd: Appliable[ProfilesHomeInformation]) = {
-		if (user.isStaff) {
+		if (optionalCurrentMember.filter(_.userType == Student).isDefined) {
+			Redirect(Routes.profile.view(currentMember))
+		} else {
 			val info = cmd.apply()
 
 			Mav("home/view",
@@ -36,9 +38,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 				"adminDepartments" -> info.adminDepartments,
 				"searchDepartments" -> departmentService.departmentsWithPermission(user, Permissions.Profiles.Search)
 			)
-		} else if (optionalCurrentMember.filter(_.userType == Student).isDefined) {
-			Redirect(Routes.profile.view(currentMember))
-		} else Mav("home/nopermission")
+		}
 	}
 	
 	@RequestMapping(Array("/view")) def redirectHome() = Redirect(Routes.home)

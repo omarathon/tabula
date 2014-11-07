@@ -229,6 +229,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					logger.info(s"Migrating meetings from old relationships for ${student.universityId}")
 					migrateCommand.apply()
 				}
+			case _ =>
 		}
 
 		session.flush()

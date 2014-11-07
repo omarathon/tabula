@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
+import uk.ac.warwick.tabula.data.model.notifications.coursework.ExtensionRevokedNotification
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands.{Notifies, Description, ComposableCommand}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -8,7 +10,6 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.notifications.ExtensionRevokedNotification
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
 
 object DeleteExtensionCommand {

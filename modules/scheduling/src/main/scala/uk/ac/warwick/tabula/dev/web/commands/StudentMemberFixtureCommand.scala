@@ -70,6 +70,7 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 			val yd = new StudentCourseYearDetails(scd, 1, scydAcademicYear)
 			yd.yearOfStudy = yearOfStudy
 			if (dept.isDefined) yd.enrolmentDepartment = dept.get
+			yd.enrolledOrCompleted = true
 			scd.attachStudentCourseYearDetails(yd)
 
 			transactional() {

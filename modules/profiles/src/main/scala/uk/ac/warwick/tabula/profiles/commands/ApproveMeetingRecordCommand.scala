@@ -2,58 +2,64 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.FeaturesComponent
+import uk.ac.warwick.tabula.{CurrentUser, FeaturesComponent}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
-import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.{MeetingRecordApprovedNotification, MeetingRecordRejectedNotification}
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, MeetingRecordApproval, Notification}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{MeetingRecordApprovedNotification, MeetingRecordRejectedNotification}
+import uk.ac.warwick.tabula.data.model.{MeetingRecordApproval, MeetingRecord, Notification}
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordServiceComponent, AutowiringAttendanceMonitoringMeetingRecordServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointMeetingRelationshipTermServiceComponent, MonitoringPointMeetingRelationshipTermServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import collection.JavaConverters._
 
 object ApproveMeetingRecordCommand {
-	def apply(approval: MeetingRecordApproval) =
-		new ApproveMeetingRecordCommand(approval)
-		with ComposableCommand[MeetingRecordApproval]
+	def apply(meeting: MeetingRecord, user: CurrentUser) =
+		new ApproveMeetingRecordCommand(meeting, user)
+		with AutowiringSecurityServiceComponent
+		with AutowiringMeetingRecordDaoComponent
+		with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
+		with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
+		with ComposableCommand[MeetingRecord]
 		with ApproveMeetingRecordDescription
 		with ApproveMeetingRecordPermission
 		with ApproveMeetingRecordValidation
 		with ApproveMeetingRecordNotification
-		with AutowiringMeetingRecordDaoComponent
-		with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
-		with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
-
 }
 
-class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval) extends CommandInternal[MeetingRecordApproval] with ApproveMeetingRecordState {
+class ApproveMeetingRecordCommand (val meeting: MeetingRecord, val user: CurrentUser)
+	extends CommandInternal[MeetingRecord] with ApproveMeetingRecordState {
 
 	self: MeetingRecordDaoComponent with MonitoringPointMeetingRelationshipTermServiceComponent
-		with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent =>
+		with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent with SecurityServiceComponent =>
 
 	def applyInternal() = transactional() {
 		if (approved) {
-			approval.state = Approved
+			approvals.foreach(approval => {
+				approval.state = Approved
+				approval.lastUpdatedDate = DateTime.now
+				meetingRecordDao.saveOrUpdate(approval)
+			})
 		} else {
-			approval.state = Rejected
-			approval.comments = rejectionComments
+			approvals.foreach(approval => {
+				approval.state = Rejected
+				approval.comments = rejectionComments
+				approval.lastUpdatedDate = DateTime.now
+				meetingRecordDao.saveOrUpdate(approval)
+			})
 		}
-
-		approval.lastUpdatedDate = DateTime.now
-
-		meetingRecordDao.saveOrUpdate(approval)
 
 		if (features.attendanceMonitoringMeetingPointType) {
-			monitoringPointMeetingRelationshipTermService.updateCheckpointsForMeeting(approval.meetingRecord)
+			monitoringPointMeetingRelationshipTermService.updateCheckpointsForMeeting(meeting)
 			if (features.attendanceMonitoringAcademicYear2014)
-				attendanceMonitoringMeetingRecordService.updateCheckpoints(approval.meetingRecord)
+				attendanceMonitoringMeetingRecordService.updateCheckpoints(meeting)
 		}
 
-		approval
+		meeting
 	}
 }
 
@@ -61,7 +67,7 @@ trait ApproveMeetingRecordValidation extends SelfValidating {
 	self: ApproveMeetingRecordState =>
 
 	def validate(errors: Errors) {
-		if (approval.meetingRecord.deleted){
+		if (meeting.deleted){
 			errors.reject("meetingRecordApproval.meetingRecord.deleted")
 		}
 		if (approved == null) {
@@ -76,31 +82,43 @@ trait ApproveMeetingRecordPermission extends RequiresPermissionsChecking with Pe
 	self: ApproveMeetingRecordState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.MeetingRecord.Update(approval.meetingRecord.relationship.relationshipType), approval.meetingRecord)
+		p.PermissionCheckAny(meeting.approvals.asScala.map(approval =>
+			CheckablePermission(Permissions.Profiles.MeetingRecord.Approve, approval)
+		))
 	}
 }
 
-trait ApproveMeetingRecordDescription extends Describable[MeetingRecordApproval] {
+trait ApproveMeetingRecordDescription extends Describable[MeetingRecord] {
+
 	self: ApproveMeetingRecordState =>
+
 	def describe(d: Description) {
-		d.properties("meetingRecord" -> approval.meetingRecord.id)
+		d.meeting(meeting)
 	}
 }
 
-trait ApproveMeetingRecordNotification extends Notifies[MeetingRecordApproval, MeetingRecord] {
+trait ApproveMeetingRecordNotification extends Notifies[MeetingRecord, MeetingRecord] {
 	self: ApproveMeetingRecordState =>
 
-	def emit(approval: MeetingRecordApproval) = {
-		val agent = approval.approver.asSsoUser
+	def emit(meeting: MeetingRecord) = {
+		val agent = user.apparentUser
 
-		if (approved) Seq( Notification.init(new MeetingRecordApprovedNotification, agent, Seq(approval) ))
-		else Seq( Notification.init(new MeetingRecordRejectedNotification, agent, Seq(approval) ))
+		if (approved)
+			Seq(Notification.init(new MeetingRecordApprovedNotification, agent, Seq(approvals.head)))
+		else Seq( Notification.init(new MeetingRecordRejectedNotification, agent, Seq(approvals.head) ))
 	}
 
 }
 
 trait ApproveMeetingRecordState {
-	def approval: MeetingRecordApproval
+
+	self: SecurityServiceComponent =>
+
+	def meeting: MeetingRecord
+	def user: CurrentUser
 	var approved: JBoolean = _
 	var rejectionComments: String =_
+
+	lazy val approvals: Seq[MeetingRecordApproval] =
+		meeting.approvals.asScala.filter(approval => securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, approval)).toSeq
 }

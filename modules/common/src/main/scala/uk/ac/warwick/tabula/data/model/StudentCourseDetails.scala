@@ -206,6 +206,9 @@ trait BasicStudentCourseProperties {
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var mostSignificant: JBoolean = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var reasonForTransferCode: String = _
 }
 
 trait StudentCourseProperties extends BasicStudentCourseProperties {

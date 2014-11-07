@@ -125,6 +125,7 @@ trait AttendanceFilterExtras extends FiltersStudents {
 	override lazy val allOtherCriteria: Seq[String] = Seq(
 		"Tier 4 only",
 		"Visiting",
+		"Enrolled for year or course completed",
 		UNAUTHORISED,
 		AUTHORISED,
 		UNRECORDED,

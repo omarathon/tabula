@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.criterion.{PropertySubqueryExpression, DetachedCriteria}
 import org.hibernate.{Hibernate, SessionFactory, Session}
 import javax.sql.DataSource
 import uk.ac.warwick.tabula.data.model.{StudentCourseYearDetails, CanBeDeleted, Member, StudentCourseDetails}
@@ -45,6 +46,7 @@ trait ExtendedSessionComponent extends SessionComponent {
 
 trait HelperRestrictions extends Logging {
 	def is = org.hibernate.criterion.Restrictions.eqOrIsNull _
+	def isSubquery(propertyName: String, subquery: DetachedCriteria) = new PropertySubqueryExpressionWithToString(propertyName, subquery)
 	def isNull(propertyName: String) = org.hibernate.criterion.Restrictions.isNull(propertyName)
 	def safeIn[A](propertyName: String, iterable: Seq[A]) = {
 		if (iterable.isEmpty) {
@@ -131,3 +133,8 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 
 }
 
+class PropertySubqueryExpressionWithToString(propertyName: String, dc: DetachedCriteria) extends PropertySubqueryExpression(propertyName, "=", null, dc) {
+
+	override def toString() = propertyName + "=" + dc
+
+}

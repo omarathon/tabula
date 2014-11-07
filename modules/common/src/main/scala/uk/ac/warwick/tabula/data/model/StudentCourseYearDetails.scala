@@ -131,6 +131,16 @@ trait StudentCourseYearProperties extends BasicStudentCourseYearProperties {
 	@JoinColumn(name="modeOfAttendanceCode", referencedColumnName="code")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var modeOfAttendance: ModeOfAttendance = _
+
+	/*
+	 * A boolean flag set at import-time (see ImportStudentCourseYearCommand) that indicates whether we believe
+	 * the student was enrolled in this year or not. For every year except the student's final year, this is effectively
+	 * the same as checking that the enrolmentStatus is not permanently withdrawn (doesn't start with P). Because the
+	 * Academic Office marks SCE records as permanently withdrawn when a student graduates, we also set this for true
+	 * if the student is permanently withdrawn but their SCJ reason for transfer code starts with S (i.e. they have successfully
+	 * completed their course).
+	 */
+	var enrolledOrCompleted: Boolean = _
 }
 
 class StudentCourseYearKey {

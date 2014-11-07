@@ -43,10 +43,9 @@ class ViewStudentRelationshipsCommand(val department: Department, val relationsh
 		val unsortedAgentRelationshipsByStaffDept = relationshipService.listStudentRelationshipsByStaffDepartment(relationshipType, department)
 
 		// combine the two and remove the dups
-		val unsortedAgentRelationships =
-			(unsortedAgentRelationshipsByStudentDept ++ unsortedAgentRelationshipsByStaffDept)
-				// TAB-2723 treat relationships between the same agent and student as identical
-				.groupBy { rel => (rel.agent, rel.studentId) }
+		val unsortedAgentRelationships = (unsortedAgentRelationshipsByStudentDept ++ unsortedAgentRelationshipsByStaffDept)
+				// TAB-2750 treat relationships between the same agent and student COURSE as identical
+				.groupBy { rel => (rel.agent, rel.studentCourseDetails) }
 				.map { case (_, rels) => rels.maxBy { rel => rel.startDate.getMillis } }
 				.toSeq
 

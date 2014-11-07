@@ -18,6 +18,7 @@ object MasqueradeCommand {
 				with AutowiringUserLookupComponent
 				with AutowiringSecurityServiceComponent
 				with AutowiringProfileServiceComponent
+				with AutowiringModuleAndDepartmentServiceComponent
 				with ComposableCommand[Option[Cookie]]
 				with ReadOnly
 				with PubliclyVisiblePermissions // Public because we always want to be able to remove the cookie, and we validate our own perms
@@ -49,17 +50,24 @@ trait MasqueradeCommandState {
 }
 
 trait MasqueradeCommandValidation extends SelfValidating {
-	self: MasqueradeCommandState with UserLookupComponent with ProfileServiceComponent with SecurityServiceComponent =>
+	self: MasqueradeCommandState with UserLookupComponent with ProfileServiceComponent with SecurityServiceComponent with ModuleAndDepartmentServiceComponent =>
 
 	def validate(errors: Errors) {
 		if (action != "remove") {
 			userLookup.getUserByUserId(usercode) match {
 				case FoundUser(u) =>
-					val realUser = new CurrentUser(user.realUser, user.realUser)
+					val realUser = if (user.masquerading) new CurrentUser(user.realUser, user.realUser) else user
+					val masqueradeDepartments = moduleAndDepartmentService.departmentsWithPermission(realUser, Permissions.Masquerade)
+					val masqueradeDepartmentsAndRoots = masqueradeDepartments.flatMap { dept =>
+						if (dept.hasParent) Seq(dept, dept.rootDepartment)
+						else Seq(dept)
+					}
 
 					if (!securityService.can(realUser, Permissions.Masquerade, PermissionsTarget.Global)) {
 						profileService.getMemberByUser(u, disableFilter = true, eagerLoad = false) match {
-							case Some(profile) if securityService.can(realUser, Permissions.Masquerade, profile) =>
+							case Some(profile)
+								if securityService.can(realUser, Permissions.Masquerade, profile) ||
+									 masqueradeDepartmentsAndRoots.exists(profile.affiliatedDepartments.contains) =>
 							case _ => errors.rejectValue("usercode", "masquerade.noPermission")
 						}
 					}

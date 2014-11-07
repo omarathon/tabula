@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.groups.notifications
 
+import uk.ac.warwick.tabula.data.model.notifications.groups.SmallGroupSetChangedNotification
 import uk.ac.warwick.tabula.{FreemarkerTestHelpers, TestBase}
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.groups.{SmallGroupEventBuilder, SmallGroupFixture}
@@ -9,7 +10,6 @@ import org.mockito.Mockito._
 import org.mockito.Matchers._
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import org.joda.time.LocalTime
-import uk.ac.warwick.tabula.data.model.notifications.SmallGroupSetChangedNotification
 
 class SmallGroupSetChangedNotificationTemplateTest extends TestBase with FreemarkerTestHelpers with FreemarkerRendering {
 

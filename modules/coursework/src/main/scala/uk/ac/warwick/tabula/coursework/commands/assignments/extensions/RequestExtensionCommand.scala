@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{ExtensionRequestModifiedNotification, ExtensionRequestCreatedNotification}
+
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.forms.Extension
@@ -18,8 +20,6 @@ import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 import scala.collection.mutable
-import uk.ac.warwick.tabula.data.model.notifications.{ExtensionRequestCreatedNotification, ExtensionRequestModifiedNotification}
-
 
 object RequestExtensionCommand {
 	def apply (module: Module, assignment: Assignment, submitter: CurrentUser, action: String) = {
