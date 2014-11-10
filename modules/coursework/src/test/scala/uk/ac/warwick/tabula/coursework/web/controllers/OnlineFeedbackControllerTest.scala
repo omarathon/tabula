@@ -21,7 +21,7 @@ class OnlineFeedbackControllerTest extends TestBase {
 		assignment.module = module
 		assignment.name = "Herons are evil"
 
-		val command = new OnlineFeedbackCommand(module, assignment) with OnlineFeedbackCommandTestSupport
+		val command = new OnlineFeedbackCommand(module, assignment, currentUser) with OnlineFeedbackCommandTestSupport
 
 	}
 

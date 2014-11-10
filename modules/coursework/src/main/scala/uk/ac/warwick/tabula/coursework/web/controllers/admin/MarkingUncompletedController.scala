@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.coursework.web.Routes
@@ -21,8 +22,11 @@ class MarkingUncompletedController extends CourseworkController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("markingUncompletedCommand")
-	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("marker") marker: User) =
-		MarkingUncompletedCommand(module, assignment, marker)
+	def command(@PathVariable("module") module: Module,
+							@PathVariable("assignment") assignment: Assignment,
+							@PathVariable("marker") marker: User,
+							submitter: CurrentUser) =
+		MarkingUncompletedCommand(module, assignment, marker, submitter)
 
 	def RedirectBack(assignment: Assignment, command: MarkingUncompletedCommand) = {
 		if (command.onlineMarking) {

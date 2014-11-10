@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.coursework.commands.feedback.OnlineModerationCommand
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
@@ -18,8 +19,12 @@ class OnlineModerationController extends CourseworkController {
 	validatesSelf[OnlineModerationCommand]
 
 	@ModelAttribute("command")
-	def command(@PathVariable student: User, @PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable marker: User) =
-		OnlineModerationCommand(module, assignment, student, marker)
+	def command(@PathVariable student: User,
+							@PathVariable module: Module,
+							@PathVariable assignment: Assignment,
+							@PathVariable marker: User,
+							submitter: CurrentUser) =
+		OnlineModerationCommand(module, assignment, student, marker, submitter)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineModerationCommand, errors: Errors): Mav = {

@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services._
@@ -10,8 +11,8 @@ import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object OnlineFeedbackCommand {
-	def apply(module: Module, assignment: Assignment) =
-		new OnlineFeedbackCommand(module, assignment)
+	def apply(module: Module, assignment: Assignment, submitter: CurrentUser) =
+		new OnlineFeedbackCommand(module, assignment, submitter)
 			with ComposableCommand[Seq[StudentFeedbackGraph]]
 			with OnlineFeedbackPermissions
 			with AutowiringSubmissionServiceComponent
@@ -22,11 +23,13 @@ object OnlineFeedbackCommand {
 			with ReadOnly
 }
 
-abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignment)
+abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser)
 	extends CommandInternal[Seq[StudentFeedbackGraph]]
 	with Appliable[Seq[StudentFeedbackGraph]] with OnlineFeedbackState {
 
 	self: SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with AssignmentMembershipServiceComponent =>
+
+	val marker = submitter.apparentUser
 
 	def applyInternal() = {
 		val studentsWithSubmissionOrFeedback = 
@@ -55,8 +58,8 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 
 
 object OnlineMarkerFeedbackCommand {
-	def apply(module: Module, assignment: Assignment, marker: User) =
-		new OnlineMarkerFeedbackCommand(module, assignment, marker)
+	def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser) =
+		new OnlineMarkerFeedbackCommand(module, assignment, marker, submitter)
 			with ComposableCommand[Seq[StudentFeedbackGraph]]
 			with OnlineFeedbackPermissions
 			with AutowiringUserLookupComponent
@@ -66,7 +69,7 @@ object OnlineMarkerFeedbackCommand {
 			with ReadOnly
 }
 
-abstract class OnlineMarkerFeedbackCommand(val module: Module, val assignment: Assignment, val marker: User)
+abstract class OnlineMarkerFeedbackCommand(val module: Module, val assignment: Assignment, val marker: User, val submitter: CurrentUser)
 	extends CommandInternal[Seq[StudentFeedbackGraph]]
 	with Appliable[Seq[StudentFeedbackGraph]] with OnlineFeedbackState {
 
@@ -108,12 +111,17 @@ trait OnlineFeedbackPermissions extends RequiresPermissionsChecking {
 	def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assignment, module)
 		p.PermissionCheck(Permissions.Feedback.Read, assignment)
+		if(submitter.apparentUser != marker) {
+			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
+		}
 	}
 }
 
 trait OnlineFeedbackState {
 	val assignment: Assignment
 	val module: Module
+	val marker: User
+	val submitter: CurrentUser
 }
 
 

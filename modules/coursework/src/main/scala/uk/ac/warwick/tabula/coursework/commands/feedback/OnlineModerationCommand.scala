@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.notifications.coursework.ModeratorRejectedNotification
 
 import scala.collection.JavaConverters._
@@ -17,8 +18,8 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 
 object OnlineModerationCommand {
-	def apply(module: Module, assignment: Assignment, student: User, marker: User) =
-		new OnlineModerationCommand(module, assignment, student, marker)
+	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser) =
+		new OnlineModerationCommand(module, assignment, student, marker, submitter)
 			with ComposableCommand[MarkerFeedback]
 			with OnlineFeedbackFormPermissions
 			with MarkerFeedbackStateCopy
@@ -36,7 +37,7 @@ object OnlineModerationCommand {
 			}
 }
 
-abstract class OnlineModerationCommand(module: Module, assignment: Assignment, student: User, marker: User)
+abstract class OnlineModerationCommand(module: Module, assignment: Assignment, student: User, marker: User, val submitter: CurrentUser)
 	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] with ModerationState with UserAware {
 

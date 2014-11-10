@@ -21,8 +21,8 @@ import uk.ac.warwick.userlookup.User
 class OnlineFeedbackController extends CourseworkController with MarkerFeedbackCollecting with AutowiringUserLookupComponent {
 
 	@ModelAttribute
-	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
-		OnlineFeedbackCommand(module, assignment)
+	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, submitter: CurrentUser) =
+		OnlineFeedbackCommand(module, assignment, submitter)
 
 	@RequestMapping
 	def showTable(@ModelAttribute command: OnlineFeedbackCommand, errors: Errors): Mav = {
@@ -57,8 +57,11 @@ class OnlineFeedbackController extends CourseworkController with MarkerFeedbackC
 class OnlineMarkerFeedbackController extends CourseworkController with MarkerFeedbackCollecting with AutowiringUserLookupComponent {
 
 	@ModelAttribute
-	def command(@PathVariable module: Module, @PathVariable assignment: Assignment,  @PathVariable marker: User) =
-		OnlineMarkerFeedbackCommand(module, assignment, marker)
+	def command(@PathVariable module: Module,
+							@PathVariable assignment: Assignment,
+							@PathVariable marker: User,
+							submitter: CurrentUser) =
+		OnlineMarkerFeedbackCommand(module, assignment, marker, submitter)
 
 	@RequestMapping
 	def showTable(@ModelAttribute command: OnlineMarkerFeedbackCommand, errors: Errors): Mav = {
@@ -99,7 +102,7 @@ class OnlineFeedbackFormController extends CourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable student: User, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
-		OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser)
+		OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineFeedbackFormCommand, errors: Errors): Mav = {
@@ -127,8 +130,12 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 	validatesSelf[OnlineMarkerFeedbackFormCommand]
 
 	@ModelAttribute("command")
-	def command(@PathVariable student: User, @PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable marker: User) =
-		OnlineMarkerFeedbackFormCommand(module, assignment, student, marker)
+	def command(@PathVariable student: User,
+							@PathVariable module: Module,
+							@PathVariable assignment: Assignment,
+							@PathVariable marker: User,
+							submitter: CurrentUser) =
+		OnlineMarkerFeedbackFormCommand(module, assignment, student, marker, submitter)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineMarkerFeedbackFormCommand, errors: Errors): Mav = {

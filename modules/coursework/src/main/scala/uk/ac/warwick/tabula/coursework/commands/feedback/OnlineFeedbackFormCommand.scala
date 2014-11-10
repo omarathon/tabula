@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.CurrentUser
 
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model._
@@ -16,8 +17,8 @@ import uk.ac.warwick.userlookup.User
 
 
 object OnlineFeedbackFormCommand {
-	def apply(module: Module, assignment: Assignment, student: User, marker: User) =
-		new OnlineFeedbackFormCommand(module, assignment, student, marker)
+	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser) =
+		new OnlineFeedbackFormCommand(module, assignment, student, marker, submitter)
 			with ComposableCommand[Feedback]
 			with OnlineFeedbackFormPermissions
 			with AutowiringFeedbackServiceComponent
@@ -29,7 +30,7 @@ object OnlineFeedbackFormCommand {
 		}
 }
 
-abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment, student: User, marker: User)
+abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment, student: User, marker: User, val submitter: CurrentUser)
 	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker)
 	with CommandInternal[Feedback] with Appliable[Feedback] {
 
@@ -201,12 +202,16 @@ trait OnlineFeedbackFormPermissions extends RequiresPermissionsChecking {
 	def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assignment, module)
 		p.PermissionCheck(Permissions.Feedback.Create, assignment)
+		if(submitter.apparentUser != marker) {
+			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
+		}
 	}
 }
 
 trait OnlineFeedbackStudentState {
 	val student: User
 	val assignment: Assignment
+
 	var mark: String = _
 	var grade: String = _
 	var fields: JMap[String, FormValue] = _

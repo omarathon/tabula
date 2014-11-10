@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.CurrentUser
 
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Feedback, MarkerFeedback, Assignment, Module}
@@ -13,8 +14,8 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.userlookup.User
 
 object OnlineMarkerFeedbackFormCommand {
-	def apply(module: Module, assignment: Assignment, student: User, marker: User) =
-		new OnlineMarkerFeedbackFormCommand(module, assignment, student, marker)
+	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser) =
+		new OnlineMarkerFeedbackFormCommand(module, assignment, student, marker, submitter)
 			with ComposableCommand[MarkerFeedback]
 			with MarkerFeedbackStateCopy
 			with OnlineFeedbackFormPermissions
@@ -29,7 +30,7 @@ object OnlineMarkerFeedbackFormCommand {
 		}
 }
 
-abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assignment, student: User, marker: User)
+abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assignment, student: User, marker: User, val submitter: CurrentUser)
 	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] {
 
