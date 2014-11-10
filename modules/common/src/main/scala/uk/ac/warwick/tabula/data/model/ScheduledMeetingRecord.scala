@@ -1,7 +1,10 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence}
 
 @Entity
@@ -21,7 +24,14 @@ class ScheduledMeetingRecord extends AbstractMeetingRecord {
 	var missedReason: String = _
 
 	def isPendingAction = meetingDate.isBeforeNow && !missed
-	def pendingActionBy(user: CurrentUser): Boolean = user.universityId == creator.universityId && isPendingAction
+
+	@transient
+	var securityService = Wire[SecurityService]
+
+	def pendingActionBy(user: CurrentUser): Boolean =
+		isPendingAction &&
+		(user.universityId == creator.universityId ||
+		 securityService.can(user, Permissions.Profiles.ScheduledMeetingRecord.Confirm, this))
 
 	def toEventOccurrence(context: TimetableEvent.Context): Option[EventOccurrence] = asEventOccurrence(context)
 

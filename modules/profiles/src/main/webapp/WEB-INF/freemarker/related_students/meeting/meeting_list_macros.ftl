@@ -184,12 +184,17 @@
 </#macro>
 
 <#macro scheduledMeetingState meeting studentCourseDetails>
-	<#if meeting.pendingAction && !meeting.pendingActionBy(viewerUser)>
-	<small class="muted">Pending confirmation. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
-	<div class="alert alert-info">
-		${meeting.creator.fullName} needs to confirm that this meeting took place.
-	</div>
-	<#elseif meeting.pendingActionBy(viewerUser)>
+	<#local pendingAction = meeting.pendingAction />
+	<#local canConvertMeeting = can.do("Profiles.ScheduledMeetingRecord.Confirm", meeting) />
+
+	<#if pendingAction && !canConvertMeeting>
+		<small class="muted">Pending confirmation. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
+		<#if !meeting.pendingActionBy(viewerUser)>
+			<div class="alert alert-info">
+				${meeting.creator.fullName} needs to confirm that this meeting took place.
+			</div>
+		</#if>
+	<#elseif pendingAction && canConvertMeeting>
 		<small class="muted">Pending confirmation. ${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
 		<div class="alert alert-warning">
 			Please confirm whether this scheduled meeting took place.
