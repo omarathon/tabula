@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.coursework.services.feedbackreport
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import collection.immutable.TreeMap
 
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import org.joda.time.DateTime
 
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers._
-import uk.ac.warwick.tabula.data.model.{Assignment, Department, Feedback}
+import uk.ac.warwick.tabula.data.model.{Assignment, Department}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{SubmissionService, FeedbackService, AssignmentMembershipService, AuditEventQueryMethods}
-import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 class FeedbackReport(department: Department, startDate: DateTime, endDate: DateTime) {
 	import FeedbackReport._
@@ -20,7 +19,6 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 	var submissionService = Wire[SubmissionService]
 	var feedbackService = Wire[FeedbackService]
 	val workbook = new XSSFWorkbook()
-	var workingDaysHelper = new WorkingDaysHelperImpl
 
 	var assignmentData : List[AssignmentInfo] = List()
 
@@ -61,15 +59,15 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			addStringCell(assignment.name, row)
 			addStringCell(assignment.module.code.toUpperCase, row)
 			addDateCell(assignment.closeDate, row, dateCellStyle(workbook))
-			val publishDeadline = workingDaysHelper.datePlusWorkingDays(assignment.closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)
+			val publishDeadline = assignment.feedbackDeadline.orNull
 			addDateCell(publishDeadline, row, dateCellStyle(workbook))
 			addStringCell(if (assignment.summative) "Summative" else "Formative", row)
 			addStringCell(if (assignment.dissertation) "Dissertation" else "", row)
 			val numberOfStudents = assignmentMembershipService.determineMembershipUsers(assignment).size
 			addNumericCell(numberOfStudents, row)
 			addNumericCell(assignment.submissions.size, row)
-			addNumericCell(assignment.submissions.count(submission => submission.isAuthorisedLate), row)
-			addNumericCell(assignment.submissions.count(submission => submission.isLate && !submission.isAuthorisedLate), row)
+			addNumericCell(assignment.submissions.asScala.count(submission => submission.isAuthorisedLate), row)
+			addNumericCell(assignment.submissions.asScala.count(submission => submission.isLate && !submission.isAuthorisedLate), row)
 			val feedbackCount = getFeedbackCount(assignment)
 			val totalPublished = feedbackCount.onTime + feedbackCount.late
 			val totalUnPublished = assignment.submissions.size - totalPublished
@@ -86,7 +84,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 
 	def buildAssignmentData() {
 
-		val allAssignments = department.modules.flatMap(_.assignments)
+		val allAssignments = department.modules.asScala.flatMap(_.assignments.asScala)
 		val inDateAssignments = allAssignments.filter(a => a.collectSubmissions && a.submissions.size > 0
 			&& a.closeDate.isAfter(startDate) && a.closeDate.isBefore(endDate)).toList
 		val sortedAssignments = inDateAssignments.sortWith{(a1, a2) =>
@@ -103,8 +101,8 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 				assignment.summative,
 				assignment.dissertation,
 				assignment.submissions.size,
-				assignment.submissions.count(submission => submission.isAuthorisedLate),
-				assignment.submissions.count(submission => submission.isLate && !submission.isAuthorisedLate),
+				assignment.submissions.asScala.count(submission => submission.isAuthorisedLate),
+				assignment.submissions.asScala.count(submission => submission.isLate && !submission.isAuthorisedLate),
 				feedbackCount,
 				totalPublished,
 				assignment
@@ -184,30 +182,15 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			submission <- submissionService.getSubmissionsByAssignment(assignment)
 			feedback <- feedbackService.getFeedbackByUniId(assignment, submission.universityId)
 			if feedback.released
-			submissionEventDate <- Option(submission.submittedDate)
 			publishEventDate <- Option(feedback.releasedDate).orElse {
 				auditEventQueryMethods.publishFeedbackForStudent(assignment, feedback.universityId).headOption.map { _.eventDate }
 			}
-			assignmentCloseDate <- Option(assignment.closeDate)
 		} yield {
-			val submissionCandidateDate =
-				if(submissionEventDate.isAfter(assignmentCloseDate)) submissionEventDate
-				else assignmentCloseDate
-
-			// is this assignment exempt from the within 20 working days rule?
-			val isLateExempt = assignment.dissertation
-
 			// was feedback returned within 20 working days?
-			val numOfDays = workingDaysHelper.getNumWorkingDays(submissionCandidateDate.toLocalDate, publishEventDate.toLocalDate)
-
-			// note +1 working day  - getNumWorkingDays is inclusive (starts at 1)
-			// we want n working days after the close date
-			if (numOfDays > (Feedback.PublishDeadlineInWorkingDays + 1) && !isLateExempt)  {
-				FeedbackCount(0, 1, publishEventDate, publishEventDate)
-			} // was late
-			else {
-				FeedbackCount(1, 0, publishEventDate, publishEventDate)
-			} // on time
+			submission.feedbackDeadline // If the deadline is exempt (e.g. open-ended or dissertation) this will return None
+				.filter(publishEventDate.toLocalDate.isAfter)
+				.map { _ =>  FeedbackCount(0, 1, publishEventDate, publishEventDate) } // was late
+				.getOrElse { FeedbackCount(1, 0, publishEventDate, publishEventDate) } // on time
 		}
 
 		// merge our list of pairs into a single pair of (on time, late)

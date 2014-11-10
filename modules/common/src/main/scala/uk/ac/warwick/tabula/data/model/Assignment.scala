@@ -162,18 +162,29 @@ class Assignment
 		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
 	}
 
-	def feedbackDeadlineWorkingDaysAway: Option[Int] = if (openEnded || dissertation) {
-		None
-	} else {
+	def feedbackDeadlineForSubmission(submission: Submission) = feedbackDeadline.map { wholeAssignmentDeadline =>
+		// If we have an extension, use the extension's expiry date
+		val extension = extensions.asScala.find { e => e.isForUser(submission.universityId, submission.userId) && e.approved }
+
+		val baseFeedbackDeadline =
+			extension.map { _.feedbackDeadline.toLocalDate }.getOrElse(wholeAssignmentDeadline)
+
+		// If the submission was late, allow 20 days from the submission day
+		if (submission.isLate)
+			workingDaysHelper.datePlusWorkingDays(submission.submittedDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)
+		else
+			baseFeedbackDeadline
+	}
+
+	def feedbackDeadlineWorkingDaysAway: Option[Int] = feedbackDeadline.map { deadline =>
 		val now = LocalDate.now
-		val deadline = workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)
 
 		// need an offset, as the helper always includes both start and end date, off-by-one from what we want to show
 		val offset =
 			if (deadline.isBefore(now)) 1
 			else -1 // today or in the future
 
-		Option(workingDaysHelper.getNumWorkingDays(now, deadline) + offset)
+		workingDaysHelper.getNumWorkingDays(now, deadline) + offset
 	}
 
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
