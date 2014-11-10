@@ -35,13 +35,11 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 			// TAB-2682 Also include events that the student has been manually added to
 			val manualTimetableEvents = smallGroupService.findManuallyAddedAttendance(user.getWarwickId)
 				.filter { a =>
-				val groupSet = a.occurrence.event.group.groupSet
+					val groupSet = a.occurrence.event.group.groupSet
 
-				!groupSet.deleted && groupSet.visibleToStudents
-			}
-				.map { a =>
-				TimetableEvent(a.occurrence)
-			}
+					!groupSet.deleted && groupSet.visibleToStudents
+				}
+				.map { a => TimetableEvent(a.occurrence) }
 
 			autoTimetableEvents ++ manualTimetableEvents
 		}
