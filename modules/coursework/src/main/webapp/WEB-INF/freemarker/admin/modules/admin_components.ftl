@@ -282,11 +282,13 @@
 								scope=assignment
 								action_descr='assign markers'
 								href=markers_url>
-	            	<i class="icon-user"></i> Assign markers
-	            </@fmt.permission_button>
-	          </li>
+							<i class="icon-user"></i> Assign markers
+						</@fmt.permission_button>
+					  </li>
+					<#elseif assignment.markingWorkflow.studentsChooseMarker>
+						<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Marking workflow requires students to choose marker"><i class="icon-user"></i> Assign markers </a></li>
 					<#else>
-						<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Marking workflow is not enabled for this assignment."><i class="icon-user"></i> Assign markers </a></li>
+						<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Marking workflow is not enabled for this assignment"><i class="icon-user"></i> Assign markers </a></li>
 					</#if>
 
 					<#if assignment.collectMarks>
