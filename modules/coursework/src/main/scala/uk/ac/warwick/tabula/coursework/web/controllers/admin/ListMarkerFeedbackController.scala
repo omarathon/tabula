@@ -73,6 +73,6 @@ class ListMarkerFeedbackController extends CourseworkController {
 class ListCurrentUsersMarkerFeedbackController extends CourseworkController {
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
-		Routes.admin.assignment.markerFeedback(assignment, currentUser.apparentUser)
+		Redirect(Routes.admin.assignment.markerFeedback(assignment, currentUser.apparentUser))
 	}
 }
