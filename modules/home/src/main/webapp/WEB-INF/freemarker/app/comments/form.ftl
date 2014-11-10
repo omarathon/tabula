@@ -9,7 +9,7 @@
 		Note that if you have a question about your course material or want to talk about some feedback/marks
 		you received, you should talk to the person setting your coursework.
 	</#if>
-	(If you are looking for instructions on how to use Tabula, you might like to look at <a href="http://warwick.ac.uk/tabula/faqs/" target="_blank">these FAQs</a>)
+	(If you are looking for instructions on how to use Tabula, you might like to look at <a href="http://warwick.ac.uk/tabula/manual/" target="_blank">the Tabula manual</a>)
 	</p>
 	
 	<p>
