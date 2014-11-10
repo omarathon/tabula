@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.ScheduledMeetingRecordMissedInviteeNotification
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.ScheduledMeetingRecordMissedInviteeNotification
 import uk.ac.warwick.tabula.data.model.{Notification, ScheduledMeetingRecord}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}

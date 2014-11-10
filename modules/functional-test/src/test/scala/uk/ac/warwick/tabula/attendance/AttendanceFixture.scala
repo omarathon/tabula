@@ -27,7 +27,7 @@ class AttendanceFixture extends BrowserTest with FeaturesDriver with FixturesDri
 		createMonitoringPointSet(TEST_UG_ROUTE_CODE, 3, "2013", Option(1))
 
 		// new AM
-		createAttendanceMonitoringScheme(TEST_DEPARTMENT_CODE, 3, "2014", P.Student1.warwickId)
+		createAttendanceMonitoringScheme(TEST_DEPARTMENT_CODE, 3, "2014", P.Student3.warwickId)
 
 	}
 

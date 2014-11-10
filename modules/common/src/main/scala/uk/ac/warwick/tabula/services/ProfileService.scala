@@ -54,7 +54,7 @@ trait ProfileService {
 	): (Int, Seq[StudentMember])
 	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[StudentMember]
 	def findAllUniversityIdsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
-	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction]): Seq[AttendanceMonitoringStudentData]
+	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
 	def getSCDsByAgentRelationshipAndRestrictions(
 		relationshipType: StudentRelationshipType,
 		agent: Member,
@@ -348,17 +348,26 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		}
 	}
 
-	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction]): Seq[AttendanceMonitoringStudentData] = {
+	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {
 		val allRestrictions = affiliatedDepartmentsRestriction(department, restrictions)
 
 		if (department.hasParent) {
 			// TODO this sucks. Would be better if you could get ScalaRestrictions from a filter rule and add them to allRestrictions
 			memberDao.findStudentsByRestrictions(allRestrictions, Seq(), Int.MaxValue, 0)
 				.filter(studentDepartmentFilterMatches(department))
-				.filter(_.mostSignificantCourseDetails.isDefined)
-				.map(student => AttendanceMonitoringStudentData(student.universityId, student.userId, student.mostSignificantCourse.beginDate))
+				.flatMap(student => {
+					val beginDates = student.freshStudentCourseDetails.filter(_.freshStudentCourseYearDetails.exists(_.academicYear == academicYear)).map(_.beginDate)
+					if (beginDates.nonEmpty) {
+						// do not remove; import needed for sorting
+						// should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+						import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+						Option(AttendanceMonitoringStudentData(student.universityId, student.userId, beginDates.min))
+					} else {
+						None
+					}
+				})
 		}	else {
-			memberDao.findAllStudentDataByRestrictions(allRestrictions)
+			memberDao.findAllStudentDataByRestrictions(allRestrictions, academicYear: AcademicYear)
 		}
 	}
 

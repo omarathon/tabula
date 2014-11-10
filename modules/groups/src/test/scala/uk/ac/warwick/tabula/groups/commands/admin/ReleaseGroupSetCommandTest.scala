@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
+import uk.ac.warwick.tabula.data.model.notifications.groups.ReleaseSmallGroupSetsNotification
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.{UserGroup, Notification}
@@ -9,7 +11,6 @@ import uk.ac.warwick.tabula.commands.{Description, DescriptionImpl}
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.groups.SmallGroupFixture
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.data.model.notifications.ReleaseSmallGroupSetsNotification
 
 class ReleaseGroupSetCommandTest extends TestBase with Mockito {
 

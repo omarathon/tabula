@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Notifies, Description, Command}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.RequestAssignmentAccessNotification
 import uk.ac.warwick.tabula.data.model.{Notification, Module, Assignment}
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.notifications.RequestAssignmentAccessNotification
 
 /**
  * Sends a message to one or more admins to let them know that the current

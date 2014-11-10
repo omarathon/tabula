@@ -2,7 +2,7 @@
 <#escape x as x?html>
 <div id="student-groups-view">
 	<#assign student=member />	
-	<#assign is_the_student=user.apparentUser.warwickId==command.member.universityId />
+	<#assign is_the_student=user.apparentUser.warwickId! == command.member.universityId />
 	
 	<#macro eventsInATerm term>
 		<#local weekNumbers = mapGet(termWeeks, term) />

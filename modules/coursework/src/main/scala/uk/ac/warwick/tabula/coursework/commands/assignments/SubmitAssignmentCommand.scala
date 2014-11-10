@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{SubmissionReceivedNotification, SubmissionReceiptNotification}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringCourseworkSubmissionService
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, FormValue}
@@ -17,7 +18,6 @@ import org.springframework.util.Assert
 import org.springframework.validation.BindingResult
 import org.apache.commons.collections.map.LazyMap
 import org.apache.commons.collections.Factory
-import uk.ac.warwick.tabula.data.model.notifications.{SubmissionReceivedNotification, SubmissionReceiptNotification}
 
 class SubmitAssignmentCommand(
 		val module: Module,

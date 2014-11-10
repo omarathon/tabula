@@ -5,6 +5,7 @@ import org.hibernate.criterion.{DetachedCriteria, Projections, Property, Restric
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, _}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
@@ -38,7 +39,7 @@ trait MemberDao {
 	def getStaffByDepartment(department: Department): Seq[StaffMember]
 	
 	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
-	def findAllStudentDataByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[AttendanceMonitoringStudentData]
+	def findAllStudentDataByRestrictions(restrictions: Iterable[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
 	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember]
 	def getSCDsByAgentRelationshipAndRestrictions(
 		relationshipType: StudentRelationshipType,
@@ -295,16 +296,29 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		}
 	}
 
-	def findAllStudentDataByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[AttendanceMonitoringStudentData] = {
+	def findAllStudentDataByRestrictions(restrictions: Iterable[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {
 		val idCriteria = session.newCriteria[StudentMember]
 		restrictions.foreach { _.apply(idCriteria) }
-		val projections = Projections.projectionList()
-		projections.add(property("universityId"))
-		projections.add(property("userId"))
-		projections.add(property("studentCourseDetails.beginDate"))
-		idCriteria.project[Array[java.lang.Object]](projections).seq.map(r => {
-			AttendanceMonitoringStudentData(r(0).asInstanceOf[String], r(1).asInstanceOf[String], r(2).asInstanceOf[LocalDate])
-		})
+		val studentProjections = Projections.projectionList()
+		studentProjections.add(property("universityId"))
+		studentProjections.add(property("userId"))
+		val studentResults = idCriteria.project[Array[java.lang.Object]](studentProjections).seq.map(r =>
+			(r(0).asInstanceOf[String], r(1).asInstanceOf[String])
+		).toMap
+
+		val beginDateProjections = Projections.projectionList()
+		beginDateProjections.add(groupProperty("universityId"))
+		beginDateProjections.add(min("studentCourseDetails.beginDate"))
+
+		session.newCriteria[StudentMember]
+			.createAlias("studentCourseDetails","studentCourseDetails")
+			.createAlias("studentCourseDetails.studentCourseYearDetails","studentCourseYearDetails")
+			.add(isNull("studentCourseDetails.missingFromImportSince"))
+			.add(is("studentCourseYearDetails.academicYear", academicYear))
+			.add(safeIn("universityId", studentResults.keys.toSeq))
+			.project[Array[java.lang.Object]](beginDateProjections).seq.map(r =>
+				AttendanceMonitoringStudentData(r(0).asInstanceOf[String], studentResults(r(0).asInstanceOf[String]), r(1).asInstanceOf[LocalDate])
+			)
 	}
 
 	def findStudentsByRestrictions(

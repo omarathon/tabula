@@ -39,7 +39,8 @@ class ViewMeetingsForRelationshipController
 		Mav("related_students/meeting/list",
 			"meetings" -> meetings,
 			"role" -> mandatory(studentRelationshipType),
-			"viewer" -> currentMember,
+			"viewerUser" -> user,
+			"viewerMember" -> currentMember,
 			"openMeetingId" -> openMeetingId,
 			"meetingApprovalWillCreateCheckpoint" -> meetings.map {
 				case (meeting: MeetingRecord) => meeting.id -> (

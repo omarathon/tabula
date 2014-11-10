@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.jobs
 
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{TurnitinJobSuccessNotification, TurnitinJobErrorNotification, TurnitinClassDeletedNotification}
+
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,7 +18,6 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.jobs._
 import uk.ac.warwick.tabula.services.OriginalityReportService
 import language.implicitConversions
-import uk.ac.warwick.tabula.data.model.notifications.{TurnitinJobSuccessNotification, TurnitinJobErrorNotification, TurnitinClassDeletedNotification}
 
 object SubmitToTurnitinJob {
 	val identifier = "turnitin-submit"

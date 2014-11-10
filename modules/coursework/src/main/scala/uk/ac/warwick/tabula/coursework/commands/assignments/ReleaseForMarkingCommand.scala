@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
 
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model._
@@ -14,7 +15,6 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{ReleasedState, FeedbackReleasedNotifier}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.notifications.ReleaseToMarkerNotification
 
 object ReleaseForMarkingCommand {
 	def apply(module: Module, assignment: Assignment, user: User) =

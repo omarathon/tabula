@@ -117,7 +117,8 @@ class CreateScheduledMeetingRecordController extends ProfilesController with
 						)
 					case (meeting: ScheduledMeetingRecord) => meeting.id -> false
 				}.toMap,
-				"viewer" -> currentMember,
+				"viewerUser" -> user,
+				"viewerMember" -> currentMember,
 				"openMeeting" -> modifiedMeeting).noLayout()
 		}
 	}

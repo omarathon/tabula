@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.{Notifies, Command, Description, SelfValidating}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackPublishedNotification
 import uk.ac.warwick.tabula.data.model.{Notification, Feedback, Assignment, Module}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -13,7 +14,6 @@ import uk.ac.warwick.tabula.services.FeedbackService
 import language.implicitConversions
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.notifications.FeedbackPublishedNotification
 
 object PublishFeedbackCommand {
 	case class MissingUser(universityId: String)

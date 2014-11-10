@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.commands.{Notifies, ComposableCommand, Describable, CommandInternal, SelfValidating, Description}
-import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.{ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification}
 import uk.ac.warwick.tabula.data.model.{Notification, ScheduledMeetingRecord, AbstractMeetingRecord, MeetingRecord}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser

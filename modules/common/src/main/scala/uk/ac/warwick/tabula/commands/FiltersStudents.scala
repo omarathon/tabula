@@ -9,33 +9,33 @@ import scala.collection.JavaConverters._
 
 object FiltersStudents {
 	val AliasPaths: Map[String, Seq[(String, AliasAndJoinType)]] = Seq(
-		"studentCourseDetails" -> Seq(
-			"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails")
+		"mostSignificantCourse" -> Seq(
+			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse")
 		),
 		"studentCourseYearDetails" -> Seq(
-			"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails"),
-			"studentCourseDetails.latestStudentCourseYearDetails" -> AliasAndJoinType("studentCourseYearDetails")
+			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
+			"mostSignificantCourse.studentCourseYearDetails" -> AliasAndJoinType("studentCourseYearDetails")
 		),
 		"moduleRegistration" -> Seq(
-			"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails"),
-			"studentCourseDetails._moduleRegistrations" -> AliasAndJoinType("moduleRegistration")
+			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
+			"mostSignificantCourse._moduleRegistrations" -> AliasAndJoinType("moduleRegistration")
 		),
 		"course" -> Seq(
-			"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails"),
-			"studentCourseDetails.course" -> AliasAndJoinType("course")
+			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
+			"mostSignificantCourse.course" -> AliasAndJoinType("course")
 		),
 		"route" -> Seq(
-			"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails"),
-			"studentCourseDetails.route" -> AliasAndJoinType("route")
+			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
+			"mostSignificantCourse.route" -> AliasAndJoinType("route")
 		),
 		"department" -> Seq(
-			"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails"),
-			"studentCourseDetails.route" -> AliasAndJoinType("route"),
+			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
+			"mostSignificantCourse.route" -> AliasAndJoinType("route"),
 			"route.adminDepartment" -> AliasAndJoinType("department")
 		),
 		"teachingInfo" -> Seq(
-			"mostSignificantCourse" -> AliasAndJoinType("studentCourseDetails"),
-			"studentCourseDetails.route" -> AliasAndJoinType("route"),
+			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
+			"mostSignificantCourse.route" -> AliasAndJoinType("route"),
 			"route.teachingInfo" -> AliasAndJoinType("teachingInfo", JoinType.LEFT_OUTER_JOIN)
 		)
 	).toMap
@@ -50,13 +50,13 @@ trait FiltersStudents extends FilterStudentsOrRelationships {
 	def department: Department
 
 	def routeRestriction: Option[ScalaRestriction] = inIfNotEmpty(
-		"studentCourseDetails.route.code", routes.asScala.map {_.code},
-		getAliasPaths("studentCourseDetails") : _*
+		"mostSignificantCourse.route.code", routes.asScala.map {_.code},
+		getAliasPaths("mostSignificantCourse") : _*
 	)
 
 	def sprStatusRestriction: Option[ScalaRestriction] = inIfNotEmpty(
-		"studentCourseDetails.statusOnRoute", sprStatuses.asScala,
-		getAliasPaths("studentCourseDetails") : _*
+		"mostSignificantCourse.statusOnRoute", sprStatuses.asScala,
+		getAliasPaths("mostSignificantCourse") : _*
 	)
 
 	override def getAliasPaths(sitsTable: String) = AliasPaths(sitsTable)

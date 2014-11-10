@@ -304,6 +304,7 @@ object Permissions {
       	extends SelectorPermission(relationshipType, "Edit a meeting record")
       case class Delete(relationshipType: PermissionsSelector[StudentRelationshipType])
       	extends SelectorPermission(relationshipType, "Remove a meeting record")
+			case object Approve extends Permission("Approve a meeting record")
     }
 
 		object ScheduledMeetingRecord {

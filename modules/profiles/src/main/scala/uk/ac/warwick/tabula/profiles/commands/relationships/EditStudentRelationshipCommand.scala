@@ -7,11 +7,11 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.data.model.StudentRelationship
+import uk.ac.warwick.tabula.data.model.notifications.profiles.{StudentRelationshipChangeToNewAgentNotification, StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToStudentNotification}
 import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.notifications.{StudentRelationshipChangeToNewAgentNotification, StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToStudentNotification}
 
 /**
  * Command to edit the relationship for the StudentCourseDetails passed in, passing 

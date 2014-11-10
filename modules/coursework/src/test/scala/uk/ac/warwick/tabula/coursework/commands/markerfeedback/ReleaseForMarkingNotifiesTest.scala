@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
+import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
+
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.services.UserLookupComponent
@@ -8,7 +10,6 @@ import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.R
 import uk.ac.warwick.tabula.commands.UserAware
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.coursework.commands.assignments.{ReleaseForMarkingState, FirstMarkerReleaseNotifier}
-import uk.ac.warwick.tabula.data.model.notifications.ReleaseToMarkerNotification
 
 
 class ReleaseForMarkingNotifiesTest extends TestBase with Mockito {

@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
+import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
+
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.coursework.commands.assignments.{MarkingCompletedState, SecondMarkerReleaseNotifier, MarkingCompletedCommand}
 import uk.ac.warwick.tabula._
@@ -14,7 +16,6 @@ import uk.ac.warwick.tabula.commands.UserAware
 import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.ReleasedState
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.data.model.notifications.ReleaseToMarkerNotification
 
 /*
  * Fixed this test by replacing the full appcontext with a minimal functional one as below.

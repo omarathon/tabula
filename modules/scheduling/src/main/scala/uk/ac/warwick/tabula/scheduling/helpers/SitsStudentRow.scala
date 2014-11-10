@@ -4,26 +4,30 @@ import java.sql.ResultSet
 import uk.ac.warwick.tabula.data.model.{BasicStudentCourseYearProperties, BasicStudentCourseProperties}
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportMemberHelpers._
 
+trait HasResultSet {
+	def rs: ResultSet
+}
+
 /**
- *
  * Contains the data from the result set for the SITS query.  (Doesn't include member properties)
  */
-
-class SitsStudentRow(resultSet: ResultSet)
+class SitsStudentRow(val rs: ResultSet)
 	extends SitsStudentRowCourseDetails
-	with SitsStudentRowYearDetails {
+		with SitsStudentRowYearDetails
+		with HasResultSet {
 
-	def rs = resultSet
-
-	val disabilityCode = resultSet.getString("disability")
+	val disabilityCode = rs.getString("disability")
+	val deceased = rs.getString("mst_type") match {
+		case "D" | "d" => true
+		case _ => false
+	}
 }
 
 // this trait holds data from the result set which will be used by ImportStudentCourseCommand to create
 // StudentCourseDetails.  The data needs to be extracted in this command while the result set is accessible.
 trait SitsStudentRowCourseDetails
-	extends BasicStudentCourseProperties
-{
-	def rs: ResultSet
+	extends BasicStudentCourseProperties {
+	self: HasResultSet =>
 
 	var routeCode = rs.getString("route_code")
 	var courseCode = rs.getString("course_code")
@@ -46,7 +50,7 @@ trait SitsStudentRowCourseDetails
 		}
 
 	// this is the key and is not included in StudentCourseProperties, so just storing it in a var:
-	var scjCode: String = rs.getString("scj_code")
+	var scjCode = rs.getString("scj_code")
 
 	// now grab data from the result set into properties
 	this.mostSignificant = rs.getString("most_signif_indicator") match {
@@ -60,18 +64,19 @@ trait SitsStudentRowCourseDetails
 	this.expectedEndDate = toLocalDate(rs.getDate("expected_end_date"))
 	this.courseYearLength = rs.getString("course_year_length")
 	this.levelCode = rs.getString("level_code")
+	this.reasonForTransferCode = rs.getString("scj_transfer_reason_code")
 }
 
 // this trait holds data from the result set which will be used by ImportStudentCourseYearCommand to create
 // StudentCourseYearDetails.  The data needs to be extracted in this command while the result set is accessible.
 trait SitsStudentRowYearDetails extends BasicStudentCourseYearProperties {
-	def rs: ResultSet
+	self: HasResultSet =>
 
-	var enrolmentDepartmentCode: String = rs.getString("enrolment_department_code")
-	var enrolmentStatusCode: String = rs.getString("enrolment_status_code")
-	var modeOfAttendanceCode: String = rs.getString("mode_of_attendance_code")
-	var academicYearString: String = rs.getString("sce_academic_year")
-	var moduleRegistrationStatusCode: String = rs.getString("mod_reg_status")
+	var enrolmentDepartmentCode = rs.getString("enrolment_department_code")
+	var enrolmentStatusCode = rs.getString("enrolment_status_code")
+	var modeOfAttendanceCode = rs.getString("mode_of_attendance_code")
+	var academicYearString = rs.getString("sce_academic_year")
+	var moduleRegistrationStatusCode = rs.getString("mod_reg_status")
 
 	this.yearOfStudy = rs.getInt("year_of_study")
 	//this.fundingSource = rs.getString("funding_source")

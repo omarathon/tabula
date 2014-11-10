@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.groups.commands.admin
 
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet}
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.notifications.groups.OpenSmallGroupSetsNotification
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -10,7 +11,6 @@ import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState._
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.notifications.OpenSmallGroupSetsNotification
 
 
 object OpenSmallGroupSetCommand {

@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence._
-import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.ToString
-import org.joda.time.DateTime
-import org.hibernate.annotations.Type
-import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
+import javax.persistence._
+
+import org.hibernate.`type`.StandardBasicTypes
+import org.hibernate.annotations.Type
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Entity
-class MeetingRecordApproval extends GeneratedId with ToEntityReference {
+class MeetingRecordApproval extends GeneratedId with ToEntityReference with PermissionsTarget {
 	type Entity = MeetingRecordApproval
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -33,6 +32,8 @@ class MeetingRecordApproval extends GeneratedId with ToEntityReference {
 	var comments: String = _
 
 	override def toEntityReference: EntityReference[MeetingRecordApproval] = new MeetingRecordApprovalEntityReference().put(this)
+
+	override def permissionsParents: Stream[PermissionsTarget] = Stream(meetingRecord)
 }
 
 sealed abstract class MeetingApprovalState(val code: String, val description: String) {

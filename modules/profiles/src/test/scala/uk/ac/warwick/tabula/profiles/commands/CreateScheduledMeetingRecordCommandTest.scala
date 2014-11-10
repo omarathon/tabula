@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.notifications.meetingrecord.{ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordBehalfNotification}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordBehalfNotification}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.services.{MeetingRecordServiceComponent, MeetingRecordService}
 import org.joda.time.DateTime

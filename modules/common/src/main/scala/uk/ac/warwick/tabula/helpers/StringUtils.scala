@@ -22,6 +22,7 @@ trait StringUtils {
 		def safeLowercase = Option(string).map { _.toLowerCase }.getOrElse("")
 		def safeLength = Option(string).fold(0) { _.length }
 		def safeContains(substring: String) = Option(string).exists(_.contains(substring))
+		def safeStartsWith(substring: String) = Option(string).exists(_.startsWith(substring))
 	}
 
 	implicit def StringToSuperString(string: String) = new SuperString(string)

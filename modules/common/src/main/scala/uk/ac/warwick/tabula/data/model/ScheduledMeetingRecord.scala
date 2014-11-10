@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence}
 
 @Entity
@@ -20,7 +21,7 @@ class ScheduledMeetingRecord extends AbstractMeetingRecord {
 	var missedReason: String = _
 
 	def isPendingAction = meetingDate.isBeforeNow && !missed
-	def pendingActionBy(member: Member): Boolean = member == creator && isPendingAction
+	def pendingActionBy(user: CurrentUser): Boolean = user.universityId == creator.universityId && isPendingAction
 
 	def toEventOccurrence(context: TimetableEvent.Context): Option[EventOccurrence] = asEventOccurrence(context)
 
