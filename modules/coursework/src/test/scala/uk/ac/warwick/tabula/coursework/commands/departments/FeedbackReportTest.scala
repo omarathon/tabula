@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.coursework.commands.departments
 
 import java.util.Date
+import org.joda.time.DateTime
+
 import scala.collection.JavaConverters._
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.xssf.usermodel.XSSFRow
@@ -123,6 +125,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 			case dt: AbstractInstant => cell.getDateCellValue should be (dt.toDate)
 			case date: Date => cell.getDateCellValue should be (date)
 			case number: Number => cell.getNumericCellValue should be (number)
+			case null => cell.getDateCellValue should be (null)
 			case x => fail("This value type is not handled by compare(): " + x)
 		}
 
@@ -172,7 +175,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 
 		check("Row 7",
 			assignmentSheet.getRow(6),
-			Seq("test seven","IN102", dateTime(2013, 7, 1), dateTime(2013, 7, 29), "Summative", "Dissertation", 100, 100, 0, 2, 50, 50, 50, 1, 0, 0))
+			Seq("test seven","IN102", dateTime(2013, 7, 1), null, "Summative", "Dissertation", 100, 100, 0, 2, 50, 50, 50, 1, 0, 0))
 
 		check("Row 8",
 			assignmentSheet.getRow(7),
