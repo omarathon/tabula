@@ -4,21 +4,28 @@ import javax.validation.Valid
 
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, _}
-import uk.ac.warwick.tabula.profiles.commands.{CreateMeetingRecordCommand, ModifyMeetingRecordCommand, ViewMeetingRecordCommand}
+import uk.ac.warwick.tabula.profiles.commands.{ModifyMeetingRecordCommand, ViewMeetingRecordCommand}
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.profiles.web.controllers.CurrentMemberComponent
+import uk.ac.warwick.tabula.profiles.web.controllers.{MeetingRecordAcademicYearFiltering, CurrentMemberComponent}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordServiceComponent
-import uk.ac.warwick.tabula.services.{MonitoringPointMeetingRelationshipTermServiceComponent, ProfileServiceComponent, RelationshipServiceComponent}
+import uk.ac.warwick.tabula.services.{TermServiceComponent, MonitoringPointMeetingRelationshipTermServiceComponent, ProfileServiceComponent, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.{ControllerImports, ControllerMethods, ControllerViews}
 
 
-trait MeetingRecordModal {
-
-	this: ProfileServiceComponent with RelationshipServiceComponent with ControllerMethods with ControllerImports with CurrentMemberComponent with ControllerViews
-		with MonitoringPointMeetingRelationshipTermServiceComponent with AttendanceMonitoringMeetingRecordServiceComponent =>
+trait MeetingRecordModal extends MeetingRecordAcademicYearFiltering {
+	self: ProfileServiceComponent
+		with RelationshipServiceComponent
+		with ControllerMethods
+		with ControllerImports
+		with CurrentMemberComponent
+		with ControllerViews
+		with MonitoringPointMeetingRelationshipTermServiceComponent
+		with AttendanceMonitoringMeetingRecordServiceComponent
+		with TermServiceComponent =>
 	/**
 	 * Contains all of the request mappings needed to drive meeting record modals (including iframe stuff)
 	 *
@@ -102,7 +109,7 @@ trait MeetingRecordModal {
 			val modifiedMeeting = command.apply()
 			val meetingList = viewCommand match {
 				case None => Seq()
-				case Some(cmd) => cmd.apply()
+				case Some(cmd) => cmd.apply().filterNot(meetingNotInAcademicYear(AcademicYear.guessSITSAcademicYearByDate(modifiedMeeting.meetingDate)))
 			}
 
 			Mav("related_students/meeting/list",
@@ -151,15 +158,15 @@ trait MeetingRecordModal {
 	// submit sync
 	@RequestMapping(method = Array(POST), params = Array("submit"))
 	def saveMeetingRecord(
-		@Valid @ModelAttribute("command") createCommand: CreateMeetingRecordCommand,
+		@Valid @ModelAttribute("command") command: ModifyMeetingRecordCommand,
 		errors: Errors,
 		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
 		@PathVariable("relationshipType") relationshipType: StudentRelationshipType
 	) = transactional() {
 		if (errors.hasErrors) {
-			showForm(createCommand, studentCourseDetails, relationshipType)
+			showForm(command, studentCourseDetails, relationshipType)
 		} else {
-			val meeting = createCommand.apply()
+			val meeting = command.apply()
 			Redirect(Routes.profile.view(studentCourseDetails.student, meeting))
 		}
 	}

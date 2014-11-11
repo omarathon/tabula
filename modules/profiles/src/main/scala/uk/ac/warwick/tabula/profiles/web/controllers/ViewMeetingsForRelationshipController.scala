@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{ScheduledMeetingRecord, MeetingRecord, StudentCourseDetails, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointMeetingRelationshipTermServiceComponent, AutowiringTermServiceComponent}
@@ -13,7 +13,7 @@ import uk.ac.warwick.util.termdates.{Term, TermNotFoundException}
 @RequestMapping(Array("/view/meetings/{studentRelationshipType}/{studentCourseDetails}/{academicYear}"))
 class ViewMeetingsForRelationshipController
 	extends ProfilesController with AutowiringTermServiceComponent with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
-	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent {
+	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent with MeetingRecordAcademicYearFiltering {
 
 	@RequestMapping
 	def home(
@@ -25,17 +25,8 @@ class ViewMeetingsForRelationshipController
 			mandatory(studentCourseDetails),
 			optionalCurrentMember,
 			mandatory(studentRelationshipType)
-		).apply().filterNot { meeting =>
-			try {
-				Seq(Term.WEEK_NUMBER_BEFORE_START, Term.WEEK_NUMBER_AFTER_END).contains(
-					termService.getAcademicWeekForAcademicYear(meeting.meetingDate, mandatory(academicYear))
-				)
-			} catch {
-				case e: TermNotFoundException =>
-					// TAB-2465 Don't include this meeting - this happens if you are looking at a year before we recorded term dates
-					true
-			}
-		}
+		).apply().filterNot(meetingNotInAcademicYear(mandatory(academicYear)))
+
 		Mav("related_students/meeting/list",
 			"meetings" -> meetings,
 			"role" -> mandatory(studentRelationshipType),

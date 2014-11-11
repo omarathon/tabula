@@ -10,14 +10,15 @@ import uk.ac.warwick.tabula.data.model._
 class MeetingRecordModalTest extends TestBase with Mockito {
 
 	// a helper trait that allows for injection of all the stubs/mocks required for constructing a MeetingRecordModal
-	trait ModalTestSupport extends  ProfileServiceComponent
+	trait ModalTestSupport extends ProfileServiceComponent
 	with RelationshipServiceComponent
 	with ControllerMethods
 	with ControllerImports
 	with CurrentMemberComponent
 	with ControllerViews
 	with MonitoringPointMeetingRelationshipTermServiceComponent
-	with AttendanceMonitoringMeetingRecordServiceComponent {
+	with AttendanceMonitoringMeetingRecordServiceComponent
+	with TermServiceComponent {
 		var requestInfo: Option[RequestInfo] = _
 		var user: CurrentUser = _
 		var securityService: SecurityService = smartMock[SecurityService]
@@ -27,6 +28,7 @@ class MeetingRecordModalTest extends TestBase with Mockito {
 		var relationshipService: RelationshipService = smartMock[RelationshipService]
 		var monitoringPointMeetingRelationshipTermService = smartMock[MonitoringPointMeetingRelationshipTermService]
 		val attendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
+		val termService = smartMock[TermService]
 	}
 
 	val scd = new StudentCourseDetails()

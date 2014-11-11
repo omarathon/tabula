@@ -50,7 +50,7 @@ trait ScheduledMeetingRecordMissedPermission extends RequiresPermissionsChecking
 	self: ScheduledMeetingRecordMissedState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Update(meetingRecord.relationship.relationshipType), mandatory(meetingRecord))
+		p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Confirm, mandatory(meetingRecord))
 	}
 }
 

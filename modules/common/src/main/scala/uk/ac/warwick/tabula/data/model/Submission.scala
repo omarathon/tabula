@@ -35,6 +35,8 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 	def workingDaysLate = assignment.workingDaysLate(this)
 	def deadline = assignment.submissionDeadline(this)
 
+	def feedbackDeadline = assignment.feedbackDeadlineForSubmission(this)
+
 	@ManyToOne(optional = false, cascade = Array(PERSIST, MERGE), fetch = LAZY)
 	@JoinColumn(name = "assignment_id")
 	var assignment: Assignment = _
