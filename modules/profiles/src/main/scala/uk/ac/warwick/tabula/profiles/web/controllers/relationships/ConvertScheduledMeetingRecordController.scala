@@ -2,21 +2,25 @@ package uk.ac.warwick.tabula.profiles.web.controllers.relationships
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.commands.{ConvertScheduledMeetingRecordState, ConvertScheduledMeetingRecordCommand, CreateMeetingRecordCommand, ViewMeetingRecordCommand}
-import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
+import uk.ac.warwick.tabula.profiles.web.controllers.{MeetingRecordAcademicYearFiltering, ProfilesController}
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable, SelfValidating}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringMonitoringPointMeetingRelationshipTermServiceComponent}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 
 @Controller
 @RequestMapping(value = Array("/{relationshipType}/meeting/{studentCourseDetails}/schedule/{meetingRecord}/confirm"))
 class ConvertScheduledMeetingRecordController extends ProfilesController
-	with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent with AutowiringAttendanceMonitoringMeetingRecordServiceComponent {
+	with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
+	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
+	with MeetingRecordAcademicYearFiltering
+	with AutowiringTermServiceComponent {
 
 	type PopulatableCommand = Appliable[MeetingRecord] with PopulateOnForm
 	type ConvertScheduledMeetingRecordCommand = Appliable[MeetingRecord] with PopulateOnForm with ConvertScheduledMeetingRecordState
@@ -109,7 +113,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController
 						val modifiedMeeting = convertCommand.apply()
 						val meetingList = viewCommand match {
 							case None => Seq()
-							case Some(c) => c.apply()
+							case Some(c) => c.apply().filterNot(meetingNotInAcademicYear(AcademicYear.guessSITSAcademicYearByDate(modifiedMeeting.meetingDate)))
 						}
 						Mav("related_students/meeting/list",
 							"studentCourseDetails" -> studentCourseDetails,
