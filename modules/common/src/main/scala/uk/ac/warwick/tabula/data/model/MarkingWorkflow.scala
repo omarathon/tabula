@@ -93,7 +93,8 @@ object MarkingWorkflow {
 
 	def getMarkerFromAssignmentMap(userLookup: UserLookupService, universityId: String, markerMap: Map[String, UserGroup]): Option[String] = {
 		val student = userLookup.getUserByWarwickUniId(universityId)
-		markerMap.find{case(markerUserId, group) => group.includesUser(student)}.map{ case (markerUserId, _) => markerUserId }
+		val studentsGroup = markerMap.find{case(markerUserId, group) => group.includesUser(student)}
+		studentsGroup.map{ case (markerUserId, _) => markerUserId }
 	}
 }
 
