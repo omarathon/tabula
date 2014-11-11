@@ -106,7 +106,7 @@ object ModuleRegistrationImporter {
 	//
 	// Although the 3 queries aren't unioned in SQL now, the column names still need to match.
 
-	def UnconfirmedModuleRegistrations = f"""
+	val UnconfirmedModuleRegistrations = f"""
 			select scj_code, sms.mod_code, sms.sms_mcrd as credit, sms.sms_agrp as assess_group,
 			sms.ses_code, sms.ayr_code, sms_occl as occurrence, null as smr_agrm, null as smr_agrg
 				from $sitsSchema.ins_stu stu
@@ -114,7 +114,7 @@ object ModuleRegistrationImporter {
 						on spr.spr_stuc = stu.stu_code
 					
 					join $sitsSchema.srs_scj scj 
-						on scj.scj_sprc = spr.spr_code and scj.scj_udfa in ('Y','y')
+						on scj.scj_sprc = spr.spr_code
 					
 					join $sitsSchema.cam_sms sms 
 						on sms.spr_code = spr.spr_code
@@ -127,7 +127,7 @@ object ModuleRegistrationImporter {
 				where stu.stu_code = :universityId"""
 
 	// The check on SMO_RTSC excludes WMG cancelled modules or module registrations
-	def ConfirmedModuleRegistrations = f"""
+	val ConfirmedModuleRegistrations = f"""
 			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
 			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence, smr_agrm, smr_agrg
 				from $sitsSchema.ins_stu stu
@@ -135,7 +135,7 @@ object ModuleRegistrationImporter {
 						on spr.spr_stuc = stu.stu_code
 					
 					join $sitsSchema.srs_scj scj 
-						on scj.scj_sprc = spr.spr_code and scj.scj_udfa in ('Y','y')
+						on scj.scj_sprc = spr.spr_code
 					
 					join $sitsSchema.cam_smo smo 
 						on smo.spr_code = spr.spr_code
@@ -156,7 +156,7 @@ object ModuleRegistrationImporter {
 
 	// the left outer join to SSN excludes rows with a matching SSN since is only matching where SSN_SPRC is null
 	// but that column has a non-null constraint
-	def AutoUploadedConfirmedModuleRegistrations = f"""
+	val AutoUploadedConfirmedModuleRegistrations = f"""
 			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
 			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence, smr_agrm, smr_agrg
 				from $sitsSchema.ins_stu stu
@@ -164,7 +164,7 @@ object ModuleRegistrationImporter {
 						on spr.spr_stuc = stu.stu_code
 					
 					join $sitsSchema.srs_scj scj 
-						on scj.scj_sprc = spr.spr_code and scj.scj_udfa in ('Y','y')
+						on scj.scj_sprc = spr.spr_code
 					
 					join $sitsSchema.cam_smo smo 
 						on smo.spr_code = spr.spr_code
@@ -243,5 +243,4 @@ case class ModuleRegistrationRow(
 	academicYear: String,
 	var agreedMark: Option[java.math.BigDecimal],
 	agreedGrade: String
-) {
-}
+)
