@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web
 
-import uk.ac.warwick.tabula.data.model.{Module, MarkingWorkflow, Department, Assignment}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.RoutesUtils
 import uk.ac.warwick.userlookup.User
 
@@ -37,16 +37,60 @@ object Routes {
 		}
 
 		object assignment {
+
+			private def markerroot(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}/"
+
 			object markerFeedback {
-				def apply(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}/list"
+				def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/list"
+				object complete {
+					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/marking-completed"
+				}
+				object uncomplete {
+					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/marking-uncompleted"
+				}
+				object marksTemplate {
+					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/marks-template"
+				}
+				object onlineFeedback {
+					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/feedback/online"
+
+					object student {
+						def apply(assignment: Assignment, marker: User, student: User) =
+							markerroot(assignment, marker) + s"/feedback/online/${student.getWarwickId}/"
+					}
+					object moderation {
+						def apply(assignment: Assignment, marker: User, student: User) =
+							markerroot(assignment, marker) + s"/feedback/online/moderation/${student.getWarwickId}/"
+					}
+				}
+				object marks {
+					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/marks"
+				}
+				object feedback {
+					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/feedback"
+				}
+				object submissions {
+					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/submissions.zip"
+				}
+				object downloadFeedback {
+					object marker {
+						def apply(assignment: Assignment, marker: User, feedbackId: String, filename: String) =
+							markerroot(assignment, marker) + s"/feedback/download/${feedbackId}/${filename}"
+					}
+
+					object all {
+						def apply(assignment: Assignment, marker: User, markerFeedback: String) = markerroot(assignment, marker) + s"/feedback/download/$markerFeedback/attachments/"
+					}
+
+					object one {
+						def apply(assignment: Assignment, marker: User, markerFeedback: String, filename: String) = markerroot(assignment, marker) + s"/feedback/download/$markerFeedback/attachment/$filename"
+					}
+				}
+
 			}
 
 			object onlineFeedback {
 				def apply(assignment: Assignment) = assignmentroot(assignment) + "/feedback/online"
-			}
-
-			object onlineMarkerFeedback {
-				def apply(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}/feedback/online"
 			}
 
 			object onlineModeration {

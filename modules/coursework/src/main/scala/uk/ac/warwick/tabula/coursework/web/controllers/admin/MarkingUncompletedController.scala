@@ -30,7 +30,7 @@ class MarkingUncompletedController extends CourseworkController {
 
 	def RedirectBack(assignment: Assignment, command: MarkingUncompletedCommand) = {
 		if (command.onlineMarking) {
-			Redirect(Routes.admin.assignment.onlineMarkerFeedback(assignment, command.user))
+			Redirect(Routes.admin.assignment.markerFeedback.onlineFeedback(assignment, command.user))
 		} else {
 			Redirect(Routes.admin.assignment.markerFeedback(assignment, command.user))
 		}
@@ -72,5 +72,18 @@ class MarkingUncompletedController extends CourseworkController {
 				RedirectBack(assignment, form)
 			}
 		}
+
+}
+
+
+// Redirects users trying to access a marking workflow using the old style URL
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/marking-uncompleted"))
+class MarkingUncompletedControllerCurrentUser extends CourseworkController {
+
+	@RequestMapping
+	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
+		Redirect(Routes.admin.assignment.markerFeedback.uncomplete(assignment, currentUser.apparentUser))
+	}
 
 }

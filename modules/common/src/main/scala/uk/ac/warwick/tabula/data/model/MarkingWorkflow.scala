@@ -41,7 +41,7 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	def permissionsParents = Option(department).toStream
 
 	def onlineMarkingUrl(assignment:Assignment, marker: User, studentId: String) : String =
-		Routes.coursework.admin.assignment.onlineMarkerFeedback(assignment, marker)
+		Routes.coursework.admin.assignment.markerFeedback.onlineFeedback(assignment, marker)
 
 	/** The group of first markers. */
 	@OneToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)

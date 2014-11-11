@@ -95,3 +95,13 @@ class MarkerAddMarksController extends CourseworkController {
 		cmd.postExtractValidation(errors)
 	}
 }
+
+// Redirects users trying to access a marking workflow using the old style URL
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/marks"))
+class ListCurrentUsersMarkerFeedbackController extends CourseworkController {
+	@RequestMapping
+	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
+		Redirect(Routes.admin.assignment.markerFeedback.marks(assignment, currentUser.apparentUser))
+	}
+}

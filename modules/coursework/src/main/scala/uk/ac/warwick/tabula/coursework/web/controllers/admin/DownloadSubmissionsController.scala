@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.coursework.commands.assignments.{DownloadFeedbackSheetsCommand, DownloadAllSubmissionsCommand, DownloadSubmissionsCommand}
+import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.services.fileserver.{RenderableZip, FileServer}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
@@ -61,7 +62,16 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 	}
 	
 }
-	
+
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/submissions.zip"))
+class DownloadMarkerSubmissionsControllerCurrentUser extends CourseworkController {
+	@RequestMapping
+	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
+		Redirect(Routes.admin.assignment.markerFeedback.submissions(assignment, currentUser.apparentUser))
+	}
+}
+
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download-zip/{filename}"))
 class DownloadAllSubmissionsController extends CourseworkController {
@@ -115,7 +125,6 @@ class DownloadSingleSubmissionController extends CourseworkController {
 	
 }
 
-
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submissionId}/{filename}"))
 class DownloadSingleSubmissionFileController extends CourseworkController {
@@ -150,9 +159,6 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 	}
 
 }
-
-
-
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}"))

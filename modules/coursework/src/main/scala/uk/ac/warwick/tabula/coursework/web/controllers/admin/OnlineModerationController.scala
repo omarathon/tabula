@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.coursework.commands.feedback.OnlineModerationCommand
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
@@ -57,4 +58,14 @@ class OnlineModerationController extends CourseworkController {
 		}
 	}
 
+}
+
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/online/moderation/{student}"))
+class OnlineModerationControllerCurrentUser extends CourseworkController {
+
+	@RequestMapping
+	def redirect(@PathVariable assignment: Assignment, @PathVariable student: User, currentUser: CurrentUser) = {
+		Redirect(Routes.admin.assignment.markerFeedback.onlineFeedback.moderation(assignment, currentUser.apparentUser, student))
+	}
 }

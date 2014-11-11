@@ -69,3 +69,13 @@ class AddMarkerFeedbackController extends CourseworkController {
 	}
 
 }
+
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback"))
+class AddMarkerFeedbackControllerCurrentUser extends CourseworkController {
+
+	@RequestMapping
+	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
+		Redirect(Routes.admin.assignment.markerFeedback.feedback(assignment, currentUser.apparentUser))
+	}
+}

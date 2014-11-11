@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.coursework.commands.feedback._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
@@ -39,7 +40,6 @@ class DownloadSelectedFeedbackController extends CourseworkController {
 	}
 }
 
-
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
 class DownloadSelectedFeedbackFileController extends CourseworkController {
@@ -65,8 +65,6 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
 		cmd.apply().orElse { throw new ItemNotFoundException() }
 	}
 }
-
-
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedbacks.zip"))
@@ -112,6 +110,15 @@ class DownloadMarkerFeedbackController extends CourseworkController {
 }
 
 @Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{feedbackId}/{filename}"))
+class DownloadMarkerSubmissionsControllerCurrentUser extends CourseworkController {
+	@RequestMapping
+	def redirect(@PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String, currentUser: CurrentUser) = {
+		Redirect(Routes.admin.assignment.markerFeedback.downloadFeedback.marker(assignment, currentUser.apparentUser, feedbackId, filename))
+	}
+}
+
+@Controller
 class DownloadMarkerFeebackFilesController extends BaseController {
 
 	@Autowired var fileServer: FileServer = _
@@ -129,6 +136,11 @@ class DownloadMarkerFeebackFilesController extends BaseController {
 		getOne(command, null)
 	}
 
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachments/*"))
+	def redirectAll(@PathVariable assignment: Assignment, @PathVariable markerFeedback: String, @PathVariable marker: User) {
+		Redirect(Routes.admin.assignment.markerFeedback.downloadFeedback.all(assignment, marker, markerFeedback))
+	}
+
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{markerFeedback}/attachment/{filename}"))
 	def getOne(command: DownloadMarkerFeedbackFilesCommand, @PathVariable("filename") filename: String)
 						(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
@@ -139,8 +151,12 @@ class DownloadMarkerFeebackFilesController extends BaseController {
 		}
 		command.apply().orElse { throw new ItemNotFoundException() }
 	}
-}
 
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachment/{filename}"))
+	def redirectOne(@PathVariable assignment: Assignment, @PathVariable markerFeedback: String, @PathVariable marker: User, @PathVariable("filename") filename: String) {
+		Redirect(Routes.admin.assignment.markerFeedback.downloadFeedback.one(assignment, marker, markerFeedback, filename))
+	}
+}
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/{position}/feedbacks.zip"))

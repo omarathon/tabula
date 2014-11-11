@@ -25,7 +25,7 @@ class ModeratedMarkingWorkflow extends MarkingWorkflow with NoThirdMarker with A
 				if (submission.isReleasedToSecondMarker && getStudentsSecondMarker(assignment, submission.universityId).exists(_ == marker.getUserId))
 					Routes.coursework.admin.assignment.onlineModeration(assignment, marker)
 				else
-					Routes.coursework.admin.assignment.onlineMarkerFeedback(assignment, marker)
+					Routes.coursework.admin.assignment.markerFeedback.onlineFeedback(assignment, marker)
 		}
 
 	}

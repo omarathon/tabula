@@ -8,9 +8,11 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, RequestMapping}
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.permissions._
@@ -112,6 +114,16 @@ class MarkerMarksTemplateController extends CourseworkController {
 	def generateMarksTemplate(cmd: GenerateMarksTemplateCommand, @PathVariable(value="marker") marker: User) = {
 		cmd.members = cmd.assignment.getMarkersSubmissions(marker).map(_.universityId)
 		new ExcelView(safeAssignmentName(cmd.assignment) + " marks.xlsx", cmd.apply())
+	}
+}
+
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/marks-template"))
+class CurrentMarkerMarksTemplateController extends CourseworkController {
+
+	@RequestMapping
+	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
+		Redirect(Routes.admin.assignment.markerFeedback.marksTemplate(assignment, currentUser.apparentUser))
 	}
 }
 
