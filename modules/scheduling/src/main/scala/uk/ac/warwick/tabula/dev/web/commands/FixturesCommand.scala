@@ -83,6 +83,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		upstreamAssignment.module = module1
 		upstreamAssignment.name = "Assignment from SITS"
 		upstreamAssignment.assessmentType = AssessmentType.Assignment
+		upstreamAssignment.inUse = true
 		session.save(upstreamAssignment)
 
 		val upstreamAssessmentGroup = new UpstreamAssessmentGroup

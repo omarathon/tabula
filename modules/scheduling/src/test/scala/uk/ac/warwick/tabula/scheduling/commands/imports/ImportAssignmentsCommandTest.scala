@@ -28,6 +28,12 @@ class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Moc
 		command.moduleAndDepartmentService = moduleService
 
 		moduleService.getModuleByCode(any[String]) returns (None) // Not necessary for this to work
+		membershipService.replaceMembers(any[UpstreamAssessmentGroup], any[Seq[String]]) answers { args =>
+			val uag = args.asInstanceOf[Array[_]](0).asInstanceOf[UpstreamAssessmentGroup]
+			uag.id = "seenGroupId"
+
+			uag
+		}
 
 		val registrations: Seq[UpstreamModuleRegistration]
 
@@ -40,7 +46,8 @@ class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Moc
 
 	it should "process all collections" in {
 		new Fixture {
-			importer.getEmptyAssessmentGroups returns (Nil)
+			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns (Nil)
+
 			val registrations = Seq(
 				UpstreamModuleRegistration("13/14", "0100001/1", "A", "HI33M-30", "A"),
 				UpstreamModuleRegistration("13/14", "0100001/1", "A", "HI100-30", "A"),
@@ -72,7 +79,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Moc
 				UpstreamModuleRegistration("13/14", "0100002/1", "A", "HI100-30", "A")
 			)
 
-			importer.getEmptyAssessmentGroups returns (Seq(hi900_30))
+			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns (Seq(hi900_30))
 
 			command.doGroupMembers()
 
