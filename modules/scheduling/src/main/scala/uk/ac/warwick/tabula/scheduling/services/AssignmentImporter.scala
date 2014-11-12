@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.data.model.{AssessmentType, UpstreamAssessmentGroup,
 import uk.ac.warwick.tabula.AcademicYear
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.sandbox.SandboxData
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait AssignmentImporter {
 	/**
@@ -182,6 +183,12 @@ case class UpstreamModuleRegistration(year: String, sprCode: String, occurrence:
 
 object AssignmentImporter {
 	var sitsSchema: String = Wire.property("${schema.sits}")
+	var sqlStringCastFunction: String = "to_char"
+
+	// Because we have a mismatch between nvarchar2 and chars in the text, we need to cast some results to chars in Oracle, but not in HSQL
+	def castToString(orig: String) =
+		if (sqlStringCastFunction.hasText) s"$sqlStringCastFunction($orig)"
+		else orig
 
 	/** Get AssessmentComponents, and also some fake ones for linking to
 		* the group of students with no selected assessment group.
@@ -215,7 +222,7 @@ object AssignmentImporter {
 				smo.smo_agrp is null and
 				smo.ayr_code in (:academic_year_code)
 	union all
-		select mab.map_code as module_code, mab.mab_seq as seq, mab.mab_name as name, mab.mab_agrp as assessment_group, mab.ast_code as assessment_code
+		select mab.map_code as module_code, ${castToString("mab.mab_seq")} as seq, ${castToString("mab.mab_name")} as name, ${castToString("mab.mab_agrp")} as assessment_group, ${castToString("mab.ast_code")} as assessment_code
 			from $sitsSchema.cam_mab mab
 				join $sitsSchema.cam_mav mav
 					on mab.map_code = mav.mod_code and
@@ -245,8 +252,8 @@ object AssignmentImporter {
 		select distinct
 			mav.ayr_code as academic_year_code,
 			mav.mod_code as module_code,
-			mav.mav_occur as mav_occurrence,
-			mab.mab_agrp as assessment_group
+			${castToString("mav.mav_occur")} as mav_occurrence,
+			${castToString("mab.mab_agrp")} as assessment_group
 			from $sitsSchema.cam_mab mab
 				join $sitsSchema.cam_mav mav
 					on mab.map_code = mav.mod_code

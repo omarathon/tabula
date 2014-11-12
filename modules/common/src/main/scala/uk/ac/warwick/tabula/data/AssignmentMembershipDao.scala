@@ -53,6 +53,7 @@ trait AssignmentMembershipDao {
 	 * assessment group code, which most of the time is just 1.
 	 */
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
 	def countPublishedFeedback(assignment: Assignment): Int
 	def countFullFeedback(assignment: Assignment): Int
@@ -225,4 +226,10 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 			.add(is("assessmentGroup", component.assessmentGroup))
 			.seq
 	}
+
+	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
+		session.newCriteria[UpstreamAssessmentGroup]
+			.add(not(safeIn("id", ids)))
+			.add(safeIn("academicYear", academicYears))
+			.seq
 }

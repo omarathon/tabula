@@ -43,7 +43,9 @@ trait AssignmentMembershipService {
 
 	def save(assignment: AssessmentComponent): AssessmentComponent
 	def save(group: UpstreamAssessmentGroup)
-	def replaceMembers(group: UpstreamAssessmentGroup, universityIds: Seq[String])
+	def replaceMembers(group: UpstreamAssessmentGroup, universityIds: Seq[String]): UpstreamAssessmentGroup
+
+	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
 	def getEnrolledAssignments(user: User): Seq[Assignment]
 
@@ -96,12 +98,14 @@ class AssignmentMembershipServiceImpl
 		(autoEnrolled ++ manuallyEnrolled).distinct
 	}
 
-	def replaceMembers(template: UpstreamAssessmentGroup, universityIds: Seq[String]) {
+	def replaceMembers(template: UpstreamAssessmentGroup, universityIds: Seq[String]) = {
 		if (debugEnabled) debugReplace(template, universityIds)
 		getUpstreamAssessmentGroup(template).map { group =>
 			group.members.knownType.staticUserIds = universityIds
+			group
 		} getOrElse {
 			logger.warn("No such assessment group found: " + template.toString)
+			template
 		}
 	}
 
@@ -145,12 +149,11 @@ class AssignmentMembershipServiceImpl
 
 	def countFullFeedback(assignment: Assignment): Int = dao.countFullFeedback(assignment)
 
-	// private def isInteresting(assignment: AssessmentComponent) = {
-	// 	!(assignment.name contains "NOT IN USE")
-	// }
-
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] =
 		dao.getUpstreamAssessmentGroups(component, academicYear)
+
+	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
+		dao.getUpstreamAssessmentGroupsNotIn(ids, academicYears)
 
 }
 

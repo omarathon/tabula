@@ -28,6 +28,7 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 	val assignmentImporter = new AssignmentImporterImpl
 	assignmentImporter.sits = sits
 	AssignmentImporter.sitsSchema = "public"
+	AssignmentImporter.sqlStringCastFunction = ""
 	assignmentImporter.afterPropertiesSet
 
 	val NONE = AssessmentComponent.NoneAssessmentGroup

@@ -1,17 +1,19 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.{SessionComponent, Daoisms}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.SprCode
+import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
 import uk.ac.warwick.tabula.scheduling.services.UpstreamModuleRegistration
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.{RequiresPermissionsChecking, PermissionsChecking}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object ImportAssignmentsCommand {
 	def apply() = new ComposableCommand[Unit]
@@ -86,15 +88,14 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 		transactional() {
 			benchmark("Import all group members") {
 				var registrations = List[UpstreamModuleRegistration]()
-				var notEmptyNoneGroups = List[UpstreamAssessmentGroup]()
+				var notEmptyGroupIds = Set[String]()
 
 				var count = 0
 				assignmentImporter.allMembers { r =>
 					if (!registrations.isEmpty && r.differentGroup(registrations.head)) {
 						// This element r is for a new group, so save this group and start afresh
 						save(registrations)
-							.filter { uag => uag.assessmentGroup == AssessmentComponent.NoneAssessmentGroup }
-							.foreach { uag => notEmptyNoneGroups = notEmptyNoneGroups :+ uag }
+							.foreach { uag => notEmptyGroupIds = notEmptyGroupIds + uag.id }
 
 						registrations = Nil
 					}
@@ -104,19 +105,20 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 						logger.info("Processed " + count + " group members")
 					}
 				}
+
 				// TAB-1265 Don't forget the very last bunch.
 				if (!registrations.isEmpty) {
 					save(registrations)
-						.filter { uag => uag.assessmentGroup == AssessmentComponent.NoneAssessmentGroup }
-						.foreach { uag => notEmptyNoneGroups = notEmptyNoneGroups :+ uag }
+						.foreach { uag => notEmptyGroupIds = notEmptyGroupIds + uag.id }
 				}
 
-				// TODO FIXME NO-MERGE-WITHOUT Empty groups with no members
-//				val emptyGroups = assignmentImporter.getEmptyAssessmentGroups
-//				//logger.info("Found " + emptyGroups.size + " groups with no members, emptying...")
-//				for (emptyGroup <- emptyGroups.filterNot { group => notEmptyNoneGroups.exists { _.isEquivalentTo(group) } }) {
-//					assignmentMembershipService.replaceMembers(emptyGroup, Nil)
-//				}
+				// Empty groups that we haven't seen for academic years
+				assignmentMembershipService.getUpstreamAssessmentGroupsNotIn(
+					ids = notEmptyGroupIds.filter { _.hasText }.toSeq,
+					academicYears = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
+				).foreach { emptyGroup =>
+					assignmentMembershipService.replaceMembers(emptyGroup, Nil)
+				}
 
 				logger.info("Processed all " + count + " group members")
 			}
@@ -135,7 +137,6 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 			val members = group.map{ mr => SprCode.getUniversityId(mr.sprCode)}.distinct
 
 			assignmentMembershipService.replaceMembers(assessmentGroup, members)
-			assessmentGroup
 		}
 	}
 
