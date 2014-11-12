@@ -46,13 +46,6 @@
 		    </property>
 		</bean>
 		
-		<bean id="academicDataStore" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		    <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
-		    <property name="url" value="${ads.db.url}"/>
-		    <property name="username" value="${ads.db.username}"/>
-		    <property name="password" value="${ads.db.password}"/>
-		</bean>
-		
 		<bean id="sitsDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		    <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
 		    <property name="url" value="${sits.db.url}"/>
@@ -116,12 +109,6 @@
 	</beans>
 	
 	<beans profile="dev,production">
-	    <bean id="academicDataStore" class="org.springframework.jndi.JndiObjectFactoryBean">
-		   <property name="jndiName" value="java:/AcademicDS"/>
-		   <property name="lookupOnStartup" value="false" />
-		   <property name="proxyInterface" value="javax.sql.DataSource" />
-	    </bean>
-	    
 	    <bean id="sitsDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		   <property name="jndiName" value="java:/SITSDS"/>
 		   <property name="lookupOnStartup" value="false" />
@@ -136,8 +123,6 @@
 	</beans>
 	
 	<beans profile="sandbox,test">
-		<jdbc:embedded-database id="academicDataStore" />
-		
 		<jdbc:embedded-database id="sitsDataSource" />
 		
 		<jdbc:embedded-database id="membershipDataSource" />
@@ -153,15 +138,11 @@
 		<bean id="dataSourceInitialiser" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner" 
 			p:dataSource-ref="dataSource"
 			p:scripts-ref="testScripts" />
-			
-		<!-- We have ads.sql to make some tables and data but we just want a blank
-		     datasource here - ads.sql is used by the importer test only -->
-		<bean id="adsInit" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner" 
-			p:dataSource-ref="academicDataStore" />
-			
+
+		<!-- We have sits.sql to make some tables and data but we just want a blank
+		     datasource here - sits.sql is used by the importer test only -->
 		<bean id="sitsInit" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner" 
-			p:dataSource-ref="sitsDataSource"
-			p:scripts="sits.sql" />
+			p:dataSource-ref="sitsDataSource" />
 			
 		<bean id="membershipInit" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner" 
 			p:dataSource-ref="membershipDataSource"

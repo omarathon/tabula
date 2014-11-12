@@ -54,15 +54,6 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 			members += mr
 		}
 
-		/*
-UpstreamModuleRegistration(11/12,0123456/1,A,CH115-30,A)
-UpstreamModuleRegistration(11/12,0123457/1,A,CH115-30,A)
-UpstreamModuleRegistration(11/12,0123458/1,A,CH115-30,A)
-UpstreamModuleRegistration(11/12,0123458/1,A,CH120-15,A)
-
-what's missing?
-		 */
-
 		members.size should be (5)
 	}}
 
