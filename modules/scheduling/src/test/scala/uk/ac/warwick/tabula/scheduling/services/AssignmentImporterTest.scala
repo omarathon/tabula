@@ -1,35 +1,33 @@
 package uk.ac.warwick.tabula.scheduling.services
 
-import javax.sql.DataSource
-
 import scala.collection.JavaConverters._
 import scala.reflect._
 
-import org.junit.{After, Test}
+import org.junit.After
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils
-import org.springframework.stereotype.Service
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 
-import uk.ac.warwick.tabula.{TestBase, Mockito, PersistenceTestBase}
+import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.model.AssessmentComponent
 import scala.collection.mutable.ArrayBuffer
 
-trait EmbeddedAds {
-	val ads = new EmbeddedDatabaseBuilder().addScript("ads.sql").build()
+trait EmbeddedSits {
+	val sits = new EmbeddedDatabaseBuilder().addScript("sits.sql").build()
 
 	@After def after {
-		ads.shutdown()
+		sits.shutdown()
 	}
 }
 
 // scalastyle:off magic.number
-class AssignmentImporterTest extends TestBase with Mockito with EmbeddedAds {
+class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
 	val assignmentImporter = new AssignmentImporterImpl
-	assignmentImporter.ads = ads
+	assignmentImporter.sits = sits
+	AssignmentImporter.sitsSchema = "public"
 	assignmentImporter.afterPropertiesSet
 
 	val NONE = AssessmentComponent.NoneAssessmentGroup
@@ -55,24 +53,17 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedAds {
 		assignmentImporter.allMembers { mr =>
 			members += mr
 		}
+
+		/*
+UpstreamModuleRegistration(11/12,0123456/1,A,CH115-30,A)
+UpstreamModuleRegistration(11/12,0123457/1,A,CH115-30,A)
+UpstreamModuleRegistration(11/12,0123458/1,A,CH115-30,A)
+UpstreamModuleRegistration(11/12,0123458/1,A,CH120-15,A)
+
+what's missing?
+		 */
+
 		members.size should be (5)
-	}}
-
-	@Test def emptyAssessmentGroups { withFakeTime(dateTime(2012, 5)) {
-		val emptyGroups = assignmentImporter.getEmptyAssessmentGroups
-		val tuples = emptyGroups.map(asTuple)
-
-		tuples should be (Seq(
-			("CH115-30", NONE, NONE),
-			("CH120-15", NONE, NONE),
-			// Strictly these ought to appear, but if a module has _no_ registrations at all,
-			// the query won't return any "NONE" entries. Not really bothered; if nobody's registered
-			// on the module, who cares if the NONE group is stale.
-			//("CH130-15", NONE, NONE),
-			//("CH130-20", NONE, NONE),
-			("CH130-15", "A", "A"),
-			("CH130-20", "A", "A")
-		))
 	}}
 
 	@Test def getAllAssessmentGroups { withFakeTime(dateTime(2012, 5)) {

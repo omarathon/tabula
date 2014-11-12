@@ -40,7 +40,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Moc
 
 	it should "process all collections" in {
 		new Fixture {
-			importer.getEmptyAssessmentGroups returns (Nil)
+//			importer.getEmptyAssessmentGroups returns (Nil)
 			val registrations = Seq(
 				UpstreamModuleRegistration("13/14", "0100001/1", "A", "HI33M-30", "A"),
 				UpstreamModuleRegistration("13/14", "0100001/1", "A", "HI100-30", "A"),
@@ -72,7 +72,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Moc
 				UpstreamModuleRegistration("13/14", "0100002/1", "A", "HI100-30", "A")
 			)
 
-			importer.getEmptyAssessmentGroups returns (Seq(hi900_30))
+//			importer.getEmptyAssessmentGroups returns (Seq(hi900_30))
 
 			command.doGroupMembers()
 

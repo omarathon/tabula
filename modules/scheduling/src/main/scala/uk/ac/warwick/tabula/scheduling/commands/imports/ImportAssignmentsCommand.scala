@@ -111,12 +111,12 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 						.foreach { uag => notEmptyNoneGroups = notEmptyNoneGroups :+ uag }
 				}
 
-				// Empty groups with no members
-				val emptyGroups = assignmentImporter.getEmptyAssessmentGroups
-				//logger.info("Found " + emptyGroups.size + " groups with no members, emptying...")
-				for (emptyGroup <- emptyGroups.filterNot { group => notEmptyNoneGroups.exists { _.isEquivalentTo(group) } }) {
-					assignmentMembershipService.replaceMembers(emptyGroup, Nil)
-				}
+				// TODO FIXME NO-MERGE-WITHOUT Empty groups with no members
+//				val emptyGroups = assignmentImporter.getEmptyAssessmentGroups
+//				//logger.info("Found " + emptyGroups.size + " groups with no members, emptying...")
+//				for (emptyGroup <- emptyGroups.filterNot { group => notEmptyNoneGroups.exists { _.isEquivalentTo(group) } }) {
+//					assignmentMembershipService.replaceMembers(emptyGroup, Nil)
+//				}
 
 				logger.info("Processed all " + count + " group members")
 			}
