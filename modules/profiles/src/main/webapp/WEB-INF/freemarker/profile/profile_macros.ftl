@@ -50,7 +50,7 @@
 
 		<h4>${relationshipType.agentRole?cap_first}<#if relationships?size gt 1>s</#if></h4>
 
-		<#if relationships?size gt 0 && can.do_with_selector("Profiles.StudentRelationship.Create", profile, relationshipType) && acceptsChanges>
+		<#if relationships?size gt 0 && can.do_with_selector("Profiles.StudentRelationship.Create", studentCourseDetails, relationshipType) && acceptsChanges>
 			<a class="add-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"
 				data-target="#modal-change-agent"
 				data-scj="${studentCourseDetails.scjCode}"
@@ -69,7 +69,7 @@
 						<span class="percentage muted">(${relationship.percentage}%)</span>
 					</#if>
 					<span class="muted">External to Warwick</span>
-					<#if can.do_with_selector("Profiles.StudentRelationship.Update", profile, relationshipType) && acceptsChanges>
+					<#if can.do_with_selector("Profiles.StudentRelationship.Update", studentCourseDetails, relationshipType) && acceptsChanges>
 						<a class="edit-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"
 						data-target="#modal-change-agent"
 						data-scj="${studentCourseDetails.scjCode}"
@@ -87,7 +87,7 @@
 						<#if relationship.percentage?has_content>
 							<span class="percentage muted">(${relationship.percentage}%)</span>
 						</#if>
-						<#if can.do_with_selector("Profiles.StudentRelationship.Update", profile, relationshipType) && acceptsChanges>
+						<#if can.do_with_selector("Profiles.StudentRelationship.Update", studentCourseDetails, relationshipType) && acceptsChanges>
 							<a class="edit-agent-link" href="<@routes.relationship_edit scjCode=studentCourseDetails.urlSafeId currentAgent=agent relationshipType=relationshipType />"
 							data-target="#modal-change-agent"
 							data-scj="${studentCourseDetails.scjCode}"
@@ -111,7 +111,7 @@
 		<h4>${relationshipType.agentRole?cap_first}</h4>
 		<p class="text-warning"><i class="icon-warning-sign"></i> No ${relationshipType.agentRole} details are recorded in Tabula for the current year.</p>
 
-		<#if can.do_with_selector("Profiles.StudentRelationship.Update", profile, relationshipType) && acceptsChanges>
+		<#if can.do_with_selector("Profiles.StudentRelationship.Update", studentCourseDetails, relationshipType) && acceptsChanges>
 			<a class="btn edit-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"
 					data-target="#modal-change-agent"
 					data-scj="${studentCourseDetails.scjCode}"

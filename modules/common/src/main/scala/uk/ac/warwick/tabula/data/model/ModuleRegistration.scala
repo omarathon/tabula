@@ -69,7 +69,7 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 
 	override def toString = studentCourseDetails.scjCode + "-" + module.code + "-" + cats + "-" + AcademicYear.toString
 
-	def permissionsParents = Stream(Option(studentCourseDetails)).flatten
+	def permissionsParents = Option(studentCourseDetails).toStream
 
 	override def compare(that: ModuleRegistration): Int =
 		new CompareToBuilder()
