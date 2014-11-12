@@ -91,8 +91,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 		val academicYearEndDate = termService.getTermFromAcademicWeek(1, academicYear.next).getStartDate.minusDays(1)
 		val sixMonthsInDays = 6 * 30
 
-		studentCourseDetails.allRelationships.asScala
-			.filter(_.relationshipType == relationshipType)
+		studentCourseDetails.allRelationshipsOfType(relationshipType)
 			.filter(r => r.endDate == null || r.startDate.isBefore(r.endDate))
 			.filter(relationship => {
 			// For the most recent YoS, only show current relationships

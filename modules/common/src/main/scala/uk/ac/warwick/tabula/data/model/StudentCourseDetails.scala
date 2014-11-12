@@ -121,6 +121,8 @@ class StudentCourseDetails
 	@BatchSize(size=200)
 	var allRelationships: JSet[StudentRelationship] = JHashSet()
 
+	def allRelationshipsOfType(relationshipType: StudentRelationshipType) = allRelationships.asScala.filter(_.relationshipType == relationshipType)
+
 	// We can't restrict this because it's not a getter. Restrict in
 	// view code if necessary (or implement for all methods in  ScalaBeansWrapper)
 	def relationships(relationshipType: StudentRelationshipType) =
