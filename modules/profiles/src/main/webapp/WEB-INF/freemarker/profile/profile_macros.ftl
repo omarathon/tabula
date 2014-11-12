@@ -48,7 +48,7 @@
 	<#if ((studentCourseYearDetails.relationships(relationshipType))![])?size gt 0>
 		<#local relationships = studentCourseYearDetails.relationships(relationshipType) />
 
-		<h4>${relationshipType.agentRole?cap_first}<#if relationships?size gt 1>s</#if></h4>
+		<h4>${relationshipType.agentRole?cap_first}<#if relationships?size gt 1 && !relationshipType.agentRole?ends_with("s")>s</#if></h4>
 
 		<#if relationships?size gt 0 && can.do_with_selector("Profiles.StudentRelationship.Create", profile, relationshipType) && acceptsChanges>
 			<a class="add-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"
