@@ -45,8 +45,8 @@
 
 	<#local acceptsChanges = (studentCourseDetails.sprCode)?? && (studentCourseDetails.department)?? && !relationshipType.readOnly(studentCourseDetails.department) />
 
-	<#if ((studentCourseDetails.relationships(relationshipType))![])?size gt 0>
-		<#local relationships = studentCourseDetails.relationships(relationshipType) />
+	<#if ((studentCourseYearDetails.relationships(relationshipType))![])?size gt 0>
+		<#local relationships = studentCourseYearDetails.relationships(relationshipType) />
 
 		<h4>${relationshipType.agentRole?cap_first}<#if relationships?size gt 1>s</#if></h4>
 
@@ -120,6 +120,9 @@
 			</a>
 		</#if>
 	</#if>
+
+	<hr />
+
 	<#local ajaxRoute>
 		<#if openMeetingId?has_content>
 			<@routes.listMeetingsTargetted relationshipType studentCourseDetails.urlSafeId studentCourseYearDetails.academicYear openMeetingId/>

@@ -1,21 +1,19 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.joda.time.DateTime
-import javax.persistence.Basic
-import javax.persistence.Entity
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.system.permissions.Restricted
-import scala.beans.BeanProperty
-import org.apache.commons.lang3.builder.HashCodeBuilder
-import org.apache.commons.lang3.builder.EqualsBuilder
-import org.hibernate.annotations.{Filter, Filters, FilterDef, FilterDefs, Type}
-import javax.persistence.Column
+import javax.persistence.{Basic, Column, Entity, FetchType, JoinColumn, ManyToOne}
+
+import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
+import org.hibernate.annotations.{Filter, FilterDef, FilterDefs, Filters, Type}
+import org.joda.time.{DateTime, Duration}
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import javax.persistence.FetchType
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.tabula.system.permissions.Restricted
+import collection.JavaConverters._
+
+import scala.beans.BeanProperty
 
 object StudentCourseYearDetails {
 	final val FreshCourseYearDetailsOnlyFilter = "freshStudentCourseYearDetailsOnly"
@@ -31,6 +29,9 @@ object StudentCourseYearDetails {
 class StudentCourseYearDetails extends StudentCourseYearProperties
 	with GeneratedId with ToString with HibernateVersioned with PermissionsTarget
 	with Ordered[StudentCourseYearDetails] {
+
+	@transient
+	var termService = Wire.auto[TermService]
 
 	def this(studentCourseDetails: StudentCourseDetails, sceSequenceNumber: JInteger,year:AcademicYear) {
 		this()
@@ -84,6 +85,40 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	def hasAccreditedPriorLearning = !accreditedPriorLearning.isEmpty
 
 	def isLatest = this.equals(studentCourseDetails.latestStudentCourseYearDetails)
+
+	def relationships(relationshipType: StudentRelationshipType) = {
+		val academicYearStartDate = termService.getTermFromAcademicWeek(1, academicYear).getStartDate
+		val academicYearEndDate = termService.getTermFromAcademicWeek(1, academicYear.next).getStartDate.minusDays(1)
+		val sixMonthsInDays = 6 * 30
+
+		studentCourseDetails.allRelationships.asScala
+			.filter(_.relationshipType == relationshipType)
+			.filter(r => r.endDate == null || r.startDate.isBefore(r.endDate))
+			.filter(relationship => {
+			// For the most recent YoS, only show current relationships
+			if (studentCourseDetails.freshStudentCourseYearDetails.max == this) {
+				relationship.isCurrent
+			} else {
+				// Otherwise return the relationship if it lasted for at least 6 months in this academic year
+				val relationshipEndDate = if (relationship.endDate == null) DateTime.now else relationship.endDate
+				if (relationshipEndDate.isBefore(academicYearStartDate) || relationship.startDate.isAfter(academicYearEndDate)) {
+					false
+				} else {
+					val inYearStartDate =
+						if (relationship.startDate.isBefore(academicYearStartDate))
+							academicYearStartDate
+						else
+							relationship.startDate
+					val inYearEndDate =
+						if (relationshipEndDate.isAfter(academicYearEndDate))
+							academicYearEndDate
+						else
+							relationshipEndDate
+					new Duration(inYearStartDate, inYearEndDate).getStandardDays > sixMonthsInDays
+				}
+			}
+		})
+	}
 }
 
 trait BasicStudentCourseYearProperties {

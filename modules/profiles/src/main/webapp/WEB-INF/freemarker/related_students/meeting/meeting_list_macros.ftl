@@ -30,21 +30,6 @@
 			</#if>
 			<#if existingRelationship && can_create_scheduled_meetings && features.scheduledMeetings>
 				<a class="btn-like new" href="<@routes.create_scheduled_meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Schedule a meeting"><i class="icon-time"></i> Schedule</a>
-				<#if showIntro("scheduled-meetings", "anywhere")>
-					<#local introText>
-						<p>You can now schedule meetings in advance
-							<#if viewerRelationshipTypes?has_content> with your ${viewerRelationshipTypes}</#if>
-						</p>
-					</#local>
-					<a href="#"
-					   id="scheduled-meetings-intro"
-					   class="use-introductory auto"
-					   data-hash="${introHash("scheduled-meetings", "anywhere")}"
-					   data-title="Schedule Meetings"
-					   data-placement="bottom"
-					   data-html="true"
-					   data-content="${introText}"><i class="icon-question-sign"></i></a>
-				</#if>
 			</#if>
 
 		</div>
