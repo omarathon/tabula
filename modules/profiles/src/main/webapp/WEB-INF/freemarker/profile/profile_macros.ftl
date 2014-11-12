@@ -20,6 +20,32 @@
 	</div>
 </#macro>
 
+<#macro relationship_section_timeline_row profile relationship>
+	<tr>
+		<td>
+			<@fmt.relation_photo profile relationship "tinythumbnail" />
+			${relationship.agentMember.fullName!relationship.relationshipType.agentRole?cap_first}
+			<#if relationship.percentage?has_content>
+				<span class="percentage muted">(${relationship.percentage}%)</span>
+			</#if>
+		</td>
+		<td>
+			<#if relationship.startDate??>
+				<@fmt.date date=relationship.startDate includeTime=false />
+			<#else>
+				<em>Unknown</em>
+			</#if>
+		</td>
+		<td>
+			<#if relationship.endDate??>
+				<@fmt.date date=relationship.endDate includeTime=false />
+			<#else>
+				<em>None</em>
+			</#if>
+		</td>
+	</tr>
+</#macro>
+
 <#macro relationship_section studentCourseDetails relationshipType>
 <section id="relationship-${relationshipType.id}" class="relationship-section clearfix">
 
@@ -44,24 +70,86 @@
 	</#if>
 
 	<#local acceptsChanges = (studentCourseDetails.sprCode)?? && (studentCourseDetails.department)?? && !relationshipType.readOnly(studentCourseDetails.department) />
+	<#local relationships = (studentCourseYearDetails.relationships(relationshipType))![] />
+	<#local allRelationships = studentCourseDetails.allRelationshipsOfType(relationshipType) />
 
-	<#if ((studentCourseDetails.relationships(relationshipType))![])?size gt 0>
-		<#local relationships = studentCourseDetails.relationships(relationshipType) />
-
-		<h4>${relationshipType.agentRole?cap_first}<#if relationships?size gt 1>s</#if></h4>
-
-		<#if relationships?size gt 0 && can.do_with_selector("Profiles.StudentRelationship.Create", profile, relationshipType) && acceptsChanges>
-			<a class="add-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"
-				data-target="#modal-change-agent"
-				data-scj="${studentCourseDetails.scjCode}"
-			>
-			<i class="icon-plus"></i> Add another ${relationshipType.agentRole}
-			</a>
+	<div id="${relationshipType.urlPart}-timeline" class="modal hide fade">
+		<@modal.header>
+			<h2>Changes to ${relationshipType.agentRole}</h2>
+		</@modal.header>
+		<@modal.body>
+		<#if !allRelationships?has_content>
+			<em>No ${relationshipType.agentRole} details found for this course</em>
+		<#else>
+			<table class="table table-hover table-condensed sb-no-wrapper-table-popout">
+				<thead>
+					<tr>
+						<th></th>
+						<th>Start date</th>
+						<th>End date</th>
+					</tr>
+				</thead>
+				<tbody>
+					<#list allRelationships as rel>
+						<#if rel.current>
+							<@relationship_section_timeline_row profile rel />
+						</#if>
+					</#list>
+					<#list allRelationships as rel>
+						<#if !rel.current>
+							<@relationship_section_timeline_row profile rel />
+						</#if>
+					</#list>
+				</tbody>
+			</table>
 		</#if>
+		</@modal.body>
+	</div>
 
+	<#if can.do_with_selector("Profiles.StudentRelationship.Create", profile, relationshipType)>
+		<div class="btn-group pull-right">
+			<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+				<i class="icon-cog"></i>
+				Actions&hellip;
+				<span class="caret"></span>
+			</a>
+			<ul class="dropdown-menu">
+				<#if acceptsChanges>
+					<#if relationships?size gt 0>
+						<li>
+							<a class="add-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"
+							   data-target="#modal-change-agent"
+							   data-scj="${studentCourseDetails.scjCode}"
+							>
+								<i class="icon-plus"></i> Add another ${relationshipType.agentRole}
+							</a>
+						</li>
+					<#else>
+						<li>
+							<a class="edit-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"
+							   data-target="#modal-change-agent"
+							   data-scj="${studentCourseDetails.scjCode}"
+							>
+								<i class="icon-plus"></i> Add a ${relationshipType.agentRole}
+							</a>
+						</li>
+					</#if>
+				<#else>
+				</#if>
+				<li>
+					<a href="#" data-target="#${relationshipType.urlPart}-timeline" data-toggle="modal"><i class="icon-time"></i> View timeline</a>
+				</li>
+			</ul>
+		</div>
+	<#else>
+		<a href="#" class="btn pull-right" data-target="#${relationshipType.urlPart}-timeline" data-toggle="modal"><i class="icon-time"></i> View timeline</a>
+	</#if>
+
+	<h4>${relationshipType.agentRole?cap_first}<#if relationships?size gt 1 && !relationshipType.agentRole?ends_with("s")>s</#if></h4>
+
+	<#if relationships?size gt 0>
 		<div class="relationships clearfix row-fluid">
 		<#list relationships as relationship>
-
 			<div class="agent clearfix span4">
 				<#if !relationship.agentMember??>
 					${relationship.agentName}
@@ -71,8 +159,8 @@
 					<span class="muted">External to Warwick</span>
 					<#if can.do_with_selector("Profiles.StudentRelationship.Update", profile, relationshipType) && acceptsChanges>
 						<a class="edit-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"
-						data-target="#modal-change-agent"
-						data-scj="${studentCourseDetails.scjCode}"
+							data-target="#modal-change-agent"
+							data-scj="${studentCourseDetails.scjCode}"
 						>
 						<i class="icon-edit"></i>
 						</a>
@@ -89,8 +177,8 @@
 						</#if>
 						<#if can.do_with_selector("Profiles.StudentRelationship.Update", profile, relationshipType) && acceptsChanges>
 							<a class="edit-agent-link" href="<@routes.relationship_edit scjCode=studentCourseDetails.urlSafeId currentAgent=agent relationshipType=relationshipType />"
-							data-target="#modal-change-agent"
-							data-scj="${studentCourseDetails.scjCode}"
+								data-target="#modal-change-agent"
+								data-scj="${studentCourseDetails.scjCode}"
 							>
 							<i class="icon-edit"></i>
 							</a>
@@ -108,18 +196,11 @@
 		</#list>
 		</div>
 	<#else>
-		<h4>${relationshipType.agentRole?cap_first}</h4>
 		<p class="text-warning"><i class="icon-warning-sign"></i> No ${relationshipType.agentRole} details are recorded in Tabula for the current year.</p>
-
-		<#if can.do_with_selector("Profiles.StudentRelationship.Update", profile, relationshipType) && acceptsChanges>
-			<a class="btn edit-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"
-					data-target="#modal-change-agent"
-					data-scj="${studentCourseDetails.scjCode}"
-				>
-				<i class="icon-plus"></i> Add a ${relationshipType.agentRole}
-			</a>
-		</#if>
 	</#if>
+
+	<hr />
+
 	<#local ajaxRoute>
 		<#if openMeetingId?has_content>
 			<@routes.listMeetingsTargetted relationshipType studentCourseDetails.urlSafeId studentCourseYearDetails.academicYear openMeetingId/>
