@@ -137,12 +137,12 @@
 				<#else>
 				</#if>
 				<li>
-					<a href="#" data-target="#${relationshipType.urlPart}-timeline" data-toggle="modal"><i class="icon-time"></i> Timeline</a>
+					<a href="#" data-target="#${relationshipType.urlPart}-timeline" data-toggle="modal"><i class="icon-time"></i> View timeline</a>
 				</li>
 			</ul>
 		</div>
 	<#else>
-		<a href="#" class="btn pull-right" data-target="#${relationshipType.urlPart}-timeline" data-toggle="modal"><i class="icon-time"></i> Timeline</a>
+		<a href="#" class="btn pull-right" data-target="#${relationshipType.urlPart}-timeline" data-toggle="modal"><i class="icon-time"></i> View timeline</a>
 	</#if>
 
 	<h4>${relationshipType.agentRole?cap_first}<#if relationships?size gt 1 && !relationshipType.agentRole?ends_with("s")>s</#if></h4>
