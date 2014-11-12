@@ -16,6 +16,7 @@ class AssessmentComponentCreationFixtureCommandInternal extends CommandInternal[
 	var departmentCode: String = _
 	var assessmentType = AssessmentType.Assignment
 	var name: String = _
+	var inUse: Boolean = true
 
 	def applyInternal() = transactional() {
 		val ac = new AssessmentComponent
@@ -25,6 +26,7 @@ class AssessmentComponentCreationFixtureCommandInternal extends CommandInternal[
 		ac.sequence = sequence
 		ac.assessmentType = assessmentType
 		ac.name = name
+		ac.inUse = inUse
 
 		assignmentMembershipService.save(ac)
 	}

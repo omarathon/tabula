@@ -115,7 +115,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 				// Empty groups that we haven't seen for academic years
 				assignmentMembershipService.getUpstreamAssessmentGroupsNotIn(
 					ids = notEmptyGroupIds.filter { _.hasText }.toSeq,
-					academicYears = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
+					academicYears = assignmentImporter.yearsToImport
 				).foreach { emptyGroup =>
 					assignmentMembershipService.replaceMembers(emptyGroup, Nil)
 				}

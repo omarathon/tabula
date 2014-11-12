@@ -31,6 +31,8 @@ trait AssignmentImporter {
 	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup]
 	
 	def getAllAssessmentComponents: Seq[AssessmentComponent]
+
+	def yearsToImport = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
 }
 
 @Profile(Array("dev", "test", "production")) @Service
@@ -83,8 +85,6 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 	private def convertAssessmentGroupFromSITS(string: String) =
 		if (string == null) AssessmentComponent.NoneAssessmentGroup
 		else string
-
-	private def yearsToImport = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
 }
 
 @Profile(Array("sandbox")) @Service
@@ -147,6 +147,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 			a.name = "Coursework"
 			a.assessmentGroup = "A"
 			a.assessmentType = AssessmentType.Assignment
+			a.inUse = true
 			a
 		}
 	
@@ -199,7 +200,8 @@ object AssignmentImporter {
 			'${AssessmentComponent.NoneAssessmentGroup}' as seq,
 			'Students not registered for assessment' as name,
 			'${AssessmentComponent.NoneAssessmentGroup}' as assessment_group,
-			'X' as assessment_code
+			'X' as assessment_code,
+	 		'Y' as in_use
 			from $sitsSchema.cam_sms sms
 				join $sitsSchema.cam_ssn ssn
 					on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON'
@@ -212,7 +214,8 @@ object AssignmentImporter {
 			'${AssessmentComponent.NoneAssessmentGroup}' as seq,
 			'Students not registered for assessment' as name,
 			'${AssessmentComponent.NoneAssessmentGroup}' as assessment_group,
-			'X' as assessment_code
+			'X' as assessment_code,
+	 		'Y' as in_use
 			from $sitsSchema.cam_smo smo
 				left outer join $sitsSchema.cam_ssn ssn
 					on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
@@ -222,7 +225,13 @@ object AssignmentImporter {
 				smo.smo_agrp is null and
 				smo.ayr_code in (:academic_year_code)
 	union all
-		select mab.map_code as module_code, ${castToString("mab.mab_seq")} as seq, ${castToString("mab.mab_name")} as name, ${castToString("mab.mab_agrp")} as assessment_group, ${castToString("mab.ast_code")} as assessment_code
+		select
+			mab.map_code as module_code,
+			${castToString("mab.mab_seq")} as seq,
+			${castToString("mab.mab_name")} as name,
+			${castToString("mab.mab_agrp")} as assessment_group,
+			${castToString("mab.ast_code")} as assessment_code,
+	 		${castToString("mab.mab_udf1")} as in_use
 			from $sitsSchema.cam_mab mab
 				join $sitsSchema.cam_mav mav
 					on mab.map_code = mav.mod_code and
@@ -356,6 +365,10 @@ object AssignmentImporter {
 			a.name = rs.getString("name")
 			a.assessmentGroup = rs.getString("assessment_group")
 			a.assessmentType = AssessmentType(rs.getString("assessment_code"))
+			a.inUse = rs.getString("in_use") match {
+				case "Y" | "y" => true
+				case _ => false
+			}
 			a
 		}
 	}
