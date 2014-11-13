@@ -160,7 +160,7 @@
 </#macro>
 
 <#macro viewPoints department academicYearString filterQuery="">
-	<#local filterQuery><#if filterQuery?has_content>?${filterQuery}</#if></#local>
+	<#local filterQuery><#if filterQuery?has_content>?${filterQuery}&hasBeenFiltered=true</#if></#local>
 	<@_u page="/view/${department.code}/${academicYearString}/points${filterQuery}"/>
 </#macro>
 <#macro viewRecordPoints department academicYearString point queryString returnTo><@_u page="/view/${department.code}/${academicYearString}/points/${point.id}/record?returnTo=${returnTo?url}&hasBeenFiltered=true&${queryString}"/></#macro>
