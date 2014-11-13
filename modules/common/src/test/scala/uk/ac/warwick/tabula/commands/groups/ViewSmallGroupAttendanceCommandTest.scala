@@ -127,24 +127,12 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 			Seq(occurrence1, occurrence2, occurrence3)
 		) returns Seq()
 
-		command.weekToDateConverter.toLocalDatetime(1, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.SEPTEMBER, 29, 16, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 16, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 16, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
-		)
+		command.weekToDateConverter.toLocalDatetime(1, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.SEPTEMBER, 29, 16, 0))
+		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 16, 0))
+		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
+		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 16, 0))
+		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
+		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
 
 		val info = command.applyInternal()
 		
@@ -201,11 +189,11 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 			
 			(user5, Seq(
 				((event2, 1), Attended),
-				((event1, 2), Late),
+				((event1, 2), NotExpected),
 				((event1, 3), MissedAuthorised),
 				((event2, 3), MissedUnauthorised),
-				((event1, 4), NotRecorded),
-				((event2, 7), NotRecorded)
+				((event1, 4), NotExpected),
+				((event2, 7), NotExpected)
 			))
 		))
 	}}
@@ -259,15 +247,9 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 			any[Seq[SmallGroupEventOccurrence]]
 		) returns Seq()
 
-		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 12, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
-		)
+		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 12, 0))
+		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
+		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
 
 		val info = command.applyInternal()
 		info.attendance.keySet.size should be (3) // If it's 2, we're bad
