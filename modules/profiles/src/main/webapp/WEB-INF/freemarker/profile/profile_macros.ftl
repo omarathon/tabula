@@ -106,7 +106,7 @@
 		</@modal.body>
 	</div>
 
-	<#if can.do_with_selector("Profiles.StudentRelationship.Create", profile, relationshipType)>
+	<#if can.do_with_selector("Profiles.StudentRelationship.Create", studentCourseDetails, relationshipType)>
 		<div class="btn-group pull-right">
 			<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
 				<i class="icon-cog"></i>
@@ -157,7 +157,7 @@
 						<span class="percentage muted">(${relationship.percentage}%)</span>
 					</#if>
 					<span class="muted">External to Warwick</span>
-					<#if can.do_with_selector("Profiles.StudentRelationship.Update", profile, relationshipType) && acceptsChanges>
+					<#if can.do_with_selector("Profiles.StudentRelationship.Update", studentCourseDetails, relationshipType) && acceptsChanges>
 						<a class="edit-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"
 							data-target="#modal-change-agent"
 							data-scj="${studentCourseDetails.scjCode}"
@@ -175,7 +175,7 @@
 						<#if relationship.percentage?has_content>
 							<span class="percentage muted">(${relationship.percentage}%)</span>
 						</#if>
-						<#if can.do_with_selector("Profiles.StudentRelationship.Update", profile, relationshipType) && acceptsChanges>
+						<#if can.do_with_selector("Profiles.StudentRelationship.Update", studentCourseDetails, relationshipType) && acceptsChanges>
 							<a class="edit-agent-link" href="<@routes.relationship_edit scjCode=studentCourseDetails.urlSafeId currentAgent=agent relationshipType=relationshipType />"
 								data-target="#modal-change-agent"
 								data-scj="${studentCourseDetails.scjCode}"

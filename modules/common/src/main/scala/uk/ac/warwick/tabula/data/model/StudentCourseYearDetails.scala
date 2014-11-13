@@ -46,7 +46,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 
 	def toStringProps = Seq("studentCourseDetails" -> studentCourseDetails, "sceSequenceNumber" -> sceSequenceNumber, "academicYear" -> academicYear)
 
-	def permissionsParents = Option(studentCourseDetails).toStream
+	def permissionsParents = Stream(Option(studentCourseDetails), Option(enrolmentDepartment)).flatten
 
 	/**
 	 * This is used to calculate StudentCourseDetails.latestStudentCourseYearDetails

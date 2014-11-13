@@ -93,7 +93,19 @@ class StudentCourseDetails
 		"scjCode" -> scjCode,
 		"sprCode" -> sprCode)
 
-	def permissionsParents = Stream(Option(student), Option(route)).flatten.append(moduleRegistrations.map(_.module).toStream)
+	def permissionsParents = {
+		val latestYearDetails = Option(latestStudentCourseYearDetails)
+		val enrolmentDepartment = latestYearDetails.flatMap { scyd => Option(scyd.enrolmentDepartment) }
+
+		Stream(Option(student), Option(route), Option(department), enrolmentDepartment).flatten
+			.append(
+				latestYearDetails.toStream.flatMap { scyd =>
+					// Only include module registrations for the latest year
+					// FIXME TAB-2971 See StudentMember.permissionsParents
+					moduleRegistrationsByYear(Some(scyd.academicYear)).map { _.module }
+				}
+			)
+	}
 
 	def hasCurrentEnrolment: Boolean = {
 		Option(latestStudentCourseYearDetails).exists(scyd => !scyd.enrolmentStatus.code.startsWith("P"))

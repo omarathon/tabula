@@ -333,10 +333,37 @@ class StudentMember extends Member with StudentProperties {
 	def registeredSmallGroups: Stream[SmallGroup] = smallGroupService.findSmallGroupsByStudent(asSsoUser).toStream
 
 	override def permissionsParents: Stream[PermissionsTarget] = {
-		val departments: Stream[PermissionsTarget] = affiliatedDepartments.flatMap(_.subDepartmentsContaining(this))
-		val modules: Stream[PermissionsTarget] = registeredModulesByYear(None).toStream
+		// TAB-3007 We shouldn't swim downstream to the StudentCourseDetails or StudentCourseYearDetails for things here,
+		// rely on them swimming up.
+
+		// Allow swimming down only for *current* information
+		val mostSignificantCourse = mostSignificantCourseDetails
+		val latestStudentCourseYearDetails = mostSignificantCourseDetails.flatMap { scd => Option(scd.latestStudentCourseYearDetails) }
+
+		val studyDepartment = mostSignificantCourse.flatMap { scd => Option(scd.department) }
+		val enrolmentDepartment = latestStudentCourseYearDetails.flatMap { scyd => Option(scyd.enrolmentDepartment) }
+
+		val departments: Stream[PermissionsTarget] =
+			Stream(Option(homeDepartment), studyDepartment, enrolmentDepartment).flatten.distinct.flatMap(_.subDepartmentsContaining(this))
+
+		/*
+		 * FIXME TAB-2971 The small groups and modules from registrations here shouldn't be in permissionsParents, because
+		 * the SmallGroup doesn't wholly contain the student and neither does the Module. As things stand, you can add a student
+		 * to a small group and thereby elevate your own permissions on that student, which is wrong. We're really using this
+		 * as a mechanism to show more information to markers, module managers and small group tutors, which could be achieved
+		 * via a separate role provider that searches for registered small groups (or module registrations) when given the scope
+		 * of a StudentMember.
+		 */
 		val smallGroups: Stream[PermissionsTarget] = registeredSmallGroups
-		val currentRoute: Stream[PermissionsTarget] = mostSignificantCourseDetails.map { _.route }.toStream
+		val modules: Stream[PermissionsTarget] = mostSignificantCourse.toStream.flatMap { scd =>
+			latestStudentCourseYearDetails.toStream.flatMap { scyd =>
+				// Only include module registrations for the latest year of the most significant course
+				scd.moduleRegistrationsByYear(Some(scyd.academicYear)).map { _.module }
+			}
+		}
+
+		// Despite the above, it's still ok to do this as it only includes current information, so it's not swimming downstream
+		val currentRoute: Stream[PermissionsTarget] = mostSignificantCourse.map { _.route }.toStream
 
 		departments #::: modules #::: smallGroups #::: currentRoute
 	}
