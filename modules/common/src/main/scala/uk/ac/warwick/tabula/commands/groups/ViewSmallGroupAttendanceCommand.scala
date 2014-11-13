@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.groups
 
-import org.joda.time.{LocalDateTime, DateTime}
-import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+import org.joda.time.LocalDateTime
+import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, MemberOrUser, ReadOnly, TaskBenchmarking, Unaudited}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupEventAttendanceNote, SmallGroupEventOccurrence}
@@ -23,6 +23,7 @@ object SmallGroupAttendanceState {
 	case object MissedUnauthorised extends SmallGroupAttendanceState
 	case object NotRecorded extends SmallGroupAttendanceState
 	case object Late extends SmallGroupAttendanceState
+	case object NotExpected extends SmallGroupAttendanceState // The user is no longer in the group so is not expected to attend
 	
 	def from(state: Option[AttendanceState]) = state match {
 		case Some(AttendanceState.Attended) => Attended
@@ -90,7 +91,13 @@ object ViewSmallGroupAttendanceCommand {
 				)
 			
 			val state = 
-				if (attendance == SmallGroupAttendanceState.NotRecorded && isLate(event, week)) SmallGroupAttendanceState.Late
+				if (attendance == SmallGroupAttendanceState.NotRecorded)
+					if (!event.group.students.includesUser(user))
+						SmallGroupAttendanceState.NotExpected
+					else if (isLate(event, week))
+						SmallGroupAttendanceState.Late
+					else
+						attendance
 				else attendance
 			
 			instance -> state
@@ -133,7 +140,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 					MemberOrUser(student).asUser -> notes.groupBy(n => (n.occurrence.event, n.occurrence.week)).mapValues(_.head)
 			}.toMap.withDefaultValue(Map())
 		}
-		val attendanceNotes = allStudents.map{ student => student -> existingAttendanceNotes.get(student).getOrElse(Map())}.toMap
+		val attendanceNotes = allStudents.map{ student => student -> existingAttendanceNotes.getOrElse(student, Map())}.toMap
 		
 		SmallGroupAttendanceInformation(
 			instances = instances.map { case ((event, week), occurrence) => (event, week) }.sorted,
@@ -145,9 +152,8 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 	private def isLate(instance: EventInstance): Boolean = instance match {
 		case (event, week: SmallGroupEventOccurrence.WeekNumber) =>
 			// Get the actual end date of the event in this week
-			weekToDateConverter.toLocalDatetime(week, event.day, event.endTime, event.group.groupSet.academicYear).map { eventDateTime =>
-				eventDateTime.isBefore(LocalDateTime.now())
-			}.getOrElse(false)
+			weekToDateConverter.toLocalDatetime(week, event.day, event.endTime, event.group.groupSet.academicYear)
+				.exists(eventDateTime => eventDateTime.isBefore(LocalDateTime.now()))
 	}
 	
 }

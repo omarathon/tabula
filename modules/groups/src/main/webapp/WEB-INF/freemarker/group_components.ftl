@@ -853,6 +853,9 @@
 			<#elseif state.name == 'Late'>
 				<#local class = "icon-warning-sign late" />
 				<#local title = "No data: " + title />
+			<#elseif state.name == 'NotExpected'>
+				<#local class = "" />
+				<#local title = "No longer in group" />
 			<#else>
 				<#local class = "icon-minus" />
 			</#if>
