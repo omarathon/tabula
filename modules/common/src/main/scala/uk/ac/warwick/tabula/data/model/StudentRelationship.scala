@@ -1,19 +1,13 @@
 package uk.ac.warwick.tabula.data.model
 
-import java.sql.Types
-import org.hibernate.`type`.StandardBasicTypes
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Type
-import org.joda.time.DateTime
 import javax.persistence._
-import uk.ac.warwick.tabula.data.MemberDao
-import uk.ac.warwick.tabula.services.ProfileService
+
+import org.hibernate.annotations.AccessType
+import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{ToString, SprCode}
-import org.springframework.dao.DataRetrievalFailureException
 import uk.ac.warwick.tabula.JavaImports._
-import scala.collection.JavaConverters._
-import org.hibernate.annotations.BatchSize
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.{SprCode, ToString}
 
 @Entity
 @AccessType("field")
@@ -78,6 +72,7 @@ abstract class StudentRelationship extends GeneratedId with Serializable with To
 	def toEntityReference = new StudentRelationshipEntityReference().put(this)
 
 	def isCurrent = endDate == null || endDate.isAfterNow
+
 }
 
 @Entity

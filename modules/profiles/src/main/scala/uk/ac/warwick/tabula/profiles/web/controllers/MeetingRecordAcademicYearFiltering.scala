@@ -10,9 +10,14 @@ trait MeetingRecordAcademicYearFiltering {
 
 	def meetingNotInAcademicYear(academicYear: AcademicYear)(meeting: AbstractMeetingRecord) =
 		try {
-			Seq(Term.WEEK_NUMBER_BEFORE_START, Term.WEEK_NUMBER_AFTER_END).contains(
-				termService.getAcademicWeekForAcademicYear(meeting.meetingDate, academicYear)
-			)
+			termService.getAcademicWeekForAcademicYear(meeting.meetingDate, academicYear) match {
+				case Term.WEEK_NUMBER_AFTER_END =>
+					true
+				case Term.WEEK_NUMBER_BEFORE_START =>
+					meeting.relationship.studentCourseDetails.freshStudentCourseYearDetails.min.academicYear != academicYear
+				case _ =>
+					false
+			}
 		} catch {
 			case e: TermNotFoundException =>
 				// TAB-2465 Don't include this meeting - this happens if you are looking at a year before we recorded term dates
