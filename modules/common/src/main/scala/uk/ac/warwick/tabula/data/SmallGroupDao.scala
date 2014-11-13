@@ -48,6 +48,7 @@ trait SmallGroupDao {
 	def getAttendanceNote(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendanceNote]
 	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote]
 
+	def findSmallGroupsWithAttendanceRecorded(studentId: String): Seq[SmallGroup]
 	def findManuallyAddedAttendance(studentId: String): Seq[SmallGroupEventAttendance]
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
 
@@ -155,6 +156,14 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 			.add(in("occurrence", occurrences.asJava))
 			.seq
 	}
+
+	def findSmallGroupsWithAttendanceRecorded(studentId: String): Seq[SmallGroup] =
+		session.newCriteria[SmallGroupEventAttendance]
+			.createAlias("occurrence", "occurrence")
+			.createAlias("occurrence.event", "event")
+			.add(is("universityId", studentId))
+			.project[SmallGroup](Projections.distinct(Projections.groupProperty("event.group")))
+			.seq
 
 	def findManuallyAddedAttendance(studentId: String): Seq[SmallGroupEventAttendance] =
 		session.newCriteria[SmallGroupEventAttendance]

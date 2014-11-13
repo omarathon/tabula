@@ -118,6 +118,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		
 		val command = new ListStudentGroupAttendanceCommandInternal(member, academicYear) with CommandTestSupport
 		command.smallGroupService.findSmallGroupsByStudent(user1) returns Seq()
+		command.smallGroupService.findSmallGroupsWithAttendanceRecorded(user1.getWarwickId) returns Seq()
 		command.smallGroupService.findAttendanceNotes(
 			Seq(user1).map(_.getWarwickId),
 			Seq()
@@ -136,6 +137,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		
 		val command = new ListStudentGroupAttendanceCommandInternal(member, academicYear) with CommandTestSupport
 		command.smallGroupService.findSmallGroupsByStudent(user1) returns Seq(group)
+		command.smallGroupService.findSmallGroupsWithAttendanceRecorded(user1.getWarwickId) returns Seq()
 		command.smallGroupService.findAttendanceByGroup(group) returns Seq(occurrence1, occurrence2, occurrence3)
 		command.smallGroupService.findAttendanceNotes(
 			Seq(user1).map(_.getWarwickId),
@@ -203,6 +205,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		
 		val command = new ListStudentGroupAttendanceCommandInternal(member, academicYear) with CommandTestSupport
 		command.smallGroupService.findSmallGroupsByStudent(user3) returns Seq(group)
+		command.smallGroupService.findSmallGroupsWithAttendanceRecorded(user3.getWarwickId) returns Seq()
 		command.smallGroupService.findAttendanceByGroup(group) returns Seq(occurrence1, occurrence2, occurrence3)
 		command.smallGroupService.findAttendanceNotes(
 			Seq(user3).map(_.getWarwickId),
@@ -270,6 +273,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		
 		val command = new ListStudentGroupAttendanceCommandInternal(member, academicYear) with CommandTestSupport
 		command.smallGroupService.findSmallGroupsByStudent(user5) returns Seq(group)
+		command.smallGroupService.findSmallGroupsWithAttendanceRecorded(user5.getWarwickId) returns Seq()
 		command.smallGroupService.findAttendanceByGroup(group) returns Seq(occurrence1, occurrence2, occurrence3)
 		command.smallGroupService.findAttendanceNotes(
 			Seq(user5).map(_.getWarwickId),

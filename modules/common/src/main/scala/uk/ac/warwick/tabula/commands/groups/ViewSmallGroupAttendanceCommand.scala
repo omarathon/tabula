@@ -129,7 +129,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 		}
 		
 		val attendance = benchmarkTask("For each student, build an attended list for each instance") { 
-			val attendance = allStudents.map { user => user -> attendanceForStudent(instances, isLate)(user) }
+			val attendance = allStudents.map { user => user -> attendanceForStudent(instances, isLate(user))(user) }
 			
 			SortedMap(attendance.toSeq:_*)
 		}
@@ -149,8 +149,10 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 		)
 	}
 
-	private def isLate(instance: EventInstance): Boolean = instance match {
+	private def isLate(user: User)(instance: EventInstance): Boolean = instance match {
 		case (event, week: SmallGroupEventOccurrence.WeekNumber) =>
+			// Can't be late if the student is no longer in that group
+			event.group.students.includesUser(user) &&
 			// Get the actual end date of the event in this week
 			weekToDateConverter.toLocalDatetime(week, event.day, event.endTime, event.group.groupSet.academicYear)
 				.exists(eventDateTime => eventDateTime.isBefore(LocalDateTime.now()))
