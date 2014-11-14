@@ -32,9 +32,12 @@ class RoleProviderTest extends TestBase with Mockito {
 
 		customRole.get.definition match {
 			case customRoleDefinition: CustomRoleDefinition =>
+				// Check original hasn't been changed (otherwise the restricted selector is persisted)
+				department.customRoleDefinitions.size should be (1)
+				department.customRoleDefinitions.get(0).builtInBaseRoleDefinition.asInstanceOf[SelectorBuiltInRoleDefinition[_]].selector should be (PermissionsSelector.Any)
 				customRoleDefinition.baseRoleDefinition match {
 					case selectorDefinition: SelectorBuiltInRoleDefinition[_] =>
-						selectorDefinition.selector should be (personalTutorRelationshipType)
+						selectorDefinition.selector should be(personalTutorRelationshipType)
 					case _ =>
 						assert(condition = false, "customRole.head.definition should be a SelectorBuiltInRoleDefinition")
 				}

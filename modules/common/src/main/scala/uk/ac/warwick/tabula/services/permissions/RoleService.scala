@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles._
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, GrantedPermission}
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.data.model.Department
 
@@ -38,12 +38,19 @@ trait RoleProvider {
 				case originalSelectorRoleDefinition: SelectorBuiltInRoleDefinition[A @unchecked] => customDefinition.baseRoleDefinition match {
 					case customBaseSelectorRoleDefinition: SelectorBuiltInRoleDefinition[A @unchecked] =>
 						val correctedBaseSelectorDefinition = customBaseSelectorRoleDefinition.duplicate(Option(originalSelectorRoleDefinition.selector))
-						customDefinition.baseRoleDefinition = correctedBaseSelectorDefinition
+						val newCustomDefinition = new CustomRoleDefinition
+						newCustomDefinition.baseRoleDefinition = correctedBaseSelectorDefinition
+						newCustomDefinition.canDelegateThisRolesPermissions = customDefinition.canDelegateThisRolesPermissions
+						newCustomDefinition.overrides = customDefinition.overrides
+						newCustomDefinition.replacesBaseDefinition = customDefinition.replacesBaseDefinition
+						newCustomDefinition.department = customDefinition.department
+						RoleBuilder.build(newCustomDefinition, Some(scope), newCustomDefinition.getName)
 					case _ =>
+						RoleBuilder.build(customDefinition, Some(scope), customDefinition.getName)
 				}
 				case _ =>
+					RoleBuilder.build(customDefinition, Some(scope), customDefinition.getName)
 			}
-			RoleBuilder.build(customDefinition, Some(scope), customDefinition.getName)
 		}}
 
 
