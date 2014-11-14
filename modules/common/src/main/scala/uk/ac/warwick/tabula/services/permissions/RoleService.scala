@@ -40,6 +40,7 @@ trait RoleProvider {
 						val correctedBaseSelectorDefinition = customBaseSelectorRoleDefinition.duplicate(Option(originalSelectorRoleDefinition.selector))
 						val newCustomDefinition = new CustomRoleDefinition
 						newCustomDefinition.baseRoleDefinition = correctedBaseSelectorDefinition
+						newCustomDefinition.name = customDefinition.name
 						newCustomDefinition.canDelegateThisRolesPermissions = customDefinition.canDelegateThisRolesPermissions
 						newCustomDefinition.overrides = customDefinition.overrides
 						newCustomDefinition.replacesBaseDefinition = customDefinition.replacesBaseDefinition
