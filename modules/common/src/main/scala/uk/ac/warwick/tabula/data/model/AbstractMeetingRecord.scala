@@ -109,7 +109,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 		))
 	}
 
-	def permissionsParents = relationship.studentMember.toStream
+	def permissionsParents = Option(relationship.studentCourseDetails).toStream
 
 	def toStringProps = Seq(
 		"creator" -> creator,

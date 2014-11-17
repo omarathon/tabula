@@ -30,21 +30,6 @@
 			</#if>
 			<#if existingRelationship && can_create_scheduled_meetings && features.scheduledMeetings>
 				<a class="btn-like new" href="<@routes.create_scheduled_meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Schedule a meeting"><i class="icon-time"></i> Schedule</a>
-				<#if showIntro("scheduled-meetings", "anywhere")>
-					<#local introText>
-						<p>You can now schedule meetings in advance
-							<#if viewerRelationshipTypes?has_content> with your ${viewerRelationshipTypes}</#if>
-						</p>
-					</#local>
-					<a href="#"
-					   id="scheduled-meetings-intro"
-					   class="use-introductory auto"
-					   data-hash="${introHash("scheduled-meetings", "anywhere")}"
-					   data-title="Schedule Meetings"
-					   data-placement="bottom"
-					   data-html="true"
-					   data-content="${introText}"><i class="icon-question-sign"></i></a>
-				</#if>
 			</#if>
 
 		</div>
@@ -184,12 +169,17 @@
 </#macro>
 
 <#macro scheduledMeetingState meeting studentCourseDetails>
-	<#if meeting.pendingAction && !meeting.pendingActionBy(viewerUser)>
-	<small class="muted">Pending confirmation. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
-	<div class="alert alert-info">
-		${meeting.creator.fullName} needs to confirm that this meeting took place.
-	</div>
-	<#elseif meeting.pendingActionBy(viewerUser)>
+	<#local pendingAction = meeting.pendingAction />
+	<#local canConvertMeeting = can.do("Profiles.ScheduledMeetingRecord.Confirm", meeting) />
+
+	<#if pendingAction && !canConvertMeeting>
+		<small class="muted">Pending confirmation. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
+		<#if !meeting.pendingActionBy(viewerUser)>
+			<div class="alert alert-info">
+				${meeting.creator.fullName} needs to confirm that this meeting took place.
+			</div>
+		</#if>
+	<#elseif pendingAction && canConvertMeeting>
 		<small class="muted">Pending confirmation. ${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
 		<div class="alert alert-warning">
 			Please confirm whether this scheduled meeting took place.

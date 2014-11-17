@@ -39,6 +39,11 @@
 							// (cal.fullCalendar('option','weekends',true); doesn't work, although some other options do)
 							// https://code.google.com/p/fullcalendar/issues/detail?id=293 has some discussion and patches
 							//
+							// TAB-3008 - Change times to Europe/London
+							$.each(data, function(i, event){
+								event.start = moment(moment.unix(event.start).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
+								event.end = moment(moment.unix(event.end).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
+							});
 							callback(data);
 						},
 						complete: function() {

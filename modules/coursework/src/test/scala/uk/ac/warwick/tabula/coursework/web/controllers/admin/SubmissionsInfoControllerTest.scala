@@ -69,7 +69,7 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 		}
 	}
 
-	@Ignore @Test def getCsv {
+	@Test def getCsv {
 		val controller = new SubmissionsInfoController()
 		controller.securityService = mock[SecurityService]
 		controller.checkIndex = false

@@ -35,7 +35,7 @@
 	<#assign can_manage = (managePermissions?size > 0) />
 
 	<#if can_record || can_manage>
-		<#if (viewPermissions?size > 0)>
+		<#if can_record>
 			<h2>View and record monitoring points</h2>
 			<ul class="unstyled">
 				<#list viewPermissions as department>
@@ -49,7 +49,7 @@
 			</ul>
 		</#if>
 		
-		<#if (managePermissions?size > 0)>
+		<#if can_manage>
 			<h2>Create and edit monitoring schemes</h2>
 			<ul class="unstyled">
 				<#list managePermissions as department>
@@ -61,6 +61,21 @@
 					</li>
 				</#list>
 			</ul>
+			<#assign introText>
+			<p>
+				You can now view or manage monitoring points for any students who are enrolled in your department,
+				but whose route is owned by a different department.
+				This means that you will no longer see separate links to monitor students in departments
+				where you have been granted permissions on a specific route.
+			</p>
+			</#assign>
+			<a href="#"
+			   id="no-route-departments-intro"
+			   class="use-introductory auto"
+			   data-hash="${introHash("no-route-departments-intro", "anywhere")}"
+			   data-placement="bottom"
+			   data-html="true"
+			   data-content="${introText}"><i class="icon-question-sign"></i></a>
 		</#if>
 	<#else>
 		<#if user.staff && !hasAnyRelationships>

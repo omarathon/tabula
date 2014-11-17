@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.coursework.commands.departments
 
 import java.util.Date
+import org.joda.time.DateTime
+
 import scala.collection.JavaConverters._
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.xssf.usermodel.XSSFRow
@@ -34,8 +36,8 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 		report.getFeedbackCount(assignmentOne) should be (FeedbackCount(10,0, dateTime(2013, 3, 25), dateTime(2013, 3, 25))) // 10 on time
 		report.getFeedbackCount(assignmentTwo) should be (FeedbackCount(0,29, dateTime(2013, 5, 15), dateTime(2013, 5, 15))) // 29 late
 		report.getFeedbackCount(assignmentThree) should be (FeedbackCount(4,9, dateTime(2013, 5, 20), dateTime(2013, 6, 14))) // 4 on time - 9 late
-		report.getFeedbackCount(assignmentFour) should be (FeedbackCount(7,28, dateTime(2013, 7, 1), dateTime(2013, 7, 1))) // 7 on time - 28 late
-		report.getFeedbackCount(assignmentFive) should be (FeedbackCount(2,98, dateTime(2013, 9, 24), dateTime(2013, 9, 24))) // 2 on time - 98 late
+		report.getFeedbackCount(assignmentFour) should be (FeedbackCount(7,28, dateTime(2013, 6, 28), dateTime(2013, 6, 28))) // 7 on time - 28 late
+		report.getFeedbackCount(assignmentFive) should be (FeedbackCount(2,98, dateTime(2013, 9, 23), dateTime(2013, 9, 23))) // 2 on time - 98 late
 		report.getFeedbackCount(assignmentSix) should be (FeedbackCount(65,8, dateTime(2013, 7, 16), dateTime(2013, 8, 1))) // 65 on time - 8 late
 	}
 
@@ -61,8 +63,8 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 		val report = getTestFeedbackReport
 
 		// assignmentSeven is a dissertation, assignmentEight isn't
-		report.getFeedbackCount(assignmentSeven) should be (FeedbackCount(50,0, dateTime(2013, 8, 1), dateTime(2013, 8, 1))) // 50 on time
-		report.getFeedbackCount(assignmentEight) should be (FeedbackCount(0,50, dateTime(2013, 8, 1), dateTime(2013, 8, 1))) // is not a dissertation, 50 late
+		report.getFeedbackCount(assignmentSeven) should be (FeedbackCount(50, 0, dateTime(2013, 8, 1), dateTime(2013, 8, 1))) // everything on time
+		report.getFeedbackCount(assignmentEight) should be (FeedbackCount(0, 50, dateTime(2013, 8, 1), dateTime(2013, 8, 1))) // is not a dissertation, 50 late
 	}
 
 	/**
@@ -123,6 +125,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 			case dt: AbstractInstant => cell.getDateCellValue should be (dt.toDate)
 			case date: Date => cell.getDateCellValue should be (date)
 			case number: Number => cell.getNumericCellValue should be (number)
+			case null => cell.getDateCellValue should be (null)
 			case x => fail("This value type is not handled by compare(): " + x)
 		}
 
@@ -160,11 +163,11 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 
 		check("Row 4",
 			assignmentSheet.getRow(4),
-			Seq("test four","IN102",dateTime(2013, 5, 31),dateTime(2013, 6, 28),"Summative", "", 35,35,0,7,0,35,7,0.2,28,0.8))
+			Seq("test four","IN102",dateTime(2013, 5, 30),dateTime(2013, 6, 27),"Summative", "", 35,35,0,7,0,35,7,0.2,28,0.8))
 
 		check("Row 5",
 			assignmentSheet.getRow(8),
-			Seq("test five","IN102",dateTime(2013, 8, 23),dateTime(2013, 9, 23),"Summative", "", 100,100,0,2,0,100,2,0.02,98,0.98))
+			Seq("test five","IN102",dateTime(2013, 8, 22),dateTime(2013, 9, 20),"Summative", "", 100,100,0,2,0,100,2,0.02,98,0.98))
 
 		check("Row 6",
 			assignmentSheet.getRow(5),
@@ -172,7 +175,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 
 		check("Row 7",
 			assignmentSheet.getRow(6),
-			Seq("test seven","IN102", dateTime(2013, 7, 1), dateTime(2013, 7, 29), "Summative", "Dissertation", 100, 100, 0, 2, 50, 50, 50, 1, 0, 0))
+			Seq("test seven","IN102", dateTime(2013, 7, 1), null, "Summative", "Dissertation", 100, 100, 0, 2, 50, 50, 50, 1, 0, 0))
 
 		check("Row 8",
 			assignmentSheet.getRow(7),

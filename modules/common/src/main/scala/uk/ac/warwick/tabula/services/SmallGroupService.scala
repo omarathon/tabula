@@ -46,6 +46,7 @@ trait SmallGroupService {
 	def removeFromSmallGroups(moduleRegistration: ModuleRegistration)
 
 	def getSmallGroupSets(department: Department, year: AcademicYear): Seq[SmallGroupSet]
+	def getSmallGroupSets(module: Module, year: AcademicYear): Seq[SmallGroupSet]
 	def getAllSmallGroupSets(department: Department): Seq[SmallGroupSet]
 
 	def findSmallGroupsByStudent(student: User): Seq[SmallGroup]
@@ -57,6 +58,7 @@ trait SmallGroupService {
 	def getAttendanceNote(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendanceNote]
 	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote]
 	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence) : Option[SmallGroupEventAttendance]
+	def findSmallGroupsWithAttendanceRecorded(studentId: String): Seq[SmallGroup]
 	def findManuallyAddedAttendance(studentId: String): Seq[SmallGroupEventAttendance]
 
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
@@ -108,6 +110,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def saveOrUpdate(attendance: SmallGroupEventAttendance) = smallGroupDao.saveOrUpdate(attendance)
 
 	def getSmallGroupSets(department: Department, year: AcademicYear) = smallGroupDao.findSetsByDepartmentAndYear(department, year)
+	def getSmallGroupSets(module: Module, year: AcademicYear) = smallGroupDao.findSetsByModuleAndYear(module, year)
 	def getAllSmallGroupSets(department: Department) = smallGroupDao.findAllSetsByDepartment(department)
 
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = eventTutorsHelper.findBy(user)
@@ -228,6 +231,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence) : Option[SmallGroupEventAttendance] =
 		smallGroupDao.getAttendance(studentId, occurrence)
+
+	def findSmallGroupsWithAttendanceRecorded(studentId: String): Seq[SmallGroup] =
+		smallGroupDao.findSmallGroupsWithAttendanceRecorded(studentId)
 
 	def findManuallyAddedAttendance(studentId: String): Seq[SmallGroupEventAttendance] =
 		smallGroupDao.findManuallyAddedAttendance(studentId)

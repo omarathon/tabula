@@ -381,13 +381,14 @@
 					if (!complete) $container.fadeTo('fast', 0.3);
 				}, 300);
 				$.ajax({url:'/profiles/timetable/api',
-				  // make the from/to params compatible with what FullCalendar sends if you just specify a URL
-				  // as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
-				  data:{'from':start.getTime()/1000,
+					// make the from/to params compatible with what FullCalendar sends if you just specify a URL
+					// as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
+					data:{
+						'from':start.getTime()/1000,
 						'to':end.getTime()/1000,
 						'whoFor':studentId
 					},
-				  success:function(data){
+					success:function(data){
 						//
 						// TODO
 						//
@@ -395,12 +396,17 @@
 						// (cal.fullCalendar('option','weekends',true); doesn't work, although some other options do)
 						// https://code.google.com/p/fullcalendar/issues/detail?id=293 has some discussion and patches
 						//
+						// TAB-3008 - Change times to Europe/London
+						$.each(data, function(i, event){
+							event.start = moment(moment.unix(event.start).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
+							event.end = moment(moment.unix(event.end).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
+						});
 						callback(data);
-				  },
-				  complete: function() {
-				  	complete = true;
-				  	$container.fadeTo('fast', 1);
-				  }
+					},
+					complete: function() {
+						complete = true;
+						$container.fadeTo('fast', 1);
+					}
 			  });
 			};
 		}

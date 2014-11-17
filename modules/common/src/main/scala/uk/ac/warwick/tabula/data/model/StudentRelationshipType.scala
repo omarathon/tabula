@@ -80,11 +80,11 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 		studentCourseDetails.courseType match {
 			case Some(courseType: CourseType) => courseType match {
 				case CourseType.UG =>
-					studentCourseDetails.department.getStudentRelationshipExpected(this, courseType).getOrElse(expectedUG.booleanValue)
+					Option(studentCourseDetails.department).flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedUG.booleanValue)
 				case CourseType.PGT =>
-					studentCourseDetails.department.getStudentRelationshipExpected(this, courseType).getOrElse(expectedPGT.booleanValue)
+					Option(studentCourseDetails.department).flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedPGT.booleanValue)
 				case CourseType.PGR =>
-					studentCourseDetails.department.getStudentRelationshipExpected(this, courseType).getOrElse(expectedPGR.booleanValue)
+					Option(studentCourseDetails.department).flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedPGR.booleanValue)
 				case _ => false
 			}
 			case _ => false

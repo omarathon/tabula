@@ -5,14 +5,16 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.data.model.MeetingRecord
 import uk.ac.warwick.tabula.profiles.commands.EditMeetingRecordCommand
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
-import uk.ac.warwick.tabula.services.AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringMonitoringPointMeetingRelationshipTermServiceComponent}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 
 @Controller
 @RequestMapping(value = Array("/{relationshipType}/meeting/{studentCourseDetails}/edit/{meetingRecord}"))
 class EditMeetingRecordController extends ProfilesController
-	with MeetingRecordModal with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
-	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent{
+	with MeetingRecordModal
+	with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
+	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
+	with AutowiringTermServiceComponent {
 
 	validatesSelf[EditMeetingRecordCommand]
 
