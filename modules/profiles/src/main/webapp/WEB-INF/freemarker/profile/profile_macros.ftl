@@ -247,16 +247,22 @@
 </div>
 </#macro>
 
-<#macro timetable_placeholder profile view_name="agendaWeek" show_view_switcher=false>
-	<div class='fullCalendar' data-viewname='${view_name}' data-studentid='${profile.universityId}' data-showviewswitcher="${show_view_switcher?string("true", "false")}"></div>
+<#macro timetable_placeholder profile view_name="agendaWeek" show_view_switcher=false renderdate=.now>
+	<div
+		class='fullCalendar'
+		data-viewname='${view_name}'
+		data-studentid='${profile.universityId}'
+		data-showviewswitcher="${show_view_switcher?string("true", "false")}"
+		data-renderdate="${renderdate?long?c}"
+	></div>
 </#macro>
 
 <#macro timetablePane profile>
 	<li id="timetable-pane" data-title="Timetable">
 		<section id="timetable-details" class="clearfix" >
 			<div class="pull-right">
-				<a href="<@routes.timetable profile />"><i class="icon-fullscreen"></i></a>
-				<a href="<@routes.timetable profile />">View full screen</a>
+				<a class="timetable-fullscreen" href="<@routes.timetable profile />"><i class="icon-fullscreen"></i></a>
+				<a class="timetable-fullscreen" href="<@routes.timetable profile />">View full screen</a>
 			</div>
 
 			<h4>

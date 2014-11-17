@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.timetables.EventOccurrence
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, ItemNotFoundException}
+import uk.ac.warwick.tabula.JavaImports._
 
 abstract class AbstractTimetableController extends ProfilesController with AutowiringProfileServiceComponent {
 
@@ -137,16 +138,18 @@ class ViewMyTimetableController extends ProfilesController {
 @RequestMapping(value = Array("/timetable/{member}"))
 class TimetableForMemberController extends AbstractTimetableController with AutowiringUserLookupComponent {
 
-	@ModelAttribute("command")
-	def command(@PathVariable member: Member) = commandForMember(member)
-
 	@RequestMapping
-	def viewTimetable(@ModelAttribute("command") command: TimetableCommand, @PathVariable member: Member) = {
+	def viewTimetable(
+		@PathVariable member: Member,
+		@RequestParam(value = "now", required = false) now: JLong
+	) = {
+		val renderDate = if (now == null) DateTime.now else new DateTime(now)
 		val isSelf = member.universityId == user.universityId
 
 		Mav("profile/view_timetable",
 			"profile" -> member,
-			"isSelf" -> isSelf
+			"isSelf" -> isSelf,
+			"renderDate" -> renderDate.toDate
 		).crumbs(Breadcrumbs.Profile(member, isSelf))
 	}
 
