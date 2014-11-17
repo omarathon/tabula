@@ -53,7 +53,7 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 
 	override def toString = "Route[" + code + "]"
 	
-	def permissionsParents = Option(adminDepartment).toStream
+	def permissionsParents = teachingDepartments.toStream
 	override def humanReadableId = code.toUpperCase + " " + name
 	override def urlSlug = code
 

@@ -57,6 +57,7 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 		assignment2AC.module = module1
 		assignment2AC.assessmentType = AssessmentType.Assignment
 		assignment2AC.name = "Cool Essay"
+		assignment2AC.inUse = true
 
 		val assessmentGroup2 = new AssessmentGroup
 		assessmentGroup2.membershipService = assignmentMembershipService
@@ -85,6 +86,7 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 		assignment3AC.module = module2
 		assignment3AC.assessmentType = AssessmentType.Assignment
 		assignment3AC.name = "Cool Stuff"
+		assignment3AC.inUse = true
 
 		val assessmentGroup3 = new AssessmentGroup
 		assessmentGroup3.membershipService = assignmentMembershipService

@@ -53,6 +53,7 @@ trait AssignmentMembershipDao {
 	 * assessment group code, which most of the time is just 1.
 	 */
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
 	def countPublishedFeedback(assignment: Assignment): Int
 	def countFullFeedback(assignment: Assignment): Int
@@ -173,8 +174,9 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 	def getAssessmentComponents(module: Module) = {
 		session.newCriteria[AssessmentComponent]
 			.add(Restrictions.like("moduleCode", module.code.toUpperCase + "-%"))
+			.add(is("inUse", true))
 			.addOrder(Order.asc("sequence"))
-			.seq filter isInteresting
+			.seq
 	}
 
 	/** Just gets components of type Assignment for modules in this department, not all components. */
@@ -192,9 +194,10 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 		else {
 			session.newCriteria[AssessmentComponent]
 				.add(safeIn("module", deptModules))
+				.add(is("inUse", true))
 				.addOrder(asc("moduleCode"))
 				.addOrder(asc("sequence"))
-				.seq filter isInteresting
+				.seq
 		}
 	}
 
@@ -214,10 +217,6 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 			.asInstanceOf[Number].intValue
 	}
 
-	private def isInteresting(assignment: AssessmentComponent) = {
-		!(assignment.name contains "NOT IN USE")
-	}
-
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] = {
 		session.newCriteria[UpstreamAssessmentGroup]
 			.add(is("academicYear", academicYear))
@@ -225,4 +224,10 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 			.add(is("assessmentGroup", component.assessmentGroup))
 			.seq
 	}
+
+	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
+		session.newCriteria[UpstreamAssessmentGroup]
+			.add(not(safeIn("id", ids)))
+			.add(safeIn("academicYear", academicYears))
+			.seq
 }

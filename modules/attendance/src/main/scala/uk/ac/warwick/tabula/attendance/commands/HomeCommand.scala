@@ -45,14 +45,11 @@ abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeIn
 		val manageDepartments = moduleAndDepartmentService.departmentsWithPermission(user, Permissions.MonitoringPoints.Manage)
 		
 		val viewRoutes = courseAndRouteService.routesWithPermission(user, Permissions.MonitoringPoints.View)
-		val manageRoutes = courseAndRouteService.routesWithPermission(user, Permissions.MonitoringPoints.Manage)
 		
 		def withSubDepartments(d: Department) = (Set(d) ++ d.children.asScala.toSet).filter(_.routes.asScala.size > 0)
 		
 		val allViewDepartments = (viewDepartments ++ viewRoutes.map { _.adminDepartment }).map(withSubDepartments).flatten
-		val allManageDepartments = (manageDepartments ++ manageRoutes.map { _.adminDepartment }).map(withSubDepartments).flatten
-		
-		// TODO we might want to distinguish between a "Manage department" and a "Manage route" like we do in coursework with modules
+
 		// These return Sets so no need to distinct the result
 
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
@@ -64,7 +61,7 @@ abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeIn
 		HomeInformation(
 			hasProfile,
 			allViewDepartments,
-			allManageDepartments,
+			manageDepartments,
 			allRelationshipTypes,
 			relationshipTypesMap
 		)

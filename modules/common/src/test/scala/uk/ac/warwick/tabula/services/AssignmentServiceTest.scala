@@ -232,6 +232,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		upstream.assessmentGroup = "A"
 		upstream.assessmentType = AssessmentType.Assignment
 		upstream.name = "Egg plants"
+		upstream.inUse = true
 
 		assignmentMembershipService.save(upstream)
 
@@ -242,6 +243,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		upstream2.assessmentGroup = "A"
 		upstream2.assessmentType = AssessmentType.Assignment
 		upstream2.name = "Greg's plants"
+		upstream2.inUse = true
 
 		assignmentMembershipService.save(upstream2)
 	}
@@ -366,6 +368,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		ua.assessmentGroup = "A"
 		ua.assessmentType = AssessmentType.Assignment
 		ua.name = "Egg plants"
+		ua.inUse = true
 
 		assignmentMembershipService.save(ua) should be (ua)
 
@@ -414,6 +417,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		ua1.assessmentGroup = "A"
 		ua1.assessmentType = AssessmentType.Assignment
 		ua1.name = "Egg plants"
+		ua1.inUse = true
 
 		val ua2 = new AssessmentComponent
 		ua2.module = chemistryModule
@@ -422,6 +426,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		ua2.assessmentGroup = "A"
 		ua2.assessmentType = AssessmentType.Assignment
 		ua2.name = "Egg plants"
+		ua2.inUse = true
 
 		val ua3 = new AssessmentComponent
 		ua3.module = lawModule1
@@ -430,6 +435,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		ua3.assessmentGroup = "A"
 		ua3.assessmentType = AssessmentType.Assignment
 		ua3.name = "Egg plants"
+		ua3.inUse = true
 
 		val ua4 = new AssessmentComponent
 		ua4.module = lawModule1
@@ -438,6 +444,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		ua4.assessmentGroup = "B"
 		ua4.assessmentType = AssessmentType.Assignment
 		ua4.name = "Egg plants NOT IN USE"
+		ua4.inUse = false
 
 		assignmentMembershipService.save(ua1) should be (ua1)
 		assignmentMembershipService.save(ua2) should be (ua2)
@@ -501,6 +508,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		upstreamAssignment.assessmentGroup = "A"
 		upstreamAssignment.assessmentType = AssessmentType.Assignment
 		upstreamAssignment.name = "Egg plants"
+		upstreamAssignment.inUse = true
 
 		assignmentMembershipService.save(upstreamAssignment) should be (upstreamAssignment)
 
@@ -634,6 +642,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		up1.assessmentGroup = "A"
 		up1.assessmentType = AssessmentType.Assignment
 		up1.name = "Egg plants"
+		up1.inUse = true
 
 		val upstream1 = assignmentMembershipService.save(up1)
 
@@ -644,6 +653,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		up2.assessmentGroup = "B"
 		up2.assessmentType = AssessmentType.Assignment
 		up2.name = "Greg's plants"
+		up2.inUse = true
 
 		val upstream2 = assignmentMembershipService.save(up2)
 
@@ -654,6 +664,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		up3.assessmentGroup = "C"
 		up3.assessmentType = AssessmentType.Assignment
 		up3.name = "Steg's plants"
+		up3.inUse = true
 
     val upstream3 = assignmentMembershipService.save(up3)
 

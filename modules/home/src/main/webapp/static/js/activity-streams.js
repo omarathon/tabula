@@ -3,7 +3,7 @@ jQuery(function($) {
 
 	// TODO this should be run early on in a more general file,
 	// so that it applies to all use of moment
-	moment.lang('en-gb');
+	moment.locale('en-gb');
 
 	// Maps from priority classes to icon classes.
 	var icons = {

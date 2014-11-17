@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 class ViewSmallGroupAttendanceController extends GroupsController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable group: SmallGroup) = ViewSmallGroupAttendanceCommand(group)
+	def command(@PathVariable group: SmallGroup) = ViewSmallGroupAttendanceCommand(mandatory(group))
 
 	@RequestMapping
 	def show(

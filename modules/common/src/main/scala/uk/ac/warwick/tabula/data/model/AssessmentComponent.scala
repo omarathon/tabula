@@ -48,21 +48,12 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 	var sequence: String = _
 
 	/**
-	 * Lowercase department code, e.g. md.
-	 */
-	@deprecated("TAB-2839 Don't make any assumptions on the department code here, the module may have been moved in Tabula", "85")
-	def departmentCode = _departmentCode
-
-	@deprecated("TAB-2839 Don't make any assumptions on the department code here, the module may have been moved in Tabula", "85")
-	def departmentCode_=(code: String) { _departmentCode = code }
-
-	@Column(name = "DEPARTMENTCODE")
-	private var _departmentCode: String = _
-
-	/**
 	 * Name as defined upstream.
 	 */
 	var name: String = _
+
+	@Column(name = "IN_USE")
+	var inUse: Boolean = _
 
 	/**
 	 * The type of component. Typical values are A for assignment,
@@ -96,8 +87,8 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 
 	def needsUpdatingFrom(other: AssessmentComponent) = (
 		this.name != other.name ||
-		this._departmentCode != other._departmentCode ||
-		this.module != other.module
+		this.module != other.module ||
+		this.inUse != other.inUse
 	)
 
 	override def preSave(newRecord: Boolean) {
@@ -113,7 +104,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 		moduleCode = other.moduleCode
 		assessmentGroup = other.assessmentGroup
 		sequence = other.sequence
-		_departmentCode = other._departmentCode
+		inUse = other.inUse
 		module = other.module
 		name = other.name
 		assessmentType = other.assessmentType

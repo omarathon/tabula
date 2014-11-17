@@ -222,7 +222,7 @@
 			          			<li class="spacer">|</li>
 			          			<li id="accessibility-link"><a href="http://go.warwick.ac.uk/accessibility" title="Accessibility information [0]" accesskey="0">Accessibility</a></li>
 			          			<li class="spacer subtle">|</li>
-			          			<li id="faqs-link"><a href="http://warwick.ac.uk/tabula/faqs/" target="_blank">FAQs</a></li>
+			          			<li id="faqs-link"><a href="http://warwick.ac.uk/tabula/manual/" target="_blank">Manual</a></li>
 			          			<li class="spacer subtle">|</li>
 								<li id="whatsnew-link"><a href="http://warwick.ac.uk/tabula/whatsnew/" target="_blank">What's new?</a></li>
 								<li class="spacer subtle">|</li>

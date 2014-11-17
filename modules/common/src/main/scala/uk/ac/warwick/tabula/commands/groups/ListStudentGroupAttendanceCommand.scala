@@ -2,13 +2,15 @@ package uk.ac.warwick.tabula.commands.groups
 
 import org.joda.time.{LocalDateTime, DateMidnight, DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.groups.ListStudentGroupAttendanceCommand._
 import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand._
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, TaskBenchmarking, Unaudited}
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEventAttendanceNote, SmallGroupEventOccurrence, WeekRange}
+import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.termdates.Term
 
 import scala.collection.JavaConverters._
@@ -24,7 +26,9 @@ case class StudentGroupAttendance(
 
 object ListStudentGroupAttendanceCommand {
 
-	type PerGroupAttendance = SortedMap[SmallGroup, SortedMap[SmallGroupEventOccurrence.WeekNumber, SortedMap[EventInstance, SmallGroupAttendanceState]]]
+	type PerInstanceAttendance = SortedMap[EventInstance, SmallGroupAttendanceState]
+	type PerWeekAttendance = SortedMap[SmallGroupEventOccurrence.WeekNumber, PerInstanceAttendance]
+	type PerGroupAttendance = SortedMap[SmallGroup, PerWeekAttendance]
 	type PerTermAttendance = SortedMap[Term, PerGroupAttendance]
 
 	def apply(member: Member, academicYear: AcademicYear) =
@@ -49,24 +53,37 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 	def applyInternal() = {
 		val user = member.asSsoUser
 
-		val groups = smallGroupService.findSmallGroupsByStudent(user).filter {
-			group =>
-				group.groupSet.showAttendanceReports &&
-				group.groupSet.visibleToStudents &&
-				group.groupSet.academicYear == academicYear &&
-				group.events.nonEmpty
+		val memberGroups = smallGroupService.findSmallGroupsByStudent(user)
+
+		val attendanceRecordedGroups = smallGroupService.findSmallGroupsWithAttendanceRecorded(user.getWarwickId)
+
+		val groups = (memberGroups ++ attendanceRecordedGroups).distinct.filter { group =>
+			!group.groupSet.deleted &&
+			group.groupSet.showAttendanceReports &&
+			group.groupSet.academicYear == academicYear &&
+			group.events.nonEmpty
 		}
 
 		val allInstances = groups.flatMap { group => allEventInstances(group, smallGroupService.findAttendanceByGroup(group)) }
 
-		val attendance = groupByTerm(allInstances).mapValues { instances =>
+		def hasExpectedAttendanceForWeek(kv: (SmallGroupEventOccurrence.WeekNumber, PerInstanceAttendance)) = kv match {
+			case (_, attendance) =>
+				attendance.exists { case (_, state) => state != SmallGroupAttendanceState.NotExpected}
+		}
+
+		def hasExpectedAttendanceForGroup(kv: (SmallGroup, PerWeekAttendance)) = kv match {
+			case (_, weekAttendance) =>
+				weekAttendance.exists(hasExpectedAttendanceForWeek)
+		}
+
+		val attendance = (groupByTerm(allInstances).mapValues { instances =>
 			val groups = SortedMap(instances.groupBy { case ((event, _), _) => event.group }.toSeq:_*)
 			groups.mapValues { instances =>
 				SortedMap(instances.groupBy { case ((_, week), _) => week }.toSeq:_*).mapValues { instances =>
-					attendanceForStudent(instances, isLate)(user)
+					attendanceForStudent(instances, isLate(user))(user)
 				}
-			}
-		}
+			}.filter(hasExpectedAttendanceForGroup)
+		}).filterNot { case (term, attendance) => attendance.isEmpty }
 
 		val missedCountByTerm = attendance.mapValues { groups =>
 			val count = groups.map { case (_, attendanceByInstance) =>
@@ -112,12 +129,13 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 		}.toSeq:_*)
 	}
 
-	private def isLate(instance: EventInstance): Boolean = instance match {
+	private def isLate(user: User)(instance: EventInstance): Boolean = instance match {
 		case (event, week: SmallGroupEventOccurrence.WeekNumber) =>
+			// Can't be late if the student is no longer in that group
+			event.group.students.includesUser(user) &&
 			// Get the actual end date of the event in this week
-			weekToDateConverter.toLocalDatetime(week, event.day, event.endTime, event.group.groupSet.academicYear).map { eventDateTime =>
-				eventDateTime.isBefore(LocalDateTime.now())
-			}.getOrElse(false)
+			weekToDateConverter.toLocalDatetime(week, event.day, event.endTime, event.group.groupSet.academicYear)
+				.exists(eventDateTime => eventDateTime.isBefore(LocalDateTime.now()))
 	}
 }
 

@@ -8,8 +8,8 @@
 	<@script "/static/libs/jquery-fixedheadertable/jquery.fixedheadertable.js" />
 	<@script "/static/libs/jquery-rating/jquery.rating.pack.js" />
 	<@script "/static/libs/jquery-tablesorter/jquery.tablesorter.js" />
-	<@script "/static/js/moment.min.js" />
-	<@script "/static/js/moment-lang.en-gb.js" />
+	<@script "/static/js/moment.js" />
+	<@script "/static/js/moment-timezone-london.js" />
 	<@script "/static/libs/popup/popup.js" />
 	<@script "/static/libs/bootstrap/js/bootstrap.js" />
 	<@script "/static/libs/bootstrap-editable/js/bootstrap-editable.js" />

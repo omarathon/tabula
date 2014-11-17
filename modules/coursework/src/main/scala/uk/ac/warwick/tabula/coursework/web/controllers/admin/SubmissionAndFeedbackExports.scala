@@ -213,14 +213,19 @@ trait SubmissionAndFeedbackSpreadsheetExport extends SubmissionAndFeedbackExport
 		case None => ""
 	}
 
-	protected def itemData(item: Student) = 
-		prefix(identityData(item), "student") ++
-		prefix(submissionData(item), "submission") ++ 
-		prefix(extraFieldData(item), "submission") ++ 
-		prefix(submissionStatusData(item), "submission") ++
-		(if (assignment.markingWorkflow != null) prefix(markerData(item), "marking") else Map()) ++ 
-		prefix(plagiarismData(item), "marking") ++ 
-		prefix(feedbackData(item), "feedback")
+	protected def itemData(item: Student) =
+		(
+			prefix(identityData(item), "student") ++
+			prefix(submissionData(item), "submission") ++
+			prefix(extraFieldData(item), "submission") ++
+			prefix(submissionStatusData(item), "submission") ++
+			(if (assignment.markingWorkflow != null) prefix(markerData(item), "marking") else Map()) ++
+			prefix(plagiarismData(item), "marking") ++
+			prefix(feedbackData(item), "feedback")
+		).mapValues { v => v match {
+			case Some(any) => any
+			case any => any
+		}}
 	
 	private def prefix(fields: Seq[String], prefix: String) = fields map { name => prefix + "-" + name }
 	
@@ -339,23 +344,22 @@ trait SubmissionAndFeedbackExport {
 			) ++ (item.submission.allAttachments.find(_.originalityReport != null) match {
 				case Some(a) =>
 					val report = a.originalityReport
-					Map(
-						"similarity-percentage" -> report.overlap
-					)
+					report.overlap.map { overlap => ("similarity-percentage" -> overlap) }.toMap
 				case _ => Map()
 			})
 		case _ => Map()
 	}
 	
 	protected def feedbackData(student: Student): Map[String, Any] = student.coursework.enhancedFeedback match {
-		case Some(item) if item.feedback.id.hasText => Map(
-			"id" -> item.feedback.id, 
-			"uploaded" -> item.feedback.createdDate,
-			"released" -> item.feedback.released, 
-			"mark" -> item.feedback.actualMark,
-			"grade" -> item.feedback.actualGrade,
-			"downloaded" -> item.downloaded
-		) 
+		case Some(item) if item.feedback.id.hasText =>
+			Map(
+				"id" -> item.feedback.id,
+				"uploaded" -> item.feedback.createdDate,
+				"released" -> item.feedback.released
+			) ++
+			item.feedback.actualMark.map { mark => ("mark" -> mark) }.toMap ++
+			item.feedback.actualGrade.map { grade => ("grade" -> grade) }.toMap ++
+			Map("downloaded" -> item.downloaded)
 		case None => Map()
 	}
 }

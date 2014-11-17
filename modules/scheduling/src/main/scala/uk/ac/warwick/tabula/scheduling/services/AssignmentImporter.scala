@@ -3,7 +3,8 @@ package uk.ac.warwick.tabula.scheduling.services
 import java.sql.ResultSet
 import java.sql.Types
 import javax.sql.DataSource
-import javax.annotation.Resource
+import uk.ac.warwick.spring.Wire
+
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import org.springframework.beans.factory.InitializingBean
@@ -18,6 +19,7 @@ import uk.ac.warwick.tabula.data.model.{AssessmentType, UpstreamAssessmentGroup,
 import uk.ac.warwick.tabula.AcademicYear
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.sandbox.SandboxData
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait AssignmentImporter {
 	/**
@@ -27,34 +29,26 @@ trait AssignmentImporter {
 	def allMembers(callback: UpstreamModuleRegistration => Unit): Unit
 	
 	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup]
-
-	/**
-	 * The UpstreamAssessmentGroups that don't have any module registrations
-	 * against them.
-	 *
-	 * Also includes fake "NONE" groups for the cases where everybody has been
-	 * allocated an assessment group (TAB-2416 remove stale old NONE groups)
-	 */
-	def getEmptyAssessmentGroups: Seq[UpstreamAssessmentGroup]
 	
 	def getAllAssessmentComponents: Seq[AssessmentComponent]
+
+	def yearsToImport = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
 }
 
 @Profile(Array("dev", "test", "production")) @Service
 class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 	import AssignmentImporter._
 
-	@Resource(name = "academicDataStore") var ads: DataSource = _
+	var sits = Wire[DataSource]("sitsDataSource")
+
 	var upstreamAssessmentGroupQuery: UpstreamAssessmentGroupQuery = _
 	var assessmentComponentQuery: AssessmentComponentQuery = _
-	var emptyAssessmentGroupsQuery: EmptyUpstreamAssessmentGroupQuery = _
 	var jdbc: NamedParameterJdbcTemplate = _
 
 	override def afterPropertiesSet() {
-		upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(ads)
-		assessmentComponentQuery = new AssessmentComponentQuery(ads)
-		emptyAssessmentGroupsQuery = new EmptyUpstreamAssessmentGroupQuery(ads)
-		jdbc = new NamedParameterJdbcTemplate(ads)
+		assessmentComponentQuery = new AssessmentComponentQuery(sits)
+		upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(sits)
+		jdbc = new NamedParameterJdbcTemplate(sits)
 	}
 
 	def getAllAssessmentComponents: Seq[AssessmentComponent] = assessmentComponentQuery.executeByNamedParam(JMap(
@@ -87,16 +81,10 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 		})
 	}
 
-	def getEmptyAssessmentGroups: Seq[UpstreamAssessmentGroup] =
-		emptyAssessmentGroupsQuery.executeByNamedParam(JMap("academic_year_code" -> yearsToImportArray)).asScala
-
-
 	/** Convert incoming null assessment groups into the NONE value */
 	private def convertAssessmentGroupFromSITS(string: String) =
 		if (string == null) AssessmentComponent.NoneAssessmentGroup
 		else string
-
-	private def yearsToImport = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
 }
 
 @Profile(Array("sandbox")) @Service
@@ -159,10 +147,9 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 			a.name = "Coursework"
 			a.assessmentGroup = "A"
 			a.assessmentType = AssessmentType.Assignment
+			a.inUse = true
 			a
 		}
-
-	def getEmptyAssessmentGroups: Seq[UpstreamAssessmentGroup] = Nil
 	
 }
 
@@ -196,103 +183,177 @@ case class UpstreamModuleRegistration(year: String, sprCode: String, occurrence:
 }
 
 object AssignmentImporter {
+	var sitsSchema: String = Wire.property("${schema.sits}")
+	var sqlStringCastFunction: String = "to_char"
+
+	// Because we have a mismatch between nvarchar2 and chars in the text, we need to cast some results to chars in Oracle, but not in HSQL
+	def castToString(orig: String) =
+		if (sqlStringCastFunction.hasText) s"$sqlStringCastFunction($orig)"
+		else orig
 
 	/** Get AssessmentComponents, and also some fake ones for linking to
 		* the group of students with no selected assessment group.
 		*/
-	val GetAssessmentsQuery = s"""
+	lazy val GetAssessmentsQuery = s"""
 		select distinct
-		mr.module_code,
-		'${AssessmentComponent.NoneAssessmentGroup}' as seq,
-		'Students not registered for assessment' as name,
-		'${AssessmentComponent.NoneAssessmentGroup}' as assessment_group,
-		m.department_code,
-		'X' as assessment_code
-		from module_registration mr
-		join module m on m.module_code = mr.module_code
-		where academic_year_code in (:academic_year_code) and mr.assessment_group is null
+			sms.mod_code as module_code,
+			'${AssessmentComponent.NoneAssessmentGroup}' as seq,
+			'Students not registered for assessment' as name,
+			'${AssessmentComponent.NoneAssessmentGroup}' as assessment_group,
+			'X' as assessment_code,
+	 		'Y' as in_use
+			from $sitsSchema.cam_sms sms
+				join $sitsSchema.cam_ssn ssn
+					on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON'
+			where
+				sms.sms_agrp is null and
+				sms.ayr_code in (:academic_year_code)
 	union all
-		select mad.module_code, seq, mad.name, mad.assessment_group, m.department_code, assessment_code
-		from module_assessment_details mad
-		join module m on (m.module_code = mad.module_code and m.in_use = 'Y')
-		where m.department_code is not null"""
-	// Department code should be set for any modules since 10/11
-
-	val GetAllAssessmentGroups = s"""
 		select distinct
-			mav.academic_year_code,
-			mav.module_code,
+			smo.mod_code as module_code,
+			'${AssessmentComponent.NoneAssessmentGroup}' as seq,
+			'Students not registered for assessment' as name,
+			'${AssessmentComponent.NoneAssessmentGroup}' as assessment_group,
+			'X' as assessment_code,
+	 		'Y' as in_use
+			from $sitsSchema.cam_smo smo
+				left outer join $sitsSchema.cam_ssn ssn
+					on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
+			where
+				(smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) and
+				ssn.ssn_sprc is null and
+				smo.smo_agrp is null and
+				smo.ayr_code in (:academic_year_code)
+	union all
+		select
+			mab.map_code as module_code,
+			${castToString("mab.mab_seq")} as seq,
+			${castToString("mab.mab_name")} as name,
+			${castToString("mab.mab_agrp")} as assessment_group,
+			${castToString("mab.ast_code")} as assessment_code,
+	 		${castToString("mab.mab_udf1")} as in_use
+			from $sitsSchema.cam_mab mab
+				join $sitsSchema.cam_mav mav
+					on mab.map_code = mav.mod_code and
+						 mav.psl_code = 'Y' and
+						 mav.ayr_code in (:academic_year_code)
+				join $sitsSchema.ins_mod mod
+					on mav.mod_code = mod.mod_code
+			where	mod.mod_iuse = 'Y' and
+						mod.mot_code not in ('S-', 'D')"""
+
+	lazy val GetAllAssessmentGroups = s"""
+		select distinct
+			mav.ayr_code as academic_year_code,
+			mav.mod_code as module_code,
 			'${AssessmentComponent.NoneAssessmentGroup}' as mav_occurrence,
 			'${AssessmentComponent.NoneAssessmentGroup}' as assessment_group
-		from module_availability mav
-		join module_assessment_details mad on mad.module_code = mav.module_code
-		join module m on (m.module_code = mad.module_code and m.in_use = 'Y')
-		where academic_year_code in (:academic_year_code)
+			from $sitsSchema.cam_mab mab
+				join $sitsSchema.cam_mav mav
+					on mab.map_code = mav.mod_code
+				join $sitsSchema.ins_mod mod
+					on mav.mod_code = mod.mod_code
+			where mod.mod_iuse = 'Y' and
+						mod.mot_code not in ('S-', 'D') and
+						mav.psl_code = 'Y' and
+						mav.ayr_code in (:academic_year_code)
 	union all
-		select distinct mav.academic_year_code, mav.module_code, mav_occurrence, mad.assessment_group
-		from module_availability mav
-		join module_assessment_details mad on mad.module_code = mav.module_code
-		join module m on (m.module_code = mad.module_code and m.in_use = 'Y')
-		where academic_year_code in (:academic_year_code)"""
+		select distinct
+			mav.ayr_code as academic_year_code,
+			mav.mod_code as module_code,
+			${castToString("mav.mav_occur")} as mav_occurrence,
+			${castToString("mab.mab_agrp")} as assessment_group
+			from $sitsSchema.cam_mab mab
+				join $sitsSchema.cam_mav mav
+					on mab.map_code = mav.mod_code
+				join $sitsSchema.ins_mod mod
+					on mav.mod_code = mod.mod_code
+			where mod.mod_iuse = 'Y' and
+						mod.mot_code not in ('S-', 'D') and
+						mav.psl_code = 'Y' and
+						mav.ayr_code in (:academic_year_code)"""
 
-	val GetAllAssessmentGroupMembers = """
-		select 
-			mr.academic_year_code,
-			mr.spr_code,
-			mr.mav_occurrence,
-			mr.module_code,
-			mr.assessment_group
-		from module_registration mr
-    	left outer join student_current_study_details scd
-    		on mr.spr_code = scd.spr_code
-		where
-			mr.academic_year_code in (:academic_year_code) and
-      (
-				scd.student_status is null or
-        scd.student_status not like 'P%'
-      )
-		order by mr.academic_year_code, mr.module_code, mr.mav_occurrence, mr.assessment_group
-																		 """
+	lazy val GetUnconfirmedModuleRegistrations = s"""
+		select
+			sms.ayr_code as academic_year_code,
+			spr.spr_code as spr_code,
+			sms.sms_occl as mav_occurrence,
+			sms.mod_code as module_code,
+			sms.sms_agrp as assessment_group
+				from $sitsSchema.srs_scj scj
+					join $sitsSchema.ins_spr spr
+						on scj.scj_sprc = spr.spr_code and (spr.sts_code is null or spr.sts_code not like 'P%') -- no perm withdrawn students
 
-	/** AssessmentGroups with no registrations, and virtual NONE groups that should be empty */
-	val GetEmptyAssessmentGroups = s"""
-		(select distinct
-		  mav.module_code,
-		  mav.academic_year_code,
-		  mav.mav_occurrence,
-		  mad.assessment_group
-		  from module_availability mav
-		  join module_assessment_details mad
-		    on mad.module_code = mav.module_code
-		  join module m
-		    on mav.module_code = m.module_code
-		    and m.in_use = 'Y'
-		  left join module_registration mr
-		    on mav.module_code = mr.module_code
-		    and mav.academic_year_code = mr.academic_year_code
-		    and mav.mav_occurrence = mr.mav_occurrence
-		where mav.academic_year_code in (:academic_year_code)
-		  and mr.module_code is null)
-		union all
-		(select distinct
-			  mav.module_code,
-			  mav.academic_year_code,
-			  '${AssessmentComponent.NoneAssessmentGroup}' as mav_occurrence,
-			  '${AssessmentComponent.NoneAssessmentGroup}' as assessment_group
-			  from module_availability mav
-			  join module_assessment_details mad
-			    on mad.module_code = mav.module_code
-			  join module m
-			    on mav.module_code = m.module_code
-			    and m.in_use = 'Y'
-			  left join module_registration mr
-			    on mav.module_code = mr.module_code
-			    and mav.academic_year_code = mr.academic_year_code
-			    and mav.mav_occurrence = mr.mav_occurrence
-			where mav.academic_year_code in (:academic_year_code)
-			  and mad.assessment_group is not null
-			  and mr.module_code is not null)
-			  order by module_code"""
+					join $sitsSchema.cam_sms sms
+						on sms.spr_code = scj.scj_sprc
+
+					join $sitsSchema.srs_vco vco
+						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
+
+					join $sitsSchema.cam_ssn ssn
+						on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON'
+			where
+				scj.scj_udfa in ('Y','y') and -- most significant courses only
+				sms.ayr_code in (:academic_year_code)"""
+
+	lazy val GetConfirmedModuleRegistrations = s"""
+		select
+			smo.ayr_code as academic_year_code,
+			spr.spr_code as spr_code,
+			smo.mav_occur as mav_occurrence,
+			smo.mod_code as module_code,
+			smo.smo_agrp as assessment_group
+				from $sitsSchema.srs_scj scj
+					join $sitsSchema.ins_spr spr
+						on scj.scj_sprc = spr.spr_code and
+							(spr.sts_code is null or spr.sts_code not like 'P%') -- no perm withdrawn students
+
+					join $sitsSchema.cam_smo smo
+						on smo.spr_code = spr.spr_code and
+							(smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- no WMG cancelled
+
+					join $sitsSchema.srs_vco vco
+						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
+
+					join $sitsSchema.cam_ssn ssn
+						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code and ssn.ssn_mrgs = 'CON'
+			where
+				scj.scj_udfa in ('Y','y') and -- most significant courses only
+				smo.ayr_code in (:academic_year_code)"""
+
+	lazy val GetAutoUploadedConfirmedModuleRegistrations = s"""
+		select
+			smo.ayr_code as academic_year_code,
+			spr.spr_code as spr_code,
+			smo.mav_occur as mav_occurrence,
+			smo.mod_code as module_code,
+			smo.smo_agrp as assessment_group
+				from $sitsSchema.srs_scj scj
+					join $sitsSchema.ins_spr spr
+						on scj.scj_sprc = spr.spr_code and
+							(spr.sts_code is null or spr.sts_code not like 'P%') -- no perm withdrawn students
+
+					join $sitsSchema.cam_smo smo
+						on smo.spr_code = spr.spr_code and
+							(smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- no WMG cancelled
+
+					join $sitsSchema.srs_vco vco
+						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
+
+					left outer join $sitsSchema.cam_ssn ssn
+						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
+			where
+				scj.scj_udfa in ('Y','y') and -- most significant courses only
+				smo.ayr_code in (:academic_year_code) and
+				ssn.ssn_sprc is null -- no matching SSN"""
+
+	lazy val GetAllAssessmentGroupMembers = s"""
+			$GetUnconfirmedModuleRegistrations
+				union all
+			$GetConfirmedModuleRegistrations
+				union all
+			$GetAutoUploadedConfirmedModuleRegistrations
+		order by academic_year_code, module_code, mav_occurrence, assessment_group, spr_code"""
 
 	class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
 		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
@@ -304,18 +365,15 @@ object AssignmentImporter {
 			a.name = rs.getString("name")
 			a.assessmentGroup = rs.getString("assessment_group")
 			a.assessmentType = AssessmentType(rs.getString("assessment_code"))
+			a.inUse = rs.getString("in_use") match {
+				case "Y" | "y" => true
+				case _ => false
+			}
 			a
 		}
 	}
 
 	class UpstreamAssessmentGroupQuery(ds: DataSource) extends MappingSqlQueryWithParameters[UpstreamAssessmentGroup](ds, GetAllAssessmentGroups) {
-		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
-		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) =
-			mapRowToAssessmentGroup(rs)
-	}
-
-	class EmptyUpstreamAssessmentGroupQuery(ds: DataSource) extends MappingSqlQueryWithParameters[UpstreamAssessmentGroup](ds, GetEmptyAssessmentGroups) {
 		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
 		this.compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) =

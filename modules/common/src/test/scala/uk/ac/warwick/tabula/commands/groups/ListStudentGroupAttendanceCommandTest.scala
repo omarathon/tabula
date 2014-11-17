@@ -118,6 +118,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		
 		val command = new ListStudentGroupAttendanceCommandInternal(member, academicYear) with CommandTestSupport
 		command.smallGroupService.findSmallGroupsByStudent(user1) returns Seq()
+		command.smallGroupService.findSmallGroupsWithAttendanceRecorded(user1.getWarwickId) returns Seq()
 		command.smallGroupService.findAttendanceNotes(
 			Seq(user1).map(_.getWarwickId),
 			Seq()
@@ -136,30 +137,19 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		
 		val command = new ListStudentGroupAttendanceCommandInternal(member, academicYear) with CommandTestSupport
 		command.smallGroupService.findSmallGroupsByStudent(user1) returns Seq(group)
+		command.smallGroupService.findSmallGroupsWithAttendanceRecorded(user1.getWarwickId) returns Seq()
 		command.smallGroupService.findAttendanceByGroup(group) returns Seq(occurrence1, occurrence2, occurrence3)
 		command.smallGroupService.findAttendanceNotes(
 			Seq(user1).map(_.getWarwickId),
 			Seq(occurrence1, occurrence3, occurrence2)
 		) returns Seq()
 		
-		command.weekToDateConverter.toLocalDatetime(1, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.SEPTEMBER, 29, 16, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 16, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 16, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
-		)
+		command.weekToDateConverter.toLocalDatetime(1, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.SEPTEMBER, 29, 16, 0))
+		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 16, 0))
+		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
+		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 16, 0))
+		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
+		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
 		
 		command.termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)) returns Seq(
 			JInteger(Some(1)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 7).toDateTime.minusSeconds(1)),
@@ -215,30 +205,19 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		
 		val command = new ListStudentGroupAttendanceCommandInternal(member, academicYear) with CommandTestSupport
 		command.smallGroupService.findSmallGroupsByStudent(user3) returns Seq(group)
+		command.smallGroupService.findSmallGroupsWithAttendanceRecorded(user3.getWarwickId) returns Seq()
 		command.smallGroupService.findAttendanceByGroup(group) returns Seq(occurrence1, occurrence2, occurrence3)
 		command.smallGroupService.findAttendanceNotes(
 			Seq(user3).map(_.getWarwickId),
 			Seq(occurrence1, occurrence3, occurrence2)
 		) returns Seq()
 		
-		command.weekToDateConverter.toLocalDatetime(1, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.SEPTEMBER, 29, 16, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 16, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 16, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
-		)
+		command.weekToDateConverter.toLocalDatetime(1, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.SEPTEMBER, 29, 16, 0))
+		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 16, 0))
+		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
+		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 16, 0))
+		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
+		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
 
 		command.termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)) returns Seq(
 			JInteger(Some(1)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 7).toDateTime.minusSeconds(1)),
@@ -294,30 +273,19 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		
 		val command = new ListStudentGroupAttendanceCommandInternal(member, academicYear) with CommandTestSupport
 		command.smallGroupService.findSmallGroupsByStudent(user5) returns Seq(group)
+		command.smallGroupService.findSmallGroupsWithAttendanceRecorded(user5.getWarwickId) returns Seq()
 		command.smallGroupService.findAttendanceByGroup(group) returns Seq(occurrence1, occurrence2, occurrence3)
 		command.smallGroupService.findAttendanceNotes(
 			Seq(user5).map(_.getWarwickId),
 			Seq(occurrence1, occurrence3, occurrence2)
 		) returns Seq()
 
-		command.weekToDateConverter.toLocalDatetime(1, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.SEPTEMBER, 29, 16, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 16, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 16, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
-		)
-		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns (
-			Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
-		)
+		command.weekToDateConverter.toLocalDatetime(1, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.SEPTEMBER, 29, 16, 0))
+		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 16, 0))
+		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
+		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 16, 0))
+		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
+		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
 
 		command.termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)) returns Seq(
 			JInteger(Some(1)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 7).toDateTime.minusSeconds(1)),
@@ -358,10 +326,10 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 			(term, Seq(
 				(group, Seq(
 					(1, Seq(((event2, 1), Attended))),
-					(2, Seq(((event1, 2), Late))),
+					(2, Seq(((event1, 2), NotExpected))),
 					(3, Seq(((event1, 3), MissedUnauthorised), ((event2, 3), MissedUnauthorised))),
-					(4, Seq(((event1, 4), NotRecorded))),
-					(7, Seq(((event2, 7), NotRecorded)))
+					(4, Seq(((event1, 4), NotExpected))),
+					(7, Seq(((event2, 7), NotExpected)))
 				))
 			))
 		))

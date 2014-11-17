@@ -124,6 +124,7 @@ object Fixtures extends Mockito {
 		a.assessmentGroup = "A"
 		a.sequence = "A%02d" format number
 		a.assessmentType = AssessmentType.Assignment
+		a.inUse = true
 		a
 	}
 
