@@ -1,4 +1,6 @@
-<#if !groupsWidgetUrl?has_content><#assign groupsWidgetUrl = '/groups/student/${profile.universityId}' /></#if>
+<#if !groupsWidgetUrl?has_content>
+	<#assign groupsWidgetUrl = '/groups/student/${profile.universityId}?academicYear=${studentCourseYearDetails.academicYear.startYear?c}' />
+</#if>
 
 <section id="small-groups" class="clearfix" >
 	<script type="text/javascript">
@@ -9,8 +11,8 @@
 				if (title != '' && title != undefined) {
 					pane.find('.title').html(title);
 					$('a.ajax-modal', '#small-groups').ajaxModalLink();
-					$('#sg-pane').show();
 				}
+				pane.show();
 			});
 		});
 	</script>

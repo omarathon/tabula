@@ -86,11 +86,9 @@
 				</li>
 			</#if>
 
-			<#if numSmallGroups gt 0>
-				<li id="sg-pane" style="display:none;" data-title="Groups">
-					<#include "_small_groups.ftl" />
-				</li>
-			</#if>
+			<li id="sg-pane" style="display:none;" data-title="Groups">
+				<#include "_small_groups.ftl" />
+			</li>
 
 			<#if studentCourseYearDetails??
 				&& studentCourseYearDetails.hasModuleRegistrations
