@@ -355,4 +355,12 @@ object Fixtures extends Mockito {
 		})
 	}
 
+	def userGroup(users: User*) = {
+		val ug = new UserGroup()
+		for (user <- users) {
+			ug.add(user)
+		}
+		ug
+	}
+
 }

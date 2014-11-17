@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Module, Assignment}
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.MarkerAddMarksCommand
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
@@ -17,7 +17,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Controller
-@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/marks"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/marks"))
 class MarkerAddMarksController extends CourseworkController {
 
 	@Autowired var assignmentService: AssignmentService = _
@@ -25,12 +25,15 @@ class MarkerAddMarksController extends CourseworkController {
 
 	@ModelAttribute def command(@PathVariable("module") module: Module,
 	                            @PathVariable("assignment") assignment: Assignment,
-	                            user: CurrentUser) =
-		new MarkerAddMarksCommand(module, assignment, user, assignment.isFirstMarker(user.apparentUser))
+															@PathVariable("marker") marker: User,
+															submitter: CurrentUser) =
+		new MarkerAddMarksCommand(module, assignment, marker, submitter, assignment.isFirstMarker(marker))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def viewMarkUploadForm(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment,
-	             		   @ModelAttribute cmd: MarkerAddMarksCommand, errors: Errors): Mav = {
+	def viewMarkUploadForm(@PathVariable module: Module,
+												 @PathVariable(value = "assignment") assignment: Assignment,
+												 @PathVariable("marker") marker: User,
+												 @ModelAttribute cmd: MarkerAddMarksCommand, errors: Errors): Mav = {
 
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 		val markerFeedbacks = submissions.flatMap(s => assignment.getMarkerFeedbackForCurrentPosition(s.universityId, user.apparentUser))
@@ -48,7 +51,9 @@ class MarkerAddMarksController extends CourseworkController {
 			}
 		}.sortBy(_.universityId)
 
-		Mav("admin/assignments/markerfeedback/marksform", "marksToDisplay" -> marksToDisplay)
+		Mav("admin/assignments/markerfeedback/marksform", "marksToDisplay" -> marksToDisplay).crumbs(
+			Breadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment, marker)), "")
+		)
 	}
 
 	def noteMarkItem(member: User, markerFeedback: Option[MarkerFeedback]) = {
@@ -66,9 +71,12 @@ class MarkerAddMarksController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def confirmBatchUpload(@PathVariable module: Module,  @PathVariable(value = "assignment") assignment: Assignment,
-	                       @ModelAttribute cmd: MarkerAddMarksCommand, errors: Errors) = {
-		if (errors.hasErrors) viewMarkUploadForm(module, assignment, cmd, errors)
+	def confirmBatchUpload(@PathVariable module: Module,
+												 @PathVariable(value = "assignment") assignment: Assignment,
+												 @PathVariable("marker") marker: User,
+	                       @ModelAttribute cmd: MarkerAddMarksCommand,
+												 errors: Errors) = {
+		if (errors.hasErrors) viewMarkUploadForm(module, assignment, marker, cmd, errors)
 		else {
 			bindAndValidate(assignment, cmd, errors)
 			Mav("admin/assignments/markerfeedback/markspreview")
@@ -80,10 +88,20 @@ class MarkerAddMarksController extends CourseworkController {
 	             @ModelAttribute cmd: MarkerAddMarksCommand, errors: Errors) = {
 		bindAndValidate(assignment, cmd, errors)
 		cmd.apply()
-		Redirect(Routes.admin.assignment.markerFeedback(assignment))
+		Redirect(Routes.admin.assignment.markerFeedback(assignment, cmd.marker))
 	}
 
 	private def bindAndValidate(assignment: Assignment, cmd: MarkerAddMarksCommand, errors: Errors) {
 		cmd.postExtractValidation(errors)
+	}
+}
+
+// Redirects users trying to access a marking workflow using the old style URL
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/marks"))
+class MarkerAddMarksControllerCurrentUser extends CourseworkController {
+	@RequestMapping
+	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
+		Redirect(Routes.admin.assignment.markerFeedback.marks(assignment, currentUser.apparentUser))
 	}
 }

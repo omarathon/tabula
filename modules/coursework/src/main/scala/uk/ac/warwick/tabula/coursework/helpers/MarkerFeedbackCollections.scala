@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.coursework.helpers
 
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.MarkerFeedbackItem
 import uk.ac.warwick.tabula.data.model.{MarkingState, Module, Assignment}
 import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.userlookup.User
 
 case class MarkerFeedbackCollections(
 	inProgressFeedback: Seq[MarkerFeedbackItem],
@@ -12,13 +12,13 @@ case class MarkerFeedbackCollections(
 )
 
 trait MarkerFeedbackCollecting  {
-	def getMarkerFeedbackCollections(assignment: Assignment, module: Module, user: CurrentUser, userLookup: UserLookupService) = {
-		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
+	def getMarkerFeedbackCollections(assignment: Assignment, module: Module, marker: User, userLookup: UserLookupService) = {
+		val submissions = assignment.getMarkersSubmissions(marker)
 
 		val (inProgressFeedback: Seq[MarkerFeedbackItem], completedFeedback: Seq[MarkerFeedbackItem], rejectedFeedback: Seq[MarkerFeedbackItem]) = {
 			val markerFeedbackItems = submissions.map{ submission =>
 				val student = userLookup.getUserByWarwickUniId(submission.universityId)
-				val feedbacks = assignment.getAllMarkerFeedbacks(submission.universityId, user.apparentUser).reverse
+				val feedbacks = assignment.getAllMarkerFeedbacks(submission.universityId, marker).reverse
 				MarkerFeedbackItem(student, submission, feedbacks)
 			}.filterNot(_.feedbacks.isEmpty)
 

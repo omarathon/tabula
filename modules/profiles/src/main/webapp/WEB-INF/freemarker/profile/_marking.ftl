@@ -9,7 +9,7 @@
 			<div class="alert alert-success clearfix">
 				<div class="marking-detail-name"><div>${assignment.name}</div></div>
 				<div>
-					<a class="btn btn-mini" href="<@routes.listmarkersubmissions assignment />">
+					<a class="btn btn-mini" href="<@routes.listmarkersubmissions assignment marker />">
 						<i class="icon-cog"></i> Manage
 					</a>
 				</div>

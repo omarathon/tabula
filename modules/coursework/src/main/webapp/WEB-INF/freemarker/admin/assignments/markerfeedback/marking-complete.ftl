@@ -1,7 +1,7 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
-<#assign formAction><@routes.markingCompleted assignment /></#assign>
+<#assign formAction><@routes.markingCompleted assignment marker /></#assign>
 
 <@f.form method="post" action="${formAction}" commandName="markingCompletedCommand">
 
@@ -120,7 +120,7 @@
 
 <div class="submit-buttons">
 	<input class="btn btn-warn" type="submit" value="Confirm">
-	<a class="btn" href="<@routes.listmarkersubmissions assignment />">Cancel</a>
+	<a class="btn" href="<@routes.listmarkersubmissions assignment marker />">Cancel</a>
 </div>
 </@f.form>
 </#escape>

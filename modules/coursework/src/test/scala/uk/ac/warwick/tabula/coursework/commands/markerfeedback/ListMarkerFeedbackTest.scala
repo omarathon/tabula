@@ -19,14 +19,14 @@ class ListMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with Moc
 	@Test
 	def firstMarkerTest() {
 		withUser("cuslaj") {
-			val command =	new ListMarkerFeedbackCommand(assignment, assignment.module, currentUser) with CommandTestSupport
+			val command =	new ListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
 			val markerFeedbackCollections = command.applyInternal()
 
 			markerFeedbackCollections.completedFeedback.size should be (0)
 			markerFeedbackCollections.inProgressFeedback.size should be (3)
 		}
 		withUser("cuscav") {
-			val command =	new ListMarkerFeedbackCommand(assignment, assignment.module, currentUser) with CommandTestSupport
+			val command =	new ListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
 			val markerFeedbackCollections = command.applyInternal()
 
 			markerFeedbackCollections.completedFeedback.size should be (0)
@@ -44,14 +44,14 @@ class ListMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with Moc
 		}
 
 		withUser("cuslat") {
-			val command =	new ListMarkerFeedbackCommand(assignment, assignment.module, currentUser) with CommandTestSupport
+			val command =	new ListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
 			val markerFeedbackCollections = command.applyInternal()
 
 			markerFeedbackCollections.completedFeedback.size should be (0)
 			markerFeedbackCollections.inProgressFeedback.size should be (3)
 		}
 		withUser("cuday") {
-			val command =	new ListMarkerFeedbackCommand(assignment, assignment.module, currentUser) with CommandTestSupport
+			val command =	new ListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
 			val markerFeedbackCollections = command.applyInternal()
 
 			markerFeedbackCollections.completedFeedback.size should be (0)

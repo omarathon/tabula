@@ -13,7 +13,7 @@ import org.springframework.util.StringUtils
 import uk.ac.warwick.tabula.commands.Notifies
 
 class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: CurrentUser)
-	extends AddMarksCommand[Seq[Feedback]](module, assignment, submitter) with Notifies[Seq[Feedback], Feedback] {
+	extends AddMarksCommand[Seq[Feedback]](module, assignment, submitter.apparentUser) with Notifies[Seq[Feedback], Feedback] {
 
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Marks.Create, assignment)

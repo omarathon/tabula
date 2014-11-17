@@ -1,18 +1,19 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
 
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Notifies, Description, UploadedFile}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.Errors
 
-class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
-	extends UploadFeedbackCommand[Seq[Feedback]](module, assignment, submitter) with Notifies[Seq[Feedback], Feedback] {
+class AddFeedbackCommand(module: Module, assignment: Assignment, marker: User, currentUser: CurrentUser)
+	extends UploadFeedbackCommand[Seq[Feedback]](module, assignment, marker) with Notifies[Seq[Feedback], Feedback] {
 
 	PermissionCheck(Permissions.Feedback.Create, assignment)
 
@@ -22,7 +23,7 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 			val feedback = assignment.findFeedback(uniNumber).getOrElse({
 				val newFeedback = new Feedback
 				newFeedback.assignment = assignment
-				newFeedback.uploaderId = submitter.apparentId
+				newFeedback.uploaderId = marker.getUserId
 				newFeedback.universityId = uniNumber
 				newFeedback.released = false
 				newFeedback.createdDate = DateTime.now
@@ -99,7 +100,7 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 
 	def emit(updatedFeedback: Seq[Feedback]) = {
 		updatedFeedback.filter(_.released).map(feedback => {
-			Notification.init(new FeedbackChangeNotification, submitter.apparentUser, feedback, assignment)
+			Notification.init(new FeedbackChangeNotification, marker, feedback, assignment)
 		})
 	}
 }

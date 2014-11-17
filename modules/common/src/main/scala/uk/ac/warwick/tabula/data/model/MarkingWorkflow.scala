@@ -41,7 +41,7 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	def permissionsParents = Option(department).toStream
 
 	def onlineMarkingUrl(assignment:Assignment, marker: User, studentId: String) : String =
-		Routes.coursework.admin.assignment.onlineMarkerFeedback(assignment)
+		Routes.coursework.admin.assignment.markerFeedback.onlineFeedback(assignment, marker)
 
 	/** The group of first markers. */
 	@OneToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)
@@ -93,7 +93,8 @@ object MarkingWorkflow {
 
 	def getMarkerFromAssignmentMap(userLookup: UserLookupService, universityId: String, markerMap: Map[String, UserGroup]): Option[String] = {
 		val student = userLookup.getUserByWarwickUniId(universityId)
-		markerMap.find{case(markerUserId, group) => group.includesUser(student)}.map{ case (markerUserId, _) => markerUserId }
+		val studentsGroup = markerMap.find{case(markerUserId, group) => group.includesUser(student)}
+		studentsGroup.map{ case (markerUserId, _) => markerUserId }
 	}
 }
 
@@ -132,7 +133,7 @@ trait AssignmentMarkerMap {
 			assignment.firstMarkerMap.get(marker.getUserId).map{_.knownType.allIncludedIds}.getOrElse(Seq()) ++
 				assignment.secondMarkerMap.get(marker.getUserId).map{_.knownType.allIncludedIds}.getOrElse(Seq())
 
-		assignment.submissions.filter(s => studentIds.exists(_ == s.userId))
+		assignment.submissions.filter(s => studentIds.contains(s.userId))
 	}
 
 
