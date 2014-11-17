@@ -40,8 +40,6 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		FeedbackTemplate.Update,
 		FeedbackTemplate.Delete,
 
-		Assignment.MarkOnBehalf,
-
 		MarkingWorkflow.Create,
 		MarkingWorkflow.Read,
 		MarkingWorkflow.Update,
