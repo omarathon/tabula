@@ -111,7 +111,7 @@ class DownloadMarkerFeedbackController extends CourseworkController {
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{feedbackId}/{filename}"))
-class DownloadMarkerSubmissionsControllerCurrentUser extends CourseworkController {
+class DownloadMarkerFeedbackControllerCurrentUser extends CourseworkController {
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String, currentUser: CurrentUser) = {
 		Redirect(Routes.admin.assignment.markerFeedback.downloadFeedback.marker(assignment, currentUser.apparentUser, feedbackId, filename))
