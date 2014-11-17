@@ -90,9 +90,7 @@
 				<#include "_small_groups.ftl" />
 			</li>
 
-			<#if studentCourseYearDetails??
-				&& studentCourseYearDetails.hasModuleRegistrations
-				&& can.do("Profiles.Read.ModuleRegistration.Core", studentCourseDetails) >
+			<#if studentCourseYearDetails??>
 				<li id="module-registration-pane" data-title="Modules">
 					<#include "_module_registrations.ftl" />
 				</li>
