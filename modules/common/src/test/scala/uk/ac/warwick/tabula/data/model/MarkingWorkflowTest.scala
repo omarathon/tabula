@@ -82,7 +82,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		}
 	}
 
-	@Test def studentsChooseMarker() = withUser("cuscav") { new MarkingWorkflowFixture {
+	@Test def studentsChooseMarker() = withUser("cuscav","0000001") { new MarkingWorkflowFixture {
 		val workflow = new StudentsChooseMarkerWorkflow
 
 		assignment.markingWorkflow = workflow

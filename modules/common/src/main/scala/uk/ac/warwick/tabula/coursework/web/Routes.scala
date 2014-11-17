@@ -38,7 +38,7 @@ object Routes {
 
 		object assignment {
 
-			private def markerroot(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}/"
+			private def markerroot(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}"
 
 			object markerFeedback {
 				def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/list"
