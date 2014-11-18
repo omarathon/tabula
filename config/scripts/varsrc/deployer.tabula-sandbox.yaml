@@ -63,6 +63,7 @@ jbosses:
        /groups/test/up: 200
        /attendance/test/up: 200
        /admin/test/up: 200
+       /reports/test/up: 200
   - !ruby/object:Jboss 
     deployment_state: old
     name: tabula-secondary
@@ -81,5 +82,6 @@ jbosses:
        /groups/test/up: 200
        /attendance/test/up: 200
        /admin/test/up: 200
+       /reports/test/up: 200
 lockfile: /tmp/tabula_deploy.running
 notification_emails: n.howes@warwick.ac.uk

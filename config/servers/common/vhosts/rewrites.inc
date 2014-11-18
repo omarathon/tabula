@@ -42,6 +42,7 @@ RewriteCond %{REQUEST_URI} !^/scheduling/(.*)
 RewriteCond %{REQUEST_URI} !^/admin/(.*)
 RewriteCond %{REQUEST_URI} !^/groups/(.*)
 RewriteCond %{REQUEST_URI} !^/attendance/(.*)
+RewriteCond %{REQUEST_URI} !^/reports/(.*)
 RewriteCond %{REQUEST_URI} !^/errordocuments/(.*)
 RewriteRule (.*) http://127.0.0.1:${proxy:port}/home$1 [QSA,P,L]
 

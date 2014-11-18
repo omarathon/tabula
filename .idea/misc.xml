@@ -12,6 +12,7 @@
     <file type="web" url="file://$PROJECT_DIR$/modules/groups" />
     <file type="web" url="file://$PROJECT_DIR$/modules/home" />
     <file type="web" url="file://$PROJECT_DIR$/modules/profiles" />
+    <file type="web" url="file://$PROJECT_DIR$/modules/reports" />
     <file type="web" url="file://$PROJECT_DIR$/modules/scheduling" />
   </component>
   <component name="IdProvider" IDEtalkID="5FE0E67EA65D5BCC42D3B9C01843C6B1" />
@@ -33,4 +34,3 @@
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>
-
