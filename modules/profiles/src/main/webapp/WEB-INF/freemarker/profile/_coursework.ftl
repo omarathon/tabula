@@ -20,8 +20,7 @@
 			var pane = jQuery('#coursework-pane');
 			var title = pane.find('h4').first().html();
 			if (title != '' && title != undefined) {
-				pane.find('.title').html(title);
-				$('#coursework-pane').show();
+				pane.find('.title').html(title).show();
 			}
 		</script>
 	</#if>
