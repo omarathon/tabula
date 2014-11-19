@@ -108,14 +108,16 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 				.map(checkpoint => (checkpoint.student, checkpoint))
 	
 			if (mostSiginificantOnly)
-				result.filter{ case(student, checkpoint) => student.mostSignificantCourseDetails.exists(scd => {
+				result.filter { case(student, checkpoint) =>
 					val pointSet = checkpoint.point.pointSet
-					pointSet.route == scd.route && scd.freshStudentCourseYearDetails.exists(scyd =>
-						scyd.academicYear == pointSet.academicYear && (
-							pointSet.year == null || scyd.yearOfStudy == pointSet.year
+					student.mostSignificantCourseDetailsForYear(pointSet.academicYear).exists(scd => {
+						pointSet.route == scd.route && scd.freshStudentCourseYearDetails.exists(scyd =>
+							scyd.academicYear == pointSet.academicYear && (
+								pointSet.year == null || scyd.yearOfStudy == pointSet.year
+							)
 						)
-					)
-				})}
+					})
+				}
 			else
 				result
 		}
@@ -196,7 +198,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			where r = mps.route
 			and scd.route = r.code
 			and scyd.studentCourseDetails = scd
-			and student.mostSignificantCourse = scd
+			and scd.student = student
 			and mps.academicYear = :academicYear
 			and scyd.academicYear = mps.academicYear
 			and (
@@ -234,7 +236,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		val queryString = """
 				select student, mp
 				from StudentMember student, StudentCourseDetails scd, StudentCourseYearDetails scyd, Route r, MonitoringPointSet mps, MonitoringPoint mp
-				where student.mostSignificantCourse = scd
+				where scd.student = student
 				and scd.route = r.code
 				and scd = scyd.studentCourseDetails
 				and mps.route = r
@@ -287,7 +289,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		val queryString = """
 			select s.universityId, count(*) as missed from Member s, StudentCourseDetails scd, StudentCourseYearDetails scyd,
 			Route r, MonitoringPointSet mps, MonitoringPoint mp, MonitoringCheckpoint mc
-			where s.mostSignificantCourse = scd
+			where scd.student = s
 			and scyd.studentCourseDetails = scd
 			and scd.route = r.code
 			and mps.route = r
@@ -340,7 +342,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		val queryString = """
 			select s.universityId, count(*) as missed from Member s, StudentCourseDetails scd, StudentCourseYearDetails scyd,
 			Route r, MonitoringPointSet mps, MonitoringPoint mp
-			where s.mostSignificantCourse = scd
+			where scd.student = s
 			and scyd.studentCourseDetails = scd
 			and scd.route = r.code
 			and mps.route = r

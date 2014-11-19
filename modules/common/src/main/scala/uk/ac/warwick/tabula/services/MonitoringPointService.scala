@@ -193,13 +193,13 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	}
 
 	def getPointSetForStudent(student: StudentMember, academicYear: AcademicYear): Option[MonitoringPointSet] = {
-		student.mostSignificantCourseDetails.flatMap{ scd =>
-			scd.freshStudentCourseYearDetails.find(scyd =>
+		student.freshStudentCourseDetails.flatMap { scd =>
+			scd.freshStudentCourseYearDetails.find { scyd =>
 				scyd.academicYear == academicYear
-			).flatMap{ scyd =>
+			}.flatMap { scyd =>
 				findMonitoringPointSet(scd.route, academicYear, Option(scyd.yearOfStudy)) orElse findMonitoringPointSet(scd.route, academicYear, None)
 			}
-		}
+		}.lastOption // StudentCourseDetails is sorted by SCJ code, so we're returning the last valid one
 	}
 
 	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet] = {
