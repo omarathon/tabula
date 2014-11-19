@@ -11,7 +11,13 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 import collection.JavaConverters._
 
-case class AttendanceMonitoringStudentData(universityId: String, userId: String, scdBeginDate: LocalDate)
+case class AttendanceMonitoringStudentData(
+	firstName: String,
+	lastName: String,
+	universityId: String,
+	userId: String,
+	scdBeginDate: LocalDate
+)
 
 trait MemberDaoComponent {
 	val memberDao: MemberDao
@@ -300,10 +306,12 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		val idCriteria = session.newCriteria[StudentMember]
 		restrictions.foreach { _.apply(idCriteria) }
 		val studentProjections = Projections.projectionList()
-		studentProjections.add(property("universityId"))
-		studentProjections.add(property("userId"))
+			.add(property("universityId"))
+			.add(property("userId"))
+			.add(property("firstName"))
+			.add(property("lastName"))
 		val studentResults = idCriteria.project[Array[java.lang.Object]](studentProjections).seq.map(r =>
-			(r(0).asInstanceOf[String], r(1).asInstanceOf[String])
+			(r(0).asInstanceOf[String], (r(1).asInstanceOf[String], r(2).asInstanceOf[String], r(3).asInstanceOf[String]))
 		).toMap
 
 		val beginDateProjections = Projections.projectionList()
@@ -317,7 +325,13 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.add(is("studentCourseYearDetails.academicYear", academicYear))
 			.add(safeIn("universityId", studentResults.keys.toSeq))
 			.project[Array[java.lang.Object]](beginDateProjections).seq.map(r =>
-				AttendanceMonitoringStudentData(r(0).asInstanceOf[String], studentResults(r(0).asInstanceOf[String]), r(1).asInstanceOf[LocalDate])
+				AttendanceMonitoringStudentData(
+					studentResults(r(0).asInstanceOf[String])._2,
+					studentResults(r(0).asInstanceOf[String])._3,
+					r(0).asInstanceOf[String],
+					studentResults(r(0).asInstanceOf[String])._1,
+					r(1).asInstanceOf[LocalDate]
+				)
 			)
 	}
 
