@@ -27,7 +27,6 @@ class AddMarkingWorkflowController extends CourseworkController {
 	def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState): Mav = {
 		Mav("admin/markingworkflows/add").crumbs(Breadcrumbs.Department(cmd.department))
 	}
-
 	
 	@RequestMapping(method=Array(POST))
 	def submit(@Valid @ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState, errors: Errors): Mav = {

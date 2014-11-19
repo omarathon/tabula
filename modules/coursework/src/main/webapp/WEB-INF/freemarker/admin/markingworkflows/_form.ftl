@@ -96,8 +96,17 @@ Common form fields.
 </@form.labelled_row>
 </div>
 
+<#-- Script to change marker labels to reflect type dependant role names -->
 <script>
-
+	jQuery(function($) {
+		$('#markingMethod').change(function() {
+			var $selectedOption = $(this).find('option:selected')
+			var firstrolename = $selectedOption.data('firstrolename');
+			var secondrolename = $selectedOption.data('secondrolename');
+			if (firstrolename) $('label[for=firstMarkers]').html(firstrolename);
+			if (firstrolename) $('label[for=secondMarkers]').html(secondrolename);
+		});
+	});
 </script>
 
 <div class="submit-buttons">
