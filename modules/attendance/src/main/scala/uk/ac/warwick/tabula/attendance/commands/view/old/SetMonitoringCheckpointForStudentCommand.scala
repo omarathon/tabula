@@ -38,9 +38,8 @@ abstract class SetMonitoringCheckpointForStudentCommand(
 	def populate() {
 		if (!monitoringPointService.getPointSetForStudent(student, set.academicYear).exists(
 			s => s.points.asScala.contains(monitoringPoint))
-		) {
-			throw new ItemNotFoundException()
-		}
+		) throw new ItemNotFoundException()
+
 		val checkpoints = monitoringPointService.getCheckpointsByStudent(Seq(monitoringPoint))
 		studentsState = Map(student -> Map(monitoringPoint -> {
 			val checkpointOption = checkpoints.find{

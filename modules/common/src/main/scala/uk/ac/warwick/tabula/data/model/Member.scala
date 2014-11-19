@@ -371,6 +371,12 @@ class StudentMember extends Member with StudentProperties {
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def mostSignificantCourseDetails: Option[StudentCourseDetails] = Option(mostSignificantCourse).filter(course => course.isFresh)
 
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	def mostSignificantCourseDetailsForYear(academicYear: AcademicYear): Option[StudentCourseDetails] =
+		freshStudentCourseDetails
+			.filter { _.freshStudentCourseYearDetails.exists { _.academicYear == academicYear } }
+			.lastOption // because of the way that StudentCourseDetails are sorted, this is the "last" course details created
+
 	def defaultYearDetails: Option[StudentCourseYearDetails] = mostSignificantCourseDetails.map(_.latestStudentCourseYearDetails)
 
 	def hasCurrentEnrolment: Boolean = freshStudentCourseDetails.exists(_.hasCurrentEnrolment)
