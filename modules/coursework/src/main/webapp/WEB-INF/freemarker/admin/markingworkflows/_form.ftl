@@ -104,7 +104,7 @@ Common form fields.
 			var firstrolename = $selectedOption.data('firstrolename');
 			var secondrolename = $selectedOption.data('secondrolename');
 			if (firstrolename) $('label[for=firstMarkers]').html(firstrolename);
-			if (firstrolename) $('label[for=secondMarkers]').html(secondrolename);
+			if (secondrolename) $('label[for=secondMarkers]').html(secondrolename);
 		});
 	});
 </script>
