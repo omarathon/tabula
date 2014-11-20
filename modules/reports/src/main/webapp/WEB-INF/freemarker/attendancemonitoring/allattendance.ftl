@@ -12,10 +12,32 @@
 
 <div class="complete alert alert-success" style="display: none;">
 	<p>Report complete</p>
-	<p>
+	<div class="btn-toolbar">
 		<a href="#" class="show-data btn" data-loading-text="Loading&hellip;" ><i class="icon-eye-open"></i> Show</a>
-		<a href="#" class="download btn"><i class="icon-download"></i> Download CSV</a>
-	</p>
+		<div class="download btn-group ">
+			<a href="#" class="btn dropdown-toggle" data-toggle="dropdown">
+				<i class="icon-download"></i> Download&hellip;
+				<span class="caret"></span>
+			</a>
+			<ul class="dropdown-menu">
+				<li>
+					<a href="#" data-href="<@routes.allAttendanceDownloadCsv department academicYear />">
+						<i class="icon-table"></i> CSV
+					</a>
+				</li>
+				<li>
+					<a href="#" data-href="<@routes.allAttendanceDownloadXlsx department academicYear />">
+						<i class="icon-list-alt"></i> Excel
+					</a>
+				</li>
+				<li>
+					<a href="#" data-href="<@routes.allAttendanceDownloadXml department academicYear />">
+						<i class="icon-code"></i> XML
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
 </div>
 
 <div class="alert alert-error" style="display: none;">
@@ -23,7 +45,7 @@
 </div>
 
 <div class="report-target"></div>
-<form class="report-target-form" style="display: none;" method="POST" action="<@routes.allAttendanceDownload department academicYear />"></form>
+<form class="report-target-form" style="display: none;" method="POST" action=""></form>
 
 <script>
 	jQuery(function($){
@@ -34,12 +56,12 @@
 				$mainContent.find('.loading p em').html('Downloading data&hellip;');
 				$mainContent.find('.loading .bar').width('66%');
 				setTimeout(function(){
-					var student, point, prop;
+					var student, point, prop, result = [];
 					for (student in data.result) {
 						if (data.result.hasOwnProperty(student)) {
 							for (point in data.result[student]) {
 								if (data.result[student].hasOwnProperty(point)) {
-									$('form.report-target-form').append(
+									result.push(
 										$('<input/>').prop({
 											'type':'hidden',
 											'name':'result[' + student + '][' + point + ']',
@@ -55,12 +77,12 @@
 						if (data.students.hasOwnProperty(student)) {
 							for (prop in data.students[student]) {
 								if (data.students[student].hasOwnProperty(prop)) {
-									$('form.report-target-form').append(
-											$('<input/>').prop({
-												'type':'hidden',
-												'name':'students[' + student + '][' + prop + ']',
-												'value':data.students[student][prop]
-											})
+									result.push(
+										$('<input/>').prop({
+											'type':'hidden',
+											'name':'students[' + student + '][' + prop + ']',
+											'value':data.students[student][prop]
+										})
 									);
 								}
 							}
@@ -71,24 +93,26 @@
 						if (data.points.hasOwnProperty(point)) {
 							for (prop in data.points[point]) {
 								if (data.points[point].hasOwnProperty(prop)) {
-									$('form.report-target-form').append(
-											$('<input/>').prop({
-												'type':'hidden',
-												'name':'points[' + point + '][' + prop + ']',
-												'value':data.points[point][prop]
-											})
+									result.push(
+										$('<input/>').prop({
+											'type':'hidden',
+											'name':'points[' + point + '][' + prop + ']',
+											'value':data.points[point][prop]
+										})
 									);
 								}
 							}
 						}
 					}
 
+					$(result).appendTo($('form.report-target-form'));
+
 					$mainContent.find('div.loading').hide();
 					$mainContent.find('div.complete').show();
 
-					$mainContent.find('div.complete a.download').on('click', function(e) {
+					$mainContent.find('div.complete div.download ul.dropdown-menu a').on('click', function(e) {
 						e.preventDefault();
-						$('form.report-target-form').submit();
+						$('form.report-target-form').prop('action', $(this).data('href')).submit();
 					});
 					$mainContent.find('div.complete a.show-data').on('click', function(e) {
 						e.preventDefault();

@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, At
 import uk.ac.warwick.tabula.reports.commands.attendancemonitoring._
 import uk.ac.warwick.tabula.reports.web.ReportsBreadcrumbs
 import uk.ac.warwick.tabula.reports.web.controllers.ReportsController
-import uk.ac.warwick.tabula.web.views.{CSVView, JSONView}
+import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONView}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
 
@@ -85,8 +85,8 @@ class AllAttendanceReportController extends ReportsController {
 		).noLayoutIf(ajax)
 	}
 
-	@RequestMapping(method = Array(POST), value = Array("/download"))
-	def download(
+	@RequestMapping(method = Array(POST), value = Array("/download.csv"))
+	def csv(
 		@ModelAttribute("processor") processor: Appliable[AllAttendanceReportProcessorResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
@@ -94,7 +94,7 @@ class AllAttendanceReportController extends ReportsController {
 		val processorResult = processor.apply()
 
 		val writer = new StringWriter
-		val csvBuilder = new AllAttendanceReportExporter(processorResult)
+		val csvBuilder = new AllAttendanceReportExporter(processorResult, department)
 		val doc = new GoodCsvDocument(csvBuilder, null)
 
 		doc.setHeaderLine(true)
@@ -103,6 +103,30 @@ class AllAttendanceReportController extends ReportsController {
 		doc.write(writer)
 
 		new CSVView(s"all-attendance-${department.code}.csv", writer.toString)
+	}
+
+	@RequestMapping(method = Array(POST), value = Array("/download.xlsx"))
+	def xlsx(
+		@ModelAttribute("processor") processor: Appliable[AllAttendanceReportProcessorResult],
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear
+	) = {
+		val processorResult = processor.apply()
+
+		val workbook = new AllAttendanceReportExporter(processorResult, department).toXLSX
+
+		new ExcelView(s"all-attendance-${department.code}.xlsx", workbook)
+	}
+
+	@RequestMapping(method = Array(POST), value = Array("/download.xml"))
+	def xml(
+		@ModelAttribute("processor") processor: Appliable[AllAttendanceReportProcessorResult],
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear
+	) = {
+		val processorResult = processor.apply()
+
+		new AllAttendanceReportExporter(processorResult, department).toXML
 	}
 
 }

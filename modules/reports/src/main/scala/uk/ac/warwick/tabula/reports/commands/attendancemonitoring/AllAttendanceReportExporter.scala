@@ -1,16 +1,22 @@
 package uk.ac.warwick.tabula.reports.commands.attendancemonitoring
 
 import freemarker.template.DefaultObjectWrapper
+import org.apache.poi.hssf.usermodel.HSSFDataFormat
+import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
+import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.NotRecorded
 import uk.ac.warwick.tabula.helpers.IntervalFormatter
 import uk.ac.warwick.util.csv.CSVLineWriter
 
-class AllAttendanceReportExporter(val processorResult: AllAttendanceReportProcessorResult) extends CSVLineWriter[AttendanceMonitoringStudentData] {
+class AllAttendanceReportExporter(val processorResult: AllAttendanceReportProcessorResult, val department: Department)
+	extends CSVLineWriter[AttendanceMonitoringStudentData] {
 
 	val intervalFormatter = new IntervalFormatter
 	val wrapper = new DefaultObjectWrapper()
+	val isoFormatter = DateFormats.IsoDateTime
 
 	val result = processorResult.result
 	val students = processorResult.students
@@ -52,5 +58,83 @@ class AllAttendanceReportExporter(val processorResult: AllAttendanceReportProces
 						state.description
 				}.getOrElse("n/a")
 		}
+	}
+
+	def toXLSX = {
+		val workbook = new XSSFWorkbook()
+		val sheet = generateNewSheet(workbook)
+
+		result.keys.foreach(addRow(sheet))
+
+		(0 to headers.size) map sheet.autoSizeColumn
+		workbook
+	}
+
+	private def generateNewSheet(workbook: XSSFWorkbook) = {
+		val sheet = workbook.createSheet(department.name)
+
+		// add header row
+		val headerRow = sheet.createRow(0)
+		headers.zipWithIndex foreach {
+			case (header, index) => headerRow.createCell(index).setCellValue(header)
+		}
+		sheet
+	}
+
+	private def addRow(sheet: XSSFSheet)(studentData: AttendanceMonitoringStudentData) {
+		val plainCellStyle = {
+			val cs = sheet.getWorkbook.createCellStyle()
+			cs.setDataFormat(HSSFDataFormat.getBuiltinFormat("@"))
+			cs
+		}
+
+		val row = sheet.createRow(sheet.getLastRowNum + 1)
+		headers.zipWithIndex foreach { case (_, index) =>
+			val cell = row.createCell(index)
+
+			if (index == 2) {
+				// University IDs have leading zeros and Excel would normally remove them.
+				// Set a manual data format to remove this possibility
+				cell.setCellStyle(plainCellStyle)
+			}
+
+			cell.setCellValue(getColumn(studentData, index))
+		}
+	}
+
+	def toXML = {
+		<result>
+			<attendance>
+				{ result.map{case(studentData, pointMap) =>
+					<student universityid={studentData.universityId}>
+						{ pointMap.map{case(point, state) =>
+							<point id={point.id}>
+								{ state }
+							</point>
+						}}
+					</student>
+				}}
+			</attendance>
+
+			<students>
+				{ students.map(studentData =>
+					<student
+						firstname={studentData.firstName}
+						lastname={studentData.lastName}
+						universityid={studentData.universityId}
+					/>
+				)}
+			</students>
+			<points>
+					{ points.map(point =>
+						<point
+							id={point.id}
+							name={point.name}
+							startdate={isoFormatter.print(point.startDate.toDateTimeAtStartOfDay)}
+							enddate={isoFormatter.print(point.endDate.toDateTimeAtStartOfDay)}
+						/>
+				)}
+				</points>
+		</result>
 	}
 }
