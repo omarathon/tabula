@@ -95,5 +95,11 @@
 			<type>zip</type>
 			<scope>provided</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>uk.ac.warwick.util</groupId>
+			<artifactId>warwickutils-csv</artifactId>
+			<version>${warwickutils.version}</version>
+		</dependency>
 	</dependencies>
 </project>
