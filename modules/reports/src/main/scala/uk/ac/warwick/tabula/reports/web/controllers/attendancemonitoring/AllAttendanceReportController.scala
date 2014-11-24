@@ -102,7 +102,7 @@ class AllAttendanceReportController extends ReportsController {
 		processorResult.result.keys.foreach(item => doc.addLine(item))
 		doc.write(writer)
 
-		new CSVView(s"all-attendance-${department.code}.csv", writer.toString)
+		new CSVView(s"all-monitoring-point-attendance-${department.code}.csv", writer.toString)
 	}
 
 	@RequestMapping(method = Array(POST), value = Array("/download.xlsx"))
@@ -115,7 +115,7 @@ class AllAttendanceReportController extends ReportsController {
 
 		val workbook = new AllAttendanceReportExporter(processorResult, department).toXLSX
 
-		new ExcelView(s"all-attendance-${department.code}.xlsx", workbook)
+		new ExcelView(s"all-monitoring-point-attendance-${department.code}.xlsx", workbook)
 	}
 
 	@RequestMapping(method = Array(POST), value = Array("/download.xml"))

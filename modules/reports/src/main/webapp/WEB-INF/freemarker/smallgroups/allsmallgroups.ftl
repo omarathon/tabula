@@ -3,10 +3,10 @@
 
 <h1>All attendance</h1>
 
-<#assign reportUrl><@routes.allAttendance department academicYear /></#assign>
+<#assign reportUrl><@routes.allSmallGroups department academicYear /></#assign>
 <@reports_macros.reportLoader reportUrl>
 	<div class="btn-toolbar">
-		<a href="#" class="show-data btn" data-loading-text="Loading&hellip;" data-href="<@routes.allAttendanceShow department academicYear />">
+		<a href="#" class="show-data btn" data-loading-text="Loading&hellip;" data-href="<@routes.allSmallGroupsShow department academicYear />">
 			<i class="icon-eye-open"></i> Show
 		</a>
 		<div class="download btn-group ">
@@ -17,17 +17,17 @@
 			<ul class="dropdown-menu">
 
 				<li>
-					<a href="#" data-href="<@routes.allAttendanceDownloadCsv department academicYear />">
+					<a href="#" data-href="<@routes.allSmallGroupsDownloadCsv department academicYear />">
 						<i class="icon-table"></i> CSV
 					</a>
 				</li>
 				<li>
-					<a href="#" data-href="<@routes.allAttendanceDownloadXlsx department academicYear />">
+					<a href="#" data-href="<@routes.allSmallGroupsDownloadXlsx department academicYear />">
 						<i class="icon-list-alt"></i> Excel
 					</a>
 				</li>
 				<li>
-					<a href="#" data-href="<@routes.allAttendanceDownloadXml department academicYear />">
+					<a href="#" data-href="<@routes.allSmallGroupsDownloadXml department academicYear />">
 						<i class="icon-code"></i> XML
 					</a>
 				</li>
