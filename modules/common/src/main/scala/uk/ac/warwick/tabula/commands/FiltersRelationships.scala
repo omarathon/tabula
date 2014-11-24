@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.commands
 
-import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaRestriction}
+import org.hibernate.criterion.{Restrictions, Projections, DetachedCriteria}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.{Daoisms, AliasAndJoinType, ScalaRestriction}
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 import uk.ac.warwick.tabula.data.model._
 
@@ -56,4 +58,9 @@ trait FiltersRelationships extends FilterStudentsOrRelationships {
 	lazy val allSprStatuses: Seq[SitsStatus] = allDepartments.map(dept => profileService.allSprStatuses(dept.rootDepartment)).flatten.distinct
 	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = allDepartments.map(profileService.allModesOfAttendance).flatten.distinct
 
+	protected override def latestYearDetailsForYear(year: AcademicYear): DetachedCriteria =
+		DetachedCriteria.forClass(classOf[StudentCourseYearDetails], "latestSCYD")
+			.setProjection(Projections.max("latestSCYD.sceSequenceNumber"))
+			.add(Daoisms.is("latestSCYD.academicYear", year))
+			.add(Restrictions.eqProperty("latestSCYD.studentCourseDetails.scjCode", "this.scjCode"))
 }
