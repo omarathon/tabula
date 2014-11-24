@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.{MissedUnautho
 import uk.ac.warwick.tabula.helpers.IntervalFormatter
 import uk.ac.warwick.util.csv.CSVLineWriter
 
-class AllAttendanceReportExporter(val processorResult: AllAttendanceReportProcessorResult, val department: Department)
+class AllAttendanceReportExporter(val processorResult: AttendanceReportProcessorResult, val department: Department)
 	extends CSVLineWriter[AttendanceMonitoringStudentData] {
 
 	val intervalFormatter = new IntervalFormatter

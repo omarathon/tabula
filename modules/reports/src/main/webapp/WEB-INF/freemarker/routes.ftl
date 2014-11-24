@@ -22,6 +22,18 @@
 <#macro allAttendanceDownloadXlsx department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/attendance/all/download.xlsx" /></#macro>
 <#macro allAttendanceDownloadXml department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/attendance/all/download.xml" /></#macro>
 
+<#macro unrecordedAttendance department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/attendance/unrecorded" /></#macro>
+<#macro unrecordedAttendanceShow department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/attendance/unrecorded/show" /></#macro>
+<#macro unrecordedAttendanceDownloadCsv department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/attendance/unrecorded/download.csv" /></#macro>
+<#macro unrecordedAttendanceDownloadXlsx department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/attendance/unrecorded/download.xlsx" /></#macro>
+<#macro unrecordedAttendanceDownloadXml department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/attendance/unrecorded/download.xml" /></#macro>
+
+<#macro missedAttendance department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/attendance/missed" /></#macro>
+<#macro missedAttendanceShow department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/attendance/missed/show" /></#macro>
+<#macro missedAttendanceDownloadCsv department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/attendance/missed/download.csv" /></#macro>
+<#macro missedAttendanceDownloadXlsx department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/attendance/missed/download.xlsx" /></#macro>
+<#macro missedAttendanceDownloadXml department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/attendance/missed/download.xml" /></#macro>
+
 <#macro allSmallGroups department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/all" /></#macro>
 <#macro allSmallGroupsShow department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/all/show" /></#macro>
 <#macro allSmallGroupsDownloadCsv department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/all/download.csv" /></#macro>
