@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 import scala.xml.Elem
 
 trait ScientiaConfiguration {
@@ -115,8 +115,12 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 			// else return an empty list.
 			logger.info(s"Requesting timetable data from $uri")
 			Try(http.when(_==200)(req >:+ handler(year, excludeSmallGroupEventsInTabula))) match {
-				case Success(ev)=>ev
-				case _ => Nil
+				case Success(ev)=>
+					if (ev.isEmpty) logger.info("Timetable request successful but no events returned")
+					ev
+				case Failure(e) =>
+					logger.warn(s"Request for $uri failed: ${e.getMessage}")
+					Nil
 			}
 		}
 	}
