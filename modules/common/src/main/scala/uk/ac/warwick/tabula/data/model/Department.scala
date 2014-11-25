@@ -116,6 +116,9 @@ class Department extends GeneratedId
 	def studentsCanScheduleMeetings = getBooleanSetting(Settings.StudentsCanScheduleMeetings, default = true)
 	def studentsCanScheduleMeetings_=(canDo: Boolean) { settings += (Settings.StudentsCanScheduleMeetings -> canDo) }
 
+	def canUploadMarksToSitsForCurrentYear = getBooleanSetting(Settings.CanUploadMarksToSitsForCurrentYear, default = false)
+	def canUploadMarksToSitsForLastYear = getBooleanSetting(Settings.CanUploadMarksToSitsForLastYear, default = false)
+
 	def getStudentRelationshipSource(relationshipType: StudentRelationshipType) =
 		getStringMapSetting(Settings.StudentRelationshipSource)
 			.flatMap {
@@ -378,6 +381,11 @@ object Department {
     val AutoGroupDeregistration = "autoGroupDeregistration"
 
 		val StudentsCanScheduleMeetings = "studentsCanScheduleMeetings"
+
+		val CanUploadMarksToSitsForCurrentYear = "canUploadMarksToSitsForCurrentYear"
+
+		val CanUploadMarksToSitsForLastYear = "canUploadMarksToSitsForLastYear"
+
 	}
 }
 

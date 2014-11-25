@@ -7,10 +7,9 @@ import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackPublishe
 import uk.ac.warwick.tabula.data.model.{Notification, Feedback, Assignment, Module}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService, FeedbackService}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.FeedbackService
 import language.implicitConversions
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
@@ -35,6 +34,7 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 
 	var feedbackService = Wire.auto[FeedbackService]
 	var userLookup = Wire.auto[UserLookupService]
+	var profileService = Wire[ProfileService]
 
 	var confirm: Boolean = false
 
@@ -56,6 +56,11 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 
 	def applyInternal() = {
 		transactional() {
+			if (assignment.uploadMarksToSits) {
+				val cmd = new QueueFeedbackForSitsCommand(assignment, submitter)
+				cmd.apply()
+			}
+
 			val users = getUsersForFeedback
 			val allResults = for {
 				(studentId, user) <- users
@@ -73,6 +78,7 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 					badEmails = acc.badEmails ++ result.badEmails
 				)
 			}
+
 		}
 	}
 

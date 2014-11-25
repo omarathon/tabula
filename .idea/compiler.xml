@@ -49,19 +49,17 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="admin" target="1.6" />
-      <module name="all" target="1.6" />
-      <module name="attendance" target="1.6" />
-      <module name="attendance (1)" target="1.6" />
-      <module name="common" target="1.6" />
-      <module name="courses" target="1.6" />
-      <module name="functional-test" target="1.6" />
-      <module name="groups" target="1.6" />
-      <module name="home" target="1.6" />
-      <module name="profiles" target="1.6" />
-      <module name="reports" target="1.6" />
-      <module name="scheduling" target="1.6" />
-      <module name="tabula-project" target="1.6" />
+      <module name="admin" target="" />
+      <module name="all" target="" />
+      <module name="attendance" target="" />
+      <module name="common" target="" />
+      <module name="courses" target="" />
+      <module name="groups" target="" />
+      <module name="home" target="" />
+      <module name="profiles" target="" />
+      <module name="reports" target="" />
+      <module name="scheduling" target="" />
+      <module name="tabula-project" target="" />
     </bytecodeTargetLevel>
   </component>
 </project>

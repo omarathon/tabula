@@ -103,6 +103,7 @@ class Assignment
 	var name: String = _
 	var active: JBoolean = true
 	var archived: JBoolean = false
+	var uploadMarksToSits: JBoolean = false
 
 	var openDate: DateTime = _
 	var closeDate: DateTime = _

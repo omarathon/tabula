@@ -21,6 +21,7 @@ case object ModuleManagerRoleDefinition extends BuiltInRoleDefinition {
 		Submission.Delete,
 		
 		Feedback.Publish,
+		Feedback.UploadToSits,
 		
 		SmallGroups.Archive,
 		SmallGroups.Delete,
