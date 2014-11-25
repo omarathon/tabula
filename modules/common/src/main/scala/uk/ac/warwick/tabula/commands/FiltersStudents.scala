@@ -1,8 +1,10 @@
 package uk.ac.warwick.tabula.commands
 
+import org.hibernate.criterion.{Restrictions, Projections, DetachedCriteria}
 import org.hibernate.sql.JoinType
-import uk.ac.warwick.tabula.data.model.{Module, SitsStatus, ModeOfAttendance, Route, CourseType, Department}
-import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaRestriction}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.{Daoisms, AliasAndJoinType, ScalaRestriction}
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 
 import scala.collection.JavaConverters._
@@ -60,6 +62,12 @@ trait FiltersStudents extends FilterStudentsOrRelationships {
 	)
 
 	override def getAliasPaths(sitsTable: String) = AliasPaths(sitsTable)
+
+	override protected def latestYearDetailsForYear(year: AcademicYear): DetachedCriteria =
+		DetachedCriteria.forClass(classOf[StudentCourseYearDetails], "latestSCYD")
+			.setProjection(Projections.max("latestSCYD.sceSequenceNumber"))
+			.add(Daoisms.is("latestSCYD.academicYear", year))
+			.add(Restrictions.eqProperty("latestSCYD.studentCourseDetails.scjCode", "mostSignificantCourse.scjCode"))
 
 	lazy val allModules: Seq[Module] = ((modulesForDepartmentAndSubDepartments(mandatory(department)) match {
 		case Nil => modulesForDepartmentAndSubDepartments(mandatory(department.rootDepartment))

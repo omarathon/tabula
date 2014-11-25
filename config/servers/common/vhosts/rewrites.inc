@@ -23,6 +23,7 @@ RewriteRule ^/scheduling$ /scheduling/ [QSA,L,R=301]
 RewriteRule ^/admin$ /admin/ [QSA,L,R=301]
 RewriteRule ^/groups$ /groups/ [QSA,L,R=301]
 RewriteRule ^/attendance$ /attendance/ [QSA,L,R=301]
+RewriteRule ^/reports$ /reports/ [QSA,L,R=301]
 
 # Remove /home context
 RewriteRule ^/home(.*)$ $1 [QSA,L,R=301]
