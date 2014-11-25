@@ -1,21 +1,32 @@
-package uk.ac.warwick.tabula.reports.commands.smallgroups
+package uk.ac.warwick.tabula.reports.commands.attendancemonitoring
 
+import freemarker.template.DefaultObjectWrapper
 import org.apache.poi.hssf.usermodel.HSSFDataFormat
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
+import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.{MissedUnauthorised, NotRecorded}
+import uk.ac.warwick.tabula.helpers.IntervalFormatter
 import uk.ac.warwick.util.csv.CSVLineWriter
 
-class AllSmallGroupsReportExporter(val processorResult: AllSmallGroupsReportProcessorResult, val department: Department)
+class AttendanceReportExporter(val processorResult: AttendanceReportProcessorResult, val department: Department)
 	extends CSVLineWriter[AttendanceMonitoringStudentData] {
 
-	val attendance = processorResult.attendance
+	val intervalFormatter = new IntervalFormatter
+	val wrapper = new DefaultObjectWrapper()
+	val isoFormatter = DateFormats.IsoDateTime
+
+	val result = processorResult.result
 	val students = processorResult.students
-	val events = processorResult.events
+	val points = processorResult.points
 
 	val headers = Seq("First name","Last name","University ID") ++
-		events.map(e => s"${e.moduleCode}	${e.setName} ${e.format} ${e.groupName}	${e.dayString} Week ${e.week}") ++
+		points.map(p => s"${p.name} (${intervalFormatter.exec(JList(
+			wrapper.wrap(p.startDate.toDate),
+			wrapper.wrap(p.endDate.toDate)
+		)).asInstanceOf[String].replaceAll("<sup>","").replaceAll("</sup>","")})") ++
 		Seq("Unrecorded","Missed (unauthorised)")
 
 	val unrecordedIndex = headers.size - 2
@@ -23,8 +34,8 @@ class AllSmallGroupsReportExporter(val processorResult: AllSmallGroupsReportProc
 
 	override def getNoOfColumns(o: AttendanceMonitoringStudentData): Int = headers.size
 
-	override def getColumn(studentData: AttendanceMonitoringStudentData, eventIndex: Int): String = {
-		eventIndex match {
+	override def getColumn(studentData: AttendanceMonitoringStudentData, pointIndex: Int): String = {
+		pointIndex match {
 			case 0 =>
 				studentData.firstName
 			case 1 =>
@@ -32,24 +43,20 @@ class AllSmallGroupsReportExporter(val processorResult: AllSmallGroupsReportProc
 			case 2 =>
 				studentData.universityId
 			case index if index == unrecordedIndex =>
-				attendance.get(studentData).map(eventMap =>
-					eventMap.map{case(event, state) => state}.count(_ == NotRecorded).toString
-				).getOrElse("0")
+				result(studentData).map { case (point, state) => state}.count(_ == NotRecorded).toString
 			case index if index == missedIndex =>
-				attendance.get(studentData).map(eventMap =>
-					eventMap.map{case(event, state) => state}.count(_ == MissedUnauthorised).toString
-				).getOrElse("0")
+				result(studentData).map { case (point, state) => state}.count(_ == MissedUnauthorised).toString
 			case _ =>
-				val thisEvent = events(eventIndex - 3)
-				attendance.get(studentData).flatMap(_.get(thisEvent).map{
+				val thisPoint = points(pointIndex - 3)
+				result(studentData).get(thisPoint).map{
 					case state if state == NotRecorded =>
-						if (thisEvent.isLate)
+						if (thisPoint.isLate)
 							"Late"
 						else
 							state.description
 					case state =>
 						state.description
-				}).getOrElse("n/a")
+				}.getOrElse("n/a")
 		}
 	}
 
@@ -57,7 +64,7 @@ class AllSmallGroupsReportExporter(val processorResult: AllSmallGroupsReportProc
 		val workbook = new XSSFWorkbook()
 		val sheet = generateNewSheet(workbook)
 
-		students.foreach(addRow(sheet))
+		result.keys.foreach(addRow(sheet))
 
 		(0 to headers.size) map sheet.autoSizeColumn
 		workbook
@@ -98,10 +105,10 @@ class AllSmallGroupsReportExporter(val processorResult: AllSmallGroupsReportProc
 	def toXML = {
 		<result>
 			<attendance>
-				{ attendance.map{case(studentData, eventMap) =>
+				{ result.map{case(studentData, pointMap) =>
 					<student universityid={studentData.universityId}>
-						{ eventMap.map{case(event, state) =>
-							<point id={event.id}>
+						{ pointMap.map{case(point, state) =>
+							<point id={point.id}>
 								{ state }
 							</point>
 						}}
@@ -118,21 +125,16 @@ class AllSmallGroupsReportExporter(val processorResult: AllSmallGroupsReportProc
 					/>
 				)}
 			</students>
-			<events>
-					{ events.map(event =>
-						<event
-							id={event.id}
-							moduleCode={event.moduleCode}
-							setName={event.setName}
-							format={event.format}
-							groupName={event.groupName}
-							week={event.week.toString}
-							day={event.day.toString}
-							location={event.location}
-							tutors={event.tutors}
+			<points>
+					{ points.map(point =>
+						<point
+							id={point.id}
+							name={point.name}
+							startdate={isoFormatter.print(point.startDate.toDateTimeAtStartOfDay)}
+							enddate={isoFormatter.print(point.endDate.toDateTimeAtStartOfDay)}
 						/>
 				)}
-				</events>
+				</points>
 		</result>
 	}
 }

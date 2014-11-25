@@ -39,3 +39,15 @@
 <#macro allSmallGroupsDownloadCsv department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/all/download.csv" /></#macro>
 <#macro allSmallGroupsDownloadXlsx department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/all/download.xlsx" /></#macro>
 <#macro allSmallGroupsDownloadXml department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/all/download.xml" /></#macro>
+
+<#macro unrecordedSmallGroups department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/unrecorded" /></#macro>
+<#macro unrecordedSmallGroupsShow department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/unrecorded/show" /></#macro>
+<#macro unrecordedSmallGroupsDownloadCsv department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/unrecorded/download.csv" /></#macro>
+<#macro unrecordedSmallGroupsDownloadXlsx department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/unrecorded/download.xlsx" /></#macro>
+<#macro unrecordedSmallGroupsDownloadXml department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/unrecorded/download.xml" /></#macro>
+
+<#macro missedSmallGroups department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed" /></#macro>
+<#macro missedSmallGroupsShow department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/show" /></#macro>
+<#macro missedSmallGroupsDownloadCsv department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/download.csv" /></#macro>
+<#macro missedSmallGroupsDownloadXlsx department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/download.xlsx" /></#macro>
+<#macro missedSmallGroupsDownloadXml department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/download.xml" /></#macro>

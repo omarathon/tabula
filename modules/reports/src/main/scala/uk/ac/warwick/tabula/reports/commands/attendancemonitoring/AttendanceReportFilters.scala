@@ -9,7 +9,9 @@ object AttendanceReportFilters {
 
 	def unrecorded(result: AllAttendanceReportCommandResult): AllAttendanceReportCommandResult = {
 		val unrecordedPoints = result.flatMap { case (studentData, pointMap) =>
-			pointMap.filter{ case (point, _) => point.endDate.toDateTimeAtStartOfDay.isBeforeNow }.keySet
+			pointMap.filter{ case (point, state) =>
+				point.endDate.toDateTimeAtStartOfDay.isBeforeNow && state == AttendanceState.NotRecorded
+			}.keySet
 		}.toSeq
 		result.map{case(studentData, pointMap) =>
 			studentData -> pointMap.filterKeys(unrecordedPoints.contains)

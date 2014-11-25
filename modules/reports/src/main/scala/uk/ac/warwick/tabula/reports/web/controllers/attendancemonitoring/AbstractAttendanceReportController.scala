@@ -91,7 +91,7 @@ abstract class AbstractAttendanceReportController extends ReportsController {
 		val processorResult = processor.apply()
 
 		val writer = new StringWriter
-		val csvBuilder = new AllAttendanceReportExporter(processorResult, department)
+		val csvBuilder = new AttendanceReportExporter(processorResult, department)
 		val doc = new GoodCsvDocument(csvBuilder, null)
 
 		doc.setHeaderLine(true)
@@ -110,7 +110,7 @@ abstract class AbstractAttendanceReportController extends ReportsController {
 	) = {
 		val processorResult = processor.apply()
 
-		val workbook = new AllAttendanceReportExporter(processorResult, department).toXLSX
+		val workbook = new AttendanceReportExporter(processorResult, department).toXLSX
 
 		new ExcelView(s"$filePrefix-${department.code}.xlsx", workbook)
 	}
@@ -123,7 +123,7 @@ abstract class AbstractAttendanceReportController extends ReportsController {
 	) = {
 		val processorResult = processor.apply()
 
-		new AllAttendanceReportExporter(processorResult, department).toXML
+		new AttendanceReportExporter(processorResult, department).toXML
 	}
 
 }
