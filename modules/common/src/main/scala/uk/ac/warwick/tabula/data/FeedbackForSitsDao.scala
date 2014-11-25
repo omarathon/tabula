@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.{FeedbackForSitsStatus, FeedbackForSits}
+import uk.ac.warwick.tabula.data.model.{Feedback, FeedbackForSitsStatus, FeedbackForSits}
 import uk.ac.warwick.spring.Wire
 
 trait FeedbackForSitsDaoComponent {
@@ -15,6 +15,7 @@ trait AutowiringFeedbackForSitsDaoComponent extends FeedbackForSitsDaoComponent 
 trait FeedbackForSitsDao {
 	def saveOrUpdate(feedbackForSits: FeedbackForSits)
 	def feedbackToLoad: Seq[FeedbackForSits]
+	def getByFeedback(feedback: Feedback): Option[FeedbackForSits]
 }
 
 @Repository
@@ -26,4 +27,10 @@ class FeedbackForSitsDaoImpl extends FeedbackForSitsDao with Daoisms {
 		session.newCriteria[FeedbackForSits]
 			.add(isNot("status", FeedbackForSitsStatus.Successful))
 			.seq
+
+	def getByFeedback(feedback: Feedback) =
+		session.newCriteria[FeedbackForSits]
+			.add(is("feedback", feedback.id))
+			.uniqueResult
+
 }

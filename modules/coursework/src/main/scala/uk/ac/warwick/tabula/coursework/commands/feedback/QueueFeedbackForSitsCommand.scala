@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.FeedbackForSitsDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands.{Command, Description}
@@ -24,16 +25,25 @@ class QueueFeedbackForSitsCommand(val assignment: Assignment, val submitter: Cur
 	def applyInternal() = {
 		transactional() {
 			val users = getUsersForFeedback
-			val allResults = for {
+			val allQueuedFeedbacks = for {
 				(studentId, user) <- users
 				feedback <- assignment.fullFeedback.find { _.universityId == studentId }
 			} yield {
-				val feedbackForSits = new FeedbackForSits
-				feedbackForSits.init(feedback, submitter)
+				val feedbackForSits = feedbackForSitsDao.getByFeedback(feedback) match {
+					case Some(existingFeedbackForSits: FeedbackForSits) =>
+						// this feedback been published before
+						existingFeedbackForSits
+					case None =>
+						// create a new object for this feedback in the queue
+						val newFeedbackForSits = new FeedbackForSits
+						newFeedbackForSits.firstCreatedOn = DateTime.now
+						newFeedbackForSits
+				}
+				feedbackForSits.init(feedback, submitter) // initialise or re-initialise
 				feedbackForSitsDao.saveOrUpdate(feedbackForSits)
-				feedbackForSits
+				feedbackForSits				
 			}
-		allResults
+		allQueuedFeedbacks
 		}
 	}
 
