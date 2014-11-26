@@ -73,7 +73,6 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService {
 
 	self: SitsDataSourceComponent =>
-	val countQuery = new CountQuery(sitsDataSource)
 
 	def countMatchingBlankSasRecords(feedbackForSits: FeedbackForSits): Integer = {
 		val countQuery = new CountQuery(sitsDataSource)
@@ -85,7 +84,6 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService {
 		val parameterGetter: ParameterGetter = new ParameterGetter(feedbackForSits)
 		val updateQuery = new ExportFeedbackToSitsQuery(sitsDataSource)
 
-
 		// execute the query.  Spring's SqlUpdate.updateByNamedParam returns the number of rows affected by the update (should be 0 or 1).
 		updateQuery.updateByNamedParam(parameterGetter.getUpdateParams)
 	}
@@ -95,13 +93,13 @@ object ExportFeedbackToSitsService {
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
 	val whereClause = """
-			|		where spr_code in (select spr_code from intuit.ins_spr where spr_stuc = :studentId)
-			|		and mod_code like ':moduleCode + %'
-			|		and mav_occur in :occurrences
-			|		and ayr = :academicYear
-			|		and psl = 'Y'
-			|		and mab_seq in :sequences
-		"""
+											|		where spr_code in (select spr_code from intuit.ins_spr where spr_stuc = :studentId)
+											|		and mod_code like ':moduleCode + %'
+											|		and mav_occur in :occurrences
+											|		and ayr = :academicYear
+											|		and psl = 'Y'
+											|		and mab_seq in :sequences
+										"""
 
 	final val CountMatchingBlankSasRecordsSql = f"""
 		select count(*) from $sitsSchema.cam_sas $whereClause
@@ -148,11 +146,4 @@ class ExportFeedbackToSitsSandboxService extends ExportFeedbackToSitsService {
 	def exportToSits(feedbackForSits: FeedbackForSits) = 0
 }
 
-trait SitsDataSourceComponent {
-	def sitsDataSource: DataSource
-}
-
-trait AutowiringSitsDataSourceComponent extends SitsDataSourceComponent {
-	var sitsDataSource = Wire[DataSource]("sitsDataSource")
-}
 
