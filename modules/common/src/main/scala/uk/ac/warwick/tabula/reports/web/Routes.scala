@@ -21,6 +21,8 @@ object Routes {
 	object SmallGroups {
 		def home(department: Department, academicYear: AcademicYear) =
 			context + "/%s/%s/groups" format(encoded(department.code), encoded(academicYear.startYear.toString))
+		def unrecorded(department: Department, academicYear: AcademicYear) =
+			context + "/%s/%s/groups/unrecorded" format(encoded(department.code), encoded(academicYear.startYear.toString))
 	}
 
 }

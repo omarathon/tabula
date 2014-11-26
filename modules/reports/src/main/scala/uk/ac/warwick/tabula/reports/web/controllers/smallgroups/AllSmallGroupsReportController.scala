@@ -26,7 +26,7 @@ class UnrecordedSmallGroupsReportController extends AbstractSmallGroupsReportCon
 
 	@ModelAttribute("command")
 	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
-		AllSmallGroupsReportCommand(mandatory(department), mandatory(academicYear), SmallGroupsReportFilters.unrecorded)
+		AllSmallGroupsReportCommand(mandatory(department), mandatory(academicYear), SmallGroupsReportFilters.unrecorded(academicYear))
 
 	val pageRenderPath = "unrecorded"
 	val filePrefix = "unrecorded-small-group-attendance"
