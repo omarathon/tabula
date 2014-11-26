@@ -18,7 +18,7 @@ object AttendanceReportFilters {
 		}.filter{case(_, pointMap) => pointMap.nonEmpty}
 	}
 
-	def missed(result: AllAttendanceReportCommandResult): AllAttendanceReportCommandResult = {
+	def missedUnauthorised(result: AllAttendanceReportCommandResult): AllAttendanceReportCommandResult = {
 		val missedStudents = result.filter{case(studentData, pointMap) =>
 			pointMap.filter{case(point, state) => state == AttendanceState.MissedUnauthorised}.nonEmpty
 		}.keySet
