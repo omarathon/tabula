@@ -57,3 +57,9 @@
 <#macro missedSmallGroupsDownloadCsv department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/download.csv" /></#macro>
 <#macro missedSmallGroupsDownloadXlsx department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/download.xlsx" /></#macro>
 <#macro missedSmallGroupsDownloadXml department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/download.xml" /></#macro>
+
+<#macro missedSmallGroupsByModule department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/bymodule" /></#macro>
+<#macro missedSmallGroupsByModuleShow department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/bymodule/show" /></#macro>
+<#macro missedSmallGroupsByModuleDownloadCsv department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/bymodule/download.csv" /></#macro>
+<#macro missedSmallGroupsByModuleDownloadXlsx department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/bymodule/download.xlsx" /></#macro>
+<#macro missedSmallGroupsByModuleDownloadXml department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/bymodule/download.xml" /></#macro>
