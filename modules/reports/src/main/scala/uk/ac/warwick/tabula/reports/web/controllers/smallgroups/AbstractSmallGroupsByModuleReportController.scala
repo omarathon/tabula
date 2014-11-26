@@ -13,29 +13,30 @@ import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONView}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
 
-abstract class AbstractSmallGroupsReportController extends ReportsController {
+abstract class AbstractSmallGroupsByModuleReportController extends ReportsController {
 
-	def command(department: Department, academicYear: AcademicYear): Appliable[AllSmallGroupsReportCommandResult]
+	def command(department: Department, academicYear: AcademicYear): Appliable[SmallGroupsByModuleReportCommandResult]
 
 	val pageRenderPath: String
 	val filePrefix: String
 
 	@ModelAttribute("processor")
 	def processor(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		SmallGroupsReportProcessor(mandatory(department), mandatory(academicYear))
+		SmallGroupsByModuleReportProcessor(mandatory(department), mandatory(academicYear))
 
 	@RequestMapping(method = Array(GET))
 	def page(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
 		Mav(s"smallgroups/$pageRenderPath").crumbs(
 			ReportsBreadcrumbs.Home.Department(department),
 			ReportsBreadcrumbs.Home.DepartmentForYear(department, academicYear),
-			ReportsBreadcrumbs.SmallGroups.Home(department, academicYear)
+			ReportsBreadcrumbs.SmallGroups.Home(department, academicYear),
+			ReportsBreadcrumbs.SmallGroups.Unrecorded(department, academicYear)
 		)
 	}
 
 	@RequestMapping(method = Array(POST))
 	def apply(
-		@ModelAttribute("command") cmd: Appliable[AllSmallGroupsReportCommandResult],
+		@ModelAttribute("command") cmd: Appliable[SmallGroupsByModuleReportCommandResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {
@@ -48,54 +49,47 @@ abstract class AbstractSmallGroupsReportController extends ReportsController {
 					"userId" -> studentUser.getUserId
 				)
 		}).toMap
-		val allEventsMap: Map[String, Map[String, String]] = result.eventWeeks.map(sgew => {
-			sgew.id -> Map(
-				"moduleCode" -> sgew.event.group.groupSet.module.code.toUpperCase,
-				"setName" -> sgew.event.group.groupSet.nameWithoutModulePrefix,
-				"format" -> sgew.event.group.groupSet.format.description,
-				"groupName" -> sgew.event.group.name,
-				"week" -> sgew.week.toString,
-				"day" -> sgew.event.day.getAsInt.toString,
-				"location" -> Option(sgew.event.location).map(_.toString).orNull,
-				"tutors" -> sgew.event.tutors.users.map(u => s"${u.getFullName} (${u.getUserId})").mkString(", "),
-				"eventId" -> sgew.event.id
+		val allModulesMap: Map[String, Map[String, String]] = result.modules.map(module => {
+			module.id -> Map(
+				"code" -> module.code,
+				"name" -> module.name
 			)
 		}).toMap
 		Mav(new JSONView(Map(
-			"attendance" -> result.attendance.map{case(student, eventMap) =>
-				student.getWarwickId -> eventMap.map{case(sgew, state) =>
-					sgew.id -> Option(state).map(_.dbValue).orNull
+			"counts" -> result.counts.map{case(student, moduleMap) =>
+				student.getWarwickId -> moduleMap.map{case(module, count) =>
+					module.id -> count.toString
 				}
 			}.toMap,
 			"students" -> allStudentsMap,
-			"events" -> allEventsMap
+			"modules" -> allModulesMap
 		)))
 	}
 
 	@RequestMapping(method = Array(POST), value = Array("/show"))
 	def show(
-		@ModelAttribute("processor") processor: Appliable[SmallGroupsReportProcessorResult],
+		@ModelAttribute("processor") processor: Appliable[SmallGroupsByModuleReportProcessorResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {
 		val processorResult = processor.apply()
-		Mav("smallgroups/_smallgroups",
-			"attendance" -> processorResult.attendance,
+		Mav("smallgroups/_smallgroupsByModule",
+			"counts" -> processorResult.counts,
 			"students" -> processorResult.students,
-			"events" -> processorResult.events
+			"modules" -> processorResult.modules
 		).noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method = Array(POST), value = Array("/download.csv"))
 	def csv(
-		@ModelAttribute("processor") processor: Appliable[SmallGroupsReportProcessorResult],
+		@ModelAttribute("processor") processor: Appliable[SmallGroupsByModuleReportProcessorResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {
 		val processorResult = processor.apply()
 
 		val writer = new StringWriter
-		val csvBuilder = new SmallGroupsReportExporter(processorResult, department)
+		val csvBuilder = new SmallGroupsByModuleReportExporter(processorResult, department)
 		val doc = new GoodCsvDocument(csvBuilder, null)
 
 		doc.setHeaderLine(true)
@@ -108,26 +102,26 @@ abstract class AbstractSmallGroupsReportController extends ReportsController {
 
 	@RequestMapping(method = Array(POST), value = Array("/download.xlsx"))
 	def xlsx(
-		@ModelAttribute("processor") processor: Appliable[SmallGroupsReportProcessorResult],
+		@ModelAttribute("processor") processor: Appliable[SmallGroupsByModuleReportProcessorResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {
 		val processorResult = processor.apply()
 
-		val workbook = new SmallGroupsReportExporter(processorResult, department).toXLSX
+		val workbook = new SmallGroupsByModuleReportExporter(processorResult, department).toXLSX
 
 		new ExcelView(s"$filePrefix-${department.code}.xlsx", workbook)
 	}
 
 	@RequestMapping(method = Array(POST), value = Array("/download.xml"))
 	def xml(
-		@ModelAttribute("processor") processor: Appliable[SmallGroupsReportProcessorResult],
+		@ModelAttribute("processor") processor: Appliable[SmallGroupsByModuleReportProcessorResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {
 		val processorResult = processor.apply()
 
-		new SmallGroupsReportExporter(processorResult, department).toXML
+		new SmallGroupsByModuleReportExporter(processorResult, department).toXML
 	}
 
 }

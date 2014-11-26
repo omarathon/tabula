@@ -36,5 +36,9 @@ object ReportsBreadcrumbs {
 			val title = "Small group teaching"
 			val url = Some(Routes.SmallGroups.home(department, academicYear))
 		}
+		case class Unrecorded(department: model.Department, academicYear: AcademicYear) extends Abstract {
+			val title = "Unrecorded"
+			val url = Some(Routes.SmallGroups.unrecorded(department, academicYear))
+		}
 	}
 }
