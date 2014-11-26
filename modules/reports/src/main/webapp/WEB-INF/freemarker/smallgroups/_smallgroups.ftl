@@ -1,7 +1,7 @@
 <#escape x as x?html>
 
 <style>
-	th.rotated .rotate {
+	th.rotated .rotate, td.rotated .rotate {
 		float: left;
 		position: absolute;
 		-webkit-transform-origin: 0% 100%;
@@ -16,7 +16,7 @@
 		transform: rotateZ(90deg);
 		white-space: nowrap;
 	}
-	th.event {
+	th.event, td.tutors {
 		font-size: 80%;
 		position: relative;
 	}
@@ -41,7 +41,6 @@
 							${event.format}
 							${event.groupName}
 							${event.dayString} Week ${event.week}
-
 						</div>
 					</th>
 				</#list>
@@ -99,6 +98,22 @@
 				</tr>
 			</#list>
 		</tbody>
+		<tfoot>
+			<tr>
+				<th colspan="3" style="text-align: right;">
+					Tutor/s
+				</th>
+				<#list events as event>
+					<td class="tutors rotated">
+						<div class="rotate">
+							${event.tutors}
+						</div>
+					</td>
+				</#list>
+				<td></td>
+				<td></td>
+			</tr>
+		</tfoot>
 	</table>
 </div></div>
 
@@ -109,6 +124,12 @@
 			var height = $(this).find('.rotate').height();
 			$(this).css('height', width + 20).css('width', height + 5);
 			$(this).find('.rotate').css('margin-top', -(width + 25));
+		});
+		$('td.rotated').each(function() {
+			var width = $(this).find('.rotate').width();
+			var height = $(this).find('.rotate').height();
+			$(this).css('height', width).css('width', height + 5);
+			$(this).find('.rotate').css('margin-top', -(height));
 		});
 
 		var popoutLinkHandler = function(event) {

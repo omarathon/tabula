@@ -30,4 +30,11 @@ object ReportsBreadcrumbs {
 			val url = Some(Routes.Attendance.home(department, academicYear))
 		}
 	}
+
+	object SmallGroups {
+		case class Home(department: model.Department, academicYear: AcademicYear) extends Abstract {
+			val title = "Small group teaching"
+			val url = Some(Routes.SmallGroups.home(department, academicYear))
+		}
+	}
 }
