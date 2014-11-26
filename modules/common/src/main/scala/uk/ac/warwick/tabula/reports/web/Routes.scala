@@ -23,6 +23,8 @@ object Routes {
 			context + "/%s/%s/groups" format(encoded(department.code), encoded(academicYear.startYear.toString))
 		def unrecorded(department: Department, academicYear: AcademicYear) =
 			context + "/%s/%s/groups/unrecorded" format(encoded(department.code), encoded(academicYear.startYear.toString))
+		def missed(department: Department, academicYear: AcademicYear) =
+			context + "/%s/%s/groups/missed" format(encoded(department.code), encoded(academicYear.startYear.toString))
 	}
 
 }

@@ -7,39 +7,36 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.reports.commands.smallgroups._
-import uk.ac.warwick.tabula.reports.web.ReportsBreadcrumbs
 import uk.ac.warwick.tabula.reports.web.controllers.ReportsController
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONView}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
 
 abstract class AbstractSmallGroupsByModuleReportController extends ReportsController {
 
-	def command(department: Department, academicYear: AcademicYear): Appliable[SmallGroupsByModuleReportCommandResult]
+	def filteredAttendanceCommand(department: Department, academicYear: AcademicYear): Appliable[AllSmallGroupsReportCommandResult]
 
-	val pageRenderPath: String
 	val filePrefix: String
+
+	def page(department: Department, academicYear: AcademicYear): Mav
+
+	@ModelAttribute("command")
+	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
+		SmallGroupsByModuleReportCommand(department, academicYear)
 
 	@ModelAttribute("processor")
 	def processor(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
 		SmallGroupsByModuleReportProcessor(mandatory(department), mandatory(academicYear))
 
-	@RequestMapping(method = Array(GET))
-	def page(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
-		Mav(s"smallgroups/$pageRenderPath").crumbs(
-			ReportsBreadcrumbs.Home.Department(department),
-			ReportsBreadcrumbs.Home.DepartmentForYear(department, academicYear),
-			ReportsBreadcrumbs.SmallGroups.Home(department, academicYear),
-			ReportsBreadcrumbs.SmallGroups.Unrecorded(department, academicYear)
-		)
-	}
-
 	@RequestMapping(method = Array(POST))
 	def apply(
-		@ModelAttribute("command") cmd: Appliable[SmallGroupsByModuleReportCommandResult],
+		@ModelAttribute("command") cmd: Appliable[SmallGroupsByModuleReportCommandResult] with SetsFilteredAttendance,
+		@ModelAttribute("filteredAttendanceCommand") filteredAttendanceCmd: Appliable[AllSmallGroupsReportCommandResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {
+		cmd.setFilteredAttendance(filteredAttendanceCmd.apply())
 		val result = cmd.apply()
 		val allStudentsMap: Map[String, Map[String, String]] = result.students.map(studentUser => {
 			studentUser.getWarwickId ->

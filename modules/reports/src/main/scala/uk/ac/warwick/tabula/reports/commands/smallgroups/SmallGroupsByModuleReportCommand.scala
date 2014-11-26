@@ -7,11 +7,12 @@ import uk.ac.warwick.tabula.reports.commands.{ReportCommandState, ReportPermissi
 import uk.ac.warwick.userlookup.User
 
 object SmallGroupsByModuleReportCommand {
-	def apply(department: Department, academicYear: AcademicYear, filteredAttendance: AllSmallGroupsReportCommandResult) =
-		new SmallGroupsByModuleReportCommandInternal(department, academicYear, filteredAttendance)
+	def apply(department: Department, academicYear: AcademicYear) =
+		new SmallGroupsByModuleReportCommandInternal(department, academicYear)
 			with ComposableCommand[SmallGroupsByModuleReportCommandResult]
 			with ReportPermissions
-			with ReportCommandState
+			with SmallGroupsByModuleReportCommandState
+			with SetsFilteredAttendance
 			with ReadOnly with Unaudited
 }
 
@@ -21,11 +22,10 @@ case class SmallGroupsByModuleReportCommandResult(
 	modules: Seq[Module]
 )
 
-class SmallGroupsByModuleReportCommandInternal(
-	val department: Department,
-	val academicYear: AcademicYear,
-	val filteredAttendance: AllSmallGroupsReportCommandResult
-) extends CommandInternal[SmallGroupsByModuleReportCommandResult] {
+class SmallGroupsByModuleReportCommandInternal(val department: Department, val academicYear: AcademicYear)
+	extends CommandInternal[SmallGroupsByModuleReportCommandResult] {
+
+	self: SmallGroupsByModuleReportCommandState =>
 
 	override def applyInternal() = {
 		val byModule: Map[User, Map[Module, Int]] = filteredAttendance.attendance.map{case(student, eventMap) =>
@@ -40,4 +40,17 @@ class SmallGroupsByModuleReportCommandInternal(
 			byModule.flatMap(_._2.map(_._1)).toSeq.sorted
 		)
 	}
+}
+
+trait SetsFilteredAttendance {
+
+	self: SmallGroupsByModuleReportCommandState =>
+
+	def setFilteredAttendance(theFilteredAttendance: AllSmallGroupsReportCommandResult): Unit = {
+		filteredAttendance = theFilteredAttendance
+	}
+}
+
+trait SmallGroupsByModuleReportCommandState extends ReportCommandState {
+	var filteredAttendance: AllSmallGroupsReportCommandResult = _
 }
