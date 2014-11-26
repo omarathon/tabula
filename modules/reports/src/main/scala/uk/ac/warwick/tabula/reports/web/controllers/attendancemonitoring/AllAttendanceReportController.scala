@@ -39,7 +39,7 @@ class MissedAttendanceReportController extends AbstractAttendanceReportControlle
 
 	@ModelAttribute("command")
 	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
-		AllAttendanceReportCommand(mandatory(department), mandatory(academicYear), AttendanceReportFilters.missed)
+		AllAttendanceReportCommand(mandatory(department), mandatory(academicYear), AttendanceReportFilters.missedUnauthorised)
 
 	val pageRenderPath = "missed"
 	val filePrefix = "missed-monitoring-points"

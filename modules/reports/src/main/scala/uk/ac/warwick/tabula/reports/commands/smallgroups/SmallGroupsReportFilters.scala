@@ -28,7 +28,7 @@ object SmallGroupsReportFilters {
 		)
 	}
 
-	def missed(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult = {
+	def missedUnauthorised(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult = {
 		val missedMap = result.attendance.map{ case(studentData, eventMap) =>
 			studentData -> eventMap.filter { case (_, state) =>	state == AttendanceState.MissedUnauthorised	}
 		}.filter{ case(studentData, eventMap) => eventMap.nonEmpty }
