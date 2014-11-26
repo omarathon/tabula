@@ -13,7 +13,7 @@ class MissedSmallGroupsByModuleReportController extends AbstractSmallGroupsByMod
 
 	@ModelAttribute("filteredAttendanceCommand")
 	override def filteredAttendanceCommand(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
-		AllSmallGroupsReportCommand(department, academicYear, SmallGroupsReportFilters.missed)
+		AllSmallGroupsReportCommand(department, academicYear, SmallGroupsReportFilters.missedUnauthorised)
 
 	override val filePrefix: String = "missed-small-groups-by-module"
 
