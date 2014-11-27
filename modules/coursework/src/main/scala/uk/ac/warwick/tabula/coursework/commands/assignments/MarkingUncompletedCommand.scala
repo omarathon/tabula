@@ -40,7 +40,8 @@ abstract class MarkingUncompletedCommand(val module: Module, val assignment: Ass
 		// do not update previously released feedback
 		val feedbackForRelease = completedMarkerFeedback.asScala.filterNot(_.feedback.released).flatMap(getMarkerFeedbackForRelease)
 
-		feedbackForRelease.foreach(stateService.updateStateUnsafe(_, MarkingState.ReleasedForMarking))
+		// TAB-2957
+		// feedbackForRelease.foreach(stateService.updateStateUnsafe(_, MarkingState.ReleasedForMarking))
 	}
 
 	private def getMarkerFeedbackForRelease(markerFeedback: MarkerFeedback): Seq[MarkerFeedback] = {
