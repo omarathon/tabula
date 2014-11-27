@@ -28,9 +28,9 @@ class FeedbackForSitsDaoImpl extends FeedbackForSitsDao with Daoisms {
 			.add(isNot("status", FeedbackForSitsStatus.Successful))
 			.seq
 
-	def getByFeedback(feedback: Feedback) =
+	def getByFeedback(feedback: Feedback) = {
 		session.newCriteria[FeedbackForSits]
-			.add(is("feedback", feedback.id))
+			.add(is("feedback", feedback))
 			.uniqueResult
-
+	}
 }

@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.SqlParameter
 import uk.ac.warwick.tabula.JavaImports.JHashMap
 import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.services.ExportFeedbackToSitsService.{CountQuery, ExportFeedbackToSitsQuery}
 import collection.JavaConverters._
 import java.util
@@ -39,7 +40,7 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 		// for the where clause
 		("studentId", feedbackForSits.feedback.universityId),
 		("academicYear", feedbackForSits.feedback.assignment.academicYear.toString),
-		("moduleCode", feedbackForSits.feedback.assignment.module.code.toUpperCase),
+		("moduleCodeMatcher", feedbackForSits.feedback.assignment.module.code.toUpperCase + "%"),
 		("now", DateTime.now.toDate),
 
 		// in theory we should look for a record with occurrence and sequence from the same pair,
@@ -49,11 +50,11 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 		("sequences", sequences)
 	)
 
-	def getUpdateParams = JHashMap(
+	def getUpdateParams(mark: Integer, grade: String) = JHashMap(
 		// for the where clause
 		("studentId", feedbackForSits.feedback.universityId),
 		("academicYear", feedbackForSits.feedback.assignment.academicYear.toString),
-		("moduleCode", feedbackForSits.feedback.assignment.module.code.toUpperCase),
+		("moduleCodeMatcher", feedbackForSits.feedback.assignment.module.code.toUpperCase + "%"),
 		("now", DateTime.now.toDate),
 
 		// in theory we should look for a record with occurrence and sequence from the same pair,
@@ -63,14 +64,14 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 		("sequences", sequences),
 
 		// data to insert
-		("actualMark", feedbackForSits.feedback.actualMark),
-		("actualGrade", feedbackForSits.feedback.actualGrade)
+		("actualMark", mark),
+		("actualGrade", grade)
 	)
 
 }
 
 
-class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService {
+class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService with Logging {
 
 	self: SitsDataSourceComponent =>
 
@@ -84,22 +85,28 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService {
 		val parameterGetter: ParameterGetter = new ParameterGetter(feedbackForSits)
 		val updateQuery = new ExportFeedbackToSitsQuery(sitsDataSource)
 
-		// execute the query.  Spring's SqlUpdate.updateByNamedParam returns the number of rows affected by the update (should be 0 or 1).
-		updateQuery.updateByNamedParam(parameterGetter.getUpdateParams)
+		val actualGrade = feedbackForSits.feedback.actualGrade
+		val actualMark = feedbackForSits.feedback.actualMark
+		val numRowsChanged =
+			if (actualGrade.isDefined && actualMark.isDefined)
+				updateQuery.updateByNamedParam(parameterGetter.getUpdateParams(actualMark.get, actualGrade.get))
+		else {
+				0 // issue a warning when the FeedbackForSits record is created, not here
+			}
+		numRowsChanged
 	}
 }
 
 object ExportFeedbackToSitsService {
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
-	val whereClause = """
-											|		where spr_code in (select spr_code from intuit.ins_spr where spr_stuc = :studentId)
-											|		and mod_code like ':moduleCode + %'
-											|		and mav_occur in :occurrences
-											|		and ayr = :academicYear
-											|		and psl = 'Y'
-											|		and mab_seq in :sequences
-										"""
+	val whereClause = f"""where spr_code in (select spr_code from $sitsSchema.ins_spr where spr_stuc = :studentId)
+		and mod_code like :moduleCodeMatcher
+		and mav_occur in :occurrences
+		and ayr_code = :academicYear
+		and psl_code = 'Y'
+		and mab_seq in :sequences
+	"""
 
 	final val CountMatchingBlankSasRecordsSql = f"""
 		select count(*) from $sitsSchema.cam_sas $whereClause
@@ -113,9 +120,13 @@ object ExportFeedbackToSitsService {
 	}
 
 	final val UpdateSITSFeedbackSql = f"""
-		update $sitsSchema.CAM_SAS
-		(SAS_ACTM, SAS_ACTG, SAS_PRCS, SAS_PROC, SAS_UDF1, SAS_UDF2)
-		values (:actualMark, :actualGrade, 'I', 'SAS', 'Tabula', :now)
+		update $sitsSchema.cam_sas
+		set sas_actm = :actualMark,
+			sas_actg = :actualGrade,
+	 		sas_prcs = 'I',
+			sas_proc = 'SAS',
+	 		sas_udf1 = 'Tabula',
+			sas_udf2 = :now
 		$whereClause
 	"""
 
@@ -124,7 +135,7 @@ object ExportFeedbackToSitsService {
 		declareParameter(new SqlParameter("actualGrade", Types.VARCHAR))
 		declareParameter(new SqlParameter("studentId", Types.VARCHAR))
 		declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
-		declareParameter(new SqlParameter("moduleCode", Types.VARCHAR))
+		declareParameter(new SqlParameter("moduleCodeMatcher", Types.VARCHAR))
 		declareParameter(new SqlParameter("now", Types.DATE))
 		declareParameter(new SqlParameter("occurrences", Types.VARCHAR))
 		declareParameter(new SqlParameter("sequences", Types.VARCHAR))
