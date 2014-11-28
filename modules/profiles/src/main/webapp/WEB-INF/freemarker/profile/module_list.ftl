@@ -1,4 +1,3 @@
-<#import "profile_macros.ftl" as profile_macros />
 <#if user.staff>
 <div class="pull-right">
 	<@routes.mrm_link studentCourseDetails studentCourseYearDetails />
