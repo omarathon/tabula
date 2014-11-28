@@ -18,6 +18,7 @@ case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
 
 		Assignment.Create,
 		Assignment.Update,
+		Assignment.MarkOnBehalf,
 
 		Submission.ManagePlagiarismStatus,
 		Submission.CheckForPlagiarism,

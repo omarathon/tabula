@@ -11,11 +11,11 @@ import uk.ac.warwick.tabula.services.AutowiringSmallGroupServiceComponent
 import uk.ac.warwick.tabula.commands.CommandInternal
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 object ListStudentsGroupsCommand {
-	def apply(member: Member, user: CurrentUser) =
-		new ListStudentsGroupsCommandInternal(member, user)
+	def apply(member: Member, user: CurrentUser, academicYearOption: Option[AcademicYear]) =
+		new ListStudentsGroupsCommandInternal(member, user, academicYearOption)
 			with ComposableCommand[ViewModules]
 			with ListStudentsGroupsCommandPermissions
 			with AutowiringSmallGroupServiceComponent
@@ -25,7 +25,7 @@ object ListStudentsGroupsCommand {
 /**
  * Gets the data for a students view of all small groups they're a member of.
  */
-class ListStudentsGroupsCommandInternal(val member: Member, val currentUser: CurrentUser)
+class ListStudentsGroupsCommandInternal(val member: Member, val currentUser: CurrentUser, val academicYearOption: Option[AcademicYear])
 	extends CommandInternal[ViewModules] with ListStudentsGroupsCommandState {
 	self: SmallGroupServiceComponent =>
 
@@ -34,7 +34,8 @@ class ListStudentsGroupsCommandInternal(val member: Member, val currentUser: Cur
 	def applyInternal() = {
 		val user = member.asSsoUser
 		val memberGroupSets = smallGroupService.findSmallGroupSetsByMember(user)
-		val releasedMemberGroupSets = getGroupSetsReleasedToStudents(memberGroupSets)
+		val filteredmemberGroupSets = academicYearOption.map(academicYear => memberGroupSets.filter(_.academicYear == academicYear)).getOrElse(memberGroupSets)
+		val releasedMemberGroupSets = getGroupSetsReleasedToStudents(filteredmemberGroupSets)
 		val isTutor = !(currentUser.apparentUser == user)
 		val nonEmptyMemberViewModules = getViewModulesForStudent(releasedMemberGroupSets, getGroupsToDisplay(_, user, isTutor))
 

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.coursework.commands.feedback._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
@@ -39,7 +40,6 @@ class DownloadSelectedFeedbackController extends CourseworkController {
 	}
 }
 
-
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
 class DownloadSelectedFeedbackFileController extends CourseworkController {
@@ -66,8 +66,6 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
 	}
 }
 
-
-
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedbacks.zip"))
 class DownloadAllFeedbackController extends CourseworkController {
@@ -78,7 +76,7 @@ class DownloadAllFeedbackController extends CourseworkController {
 		new DownloadSelectedFeedbackCommand(module, assignment)
 
 	@RequestMapping
-	def getSelected(command: DownloadSelectedFeedbackCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+	def getSelected(command: DownloadSelectedFeedbackCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}
@@ -86,7 +84,7 @@ class DownloadAllFeedbackController extends CourseworkController {
 }
 
 @Controller
-@RequestMapping( value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{feedbackId}/{filename}"))
+@RequestMapping( value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{feedbackId}/{filename}"))
 class DownloadMarkerFeedbackController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
@@ -98,6 +96,7 @@ class DownloadMarkerFeedbackController extends CourseworkController {
 		@PathVariable assignment: Assignment,
 		@PathVariable feedbackId: String,
 		@PathVariable filename: String,
+		@PathVariable marker: User,
 		req: HttpServletRequest,
 		res: HttpServletResponse
 	) = {
@@ -111,23 +110,38 @@ class DownloadMarkerFeedbackController extends CourseworkController {
 }
 
 @Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{feedbackId}/{filename}"))
+class DownloadMarkerFeedbackControllerCurrentUser extends CourseworkController {
+	@RequestMapping
+	def redirect(@PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String, currentUser: CurrentUser) = {
+		Redirect(Routes.admin.assignment.markerFeedback.downloadFeedback.marker(assignment, currentUser.apparentUser, feedbackId, filename))
+	}
+}
+
+@Controller
 class DownloadMarkerFeebackFilesController extends BaseController {
 
 	@Autowired var fileServer: FileServer = _
 
 	@ModelAttribute def command( @PathVariable module: Module,
 															 @PathVariable assignment: Assignment,
-															 @PathVariable markerFeedback: String)
+															 @PathVariable markerFeedback: String,
+															 @PathVariable marker: User)
 	= new DownloadMarkerFeedbackFilesCommand(module, assignment, markerFeedback)
 
 	// the difference between the RequestMapping paths for these two methods is a bit subtle - the first has
 	// attachments plural, the second has attachments singular.
-	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachments/*"))
-	def getAll(command: DownloadMarkerFeedbackFilesCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{markerFeedback}/attachments/*"))
+	def getAll(command: DownloadMarkerFeedbackFilesCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		getOne(command, null)
 	}
 
-	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachment/{filename}"))
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachments/*"))
+	def redirectAll(@PathVariable assignment: Assignment, @PathVariable markerFeedback: String, @PathVariable marker: User) {
+		Redirect(Routes.admin.assignment.markerFeedback.downloadFeedback.all(assignment, marker, markerFeedback))
+	}
+
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{markerFeedback}/attachment/{filename}"))
 	def getOne(command: DownloadMarkerFeedbackFilesCommand, @PathVariable("filename") filename: String)
 						(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		// specify callback so that audit logging happens around file serving
@@ -137,11 +151,15 @@ class DownloadMarkerFeebackFilesController extends BaseController {
 		}
 		command.apply().orElse { throw new ItemNotFoundException() }
 	}
+
+	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachment/{filename}"))
+	def redirectOne(@PathVariable assignment: Assignment, @PathVariable markerFeedback: String, @PathVariable marker: User, @PathVariable("filename") filename: String) {
+		Redirect(Routes.admin.assignment.markerFeedback.downloadFeedback.one(assignment, marker, markerFeedback, filename))
+	}
 }
 
-
 @Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/{position}/feedbacks.zip"))
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/{position}/feedbacks.zip"))
 class DownloadFirstMarkersFeedbackController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
@@ -151,13 +169,14 @@ class DownloadFirstMarkersFeedbackController extends CourseworkController {
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
 		@PathVariable position: String,
-		currentUser:CurrentUser
+		@PathVariable marker: User,
+		user: CurrentUser
 	) = {
 		val feedbackPosition = position match {
 			case "firstmarker" => FirstFeedback
 			case "secondmarker" => SecondFeedback
 		}
-		DownloadMarkersFeedbackForPositionCommand(module, assignment, currentUser, feedbackPosition)
+		DownloadMarkersFeedbackForPositionCommand(module, assignment, marker, user, feedbackPosition)
 	}
 
 	@RequestMapping

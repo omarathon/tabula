@@ -284,6 +284,14 @@
 								<include>attendance-recording.js</include>
 							</includes>
 						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/reports.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
+							</includes>
+						</aggregation>
 					</aggregations>
 				</configuration>
 			</plugin>

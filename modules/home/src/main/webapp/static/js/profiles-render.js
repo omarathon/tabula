@@ -411,8 +411,9 @@
 			};
 		}
 		function onViewUpdate(view,element){
-		   updateCalendarTitle(view, element);
-		   $('.popover').hide();
+			updateCalendarTitle(view, element);
+			updateFullScreenLink(view, element);
+			$('.popover').hide();
 		}
 		// relies on the variable "weeks" having been defined elsewhere, by using the WeekRangesDumperTag
 		function updateCalendarTitle(view,element){
@@ -432,11 +433,21 @@
 			}
 		}
 
-		function createCalendar(container, defaultViewName, studentId, showViewSwitcher){
+		function updateFullScreenLink(view, element) {
+			$(element).closest('section').find('.timetable-fullscreen').each(function(){
+				$(this).prop('href', $(this).prop('href').replace(/\?now=\d+/,'') + '?now=' + view.start.getTime());
+			});
+		}
+
+		function createCalendar(container, defaultViewName, studentId, showViewSwitcher, currentDateMillis){
+			var renderDate = (currentDateMillis) ? new Date(currentDateMillis) : new Date();
 			var showWeekends = (defaultViewName == "month");
 			var cal = $(container).fullCalendar({
-				events:getEvents(studentId, $(container)),
+				events: getEvents(studentId, $(container)),
 				defaultView: defaultViewName,
+				year: renderDate.getFullYear(),
+				month: renderDate.getMonth(),
+				date: renderDate.getDate(),
 				allDaySlot: false,
 				slotMinutes: 60,
 				firstHour:8,
@@ -507,8 +518,14 @@
 			});
 		}
 
-        $(".fullCalendar").each(function(index){
-			createCalendar($(this),$(this).data('viewname'),$(this).data('studentid'),$(this).data('showviewswitcher'));
+        $(".fullCalendar").each(function(){
+			createCalendar(
+				$(this),
+				$(this).data('viewname'),
+				$(this).data('studentid'),
+				$(this).data('showviewswitcher'),
+				$(this).data('renderdate')
+			);
 		});
 	});
 

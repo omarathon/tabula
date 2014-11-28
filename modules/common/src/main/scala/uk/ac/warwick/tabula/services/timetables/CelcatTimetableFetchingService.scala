@@ -299,8 +299,12 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		// else return an empty list.
 		logger.info(s"Requesting timetable data from $req")
 		Try(http.when(_==200)(req >:+ handler(config))) match {
-			case Success(ev) => ev
-			case _ => Nil
+			case Success(ev)=>
+				if (ev.isEmpty) logger.info("Timetable request successful but no events returned")
+				ev
+			case Failure(e) =>
+				logger.warn(s"Request for $req failed: ${e.getMessage}")
+				Nil
 		}
 	}
 

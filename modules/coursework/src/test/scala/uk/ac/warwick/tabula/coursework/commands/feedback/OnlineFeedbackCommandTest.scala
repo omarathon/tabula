@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase, MockUserLookup}
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{Feedback, Submission, Assignment, Module}
 
@@ -10,6 +10,8 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 	trait Fixture {
 
 		// user1 and user3 deliberately have same uniId, to test members with multiple logins.
+		val marker = Fixtures.user(universityId="marker", userId="marker")
+
 		val user1 = Fixtures.user(universityId="user1", userId="user1")
 		val user2 = Fixtures.user(universityId="user2", userId="user2")
 		val user3 = Fixtures.user(universityId="user1", userId="user3")
@@ -29,7 +31,7 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 		assignment.submissions.add(submission1)
 		assignment.feedbacks.add(feedback2)
 
-		val command = new OnlineFeedbackCommand(module, assignment) with OnlineFeedbackCommandTestSupport
+		val command = new OnlineFeedbackCommand(module, assignment, new CurrentUser(marker, marker)) with OnlineFeedbackCommandTestSupport
 
 		command.assignmentMembershipService.determineMembershipUsers(assignment) returns Seq(user1, user2, user3)
 

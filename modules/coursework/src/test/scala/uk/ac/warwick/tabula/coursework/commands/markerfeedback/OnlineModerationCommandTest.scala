@@ -30,7 +30,7 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 		val marker = fakeUser("marker")
 		val currentUser = new CurrentUser(realUser = marker, apparentUser = marker)
 
-		val command = new OnlineModerationCommand(module, assignment, student, currentUser) with ModerationCommandSupport
+		val command = new OnlineModerationCommand(module, assignment, student, currentUser.apparentUser, currentUser) with ModerationCommandSupport
 			with FinaliseFeedbackTestImpl
 
 		val testFeedback = new Feedback

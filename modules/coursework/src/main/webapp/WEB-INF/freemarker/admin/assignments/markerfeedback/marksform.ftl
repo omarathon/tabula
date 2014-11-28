@@ -12,10 +12,10 @@
 			<p>
 				You can upload marks in a spreadsheet, which must be saved as an .xlsx file (ie created in Microsoft Office 2007 or later).
 				The spreadsheet should have three column headings in the following order: <b>ID, Mark, Grade</b>.
-				You can use this <a href="<@routes.markermarkstemplate assignment=assignment  />" >generated spreadsheet</a> as a template.
+				You can use this <a href="<@routes.markermarkstemplate assignment=assignment  marker=marker/>" >generated spreadsheet</a> as a template.
 				Note that you can upload just marks, just grades or both.
 			</p>
-			<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/marks')}" commandName="markerAddMarksCommand">
+			<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/marks')}" commandName="markerAddMarksCommand">
 			<input name="isfile" value="true" type="hidden"/>
 			<table role="presentation" class="narrowed-form">
 				<tr>
@@ -54,7 +54,7 @@
 				</tr>
 				</tbody>
 			</table>
-			<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/marks')}" commandName="markerAddMarksCommand">
+			<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/marks')}" commandName="markerAddMarksCommand">
 				<div class="fix-area">
 					<input name="isfile" value="false" type="hidden"/>
 					<table class="marksUploadTable">
@@ -77,7 +77,7 @@
 					<br /><button class="add-additional-marks btn"><i class="icon-plus"></i> Add</button>
 					<div class="submit-buttons fix-footer">
 						<input type="submit" class="btn btn-primary" value="Save">
-						or <a href="<@routes.listmarkersubmissions assignment />" class="btn">Cancel</a>
+						or <a href="<@routes.listmarkersubmissions assignment marker/>" class="btn">Cancel</a>
 					</div>
 				</div>
 			</@f.form>

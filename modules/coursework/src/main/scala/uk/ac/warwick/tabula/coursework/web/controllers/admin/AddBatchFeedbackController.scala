@@ -9,18 +9,15 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.AddFeedbackCommand
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.web.Mav
-import org.springframework.web.bind.annotation.RequestMethod._
 import org.springframework.validation.Errors
-import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.tabula.data.model.Module
-import javax.validation.Valid
 import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/batch"))
 class AddBatchFeedbackController extends CourseworkController {
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
-		new AddFeedbackCommand(module, assignment, user)
+		new AddFeedbackCommand(module, assignment, user.apparentUser, user)
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav: Mav, module: Module) = mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))

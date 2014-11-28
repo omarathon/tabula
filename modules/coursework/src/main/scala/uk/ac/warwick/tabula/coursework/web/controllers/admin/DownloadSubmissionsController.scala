@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.coursework.commands.assignments.{DownloadFeedbackSheetsCommand, DownloadAllSubmissionsCommand, DownloadSubmissionsCommand}
+import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.services.fileserver.{RenderableZip, FileServer}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
@@ -13,13 +14,12 @@ import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.AdminGetSingleSubmissionCommand
 import javax.servlet.http.HttpServletRequest
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmissionsCommand
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadAttachmentCommand
-import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.commands.ApplyWithCallback
-import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.userlookup.{User, AnonymousUser}
 
 
 @Controller
@@ -37,11 +37,10 @@ class DownloadSubmissionsController extends CourseworkController {
 			fileServer.serve(renderable)
 		}
 	}
-	
 }
 
 @Controller
-@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/submissions.zip"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/submissions.zip"))
 class DownloadMarkerSubmissionsController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
@@ -49,9 +48,10 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 	@ModelAttribute("command")
 	def getMarkersSubmissionCommand(
 			@PathVariable("module") module: Module, 
-			@PathVariable("assignment") assignment: Assignment, 
-			user: CurrentUser
-	) =	DownloadMarkersSubmissionsCommand(module, assignment, user)
+			@PathVariable("assignment") assignment: Assignment,
+			@PathVariable("marker") marker: User,
+			submitter: CurrentUser
+	) =	DownloadMarkersSubmissionsCommand(module, assignment, marker, submitter)
 
 	@RequestMapping
 	def downloadMarkersSubmissions(@ModelAttribute("command") command: ApplyWithCallback[RenderableZip])
@@ -62,7 +62,16 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 	}
 	
 }
-	
+
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/submissions.zip"))
+class DownloadMarkerSubmissionsControllerCurrentUser extends CourseworkController {
+	@RequestMapping
+	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
+		Redirect(Routes.admin.assignment.markerFeedback.submissions(assignment, currentUser.apparentUser))
+	}
+}
+
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download-zip/{filename}"))
 class DownloadAllSubmissionsController extends CourseworkController {
@@ -111,11 +120,10 @@ class DownloadSingleSubmissionController extends CourseworkController {
 			s"${user.getFullName} - ${cmd.submission.universityId}"
 		}
 
-		fileServer.serve(cmd.apply(), Some(s"${moduleCode} - ${userIdentifier} - ${filename}.zip"))
+		fileServer.serve(cmd.apply(), Some(s"$moduleCode - $userIdentifier - $filename.zip"))
 	}
 	
 }
-
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submissionId}/{filename}"))
@@ -146,14 +154,11 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 			s"${user.getFullName} - ${cmd.submission.universityId}"
 		}
 
-		cmd.callback = { (renderable) => fileServer.serve(renderable, Some(s"${moduleCode} - ${userIdentifier} - ${filename}"))(request, response) }
+		cmd.callback = { (renderable) => fileServer.serve(renderable, Some(s"$moduleCode - $userIdentifier - $filename"))(request, response) }
 		cmd.apply().orElse { throw new ItemNotFoundException() }
 	}
 
 }
-
-
-
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}"))

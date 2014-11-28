@@ -2,6 +2,7 @@
 
 <#macro marker_info info>
 	<#local assignment = info.assignment />
+	<#local marker = info.marker />
 	<#local numSubmissions = info.numSubmissions!0 />
 	<#assign time_remaining=durationFormatter(assignment.closeDate) />
 	
@@ -15,7 +16,7 @@
 		<#local class="" />
 		<#local title="" />
 		<#local href>
-			<@routes.listmarkersubmissions assignment=assignment />
+			<@routes.listmarkersubmissions assignment=assignment marker=marker/>
 		</#local>
 	</#if>
 	<#if assignment.closed>

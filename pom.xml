@@ -72,6 +72,7 @@
 		<module>modules/coursework</module>
 		<module>modules/profiles</module>
 		<module>modules/groups</module>
+		<module>modules/reports</module>
 		<module>modules/scheduling</module>
 
 		<!-- Combined EAR -->
@@ -249,7 +250,7 @@
           <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <version>2.1.4</version>
+                <version>2.1.11</version>
                 <executions>
                     <execution>
                         <phase>prepare-package</phase>
@@ -1075,6 +1076,13 @@
 			<dependency>
 				<groupId>uk.ac.warwick.tabula</groupId>
 				<artifactId>attendance</artifactId>
+				<version>${project.version}</version>
+				<type>jar</type>
+				<classifier>jar</classifier>
+			</dependency>
+			<dependency>
+				<groupId>uk.ac.warwick.tabula</groupId>
+				<artifactId>reports</artifactId>
 				<version>${project.version}</version>
 				<type>jar</type>
 				<classifier>jar</classifier>

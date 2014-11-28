@@ -1,26 +1,44 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
 
+import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.ModeratorRejectedNotification
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 
 	val HERON_PLUG = "Not enough time has been given to explaining the awesome nature of Herons"
+	val userLookupService = mock[UserLookupService]
 
 	def createNotification(agent: User, recipient: User, markerFeedback: MarkerFeedback) = {
 		val n =  Notification.init(new ModeratorRejectedNotification, agent, Seq(markerFeedback))
+		userLookupService.getUserByUserId(recipient.getUserId) returns recipient
+		userLookupService.getUserByWarwickUniId(recipient.getWarwickId) returns recipient
+		n.userLookup = userLookupService
 		n
 	}
 
 	trait ModeratorRejectedNotificationFixture extends MarkingNotificationFixture {
 		testAssignment.markingWorkflow = new ModeratedMarkingWorkflow
+		testAssignment.markingWorkflow.userLookup = userLookupService
+
+		val markerMap = new FirstMarkersMap {
+			assignment = testAssignment
+			marker_id = marker1.getUserId
+			students = Fixtures.userGroup(student1)
+		}
+
+		testAssignment.firstMarkers = JArrayList(markerMap)
+
 		val (f, mf1, mf2) = makeBothMarkerFeedback(student1)
 		mf2.rejectionComments = HERON_PLUG
 		mf2.mark = Some(41)
 		mf2.grade = Some("3")
+
+		userLookupService.getUserByWarwickUniId(student1.getWarwickId) returns student1
 	}
 
 	@Test
@@ -32,7 +50,7 @@ class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 	@Test
 	def urlIsProfilePageForStudents():Unit = new ModeratorRejectedNotificationFixture{
 		val n =  createNotification(marker2, marker1, mf1)
-		n.url should be("/coursework/admin/module/heron101/assignments/1/marker/list")
+		n.url should be("/coursework/admin/module/heron101/assignments/1/marker/marker1/list")
 	}
 
 
@@ -46,7 +64,7 @@ class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 	def shouldCallTextRendererWithCorrectModel():Unit = new ModeratorRejectedNotificationFixture {
 
 		val n =  createNotification(marker2, marker1, mf1)
-		n.url should be ("/coursework/admin/module/heron101/assignments/1/marker/list")
+		n.url should be ("/coursework/admin/module/heron101/assignments/1/marker/marker1/list")
 		n.content.model.get("assignment") should be(Some(testAssignment))
 		n.content.model.get("studentId") should be(Some("student1"))
 		n.content.model.get("moderatorName") should be(Some("Snorkeldink Wafflesmack"))

@@ -1,7 +1,7 @@
 <#import "*/modal_macros.ftl" as modal />
 
 <!-- nav to choose other years: -->
-<#if (studentCourseDetails.freshStudentCourseYearDetails)?? && (studentCourseDetails.freshStudentCourseYearDetails?size > 1)>
+<#if (studentCourseDetails.freshStudentCourseYearDetails)??>
 
 	<ul class="nav nav-tabs nav-justified">
 		<#list studentCourseDetails.freshStudentCourseYearDetails as scyd>
@@ -80,21 +80,17 @@
 				</#if>
 			</#list>
 
-			<#if features.courseworkInStudentProfile && can.do("Profiles.Read.Coursework", profile)>
+			<#if features.courseworkInStudentProfile>
 				<li id="coursework-pane" style="display:none;" data-title="Coursework">
 					<#include "_coursework.ftl" />
 				</li>
 			</#if>
 
-			<#if numSmallGroups gt 0>
-				<li id="sg-pane" style="display:none;" data-title="Groups">
-					<#include "_small_groups.ftl" />
-				</li>
-			</#if>
+			<li id="sg-pane" style="display:none;" data-title="Groups">
+				<#include "_small_groups.ftl" />
+			</li>
 
-			<#if studentCourseYearDetails??
-				&& studentCourseYearDetails.hasModuleRegistrations
-				&& can.do("Profiles.Read.ModuleRegistration.Core", studentCourseDetails) >
+			<#if studentCourseYearDetails??>
 				<li id="module-registration-pane" data-title="Modules">
 					<#include "_module_registrations.ftl" />
 				</li>

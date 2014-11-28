@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
 import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
+import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.{Notification, ModeratedMarkingWorkflow, Assignment, MarkerFeedback}
@@ -8,9 +9,13 @@ import uk.ac.warwick.tabula.data.model.{Notification, ModeratedMarkingWorkflow, 
 class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
 
 	val TEST_CONTENT = "test"
+	val userLookupService = mock[UserLookupService]
 
 	def createNotification(agent: User, recipient: User, _object: Seq[MarkerFeedback], assignment: Assignment, isFirstMarker: Boolean) = {
 		val n = Notification.init(new ReleaseToMarkerNotification, agent, _object, assignment)
+		userLookupService.getUserByUserId(recipient.getUserId) returns recipient
+		n.userLookup = userLookupService
+		n.recipientUserId = recipient.getUserId
 		n.whichMarker.value = if (isFirstMarker) 1 else 2
 		n
 	}
@@ -32,7 +37,7 @@ class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
 	@Test
 	def urlIsProfilePageForStudents():Unit = new ReleaseNotificationFixture{
 		val n =  createNotification(marker1, marker2, Seq(mf1, mf2), testAssignment, isFirstMarker = true)
-		n.url should be("/coursework/admin/module/heron101/assignments/1/marker/list")
+		n.url should be("/coursework/admin/module/heron101/assignments/1/marker/marker2/list")
 	}
 
 
@@ -50,7 +55,7 @@ class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
 
 		val model = n.content.model
 
-		n.url should be("/coursework/admin/module/heron101/assignments/1/marker/list")
+		n.url should be("/coursework/admin/module/heron101/assignments/1/marker/marker2/list")
 		model("assignment") should be(testAssignment)
 		model("numReleasedFeedbacks") should be(2)
 		model("workflowVerb") should be("mark")

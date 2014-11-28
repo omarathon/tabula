@@ -361,7 +361,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 						// do not remove; import needed for sorting
 						// should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 						import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-						Option(AttendanceMonitoringStudentData(student.universityId, student.userId, beginDates.min))
+						Option(AttendanceMonitoringStudentData(student.firstName, student.lastName, student.universityId, student.userId, beginDates.min))
 					} else {
 						None
 					}

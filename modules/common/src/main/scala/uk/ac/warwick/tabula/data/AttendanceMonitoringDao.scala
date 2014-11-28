@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.criterion.Projections._
 import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.{Order, Projections, Restrictions}
 import org.joda.time.LocalDate
@@ -29,6 +30,15 @@ case class SchemeMembershipItem(
 ) {
 	def itemTypeString = itemType.value
 }
+
+/**
+ * Checkpoint without associated StudentMember to save extra query
+ */
+case class AttendanceMonitoringCheckpointData(
+	point: AttendanceMonitoringPoint,
+	state: AttendanceState,
+	universityId: String
+)
 
 trait AttendanceMonitoringDaoComponent {
 	val attendanceMonitoringDao: AttendanceMonitoringDao
@@ -78,6 +88,7 @@ trait AttendanceMonitoringDao {
 		types: Seq[MonitoringPointType]
 	): Seq[MonitoringPoint]
 	def getAllCheckpoints(point: AttendanceMonitoringPoint): Seq[AttendanceMonitoringCheckpoint]
+	def getAllCheckpointData(points: Seq[AttendanceMonitoringPoint]): Seq[AttendanceMonitoringCheckpointData]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], students: Seq[StudentMember]): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]]
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
@@ -304,6 +315,22 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 		session.newCriteria[AttendanceMonitoringCheckpoint]
 			.add(is("point", point))
 			.seq
+	}
+
+	def getAllCheckpointData(points: Seq[AttendanceMonitoringPoint]): Seq[AttendanceMonitoringCheckpointData] = {
+		val result = session.newCriteria[AttendanceMonitoringCheckpoint]
+			.add(safeIn("point", points))
+			.project[Array[java.lang.Object]](Projections.projectionList()
+				.add(property("point"))
+				.add(property("_state"))
+				.add(property("student.universityId"))
+			)
+			.seq
+		result.map(objArray => AttendanceMonitoringCheckpointData(
+			objArray(0).asInstanceOf[AttendanceMonitoringPoint],
+			objArray(1).asInstanceOf[AttendanceState],
+			objArray(2).asInstanceOf[String]
+		))
 	}
 
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint] = {

@@ -68,6 +68,14 @@
 				<span class="hint">Manage department, module and route settings and permissions</span>
 			</li>
 		</#if>
+
+		<#if features.reports && user.staff>
+			<li>
+				<h2><a href="<@url page="/" context="/reports" />">Reports</a></h2>
+				<span class="hint">View reports for various aspects of Tabula</span>
+			</li>
+		</#if>
+
 	</ul>
 
 		<#if features.activityStreams>

@@ -17,7 +17,7 @@
 		var weeks = ${weekRangesDumper()}
 	</script>
 
-	<@profile_macros.timetable_placeholder profile "month" true />
+	<@profile_macros.timetable_placeholder profile "month" true renderDate />
 
 	<#if profile.timetableHash?has_content>
 		<@profile_macros.timetable_ical_modal profile />

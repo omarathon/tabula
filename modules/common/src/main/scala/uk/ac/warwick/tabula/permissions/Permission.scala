@@ -158,6 +158,7 @@ object Permissions {
 		case object ManageProfiles extends Permission("Manage student profiles")
 		case object Create extends Permission("Add a sub-department")
 		case object Update extends Permission("Edit a department")
+		case object Reports extends Permission("Generate reports")
 	}
 
 	object Module {
@@ -182,6 +183,8 @@ object Permissions {
 	object Assignment {
 		case object ImportFromExternalSystem extends Permission("Import assignments from SITS")
 		case object Archive extends Permission("Archive an assignment")
+
+		case object MarkOnBehalf extends Permission("Mark submissions on behalf of a marker")
 
 		case object Create extends Permission("Add an assignment")
 		case object Read extends Permission("View an assignment's settings")

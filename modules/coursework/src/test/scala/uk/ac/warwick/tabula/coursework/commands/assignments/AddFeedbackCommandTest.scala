@@ -30,7 +30,7 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 	userLookup.users += ("student" -> user)
 	
 	@Test def duplicateFileNames = withUser("cuscav") {
-		val cmd = new AddFeedbackCommand(module, assignment, currentUser)
+		val cmd = new AddFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
 		cmd.userLookup = userLookup
 		cmd.fileDao = dao
 		cmd.uniNumber = "1010101"

@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.validation.{BindingResult, Errors}
@@ -12,8 +13,8 @@ import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.R
 import uk.ac.warwick.tabula.system.BindListener
 
 object MarkingUncompletedCommand {
-	def apply(module: Module, assignment: Assignment, user: User) =
-		new MarkingUncompletedCommand(module, assignment, user)
+	def apply(module: Module, assignment: Assignment, user: User, submitter: CurrentUser) =
+		new MarkingUncompletedCommand(module, assignment, user, submitter)
 			with ComposableCommand[Unit]
 			with MarkingUncompletedCommandPermissions
 			with MarkingUncompletedDescription
@@ -21,7 +22,7 @@ object MarkingUncompletedCommand {
 			with AutowiringFeedbackServiceComponent
 }
 
-abstract class MarkingUncompletedCommand(val module: Module, val assignment: Assignment, val user: User)
+abstract class MarkingUncompletedCommand(val module: Module, val assignment: Assignment, val user: User, val submitter: CurrentUser)
 	extends CommandInternal[Unit] with Appliable[Unit] with SelfValidating with UserAware with MarkingUncompletedState with ReleasedState with BindListener {
 
 	self: StateServiceComponent with FeedbackServiceComponent =>
@@ -39,7 +40,8 @@ abstract class MarkingUncompletedCommand(val module: Module, val assignment: Ass
 		// do not update previously released feedback
 		val feedbackForRelease = completedMarkerFeedback.asScala.filterNot(_.feedback.released).flatMap(getMarkerFeedbackForRelease)
 
-		feedbackForRelease.foreach(stateService.updateStateUnsafe(_, MarkingState.ReleasedForMarking))
+		// TAB-2957
+		// feedbackForRelease.foreach(stateService.updateStateUnsafe(_, MarkingState.ReleasedForMarking))
 	}
 
 	private def getMarkerFeedbackForRelease(markerFeedback: MarkerFeedback): Seq[MarkerFeedback] = {
@@ -57,6 +59,9 @@ trait MarkingUncompletedCommandPermissions extends RequiresPermissionsChecking {
 	self: MarkingUncompletedState =>
 	def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.Feedback.Create, assignment)
+		if(submitter.apparentUser != marker) {
+			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
+		}
 	}
 }
 
@@ -80,6 +85,9 @@ trait MarkingUncompletedState {
 
 	val assignment: Assignment
 	val module: Module
+	val user: User
+	val marker = user
+	val submitter: CurrentUser
 
 	var students: JList[String] = JArrayList()
 	var completedMarkerFeedback: JList[MarkerFeedback] = JArrayList()

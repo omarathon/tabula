@@ -82,7 +82,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		}
 	}
 
-	@Test def studentsChooseMarker() = withUser("cuscav") { new MarkingWorkflowFixture {
+	@Test def studentsChooseMarker() = withUser("cuscav","0000001") { new MarkingWorkflowFixture {
 		val workflow = new StudentsChooseMarkerWorkflow
 
 		assignment.markingWorkflow = workflow
@@ -124,12 +124,12 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		assignment.getStudentsFirstMarker(sub4) should be (Some("cuscav"))
 	}}
 
-	@Test def seenSecondMarkingLegacy() = withUser("cuscav") { new MarkingWorkflowFixture {
+	@Test def seenSecondMarkingLegacy() = withUser("cuscav", "1234567") { new MarkingWorkflowFixture {
 		val workflow = new SeenSecondMarkingLegacyWorkflow()
 		assignment.markingWorkflow = workflow
 
 		workflow.markingMethod should be(SeenSecondMarkingLegacy)
-		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser, null) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online")
+		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser, null) should be("/coursework/admin/module/heron101/assignments/1/marker/1234567/feedback/online")
 
 		workflow.firstMarkerRoleName should be("First marker")
 		workflow.hasSecondMarker should be(true)
@@ -138,12 +138,12 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 
 	}}
 
-	@Test def seenSecondMarking() = withUser("cuscao") { new MarkingWorkflowFixture {
+	@Test def seenSecondMarking() = withUser("cuscao", "1234567") { new MarkingWorkflowFixture {
 		val workflow = new SeenSecondMarkingWorkflow()
 		assignment.markingWorkflow = workflow
 
 		workflow.markingMethod should be(SeenSecondMarking)
-		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser, null) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online")
+		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser, null) should be("/coursework/admin/module/heron101/assignments/1/marker/1234567/feedback/online")
 
 		workflow.firstMarkerRoleName should be("First marker")
 		workflow.hasSecondMarker should be(true)
@@ -152,7 +152,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 
 	}}
 
-	@Test def moderatedMarking() = withUser("curef") { new MarkingWorkflowFixture {
+	@Test def moderatedMarking() = withUser("curef", "1234567") { new MarkingWorkflowFixture {
 		val s4 = Fixtures.user(universityId="0000004", userId="student4")
 
 		val workflow = new ModeratedMarkingWorkflow
@@ -167,7 +167,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		f4.secondMarkerFeedback = Fixtures.markerFeedback(f4)
 
 		workflow.markingMethod should be(ModeratedMarking)
-		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser, sub4.userId) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online/moderation")
+		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser, sub4.userId) should be("/coursework/admin/module/heron101/assignments/1/marker/1234567/feedback/online/moderation")
 
 		workflow.firstMarkerRoleName should be("Marker")
 		workflow.hasSecondMarker should be(true)

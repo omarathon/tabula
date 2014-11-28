@@ -110,6 +110,7 @@ abstract class Features {
 	@Value("${features.masqueradersCanWrite:false}") var masqueradersCanWrite = defaults.masqueradersCanWrite
 	@Value("${features.masqueradeElevatedPermissions:false}") var masqueradeElevatedPermissions = defaults.masqueradeElevatedPermissions
 	@Value("${features.profiles.autoGroupDeregistration:false}") var autoGroupDeregistration = defaults.autoGroupDeregistration
+	@Value("${features.reports:false}") var reports = defaults.reports
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -211,6 +212,8 @@ class FeaturesMessage {
 	@BeanProperty var schedulingCleanupUnreferencedFiles = true
 	@BeanProperty var schedulingSanityCheckFilesystem = true
 	@BeanProperty var schedulingExportAttendanceToSits = true
+
+	@BeanProperty var reports = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

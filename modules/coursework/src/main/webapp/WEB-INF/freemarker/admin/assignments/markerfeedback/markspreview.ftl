@@ -10,7 +10,7 @@
 	</@spring.bind>
 
 <div class="fix-area">
-	<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/marks')}" commandName=commandName>
+	<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/marks')}" commandName=commandName>
 
 		<#assign isfile=RequestParameters.isfile/>
 
@@ -112,7 +112,7 @@
 		<div class="submit-buttons form-actions fix-footer">
 			<input type="hidden" name="confirm" value="true">
 			<input class="btn btn-primary" type="submit" value="Confirm">
-			<a class="btn" href="<@routes.listmarkersubmissions assignment />">Cancel</a>
+			<a class="btn" href="<@routes.listmarkersubmissions assignment marker/>">Cancel</a>
 		</div>
 	</@f.form>
 

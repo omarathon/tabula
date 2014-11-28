@@ -68,7 +68,9 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Profiles.Read.TelephoneNumber,
 		Profiles.Read.MobileNumber,
 
-		SmallGroups.Read
+		SmallGroups.Read,
+
+		Department.Reports
 	)
 	def canDelegateThisRolesPermissions:JBoolean = true
 

@@ -21,7 +21,7 @@
 	</#if>
 	<#assign submit_url>
 		<#if isMarking!false>
-			<@routes.markerOnlinefeedbackform assignment markingId(command.student) />
+			<@routes.markerOnlinefeedbackform assignment markingId(command.student) marker/>
 		<#else>
 			<@routes.onlinefeedbackform assignment markingId(command.student) />
 		</#if>

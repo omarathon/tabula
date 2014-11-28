@@ -1,18 +1,20 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.fileserver.{RenderableFile, RenderableZip}
+import uk.ac.warwick.tabula.services.fileserver.RenderableZip
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object DownloadMarkersFeedbackForPositionCommand {
 
-	def apply(module: Module, assignment: Assignment, currentUser: CurrentUser, position: FeedbackPosition) =
-		new DownloadMarkersFeedbackForPositionCommand(module, assignment, currentUser, position)
+	def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser, position: FeedbackPosition) =
+		new DownloadMarkersFeedbackForPositionCommand(module, assignment, marker, submitter, position)
 		with ComposableCommand[RenderableZip]
 		with ApplyWithCallback[RenderableZip]
 		with DownloadMarkersFeedbackForPositionDescription
@@ -22,13 +24,17 @@ object DownloadMarkersFeedbackForPositionCommand {
 		with AutowiringZipServiceComponent
 }
 
-class DownloadMarkersFeedbackForPositionCommand(val module: Module, val assignment: Assignment, val currentUser:CurrentUser, val position: FeedbackPosition)
+class DownloadMarkersFeedbackForPositionCommand(val module: Module,
+																								val assignment: Assignment,
+																								val marker:User,
+																								val submitter: CurrentUser,
+																								val position: FeedbackPosition)
 	extends CommandInternal[RenderableZip] with HasCallback[RenderableZip] {
 
 	self: ZipServiceComponent =>
 
 	override def applyInternal() = {
-		val markersSubs = assignment.getMarkersSubmissions(currentUser.apparentUser)
+		val markersSubs = assignment.getMarkersSubmissions(marker)
 		val feedbacks = assignment.feedbacks.filter(f => markersSubs.exists(_.universityId == f.universityId))
 		val releasedMarkerFeedbacks = feedbacks.flatMap(f => position match {
 			case FirstFeedback => Option(f.firstMarkerFeedback)
@@ -53,6 +59,9 @@ trait DownloadMarkersFeedbackForPositionPermissions extends RequiresPermissionsC
 	override def permissionsCheck(p: PermissionsChecking) {
 		mustBeLinked(assignment, module)
 		p.PermissionCheck(Permissions.Feedback.Create, assignment)
+		if(submitter.apparentUser != marker) {
+			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
+		}
 	}
 }
 
@@ -60,7 +69,8 @@ trait DownloadMarkersFeedbackForPositionCommandState {
 
 	def module: Module
 	def assignment: Assignment
-	def currentUser: CurrentUser
+	def marker: User
+	def submitter: CurrentUser
 	def position: FeedbackPosition
 
 }

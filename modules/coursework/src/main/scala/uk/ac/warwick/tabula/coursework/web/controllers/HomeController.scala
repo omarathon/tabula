@@ -120,6 +120,7 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 						"assignment" -> assignment,
 						"isFeedbacksToManage" -> !markerFeedbacks.isEmpty,
 						"numSubmissions" -> submissions.size,
+						"marker" -> user.apparentUser,
 						"isAdmin" -> securityService.can(user, Permissions.Module.ManageAssignments, assignment)
 					)
 				}
