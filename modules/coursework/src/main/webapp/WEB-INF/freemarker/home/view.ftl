@@ -25,12 +25,12 @@
 	</#if>
 </#if>
 
-<#assign isSelf = true />
-<#include "_student.ftl" />
-<#include "_markers.ftl" />
-<#include "_admin.ftl" />
-
 <#if user.loggedIn>
+
+	<#assign isSelf = true />
+	<#include "_student.ftl" />
+	<#include "_markers.ftl" />
+	<#include "_admin.ftl" />
 
 	<#assign is_student=user.student /> <#-- Non-students may also have assignments, but we still show them the intro text -->
 	<#assign is_alumni=user.alumni />
