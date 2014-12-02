@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackPublishe
 import uk.ac.warwick.tabula.data.model.{Notification, Feedback, Assignment, Module}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService, FeedbackService}
+import uk.ac.warwick.tabula.services.{UserLookupService, FeedbackService}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import language.implicitConversions
@@ -34,7 +34,6 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 
 	var feedbackService = Wire.auto[FeedbackService]
 	var userLookup = Wire.auto[UserLookupService]
-	var profileService = Wire[ProfileService]
 
 	var confirm: Boolean = false
 

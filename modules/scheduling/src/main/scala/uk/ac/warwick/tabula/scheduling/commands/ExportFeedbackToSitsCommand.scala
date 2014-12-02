@@ -35,11 +35,8 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 			val feedbackId = feedback.id
 			val department = feedback.assignment.module.adminDepartment
 
-			if (!departmentOpen(department, feedback.assignment.academicYear)) {
-
-				val departmentCode = department.code
-				logger.warn(f"Not uploading feedback $feedbackId as department $departmentCode is closed")
-			}
+			if (!department.canUploadMarksToSitsForYear(feedback.assignment.academicYear, feedback.assignment.module))
+				logger.warn(f"Not uploading feedback $feedbackId as department ${department.code} is closed")
 			else {
 
 				// first check to see if there is one and only one matching blank row
@@ -60,13 +57,6 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 		feedbacksToLoad.filter(_.status == Successful)
 	}
 
-	def departmentOpen(dept: Department, year: AcademicYear): Boolean = {
-		val thisYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
-		val lastYear = thisYear.previous
-
-		((dept.canUploadMarksToSitsForCurrentYear && (year == thisYear))
-			|| (dept.canUploadMarksToSitsForLastYear && (year == lastYear)))
-	}
 
 	def uploadFeedbackToSits(feedbackToLoad: FeedbackForSits) {
 		val feedback = feedbackToLoad.feedback

@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformatio
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.{DegreeType, Module}
 
 class ModuleFixtureCommand extends CommandInternal[Module] with Logging{
 
@@ -19,7 +19,7 @@ class ModuleFixtureCommand extends CommandInternal[Module] with Logging{
 	var code:String = _
 	var departmentCode:String = _
 
-	def moduleInfo = ModuleInfo(name, code,"")
+	def moduleInfo = ModuleInfo(name, code,"", Some(DegreeType.Undergraduate))
 	def applyInternal() = 
 		transactional() {
 			val department  = moduleAndDepartmentService.getDepartmentByCode(departmentCode).get

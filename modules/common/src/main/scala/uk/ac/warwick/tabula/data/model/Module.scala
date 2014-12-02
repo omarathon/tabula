@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 
-import org.hibernate.annotations.{BatchSize, ForeignKey}
+import org.hibernate.annotations.{Type, BatchSize, ForeignKey}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -31,6 +31,9 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 
 	var code: String = _
 	var name: String = _
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.DegreeTypeUserType")
+	var degreeType: Option[DegreeType] = _ // ug or pg
 
 	// The managers are markers/moderators who upload feedback.
 	// They can also publish feedback.

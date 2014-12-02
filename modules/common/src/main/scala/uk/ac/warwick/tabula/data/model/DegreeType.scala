@@ -17,7 +17,13 @@ object DegreeType {
 	  	case null => null
 	  	case _ => throw new IllegalArgumentException()
 	}
-	
+
+	def getFromSchemeCode(schemeCode: String): Option[DegreeType] = schemeCode match {
+		case "UW UG" => Some(Undergraduate)
+		case "UW PG" => Some(Postgraduate)
+		case _ => None
+	}
+
 	val SortOrdering: Ordering[DegreeType] = Ordering.by[DegreeType, Int] ( _.sortOrder )
 	
 	// Companion object is one of the places searched for an implicit Ordering, so

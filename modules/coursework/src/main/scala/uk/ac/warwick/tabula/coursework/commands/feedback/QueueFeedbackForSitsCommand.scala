@@ -39,7 +39,7 @@ class QueueFeedbackForSitsCommand(val assignment: Assignment, val submitter: Cur
 						newFeedbackForSits.firstCreatedOn = DateTime.now
 						newFeedbackForSits
 				}
-				feedbackForSits.init(feedback, submitter.universityId) // initialise or re-initialise
+				feedbackForSits.init(feedback, submitter.realUser) // initialise or re-initialise
 				feedbackForSitsDao.saveOrUpdate(feedbackForSits)
 				feedbackForSits				
 			}

@@ -68,6 +68,7 @@ object ImportAcademicInformationCommand {
 		module.name = m.name
 		// TODO TAB-87 check child department rules and maybe sort it into a child department instead
 		module.adminDepartment = dept
+		module.degreeType = m.degreeType
 		module
 	}
 
