@@ -24,4 +24,10 @@ class ViewModuleRegistrationsCommandTest extends TestBase with Mockito {
 		there was one(checking).PermissionCheck(Profiles.Read.ModuleRegistration.Core, testStudent)
 	}
 
+	@Test
+	def mixesCorrectPermissionsIntoCommand() {
+		val composedCommand = ViewModuleRegistrationsCommand(scyd)
+		composedCommand should be(anInstanceOf[ViewModuleRegistrationsCommandPermissions])
+	}
+
 }
