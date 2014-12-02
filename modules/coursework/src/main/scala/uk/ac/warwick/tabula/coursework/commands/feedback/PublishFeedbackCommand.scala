@@ -25,7 +25,7 @@ object PublishFeedbackCommand {
 	)
 }
 
-class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser)
+class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser, val queueFeedbackForSitsCommand: QueueFeedbackForSitsCommand)
 	extends Command[PublishFeedbackCommand.PublishFeedbackResults] with Notifies[PublishFeedbackCommand.PublishFeedbackResults, Feedback] with SelfValidating {
 	import PublishFeedbackCommand._
 
@@ -56,8 +56,7 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 	def applyInternal() = {
 		transactional() {
 			if (assignment.uploadMarksToSits) {
-				val cmd = new QueueFeedbackForSitsCommand(assignment, submitter)
-				cmd.apply()
+				queueFeedbackForSitsCommand.apply()
 			}
 
 			val users = getUsersForFeedback
