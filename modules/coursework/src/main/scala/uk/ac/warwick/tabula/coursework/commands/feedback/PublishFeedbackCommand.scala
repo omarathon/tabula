@@ -25,7 +25,7 @@ object PublishFeedbackCommand {
 	)
 }
 
-class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser, val queueFeedbackForSitsCommand: QueueFeedbackForSitsCommand)
+class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser, val optionalQueueFeedbackForSitsCommand: Option[QueueFeedbackForSitsCommand])
 	extends Command[PublishFeedbackCommand.PublishFeedbackResults] with Notifies[PublishFeedbackCommand.PublishFeedbackResults, Feedback] with SelfValidating {
 	import PublishFeedbackCommand._
 
@@ -36,6 +36,11 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 	var userLookup = Wire.auto[UserLookupService]
 
 	var confirm: Boolean = false
+
+	val queueFeedbackForSitsCommand = optionalQueueFeedbackForSitsCommand match {
+		case Some(cmd: QueueFeedbackForSitsCommand) => cmd
+		case None => new QueueFeedbackForSitsCommand(assignment, submitter)
+	}
 
 	// validation done even when showing initial form.
 	def prevalidate(errors: Errors) {

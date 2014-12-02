@@ -16,8 +16,7 @@ import uk.ac.warwick.tabula.CurrentUser
 class PublishFeedbackController extends CourseworkController {
 	
 	@ModelAttribute def cmd(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
-		val queueFeedbackForSitsCommand = new QueueFeedbackForSitsCommand(assignment, user)
-		new PublishFeedbackCommand(module, assignment, user, queueFeedbackForSitsCommand)
+		new PublishFeedbackCommand(module, assignment, user, None)
 	}
 
 	@RequestMapping(method = Array(HEAD, GET), params = Array("!confirm"))
