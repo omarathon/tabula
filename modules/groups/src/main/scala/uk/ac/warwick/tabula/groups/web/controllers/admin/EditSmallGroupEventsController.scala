@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.groups.commands.admin.EditSmallGroupEventsCommand
+import uk.ac.warwick.tabula.groups.commands.admin.{PopulateEditSmallGroupEventsSubCommands, EditSmallGroupEventsCommand}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
 import scala.collection.JavaConverters._
@@ -16,7 +16,7 @@ abstract class AbstractEditSmallGroupEventsController extends GroupsController {
 
 	validatesSelf[SelfValidating]
 
-	type EditSmallGroupEventsCommand = Appliable[SmallGroupSet]
+	type EditSmallGroupEventsCommand = Appliable[SmallGroupSet] with PopulateEditSmallGroupEventsSubCommands
 
 	@ModelAttribute("ManageSmallGroupsMappingParameters") def params = ManageSmallGroupsMappingParameters
 
@@ -50,7 +50,10 @@ abstract class AbstractEditSmallGroupEventsController extends GroupsController {
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
 	) = {
-		if (!errors.hasErrors) cmd.apply()
+		if (!errors.hasErrors) {
+			cmd.apply()
+			cmd.populate()
+		}
 
 		render(set, Map("saved" -> true))
 	}
