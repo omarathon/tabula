@@ -30,4 +30,18 @@ class FeedbackDueNotificationTest extends TestBase with Mockito {
 		notification.title should be ("CS118: Feedback for 1234567 for \"5,000 word essay\" is due to be published")
 	}
 
+	@Test def recipientsExtensionNoSubmissions() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
+		val assignment = Fixtures.assignment("5,000 word essay")
+		assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
+		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
+
+		val extension = Fixtures.extension()
+		extension.assignment = assignment
+		extension.universityId = "1234567"
+		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
+
+		val notification = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension)
+		notification.recipients should be (Seq())
+	}
+
 }
