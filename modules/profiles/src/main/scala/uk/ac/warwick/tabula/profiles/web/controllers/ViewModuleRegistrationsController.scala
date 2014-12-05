@@ -17,9 +17,7 @@ class ViewModuleRegistrationsController
 		ViewModuleRegistrationsCommand(mandatory(studentCourseDetails), academicYear)
 
 	@RequestMapping
-	def home(
-		@ModelAttribute("command") cmd: Appliable[Seq[ModuleRegistration]]
-	) = {
+	def home(@ModelAttribute("command") cmd: Appliable[Seq[ModuleRegistration]]) = {
 		Mav("profile/module_list",
 		  "moduleRegs" -> cmd.apply()
 		).noLayoutIf(ajax)
