@@ -100,3 +100,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro listMeetings relationshipType scjCode academicYear><@_u page="/view/meetings/${relationshipType.urlPart}/${scjCode}/${academicYear.startYear?c}"/></#macro>
 <#macro listMeetingsTargetted relationshipType scjCode academicYear meetingId><@_u page="/view/meetings/${relationshipType.urlPart}/${scjCode}/${academicYear.startYear?c}?meeting=${meetingId}"/></#macro>
+
+<#macro listModuleRegs scjCode academicYear><@_u page="/view/modules/${scjCode}/${academicYear.startYear?c}"/></#macro>
