@@ -4,23 +4,27 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking, PermissionsCheckingMethods}
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
+import uk.ac.warwick.tabula.AcademicYear
 
 object ViewModuleRegistrationsCommand {
-	def apply(studentCourseYearDetails: StudentCourseYearDetails) =
-		new ViewModuleRegistrationsCommandInternal(studentCourseYearDetails) with
+	def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear) =
+		new ViewModuleRegistrationsCommandInternal(studentCourseDetails, academicYear) with
 			ComposableCommand[Seq[ModuleRegistration]] with
 			ViewModuleRegistrationsCommandPermissions with
 			ReadOnly with Unaudited
 }
 
 trait ViewModuleRegistrationsCommandState {
-	val studentCourseYearDetails: StudentCourseYearDetails
+	val studentCourseDetails: StudentCourseDetails
+	val academicYear: AcademicYear
+	var studentCourseYearDetails: StudentCourseYearDetails = _
 }
 
-class ViewModuleRegistrationsCommandInternal(val studentCourseYearDetails: StudentCourseYearDetails)
+class ViewModuleRegistrationsCommandInternal(val studentCourseDetails: StudentCourseDetails, val academicYear: AcademicYear)
 	extends CommandInternal[Seq[ModuleRegistration]] with ViewModuleRegistrationsCommandState {
 
 	def applyInternal() = {
+			studentCourseYearDetails = studentCourseDetails.freshStudentCourseYearDetails.filter(_.academicYear == academicYear).seq.head
 			studentCourseYearDetails.moduleRegistrations
 	}
 }
@@ -29,6 +33,6 @@ trait ViewModuleRegistrationsCommandPermissions extends RequiresPermissionsCheck
 	self: ViewModuleRegistrationsCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Profiles.Read.ModuleRegistration.Core, studentCourseYearDetails.studentCourseDetails.student)
+		p.PermissionCheck(Profiles.Read.ModuleRegistration.Core, studentCourseDetails)
 	}
 }

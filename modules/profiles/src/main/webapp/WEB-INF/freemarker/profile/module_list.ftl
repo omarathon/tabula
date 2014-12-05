@@ -1,28 +1,28 @@
 <#if user.staff>
 <div class="pull-right">
-	<@routes.mrm_link studentCourseDetails studentCourseYearDetails />
+	<@routes.mrm_link studentCourseDetails command.studentCourseYearDetails />
 	View in MRM<img class="targetBlank" alt="" title="Link opens in a new window" src="/static/images/shim.gif"/> </a>
 </div>
 </#if>
 
 <h4>Modules</h4>
 <p><span class="muted">Module Registration Status:</span>
-<#if studentCourseYearDetails.moduleRegistrationStatus??>
-${(studentCourseYearDetails.moduleRegistrationStatus.description)!}
+<#if command.studentCourseYearDetails.moduleRegistrationStatus??>
+${(command.studentCourseYearDetails.moduleRegistrationStatus.description)!}
 <#else>
 	Unknown (not in SITS)
 </#if>
 </p>
-<#if studentCourseYearDetails.hasModuleRegistrations>
+<#if command.studentCourseYearDetails.hasModuleRegistrations>
 <table class="module-registration-table">
 	<tbody>
 	<tr>
 		<th>Code</th>
 		<th>Title</th>
 		<th>CATS</th>
-		<#if studentCourseYearDetails.latest>
+		<#if command.studentCourseYearDetails.latest>
 			<th>Assess</th>
-			<#if studentCourseYearDetails.hasModuleRegistrationWithNonStandardOccurrence>
+			<#if command.studentCourseYearDetails.hasModuleRegistrationWithNonStandardOccurrence>
 				<th>Occur</th>
 			</#if>
 		<#elseif features.showModuleResults>
@@ -37,9 +37,9 @@ ${(studentCourseYearDetails.moduleRegistrationStatus.description)!}
 			<td>${(moduleRegistration.module.name)!}</td>
 			<td>${(moduleRegistration.cats)!}</td>
 
-			<#if studentCourseYearDetails.latest>
+			<#if command.studentCourseYearDetails.latest>
 				<td>${(moduleRegistration.assessmentGroup)!}</td>
-				<#if studentCourseYearDetails.hasModuleRegistrationWithNonStandardOccurrence>
+				<#if command.studentCourseYearDetails.hasModuleRegistrationWithNonStandardOccurrence>
 					<td>${(moduleRegistration.occurrence)!}</td>
 				</#if>
 			<#elseif features.showModuleResults>
