@@ -118,10 +118,7 @@ object ModuleRegistrationImporter {
 					
 					join $sitsSchema.cam_sms sms 
 						on sms.spr_code = spr.spr_code
-					
-					join $sitsSchema.srs_vco vco 
-						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
-					
+
 					join $sitsSchema.cam_ssn ssn 
 						on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON'
 				where stu.stu_code = :universityId"""
@@ -140,9 +137,6 @@ object ModuleRegistrationImporter {
 					join $sitsSchema.cam_smo smo 
 						on smo.spr_code = spr.spr_code
 						and (smo_rtsc is null or (smo_rtsc not like 'X%' and smo_rtsc != 'Z'))
-					
-					join $sitsSchema.srs_vco vco 
-						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
 
 					left join $sitsSchema.ins_smr smr
 						on smo.spr_code = smr.spr_code
@@ -169,9 +163,6 @@ object ModuleRegistrationImporter {
 					join $sitsSchema.cam_smo smo 
 						on smo.spr_code = spr.spr_code
 						and (smo_rtsc is null or (smo_rtsc not like 'X%' and smo_rtsc != 'Z'))
-
-					join $sitsSchema.srs_vco vco 
-						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
 
 					left join $sitsSchema.ins_smr smr
 						on smo.spr_code = smr.spr_code
