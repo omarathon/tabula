@@ -41,6 +41,8 @@ object Assignment {
 			val Table = "table"
 			val Summary = "summary"
 		}
+
+		val IncludeInFeedbackReportWithoutSubmissions = "includeInFeedbackReportWithoutSubmissions"
 	}
 }
 
@@ -62,6 +64,7 @@ class Assignment
 		with CanBeDeleted
 		with ToString
 		with PermissionsTarget
+		with HasSettings
 		with PostLoadBehaviour
 		with Serializable
 		with ToEntityReference {
@@ -152,6 +155,9 @@ class Assignment
 	@BatchSize(size = 200)
 	var feedbackTemplate: FeedbackTemplate = _
 
+	def includeInFeedbackReportWithoutSubmissions = getBooleanSetting(Settings.IncludeInFeedbackReportWithoutSubmissions, default = false)
+	def includeInFeedbackReportWithoutSubmissions_= (include: Boolean) = settings += (Settings.IncludeInFeedbackReportWithoutSubmissions -> include)
+
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
 
 	@transient
@@ -216,6 +222,7 @@ class Assignment
 	// TAB-1446 If hibernate sets members to null, make a new empty usergroup
 	override def postLoad() {
 		ensureMembersGroup
+		ensureSettings
 	}
 
 	def ensureMembersGroup = {
@@ -749,6 +756,7 @@ trait BooleanAssignmentProperties {
 	var allowExtensionRequests: JBoolean = false
 	var summative: JBoolean = true
 	var dissertation: JBoolean = false
+	var includeInFeedbackReportWithoutSubmissions: JBoolean = false
 
 	def copyBooleansTo(assignment: Assignment) {
 		assignment.openEnded = openEnded
@@ -762,6 +770,7 @@ trait BooleanAssignmentProperties {
 		assignment.allowExtensionRequests = allowExtensionRequests
 		assignment.summative = summative
 		assignment.dissertation = dissertation
+		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
 	}
 }
 

@@ -14,15 +14,15 @@ import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServic
 
 import scala.collection.JavaConverters._
 
-object AllSmallGroupsReportProcessor {
+object SmallGroupsReportProcessor {
 	def apply(department: Department, academicYear: AcademicYear) =
-		new AllSmallGroupsReportProcessorInternal(department, academicYear)
+		new SmallGroupsReportProcessorInternal(department, academicYear)
 			with AutowiringTermServiceComponent
-			with ComposableCommand[AllSmallGroupsReportProcessorResult]
+			with ComposableCommand[SmallGroupsReportProcessorResult]
 			with ReportPermissions
-			with AllSmallGroupsReportProcessorState
+			with SmallGroupsReportProcessorState
 			with ReadOnly with Unaudited {
-			override lazy val eventName: String = "AllSmallGroupsReportProcessor"
+			override lazy val eventName: String = "SmallGroupsReportProcessor"
 		}
 }
 
@@ -40,16 +40,16 @@ case class EventData(
 	isLate: Boolean
 )
 
-case class AllSmallGroupsReportProcessorResult(
+case class SmallGroupsReportProcessorResult(
 	attendance: Map[AttendanceMonitoringStudentData, Map[EventData, AttendanceState]],
 	students: Seq[AttendanceMonitoringStudentData],
 	events: Seq[EventData]
 )
 
-class AllSmallGroupsReportProcessorInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[AllSmallGroupsReportProcessorResult] with TaskBenchmarking {
+class SmallGroupsReportProcessorInternal(val department: Department, val academicYear: AcademicYear)
+	extends CommandInternal[SmallGroupsReportProcessorResult] with TaskBenchmarking {
 
-	self: AllSmallGroupsReportProcessorState with TermServiceComponent =>
+	self: SmallGroupsReportProcessorState with TermServiceComponent =>
 
 	override def applyInternal() = {
 		val processedStudents = students.asScala.map{case(universityId, properties) =>
@@ -85,12 +85,12 @@ class AllSmallGroupsReportProcessorInternal(val department: Department, val acad
 					processedEvents.find(_.id == id).map(event => event -> AttendanceState.fromCode(stateString))
 				}.toMap)
 		}.toMap
-		AllSmallGroupsReportProcessorResult(processedAttendance, processedStudents, processedEvents)
+		SmallGroupsReportProcessorResult(processedAttendance, processedStudents, processedEvents)
 	}
 
 }
 
-trait AllSmallGroupsReportProcessorState extends ReportCommandState {
+trait SmallGroupsReportProcessorState extends ReportCommandState {
 	var attendance: JMap[String, JMap[String, String]] =
 		LazyMaps.create{_: String => JMap[String, String]() }.asJava
 

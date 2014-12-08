@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.services.feedbackreport
 
+import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
 import collection.immutable.TreeMap
 
@@ -7,7 +9,7 @@ import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import org.joda.time.DateTime
 
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers._
-import uk.ac.warwick.tabula.data.model.{Assignment, Department}
+import uk.ac.warwick.tabula.data.model.{FeedbackReportGenerator, Assignment, Department}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{SubmissionService, FeedbackService, AssignmentMembershipService, AuditEventQueryMethods}
 
@@ -53,39 +55,38 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 
 	def populateAssignmentSheet(sheet: XSSFSheet) {
 		for (assignmentInfo <- assignmentData) {
-			val assignment = assignmentInfo.assignment
-
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
-			addStringCell(assignment.name, row)
-			addStringCell(assignment.module.code.toUpperCase, row)
-			addDateCell(assignment.closeDate, row, dateCellStyle(workbook))
-			val publishDeadline = assignment.feedbackDeadline.orNull
+
+			addStringCell(assignmentInfo.assignment.name, row)
+			addStringCell(assignmentInfo.moduleCode.toUpperCase, row)
+			addDateCell(assignmentInfo.assignment.closeDate, row, dateCellStyle(workbook))
+
+			val publishDeadline = assignmentInfo.assignment.feedbackDeadline.orNull
 			addDateCell(publishDeadline, row, dateCellStyle(workbook))
-			addStringCell(if (assignment.summative) "Summative" else "Formative", row)
-			addStringCell(if (assignment.dissertation) "Dissertation" else "", row)
-			val numberOfStudents = assignmentMembershipService.determineMembershipUsers(assignment).size
-			addNumericCell(numberOfStudents, row)
-			addNumericCell(assignment.submissions.size, row)
-			addNumericCell(assignment.submissions.asScala.count(submission => submission.isAuthorisedLate), row)
-			addNumericCell(assignment.submissions.asScala.count(submission => submission.isLate && !submission.isAuthorisedLate), row)
-			val feedbackCount = getFeedbackCount(assignment)
-			val totalPublished = feedbackCount.onTime + feedbackCount.late
-			val totalUnPublished = assignment.submissions.size - totalPublished
-			addNumericCell(totalUnPublished, row)
-			addNumericCell(totalPublished, row)
-			addNumericCell(feedbackCount.onTime, row)
-			addPercentageCell(feedbackCount.onTime, totalPublished, row, workbook)
-			addNumericCell(feedbackCount.late, row)
-			addPercentageCell(feedbackCount.late, totalPublished, row, workbook)
-			addDateCell(feedbackCount.earliest, row, dateCellStyle(workbook))
-			addDateCell(feedbackCount.latest, row, dateCellStyle(workbook))
+
+			addStringCell(if (assignmentInfo.summative) "Summative" else "Formative", row)
+			addStringCell(if (assignmentInfo.dissertation) "Dissertation" else "", row)
+
+			addNumericCell(assignmentInfo.membership, row)
+			addNumericCell(assignmentInfo.numberOfSubmissions, row)
+			addNumericCell(assignmentInfo.submissionsLateWithExt, row)
+			addNumericCell(assignmentInfo.submissionsLateWithoutExt, row)
+
+			addNumericCell(assignmentInfo.membership - assignmentInfo.totalPublished, row)
+			addNumericCell(assignmentInfo.totalPublished, row)
+			addNumericCell(assignmentInfo.feedbackCount.onTime, row)
+			addPercentageCell(assignmentInfo.feedbackCount.onTime, assignmentInfo.totalPublished, row, workbook)
+			addNumericCell(assignmentInfo.feedbackCount.late, row)
+			addPercentageCell(assignmentInfo.feedbackCount.late, assignmentInfo.totalPublished, row, workbook)
+			addDateCell(assignmentInfo.feedbackCount.earliest, row, dateCellStyle(workbook))
+			addDateCell(assignmentInfo.feedbackCount.latest, row, dateCellStyle(workbook))
 		}
 	}
 
 	def buildAssignmentData() {
 
 		val allAssignments = department.modules.asScala.flatMap(_.assignments.asScala)
-		val inDateAssignments = allAssignments.filter(a => a.collectSubmissions && a.submissions.size > 0
+		val inDateAssignments = allAssignments.filter(a => ((a.collectSubmissions && a.submissions.size > 0) || (!a.collectSubmissions && a.includeInFeedbackReportWithoutSubmissions))
 			&& a.closeDate.isAfter(startDate) && a.closeDate.isBefore(endDate)).toList
 		val sortedAssignments = inDateAssignments.sortWith{(a1, a2) =>
 			a1.module.code < a2.module.code || (a1.module.code == a2.module.code && a1.closeDate.isBefore(a2.closeDate))
@@ -94,13 +95,20 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 		for (assignment <- sortedAssignments) {
 			val feedbackCount = getFeedbackCount(assignment)
 			val totalPublished = feedbackCount.onTime + feedbackCount.late
+
+			val membership = assignmentMembershipService.determineMembershipUsers(assignment).size
+
+			val totalSubmissionsCount =
+				if (assignment.collectSubmissions) assignment.submissions.size
+				else membership
+
 			val assignmentInfo = AssignmentInfo(
 				assignment.module.code,
 				assignment.module.name,
-				assignmentMembershipService.determineMembershipUsers(assignment).size,
+				membership,
 				assignment.summative,
 				assignment.dissertation,
-				assignment.submissions.size,
+				totalSubmissionsCount,
 				assignment.submissions.asScala.count(submission => submission.isAuthorisedLate),
 				assignment.submissions.asScala.count(submission => submission.isLate && !submission.isAuthorisedLate),
 				feedbackCount,
@@ -177,9 +185,12 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 	 * - fourth is latest publish date
 	 */
 	def getFeedbackCount(assignment: Assignment): FeedbackCount =  {
-		
+		val submissions: Seq[FeedbackReportGenerator] =
+			if (assignment.collectSubmissions) submissionService.getSubmissionsByAssignment(assignment)
+			else assignmentMembershipService.determineMembershipUsers(assignment).map(SubmissionlessFeedbackReportGenerator(assignment, _))
+
 		val times: Seq[FeedbackCount] = for {
-			submission <- submissionService.getSubmissionsByAssignment(assignment)
+			submission <- submissions
 			feedback <- feedbackService.getFeedbackByUniId(assignment, submission.universityId)
 			if feedback.released
 			publishEventDate <- Option(feedback.releasedDate).orElse {
@@ -238,5 +249,10 @@ object FeedbackReport {
 		totalPublished: Int,
 		assignment: Assignment
 	)
+
+	case class SubmissionlessFeedbackReportGenerator(assignment: Assignment, user: User) extends FeedbackReportGenerator {
+		val universityId = user.getWarwickId
+		val feedbackDeadline = assignment.feedbackDeadline
+	}
 
 }

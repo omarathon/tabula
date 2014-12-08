@@ -5,23 +5,34 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
+import uk.ac.warwick.tabula.reports.commands.attendancemonitoring.AllAttendanceReportCommand.AllAttendanceReportCommandResult
 import uk.ac.warwick.tabula.reports.commands.{ReportCommandState, ReportPermissions}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 
 object AllAttendanceReportCommand {
-	def apply(department: Department, academicYear: AcademicYear) =
-		new AllAttendanceReportCommandInternal(department, academicYear)
+
+	type AllAttendanceReportCommandResult = Map[AttendanceMonitoringStudentData, Map[AttendanceMonitoringPoint, AttendanceState]]
+	def apply(
+		department: Department,
+		academicYear: AcademicYear,
+		filter: AllAttendanceReportCommandResult => AllAttendanceReportCommandResult
+	) =
+		new AllAttendanceReportCommandInternal(department, academicYear, filter)
 			with AutowiringProfileServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
-			with ComposableCommand[Map[AttendanceMonitoringStudentData, Map[AttendanceMonitoringPoint, AttendanceState]]]
+			with ComposableCommand[AllAttendanceReportCommandResult]
 			with ReportPermissions
 			with AllAttendanceReportCommandState
 			with ReadOnly with Unaudited
 }
 
-class AllAttendanceReportCommandInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[Map[AttendanceMonitoringStudentData, Map[AttendanceMonitoringPoint, AttendanceState]]] with TaskBenchmarking {
+class AllAttendanceReportCommandInternal(
+	val department: Department,
+	val academicYear: AcademicYear,
+	val filter : AllAttendanceReportCommandResult => AllAttendanceReportCommandResult
+)
+	extends CommandInternal[AllAttendanceReportCommandResult] with TaskBenchmarking {
 
 	self: ProfileServiceComponent with AttendanceMonitoringServiceComponent =>
 
@@ -37,14 +48,14 @@ class AllAttendanceReportCommandInternal(val department: Department, val academi
 			attendanceMonitoringService.getAllCheckpointData(studentPointMap.values.flatten.toSeq.distinct).groupBy(_.point)
 		}
 
-		benchmarkTask("result") {
+		val result = benchmarkTask("result") {
 			studentPointMap.map { case (studentData, points) =>
 				studentData -> points.map(point => point -> checkpointMap.get(point).flatMap(
 					checkpoints => checkpoints.find(_.universityId == studentData.universityId).map(_.state)).getOrElse(AttendanceState.NotRecorded)
 				).toMap
 			}
 		}
-
+		filter(result)
 	}
 
 }

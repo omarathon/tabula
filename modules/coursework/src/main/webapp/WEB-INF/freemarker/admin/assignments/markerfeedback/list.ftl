@@ -192,7 +192,7 @@
 						<i class="icon-ok"></i> Marking completed
 					</a>
 				</li>
-				<li>
+				<#-- TAB-2957 <li>
 					<a class="use-tooltip form-post"
 					   title="Unfinalise marks and feedback. Note that this can only be done if feedback has not been released for this student."
 					   data-container="body"
@@ -200,7 +200,7 @@
 					   id="marking-uncomplete-button">
 						<i class="icon-remove"></i> Marking uncompleted
 					</a>
-				</li>
+				</li> -->
 			</ul>
 		</div>
 	</div>

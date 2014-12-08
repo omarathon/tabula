@@ -12,14 +12,14 @@ import uk.ac.warwick.tabula.reports.commands.{ReportCommandState, ReportPermissi
 
 import scala.collection.JavaConverters._
 
-object AllAttendanceReportProcessor {
+object AttendanceReportProcessor {
 	def apply(department: Department, academicYear: AcademicYear) =
-		new AllAttendanceReportProcessorInternal(department, academicYear)
-			with ComposableCommand[AllAttendanceReportProcessorResult]
+		new AttendanceReportProcessorInternal(department, academicYear)
+			with ComposableCommand[AttendanceReportProcessorResult]
 			with ReportPermissions
-			with AllAttendanceReportProcessorState
+			with AttendanceReportProcessorState
 			with ReadOnly with Unaudited {
-			override lazy val eventName: String = "AllAttendanceReportProcessor"
+			override lazy val eventName: String = "AttendanceReportProcessor"
 		}
 }
 
@@ -31,16 +31,16 @@ case class PointData(
 	isLate: Boolean
 )
 
-case class AllAttendanceReportProcessorResult(
+case class AttendanceReportProcessorResult(
 	result: Map[AttendanceMonitoringStudentData, Map[PointData, AttendanceState]],
 	students: Seq[AttendanceMonitoringStudentData],
 	points: Seq[PointData]
 )
 
-class AllAttendanceReportProcessorInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[AllAttendanceReportProcessorResult] with TaskBenchmarking {
+class AttendanceReportProcessorInternal(val department: Department, val academicYear: AcademicYear)
+	extends CommandInternal[AttendanceReportProcessorResult] with TaskBenchmarking {
 
-	self: AllAttendanceReportProcessorState =>
+	self: AttendanceReportProcessorState =>
 
 	override def applyInternal() = {
 		val processedStudents = students.asScala.map{case(universityId, properties) =>
@@ -68,12 +68,12 @@ class AllAttendanceReportProcessorInternal(val department: Department, val acade
 					processedPoints.find(_.id == id).map(point => point -> AttendanceState.fromCode(stateString))
 			}.toMap)
 		}.toMap
-		AllAttendanceReportProcessorResult(processedResult, processedStudents, processedPoints)
+		AttendanceReportProcessorResult(processedResult, processedStudents, processedPoints)
 	}
 
 }
 
-trait AllAttendanceReportProcessorState extends ReportCommandState {
+trait AttendanceReportProcessorState extends ReportCommandState {
 	var result: JMap[String, JMap[String, String]] =
 		LazyMaps.create{_: String => JMap[String, String]() }.asJava
 

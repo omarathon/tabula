@@ -4,52 +4,31 @@ import org.apache.poi.hssf.usermodel.HSSFDataFormat
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.{MissedUnauthorised, NotRecorded}
 import uk.ac.warwick.util.csv.CSVLineWriter
 
-class AllSmallGroupsReportExporter(val processorResult: AllSmallGroupsReportProcessorResult, val department: Department)
+class SmallGroupsByModuleReportExporter(val processorResult: SmallGroupsByModuleReportProcessorResult, val department: Department)
 	extends CSVLineWriter[AttendanceMonitoringStudentData] {
 
-	val attendance = processorResult.attendance
+	val counts = processorResult.counts
 	val students = processorResult.students
-	val events = processorResult.events
+	val modules = processorResult.modules
 
 	val headers = Seq("First name","Last name","University ID") ++
-		events.map(e => s"${e.moduleCode}	${e.setName} ${e.format} ${e.groupName}	${e.dayString} Week ${e.week}") ++
-		Seq("Unrecorded","Missed (unauthorised)")
-
-	val unrecordedIndex = headers.size - 2
-	val missedIndex = headers.size - 1
+		modules.map(m => s"${m.code} ${m.name}")
 
 	override def getNoOfColumns(o: AttendanceMonitoringStudentData): Int = headers.size
 
-	override def getColumn(studentData: AttendanceMonitoringStudentData, eventIndex: Int): String = {
-		eventIndex match {
+	override def getColumn(studentData: AttendanceMonitoringStudentData, moduleIndex: Int): String = {
+		moduleIndex match {
 			case 0 =>
 				studentData.firstName
 			case 1 =>
 				studentData.lastName
 			case 2 =>
 				studentData.universityId
-			case index if index == unrecordedIndex =>
-				attendance.get(studentData).map(eventMap =>
-					eventMap.map{case(event, state) => state}.count(_ == NotRecorded).toString
-				).getOrElse("0")
-			case index if index == missedIndex =>
-				attendance.get(studentData).map(eventMap =>
-					eventMap.map{case(event, state) => state}.count(_ == MissedUnauthorised).toString
-				).getOrElse("0")
 			case _ =>
-				val thisEvent = events(eventIndex - 3)
-				attendance.get(studentData).flatMap(_.get(thisEvent).map{
-					case state if state == NotRecorded =>
-						if (thisEvent.isLate)
-							"Late"
-						else
-							state.description
-					case state =>
-						state.description
-				}).getOrElse("n/a")
+				val thisModule = modules(moduleIndex - 3)
+				counts.get(studentData).flatMap(_.get(thisModule).map{_.toString}).getOrElse("n/a")
 		}
 	}
 
@@ -97,17 +76,17 @@ class AllSmallGroupsReportExporter(val processorResult: AllSmallGroupsReportProc
 
 	def toXML = {
 		<result>
-			<attendance>
-				{ attendance.map{case(studentData, eventMap) =>
+			<counts>
+				{ counts.map{case(studentData, moduleMap) =>
 					<student universityid={studentData.universityId}>
-						{ eventMap.map{case(event, state) =>
-							<point id={event.id}>
-								{ state }
-							</point>
+						{ moduleMap.map{case(module, count) =>
+							<module id={module.id}>
+								{ count }
+							</module>
 						}}
 					</student>
 				}}
-			</attendance>
+			</counts>
 
 			<students>
 				{ students.map(studentData =>
@@ -118,21 +97,15 @@ class AllSmallGroupsReportExporter(val processorResult: AllSmallGroupsReportProc
 					/>
 				)}
 			</students>
-			<events>
-					{ events.map(event =>
-						<event
-							id={event.id}
-							moduleCode={event.moduleCode}
-							setName={event.setName}
-							format={event.format}
-							groupName={event.groupName}
-							week={event.week.toString}
-							day={event.day.toString}
-							location={event.location}
-							tutors={event.tutors}
+			<modules>
+					{ modules.map(module =>
+						<module
+							id={module.id}
+							code={module.code}
+							name={module.name}
 						/>
 				)}
-				</events>
+				</modules>
 		</result>
 	}
 }

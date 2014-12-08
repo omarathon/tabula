@@ -1,12 +1,12 @@
 <#escape x as x?html>
 <#import "../reports_macros.ftl" as reports_macros />
 
-<h1>All event attendance</h1>
+<h1>Missed event attendance by module</h1>
 
-<#assign reportUrl><@routes.allSmallGroups department academicYear /></#assign>
+<#assign reportUrl><@routes.missedSmallGroupsByModule department academicYear /></#assign>
 <@reports_macros.reportLoader reportUrl>
 	<div class="btn-toolbar">
-		<a href="#" class="show-data btn" data-loading-text="Loading&hellip;" data-href="<@routes.allSmallGroupsShow department academicYear />">
+		<a href="#" class="show-data btn" data-loading-text="Loading&hellip;" data-href="<@routes.missedSmallGroupsByModuleShow department academicYear />">
 			<i class="icon-eye-open"></i> Show
 		</a>
 		<div class="download btn-group ">
@@ -17,17 +17,17 @@
 			<ul class="dropdown-menu">
 
 				<li>
-					<a href="#" data-href="<@routes.allSmallGroupsDownloadCsv department academicYear />">
+					<a href="#" data-href="<@routes.missedSmallGroupsByModuleDownloadCsv department academicYear />">
 						<i class="icon-table"></i> CSV
 					</a>
 				</li>
 				<li>
-					<a href="#" data-href="<@routes.allSmallGroupsDownloadXlsx department academicYear />">
+					<a href="#" data-href="<@routes.missedSmallGroupsByModuleDownloadXlsx department academicYear />">
 						<i class="icon-list-alt"></i> Excel
 					</a>
 				</li>
 				<li>
-					<a href="#" data-href="<@routes.allSmallGroupsDownloadXml department academicYear />">
+					<a href="#" data-href="<@routes.missedSmallGroupsByModuleDownloadXml department academicYear />">
 						<i class="icon-code"></i> XML
 					</a>
 				</li>

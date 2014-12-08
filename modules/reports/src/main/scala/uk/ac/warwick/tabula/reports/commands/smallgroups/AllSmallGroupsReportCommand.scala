@@ -14,8 +14,12 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 object AllSmallGroupsReportCommand {
-	def apply(department: Department, academicYear: AcademicYear) =
-		new AllSmallGroupsReportCommandInternal(department, academicYear)
+	def apply(
+		department: Department,
+		academicYear: AcademicYear,
+		filter: AllSmallGroupsReportCommandResult => AllSmallGroupsReportCommandResult
+	) =
+		new AllSmallGroupsReportCommandInternal(department, academicYear, filter)
 			with AutowiringSmallGroupServiceComponent
 			with ComposableCommand[AllSmallGroupsReportCommandResult]
 			with ReportPermissions
@@ -35,8 +39,11 @@ case class AllSmallGroupsReportCommandResult(
 	eventWeeks: Seq[SmallGroupEventWeek]
 )
 
-class AllSmallGroupsReportCommandInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[AllSmallGroupsReportCommandResult] with TaskBenchmarking {
+class AllSmallGroupsReportCommandInternal(
+	val department: Department,
+	val academicYear: AcademicYear,
+	val filter: AllSmallGroupsReportCommandResult => AllSmallGroupsReportCommandResult
+) extends CommandInternal[AllSmallGroupsReportCommandResult] with TaskBenchmarking {
 
 	self: SmallGroupServiceComponent =>
 
@@ -83,7 +90,7 @@ class AllSmallGroupsReportCommandInternal(val department: Department, val academ
 			}).filter{case(_, state) => state != null}.toMap).toMap
 		}
 
-		AllSmallGroupsReportCommandResult(studentAttendanceMap, students, eventWeeks)
+		filter(AllSmallGroupsReportCommandResult(studentAttendanceMap, students, eventWeeks))
 	}
 }
 
