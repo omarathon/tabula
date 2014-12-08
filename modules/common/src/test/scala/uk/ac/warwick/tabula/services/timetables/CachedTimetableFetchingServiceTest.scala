@@ -30,14 +30,14 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 
 	@Test
 	def firstRequestIsPassedThrough(){new Fixture {
-		cache.getTimetableForStudent(studentId) should be(studentEvents)
+		cache.getTimetableForStudent(studentId) should be (Success(studentEvents))
 		there was one (delegate).getTimetableForStudent(studentId)
 	}}
 
 	@Test
 	def repeatedRequestsAreCached(){new Fixture {
-		cache.getTimetableForStudent(studentId) should be(studentEvents)
-		cache.getTimetableForStudent(studentId) should be(studentEvents)
+		cache.getTimetableForStudent(studentId) should be (Success(studentEvents))
+		cache.getTimetableForStudent(studentId) should be (Success(studentEvents))
 		there was one(delegate).getTimetableForStudent(studentId)
 	}}
 
@@ -49,10 +49,10 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		val staffEvents = Seq(new TimetableEvent("test2", "test2", "test2","test2",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,None,None,Nil,Nil, AcademicYear(2013)))
 		delegate.getTimetableForStaff(studentId) returns Success(staffEvents)
 
-		cache.getTimetableForStudent(studentId)  should be(studentEvents)
-		cache.getTimetableForStudent(studentId)  should be(studentEvents)
-		cache.getTimetableForStaff(studentId)  should be(staffEvents)
-		cache.getTimetableForStaff(studentId)  should be(staffEvents)
+		cache.getTimetableForStudent(studentId)  should be(Success(studentEvents))
+		cache.getTimetableForStudent(studentId)  should be(Success(studentEvents))
+		cache.getTimetableForStaff(studentId)  should be(Success(staffEvents))
+		cache.getTimetableForStaff(studentId)  should be(Success(staffEvents))
 		there was one (delegate).getTimetableForStudent(studentId)
 		there was one (delegate).getTimetableForStaff(studentId)
 
