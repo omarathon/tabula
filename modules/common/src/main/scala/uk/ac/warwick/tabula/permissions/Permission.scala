@@ -297,26 +297,18 @@ object Permissions {
 		}
 
 		object MeetingRecord {
-      case class Create(relationshipType: PermissionsSelector[StudentRelationshipType])
-      	extends SelectorPermission(relationshipType, "Add a meeting record")
       case class Read(relationshipType: PermissionsSelector[StudentRelationshipType])
       	extends SelectorPermission(relationshipType, "View a meeting record")
       case class ReadDetails(relationshipType: PermissionsSelector[StudentRelationshipType])
       	extends SelectorPermission(relationshipType, "View the contents of a meeting record")
-      case class Update(relationshipType: PermissionsSelector[StudentRelationshipType])
-      	extends SelectorPermission(relationshipType, "Edit a meeting record")
-      case class Delete(relationshipType: PermissionsSelector[StudentRelationshipType])
-      	extends SelectorPermission(relationshipType, "Remove a meeting record")
+      case class Manage(relationshipType: PermissionsSelector[StudentRelationshipType])
+      	extends SelectorPermission(relationshipType, "Manage meeting records")
 			case object Approve extends Permission("Approve a meeting record")
     }
 
 		object ScheduledMeetingRecord {
-			case class Create(relationshipType: PermissionsSelector[StudentRelationshipType])
-				extends SelectorPermission(relationshipType, "Create a scheduled meeting record")
-			case class Update(relationshipType: PermissionsSelector[StudentRelationshipType])
-				extends SelectorPermission(relationshipType, "Update a scheduled meeting record")
-			case class Delete(relationshipType: PermissionsSelector[StudentRelationshipType])
-				extends SelectorPermission(relationshipType, "Remove a scheduled meeting record")
+			case class Manage(relationshipType: PermissionsSelector[StudentRelationshipType])
+				extends SelectorPermission(relationshipType, "Manage scheduled meeting records")
 			case object Confirm extends Permission("Confirm whether a scheduled meeting record took place")
 		}
 

@@ -65,9 +65,9 @@ class MeetingRecord extends AbstractMeetingRecord {
 	def pendingApprovalBy(user: CurrentUser): Boolean =
 		approvals.asScala.exists(approval =>
 			approval.state == Pending &&
-				securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, approval) &&
-				user.universityId != creator.universityId
-		)
+				user.universityId != creator.universityId &&
+				securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, approval)
+	)
 
 	def pendingApprovers:List[Member] = pendingApprovals.map(_.approver).toList
 

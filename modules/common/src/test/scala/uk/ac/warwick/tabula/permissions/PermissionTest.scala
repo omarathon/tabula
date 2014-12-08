@@ -53,8 +53,8 @@ class PermissionTest extends TestBase {
 
 	@Test
 	def selectorPermissionsHashing(){
-		val selectorPermission = Permissions.Profiles.MeetingRecord.Create(PermissionsSelector.Any[StudentRelationshipType])
-		val selectorPermission2 = Permissions.Profiles.MeetingRecord.Create(PermissionsSelector.Any[StudentRelationshipType])
+		val selectorPermission = Permissions.Profiles.MeetingRecord.Manage(PermissionsSelector.Any[StudentRelationshipType])
+		val selectorPermission2 = Permissions.Profiles.MeetingRecord.Manage(PermissionsSelector.Any[StudentRelationshipType])
 
 		Set(selectorPermission)(selectorPermission2) should be (true)
 		selectorPermission should be(selectorPermission2)
