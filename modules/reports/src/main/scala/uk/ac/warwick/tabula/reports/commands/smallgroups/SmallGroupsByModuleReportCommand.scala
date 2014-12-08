@@ -37,7 +37,7 @@ class SmallGroupsByModuleReportCommandInternal(val department: Department, val a
 		SmallGroupsByModuleReportCommandResult(
 			byModule,
 			byModule.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)),
-			byModule.flatMap(_._2.map(_._1)).toSeq.sorted
+			byModule.flatMap(_._2.map(_._1)).toSeq.distinct.sorted
 		)
 	}
 }
