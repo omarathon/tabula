@@ -28,6 +28,7 @@ TODO a way to not have to do these, or at least way to make it obvious when this
 <@hiddenorfalse path="allowExtensions" />
 <@hiddenorfalse path="allowExtensionRequests" />
 <@hiddenorfalse path="summative" />
+<@hiddenorfalse path="includeInFeedbackReportWithoutSubmissions" />
 <@f.hidden path="wordCountMin" />
 <@f.hidden path="wordCountMax" />
 <@f.hidden path="wordCountConventions" />
