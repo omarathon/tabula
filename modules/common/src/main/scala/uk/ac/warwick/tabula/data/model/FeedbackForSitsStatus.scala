@@ -34,14 +34,9 @@ object FeedbackForSitsStatus {
 		}
 }
 
-class FeedbackForSitsStatusUserType extends AbstractBasicUserType[FeedbackForSitsStatus, String] {
+class FeedbackForSitsStatusUserType extends AbstractStringUserType[FeedbackForSitsStatus] {
 
-	val basicType = StandardBasicTypes.STRING
 	override def sqlTypes = Array(Types.VARCHAR)
-
-	val nullValue = null
-	val nullObject = null
-
 	override def convertToObject(string: String) = FeedbackForSitsStatus.fromCode(string)
 	override def convertToValue(format: FeedbackForSitsStatus) = format.code
 }
