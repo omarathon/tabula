@@ -84,7 +84,7 @@ trait LookupEventsFromModuleTimetables {
 		modules.toSeq
 			.flatMap { module =>
 			val events =
-				timetableFetchingService.getTimetableForModule(module.code.toUpperCase)
+				timetableFetchingService.getTimetableForModule(module.code.toUpperCase).getOrElse(Nil)
 					.filter { event => event.year == academicYear }
 					.filter { event => event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar }
 					.groupBy { _.eventType }
