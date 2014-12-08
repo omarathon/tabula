@@ -106,30 +106,44 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 			smallGroupService.getSmallGroupSets(module, year).filterNot { _.archived }.nonEmpty
 		}
 
-	def getTimetableForStudent(universityId: String): Seq[TimetableEvent] = doRequest(studentUris, universityId, excludeSmallGroupEventsInTabula = true)
-	def getTimetableForModule(moduleCode: String): Seq[TimetableEvent] = doRequest(moduleUris, moduleCode)
-	def getTimetableForCourse(courseCode: String): Seq[TimetableEvent] = doRequest(courseUris, courseCode)
-	def getTimetableForRoom(roomName: String): Seq[TimetableEvent] = doRequest(roomUris, roomName)
-	def getTimetableForStaff(universityId: String): Seq[TimetableEvent] = doRequest(staffUris, universityId, excludeSmallGroupEventsInTabula = true)
+	def getTimetableForStudent(universityId: String) = doRequest(studentUris, universityId, excludeSmallGroupEventsInTabula = true)
+	def getTimetableForModule(moduleCode: String) = doRequest(moduleUris, moduleCode)
+	def getTimetableForCourse(courseCode: String) = doRequest(courseUris, courseCode)
+	def getTimetableForRoom(roomName: String) = doRequest(roomUris, roomName)
+	def getTimetableForStaff(universityId: String) = doRequest(staffUris, universityId, excludeSmallGroupEventsInTabula = true)
 
-	def doRequest(uris: Seq[(String, AcademicYear)], param: String, excludeSmallGroupEventsInTabula: Boolean = false): Seq[TimetableEvent] = {
+	def doRequest(uris: Seq[(String, AcademicYear)], param: String, excludeSmallGroupEventsInTabula: Boolean = false): Try[Seq[TimetableEvent]] = {
+		def flatten[T](xs: Seq[Try[Seq[T]]]): Try[Seq[T]] = {
+			val (ss: Seq[Success[Seq[T]]] @unchecked, fs: Seq[Failure[Seq[T]]] @unchecked) =
+				xs.partition(_.isSuccess)
+
+			if (fs.isEmpty) Success(ss.map { _.get }.flatten)
+			else Failure[Seq[T]](fs(0).exception) // Only keep the first failure
+		}
+
 		// fetch the events from each of the supplied URIs, and flatmap them to make one big list of events
-		uris.flatMap{case (uri, year) =>
+		val results = uris.map { case (uri, year) =>
 			// add ?p0={param} to the URL's get parameters
 			val req = url(uri) <<? Map("p0" -> param)
 			// execute the request.
 			// If the status is OK, pass the response to the handler function for turning into TimetableEvents
 			// else return an empty list.
 			logger.info(s"Requesting timetable data from $uri")
-			Try(http.when(_==200)(req >:+ handler(year, excludeSmallGroupEventsInTabula))) match {
-				case Success(ev)=>
+
+			val result = Try(http.when(_==200)(req >:+ handler(year, excludeSmallGroupEventsInTabula)))
+
+			// Some extra logging here
+			result match {
+				case Success(ev) =>
 					if (ev.isEmpty) logger.info("Timetable request successful but no events returned")
-					ev
 				case Failure(e) =>
 					logger.warn(s"Request for $uri failed: ${e.getMessage}")
-					Nil
 			}
+
+			result
 		}
+
+		flatten(results)
 	}
 
 }

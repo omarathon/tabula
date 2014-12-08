@@ -3,26 +3,28 @@ package uk.ac.warwick.tabula.services.timetables
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
+import scala.util.Try
+
 trait PartialTimetableFetchingService
 
 trait StudentTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForStudent(universityId: String): Seq[TimetableEvent]
+	def getTimetableForStudent(universityId: String): Try[Seq[TimetableEvent]]
 }
 
 trait ModuleTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForModule(moduleCode: String): Seq[TimetableEvent]
+	def getTimetableForModule(moduleCode: String): Try[Seq[TimetableEvent]]
 }
 
 trait CourseTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForCourse(courseCode: String): Seq[TimetableEvent]
+	def getTimetableForCourse(courseCode: String): Try[Seq[TimetableEvent]]
 }
 
 trait RoomTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForRoom(roomName: String): Seq[TimetableEvent]
+	def getTimetableForRoom(roomName: String): Try[Seq[TimetableEvent]]
 }
 
 trait StaffTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForStaff(universityId: String): Seq[TimetableEvent]
+	def getTimetableForStaff(universityId: String): Try[Seq[TimetableEvent]]
 }
 
 trait CompleteTimetableFetchingService
@@ -106,17 +108,27 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 	}
 
 	def getTimetableForStudent(universityId: String) =
-		mergeDuplicates(services.collect { case service: StudentTimetableFetchingService => service }.flatMap { _.getTimetableForStudent(universityId) })
+		Try(services.collect { case service: StudentTimetableFetchingService => service }.flatMap {
+			_.getTimetableForStudent(universityId).get
+		}).map(mergeDuplicates)
 
 	def getTimetableForModule(moduleCode: String) =
-		mergeDuplicates(services.collect { case service: ModuleTimetableFetchingService => service }.flatMap { _.getTimetableForModule(moduleCode) })
+		Try(services.collect { case service: ModuleTimetableFetchingService => service }.flatMap {
+			_.getTimetableForModule(moduleCode).get
+		}).map(mergeDuplicates)
 
 	def getTimetableForCourse(courseCode: String) =
-		mergeDuplicates(services.collect { case service: CourseTimetableFetchingService => service }.flatMap { _.getTimetableForCourse(courseCode) })
+		Try(services.collect { case service: CourseTimetableFetchingService => service }.flatMap {
+			_.getTimetableForCourse(courseCode).get
+		}).map(mergeDuplicates)
 
 	def getTimetableForStaff(universityId: String) =
-		mergeDuplicates(services.collect { case service: StaffTimetableFetchingService => service }.flatMap { _.getTimetableForStaff(universityId) })
+		Try(services.collect { case service: StaffTimetableFetchingService => service }.flatMap {
+			_.getTimetableForStaff(universityId).get
+		}).map(mergeDuplicates)
 
 	def getTimetableForRoom(roomName: String) =
-		mergeDuplicates(services.collect { case service: RoomTimetableFetchingService => service }.flatMap { _.getTimetableForRoom(roomName) })
+		Try(services.collect { case service: RoomTimetableFetchingService => service }.flatMap {
+			_.getTimetableForRoom(roomName).get
+		}).map(mergeDuplicates)
 }

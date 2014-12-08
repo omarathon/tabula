@@ -13,6 +13,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 import uk.ac.warwick.userlookup.User
 
+import scala.util.Success
+
 class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends ModuleTimetableFetchingServiceComponent
@@ -113,7 +115,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			year = AcademicYear(2012)
 		)
 
-		command.timetableFetchingService.getTimetableForModule("IN101") returns (Seq(
+		command.timetableFetchingService.getTimetableForModule("IN101") returns Success(Seq(
 			tEventModule1Seminar1, tEventModule1Seminar2,
 			TimetableEvent(
 				uid="uuid3",
@@ -133,7 +135,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 				year = AcademicYear(2012)
 			)
 		))
-		command.timetableFetchingService.getTimetableForModule("IN102") returns (Seq(
+		command.timetableFetchingService.getTimetableForModule("IN102") returns Success(Seq(
 			TimetableEvent(
 				uid="uuid4",
 				name="IN102S",
