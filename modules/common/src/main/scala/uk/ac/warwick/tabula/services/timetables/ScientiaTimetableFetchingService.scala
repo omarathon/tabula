@@ -4,7 +4,7 @@ import dispatch.classic.thread.ThreadSafeHttpClient
 import dispatch.classic.{url, thread, Http}
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.client.params.{CookiePolicy, ClientPNames}
-import org.joda.time.LocalTime
+import org.joda.time.{DateTimeConstants, LocalTime}
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -34,9 +34,16 @@ trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComp
 		}
 
 		lazy val scientiaBaseUrl = Wire.optionProperty("${scientia.base.url}").getOrElse("https://test-timetablingmanagement.warwick.ac.uk/xml")
-		lazy val currentAcademicYear = AcademicYear.guessSITSAcademicYearByDate(clock.now)
-		lazy val prevAcademicYear = currentAcademicYear.-(1)
-		lazy val perYearUris =	Seq(prevAcademicYear, currentAcademicYear) map (year=>(scientiaBaseUrl + scientiaFormat(year) + "/",year))
+		lazy val currentAcademicYear: Option[AcademicYear] = Some(AcademicYear.guessSITSAcademicYearByDate(clock.now))
+		lazy val prevAcademicYear: Option[AcademicYear] = {
+			// TAB-3074 we only fetch the previous academic year if the month is >= AUGUST and < NOVEMBER
+			val month = clock.now.getMonthOfYear
+			if (month >= DateTimeConstants.AUGUST && month < DateTimeConstants.NOVEMBER)
+				currentAcademicYear.map { _ - 1 }
+			else
+				None
+		}
+		lazy val perYearUris =	Seq(prevAcademicYear, currentAcademicYear).flatten map (year=>(scientiaBaseUrl + scientiaFormat(year) + "/",year))
 	}
 }
 
