@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.sandbox.SandboxData
 
 case class DepartmentInfo(val name: String, val code: String, val faculty: String, val parentCode:Option[String] = None, val filterName:Option[String] = None)
-case class ModuleInfo(val name: String, val code: String, val group: String, val degreeType: Option[DegreeType])
+case class ModuleInfo(val name: String, val code: String, val group: String, val degreeType: DegreeType)
 case class ModuleTeachingDepartmentInfo(val code: String, val departmentCode: String, val percentage: JBigDecimal)
 case class RouteInfo(val name: String, val code: String, val degreeType: DegreeType)
 case class RouteTeachingDepartmentInfo(val code: String, val departmentCode: String, val percentage: JBigDecimal)
@@ -73,7 +73,7 @@ class SandboxModuleImporter extends ModuleImporter {
 		SandboxData.Departments.toSeq map { case (code, d) => DepartmentInfo(d.name, d.code, d.facultyCode) }
 	
 	def getModules(deptCode: String): Seq[ModuleInfo] = 
-		SandboxData.Departments(deptCode).modules.toSeq map { case (code, m) => ModuleInfo(m.name, m.code, deptCode + "-" + m.code, Some(DegreeType.fromCode("UG"))) }
+		SandboxData.Departments(deptCode).modules.toSeq map { case (code, m) => ModuleInfo(m.name, m.code, deptCode + "-" + m.code, DegreeType.fromCode("UG")) }
 
 	def getModuleTeachingDepartments(moduleCode: String): Seq[ModuleTeachingDepartmentInfo] =
 		SandboxData.Departments.values
@@ -190,7 +190,7 @@ object ModuleImporter {
 		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
 			val moduleCode = rs.getString("code").toLowerCase.safeTrim
 			val deptCode = params(0).toString.toLowerCase
-			val degreeType: Option[DegreeType] = DegreeType.getFromSchemeCode(rs.getString("scheme_code"))
+			val degreeType: DegreeType = DegreeType.getFromSchemeCode(rs.getString("scheme_code"))
 			ModuleInfo(
 				rs.getString("name").safeTrim,
 				moduleCode,

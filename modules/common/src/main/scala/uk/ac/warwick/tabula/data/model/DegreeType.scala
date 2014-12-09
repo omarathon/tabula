@@ -18,10 +18,10 @@ object DegreeType {
 	  	case _ => throw new IllegalArgumentException()
 	}
 
-	def getFromSchemeCode(schemeCode: String): Option[DegreeType] = schemeCode match {
-		case "UW UG" => Some(Undergraduate)
-		case "UW PG" => Some(Postgraduate)
-		case _ => None
+	def getFromSchemeCode(schemeCode: String): DegreeType = schemeCode match {
+		case "UW UG" => Undergraduate
+		case "UW PG" => Postgraduate
+		case _ => null
 	}
 
 	val SortOrdering: Ordering[DegreeType] = Ordering.by[DegreeType, Int] ( _.sortOrder )

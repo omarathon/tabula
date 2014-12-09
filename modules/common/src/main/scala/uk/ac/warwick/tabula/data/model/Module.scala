@@ -33,7 +33,7 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 	var name: String = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.DegreeTypeUserType")
-	var degreeType: Option[DegreeType] = _ // ug or pg
+	var degreeType: DegreeType = _ // ug or pg
 
 	// The managers are markers/moderators who upload feedback.
 	// They can also publish feedback.

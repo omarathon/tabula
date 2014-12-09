@@ -121,8 +121,8 @@ class Department extends GeneratedId
 
 	def canUploadMarksToSitsForYear(year: AcademicYear, module: Module): Boolean = {
 		val markUploadMap: Option[Map[String, String]] = module.degreeType match {
-			case Some(DegreeType.Undergraduate) => getStringMapSetting(Settings.CanUploadMarksToSitsForYearUg)
-			case Some(DegreeType.Postgraduate) => getStringMapSetting(Settings.CanUploadMarksToSitsForYearPg)
+			case DegreeType.Undergraduate => getStringMapSetting(Settings.CanUploadMarksToSitsForYearUg)
+			case DegreeType.Postgraduate => getStringMapSetting(Settings.CanUploadMarksToSitsForYearPg)
 			case _ => {
 				logger.warn(s"Can't upload marks for module $module since degreeType ${module.degreeType} can't be identified as UG or PG")
 				return false

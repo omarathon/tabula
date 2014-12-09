@@ -220,9 +220,15 @@ trait ImportModules {
 					if (mod.name != module.name) {
 						logger.info("Updating name of %s to %s".format(mod.code, mod.name))
 						module.name = mod.name
+						module.degreeType = mod.degreeType
 						module.missingFromImportSince = null
 						moduleAndDepartmentService.saveOrUpdate(module)
-
+						ImportResult(changed = 1)
+					} else if (mod.degreeType != module.degreeType) {
+						logger.info("Updating degreetype of %s to %s".format(mod.code, mod.degreeType))
+						module.degreeType = mod.degreeType
+						module.missingFromImportSince = null
+						moduleAndDepartmentService.saveOrUpdate(module)
 						ImportResult(changed = 1)
 					} else {
 						module.missingFromImportSince = null
