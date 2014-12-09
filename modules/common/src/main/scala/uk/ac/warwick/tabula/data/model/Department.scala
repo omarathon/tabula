@@ -402,9 +402,9 @@ object Department {
 
 		val StudentsCanScheduleMeetings = "studentsCanScheduleMeetings"
 
-		val CanUploadMarksToSitsForYearUg = "canUploadMarksToSitsForCurrentYear"
+		val CanUploadMarksToSitsForYearUg = "canUploadMarksToSitsForYearUG"
 
-		val CanUploadMarksToSitsForYearPg = "canUploadMarksToSitsForLastYear"
+		val CanUploadMarksToSitsForYearPg = "canUploadMarksToSitsForYearPG"
 
 	}
 }
