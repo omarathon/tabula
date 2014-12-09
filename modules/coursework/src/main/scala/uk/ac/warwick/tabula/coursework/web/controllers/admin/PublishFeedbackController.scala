@@ -3,7 +3,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.coursework.commands.feedback.PublishFeedbackCommand
+import uk.ac.warwick.tabula.coursework.commands.feedback.{QueueFeedbackForSitsCommand, PublishFeedbackCommand}
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -15,8 +15,9 @@ import uk.ac.warwick.tabula.CurrentUser
 @Controller
 class PublishFeedbackController extends CourseworkController {
 	
-	@ModelAttribute def cmd(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
-		new PublishFeedbackCommand(module, assignment, user)
+	@ModelAttribute def cmd(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
+		new PublishFeedbackCommand(module, assignment, user, None)
+	}
 
 	@RequestMapping(method = Array(HEAD, GET), params = Array("!confirm"))
 	def confirmation(command: PublishFeedbackCommand, errors: Errors): Mav = {

@@ -1,5 +1,8 @@
 package uk.ac.warwick.tabula.data.model
 
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.helpers.Logging
+
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.xml.NodeSeq
@@ -23,7 +26,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Entity @AccessType("field")
 class Department extends GeneratedId
-	with PostLoadBehaviour with HasSettings with HasNotificationSettings with PermissionsTarget with Serializable with ToEntityReference {
+	with PostLoadBehaviour with HasSettings with HasNotificationSettings with PermissionsTarget with Serializable with ToEntityReference with Logging{
 
 	import Department._
 
@@ -115,6 +118,26 @@ class Department extends GeneratedId
 
 	def studentsCanScheduleMeetings = getBooleanSetting(Settings.StudentsCanScheduleMeetings, default = true)
 	def studentsCanScheduleMeetings_=(canDo: Boolean) { settings += (Settings.StudentsCanScheduleMeetings -> canDo) }
+
+	def canUploadMarksToSitsForYear(year: AcademicYear, module: Module): Boolean = {
+		val markUploadMap: Option[Map[String, String]] = module.degreeType match {
+			case DegreeType.Undergraduate => getStringMapSetting(Settings.CanUploadMarksToSitsForYearUg)
+			case DegreeType.Postgraduate => getStringMapSetting(Settings.CanUploadMarksToSitsForYearPg)
+			case _ => {
+				logger.warn(s"Can't upload marks for module $module since degreeType ${module.degreeType} can't be identified as UG or PG")
+				return false
+			}
+		}
+		// marks are uploadable until a department is explicitly closed for the year by the Exams Office
+		markUploadMap match {
+			case None => true // there isn't even a settings map at all for this so hasn't been closed yet for the year
+			case Some(markMap: Map[String, String]) =>
+				markMap.get(year.toString) match {
+					case None => true // no setting for this year/ugpg combo for the department - so hasn't been closed yet for the year
+					case Some(booleanStringValue: String) => booleanStringValue.toBoolean
+				}
+		}
+	}
 
 	def getStudentRelationshipSource(relationshipType: StudentRelationshipType) =
 		getStringMapSetting(Settings.StudentRelationshipSource)
@@ -378,6 +401,11 @@ object Department {
     val AutoGroupDeregistration = "autoGroupDeregistration"
 
 		val StudentsCanScheduleMeetings = "studentsCanScheduleMeetings"
+
+		val CanUploadMarksToSitsForYearUg = "canUploadMarksToSitsForYearUG"
+
+		val CanUploadMarksToSitsForYearPg = "canUploadMarksToSitsForYearPG"
+
 	}
 }
 

@@ -213,6 +213,7 @@ object Permissions {
 		case object Read extends Permission("View feedback")
 		case object Update extends Permission("Edit feedback")
 		case object Delete extends Permission("Remove feedback")
+		case object UploadToSits extends ScopelessPermission("Upload feedback to SITS")
 	}
 
 	object Marks {

@@ -1,0 +1,160 @@
+package uk.ac.warwick.tabula.scheduling.services
+
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.FeedbackForSits
+import javax.sql.DataSource
+import org.springframework.jdbc.`object`.SqlUpdate
+import java.sql.Types
+import org.springframework.jdbc.core.SqlParameter
+import uk.ac.warwick.tabula.JavaImports.JHashMap
+import org.joda.time.DateTime
+import org.springframework.context.annotation.Profile
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.scheduling.services.ExportFeedbackToSitsService.{CountQuery, ExportFeedbackToSitsQuery}
+import collection.JavaConverters._
+import java.util
+import uk.ac.warwick.tabula.JavaImports._
+
+trait ExportFeedbackToSitsServiceComponent {
+	def exportFeedbackToSitsService: ExportFeedbackToSitsService
+}
+
+trait AutowiringExportFeedbackToSitsServiceComponent extends ExportFeedbackToSitsServiceComponent {
+	var exportFeedbackToSitsService = Wire[ExportFeedbackToSitsService]
+}
+
+trait ExportFeedbackToSitsService {
+	def countMatchingBlankSasRecords(feedbackForSits: FeedbackForSits): Integer
+	def exportToSits(feedbackToLoad: FeedbackForSits): Integer
+}
+
+class ParameterGetter(feedbackForSits: FeedbackForSits) {
+	val assessGroups = feedbackForSits.feedback.assignment.assessmentGroups.asScala.toSeq
+	val possibleOccurrenceSequencePairs = assessGroups.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence))
+	val occurrences = possibleOccurrenceSequencePairs.map(_._1).mkString(",")
+	val sequences = possibleOccurrenceSequencePairs.map(_._2).mkString(",")
+
+	def getQueryParams: util.HashMap[String, Object] = JHashMap(
+		// for the where clause
+		("studentId", feedbackForSits.feedback.universityId),
+		("academicYear", feedbackForSits.feedback.assignment.academicYear.toString),
+		("moduleCodeMatcher", feedbackForSits.feedback.assignment.module.code.toUpperCase + "%"),
+		("now", DateTime.now.toDate),
+
+		// in theory we should look for a record with occurrence and sequence from the same pair,
+		// but in practice there won't be any ambiguity since the record is already determined
+		// by student, module code and year
+		("occurrences", occurrences),
+		("sequences", sequences)
+	)
+
+	def getUpdateParams(mark: Integer, grade: String) = JHashMap(
+		// for the where clause
+		("studentId", feedbackForSits.feedback.universityId),
+		("academicYear", feedbackForSits.feedback.assignment.academicYear.toString),
+		("moduleCodeMatcher", feedbackForSits.feedback.assignment.module.code.toUpperCase + "%"),
+		("now", DateTime.now.toDate),
+
+		// in theory we should look for a record with occurrence and sequence from the same pair,
+		// but in practice there won't be any ambiguity since the record is already determined
+		// by student, module code and year
+		("occurrences", occurrences),
+		("sequences", sequences),
+
+		// data to insert
+		("actualMark", mark),
+		("actualGrade", grade)
+	)
+
+}
+
+
+class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService with Logging {
+
+	self: SitsDataSourceComponent =>
+
+	def countMatchingBlankSasRecords(feedbackForSits: FeedbackForSits): Integer = {
+		val countQuery = new CountQuery(sitsDataSource)
+		val parameterGetter: ParameterGetter = new ParameterGetter(feedbackForSits)
+		countQuery.getCount(parameterGetter.getQueryParams)
+	}
+
+	def exportToSits(feedbackForSits: FeedbackForSits): Integer = {
+		val parameterGetter: ParameterGetter = new ParameterGetter(feedbackForSits)
+		val updateQuery = new ExportFeedbackToSitsQuery(sitsDataSource)
+
+		val actualGrade = feedbackForSits.feedback.actualGrade
+		val actualMark = feedbackForSits.feedback.actualMark
+		val numRowsChanged =
+			if (actualGrade.isDefined && actualMark.isDefined)
+				updateQuery.updateByNamedParam(parameterGetter.getUpdateParams(actualMark.get, actualGrade.get))
+		else {
+				0 // issue a warning when the FeedbackForSits record is created, not here
+			}
+		numRowsChanged
+	}
+}
+
+object ExportFeedbackToSitsService {
+	val sitsSchema: String = Wire.property("${schema.sits}")
+
+	val whereClause = f"""where spr_code in (select spr_code from $sitsSchema.ins_spr where spr_stuc = :studentId)
+		and mod_code like :moduleCodeMatcher
+		and mav_occur in :occurrences
+		and ayr_code = :academicYear
+		and psl_code = 'Y'
+		and mab_seq in :sequences
+	"""
+
+	final val CountMatchingBlankSasRecordsSql = f"""
+		select count(*) from $sitsSchema.cam_sas $whereClause
+	"""
+
+	class CountQuery(ds: DataSource) extends NamedParameterJdbcTemplate(ds) {
+
+		def getCount(params: util.HashMap[String, Object]): Int = {
+			this.queryForObject(CountMatchingBlankSasRecordsSql, params, classOf[JInteger]).asInstanceOf[Int]
+		}
+	}
+
+	final val UpdateSITSFeedbackSql = f"""
+		update $sitsSchema.cam_sas
+		set sas_actm = :actualMark,
+			sas_actg = :actualGrade,
+	 		sas_prcs = 'I',
+			sas_proc = 'SAS',
+	 		sas_udf1 = 'Tabula',
+			sas_udf2 = :now
+		$whereClause
+	"""
+
+	class ExportFeedbackToSitsQuery(ds: DataSource) extends SqlUpdate(ds, UpdateSITSFeedbackSql) {
+		declareParameter(new SqlParameter("actualMark", Types.INTEGER))
+		declareParameter(new SqlParameter("actualGrade", Types.VARCHAR))
+		declareParameter(new SqlParameter("studentId", Types.VARCHAR))
+		declareParameter(new SqlParameter("academicYear", Types.VARCHAR))
+		declareParameter(new SqlParameter("moduleCodeMatcher", Types.VARCHAR))
+		declareParameter(new SqlParameter("now", Types.DATE))
+		declareParameter(new SqlParameter("occurrences", Types.VARCHAR))
+		declareParameter(new SqlParameter("sequences", Types.VARCHAR))
+
+		compile()
+
+	}
+}
+
+@Profile(Array("dev", "test", "production"))
+@Service
+class ExportFeedbackToSitsServiceImpl
+	extends AbstractExportFeedbackToSitsService with AutowiringSitsDataSourceComponent
+
+@Profile(Array("sandbox"))
+@Service
+class ExportFeedbackToSitsSandboxService extends ExportFeedbackToSitsService {
+	def countMatchingBlankSasRecords(feedbackForSits: FeedbackForSits) = 0
+	def exportToSits(feedbackForSits: FeedbackForSits) = 0
+}
+
+
