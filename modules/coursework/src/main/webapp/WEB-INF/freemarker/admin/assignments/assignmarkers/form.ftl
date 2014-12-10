@@ -110,20 +110,25 @@
 
 
 <#escape x as x?html>
-
 	<h1>Assign markers</h1>
 	<h4><span class="muted">for</span>
 	${assignment.name}</h4>
-
-		<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/assign-markers')}" commandName="command">
+	<div class="btn-toolbar">
+		<div class="pull-right">
+			<div class="btn-group">
+				<button data-selector="spreadsheet" class="btn mode">Upload spreadsheet</button>
+				<button data-selector="small-groups" class="btn mode">Import small groups</button>
+			</div>
+		</div>
+	</div>
+	<div class="clearfix"></div>
+	<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/assign-markers')}" commandName="command">
 		<div class="fix-area">
-			<div id="assign-markers">
+			<div id="assign-markers" class="tabbable">
 				<ul class="nav nav-tabs">
 					<li class="active"><a href="#first-markers">${firstMarkerRoleName}s</a></li>
 					<#if hasSecondMarker><li><a href="#second-markers">${secondMarkerRoleName}s</a></li></#if>
-					<li><a href="#spreadsheet">Upload spreadsheet</a></li>
 				</ul>
-
 				<div class="tab-content">
 					<div class="tab-pane active" id="first-markers">
 						<@assignStudents
@@ -145,43 +150,105 @@
 							/>
 						</div>
 					</#if>
-					<div class="tab-pane" id="spreadsheet">
-						<p>You can assign students to markers by uploading a spreadsheet.</p>
-						<ol>
-							<li>
-								<p><a class="btn" href="assign-markers/template">
-									<i class="icon-download"></i> Download a template spreadsheet
-								</a></p>
-								<div class="alert alert-info">
-									Any markers that you have already assigned using the drag and drop interface will be present in the template.
-								</div>
-							</li>
-							<li>
-								<p>
-									Allocate students to markers using the dropdown menu in the marker name column or by typing a personal tutor's University ID into the agent_id column. The agent_id field will be updated with the University ID for that personal tutor if you use the dropdown. Any students with an empty agent_id field will have their marker removed, if they have one.
-								</p>
-							</li>
-							<li><p><strong>Save</strong> your updated spreadsheet.</p></li>
-							<li>
-								<@form.labelled_row "file.upload" "Choose your updated spreadsheet" "step-action" >
-									<input type="file" name="file.upload"  />
-								</@form.labelled_row>
-							</li>
-						</ol>
-						<div class="fix-footer submit-buttons">
-							<input type="submit" name="uploadSpreadsheet" class="btn btn-primary" value="Upload">
-							<a href="<@routes.depthome module />" class="btn">Cancel</a>
-						</div>
-					</div>
 				</div>
 			</div>
+			<div id="spreadsheet" class="hide">
+				<p>You can assign students to markers by uploading a spreadsheet.</p>
+				<ol>
+					<li>
+						<p><a class="btn" href="assign-markers/template">
+							<i class="icon-download"></i> Download a template spreadsheet
+						</a></p>
+						<div class="alert alert-info">
+							Any markers that you have already assigned using the drag and drop interface will be present in the template.
+						</div>
+					</li>
+					<li>
+						<p>
+							Allocate students to markers using the dropdown menu in the marker name column or by typing a personal tutor's University ID into the agent_id column. The agent_id field will be updated with the University ID for that personal tutor if you use the dropdown. Any students with an empty agent_id field will have their marker removed, if they have one.
+						</p>
+					</li>
+					<li><p><strong>Save</strong> your updated spreadsheet.</p></li>
+					<li>
+						<@form.labelled_row "file.upload" "Choose your updated spreadsheet" "step-action" >
+							<input type="file" name="file.upload"  />
+						</@form.labelled_row>
+					</li>
+				</ol>
+				<div class="fix-footer submit-buttons">
+					<input type="submit" name="uploadSpreadsheet" class="btn btn-primary" value="Upload">
+					<a href="<@routes.depthome module />" class="btn">Cancel</a>
+				</div>
+			</div>
+			<div id="small-groups" class="hide tabbable">
 
-
+			</div>
 		</div><!-- end fix-area -->
 	</@f.form>
 
 <script type="text/javascript">
 (function($) {
+
+	// mode buttons
+	$('.mode').on('click', function(){
+		var selector = $(this).data('selector');
+		$('#assign-markers,.btn-toolbar').fadeOut(300, function() {
+			$(this).remove();
+			if(selector === "small-groups") {
+				$('#small-groups').load('<@routes.assignMarkersSmallGroups assignment />')
+			}
+			$('#'+selector).fadeIn(300);
+		});
+	});
+
+	$("#small-groups").on('click', 'button[name=smallGroupImport]', function(e){
+		var $setSelector = $('.set-selector')
+		var set = $setSelector.val();
+		if (set === "") {
+			var $controls = $setSelector.closest(".controls");
+			$controls.closest(".control-group").addClass("error");
+			$controls.append('<span class="error help-inline">You must choose a small group set</span>');
+			e.preventDefault();
+		}
+	});
+
+	$("#small-groups").on("change", ".set-selector", function(e) {
+		var $target = $(e.target);
+		var set = $target.val();
+		if (set === "") {
+			$(".nav-tabs,.tab-content").hide();
+		} else {
+			$(".nav-tabs,.tab-content").show();
+		}
+
+		var $allSets = $('.set-info');
+		$allSets.hide();
+		$allSets.find("input").prop('disabled', true);
+		var $set = $("."+set);
+		$set.show();
+		$set.find("input").prop('disabled', false);
+	})
+
+	$("#small-groups").on("change", ".marker-selector", function(e) {
+		var $target = $(e.target);
+		var newMarker = $target.val();
+		var $group = $target.closest(".group");
+		var $inputs = $group.find("input.allocation");
+
+		var $roleContainer = $target.closest(".role-container");
+		var roleBinding = $roleContainer.data("rolebinding");
+		// work out how many students are already assigned to this marker so we can increment the binding correctly
+		var $markersExistingStudents = $("input[name^="+roleBinding+"\\["+newMarker+"\\]]", $roleContainer);
+		$inputs.each(function(index) {
+			var newIndex = $markersExistingStudents.size() + index
+			var $this = $(this);
+			var name = $this.attr("name");
+			// update the hidden input that will bind the chosen marker to the student
+			$this.attr("name", name.replace(/(.*\[).*(\]\[.*\])/g, "$1"+newMarker+"]["+newIndex+"]"));
+		});
+	});
+
+	// drag-and drop header fixes
 	var fixHeaderFooter = $('.fix-area').fixHeaderFooter();
 	var singleColumnDragTargetHeight = $('.agentslist .drag-target').outerHeight(true);
 
