@@ -45,32 +45,39 @@
 </#macro>
 
 <#escape x as x?html>
-	<div class="form-horizontal">
-		<@form.labelled_row "" "Small group set">
-			<select class="set-selector">
-				<option></option>
-				<#list sets as set>
-					<option value="set-${set.id}">${set.name}</option>
-				</#list>
-			</select>
-		</@form.labelled_row>
-	</div>
-	<ul class="nav nav-tabs hide">
-		<li class="active"><a href="#first-markers" data-toggle="tab">${firstMarkerRole}s</a></li>
-		<#if hasSecondMarker><li><a href="#second-markers" data-toggle="tab">${secondMarkerRole}s</a></li></#if>
-	</ul>
-	<div class="tab-content hide">
-		<div class="tab-pane role-container active" id="first-markers" data-rolebinding="firstMarkerMapping">
-			<@listSets allocations true />
+	<#if sets?has_content>
+		<div class="form-horizontal">
+			<@form.labelled_row "" "Small group set">
+				<select class="set-selector">
+					<option></option>
+					<#list sets as set>
+						<option value="set-${set.id}">${set.name}</option>
+					</#list>
+				</select>
+			</@form.labelled_row>
 		</div>
-		<#if hasSecondMarker>
-			<div class="tab-pane role-container" id="second-markers" data-rolebinding="secondMarkerMapping">
-				<@listSets allocations false />
+		<ul class="nav nav-tabs hide">
+			<li class="active"><a href="#first-markers" data-toggle="tab">${firstMarkerRole}s</a></li>
+			<#if hasSecondMarker><li><a href="#second-markers" data-toggle="tab">${secondMarkerRole}s</a></li></#if>
+		</ul>
+		<div class="tab-content hide">
+			<div class="tab-pane role-container active" id="first-markers" data-rolebinding="firstMarkerMapping">
+				<@listSets allocations true />
 			</div>
-		</#if>
-	</div>
-	<div class="submit-buttons form-actions">
-		<button type="submit" name="smallGroupImport" class="btn btn-primary">Save</button>
-		<a class="btn" href="<@routes.courseworkDeptHome assignment.module />">Cancel</a>
-	</div>
+			<#if hasSecondMarker>
+				<div class="tab-pane role-container" id="second-markers" data-rolebinding="secondMarkerMapping">
+					<@listSets allocations false />
+				</div>
+			</#if>
+		</div>
+		<div class="submit-buttons form-actions">
+			<button type="submit" name="smallGroupImport" class="btn btn-primary">Save</button>
+			<a class="btn" href="<@routes.courseworkDeptHome assignment.module />">Cancel</a>
+		</div>
+	<#else>
+		<div>
+			I've looked at the Small Group sets for ${assignment.module.code} in ${assignment.academicYear.toString}. Not enough tutors are set up as markers in this workflow.
+			You need to make sure that every Small Group has tutors who are also markers.
+		</div>
+	</#if>
 </#escape>

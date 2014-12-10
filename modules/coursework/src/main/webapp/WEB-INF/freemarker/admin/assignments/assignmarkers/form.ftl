@@ -115,9 +115,15 @@
 	${assignment.name}</h4>
 	<div class="btn-toolbar">
 		<div class="pull-right">
-			<div class="btn-group">
+			<div class="btn-group mode-nav">
 				<button data-selector="spreadsheet" class="btn mode">Upload spreadsheet</button>
 				<button data-selector="small-groups" class="btn mode">Import small groups</button>
+			</div>
+			<div class="btn-group hide back-nav">
+				<a href="<@routes.assignMarkers assignment />" class="btn">
+					<i class="icon-reply"></i>
+					Return to drag and drop
+				</a>
 			</div>
 		</div>
 	</div>
@@ -192,8 +198,9 @@
 	// mode buttons
 	$('.mode').on('click', function(){
 		var selector = $(this).data('selector');
-		$('#assign-markers,.btn-toolbar').fadeOut(300, function() {
+		$('#assign-markers,.mode-nav').fadeOut(300, function() {
 			$(this).remove();
+			$('.back-nav').show();
 			if(selector === "small-groups") {
 				$('#small-groups').load('<@routes.assignMarkersSmallGroups assignment />')
 			}
@@ -227,6 +234,8 @@
 		var $set = $("."+set);
 		$set.show();
 		$set.find("input").prop('disabled', false);
+
+		$(".marker-selector").trigger('change');
 	})
 
 	$("#small-groups").on("change", ".marker-selector", function(e) {
