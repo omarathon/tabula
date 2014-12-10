@@ -742,6 +742,26 @@
 			$m.find('form.double-submit-protection').tabulaSubmitOnce();
             $('select.selectOffset').selectOffset();
 			$m.tabulaPrepareSpinners();
+
+			var $form = ($m.find('iframe').contents().find('form').length == 1) ? $m.find('iframe').contents().find('form') : $m.find('form');
+			if ($form.length == 1 ) {
+
+				$form.areYouSure();
+
+				$m.find('[data-dismiss="modal"]').on('click', function(e) {
+					$form.trigger('checkForm.areYouSure');
+					if($form.hasClass('dirty') && !window.confirm('You have unsaved changes! \n\n Are you sure you want to close this form?')){
+						e.preventDefault();
+						e.stopImmediatePropagation();
+					} else {
+						$form.trigger('reset');
+					}
+				})
+
+				//Prevent modal closing from clicking on parent page or from cancel and cross buttons (use dirty check event above).
+				$m.find('[data-dismiss="modal"]').off('click.dismiss.modal');
+				$("div.modal-backdrop.fade.in").off();
+			}
 		});
 
 		$(document).on("ajaxComplete", function(e, xhr) {
