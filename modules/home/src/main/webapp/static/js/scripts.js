@@ -744,7 +744,7 @@
 			$m.tabulaPrepareSpinners();
 
 			var $form = ($m.find('iframe').contents().find('form').length == 1) ? $m.find('iframe').contents().find('form') : $m.find('form');
-			if ($form.length == 1 ) {
+			if ($form.length == 1) {
 
 				$form.areYouSure();
 
