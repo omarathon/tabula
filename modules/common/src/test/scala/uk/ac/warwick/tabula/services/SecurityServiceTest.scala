@@ -284,14 +284,12 @@ class SecurityServiceTest extends TestBase with Mockito {
 		 * I can:
 		 * 
 		 * - read any relationship type in the department
-		 * - create type1, but only against that student
-		 * - delete type2 over the whole department
+		 * - manage type1, but only against that student
+		 * - manage type2 over the whole department
 		 */ 
 		
 		val deptPerms = Stream(
 				PermissionDefinition(Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), Some(department), true),
-				PermissionDefinition(Permissions.Profiles.StudentRelationship.Manage(type2), Some(department), true),
-				PermissionDefinition(Permissions.Profiles.StudentRelationship.Manage(type1), Some(department), true),
 				PermissionDefinition(Permissions.Profiles.StudentRelationship.Manage(type2), Some(department), true)
 		)
 		
@@ -317,25 +315,27 @@ class SecurityServiceTest extends TestBase with Mockito {
 		roleService.getExplicitPermissionsFor(currentUser, department) returns deptPerms
 				
 		securityService.roleService = roleService
-		
-		// Should be able to manage type 1, but not type 2 or any, and only over student1
+
+		// Can manage type 2 for whole dept
+		// Can also manage type 1, but only over student1
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), department) should be {false}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), department) should be {false}
+		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), department) should be {true}
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), department) should be {false}
-		
+
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), student1) should be {true}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), student1) should be {false}
+		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), student1) should be {true}
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), student1) should be {false}
 		
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), studentCourseDetails) should be {true}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), studentCourseDetails) should be {false}
+		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), studentCourseDetails) should be {true}
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), studentCourseDetails) should be {false}
 		
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), student2) should be {false}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), student2) should be {false}
+		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), student2) should be {true}
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), student2) should be {false}
 
 		securityService.canForAny(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), Seq(student1, student2)) should be {true}
+
 		// Can read any type over the dept
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type1), department) should be {true}
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type2), department) should be {true}
@@ -353,39 +353,6 @@ class SecurityServiceTest extends TestBase with Mockito {
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type2), student2) should be {true}
 		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), student2) should be {true}
 		
-		// Can manage type 2 only for whole dept
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), department) should be {false}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), department) should be {true}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), department) should be {false}
-		
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), student1) should be {false}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), student1) should be {true}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), student1) should be {false}
-		
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), studentCourseDetails) should be {false}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), studentCourseDetails) should be {true}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), studentCourseDetails) should be {false}
-		
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), student2) should be {false}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), student2) should be {true}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), student2) should be {false}
-		
-		// Can manage type 1 and type 2, but not any
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), department) should be {true}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), department) should be {true}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), department) should be {false}
-		
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), student1) should be {true}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), student1) should be {true}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), student1) should be {false}
-		
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), studentCourseDetails) should be {true}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), studentCourseDetails) should be {true}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), studentCourseDetails) should be {false}
-		
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), student2) should be {true}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), student2) should be {true}
-		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), student2) should be {false}
 	}
 	
 	/*
