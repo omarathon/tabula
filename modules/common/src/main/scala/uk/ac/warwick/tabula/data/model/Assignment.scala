@@ -165,7 +165,7 @@ class Assignment
 
 	def feedbackDeadline: Option[LocalDate] = if (openEnded || dissertation) {
 		None
-	} else if (!hasExtensions || !extensions.exists(_.approved) || extensions.count(_.approved) < submissions.size) {
+	} else if (!hasExtensions || !extensions.exists(_.approved) || submissions.exists(s => !extensions.exists(e => e.isForUser(s.universityId, s.userId)))) {
 		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
 	} else {
 		Option(extensions.filter(_.approved).map(_.feedbackDeadline.toLocalDate).min)
