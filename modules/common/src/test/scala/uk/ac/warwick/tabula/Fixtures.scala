@@ -156,6 +156,12 @@ object Fixtures extends Mockito {
 		workflow
 	}
 
+	def seenSecondMarkingWorkflow(name: String) = {
+		val workflow = new SeenSecondMarkingWorkflow
+		workflow.name = name
+		workflow
+	}
+
 	def studentsChooseMarkerWorkflow(name: String) = {
 		val workflow = new StudentsChooseMarkerWorkflow
 		workflow.name = name

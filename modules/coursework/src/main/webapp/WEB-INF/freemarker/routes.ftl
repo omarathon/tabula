@@ -63,6 +63,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentsubmissionsandfeedbacksummary assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/summary"/></#macro>
 
 <#macro assignMarkers assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/assign-markers" /></#macro>
+<#macro assignMarkersSmallGroups assignment><@url context="/groups" page="/admin/marker-allocation/${assignment.id}" /></#macro>
 <#macro releaseForMarking assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions" /></#macro>
 
 <#macro onlinemarking assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/online" /></#macro>
