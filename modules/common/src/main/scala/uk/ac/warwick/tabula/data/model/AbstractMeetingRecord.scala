@@ -124,7 +124,7 @@ sealed abstract class MeetingFormat(val code: String, val description: String) {
 }
 
 object MeetingFormat {
-	case object FaceToFace extends MeetingFormat("f2f", "Face to face meeting")
+	case object FaceToFace extends MeetingFormat("f2f", "Face-to-face meeting")
 	case object VideoConference extends MeetingFormat("video", "Video conference")
 	case object PhoneCall extends MeetingFormat("phone", "Telephone call")
 	case object Email extends MeetingFormat("email", "Email conversation")
