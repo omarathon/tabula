@@ -52,14 +52,9 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		MemberNotes.Delete,
 
 		Profiles.MeetingRecord.ReadDetails(PermissionsSelector.Any[StudentRelationshipType]),
+		Profiles.MeetingRecord.Manage(PermissionsSelector.Any[StudentRelationshipType]),
 
-		Profiles.ScheduledMeetingRecord.Create(PermissionsSelector.Any[StudentRelationshipType]),
-		Profiles.ScheduledMeetingRecord.Update(PermissionsSelector.Any[StudentRelationshipType]),
-		Profiles.ScheduledMeetingRecord.Delete(PermissionsSelector.Any[StudentRelationshipType]),
-
-		Profiles.MeetingRecord.Create(PermissionsSelector.Any[StudentRelationshipType]),
-		Profiles.MeetingRecord.Update(PermissionsSelector.Any[StudentRelationshipType]),
-		Profiles.MeetingRecord.Delete(PermissionsSelector.Any[StudentRelationshipType]),
+		Profiles.ScheduledMeetingRecord.Manage(PermissionsSelector.Any[StudentRelationshipType]),
 
 		Profiles.MeetingRecord.Approve,
 		Profiles.ScheduledMeetingRecord.Confirm,
