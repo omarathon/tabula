@@ -171,7 +171,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 
 		check("Row 6",
 			assignmentSheet.getRow(5),
-			Seq("test six","IN102",dateTime(2013, 7, 1),dateTime(2013, 7, 29),"Summative", "", 73,73,24,0,0,73,65,0.890410958904109589,8,0.109589041095890410))
+			Seq("test six","IN102",dateTime(2013, 7, 1),dateTime(2013, 7, 31),"Summative", "", 73,73,24,0,0,73,65,0.890410958904109589,8,0.109589041095890410))
 
 		check("Row 7",
 			assignmentSheet.getRow(6),
