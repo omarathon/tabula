@@ -45,10 +45,6 @@ Options: (all of these options can be set as data- attributes)
  			 The name of the items being drag and dropped, for tooltips and help text
  - textSelector:
  			 If set, is used as a selector to find the text representation of an item
- - useHandle (default: true):
- 			 If set to true, adds a handle to each item (see 'handle' option for class name/selector)
- - handle (default: .handle):
- 			 See useHandle
  - selectables (default: .drag-list):
  			 Selector for selectable elements
  - removeTooltip:
@@ -97,10 +93,7 @@ Method calls (after initialising):
 		var itemName = this.options.itemName || 'item';
 		var textSelector = this.options.textSelector;
 
-		var useHandle = this.options.useHandle;
-		if (typeof(useHandle) === 'undefined') useHandle = true;
-
-		var handleClass = this.options.handle || '.handle';
+		var handleClass = '.handle';
 
         var sortables = '.drag-list';
         var selectables = this.options.selectables || sortables;
@@ -240,14 +233,11 @@ Method calls (after initialising):
         	});
         });
 
-		var deleteLinkHtml;
-		if (this.options.removeTooltip)
-			deleteLinkHtml = ' <a href="#" class="delete" data-toggle="tooltip" title="' + this.options.removeTooltip + '"><i class="icon-remove icon-large"></i></a>';
-        else
-			deleteLinkHtml = ' <a href="#" class="delete"><i class="icon-remove icon-large"></i> Remove</a>';
+		var deleteLinkHtml = ' <a href="#" class="delete" data-toggle="tooltip" title="' + this.options.removeTooltip + '"><i class="icon-remove icon-large"></i></a>';
+
 
 		var popoverGenerator = function() {
-            var customHeader = $(this).data('pre') || ''; // data-pre attribute
+            var customHeader = $(this).data('pre') || ''; // data-pre attribute+
             var prelude = $(this).data('prelude') || '';
             var LIs = $(this)
                 .closest('.drag-target')
@@ -384,21 +374,15 @@ Method calls (after initialising):
 
         };
 
-        if (useHandle) draggableOptions.handle = handleClass;
-
         // Drag any list item by its handle
-        var draggables =
-        	$sortables.find('li')
-            .draggable(draggableOptions);
-
-        if (useHandle) draggables.prepend('<i class="icon-reorder icon-white ' + handleClass.substr(1) + '"></i> ');
+        var draggables = $sortables.find('li').draggable(draggableOptions);
 
         // Drag-select
         var dragSelectOptions = {
             filter: 'li'
         };
-        if (useHandle) dragSelectOptions.cancel = handleClass;
-        else dragSelectOptions.cancel = 'li';
+
+        dragSelectOptions.cancel = 'li';
 
         $selectables.selectable(dragSelectOptions);
 

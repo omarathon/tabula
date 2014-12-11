@@ -621,7 +621,7 @@
 								// FIXME This sucks, need to change id6scripts.js to expose this as a function!
 								$target.find('table').each(function() {
 									var t = $(this);
-									if (Math.floor(t.width()) > t.parent().width()) {
+									if (t.isVisible() && Math.floor(t.width()) > t.parent().width()) {
 										t.wrap($('<div><div class="sb-wide-table-wrapper"></div></div>'));
 									}
 								});
