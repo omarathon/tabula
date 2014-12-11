@@ -19,8 +19,10 @@ trait CombinedStaffTimetableEventSourceComponent extends StaffTimetableEventSour
 	class CombinedStaffTimetableEventSource() extends StaffTimetableEventSource {
 
 		def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Seq[TimetableEvent] = {
-			timetableFetchingService.getTimetableForStaff(staff.universityId) ++
-				staffGroupEventSource.eventsFor(staff, currentUser, context)
+			val timetableEvents: Seq[TimetableEvent] = timetableFetchingService.getTimetableForStaff(staff.universityId).getOrElse(Nil)
+			val smallGroupEvents: Seq[TimetableEvent] = staffGroupEventSource.eventsFor(staff, currentUser, context)
+
+			timetableEvents ++ smallGroupEvents
 		}
 
 	}

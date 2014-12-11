@@ -48,7 +48,7 @@ class PublishFeedbackCommandTest extends TestBase {
 		val user = new User("admin")
 		val currentUser = new CurrentUser(user, user)
 		val assignment = newDeepAssignment(moduleCode = "IN101")
-		val command = new PublishFeedbackCommand(assignment.module, assignment, currentUser)
+		val command = new PublishFeedbackCommand(assignment.module, assignment, currentUser, None)
 		val errors = new BindException(command, "command")
 		val feedback = new Feedback()
 		feedback.actualMark = Option(41)

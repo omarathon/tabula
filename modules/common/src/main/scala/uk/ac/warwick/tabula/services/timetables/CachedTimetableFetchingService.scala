@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import uk.ac.warwick.util.cache.{CacheEntryFactory, Caches}
-import uk.ac.warwick.util.cache.Caches.CacheStrategy
+import uk.ac.warwick.util.cache.{CacheEntryUpdateException, CacheEntryFactory, Caches}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
 import uk.ac.warwick.tabula.services.timetables.TimetableCacheKey._
+
+import scala.util.{Try, Success, Failure}
 
 /**
  * A wrapper around a TimetableFetchingService that stores the resulting TimetableEvents in a
@@ -36,28 +37,35 @@ class CachedPartialTimetableFetchingService(delegate: PartialTimetableFetchingSe
 			}
 		}
 
-		def create(key:TimetableCacheKey):EventList = toEventList(key match {
-			case StudentKey(id) => delegate match {
-				case delegate: StudentTimetableFetchingService => delegate.getTimetableForStudent(id)
-				case _ => throw new UnsupportedOperationException("Delegate does not support fetching student timetables")
+		def create(key:TimetableCacheKey): EventList = {
+			val result = (key match {
+				case StudentKey(id) => delegate match {
+					case delegate: StudentTimetableFetchingService => delegate.getTimetableForStudent(id)
+					case _ => throw new UnsupportedOperationException("Delegate does not support fetching student timetables")
+				}
+				case StaffKey(id)   => delegate match {
+					case delegate: StaffTimetableFetchingService => delegate.getTimetableForStaff(id)
+					case _ => throw new UnsupportedOperationException("Delegate does not support fetching staff timetables")
+				}
+				case CourseKey(id)  => delegate match {
+					case delegate: CourseTimetableFetchingService => delegate.getTimetableForCourse(id)
+					case _ => throw new UnsupportedOperationException("Delegate does not support fetching course timetables")
+				}
+				case RoomKey(id)    => delegate match {
+					case delegate: RoomTimetableFetchingService => delegate.getTimetableForRoom(id)
+					case _ => throw new UnsupportedOperationException("Delegate does not support fetching room timetables")
+				}
+				case ModuleKey(id)  => delegate match {
+					case delegate: ModuleTimetableFetchingService => delegate.getTimetableForModule(id)
+					case _ => throw new UnsupportedOperationException("Delegate does not support fetching module timetables")
+				}
+			}).map(toEventList)
+
+			result match {
+				case Success(ev) => ev
+				case Failure(e) => throw new CacheEntryUpdateException(e)
 			}
-			case StaffKey(id)   => delegate match {
-				case delegate: StaffTimetableFetchingService => delegate.getTimetableForStaff(id)
-				case _ => throw new UnsupportedOperationException("Delegate does not support fetching staff timetables")
-			}
-			case CourseKey(id)  => delegate match {
-				case delegate: CourseTimetableFetchingService => delegate.getTimetableForCourse(id)
-				case _ => throw new UnsupportedOperationException("Delegate does not support fetching course timetables")
-			}
-			case RoomKey(id)    => delegate match {
-				case delegate: RoomTimetableFetchingService => delegate.getTimetableForRoom(id)
-				case _ => throw new UnsupportedOperationException("Delegate does not support fetching room timetables")
-			}
-			case ModuleKey(id)  => delegate match {
-				case delegate: ModuleTimetableFetchingService => delegate.getTimetableForModule(id)
-				case _ => throw new UnsupportedOperationException("Delegate does not support fetching module timetables")
-			}
-		})
+		}
 
 		def create(keys: JList[TimetableCacheKey]): JMap[TimetableCacheKey, EventList] = {
 			JMap(keys.asScala.map(id => (id, create(id))): _*)
@@ -70,11 +78,11 @@ class CachedPartialTimetableFetchingService(delegate: PartialTimetableFetchingSe
 	lazy val timetableCache =
 		Caches.newCache(cacheName, cacheEntryFactory, CacheExpiryTime, cacheStrategy)
 
-	def getTimetableForStudent(universityId: String): Seq[TimetableEvent] = timetableCache.get(StudentKey(universityId))
-	def getTimetableForModule(moduleCode: String): Seq[TimetableEvent] = timetableCache.get(ModuleKey(moduleCode))
-	def getTimetableForCourse(courseCode: String): Seq[TimetableEvent] = timetableCache.get(CourseKey(courseCode))
-	def getTimetableForRoom(roomName: String): Seq[TimetableEvent] = timetableCache.get(RoomKey(roomName))
-	def getTimetableForStaff(universityId: String): Seq[TimetableEvent] = timetableCache.get(StaffKey(universityId))
+	def getTimetableForStudent(universityId: String) = Try(timetableCache.get(StudentKey(universityId)))
+	def getTimetableForModule(moduleCode: String) = Try(timetableCache.get(ModuleKey(moduleCode)))
+	def getTimetableForCourse(courseCode: String) = Try(timetableCache.get(CourseKey(courseCode)))
+	def getTimetableForRoom(roomName: String) = Try(timetableCache.get(RoomKey(roomName)))
+	def getTimetableForStaff(universityId: String) = Try(timetableCache.get(StaffKey(universityId)))
 
 }
 

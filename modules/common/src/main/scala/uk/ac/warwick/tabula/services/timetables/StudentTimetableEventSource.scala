@@ -18,10 +18,14 @@ trait CombinedStudentTimetableEventSourceComponent extends StudentTimetableEvent
 
 	class CombinedStudentTimetableEventSource() extends StudentTimetableEventSource {
 		def eventsFor(student: StudentMember, currentUser: CurrentUser, context: TimetableEvent.Context): Seq[TimetableEvent] = {
-			val events = timetableFetchingService.getTimetableForStudent(student.universityId) ++
-				studentGroupEventSource.eventsFor(student, currentUser, context)
-			if (student.isPGR) { events ++ timetableFetchingService.getTimetableForStaff(student.universityId) }
-			events
+			val timetableEvents: Seq[TimetableEvent] = timetableFetchingService.getTimetableForStudent(student.universityId).getOrElse(Nil)
+			val smallGroupEvents: Seq[TimetableEvent] = studentGroupEventSource.eventsFor(student, currentUser, context)
+
+			val staffEvents: Seq[TimetableEvent] =
+				if (student.isPGR) { timetableFetchingService.getTimetableForStaff(student.universityId).getOrElse(Nil) }
+				else Nil
+
+			timetableEvents ++ smallGroupEvents ++ staffEvents
 		}
 	}
 

@@ -417,6 +417,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote] = {
 		val notes = session.newCriteria[AttendanceMonitoringNote]
+			.createAlias("point", "point") // We don't reference the alias, but it means only notes where the point still exists are returned
 			.add(is("student", student))
 			.seq
 

@@ -18,7 +18,7 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 	val wrapper = new DefaultObjectWrapper()
 	val isoFormatter = DateFormats.IsoDateTime
 
-	val result = processorResult.result
+	val result = processorResult.attendance
 	val students = processorResult.students
 	val points = processorResult.points
 

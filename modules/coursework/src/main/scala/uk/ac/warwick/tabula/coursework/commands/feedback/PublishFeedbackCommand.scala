@@ -7,10 +7,9 @@ import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackPublishe
 import uk.ac.warwick.tabula.data.model.{Notification, Feedback, Assignment, Module}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{UserLookupService, FeedbackService}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.FeedbackService
 import language.implicitConversions
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
@@ -26,7 +25,7 @@ object PublishFeedbackCommand {
 	)
 }
 
-class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser)
+class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser, val optionalQueueFeedbackForSitsCommand: Option[QueueFeedbackForSitsCommand])
 	extends Command[PublishFeedbackCommand.PublishFeedbackResults] with Notifies[PublishFeedbackCommand.PublishFeedbackResults, Feedback] with SelfValidating {
 	import PublishFeedbackCommand._
 
@@ -37,6 +36,11 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 	var userLookup = Wire.auto[UserLookupService]
 
 	var confirm: Boolean = false
+
+	val queueFeedbackForSitsCommand = optionalQueueFeedbackForSitsCommand match {
+		case Some(cmd: QueueFeedbackForSitsCommand) => cmd
+		case None => new QueueFeedbackForSitsCommand(assignment, submitter)
+	}
 
 	// validation done even when showing initial form.
 	def prevalidate(errors: Errors) {
@@ -56,6 +60,10 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 
 	def applyInternal() = {
 		transactional() {
+			if (assignment.uploadMarksToSits) {
+				queueFeedbackForSitsCommand.apply()
+			}
+
 			val users = getUsersForFeedback
 			val allResults = for {
 				(studentId, user) <- users
@@ -73,6 +81,7 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 					badEmails = acc.badEmails ++ result.badEmails
 				)
 			}
+
 		}
 	}
 

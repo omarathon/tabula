@@ -23,6 +23,7 @@ import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
 import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.userlookup.UserLookupException
 import uk.ac.warwick.util.cache.{CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
 
 import scala.collection.JavaConverters._
@@ -207,12 +208,13 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		req >> { (is) => combineIdenticalEvents(parseICal(is, config)) }
 	}
 
-	def getTimetableForStudent(universityId: UniversityId): Seq[TimetableEvent] = {
+	def getTimetableForStudent(universityId: UniversityId): Try[Seq[TimetableEvent]] = {
 		userLookup.getUserByWarwickUniId(universityId) match {
-			case FoundUser(u) if u.getDepartmentCode.hasText => configs.get(u.getDepartmentCode.toLowerCase).map { config =>
-				doRequest(s"${u.getWarwickId}.ics", config)
-			}.getOrElse(Nil)
-			case _ => Nil
+			case FoundUser(u) if u.getDepartmentCode.hasText =>
+				configs.get(u.getDepartmentCode.toLowerCase).map { config =>
+					doRequest(s"${u.getWarwickId}.ics", config)
+				}.getOrElse(Success(Nil))
+			case _ => Failure(new UserLookupException(s"No user found for university ID $universityId"))
 		}
 	}
 
@@ -232,7 +234,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		}
 	}
 
-	def getTimetableForStaff(universityId: UniversityId): Seq[TimetableEvent] = {
+	def getTimetableForStaff(universityId: UniversityId): Try[Seq[TimetableEvent]] = {
 		findConfigForStaff(universityId).map { config =>
 			val filename = config.staffFilenameLookupStrategy match {
 				case FilenameGenerationStrategy.Default => s"$universityId.ics"
@@ -240,7 +242,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 			}
 
 			doRequest(filename, config)
-		}.getOrElse(Nil)
+		}.getOrElse(Success(Nil))
 	}
 
 	type BSVCacheEntry = Seq[(UniversityId, CelcatStaffInfo)] with java.io.Serializable
@@ -290,7 +292,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 			}
 		} else Map()
 
-	def doRequest(filename: String, config: CelcatDepartmentConfiguration): Seq[TimetableEvent] = {
+	def doRequest(filename: String, config: CelcatDepartmentConfiguration): Try[Seq[TimetableEvent]] = {
 		// Add {universityId}.ics to the URL
 		val req = url(config.baseUri) / filename <<? Map("forcebasic" -> "true")
 
@@ -298,14 +300,17 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		// If the status is OK, pass the response to the handler function for turning into TimetableEvents
 		// else return an empty list.
 		logger.info(s"Requesting timetable data from $req")
-		Try(http.when(_==200)(req >:+ handler(config))) match {
-			case Success(ev)=>
+		val result = Try(http.when(_==200)(req >:+ handler(config)))
+
+		// Extra logging
+		result match {
+			case Success(ev) =>
 				if (ev.isEmpty) logger.info("Timetable request successful but no events returned")
-				ev
 			case Failure(e) =>
 				logger.warn(s"Request for $req failed: ${e.getMessage}")
-				Nil
 		}
+
+		result
 	}
 
 	def combineIdenticalEvents(events: Seq[TimetableEvent]): Seq[TimetableEvent] = {
