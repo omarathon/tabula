@@ -103,8 +103,8 @@ abstract class OnlineModerationCommand(module: Module, assignment: Assignment, s
 		}
 	}
 
-	override def validate(errors: Errors){
-		super.validate(errors)
+	override def validate(errors: Errors) {
+		super.fieldValidation(errors)
 
 		if (!Option(approved).isDefined)
 			errors.rejectValue("approved", "markers.moderation.approved.notDefined")
