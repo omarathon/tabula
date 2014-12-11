@@ -15,7 +15,7 @@ class TwoWayConverterTest extends TestBase {
 		converter.convert("3", descriptor[String], descriptor[Days]) should be (Days.THREE)
 		converter.convert(Days.FIVE, descriptor[Days], descriptor[String]) should be ("5")
 	}
-	
+
 	@Test def formatting {
 		val converter = new DaysConverter
 		converter.parse("3", Locale.getDefault()) should be (Days.THREE)
@@ -32,7 +32,7 @@ class TwoWayConverterTest extends TestBase {
 		val sourceType = TypeDescriptor.valueOf(MeetingFormat.FaceToFace.getClass)
 		val targetType = TypeDescriptor.valueOf(classOf[String])
 		val faceToFace = converter.convert(sourceValue, sourceType, targetType)
-		faceToFace should be ("Face to face meeting")
+		faceToFace should be ("Face-to-face meeting")
 	}
 
 	private def descriptor[A](implicit tag: ClassTag[A]) = TypeDescriptor.valueOf(tag.runtimeClass)
