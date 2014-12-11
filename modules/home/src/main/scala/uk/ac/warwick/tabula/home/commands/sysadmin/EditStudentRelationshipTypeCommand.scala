@@ -36,6 +36,6 @@ trait EditStudentRelationshipTypeCommandPermissions extends RequiresPermissionsC
 	
 	def permissionsCheck(p: PermissionsChecking) {
 		mandatory(relationshipType)
-		p.PermissionCheck(Permissions.StudentRelationshipType.Update)
+		p.PermissionCheck(Permissions.StudentRelationshipType.Manage)
 	}
 }

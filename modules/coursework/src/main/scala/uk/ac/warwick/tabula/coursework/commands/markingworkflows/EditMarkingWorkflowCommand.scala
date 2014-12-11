@@ -78,7 +78,7 @@ trait EditMarkingWorkflowCommandPermissions extends RequiresPermissionsChecking 
 		
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(mandatory(markingWorkflow), mandatory(department))
-		p.PermissionCheck(Permissions.MarkingWorkflow.Update, markingWorkflow)
+		p.PermissionCheck(Permissions.MarkingWorkflow.Manage, markingWorkflow)
 	}
 }
 

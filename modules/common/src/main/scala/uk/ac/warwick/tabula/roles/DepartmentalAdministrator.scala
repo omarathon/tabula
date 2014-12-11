@@ -35,15 +35,11 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Assignment.ImportFromExternalSystem,
 		SmallGroups.ImportFromExternalSystem,
 
-		FeedbackTemplate.Create,
 		FeedbackTemplate.Read,
-		FeedbackTemplate.Update,
-		FeedbackTemplate.Delete,
+		FeedbackTemplate.Manage,
 
-		MarkingWorkflow.Create,
 		MarkingWorkflow.Read,
-		MarkingWorkflow.Update,
-		MarkingWorkflow.Delete,
+		MarkingWorkflow.Manage,
 
 		Department.ManageProfiles,
 
