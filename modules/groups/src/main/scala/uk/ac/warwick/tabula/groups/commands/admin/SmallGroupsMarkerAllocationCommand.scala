@@ -52,7 +52,10 @@ class SmallGroupsMarkerAllocationCommandInternal(val assignment: Assignment)
 		})
 		// do not return sets that have groups that don't have at least one tutor who is a marker
 		setAllocations.filterNot( s =>
-			s.firstMarkerGroups.exists(_.tutors.isEmpty) || s.secondMarkerGroups.exists(_.tutors.isEmpty)
+			s.firstMarkerGroups.isEmpty ||
+			s.firstMarkerGroups.exists(_.tutors.isEmpty) ||
+			s.secondMarkerGroups.isEmpty ||
+			s.secondMarkerGroups.exists(_.tutors.isEmpty)
 		)
 	}
 }
