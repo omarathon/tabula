@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.permissions._
 class DeleteMarkingWorkflowCommand(val department: Department, val markingWorkflow: MarkingWorkflow) extends Command[Unit] with SelfValidating {
 	
 	mustBeLinked(markingWorkflow, department)
-	PermissionCheck(Permissions.MarkingWorkflow.Delete, markingWorkflow)
+	PermissionCheck(Permissions.MarkingWorkflow.Manage, markingWorkflow)
 	
 	var dao = Wire.auto[MarkingWorkflowDao]
 	

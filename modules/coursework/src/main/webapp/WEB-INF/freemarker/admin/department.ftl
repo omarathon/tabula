@@ -118,7 +118,7 @@
 					<#if features.feedbackTemplates>
 						<li>
 							<#assign feedback_url><@routes.feedbacktemplates department /></#assign>
-							<@fmt.permission_button permission='FeedbackTemplate.Create' scope=department action_descr='create feedback template' href=feedback_url>
+							<@fmt.permission_button permission='FeedbackTemplate.Manage' scope=department action_descr='create feedback template' href=feedback_url>
 								<i class="icon-comment icon-fixed-width"></i> Feedback templates
 							</@fmt.permission_button>
 						</li>

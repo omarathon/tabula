@@ -95,7 +95,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			val perms = new AddStudentRelationshipTypeCommandPermissions() {}
 			val checking = mock[PermissionsChecking]
 			perms.permissionsCheck(checking)
-			there was one(checking).PermissionCheck(Permissions.StudentRelationshipType.Create)
+			there was one(checking).PermissionCheck(Permissions.StudentRelationshipType.Manage)
 		}
 	}
 	

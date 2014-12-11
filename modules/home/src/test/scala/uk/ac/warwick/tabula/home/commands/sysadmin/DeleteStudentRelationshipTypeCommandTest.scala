@@ -79,7 +79,7 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			}
 			val checking = mock[PermissionsChecking]
 			perms.permissionsCheck(checking)
-			there was one(checking).PermissionCheck(Permissions.StudentRelationshipType.Delete)
+			there was one(checking).PermissionCheck(Permissions.StudentRelationshipType.Manage)
 		}
 	}
 	

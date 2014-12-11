@@ -235,17 +235,13 @@ object Permissions {
 	}
 
 	object FeedbackTemplate {
-		case object Create extends Permission("Add a feedback template")
 		case object Read extends Permission("View a feedback template")
-		case object Update extends Permission("Edit a feedback template")
-		case object Delete extends Permission("Remove a feedback template")
+		case object Manage extends Permission("Manage feedback templates")
 	}
 
 	object MarkingWorkflow {
-		case object Create extends Permission("Add a marking workflow")
 		case object Read extends Permission("View a marking workflow")
-		case object Update extends Permission("Edit a marking workflow")
-		case object Delete extends Permission("Delete a marking workflow")
+		case object Manage extends Permission("Manage marking workflows")
 	}
 
 	object Profiles {
@@ -287,14 +283,10 @@ object Permissions {
 		}
 
 		object StudentRelationship {
-			case class Create(relationshipType: PermissionsSelector[StudentRelationshipType])
-				extends SelectorPermission(relationshipType, "Add a student relationship")
 			case class Read(relationshipType: PermissionsSelector[StudentRelationshipType])
 				extends SelectorPermission(relationshipType, "View a student relationship")
-			case class Update(relationshipType: PermissionsSelector[StudentRelationshipType])
-				extends SelectorPermission(relationshipType, "Edit a student relationship")
-			case class Delete(relationshipType: PermissionsSelector[StudentRelationshipType])
-				extends SelectorPermission(relationshipType, "Remove a student relationship")
+			case class Manage(relationshipType: PermissionsSelector[StudentRelationshipType])
+				extends SelectorPermission(relationshipType, "Manage student relationships")
 		}
 
 		object MeetingRecord {
@@ -354,10 +346,8 @@ object Permissions {
 	}
 
 	object StudentRelationshipType {
-		case object Create extends ScopelessPermission("Create student relationship types")
 		case object Read extends ScopelessPermission("View student relationship types")
-		case object Update extends ScopelessPermission("Edit student relationship types")
-		case object Delete extends ScopelessPermission("Remove student relationship types")
+		case object Manage extends ScopelessPermission("Manage student relationship types")
 	}
 
 	object MemberNotes {

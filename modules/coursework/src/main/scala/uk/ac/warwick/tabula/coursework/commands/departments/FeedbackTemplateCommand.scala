@@ -42,7 +42,7 @@ abstract class FeedbackTemplateCommand(val department:Department)
 
 class BulkFeedbackTemplateCommand(department:Department) extends FeedbackTemplateCommand(department) {
 	
-	PermissionCheck(Permissions.FeedbackTemplate.Create, department)
+	PermissionCheck(Permissions.FeedbackTemplate.Manage, department)
 
 	override def applyInternal() = {
 		transactional() {
@@ -68,7 +68,7 @@ class BulkFeedbackTemplateCommand(department:Department) extends FeedbackTemplat
 class EditFeedbackTemplateCommand(department:Department, val template: FeedbackTemplate) extends FeedbackTemplateCommand(department) {
 	
 	mustBeLinked(template, department)
-	PermissionCheck(Permissions.FeedbackTemplate.Update, template)
+	PermissionCheck(Permissions.FeedbackTemplate.Manage, template)
 
 	var zipService = Wire.auto[ZipService]
 
@@ -99,7 +99,7 @@ class EditFeedbackTemplateCommand(department:Department, val template: FeedbackT
 class DeleteFeedbackTemplateCommand(department:Department, val template: FeedbackTemplate) extends FeedbackTemplateCommand(department) with Logging {
 	
 	mustBeLinked(template, department)
-	PermissionCheck(Permissions.FeedbackTemplate.Delete, template)
+	PermissionCheck(Permissions.FeedbackTemplate.Manage, template)
 
 	var id:String = _
 
