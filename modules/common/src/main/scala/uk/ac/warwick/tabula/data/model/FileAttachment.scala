@@ -142,16 +142,20 @@ class FileAttachment extends GeneratedId {
 }
 
 object FileAttachment {
-
-	private val BadCharacters = new Regex("""[<\\"|;:*/>?]""")
+	private val BadCharacters = new Regex("[^-!'., \\w]")
 	private val Space = new Regex("(\\s|%20)+")
-	private val BadExtensions = new Regex("\\s*\\.\\s*(\\w+)$")
 
 	def sanitisedFilename(filename: String) = {
-		val trimmed = filename.trim
-		val niceChars = BadCharacters.replaceAllIn(trimmed, "")
-		val deSpaced = Space.replaceAllIn(niceChars, " ")
-		BadExtensions.replaceAllIn(deSpaced, ".$1")
-	}
+		val spaced = Space.replaceAllIn(filename, " ")
+		val sanitised = BadCharacters.replaceAllIn(spaced, "")
+		val hasNoFilename = sanitised.head == '.'
 
+		val dotSplit = sanitised.split('.').map(_.trim).toList.filterNot(_.isEmpty)
+		dotSplit match {
+			case Nil => "download.unknowntype"
+			case extension :: Nil if hasNoFilename => "download." + extension
+			case filename :: Nil => filename + ".unknowntype"
+			case _ => dotSplit.mkString(".")
+		}
+	}
 }

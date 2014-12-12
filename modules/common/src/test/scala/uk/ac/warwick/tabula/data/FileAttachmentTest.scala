@@ -32,8 +32,17 @@ class FileAttachmentTest extends TestBase {
 	}
 
 	@Test
+	def tidyNonAscii() {
+		new FileAttachment("看看我的鱼.pdf").name should be ("download.pdf")
+		new FileAttachment("看看我的鱼.球").name should be ("download.unknowntype")
+		new FileAttachment("Aperçu.pdf").name should be ("Aperu.pdf")
+	}
+
+	@Test
 	def tidyExtensions() {
 		new FileAttachment("No spaces after this. pdf").name should be ("No spaces after this.pdf")
-		new FileAttachment("No extension here.").name should be ("No extension here.")
+		new FileAttachment("No extension here.").name should be ("No extension here.unknowntype")
+		new FileAttachment(".docx").name should be ("download.docx")
+		new FileAttachment(".").name should be ("download.unknowntype")
 	}
 }
