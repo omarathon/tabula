@@ -2463,7 +2463,7 @@ initLightbox()
 }})
 });
 h(window).load(function(){h("table").each(function(){var r=h(this);
-if(r.isVisible() && Math.floor(r.width())>r.parent().width()){r.wrap(h('<div><div class="sb-wide-table-wrapper"></div></div>'))
+if(r.is(':visible') && Math.floor(r.width())>r.parent().width()){r.wrap(h('<div><div class="sb-wide-table-wrapper"></div></div>'))
 }});
 if(h("body.is-smallscreen").length===0&&h("div.sb-wide-table-wrapper").length>0){var p=function(r){r.stopPropagation();
 r.preventDefault();
