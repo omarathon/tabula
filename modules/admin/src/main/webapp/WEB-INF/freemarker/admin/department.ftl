@@ -37,12 +37,12 @@
 					<li class="divider"></li>
 				</#if>
 
-				<#if can.do("Department.Create", department)>
+				<#if can.do("Department.Manage", department)>
 					<li><a href="<@routes.createsubdepartment department />">
 						<i class="icon-plus icon-fixed-width"></i> Create sub-department</a>
 					</li>
 				</#if>
-				<#if can.do("Department.Update", department)>
+				<#if can.do("Department.Manage", department)>
 					<li><a href="<@routes.editdepartment department />">
 						<i class="icon-plus icon-fixed-width"></i> Edit department</a>
 					</li>
@@ -52,14 +52,14 @@
 						<i class="icon-plus icon-fixed-width"></i> Create module</a>
 					</li>
 				</#if>
-				<#if department.children?has_content && can.do("Department.ArrangeModules", department)>
+				<#if department.children?has_content && can.do("Department.ArrangeRoutesAndModules", department)>
 					<li class="divider"></li>
 
 					<li><a href="<@routes.sortmodules department />">
 						<i class="icon-random icon-fixed-width"></i> Arrange modules</a>
 					</li>
 				</#if>
-				<#if department.children?has_content && can.do("Department.ArrangeRoutes", department)>
+				<#if department.children?has_content && can.do("Department.ArrangeRoutesAndModules", department)>
 					<li><a href="<@routes.sortroutes department />">
 						<i class="icon-random icon-fixed-width"></i> Arrange routes</a>
 					</li>

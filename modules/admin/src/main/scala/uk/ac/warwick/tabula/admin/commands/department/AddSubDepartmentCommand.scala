@@ -126,7 +126,7 @@ trait AddSubDepartmentCommandPermissions extends RequiresPermissionsChecking wit
 	self: AddSubDepartmentCommandState =>
 		
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Department.Create, mandatory(parent))
+		p.PermissionCheck(Permissions.Department.Manage, mandatory(parent))
 	}
 }
 
