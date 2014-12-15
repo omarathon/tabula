@@ -44,5 +44,6 @@ class FileAttachmentTest extends TestBase {
 		new FileAttachment("No extension here.").name should be ("No extension here.unknowntype")
 		new FileAttachment(".docx").name should be ("download.docx")
 		new FileAttachment(".").name should be ("download.unknowntype")
+		new FileAttachment(".hidden.unix.file.txt").name should be ("hidden.unix.file.txt")
 	}
 }
