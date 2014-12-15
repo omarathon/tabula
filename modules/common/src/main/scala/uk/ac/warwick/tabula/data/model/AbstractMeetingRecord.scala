@@ -120,6 +120,9 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 }
 
 sealed abstract class MeetingFormat(val code: String, val description: String) {
+	def getCode = code
+	def getDescription = description
+
 	override def toString = description
 }
 
