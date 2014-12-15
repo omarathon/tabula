@@ -246,6 +246,7 @@ object Permissions {
 		object Read {
 			case object Core extends Permission("View a member's photo, name, Warwick email, job title and University number")
 
+			/* We can split these back into DateOfBirth, Nationality and HomeEmail if any role requires a subset */
 			case object PrivateDetails extends Permission("View a member's date of birth, nationality, and alternative email address")
 
 			case object NextOfKin extends Permission("View a member's next of kin")
