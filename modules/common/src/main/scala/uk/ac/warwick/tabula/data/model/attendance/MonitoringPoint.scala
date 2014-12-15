@@ -98,8 +98,7 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 	def meetingRelationshipsSpring_= (relationships: JSet[StudentRelationshipType]):Unit = {
 		meetingRelationships = relationships.asScala.toSeq
 	}
-
-	def meetingFormats = getStringSeqSetting(Settings.MeetingFormats, Seq()).map(MeetingFormat.fromCode)
+	def meetingFormats = getStringSeqSetting(Settings.MeetingFormats, Seq()).map(MeetingFormat.fromCodeOrDescription)
 	def meetingFormats_= (formats: Seq[MeetingFormat]) =
 		settings += (Settings.MeetingFormats -> formats.map(_.code))
 	// See above

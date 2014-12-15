@@ -32,7 +32,7 @@ class TwoWayConverterTest extends TestBase {
 		val sourceType = TypeDescriptor.valueOf(MeetingFormat.FaceToFace.getClass)
 		val targetType = TypeDescriptor.valueOf(classOf[String])
 		val faceToFace = converter.convert(sourceValue, sourceType, targetType)
-		faceToFace should be ("Face-to-face meeting")
+		faceToFace should be ("f2f")
 	}
 
 	private def descriptor[A](implicit tag: ClassTag[A]) = TypeDescriptor.valueOf(tag.runtimeClass)

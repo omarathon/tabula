@@ -139,9 +139,10 @@ object MeetingFormat {
 			case None => throw new IllegalArgumentException()
 		}
 
-	def fromDescription(description: String) =
-		if (description == null) null
-		else members.find{_.description == description} match {
+	@Deprecated // use only in MonitoringPoint, AttendanceMonitoringPoint to catch legacy db data
+	def fromCodeOrDescription(value: String) =
+		if (value == null) null
+		else members.find{ m => m.description == value || m.code == value} match {
 			case Some(caseObject) => caseObject
 			case None => throw new IllegalArgumentException()
 		}
