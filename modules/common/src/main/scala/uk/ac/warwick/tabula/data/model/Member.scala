@@ -488,7 +488,7 @@ trait MemberProperties extends StringId {
 	var lastName: String = _
 	var email: String = _
 
-	@Restricted(Array("Profiles.Read.HomeEmail"))
+	@Restricted(Array("Profiles.Read.PrivateDetails"))
 	var homeEmail: String = _
 
 	var title: String = _
@@ -518,7 +518,7 @@ trait MemberProperties extends StringId {
 	@JoinColumn(name = "home_department_id")
 	var homeDepartment: Department = _
 
-	@Restricted(Array("Profiles.Read.DateOfBirth"))
+	@Restricted(Array("Profiles.Read.PrivateDetails"))
 	var dateOfBirth: LocalDate = _
 
 	var jobTitle: String = _
@@ -526,7 +526,7 @@ trait MemberProperties extends StringId {
 	@RestrictionProvider("phoneNumberPermissions")
 	var phoneNumber: String = _
 
-	@Restricted(Array("Profiles.Read.Nationality"))
+	@Restricted(Array("Profiles.Read.PrivateDetails"))
 	var nationality: String = _
 
 	@Restricted(Array("Profiles.Read.MobileNumber"))

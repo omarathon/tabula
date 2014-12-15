@@ -245,13 +245,13 @@ object Permissions {
 
 		object Read {
 			case object Core extends Permission("View a member's photo, name, Warwick email, job title and University number")
-			case object DateOfBirth extends Permission("View a member's date of birth")
-			case object Nationality extends Permission("View a member's nationality")
+
+			case object PrivateDetails extends Permission("View a member's date of birth, nationality, and alternative email address")
+
 			case object NextOfKin extends Permission("View a member's next of kin")
 			case object HomeAndTermTimeAddresses extends Permission("View a member's home and term-time addresses")
 			case object TelephoneNumber extends Permission("View a member's telephone number")
 			case object MobileNumber extends Permission("View a member's mobile number")
-			case object HomeEmail extends Permission("View a member's alternative email address")
 			case object Usercode extends Permission("View a member's usercode")
 			case object SmallGroups extends Permission("View a member's small groups")
 			case object Coursework extends Permission("View a member's coursework")
