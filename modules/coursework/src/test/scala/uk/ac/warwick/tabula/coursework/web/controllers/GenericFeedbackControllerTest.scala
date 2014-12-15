@@ -19,7 +19,7 @@ class GenericFeedbackControllerTest extends TestBase with Mockito {
 
 	@Test def controllerShowsForm() {
 		new Fixture {
-			val mav = controller.showForm(command, null)
+			val mav = controller.showForm(assignment, command, null)
 			mav.map("command") should be(command)
 			mav.viewName should be ("admin/assignments/feedback/generic_feedback")
 		}
@@ -28,7 +28,7 @@ class GenericFeedbackControllerTest extends TestBase with Mockito {
 	@Test def controllerAppliesCommand() {
 		new Fixture {
 			val errors = mock[Errors]
-			val mav = controller.submit(command, errors)
+			val mav = controller.submit(assignment, command, errors)
 
 			there was one(command).apply()
 

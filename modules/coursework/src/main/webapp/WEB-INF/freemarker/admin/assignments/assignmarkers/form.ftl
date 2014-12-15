@@ -110,7 +110,7 @@
 
 
 <#escape x as x?html>
-	<h1>Assign markers</h1>
+	<h1>Assign students to markers</h1>
 	<h4><span class="muted">for</span>
 	${assignment.name}</h4>
 	<div class="btn-toolbar">

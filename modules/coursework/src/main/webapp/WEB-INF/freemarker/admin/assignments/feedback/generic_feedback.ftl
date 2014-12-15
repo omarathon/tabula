@@ -4,6 +4,10 @@
 <div class="form onlineFeedback">
 
 	<#assign submit_url><@routes.genericfeedback assignment /></#assign>
+	<#if !ajax>
+		<h1>Generic feedback</h1>
+		<h4><span class="muted">for</span> ${assignment.name}</h4>
+	</#if>
 
 	<@f.form cssClass="form-horizontal" method="post" commandName="command" action="${submit_url}">
 		<div>
