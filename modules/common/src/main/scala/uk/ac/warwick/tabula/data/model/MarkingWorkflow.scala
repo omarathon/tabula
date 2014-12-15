@@ -164,16 +164,16 @@ trait NoSecondMarker extends NoThirdMarker {
 /**
  * Available marking methods and code to persist them
  */
-sealed abstract class MarkingMethod(val name: String){
+sealed abstract class MarkingMethod(val name: String, val description: String){
 	override def toString = name
 }
 
 object MarkingMethod {
-	case object StudentsChooseMarker extends MarkingMethod("StudentsChooseMarker")
-	case object SeenSecondMarkingLegacy extends MarkingMethod("SeenSecondMarkingLegacy")
-	case object SeenSecondMarking extends MarkingMethod("SeenSecondMarking")
-	case object ModeratedMarking extends MarkingMethod("ModeratedMarking")
-	case object FirstMarkerOnly extends MarkingMethod("FirstMarkerOnly")
+	case object StudentsChooseMarker extends MarkingMethod("StudentsChooseMarker", "Students choose marker")
+	case object SeenSecondMarkingLegacy extends MarkingMethod("SeenSecondMarkingLegacy", "Seen second marking - legacy")
+	case object SeenSecondMarking extends MarkingMethod("SeenSecondMarking", "Seen second marking")
+	case object ModeratedMarking extends MarkingMethod("ModeratedMarking", "Moderated marking")
+	case object FirstMarkerOnly extends MarkingMethod("FirstMarkerOnly", "First marker only")
 
 	val values: Set[MarkingMethod] = Set(
 		StudentsChooseMarker,

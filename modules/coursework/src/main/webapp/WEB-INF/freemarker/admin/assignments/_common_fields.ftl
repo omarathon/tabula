@@ -27,18 +27,18 @@ so that they can be passed around between requests.
 
 	<#assign disabled = !(canUpdateMarkingWorkflow!true)>
 
-	<@form.labelled_row "markingWorkflow" "Marking Workflow">
+	<@form.labelled_row "markingWorkflow" "Marking workflow">
 		<@f.select path="markingWorkflow" disabled="${disabled?string}">
 			<@f.option value="" label="None"/>
 			<#list department.markingWorkflows as markingWorkflow>
-				<@f.option value="${markingWorkflow.id}" label="${markingWorkflow.name}"/>
+				<@f.option value="${markingWorkflow.id}" label="${markingWorkflow.name} (${markingWorkflow.markingMethod.description})"/>
 			</#list>
 		</@f.select>
 		<div class="help-block">
 			<#if disabled>
 				<span class="warning">You cannot change the marking workflow for this assignment as it already has submissions.</span>
 			<#else>
-				Select the way in which this assignment will be marked.
+				Marking workflows define how and by whom the assignment will be marked. They are set up for the department by a Departmental Administrator <#if can.do("MarkingWorkflow.Manage", department)><a href="<@routes.markingworkflowlist department />">here</a></#if>.
 			</#if>
 		</div>
 	</@form.labelled_row>

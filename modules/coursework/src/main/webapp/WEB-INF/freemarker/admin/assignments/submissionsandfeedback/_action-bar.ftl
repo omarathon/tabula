@@ -139,7 +139,7 @@
 									id="release-submissions-button"
 									tooltip="Release the submissions for marking. First markers will be able to download their submissions."
 									data_attr='data-container=body'>
-									<i class="icon-inbox"></i> Release for marking
+									<i class="icon-inbox"></i> Release selected for marking
 								</@fmt.permission_button>
 							</li>
 						</ul>
