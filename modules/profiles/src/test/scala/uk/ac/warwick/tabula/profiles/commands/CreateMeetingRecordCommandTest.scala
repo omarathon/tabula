@@ -85,7 +85,7 @@ class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRec
 		uploadedFile.upload.add(mpFile)
 
 		val fileAttach = new FileAttachment
-		fileAttach.name = "Beltane"
+		fileAttach.name = "Beltane.txt"
 
 		uploadedFile.attached.add(fileAttach)
 
@@ -102,7 +102,7 @@ class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRec
 		meeting.title should be ("A good title")
 		meeting.description should be ("Lovely words")
 		meeting.meetingDate should be (marchHare)
-		meeting.attachments.get(0).name should be ("Beltane")
+		meeting.attachments.get(0).name should be ("Beltane.txt")
 		meeting.format should be (Email)
 	}}
 }

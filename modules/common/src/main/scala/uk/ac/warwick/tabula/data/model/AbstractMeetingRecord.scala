@@ -124,7 +124,7 @@ sealed abstract class MeetingFormat(val code: String, val description: String) {
 }
 
 object MeetingFormat {
-	case object FaceToFace extends MeetingFormat("f2f", "Face to face meeting")
+	case object FaceToFace extends MeetingFormat("f2f", "Face-to-face meeting")
 	case object VideoConference extends MeetingFormat("video", "Video conference")
 	case object PhoneCall extends MeetingFormat("phone", "Telephone call")
 	case object Email extends MeetingFormat("email", "Email conversation")
@@ -139,9 +139,10 @@ object MeetingFormat {
 			case None => throw new IllegalArgumentException()
 		}
 
-	def fromDescription(description: String) =
-		if (description == null) null
-		else members.find{_.description == description} match {
+	@Deprecated // use only in MonitoringPoint, AttendanceMonitoringPoint to catch legacy db data
+	def fromCodeOrDescription(value: String) =
+		if (value == null) null
+		else members.find{ m => m.description == value || m.code == value} match {
 			case Some(caseObject) => caseObject
 			case None => throw new IllegalArgumentException()
 		}

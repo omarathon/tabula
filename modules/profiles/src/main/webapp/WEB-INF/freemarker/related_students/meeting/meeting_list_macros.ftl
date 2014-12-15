@@ -64,7 +64,7 @@
 							<span class="title">${meeting.title!}</span>
 
 							<#if meeting.scheduled>
-								<#local can_update_scheduled_meeting = can.do_with_selector("Profiles.ScheduledMeetingRecord.Update", meeting, relationshipType) />
+								<#local can_update_scheduled_meeting = can.do_with_selector("Profiles.ScheduledMeetingRecord.Manage", meeting, relationshipType) />
 								<#local editUrl><@routes.edit_scheduled_meeting_record meeting studentCourseDetails.urlSafeId relationshipType /></#local>
 							<#else>
 								<#local editUrl><@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting /></#local>
