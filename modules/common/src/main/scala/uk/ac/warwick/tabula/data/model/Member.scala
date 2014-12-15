@@ -546,12 +546,12 @@ trait MemberProperties extends StringId {
 trait StudentProperties extends RestrictedPhoneNumber {
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name="HOME_ADDRESS_ID")
-	@Restricted(Array("Profiles.Read.HomeAddress"))
+	@Restricted(Array("Profiles.Read.HomeAndTermTimeAddresses"))
 	var homeAddress: Address = null
 
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name="TERMTIME_ADDRESS_ID")
-	@Restricted(Array("Profiles.Read.TermTimeAddress"))
+	@Restricted(Array("Profiles.Read.HomeAndTermTimeAddresses"))
 	var termtimeAddress: Address = null
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = Array(ALL))
