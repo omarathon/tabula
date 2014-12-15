@@ -170,7 +170,7 @@ class SortRoutesCommandTest extends TestBase with Mockito {
 
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
-		there was one(checking).PermissionCheck(Permissions.Department.ArrangeRoutes, dept)
+		there was one(checking).PermissionCheck(Permissions.Department.ArrangeRoutesAndModules, dept)
 	}
 
 	@Test

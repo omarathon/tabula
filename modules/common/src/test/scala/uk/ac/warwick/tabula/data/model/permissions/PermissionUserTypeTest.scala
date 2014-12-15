@@ -10,7 +10,7 @@ class PermissionUserTypeTest extends TestBase with Mockito {
 
 	@Test def convertToObject() {
 		val t = new PermissionUserType
-		t.convertToObject("Department.Create") should be (Permissions.Department.Create)
+		t.convertToObject("Department.Manage") should be (Permissions.Department.Manage)
 		t.convertToObject("Profiles.Read.Core") should be (Permissions.Profiles.Read.Core)
 		t.convertToObject("Masquerade") should be (Permissions.Masquerade)
 		evaluating { t.convertToObject("Q") } should produce [IllegalArgumentException]
@@ -18,7 +18,7 @@ class PermissionUserTypeTest extends TestBase with Mockito {
 
 	@Test def convertToValue() {
 		val t = new PermissionUserType
-		t.convertToValue(Permissions.Department.Create) should be ("Department.Create")
+		t.convertToValue(Permissions.Department.Manage) should be ("Department.Manage")
 		t.convertToValue(Permissions.Profiles.Read.Core) should be ("Profiles.Read.Core")
 		t.convertToValue(Permissions.Masquerade) should be ("Masquerade")
 	}
