@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.roles.Role
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 /**
  * A role provider that will look for any staff members who the current user
@@ -16,13 +17,13 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
  * granted rather than explicitly granted.
  */
 @Component
-class StaffMemberAssistantRoleProvider extends RoleProvider {
+class StaffMemberAssistantRoleProvider extends RoleProvider with TaskBenchmarking {
 	
 	val roleService = promise { Wire[RoleService] }
 	val roleProviders = promise { Wire.all[RoleProvider] }
 	val profileService = promise { Wire[ProfileService] }
 	
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = {
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for StaffMemberAssistantRoleProvider") {
 		profileService.get.findStaffMembersWithAssistant(user.apparentUser).toStream.flatMap { staff =>
 			// Treat it as a masquerade, so if we have any role providers that explicitly ignore masquerade this is taken into account
 			val staffCurrentUser = 

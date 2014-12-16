@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTar
 import uk.ac.warwick.tabula.roles.Role
 import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.tabula.{CurrentUser, Features, PermissionDeniedException, SubmitPermissionDeniedException}
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 trait SecurityServiceComponent {
 	def securityService: SecurityService
@@ -22,7 +23,8 @@ trait AutowiringSecurityServiceComponent extends SecurityServiceComponent {
  * Checks permissions.
  */
 @Service
-class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Permission, PermissionsTarget), Option[Boolean]] {
+class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Permission, PermissionsTarget), Option[Boolean]]
+	with TaskBenchmarking {
 
 	var roleService = Wire[RoleService]
 	var features = Wire[Features]
@@ -141,7 +143,7 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 		// Lazily go through the checks using a view, and try to get the first one that's Allow or Deny
 		val checksToRun = if (canDelegate) delegationChecks else checks
 		val result: Response = cachedBy((user, permission, scope.orNull)) {
-			checksToRun.view.flatMap { _(user, permission, scope.orNull ) }.headOption
+			benchmarkTask(s"Checking permission $permission.getName") {checksToRun.view.flatMap { _(user, permission, scope.orNull ) }.headOption}
 		}
 
 		/*
