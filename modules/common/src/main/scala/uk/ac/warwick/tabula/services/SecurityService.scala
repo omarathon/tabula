@@ -40,12 +40,8 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 	val Deny: Response = Some(false)
 	val Continue: Response = None // delegate to the next handler
 
-	val checks: Seq[PermissionChecker] = benchmarkTask("Check perms for roles") {
-		List(checkRuntimeMember _, checkGod _, checkPermissions(_,_,_), checkRoles(delegatablePermissionsOnly = false, _,_,_))
-	}
-	val delegationChecks:Seq[PermissionChecker] = benchmarkTask("Check delegatable perms for roles") {
-		List(checkGod _, checkRoles(delegatablePermissionsOnly = true,_,_,_))
-	}
+	val checks: Seq[PermissionChecker] = List(checkRuntimeMember _, checkGod _, checkPermissions(_,_,_), checkRoles(delegatablePermissionsOnly = false, _,_,_))
+	val delegationChecks:Seq[PermissionChecker] = List(checkGod _, checkRoles(delegatablePermissionsOnly = true,_,_,_))
 
 	def checkRuntimeMember(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = scope match {
 		case ignore: RuntimeMember => Deny
@@ -147,7 +143,7 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 		// Lazily go through the checks using a view, and try to get the first one that's Allow or Deny
 		val checksToRun = if (canDelegate) delegationChecks else checks
 		val result: Response = cachedBy((user, permission, scope.orNull)) {
-			checksToRun.view.flatMap { _(user, permission, scope.orNull ) }.headOption
+			benchmarkTask("Checking permission " + permission.getName ) {checksToRun.view.flatMap { _(user, permission, scope.orNull ) }.headOption}
 		}
 
 		/*
