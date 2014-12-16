@@ -214,6 +214,9 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 				configs.get(u.getDepartmentCode.toLowerCase).map { config =>
 					doRequest(s"${u.getWarwickId}.ics", config)
 				}.getOrElse(Success(Nil))
+			case FoundUser(u) =>
+				logger.warn(s"Found user for ${u.getWarwickId}, but not departmentCode. Returning empty Celcat timetable")
+				Success(Nil)
 			case _ => Failure(new UserLookupException(s"No user found for university ID $universityId"))
 		}
 	}
