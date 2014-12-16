@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTar
 import uk.ac.warwick.tabula.roles.Role
 import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.tabula.{CurrentUser, Features, PermissionDeniedException, SubmitPermissionDeniedException}
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 trait SecurityServiceComponent {
 	def securityService: SecurityService
@@ -22,7 +23,8 @@ trait AutowiringSecurityServiceComponent extends SecurityServiceComponent {
  * Checks permissions.
  */
 @Service
-class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Permission, PermissionsTarget), Option[Boolean]] {
+class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Permission, PermissionsTarget), Option[Boolean]]
+	with TaskBenchmarking {
 
 	var roleService = Wire[RoleService]
 	var features = Wire[Features]
@@ -38,8 +40,12 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 	val Deny: Response = Some(false)
 	val Continue: Response = None // delegate to the next handler
 
-	val checks: Seq[PermissionChecker] = List(checkRuntimeMember _, checkGod _, checkPermissions(_,_,_), checkRoles(delegatablePermissionsOnly = false, _,_,_))
-	val delegationChecks:Seq[PermissionChecker] = List(checkGod _, checkRoles(delegatablePermissionsOnly = true,_,_,_))
+	val checks: Seq[PermissionChecker] = benchmarkTask("Check perms for roles") {
+		List(checkRuntimeMember _, checkGod _, checkPermissions(_,_,_), checkRoles(delegatablePermissionsOnly = false, _,_,_))
+	}
+	val delegationChecks:Seq[PermissionChecker] = benchmarkTask("Check delegatable perms for roles") {
+		List(checkGod _, checkRoles(delegatablePermissionsOnly = true,_,_,_))
+	}
 
 	def checkRuntimeMember(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = scope match {
 		case ignore: RuntimeMember => Deny
