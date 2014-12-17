@@ -6,14 +6,17 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.SmallGroupTutor
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent}
 import uk.ac.warwick.tabula.roles.SmallGroupTutorRoleDefinition
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 @Component
-class SmallGroupTutorRoleProvider extends RoleProvider {
+class SmallGroupTutorRoleProvider extends RoleProvider with TaskBenchmarking {
 
-	override def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = scope match {
-		case event: SmallGroupEvent => getRoles(user, Seq(event))
-		case group: SmallGroup => getRoles(user, group.events)
-		case _ => Stream.empty
+	override def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = benchmarkTask("Get roles for SmallGroupTutorRoleProvider") {
+		scope match {
+			case event: SmallGroupEvent => getRoles(user, Seq(event))
+			case group: SmallGroup => getRoles(user, group.events)
+			case _ => Stream.empty
+		}
 	}
 
 	private def getRoles(user: CurrentUser, events: Seq[SmallGroupEvent]) =

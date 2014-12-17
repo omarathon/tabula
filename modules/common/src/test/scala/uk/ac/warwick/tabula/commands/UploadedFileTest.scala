@@ -14,29 +14,29 @@ class UploadedFileTest extends TestBase with Mockito{
 	val multiUnderscorePrefix = new MockMultipartFile("file", "thumbs.db", "text/plain", "aaaaaaaaaaaa".getBytes)
 	val multiSystemFile = new MockMultipartFile("file", "thumbs.db", "text/plain", "aaaaaaaaaaaa".getBytes)
 	val multiAppleDouble = new MockMultipartFile("file", "._thing.doc", "text/plain", "aaaaaaaaaaaa".getBytes)
-	
+
 	@Test // HFC-375
 	def ignoreEmptyMultipartFiles() {
 		val uploadedFile = new UploadedFile
 		uploadedFile.fileDao = smartMock[FileDao]
 		uploadedFile.upload = JArrayList(multi1, multiEmpty)
 		uploadedFile.onBind(new BindException(uploadedFile, "file"))
-		
+
 		uploadedFile.attached.size should be (1)
 		uploadedFile.attached.get(0).name should be ("feedback.doc")
 	}
-	
+
 	@Test
 	def uploads() {
 		val uploadedFile = new UploadedFile
 		uploadedFile.upload = JArrayList()
 		uploadedFile.hasUploads should be {false}
 		uploadedFile.uploadOrEmpty should be (JArrayList())
-		
+
 		uploadedFile.upload = JArrayList(multiEmpty)
 		uploadedFile.hasUploads should be {false}
 		uploadedFile.uploadOrEmpty should be (JArrayList())
-		
+
 		uploadedFile.upload = JArrayList(multi1)
 		uploadedFile.hasUploads should be {true}
 		uploadedFile.uploadOrEmpty should be (JArrayList(multi1))
@@ -50,12 +50,12 @@ class UploadedFileTest extends TestBase with Mockito{
 		uploadedFile.fileDao = smartMock[FileDao]
 		uploadedFile.upload = JArrayList(multi1, multiSystemFile)
 		uploadedFile.onBind(new BindException(uploadedFile, "file"))
-		
+
 		uploadedFile.attached.size should be (1)
 		uploadedFile.attached.get(0).name should be ("feedback.doc")
 	}
-	
-	
+
+
 	@Test // TAB-48
 	def ignoreAppleDouble() {
 		val uploadedFile = new UploadedFile
@@ -63,7 +63,7 @@ class UploadedFileTest extends TestBase with Mockito{
 		uploadedFile.fileDao = smartMock[FileDao]
 		uploadedFile.upload = JArrayList(multi1, multiAppleDouble)
 		uploadedFile.onBind(new BindException(uploadedFile, "file"))
-		
+
 		uploadedFile.attached.size should be (1)
 		uploadedFile.attached.get(0).name should be ("feedback.doc")
 	}
@@ -81,8 +81,8 @@ class UploadedFileTest extends TestBase with Mockito{
 		uploadedFile.attached.size should be (2)
 		}
 		uploadedFile.attached.get(0).name should be (multiSystemFile.getOriginalFilename)
-		uploadedFile.attached.get(1).name should be (multiAppleDouble.getOriginalFilename)
+		uploadedFile.attached.get(1).name should not be (multiAppleDouble.getOriginalFilename)
 	}
-		
-	
+
+
 }

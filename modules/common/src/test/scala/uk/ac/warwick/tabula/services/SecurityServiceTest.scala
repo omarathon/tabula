@@ -382,13 +382,13 @@ class SecurityServiceTest extends TestBase with Mockito {
 	object TestRoleDef extends BuiltInRoleDefinition{
 		override def description="test"
 		GrantsScopedPermission(
-			Permissions.Department.ArrangeModules)
+			Permissions.Department.ArrangeRoutesAndModules)
 		def canDelegateThisRolesPermissions:JBoolean = false
 	}
 	object TestDelegatableRoleDef extends BuiltInRoleDefinition{
 		override def description="test"
 		GrantsScopedPermission(
-			Permissions.Department.ArrangeModules)
+			Permissions.Department.ArrangeRoutesAndModules)
 		def canDelegateThisRolesPermissions:JBoolean = true
 	}
 
@@ -399,7 +399,7 @@ class SecurityServiceTest extends TestBase with Mockito {
 		val module = new Module("xxx01")
 		securityService.roleService = mock[RoleService]
 		securityService.roleService.getRolesFor(currentUser,module) returns Seq(new BuiltInRole(TestRoleDef,Some(module)){}).toStream
-		securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules,module) should be {false}
+		securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules,module) should be {false}
 	}
 
 	@Test
@@ -409,7 +409,7 @@ class SecurityServiceTest extends TestBase with Mockito {
 		val module = new Module("xxx01")
 		securityService.roleService = mock[RoleService]
 		securityService.roleService.getRolesFor(currentUser,module) returns Seq(new BuiltInRole(TestDelegatableRoleDef,Some(module)){}).toStream
-		securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules,module) should be {true}
+		securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules,module) should be {true}
 	}
 
 	@Test
@@ -420,7 +420,7 @@ class SecurityServiceTest extends TestBase with Mockito {
 		securityService.roleService = mock[RoleService]
 		// use a role without delegation, to prove godliness works.
 		securityService.roleService.getRolesFor(currentUser,module) returns Seq(new BuiltInRole(TestRoleDef,Some(module)){}).toStream
-		securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules,module) should be {true}
+		securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules,module) should be {true}
 	}
 
 }

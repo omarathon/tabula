@@ -26,7 +26,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		override val getName="test"
 		override def description="test"
 		GrantsScopedPermission(
-			Permissions.Department.ArrangeModules)
+			Permissions.Department.ArrangeRoutesAndModules)
 		def canDelegateThisRolesPermissions:JBoolean = false
 	}
 
@@ -91,7 +91,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		command.usercodes.add("cusebr")
 
 		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (None)
-		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules, department) returns true
+		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns true
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -103,7 +103,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		command.roleDefinition = singlePermissionsRoleDefinition
 
 		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns (None)
-		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules, department) returns true
+		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns true
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -124,7 +124,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		existing.users.knownType.addUserId("cuscao")
 
 		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (Some(existing))
-		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules, department) returns true
+		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns true
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -156,7 +156,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		command.usercodes.add("cusebr")
 
 		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns (None)
-		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules, department) returns false
+		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns false
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)

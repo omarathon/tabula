@@ -37,7 +37,7 @@ class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 		uploadedFile.upload.add(mpFile)
 
 		val fileAttach = new FileAttachment
-		fileAttach.name = "Beltane"
+		fileAttach.name = "Beltane.txt"
 		uploadedFile.attached.add(fileAttach)
 
 		val createMeetingRecordCommand = new CreateMeetingRecordCommand(creator, relationship, false)
@@ -61,9 +61,9 @@ class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 		val downloadCommand = new DownloadMeetingRecordFilesCommand(meeting)
 
 		// normally for single files the filename is set in the command as it is a path variable (I think!)
-		downloadCommand.filename = "Beltane"
+		downloadCommand.filename = "Beltane.txt"
 		val retSingle = downloadCommand.applyInternal()
 		val rendFile = retSingle.get
-		rendFile.filename should be ("Beltane")
+		rendFile.filename should be ("Beltane.txt")
 	}}
 }

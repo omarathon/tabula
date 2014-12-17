@@ -7,6 +7,7 @@
       <module fileurl="file://$PROJECT_DIR$/modules/attendance/attendance.iml" filepath="$PROJECT_DIR$/modules/attendance/attendance.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/common/common.iml" filepath="$PROJECT_DIR$/modules/common/common.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/coursework/courses.iml" filepath="$PROJECT_DIR$/modules/coursework/courses.iml" />
+      <module fileurl="file://$PROJECT_DIR$/modules/functional-test/functional-test.iml" filepath="$PROJECT_DIR$/modules/functional-test/functional-test.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/groups/groups.iml" filepath="$PROJECT_DIR$/modules/groups/groups.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/home/home.iml" filepath="$PROJECT_DIR$/modules/home/home.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/profiles/profiles.iml" filepath="$PROJECT_DIR$/modules/profiles/profiles.iml" />

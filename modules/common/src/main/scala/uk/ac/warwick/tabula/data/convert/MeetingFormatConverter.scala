@@ -6,6 +6,6 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 
 class MeetingFormatConverter extends TwoWayConverter[String, MeetingFormat] {
 
-	override def convertRight(description: String) = MeetingFormat.fromDescription(description)
-	override def convertLeft(format: MeetingFormat) = (Option(format) map { _.description }).orNull
+	override def convertRight(code: String) = MeetingFormat.fromCode(code)
+	override def convertLeft(format: MeetingFormat) = (Option(format) map { _.code }).orNull
 }

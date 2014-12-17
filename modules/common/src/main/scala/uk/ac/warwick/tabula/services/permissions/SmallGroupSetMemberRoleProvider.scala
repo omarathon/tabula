@@ -8,13 +8,16 @@ import uk.ac.warwick.tabula.roles.{Role, SmallGroupSetMember, SmallGroupSetViewe
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.roles.SmallGroupSetMemberRoleDefinition
 import uk.ac.warwick.tabula.roles.SmallGroupSetViewerRoleDefinition
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 @Component
-class SmallGroupSetMemberRoleProvider extends RoleProvider {
+class SmallGroupSetMemberRoleProvider extends RoleProvider with TaskBenchmarking {
 
-	override def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = scope match {
-		case set: SmallGroupSet => getRoles(user, Seq(set))
-		case _ => Stream.empty
+	override def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = benchmarkTask("Get roles for SmallGroupSetMemberRoleProvider") {
+		scope match {
+			case set: SmallGroupSet => getRoles(user, Seq(set))
+			case _ => Stream.empty
+		}
 	}
 
 	private def getRoles(user: CurrentUser, sets: Seq[SmallGroupSet]) = {
