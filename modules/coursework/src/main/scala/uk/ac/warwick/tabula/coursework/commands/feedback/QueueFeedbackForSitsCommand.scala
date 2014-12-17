@@ -24,7 +24,7 @@ class QueueFeedbackForSitsCommand(val assignment: Assignment, val submitter: Cur
 
 	def applyInternal() = {
 		transactional() {
-			val users = getUsersWithFeedbackToPublish
+			lazy val users = getUsersWithFeedbackToPublish
 			val allQueuedFeedbacks = for {
 				(studentId, user) <- users
 				feedback <- assignment.fullFeedback.find { _.universityId == studentId }
