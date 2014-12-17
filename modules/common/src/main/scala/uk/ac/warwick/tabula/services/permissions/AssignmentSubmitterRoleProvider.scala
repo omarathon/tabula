@@ -7,11 +7,12 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.AssignmentSubmitter
 import uk.ac.warwick.tabula.roles.Role
 import uk.ac.warwick.tabula.roles.AssignmentSubmitterRoleDefinition
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 @Component
-class AssignmentSubmitterRoleProvider extends RoleProvider {
+class AssignmentSubmitterRoleProvider extends RoleProvider with TaskBenchmarking {
 	
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = {
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for AssignmentSubmitterRoleProvider") {
 		scope match {
 			case assignment: Assignment => 
 				if (assignment.canSubmit(user.apparentUser)) 
