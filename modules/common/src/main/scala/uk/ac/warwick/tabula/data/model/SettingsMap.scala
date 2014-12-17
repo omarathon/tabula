@@ -31,7 +31,7 @@ object HasSettings {
 	case class BooleanSetting(allSettings: HasSettings)(val key: String, val default: Boolean) extends Setting[Boolean] {
 		def value = allSettings.getBooleanSetting(key, default)
 	}
-	
+
 	case class StringMapSetting(allSettings: HasSettings)(val key: String, val default: Map[String, String]) extends Setting[Map[String, String]] {
 		def value = allSettings.getStringMapSetting(key, default)
 	}
