@@ -139,6 +139,23 @@ class Department extends GeneratedId
 		}
 	}
 
+	def setUploadMarksToSitsForYear(year: AcademicYear, degreeType: DegreeType, canUpload: Boolean): Unit = {
+		val (markUploadMap, mapKey) = degreeType match {
+			case DegreeType.Undergraduate => (getStringMapSetting(Settings.CanUploadMarksToSitsForYearUg), Settings.CanUploadMarksToSitsForYearUg)
+			case _ => (getStringMapSetting(Settings.CanUploadMarksToSitsForYearPg), Settings.CanUploadMarksToSitsForYearPg)
+		}
+
+		degreeType match {
+			case DegreeType.Undergraduate => Settings.CanUploadMarksToSitsForYearUg
+			case DegreeType.Postgraduate => Settings.CanUploadMarksToSitsForYearPg
+			case _ => throw new IllegalStateException("setUploadMarksToSitsForYear called with invalid degreeType")
+		}
+
+		val markMap = markUploadMap.getOrElse(new collection.mutable.HashMap[String, String]())
+
+		settings += (mapKey -> (markMap + (year.toString -> canUpload.toString)))
+	}
+
 	def getStudentRelationshipSource(relationshipType: StudentRelationshipType) =
 		getStringMapSetting(Settings.StudentRelationshipSource)
 			.flatMap {

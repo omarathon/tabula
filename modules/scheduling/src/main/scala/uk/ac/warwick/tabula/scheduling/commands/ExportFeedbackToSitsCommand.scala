@@ -29,6 +29,8 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 	override def applyInternal() = transactional() {
 
 		val feedbacksToLoad = feedbackForSitsDao.feedbackToLoad
+		var feedbacksLoaded: Seq[FeedbackForSits] = Seq()
+
 		// for each mark/grade
 		for (feedbackToLoad <- feedbacksToLoad) {
 			val feedback = feedbackToLoad.feedback
@@ -48,34 +50,36 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 					logger.warn(f"Not updating SITS CAM_SAS for feedback $feedbackId - found multiple rows")
 				}
 				else {
-					uploadFeedbackToSits(feedbackToLoad)
+					feedbacksLoaded = feedbacksLoaded :+ uploadFeedbackToSits(feedbackToLoad)
 				}
 				feedbackForSitsDao.saveOrUpdate(feedbackToLoad)
 			}
 		}
 
-		feedbacksToLoad.filter(_.status == Successful)
+		feedbacksLoaded
 	}
 
 
-	def uploadFeedbackToSits(feedbackToLoad: FeedbackForSits) {
+	def uploadFeedbackToSits(feedbackToLoad: FeedbackForSits): FeedbackForSits = {
 		val feedback = feedbackToLoad.feedback
 		val feedbackId = feedback.id
 		val studentId = feedback.universityId
 
 		//  update - expecting to update one row
-		val updatedRows = exportFeedbackToSitsService.exportToSits(feedbackToLoad)
+		val expectedRowCount = exportFeedbackToSitsService.exportToSits(feedbackToLoad)
 
-		if (updatedRows == 0) feedbackToLoad.status = Failed
-		else if (updatedRows == 1) {
+		if (expectedRowCount == 0) feedbackToLoad.status = Failed
+		else if (expectedRowCount == 1) {
 			// record what's been done in the FeedbackToLoad object
 			feedbackToLoad.status = Successful
 			feedbackToLoad.dateOfUpload = DateTime.now
 			feedback.actualMark.foreach( mark => feedbackToLoad.actualMarkLastUploaded = mark)
 			feedback.actualGrade.foreach( grade => feedbackToLoad.actualGradeLastUploaded = grade)
 		}
-		else throw new IllegalStateException(f"Unexpected SITS update!  Only expected to update one row, but $updatedRows rows were updated " +
+		else throw new IllegalStateException(f"Unexpected SITS update!  Only expected to update one row, but $expectedRowCount rows were updated " +
 				f"in CAM_SAS for student $studentId, feedback $feedbackId")
+
+		feedbackToLoad
 	}
 }
 
