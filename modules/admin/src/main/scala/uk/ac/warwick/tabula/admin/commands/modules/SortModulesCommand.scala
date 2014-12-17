@@ -95,7 +95,7 @@ trait SortModulesCommandPermissions extends RequiresPermissionsChecking with Per
 	self: SortModulesCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Department.ArrangeModules, mandatory(department))
+		p.PermissionCheck(Permissions.Department.ArrangeRoutesAndModules, mandatory(department))
 	}
 }
 

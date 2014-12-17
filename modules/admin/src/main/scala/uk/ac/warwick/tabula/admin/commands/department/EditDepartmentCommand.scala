@@ -153,7 +153,7 @@ trait EditDepartmentCommandPermissions extends RequiresPermissionsChecking with 
 	self: EditDepartmentCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Department.Update, mandatory(department))
+		p.PermissionCheck(Permissions.Department.Manage, mandatory(department))
 	}
 }
 

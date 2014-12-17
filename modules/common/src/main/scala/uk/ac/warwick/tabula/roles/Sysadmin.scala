@@ -21,25 +21,21 @@ case object SysadminRoleDefinition extends UnassignableBuiltInRoleDefinition {
 		ReplicaSyncing,
 		ViewAuditLog,
 		
-		StudentRelationshipType.Create,
 		StudentRelationshipType.Read,
-		StudentRelationshipType.Update,
-		StudentRelationshipType.Delete,
+		StudentRelationshipType.Manage,
 
 		MonitoringPointTemplates.Manage
 	)
 
 	GrantsGlobalPermission(
 		Masquerade,
-		Department.Create,
-		Department.Update,
+		Department.Manage,
 		Module.Create,
 		// We don't give Read here, god up for that
 		Module.Update,
 		Module.Delete,
 		
-		Department.ArrangeModules,
-		Department.ArrangeRoutes
+		Department.ArrangeRoutesAndModules
 	)
 	
 }

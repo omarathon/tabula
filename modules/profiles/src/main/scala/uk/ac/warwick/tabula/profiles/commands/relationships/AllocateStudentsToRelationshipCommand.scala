@@ -35,7 +35,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		with NotifiesAffectedStudents
 		with FetchesRelationshipMappings {
 
-	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), mandatory(department))
+	PermissionCheck(Permissions.Profiles.StudentRelationship.Manage(mandatory(relationshipType)), mandatory(department))
 
 	// throw this request out if this relationship can't be edited in Tabula for this department
 	if (relationshipType.readOnly(department)) {

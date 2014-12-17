@@ -26,7 +26,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		override val getName="test"
 		override def description="test"
 		GrantsScopedPermission(
-			Permissions.Department.ArrangeModules)
+			Permissions.Department.ArrangeRoutesAndModules)
 		def canDelegateThisRolesPermissions: JBoolean = false
 	}
 
@@ -89,7 +89,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		existing.users.knownType.addUserId("cuscav")
 		
 		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (Some(existing))
-		command.securityService.canDelegate(currentUser, Permissions.Department.ArrangeModules, department) returns true
+		command.securityService.canDelegate(currentUser, Permissions.Department.ArrangeRoutesAndModules, department) returns true
 		
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -105,7 +105,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		existing.users.knownType.addUserId("cusebr")
 
 		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (Some(existing))
-		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules, department) returns true
+		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns true
 		
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -126,7 +126,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		existing.users.knownType.addUserId("cusebr")
 
 		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (Some(existing))
-		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules, department) returns true
+		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns true
 		
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -161,7 +161,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		existing.users.knownType.addUserId("cusebr")
 
 		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (Some(existing))
-		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules, department) returns false
+		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns false
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)

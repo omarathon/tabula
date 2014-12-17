@@ -57,18 +57,13 @@ case class StudentRelationshipAgentRoleDefinition(relationshipType: PermissionsS
 	val readOnlyPermissions = StudentRelationshipAgent.profileReadOnlyPermissions(relationshipType)
 	val permissionsForCurrentRelationships = Seq (
 		Profiles.Read.NextOfKin,
-		Profiles.Read.HomeAddress,
-		Profiles.Read.TermTimeAddress,
+		Profiles.Read.HomeAndTermTimeAddresses,
 		Profiles.Read.TelephoneNumber,
 		Profiles.Read.MobileNumber,
 
-		Profiles.MeetingRecord.Create(relationshipType),
-		Profiles.MeetingRecord.Update(relationshipType),
-		Profiles.MeetingRecord.Delete(relationshipType),
+		Profiles.MeetingRecord.Manage(relationshipType),
 
-		Profiles.ScheduledMeetingRecord.Create(relationshipType),
-		Profiles.ScheduledMeetingRecord.Update(relationshipType),
-		Profiles.ScheduledMeetingRecord.Delete(relationshipType),
+		Profiles.ScheduledMeetingRecord.Manage(relationshipType),
 
 		MemberNotes.Create,
 

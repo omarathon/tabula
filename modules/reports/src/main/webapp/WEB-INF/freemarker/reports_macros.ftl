@@ -31,7 +31,7 @@
 	</div>
 	
 	<div class="report-target"></div>
-	<form class="report-target-form" style="display: none;" method="POST" action=""></form>
+	<form class="report-target-form" style="display: none;" method="POST" action="" enctype="multipart/form-data"></form>
 	
 	<script>
 		jQuery(function($){

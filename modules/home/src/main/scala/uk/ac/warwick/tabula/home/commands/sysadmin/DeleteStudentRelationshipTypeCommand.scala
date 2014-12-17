@@ -49,7 +49,7 @@ trait DeleteStudentRelationshipTypeCommandPermissions extends RequiresPermission
 	
 	def permissionsCheck(p: PermissionsChecking) {
 		mandatory(relationshipType)
-		p.PermissionCheck(Permissions.StudentRelationshipType.Delete)
+		p.PermissionCheck(Permissions.StudentRelationshipType.Manage)
 	}
 }
 

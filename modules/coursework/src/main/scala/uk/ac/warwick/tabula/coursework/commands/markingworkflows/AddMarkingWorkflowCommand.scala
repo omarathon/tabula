@@ -55,7 +55,7 @@ trait AddMarkingWorkflowCommandPermissions extends RequiresPermissionsChecking w
 	self: MarkingWorkflowCommandState =>
 		
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MarkingWorkflow.Create, mandatory(department))
+		p.PermissionCheck(Permissions.MarkingWorkflow.Manage, mandatory(department))
 	}
 }
 

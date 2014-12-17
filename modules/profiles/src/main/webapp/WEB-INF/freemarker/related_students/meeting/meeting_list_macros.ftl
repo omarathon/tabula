@@ -2,7 +2,7 @@
 
 <#macro list studentCourseDetails meetings relationshipType viewerRelationshipTypes="">
 	<#local can_read_meetings = can.do_with_selector("Profiles.MeetingRecord.Read", studentCourseDetails, relationshipType) />
-	<#local can_create_meetings = can.do_with_selector("Profiles.MeetingRecord.Create", studentCourseDetails, relationshipType) />
+	<#local can_create_meetings = can.do_with_selector("Profiles.MeetingRecord.Manage", studentCourseDetails, relationshipType) />
 	<#local existingRelationship = ((studentCourseDetails.relationships(relationshipType))![])?size gt 0 />
 	<#local is_student = ((viewerUser.universityId)!"")?length gt 0 && viewerUser.universityId == (studentCourseDetails.student.universityId)!"" />
 
@@ -15,7 +15,7 @@
 		</#list>
 	</#if>
 	<#local can_create_scheduled_meetings =
-		can.do_with_selector("Profiles.ScheduledMeetingRecord.Create", studentCourseDetails, relationshipType) &&
+		can.do_with_selector("Profiles.ScheduledMeetingRecord.Manage", studentCourseDetails, relationshipType) &&
 		(!is_student || student_can_schedule_meetings)
 	/>
 
@@ -64,7 +64,7 @@
 							<span class="title">${meeting.title!}</span>
 
 							<#if meeting.scheduled>
-								<#local can_update_scheduled_meeting = can.do_with_selector("Profiles.ScheduledMeetingRecord.Update", meeting, relationshipType) />
+								<#local can_update_scheduled_meeting = can.do_with_selector("Profiles.ScheduledMeetingRecord.Manage", meeting, relationshipType) />
 								<#local editUrl><@routes.edit_scheduled_meeting_record meeting studentCourseDetails.urlSafeId relationshipType /></#local>
 							<#else>
 								<#local editUrl><@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting /></#local>

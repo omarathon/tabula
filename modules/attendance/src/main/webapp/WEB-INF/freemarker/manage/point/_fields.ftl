@@ -57,7 +57,7 @@
 <#if features.attendanceMonitoringMeetingPointType>
 
 	<#assign meetingRelationshipsStrings = extractParam(command.meetingRelationships, 'urlPart') />
-	<#assign meetingFormatsStrings = extractParam(command.meetingFormats, 'description') />
+	<#assign meetingFormatsStrings = extractParam(command.meetingFormats, 'code') />
 	<div class="pointTypeOption meeting row-fluid" <#if ((command.pointType.dbValue)!'null') != 'meeting'>style="display:none"</#if>>
 		<div class="span5">
 			<@form.labelled_row "meetingRelationships" "Meeting with">
@@ -80,7 +80,7 @@
 			<@form.labelled_row path="meetingFormats" label="Meeting formats" helpPopover="Only selected meeting formats will count towards this monitoring point">
 				<#list allMeetingFormats as format>
 					<@form.label checkbox=true>
-						<input type="checkbox" name="meetingFormats" id="meetingFormats-${format.code}" value="${format.description}" <#if meetingFormatsStrings?seq_contains(format.description)>checked</#if> />
+						<input type="checkbox" name="meetingFormats" id="meetingFormats-${format.code}" value="${format.code}" <#if meetingFormatsStrings?seq_contains(format.code)>checked</#if> />
 						${format.description}
 					</@form.label>
 				</#list>
