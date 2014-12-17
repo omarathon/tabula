@@ -11,7 +11,7 @@
 	<input type="hidden" name="monitoringPoints[${thisPointIndex}].meetingRelationshipsSpring" value="${relationship.urlPart}" />
 </#list>
 <#list point.meetingFormats as format>
-	<input type="hidden" name="monitoringPoints[${thisPointIndex}].meetingFormatsSpring" value="${format.description}" />
+	<input type="hidden" name="monitoringPoints[${thisPointIndex}].meetingFormatsSpring" value="${format.code}" />
 </#list>
 <input type="hidden" name="monitoringPoints[${thisPointIndex}].meetingQuantity" value="${point.meetingQuantity}" />
 <#list point.smallGroupEventModules as module>

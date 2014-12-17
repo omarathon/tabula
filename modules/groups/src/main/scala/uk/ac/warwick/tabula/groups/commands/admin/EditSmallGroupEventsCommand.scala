@@ -22,7 +22,9 @@ object EditSmallGroupEventsCommand {
 			with EditSmallGroupEventsValidation
 			with Unaudited
 			with AutowiringSmallGroupServiceComponent
-			with PopulateEditSmallGroupEventsSubCommands
+			with PopulateEditSmallGroupEventsSubCommands {
+			populate()
+		}
 
 	class EventProperties(val event: SmallGroupEvent, smallGroupService: SmallGroupService) {
 		var delete: Boolean = false
@@ -53,10 +55,13 @@ trait EditSmallGroupEventsCommandState {
 trait PopulateEditSmallGroupEventsSubCommands {
 	self: EditSmallGroupEventsCommandState with SmallGroupServiceComponent =>
 
-	groups.clear()
-	set.groups.asScala.sorted.foreach { group =>
-		groups.put(group, new GroupProperties(module, set, group, smallGroupService))
+	def populate() {
+		groups.clear()
+		set.groups.asScala.sorted.foreach { group =>
+			groups.put(group, new GroupProperties(module, set, group, smallGroupService))
+		}
 	}
+
 }
 
 class EditSmallGroupEventsCommandInternal(val module: Module, val set: SmallGroupSet) extends CommandInternal[SmallGroupSet] with EditSmallGroupEventsCommandState {

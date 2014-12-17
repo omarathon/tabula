@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import scala.collection.JavaConversions._
 
 import org.hibernate.annotations.{Type, BatchSize, AccessType}
-import org.joda.time.DateTime
+import org.joda.time.{LocalDate, DateTime}
 
 import javax.persistence._
 import javax.persistence.CascadeType._
@@ -18,7 +18,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, SuspectPlagiarised}
 
 @Entity @AccessType("field")
-class Submission extends GeneratedId with PermissionsTarget with ToEntityReference {
+class Submission extends GeneratedId with PermissionsTarget with ToEntityReference with FeedbackReportGenerator {
 
 	type Entity = Submission
 
@@ -106,4 +106,9 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 	def isReleasedToThirdMarker: Boolean = assignment.isReleasedToThirdMarker(this)
 
 	def toEntityReference = new SubmissionEntityReference().put(this)
+}
+
+trait FeedbackReportGenerator {
+	def universityId: String
+	def feedbackDeadline: Option[LocalDate]
 }

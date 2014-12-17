@@ -13,9 +13,10 @@ import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.roles.UniversityMemberRole
 import uk.ac.warwick.tabula.roles.StaffRole
 import uk.ac.warwick.tabula.roles.StudentRole
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 @Component
-class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
+class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider with TaskBenchmarking {
 	
 	var profileService = Wire.auto[ProfileService]
 	val departmentService = promise { Wire[ModuleAndDepartmentService] }
@@ -55,7 +56,7 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
 		}
 		else Stream.empty
 
-	def getRolesFor(user: CurrentUser): Stream[Role] = {
+	def getRolesFor(user: CurrentUser): Stream[Role] = benchmarkTask("Get roles for UserTypeAndDepartmentRoleProvider") {
 		if (user.realUser.isLoggedIn) {
 			val members = profileService.getAllMembersWithUserId(user.apparentId, disableFilter = true)
 

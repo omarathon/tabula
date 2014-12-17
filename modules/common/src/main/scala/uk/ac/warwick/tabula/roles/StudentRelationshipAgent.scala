@@ -62,13 +62,9 @@ case class StudentRelationshipAgentRoleDefinition(relationshipType: PermissionsS
 		Profiles.Read.TelephoneNumber,
 		Profiles.Read.MobileNumber,
 
-		Profiles.MeetingRecord.Create(relationshipType),
-		Profiles.MeetingRecord.Update(relationshipType),
-		Profiles.MeetingRecord.Delete(relationshipType),
+		Profiles.MeetingRecord.Manage(relationshipType),
 
-		Profiles.ScheduledMeetingRecord.Create(relationshipType),
-		Profiles.ScheduledMeetingRecord.Update(relationshipType),
-		Profiles.ScheduledMeetingRecord.Delete(relationshipType),
+		Profiles.ScheduledMeetingRecord.Manage(relationshipType),
 
 		MemberNotes.Create,
 

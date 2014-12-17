@@ -20,8 +20,8 @@ class ImportModulesCommandTest extends TestBase with MockitoSugar {
 			fullName = "Computer Science"
 		}
 		val moduleInfos = Seq(
-            ModuleInfo("Science for Computers", "CS101", null),
-            ModuleInfo("Computers for Science", "CS102", null))
+            ModuleInfo("Science for Computers", "CS101", null, DegreeType.Undergraduate),
+            ModuleInfo("Computers for Science", "CS102", null, DegreeType.Undergraduate))
         
         // Mocks
 		val mockModuleService = mock[ModuleAndDepartmentService]

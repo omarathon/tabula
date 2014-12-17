@@ -7,6 +7,8 @@ import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
+import scala.util.Success
+
 class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 
 	val student = new StudentMember
@@ -27,7 +29,7 @@ class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 		val timetableFetchingService = mock[CompleteTimetableFetchingService]
 	}
 
-	source.timetableFetchingService.getTimetableForStudent(student.universityId)  returns timetableEvents
+	source.timetableFetchingService.getTimetableForStudent(student.universityId) returns Success(timetableEvents)
 	source.studentGroupEventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student) returns groupEvents
 
 	@Test

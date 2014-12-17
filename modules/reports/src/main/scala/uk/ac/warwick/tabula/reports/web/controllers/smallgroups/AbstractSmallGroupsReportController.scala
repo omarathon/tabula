@@ -40,50 +40,39 @@ abstract class AbstractSmallGroupsReportController extends ReportsController {
 		@PathVariable academicYear: AcademicYear
 	) = {
 		val result = cmd.apply()
-		val allStudentsMap: Map[String, Map[String, String]] = result.students.map(studentUser => {
-			studentUser.getWarwickId ->
-				Map(
-					"firstName" -> studentUser.getFirstName,
-					"lastName" -> studentUser.getLastName,
-					"userId" -> studentUser.getUserId
-				)
-		}).toMap
-		val allEventsMap: Map[String, Map[String, String]] = result.eventWeeks.map(sgew => {
-			sgew.id -> Map(
+		val allStudents: Seq[Map[String, String]] = result.students.map(studentUser =>
+			Map(
+				"universityId" -> studentUser.getWarwickId,
+				"firstName" -> studentUser.getFirstName,
+				"lastName" -> studentUser.getLastName,
+				"userId" -> studentUser.getUserId
+			)
+		)
+		val allEvents: Seq[Map[String, String]] = result.eventWeeks.map(sgew =>
+			Map(
+				"id" -> sgew.id,
 				"moduleCode" -> sgew.event.group.groupSet.module.code.toUpperCase,
 				"setName" -> sgew.event.group.groupSet.nameWithoutModulePrefix,
 				"format" -> sgew.event.group.groupSet.format.description,
 				"groupName" -> sgew.event.group.name,
 				"week" -> sgew.week.toString,
 				"day" -> sgew.event.day.getAsInt.toString,
+				"dayString" -> sgew.event.day.shortName,
 				"location" -> Option(sgew.event.location).map(_.toString).orNull,
 				"tutors" -> sgew.event.tutors.users.map(u => s"${u.getFullName} (${u.getUserId})").mkString(", "),
-				"eventId" -> sgew.event.id
+				"eventId" -> sgew.event.id,
+				"late" -> sgew.late.toString
 			)
-		}).toMap
+		)
 		Mav(new JSONView(Map(
 			"attendance" -> result.attendance.map{case(student, eventMap) =>
 				student.getWarwickId -> eventMap.map{case(sgew, state) =>
 					sgew.id -> Option(state).map(_.dbValue).orNull
 				}
 			}.toMap,
-			"students" -> allStudentsMap,
-			"events" -> allEventsMap
+			"students" -> allStudents,
+			"events" -> allEvents
 		)))
-	}
-
-	@RequestMapping(method = Array(POST), value = Array("/show"))
-	def show(
-		@ModelAttribute("processor") processor: Appliable[SmallGroupsReportProcessorResult],
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	) = {
-		val processorResult = processor.apply()
-		Mav("smallgroups/_smallgroups",
-			"attendance" -> processorResult.attendance,
-			"students" -> processorResult.students,
-			"events" -> processorResult.events
-		).noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method = Array(POST), value = Array("/download.csv"))

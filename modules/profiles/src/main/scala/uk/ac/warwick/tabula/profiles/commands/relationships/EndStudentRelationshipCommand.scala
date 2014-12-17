@@ -26,7 +26,7 @@ class EndStudentRelationshipCommand(
 	val relationshipType = relationship.relationshipType
 	val studentCourseDetails = relationship.studentCourseDetails
 
-	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), mandatory(studentCourseDetails))
+	PermissionCheck(Permissions.Profiles.StudentRelationship.Manage(mandatory(relationshipType)), mandatory(studentCourseDetails))
 
 	// throw this request out if the relationship can't be edited in Tabula for this department
 	if (relationshipType.readOnly(mandatory(studentCourseDetails.department))) {

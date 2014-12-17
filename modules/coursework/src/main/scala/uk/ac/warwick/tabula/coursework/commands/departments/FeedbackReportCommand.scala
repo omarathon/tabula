@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.jobs.{JobInstance, JobService}
 import uk.ac.warwick.tabula.coursework.jobs.FeedbackReportJob
 import uk.ac.warwick.tabula.validators.WithinYears
 
-class FeedbackReportCommand (val department:Department, val user: CurrentUser) extends Command[JobInstance] with ReadOnly
+class FeedbackReportCommand (val department:Department, val user: CurrentUser) extends Command[JobInstance]
 			with Unaudited with SelfValidating {
 	
 	PermissionCheck(Permissions.Department.DownloadFeedbackReport, department)

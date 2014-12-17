@@ -287,9 +287,6 @@ object AssignmentImporter {
 					join $sitsSchema.cam_sms sms
 						on sms.spr_code = scj.scj_sprc
 
-					join $sitsSchema.srs_vco vco
-						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
-
 					join $sitsSchema.cam_ssn ssn
 						on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON'
 			where
@@ -312,9 +309,6 @@ object AssignmentImporter {
 						on smo.spr_code = spr.spr_code and
 							(smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- no WMG cancelled
 
-					join $sitsSchema.srs_vco vco
-						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
-
 					join $sitsSchema.cam_ssn ssn
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code and ssn.ssn_mrgs = 'CON'
 			where
@@ -336,9 +330,6 @@ object AssignmentImporter {
 					join $sitsSchema.cam_smo smo
 						on smo.spr_code = spr.spr_code and
 							(smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- no WMG cancelled
-
-					join $sitsSchema.srs_vco vco
-						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
 
 					left outer join $sitsSchema.cam_ssn ssn
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code

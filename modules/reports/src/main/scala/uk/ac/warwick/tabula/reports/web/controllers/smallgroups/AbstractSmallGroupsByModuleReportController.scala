@@ -38,43 +38,30 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 	) = {
 		cmd.setFilteredAttendance(filteredAttendanceCmd.apply())
 		val result = cmd.apply()
-		val allStudentsMap: Map[String, Map[String, String]] = result.students.map(studentUser => {
-			studentUser.getWarwickId ->
-				Map(
-					"firstName" -> studentUser.getFirstName,
-					"lastName" -> studentUser.getLastName,
-					"userId" -> studentUser.getUserId
-				)
-		}).toMap
-		val allModulesMap: Map[String, Map[String, String]] = result.modules.map(module => {
-			module.id -> Map(
+		val allStudents: Seq[Map[String, String]] = result.students.map(studentUser =>
+			Map(
+				"firstName" -> studentUser.getFirstName,
+				"lastName" -> studentUser.getLastName,
+				"userId" -> studentUser.getUserId,
+				"universityId" -> studentUser.getWarwickId
+			)
+		)
+		val allModules: Seq[Map[String, String]] = result.modules.map(module =>
+			Map(
+				"id" -> module.id,
 				"code" -> module.code,
 				"name" -> module.name
 			)
-		}).toMap
+		)
 		Mav(new JSONView(Map(
 			"counts" -> result.counts.map{case(student, moduleMap) =>
 				student.getWarwickId -> moduleMap.map{case(module, count) =>
 					module.id -> count.toString
 				}
 			}.toMap,
-			"students" -> allStudentsMap,
-			"modules" -> allModulesMap
+			"students" -> allStudents,
+			"modules" -> allModules
 		)))
-	}
-
-	@RequestMapping(method = Array(POST), value = Array("/show"))
-	def show(
-		@ModelAttribute("processor") processor: Appliable[SmallGroupsByModuleReportProcessorResult],
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	) = {
-		val processorResult = processor.apply()
-		Mav("smallgroups/_smallgroupsByModule",
-			"counts" -> processorResult.counts,
-			"students" -> processorResult.students,
-			"modules" -> processorResult.modules
-		).noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method = Array(POST), value = Array("/download.csv"))

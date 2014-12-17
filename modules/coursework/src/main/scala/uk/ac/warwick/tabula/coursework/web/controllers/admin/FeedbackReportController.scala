@@ -16,7 +16,6 @@ import uk.ac.warwick.tabula.services.jobs.JobService
 import javax.validation.Valid
 import uk.ac.warwick.spring.Wire
 
-
 @Controller
 @RequestMapping(Array("/admin/department/{dept}/reports/feedback"))
 class FeedbackReportController extends CourseworkController {
@@ -37,7 +36,6 @@ class FeedbackReportController extends CourseworkController {
 			"endDate" ->  formatter.print(new DateTime())
 		).noLayout()
 	}
-
 
 	@RequestMapping(method = Array(POST), params = Array("!jobId"))
 	def generateReport(@Valid cmd: FeedbackReportCommand, errors: Errors) = {

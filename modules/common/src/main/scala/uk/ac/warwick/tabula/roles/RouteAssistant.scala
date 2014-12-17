@@ -18,10 +18,8 @@ case object RouteAssistantRoleDefinition extends BuiltInRoleDefinition {
 	GrantsScopedPermission(
 		MonitoringPoints.Record,
 		
-		Profiles.StudentRelationship.Create(PermissionsSelector.Any[StudentRelationshipType]),
 		Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]),
-		Profiles.StudentRelationship.Update(PermissionsSelector.Any[StudentRelationshipType]),
-		Profiles.StudentRelationship.Delete(PermissionsSelector.Any[StudentRelationshipType]),
+		Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]),
 
 		Profiles.Read.Tier4VisaRequirement,
 

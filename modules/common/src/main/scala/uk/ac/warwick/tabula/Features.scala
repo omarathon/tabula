@@ -111,6 +111,7 @@ abstract class Features {
 	@Value("${features.masqueradeElevatedPermissions:false}") var masqueradeElevatedPermissions = defaults.masqueradeElevatedPermissions
 	@Value("${features.profiles.autoGroupDeregistration:false}") var autoGroupDeregistration = defaults.autoGroupDeregistration
 	@Value("${features.reports:false}") var reports = defaults.reports
+	@Value("${features.scheduling.exportFeedbackToSits:false}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -212,6 +213,7 @@ class FeaturesMessage {
 	@BeanProperty var schedulingCleanupUnreferencedFiles = true
 	@BeanProperty var schedulingSanityCheckFilesystem = true
 	@BeanProperty var schedulingExportAttendanceToSits = true
+	@BeanProperty var schedulingExportFeedbackToSits = false
 
 	@BeanProperty var reports = false
 }

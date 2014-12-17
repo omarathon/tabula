@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.groups.commands.admin.reusable
 
-import org.joda.time.DateTime
 import org.springframework.validation.{BindingResult, BindException}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet}
-import uk.ac.warwick.tabula.groups
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener

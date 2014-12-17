@@ -32,7 +32,7 @@ case class PointData(
 )
 
 case class AttendanceReportProcessorResult(
-	result: Map[AttendanceMonitoringStudentData, Map[PointData, AttendanceState]],
+	attendance: Map[AttendanceMonitoringStudentData, Map[PointData, AttendanceState]],
 	students: Seq[AttendanceMonitoringStudentData],
 	points: Seq[PointData]
 )
@@ -43,38 +43,38 @@ class AttendanceReportProcessorInternal(val department: Department, val academic
 	self: AttendanceReportProcessorState =>
 
 	override def applyInternal() = {
-		val processedStudents = students.asScala.map{case(universityId, properties) =>
+		val processedStudents = students.asScala.map{case(_, properties) =>
 			AttendanceMonitoringStudentData(
 				properties.get("firstName"),
 				properties.get("lastName"),
-				universityId,
+				properties.get("universityId"),
 				null,
 				null
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-		val processedPoints = points.asScala.map{case(id, properties) =>
+		val processedPoints = points.asScala.map{case(_, properties) =>
 			PointData(
-				id,
+				properties.get("id"),
 				properties.get("name"),
 				new LocalDate(properties.get("startDate").toLong),
 				new LocalDate(properties.get("endDate").toLong),
-				new DateTime(properties.get("endDate").toLong).isBeforeNow
+				new DateTime(properties.get("endDate").toLong).plusDays(1).isBeforeNow
 			)
 		}.toSeq.sortBy(p => (p.startDate, p.endDate))
-		val processedResult = result.asScala.flatMap{case(universityId, pointMap) =>
+		val processedAttendance = attendance.asScala.flatMap{case(universityId, pointMap) =>
 			processedStudents.find(_.universityId == universityId).map(studentData =>
 				studentData -> pointMap.asScala.flatMap { case (id, stateString) =>
 					processedPoints.find(_.id == id).map(point => point -> AttendanceState.fromCode(stateString))
 			}.toMap)
 		}.toMap
-		AttendanceReportProcessorResult(processedResult, processedStudents, processedPoints)
+		AttendanceReportProcessorResult(processedAttendance, processedStudents, processedPoints)
 	}
 
 }
 
 trait AttendanceReportProcessorState extends ReportCommandState {
-	var result: JMap[String, JMap[String, String]] =
+	var attendance: JMap[String, JMap[String, String]] =
 		LazyMaps.create{_: String => JMap[String, String]() }.asJava
 
 	var students: JMap[String, JMap[String, String]] =

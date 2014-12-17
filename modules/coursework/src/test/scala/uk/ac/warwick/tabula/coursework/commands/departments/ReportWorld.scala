@@ -6,9 +6,9 @@ import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Module
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
+import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.AuditEvent
-import uk.ac.warwick.tabula.services.{SubmissionService, FeedbackService, AssignmentMembershipService, AuditEventQueryMethods}
+import uk.ac.warwick.tabula.services._
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.data.model.Assignment
@@ -29,6 +29,12 @@ trait ReportWorld extends TestBase with Mockito {
 		}.toList
 		users
 	}
+
+	val extensionService = mock[ExtensionService]
+	extensionService.hasExtensions(any[Assignment]) answers (assignmentObj => {
+		val assignment = assignmentObj.asInstanceOf[Assignment]
+		!assignment.extensions.isEmpty
+	})
 
 	val department = new Department
 	department.code = "IN"
@@ -101,7 +107,7 @@ trait ReportWorld extends TestBase with Mockito {
 		assignment.feedbacks.find(_.universityId == userId)
 	}}
 
-	def studentData(start:Int, end:Int) = (start to end).map(idFormat(_)).toList
+	def studentData(start:Int, end:Int) = (start to end).map(idFormat).toList
 
 	def createPublishEvent(assignment: Assignment, daysAfter: Int, students: List[String]) {
 		val date = assignment.closeDate.plusDays(daysAfter)
@@ -119,7 +125,6 @@ trait ReportWorld extends TestBase with Mockito {
 
 	def studentsData(students: List[String]) = students.addString(new StringBuilder(), """["""", """","""", """"]""")
 
-
 	val extension = new Extension(idFormat(3))
 	extension.approve()
 	extension.expiryDate = assignmentSix.closeDate.plusDays(2)
@@ -128,7 +133,7 @@ trait ReportWorld extends TestBase with Mockito {
 	def addAssignment(id: String, name: String, closeDate: DateTime, numberOfStudents: Int, lateModNumber: Int, module: Module) = {
 		val assignment = new Assignment(module)
 		assignment.assignmentMembershipService = assignmentMembershipService
-
+		assignment.extensionService = extensionService
 		assignment.setDefaultBooleanProperties()
 		assignment.id = id
 		assignment.name = name
@@ -141,7 +146,7 @@ trait ReportWorld extends TestBase with Mockito {
 			addFeedback(assignment)
 		}
 
-		val userIds = (1 to numberOfStudents).map(idFormat(_))
+		val userIds = (1 to numberOfStudents).map(idFormat)
 		assignment.members = makeUserGroup(userIds)
 		module.assignments.add(assignment)
 

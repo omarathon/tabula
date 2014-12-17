@@ -23,8 +23,8 @@ class PermissionConverterTest extends TestBase {
 	}
 
 	@Test def selector {
-		converter.convertRight("Profiles.StudentRelationship.Create(*)") should be (Permissions.Profiles.StudentRelationship.Create(PermissionsSelector.Any[StudentRelationshipType]))
-		converter.convertLeft(Permissions.Profiles.StudentRelationship.Create(PermissionsSelector.Any[StudentRelationshipType])) should be ("Profiles.StudentRelationship.Create(*)")
+		converter.convertRight("Profiles.StudentRelationship.Manage(*)") should be (Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]))
+		converter.convertLeft(Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType])) should be ("Profiles.StudentRelationship.Manage(*)")
 	}
 
 }

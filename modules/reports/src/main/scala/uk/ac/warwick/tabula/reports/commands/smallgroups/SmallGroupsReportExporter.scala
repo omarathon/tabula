@@ -33,7 +33,7 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
 				studentData.universityId
 			case index if index == unrecordedIndex =>
 				attendance.get(studentData).map(eventMap =>
-					eventMap.map{case(event, state) => state}.count(_ == NotRecorded).toString
+					eventMap.map{case(event, state) => event}.count(_.isLate).toString
 				).getOrElse("0")
 			case index if index == missedIndex =>
 				attendance.get(studentData).map(eventMap =>

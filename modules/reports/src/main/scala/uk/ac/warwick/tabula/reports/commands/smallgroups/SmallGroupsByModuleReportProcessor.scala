@@ -41,18 +41,18 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
 	self: SmallGroupsByModuleReportProcessorState with TermServiceComponent =>
 
 	override def applyInternal() = {
-		val processedStudents = students.asScala.map{case(universityId, properties) =>
+		val processedStudents = students.asScala.map{case(_, properties) =>
 			AttendanceMonitoringStudentData(
 				properties.get("firstName"),
 				properties.get("lastName"),
-				universityId,
+				properties.get("universityId"),
 				null,
 				null
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))
-		val processedModules = modules.asScala.map{ case (id, properties) =>
+		val processedModules = modules.asScala.map{ case (_, properties) =>
 			ModuleData(
-				id,
+				properties.get("id"),
 				properties.get("code"),
 				properties.get("name")
 			)

@@ -41,6 +41,8 @@ object Assignment {
 			val Table = "table"
 			val Summary = "summary"
 		}
+
+		val IncludeInFeedbackReportWithoutSubmissions = "includeInFeedbackReportWithoutSubmissions"
 	}
 }
 
@@ -62,6 +64,7 @@ class Assignment
 		with CanBeDeleted
 		with ToString
 		with PermissionsTarget
+		with HasSettings
 		with PostLoadBehaviour
 		with Serializable
 		with ToEntityReference {
@@ -103,6 +106,7 @@ class Assignment
 	var name: String = _
 	var active: JBoolean = true
 	var archived: JBoolean = false
+	var uploadMarksToSits: JBoolean = false
 
 	var openDate: DateTime = _
 	var closeDate: DateTime = _
@@ -151,6 +155,9 @@ class Assignment
 	@BatchSize(size = 200)
 	var feedbackTemplate: FeedbackTemplate = _
 
+	def includeInFeedbackReportWithoutSubmissions = getBooleanSetting(Settings.IncludeInFeedbackReportWithoutSubmissions, default = false)
+	def includeInFeedbackReportWithoutSubmissions_= (include: Boolean) = settings += (Settings.IncludeInFeedbackReportWithoutSubmissions -> include)
+
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
 
 	@transient
@@ -158,8 +165,10 @@ class Assignment
 
 	def feedbackDeadline: Option[LocalDate] = if (openEnded || dissertation) {
 		None
-	} else {
+	} else if (!hasExtensions || !extensions.exists(_.approved) || submissions.exists(s => !extensions.exists(e => e.isForUser(s.universityId, s.userId)))) {
 		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
+	} else {
+		Option(extensions.filter(_.approved).map(_.feedbackDeadline.toLocalDate).min)
 	}
 
 	def feedbackDeadlineForSubmission(submission: Submission) = feedbackDeadline.map { wholeAssignmentDeadline =>
@@ -215,6 +224,7 @@ class Assignment
 	// TAB-1446 If hibernate sets members to null, make a new empty usergroup
 	override def postLoad() {
 		ensureMembersGroup
+		ensureSettings
 	}
 
 	def ensureMembersGroup = {
@@ -748,6 +758,7 @@ trait BooleanAssignmentProperties {
 	var allowExtensionRequests: JBoolean = false
 	var summative: JBoolean = true
 	var dissertation: JBoolean = false
+	var includeInFeedbackReportWithoutSubmissions: JBoolean = false
 
 	def copyBooleansTo(assignment: Assignment) {
 		assignment.openEnded = openEnded
@@ -761,6 +772,7 @@ trait BooleanAssignmentProperties {
 		assignment.allowExtensionRequests = allowExtensionRequests
 		assignment.summative = summative
 		assignment.dissertation = dissertation
+		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
 	}
 }
 

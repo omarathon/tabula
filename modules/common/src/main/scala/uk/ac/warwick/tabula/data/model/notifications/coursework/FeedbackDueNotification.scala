@@ -86,10 +86,14 @@ class FeedbackDueExtensionNotification
 	override final def title = "%s: Feedback for %s for \"%s\" is due to be published".format(assignment.module.code.toUpperCase, extension.universityId, assignment.name)
 
 	override final def recipients = {
-		val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
-		moduleAndDepartmentService.getModuleByCode(assignment.module.code)
-			.getOrElse(throw new IllegalStateException("No such module"))
-			.managers.users
+		if (assignment.needsFeedbackPublishing) {
+			val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+			moduleAndDepartmentService.getModuleByCode(assignment.module.code)
+				.getOrElse(throw new IllegalStateException("No such module"))
+				.managers.users
+		} else {
+			Seq()
+		}
 	}
 
 	override final def deadline = extension.feedbackDeadline.toLocalDate

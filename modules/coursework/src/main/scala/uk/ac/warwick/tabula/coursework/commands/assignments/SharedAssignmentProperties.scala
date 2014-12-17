@@ -118,6 +118,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 		dissertation = assignment.dissertation
 		feedbackTemplate = assignment.feedbackTemplate
 		markingWorkflow = assignment.markingWorkflow
+		includeInFeedbackReportWithoutSubmissions = assignment.includeInFeedbackReportWithoutSubmissions
 
 		for (field <- findCommentField(assignment)) comment = field.value
 		for (file <- findFileField(assignment)) {

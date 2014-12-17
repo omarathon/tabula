@@ -7,11 +7,12 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.Marker
 import uk.ac.warwick.tabula.roles.Role
 import uk.ac.warwick.tabula.roles.MarkerRoleDefinition
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 @Component
-class MarkerRoleProvider extends RoleProvider {
+class MarkerRoleProvider extends RoleProvider with TaskBenchmarking {
 	
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = {
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for MarkerRoleProvider") {
 		def getRoles(assignments: Seq[Assignment]) = assignments.toStream.filter { _.isMarker(user.apparentUser) }.map { assignment =>
 			customRoleFor(assignment.module.adminDepartment)(MarkerRoleDefinition, assignment).getOrElse(Marker(assignment))
 		} 

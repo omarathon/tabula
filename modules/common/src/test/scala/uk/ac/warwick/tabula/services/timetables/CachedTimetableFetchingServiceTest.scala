@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.util.cache.HashMapCacheStore
 
+import scala.util.Success
+
 class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 
 	private trait Fixture{
@@ -17,7 +19,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		val studentEvents = Seq(new TimetableEvent("test","test","test","test",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,None,None,Nil,Nil, AcademicYear(2013)))
 		val delegate = mock[CompleteTimetableFetchingService]
 
-		delegate.getTimetableForStudent(studentId) returns studentEvents
+		delegate.getTimetableForStudent(studentId) returns Success(studentEvents)
 		
 		val cache = new CachedCompleteTimetableFetchingService(delegate, "cacheName")
 	}
@@ -28,14 +30,14 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 
 	@Test
 	def firstRequestIsPassedThrough(){new Fixture {
-		cache.getTimetableForStudent(studentId) should be(studentEvents)
+		cache.getTimetableForStudent(studentId) should be (Success(studentEvents))
 		there was one (delegate).getTimetableForStudent(studentId)
 	}}
 
 	@Test
 	def repeatedRequestsAreCached(){new Fixture {
-		cache.getTimetableForStudent(studentId) should be(studentEvents)
-		cache.getTimetableForStudent(studentId) should be(studentEvents)
+		cache.getTimetableForStudent(studentId) should be (Success(studentEvents))
+		cache.getTimetableForStudent(studentId) should be (Success(studentEvents))
 		there was one(delegate).getTimetableForStudent(studentId)
 	}}
 
@@ -45,12 +47,12 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		// request (staff, student, room, etc) so we should get different results back for student and staff
 
 		val staffEvents = Seq(new TimetableEvent("test2", "test2", "test2","test2",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,None,None,Nil,Nil, AcademicYear(2013)))
-		delegate.getTimetableForStaff(studentId) returns staffEvents
+		delegate.getTimetableForStaff(studentId) returns Success(staffEvents)
 
-		cache.getTimetableForStudent(studentId)  should be(studentEvents)
-		cache.getTimetableForStudent(studentId)  should be(studentEvents)
-		cache.getTimetableForStaff(studentId)  should be(staffEvents)
-		cache.getTimetableForStaff(studentId)  should be(staffEvents)
+		cache.getTimetableForStudent(studentId)  should be(Success(studentEvents))
+		cache.getTimetableForStudent(studentId)  should be(Success(studentEvents))
+		cache.getTimetableForStaff(studentId)  should be(Success(staffEvents))
+		cache.getTimetableForStaff(studentId)  should be(Success(staffEvents))
 		there was one (delegate).getTimetableForStudent(studentId)
 		there was one (delegate).getTimetableForStaff(studentId)
 
