@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 @Component
 class OwnDataRoleProvider extends RoleProvider with TaskBenchmarking {
 	
-	val departmentService = promise { Wire[ModuleAndDepartmentService] }
+	lazy val departmentService = promise { Wire[ModuleAndDepartmentService] }
 
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for OwnDataRoleProvider"){
 		val department = 
