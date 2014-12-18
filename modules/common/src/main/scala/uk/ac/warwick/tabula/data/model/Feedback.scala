@@ -91,11 +91,19 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	var actualMark: Option[Int] = None
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+	var adjustedMark: Option[Int] = None
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	var agreedMark: Option[Int] = None
+
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var actualGrade: Option[String] = None
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+	var adjustedGrade: Option[String] = None
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var agreedGrade: Option[String] = None
+
+	var adjustmentComments: String = _
+	var adjustmentReason: String = _
 
 	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
 	@JoinColumn(name = "first_marker_feedback")

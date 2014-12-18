@@ -89,6 +89,10 @@ object Routes {
 
 			}
 
+			object feedbackAdjustment {
+				def apply(assignment: Assignment, student: User) = assignmentroot(assignment) + "/feedback/adjustments"
+			}
+
 			object onlineFeedback {
 				def apply(assignment: Assignment) = assignmentroot(assignment) + "/feedback/online"
 			}

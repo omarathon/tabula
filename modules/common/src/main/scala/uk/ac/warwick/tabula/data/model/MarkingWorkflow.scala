@@ -83,6 +83,10 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 
 	def getStudentsThirdMarker(assignment:Assignment, universityId: UniversityId): Option[Usercode]
 
+	// get's the marker that is primarally responsible for the specified students feedback.
+	// This user is notified of adjustments. the default is the first marker but this can be overriden when that isn't the case
+	def getStudentsPrimaryMarker(assignment:Assignment, universityId: UniversityId) = getStudentsFirstMarker(assignment, universityId)
+
 	def getSubmissions(assignment: Assignment, user: User): Seq[Submission]
 
 	override def toString = "MarkingWorkflow(" + id + ")"
