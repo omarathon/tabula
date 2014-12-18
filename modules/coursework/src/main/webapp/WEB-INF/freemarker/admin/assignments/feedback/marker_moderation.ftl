@@ -81,7 +81,7 @@
 
 			<div class="submit-buttons">
 				<input class="btn btn-primary" type="submit" value="Save">
-				<a class="btn discard-changes" href="">Discard</a>
+				<a class="btn discard-changes" href="">Cancel</a>
 			</div>
 		</@f.form>
 	</#if>
