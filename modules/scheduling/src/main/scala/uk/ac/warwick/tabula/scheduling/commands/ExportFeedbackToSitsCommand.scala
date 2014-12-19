@@ -76,8 +76,8 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 			feedback.actualMark.foreach( mark => feedbackToLoad.actualMarkLastUploaded = mark)
 			feedback.actualGrade.foreach( grade => feedbackToLoad.actualGradeLastUploaded = grade)
 		}
-		else throw new IllegalStateException(f"Unexpected SITS update!  Only expected to update one row, but $expectedRowCount rows were updated " +
-				f"in CAM_SAS for student $studentId, feedback $feedbackId")
+		else throw new IllegalStateException(s"Unexpected SITS update!  Only expected to update one row, but $expectedRowCount rows were updated " +
+				s"in CAM_SAS for student $studentId, feedback $feedbackId")
 
 		feedbackToLoad
 	}
