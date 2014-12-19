@@ -382,20 +382,20 @@ object ProfileImporter extends Logging {
 
 			ssn.ssn_mrgs as mod_reg_status,
 
-			mst.mst_type as mst_type
+			mst.mst_type as mst_type -- D for deceased.  Other values are L (live record) and N (no MRE records)
 
-		from $sitsSchema.ins_stu stu
+		from $sitsSchema.ins_stu stu -- Student
 
-			join $sitsSchema.ins_spr spr
+			join $sitsSchema.ins_spr spr -- Student Programme Route
 				on stu.stu_code = spr.spr_stuc
 
-			join $sitsSchema.srs_scj scj
+			join $sitsSchema.srs_scj scj -- Student Course Join
 				on spr.spr_code = scj.scj_sprc
 
-			join $sitsSchema.srs_sce sce
+			join $sitsSchema.srs_sce sce -- Student Course Enrolment
 				on scj.scj_code = sce.sce_scjc
 				$sceYearClause
-				and sce.sce_seq2 =
+				and sce.sce_seq2 = -- get the last course enrolment record for the course and year
 					(
 						select max(sce2.sce_seq2)
 							from $sitsSchema.srs_sce sce2
@@ -403,7 +403,7 @@ object ProfileImporter extends Logging {
 								and sce2.sce_ayrc = sce.sce_ayrc
 					)
 
-			join $sitsSchema.srs_mst mst
+			join $sitsSchema.srs_mst mst -- Master Student
 	 			on stu.stu_code = mst.mst_adid
 		 		and mst.mst_code =
 		 			(
@@ -412,20 +412,20 @@ object ProfileImporter extends Logging {
 			 					where mst.mst_adid = mst2.mst_adid
 	 				)
 
-			left outer join $sitsSchema.srs_crs crs
+			left outer join $sitsSchema.srs_crs crs -- Course
 				on sce.sce_crsc = crs.crs_code
 
-			left outer join $sitsSchema.srs_nat nat
+			left outer join $sitsSchema.srs_nat nat -- Nationality
 				on stu.stu_natc = nat.nat_code
 
-			left outer join $sitsSchema.srs_sta sts
+			left outer join $sitsSchema.srs_sta sts -- Status
 				on spr.sts_code = sts.sta_code
 
-			left outer join $sitsSchema.cam_ssn ssn
+			left outer join $sitsSchema.cam_ssn ssn -- module registration status
 				on spr.spr_code = ssn.ssn_sprc
 				and sce.sce_ayrc = ssn.ssn_ayrc
 
-			left outer join $sitsSchema.ins_prs prs
+			left outer join $sitsSchema.ins_prs prs -- Personnel
 				on spr.prs_code = prs.prs_code
 
 		where stu.stu_code = :universityId

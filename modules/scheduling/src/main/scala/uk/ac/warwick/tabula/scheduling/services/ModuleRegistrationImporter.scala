@@ -108,25 +108,30 @@ object ModuleRegistrationImporter {
 
 	val UnconfirmedModuleRegistrations = s"""
 			select scj_code, sms.mod_code, sms.sms_mcrd as credit, sms.sms_agrp as assess_group,
-			sms.ses_code, sms.ayr_code, sms_occl as occurrence, null as smr_agrm, null as smr_agrg
-				from $sitsSchema.ins_stu stu
-					join $sitsSchema.ins_spr spr 
+			sms.ses_code, -- e.g. C for core or O for option
+			sms.ayr_code, sms_occl as occurrence,
+			null as smr_agrm, -- agreed mark
+			null as smr_agrg -- agreed grade
+				from $sitsSchema.ins_stu stu -- student
+					join $sitsSchema.ins_spr spr -- Student Programme Route, needed for SPR code
 						on spr.spr_stuc = stu.stu_code
 					
-					join $sitsSchema.srs_scj scj 
+					join $sitsSchema.srs_scj scj -- Student Course Join, needed for SCJ code
 						on scj.scj_sprc = spr.spr_code
 					
-					join $sitsSchema.cam_sms sms 
+					join $sitsSchema.cam_sms sms -- Student Module Selection (unconfirmed module choices)
 						on sms.spr_code = spr.spr_code
 
-					join $sitsSchema.cam_ssn ssn 
-						on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON'
+					join $sitsSchema.cam_ssn ssn -- holds student module registration status
+						on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- module choices not confirmed
 				where stu.stu_code = :universityId"""
 
 	// The check on SMO_RTSC excludes WMG cancelled modules or module registrations
 	val ConfirmedModuleRegistrations = s"""
 			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
-			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence, smr_agrm, smr_agrg
+			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence,
+			smr_agrm, -- agreed overall module mark
+			smr_agrg -- agreed overall module grade
 				from $sitsSchema.ins_stu stu
 					join $sitsSchema.ins_spr spr 
 						on spr.spr_stuc = stu.stu_code
@@ -136,9 +141,9 @@ object ModuleRegistrationImporter {
 					
 					join $sitsSchema.cam_smo smo 
 						on smo.spr_code = spr.spr_code
-						and (smo_rtsc is null or (smo_rtsc not like 'X%' and smo_rtsc != 'Z'))
+						and (smo_rtsc is null or (smo_rtsc not like 'X%' and smo_rtsc != 'Z')) -- exclude WMG cancelled registrations
 
-					left join $sitsSchema.ins_smr smr
+					left join $sitsSchema.ins_smr smr -- Student Module Result
 						on smo.spr_code = smr.spr_code
 						and smo.ayr_code = smr.ayr_code
 						and smo.mod_code = smr.mod_code
