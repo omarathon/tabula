@@ -1,13 +1,18 @@
 package uk.ac.warwick.tabula.services.permissions
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase, Fixtures}
+import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.roles.Marker
+import uk.ac.warwick.tabula.helpers.Promises._
 
-class MarkerRoleProviderTest extends TestBase {
-	
-	val provider = new MarkerRoleProvider
+class MarkerRoleProviderTest extends TestBase with Mockito {
+
+	val mockAssignmentService = smartMock[AssignmentService]
+	val provider = new MarkerRoleProvider {
+		override val assignmentService = promise { mockAssignmentService }
+	}
 	
 	val mw1 = Fixtures.seenSecondMarkingLegacyWorkflow("workflow is marker")
 	mw1.firstMarkers.addUserId("cuscav")
@@ -42,24 +47,31 @@ class MarkerRoleProviderTest extends TestBase {
 	mod1.assignments.addAll(Seq(assignmentIsMarker1, assignmentNotMarker))
 	mod2.assignments.addAll(Seq(assignmentIsMarker2))
 	mod3.assignments.addAll(Seq(assignmentNotMarker))
+
+	val cuscavUser = new CurrentUser(new User("cuscav"), new User("cuscav"))
+
+	mockAssignmentService.getAssignmentsByDepartmentAndMarker(dept, cuscavUser) returns Seq(assignmentIsMarker1, assignmentIsMarker2)
+	mockAssignmentService.getAssignmentsByModuleAndMarker(mod1, cuscavUser) returns Seq(assignmentIsMarker1)
+	mockAssignmentService.getAssignmentsByModuleAndMarker(mod2, cuscavUser) returns Seq(assignmentIsMarker2)
+	mockAssignmentService.getAssignmentsByModuleAndMarker(mod3, cuscavUser) returns Seq()
 	
-	@Test def forAssignment() = withUser("cuscav") {
+	@Test def forAssignment() = withCurrentUser(cuscavUser) {
 		provider.getRolesFor(currentUser, assignmentIsMarker1) should be (Seq(Marker(assignmentIsMarker1)))
 		provider.getRolesFor(currentUser, assignmentIsMarker2) should be (Seq(Marker(assignmentIsMarker2)))
 		provider.getRolesFor(currentUser, assignmentNotMarker) should be (Seq())
 	}
 	
-	@Test def forModule() = withUser("cuscav") {
+	@Test def forModule() = withCurrentUser(cuscavUser) {
 		provider.getRolesFor(currentUser, mod1) should be (Seq(Marker(assignmentIsMarker1)))
 		provider.getRolesFor(currentUser, mod2) should be (Seq(Marker(assignmentIsMarker2)))
 		provider.getRolesFor(currentUser, mod3) should be (Seq())
 	}
 	
-	@Test def forDepartment() = withUser("cuscav") {
+	@Test def forDepartment() = withCurrentUser(cuscavUser) {
 		provider.getRolesFor(currentUser, dept) should be (Seq(Marker(assignmentIsMarker1), Marker(assignmentIsMarker2)))
 	}
 	
-	@Test def handlesDefault() = withUser("cuscav") {
+	@Test def handlesDefault() = withCurrentUser(cuscavUser) {
 		provider.getRolesFor(currentUser, Fixtures.feedback()) should be (Seq())
 	}
 
