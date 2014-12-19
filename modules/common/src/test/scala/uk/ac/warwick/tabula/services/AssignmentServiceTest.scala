@@ -16,8 +16,10 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 	val thisAssignmentDao = new AssignmentDaoImpl
 
-	val assignmentService = new AbstractAssignmentService with AssignmentDaoComponent {
+	val assignmentService = new AbstractAssignmentService with AssignmentDaoComponent with AssignmentServiceUserGroupHelpers {
 		val assignmentDao = thisAssignmentDao
+		val firstMarkerHelper = ???
+		val secondMarkerHelper = ???
 	}
 	val assignmentMembershipService = new AssignmentMembershipServiceImpl
 	val feedbackService = new FeedbackServiceImpl
@@ -788,14 +790,14 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		workflow2.name = "mw2"
 		workflow2.department = department
 
-		workflow1.firstMarkers.addUserId("cuscav")
-		workflow1.firstMarkers.addUserId("cusebr")
-		workflow1.firstMarkers.addUserId("cuscao")
+		workflow1.firstMarkers.knownType.addUserId("cuscav")
+		workflow1.firstMarkers.knownType.addUserId("cusebr")
+		workflow1.firstMarkers.knownType.addUserId("cuscao")
 
-		workflow2.firstMarkers.addUserId("cuscav")
-		workflow2.firstMarkers.addUserId("curef")
-		workflow2.secondMarkers.addUserId("cusfal")
-		workflow2.secondMarkers.addUserId("cusebr")
+		workflow2.firstMarkers.knownType.addUserId("cuscav")
+		workflow2.firstMarkers.knownType.addUserId("curef")
+		workflow2.secondMarkers.knownType.addUserId("cusfal")
+		workflow2.secondMarkers.knownType.addUserId("cusebr")
 
 		val assignment1 = new Assignment
 		val assignment2 = new Assignment

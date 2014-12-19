@@ -15,10 +15,10 @@ class MarkerRoleProviderTest extends TestBase with Mockito {
 	}
 	
 	val mw1 = Fixtures.seenSecondMarkingLegacyWorkflow("workflow is marker")
-	mw1.firstMarkers.addUserId("cuscav")
+	mw1.firstMarkers.knownType.addUserId("cuscav")
 	
 	val mw2 = Fixtures.seenSecondMarkingLegacyWorkflow("workflow not marker")
-	mw2.firstMarkers.addUserId("cusebr")
+	mw2.firstMarkers.knownType.addUserId("cusebr")
 	
 	val assignmentIsMarker1 = Fixtures.assignment("assignment is marker 1")	
 	assignmentIsMarker1.markingWorkflow = mw1

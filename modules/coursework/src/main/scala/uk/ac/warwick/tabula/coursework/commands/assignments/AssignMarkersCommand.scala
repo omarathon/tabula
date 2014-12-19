@@ -36,12 +36,12 @@ class AssignMarkersCommand(val module: Module, val assignment: Assignment)
 	var alloctaionExtractor = Wire[MarkerAllocationExtractor]
 	var file: UploadedFile = new UploadedFile
 
-	var firstMarkerMapping : JMap[String, JList[String]] = assignment.markingWorkflow.firstMarkers.members.map({ marker =>
+	var firstMarkerMapping : JMap[String, JList[String]] = assignment.markingWorkflow.firstMarkers.knownType.members.map({ marker =>
 		val list : JList[String] = JArrayList()
 		(marker, list)
 	}).toMap.asJava
 
-	var secondMarkerMapping : JMap[String, JList[String]] = assignment.markingWorkflow.secondMarkers.members.map({ marker =>
+	var secondMarkerMapping : JMap[String, JList[String]] = assignment.markingWorkflow.secondMarkers.knownType.members.map({ marker =>
 		val list : JList[String] = JArrayList()
 		(marker, list)
 	}).toMap.asJava
