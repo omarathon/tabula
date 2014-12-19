@@ -91,25 +91,32 @@ class SandboxAccreditedPriorLearningImporter extends AccreditedPriorLearningImpo
 object AccreditedPriorLearningImporter {
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
-	// Choose the most significant course if there is one for this SPR.
+	// Choose the most significant course, flagged by SCJ_UDFA value of Y in the Student Course Join (SCJ) table
+	// if there is one for the student's SPR (Student Programme Route) record.
 	// If there is no most signif SCJ for this SPR, choose the SCJ with the max sequence number.
 	val AccreditedPriorLearning = f"""
-		select scj.scj_code, sac.awd_code, sac.sac_seq, sac.ayr_code, sac.sac_crdt, sac.lev_code, sac.sac_resn
-		from $sitsSchema.ins_stu stu
+		select scj.scj_code, -- Student Course Join code
+			sac.awd_code,  -- award code, e.g. "BA"
+			sac.sac_seq, -- sequence code on the Student Award Credits table
+			sac.ayr_code,
+			sac.sac_crdt, -- credit value e.g. 30
+			sac.lev_code, -- level code, e.g. 1, M1
+			sac.sac_resn -- description e.g. "Exemption of 30 CATs from optional modules"
+		from $sitsSchema.ins_stu stu -- student table
 
-		join $sitsSchema.ins_spr spr
+		join $sitsSchema.ins_spr spr -- join to Student Program Route table to get SPR code
 			on spr.spr_stuc = stu.stu_code
 
-		join $sitsSchema.cam_sac sac
+		join $sitsSchema.cam_sac sac -- join to Student Award Crecits table
 			on sac.spr_code = spr.spr_code
 
-	join $sitsSchema.srs_scj scj
+	join $sitsSchema.srs_scj scj -- join to Student Course Join table to get the SCJ code
 		on (
-			scj.scj_sprc = sac.spr_code
+			scj.scj_sprc = sac.spr_code -- join to Student Award Credits table
 			and (
-				scj.scj_udfa = 'Y'
+				scj.scj_udfa = 'Y' -- the current SCJ
 				or (
-					scj.scj_seq2 = (
+					scj.scj_seq2 = ( -- or, if no current, then the latest SCJ
 						select max(scj2.scj_seq2) from $sitsSchema.srs_scj scj2
 							where scj2.scj_sprc = spr.spr_code
 							and not exists (select * from $sitsSchema.srs_scj where scj_udfa in ('Y','y') and scj.scj_sprc = sac.spr_code)
@@ -122,13 +129,13 @@ object AccreditedPriorLearningImporter {
 
 
 	def mapResultSet(resultSet: ResultSet): AccreditedPriorLearningRow = {
-		new AccreditedPriorLearningRow(resultSet.getString("scj_code"),
-		resultSet.getString("awd_code"),
-		resultSet.getInt("sac_seq"),
+		new AccreditedPriorLearningRow(resultSet.getString("scj_code"), // Student Course Join code
+		resultSet.getString("awd_code"), // award code
+		resultSet.getInt("sac_seq"), // student award credit sequence code
 		resultSet.getString("ayr_code"),
-		resultSet.getBigDecimal("sac_crdt"),
-		resultSet.getString("lev_code"),
-		resultSet.getString("sac_resn"))
+		resultSet.getBigDecimal("sac_crdt"), // credit
+		resultSet.getString("lev_code"), // level code
+		resultSet.getString("sac_resn")) // description
 	}
 
 	class AccreditedPriorLearningQuery(ds: DataSource)
