@@ -42,7 +42,7 @@
 		<div class="row-fluid fix-on-scroll-container">
 			<div class="span5">
 				<div id="studentslist"
-			 		 class="students tabula-filtered-list"
+			 		 class="students tabula-filtered-list fix-on-scroll"
 					 data-item-selector=".student-list li">
 					<div class="well ">
 						<h4>Not allocated to a marker</h4>
@@ -64,7 +64,7 @@
 			<div class="span5">
 				<h3 class="smallscreen-only">Groups</h3>
 
-				<div id="groupslist" class="agentslist ${class} fix-on-scroll">
+				<div id="groupslist" class="agentslist ${class} ">
 					<#list markerList as marker>
 						<#local existingStudents = marker.students />
 
@@ -256,51 +256,6 @@
 			$this.attr("name", name.replace(/(.*\[).*(\]\[.*\])/g, "$1"+newMarker+"]["+newIndex+"]"));
 		});
 	});
-
-	// drag-and drop header fixes
-	var fixHeaderFooter = $('.fix-area').fixHeaderFooter();
-	var singleColumnDragTargetHeight = $('.agentslist .drag-target').outerHeight(true);
-
-	$(window).scroll(function() {
-		fixHeaderFooter.fixTargetList('.agentslist:visible');
-	});
-
-	// when tabs and fixed headers collide
-	var $tabs = $('.nav');
-	var $tabFixedHeaders = $tabs.siblings('.tab-content').find('.fix-header');
-
-	$tabs.on('shown', function() {
-		$tabFixedHeaders.trigger('disabled.ScrollToFixed');
-		$tabFixedHeaders.filter(':visible').trigger('enable.ScrollToFixed');
-		$(window).resize();
-	});
-
-	// onload reformat agents layout
-	formatAgentsLayout();
-
-	// debounced on window resize, reformat agents layout...
-	on_resize(formatAgentsLayout);
-
-
-	function formatAgentsLayout() {
-		var agentslist = $('.agentslist:visible');
-		var heightOfSingleColumnList = agentslist.find('.drag-target').length * singleColumnDragTargetHeight;
-
-		if(agentslist.height() > fixHeaderFooter.viewableArea()) {
-			agentslist.addClass('drag-list-three-col');
-		} else if(fixHeaderFooter.viewableArea() > heightOfSingleColumnList) {
-			agentslist.removeClass('drag-list-three-col');
-		}
-	}
-
-	// debounced on_resize to avoid retriggering while resizing window
-	function on_resize(c,t) {
-		onresize = function() {
-			clearTimeout(t);
-			t = setTimeout(c,100)
-		};
-		return c;
-	}
 
 })(jQuery);
 </script>

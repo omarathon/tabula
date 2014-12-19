@@ -24,7 +24,7 @@ class OwnDataRoleProvider extends RoleProvider with TaskBenchmarking {
 	val departmentService = promise { Wire[ModuleAndDepartmentService] }
 
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for OwnDataRoleProvider"){
-		val department = 
+		lazy val department =
 			user.departmentCode.maybeText.flatMap { code => departmentService.get.getDepartmentByCode(code.toLowerCase) }
 		
 		scope match {
