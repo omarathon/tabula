@@ -382,7 +382,7 @@ object ProfileImporter extends Logging {
 
 			ssn.ssn_mrgs as mod_reg_status,
 
-			mst.mst_type as mst_type -- D for deceased.  (Other values are L and N)
+			mst.mst_type as mst_type -- D for deceased.  Other values are L (live record) and N (no MRE records)
 
 		from $sitsSchema.ins_stu stu -- Student
 
