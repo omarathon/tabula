@@ -369,4 +369,10 @@ object Fixtures extends Mockito {
 		ug
 	}
 
+	def feedbackForSits(feedback: Feedback, user: User): FeedbackForSits = {
+		val fb = new FeedbackForSits
+		fb.init(feedback, user)
+		fb
+	}
+
 }

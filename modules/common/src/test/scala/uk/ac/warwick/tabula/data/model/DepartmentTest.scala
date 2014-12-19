@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.helpers.Tap.tap
 import uk.ac.warwick.tabula.permissions.PermissionsSelector
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ExtensionManagerRoleDefinition, StudentRelationshipAgentRoleDefinition}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
 
 class DepartmentTest extends TestBase with Mockito {
 
@@ -243,6 +243,40 @@ class DepartmentTest extends TestBase with Mockito {
 		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(selector)) should be (Some(customDefinition))
 		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(new StudentRelationshipType)) should be (Some(customDefinition))
 		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any)) should be (Some(customDefinition))
+	}
+
+	@Test
+	def testUploadMarksSettings: Unit = {
+		val department = new Department
+		val year = new AcademicYear(2014)
+		var degreeType = DegreeType.Undergraduate
+
+		val module = Fixtures.module("AM903", "Test module")
+		module.degreeType = degreeType
+
+		// no department settings created - marks upload is open by default
+		department.canUploadMarksToSitsForYear(year, module) should be (true)
+
+		// set to false and make sure it can be read back
+		department.setUploadMarksToSitsForYear(year, degreeType, false)
+		department.canUploadMarksToSitsForYear(year, module) should be (false)
+
+		// now set to true and test again
+		department.setUploadMarksToSitsForYear(year, degreeType, true)
+		department.canUploadMarksToSitsForYear(year, module) should be (true)
+
+		// make PG false and see if we can still load UG
+		department.setUploadMarksToSitsForYear(year, DegreeType.Postgraduate, false)
+		department.canUploadMarksToSitsForYear(year, module) should be (true)
+
+		// now make the module PG - upload should fail
+		module.degreeType = DegreeType.Postgraduate
+		department.canUploadMarksToSitsForYear(year, module) should be (false)
+
+		// set pg to be uploadable so it passes
+		department.setUploadMarksToSitsForYear(year, DegreeType.Postgraduate, true)
+		department.canUploadMarksToSitsForYear(year, module) should be (true)
+
 	}
 
 }
