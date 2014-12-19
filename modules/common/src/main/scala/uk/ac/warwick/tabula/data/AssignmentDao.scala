@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.forms.FormField
 import org.joda.time.DateTime
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.Order._
 
@@ -30,6 +30,8 @@ trait AssignmentDao {
 	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment]
+	def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser): Seq[Assignment]
+	def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser): Seq[Assignment]
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
 
 	def getAssignments(department: Department, year: AcademicYear): Seq[Assignment]
@@ -84,7 +86,35 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 				where (:userId in elements(a.markingWorkflow.firstMarkers.includeUsers)
 					or :userId in elements(a.markingWorkflow.secondMarkers.includeUsers))
 					and a.deleted = false and a.archived = false
-																 """).setString("userId", user.getUserId).distinct.seq
+		""").setString("userId", user.getUserId).distinct.seq
+
+	def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser): Seq[Assignment] =
+		session.newQuery[Assignment](
+			"""
+				select a from Assignment a
+				where (
+					:userId in elements(a.markingWorkflow.firstMarkers.includeUsers)
+					or :userId in elements(a.markingWorkflow.secondMarkers.includeUsers)
+				)
+				and a.module.adminDepartment = :dept and a.deleted = false and a.archived = false
+			"""
+		).setParameter("dept", department)
+			.setString("userId", user.apparentId)
+			.distinct.seq
+
+	def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser): Seq[Assignment] =
+		session.newQuery[Assignment](
+			"""
+				select a from Assignment a
+				where (
+					:userId in elements(a.markingWorkflow.firstMarkers.includeUsers)
+					or :userId in elements(a.markingWorkflow.secondMarkers.includeUsers)
+				)
+				and a.module = :module and a.deleted = false and a.archived = false
+			"""
+		).setParameter("module", module)
+			.setString("userId", user.apparentId)
+			.distinct.seq
 
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module) =
 		session.newQuery[Assignment]("from Assignment where name=:name and academicYear=:year and module=:module and deleted=0")
