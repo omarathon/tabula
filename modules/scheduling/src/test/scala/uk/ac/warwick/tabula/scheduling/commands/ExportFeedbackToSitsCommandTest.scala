@@ -67,7 +67,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 			// check that the feedbackForSits record has been updated to reflect the fact that data has been written to SITS
 			val dateOfUpload = feedbackForSits.dateOfUpload
 			dateOfUpload should not be (null)
-			dateOfUpload.isBefore(DateTime.now) should be(true)
+			dateOfUpload.isAfter(DateTime.now) should be(false)
 			dateOfUpload.plusMinutes(1).isAfter(DateTime.now) should be(true)
 
 			feedbackForSits.actualGradeLastUploaded should be("B")
