@@ -173,86 +173,73 @@
 			</div>
 		</div>
 
-		<#if !command.members?has_content>
-
+		<#if !command.members?has_content && !command.manuallyAddedUniversityIds?has_content && !command.additionalStudent?has_content>
 			<p><em>There are no students allocated to this group.</em></p>
+		</#if>
 
-		<#else>
+		<#macro studentRow student added_manually linked_info={}>
+			<div class="row-fluid item-info">
+				<div class="span12" id="student-${student.universityId}">
+					<div class="span8">
+						<@fmt.member_photo student "tinythumbnail" true />
+						${student.fullName}
+						<@pl.profile_link student.universityId />
 
-			<#macro studentRow student added_manually linked_info={}>
-				<div class="row-fluid item-info">
-					<div class="span12" id="student-${student.universityId}">
-						<div class="span8">
-							<@fmt.member_photo student "tinythumbnail" true />
-							${student.fullName}
-							<@pl.profile_link student.universityId />
+						<#if added_manually>
+							<#assign popoverText>
+								<p>${student.fullName} has been manually added to this event.</p>
 
-							<#if added_manually>
-								<#assign popoverText>
-									<p>${student.fullName} has been manually added to this event.</p>
-
-									<#if linked_info.replacesAttendance??>
-										<p>Attending instead of
-										${linked_info.replacesAttendance.occurrence.event.group.groupSet.name}, ${linked_info.replacesAttendance.occurrence.event.group.name}:
-										${linked_info.replacesAttendance.occurrence.event.day.name} <@fmt.time linked_info.replacesAttendance.occurrence.event.startTime /> - <@fmt.time linked_info.replacesAttendance.occurrence.event.endTime />, Week ${linked_info.replacesAttendance.occurrence.week}.
-										</p>
-									</#if>
-
-									<button class="btn btn-mini btn-danger" type="button" data-action="remove" data-student="${student.universityId}">Remove from this occurrence</button>
-								</#assign>
-
-								<a class="use-popover" data-container="body" data-content="${popoverText}" data-html="true">
-									<i class="icon-hand-up"></i>
-								</a>
-							</#if>
-
-							<#if linked_info.replacedBy??>
-								<#list linked_info.replacedBy as replaced_by>
-									<i class="icon-link use-tooltip" data-container="body" title="<#compress>
-									Replaced by attendance at
-									${replaced_by.occurrence.event.group.groupSet.name}, ${replaced_by.occurrence.event.group.name}:
-									${replaced_by.occurrence.event.day.name} <@fmt.time replaced_by.occurrence.event.startTime /> - <@fmt.time replaced_by.occurrence.event.endTime />, Week ${replaced_by.occurrence.week}.
-								</#compress>"></i>
-								</#list>
-							</#if>
-						</div>
-						<div class="span4">
-							<div class="pull-right">
-								<#local hasState = mapGet(command.studentsState, student.universityId)?? />
-								<#if hasState>
-									<#local currentState = mapGet(command.studentsState, student.universityId) />
+								<#if linked_info.replacesAttendance??>
+									<p>Attending instead of
+									${linked_info.replacesAttendance.occurrence.event.group.groupSet.name}, ${linked_info.replacesAttendance.occurrence.event.group.name}:
+									${linked_info.replacesAttendance.occurrence.event.day.name} <@fmt.time linked_info.replacesAttendance.occurrence.event.startTime /> - <@fmt.time linked_info.replacesAttendance.occurrence.event.endTime />, Week ${linked_info.replacesAttendance.occurrence.week}.
+									</p>
 								</#if>
-								<select id="studentsState-${student.universityId}" name="studentsState[${student.universityId}]" data-universityid="${student.universityId}">
-									<option value="" <#if !hasState>selected</#if>>Not recorded</option>
-									<#list allCheckpointStates as state>
-										<option value="${state.dbValue}" <#if hasState && currentState.dbValue == state.dbValue>selected</#if>>${state.description}</option>
-									</#list>
-								</select>
-								<#if features.attendanceMonitoringNote>
-									<#local hasNote = mapGet(mapGet(command.attendanceNotes, student), command.occurrence)?? />
-									<#if hasNote>
-										<#local note = mapGet(mapGet(command.attendanceNotes, student), command.occurrence) />
-										<#if note.hasContent>
-											<a
-												id="attendanceNote-${student.universityId}-${command.occurrence.id}"
-												class="btn use-tooltip attendance-note edit"
-												title="Edit attendance note"
-												data-container="body"
-												href="<@routes.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />"
-											>
-												<i class="icon-edit attendance-note-icon"></i>
-											</a>
-										<#else>
-											<a
-												id="attendanceNote-${student.universityId}-${command.occurrence.id}"
-												class="btn use-tooltip attendance-note"
-												title="Add attendance note"
-												data-container="body"
-												href="<@routes.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />"
-											>
-												<i class="icon-edit attendance-note-icon"></i>
-											</a>
-										</#if>
+
+								<button class="btn btn-mini btn-danger" type="button" data-action="remove" data-student="${student.universityId}">Remove from this occurrence</button>
+							</#assign>
+
+							<a class="use-popover" data-container="body" data-content="${popoverText}" data-html="true">
+								<i class="icon-hand-up"></i>
+							</a>
+						</#if>
+
+						<#if linked_info.replacedBy??>
+							<#list linked_info.replacedBy as replaced_by>
+								<i class="icon-link use-tooltip" data-container="body" title="<#compress>
+								Replaced by attendance at
+								${replaced_by.occurrence.event.group.groupSet.name}, ${replaced_by.occurrence.event.group.name}:
+								${replaced_by.occurrence.event.day.name} <@fmt.time replaced_by.occurrence.event.startTime /> - <@fmt.time replaced_by.occurrence.event.endTime />, Week ${replaced_by.occurrence.week}.
+							</#compress>"></i>
+							</#list>
+						</#if>
+					</div>
+					<div class="span4">
+						<div class="pull-right">
+							<#local hasState = mapGet(command.studentsState, student.universityId)?? />
+							<#if hasState>
+								<#local currentState = mapGet(command.studentsState, student.universityId) />
+							</#if>
+							<select id="studentsState-${student.universityId}" name="studentsState[${student.universityId}]" data-universityid="${student.universityId}">
+								<option value="" <#if !hasState>selected</#if>>Not recorded</option>
+								<#list allCheckpointStates as state>
+									<option value="${state.dbValue}" <#if hasState && currentState.dbValue == state.dbValue>selected</#if>>${state.description}</option>
+								</#list>
+							</select>
+							<#if features.attendanceMonitoringNote>
+								<#local hasNote = mapGet(mapGet(command.attendanceNotes, student), command.occurrence)?? />
+								<#if hasNote>
+									<#local note = mapGet(mapGet(command.attendanceNotes, student), command.occurrence) />
+									<#if note.hasContent>
+										<a
+											id="attendanceNote-${student.universityId}-${command.occurrence.id}"
+											class="btn use-tooltip attendance-note edit"
+											title="Edit attendance note"
+											data-container="body"
+											href="<@routes.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />"
+										>
+											<i class="icon-edit attendance-note-icon"></i>
+										</a>
 									<#else>
 										<a
 											id="attendanceNote-${student.universityId}-${command.occurrence.id}"
@@ -264,44 +251,57 @@
 											<i class="icon-edit attendance-note-icon"></i>
 										</a>
 									</#if>
+								<#else>
+									<a
+										id="attendanceNote-${student.universityId}-${command.occurrence.id}"
+										class="btn use-tooltip attendance-note"
+										title="Add attendance note"
+										data-container="body"
+										href="<@routes.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />"
+									>
+										<i class="icon-edit attendance-note-icon"></i>
+									</a>
 								</#if>
-							</div>
-						</div>
-
-						<@spring.bind path="command.studentsState[${student.universityId}]">
-							<#list status.errorMessages as err>${err}</#list>
-							<div class="text-error"><@f.errors path="studentsState[${student.universityId}]" cssClass="error"/></div>
-						</@spring.bind>
-					</div>
-					<script type="text/javascript">
-						AttendanceRecording.createButtonGroup('#studentsState-${student.universityId}');
-						AttendanceRecording.wireButtons('#student-${student.universityId}');
-					</script>
-				</div>
-			</#macro>
-
-			<div class="striped-section-contents attendees">
-				<form id="recordAttendance" action="" method="post" data-occurrence="${command.occurrence.id}">
-					<script type="text/javascript">
-						AttendanceRecording.bindButtonGroupHandler(true);
-					</script>
-
-					<#if command.additionalStudent??>
-						<#assign already_in = false />
-						<#list command.members as student>
-							<#if student.universityId == command.additionalStudent.universityId>
-								<#assign already_in = true />
 							</#if>
-						</#list>
+						</div>
+					</div>
 
-						<#if !already_in><@studentRow command.additionalStudent true command.linkedAttendance /></#if>
-					</#if>
+					<@spring.bind path="command.studentsState[${student.universityId}]">
+						<#list status.errorMessages as err>${err}</#list>
+						<div class="text-error"><@f.errors path="studentsState[${student.universityId}]" cssClass="error"/></div>
+					</@spring.bind>
+				</div>
+				<script type="text/javascript">
+					AttendanceRecording.createButtonGroup('#studentsState-${student.universityId}');
+					AttendanceRecording.wireButtons('#student-${student.universityId}');
+				</script>
+			</div>
+		</#macro>
 
+		<div class="striped-section-contents attendees">
+			<form id="recordAttendance" action="" method="post" data-occurrence="${command.occurrence.id}">
+				<script type="text/javascript">
+					AttendanceRecording.bindButtonGroupHandler(true);
+				</script>
+
+				<#if command.additionalStudent??>
+					<#assign already_in = false />
 					<#list command.members as student>
-						<#if !(command.removeAdditionalStudent??) || command.removeAdditionalStudent.universityId != student.universityId>
-							<@studentRow student command.manuallyAddedUniversityIds?seq_contains(student.universityId) mapGet(command.attendances, student) />
+						<#if student.universityId == command.additionalStudent.universityId>
+							<#assign already_in = true />
 						</#if>
 					</#list>
+
+					<#if !already_in><@studentRow command.additionalStudent true command.linkedAttendance /></#if>
+				</#if>
+
+				<#list command.members as student>
+					<#if !(command.removeAdditionalStudent??) || command.removeAdditionalStudent.universityId != student.universityId>
+						<@studentRow student command.manuallyAddedUniversityIds?seq_contains(student.universityId) mapGet(command.attendances, student) />
+					</#if>
+				</#list>
+
+				<#if command.members?has_content || command.manuallyAddedUniversityIds?has_content>
 
 					<div class="fix-footer submit-buttons">
 						<div class="pull-right">
@@ -314,10 +314,10 @@
 							as attended.
 						</div>
 					</div>
-				</form>
-			</div>
 
-		</#if>
+				</#if>
+			</form>
+		</div>
 
 	</div>
 </div>
