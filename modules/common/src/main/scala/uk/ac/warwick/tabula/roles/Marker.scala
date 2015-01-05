@@ -15,6 +15,7 @@ case object MarkerRoleDefinition extends UnassignableBuiltInRoleDefinition {
 		Feedback.Read,
 		Marks.Create,
 		Marks.Read,
+		Marks.DownloadOwnTemplate,
 		Submission.Read,
 		Submission.ViewPlagiarismStatus
 	)
