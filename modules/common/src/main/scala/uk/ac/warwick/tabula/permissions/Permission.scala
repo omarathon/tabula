@@ -212,7 +212,8 @@ object Permissions {
 	}
 
 	object Marks {
-		case object DownloadTemplate extends Permission("Download a marks template")
+		case object DownloadTemplate extends Permission("Download a marks template for all marks")
+		case object DownloadOwnTemplate extends Permission("Download a marks template for own marks")
 
 		case object Create extends Permission("Add marks")
 		case object Read extends Permission("View marks")

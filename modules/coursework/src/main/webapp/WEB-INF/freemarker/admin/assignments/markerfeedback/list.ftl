@@ -169,7 +169,7 @@
 				</li>
 				<li>
 					<a class="${disabledClass}" href="<@routes.markeraddmarks assignment=assignment marker=marker/>">
-						<i class="icon-plus"></i> Add Marks
+						<i class="icon-plus"></i> Add marks
 					</a>
 				</li>
 			</ul>
