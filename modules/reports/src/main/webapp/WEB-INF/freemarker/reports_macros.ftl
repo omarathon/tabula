@@ -3,17 +3,17 @@
 		window.ReportBuilder = {};
 	</script>
 	<div class="loading">
-		<p><em>Building report...</em></p>
+		<p><em>Building report&hellip;</em></p>
 	
-		<div class="progress">
-			<div class="bar" style="width: 33%;"></div>
+		<div class="progress progress-striped active">
+			<div class="bar" style="width: 10%;"></div>
 		</div>
 	</div>
 	
 	<div class="complete alert alert-success" style="display: none;">
 		<p>Report complete</p>
 		<div class="btn-toolbar">
-			<a href="#" class="show-data btn" data-loading-text="Loading&hellip;">
+			<a href="#" class="show-data btn" data-loading-text="Building table, please wait&hellip;">
 				<i class="icon-eye-open"></i> Show
 			</a>
 			<div class="download btn-group ">
@@ -34,13 +34,23 @@
 	<form class="report-target-form" style="display: none;" method="POST" action="" enctype="multipart/form-data"></form>
 	
 	<script>
+		var progress = 10, stepProgress = function() {
+			progress = progress + 5;
+			jQuery('#main-content').find('.loading .bar').width(progress + '%');
+			if (progress < 90) {
+				progressStepperTimeout = setTimeout(stepProgress, 10 * 1000);
+			}
+		}, progressStepperTimeout = setTimeout(stepProgress, 10 * 1000), pleaseWaitTimeout = setTimeout(function(){
+			jQuery('#main-content').find('.loading p em').html('Still building report&hellip; please be patient');
+		}, 60 * 1000);
 		jQuery(function($){
 			$.ajax('${reportUrl}', {
 				type: 'POST',
 				success: function(data) {
+					clearTimeout(progressStepperTimeout);
 					var $mainContent = $('#main-content');
 					$mainContent.find('.loading p em').html('Downloading data&hellip;');
-					$mainContent.find('.loading .bar').width('66%');
+					$mainContent.find('.loading .bar').width('100%');
 					setTimeout(function(){
 						var key, key1, key2, result = [];
 						window.ReportBuilder.reportData = data;
@@ -171,14 +181,22 @@
 							table.sortableTable();
 						};
 
-						$('#main-content').find('div.complete a.show-data').on('click', function(e) {
-							e.preventDefault();
-							var $this = $(this);
-							setTimeout(function(){
-								showReport();
-								$this.hide();
-							}, 500);
-						});
+						if (window.ReportBuilder.buildHeader().find('th').length > 300) {
+							$('#main-content').find('div.complete a.show-data').attr({
+								'disabled': true,
+								'title': 'The report is too large to display in the page'
+							});
+						} else {
+							$('#main-content').find('div.complete a.show-data').on('click', function(e) {
+								e.preventDefault();
+								var $this = $(this);
+								setTimeout(function(){
+									showReport();
+									$this.hide();
+								}, 500);
+							});
+						}
+
 					}, 500);
 				},
 				error: function() {

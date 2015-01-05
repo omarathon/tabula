@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.tabula.data.{AssignmentDaoComponent, AutowiringAssignmentDaoComponent}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 import org.joda.time.DateTime
@@ -37,6 +37,8 @@ trait AssignmentService {
 	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment]
+	def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser): Seq[Assignment]
+	def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser): Seq[Assignment]
 
 	/**
 	 * Find a recent assignment within this module or possible department.
@@ -82,6 +84,12 @@ abstract class AbstractAssignmentService extends AssignmentService {
 		assignmentDao.getSubmissionsForAssignmentsBetweenDates(universityId, startInclusive, endExclusive)
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment] = assignmentDao.getAssignmentWhereMarker(user)
+
+	def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser): Seq[Assignment] =
+		assignmentDao.getAssignmentsByDepartmentAndMarker(department, user)
+
+	def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser): Seq[Assignment] =
+		assignmentDao.getAssignmentsByModuleAndMarker(module, user)
 
 	/**
 	 * Find a recent assignment within this module or possible department.

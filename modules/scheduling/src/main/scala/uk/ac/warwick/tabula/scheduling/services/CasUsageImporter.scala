@@ -40,11 +40,13 @@ object CasUsageImporter {
 	var sitsSchema: String = Wire.property("${schema.sits}")
 
 		// check to see if CAS is current or expired less than 3 months ago
+		// VCR table in SITS is Visa CAS Request
+		// CAS is Confirmation of Acceptance for Studies
     val CasUsedSql = f"""
  			select count(*) as count from $sitsSchema.srs_vcr
  			where vcr_stuc = :universityId
  			and vcr_iuse = 'Y'
- 			and vcr_ukst in ('USED','ASSIGNED')
+ 			and vcr_ukst in ('USED','ASSIGNED') -- CAS status
 			and vcr_endd > :earliestEndDate
  		"""
 

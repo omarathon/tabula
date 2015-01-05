@@ -110,7 +110,7 @@ abstract class Features {
 	@Value("${features.masqueradersCanWrite:false}") var masqueradersCanWrite = defaults.masqueradersCanWrite
 	@Value("${features.masqueradeElevatedPermissions:false}") var masqueradeElevatedPermissions = defaults.masqueradeElevatedPermissions
 	@Value("${features.profiles.autoGroupDeregistration:false}") var autoGroupDeregistration = defaults.autoGroupDeregistration
-	@Value("${features.reports:false}") var reports = defaults.reports
+	@Value("${features.reports:true}") var reports = defaults.reports
 	@Value("${features.scheduling.exportFeedbackToSits:false}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
 
 	private val bean = new BeanWrapperImpl(this)
@@ -215,7 +215,7 @@ class FeaturesMessage {
 	@BeanProperty var schedulingExportAttendanceToSits = true
 	@BeanProperty var schedulingExportFeedbackToSits = false
 
-	@BeanProperty var reports = false
+	@BeanProperty var reports = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

@@ -100,6 +100,10 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
 object ExportFeedbackToSitsService {
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
+	// match on the Student Programme Route (SPR) code for the student
+	// mav_occur = module occurrence code
+	// psl_code = "Period Slot"
+	// mab_seq = sequence code determining an assessment component
 	val whereClause = f"""where spr_code in (select spr_code from $sitsSchema.ins_spr where spr_stuc = :studentId)
 		and mod_code like :moduleCodeMatcher
 		and mav_occur in :occurrences
@@ -119,6 +123,10 @@ object ExportFeedbackToSitsService {
 		}
 	}
 
+	// update Student Assessment table (CAM_SAS) which holds module component marks
+	// SAS_PRCS = Process Status - Value of I enables overall marks to be calculated in SITS
+	// SAS_PROC = Current Process - Value of SAS enabled overall marks to be calculated in SITS
+	// SAS_UDF1, SAS_UDF2 - user defined fields used for audit
 	final val UpdateSITSFeedbackSql = f"""
 		update $sitsSchema.cam_sas
 		set sas_actm = :actualMark,

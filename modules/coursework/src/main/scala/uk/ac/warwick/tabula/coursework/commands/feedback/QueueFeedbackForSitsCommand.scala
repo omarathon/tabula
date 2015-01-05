@@ -24,9 +24,8 @@ class QueueFeedbackForSitsCommand(val assignment: Assignment, val submitter: Cur
 
 	def applyInternal() = {
 		transactional() {
-			val users = getUsersForFeedback
 			val allQueuedFeedbacks = for {
-				(studentId, user) <- users
+				(studentId, user) <- getUsersWithFeedbackToPublish
 				feedback <- assignment.fullFeedback.find { _.universityId == studentId }
 			} yield {
 				val feedbackForSits = feedbackForSitsDao.getByFeedback(feedback) match {
@@ -47,10 +46,10 @@ class QueueFeedbackForSitsCommand(val assignment: Assignment, val submitter: Cur
 		}
 	}
 
-	def getUsersForFeedback = feedbackService.getUsersForFeedback(assignment)
+	lazy val getUsersWithFeedbackToPublish = feedbackService.getUsersForFeedback(assignment)
 
 	def describe(d: Description) = d
 		.assignment(assignment)
-		.studentIds(getUsersForFeedback map { case(userId, user) => user.getWarwickId })
+		.studentIds(getUsersWithFeedbackToPublish map { case(userId, user) => user.getWarwickId })
 
 }

@@ -69,7 +69,7 @@
 			</li>
 		</#if>
 
-		<#if features.reports && user.staff>
+		<#if features.reports && canDeptAdmin>
 			<li>
 				<h2><a href="<@url page="/" context="/reports" />">Reports</a></h2>
 				<span class="hint">View reports for various aspects of Tabula</span>

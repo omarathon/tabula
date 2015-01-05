@@ -17,7 +17,8 @@ import uk.ac.warwick.tabula.web.controllers._
 	hideDeletedItems
 
 	@RequestMapping(Array("/")) def home(user: CurrentUser) = {
-		val canAdmin =
+		val canDeptAdmin = user.loggedIn && moduleService.departmentsWithPermission(user, Permissions.Department.Reports).nonEmpty
+		val canAdmin = canDeptAdmin ||
 			// Avoid doing too much work by just returning the first one of these that's true
 			user.loggedIn && (
 				moduleService.departmentsWithPermission(user, Permissions.Module.Administer).nonEmpty ||
@@ -34,6 +35,7 @@ import uk.ac.warwick.tabula.web.controllers._
 	  Mav("home/view",
 	  	"ajax" -> ajax,
 			"canAdmin" -> canAdmin,
+			"canDeptAdmin" -> canDeptAdmin,
 			"canViewProfiles" -> canViewProfiles,
 			"jumbotron" -> true
 		).noLayoutIf(ajax) // All hail our new Jumbotron overlords

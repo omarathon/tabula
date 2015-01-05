@@ -45,8 +45,9 @@ object SupervisorImporter {
 	val GetSupervisorsSql = f"""
 		select
 			prs_udf1,
-			rdx_perc
-		from $sitsSchema.srs_rdx rdx, $sitsSchema.ins_prs prs
+			rdx_perc -- percentage
+		from $sitsSchema.srs_rdx rdx, -- Research Degree Examiner
+		$sitsSchema.ins_prs prs -- Personnel
 		where rdx_scjc = :scj_code
 		and rdx_extc = :sits_examiner_type
 		and rdx.rdx_prsc = prs.prs_code

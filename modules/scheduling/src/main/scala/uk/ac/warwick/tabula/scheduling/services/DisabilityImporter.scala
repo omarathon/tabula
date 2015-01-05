@@ -67,6 +67,7 @@ class SitsDisabilityImporter extends DisabilityImporter {
 object SitsDisabilityImporter {
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
+	// DSB in SITS is Disability Table
 	val GetDisability = f"select dsb_code, dsb_snam, dsb_name from $sitsSchema.srs_dsb"
 
 	class DisabilitysQuery(ds: DataSource) extends MappingSqlQuery[ImportDisabilitiesCommand](ds, GetDisability) {

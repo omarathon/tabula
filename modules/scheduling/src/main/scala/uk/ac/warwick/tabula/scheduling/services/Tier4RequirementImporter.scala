@@ -41,15 +41,16 @@ class SandboxTier4RequirementImporter extends Tier4RequirementImporter {
 object Tier4RequirementImporter {
 	var sitsSchema: String = Wire.property("${schema.sits}")
 
-	// originally this query also had a condition nat_iuse = 'Y' but we found that
+	// Originally this query also had a condition nat_iuse = 'Y' but we found that
 	// there are current students with nationality codes which are not flagged as in
-	// use
+	// use.
+	// Returns the number of nationalities for the student (1 or 2, which is the most SITS stores) which don't need a visa
 	val GetTier4RequirementSql = f"""
-			select count(nat_edid) as count from $sitsSchema.srs_nat
+			select count(nat_edid) as count from $sitsSchema.srs_nat -- nationality
 			where nat_code in (
 				(select stu_natc from $sitsSchema.ins_stu where stu_code = :universityId),
 				(select stu_nat1 from $sitsSchema.ins_stu where stu_code = :universityId))
-			and nat_edid = 0
+			and nat_edid = 0 -- indicates that the nationality does not require a visa
 		"""
 
 	class Tier4RequirementMappingQuery(ds: DataSource)
