@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.helpers.{MarkerFeedbackCollections, MarkerFeedbackCollecting}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, Unaudited}
 import uk.ac.warwick.userlookup.User
@@ -9,16 +8,24 @@ import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupC
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-case class MarkerFeedbackItem(
+case class MarkerFeedbackItem (
 	student: User,
 	submission: Submission,
-	feedbacks: Seq[MarkerFeedback]
+	feedbacks: Seq[MarkerFeedback],
+	nextMarker: Option[User]
+)
+
+case class MarkerFeedbackStage (
+	roleName: String,
+	nextRoleName: String,
+	position: FeedbackPosition,
+	feedbackItems: Seq[MarkerFeedbackItem]
 )
 
 object ListMarkerFeedbackCommand  {
 	def apply(assignment:Assignment, module: Module, marker:User, submitter: CurrentUser) =
 		new ListMarkerFeedbackCommand(assignment, module, marker, submitter)
-		with ComposableCommand[MarkerFeedbackCollections]
+		with ComposableCommand[Seq[MarkerFeedbackStage]]
 		with ListMarkerFeedbackPermissions
 		with ListMarkerFeedbackCommandState
 		with AutowiringUserLookupComponent
@@ -26,11 +33,32 @@ object ListMarkerFeedbackCommand  {
 }
 
 class ListMarkerFeedbackCommand(val assignment: Assignment, val module: Module, val marker: User, val submitter: CurrentUser)
-	extends CommandInternal[MarkerFeedbackCollections] with MarkerFeedbackCollecting {
+	extends CommandInternal[Seq[MarkerFeedbackStage]] {
 
 	self: UserLookupComponent =>
 
-	def applyInternal() = getMarkerFeedbackCollections(assignment, module, marker, userLookup)
+	def applyInternal() = {
+		val submissions = assignment.getMarkersSubmissions(marker)
+		val workflow = assignment.markingWorkflow
+
+		val feedbackItems = submissions.map(submission => {
+			val student = userLookup.getUserByWarwickUniId(submission.universityId)
+			val feedbacks = assignment.getAllMarkerFeedbacks(submission.universityId, marker).reverse
+			val position = feedbacks.last.getFeedbackPosition
+			val nextMarker = workflow.getNextMarker(position, assignment, submission.universityId)
+			MarkerFeedbackItem(student, submission, feedbacks, nextMarker)
+		}).filterNot(_.feedbacks.isEmpty)
+
+		feedbackItems
+			.groupBy(_.feedbacks.last.getFeedbackPosition)
+			.map { case (position, items) =>
+				val roleName = workflow.getRoleNameForPosition(position)
+				val nextRoleName = workflow.getRoleNameForNextPosition(position).toLowerCase
+				MarkerFeedbackStage(roleName, nextRoleName, position, items)
+			}
+			.toSeq
+			.sortBy(_.position)
+	}
 
 }
 

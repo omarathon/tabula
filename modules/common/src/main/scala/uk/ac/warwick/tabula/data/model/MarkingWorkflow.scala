@@ -75,7 +75,9 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	def thirdMarkerVerb: Option[String]
 
 	def studentHasMarker(assignment:Assignment, universityId: String): Boolean =
-		getStudentsFirstMarker(assignment, universityId).isDefined || getStudentsSecondMarker(assignment, universityId).isDefined
+		getStudentsFirstMarker(assignment, universityId).isDefined ||
+		getStudentsSecondMarker(assignment, universityId).isDefined ||
+		getStudentsThirdMarker(assignment, universityId).isDefined
 
 	def getStudentsFirstMarker(assignment:Assignment, universityId: UniversityId): Option[Usercode]
 
@@ -83,17 +85,51 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 
 	def getStudentsThirdMarker(assignment:Assignment, universityId: UniversityId): Option[Usercode]
 
-	// get's the marker that is primarally responsible for the specified students feedback.
-	// This user is notified of adjustments. the default is the first marker but this can be overriden when that isn't the case
-	def getStudentsPrimaryMarker(assignment:Assignment, universityId: UniversityId) = getStudentsFirstMarker(assignment, universityId)
+	// Get's the marker that is primarally responsible for the specified students feedback. This user is notified of
+	// adjustments. The default is the first marker but this can be overriden when that isn't the case
+	def getStudentsPrimaryMarker(assignment:Assignment, universityId: UniversityId): Option[Usercode] =
+		getStudentsFirstMarker(assignment, universityId)
 
+	// get's the submissions for the given marker
 	def getSubmissions(assignment: Assignment, user: User): Seq[Submission]
+
+	// get's this workflows role name for the specified position in the workflow
+	def getRoleNameForPosition(position: FeedbackPosition): String = {
+		position match {
+			case FirstFeedback => firstMarkerRoleName
+			case SecondFeedback => secondMarkerRoleName.getOrElse(MarkingWorkflow.adminRole)
+			case ThirdFeedback => thirdMarkerRoleName.getOrElse(MarkingWorkflow.adminRole)
+		}
+	}
+
+	// get's this workflows role name for the specified position in the workflow
+	def getRoleNameForNextPosition(position: FeedbackPosition): String = {
+		(position match {
+			case FirstFeedback => secondMarkerRoleName
+			case SecondFeedback => thirdMarkerRoleName
+			case ThirdFeedback => None
+		}).getOrElse(MarkingWorkflow.adminRole)
+	}
+
+	// get's the next marker in the workflow if one exists
+	def getNextMarker(position: FeedbackPosition, assignment:Assignment, universityId: UniversityId): Option[User] = {
+		val markerId = position match {
+			case FirstFeedback => getStudentsSecondMarker(assignment, universityId)
+			case SecondFeedback => getStudentsThirdMarker(assignment, universityId)
+			case _ => None
+		}
+		markerId.map(userLookup.getUserByUserId)
+	}
 
 	override def toString = "MarkingWorkflow(" + id + ")"
 
 }
 
+case class MarkerAndRole(role: String, marker: Option[User])
+
 object MarkingWorkflow {
+
+	val adminRole = "Administrator"
 
 	def getMarkerFromAssignmentMap(userLookup: UserLookupService, universityId: String, markerMap: Map[String, UserGroup]): Option[String] = {
 		val student = userLookup.getUserByWarwickUniId(universityId)

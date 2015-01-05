@@ -272,7 +272,11 @@ object FeedbackPosition {
 	}
 }
 
-sealed trait FeedbackPosition
-case object  FirstFeedback extends FeedbackPosition { val description = "First marker's feedback" }
-case object  SecondFeedback extends FeedbackPosition { val description = "Second marker's feedback" }
-case object  ThirdFeedback extends FeedbackPosition { val description = "Third marker's feedback" }
+sealed trait FeedbackPosition extends Ordered[FeedbackPosition] {
+	val description: String
+	val position: Int
+	def compare(that: FeedbackPosition) = this.position compare that.position
+}
+case object FirstFeedback extends FeedbackPosition { val description = "First marker's feedback"; val position = 1 }
+case object SecondFeedback extends FeedbackPosition { val description = "Second marker's feedback"; val position = 2 }
+case object ThirdFeedback extends FeedbackPosition { val description = "Third marker's feedback"; val position = 3 }

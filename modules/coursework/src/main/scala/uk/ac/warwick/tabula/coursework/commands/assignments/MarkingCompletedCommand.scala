@@ -33,23 +33,24 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 	self: StateServiceComponent with FeedbackServiceComponent =>
 
 	override def onBind(result: BindingResult) {
-		pendingMarkerFeedbacks = students.flatMap(assignment.getMarkerFeedbackForCurrentPosition(_, user)).filter(null != _)
+		// filter out any feedbacks where the current user is not the marker
+		markerFeedback = markerFeedback.filter(_.getMarkerUser == user)
 	}
 
 	def preSubmitValidation() {
-		noMarks = pendingMarkerFeedbacks.filter(!_.hasMark)
-		noFeedback = pendingMarkerFeedbacks.filter(!_.hasFeedback)
-		releasedFeedback = pendingMarkerFeedbacks.filter(_.state == MarkingState.MarkingCompleted)
+		noMarks = markerFeedback.filter(!_.hasMark)
+		noFeedback = markerFeedback.filter(!_.hasFeedback)
+		releasedFeedback = markerFeedback.filter(_.state == MarkingState.MarkingCompleted)
 	}
 
 	def validate(errors: Errors) {
 		if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
-		if (pendingMarkerFeedbacks.isEmpty) errors.rejectValue("students", "markers.finishMarking.noStudents")
+		if (markerFeedback.isEmpty) errors.rejectValue("students", "markerFeedback.finishMarking.noStudents")
 	}
 
 	def applyInternal() {
 		// do not update previously released feedback
-		val feedbackForRelease = pendingMarkerFeedbacks -- releasedFeedback
+		val feedbackForRelease = markerFeedback -- releasedFeedback
 
 		feedbackForRelease.foreach(stateService.updateState(_, MarkingState.MarkingCompleted))
 
@@ -100,12 +101,12 @@ trait MarkingCompletedDescription extends Describable[Unit] {
 
 	override def describe(d: Description){
 		d.assignment(assignment)
-			.property("students" -> students)
+			.property("students" -> markerFeedback.map(_.feedback.universityId))
 	}
 
 	override def describeResult(d: Description){
 		d.assignment(assignment)
-			.property("numFeedbackUpdated" -> pendingMarkerFeedbacks.size())
+			.property("numFeedbackUpdated" -> markerFeedback.size())
 	}
 }
 
@@ -117,8 +118,7 @@ trait MarkingCompletedState {
 	val assignment: Assignment
 	val module: Module
 
-	var students: JList[String] = JArrayList()
-	var pendingMarkerFeedbacks: JList[MarkerFeedback] = JArrayList()
+	var markerFeedback: JList[MarkerFeedback] = JArrayList()
 
 	var noMarks: JList[MarkerFeedback] = JArrayList()
 	var noFeedback: JList[MarkerFeedback] = JArrayList()
