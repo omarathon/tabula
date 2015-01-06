@@ -43,7 +43,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro markingCompleted assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/marking-completed" /></#macro>
 <#macro markingCompleted assignment marker nextRoleName><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/marking-completed?nextStageRole=${nextRoleName}" /></#macro>
-<#macro markingUncompleted assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/marking-uncompleted" /></#macro>
+<#macro markingUncompleted assignment marker previousRoleName><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/marking-uncompleted?previousStageRole=${previousRoleName}" /></#macro>
 
 <#macro enrolment module academicYear><@_u page="/admin/module/${module.code}/assignments/enrolment/${academicYear.startYear?c}"/></#macro>
 
@@ -69,6 +69,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignMarkers assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/assign-markers" /></#macro>
 <#macro assignMarkersSmallGroups assignment><@url context="/groups" page="/admin/marker-allocation/${assignment.id}" /></#macro>
 <#macro releaseForMarking assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions" /></#macro>
+<#macro returnForMarking assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissionsandfeedback/return-submissions" /></#macro>
 
 <#macro onlinemarking assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/online" /></#macro>
 <#macro onlinemarkingform assignment student><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/online/${student.universityId}" /></#macro>

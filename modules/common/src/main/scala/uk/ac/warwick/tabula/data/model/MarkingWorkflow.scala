@@ -111,6 +111,15 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 		}).getOrElse(MarkingWorkflow.adminRole)
 	}
 
+	// get's this workflows role name for the specified position in the workflow
+	def getRoleNameForPreviousPosition(position: FeedbackPosition) = {
+		position match {
+			case FirstFeedback => None
+			case SecondFeedback => Some(firstMarkerRoleName)
+			case ThirdFeedback => secondMarkerRoleName
+		}
+	}
+
 	// get's the next marker in the workflow if one exists
 	def getNextMarker(position: FeedbackPosition, assignment:Assignment, universityId: UniversityId): Option[User] = {
 		val markerId = position match {

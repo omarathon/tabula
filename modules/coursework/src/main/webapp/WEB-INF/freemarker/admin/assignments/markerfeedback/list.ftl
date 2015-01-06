@@ -64,24 +64,25 @@
 	</#list>
 </#macro>
 
-<#macro workflowActions nextRoleName>
+<#macro workflowActions nextRoleName previousRoleName>
 <div class="btn-group">
-			<a class="use-tooltip form-post btn"
-			   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point."
-			   data-container="body"
-			   href="<@routes.markingCompleted assignment marker nextRoleName/>"
-			   id="marking-complete-button">
-				<i class="icon-share-alt"></i> Send to ${nextRoleName}
-			</a>
-		<#--
-		<a class="use-tooltip form-post"
-		   title="Unfinalise marks and feedback. Note that this can only be done if feedback has not been released for this student."
+	<a class="use-tooltip form-post btn"
+	   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point."
+	   data-container="body"
+	   href="<@routes.markingCompleted assignment marker nextRoleName/>"
+	   id="marking-complete-button">
+		<i class="text-success icon-arrow-right"></i> Send to ${nextRoleName}
+	</a>
+
+	<#if previousRoleName?has_content>
+		<a class="use-tooltip form-post btn"
+		   title="Return marks and feedback to the previous marker. All changes you have made will be discarded. Note that this can only be done if feedback has not been released for this student."
 		   data-container="body"
-		   href="<@routes.markingUncompleted assignment marker />"
+		   href="<@routes.markingUncompleted assignment marker previousRoleName />"
 		   id="marking-uncomplete-button">
-			<i class="icon-remove"></i> Marking uncompleted
+			<i class="text-error icon-arrow-left"></i> Return to ${previousRoleName}
 		</a>
-		-->
+	</#if>
 </div>
 </#macro>
 
@@ -158,7 +159,7 @@
 		<#list markerFeedback as stage>
 			<div class="well">
 				<h3>${stage.roleName}</h3>
-				<@workflowActions stage.nextRoleName />
+				<@workflowActions stage.nextRoleName stage.previousRoleName!"" />
 				<table class="table
 							  table-bordered
 							  table-striped

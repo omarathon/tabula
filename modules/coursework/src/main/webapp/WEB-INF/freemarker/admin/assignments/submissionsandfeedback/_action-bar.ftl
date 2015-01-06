@@ -142,6 +142,20 @@
 									<i class="icon-inbox"></i> Release selected for marking
 								</@fmt.permission_button>
 							</li>
+							<li class="must-have-selected">
+								<#assign returnForMarking_url><@routes.returnForMarking assignment /></#assign>
+								<@fmt.permission_button
+								permission='Submission.ReleaseForMarking'
+								scope=assignment
+								action_descr='return for marking'
+								classes='form-post'
+								href=returnForMarking_url
+								id="return-submissions-button"
+								tooltip="Retrun the submissions for marking. The last marker in the workflow will be able to update their feedback. You can only return feedback that has not been published."
+								data_attr='data-container=body'>
+									<i class="icon-arrow-left"></i> Return selected for marking
+								</@fmt.permission_button>
+							</li>
 						</ul>
 					</div>
 				<#else>
