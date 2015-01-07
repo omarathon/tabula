@@ -8,9 +8,8 @@ import uk.ac.warwick.tabula.commands.UploadedFile
 import org.springframework.validation.BindException
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.data.model.{UserGroup, UnspecifiedTypeUserGroup, FileAttachment, Assignment}
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, AssignmentService}
 
 // scalastyle:off magic.number
 class FormFieldTest extends TestBase with Mockito {
@@ -120,12 +119,17 @@ class FormFieldTest extends TestBase with Mockito {
 		field.template should be ("checkbox")
 	}
 
+	def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
+		case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
+		case ug: UserGroup => ug.userLookup = userLookup
+	}
+
 	@Test def markerSelectField() {
 		val assignment = Fixtures.assignment("my assignment")
 		val workflow = Fixtures.seenSecondMarkingLegacyWorkflow("my workflow")
-		workflow.firstMarkers.addUserId("cuscav")
-		workflow.firstMarkers.addUserId("cusebr")
-		workflow.firstMarkers.userLookup = userLookup
+		workflow.firstMarkers.knownType.addUserId("cuscav")
+		workflow.firstMarkers.knownType.addUserId("cusebr")
+		wireUserLookup(workflow.firstMarkers)
 
 		val user1 = new User("cuscav")
 		val user2 = new User("cusebr")

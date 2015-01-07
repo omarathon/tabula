@@ -46,12 +46,12 @@ class AssignMarkersController extends CourseworkController {
 
 	@ModelAttribute("firstMarkers")
 	def firstMarkers(@PathVariable module: Module, @PathVariable assignment: Assignment): Seq[Marker] =
-		retrieveMarkers(module, assignment, assignment.markingWorkflow.firstMarkers.members, assignment.firstMarkerMap)
+		retrieveMarkers(module, assignment, assignment.markingWorkflow.firstMarkers.knownType.members, assignment.firstMarkerMap)
 
 	@ModelAttribute("secondMarkers")
 	def secondMarkers(@PathVariable module: Module, @PathVariable assignment: Assignment): Seq[Marker] =
 		assignment.markingWorkflow.hasSecondMarker match {
-			case true => retrieveMarkers(module, assignment, assignment.markingWorkflow.secondMarkers.members, assignment.secondMarkerMap)
+			case true => retrieveMarkers(module, assignment, assignment.markingWorkflow.secondMarkers.knownType.members, assignment.secondMarkerMap)
 			case false => Seq()
 		}
 
