@@ -51,7 +51,25 @@ so that they can be passed around between requests.
 			Collect marks
 		</label>
 	</@form.labelled_row>
+	<#if features.queueFeedbackForSits>
+		<@form.row>
+			<@form.field>
+				<label class="checkbox">
+					<@f.checkbox path="uploadMarksToSits" id="uploadMarksToSits" />
+					Send published marks to SITS
+				</label>
+				<div class="help-block">
+					Marks will be queued to be sent to SITS when the feedback is published.
+					The marks will be sent to SITS when the Exams Office has enabled marks upload for this deparment,
+					for any student where SITS has been setup to accept marks on this assignment.
+				</div>
+			</@form.field>
+		</@form.row>
+	</#if>
 </#if>
+
+
+
 
 <#if features.summativeFilter>
 	<@form.row>

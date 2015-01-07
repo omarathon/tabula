@@ -107,6 +107,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 	def copySharedFrom(assignment: Assignment) {
 		openEnded = assignment.openEnded
 		collectMarks = assignment.collectMarks
+		uploadMarksToSits = assignment.uploadMarksToSits
 		collectSubmissions = assignment.collectSubmissions
 		restrictSubmissions = assignment.restrictSubmissions
 		allowLateSubmissions = assignment.allowLateSubmissions
