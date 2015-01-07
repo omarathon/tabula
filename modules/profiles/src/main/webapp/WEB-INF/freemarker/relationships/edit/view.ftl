@@ -15,7 +15,7 @@
 
 	<#assign student = studentCourseDetails.student/>
 	<div id="edit-agent-modal" class="modal-body">
-	<@f.form method="post" commandName="editStudentRelationshipCommand" action="" cssClass="form-horizontal">
+	<@f.form method="post" commandName="editStudentRelationshipCommand" action="" cssClass="form-horizontal dirty-check-ignore">
 
 		<h5 id="studentName">${relationshipType.studentRole?capitalize}: ${student.fullName}</h5>
 		<input id="student" name="student" type="hidden" value="${student.universityId}" />

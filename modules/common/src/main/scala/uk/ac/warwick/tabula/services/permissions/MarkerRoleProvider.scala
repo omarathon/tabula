@@ -1,32 +1,40 @@
 package uk.ac.warwick.tabula.services.permissions
-import scala.collection.JavaConversions._
+
 import org.springframework.stereotype.Component
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.roles.Marker
-import uk.ac.warwick.tabula.roles.Role
-import uk.ac.warwick.tabula.roles.MarkerRoleDefinition
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.Promises._
+import uk.ac.warwick.tabula.helpers.RequestLevelCaching
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.roles.{Marker, MarkerRoleDefinition, Role}
+import uk.ac.warwick.tabula.services.AssignmentService
 
 @Component
-class MarkerRoleProvider extends RoleProvider with TaskBenchmarking {
+class MarkerRoleProvider extends RoleProvider with TaskBenchmarking with RequestLevelCaching[(CurrentUser, String), Seq[Assignment]] {
+
+	val assignmentService = promise { Wire[AssignmentService] }
 	
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for MarkerRoleProvider") {
-		def getRoles(assignments: Seq[Assignment]) = assignments.toStream.filter { _.isMarker(user.apparentUser) }.map { assignment =>
+		def getRoles(assignmentsForMarker: Stream[Assignment]) = assignmentsForMarker.map{ assignment =>
 			customRoleFor(assignment.module.adminDepartment)(MarkerRoleDefinition, assignment).getOrElse(Marker(assignment))
 		} 
 		
 		scope match {
-			case department: Department => 
-				getRoles(department.modules flatMap { _.assignments })
+			case department: Department =>
+				getRoles(cachedBy((user, scope.toString)) {
+					assignmentService.get.getAssignmentsByDepartmentAndMarker(department, user)
+				}.toStream)
 			
 			case module: Module =>
-				getRoles(module.assignments)
-				
-			case assignment: Assignment =>
-				getRoles(Seq(assignment))
-				
+				getRoles(cachedBy((user, scope.toString)) {
+					assignmentService.get.getAssignmentsByModuleAndMarker(module, user).toStream
+				}.toStream)
+
+			case assignment: Assignment if assignment.isMarker(user.apparentUser) =>
+				getRoles(Stream(assignment))
+
 			// We don't need to check for the marker role on any other scopes
 			case _ => Stream.empty
 		}

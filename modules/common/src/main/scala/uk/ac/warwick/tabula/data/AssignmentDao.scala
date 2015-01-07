@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.forms.FormField
 import org.joda.time.DateTime
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.Order._
 
@@ -29,7 +29,6 @@ trait AssignmentDao {
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment]
 	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
-	def getAssignmentWhereMarker(user: User): Seq[Assignment]
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
 
 	def getAssignments(department: Department, year: AcademicYear): Seq[Assignment]
@@ -77,14 +76,6 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 			.add(ge("assignment.closeDate", startInclusive))
 			.add(lt("assignment.closeDate", endExclusive))
 			.seq
-
-	def getAssignmentWhereMarker(user: User): Seq[Assignment] =
-		session.newQuery[Assignment]("""select a
-				from Assignment a
-				where (:userId in elements(a.markingWorkflow.firstMarkers.includeUsers)
-					or :userId in elements(a.markingWorkflow.secondMarkers.includeUsers))
-					and a.deleted = false and a.archived = false
-																 """).setString("userId", user.getUserId).distinct.seq
 
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module) =
 		session.newQuery[Assignment]("from Assignment where name=:name and academicYear=:year and module=:module and deleted=0")

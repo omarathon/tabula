@@ -18,8 +18,7 @@ case object UniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefini
 
 	GrantsScopedPermission(
 		Profiles.Read.NextOfKin,
-		Profiles.Read.HomeAddress,
-		Profiles.Read.TermTimeAddress,
+		Profiles.Read.HomeAndTermTimeAddresses,
 		Profiles.Read.TelephoneNumber,
 		Profiles.Read.MobileNumber,
 		Profiles.Read.Usercode,

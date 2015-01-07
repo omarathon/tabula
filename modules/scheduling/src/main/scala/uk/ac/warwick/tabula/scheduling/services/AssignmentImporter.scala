@@ -193,6 +193,15 @@ object AssignmentImporter {
 
 	/** Get AssessmentComponents, and also some fake ones for linking to
 		* the group of students with no selected assessment group.
+		*
+		* The actual assessment components come from CAM_MAB ("Module Assessment Body") which contains the
+		* assessment components which make up modules.
+		* This is unioned with module registrations (in SMS and SMO) where assessment group (SMS_AGRP and SMO_AGRP) is not
+		* specified.
+		*
+		* SMS holds unconfirmed module registrations and is included to catch module registrations not approved yet.
+		* SMO holds confirmed module registrations and is included to catch module registrations in departments which
+		* upload module registrations after confirmation.
 		*/
 	lazy val GetAssessmentsQuery = s"""
 		select distinct
@@ -203,10 +212,10 @@ object AssignmentImporter {
 			'X' as assessment_code,
 	 		'Y' as in_use
 			from $sitsSchema.cam_sms sms
-				join $sitsSchema.cam_ssn ssn
-					on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON'
+				join $sitsSchema.cam_ssn ssn -- SSN table holds module registration status
+					on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- mrgs = "Module Registration Status"
 			where
-				sms.sms_agrp is null and
+				sms.sms_agrp is null and -- assessment group, ie group of assessment components which together represent an assessment choice
 				sms.ayr_code in (:academic_year_code)
 	union all
 		select distinct
@@ -219,10 +228,10 @@ object AssignmentImporter {
 			from $sitsSchema.cam_smo smo
 				left outer join $sitsSchema.cam_ssn ssn
 					on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
-			where
+			where -- RTSC is used by WMG to indicate attendance status.  X = cancelled, Z = module cancelled
 				(smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) and
-				ssn.ssn_sprc is null and
-				smo.smo_agrp is null and
+				ssn.ssn_sprc is null and -- there is no module registration status row, so this SMO has been uploaded rather than created in SITS
+				smo.smo_agrp is null and -- assessment group, ie group of assessment components which together represent an assessment choice
 				smo.ayr_code in (:academic_year_code)
 	union all
 		select
@@ -232,15 +241,15 @@ object AssignmentImporter {
 			${castToString("mab.mab_agrp")} as assessment_group,
 			${castToString("mab.ast_code")} as assessment_code,
 	 		${castToString("mab.mab_udf1")} as in_use
-			from $sitsSchema.cam_mab mab
-				join $sitsSchema.cam_mav mav
+			from $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components
+				join $sitsSchema.cam_mav mav -- Module Availability which indicates which modules are avaiable in the year
 					on mab.map_code = mav.mod_code and
-						 mav.psl_code = 'Y' and
+						 mav.psl_code = 'Y' and -- "Period Slot" code - Y indicates year
 						 mav.ayr_code in (:academic_year_code)
 				join $sitsSchema.ins_mod mod
 					on mav.mod_code = mod.mod_code
-			where	mod.mod_iuse = 'Y' and
-						mod.mot_code not in ('S-', 'D')"""
+			where	mod.mod_iuse = 'Y' and -- in use
+						mod.mot_code not in ('S-', 'D')""" // MOT = module type code - not suspended, discontinued?
 
 	lazy val GetAllAssessmentGroups = s"""
 		select distinct
@@ -253,51 +262,53 @@ object AssignmentImporter {
 					on mab.map_code = mav.mod_code
 				join $sitsSchema.ins_mod mod
 					on mav.mod_code = mod.mod_code
-			where mod.mod_iuse = 'Y' and
-						mod.mot_code not in ('S-', 'D') and
-						mav.psl_code = 'Y' and
+			where mod.mod_iuse = 'Y' and -- in use
+						mod.mot_code not in ('S-', 'D') and -- MOT = module type code - not suspended, discontinued?
+						mav.psl_code = 'Y' and -- period slot code of Y (year)
 						mav.ayr_code in (:academic_year_code)
 	union all
 		select distinct
 			mav.ayr_code as academic_year_code,
 			mav.mod_code as module_code,
-			${castToString("mav.mav_occur")} as mav_occurrence,
-			${castToString("mab.mab_agrp")} as assessment_group
-			from $sitsSchema.cam_mab mab
-				join $sitsSchema.cam_mav mav
+			${castToString("mav.mav_occur")} as mav_occurrence, -- module occurrence (representing eg day or evening - usually 'A')
+			${castToString("mab.mab_agrp")} as assessment_group -- group of assessment components forming one assessment choice
+			from $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components
+				join $sitsSchema.cam_mav mav -- Module Availability which indicates which modules are available in the year
 					on mab.map_code = mav.mod_code
 				join $sitsSchema.ins_mod mod
 					on mav.mod_code = mod.mod_code
-			where mod.mod_iuse = 'Y' and
-						mod.mot_code not in ('S-', 'D') and
+			where mod.mod_iuse = 'Y' and -- in use
+						mod.mot_code not in ('S-', 'D') and -- module type - not suspended, discontinued?
 						mav.psl_code = 'Y' and
 						mav.ayr_code in (:academic_year_code)"""
 
+	// for students who register for modules through SITS,this gets their assessments before their choices are confirmed
 	lazy val GetUnconfirmedModuleRegistrations = s"""
 		select
 			sms.ayr_code as academic_year_code,
 			spr.spr_code as spr_code,
-			sms.sms_occl as mav_occurrence,
+			sms.sms_occl as mav_occurrence, -- module occurrence (representing eg day or evening - usually 'A')
 			sms.mod_code as module_code,
 			sms.sms_agrp as assessment_group
-				from $sitsSchema.srs_scj scj
-					join $sitsSchema.ins_spr spr
+				from $sitsSchema.srs_scj scj -- Student Course Join  - gives us most significant course
+					join $sitsSchema.ins_spr spr -- Student Programme Route - gives us SPR code
 						on scj.scj_sprc = spr.spr_code and (spr.sts_code is null or spr.sts_code not like 'P%') -- no perm withdrawn students
 
-					join $sitsSchema.cam_sms sms
+					join $sitsSchema.cam_sms sms -- Student Module Selection table, storing unconfirmed module registrations
 						on sms.spr_code = scj.scj_sprc
 
-					join $sitsSchema.cam_ssn ssn
-						on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON'
+					join $sitsSchema.cam_ssn ssn -- SSN holds module registration status
+						on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- module choices confirmed
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
 				sms.ayr_code in (:academic_year_code)"""
 
+	// this gets a student's assessments from the SMO table, which stores confirmed module choices
 	lazy val GetConfirmedModuleRegistrations = s"""
 		select
 			smo.ayr_code as academic_year_code,
 			spr.spr_code as spr_code,
-			smo.mav_occur as mav_occurrence,
+			smo.mav_occur as mav_occurrence, -- module occurrence (representing eg day or evening - usually 'A')
 			smo.mod_code as module_code,
 			smo.smo_agrp as assessment_group
 				from $sitsSchema.srs_scj scj
@@ -310,7 +321,7 @@ object AssignmentImporter {
 							(smo.smo_rtsc is null or (smo.smo_rtsc not like 'X%' and smo.smo_rtsc != 'Z')) -- no WMG cancelled
 
 					join $sitsSchema.cam_ssn ssn
-						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code and ssn.ssn_mrgs = 'CON'
+						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code and ssn.ssn_mrgs = 'CON' -- confirmed module choices
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
 				smo.ayr_code in (:academic_year_code)"""

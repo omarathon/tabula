@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.tabula.data.{AssignmentDaoComponent, AutowiringAssignmentDaoComponent}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 import org.joda.time.DateTime
@@ -37,6 +37,8 @@ trait AssignmentService {
 	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment]
+	def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser): Seq[Assignment]
+	def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser): Seq[Assignment]
 
 	/**
 	 * Find a recent assignment within this module or possible department.
@@ -54,7 +56,7 @@ trait AssignmentService {
 }
 
 abstract class AbstractAssignmentService extends AssignmentService {
-	self: AssignmentDaoComponent =>
+	self: AssignmentDaoComponent with AssignmentServiceUserGroupHelpers =>
 
 	def getAssignmentById(id: String): Option[Assignment] = assignmentDao.getAssignmentById(id)
 	def save(assignment: Assignment): Unit = assignmentDao.save(assignment)
@@ -81,7 +83,17 @@ abstract class AbstractAssignmentService extends AssignmentService {
 	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
 		assignmentDao.getSubmissionsForAssignmentsBetweenDates(universityId, startInclusive, endExclusive)
 
-	def getAssignmentWhereMarker(user: User): Seq[Assignment] = assignmentDao.getAssignmentWhereMarker(user)
+	def getAssignmentWhereMarker(user: User): Seq[Assignment] = {
+		(firstMarkerHelper.findBy(user) ++ secondMarkerHelper.findBy(user))
+			.distinct
+			.filterNot { a => a.deleted || a.archived }
+	}
+
+	def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser): Seq[Assignment] =
+		getAssignmentWhereMarker(user.apparentUser).filter { _.module.adminDepartment == department }
+
+	def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser): Seq[Assignment] =
+		getAssignmentWhereMarker(user.apparentUser).filter { _.module == module }
 
 	/**
 	 * Find a recent assignment within this module or possible department.
@@ -108,8 +120,19 @@ abstract class AbstractAssignmentService extends AssignmentService {
 	def getAssignmentsClosingBetween(start: DateTime, end: DateTime) = assignmentDao.getAssignmentsClosingBetween(start, end)
 }
 
+trait AssignmentServiceUserGroupHelpers {
+	val firstMarkerHelper: UserGroupMembershipHelper[Assignment]
+	val secondMarkerHelper: UserGroupMembershipHelper[Assignment]
+}
+
+trait AssignmentServiceUserGroupHelpersImpl extends AssignmentServiceUserGroupHelpers {
+	val firstMarkerHelper = new UserGroupMembershipHelper[Assignment]("markingWorkflow._firstMarkers")
+	val secondMarkerHelper = new UserGroupMembershipHelper[Assignment]("markingWorkflow._secondMarkers")
+}
+
 @Service(value = "assignmentService")
 class AssignmentServiceImpl
 	extends AbstractAssignmentService
 	with AutowiringAssignmentDaoComponent
+	with AssignmentServiceUserGroupHelpersImpl
 

@@ -22,4 +22,10 @@ class DegreeTypeTest extends TestBase {
 		t.convertToValue(PGCE) should be ("PGCE")
 	}
 
+	@Test def getFromSchemeCode(): Unit = {
+		DegreeType.getFromSchemeCode("UW UG") should be (Undergraduate)
+		DegreeType.getFromSchemeCode("UW PG") should be (Postgraduate)
+		DegreeType.getFromSchemeCode("X") should be (null)
+	}
+
 }

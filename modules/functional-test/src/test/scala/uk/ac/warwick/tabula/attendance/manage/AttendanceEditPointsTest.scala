@@ -1,13 +1,12 @@
 package uk.ac.warwick.tabula.attendance.manage
 
-import org.joda.time.DateTime
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.FunctionalTestAcademicYear
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
 
 class AttendanceEditPointsTest extends AttendanceFixture with GivenWhenThen {
 
-	val thisAcademicYearString = new FunctionalTestAcademicYear(new DateTime().getYear).startYear.toString
+	val thisAcademicYearString = FunctionalTestAcademicYear.current.startYear.toString
 	val newPointName = "Renamed point"
 
 	"A Member of staff" should "be able to edit and delete existing points on a scheme" in {
@@ -71,6 +70,6 @@ class AttendanceEditPointsTest extends AttendanceFixture with GivenWhenThen {
 
 		Then("I am redirected to the manage home page")
 		eventually(currentUrl should endWith(s"/attendance/manage/xxx/$thisAcademicYearString"))
-		pageSource should include(s"Manage monitoring points for ${new FunctionalTestAcademicYear(new DateTime().getYear).toString}")
+		pageSource should include(s"Manage monitoring points for ${FunctionalTestAcademicYear.current.toString}")
 	}
 }

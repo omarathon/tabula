@@ -68,11 +68,11 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		def setupWorkflow() {
 			assignment.markingWorkflow = workflow
 
-			workflow.firstMarkers.addUserId("cuscav")
-			workflow.firstMarkers.addUserId("cusebr")
+			workflow.firstMarkers.knownType.addUserId("cuscav")
+			workflow.firstMarkers.knownType.addUserId("cusebr")
 
-			workflow.secondMarkers.addUserId("curef")
-			workflow.secondMarkers.addUserId("cusfal")
+			workflow.secondMarkers.knownType.addUserId("curef")
+			workflow.secondMarkers.knownType.addUserId("cusfal")
 
 			workflow.userLookup = mock[UserLookupService]
 			when(workflow.userLookup.getUserByWarwickUniId("0000001")).thenReturn(s1)

@@ -251,7 +251,7 @@ $(function(){
 								e.preventDefault();
 								e.stopPropagation();
 
-								var $form = $('.recordCheckpointForm form');
+								var $form = $('form#recordAttendance');
 
 								$form.prepend($target.clone()).prepend(
 									$('<input />').attr({

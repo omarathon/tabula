@@ -95,7 +95,7 @@ trait SortRoutesCommandPermissions extends RequiresPermissionsChecking with Perm
 	self: SortRoutesCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Department.ArrangeRoutes, mandatory(department))
+		p.PermissionCheck(Permissions.Department.ArrangeRoutesAndModules, mandatory(department))
 	}
 }
 

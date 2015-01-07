@@ -1,101 +1,37 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import org.apache.poi.ss.usermodel.{IndexedColors, ComparisonOperator}
-import org.apache.poi.ss.util.CellRangeAddress
-import org.apache.poi.ss.util.WorkbookUtil
-import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, RequestMapping}
-import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.coursework.commands.feedback.MarksTemplateCommand._
+import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateMarksTemplateCommand, GenerateOwnMarksTemplateCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.data.model.{Module, Assignment}
-import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
-import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.web.views.ExcelView
-import uk.ac.warwick.tabula.services.FeedbackService
 import uk.ac.warwick.userlookup.User
-
-class GenerateMarksTemplateCommand(val module: Module, val assignment: Assignment) extends Command[XSSFWorkbook] with ReadOnly with Unaudited {
-	import MarksTemplateCommand._
-	
-	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Marks.DownloadTemplate, assignment)
-
-	var members:Seq[String] =_
-	var feedbackService = Wire.auto[FeedbackService]
-	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
-
-	def applyInternal() = {
-
-		val workbook = new XSSFWorkbook()
-		val sheet = generateNewMarkSheet(assignment, workbook)
-
-		// populate the mark sheet with ids
-		for ((member, i) <- members.zipWithIndex) {
-			val row = sheet.createRow(i + 1)
-			row.createCell(0).setCellValue(member)
-			val marksCell = row.createCell(1)
-			val gradesCell = row.createCell(2)
-			val feedbacks = feedbackService.getStudentFeedback(assignment, member)
-			feedbacks.foreach { feedback =>
-			  feedback.actualMark.foreach(marksCell.setCellValue(_))
-			  feedback.actualGrade.foreach(gradesCell.setCellValue)
-			}
-		}
-
-		// add conditional formatting for invalid marks
-		addConditionalFormatting(sheet)
-		
-		workbook
-	}
-
-	def generateNewMarkSheet(assignment: Assignment, workbook: XSSFWorkbook) = {
-		val sheet = workbook.createSheet("Marks for " + safeAssignmentName(assignment))
-
-		// add header row
-		val header = sheet.createRow(0)
-		header.createCell(0).setCellValue("ID")
-		header.createCell(1).setCellValue("Mark")
-		header.createCell(2).setCellValue("Grade")
-
-		sheet
-	}
-
-	def addConditionalFormatting(sheet: XSSFSheet) = {
-		val sheetCF = sheet.getSheetConditionalFormatting
-
-		val invalidMarkRule = sheetCF.createConditionalFormattingRule(ComparisonOperator.NOT_BETWEEN, "0", "100")
-		val fontFmt = invalidMarkRule.createFontFormatting
-		fontFmt.setFontStyle(true, false)
-		fontFmt.setFontColorIndex(IndexedColors.DARK_RED.index)
-
-		val marksColumn = Array(new CellRangeAddress(1, sheet.getLastRowNum, 1, 1))
-		sheetCF.addConditionalFormatting(marksColumn, invalidMarkRule)
-	}
-	
-}
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marks-template"))
 class MarksTemplateController extends CourseworkController {
-	import MarksTemplateCommand._
 
-	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
+	var assignmentMembershipService = Wire[AssignmentMembershipService]
 	
-	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable(value="assignment") assignment: Assignment) =
-		new GenerateMarksTemplateCommand(module, assignment)
+	@ModelAttribute("command")
+	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
+		GenerateMarksTemplateCommand(
+			mandatory(module),
+			mandatory(assignment),
+			assignmentMembershipService.determineMembershipUsers(assignment).map(_.getWarwickId)
+		)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(cmd: GenerateMarksTemplateCommand) = {
-		cmd.members = assignmentMembershipService.determineMembershipUsers(cmd.assignment).map(_.getWarwickId)
-		new ExcelView(safeAssignmentName(cmd.assignment) + " marks.xlsx", cmd.apply())
+	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable("assignment") assignment: Assignment) = {
+		new ExcelView(safeAssignmentName(assignment) + " marks.xlsx", cmd.apply())
 	}
 }
 
@@ -103,17 +39,22 @@ class MarksTemplateController extends CourseworkController {
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/marks-template"))
 class MarkerMarksTemplateController extends CourseworkController {
-	import MarksTemplateCommand._
 
-	var assignmentService = Wire.auto[AssignmentService]
-
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable(value="assignment") assignment: Assignment) =
-		new GenerateMarksTemplateCommand(module, assignment)
+	@ModelAttribute("command")
+	def command(
+		@PathVariable("module") module: Module,
+		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable("marker") marker: User
+	) =
+		GenerateOwnMarksTemplateCommand(
+			mandatory(module),
+			mandatory(assignment),
+			assignment.getMarkersSubmissions(mandatory(marker)).map(_.universityId)
+		)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(cmd: GenerateMarksTemplateCommand, @PathVariable(value="marker") marker: User) = {
-		cmd.members = cmd.assignment.getMarkersSubmissions(marker).map(_.universityId)
-		new ExcelView(safeAssignmentName(cmd.assignment) + " marks.xlsx", cmd.apply())
+	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable("assignment") assignment: Assignment) = {
+		new ExcelView(safeAssignmentName(assignment) + " marks.xlsx", cmd.apply())
 	}
 }
 
@@ -125,23 +66,4 @@ class CurrentMarkerMarksTemplateController extends CourseworkController {
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
 		Redirect(Routes.admin.assignment.markerFeedback.marksTemplate(assignment, currentUser.apparentUser))
 	}
-}
-
-object MarksTemplateCommand {
-
-	// util to replace unsafe characters with spaces
-	def safeAssignmentName(assignment: Assignment) = WorkbookUtil.createSafeSheetName(trimmedAssignmentName(assignment))
-	
-	val MaxSpreadsheetNameLength = 31
-	val MaxAssignmentNameLength = MaxSpreadsheetNameLength - "Marks for ".length
-
-	// trim the assignment name down to 21 characters. Excel sheet names must be 31 chars or less so
-	// "Marks for " = 10 chars + assignment name (max 21) = 31
-	def trimmedAssignmentName(assignment: Assignment) = {
-		if (assignment.name.length > MaxAssignmentNameLength)
-			assignment.name.substring(0, MaxAssignmentNameLength)
-		else
-			assignment.name
-	}	
-	
 }

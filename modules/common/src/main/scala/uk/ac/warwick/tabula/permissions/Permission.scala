@@ -149,15 +149,13 @@ object Permissions {
 	}
 
 	object Department {
-		case object ArrangeModules extends Permission("Sort modules into sub-departments")
-		case object ArrangeRoutes extends Permission("Sort routes into sub-departments")
+		case object ArrangeRoutesAndModules extends Permission("Sort routes and modules into sub-departments")
 		case object ManageExtensionSettings extends Permission("Manage extension settings")
 		case object ManageDisplaySettings extends Permission("Manage display settings")
 		case object ManageNotificationSettings extends Permission("Manage notification settings")
 		case object DownloadFeedbackReport extends Permission("Generate a feedback report")
 		case object ManageProfiles extends Permission("Manage student profiles")
-		case object Create extends Permission("Add a sub-department")
-		case object Update extends Permission("Edit a department")
+		case object Manage extends Permission("Manage sub-departments")
 		case object Reports extends Permission("Generate reports")
 	}
 
@@ -174,10 +172,7 @@ object Permissions {
 
 	object Route {
 		case object Administer extends Permission("Administer")
-
-		case object Create extends Permission("Add a route")
-		case object Update extends Permission("Edit a route")
-		case object Delete extends Permission("Remove a route")
+		case object Manage extends Permission("Manage routes")
 	}
 
 	object Assignment {
@@ -217,7 +212,8 @@ object Permissions {
 	}
 
 	object Marks {
-		case object DownloadTemplate extends Permission("Download a marks template")
+		case object DownloadTemplate extends Permission("Download a marks template for all marks")
+		case object DownloadOwnTemplate extends Permission("Download a marks template for own marks")
 
 		case object Create extends Permission("Add marks")
 		case object Read extends Permission("View marks")
@@ -250,14 +246,14 @@ object Permissions {
 
 		object Read {
 			case object Core extends Permission("View a member's photo, name, Warwick email, job title and University number")
-			case object DateOfBirth extends Permission("View a member's date of birth")
-			case object Nationality extends Permission("View a member's nationality")
+
+			/* We can split these back into DateOfBirth, Nationality and HomeEmail if any role requires a subset */
+			case object PrivateDetails extends Permission("View a member's date of birth, nationality, and alternative email address")
+
 			case object NextOfKin extends Permission("View a member's next of kin")
-			case object HomeAddress extends Permission("View a member's home address")
-			case object TermTimeAddress extends Permission("View a member's term-time address")
+			case object HomeAndTermTimeAddresses extends Permission("View a member's home and term-time addresses")
 			case object TelephoneNumber extends Permission("View a member's telephone number")
 			case object MobileNumber extends Permission("View a member's mobile number")
-			case object HomeEmail extends Permission("View a member's alternative email address")
 			case object Usercode extends Permission("View a member's usercode")
 			case object SmallGroups extends Permission("View a member's small groups")
 			case object Coursework extends Permission("View a member's coursework")
