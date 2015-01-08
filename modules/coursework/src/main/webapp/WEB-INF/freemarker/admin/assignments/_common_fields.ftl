@@ -59,9 +59,9 @@ so that they can be passed around between requests.
 					Send published marks to SITS
 				</label>
 				<div class="help-block">
-					Marks will be queued to be sent to SITS when the feedback is published.
-					The marks will be sent to SITS when the Exams Office has enabled marks upload for this deparment,
-					for any student where SITS has been setup to accept marks on this assignment.
+					Marks will be uploaded to SITS when feedback is published
+					for any student that has been setup to accept marks on this assignment in SITS
+					(and we will wait for the Exams Office to enable marks upload for this department if that has not already happened).
 				</div>
 			</@form.field>
 		</@form.row>
