@@ -419,14 +419,14 @@ $(function() {
 			}
 		});
 
-		$('.feedback-comments:not(.collapsible)').off('click').on('open.collapsible close.collapsible', function(){
+		$('.feedback-comments:not(.collapsible)').off('click').on('open.collapsible close.collapsible', function() {
 			$('.expanding-table').trigger('tabula.expandingTable.repositionContent');
 		}).collapsible();
 
 		$(".copyFeedback").off("click").on("click", function(){
 
 			var $button = $(this);
-			var feedbackHeading = $button.closest(".well").find("h3").text();
+			var feedbackHeading = $button.closest(".well").find(".feedback-summary-heading h3").text();
 			var $summaryFeeback = $button.closest(".well");
 			var $feedbackForm = $button.closest(".content-container").find("form");
 			var attachments = "";
@@ -435,13 +435,15 @@ $(function() {
 			var bigTextArea = $feedbackForm.find(".big-textarea");
 
 			if (bigTextArea.val()){
-				bigTextArea.val(bigTextArea.val() + '\n')
+				bigTextArea.val(bigTextArea.val() + '\n\n')
 			}
 
 			bigTextArea.val(bigTextArea.val() + $.trim($summaryFeeback.find(".feedback-comments").contents(':not(h5)').text()));
 
-			$(".copyFeedback").find("i").css("color", "#ffffff");
-			$button.find("i").css("color","#7DDB6B");
+			// replace the button with a note saying that the feedback has been copied.
+			$button.after($('<span class="muted">Feedback copied</span>'));
+			$button.remove();
+
 			var $copyAlert = $feedbackForm.find(".alert-success");
 			$copyAlert.text("Feedback copied from "+feedbackHeading.charAt(0).toLowerCase() + feedbackHeading.substr(1)).show(0, function(){
 				$('.expanding-table').trigger('tabula.expandingTable.repositionContent');
