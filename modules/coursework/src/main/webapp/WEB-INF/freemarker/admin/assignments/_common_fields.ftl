@@ -56,7 +56,7 @@ so that they can be passed around between requests.
 			<@form.field>
 				<label class="checkbox">
 					<@f.checkbox path="uploadMarksToSits" id="uploadMarksToSits" />
-					Send published marks to SITS
+					Upload published marks to SITS
 
 					<#assign popoverText>
 						<p>
@@ -71,7 +71,7 @@ so that they can be passed around between requests.
 					<a href="#"
 					   title="What's this?"
 					   class="use-popover"
-					   data-title="Send published marks to SITS"
+					   data-title="Upload published marks to SITS"
 					   data-html="true"
 					   data-trigger="hover"
 					   data-content="${popoverText}"
