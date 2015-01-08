@@ -19,7 +19,11 @@ trait MarkingWorkflowWorld extends TestHelpers {
 		new User("cuscao") { setWarwickId("0270954"); setFoundUser(true); setVerified(true); },
 		new User("curef") { setWarwickId("9170726"); setFoundUser(true); setVerified(true); },
 		new User("cusebr") { setWarwickId("0672088"); setFoundUser(true); setVerified(true); },
-		new User("cuscav") { setWarwickId("0672089"); setFoundUser(true); setVerified(true); }
+		new User("cuscav") { setWarwickId("0672089"); setFoundUser(true); setVerified(true); },
+
+		new User("cuslaj") { setWarwickId("1170836"); setFoundUser(true); setVerified(true); },
+		new User("cuslat") { setWarwickId("1171795"); setFoundUser(true); setVerified(true); },
+		new User("cuday") { setWarwickId("7170124"); setFoundUser(true); setVerified(true); }
 	)
 
 	val assignment = newDeepAssignment(moduleCode = "IN101")
@@ -34,6 +38,7 @@ trait MarkingWorkflowWorld extends TestHelpers {
 	markingWorkflow.department = assignment.module.adminDepartment
 	markingWorkflow.firstMarkers = makeUserGroup("cuslaj", "cuscav")
 	markingWorkflow.secondMarkers = makeUserGroup("cuslat", "cuday")
+	markingWorkflow.userLookup = mockUserLookup
 	assignment.markingWorkflow = markingWorkflow
 
 	val firstMarkers: JList[FirstMarkersMap] = JArrayList()
@@ -85,6 +90,7 @@ trait MarkingWorkflowWorld extends TestHelpers {
 			case (SecondFeedback) => feedback.retrieveSecondMarkerFeedback
 			case _ => feedback.retrieveFirstMarkerFeedback
 		}
+		mf.userLookup = mockUserLookup
 		mf.state = MarkingState.InProgress
 	}
 

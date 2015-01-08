@@ -94,8 +94,11 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 
 			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
 			command.stateService = stateService
+			command.userLookup = mockUserLookup
 			val students = List("0672088", "0672089")
-			command.markerFeedback = assignment.feedbacks.filter(f => students.contains(f.universityId)).map(_.secondMarkerFeedback)
+			assignment.feedbacks.map(addMarkerFeedback(_, SecondFeedback))
+			val feedbacks = assignment.feedbacks.filter(f => students.contains(f.universityId))
+			command.markerFeedback = feedbacks.map(_.secondMarkerFeedback)
 			setFirstMarkerFeedbackState(MarkingState.MarkingCompleted)
 			command.onBind(null)
 
