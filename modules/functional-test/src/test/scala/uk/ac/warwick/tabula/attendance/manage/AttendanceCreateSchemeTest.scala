@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.attendance.manage
 
-import org.joda.time.DateTime
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.FunctionalTestAcademicYear
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
@@ -8,7 +7,7 @@ import uk.ac.warwick.tabula.attendance.AttendanceFixture
 class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
 
 	val schemeName = "The Scheme of things"
-	val thisAcademicYearString = new FunctionalTestAcademicYear(new DateTime().getYear).startYear.toString
+	val thisAcademicYearString = FunctionalTestAcademicYear.current.startYear.toString
 
 	"A Member of staff" should "be able to create monitoring point schemes" in {
 		Given("I am logged in as Admin1")
@@ -64,7 +63,7 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
 
 		Then("I am redirected to the manage home page")
 		eventually(currentUrl should endWith(s"/attendance/manage/xxx/$thisAcademicYearString"))
-		pageSource should include(s"Manage monitoring points for ${new FunctionalTestAcademicYear(new DateTime().getYear).toString}")
+		pageSource should include(s"Manage monitoring points for ${FunctionalTestAcademicYear.current.toString}")
 		pageSource should include(schemeName)
 
 		When("The I click the 'Add points' link")

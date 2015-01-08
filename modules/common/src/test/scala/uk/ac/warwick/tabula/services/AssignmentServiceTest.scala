@@ -12,12 +12,16 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarised
 
 // scalastyle:off magic.number
-class AssignmentServiceTest extends PersistenceTestBase {
+class AssignmentServiceTest extends PersistenceTestBase with Mockito {
 
 	val thisAssignmentDao = new AssignmentDaoImpl
+	val thisFirstMarkerHelper = smartMock[UserGroupMembershipHelper[Assignment]]
+	val thisSecondMarkerHelper = smartMock[UserGroupMembershipHelper[Assignment]]
 
-	val assignmentService = new AbstractAssignmentService with AssignmentDaoComponent {
+	val assignmentService = new AbstractAssignmentService with AssignmentDaoComponent with AssignmentServiceUserGroupHelpers {
 		val assignmentDao = thisAssignmentDao
+		val firstMarkerHelper = thisFirstMarkerHelper
+		val secondMarkerHelper = thisSecondMarkerHelper
 	}
 	val assignmentMembershipService = new AssignmentMembershipServiceImpl
 	val feedbackService = new FeedbackServiceImpl
@@ -772,54 +776,6 @@ class AssignmentServiceTest extends PersistenceTestBase {
 			withUser("student5", "0000005") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
 		}
 	}}
-
-	@Test def assignmentWhereMarker() = transactional { tx =>
-		val department = new Department
-		department.code = "in"
-
-		session.save(department)
-
-		val workflow1 = new StudentsChooseMarkerWorkflow
-
-		workflow1.name = "mw1"
-		workflow1.department = department
-
-		val workflow2 = new SeenSecondMarkingLegacyWorkflow
-		workflow2.name = "mw2"
-		workflow2.department = department
-
-		workflow1.firstMarkers.addUserId("cuscav")
-		workflow1.firstMarkers.addUserId("cusebr")
-		workflow1.firstMarkers.addUserId("cuscao")
-
-		workflow2.firstMarkers.addUserId("cuscav")
-		workflow2.firstMarkers.addUserId("curef")
-		workflow2.secondMarkers.addUserId("cusfal")
-		workflow2.secondMarkers.addUserId("cusebr")
-
-		val assignment1 = new Assignment
-		val assignment2 = new Assignment
-		val assignment3 = new Assignment
-		assignment3.markDeleted()
-
-		assignment1.markingWorkflow = workflow1
-		assignment2.markingWorkflow = workflow2
-		assignment3.markingWorkflow = workflow1
-
-		session.save(workflow1)
-		session.save(workflow2)
-
-		assignmentService.save(assignment1)
-		assignmentService.save(assignment2)
-		assignmentService.save(assignment3)
-
-		withUser("cuscav") { assignmentService.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
-		withUser("cusebr") { assignmentService.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
-		withUser("cuscao") { assignmentService.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment1).toSet) }
-		withUser("curef") { assignmentService.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
-		withUser("cusfal") { assignmentService.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
-		withUser("cusmab") { assignmentService.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq().toSet) }
-	}
 
 	@Test def determineMembership() { transactional { tx =>
 		new AssignmentMembershipFixture() {

@@ -148,7 +148,7 @@
 					</a>
 				</li>
 				<li>
-					<a class="" href="<@routes.markeraddmarks assignment=assignment marker=marker/>">
+					<a class="${disabledClass}" href="<@routes.markeraddmarks assignment=assignment marker=marker/>">
 						<i class="icon-plus"></i> Upload Marks
 					</a>
 				</li>

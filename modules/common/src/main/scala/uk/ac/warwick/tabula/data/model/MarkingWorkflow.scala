@@ -6,7 +6,7 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.userlookup.User
 import org.springframework.core.convert.converter.Converter
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{AssignmentServiceUserGroupHelpers, AssignmentService, UserGroupCacheManager, UserLookupService}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.web.Routes
 
@@ -43,19 +43,40 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	def onlineMarkingUrl(assignment:Assignment, marker: User, studentId: String) : String =
 		Routes.coursework.admin.assignment.markerFeedback.onlineFeedback(assignment, marker)
 
+	// FIXME this isn't really optional, but testing is a pain unless it's made so
+	@transient var assignmentService = Wire.option[AssignmentService with AssignmentServiceUserGroupHelpers]
+
 	/** The group of first markers. */
 	@OneToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "firstmarkers_id")
-	var firstMarkers = UserGroup.ofUsercodes
+	private var _firstMarkers = UserGroup.ofUsercodes
 
 	/** The second group of markers. May be unused if the marking workflow
 	  * only has one marking stage.
 	  */
 	@OneToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "secondmarkers_id")
-	var secondMarkers = UserGroup.ofUsercodes
+	private var _secondMarkers = UserGroup.ofUsercodes
 
-	def thirdMarkers: UserGroup
+	def thirdMarkers: UnspecifiedTypeUserGroup
+
+	def firstMarkers: UnspecifiedTypeUserGroup = {
+		assignmentService match {
+			case Some(service) =>
+				new UserGroupCacheManager(_firstMarkers, service.firstMarkerHelper)
+			case _ => _firstMarkers
+		}
+	}
+	def firstMarkers_=(group: UserGroup) { _firstMarkers = group }
+
+	def secondMarkers: UnspecifiedTypeUserGroup = {
+		assignmentService match {
+			case Some(service) =>
+				new UserGroupCacheManager(_secondMarkers, service.firstMarkerHelper)
+			case _ => _secondMarkers
+		}
+	}
+	def secondMarkers_=(group: UserGroup) { _secondMarkers = group }
 
 	def markingMethod: MarkingMethod
 

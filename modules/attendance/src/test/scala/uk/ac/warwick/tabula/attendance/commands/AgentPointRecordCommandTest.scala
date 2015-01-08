@@ -39,7 +39,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 		val tutorType = StudentRelationshipType("tutor", "tutor", "tutor", "tutee")
 
 		val templateSet = new MonitoringPointSet
-		templateSet.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now.withYear(2013))
+		templateSet.academicYear = AcademicYear(2013)
 		val template = Fixtures.monitoringPoint(name = "Attend University", validFromWeek = 1, requiredFromWeek = 4)
 		templateSet.add(template)
 
@@ -57,8 +57,8 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 
 		val pointSet1 = new MonitoringPointSet
 		val pointSet2 = new MonitoringPointSet
-		pointSet1.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now.withYear(2013))
-		pointSet2.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now.withYear(2013))
+		pointSet1.academicYear = AcademicYear(2013)
+		pointSet2.academicYear = AcademicYear(2013)
 
 		val point1 = Fixtures.monitoringPoint(name = "Attend University", validFromWeek = 1, requiredFromWeek = 4)
 		point1.id = "point1Id"
@@ -83,10 +83,10 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 	trait AgentPointRecordWorld extends Fixture {
 		command.relationshipService.listStudentRelationshipsWithMember(tutorType, agentMember) returns Seq(studentRel1, studentRel2, studentRel3, studentRel4)
 
-		command.monitoringPointService.getPointSetForStudent(student1, AcademicYear.guessSITSAcademicYearByDate(DateTime.now.withYear(2013))) returns Some(pointSet1)
-		command.monitoringPointService.getPointSetForStudent(student2, AcademicYear.guessSITSAcademicYearByDate(DateTime.now.withYear(2013))) returns Some(pointSet1)
-		command.monitoringPointService.getPointSetForStudent(student3, AcademicYear.guessSITSAcademicYearByDate(DateTime.now.withYear(2013))) returns Some(pointSet1)
-		command.monitoringPointService.getPointSetForStudent(student4, AcademicYear.guessSITSAcademicYearByDate(DateTime.now.withYear(2013))) returns Some(pointSet2)
+		command.monitoringPointService.getPointSetForStudent(student1, AcademicYear(2013)) returns Some(pointSet1)
+		command.monitoringPointService.getPointSetForStudent(student2, AcademicYear(2013)) returns Some(pointSet1)
+		command.monitoringPointService.getPointSetForStudent(student3, AcademicYear(2013)) returns Some(pointSet1)
+		command.monitoringPointService.getPointSetForStudent(student4, AcademicYear(2013)) returns Some(pointSet2)
 		command.monitoringPointService.getPointById(point1.id) returns Some(point1)
 		command.monitoringPointService.getPointById(point2.id) returns Some(point2)
 
@@ -123,11 +123,11 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 
 		command.termService.getAcademicWeekForAcademicYear(any[DateTime], any[AcademicYear]) returns 5
 
-		command.monitoringPointService.findNonReported(allStudents, AcademicYear.guessSITSAcademicYearByDate(DateTime.now.withYear(2013)), "spring") returns nonReportedStudents
-		command.monitoringPointService.findNonReportedTerms(Seq(student1), AcademicYear.guessSITSAcademicYearByDate(DateTime.now.withYear(2013))) returns Seq("spring")
-		command.monitoringPointService.findNonReportedTerms(Seq(student2), AcademicYear.guessSITSAcademicYearByDate(DateTime.now.withYear(2013))) returns Seq("spring")
-		command.monitoringPointService.findNonReportedTerms(Seq(student3), AcademicYear.guessSITSAcademicYearByDate(DateTime.now.withYear(2013))) returns Nil
-		command.monitoringPointService.findNonReportedTerms(Seq(student4), AcademicYear.guessSITSAcademicYearByDate(DateTime.now.withYear(2013))) returns Seq("spring")
+		command.monitoringPointService.findNonReported(allStudents, AcademicYear(2013), "spring") returns nonReportedStudents
+		command.monitoringPointService.findNonReportedTerms(Seq(student1), AcademicYear(2013)) returns Seq("spring")
+		command.monitoringPointService.findNonReportedTerms(Seq(student2), AcademicYear(2013)) returns Seq("spring")
+		command.monitoringPointService.findNonReportedTerms(Seq(student3), AcademicYear(2013)) returns Nil
+		command.monitoringPointService.findNonReportedTerms(Seq(student4), AcademicYear(2013)) returns Seq("spring")
 
 		command.monitoringPointService.getCheckpointsByStudent(Seq(point1, point2)) returns Seq((student1, student1Point), (student3, student3Point))
 

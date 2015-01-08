@@ -585,6 +585,12 @@
 		<bean id="AttendanceMonitoringScheme-_members" parent="userGroupCacheBean"
 			  p:runtimeClass="uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme"
 			  p:path="_members" />
+		<bean id="Assignment-markingWorkflow-_firstMarkers" parent="userGroupCacheBean"
+			  p:runtimeClass="uk.ac.warwick.tabula.data.model.Assignment"
+			  p:path="markingWorkflow._firstMarkers" />
+		<bean id="Assignment-markingWorkflow-_secondMarkers" parent="userGroupCacheBean"
+			  p:runtimeClass="uk.ac.warwick.tabula.data.model.Assignment"
+			  p:path="markingWorkflow._secondMarkers" />
 
 			<!-- JMX -->
 
