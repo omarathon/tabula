@@ -116,11 +116,7 @@
 <p>
 	<@form.errors path="confirm" />
 	<@form.label checkbox=true><@f.checkbox path="confirm" />
-		<#if (markerFeedback?size > 1)>
-			I confirm that I have finished marking these student's submissions.
-		<#else>
-			I confirm that I have finished marking this student's submission.
-		</#if>
+		I confirm that I have finished marking <@fmt markerFeedback?size singular="this" plural="these" /> student's submissions.
 	</@form.label>
 </p>
 

@@ -31,7 +31,8 @@ class FeedbackAdjustmentNotification
 		userLookup.getUserByUserId(userId)
 	}
 
-	def title = s"Adjustments have been made to feedback for ${feedback.universityId}"
+	def title = s"${assignment.module.code.toUpperCase} - for ${assignment.name} : Adjustments have been made to feedback for ${feedback.universityId}"
+
 	def content = FreemarkerModel(FeedbackAdjustmentNotification.templateLocation,
 		Map(
 			"assignment" -> assignment,

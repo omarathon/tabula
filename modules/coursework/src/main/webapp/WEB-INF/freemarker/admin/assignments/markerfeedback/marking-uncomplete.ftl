@@ -40,7 +40,7 @@
 		<label class="checkbox">
 			<@f.errors path="confirm" cssClass="error" />
 			<@f.checkbox path="confirm" />
-			I confirm that I would like to return <#if (markerFeedback?size > 1)>these student's submissions<#else>this student's submission</#if> to the ${previousStageRole}.
+			I confirm that I would like to return <@fmt.p markerFeedback?size singular="this student's submission" plural="these student's submissions" shownumber=false /> to the ${previousStageRole}.
 		</label>
 		</@form.field>
 	</@form.row>

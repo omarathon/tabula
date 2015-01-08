@@ -2,9 +2,7 @@ package uk.ac.warwick.tabula.data.convert
 import org.springframework.beans.factory.annotation.Autowired
 
 import uk.ac.warwick.tabula.data.FeedbackDao
-import uk.ac.warwick.tabula.data.FeedbackDao
-import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Feedback}
-import uk.ac.warwick.tabula.system.TwoWayConverter
+import uk.ac.warwick.tabula.data.model.MarkerFeedback
 import uk.ac.warwick.tabula.system.TwoWayConverter
 
 class MarkerFeedbackIdConverter extends TwoWayConverter[String, MarkerFeedback] {

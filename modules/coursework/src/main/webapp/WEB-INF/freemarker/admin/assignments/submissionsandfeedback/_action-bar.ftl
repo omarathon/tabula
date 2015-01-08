@@ -151,7 +151,7 @@
 								classes='form-post'
 								href=returnForMarking_url
 								id="return-submissions-button"
-								tooltip="Retrun the submissions for marking. The last marker in the workflow will be able to update their feedback. You can only return feedback that has not been published."
+								tooltip="Return the submissions for marking. The last marker in the workflow will be able to update their feedback. You can only return feedback that has not been published."
 								data_attr='data-container=body'>
 									<i class="icon-arrow-left"></i> Return selected for marking
 								</@fmt.permission_button>

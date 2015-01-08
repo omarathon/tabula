@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackAdjustmentNotification
 import uk.ac.warwick.tabula.data.model.{Notification, Submission, Assignment, Feedback}
@@ -34,7 +34,7 @@ class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:
 
 	val submission = assignment.findSubmission(student.getWarwickId)
 	val feedback = assignment.findFeedback(student.getWarwickId)
-		.getOrElse(throw new IllegalStateException("Can't adjust for non-existant feedback"))
+		.getOrElse(throw new ItemNotFoundException("Can't adjust for non-existent feedback"))
 	copyFrom(feedback)
 
 	def applyInternal() = {
@@ -54,15 +54,9 @@ class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:
 	def copyFrom(feedback: Feedback) {
 		// mark and grade
 		if (assignment.collectMarks) {
-			actualMark = feedback.actualMark match {
-				case Some(m) => m.toString
-				case None => null
-			}
-			actualGrade = feedback.actualGrade.getOrElse(null)
-			adjustedMark = feedback.adjustedMark match {
-				case Some(m) => m.toString
-				case None => ""
-			}
+			actualMark = feedback.actualMark.map(_.toString).orNull
+			actualGrade = feedback.actualGrade.orNull
+			adjustedMark = feedback.adjustedMark.map(_.toString).orNull
 			adjustedGrade = feedback.adjustedGrade.getOrElse("")
 			reason = feedback.adjustmentReason
 			comments = feedback.adjustmentComments
@@ -89,6 +83,18 @@ trait FeedbackAdjustmentCommandValidation extends SelfValidating {
 		else if(reason.length > FeedbackAdjustmentCommand.REASON_SIZE_LIMIT)
 			errors.rejectValue("reason", "feedback.adjustment.reason.tooBig")
 		if (!comments.hasText) errors.rejectValue("comments", "feedback.adjustment.comments.empty")
+		// validate mark (must be int between 0 and 100)
+		if (adjustedMark.hasText) {
+			try {
+				val asInt = adjustedMark.toInt
+				if (asInt < 0 || asInt > 100) {
+					errors.rejectValue("adjustedMark", "actualMark.range")
+				}
+			} catch {
+				case _ @ (_: NumberFormatException | _: IllegalArgumentException) =>
+					errors.rejectValue("adjustedMark", "actualMark.format")
+			}
+		}
 	}
 }
 
@@ -113,7 +119,7 @@ trait FeedbackAdjustmentCommandState {
 trait FeedbackAdjustmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: FeedbackAdjustmentCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.Update,assignment)
+		p.PermissionCheck(Permissions.Feedback.Update, mandatory(assignment))
 	}
 }
 
