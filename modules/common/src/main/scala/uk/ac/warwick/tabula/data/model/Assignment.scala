@@ -749,6 +749,7 @@ case class SubmissionsReport(assignment: Assignment) {
 trait BooleanAssignmentProperties {
 	var openEnded: JBoolean = false
 	var collectMarks: JBoolean = true
+	var uploadMarksToSits: JBoolean = false
 	var collectSubmissions: JBoolean = true
 	var restrictSubmissions: JBoolean = false
 	var allowLateSubmissions: JBoolean = true
@@ -763,6 +764,7 @@ trait BooleanAssignmentProperties {
 	def copyBooleansTo(assignment: Assignment) {
 		assignment.openEnded = openEnded
 		assignment.collectMarks = collectMarks
+		assignment.uploadMarksToSits = uploadMarksToSits
 		assignment.collectSubmissions = collectSubmissions
 		assignment.restrictSubmissions = restrictSubmissions
 		assignment.allowLateSubmissions = allowLateSubmissions

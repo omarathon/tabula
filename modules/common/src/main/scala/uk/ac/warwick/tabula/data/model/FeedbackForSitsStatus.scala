@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
 sealed abstract class FeedbackForSitsStatus(val code: String, val description: String) {
