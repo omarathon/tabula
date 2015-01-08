@@ -57,12 +57,26 @@ so that they can be passed around between requests.
 				<label class="checkbox">
 					<@f.checkbox path="uploadMarksToSits" id="uploadMarksToSits" />
 					Send published marks to SITS
+
+					<#assign popoverText>
+						<p>
+							Check this box to queue marks and grades for upload to SITS when you publish feedback for the assignment.
+						</p>
+						<p>
+							Marks and grades will automatically be uploaded and displayed in the SITS SAT screen as actual marks and grades
+							as soon as the Exams Office have enabled this for your department.
+						</p>
+					</#assign>
+
+					<a href="#"
+					   title="What's this?"
+					   class="use-popover"
+					   data-title="Send published marks to SITS"
+					   data-html="true"
+					   data-trigger="hover"
+					   data-content="${popoverText}"
+					   ><i class="icon-question-sign"></i></a>
 				</label>
-				<div class="help-block">
-					Marks will be uploaded to SITS when feedback is published
-					for any student that has been setup to accept marks on this assignment in SITS
-					(and we will wait for the Exams Office to enable marks upload for this department if that has not already happened).
-				</div>
 			</@form.field>
 		</@form.row>
 	</#if>
