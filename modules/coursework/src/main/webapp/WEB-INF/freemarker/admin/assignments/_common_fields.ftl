@@ -68,9 +68,6 @@ so that they can be passed around between requests.
 	</#if>
 </#if>
 
-
-
-
 <#if features.summativeFilter>
 	<@form.row>
 			<@form.label>Credit bearing</@form.label>

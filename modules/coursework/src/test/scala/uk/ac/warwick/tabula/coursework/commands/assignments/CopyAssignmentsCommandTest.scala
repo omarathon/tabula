@@ -29,6 +29,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 		assignment.closeDate = fakeDate.plusDays(30)
 		assignment.openEnded = false
 		assignment.collectMarks = true
+		assignment.uploadMarksToSits = true
 		assignment.collectSubmissions = true
 		assignment.restrictSubmissions = true
 		assignment.allowLateSubmissions = true
@@ -69,6 +70,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 				newAssignment.closeDate should be(new DateTime(2014, 8, 22, 0, 0).plusDays(30))
 				newAssignment.openEnded.booleanValue should be(false)
 				newAssignment.collectMarks.booleanValue should be(true)
+				newAssignment.uploadMarksToSits.booleanValue should be(true)
 				newAssignment.collectSubmissions.booleanValue should be(true)
 				newAssignment.restrictSubmissions.booleanValue should be(true)
 				newAssignment.allowLateSubmissions.booleanValue should be(true)
