@@ -57,6 +57,7 @@ abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignm
 trait SubmissionState {
 	def assignment: Assignment
 	def submission: Option[Submission]
+	def student: User
 
 	def submissionState = {
 		submission match {
@@ -64,6 +65,8 @@ trait SubmissionState {
 			case Some(s) if s.isLate => "workflow.Submission.late"
 			case Some(_) => "workflow.Submission.onTime"
 			case None if !assignment.isClosed => "workflow.Submission.unsubmitted.withinDeadline"
+			case None if assignment.extensions.asScala.exists(e => e.universityId == student.getWarwickId && e.expiryDate.isBeforeNow)
+				=> "workflow.Submission.unsubmitted.withinExtension"
 			case None => "workflow.Submission.unsubmitted.late"
 		}
 	}
