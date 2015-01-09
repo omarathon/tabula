@@ -44,7 +44,7 @@ class FeedbackAdjustmentNotificationTest extends TestBase with Mockito {
 	@Test
 	def titleShouldContainMessage() {
 		val n = createNotification
-		n.title should be("Adjustments have been made to feedback for 7654321")
+		n.title should be("HNZ101 - for hernz : Adjustments have been made to feedback for 7654321")
 	}
 
 	@Test
