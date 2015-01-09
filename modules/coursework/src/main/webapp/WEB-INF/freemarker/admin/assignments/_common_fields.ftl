@@ -63,8 +63,7 @@ so that they can be passed around between requests.
 							Check this box to queue marks and grades for upload to SITS when you publish feedback for the assignment.
 						</p>
 						<p>
-							Marks and grades will automatically be uploaded and displayed in the SITS SAT screen as actual marks and grades
-							as soon as the Exams Office have enabled this for your department.
+							Marks and grades will automatically be uploaded and displayed in the SITS SAT screen as actual marks and grades.
 						</p>
 					</#assign>
 
