@@ -116,7 +116,7 @@
 <p>
 	<@form.errors path="confirm" />
 	<@form.label checkbox=true><@f.checkbox path="confirm" />
-		I confirm that I have finished marking <@fmt markerFeedback?size singular="this" plural="these" /> student's submissions.
+		I confirm that I have finished marking <@fmt.p markerFeedback?size "this" "these" "1" "0" false /> student's submissions.
 	</@form.label>
 </p>
 

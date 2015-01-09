@@ -38,6 +38,7 @@ class ListMarkerFeedbackController extends CourseworkController {
 			Mav("admin/assignments/markerfeedback/list",
 				"assignment" -> assignment,
 				"markerFeedback" -> markerFeedback,
+				"feedbackToDoCount" -> markerFeedback.map(_.feedbackItems.size).sum,
 				"hasFirstMarkerFeedback" -> hasFirstMarkerFeedback,
 				"hasSecondMarkerFeedback" -> hasSecondMarkerFeedback,
 				"firstMarkerRoleName" -> assignment.markingWorkflow.firstMarkerRoleName,

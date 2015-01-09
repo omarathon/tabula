@@ -93,6 +93,7 @@
 	<div id="profile-modal" class="modal fade profile-subset"></div>
 
 	<div class="btn-toolbar">
+		<#assign disabledClass><#if feedbackToDoCount == 0>disabled</#if></#assign>
 		<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 			<a class="btn use-tooltip"
 				title="Download feedback templates for all students as a ZIP file."
