@@ -3,14 +3,14 @@ package uk.ac.warwick.tabula.scheduling.commands
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.{Describable, ComposableCommand, CommandInternal, Description}
 import uk.ac.warwick.tabula.data.model.FeedbackForSitsStatus.{Failed, Successful}
-import uk.ac.warwick.tabula.data.model.{Department, FeedbackForSits}
+import uk.ac.warwick.tabula.data.model.FeedbackForSits
 import uk.ac.warwick.tabula.data.{FeedbackForSitsDaoComponent, AutowiringFeedbackForSitsDaoComponent}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.scheduling.services.{ExportFeedbackToSitsServiceComponent, AutowiringExportFeedbackToSitsServiceComponent}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, FeaturesComponent}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
 object ExportFeedbackToSitsCommand {
 	def apply() = new ExportFeedbackToSitsCommand

@@ -111,6 +111,7 @@ abstract class Features {
 	@Value("${features.masqueradeElevatedPermissions:false}") var masqueradeElevatedPermissions = defaults.masqueradeElevatedPermissions
 	@Value("${features.profiles.autoGroupDeregistration:false}") var autoGroupDeregistration = defaults.autoGroupDeregistration
 	@Value("${features.reports:true}") var reports = defaults.reports
+	@Value("${features.queueFeedbackForSits:false}") var queueFeedbackForSits = defaults.queueFeedbackForSits
 	@Value("${features.scheduling.exportFeedbackToSits:false}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
 
 	private val bean = new BeanWrapperImpl(this)
@@ -164,6 +165,7 @@ class FeaturesMessage {
 	@BeanProperty var dissertationFilter = true
 	@BeanProperty var disabilityRenderingInExtensions = true
 	@BeanProperty var newSeenSecondMarkingWorkflows = true
+	@BeanProperty var queueFeedbackForSits = false
 
 	@BeanProperty var profiles = true
 	@BeanProperty var meetingRecordApproval = true

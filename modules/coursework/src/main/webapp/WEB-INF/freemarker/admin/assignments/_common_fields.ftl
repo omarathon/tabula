@@ -51,6 +51,34 @@ so that they can be passed around between requests.
 			Collect marks
 		</label>
 	</@form.labelled_row>
+	<#if features.queueFeedbackForSits>
+		<@form.row>
+			<@form.field>
+				<label class="checkbox">
+					<@f.checkbox path="uploadMarksToSits" id="uploadMarksToSits" />
+					Upload published marks to SITS
+
+					<#assign popoverText>
+						<p>
+							Check this box to queue marks and grades for upload to SITS when you publish feedback for the assignment.
+						</p>
+						<p>
+							Marks and grades will automatically be uploaded and displayed in the SITS SAT screen as actual marks and grades.
+						</p>
+					</#assign>
+
+					<a href="#"
+					   title="What's this?"
+					   class="use-popover"
+					   data-title="Upload published marks to SITS"
+					   data-html="true"
+					   data-trigger="hover"
+					   data-content="${popoverText}"
+					   ><i class="icon-question-sign"></i></a>
+				</label>
+			</@form.field>
+		</@form.row>
+	</#if>
 </#if>
 
 <#if features.summativeFilter>

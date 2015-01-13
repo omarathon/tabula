@@ -8,7 +8,6 @@ import javax.sql.DataSource
 import org.springframework.jdbc.`object`.SqlUpdate
 import java.sql.Types
 import org.springframework.jdbc.core.SqlParameter
-import uk.ac.warwick.tabula.JavaImports.JHashMap
 import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.helpers.Logging

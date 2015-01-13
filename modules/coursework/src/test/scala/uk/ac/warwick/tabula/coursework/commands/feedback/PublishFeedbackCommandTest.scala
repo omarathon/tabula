@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import uk.ac.warwick.tabula.{CurrentUser, TestBase}
-import uk.ac.warwick.util.core.jodatime.DateTimeUtils
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.JavaImports._
