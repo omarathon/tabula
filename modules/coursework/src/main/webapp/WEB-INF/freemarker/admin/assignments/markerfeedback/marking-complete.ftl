@@ -1,20 +1,26 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
-<#assign formAction><@routes.markingCompleted assignment marker /></#assign>
+<#assign formAction>
+	<#if nextStageRole?has_content><@routes.markingCompleted assignment marker nextStageRole/>
+	<#else><@routes.markingCompleted assignment marker />
+	</#if>
+</#assign>
 
 <@f.form method="post" action="${formAction}" commandName="markingCompletedCommand">
 
-<h1>Marking completed</h1>
+<#assign title><#if nextStageRole?has_content>Send to ${nextStageRole}<#else>Marking completed</#if></#assign>
+
+<h1>Send to ${nextStageRole}</h1>
 
 <@form.errors path="" />
 
 <input type="hidden" name="onlineMarking" value="${onlineMarking?string}" />
 <input type="hidden" name="confirmScreen" value="true" />
 
-<@spring.bind path="students">
-	<@form.errors path="students" />
-	<#assign students=status.actualValue />
+<@spring.bind path="markerFeedback">
+	<@form.errors path="markerFeedback" />
+	<#assign markerFeedback=status.actualValue />
 	<#assign noMarks = markingCompletedCommand.noMarks />
 	<#assign noFeedback = markingCompletedCommand.noFeedback />
 	<#assign releasedFeedback = markingCompletedCommand.releasedFeedback />
@@ -91,30 +97,26 @@
 
 	<#if isUserALaterMarker>
 		<p>
-			<strong><@fmt.p (students?size - releasedFeedback?size) "student" /></strong> submissions will be listed as completed.
+			<strong><@fmt.p (markerFeedback?size - releasedFeedback?size) "student" /></strong> submissions will be listed as completed.
 			You will not be able to make further changes to the marks or feedback associated with these submissions until they have been marked by others.
 			If there are still changes that have to be made for these submissions then click cancel to return to the feedback list.
 		</p>
 	<#else>
 		<p>
-			<strong><@fmt.p (students?size - releasedFeedback?size) "student" /></strong> submissions will be listed as completed.
+			<strong><@fmt.p (markerFeedback?size - releasedFeedback?size) "student" /></strong> submissions will be listed as completed.
 			Note that you will not be able to make any further changes to the marks or feedback associated with these submissions after this point.
 			If there are still changes that have to be made for these submissions then click cancel to return to the feedback list.
 		</p>
 	</#if>
 
-	<#list students as uniId>
-		<input type="hidden" name="students" value="${uniId}" />
+	<#list markerFeedback as mf>
+		<input type="hidden" name="markerFeedback" value="${mf.id}" />
 	</#list>
 </@spring.bind>
 <p>
 	<@form.errors path="confirm" />
 	<@form.label checkbox=true><@f.checkbox path="confirm" />
-		<#if (students?size > 1)>
-			I confirm that I have finished marking these student's submissions.
-		<#else>
-			I confirm that I have finished marking this student's submission.
-		</#if>
+		I confirm that I have finished marking <@fmt.p markerFeedback?size "this" "these" "1" "0" false /> student's submissions.
 	</@form.label>
 </p>
 

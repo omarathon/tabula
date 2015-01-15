@@ -12,6 +12,7 @@ trait FeedbackDao {
 	def save(feedback: Feedback)
 	def delete(feedback: Feedback)
 	def save(feedback: MarkerFeedback)
+	def delete(feedback: MarkerFeedback)
 }
 
 abstract class AbstractFeedbackDao extends FeedbackDao {
@@ -42,6 +43,11 @@ abstract class AbstractFeedbackDao extends FeedbackDao {
 	override def save(feedback: MarkerFeedback) = {
 		session.saveOrUpdate(feedback)
 	}
+
+	override def delete(feedback: MarkerFeedback) = {
+		session.delete(feedback)
+	}
+
 
 }
 

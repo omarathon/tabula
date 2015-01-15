@@ -7,12 +7,11 @@ import org.springframework.mock.web.MockHttpServletRequest
 class AllowedFieldsBindingTest extends TestBase {
 	
 	@Test
-	def annotatedClasses {
+	def annotatedClasses() {
 		val cmd = new TestCommand
-		val binder = new CustomDataBinder(cmd, "command") 
-		             with AllowedFieldsBinding
+		val binder = new CustomDataBinder(cmd, "command") with AllowedFieldsBinding
 		
-		binder.usesDisallowedAnnotation(classOf[TestService]) should be (true)
+		binder.usesDisallowedAnnotation(classOf[TestService]) should be {true}
 
 		val request = new MockHttpServletRequest
 		request.addParameter("value", "top")

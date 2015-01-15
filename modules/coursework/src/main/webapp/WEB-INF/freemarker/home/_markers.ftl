@@ -22,9 +22,10 @@
 	<#if assignment.closed>
 		<div class="alert alert-success deadline">
 			Assignment closed: <strong><@fmt.date date=assignment.closeDate /> (${time_remaining})</strong>
-			<div class="marker-btn btn-group">
-				<a class="btn btn-mini ${class}" href="${href}" data-title="${title}" data-container="body">Manage <i class="icon-cog"></i></a>
+			<div class="pull-right btn-group">
+				<a class="btn btn-primary ${class}" href="${href}" data-title="${title}" data-container="body">Mark</a>
 			</div>
+			<div class="clearfix"></div>
 		</div>
 	<#else>
 		<div class="alert alert-info deadline">

@@ -15,7 +15,7 @@
 
 <#macro row graph>
 	<#assign u = graph.student />
-<tr class="itemContainer" data-contentid="${markingId(u)}" data-markingurl="${onlineMarkingUrls[u.userId]}">
+<tr class="item-container" data-contentid="${markingId(u)}" data-markingurl="${onlineMarkingUrls[u.userId]}">
 	<#if showMarkingCompleted>
 		<td class="check-col">
 			<input type="checkbox" class="collection-checkbox" name="students" value="${markingId(u)}">

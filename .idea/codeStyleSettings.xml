@@ -19,10 +19,6 @@
         <JSCodeStyleSettings>
           <option name="SPACE_BEFORE_FUNCTION_LEFT_PARENTH" value="false" />
         </JSCodeStyleSettings>
-        <ScalaCodeStyleSettings>
-          <option name="MULTILINE_STRING_SUPORT" value="0" />
-          <option name="PROCESS_MARGIN_ON_COPY_PASTE" value="false" />
-        </ScalaCodeStyleSettings>
         <XML>
           <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
         </XML>

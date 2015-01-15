@@ -54,184 +54,190 @@ jQuery.fn.expandingTable = function(options) {
 
 	var iconMarkup = '<i class="row-icon icon-chevron-right icon-fixed-width"></i>';
 
-	var $table = this.first();
+	//var $table = this.first();
 
-	function repositionContentBoxes() {
-		// These have to be positioned in the right order, so we loop through content-container rather than
-		// directly on content
-		$(tableContainerSelector).hide().each(function() {
-			var contentID = $(this).attr('data-contentid');
-			var $content = $('#content-' + contentID);
+	this.each(function(index, table){
 
-			if ($content.length) {
-				var isOpen = $content.data('open');
+		var $table = $(table);
 
-				if (isOpen) {
-					$(this).show();
-					var $contentCell = $(this).closest(contentCellSelector);
+		function repositionContentBoxes() {
+			// These have to be positioned in the right order, so we loop through content-container rather than
+			// directly on content
+			$table.find(tableContainerSelector).hide().each(function() {
+				var contentID = $(this).attr('data-contentid');
+				var $content = $('#content-' + contentID);
 
-					// Add bottom padding equivalent to the height of the content to the content cell
-					var cellPosition = $contentCell.position();
+				if ($content.length) {
+					var isOpen = $content.data('open');
 
-					$contentCell.css('padding-bottom', '');
-					var cellHeight = $contentCell.outerHeight();
-					var contentHeight = $content.outerHeight();
-					$contentCell.css('padding-bottom', contentHeight + 10);
+					if (isOpen) {
+						$(this).show();
+						var $contentCell = $(this).closest(contentCellSelector);
 
-					// Position the content div in the correct location
-					$content.css({
-						top: (cellPosition.top + cellHeight - 2) + 'px',
-						left: ($table.position().left + 1) + 'px'
-					});
+						// Add bottom padding equivalent to the height of the content to the content cell
+						var cellPosition = $contentCell.position();
+
+						$contentCell.css('padding-bottom', '');
+						var cellHeight = $contentCell.outerHeight();
+						var contentHeight = $content.outerHeight();
+						$contentCell.css('padding-bottom', contentHeight + 10);
+
+						// Position the content div in the correct location
+						$content.css({
+							top: (cellPosition.top + cellHeight - 2) + 'px',
+							left: ($table.position().left + 1) + 'px'
+						});
+					}
 				}
-			}
-		});
-	}
-
-	$table.on('tabula.expandingTable.repositionContent', function() {
-		 repositionContentBoxes();
-	});
-
-	function hideContent($content, $row, $icon) {
-		var $contentCell = $('.content-cell', $row);
-
-		// Hide the content div and move it back to where it was before
-		$content.hide();
-		$contentCell.find('.table-content').append($content);
-
-		// Remove the bottom padding on the content cell
-		$contentCell.css('padding-bottom', '');
-
-		// Remove any position data from the content div and hide
-		$content.attr('style', 'display:none;');
-
-		// Change the icon to closed
-		$icon.removeClass('icon-chevron-down').addClass('icon-chevron-right');
-
-		// Set the data
-		$content.data('open', false);
-
-		repositionContentBoxes();
-		$content.trigger('tabula.expandingTable.parentRowCollapsed');
-	}
-
-	function showContent($content, $row, $icon) {
-		// Move the workflow div to be at the end of the offset parent and display it
-		$('#main-content').append($content);
-		$content.show();
-
-		if ($row.is(':nth-child(odd)')) {
-			$content.css('background-color', '#ebebeb');
-		} else {
-			$content.css('background-color', '#f5f5f5');
+			});
 		}
 
-		$content.css({
-			width: ($row.closest('table').width() - 21) + 'px'
-		});
-
-		// Change the icon to open
-		$icon.removeClass('icon-chevron-right').addClass('icon-chevron-down');
-
-		// Set the data
-		$content.data('open', true);
-
-		repositionContentBoxes();
-		$content.trigger('tabula.expandingTable.parentRowExpanded');
-	}
-
-	function toggleRow($content, $row, $icon) {
-		if ($content.length) {
-			var isOpen = $content.data('open');
-			if (isOpen) {
-				hideContent($content, $row, $icon);
-			} else {
-				if(options.contentUrlFunction && !$content.data("loaded")) {
-					var contentId = ""
-					if(!preventContentIdInUrl) { contentId = '/' + ($row.attr("data-contentid")).replace("_","/"); }
-					var dataUrl = options.contentUrlFunction($row) + contentId;
-
-					$icon.removeClass('icon-chevron-right').addClass('icon-spinner icon-spin');
-
-					$content.load(dataUrl, function(resp, status, req) {
-						if ("403" == req.status) {
-							$content.html("<p class='text-error'><i class='icon-warning-sign'></i> Sorry, you don't have permission to see that. Have you signed out of Tabula?</p><p class='text-error'>Refresh the page and try again. If it remains a problem, please let us know using the comments link on the edge of the page.</p>");
-						}
-						$icon.removeClass('icon-spinner icon-spin');
-						showContent($content, $row, $icon);
-						$content.data("loaded", "true");
-						$content.trigger('tabula.expandingTable.contentChanged');
-					});
-
-				} else {
-					showContent($content, $row, $icon);
-				}
-			}
-		}
-	}
-
-	// init
-	$('tbody tr', $table).each(function() {
-		var $row = $(this);
-		// get the contentId for this row
-		var contentId = $row.attr("data-contentid");
-		var $content = $('#content-' + contentId);
-
-		// add the arrow icon to the row
-		var $iconCell = $(iconSelector, $row).first();
-		var $icon = $(iconMarkup).css('margin-top', '2px');
-		$iconCell.prepend(' ').prepend($icon);
-		// find the cells in the row that will trigger a toggle when clicked.
-		var $toggleCells = $(toggleCellSelector, $row);
-		// add some styles to them and register the click event
-		$toggleCells.css('cursor', 'pointer');
-
-		// add click handlers to the toggle cells
-		$toggleCells.on('click', function(evt) {
-			toggleRow($content, $row, $icon);
-			evt.preventDefault();
-			evt.stopPropagation();
-		});
-
-		// add handlers for a cutom event so external modules can collapse the row
-		$row.on('tabula.expandingTable.toggle', function(evt) {
-			toggleRow($content, $row, $icon);
-			evt.preventDefault();
-			evt.stopPropagation();
-		});
-
-		// global scope for this event. all instances of the plugin will need to run this
-		$(document).on('tabula.expandingTable.contentChanged', function(evt) {
+		$table.on('tabula.expandingTable.repositionContent', function() {
 			repositionContentBoxes();
 		});
 
+		function hideContent($content, $row, $icon) {
+			var $contentCell = $('.content-cell', $row);
+
+			// Hide the content div and move it back to where it was before
+			$content.hide();
+			$contentCell.find('.table-content').append($content);
+
+			// Remove the bottom padding on the content cell
+			$contentCell.css('padding-bottom', '');
+
+			// Remove any position data from the content div and hide
+			$content.attr('style', 'display:none;');
+
+			// Change the icon to closed
+			$icon.removeClass('icon-chevron-down').addClass('icon-chevron-right');
+
+			// Set the data
+			$content.data('open', false);
+
+			repositionContentBoxes();
+			$content.trigger('tabula.expandingTable.parentRowCollapsed');
+		}
+
+		function showContent($content, $row, $icon) {
+			// Move the workflow div to be at the end of the offset parent and display it
+			$('#main-content').append($content);
+			$content.show();
+
+			if ($row.is(':nth-child(odd)')) {
+				$content.css('background-color', '#ebebeb');
+			} else {
+				$content.css('background-color', '#f5f5f5');
+			}
+
+			$content.css({
+				width: ($row.closest('table').width() - 21) + 'px'
+			});
+
+			// Change the icon to open
+			$icon.removeClass('icon-chevron-right').addClass('icon-chevron-down');
+
+			// Set the data
+			$content.data('open', true);
+
+			repositionContentBoxes();
+			$content.trigger('tabula.expandingTable.parentRowExpanded');
+		}
+
+		function toggleRow($content, $row, $icon) {
+			if ($content.length) {
+				var isOpen = $content.data('open');
+				if (isOpen) {
+					hideContent($content, $row, $icon);
+				} else {
+					if(options.contentUrlFunction && !$content.data("loaded")) {
+						var contentId = ""
+						if(!preventContentIdInUrl) { contentId = '/' + ($row.attr("data-contentid")).replace("_","/"); }
+						var dataUrl = options.contentUrlFunction($row) + contentId;
+
+						$icon.removeClass('icon-chevron-right').addClass('icon-spinner icon-spin');
+
+						$content.load(dataUrl, function(resp, status, req) {
+							if ("403" == req.status) {
+								$content.html("<p class='text-error'><i class='icon-warning-sign'></i> Sorry, you don't have permission to see that. Have you signed out of Tabula?</p><p class='text-error'>Refresh the page and try again. If it remains a problem, please let us know using the comments link on the edge of the page.</p>");
+							}
+							$icon.removeClass('icon-spinner icon-spin');
+							showContent($content, $row, $icon);
+							$content.data("loaded", "true");
+							$content.trigger('tabula.expandingTable.contentChanged');
+						});
+
+					} else {
+						showContent($content, $row, $icon);
+					}
+				}
+			}
+		}
+
+		// init
+		$('tbody tr', $table).each(function() {
+			var $row = $(this);
+			// get the contentId for this row
+			var contentId = $row.attr("data-contentid");
+			var $content = $('#content-' + contentId);
+
+			// add the arrow icon to the row
+			var $iconCell = $(iconSelector, $row).first();
+			var $icon = $(iconMarkup).css('margin-top', '2px');
+			$iconCell.prepend(' ').prepend($icon);
+			// find the cells in the row that will trigger a toggle when clicked.
+			var $toggleCells = $(toggleCellSelector, $row);
+			// add some styles to them and register the click event
+			$toggleCells.css('cursor', 'pointer');
+
+			// add click handlers to the toggle cells
+			$toggleCells.on('click', function(evt) {
+				toggleRow($content, $row, $icon);
+				evt.preventDefault();
+				evt.stopPropagation();
+			});
+
+			// add handlers for a cutom event so external modules can collapse the row
+			$row.on('tabula.expandingTable.toggle', function(evt) {
+				toggleRow($content, $row, $icon);
+				evt.preventDefault();
+				evt.stopPropagation();
+			});
+
+			// global scope for this event. all instances of the plugin will need to run this
+			$(document).on('tabula.expandingTable.contentChanged', function(evt) {
+				repositionContentBoxes();
+			});
+
+		});
+
+		if(allowTableSort) {
+			$.tablesorter.addWidget({
+				id: 'repositionContentBoxes',
+				format: repositionContentBoxes
+			});
+
+			var widgetOptions = { widgets: ['repositionContentBoxes'] };
+			var sortOptions = $.extend(widgetOptions, tableSorterOptions);
+			$table.tablesorter(sortOptions);
+		}
+
+		// TAB-2075 open expanded row when fragment identifier present
+		// expects to find a data attribute on the table called row-to-open
+		// which contains the content id for that row
+		var contentIdToOpen = $table.data('row-to-open');
+
+		if(contentIdToOpen) {
+			var $content = $('#content-' + contentIdToOpen);
+			var $row = $("tr[data-contentid='" + contentIdToOpen + "']");
+			var $icon = $(iconSelector, $row).first().find(".row-icon");
+			toggleRow($content, $row, $icon);
+			$content.on('tabula.expandingTable.contentChanged', function() {
+				$content[0].scrollIntoView();
+			});
+		}
+
 	});
-
-	if(allowTableSort) {
-		$.tablesorter.addWidget({
-			id: 'repositionContentBoxes',
-			format: repositionContentBoxes
-		});
-
-		var widgetOptions = { widgets: ['repositionContentBoxes'] };
-		var sortOptions = $.extend(widgetOptions, tableSorterOptions);
-		$table.tablesorter(sortOptions);
-	}
-
-	// TAB-2075 open expanded row when fragment identifier present
-	// expects to find a data attribute on the table called row-to-open
-	// which contains the content id for that row
-	var contentIdToOpen = $('.expanding-table').data('row-to-open');
-
-	if(contentIdToOpen) {
-		var $content = $('#content-' + contentIdToOpen);
-		var $row = $("tr[data-contentid='" + contentIdToOpen + "']");
-		var $icon = $(iconSelector, $row).first().find(".row-icon");
-		toggleRow($content, $row, $icon);
-		$content.on('tabula.expandingTable.contentChanged', function() {
-			$content[0].scrollIntoView();
-		});
-	}
 
 }
 
