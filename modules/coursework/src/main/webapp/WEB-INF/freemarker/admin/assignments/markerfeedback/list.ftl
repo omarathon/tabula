@@ -14,8 +14,9 @@
 
 		<#assign u = item.student />
 		<#local thisFeedback = item.feedbacks?last />
+		<#local nextMarkerAction>Send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if></#local>
 
-		<tr class="item-container" data-contentid="${markingId(u)}" data-markingurl="${onlineMarkingUrls[u.userId]}">
+		<tr class="item-container" data-contentid="${markingId(u)}" data-markingurl="${onlineMarkingUrls[u.userId]}" data-nextmarkeraction="${nextMarkerAction}">
 			<td class="check-col">
 				<@form.selector_check_row "markerFeedback" thisFeedback.id />
 			</td>
@@ -53,7 +54,7 @@
 				<#if thisFeedback.state.toString == "ReleasedForMarking">
 					Submission needs marking
 				<#elseif thisFeedback.state.toString == "InProgress">
-					Send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if>
+					${nextMarkerAction}
 				<#elseif thisFeedback.state.toString == "Rejected">
 					Review feedback and re-send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if>
 				<#elseif thisFeedback.state.toString == "MarkingCompleted">
