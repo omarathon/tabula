@@ -698,7 +698,7 @@ class Assignment
 	def hasWorkflow = markingWorkflow != null
 
 	def needsFeedbackPublishing = {
-		if (openEnded || !collectSubmissions) {
+		if (openEnded || !collectSubmissions || archived) {
 			false
 		} else {
 			submissions.asScala.exists(s => !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))

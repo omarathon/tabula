@@ -26,6 +26,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro sortroutes department><@_u page="/department/${department.code}/sort-routes" /></#macro>
 
 <#macro permissions scope><@_u page="/permissions/${scope.urlCategory}/${scope.urlSlug}" /></#macro>
+<#macro permissionstree scope><@_u page="/permissions/${scope.urlCategory}/${scope.urlSlug}/tree" /></#macro>
 
 <#macro customroles department><@_u page="/department/${department.code}/customroles/list" /></#macro>
 <#macro addcustomrole department><@_u page="/department/${department.code}/customroles/add" /></#macro>
