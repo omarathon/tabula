@@ -46,8 +46,13 @@
 
 <#assign isMarking=true />
 <#if isCurrentUserFeedbackEntry>
-	<div class="well">
-		<h3>Final feedback</h3>
+	<#if isFinalMarking>
+		<div class="well">
+			<h3>Final feedback</h3>
+			<#include "online_feedback.ftl">
+		</div>
+	<#else>
 		<#include "online_feedback.ftl">
-	</div>
+	</#if>
+
 </#if>

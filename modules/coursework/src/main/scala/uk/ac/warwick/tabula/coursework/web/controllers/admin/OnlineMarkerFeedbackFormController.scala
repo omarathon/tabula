@@ -47,7 +47,8 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 			"isCurrentUserFeedbackEntry" -> isCurrentUserFeebackEntry,
 			"parentFeedback" -> parentFeedback,
 			"secondMarkerNotes" -> Option(parentFeedback.secondMarkerFeedback).map(_.rejectionComments).orNull,
-			"isModerated" -> (command.assignment.markingWorkflow.markingMethod == MarkingMethod.ModeratedMarking)
+			"isModerated" -> (command.assignment.markingWorkflow.markingMethod == MarkingMethod.ModeratedMarking),
+			"isFinalMarking" -> Option(parentFeedback.secondMarkerFeedback).exists(_.state == MarkingCompleted)
 		).noLayout()
 	}
 
