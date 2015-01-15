@@ -14,7 +14,8 @@ No marking workflows have been created yet. Click <strong>Create</strong> below 
 <table class="marking-workflows table table-bordered table-striped">
 <thead>
 	<tr>
-		<th>Marking workflow name</th>
+		<th>Name</th>
+		<th>Type</th>
 		<th></th>
 	</tr>
 </thead>
@@ -24,6 +25,7 @@ No marking workflows have been created yet. Click <strong>Create</strong> below 
 <#assign canDelete = (info.assignmentCount == 0) />
 <tr>
 	<td>${markingWorkflow.name}</td>
+	<td>${markingWorkflow.markingMethod.description}</td>
 	<td>
 		<a class="btn btn-mini" href="<@routes.markingworkflowedit markingWorkflow />"><i class="icon-edit"></i> Modify</a>
 		<a class="btn btn-mini btn-danger<#if !canDelete> use-tooltip disabled</#if>" href="<@routes.markingworkflowdelete markingWorkflow />" data-toggle="modal" data-target="#marking-workflow-modal"<#if !canDelete> title="You can't delete this marking workflow as it is in use by <@fmt.p info.assignmentCount "assignment" "assignments" />."</#if>><i class="icon-remove icon-white"></i> Delete</a>

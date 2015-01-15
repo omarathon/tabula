@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineFeedbackFormCommand, OnlineFeedbackCommand}
-import uk.ac.warwick.tabula.coursework.helpers.MarkerFeedbackCollecting
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
@@ -17,7 +16,7 @@ import uk.ac.warwick.userlookup.User
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/online"))
-class OnlineFeedbackController extends CourseworkController with MarkerFeedbackCollecting with AutowiringUserLookupComponent {
+class OnlineFeedbackController extends CourseworkController with AutowiringUserLookupComponent {
 
 	@ModelAttribute
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, submitter: CurrentUser) =
@@ -29,16 +28,11 @@ class OnlineFeedbackController extends CourseworkController with MarkerFeedbackC
 		val feedbackGraphs = command.apply()
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
-		val markerFeedbackCollections = getMarkerFeedbackCollections(assignment, module, user.apparentUser, userLookup)
-
 		Mav("admin/assignments/feedback/online_framework",
 			"showMarkingCompleted" -> false,
 			"showGenericFeedback" -> true,
 			"assignment" -> assignment,
 			"command" -> command,
-			"inProgressFeedback" -> markerFeedbackCollections.inProgressFeedback,
-			"completedFeedback" -> markerFeedbackCollections.completedFeedback,
-			"rejectedFeedback" -> markerFeedbackCollections.rejectedFeedback,
 			"studentFeedbackGraphs" -> feedbackGraphs,
 			"onlineMarkingUrls" -> feedbackGraphs.map{ graph =>
 				graph.student.getUserId -> Routes.admin.assignment.onlineFeedback(assignment)

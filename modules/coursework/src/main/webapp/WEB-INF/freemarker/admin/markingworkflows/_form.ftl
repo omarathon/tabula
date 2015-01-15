@@ -30,7 +30,7 @@ Common form fields.
 	</div>
 </@form.labelled_row>
 
-<@form.labelled_row "markingMethod" "Marking Method">
+<@form.labelled_row "markingMethod" "Workflow type">
 
 	<#assign isDisabled = (view_type == "edit") />
 

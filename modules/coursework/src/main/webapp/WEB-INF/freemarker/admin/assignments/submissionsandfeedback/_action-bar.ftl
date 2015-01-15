@@ -139,7 +139,21 @@
 									id="release-submissions-button"
 									tooltip="Release the submissions for marking. First markers will be able to download their submissions."
 									data_attr='data-container=body'>
-									<i class="icon-inbox"></i> Release for marking
+									<i class="icon-inbox"></i> Release selected for marking
+								</@fmt.permission_button>
+							</li>
+							<li class="must-have-selected">
+								<#assign returnForMarking_url><@routes.returnForMarking assignment /></#assign>
+								<@fmt.permission_button
+								permission='Submission.ReleaseForMarking'
+								scope=assignment
+								action_descr='return for marking'
+								classes='form-post'
+								href=returnForMarking_url
+								id="return-submissions-button"
+								tooltip="Return the submissions for marking. The last marker in the workflow will be able to update their feedback. You can only return feedback that has not been published."
+								data_attr='data-container=body'>
+									<i class="icon-arrow-left"></i> Return selected for marking
 								</@fmt.permission_button>
 							</li>
 						</ul>
@@ -160,48 +174,75 @@
 					<span class="caret"></span>
 				</a>
 				<ul class="dropdown-menu">
-					<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
+
+					<#if assignment.hasWorkflow>
 						<li>
-							<a class="long-running use-tooltip"
-								 href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>"
-								 title="Download feedback templates for all students as a ZIP file."
-								 data-container="body"><i class="icon-download"></i> Download templates
-							</a>
+							<#assign onlinefeedback_url><@routes.genericfeedback assignment /></#assign>
+							<@fmt.permission_button
+							permission='Feedback.Update'
+							scope=assignment
+							action_descr='add general feedback for all students'
+							tooltip='Add general feedback that will be sent to all students'
+							href=onlinefeedback_url>
+								<i class="icon-edit"></i> Generic feedback
+							</@fmt.permission_button>
 						</li>
-						<li class="divider"></li>
-					</#if>
-					<li>
-						<#assign marks_url><@routes.addMarks assignment /></#assign>
-						<@fmt.permission_button
+						<li>
+							<#assign onlinefeedback_url><@routes.feedbackAdjustment assignment /></#assign>
+							<@fmt.permission_button
+							permission='Feedback.Update'
+							scope=assignment
+							action_descr='make adjustments to feedback'
+							tooltip='Apply penalties or make adjustments before publishing feedback'
+							href=onlinefeedback_url>
+								<i class="icon-sort"></i> Adjustments
+							</@fmt.permission_button>
+						</li>
+					<#else>
+						<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
+							<li>
+								<a class="long-running use-tooltip"
+								   href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>"
+								   title="Download feedback templates for all students as a ZIP file."
+								   data-container="body"><i class="icon-download"></i> Download templates
+								</a>
+							</li>
+							<li class="divider"></li>
+						</#if>
+						<li>
+							<#assign marks_url><@routes.addMarks assignment /></#assign>
+							<@fmt.permission_button
 							permission='Marks.Create'
 							scope=assignment
 							action_descr='add marks'
 							href=marks_url>
-            	<i class="icon-check"></i> Add marks
-            </@fmt.permission_button>
-					</li>
-					<li class="divider"></li>
-					<li>
-						<#assign onlinefeedback_url><@routes.onlinefeedback assignment /></#assign>
-						<@fmt.permission_button
+								<i class="icon-check"></i> Add marks
+							</@fmt.permission_button>
+						</li>
+						<li>
+							<#assign onlinefeedback_url><@routes.onlinefeedback assignment /></#assign>
+							<@fmt.permission_button
 							permission='Feedback.Read'
 							scope=assignment
 							action_descr='manage online feedback'
 							href=onlinefeedback_url>
-            	<i class="icon-edit"></i> Online feedback
-            </@fmt.permission_button>
-					</li>
-					<li>
-						<#assign feedback_url><@routes.addFeedback assignment /></#assign>
-						<@fmt.permission_button
+								<i class="icon-edit"></i> Online feedback
+							</@fmt.permission_button>
+						</li>
+						<li>
+							<#assign feedback_url><@routes.addFeedback assignment /></#assign>
+							<@fmt.permission_button
 							permission='Feedback.Create'
 							scope=assignment
 							action_descr='upload feedback'
 							classes='feedback-link'
 							href=feedback_url>
-            	<i class="icon-upload"></i> Upload feedback
-            </@fmt.permission_button>
-					</li>
+								<i class="icon-upload"></i> Upload feedback
+							</@fmt.permission_button>
+						</li>
+					</#if>
+
+					<#-- Download / Publish / Delete always available -->
 					<li class="must-have-selected">
 						<a class="long-running use-tooltip form-post"
 							 href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>"
@@ -209,7 +250,6 @@
 							 data-container="body"><i class="icon-download"></i> Download feedback
 						</a>
 					</li>
-					
 					<#if assignment.canPublishFeedback>
 						<li>
 							<#assign publishfeedbackurl><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/publish'/></#assign>
@@ -220,7 +260,6 @@
 					<#else>
 						<li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish, or the assignment is not yet closed."><i class="icon-share"></i> Publish feedback</a></li>
 					</#if>
-					
 					<li class="must-have-selected">
 						<#assign deletefeedback_url><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
 						<@fmt.permission_button permission='Feedback.Delete' scope=assignment action_descr='delete feedback' classes="form-post" href=deletefeedback_url tooltip='Delete feedback'>
@@ -229,6 +268,7 @@
 					</li>
 				</ul>
 			</div>
+
 		</div>
 
 		<div class="btn-group">

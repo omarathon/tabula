@@ -29,11 +29,7 @@ class MarkingUncompletedController extends CourseworkController {
 		MarkingUncompletedCommand(module, assignment, marker, submitter)
 
 	def RedirectBack(assignment: Assignment, command: MarkingUncompletedCommand) = {
-		if (command.onlineMarking) {
-			Redirect(Routes.admin.assignment.markerFeedback.onlineFeedback(assignment, command.user))
-		} else {
 			Redirect(Routes.admin.assignment.markerFeedback(assignment, command.user))
-		}
 	}
 
 	// shouldn't ever be called as a GET - if it is, just redirect back to the submission list
@@ -48,10 +44,16 @@ class MarkingUncompletedController extends CourseworkController {
 		@ModelAttribute("markingUncompletedCommand") form: MarkingUncompletedCommand,
 		errors: Errors
 	) = {
+
+		val previousStageRole = requestInfo
+			.flatMap(_.requestParameters.get("previousStageRole"))
+			.flatMap(_.headOption)
+
 		Mav("admin/assignments/markerfeedback/marking-uncomplete",
 			"assignment" -> assignment,
-			"onlineMarking" -> form.onlineMarking,
-			"marker" -> form.user
+			"formAction" -> Routes.admin.assignment.markerFeedback.uncomplete(assignment, marker, previousStageRole.getOrElse("Marker")),
+			"marker" -> form.user,
+			"previousStageRole" -> previousStageRole
 		).crumbs(
 			Breadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment, marker)), "")
 		)
