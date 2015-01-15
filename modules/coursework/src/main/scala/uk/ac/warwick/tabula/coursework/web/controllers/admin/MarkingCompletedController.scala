@@ -50,7 +50,7 @@ class MarkingCompletedController extends CourseworkController {
 	) = {
 		form.preSubmitValidation()
 
-		val isUserALaterMarker = form.pendingMarkerFeedbacks.exists{ markerFeedback =>
+		val isUserALaterMarker = form.markerFeedback.exists{ markerFeedback =>
 			def checkNextMarkerFeedbackForMarker(thisMarkerFeedback: MarkerFeedback): Boolean = {
 				form.nextMarkerFeedback(thisMarkerFeedback).exists{ mf =>
 					if (mf.getMarkerUsercode.getOrElse("") == user.apparentId)
@@ -62,11 +62,16 @@ class MarkingCompletedController extends CourseworkController {
 			checkNextMarkerFeedbackForMarker(markerFeedback)
 		}
 
+		val nextStageRole = requestInfo
+			.flatMap(_.requestParameters.get("nextStageRole"))
+			.flatMap(_.headOption)
+
 		Mav("admin/assignments/markerfeedback/marking-complete",
 			"assignment" -> assignment,
 			"onlineMarking" -> form.onlineMarking,
 			"marker" -> form.user,
-			"isUserALaterMarker" -> isUserALaterMarker
+			"isUserALaterMarker" -> isUserALaterMarker,
+			"nextStageRole" -> nextStageRole
 		).crumbs(
 			Breadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment, marker)), "")
 		)

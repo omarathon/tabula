@@ -1,4 +1,3 @@
-
 <#if (allCompletedMarkerFeedback?size > 1) && !isCompleted><h2>Finalise feedback</h2></#if>
 <#if command.submission?? && (allCompletedMarkerFeedback?size > 0)>
 	<div class="content">
@@ -9,40 +8,46 @@
 
 
 <#assign isMarking=false />
-<#list allCompletedMarkerFeedback as feedback>
-	<div class="well">
-		<div class="feedback-summary-heading">
-			<h3>
-				<#if isModerated?? && isModerated && feedback.feedbackPosition.toString == "SecondFeedback">
-					Moderation
-				<#else>
-					${feedback.feedbackPosition.description}
-				</#if>
-				(${feedback.markerUser.fullName})
-			</h3>
-		<#if (allCompletedMarkerFeedback?size > 1 && (feedback.hasComments || feedback.hasContent) && !isCompleted)>
-			<div>
-				<a data-feedback="${feedback.feedbackPosition.toString}" class="copyFeedback btn btn-primary"><i class="icon-arrow-down"></i> Copy Feedback Comments</a>
-			</div>
-		</#if>
-		<div style="clear: both;"></div>
-		</div>
-		<#include "_feedback_summary.ftl">
-	</div>
-</#list>
+<#assign widthClass><#if allCompletedMarkerFeedback?size &gt; 1>half-width</#if></#assign>
 
-<#if isModerated?? && !isModerated>
-	<#if secondMarkerNotes??>
-		<div class="well" >
-			<div class="feedback-notes">
-				<h4>Notes from Second Marker</h4>
-			${secondMarkerNotes!""}
+<div class="marker-feedback">
+	<#list allCompletedMarkerFeedback as feedback>
+		<div class="well ${widthClass}">
+			<div class="feedback-summary-heading">
+				<h3>
+					<#if isModerated?? && isModerated && feedback.feedbackPosition.toString == "SecondFeedback">
+						Moderation
+					<#else>
+						${feedback.feedbackPosition.description}
+					</#if>
+				</h3>
+				<h5>${feedback.markerUser.fullName}</h5>
+				<div class="clearfix"></div>
 			</div>
+
+			<#include "_feedback_summary.ftl">
+
+			<#if (allCompletedMarkerFeedback?size > 1 && (feedback.hasComments || feedback.hasContent) && !isCompleted)>
+				<div class="copy-comments">
+					<a data-feedback="${feedback.feedbackPosition.toString}" class="copyFeedback btn btn-small btn-primary"><i class="icon-arrow-down"></i> Copy Comments</a>
+				</div>
+				<div class="clearfix"></div>
+			</#if>
+
+			<#if isModerated?? && !isModerated && secondMarkerNotes?? && feedback.feedbackPosition.toString == "SecondFeedback">
+				<div class="feedback-notes alert-info">
+					<h3>Notes from Second Marker</h3>
+					<p>${secondMarkerNotes!""}</p>
+				</div>
+			</#if>
 		</div>
-	</#if>
-</#if>
+	</#list>
+</div>
 
 <#assign isMarking=true />
 <#if isCurrentUserFeedbackEntry>
-	<#include "online_feedback.ftl">
+	<div class="well">
+		<h3>Final feedback</h3>
+		<#include "online_feedback.ftl">
+	</div>
 </#if>

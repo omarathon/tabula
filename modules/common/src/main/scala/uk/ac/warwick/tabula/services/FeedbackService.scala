@@ -1,21 +1,14 @@
 package uk.ac.warwick.tabula.services
 import scala.collection.JavaConversions._
 
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
-import org.hibernate.criterion.{Projections, Restrictions, Order}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
-import javax.persistence.Entity
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 
@@ -28,11 +21,11 @@ trait FeedbackService {
 	def saveOrUpdate(feedback: Feedback)
 	def delete(feedback: Feedback)
 	def save(feedback: MarkerFeedback)
+	def delete(feedback: MarkerFeedback)
 }
 
 @Service(value = "feedbackService")
 class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
-	import Restrictions._
 
 	@Autowired var userLookup: UserLookupService = _
 	@Autowired var dao: FeedbackDao = _
@@ -74,9 +67,20 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 		session.saveOrUpdate(feedback)
 	}
 
-
 	def save(feedback: MarkerFeedback) = transactional() {
 		dao.save(feedback)
+	}
+
+	def delete(markerFeedback: MarkerFeedback) = transactional() {
+
+		// remove link to parent
+		val parentFeedback = markerFeedback.feedback
+		if (markerFeedback == parentFeedback.firstMarkerFeedback) parentFeedback.firstMarkerFeedback = null
+		else if (markerFeedback == parentFeedback.secondMarkerFeedback) parentFeedback.secondMarkerFeedback = null
+		else if (markerFeedback == parentFeedback.thirdMarkerFeedback) parentFeedback.thirdMarkerFeedback = null
+		saveOrUpdate(parentFeedback)
+
+		dao.delete(markerFeedback)
 	}
 
 }

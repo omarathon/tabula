@@ -47,6 +47,7 @@ object Routes {
 				}
 				object uncomplete {
 					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/marking-uncompleted"
+					def apply(assignment: Assignment, marker: User, previousRole: String) = markerroot(assignment, marker) + "/marking-uncompleted?previousStageRole="+previousRole
 				}
 				object marksTemplate {
 					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/marks-template"
@@ -86,7 +87,13 @@ object Routes {
 						def apply(assignment: Assignment, marker: User, markerFeedback: String, filename: String) = markerroot(assignment, marker) + s"/feedback/download/$markerFeedback/attachment/$filename"
 					}
 				}
+				object returnsubmissions {
+					def apply(assignment: Assignment) = assignmentroot(assignment) + "/submissionsandfeedback/return-submissions"
+				}
+			}
 
+			object feedbackAdjustment {
+				def apply(assignment: Assignment, student: User) = assignmentroot(assignment) + "/feedback/adjustments"
 			}
 
 			object onlineFeedback {

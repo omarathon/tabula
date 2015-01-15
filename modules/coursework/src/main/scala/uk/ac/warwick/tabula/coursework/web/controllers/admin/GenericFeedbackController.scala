@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestMapping, PathVariable, ModelAttribute}
+import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.coursework.commands.feedback.GenericFeedbackCommand
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
@@ -18,16 +19,26 @@ class GenericFeedbackController extends CourseworkController {
 		GenericFeedbackCommand(module, assignment)
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(@ModelAttribute("command") command: GenericFeedbackCommand, errors: Errors): Mav = {
+	def showForm(@PathVariable assignment: Assignment,
+							 @ModelAttribute("command") command: GenericFeedbackCommand,
+							 errors: Errors): Mav = {
 
 		Mav("admin/assignments/feedback/generic_feedback",
-			"command" -> command).noLayout()
+			"command" -> command, "ajax" -> ajax).noLayoutIf(ajax).crumbs(
+				Breadcrumbs.Department(assignment.module.adminDepartment),
+				Breadcrumbs.Module(assignment.module)
+			)
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("command") @Valid command: GenericFeedbackCommand, errors: Errors): Mav = {
+	def submit(@PathVariable assignment: Assignment,
+						 @ModelAttribute("command") @Valid command: GenericFeedbackCommand,
+						 errors: Errors): Mav = {
 		command.apply()
-		Mav("ajax_success").noLayout()
+		if(ajax)
+			Mav("ajax_success")
+		else
+			Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
 	}
 
 }

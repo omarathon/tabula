@@ -4,6 +4,10 @@
 <div class="form onlineFeedback">
 
 	<#assign submit_url><@routes.genericfeedback assignment /></#assign>
+	<#if !ajax>
+		<h1>Generic feedback</h1>
+		<h4><span class="muted">for</span> ${assignment.name}</h4>
+	</#if>
 
 	<@f.form cssClass="form-horizontal" method="post" commandName="command" action="${submit_url}">
 		<div>
@@ -14,7 +18,7 @@
 		</div>
 		<div class="submit-buttons">
 			<input class="before-save btn btn-primary" type="submit" value="Save">
-			<a class="before-save btn discard-changes" href="">Discard</a>
+			<a class="before-save btn discard-changes" href="">Cancel</a>
 			<a class="saving btn btn-primary disabled" style="display:none" onclick="return false;" href="">
 				<i class="icon-spinner icon-spin"></i> Saving
 			</a>

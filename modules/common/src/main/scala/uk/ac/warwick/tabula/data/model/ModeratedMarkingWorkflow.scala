@@ -34,4 +34,6 @@ class ModeratedMarkingWorkflow extends MarkingWorkflow with NoThirdMarker with A
 	def hasSecondMarker = true
 	def secondMarkerRoleName = Some("Moderator")
 	def secondMarkerVerb = Some("moderate")
+
+	override def getStudentsPrimaryMarker(assignment: Assignment, universityId: String) = getStudentsSecondMarker(assignment, universityId)
 }
