@@ -15,13 +15,16 @@ import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarise
 class AssignmentServiceTest extends PersistenceTestBase with Mockito {
 
 	val thisAssignmentDao = new AssignmentDaoImpl
-	val thisFirstMarkerHelper = smartMock[UserGroupMembershipHelper[Assignment]]
-	val thisSecondMarkerHelper = smartMock[UserGroupMembershipHelper[Assignment]]
+	val thisFirstMarkerHelper = smartMock[UserGroupMembershipHelper[MarkingWorkflow]]
+	val thisSecondMarkerHelper = smartMock[UserGroupMembershipHelper[MarkingWorkflow]]
+	val thisMarkingWorkflowService = smartMock[MarkingWorkflowService]
 
-	val assignmentService = new AbstractAssignmentService with AssignmentDaoComponent with AssignmentServiceUserGroupHelpers {
+	val assignmentService = new AbstractAssignmentService with AssignmentDaoComponent
+		with AssignmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent {
 		val assignmentDao = thisAssignmentDao
 		val firstMarkerHelper = thisFirstMarkerHelper
 		val secondMarkerHelper = thisSecondMarkerHelper
+		val markingWorkflowService = thisMarkingWorkflowService
 	}
 	val assignmentMembershipService = new AssignmentMembershipServiceImpl
 	val feedbackService = new FeedbackServiceImpl

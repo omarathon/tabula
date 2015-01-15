@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.web.Routes
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="MarkingMethod", discriminatorType = DiscriminatorType.STRING, length=255)
 @AccessType("field")
-abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
+abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with Serializable {
 
 	type Usercode = String
 	type UniversityId = String

@@ -56,7 +56,7 @@ trait AssignmentService {
 }
 
 abstract class AbstractAssignmentService extends AssignmentService {
-	self: AssignmentDaoComponent with AssignmentServiceUserGroupHelpers =>
+	self: AssignmentDaoComponent with AssignmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent =>
 
 	def getAssignmentById(id: String): Option[Assignment] = assignmentDao.getAssignmentById(id)
 	def save(assignment: Assignment): Unit = assignmentDao.save(assignment)
@@ -86,6 +86,7 @@ abstract class AbstractAssignmentService extends AssignmentService {
 	def getAssignmentWhereMarker(user: User): Seq[Assignment] = {
 		(firstMarkerHelper.findBy(user) ++ secondMarkerHelper.findBy(user))
 			.distinct
+			.flatMap(markingWorkflowService.getAssignmentsUsingMarkingWorkflow)
 			.filterNot { a => a.deleted || a.archived }
 	}
 
@@ -121,18 +122,19 @@ abstract class AbstractAssignmentService extends AssignmentService {
 }
 
 trait AssignmentServiceUserGroupHelpers {
-	val firstMarkerHelper: UserGroupMembershipHelper[Assignment]
-	val secondMarkerHelper: UserGroupMembershipHelper[Assignment]
+	val firstMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow]
+	val secondMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow]
 }
 
 trait AssignmentServiceUserGroupHelpersImpl extends AssignmentServiceUserGroupHelpers {
-	val firstMarkerHelper = new UserGroupMembershipHelper[Assignment]("markingWorkflow._firstMarkers")
-	val secondMarkerHelper = new UserGroupMembershipHelper[Assignment]("markingWorkflow._secondMarkers")
+	val firstMarkerHelper = new UserGroupMembershipHelper[MarkingWorkflow]("_firstMarkers")
+	val secondMarkerHelper = new UserGroupMembershipHelper[MarkingWorkflow]("_secondMarkers")
 }
 
 @Service(value = "assignmentService")
 class AssignmentServiceImpl
 	extends AbstractAssignmentService
 	with AutowiringAssignmentDaoComponent
+	with AutowiringMarkingWorkflowServiceComponent
 	with AssignmentServiceUserGroupHelpersImpl
 
