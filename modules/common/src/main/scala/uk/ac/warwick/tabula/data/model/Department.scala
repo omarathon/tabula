@@ -122,6 +122,7 @@ class Department extends GeneratedId
 	def canUploadMarksToSitsForYear(year: AcademicYear, module: Module): Boolean = {
 		if (module.degreeType != DegreeType.Undergraduate && module.degreeType != DegreeType.Postgraduate) {
 			logger.warn(s"Can't upload marks for module $module since degreeType ${module.degreeType} can't be identified as UG or PG")
+			return false
 		}
 		canUploadMarksToSitsForYear(year, module.degreeType)
 	}

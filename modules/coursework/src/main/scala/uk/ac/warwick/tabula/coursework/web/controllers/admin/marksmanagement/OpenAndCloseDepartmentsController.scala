@@ -27,7 +27,7 @@ class OpenAndCloseDepartmentsController extends BaseController {
 	def submit(@ModelAttribute("command") cmd: OpenAndCloseDepartmentsCommand): Mav = {
 		val degreeTypeUpdated: DegreeType = cmd.apply()
 		val mav = Mav("admin/marksmanagement/open_close_departments")
-		if (DegreeType.Undergraduate == degreeTypeUpdated) {
+		if (degreeTypeUpdated == DegreeType.Undergraduate) {
 			mav.addObjects("undergraduateUpdated" -> true)
 		}	else {
 			mav.addObjects("postgraduateUpdated" -> true)

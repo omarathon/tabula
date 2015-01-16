@@ -32,21 +32,19 @@ class OpenAndCloseDepartmentsCommandInternal extends CommandInternal[DegreeType]
 	self: OpenAndCloseDepartmentsCommandState with ModuleAndDepartmentServiceComponent =>
 
 	def applyInternal() = {
-		var degreeType: DegreeType = DegreeType.Postgraduate
-
 		if (updatePostgrads){
-			updateDepartments(pgMappings, degreeType)
+			updateDepartments(pgMappings, DegreeType.Postgraduate)
+			DegreeType.Postgraduate
 		} else {
-			degreeType = DegreeType.Undergraduate
-			updateDepartments(ugMappings, degreeType)
+			updateDepartments(ugMappings, DegreeType.Undergraduate)
+			DegreeType.Undergraduate
 		}
-		degreeType
 	}
 
 	private def updateDepartments(mapping: JMap[String, String], degreeType: DegreeType ) {
 		mapping.asScala.foreach {
 			case (key, value) => {
-				val dept: Department = moduleAndDepartmentService.getDepartmentByCode(key).getOrElse(throw new NoSuchElementException)
+				val dept: Department = moduleAndDepartmentService.getDepartmentByCode(key).get
 				dept.setUploadMarksToSitsForYear(currentAcademicYear, degreeType, thisYearOpen(value))
 				dept.setUploadMarksToSitsForYear(previousAcademicYear, degreeType, lastYearOpen(value))
 			}
@@ -82,7 +80,7 @@ trait OpenAndCloseDepartmentsCommandState {
 	self: TermServiceComponent with ModuleAndDepartmentServiceComponent =>
 
 	lazy val currentAcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now, termService)
-	lazy val previousAcademicYear = currentAcademicYear.-(1)
+	lazy val previousAcademicYear = currentAcademicYear.previous
 
 	lazy val departments: Seq[Department] = moduleAndDepartmentService.allRootDepartments
 	var ugMappings: JMap[String, String] = JHashMap()
