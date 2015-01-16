@@ -65,15 +65,17 @@
 	</#list>
 </#macro>
 
-<#macro workflowActions nextRoleName previousRoleName>
+<#macro workflowActions nextRoleName previousRoleName currentRoleName>
 <div class="btn-group">
-	<a class="use-tooltip form-post btn"
-	   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point."
-	   data-container="body"
-	   href="<@routes.markingCompleted assignment marker nextRoleName/>"
-	   id="marking-complete-button">
-		<i class="text-success icon-arrow-right"></i> Send to ${nextRoleName}
-	</a>
+	<#if currentRoleName != 'Moderator'>
+		<a class="use-tooltip form-post btn"
+		   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point."
+		   data-container="body"
+		   href="<@routes.markingCompleted assignment marker nextRoleName/>"
+		   id="marking-complete-button">
+			<i class="text-success icon-arrow-right"></i> Send to ${nextRoleName}
+		</a>
+	</#if>
 
 	<#if previousRoleName?has_content>
 		<a class="use-tooltip form-post btn"
@@ -161,7 +163,7 @@
 		<#list markerFeedback as stage>
 			<div class="well">
 				<h3>${stage.roleName}</h3>
-				<@workflowActions stage.nextRoleName stage.previousRoleName!"" />
+				<@workflowActions stage.nextRoleName stage.previousRoleName!"" stage.roleName!""/>
 				<table class="table
 							  table-bordered
 							  table-striped
