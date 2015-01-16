@@ -4,7 +4,6 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.web.Mav
-import javax.validation.Valid
 import uk.ac.warwick.tabula.coursework.commands.marksmanagement.OpenAndCloseDepartmentsCommand
 import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable}
 import uk.ac.warwick.tabula.data.model.DegreeType
@@ -25,7 +24,7 @@ class OpenAndCloseDepartmentsController extends BaseController {
 	}
 
 	@RequestMapping(method=Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: OpenAndCloseDepartmentsCommand): Mav = {
+	def submit(@ModelAttribute("command") cmd: OpenAndCloseDepartmentsCommand): Mav = {
 		val degreeTypeUpdated: DegreeType = cmd.apply()
 		val mav = Mav("admin/marksmanagement/open_close_departments")
 		if (DegreeType.Undergraduate == degreeTypeUpdated) {
