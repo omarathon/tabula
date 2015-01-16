@@ -1,107 +1,90 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/submission_components.ftl" as components />
 
-<#macro listMarkerFeedback items>
+<#function markingId user>
+	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>
+		<#return user.userId />
+	<#else>
+		<#return user.warwickId />
+	</#if>
+</#function>
+
+<#macro listMarkerFeedback items nextRoleName>
 	<#list items as item>
-		<tr>
-			<td>
-				<@form.selector_check_row "students" item.student.warwickId! />
+
+		<#assign u = item.student />
+		<#local thisFeedback = item.feedbacks?last />
+		<#local nextMarkerAction>Send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if></#local>
+
+		<tr class="item-container" data-contentid="${markingId(u)}" data-markingurl="${onlineMarkingUrls[u.userId]}" data-nextmarkeraction="${nextMarkerAction}">
+			<td class="check-col">
+				<@form.selector_check_row "markerFeedback" thisFeedback.id />
 			</td>
-			<td>
-				<#if assignment.module.department.showStudentName>
-					${item.student.fullName} <@pl.profile_link item.student.warwickId! />
-				<#else>
-					${item.student.warwickId!}
+
+			<#if assignment.module.department.showStudentName>
+				<td class="student-col toggle-cell"><h6 class="toggle-icon">${item.student.firstName}</h6></td>
+				<td class="student-col toggle-cell"><h6>${item.student.lastName} <@pl.profile_link item.student.warwickId! /></h6></td>
+				<#assign toggleIcon = "" />
+			<#else>
+				<#assign toggleIcon = "toggle-icon" />
+			</#if>
+			<td class="student-col toggle-cell"><h6 class="${toggleIcon}">${item.student.warwickId!}</h6></td>
+
+			<td class="status-col toggle-cell content-cell">
+				<dl style="margin: 0; border-bottom: 0;">
+					<dt>
+						<#if thisFeedback.state.toString == "ReleasedForMarking">
+							<span class="label label-warning">Ready for marking</span>
+						<#elseif thisFeedback.state.toString == "InProgress">
+							<span class="label label-info">In Progress</span>
+						<#elseif thisFeedback.state.toString == "MarkingCompleted">
+							<span class="label label-success">Marking completed</span>
+						<#elseif thisFeedback.state.toString == "Rejected">
+							<span class="label label-important">Rejected</span>
+						</#if>
+					</dt>
+					<dd style="display: none;" class="table-content-container" data-contentid="${markingId(u)}">
+						<div id="content-${markingId(u)}" class="content-container" data-contentid="${markingId(u)}">
+							<p>No data is currently available. Please check that you are signed in.</p>
+						</div>
+					</dd>
+				</dl>
+			</td>
+			<td class="action-col toggle-cell">
+				<#if thisFeedback.state.toString == "ReleasedForMarking">
+					Submission needs marking
+				<#elseif thisFeedback.state.toString == "InProgress">
+					${nextMarkerAction}
+				<#elseif thisFeedback.state.toString == "Rejected">
+					Review feedback and re-send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if>
+				<#elseif thisFeedback.state.toString == "MarkingCompleted">
+					No action required<#if item.nextMarker?has_content> - Sent to ${item.nextMarker.fullName}</#if>
 				</#if>
 			</td>
-			<td>
-				<@fmt.date date=item.submission.submittedDate seconds=true capitalise=true />
-			</td>
-			<#if hasOriginalityReport && item.submission?? && item.submission.hasOriginalityReport>
-				<td>
-					<#list item.submission.allAttachments as attachment>
-						<!-- Checking originality report for ${attachment.name} ... -->
-						<#if attachment.originalityReport??>
-							<@components.originalityReport attachment />
-						</#if>
-					</#list>
-				</td>
-			</#if>
-
-			<#if hasSecondMarkerFeedback || hasFirstMarkerFeedback>
-				<#local lastIndex = item.feedbacks?size - 1 />
-				<td>
-					<#list item.feedbacks as feedback>
-						<#if feedback_index < lastIndex>
-							${feedback.mark!''}<#if feedback_index < lastIndex - 1><br/></#if>
-						</#if>
-					</#list>
-				</td>
-
-				<td>
-					<#list item.feedbacks as feedback>
-						<#if feedback_index < lastIndex>
-							${feedback.grade!''}<#if feedback_index < lastIndex - 1><br/></#if>
-						</#if>
-					</#list>
-				</td>
-				<td>
-					<#list item.feedbacks as feedback>
-						<#if feedback_index < lastIndex>
-							<#local attachments=feedback.attachments />
-							<#if attachments?size gt 0>
-								<a class="btn long-running" href="<@routes.downloadMarkerFeedback assignment feedback marker />">
-								<a class="btn long-running" href="<@routes.downloadMarkerFeedback assignment feedback marker />">
-									<i class="icon-download"></i>
-									${attachments?size}
-									<#if attachments?size == 1> file<#else> files</#if>
-								</a>
-								<#if feedback_index < lastIndex - 1><br/></#if>
-							</#if>
-						</#if>
-					</#list>
-				</td>
-			</#if>
-
-			<#if (item.feedbacks?size > 0)>
-				<#local thisFeedback = item.feedbacks?last />
-				<td>
-					${thisFeedback.mark!''}
-				</td>
-				<td>
-					${thisFeedback.grade!''}
-				</td>
-				<td>
-					<#local attachments=thisFeedback.attachments />
-					<#if attachments?size gt 0>
-						<a class="btn long-running" href="<@routes.downloadMarkerFeedback assignment thisFeedback marker />">
-							<i class="icon-download"></i>
-							${attachments?size}
-							<#if attachments?size == 1> file<#else> files</#if>
-						</a>
-					</#if>
-				</td>
-
-				<td>
-					<#if thisFeedback.state.toString == "ReleasedForMarking">
-						<span class="label label-warning">Ready for marking</span>
-					<#elseif thisFeedback.state.toString == "InProgress">
-						<span class="label label-info">In Progress</span>
-					<#elseif thisFeedback.state.toString == "MarkingCompleted">
-						<span class="label label-success">Marking completed</span>
-					<#elseif thisFeedback.state.toString == "Rejected">
-						<span class="label label-important">Rejected</span>
-					</#if>
-				</td>
-
-			<#else>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-			</#if>
 		</tr>
 	</#list>
+</#macro>
+
+<#macro workflowActions nextRoleName previousRoleName>
+<div class="btn-group">
+	<a class="use-tooltip form-post btn"
+	   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point."
+	   data-container="body"
+	   href="<@routes.markingCompleted assignment marker nextRoleName/>"
+	   id="marking-complete-button">
+		<i class="text-success icon-arrow-right"></i> Send to ${nextRoleName}
+	</a>
+
+	<#if previousRoleName?has_content>
+		<a class="use-tooltip form-post btn"
+		   title="Return marks and feedback to the previous marker. All changes you have made will be discarded. Note that this can only be done if feedback has not been released for this student."
+		   data-container="body"
+		   href="<@routes.markingUncompleted assignment marker previousRoleName />"
+		   id="marking-uncomplete-button">
+			<i class="text-error icon-arrow-left"></i> Return to ${previousRoleName}
+		</a>
+	</#if>
+</div>
 </#macro>
 
 <#escape x as x?html>
@@ -110,10 +93,7 @@
 
 	<div id="profile-modal" class="modal fade profile-subset"></div>
 
-	<p>You are the <#if hasSecondMarkerFeedback>${thirdMarkerRoleName}<#elseif hasFirstMarkerFeedback>${secondMarkerRoleName}<#else>${firstMarkerRoleName}</#if> for the following submissions</p>
-
 	<div class="btn-toolbar">
-		<#assign feedbackToDoCount = inProgressFeedback?size + rejectedFeedback?size />
 		<#assign disabledClass><#if feedbackToDoCount == 0>disabled</#if></#assign>
 		<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 			<a class="btn use-tooltip"
@@ -125,117 +105,104 @@
 			</a>
 
 		</#if>
-		<a class="btn use-tooltip ${disabledClass}"
-		   title="Download a zip of submissions due to be marked. Note that submissions with a status of 'Marking completed' will not be included in this zip"
-		   href="<@routes.downloadmarkersubmissions assignment=assignment marker=marker />"
-		   data-container="body"
-		>
-			<i class="icon-download"></i> Download submissions (${feedbackToDoCount})
-		</a>
-		<#if hasFirstMarkerFeedback && hasSecondMarkerFeedback>
-			<div class="btn-group">
-				<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-					<i class="icon-download"></i> Download feedback
-					<span class="caret"></span>
-				</a>
-				<ul class="dropdown-menu">
+
+		<div class="btn-group">
+			<a class="btn dropdown-toggle"
+		   		data-toggle="dropdown"
+		   		href="#">
+				<i class="icon-download"></i> Download
+				<span class="caret"></span>
+			</a>
+			<ul class="dropdown-menu">
+				<li>
+					<a class="use-tooltip"
+					   title="Download a zip of submissions due to be marked. Note that submissions with a status of 'Marking completed' will not be included in this zip"
+					   href="<@routes.downloadmarkersubmissions assignment=assignment marker=marker />"
+					   data-container="body">
+						<i class="icon-download"></i> Download submissions
+					</a>
+				</li>
+				<#if hasFirstMarkerFeedback>
 					<li>
 						<a href="<@routes.downloadfirstmarkerfeedback assignment=assignment marker=marker />">
 							<i class="icon-download"></i> Download ${firstMarkerRoleName} feedback
 						</a>
 					</li>
+				</#if>
+				<#if hasSecondMarkerFeedback>
 					<li>
 						<a href="<@routes.downloadsecondmarkerfeedback assignment=assignment  marker=marker />">
 							<i class="icon-download"></i> Download ${secondMarkerRoleName} feedback
 						</a>
 					</li>
-				</ul>
-			</div>
-		<#elseif hasFirstMarkerFeedback>
-			<a class="btn" href="<@routes.downloadfirstmarkerfeedback assignment=assignment marker=marker />">
-				<i class="icon-download"></i> Download ${firstMarkerRoleName} feedback
-			</a>
-		</#if>
+				</#if>
+			</ul>
+		</div>
 		<div class="btn-group">
-			<a class="btn dropdown-toggle ${disabledClass}" data-toggle="dropdown" href="#">
-				<i class="icon-upload"></i> Upload feedback
+			<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+				<i class="icon-upload"></i> Upload
 				<span class="caret"></span>
 			</a>
 			<ul class="dropdown-menu">
 				<li>
-					<a class="${disabledClass}" href="<@routes.uploadmarkerfeedback assignment=assignment marker=marker/>">
+					<a class="" href="<@routes.uploadmarkerfeedback assignment=assignment marker=marker/>">
 						<i class="icon-upload"></i> Upload attachments
 					</a>
 				</li>
 				<li>
 					<a class="${disabledClass}" href="<@routes.markeraddmarks assignment=assignment marker=marker/>">
-						<i class="icon-plus"></i> Add marks
+						<i class="icon-plus"></i> Upload Marks
 					</a>
 				</li>
 			</ul>
 		</div>
-		<a class="btn ${disabledClass}" href="<@routes.markerOnlinefeedback assignment marker />">
-			<i class="icon-edit"></i> Online feedback
-		</a>
-		<div class="btn-group">
-			<a id="modify-selected" class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-				Update selected
-				<span class="caret"></span>
-			</a>
-			<ul class="dropdown-menu">
-				<li>
-					<a class="use-tooltip form-post"
-					   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point."
-					   data-container="body"
-					   href="<@routes.markingCompleted assignment marker />"
-					   id="marking-complete-button">
-						<i class="icon-ok"></i> Marking completed
-					</a>
-				</li>
-				<#-- TAB-2957 <li>
-					<a class="use-tooltip form-post"
-					   title="Unfinalise marks and feedback. Note that this can only be done if feedback has not been released for this student."
-					   data-container="body"
-					   href="<@routes.markingUncompleted assignment marker />"
-					   id="marking-uncomplete-button">
-						<i class="icon-remove"></i> Marking uncompleted
-					</a>
-				</li> -->
-			</ul>
-		</div>
 	</div>
-	<div class="submission-feedback-list">
-		<table class="table table-bordered table-striped">
-			<thead><tr>
-				<th>
-					<div class="clearfix">
-						<@form.selector_check_all />
-					</div>
-				</th>
-				<th>Student</th>
-				<th>Date submitted</th>
-				<#if hasOriginalityReport>
-					<th>Plagiarism report</th>
-				</#if>
-				<#if hasSecondMarkerFeedback>
-					<th>Other marks</th>
-					<th>Other grades</th>
-					<th>Other feedback</th>
-				<#elseif hasFirstMarkerFeedback>
-					<th>First mark</th>
-					<th>First grade</th>
-					<th>First feedback</th>
-				</#if>
-				<th>Mark</th>
-				<th>Grade</th>
-				<th>Feedback files</th>
-				<th>Status</th>
-			</tr></thead>
-			<tbody>
-				<@listMarkerFeedback inProgressFeedback/>
-				<@listMarkerFeedback completedFeedback />
-				<@listMarkerFeedback rejectedFeedback />
-			</tbody>
-		</table>
-	</div>
+	<#if markerFeedback?has_content>
+		<#list markerFeedback as stage>
+			<div class="well">
+				<h3>${stage.roleName}</h3>
+				<@workflowActions stage.nextRoleName stage.previousRoleName!"" />
+				<table class="table
+							  table-bordered
+							  table-striped
+							  tabula-greenLight
+							  sticky-table-headers
+							  expanding-table
+							  tablesorter
+							  marker-feedback-table">
+					<thead><tr>
+						<th class="check-col no-sort">
+							<@form.selector_check_all />
+						</th>
+						<#if assignment.module.department.showStudentName>
+							<th class="student-col">First name</th>
+							<th class="student-col">Last name</th>
+						</#if>
+						<th class="student-col">University ID</th>
+						<th class="status-col">Status</th>
+						<th class="status-col">Next action</th>
+					</tr></thead>
+					<tbody>
+						<@listMarkerFeedback stage.feedbackItems stage.nextRoleName />
+					</tbody>
+				</table>
+			</div>
+		</#list>
+		<script type="text/javascript">
+			(function($) {
+				var tsOptions = {
+					sortList: [<#if assignment.module.department.showStudentName>[3, 0], </#if>[2, 0], [1,0]],
+					headers: { 0: { sorter: false} }
+				};
+
+				$('.expanding-table').expandingTable({
+					contentUrlFunction: function($row){ return $row.data('markingurl'); },
+					useIframe: true,
+					tableSorterOptions: tsOptions
+				});
+			})(jQuery);
+		</script>
+	<#else>
+		<p>There are no submissions for you to mark</p>
+	</#if>
 </#escape>

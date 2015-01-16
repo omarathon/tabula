@@ -88,7 +88,7 @@ class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] wi
 	def assignment = item.entity
 
 	def recipients = {
-		if (!assignment.collectSubmissions || assignment.openEnded) Nil
+		if (!assignment.collectSubmissions || assignment.openEnded || assignment.archived) Nil
 		else {
 			val submissions = assignment.submissions.asScala
 			val extensions = assignment.extensions.asScala.filter(_.approved) // TAB-2303
@@ -114,7 +114,7 @@ class SubmissionDueWithExtensionNotification extends Notification[Extension, Uni
 	def recipients = {
 		val hasSubmitted = assignment.submissions.asScala.exists(_.universityId == extension.universityId)
 
-		if (hasSubmitted || !assignment.collectSubmissions || assignment.openEnded) {
+		if (hasSubmitted || !assignment.collectSubmissions || assignment.openEnded || assignment.archived) {
 			Nil
 		} else {
 			Seq(userLookup.getUserByWarwickUniId(extension.universityId))

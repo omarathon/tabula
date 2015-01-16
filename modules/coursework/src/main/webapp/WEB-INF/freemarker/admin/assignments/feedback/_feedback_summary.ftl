@@ -29,22 +29,18 @@
 		<#else>
 			<#list feedback.customFormValues as formValue>
 				<#if formValue.value?has_content>
-			<div class="feedback-comments" style="clear: left;">
-					<h5>Feedback Comments</h5>
+					<div class="feedback-comments">
+						<h5>Feedback Comments</h5>
+						<p>${formValue.value!""}</p>
+					</div>
 				<#else>
-			<div>
+					<h5>No feedback comments added.</h5>
 				</#if>
-				${formValue.value!"<h5>No feedback comments added.</h5>"}
 			</#list>
-			</div>
 		</#if>
 	</div>
 
-
-
-
-
-		<#if feedback.attachments?has_content >
+	<#if feedback.attachments?has_content >
 		<div class="feedback-attachments attachments">
 			<h5>Attachments</h5>
 			<div>
@@ -55,9 +51,7 @@
 				</#list>
 			</div>
 		</div>
-		</#if>
-
-
+	</#if>
 
 	<div style="clear: both;"></div>
 

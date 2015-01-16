@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 	def createCommand(user: CurrentUser) = ProfilesHomeCommand(user, optionalCurrentMember)
 
 	@RequestMapping(Array("/")) def home(@ModelAttribute("command") cmd: Appliable[ProfilesHomeInformation]) = {
-		if (optionalCurrentMember.filter(_.userType == Student).isDefined) {
+		if (!user.isPGR && optionalCurrentMember.filter(_.userType == Student).isDefined) {
 			Redirect(Routes.profile.view(currentMember))
 		} else {
 			val info = cmd.apply()

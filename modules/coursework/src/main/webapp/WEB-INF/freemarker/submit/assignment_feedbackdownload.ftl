@@ -11,8 +11,16 @@
 
 <#if feedback.hasMarkOrGrade>
 	<div class="mark-and-grade">
-		<#if feedback.actualMark??><h3>Mark: ${feedback.actualMark}</h3></#if>
-		<#if feedback.actualGrade??><h3>Grade: ${feedback.actualGrade}</h3></#if>
+		<#if feedback.adjustedMark??>
+			<h3>Mark: ${feedback.adjustedMark}</h3>
+		<#elseif feedback.actualMark??>
+			<h3>Mark: ${feedback.actualMark}</h3>
+		</#if>
+		<#if feedback.adjustedGrade??>
+			<h3>Grade: ${feedback.adjustedGrade}</h3>
+		<#elseif feedback.actualGrade??>
+			<h3>Grade: ${feedback.actualGrade}</h3>
+		</#if>
 	</div>
 </#if>
 

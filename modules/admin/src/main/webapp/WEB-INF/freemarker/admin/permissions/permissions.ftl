@@ -45,7 +45,14 @@
 				</#if>
 			</div>
 			<br>
-			<div class="pull-right"><a href="<@routes.roles />"><strong>About roles</strong></a></div>
+			<div class="pull-right">
+				<#if target.urlCategory == 'department'>
+					<a href="<@routes.permissionstree target />"><strong>Permissions tree</strong></a><br>
+					<a href="<@routes.rolesDepartment target />"><strong>About roles</strong></a>
+				<#else>
+					<a href="<@routes.roles />"><strong>About roles</strong></a>
+				</#if>
+			</div>
 		</div>
 	</#if>
 
