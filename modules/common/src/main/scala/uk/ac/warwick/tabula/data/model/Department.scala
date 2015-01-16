@@ -120,11 +120,18 @@ class Department extends GeneratedId
 	def studentsCanScheduleMeetings_=(canDo: Boolean) { settings += (Settings.StudentsCanScheduleMeetings -> canDo) }
 
 	def canUploadMarksToSitsForYear(year: AcademicYear, module: Module): Boolean = {
-		val markUploadMap: Option[Map[String, String]] = module.degreeType match {
+		if (module.degreeType != DegreeType.Undergraduate && module.degreeType != DegreeType.Postgraduate) {
+			logger.warn(s"Can't upload marks for module $module since degreeType ${module.degreeType} can't be identified as UG or PG")
+		}
+		canUploadMarksToSitsForYear(year, module.degreeType)
+	}
+
+	def canUploadMarksToSitsForYear(year: AcademicYear, degreeType: DegreeType): Boolean = {
+		val markUploadMap: Option[Map[String, String]] = degreeType match {
 			case DegreeType.Undergraduate => getStringMapSetting(Settings.CanUploadMarksToSitsForYearUg)
 			case DegreeType.Postgraduate => getStringMapSetting(Settings.CanUploadMarksToSitsForYearPg)
 			case _ => {
-				logger.warn(s"Can't upload marks for module $module since degreeType ${module.degreeType} can't be identified as UG or PG")
+				logger.warn(s"Can't upload marks for degree type $degreeType since it can't be identified as UG or PG")
 				return false
 			}
 		}

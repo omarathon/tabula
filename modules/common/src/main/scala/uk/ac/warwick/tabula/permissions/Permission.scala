@@ -155,6 +155,7 @@ object Permissions {
 		case object ManageNotificationSettings extends Permission("Manage notification settings")
 		case object DownloadFeedbackReport extends Permission("Generate a feedback report")
 		case object ManageProfiles extends Permission("Manage student profiles")
+
 		case object Manage extends Permission("Manage sub-departments")
 		case object Reports extends Permission("Generate reports")
 	}
@@ -212,6 +213,8 @@ object Permissions {
 	}
 
 	object Marks {
+		case object MarksManagement extends ScopelessPermission("Marks management across all departments")
+
 		case object DownloadTemplate extends Permission("Download a marks template for all marks")
 		case object DownloadOwnTemplate extends Permission("Download a marks template for own marks")
 
