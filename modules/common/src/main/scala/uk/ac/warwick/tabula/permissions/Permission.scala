@@ -155,7 +155,6 @@ object Permissions {
 		case object ManageNotificationSettings extends Permission("Manage notification settings")
 		case object DownloadFeedbackReport extends Permission("Generate a feedback report")
 		case object ManageProfiles extends Permission("Manage student profiles")
-
 		case object Manage extends Permission("Manage sub-departments")
 		case object Reports extends Permission("Generate reports")
 	}

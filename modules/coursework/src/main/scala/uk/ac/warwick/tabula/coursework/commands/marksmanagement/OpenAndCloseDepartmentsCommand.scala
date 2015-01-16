@@ -33,26 +33,29 @@ class OpenAndCloseDepartmentsCommandInternal extends CommandInternal[DegreeType]
 
 	def applyInternal() = {
 		var degreeType: DegreeType = DegreeType.Postgraduate
+
 		if (updatePostgrads){
-			pgMappings.asScala.foreach {
-				case(key, value) => {
-					val dept: Department = moduleAndDepartmentService.getDepartmentByCode(key).getOrElse(throw new NoSuchElementException)
-					dept.setUploadMarksToSitsForYear(previousAcademicYear, DegreeType.Postgraduate,	value == DepartmentStateThisYearAndLastYear.value)
-					dept.setUploadMarksToSitsForYear(currentAcademicYear, DegreeType.Postgraduate, value != DepartmentStateClosed.value)
-				}
-			}
+			updateDepartments(pgMappings, degreeType)
 		} else {
 			degreeType = DegreeType.Undergraduate
-			ugMappings.asScala.foreach {
-				case(key, value) => {
-					val dept: Department = moduleAndDepartmentService.getDepartmentByCode(key).getOrElse(throw new NoSuchElementException)
-					dept.setUploadMarksToSitsForYear(previousAcademicYear, degreeType, value == DepartmentStateThisYearAndLastYear.value)
-					dept.setUploadMarksToSitsForYear(currentAcademicYear, degreeType, value != DepartmentStateClosed.value)
-				}
-			}
+			updateDepartments(ugMappings, degreeType)
 		}
 		degreeType
 	}
+
+	private def updateDepartments(mapping: JMap[String, String], degreeType: DegreeType ) {
+		mapping.asScala.foreach {
+			case (key, value) => {
+				val dept: Department = moduleAndDepartmentService.getDepartmentByCode(key).getOrElse(throw new NoSuchElementException)
+				dept.setUploadMarksToSitsForYear(currentAcademicYear, degreeType, thisYearOpen(value))
+				dept.setUploadMarksToSitsForYear(previousAcademicYear, degreeType, lastYearOpen(value))
+			}
+		}
+	}
+
+	private def thisYearOpen(deptStateValue: String) = deptStateValue != DepartmentStateClosed.value
+	private def lastYearOpen(deptStateValue: String) = deptStateValue !=  DepartmentStateClosed.value
+
 }
 
 trait OpenAndCloseDepartmentsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
