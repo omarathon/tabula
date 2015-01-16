@@ -35,7 +35,7 @@
 		<div class="span6">
 			<h3 class="permissionTitle">Departmental administrators</h3> <a class="use-popover colour-h3" id="popover-deptadmins" data-html="true"
 			   data-original-title="Departmental Administrators"
-			   data-content="A departmental administrator can manage Modules, Marking Workflows and Extension settings; and can assign tutors and supervisors."><i class="icon-question-sign"></i></a>
+			   data-content="A departmental administrator can manage Modules, Marking workflows and Extension settings; and can assign tutors and supervisors."><i class="icon-question-sign"></i></a>
 
 			<@pm.roleTable perms_url "admin-table" department "DepartmentalAdministratorRoleDefinition" "departmental administrators" />
 		</div>

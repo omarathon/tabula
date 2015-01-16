@@ -153,6 +153,15 @@
 								</div>
 								<div class="span4">
 									<div class="pull-right">
+										<div class="hidden-desktop visible-print">
+											<@attendance_macros.checkpointLabel
+												department=command.department
+												student=student
+												checkpoint=(mapGet(mapGet(command.studentPointCheckpointMap, student), point))!""
+												note=(mapGet(mapGet(command.attendanceNoteMap, student), point))!""
+												point=point
+											/>
+										</div>
 										<#if mapGet(command.hasReportedMap, student)>
 											<@attendance_macros.checkpointLabel
 												department=command.department

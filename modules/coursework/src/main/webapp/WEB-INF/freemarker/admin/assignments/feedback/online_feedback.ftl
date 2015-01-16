@@ -1,6 +1,6 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
-<#assign finalMarkingStage = (allCompletedMarkerFeedback?? && allCompletedMarkerFeedback?size > 1)>
+<#assign markingStage = (allCompletedMarkerFeedback?? && allCompletedMarkerFeedback?size > 0)>
 
 <#function markingId user>
 	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>
@@ -12,7 +12,7 @@
 
 <div class="content online-feedback feedback-summary">
 
-	<#if command.submission?? && !finalMarkingStage>
+	<#if command.submission?? && !markingStage>
 		<#assign submission = command.submission />
 		<#include "_submission_summary.ftl">
 	</#if>
@@ -111,7 +111,7 @@
 
 		<div class="submit-buttons">
 			<input class="btn btn-primary" type="submit" value="Save">
-			<a class="btn discard-changes" href="">Discard</a>
+			<a class="btn discard-changes" href="">Cancel</a>
 		</div>
 
 	</@f.form>

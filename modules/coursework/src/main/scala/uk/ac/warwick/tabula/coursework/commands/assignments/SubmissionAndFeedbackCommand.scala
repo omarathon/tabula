@@ -49,47 +49,49 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		val whoDownloaded = enhancedFeedbacks.downloads
 		val whoViewed = enhancedFeedbacks.latestOnlineViews
 		val latestGenericFeedbackUpdate = enhancedFeedbacks.latestGenericFeedback
-		
-		val hasOriginalityReport = benchmarkTask("Check for originality reports") { enhancedSubmissions.exists(_.submission.hasOriginalityReport) }
-		val uniIdsWithSubmissionOrFeedback = benchmarkTask("Get uni IDs with submissions or feedback") { assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted }
-		val moduleMembers = benchmarkTask("Get module membership") { assignmentMembershipService.determineMembershipUsers(assignment) }
-		val unsubmittedMembers = moduleMembers.filterNot(member => uniIdsWithSubmissionOrFeedback.contains(member.getWarwickId))
-		val withExtension = unsubmittedMembers.map(member => (member, assignment.findExtension(member.getWarwickId)))
-		
-		// later we may do more complex checks to see if this particular markingWorkflow requires that feedback is released manually
-		// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
-		val mustReleaseForMarking = assignment.markingWorkflow != null
-		
-		val unsubmitted = benchmarkTask("Get unsubmitted users") { for (user <- unsubmittedMembers) yield {			
-			val usersExtension = assignment.extensions.asScala.filter(extension => extension.universityId == user.getWarwickId)
-			
-			if (usersExtension.size > 1) throw new IllegalStateException("More than one Extension for " + user.getWarwickId)
-			
-			val enhancedExtensionForUniId = usersExtension.headOption map { extension =>
-				new ExtensionListItem(
-					extension=extension,
-					within=assignment.isWithinExtension(user)
+		val hasOriginalityReport = benchmarkTask("Check for originality reports") {
+			enhancedSubmissions.exists(_.submission.hasOriginalityReport)
+		}
+		val uniIdsWithSubmissionOrFeedback = benchmarkTask("Get uni IDs with submissions or feedback") {
+			assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
+		}
+		val moduleMembers = benchmarkTask("Get module membership") {
+			assignmentMembershipService.determineMembershipUsers(assignment)
+		}
+		val unsubmittedMembers = moduleMembers.filterNot(m => uniIdsWithSubmissionOrFeedback.contains(m.getWarwickId))
+
+		val unsubmitted = benchmarkTask("Get unsubmitted users") {
+			for (user <- unsubmittedMembers) yield {
+				val usersExtension = assignment.extensions.asScala.filter(_.universityId == user.getWarwickId)
+				if (usersExtension.size > 1) throw new IllegalStateException("More than one Extension for " + user.getWarwickId)
+
+				val enhancedExtensionForUniId = usersExtension.headOption map { extension =>
+					new ExtensionListItem(
+						extension=extension,
+						within=assignment.isWithinExtension(user)
+					)
+				}
+
+				val coursework = WorkflowItems(
+					enhancedSubmission=None,
+					enhancedFeedback=None,
+					enhancedExtension=enhancedExtensionForUniId
+				)
+
+				val progress = courseworkWorkflowService.progress(assignment)(coursework)
+
+				Student(
+					user=user,
+					progress=Progress(progress.percentage, progress.cssClass, progress.messageCode),
+					nextStage=progress.nextStage,
+					stages=progress.stages,
+					coursework=coursework
 				)
 			}
-						
-			val coursework = WorkflowItems(
-				enhancedSubmission=None, 
-				enhancedFeedback=None,
-				enhancedExtension=enhancedExtensionForUniId
-			)
-			
-			val progress = courseworkWorkflowService.progress(assignment)(coursework)
-			
-			Student(
-				user=user,
-				progress=Progress(progress.percentage, progress.cssClass, progress.messageCode),
-				nextStage=progress.nextStage,
-				stages=progress.stages,
-				coursework=coursework
-			)
-		}}
+		}
+
 		val submitted = benchmarkTask("Get submitted users") { for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
-			val usersSubmissions = enhancedSubmissions.filter(submissionListItem => submissionListItem.submission.universityId == uniId)
+			val usersSubmissions = enhancedSubmissions.filter(_.submission.universityId == uniId)
 			val usersFeedback = assignment.feedbacks.asScala.filter(feedback => feedback.universityId == uniId)
 			val usersExtension = assignment.extensions.asScala.filter(extension => extension.universityId == uniId)
 
@@ -107,16 +109,18 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 			val enhancedSubmissionForUniId = usersSubmissions.headOption
 
 			val enhancedFeedbackForUniId = usersFeedback.headOption map { feedback =>
-				val downloaded = !feedback.attachments.isEmpty && (whoDownloaded exists { x=> (x._1.getWarwickId == feedback.universityId  &&
-					x._2.isAfter(feedback.mostRecentAttachmentUpload))})
+				val downloaded = !feedback.attachments.isEmpty && (whoDownloaded exists { x=>
+					x._1.getWarwickId == feedback.universityId  &&
+					x._2.isAfter(feedback.mostRecentAttachmentUpload)
+				})
 
 				val viewed = (feedback.hasOnlineFeedback || feedback.hasGenericFeedback) && (whoViewed exists { x =>
 					val universityId = x._1.getWarwickId
 					val latestOnlineUpdate =
-						latestModifiedOnlineFeedback.filter( x => x._1.getWarwickId == universityId).headOption.map { _._2 }.getOrElse(new DateTime(0))
+						latestModifiedOnlineFeedback.find(_._1.getWarwickId == universityId).map {_._2 }.getOrElse(new DateTime(0))
 					val latestUpdate = latestGenericFeedbackUpdate.filter(_.isAfter(latestOnlineUpdate)).getOrElse(latestOnlineUpdate)
-
-					(universityId == feedback.universityId  && 	x._2.isAfter(latestUpdate))})
+					universityId == feedback.universityId && x._2.isAfter(latestUpdate)
+				})
 
 				FeedbackListItem(feedback, downloaded, viewed)
 			}
@@ -146,13 +150,13 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		}}
 		
 		val membersWithPublishedFeedback = submitted.filter { student => 
-			student.coursework.enhancedFeedback map { _.feedback.checkedReleased } getOrElse (false)
+			student.coursework.enhancedFeedback exists { _.feedback.checkedReleased }
 		}
 
 		// True if any feedback exists that's been published. To decide whether to show whoDownloaded count.
-		val hasPublishedFeedback = !membersWithPublishedFeedback.isEmpty
+		val hasPublishedFeedback = membersWithPublishedFeedback.nonEmpty
 		
-		val stillToDownload = membersWithPublishedFeedback filterNot { item => item.coursework.enhancedFeedback map { _.downloaded } getOrElse(false) }
+		val stillToDownload = membersWithPublishedFeedback.filterNot(_.coursework.enhancedFeedback.exists(_.downloaded))
 		
 		val studentsFiltered = benchmarkTask("Do filtering") { 
 			val allStudents = (unsubmitted ++ submitted).filter(filter.predicate(filterParameters.asScala.toMap))
@@ -169,7 +173,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 			stillToDownload=stillToDownload,
 			hasPublishedFeedback=hasPublishedFeedback,
 			hasOriginalityReport=hasOriginalityReport,
-			mustReleaseForMarking=mustReleaseForMarking
+			mustReleaseForMarking=assignment.mustReleaseForMarking
 		)
 	}
 	
@@ -178,37 +182,37 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	}
 }
 
-case class SubmissionAndFeedbackResults(
-	val students:Seq[Student],
-	val whoDownloaded: Seq[(User, DateTime)],
-	val stillToDownload: Seq[Student],
-	val hasPublishedFeedback: Boolean,
-	val hasOriginalityReport: Boolean,
-	val mustReleaseForMarking: Boolean
+case class SubmissionAndFeedbackResults (
+	students:Seq[Student],
+	whoDownloaded: Seq[(User, DateTime)],
+	stillToDownload: Seq[Student],
+	hasPublishedFeedback: Boolean,
+	hasOriginalityReport: Boolean,
+	mustReleaseForMarking: Boolean
 )
 
 // Simple object holder
-case class Student(
-	val user: User,
-	val progress: Progress,
-	val nextStage: Option[WorkflowStage],
-	val stages: ListMap[String, WorkflowStages.StageProgress],
-	val coursework: WorkflowItems
+case class Student (
+	user: User,
+	progress: Progress,
+	nextStage: Option[WorkflowStage],
+	stages: ListMap[String, WorkflowStages.StageProgress],
+	coursework: WorkflowItems
 )
 
-case class WorkflowItems(
-	val enhancedSubmission: Option[SubmissionListItem], 
-	val enhancedFeedback: Option[FeedbackListItem],
-	val enhancedExtension: Option[ExtensionListItem]
+case class WorkflowItems (
+	enhancedSubmission: Option[SubmissionListItem],
+	enhancedFeedback: Option[FeedbackListItem],
+	enhancedExtension: Option[ExtensionListItem]
 )
 
-case class Progress(
-	val percentage: Int,
-	val t: String,
-	val messageCode: String
+case class Progress (
+	percentage: Int,
+	t: String,
+	messageCode: String
 )
 
-case class ExtensionListItem(
-	val extension: Extension,
-	val within: Boolean
+case class ExtensionListItem (
+	extension: Extension,
+	within: Boolean
 )

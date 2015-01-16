@@ -691,8 +691,14 @@ class Assignment
 			submissionIds ++ feedbackIds
 	}
 
+	// later we may do more complex checks to see if this particular markingWorkflow requires that feedback is released manually
+	// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
+	def mustReleaseForMarking = hasWorkflow
+
+	def hasWorkflow = markingWorkflow != null
+
 	def needsFeedbackPublishing = {
-		if (openEnded || !collectSubmissions) {
+		if (openEnded || !collectSubmissions || archived) {
 			false
 		} else {
 			submissions.asScala.exists(s => !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
@@ -749,6 +755,7 @@ case class SubmissionsReport(assignment: Assignment) {
 trait BooleanAssignmentProperties {
 	var openEnded: JBoolean = false
 	var collectMarks: JBoolean = true
+	var uploadMarksToSits: JBoolean = false
 	var collectSubmissions: JBoolean = true
 	var restrictSubmissions: JBoolean = false
 	var allowLateSubmissions: JBoolean = true
@@ -763,6 +770,7 @@ trait BooleanAssignmentProperties {
 	def copyBooleansTo(assignment: Assignment) {
 		assignment.openEnded = openEnded
 		assignment.collectMarks = collectMarks
+		assignment.uploadMarksToSits = uploadMarksToSits
 		assignment.collectSubmissions = collectSubmissions
 		assignment.restrictSubmissions = restrictSubmissions
 		assignment.allowLateSubmissions = allowLateSubmissions

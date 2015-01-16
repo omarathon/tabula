@@ -91,11 +91,19 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	var actualMark: Option[Int] = None
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+	var adjustedMark: Option[Int] = None
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	var agreedMark: Option[Int] = None
+
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var actualGrade: Option[String] = None
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+	var adjustedGrade: Option[String] = None
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var agreedGrade: Option[String] = None
+
+	var adjustmentComments: String = _
+	var adjustmentReason: String = _
 
 	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
 	@JoinColumn(name = "first_marker_feedback")
@@ -193,9 +201,9 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	}
 
 	// The current workflow position isn't None so this must be a placeholder
-	def isPlaceholder = getCurrentWorkflowFeedbackPosition.isDefined || !hasConent
+	def isPlaceholder = getCurrentWorkflowFeedbackPosition.isDefined || !hasContent
 
-	def hasConent = hasMarkOrGrade || hasAttachments || hasOnlineFeedback
+	def hasContent = hasMarkOrGrade || hasAttachments || hasOnlineFeedback
 
 	def hasMarkOrGrade = hasMark || hasGrade
 
@@ -264,7 +272,11 @@ object FeedbackPosition {
 	}
 }
 
-sealed trait FeedbackPosition
-case object  FirstFeedback extends FeedbackPosition { val description = "First marker's feedback" }
-case object  SecondFeedback extends FeedbackPosition { val description = "Second marker's feedback" }
-case object  ThirdFeedback extends FeedbackPosition { val description = "Third marker's feedback" }
+sealed trait FeedbackPosition extends Ordered[FeedbackPosition] {
+	val description: String
+	val position: Int
+	def compare(that: FeedbackPosition) = this.position compare that.position
+}
+case object FirstFeedback extends FeedbackPosition { val description = "First marker's feedback"; val position = 1 }
+case object SecondFeedback extends FeedbackPosition { val description = "Second marker's feedback"; val position = 2 }
+case object ThirdFeedback extends FeedbackPosition { val description = "Third marker's feedback"; val position = 3 }
