@@ -51,4 +51,32 @@ class PermissionFunctionTest extends TestBase with Mockito {
 		fn.exec(args).asInstanceOf[JBoolean] should be (java.lang.Boolean.FALSE)
 	}
 
+	@Test def canScopeless = withUser("cuscav") {
+		val args: JList[TemplateModel] = JArrayList()
+
+		// Use a SimpleHash as a workaround to wrapping things manually
+		val model = new SimpleHash
+		model.put("permissionName", "Marks.MarksManagement")
+
+		args.add(model.get("permissionName"))
+
+		securityService.can(currentUser, Permissions.Marks.MarksManagement) returns (true)
+
+		fn.exec(args).asInstanceOf[JBoolean] should be (java.lang.Boolean.TRUE)
+	}
+
+	@Test def cannotScopeless = withUser("cuscav") {
+		val args: JList[TemplateModel] = JArrayList()
+
+		// Use a SimpleHash as a workaround to wrapping things manually
+		val model = new SimpleHash
+		model.put("permissionName", "Marks.MarksManagement")
+
+		args.add(model.get("permissionName"))
+
+		securityService.can(currentUser, Permissions.Marks.MarksManagement) returns (false)
+
+		fn.exec(args).asInstanceOf[JBoolean] should be (java.lang.Boolean.FALSE)
+	}
+
 }
