@@ -49,7 +49,6 @@
 	<a class="btn" href="<@routes.home />">Cancel</a>
 </div>
 
-
 </@f.form>
 
 <script>
@@ -67,6 +66,32 @@
 		$('#js-required-message').hide();
 		$('form input[name=updatePostgrads]').on('click', showDegreeType);
 		showDegreeType();
+
+		var openAllThisYearAndLastYear = function() {
+			$('form .department-years-list input[type=radio]').each(function() {
+				var $radio = $(this);
+				$radio.val(['openCurrentAndPrevious']);
+			});
+		};
+
+		var openAllThisYear = function() {
+			$('form .department-years-list input[type=radio]').each(function() {
+				var $radio = $(this);
+				$radio.val(['openCurrent']);
+			});
+		};
+
+		var closeAll = function() {
+			$('form .department-years-list input[type=radio]').each(function() {
+				var $radio = $(this);
+				$radio.val(['closed']);
+			});
+		};
+
+		$('.selectOpenAllThisYearAndLastYear').on('click', openAllThisYearAndLastYear);
+		$('.selectOpenAllThisYear').on('click', openAllThisYear);
+		$('.selectCloseAll').on('click', closeAll);
+
 	})(jQuery);
 </script>
 
@@ -76,9 +101,15 @@
 		<tr>
 			<th>Dept code</th>
 			<th>Department</th>
-			<th>Open for ${command.previousAcademicYear.toString} and ${command.currentAcademicYear.toString}</th>
-			<th>Open for ${command.currentAcademicYear.toString}</th>
-			<th>Closed</th>
+			<th>Open for ${command.previousAcademicYear.toString} and ${command.currentAcademicYear.toString} <br />
+				<a href="#" class="selectOpenAllThisYearAndLastYear collection-check-all">Select all</a>
+			</th>
+			<th>Open for ${command.currentAcademicYear.toString} <br />
+				<a href="#" class="selectOpenAllThisYear collection-check-all">Select all</a>
+			</th>
+			<th>Closed <br />
+				<a href="#" class="selectCloseAll collection-check-all">Select all</a>
+			</th>
 		</tr>
 		</thead>
 		<tbody>
