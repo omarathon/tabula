@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.attendance.web.controllers.view
 
+import java.net.URLDecoder
 import javax.validation.Valid
 
 import org.springframework.stereotype.Controller
@@ -51,19 +52,19 @@ class ReportStudentsConfirmController extends AttendanceController {
 		} else {
 			val reports = cmd.apply()
 			val filterMap = filterString match {
-				case null => Map()
-				case s: String => s.split("&").toSeq.flatMap(p => {
+				case null => Seq()
+				case s: String => URLDecoder.decode(s, "UTF-8").split("&").toSeq.flatMap(p => {
 					val keyValue = p.split("=")
 					if (keyValue.size < 2) None
 					else Option((keyValue(0), keyValue(1)))
-				}).toMap
+				})
 			}
-			val redirectObjects = Map(
+			val redirectObjects = Seq(
 				"reports" -> reports.size,
 				"monitoringPeriod" -> period,
 				"academicYear" -> academicYear
 			) ++ filterMap
-			Redirect(Routes.View.students(department, academicYear), redirectObjects)
+			Redirect(Routes.View.students(department, academicYear), redirectObjects: _*)
 		}
 	}
 
