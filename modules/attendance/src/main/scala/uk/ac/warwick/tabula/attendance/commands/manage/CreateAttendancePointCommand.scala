@@ -86,6 +86,7 @@ trait CreateAttendancePointValidation extends SelfValidating with AttendanceMoni
 				startDate = weeksForYear(startWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
 				endDate = weeksForYear(endWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate.plusDays(6)
 			}
+			validateTypeForEndDate(errors, pointType, endDate)
 			pointType match {
 				case AttendanceMonitoringPointType.Meeting =>
 					validateTypeMeeting(
