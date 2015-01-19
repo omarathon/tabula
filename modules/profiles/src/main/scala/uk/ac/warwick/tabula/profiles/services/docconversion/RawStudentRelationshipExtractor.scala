@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.ProfileService
 
+import scala.util.Left
+
 object RawStudentRelationshipExtractor {
 	type RowData = Map[String, String]
 	type RawStudentRelationship = (Member, Option[Member])
@@ -23,9 +25,7 @@ object RawStudentRelationshipExtractor {
 class RawStudentRelationshipRow(relationshipType: StudentRelationshipType, val rowData: Map[String, String]) {
 	import uk.ac.warwick.tabula.profiles.services.docconversion.RawStudentRelationshipExtractor._
 
-	var profileService = Wire[ProfileService]
-
-	def extractStudent(department: Department): (Option[StudentMember], Option[ErrorCode]) = {
+	def extractStudent(department: Department, memberMap: Map[String, Member]): (Option[StudentMember], Option[ErrorCode]) = {
 		def validateCourseAndDepartmentDetails(student: StudentMember): Option[ErrorCode] = {
 			student.mostSignificantCourseDetails match {
 				case Some(scd) if scd.department == null =>
@@ -43,7 +43,7 @@ class RawStudentRelationshipRow(relationshipType: StudentRelationshipType, val r
 			case strStudentId if strStudentId.matches("\\d+") =>
 				val studentId = UniversityId.zeroPad(strStudentId)
 
-				profileService.getMemberByUniversityId(studentId) match {
+				memberMap.get(studentId) match {
 					case Some(student: StudentMember) =>
 						(Some(student), validateCourseAndDepartmentDetails(student))
 
@@ -56,12 +56,12 @@ class RawStudentRelationshipRow(relationshipType: StudentRelationshipType, val r
 		}
 	}
 
-	def extractAgent(): Either[Option[Member], ErrorCode] = {
+	def extractAgent(memberMap: Map[String, Member]): Either[Option[Member], ErrorCode] = {
 		rowData.get("agent_id") match {
 			case Some(strAgentId) if strAgentId.hasText && strAgentId.matches("\\d+") =>
 				val agentId = UniversityId.zeroPad(strAgentId)
 
-				profileService.getMemberByUniversityId(agentId) match {
+				memberMap.get(agentId) match {
 					case Some(member) => Left(Some(member))
 					case _ => Right("agent_id" -> "profiles.relationship.allocate.universityId.notMember")
 				}
@@ -78,29 +78,39 @@ class RawStudentRelationshipRow(relationshipType: StudentRelationshipType, val r
 class RawStudentRelationshipExtractor {
 	import uk.ac.warwick.tabula.profiles.services.docconversion.RawStudentRelationshipExtractor._
 
+	var profileService = Wire[ProfileService]
+
 	/**
 	 * Method for reading in a xlsx spreadsheet and converting it into a list of relationships
 	 */
-	def readXSSFExcelFile(file: InputStream, relationshipType: StudentRelationshipType, department: Department): Seq[ParsedRow] =
-		SpreadsheetHelpers.parseXSSFExcelFile(file)
-			.map { rowData => new RawStudentRelationshipRow(relationshipType, rowData) }
-			.filter { _.isValid } // Ignore blank rows
-			.map { row =>
-				val (student, studentError) = row.extractStudent(department)
-				val agentOrError = row.extractAgent()
+	def readXSSFExcelFile(file: InputStream, relationshipType: StudentRelationshipType, department: Department): Seq[ParsedRow] = {
+		val validRows = SpreadsheetHelpers.parseXSSFExcelFile(file)
+			.map { rowData => new RawStudentRelationshipRow(relationshipType, rowData)}
+			.filter {	_.isValid } // Ignore blank rows
 
-				val relationship = student.map { student =>
-					agentOrError match {
-						case Left(agent) => student -> agent
-						case _ => student -> None
-					}
+		val memberMap = profileService.getAllMembersWithUniversityIds(
+			validRows.flatMap(r => Seq(r.rowData("student_id"), r.rowData("agent_id")))
+				.filter(s => s.hasText && s.matches("\\d+"))
+				.map(UniversityId.zeroPad)
+		).map(m => m.universityId -> m).toMap
+
+		validRows.map { row =>
+			val (student, studentError) = row.extractStudent(department, memberMap)
+			val agentOrError = row.extractAgent(memberMap)
+
+			val relationship = student.map { student =>
+				agentOrError match {
+					case Left(agent) => student -> agent
+					case _ => student -> None
 				}
-
-				val errors = agentOrError match {
-					case Right(agentError) => Seq(studentError).flatten :+ agentError
-					case _ => Seq(studentError).flatten
-				}
-
-				(row.rowData, relationship, errors)
 			}
+
+			val errors = agentOrError match {
+				case Right(agentError) => Seq(studentError).flatten :+ agentError
+				case _ => Seq(studentError).flatten
+			}
+
+			(row.rowData, relationship, errors)
+		}
+	}
 }
