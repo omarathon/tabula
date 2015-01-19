@@ -84,7 +84,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 	}
 
 	def listen(recipientInfo: RecipientNotificationInfo) = {
-		if (!recipientInfo.emailSent) {
+		if (!recipientInfo.emailSent && !recipientInfo.dismissed) {
 			def cancelSendingEmail() {
 				// TODO This is incorrect, really - we're not sending the email, we're cancelling the sending of the email
 				recipientInfo.emailSent = true
