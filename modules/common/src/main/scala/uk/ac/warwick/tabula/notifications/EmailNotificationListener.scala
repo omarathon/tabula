@@ -84,14 +84,17 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 	}
 
 	def listen(recipientInfo: RecipientNotificationInfo) = {
-		if (!recipientInfo.emailSent && !recipientInfo.dismissed) {
+		if (!recipientInfo.emailSent) {
 			def cancelSendingEmail() {
 				// TODO This is incorrect, really - we're not sending the email, we're cancelling the sending of the email
 				recipientInfo.emailSent = true
 				service.save(recipientInfo)
 			}
 
-			if (recipientInfo.notification.priority < Notification.PriorityEmailThreshold) {
+			if (recipientInfo.dismissed) {
+				logger.info(s"Not sending email for Notification as it is dismissed for $recipientInfo")
+				cancelSendingEmail()
+			} else if (recipientInfo.notification.priority < Notification.PriorityEmailThreshold) {
 				logger.info(s"Not sending email as notification priority ${recipientInfo.notification.priority} below threshold")
 				cancelSendingEmail()
 			} else if (!recipientInfo.recipient.isFoundUser) {
