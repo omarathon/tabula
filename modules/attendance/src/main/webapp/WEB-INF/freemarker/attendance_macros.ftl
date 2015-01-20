@@ -407,6 +407,10 @@
 		<#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}'>View attendance note</a></p></#if>
 	</#local>
 	<span class="use-popover label ${formatResult.labelClass}" data-content="${popoverContent}" data-html="true" data-placement="left">${formatResult.labelText}</span>
+	<span class="hidden-desktop visible-print">
+		<#if formatResult.metadata?has_content>${formatResult.metadata}<br /></#if>
+		<#if formatResult.noteText?has_content>${formatResult.noteText}</#if>
+	</span>
 </#macro>
 
 <#macro checkpointSelect department id name checkpoint="" point="" student="" note="">
