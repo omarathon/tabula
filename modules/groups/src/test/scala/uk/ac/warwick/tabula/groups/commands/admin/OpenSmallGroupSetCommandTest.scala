@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.notifications.groups.OpenSmallGroupSetsNotification
+import uk.ac.warwick.tabula.data.model.notifications.groups.{OpenSmallGroupSetsOtherSignUpNotification, OpenSmallGroupSetsStudentSignUpNotification, OpenSmallGroupSetsNotification}
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -174,7 +174,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
 		val notifications = notifier.emit(Seq(set1,set2))
 		notifications.foreach {
-			case n: OpenSmallGroupSetsNotification => n.userLookup = userLookup
+			case n: OpenSmallGroupSetsOtherSignUpNotification => n.userLookup = userLookup
 		}
 
 		notifications.size should be(3)

@@ -43,5 +43,5 @@ class FeedbackAdjustmentNotification
 	def urlTitle = s"Marking for this assignment"
 
 	priority = Info
-	def actionRequired = false
+
 }

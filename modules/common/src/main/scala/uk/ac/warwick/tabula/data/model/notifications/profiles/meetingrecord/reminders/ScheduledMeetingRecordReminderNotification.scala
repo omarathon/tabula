@@ -12,7 +12,6 @@ abstract class ScheduledMeetingRecordReminderNotification extends ScheduledMeeti
 
 	verbSetting.value = "remind"
 	priority = Warning
-	def actionRequired = false
 
 	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_reminder_notification.ftl"
 

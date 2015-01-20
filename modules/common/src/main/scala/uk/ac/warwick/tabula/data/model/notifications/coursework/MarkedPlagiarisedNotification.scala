@@ -27,8 +27,6 @@ class MarkedPlagiarisedNotification extends NotificationWithTarget[Submission, A
 		moduleManagers.users ++ departmentAdmins.users
 	}
 
-	def actionRequired = false
-
 	def url = Routes.admin.assignment.submissionsandfeedback(assignment)
 
 	def urlTitle = "view the submissions for this assignment"

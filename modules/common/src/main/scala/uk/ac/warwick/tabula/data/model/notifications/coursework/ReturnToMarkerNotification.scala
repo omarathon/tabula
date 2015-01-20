@@ -24,7 +24,8 @@ class ReturnToMarkerNotification
 	with SingleRecipientNotification
 	with UserIdRecipientNotification
 	with AutowiringUserLookupComponent
-	with Logging {
+	with Logging
+	with ActionRequiredNotification {
 
 	def this(markerNumber: Int, commentValue: String) {
 		this()
@@ -68,6 +69,6 @@ class ReturnToMarkerNotification
 	def urlTitle = s"$workflowVerb this feedback"
 
 	priority = Warning
-	def actionRequired = true
+
 }
 

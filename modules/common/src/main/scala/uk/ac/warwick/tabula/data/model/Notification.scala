@@ -161,8 +161,6 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	@transient def content: FreemarkerModel
 	@transient def url: String
 
-	@transient def actionRequired: Boolean
-
 	/**
 	 * URL title will be used to generate the links in notifications
 	 *
@@ -301,4 +299,8 @@ trait ConfigurableNotification {
 
 	final def recipients: Seq[User] = if (enabledForDepartment) allRecipients.filter(enabledForUser) else Seq()
 	def allRecipients: Seq[User]
+}
+
+trait ActionRequiredNotification {
+	self: Notification[_, _] =>
 }

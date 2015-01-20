@@ -14,7 +14,8 @@ class FeedbackPublishedNotification
 	with SingleRecipientNotification
 	with SingleItemNotification[Feedback]
 	with UniversityIdRecipientNotification
-	with AutowiringUserLookupComponent {
+	with AutowiringUserLookupComponent
+	with ActionRequiredNotification {
 
 	def feedback = item.entity
 	def assignment = feedback.assignment
@@ -36,5 +37,5 @@ class FeedbackPublishedNotification
 
 	def url = Routes.assignment.receipt(assignment)
 	def urlTitle = "view your feedback"
-	def actionRequired = true
+
 }

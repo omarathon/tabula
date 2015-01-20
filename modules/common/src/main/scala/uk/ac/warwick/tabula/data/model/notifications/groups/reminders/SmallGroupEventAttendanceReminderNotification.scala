@@ -19,11 +19,10 @@ import scala.collection.JavaConverters._
 class SmallGroupEventAttendanceReminderNotification
 	extends Notification[SmallGroupEventOccurrence, Unit]
 		with SingleItemNotification[SmallGroupEventOccurrence]
-		with ConfigurableNotification {
+		with ConfigurableNotification
+		with ActionRequiredNotification {
 
 	override final def verb = "record"
-
-	override final def actionRequired = true
 
 	override def urlTitle = "record attendance for these seminars"
 

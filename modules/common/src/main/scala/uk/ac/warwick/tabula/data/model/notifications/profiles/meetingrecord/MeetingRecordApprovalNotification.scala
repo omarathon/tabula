@@ -4,12 +4,13 @@ import javax.persistence.{DiscriminatorValue, Entity}
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Warning}
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MeetingRecord, NotificationWithTarget, SingleItemNotification, StudentRelationship}
+import uk.ac.warwick.tabula.data.model._
 
 abstract class MeetingRecordApprovalNotification(val verb: String)
 	extends NotificationWithTarget[MeetingRecord, StudentRelationship]
 	with MeetingRecordNotificationTrait
-	with SingleItemNotification[MeetingRecord] {
+	with SingleItemNotification[MeetingRecord]
+	with ActionRequiredNotification {
 
 	override def onPreSave(newRecord: Boolean) {
 		// if the meeting took place more than a week ago then this is more important
@@ -30,7 +31,6 @@ abstract class MeetingRecordApprovalNotification(val verb: String)
 
 		s"${agentRole.capitalize} meeting record with $name needs review"
 	}
-	def actionRequired = true
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
 		"actor" -> meeting.creator.asSsoUser,
 		"role"-> agentRole,

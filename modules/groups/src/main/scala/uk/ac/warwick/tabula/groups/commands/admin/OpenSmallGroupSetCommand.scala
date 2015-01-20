@@ -1,16 +1,14 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.notifications.groups.OpenSmallGroupSetsNotification
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.data.model.Notification
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
+import uk.ac.warwick.tabula.data.model.{Department, Notification}
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.StudentSignUp
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState._
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet, SmallGroupSetSelfSignUpState}
+import uk.ac.warwick.tabula.data.model.notifications.groups.{OpenSmallGroupSetsOtherSignUpNotification, OpenSmallGroupSetsStudentSignUpNotification}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
 
 
 object OpenSmallGroupSetCommand {
@@ -82,8 +80,14 @@ trait OpenSmallGroupSetNotifier extends Notifies[Seq[SmallGroupSet], Seq[SmallGr
 		val setsPerUser: Map[User,Seq[SmallGroupSet]] = allMemberships.groupBy(_._1).map { case (k,v) => (k,v.map(_._2))}
 
 		// convert the map into a notification per user
-		setsPerUser.map { case (student, sets) =>
-			val n = Notification.init(new OpenSmallGroupSetsNotification, user, sets)
+		setsPerUser.map { case (student, studentSets) =>
+			val n = {
+				if (studentSets.exists(_.allocationMethod == StudentSignUp)) {
+					Notification.init(new OpenSmallGroupSetsStudentSignUpNotification, user, studentSets)
+				} else {
+					Notification.init(new OpenSmallGroupSetsOtherSignUpNotification, user, studentSets)
+				}
+			}
 			n.recipientUserId = student.getUserId
 			n
 		}.toSeq

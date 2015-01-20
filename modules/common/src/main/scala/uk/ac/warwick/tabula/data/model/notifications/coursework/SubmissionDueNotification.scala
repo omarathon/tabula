@@ -7,12 +7,12 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority._
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.{Assignment, FreemarkerModel, Notification, NotificationPreSaveBehaviour, SingleItemNotification}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AutowiringUserLookupComponent}
 
 import scala.collection.JavaConverters._
 
-trait SubmissionReminder {
+trait SubmissionReminder extends ActionRequiredNotification {
 	self : Notification[_, Unit] with NotificationPreSaveBehaviour =>
 
 	def deadline: DateTime
@@ -37,8 +37,6 @@ trait SubmissionReminder {
 			Info
 		}
 	}
-
-	def actionRequired = true
 
 	def url = Routes.assignment(assignment)
 

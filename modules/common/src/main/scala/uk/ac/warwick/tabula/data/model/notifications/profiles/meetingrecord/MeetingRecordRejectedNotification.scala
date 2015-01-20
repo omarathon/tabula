@@ -2,14 +2,15 @@ package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import javax.persistence.{DiscriminatorValue, Entity}
 
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MeetingRecordApproval, Notification, NotificationPriority, SingleItemNotification}
+import uk.ac.warwick.tabula.data.model._
 
 @Entity
 @DiscriminatorValue("meetingRecordRejected")
 class MeetingRecordRejectedNotification
 	extends Notification[MeetingRecordApproval, Unit]
 	with MeetingRecordNotificationTrait
-	with SingleItemNotification[MeetingRecordApproval] {
+	with SingleItemNotification[MeetingRecordApproval]
+	with ActionRequiredNotification {
 
 	priority = NotificationPriority.Warning
 
@@ -18,7 +19,6 @@ class MeetingRecordRejectedNotification
 	def relationship = meeting.relationship
 
 	def verb = "return"
-	def actionRequired = true
 
 	def title = {
 		val name =

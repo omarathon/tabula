@@ -30,8 +30,6 @@ abstract class BulkRelationshipChangeNotification extends Notification[StudentRe
 		) ++ extraModel)
 	}
 
-	def actionRequired = false
-
 	def extraModel: Map[String, Any]
 }
 

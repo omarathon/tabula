@@ -5,10 +5,10 @@ import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, StudentMember}
+import uk.ac.warwick.tabula.data.model.{ActionRequiredNotification, FreemarkerModel, StudentMember}
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 
-abstract class ExtensionRequestNotification extends ExtensionNotification {
+abstract class ExtensionRequestNotification extends ExtensionNotification with ActionRequiredNotification {
 
 	@transient
 	var relationshipService = Wire.auto[RelationshipService]
@@ -22,8 +22,6 @@ abstract class ExtensionRequestNotification extends ExtensionNotification {
 
 	def studentMember = profileService.getMemberByUniversityId(student.getWarwickId)
 	def studentRelationships = relationshipService.allStudentRelationshipTypes
-
-	def actionRequired = true
 
 	def profileInfo = studentMember.collect { case student: StudentMember => student }.flatMap(_.mostSignificantCourseDetails).map(scd => {
 		val relationships = studentRelationships.map(x => (
