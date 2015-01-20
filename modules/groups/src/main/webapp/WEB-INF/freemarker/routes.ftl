@@ -104,4 +104,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro permissions scope><@_u page="/permissions/${scope.urlCategory}/${scope.urlSlug}" context="/admin" /></#macro>
 
 <#macro deregisteredStudents set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/deregistered" /></#macro>
+<#macro withdrawnStudents set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/withdrawn" /></#macro>
 <#macro courseworkDeptHome module><@url context="/coursework" page="/admin/department/${module.department.code}/#module-${module.code}" /></#macro>

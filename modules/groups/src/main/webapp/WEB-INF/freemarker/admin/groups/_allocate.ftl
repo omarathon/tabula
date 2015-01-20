@@ -150,10 +150,14 @@
 										</div>
 									</div>
 									<#if command.unallocatedPermWithdrawnCount gt 0>
-										<p>There <@fmt.p number=command.unallocatedPermWithdrawnCount singular="is" plural="are" shownumber=false />
+										<p>
+											There <@fmt.p number=command.unallocatedPermWithdrawnCount singular="is" plural="are" shownumber=false />
 											<@fmt.p command.unallocatedPermWithdrawnCount "unallocated student" /> who
 											<@fmt.p number=command.unallocatedPermWithdrawnCount singular="is" plural="are" shownumber=false />
-											permanently withdrawn and so cannot be allocated.</p>
+											permanently withdrawn and so cannot be allocated. You can
+											<a target="_blank" href="<@routes.editsetstudents command.set />">edit the students in the group set</a>
+											to remove them.
+										</p>
 									</#if>
 								</div>
 								<div class="span2">

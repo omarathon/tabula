@@ -107,15 +107,22 @@ Generates the bulk of the picker HTML, inside a fieldset element
 		</#if>
 
 		<a class="btn use-tooltip disabled show-adder"
-				<#if availableUpstreamGroups??>title="This will only enrol a student for this ${name} in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
-				>
+		   <#if availableUpstreamGroups??>title="This will only enrol a student for this ${name} in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
+		>
 			Add students manually
 		</a>
 
 		<#if hasMembers>
+			<a
+				data-href="<@routes.withdrawnStudents command.set />"
+				class="btn select-withdrawn member-action use-tooltip"
+				title="Select permanantly withdrawn students" data-loading-text="Loading&hellip;"
+			>
+				Select PWD students
+			</a>
 			<a class="btn btn-warning disabled remove-users member-action use-tooltip"
-					<#if availableUpstreamGroups??>title="This will only remove enrolment for this ${name} in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
-					>
+			   <#if availableUpstreamGroups??>title="This will only remove enrolment for this ${name} in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
+			>
 				Remove
 			</a>
 
@@ -501,6 +508,18 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				$(this).find('input:checked').removeAttr('checked');
 				$(this).find('.spinnable').spin(false);
 			}
+		});
+
+		<#-- select users from enrolment table who are PWD -->
+		$enrolment.on('click', '.select-withdrawn', function(e) {
+			e.preventDefault();
+			var $this = $(this);
+			$.get($this.data('href'), function(data) {
+				$.each(data.students, function(i, universityId) {
+					$('#enrolment-table').find('input[name=modifyEnrolment][value='+ universityId + ']').trigger('click');
+				});
+				$this.button('reset');
+			});
 		});
 
 		<#-- remove user from enrolment table -->
