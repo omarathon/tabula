@@ -307,8 +307,8 @@ trait ActionRequiredNotification {
 
 	@transient var notificationService = Wire[NotificationService]
 
-	@transient final val completed = BooleanSetting("completed", false)
-	@transient final val completedBy = StringSetting("completedBy", "")
+	@transient final protected val completed = BooleanSetting("completed", false)
+	@transient final protected val completedBy = StringSetting("completedBy", "")
 
 	def actionCompleted(user: User)
 

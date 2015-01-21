@@ -52,6 +52,11 @@ trait SchedulesNotifications[A, B] {
 	def scheduledNotifications(notificationTarget: B): Seq[ScheduledNotification[_]]
 }
 
+trait CompletesNotifications[A] {
+	case class CompletesNotificationsResult(notifications: Seq[ActionRequiredNotification], completedBy: User)
+	def notificationsToComplete(commandResult: A): CompletesNotificationsResult
+}
+
 
 trait Appliable[A]{
   def apply():A
