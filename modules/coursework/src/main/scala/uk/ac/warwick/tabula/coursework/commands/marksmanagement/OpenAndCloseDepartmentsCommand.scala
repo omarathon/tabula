@@ -52,7 +52,7 @@ class OpenAndCloseDepartmentsCommandInternal extends CommandInternal[DegreeType]
 	}
 
 	private def thisYearOpen(deptStateValue: String) = deptStateValue != DepartmentStateClosed.value
-	private def lastYearOpen(deptStateValue: String) = deptStateValue !=  DepartmentStateClosed.value
+	private def lastYearOpen(deptStateValue: String) = deptStateValue ==  DepartmentStateThisYearAndLastYear.value
 
 }
 
