@@ -113,13 +113,15 @@ Generates the bulk of the picker HTML, inside a fieldset element
 		</a>
 
 		<#if hasMembers>
-			<a
-				data-href="<@routes.withdrawnStudents command.set />"
-				class="btn select-withdrawn member-action use-tooltip"
-				title="Select permanantly withdrawn students" data-loading-text="Loading&hellip;"
-			>
-				Select PWD students
-			</a>
+			<#if component.name == 'groups'>
+				<a
+					data-href="<@routes.withdrawnStudents command.set />"
+					class="btn select-withdrawn member-action use-tooltip"
+					title="Select permanantly withdrawn students" data-loading-text="Loading&hellip;"
+				>
+					Select PWD students
+				</a>
+			</#if>
 			<a class="btn btn-warning disabled remove-users member-action use-tooltip"
 			   <#if availableUpstreamGroups??>title="This will only remove enrolment for this ${name} in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
 			>
