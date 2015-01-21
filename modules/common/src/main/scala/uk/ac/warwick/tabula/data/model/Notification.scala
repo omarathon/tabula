@@ -305,6 +305,8 @@ trait ActionRequiredNotification {
 
 	self: Notification[_, _] =>
 
+	@transient var notificationService = Wire[NotificationService]
+
 	@transient final val completed = BooleanSetting("completed", false)
 	@transient final val completedBy = StringSetting("completedBy", "")
 
@@ -312,8 +314,7 @@ trait ActionRequiredNotification {
 
 }
 
-trait AllCompletedActionRequiredNotification
-	extends ActionRequiredNotification with AutowiringNotificationServiceComponent {
+trait AllCompletedActionRequiredNotification extends ActionRequiredNotification {
 
 	self: Notification[_, _] =>
 
@@ -325,8 +326,7 @@ trait AllCompletedActionRequiredNotification
 	}
 }
 
-trait RecipientCompletedActionRequiredNotification
-	extends ActionRequiredNotification with AutowiringNotificationServiceComponent {
+trait RecipientCompletedActionRequiredNotification extends ActionRequiredNotification {
 
 	self: Notification[_, _] =>
 
