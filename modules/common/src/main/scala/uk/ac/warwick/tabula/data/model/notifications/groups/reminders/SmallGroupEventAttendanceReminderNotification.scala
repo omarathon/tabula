@@ -20,7 +20,7 @@ class SmallGroupEventAttendanceReminderNotification
 	extends Notification[SmallGroupEventOccurrence, Unit]
 		with SingleItemNotification[SmallGroupEventOccurrence]
 		with ConfigurableNotification
-		with ActionRequiredNotification {
+		with AllCompletedActionRequiredNotification {
 
 	override final def verb = "record"
 

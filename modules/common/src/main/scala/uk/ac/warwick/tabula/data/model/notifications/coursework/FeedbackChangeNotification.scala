@@ -14,7 +14,7 @@ class FeedbackChangeNotification extends NotificationWithTarget[Feedback, Assign
 	with SingleRecipientNotification
 	with UniversityIdRecipientNotification
 	with AutowiringUserLookupComponent
-	with ActionRequiredNotification {
+	with AllCompletedActionRequiredNotification {
 
 	def feedback = item.entity
 	def assignment = target.entity

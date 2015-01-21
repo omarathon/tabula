@@ -10,7 +10,8 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 @Entity
 @DiscriminatorValue("RequestAssignmentAccess")
 class RequestAssignmentAccessNotification
-	extends Notification[Assignment, Unit] with SingleItemNotification[Assignment] with ActionRequiredNotification {
+	extends Notification[Assignment, Unit]
+	with SingleItemNotification[Assignment] with AllCompletedActionRequiredNotification {
 
 	def assignment = item.entity
 

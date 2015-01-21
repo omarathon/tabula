@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AutowiringUse
 
 import scala.collection.JavaConverters._
 
-trait SubmissionReminder extends ActionRequiredNotification {
+trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 	self : Notification[_, Unit] with NotificationPreSaveBehaviour =>
 
 	def deadline: DateTime

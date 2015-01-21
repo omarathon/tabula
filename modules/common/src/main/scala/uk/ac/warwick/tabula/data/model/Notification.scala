@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.{UserSettingsService, UserLookupComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
@@ -302,5 +302,36 @@ trait ConfigurableNotification {
 }
 
 trait ActionRequiredNotification {
+
 	self: Notification[_, _] =>
+
+	@transient final val completed = BooleanSetting("completed", false)
+	@transient final val completedBy = StringSetting("completedBy", "")
+
+	def actionCompleted(user: User)
+
+}
+
+trait AllCompletedActionRequiredNotification
+	extends ActionRequiredNotification with AutowiringNotificationServiceComponent {
+
+	self: Notification[_, _] =>
+
+	override final def actionCompleted(user: User) = {
+		dismiss(user)
+		this.completed.value = true
+		this.completedBy.value = user.getUserId
+		notificationService.update(Seq(this), user)
+	}
+}
+
+trait RecipientCompletedActionRequiredNotification
+	extends ActionRequiredNotification with AutowiringNotificationServiceComponent {
+
+	self: Notification[_, _] =>
+
+	override final def actionCompleted(user: User) = {
+		dismiss(user)
+		notificationService.update(Seq(this), user)
+	}
 }

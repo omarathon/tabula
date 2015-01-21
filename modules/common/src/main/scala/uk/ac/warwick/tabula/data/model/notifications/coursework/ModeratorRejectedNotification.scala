@@ -21,7 +21,7 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 	with SingleItemNotification[MarkerFeedback]
 	with SingleRecipientNotification
 	with AutowiringUserLookupComponent
-	with ActionRequiredNotification {
+	with AllCompletedActionRequiredNotification {
 
 	def markerFeedback = item.entity
 	def parentFeedback = markerFeedback.feedback

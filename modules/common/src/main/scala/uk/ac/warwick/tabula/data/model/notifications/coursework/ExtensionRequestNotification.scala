@@ -5,10 +5,11 @@ import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
-import uk.ac.warwick.tabula.data.model.{ActionRequiredNotification, FreemarkerModel, StudentMember}
+import uk.ac.warwick.tabula.data.model.{AllCompletedActionRequiredNotification, ActionRequiredNotification, FreemarkerModel, StudentMember}
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 
-abstract class ExtensionRequestNotification extends ExtensionNotification with ActionRequiredNotification {
+abstract class ExtensionRequestNotification
+	extends ExtensionNotification with AllCompletedActionRequiredNotification {
 
 	@transient
 	var relationshipService = Wire.auto[RelationshipService]

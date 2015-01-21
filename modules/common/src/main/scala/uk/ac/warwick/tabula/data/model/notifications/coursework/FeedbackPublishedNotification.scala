@@ -15,7 +15,7 @@ class FeedbackPublishedNotification
 	with SingleItemNotification[Feedback]
 	with UniversityIdRecipientNotification
 	with AutowiringUserLookupComponent
-	with ActionRequiredNotification {
+	with AllCompletedActionRequiredNotification {
 
 	def feedback = item.entity
 	def assignment = feedback.assignment

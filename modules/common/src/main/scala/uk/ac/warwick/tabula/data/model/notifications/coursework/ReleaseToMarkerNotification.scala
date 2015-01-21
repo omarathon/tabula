@@ -20,7 +20,7 @@ class ReleaseToMarkerNotification
 	with UserIdRecipientNotification
 	with AutowiringUserLookupComponent
 	with Logging
-	with ActionRequiredNotification {
+	with AllCompletedActionRequiredNotification {
 
 	def this(markerNumber: Int) {
 		this()

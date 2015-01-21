@@ -4,7 +4,7 @@ import javax.persistence.{DiscriminatorValue, Entity}
 
 import org.joda.time.Days
 import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Warning}
-import uk.ac.warwick.tabula.data.model.{ActionRequiredNotification, FreemarkerModel, SingleRecipientNotification}
+import uk.ac.warwick.tabula.data.model.{AllCompletedActionRequiredNotification, ActionRequiredNotification, FreemarkerModel, SingleRecipientNotification}
 import uk.ac.warwick.userlookup.User
 
 @Entity
@@ -12,7 +12,7 @@ import uk.ac.warwick.userlookup.User
 class ScheduledMeetingRecordConfirmNotification
 	extends ScheduledMeetingRecordNotification
 	with SingleRecipientNotification
-	with ActionRequiredNotification {
+	with AllCompletedActionRequiredNotification {
 
 	verbSetting.value = "confirm"
 

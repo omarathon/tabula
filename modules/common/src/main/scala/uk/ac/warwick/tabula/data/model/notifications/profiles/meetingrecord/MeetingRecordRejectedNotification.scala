@@ -10,7 +10,7 @@ class MeetingRecordRejectedNotification
 	extends Notification[MeetingRecordApproval, Unit]
 	with MeetingRecordNotificationTrait
 	with SingleItemNotification[MeetingRecordApproval]
-	with ActionRequiredNotification {
+	with AllCompletedActionRequiredNotification {
 
 	priority = NotificationPriority.Warning
 

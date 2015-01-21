@@ -10,7 +10,7 @@ abstract class MeetingRecordApprovalNotification(val verb: String)
 	extends NotificationWithTarget[MeetingRecord, StudentRelationship]
 	with MeetingRecordNotificationTrait
 	with SingleItemNotification[MeetingRecord]
-	with ActionRequiredNotification {
+	with RecipientCompletedActionRequiredNotification {
 
 	override def onPreSave(newRecord: Boolean) {
 		// if the meeting took place more than a week ago then this is more important

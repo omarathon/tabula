@@ -25,7 +25,7 @@ class ReturnToMarkerNotification
 	with UserIdRecipientNotification
 	with AutowiringUserLookupComponent
 	with Logging
-	with ActionRequiredNotification {
+	with AllCompletedActionRequiredNotification {
 
 	def this(markerNumber: Int, commentValue: String) {
 		this()

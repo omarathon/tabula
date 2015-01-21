@@ -5,7 +5,7 @@ import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.StudentSignUp
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.{ActionRequiredNotification, FreemarkerModel, Notification, UserIdRecipientNotification}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 object OpenSmallGroupSetsNotification {
@@ -55,7 +55,8 @@ abstract class AbstractOpenSmallGroupSetsNotification
 
 @Entity
 @DiscriminatorValue(value="OpenSmallGroupSets")
-class OpenSmallGroupSetsStudentSignUpNotification extends AbstractOpenSmallGroupSetsNotification with ActionRequiredNotification {
+class OpenSmallGroupSetsStudentSignUpNotification
+	extends AbstractOpenSmallGroupSetsNotification with AllCompletedActionRequiredNotification {
 
 	priority = Warning
 

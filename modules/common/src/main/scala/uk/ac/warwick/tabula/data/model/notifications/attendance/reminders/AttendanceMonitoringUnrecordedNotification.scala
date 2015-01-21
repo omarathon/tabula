@@ -13,7 +13,7 @@ import uk.ac.warwick.userlookup.User
 abstract class AbstractAttendanceMonitoringUnrecordedNotification
 	extends Notification[Department, Unit]
 	with SingleItemNotification[Department]
-	with ActionRequiredNotification {
+	with AllCompletedActionRequiredNotification {
 
 	override final def verb = "record"
 
