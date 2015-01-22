@@ -307,8 +307,17 @@ trait ActionRequiredNotification {
 
 	@transient var notificationService = Wire[NotificationService]
 
-	@transient final protected val completed = BooleanSetting("completed", false)
-	@transient final protected val completedBy = StringSetting("completedBy", "")
+	@transient final protected val _completed = BooleanSetting("completed", false)
+	protected def completed_=(isCompleted: Boolean) { _completed.value = isCompleted }
+	def completed = _completed.value
+
+	@transient final protected val _completedBy = StringSetting("completedBy", "")
+	protected def completedBy_=(userId: String) { _completedBy.value = userId }
+	def completedBy = _completedBy.value
+
+	@transient final protected val _completedOn = StringSetting("completedOn", "")
+	protected def completedOn_=(dateTime: DateTime) { _completedOn.value = dateTime.getMillis.toString }
+	def completedOn = new DateTime(_completedOn.value.toLong)
 
 	def actionCompleted(user: User)
 
@@ -320,8 +329,9 @@ trait AllCompletedActionRequiredNotification extends ActionRequiredNotification 
 
 	override final def actionCompleted(user: User) = {
 		dismiss(user)
-		this.completed.value = true
-		this.completedBy.value = user.getUserId
+		completed = true
+		completedBy = user.getUserId
+		completedOn = DateTime.now
 		notificationService.update(Seq(this), user)
 	}
 }

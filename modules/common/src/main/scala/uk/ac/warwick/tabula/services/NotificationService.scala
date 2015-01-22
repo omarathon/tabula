@@ -1,17 +1,18 @@
 package uk.ac.warwick.tabula.services
 
+import org.apache.lucene.search.FieldDoc
+import org.hibernate.ObjectNotFoundException
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{Activity, Notification}
-import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.NotificationDao
-import uk.ac.warwick.userlookup.User
-import org.apache.lucene.search.FieldDoc
-import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
-import org.hibernate.ObjectNotFoundException
-import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
+import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
+import uk.ac.warwick.userlookup.User
+
+import scala.reflect.ClassTag
 
 case class ActivityStreamRequest(
 		user: User,
@@ -34,6 +35,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 	var dao = Wire[NotificationDao]
 	var index = Wire[NotificationIndexService]
 	var indexManager = Wire[IndexManager]
+	var userLookup = Wire[UserLookupService]
 
 	def getNotificationById(id: String) = dao.getById(id)
 
@@ -59,14 +61,32 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 
 	def toActivity(notification: Notification[_,_]) : Option[Activity[Any]] = {
 		try {
-			val content = notification.content
-			val message = renderTemplate(content.template, content.model)
+			val (message, priority) =
+			// TODO Tried pattern matching this but it wouldn't complile
+				if (notification.isInstanceOf[ActionRequiredNotification] && notification.asInstanceOf[ActionRequiredNotification].completed) {
+					val actionRequired = notification.asInstanceOf[ActionRequiredNotification]
+					val message = "Completed by %s on %s".format(
+						userLookup.getUserByUserId(actionRequired.completedBy) match {
+							case FoundUser(u) => u.getFullName
+							case _ => "Unknown user"
+						},
+						notification.dateTimeFormatter.print(actionRequired.completedOn)
+					)
+					val priority = NotificationPriority.Complete
+					(message, priority)
+				} else {
+					val content = notification.content
+					val message = renderTemplate(content.template, content.model)
+					val priority = notification.priorityOrDefault
+					(message, priority)
+				}
+
 
 			Some(new Activity[Any](
 				id = notification.id,
 				title = notification.title,
 				date = notification.created,
-				priority = notification.priorityOrDefault.toNumericalValue,
+				priority = priority.toNumericalValue,
 				agent = notification.agent,
 				verb = notification.verb,
 				url = notification.url,
@@ -82,6 +102,10 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 
 	def save(recipientInfo: RecipientNotificationInfo) = transactional() {
 		dao.save(recipientInfo)
+	}
+
+	def findActionRequiredNotificationsByEntityAndType[A <: ActionRequiredNotification : ClassTag](entity: ToEntityReference): Seq[ActionRequiredNotification] = {
+		dao.findActionRequiredNotificationsByEntityAndType[A](entity)
 	}
 
 }

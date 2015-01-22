@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.data
 
-import org.springframework.stereotype.Repository
-import org.hibernate.criterion.{Restrictions, Order}
-import uk.ac.warwick.util.hibernate.{BatchResultsImpl, BatchResults}
-import uk.ac.warwick.tabula.data.model.{ToEntityReference, Notification}
-import uk.ac.warwick.tabula.helpers.FunctionConversions.asGoogleFunction
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import org.hibernate.FetchMode
+import org.hibernate.criterion.{Order, Restrictions}
+import org.joda.time.DateTime
+import org.springframework.stereotype.Repository
+import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
+import uk.ac.warwick.tabula.data.model.{ActionRequiredNotification, Notification, ToEntityReference}
+
+import scala.reflect.ClassTag
 
 trait NotificationDao {
 	def save(notification: Notification[_,_])
@@ -16,6 +16,7 @@ trait NotificationDao {
 	def update(notification: Notification[_,_])
 
 	def getById(id: String): Option[Notification[_  >: Null <: ToEntityReference, _]]
+	def findActionRequiredNotificationsByEntityAndType[A <: ActionRequiredNotification : ClassTag](entity: ToEntityReference): Seq[ActionRequiredNotification]
 
 	def recent(start: DateTime): Scrollable[Notification[_,_]]
 	def unemailedRecipientCount: Number
@@ -89,4 +90,15 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 	}
 
 	def getById(id: String) = getById[Notification[_ >: Null <: ToEntityReference,_]](id)
+
+	def findActionRequiredNotificationsByEntityAndType[A <: ActionRequiredNotification : ClassTag](entity: ToEntityReference): Seq[ActionRequiredNotification] = {
+		val targetEntity = entity match {
+			case ref: ToEntityReference => ref.toEntityReference.entity
+			case _ => entity
+		}
+		session.newCriteria[A]
+			.createAlias("items", "items")
+			.add(is("items.entity", targetEntity))
+			.seq
+	}
 }
