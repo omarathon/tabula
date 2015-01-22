@@ -35,7 +35,6 @@
 	<#assign queueSitsUploadEnabled=features.queueFeedbackForSits />
 	<#assign uploadToSits=assignment.uploadMarksToSits />
 
-
 	<div class="fix-header pad-when-fixed">
 		<#include "_filter.ftl" />
 

@@ -4,11 +4,6 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
-import uk.ac.warwick.tabula.coursework.commands.assignments.ExtensionListItem
-import uk.ac.warwick.tabula.coursework.commands.assignments.Student
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
-import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
-import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, Extension, MarkerSelectField, WordCountField}
 import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
