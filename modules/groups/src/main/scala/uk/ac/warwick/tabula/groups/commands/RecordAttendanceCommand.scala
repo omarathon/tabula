@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.groups.commands
 
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.groups.commands.RecordAttendanceCommand.UniversityId
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringEventAttendanceServiceComponent, AutowiringAttendanceMonitoringEventAttendanceServiceComponent}
 
 import scala.collection.JavaConverters._
@@ -13,9 +14,9 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
-import uk.ac.warwick.tabula.helpers.LazyMaps
+import uk.ac.warwick.tabula.helpers.{DateBuilder, FoundUser, LazyMaps}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.{FeaturesComponent, AutowiringFeaturesComponent, CurrentUser, ItemNotFoundException}
+import uk.ac.warwick.tabula._
 import org.joda.time.{LocalDateTime, DateTime}
 import RecordAttendanceCommand._
 
@@ -145,6 +146,19 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 	lazy val attendances: Map[MemberOrUser, Option[SmallGroupEventAttendance]] = benchmarkTask("Get attendances") {
 		val all = occurrence.attendance.asScala
 		members.map { m => (m, all.find { a => a.universityId == m.universityId })}.toMap
+	}
+
+	def attendanceMetadata(uniId: UniversityId) = {
+		occurrence.attendance.asScala
+			.find { _.universityId == uniId }
+			.map(attendance => {
+				val userString = userLookup.getUserByUserId(attendance.updatedBy) match {
+					case FoundUser(u) => s"by ${u.getFullName}, "
+					case _ => ""
+				}
+
+				s"Recorded $userString${DateFormats.CSVDateTime.print(attendance.updatedDate)}"
+		})
 	}
 	
 	def populate() {
