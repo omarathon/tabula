@@ -13,7 +13,7 @@
 
 <#macro row info>
 	<#assign u = info.student />
-	<tr class="itemContainer" data-contentid="${markingId(u)}" data-markingurl="<@routes.feedbackAdjustment assignment />">
+	<tr class="item-container" data-contentid="${markingId(u)}" data-markingurl="<@routes.feedbackAdjustment assignment />">
 		<td class="student-col toggle-cell"><h6 class="toggle-icon">${u.firstName}</h6></td>
 		<td class="student-col toggle-cell">
 			<h6>${u.lastName}&nbsp;<@pl.profile_link u.warwickId! /></h6>
