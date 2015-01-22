@@ -284,6 +284,14 @@
 											</#compress>
 										</#if>
 									</#compress></@stage>
+									<#if feedback.adjustmentReason??>
+										<div>
+											<i class="icon-ok"></i> Marks adjusted :
+											<#if feedback.adjustedMark??>${feedback.adjustedMark}</#if><#if feedback.adjustedGrade??>,</#if>
+											<#if feedback.adjustedGrade??> grade ${feedback.adjustedGrade}</#if>
+										 	 - Reason for adjustment: ${feedback.adjustmentReason!''}
+										</div>
+									</#if>
 								</#if>
 
 								<#if student.stages?keys?seq_contains('AddFeedback')>

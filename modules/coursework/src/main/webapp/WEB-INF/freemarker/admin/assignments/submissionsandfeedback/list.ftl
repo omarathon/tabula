@@ -269,9 +269,15 @@
 							 <#if assignment.collectMarks>
 								<td class="mark">
 									${(student.coursework.enhancedFeedback.feedback.actualMark)!''}
+									<#if student.coursework.enhancedFeedback.feedback.adjustedMark??>
+										 (Adjusted to - ${student.coursework.enhancedFeedback.feedback.adjustedMark})
+									</#if>
 								</td>
 								<td class="grade">
 									${(student.coursework.enhancedFeedback.feedback.actualGrade)!''}
+									<#if student.coursework.enhancedFeedback.feedback.adjustedGrade??>
+										(Adjusted to - ${student.coursework.enhancedFeedback.feedback.adjustedGrade})
+									</#if>
 								</td>
 							</#if>
 
