@@ -236,8 +236,6 @@ class Assignment
 	@JoinColumn(name = "markscheme_id")
 	var markingWorkflow: MarkingWorkflow = _
 
-	//var markerMap: JMap[String, UserGroup] = JMap[String, UserGroup]()
-
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
 	@BatchSize(size = 200)
 	var firstMarkers: JList[FirstMarkersMap] = JArrayList()
