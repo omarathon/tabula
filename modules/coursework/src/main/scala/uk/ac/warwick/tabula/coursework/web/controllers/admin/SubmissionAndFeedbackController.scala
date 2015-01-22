@@ -49,7 +49,7 @@ class SubmissionAndFeedbackController extends CourseworkController {
 
 	@ModelAttribute("submissionAndFeedbackCommand")
 	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
-		new SubmissionAndFeedbackCommand(module, assignment)
+		SubmissionAndFeedbackCommand(module, assignment)
 
 	@ModelAttribute("allFilters")
 	def allFilters(@PathVariable("assignment") assignment: Assignment) =
