@@ -14,8 +14,9 @@
 
 		<#assign u = item.student />
 		<#local thisFeedback = item.feedbacks?last />
+		<#local nextMarkerAction>Send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if></#local>
 
-		<tr class="item-container" data-contentid="${markingId(u)}" data-markingurl="${onlineMarkingUrls[u.userId]}">
+		<tr class="item-container" data-contentid="${markingId(u)}" data-markingurl="${onlineMarkingUrls[u.userId]}" data-nextmarkeraction="${nextMarkerAction}">
 			<td class="check-col">
 				<@form.selector_check_row "markerFeedback" thisFeedback.id />
 			</td>
@@ -53,26 +54,28 @@
 				<#if thisFeedback.state.toString == "ReleasedForMarking">
 					Submission needs marking
 				<#elseif thisFeedback.state.toString == "InProgress">
-					Send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if>
+					${nextMarkerAction}
 				<#elseif thisFeedback.state.toString == "Rejected">
 					Review feedback and re-send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if>
 				<#elseif thisFeedback.state.toString == "MarkingCompleted">
-					No action required
+					No action required<#if item.nextMarker?has_content> - Sent to ${item.nextMarker.fullName}</#if>
 				</#if>
 			</td>
 		</tr>
 	</#list>
 </#macro>
 
-<#macro workflowActions nextRoleName previousRoleName>
+<#macro workflowActions nextRoleName previousRoleName currentRoleName>
 <div class="btn-group">
-	<a class="use-tooltip form-post btn"
-	   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point."
-	   data-container="body"
-	   href="<@routes.markingCompleted assignment marker nextRoleName/>"
-	   id="marking-complete-button">
-		<i class="text-success icon-arrow-right"></i> Send to ${nextRoleName}
-	</a>
+	<#if currentRoleName != 'Moderator'>
+		<a class="use-tooltip form-post btn"
+		   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point."
+		   data-container="body"
+		   href="<@routes.markingCompleted assignment marker nextRoleName/>"
+		   id="marking-complete-button">
+			<i class="text-success icon-arrow-right"></i> Send to ${nextRoleName}
+		</a>
+	</#if>
 
 	<#if previousRoleName?has_content>
 		<a class="use-tooltip form-post btn"
@@ -160,7 +163,7 @@
 		<#list markerFeedback as stage>
 			<div class="well">
 				<h3>${stage.roleName}</h3>
-				<@workflowActions stage.nextRoleName stage.previousRoleName!"" />
+				<@workflowActions stage.nextRoleName stage.previousRoleName!"" stage.roleName!""/>
 				<table class="table
 							  table-bordered
 							  table-striped

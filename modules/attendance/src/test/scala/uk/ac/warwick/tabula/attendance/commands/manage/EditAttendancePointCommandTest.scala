@@ -11,7 +11,7 @@ import scala.collection.mutable
 import uk.ac.warwick.tabula.data.model.{ScheduledNotification, StudentRelationshipType, Department}
 import uk.ac.warwick.tabula.JavaImports.JHashSet
 import uk.ac.warwick.util.termdates.Term.TermType
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceMonitoringPoint, MonitoringPointReport}
+import uk.ac.warwick.tabula.data.model.attendance._
 
 class EditAttendancePointCommandTest extends TestBase with Mockito {
 
@@ -154,6 +154,16 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 		errors.hasFieldErrors("startDate") should be {false}
 		validator.validateDates(errors, new DateTime().toLocalDate, new DateTime().toLocalDate.minusDays(1))
 		errors.hasFieldErrors("startDate") should be {true}
+	}}
+
+	@Test
+	def validateTypeForEndDate() { new Fixture {
+		validator.validateTypeForEndDate(errors, AttendanceMonitoringPointType.Standard, new DateTime().toLocalDate.minusDays(1))
+		errors.hasFieldErrors("pointType") should be {false}
+		validator.validateTypeForEndDate(errors, AttendanceMonitoringPointType.Meeting, new DateTime().toLocalDate)
+		errors.hasFieldErrors("pointType") should be {false}
+		validator.validateTypeForEndDate(errors, AttendanceMonitoringPointType.Meeting, new DateTime().toLocalDate.minusDays(1))
+		errors.hasFieldErrors("pointType") should be {true}
 	}}
 
 	@Test

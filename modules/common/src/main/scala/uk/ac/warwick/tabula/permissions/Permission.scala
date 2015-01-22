@@ -212,6 +212,8 @@ object Permissions {
 	}
 
 	object Marks {
+		case object MarksManagement extends ScopelessPermission("Marks management across all departments")
+
 		case object DownloadTemplate extends Permission("Download a marks template for all marks")
 		case object DownloadOwnTemplate extends Permission("Download a marks template for own marks")
 

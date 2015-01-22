@@ -82,8 +82,10 @@
 	</@f.form>
 	</div>
 	<div class="modal-footer">
-		<button id="save-agent" class="btn disabled pull-right" type="button">Save</button>
-		<button id="cancel-save-agent" class="btn pull-right" data-dismiss="modal" type="button">Cancel</button>
+		<div class="pull-right">
+			<button id="save-agent" class="btn disabled" type="button">Save</button>
+			<button id="cancel-save-agent" class="btn" data-dismiss="modal" type="button">Cancel</button>
+		</div>
 	</div>
 
 

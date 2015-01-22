@@ -41,6 +41,30 @@ their feedback published. Those students won't be emailed again.
 </#if>
 </p>
 
+<#if features.queueFeedbackForSits && assignment.uploadMarksToSits>
+	<#if assignment.module.adminDepartment.canUploadMarksToSitsForYear(assignment.academicYear, assignment.module)>
+		<div class="alert alert-info">
+			<p>Publishing this feedback will cause marks to be queued for upload to SITS.</p>
+			<p>Marks and grades will automatically be uploaded and displayed in the SITS SAT screen as actual marks and grades.</p>
+		</div>
+	<#else>
+		<div class="alert alert-warning">
+			<p>Publishing this feedback will cause marks to be queued for upload to SITS.</p>
+			<p>
+				However mark upload is closed for ${assignment.module.adminDepartment.name} (${assignment.module.degreeType.toString})
+				for the academic year ${assignment.academicYear.toString}.
+			</p>
+			<p>
+				If you still have marks to upload, please contact the Exams Office <a id="email-support-link" href="mailto:aoexams@warwick.ac.uk">aoexams@warwick.ac.uk</a>.
+			</p>
+			<p>
+				As soon as mark upload is re-opened for this department,
+				the marks and grades will automatically be uploaded and displayed in the SITS SAT screen as actual marks and grades
+			</p>
+		</div>
+	</#if>
+</#if>
+
 <p>
 Publishing feedback will make all currently uploaded feedback for this assignment available for students to download. 
 If more feedback is added later, it won't be published automatically.

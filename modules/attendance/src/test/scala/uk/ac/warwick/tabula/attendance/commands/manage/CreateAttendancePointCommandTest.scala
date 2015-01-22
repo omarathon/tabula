@@ -93,6 +93,16 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test
+	def validateTypeForEndDate() { new Fixture {
+		validator.validateTypeForEndDate(errors, AttendanceMonitoringPointType.Standard, new DateTime().toLocalDate.minusDays(1))
+		errors.hasFieldErrors("pointType") should be {false}
+		validator.validateTypeForEndDate(errors, AttendanceMonitoringPointType.Meeting, new DateTime().toLocalDate)
+		errors.hasFieldErrors("pointType") should be {false}
+		validator.validateTypeForEndDate(errors, AttendanceMonitoringPointType.Meeting, new DateTime().toLocalDate.minusDays(1))
+		errors.hasFieldErrors("pointType") should be {true}
+	}}
+
+	@Test
 	def validateTypeMeeting() {
 		new Fixture {
 			validator.validateTypeMeeting(errors, mutable.Set(), mutable.Set(), 0, null)

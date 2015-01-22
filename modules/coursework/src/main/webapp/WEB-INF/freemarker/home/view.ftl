@@ -31,6 +31,7 @@
 	<#include "_student.ftl" />
 	<#include "_markers.ftl" />
 	<#include "_admin.ftl" />
+	<#include "_marks_management_admin.ftl" />
 
 	<#assign is_student=user.student /> <#-- Non-students may also have assignments, but we still show them the intro text -->
 	<#assign is_alumni=user.alumni />

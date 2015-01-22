@@ -64,6 +64,12 @@ trait AttendanceMonitoringPointValidation {
 		}
 	}
 
+	def validateTypeForEndDate(errors: Errors, pointType: AttendanceMonitoringPointType, endDate: LocalDate): Unit = {
+		if (pointType != AttendanceMonitoringPointType.Standard && endDate.plusDays(1).toDateTimeAtStartOfDay.isBeforeNow) {
+			errors.rejectValue("pointType", "attendanceMonitoringPoint.nonStandardInPast")
+		}
+	}
+
 	def validateTypeMeeting(
 		errors: Errors,
 		meetingRelationships: mutable.Set[StudentRelationshipType],

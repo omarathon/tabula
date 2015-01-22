@@ -517,6 +517,8 @@ $(function() {
 				var rejected = $response.data('data') == 'Rejected';
 				var markingCompleted = $response.data('data') == 'MarkingCompleted';
 				var $statusContainer = $row.find('.status-col dt');
+				var $actionContainer = $row.find('.action-col');
+				var nextMarkerAction = $row.data('nextmarkeraction');
 
 				if(rejected) {
 					$statusContainer.append($('<div class="label label-important">Rejected</div>'));
@@ -527,6 +529,7 @@ $(function() {
 				else if(!$statusContainer.find('.marked').length) {
 					$statusContainer.find('.label-warning').remove() // remove existing label before adding another
 					$statusContainer.append($('<div class="label label-warning marked">Marked</div>'));
+					$actionContainer.html(nextMarkerAction);
 				}
 
 				$row.next('tr').trigger('tabula.expandingTable.toggle');

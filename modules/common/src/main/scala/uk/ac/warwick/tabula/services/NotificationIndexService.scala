@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services
 
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{NotificationPriority, Notification}
 import java.io.File
 import org.apache.lucene.analysis.Analyzer
@@ -147,6 +148,13 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 		val sorter: Sorter = new NumericDocValuesSorter(UpdatedDateField, false)
 		val sortingMergePolicy = new SortingMergePolicy(config.getMergePolicy, sorter)
 		config.setMergePolicy(sortingMergePolicy)
+	}
+
+	override def indexItems(items: TraversableOnce[RecipientNotification]) = transactional(readOnly = true) {
+		guardMultipleIndexes {
+			if (items.nonEmpty) logger.info(s"Start notification index, ${items.size} items, for ${items.toSeq.head.recipient.getUserId}")
+			doIndexItems(items, isIncremental = false)
+		}
 	}
 
 }
