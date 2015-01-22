@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.coursework.services.CourseworkWorkflowService
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.{AssignmentMembershipService, UserLookupService}
+import uk.ac.warwick.tabula.services.{FeedbackForSitsService, AssignmentMembershipService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.Errors
@@ -31,6 +31,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 	var userLookup = Wire.auto[UserLookupService]
 	var courseworkWorkflowService = Wire.auto[CourseworkWorkflowService]
+	var feedbackForSitsService = Wire.auto[FeedbackForSitsService]
 
 	val enhancedSubmissionsCommand = new ListSubmissionsCommand(module, assignment)
 	val enhancedFeedbacksCommand = new ListFeedbackCommand(module, assignment)
@@ -122,7 +123,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 					universityId == feedback.universityId && x._2.isAfter(latestUpdate)
 				})
 
-				FeedbackListItem(feedback, downloaded, viewed)
+				FeedbackListItem(feedback, downloaded, viewed, feedbackForSitsService.getByFeedback(feedback).getOrElse(null))
 			}
 			
 			val enhancedExtensionForUniId = usersExtension.headOption map { extension =>

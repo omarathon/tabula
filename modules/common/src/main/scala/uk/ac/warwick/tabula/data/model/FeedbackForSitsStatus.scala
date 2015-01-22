@@ -11,9 +11,9 @@ sealed abstract class FeedbackForSitsStatus(val code: String, val description: S
 }
 
 object FeedbackForSitsStatus {
-	case object UploadNotAttempted extends FeedbackForSitsStatus("uploadNotAttempted", "Upload not yet attempted")
-	case object Failed extends FeedbackForSitsStatus("failed", "Failed")
-	case object Successful extends FeedbackForSitsStatus("successful", "Successful")
+	case object UploadNotAttempted extends FeedbackForSitsStatus("uploadNotAttempted", "Queued for SITS upload")
+	case object Failed extends FeedbackForSitsStatus("failed", "SITS Upload Failed")
+	case object Successful extends FeedbackForSitsStatus("successful", "Uploaded to SITS")
 
 	// manual collection - keep in sync with the case objects above
 	val members = Seq(UploadNotAttempted, Successful, Failed)

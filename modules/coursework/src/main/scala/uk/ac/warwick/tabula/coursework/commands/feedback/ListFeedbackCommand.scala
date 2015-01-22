@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Assignment, Module, Feedback}
+import uk.ac.warwick.tabula.data.model.{FeedbackForSits, Assignment, Module, Feedback}
 import uk.ac.warwick.tabula.services.AuditEventIndexService
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.joda.time.DateTime
@@ -43,4 +43,4 @@ case class ListFeedbackResult(
   latestGenericFeedback: Option[DateTime]
 )
 
-case class FeedbackListItem(feedback: Feedback, downloaded: Boolean, onlineViewed: Boolean)
+case class FeedbackListItem(feedback: Feedback, downloaded: Boolean, onlineViewed: Boolean, feedbackForSits: FeedbackForSits)
