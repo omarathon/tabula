@@ -89,21 +89,22 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 				}
 			  as(P.Admin1) {
 
-					And("I adjust Student2's feedback")
-					go to Path("/coursework/admin/module/" + moduleCode.toLowerCase + "/assignments/" + assignmentId + "/summary")
-					checkbox(cssSelector(s".collection-checkbox[value='${P.Student2.warwickId}']")).select()
-
-					val feedbackToolbarLink = findAll(linkText("Feedback")).next().underlying
-					feedbackToolbarLink.click()
-					eventually(click on feedbackToolbarLink.findElement(By.partialLinkText("Adjustments")))
-
-					eventually(find(cssSelector(s"#content-${P.Student2.warwickId} .toggle-cell")).get.underlying.click())
-					eventuallyAjax(getInputByLabel("Reason for adjustment") should be ('defined))
-					singleSel(cssSelector(s"#reason")).value = "Plagarism penalty"
-					textArea(cssSelector(s"#comments")).value = "Plagarism - Student copied Herons"
-					textField(cssSelector(s"#adjustedMark")).value="79"
-					textField(cssSelector(s"#adjustedGrade")).value="A"
-					find(cssSelector(s"#content-${P.Student2.warwickId} input.btn-primary")).get.underlying.click()
+					// We don't support adjusting outside of a workflow yet
+//					And("I adjust Student2's feedback")
+//					go to Path("/coursework/admin/module/" + moduleCode.toLowerCase + "/assignments/" + assignmentId + "/summary")
+//					checkbox(cssSelector(s".collection-checkbox[value='${P.Student2.warwickId}']")).select()
+//
+//					val feedbackToolbarLink = findAll(linkText("Feedback")).next().underlying
+//					feedbackToolbarLink.click()
+//					eventually(click on feedbackToolbarLink.findElement(By.partialLinkText("Adjustments")))
+//
+//					eventually(find(cssSelector(s"#content-${P.Student2.warwickId} .toggle-cell")).get.underlying.click())
+//					eventuallyAjax(getInputByLabel("Reason for adjustment") should be ('defined))
+//					singleSel(cssSelector(s"#reason")).value = "Plagarism penalty"
+//					textArea(cssSelector(s"#comments")).value = "Plagarism - Student copied Herons"
+//					textField(cssSelector(s"#adjustedMark")).value="79"
+//					textField(cssSelector(s"#adjustedGrade")).value="A"
+//					find(cssSelector(s"#content-${P.Student2.warwickId} input.btn-primary")).get.underlying.click()
 
 					And("I publish feedback")
 					go to Path("/coursework/admin/module/" + moduleCode.toLowerCase + "/assignments/" + assignmentId + "/publish")
