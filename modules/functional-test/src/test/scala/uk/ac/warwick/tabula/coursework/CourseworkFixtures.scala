@@ -119,6 +119,11 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 		click on addAssignment
 
+		val prefilledReset = linkText("Don't do this")
+		if (prefilledReset.findElement.isDefined) {
+			click on prefilledReset
+		}
+
 		textField("name").value = assignmentName
 		settings(members)
 
