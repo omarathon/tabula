@@ -131,7 +131,7 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 				as(P.Student2){
 					go to Path(s"/coursework/module/${moduleCode.toLowerCase}/$assignmentId")
 					Then("I see the feedback")
-					pageSource should include("79")
+					pageSource should include("98")
 				}
 
 				as(P.Admin1) {
