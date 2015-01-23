@@ -57,6 +57,18 @@ class OpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test
+	def applyPostgradsOpenThisYearOnly() { new Fixture{
+		command.populate()
+		command.pgMappings = Map(
+			department.code -> DepartmentStateThisYearOnly.value
+		).asJava
+		command.updatePostgrads = true
+		command.applyInternal() should be (DegreeType.Postgraduate)
+		department.canUploadMarksToSitsForYear(currentYear, DegreeType.Postgraduate) should be (true)
+		department.canUploadMarksToSitsForYear(command.previousAcademicYear, DegreeType.Postgraduate) should be(false)
+	}}
+
+	@Test
 	def populate() { new Fixture {
 		command.currentAcademicYear should be (currentYear)
 		command.previousAcademicYear should be (currentYear.-(1))

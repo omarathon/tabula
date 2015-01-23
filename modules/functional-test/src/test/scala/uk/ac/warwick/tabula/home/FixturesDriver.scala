@@ -204,7 +204,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/upstreamAssessmentGroup"
 
 		val universityIdArgs: Map[String, String] = universityIds.zipWithIndex.map { case (universityId, index) =>
-			s"universityIds[${index}]" -> universityId
+			s"universityIds[$index]" -> universityId
 		}.toMap
 
 		val args = Map(
@@ -213,6 +213,13 @@ trait FixturesDriver extends SimpleHttpFetching {
 			"occurrence" -> occurrence
 		) ++ universityIdArgs
 
+		val req = url(uri).POST << args
+		http.when(_==200)(req >|)
+	}
+
+	def createPremarkedAssignment(moduleCode: String): Unit = {
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/premarkedAssignment"
+		val args = Map("moduleCode" -> moduleCode)
 		val req = url(uri).POST << args
 		http.when(_==200)(req >|)
 	}

@@ -32,7 +32,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 			withinExtension: Boolean=false) =
 		WorkflowItems(
 			enhancedSubmission=submission map { s => SubmissionListItem(s, submissionDownloaded) }, 
-			enhancedFeedback=feedback map { f => FeedbackListItem(f, feedbackDownloaded, onlineFeedbackViewed) },
+			enhancedFeedback=feedback map { f => FeedbackListItem(f, feedbackDownloaded, onlineFeedbackViewed, null) },
 			enhancedExtension=extension map { e => ExtensionListItem(e, withinExtension) }
 		)
 		

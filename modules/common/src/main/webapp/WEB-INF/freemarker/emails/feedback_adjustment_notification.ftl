@@ -1,7 +1,7 @@
 Adjustments were made to feedback for ${feedback.universityId} on ${assignment.name} ${assignment.module.code?upper_case}.
 
-- Adjusted mark: ${feedback.adjustedMark}
-- Adjusted grade: ${feedback.adjustedGrade}
-- Reason for adjustment: ${feedback.adjustmentReason}
+<#if feedback.adjustedMark??>- Adjusted mark: ${feedback.adjustedMark}}</#if>
+<#if feedback.adjustedGrade??>- Adjusted grade: ${feedback.adjustedGrade}</#if>
+<#if feedback.adjustmentReason??>- Reason for adjustment: ${feedback.adjustmentReason}</#if>
 
-${feedback.adjustmentComments}
+${feedback.adjustmentComments!""}

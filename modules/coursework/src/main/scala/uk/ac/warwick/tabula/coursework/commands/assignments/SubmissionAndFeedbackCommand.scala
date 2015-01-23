@@ -9,27 +9,36 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
 import uk.ac.warwick.tabula.coursework.helpers.{CourseworkFilter, CourseworkFilters}
 import uk.ac.warwick.tabula.coursework.services.CourseworkWorkflowService
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.{AssignmentMembershipService, UserLookupService}
+import uk.ac.warwick.tabula.services._
+
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.Errors
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.coursework.commands.feedback.ListFeedbackCommand
+import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
 
-class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment) 
+object SubmissionAndFeedbackCommand {
+	def apply(module: Module, assignment: Assignment) =
+		new SubmissionAndFeedbackCommand(module, assignment)
+		with AutowiringAssignmentMembershipServiceComponent
+		with AutowiringUserLookupComponent
+		with AutowiringFeedbackForSitsServiceComponent
+}
+
+abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment)
 	extends Command[SubmissionAndFeedbackResults] with Unaudited with ReadOnly with SelfValidating {
+
+	self: AssignmentMembershipServiceComponent with UserLookupComponent with FeedbackForSitsServiceComponent =>
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
-	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
-	var userLookup = Wire.auto[UserLookupService]
 	var courseworkWorkflowService = Wire.auto[CourseworkWorkflowService]
 
 	val enhancedSubmissionsCommand = new ListSubmissionsCommand(module, assignment)
@@ -37,7 +46,6 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	
 	@NotNull var filter: CourseworkFilter = CourseworkFilters.AllStudents
 	var filterParameters: JMap[String, String] = JHashMap()
-	
 	// When we call export commands, we may want to further filter by a subset of student IDs
 	var students: JList[String] = JArrayList()
 
@@ -122,7 +130,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 					universityId == feedback.universityId && x._2.isAfter(latestUpdate)
 				})
 
-				FeedbackListItem(feedback, downloaded, viewed)
+				FeedbackListItem(feedback, downloaded, viewed, feedbackForSitsService.getByFeedback(feedback).getOrElse(null))
 			}
 			
 			val enhancedExtensionForUniId = usersExtension.headOption map { extension =>

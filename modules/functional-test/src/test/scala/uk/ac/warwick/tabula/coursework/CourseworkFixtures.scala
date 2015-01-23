@@ -15,9 +15,13 @@ import scala.concurrent.duration.Duration
 
 trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen {
 
+	val TEST_MODULE_CODE = "xxx02"
+
 	before {
 		Given("The test department exists")
 		go to Path("/scheduling/fixtures/setup")
+
+		createPremarkedAssignment(TEST_MODULE_CODE)
 
 		val assessmentFuture = future {
 			And("There is an assessment component for module xxx01")
@@ -72,7 +76,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 			val editPerms = info.findElement(By.partialLinkText("Edit module permissions"))
 			eventually {
-				editPerms.isDisplayed should be (true)
+				editPerms.isDisplayed should be {true}
 			}
 			click on editPerms
 
@@ -110,10 +114,15 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 		val addAssignment = info.findElement(By.partialLinkText("Create new assignment"))
 		eventually {
-			addAssignment.isDisplayed should be (true)
+			addAssignment.isDisplayed should be {true}
 		}
 
 		click on addAssignment
+
+		val prefilledReset = linkText("Don't do this")
+		if (prefilledReset.findElement.isDefined) {
+			click on prefilledReset
+		}
 
 		textField("name").value = assignmentName
 		settings(members)
@@ -132,6 +141,48 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		val assignmentId = copyableUrl.substring(copyableUrl.lastIndexOf('/') + 1)
 
 		callback(assignmentId)
+	}
+
+	def addSingleMarkingWorkflow()(callback: String => Unit) = as(P.Admin1) {
+
+		click on linkText("Go to the Test Services admin page")
+		verifyPageLoaded {
+			// wait for the page to load
+			find(cssSelector("div.dept-show")) should be('defined)
+		}
+
+		When("I should be able to click on the Manage button")
+		click on cssSelector(".dept-settings a.dropdown-toggle")
+
+		Then("I should see the workflows menu option")
+		val markingWorkflowsLink = cssSelector(".dept-settings .dropdown-menu").webElement.findElement(By.partialLinkText("Marking workflows"))
+		eventually {
+			markingWorkflowsLink.isDisplayed should be {true}
+		}
+		click on markingWorkflowsLink
+		When("I click on the create workflows button")
+		click on partialLinkText("Create")
+
+		And("I enter the necessary data")
+		textField("name").value = "First only workflow"
+		singleSel("markingMethod").value = "FirstMarkerOnly"
+		textField("firstMarkers").value = P.Marker1.usercode
+
+		Then("Another marker field should magically appear")
+		eventually {
+			findAll(cssSelector("input.flexi-picker")).toList.count(_.isDisplayed) should be (2)
+		}
+		submit()
+
+		Then("I should be redirected back to the marking workflow page")
+		currentUrl should endWith ("/markingworkflows")
+
+		val copyableUrl = find(xpath("(//a[contains(text(),'Delete')])[2]")).get.underlying.getAttribute("href")
+		val workflowId = copyableUrl.substring(copyableUrl.lastIndexOf('/') + 1)
+
+
+
+		callback(workflowId)
 	}
 
 
@@ -159,7 +210,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 		submit()
 		verifyPageLoaded(
-			pageSource contains "Thanks, we've received your submission." should be (true)
+			pageSource contains "Thanks, we've received your submission." should be {true}
 		)
 	}
 
@@ -191,7 +242,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			* instead. Noted here in case of unexpected reversion.
 			*
 			*/
-		textField("requestedExpiryDate").isDisplayed should be (true)
+		textField("requestedExpiryDate").isDisplayed should be {true}
 
 		// complete the form
 		textArea("reason").value = "I have a desperate need for an extension."
@@ -203,7 +254,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		submit()
 
 		verifyPageLoaded(
-			pageSource contains "You have requested an extension" should be (true)
+			pageSource contains "You have requested an extension" should be {true}
 		)
 	}
 
@@ -217,15 +268,15 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		// Make sure JS is working
 		id("js-hint").findElement should be ('empty)
 
-		if (!members.isEmpty) {
+		if (members.nonEmpty) {
 			click on linkText("Add students manually")
-			eventually { textArea("massAddUsers").isDisplayed should be (true) }
+			eventually { textArea("massAddUsers").isDisplayed should be {true} }
 
 			textArea("massAddUsers").value = members.mkString("\n")
 			click on className("add-students")
 
 			// Eventually, a Jax!
-			eventuallyAjax { textArea("massAddUsers").isDisplayed should be (false) }
+			eventuallyAjax { textArea("massAddUsers").isDisplayed should be {false} }
 			// there will be a delay between the dialog being dismissed and the source being updated by the
 			// ajax response. So wait some more
 			eventuallyAjax{pageSource should include(members.size + " manually enrolled")}

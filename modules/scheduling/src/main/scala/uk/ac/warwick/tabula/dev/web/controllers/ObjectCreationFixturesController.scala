@@ -286,3 +286,18 @@ class CreateAttendanceMonitoringSchemeFixturesController {
 		cmd.apply()
 	}
 }
+
+@Controller
+@RequestMapping(Array("/fixtures/create/premarkedAssignment"))
+class CreatePremarkedAssignmentFixtureController {
+
+	@ModelAttribute("createPremarkedAssignmentFixtureCommand")
+	def getCreatePremarkedAssignmentFixtureCommand(): Appliable[Assignment] = {
+		CreatePremarkedAssignmentFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createPremarkedAssignmentFixtureCommand") cmd: Appliable[Assignment]) {
+		cmd.apply()
+	}
+}
