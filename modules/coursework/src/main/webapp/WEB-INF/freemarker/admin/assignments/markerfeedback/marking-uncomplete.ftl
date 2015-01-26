@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<h1>Return to ${previousStageRole}</h1>
+<h1>Reject and return to ${previousStageRole}</h1>
 
 <@f.form cssClass="submission-form double-submit-protection form-horizontal" method="post" action="${formAction}" commandName="markingUncompletedCommand">
 
@@ -18,7 +18,7 @@
 		<@form.errors path="markerFeedback" />
 		<#assign markerFeedback = status.actualValue />
 		<p>
-			<strong><@fmt.p markingUncompletedCommand.markerFeedback?size "submission" /></strong> will be returned to the ${previousStageRole}. Any changes you have made will be discarded.
+			<strong>Feedback for <@fmt.p markingUncompletedCommand.markerFeedback?size "submission" /></strong> will be rejected and returned to the ${previousStageRole}.
 		</p>
 		<#list markerFeedback as mf>
 			<input type="hidden" name="markerFeedback" value="${mf.id}" />

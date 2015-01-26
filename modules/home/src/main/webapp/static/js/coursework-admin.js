@@ -91,7 +91,7 @@ $(function(){
 	// enable shift-click on multiple checkboxes in tables
 	$('table').find('input[type="checkbox"]').shiftSelectable();
 
-	$('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list, .coursework-progress-table, .expanding-table').bigList({
+	var biglistOptions = {
 		setup : function() {
 			var $container = this;
 			// #delete-selected-button won't work for >1 set of checkboxes on a page.
@@ -130,32 +130,34 @@ $(function(){
 
 			$('.form-post').click(function(event){
 				event.preventDefault();
+				if(!$(this).hasClass("disabled")) {
 
-				var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
-				var doFormSubmit = false;
+					var $form = $('<form></form>').attr({method: 'POST', action: this.href}).hide();
+					var doFormSubmit = false;
 
-				if ($container.data('checked') != 'none') {
-					var $checkedBoxes = $(".collection-checkbox:checked", $container);
-					$form.append($checkedBoxes.clone());
+					if ($container.data('checked') != 'none') {
+						var $checkedBoxes = $(".collection-checkbox:checked", $container);
+						$form.append($checkedBoxes.clone());
 
-					var $extraInputs = $(".post-field", $container);
-					$form.append($extraInputs.clone());
+						var $extraInputs = $(".post-field", $container);
+						$form.append($extraInputs.clone());
 
-					doFormSubmit = true;
-				}
+						doFormSubmit = true;
+					}
 
-				if ($(this).hasClass('include-filter') && ($('.filter-form').length > 0)) {
+					if ($(this).hasClass('include-filter') && ($('.filter-form').length > 0)) {
 						var $inputs = $(':input', '.filter-form:not("#floatedHeaderContainer *")');
 						$form.append($inputs.clone());
 
 						doFormSubmit = true;
-				}
+					}
 
-				if (doFormSubmit) {
-					$(document.body).append($form);
-				  $form.submit();
-				} else {
-					return false;
+					if (doFormSubmit) {
+						$(document.body).append($form);
+						$form.submit();
+					} else {
+						return false;
+					}
 				}
 			});
 
@@ -184,19 +186,43 @@ $(function(){
 			else {
 				$('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign"></i> Mark plagiarised');
 			}
-		},
-
-		onSomeChecked : function() {
-			$('.must-have-selected').removeClass('disabled');
-		},
-
-		onNoneChecked : function() {
-			$('.must-have-selected').addClass('disabled');
 		}
+	};
 
-	});
+	$('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list, .coursework-progress-table, .expanding-table').not(".marker-feedback-table").bigList(
+		$.extend(biglistOptions, {
+			onSomeChecked : function() {
+				$('.must-have-selected').removeClass('disabled');
+			},
 
+			onNoneChecked : function() {
+				$('.must-have-selected').addClass('disabled');
+			}
+		})
+	);
 
+	$('.marker-feedback-table').bigList(
+		$.extend(biglistOptions, {
+			onSomeChecked : function() {
+				var $markingContainer = $(this).closest(".workflow-role");
+				var $checkboxes = $markingContainer.find("input[type=checkbox][name=markerFeedback]:checked");
+				var $sendBack = $markingContainer.find(".must-be-blank");
+				var $sendForward = $markingContainer.find(".must-be-populated");
+				var allPopulated = $checkboxes.closest("tr").filter(".in-progress").size() == $checkboxes.size();
+				var allBlank = $checkboxes.closest("tr").filter(".in-progress").size() == 0;
+				if(allBlank){ $sendBack.removeClass("disabled");} else { $sendBack.addClass("disabled");}
+				if(allPopulated){ $sendForward.removeClass("disabled");} else{ $sendForward.addClass("disabled");}
+			},
+
+			onNoneChecked : function($table) {
+				var $markingContainer = $(this).closest(".workflow-role");
+				var $sendBack = $markingContainer.find(".must-be-blank");
+				var $sendForward = $markingContainer.find(".must-be-populated");
+				$sendBack.addClass("disabled");
+				$sendForward.addClass("disabled");
+			}
+		})
+	);
 
 });
 
@@ -528,7 +554,8 @@ $(function() {
 				}
 				else if(!$statusContainer.find('.marked').length) {
 					$statusContainer.find('.label-warning').remove() // remove existing label before adding another
-					$statusContainer.append($('<div class="label label-warning marked">Marked</div>'));
+					$statusContainer.append($('<span class="label label-info">In Progress</span>'));
+					$row.addClass("in-progress");
 					$actionContainer.html(nextMarkerAction);
 				}
 
