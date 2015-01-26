@@ -462,6 +462,10 @@
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
 		</pluginRepository>
 	</pluginRepositories>
 
