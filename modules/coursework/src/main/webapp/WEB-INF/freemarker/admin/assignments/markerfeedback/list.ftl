@@ -66,24 +66,24 @@
 </#macro>
 
 <#macro workflowActions nextRoleName previousRoleName currentRoleName>
-<div class="btn-group">
-	<#if currentRoleName != 'Moderator'>
-		<a class="use-tooltip form-post btn"
-		   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point."
-		   data-container="body"
-		   href="<@routes.markingCompleted assignment marker nextRoleName/>"
-		   id="marking-complete-button">
-			<i class="text-success icon-arrow-right"></i> Send to ${nextRoleName}
-		</a>
-	</#if>
-
+<div class="btn-toolbar">
 	<#if previousRoleName?has_content>
-		<a class="use-tooltip form-post btn"
+		<a class="use-tooltip form-post btn btn-danger"
 		   title="Return marks and feedback to the previous marker. All changes you have made will be discarded. Note that this can only be done if feedback has not been released for this student."
 		   data-container="body"
 		   href="<@routes.markingUncompleted assignment marker previousRoleName />"
 		   id="marking-uncomplete-button">
-			<i class="text-error icon-arrow-left"></i> Return to ${previousRoleName}
+			<i class="icon-arrow-left"></i> Reject and return to ${previousRoleName}
+		</a>
+	</#if>
+
+	<#if currentRoleName != 'Moderator'>
+		<a class="use-tooltip form-post btn btn-primary"
+		   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point."
+		   data-container="body"
+		   href="<@routes.markingCompleted assignment marker nextRoleName/>"
+		   id="marking-complete-button">
+			Confirm and send to ${nextRoleName} <i class="icon-arrow-right"></i>
 		</a>
 	</#if>
 </div>
@@ -188,6 +188,7 @@
 						<@listMarkerFeedback stage.feedbackItems stage.nextRoleName />
 					</tbody>
 				</table>
+				<@workflowActions stage.nextRoleName stage.previousRoleName!"" stage.roleName!""/>
 			</div>
 		</#list>
 		<script type="text/javascript">
