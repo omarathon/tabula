@@ -177,7 +177,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 				val modules = dept.modules
 
-
 				for (module <- modules) {
 					for (assignment <- module.assignments) {
 						for (feedback <- assignment.feedbacks) {
@@ -190,8 +189,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 				modules.foreach(invalidateAndDeletePermissions[Module])
 				modules.foreach(session.delete)
-
-
 
 				dept.modules.clear()
 
