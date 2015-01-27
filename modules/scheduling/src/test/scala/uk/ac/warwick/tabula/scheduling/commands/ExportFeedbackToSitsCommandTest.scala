@@ -46,7 +46,6 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 		feedback.assignment = assignment
 		feedback.actualGrade = Some("B")
 		feedback.actualMark = Some(73)
-
 		feedback.id = "397"
 
 		assignment.feedbacks.add(feedback)
