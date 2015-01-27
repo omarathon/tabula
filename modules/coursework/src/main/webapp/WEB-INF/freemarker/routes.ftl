@@ -16,6 +16,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro depthome module><@_u page="/admin/department/${module.department.code}/#module-${module.code}" /></#macro>
 <#macro moduleperms module><@_u page="/module/${module.code}/permissions" context="/admin" /></#macro>
 
+<#macro marksmanagementdepts><@_u page="/admin/marksmanagement/departments" /></#macro>
+
 <#macro ratefeedback feedback><#compress>
     <#assign assignment=feedback.assignment />
     <#assign module=assignment.module />

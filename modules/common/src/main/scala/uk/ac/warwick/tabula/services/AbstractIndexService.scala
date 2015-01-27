@@ -228,7 +228,7 @@ abstract class AbstractIndexService[A]
 	// Overridable - configure index writer
 	def configureIndexWriter(config: IndexWriterConfig): Unit = {}
 
-	private def doIndexItems(items: TraversableOnce[A], isIncremental: Boolean) {
+	protected def doIndexItems(items: TraversableOnce[A], isIncremental: Boolean) {
 		logger.debug("Writing to the index at " + indexPath + " with analyzer " + indexAnalyzer)
 		val writerConfig = new IndexWriterConfig(IndexService.TabulaLuceneVersion, indexAnalyzer)
 		configureIndexWriter(writerConfig)

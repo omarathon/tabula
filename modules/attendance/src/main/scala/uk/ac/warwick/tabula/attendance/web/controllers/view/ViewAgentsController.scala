@@ -23,7 +23,11 @@ class ViewAgentsController extends AttendanceController {
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable relationshipType: StudentRelationshipType
 	) = {
-		Mav("view/agents", "agents" -> cmd.apply()).crumbs(
+		val agents = cmd.apply()
+		Mav("view/agents",
+			"agents" -> agents,
+			"agentsEmails" -> agents.flatMap(a => Option(a.agentMember)).map(_.email)
+		).crumbs(
 			Breadcrumbs.View.Home,
 			Breadcrumbs.View.Department(department),
 			Breadcrumbs.View.DepartmentForYear(department, academicYear)

@@ -221,6 +221,9 @@
 						<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
 						<a class="btn" href="${returnTo}">Cancel</a>
 					</div>
+					<#if command.checkpointMap?keys?size < 500>
+						<@fmt.bulk_email_students students=command.checkpointMap?keys />
+					</#if>
 				</div>
 			</form>
 		</div>

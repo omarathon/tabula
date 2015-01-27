@@ -3,6 +3,9 @@
 <h1>${relationshipType.agentRole?capitalize}s</h1>
 
 <div class="agent-search" style="display: none;">
+	<div class="pull-right">
+		<@fmt.bulk_email emails=agentsEmails title="Email these ${relationshipType.agentRole}s" subject=""/>
+	</div>
 	<div class="input-append">
 		<input class="input-xlarge" type="text" placeholder="Search for a student or ${relationshipType.agentRole}&hellip;"/>
 		<button class="btn"><i class="icon-search"></i></button>

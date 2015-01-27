@@ -6,13 +6,15 @@
 <#assign deptheaderroute = deptheaderroutemacro in routes/>
 <@fmt.deptheader "View reports for ${academicYear.toString}" "in" department routes "deptheaderroute" />
 
-<h2>Monitoring points</h2>
+<#if (academicYear.startYear >= 2014)>
+	<h2>Monitoring points</h2>
 
-<ul>
-	<li><h3><a href="<@routes.allAttendance department academicYear />">All attendance</a></h3></li>
-	<li><h3><a href="<@routes.unrecordedAttendance department academicYear />">Unrecorded monitoring points</a></h3></li>
-	<li><h3><a href="<@routes.missedAttendance department academicYear />">Missed monitoring points</a></h3></li>
-</ul>
+	<ul>
+		<li><h3><a href="<@routes.allAttendance department academicYear />">All attendance</a></h3></li>
+		<li><h3><a href="<@routes.unrecordedAttendance department academicYear />">Unrecorded monitoring points</a></h3></li>
+		<li><h3><a href="<@routes.missedAttendance department academicYear />">Missed monitoring points</a></h3></li>
+	</ul>
+</#if>
 
 <h2>Small group teaching</h2>
 

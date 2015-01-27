@@ -3,7 +3,10 @@
 <#import "../attendance_macros.ftl" as attendance_macros />
 <#import "../attendance_variables.ftl" as attendance_variables />
 
-<h1>My ${relationshipType.studentRole}s</h1>
+<div class="pull-right">
+	<@fmt.bulk_email_students students=studentAttendance.students />
+</div>
+<h1 class="with-settings">My ${relationshipType.studentRole}s</h1>
 
 <#if studentAttendance.totalResults == 0>
 	<p><em>No ${relationshipType.studentRole}s were found.</em></p>

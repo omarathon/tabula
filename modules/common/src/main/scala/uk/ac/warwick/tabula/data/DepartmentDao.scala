@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait DepartmentDao {
 	def allDepartments: Seq[Department]
+	def allRootDepartments: Seq[Department]
 	def getByCode(code: String): Option[Department]
 	def getById(id: String): Option[Department]
 	def save(department: Department)
@@ -20,6 +21,9 @@ class DepartmentDaoImpl extends DepartmentDao with Daoisms {
 			.addOrder(Order.asc("code"))
 			.list
 			.distinct
+
+	def allRootDepartments: Seq[Department] =
+		allDepartments.filterNot(_.hasParent)
 
 	// Fetches modules eagerly
 	def getByCode(code: String) =	code.maybeText.flatMap { code => 

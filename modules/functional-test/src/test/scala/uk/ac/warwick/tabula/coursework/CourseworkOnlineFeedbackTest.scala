@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework
 
+import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.{Download, BrowserTest}
 import org.joda.time.DateTime
@@ -23,11 +24,11 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 					go to Path("/coursework/admin/module/" + moduleCode.toLowerCase + "/assignments/" + assignmentId + "/feedback/online")
 
 					Then("I see the table of students")
-					pageSource contains s"Online marking" should be (true)
-					pageSource contains s"$assignmentName ($moduleCode)" should be (true)
+					pageSource contains s"Online marking" should be {true}
+					pageSource contains s"$assignmentName ($moduleCode)" should be {true}
 					findAll(cssSelector(".content-container")).size should be(2)
-					pageSource contains P.Student1.usercode should be(true)
-					pageSource contains P.Student2.usercode should be(true)
+					pageSource contains P.Student1.usercode should be{true}
+					pageSource contains P.Student2.usercode should be{true}
 				}
 		}
 	}
@@ -40,10 +41,10 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 				go to Path("/coursework/admin/module/" + moduleCode.toLowerCase + "/assignments/" + assignmentId + "/feedback/online")
 
 				Then("I see the table of students")
-				pageSource contains s"Online marking" should be (true)
-				pageSource contains s"$assignmentName ($moduleCode)" should be (true)
-				findAll(cssSelector(".content-container")).size should be(1)
-				pageSource contains P.Student3.usercode should be(true)
+				pageSource contains s"Online marking" should be {true}
+				pageSource contains s"$assignmentName ($moduleCode)" should be {true}
+				findAll(cssSelector(".content-container")).size should be (1)
+				pageSource contains P.Student3.usercode should be {true}
 			}
 		}
 	}
@@ -72,8 +73,38 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 					textField(cssSelector(s"#content-${P.Student1.warwickId} input#mark")).value="12"
 					textField(cssSelector(s"#content-${P.Student1.warwickId} input#grade")).value="F"
 					find(cssSelector(s"#content-${P.Student1.warwickId} input.btn-primary")).get.underlying.click()
+
+					And("I go to the marking page")
+					go to Path("/coursework/admin/module/" + moduleCode.toLowerCase + "/assignments/" + assignmentId + "/feedback/online")
+
+					And("I give feedback for student 2")
+					val toggleLink2 = findAll(cssSelector("h6.toggle-icon")).filter(e=>e.text.contains(P.Student2.usercode)).next()
+					toggleLink2.underlying.click()
+					eventuallyAjax(getInputByLabel("Feedback") should be ('defined))
+
+					textArea(cssSelector(s"#content-${P.Student2.warwickId} textarea")).value = "That was Awesome"
+					textField(cssSelector(s"#content-${P.Student2.warwickId} input#mark")).value="98"
+					textField(cssSelector(s"#content-${P.Student2.warwickId} input#grade")).value="A"
+					find(cssSelector(s"#content-${P.Student2.warwickId} input.btn-primary")).get.underlying.click()
 				}
 			  as(P.Admin1) {
+
+					And("I adjust Student2's feedback")
+					go to Path("/coursework/admin/module/" + moduleCode.toLowerCase + "/assignments/" + assignmentId + "/summary")
+					checkbox(cssSelector(s".collection-checkbox[value='${P.Student2.warwickId}']")).select()
+
+					val feedbackToolbarLink = findAll(linkText("Feedback")).next().underlying
+					feedbackToolbarLink.click()
+					eventually(click on feedbackToolbarLink.findElement(By.partialLinkText("Adjustments")))
+
+					eventually(find(cssSelector(s"#content-${P.Student2.warwickId} .toggle-cell")).get.underlying.click())
+					eventuallyAjax(getInputByLabel("Reason for adjustment") should be ('defined))
+					singleSel(cssSelector(s"#reason")).value = "Plagarism penalty"
+					textArea(cssSelector(s"#comments")).value = "Plagarism - Student copied Herons"
+					textField(cssSelector(s"#adjustedMark")).value="79"
+					textField(cssSelector(s"#adjustedGrade")).value="A"
+					find(cssSelector(s"#content-${P.Student2.warwickId} input.btn-primary")).get.underlying.click()
+
 					And("I publish feedback")
 					go to Path("/coursework/admin/module/" + moduleCode.toLowerCase + "/assignments/" + assignmentId + "/publish")
 					checkbox(cssSelector("#confirmCheck")).select()
@@ -94,6 +125,13 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 				val pdfDownload = Download(Path(s"/coursework/module/${moduleCode.toLowerCase}/$assignmentId/feedback.pdf")).as(P.Student1)
 				pdfDownload should be ('successful)
 				pdfDownload.contentAsString should include("PDF")
+
+				When("I log in as student2 and go to the feedback page")
+				as(P.Student2){
+					go to Path(s"/coursework/module/${moduleCode.toLowerCase}/$assignmentId")
+					Then("I see the feedback")
+					pageSource should include("79")
+				}
 
 				as(P.Admin1) {
 					Then("The assignment is archived")
