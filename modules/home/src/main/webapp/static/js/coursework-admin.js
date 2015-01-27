@@ -208,7 +208,7 @@ $(function(){
 				var $checkboxes = $markingContainer.find("input[type=checkbox][name=markerFeedback]:checked");
 				var $sendBack = $markingContainer.find(".must-be-blank");
 				var $sendForward = $markingContainer.find(".must-be-populated");
-				var allPopulated = $checkboxes.closest("tr").filter(".in-progress,.marking-completed").size() == $checkboxes.size();
+				var allPopulated = $checkboxes.closest("tr").filter(".in-progress").size() == $checkboxes.size();
 				var allBlank = $checkboxes.closest("tr").filter(".in-progress,.marking-completed").size() == 0;
 				if(allBlank){ $sendBack.removeClass("disabled");} else { $sendBack.addClass("disabled");}
 				if(allPopulated){ $sendForward.removeClass("disabled");} else{ $sendForward.addClass("disabled");}
