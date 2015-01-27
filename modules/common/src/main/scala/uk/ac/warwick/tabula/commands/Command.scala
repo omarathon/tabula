@@ -53,7 +53,12 @@ trait SchedulesNotifications[A, B] {
 }
 
 trait CompletesNotifications[A] {
-	case class CompletesNotificationsResult(notifications: Seq[ActionRequiredNotification], completedBy: User)
+	class CompletesNotificationsResult(val notifications: Seq[ActionRequiredNotification], val completedBy: User)
+	object CompletesNotificationsResult {
+		def apply(notifications: Seq[ActionRequiredNotification], completedBy: User) =
+			new CompletesNotificationsResult(notifications, completedBy)
+	}
+	object EmptyCompletesNotificationsResult extends CompletesNotificationsResult(Nil, null)
 	def notificationsToComplete(commandResult: A): CompletesNotificationsResult
 }
 

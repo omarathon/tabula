@@ -156,6 +156,6 @@ trait EditExtensionCommandNotificationCompletion extends CompletesNotifications[
 				submitter.apparentUser
 			)
 		else
-			CompletesNotificationsResult(Seq(), null)
+			EmptyCompletesNotificationsResult
 	}
 }
