@@ -46,15 +46,75 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 		feedback.assignment = assignment
 		feedback.actualGrade = Some("B")
 		feedback.actualMark = Some(73)
+
 		feedback.id = "397"
 
 		assignment.feedbacks.add(feedback)
 
 	}
 
-	@Test def testUploadFeedbackToSits = withUser("0070790", "cusdx") {
-		new Environment {
+	trait EnvironmentMarkAdjusted extends Environment {
+		feedback.adjustedMark = Some(78)
+	}
+
+	trait EnvironmentMarkAndGradeAdjusted extends EnvironmentMarkAdjusted {
+		feedback.adjustedGrade = Some("A-")
+	}
+
+	@Test def testUploadFeedbackToSitsMarkAndGradeAdjusted = withUser("0070790", "cusdx") {
+		new EnvironmentMarkAndGradeAdjusted {
+
+
+			feedback.adjustedMark = Some(78)
+
 		cmd.feedbackForSitsDao = feedbackForSitsDao
+
+			val feedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
+
+			exportFeedbackToSitsService.exportToSits(feedbackForSits) returns (1)
+			cmd.exportFeedbackToSitsService = exportFeedbackToSitsService
+
+			// upload the feedback to SITS
+			cmd.uploadFeedbackToSits(feedbackForSits)
+
+			// check that the feedbackForSits record has been updated to reflect the fact that data has been written to SITS
+			val dateOfUpload = feedbackForSits.dateOfUpload
+			dateOfUpload should not be (null)
+			dateOfUpload.isAfter(DateTime.now) should be(false)
+			dateOfUpload.plusMinutes(1).isAfter(DateTime.now) should be(true)
+
+			feedbackForSits.actualGradeLastUploaded should be("A-")
+			feedbackForSits.actualMarkLastUploaded should be(78)
+		}
+	}
+
+	@Test def testUploadFeedbackToSitsMarkAdjusted = withUser("0070790", "cusdx") {
+		new EnvironmentMarkAdjusted {
+
+			cmd.feedbackForSitsDao = feedbackForSitsDao
+
+			val feedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
+
+			exportFeedbackToSitsService.exportToSits(feedbackForSits) returns (1)
+			cmd.exportFeedbackToSitsService = exportFeedbackToSitsService
+
+			// upload the feedback to SITS
+			cmd.uploadFeedbackToSits(feedbackForSits)
+
+			// check that the feedbackForSits record has been updated to reflect the fact that data has been written to SITS
+			val dateOfUpload = feedbackForSits.dateOfUpload
+			dateOfUpload should not be (null)
+			dateOfUpload.isAfter(DateTime.now) should be(false)
+			dateOfUpload.plusMinutes(1).isAfter(DateTime.now) should be(true)
+
+			feedbackForSits.actualGradeLastUploaded should be("B")
+			feedbackForSits.actualMarkLastUploaded should be(78)
+		}
+	}
+
+	@Test def testUploadFeedbackToSitsNotAdjusted = withUser("0070790", "cusdx") {
+		new Environment {
+			cmd.feedbackForSitsDao = feedbackForSitsDao
 
 			val feedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
 
@@ -76,7 +136,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 	}
 
 	@Test def testApply = withUser("0070790", "cusdx") {
-		new Environment {
+		new EnvironmentMarkAndGradeAdjusted {
 			val user = currentUser.apparentUser
 			val feedbackService = smartMock[FeedbackService]
 			feedbackService.getUsersForFeedback(assignment) returns (Seq[(String, User)]((user.getWarwickId, user)))
@@ -98,6 +158,8 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 			uploadedFeedbacks.head.status should be(Successful)
 			uploadedFeedbacks.head.feedback.actualMark should be(Some(73))
 			uploadedFeedbacks.head.feedback.actualGrade should be(Some("B"))
+			uploadedFeedbacks.head.feedback.adjustedMark should be(Some(78))
+			uploadedFeedbacks.head.feedback.adjustedGrade should be(Some("A-"))
 		}
 	}
 
