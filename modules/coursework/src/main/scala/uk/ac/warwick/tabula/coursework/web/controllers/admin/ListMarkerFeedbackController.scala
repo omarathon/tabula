@@ -31,7 +31,8 @@ class ListMarkerFeedbackController extends CourseworkController {
 			val markerFeedback = command.apply()
 			val feedbackItems = markerFeedback.flatMap(_.feedbackItems)
 
-			val maxFeedbackCount = feedbackItems.map(_.feedbacks.size).reduceOption(_ max _).getOrElse(0)
+			val feedbackCounts: Seq[Int] = feedbackItems.map(_.feedbacks.size)
+			val maxFeedbackCount = feedbackCounts.foldLeft(0)(_ max _)
 			val hasFirstMarkerFeedback = maxFeedbackCount > 1
 			val hasSecondMarkerFeedback = maxFeedbackCount > 2
 
