@@ -78,17 +78,17 @@
 
 <#macro workflowActions nextRoleName previousRoleName currentRoleName>
 <div class="btn-toolbar">
-	<#if previousRoleName?has_content>
-		<a class="use-tooltip form-post btn btn-danger must-be-blank disabled"
-		   title="Return marks and feedback to the ${previousRoleName}. You cannot return in-progress or completed feedback."
-		   data-container="body"
-		   href="<@routes.markingUncompleted assignment marker previousRoleName />"
-		   id="marking-uncomplete-button">
-			<i class="icon-arrow-left"></i> Reject and return to ${previousRoleName}
-		</a>
-	</#if>
-
 	<#if currentRoleName != 'Moderator'>
+		<#if previousRoleName?has_content>
+			<a class="use-tooltip form-post btn btn-danger must-be-blank disabled"
+			   title="Return marks and feedback to the ${previousRoleName}. You cannot return in-progress or completed feedback."
+			   data-container="body"
+			   href="<@routes.markingUncompleted assignment marker previousRoleName />"
+			   id="marking-uncomplete-button">
+				<i class="icon-arrow-left"></i> Reject and return to ${previousRoleName}
+			</a>
+		</#if>
+
 		<a class="use-tooltip form-post btn btn-primary must-be-populated disabled"
 		   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point. You cannot finalise blank feedback."
 		   data-container="body"
