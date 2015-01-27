@@ -208,8 +208,8 @@ $(function(){
 				var $checkboxes = $markingContainer.find("input[type=checkbox][name=markerFeedback]:checked");
 				var $sendBack = $markingContainer.find(".must-be-blank");
 				var $sendForward = $markingContainer.find(".must-be-populated");
-				var allPopulated = $checkboxes.closest("tr").filter(".in-progress").size() == $checkboxes.size();
-				var allBlank = $checkboxes.closest("tr").filter(".in-progress").size() == 0;
+				var allPopulated = $checkboxes.closest("tr").filter(".in-progress,.marking-completed").size() == $checkboxes.size();
+				var allBlank = $checkboxes.closest("tr").filter(".in-progress,.marking-completed").size() == 0;
 				if(allBlank){ $sendBack.removeClass("disabled");} else { $sendBack.addClass("disabled");}
 				if(allPopulated){ $sendForward.removeClass("disabled");} else{ $sendForward.addClass("disabled");}
 			},
@@ -551,6 +551,7 @@ $(function() {
 				}
 				else if(markingCompleted) {
 					$statusContainer.append($('<div class="label label-success">Marking completed</div>'));
+					$row.addClass("marking-completed");
 				}
 				else if(!$statusContainer.find('.marked').length) {
 					$statusContainer.find('.label-warning').remove() // remove existing label before adding another

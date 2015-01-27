@@ -16,7 +16,15 @@
 		<#local thisFeedback = item.feedbacks?last />
 		<#local nextMarkerAction>Send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if></#local>
 
-		<tr class="item-container <#if thisFeedback.state.toString == "InProgress">in-progress</#if>"
+		<#assign progressClass>
+			<#if thisFeedback.state.toString == "InProgress">
+				in-progress
+			<#elseif thisFeedback.state.toString == "MarkingCompleted">
+				marking-completed
+			</#if>
+		</#assign>
+
+		<tr class="item-container ${progressClass}"
 			data-contentid="${markingId(u)}"
 			data-markingurl="${onlineMarkingUrls[u.userId]}"
 			data-nextmarkeraction="${nextMarkerAction}">
