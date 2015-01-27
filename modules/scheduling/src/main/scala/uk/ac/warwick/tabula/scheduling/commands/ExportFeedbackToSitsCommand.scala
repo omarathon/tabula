@@ -76,14 +76,13 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 
 			feedback.adjustedMark match {
 				case Some(adjustedMark) => feedbackToLoad.actualMarkLastUploaded = adjustedMark
-				case None => feedbackToLoad.actualMarkLastUploaded = feedback.actualMark.getOrElse("")
+				case None => feedback.actualMark.foreach( mark => feedbackToLoad.actualMarkLastUploaded = mark)
 			}
 
 			feedback.adjustedGrade match {
 				case Some(adjustedGrade) => feedbackToLoad.actualGradeLastUploaded = adjustedGrade
-				case None => feedbackToLoad.actualGradeLastUploaded = feedback.actualGrade.getOrElse("")
+				case None => feedback.actualGrade.foreach( grade => feedbackToLoad.actualGradeLastUploaded = grade)
 			}
-
 		}
 		else throw new IllegalStateException(s"Unexpected SITS update!  Only expected to update one row, but $expectedRowCount rows were updated " +
 				s"in CAM_SAS for student $studentId, feedback $feedbackId")
