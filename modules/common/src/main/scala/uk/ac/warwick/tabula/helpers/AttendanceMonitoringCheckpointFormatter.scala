@@ -59,7 +59,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 	}
 
 	private def pointDuration(point: AttendanceMonitoringPoint, department: Department) = {
-		val wrapper = new DefaultObjectWrapper()
+		val wrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_0)
 		point.scheme.pointStyle match {
 			case AttendanceMonitoringPointStyle.Date =>
 				val intervalFormatter = Environment.getCurrentEnvironment.getGlobalVariable("intervalFormatter").asInstanceOf[TemplateMethodModel]

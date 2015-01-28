@@ -13,8 +13,8 @@ class DatabaseScriptRunner extends InitializingBean {
     
     var dataSource:DataSource =_
     
-    def setScripts(scripts:Array[Resource]) = {
-    	populator.setScripts(scripts)
+    def setScripts(scripts: Array[Resource]) = {
+    	populator.setScripts(scripts: _*)
     }
     
 	def addScript(path:String) = {

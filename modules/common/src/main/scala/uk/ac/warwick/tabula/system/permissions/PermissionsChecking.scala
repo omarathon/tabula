@@ -187,7 +187,7 @@ trait PermissionsCheckingMethods extends Logging {
 					.find { case (permission, _) => permission == Permissions.Submission.Create }
 					.map { case (permission, scopes) => (permission, scopes.head) }
 					.collect { case (_, Some(assignment: Assignment)) => assignment }
-					.map { new SubmitPermissionDeniedException(_) }
+					.map { assignment => new SubmitPermissionDeniedException(user, assignment) }
 					.getOrElse {
 						new PermissionDeniedException(user, target.permissionsAnyChecks.head._1, target.permissionsAnyChecks.head._2)
 					}

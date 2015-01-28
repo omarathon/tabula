@@ -31,7 +31,7 @@ RewriteRule ^/home(.*)$ $1 [QSA,L,R=301]
 # Rewrite everything for coursework into the courses module
 RewriteRule ^/coursework/(.*)$ http://127.0.0.1:${proxy:port}/courses/$1 [QSA,P,L]
 
-# Rewrite scheduling directly to the scheduler jboss
+# Rewrite scheduling directly to the scheduler instance
 RewriteCond %{REQUEST_URI} ^/scheduling/(.*)
 RewriteRule (.*) http://127.0.0.1:${scheduler:port}$1 [QSA,P,L]
 
@@ -44,6 +44,7 @@ RewriteCond %{REQUEST_URI} !^/admin/(.*)
 RewriteCond %{REQUEST_URI} !^/groups/(.*)
 RewriteCond %{REQUEST_URI} !^/attendance/(.*)
 RewriteCond %{REQUEST_URI} !^/reports/(.*)
+RewriteCond %{REQUEST_URI} !^/api/v1/(.*)
 RewriteCond %{REQUEST_URI} !^/errordocuments/(.*)
 RewriteRule (.*) http://127.0.0.1:${proxy:port}/home$1 [QSA,P,L]
 

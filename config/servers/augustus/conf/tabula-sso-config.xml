@@ -47,7 +47,7 @@
 		<providerid>urn:augustus.warwick.ac.uk:tabula:service</providerid>
 		<keystore>
 			<!-- location of the java keystore -->
-			<location>file:/usr/local/jboss/server/tabula/conf/augustus.warwick.ac.uk.keystore</location>
+			<location>file:/etc/apache2/SSL/augustus.warwick.ac.uk.keystore</location>
 			<!-- password for that keystore -->
 			<password>changeit</password>
 			<!-- keystore alias for the client service machine -->

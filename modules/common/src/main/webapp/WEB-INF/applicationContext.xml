@@ -290,7 +290,7 @@
 	</bean>
 
 	<filter-stack id="commonFilters" abstract="true" xmlns="http://go.warwick.ac.uk/elab-schemas/filterstack">
-		<mapping name="all">
+		<mapping name="allml">
 			<filter ref="characterEncodingFilter" />
 			<url-pattern>/*</url-pattern>
 			<excluded-url-pattern>/static/*</excluded-url-pattern>
@@ -395,7 +395,7 @@
 	<bean id="redirectViewResolver" class="uk.ac.warwick.tabula.web.views.RedirectViewResolver"
 		p:toplevelUrl="${toplevel.url}"
 		p:order="1" />
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.tiles2.TilesViewResolver"
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.tiles3.TilesViewResolver"
 		p:order="2" />
 
 	<bean id="parser" class="org.springframework.expression.spel.standard.SpelExpressionParser"/>
@@ -597,13 +597,13 @@
 			<!-- Custom FactoryBean that will try to pick the JBoss MBeanServer
 		       when there is a choice of MBeanServers (such as when jconsole
 		       support is installed). -->
-		  <bean id="jmxServerLocator" class="uk.ac.warwick.util.core.spring.JbossJmxServerLocator" />
+		  <!--<bean id="jmxServerLocator" class="uk.ac.warwick.util.core.spring.JbossJmxServerLocator" />-->
 
 		  <!-- ## auto exported beans ## -->
 
 
 		  <!-- ## auto exporters ## -->
-
+<!--
 		  <bean id="jmxAttributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
 
 		  <bean id="jmxAssembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
@@ -619,27 +619,28 @@
 		  	<property name="namingStrategy" ref="jmxNamingStrategy" />
 		    <property name="server" ref="jmxServerLocator" />
 		  </bean>
-
+-->
 		    <!-- ## manually exported beans ## -->
-
+<!--
 		  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"
 		  		lazy-init="false"
-		  		autowire="no"> <!-- don't autowire the Annotation assembler below. -->
+		  		autowire="no"> --><!-- don't autowire the Annotation assembler below. --><!--
 		    <property name="server" ref="jmxServerLocator" />
 		    <property name="beans">
 		      <map>
-		        <!-- DON'T expose features by JMX - we use a controller for that now! -->
+		        --><!-- DON'T expose features by JMX - we use a controller for that now! --><!--
 		      </map>
 		    </property>
 		  </bean>
-
-		<bean id="defaultTilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer"
+-->
+		<bean id="defaultTilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer"
 			p:definitionsFactoryClass="uk.ac.warwick.tabula.web.views.ImpliedDefinitionsFactory" abstract="true">
 			<property name="definitions">
 				<list>
 					<value>/WEB-INF/defs/common-views.xml</value>
 				</list>
 			</property>
+			<!--
 			<property name="tilesProperties">
 				<props>
 					<prop key="#{T(org.apache.tiles.definition.DefinitionsFactory).DEFINITION_DAO_INIT_PARAM}">
@@ -647,6 +648,7 @@
 					</prop>
 				</props>
 			</property>
+			-->
 		</bean>
 
 		<import resource="tiles-context.xml" />

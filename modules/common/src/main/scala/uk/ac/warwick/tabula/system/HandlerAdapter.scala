@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.system
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler
 import collection.JavaConverters._
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
@@ -34,7 +35,9 @@ class HandlerAdapter extends org.springframework.web.servlet.mvc.method.annotati
 		composite.addHandlers(customPreReturnValueHandlers)
 		composite.addHandler(defaultHandlers)
 		returnValueHandlersField.set(this, composite)
-		getMessageConverters.add(new MappingJackson2HttpMessageConverter())
+
+		val jsonConverter = new MappingJackson2HttpMessageConverter()
+		getMessageConverters.add(jsonConverter)
 	}
 	
 	override def createDataBinderFactory(binderMethods: JList[InvocableHandlerMethod]): ServletRequestDataBinderFactory = 

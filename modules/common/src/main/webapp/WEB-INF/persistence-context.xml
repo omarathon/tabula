@@ -103,20 +103,20 @@
 	<beans profile="dev,sandbox,production">
 
 		<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		   <property name="jndiName" value="java:/TabulaDS"/>
+		   <property name="jndiName" value="java:comp/env/jdbc/TabulaDS"/>
 	    </bean>
 	    
 	</beans>
 	
 	<beans profile="dev,production">
 	    <bean id="sitsDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		   <property name="jndiName" value="java:/SITSDS"/>
+		   <property name="jndiName" value="java:comp/env/jdbc/SITSDS"/>
 		   <property name="lookupOnStartup" value="false" />
 	       <property name="proxyInterface" value="javax.sql.DataSource" />
 	    </bean>
 	    
 	    <bean id="membershipDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		   <property name="jndiName" value="java:/MembershipDS"/>
+		   <property name="jndiName" value="java:comp/env/jdbc/MembershipDS"/>
 		   <property name="lookupOnStartup" value="false" />
 		   <property name="proxyInterface" value="javax.sql.DataSource" />
 	    </bean>

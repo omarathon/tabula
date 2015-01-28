@@ -9,7 +9,7 @@ import uk.ac.warwick.util.queue.QueueListener
 import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
-import org.codehaus.jackson.annotate.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import uk.ac.warwick.util.queue.conversion.ItemType
 import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.tabula.commands.Describable

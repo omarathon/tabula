@@ -4,7 +4,7 @@ import javax.persistence.CascadeType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
 
-import org.hibernate.annotations.{AccessType, BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormattedHtml, SavedFormValue}
@@ -55,7 +55,7 @@ trait FeedbackAttachments {
 	}
 }
 
-@Entity @AccessType("field")
+@Entity @Access(AccessType.FIELD)
 class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with ToEntityReference with FormattedHtml {
 
 	type Entity = Feedback

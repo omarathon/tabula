@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula
 
 import java.io.{InputStream, File, StringReader}
+import java.util.concurrent.TimeUnit
 import scala.collection.JavaConversions._
 import scala.collection.GenSeq
 import org.apache.commons.configuration.PropertiesConfiguration
@@ -50,7 +51,7 @@ abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with Test
 	type Test = org.junit.Test
 
 	// No test should take longer than a minute
-	val minuteTimeout = new Timeout(60000)
+	val minuteTimeout = new Timeout(60000, TimeUnit.MILLISECONDS)
 	@Rule def timeoutRule = minuteTimeout
 
 	Transactions.enabled = false
@@ -267,8 +268,8 @@ trait FreemarkerTestHelpers{
     def exec(arguments: util.List[_]): AnyRef = Option(mock.exec(arguments)).getOrElse("")
   }
 
-  class StubFreemarkerDirectiveModel extends TemplateDirectiveModel with TemplateMethodModel with Mockito{
-    val mockMethod: TemplateMethodModel = mock[TemplateMethodModel]
+  class StubFreemarkerDirectiveModel extends TemplateDirectiveModel with TemplateMethodModelEx with Mockito{
+    val mockMethod: TemplateMethodModelEx = mock[TemplateMethodModelEx]
     val mockDirective: TemplateDirectiveModel = mock[TemplateDirectiveModel]
 
     def execute(env: Environment, params: util.Map[_, _], loopVars: Array[TemplateModel], body: TemplateDirectiveBody) {

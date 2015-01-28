@@ -52,7 +52,7 @@ class RequestInfoInterceptorTest extends TestBase with Mockito {
 		
 		info.ajax should be (false)
 		info.maintenance should be (false)
-		info.requestedUri should be (Uri.parse("https://tabula.warwick.ac.uk:443/yes/its/me"))
+		info.requestedUri should be (Uri.parse("https://tabula.warwick.ac.uk/yes/its/me"))
 		info.requestParameters should be (Map())
 		info.user should be (null)
 		

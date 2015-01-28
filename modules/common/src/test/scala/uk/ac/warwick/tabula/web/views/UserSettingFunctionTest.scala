@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.web.views
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.JavaImports._
-import freemarker.template.TemplateModel
-import freemarker.template.SimpleHash
+import freemarker.template.{ObjectWrapper, TemplateModel, SimpleHash}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.services.UserSettingsService
@@ -21,7 +20,7 @@ class UserSettingFunctionTest extends TestBase with Mockito {
 		val args: JList[TemplateModel] = JArrayList()
 		
 		// Use a SimpleHash as a workaround to wrapping things manually
-		val model = new SimpleHash
+		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		model.put("settingName", UserSettings.Settings.BulkEmailSeparator)
 		
 		args.add(model.get("settingName"))
@@ -35,7 +34,7 @@ class UserSettingFunctionTest extends TestBase with Mockito {
 		val args: JList[TemplateModel] = JArrayList()
 		
 		// Use a SimpleHash as a workaround to wrapping things manually
-		val model = new SimpleHash
+		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		model.put("settingName", UserSettings.Settings.BulkEmailSeparator)
 		
 		args.add(model.get("settingName"))
@@ -52,7 +51,7 @@ class UserSettingFunctionTest extends TestBase with Mockito {
 		val args: JList[TemplateModel] = JArrayList()
 		
 		// Use a SimpleHash as a workaround to wrapping things manually
-		val model = new SimpleHash
+		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		model.put("settingName", UserSettings.Settings.BulkEmailSeparator)
 		
 		args.add(model.get("settingName"))

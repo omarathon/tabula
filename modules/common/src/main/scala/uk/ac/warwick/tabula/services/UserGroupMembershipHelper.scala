@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.{StringId, KnownTypeUserGroup, Unspecifie
 import uk.ac.warwick.util.queue.{Queue, QueueListener}
 import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.util.queue.conversion.ItemType
-import org.codehaus.jackson.annotate.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.hibernate.criterion.Projections
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.ScalaFactoryBean

@@ -28,7 +28,7 @@
 	</scm>
 
 	<profiles>
-		<!-- deploy to jboss -->
+		<!-- deploy to container -->
 		<profile>
 			<id>deploy</id>
 
@@ -43,12 +43,12 @@
 								<phase>install</phase>
 								<configuration>
 									<target>
-										<sync todir="${deploy.dir}/${project.artifactId}.war">
+										<sync todir="${deploy.dir}/${project.artifactId}">
 											<fileset
 												dir="${project.build.directory}/${project.build.finalName}" />
 										</sync>
 										<touch
-											file="${deploy.dir}/${project.artifactId}.war/WEB-INF/web.xml" />
+											file="${deploy.dir}/${project.artifactId}/WEB-INF/web.xml" />
 									</target>
 								</configuration>
 								<goals>
@@ -76,7 +76,7 @@
 								<phase>package</phase>
 								<configuration>
 									<target>
-										<sync todir="${deploy.dir}/${project.artifactId}.war/static">
+										<sync todir="${deploy.dir}/${project.artifactId}/static">
 											<fileset
 												dir="${project.build.directory}/${project.build.finalName}/static" />
 										</sync>
@@ -344,7 +344,7 @@
 				<dependencies>
 					<dependency>
 						<groupId>uk.ac.warwick.util</groupId>
-						<artifactId>warwickutils-ant</artifactId>
+						<artifactId>warwickutils_spring4-ant</artifactId>
 						<version>${warwickutils.version}</version>
 					</dependency>
 					<dependency>

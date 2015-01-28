@@ -5,7 +5,7 @@ import scala.collection.JavaConverters._
 import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
-import org.hibernate.annotations.{ForeignKey, Filter, FilterDef, AccessType, BatchSize, Type}
+import org.hibernate.annotations.{Filter, FilterDef, BatchSize, Type}
 import org.joda.time.{LocalDate, DateTime}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
@@ -58,7 +58,7 @@ object Assignment {
 @FilterDef(name = Assignment.NotDeletedFilter, defaultCondition = "deleted = 0")
 @Filter(name = Assignment.NotDeletedFilter)
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 class Assignment
 		extends GeneratedId
 		with CanBeDeleted

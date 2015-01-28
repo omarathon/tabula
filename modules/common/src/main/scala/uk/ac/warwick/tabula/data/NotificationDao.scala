@@ -2,9 +2,7 @@ package uk.ac.warwick.tabula.data
 
 import org.springframework.stereotype.Repository
 import org.hibernate.criterion.{Restrictions, Order}
-import uk.ac.warwick.util.hibernate.{BatchResultsImpl, BatchResults}
 import uk.ac.warwick.tabula.data.model.{ToEntityReference, Notification}
-import uk.ac.warwick.tabula.helpers.FunctionConversions.asGoogleFunction
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import org.hibernate.FetchMode

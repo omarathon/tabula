@@ -5,12 +5,9 @@ import org.junit.Before
 import java.util.Properties
 import uk.ac.warwick.tabula.JavaImports._
 import freemarker.core.Environment
-import freemarker.template.Template
+import freemarker.template._
 import java.io.StringReader
 import java.io.StringWriter
-import freemarker.template.SimpleHash
-import freemarker.template.TemplateModel
-import freemarker.template.TemplateDirectiveBody
 
 class UrlMethodModelTest extends TestBase with Mockito {
 	
@@ -36,7 +33,7 @@ class UrlMethodModelTest extends TestBase with Mockito {
 	
 	@Test def tagPageAndContext() {
 		// Use a SimpleHash as a workaround to wrapping things manually
-		val hash = new SimpleHash
+		val hash = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		hash.put("page", "/module/yes")
 		hash.put("context", "/")
 		
@@ -56,7 +53,7 @@ class UrlMethodModelTest extends TestBase with Mockito {
 	
 	@Test def tagPageNoContext() {
 		// Use a SimpleHash as a workaround to wrapping things manually
-		val hash = new SimpleHash
+		val hash = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		hash.put("page", "/module/yes")
 		
 		val writer = new StringWriter
@@ -74,7 +71,7 @@ class UrlMethodModelTest extends TestBase with Mockito {
 	
 	@Test def tagResource() {
 		// Use a SimpleHash as a workaround to wrapping things manually
-		val hash = new SimpleHash
+		val hash = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		hash.put("resource", "/css/main.css")
 		
 		model.staticHashes.setProperty("css/main.css", "1234567890")

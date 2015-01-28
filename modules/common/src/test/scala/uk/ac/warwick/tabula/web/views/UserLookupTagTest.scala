@@ -3,13 +3,10 @@ package uk.ac.warwick.tabula.web.views
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.JavaImports._
-import freemarker.template.TemplateModel
-import freemarker.template.SimpleHash
+import freemarker.template._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.Fixtures
-import freemarker.template.TemplateDirectiveBody
 import freemarker.core.Environment
-import freemarker.template.Template
 import java.io.StringWriter
 import java.io.StringReader
 import uk.ac.warwick.tabula.MockUserLookup
@@ -31,7 +28,7 @@ class UserLookupTagTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in")
 		
 		// Use a SimpleHash as a workaround to wrapping things manually
-		val model = new SimpleHash
+		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		model.put("id", "cuscav")
 		
 		val writer = new StringWriter
@@ -57,7 +54,7 @@ class UserLookupTagTest extends TestBase with Mockito {
 		ids.add("cuscav")
 		ids.add("cusebr")
 		
-		val model = new SimpleHash
+		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		model.put("ids", ids)
 		
 		val writer = new StringWriter
@@ -83,7 +80,7 @@ class UserLookupTagTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in")
 
 		// Use a SimpleHash as a workaround to wrapping things manually
-		val model = new SimpleHash
+		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		model.put("id", "0672089")
 		model.put("lookupByUniversityId", true)
 
@@ -111,7 +108,7 @@ class UserLookupTagTest extends TestBase with Mockito {
 		ids.add("0672089")
 		ids.add("0672088")
 
-		val model = new SimpleHash
+		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		model.put("ids", ids)
 		model.put("lookupByUniversityId", true)
 

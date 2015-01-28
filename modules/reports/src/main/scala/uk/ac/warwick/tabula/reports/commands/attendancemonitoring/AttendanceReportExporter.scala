@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.reports.commands.attendancemonitoring
 
-import freemarker.template.DefaultObjectWrapper
+import freemarker.template.{Configuration, DefaultObjectWrapper}
 import org.apache.poi.hssf.usermodel.HSSFDataFormat
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import uk.ac.warwick.tabula.DateFormats
@@ -15,7 +15,7 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 	extends CSVLineWriter[AttendanceMonitoringStudentData] {
 
 	val intervalFormatter = new IntervalFormatter
-	val wrapper = new DefaultObjectWrapper()
+	val wrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_0)
 	val isoFormatter = DateFormats.IsoDateTime
 
 	val result = processorResult.attendance

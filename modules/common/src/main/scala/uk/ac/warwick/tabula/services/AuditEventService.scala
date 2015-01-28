@@ -5,7 +5,7 @@ import java.sql.Clob
 import scala.collection.JavaConversions.asScalaBuffer
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.codehaus.jackson.JsonParseException
+import com.fasterxml.jackson.core.JsonParseException
 import org.hibernate.dialect.Dialect
 import org.joda.time.DateTime
 import org.springframework.stereotype.Component
