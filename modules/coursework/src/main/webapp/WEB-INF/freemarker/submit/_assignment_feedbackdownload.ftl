@@ -1,5 +1,3 @@
-<h2>Feedback for ${feedback.universityId}</h2>
-	
 <#if features.collectRatings && feedback.collectRatings && isSelf>
 	<div id="feedback-rating-container" class="is-stackable">
 		<!-- fallback for noscript -->
