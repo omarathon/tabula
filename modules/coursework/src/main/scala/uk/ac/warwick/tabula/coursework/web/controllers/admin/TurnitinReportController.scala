@@ -1,31 +1,27 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
-import java.io.Writer
-import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.Assignment
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.coursework.services.turnitin._
-import org.springframework.web.servlet.ModelAndView
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.commands.ReadOnly
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.commands.{Command, CompletesNotifications, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.coursework.services.turnitin._
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.TurnitinJobSuccessNotification
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.OriginalityReportService
+import uk.ac.warwick.tabula.web.Mav
 
 class ViewPlagiarismReportCommand(val module: Module, val assignment: Assignment, val fileId: String, val user: CurrentUser)
-	extends Command[Mav] with ReadOnly with Unaudited {
+	extends Command[Mav] with ReadOnly with Unaudited with CompletesNotifications[Mav] {
 	
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.ViewPlagiarismStatus, assignment)
 	
 	var turnitinService = Wire.auto[Turnitin]
-	
+	var originalityReportService = Wire[OriginalityReportService]
+
 	def applyInternal() = {
 		debug("Getting document viewer URL for FileAttachment %s", fileId)
 		
@@ -60,7 +56,20 @@ class ViewPlagiarismReportCommand(val module: Module, val assignment: Assignment
 			case None => Mav("admin/assignments/turnitin/report_error", "problem" -> "no-session")
 		}
 	}
-	
+
+	def notificationsToComplete(commandResult: Mav): CompletesNotificationsResult = {
+		commandResult.viewName.startsWith("redirect:") match {
+			case true =>
+				originalityReportService.getOriginalityReportByFileId(fileId).map(report =>
+					CompletesNotificationsResult(
+						notificationService.findActionRequiredNotificationsByEntityAndType[TurnitinJobSuccessNotification](report),
+						user.apparentUser
+					)
+				).getOrElse(EmptyCompletesNotificationsResult)
+			case false =>
+				EmptyCompletesNotificationsResult
+		}
+	}
 }
 
 /**

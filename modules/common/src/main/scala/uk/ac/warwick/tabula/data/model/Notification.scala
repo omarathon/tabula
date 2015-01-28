@@ -10,6 +10,7 @@ import org.springframework.util.Assert
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services._
@@ -327,7 +328,7 @@ trait AllCompletedActionRequiredNotification extends ActionRequiredNotification 
 
 	self: Notification[_, _] =>
 
-	override final def actionCompleted(user: User) = {
+	override final def actionCompleted(user: User) = transactional() {
 		dismiss(user)
 		completed = true
 		completedBy = user.getUserId
@@ -340,7 +341,7 @@ trait RecipientCompletedActionRequiredNotification extends ActionRequiredNotific
 
 	self: Notification[_, _] =>
 
-	override final def actionCompleted(user: User) = {
+	override final def actionCompleted(user: User) = transactional() {
 		dismiss(user)
 		notificationService.update(Seq(this), user)
 	}
