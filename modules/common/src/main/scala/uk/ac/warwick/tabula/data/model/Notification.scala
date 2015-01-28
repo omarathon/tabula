@@ -322,6 +322,10 @@ trait ActionRequiredNotification {
 
 	def actionCompleted(user: User)
 
+	def notificationItems: JList[EntityReference[_]] = items.asInstanceOf[JList[EntityReference[_]]]
+
+	def isRecipient(user: User) = recipientNotificationInfos.asScala.exists(_.recipient == user)
+
 }
 
 trait AllCompletedActionRequiredNotification extends ActionRequiredNotification {
