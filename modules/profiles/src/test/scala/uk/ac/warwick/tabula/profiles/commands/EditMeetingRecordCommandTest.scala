@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.MeetingRecordRejectedNotification
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.{CurrentUser, Features, FeaturesComponent, PersistenceTestBase}
@@ -25,6 +26,8 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 		cmd.features = emptyFeatures
 		cmd.features.meetingRecordApproval = true
 		cmd.features.attendanceMonitoringMeetingPointType = false
+
+		notificationService.findActionRequiredNotificationsByEntityAndType[MeetingRecordRejectedNotification](meeting.approvals.get(0)) returns Seq()
 
 		meeting = transactional { tx => cmd.apply() }
 		meeting.title should be ("Updated title fools")
@@ -83,6 +86,7 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 		editCmd.scheduledNotificationService = scheduledNotificationService
 		editCmd.copyToCommand(meeting)
 		editCmd.description = "The meeting room was full of angry herons. It was truly harrowing."
+		notificationService.findActionRequiredNotificationsByEntityAndType[MeetingRecordRejectedNotification](meeting.approvals.get(0)) returns Seq()
 		val meeting2 = transactional { tx => editCmd.apply() }
 		meeting2.isPendingApproval should be {true}
 		meeting2.securityService.can(studentCurrentUser, Permissions.Profiles.MeetingRecord.Approve, meeting2.approvals.get(0)) returns true

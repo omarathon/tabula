@@ -8,6 +8,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.data.FileDao
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.MeetingRecordRejectedNotification
 import scala.collection.JavaConverters._
 
 // scalastyle:off magic.number
