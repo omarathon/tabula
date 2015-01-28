@@ -139,7 +139,7 @@ abstract class AdminMarkingUncompletedCommand(module: Module, assignment: Assign
 	var students: JList[String] = JArrayList()
 
 	override def onBind(result: BindingResult) {
-		val parentFeedback = students.flatMap(feedbackService.getStudentFeedback(assignment, _))
+		val parentFeedback = students.flatMap(assignment.findFeedback(_))
 		markerFeedback = parentFeedback.filterNot(f => f.released || f.isPlaceholder).flatMap(_.getAllCompletedMarkerFeedback.lastOption)
 	}
 

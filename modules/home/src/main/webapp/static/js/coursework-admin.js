@@ -209,7 +209,7 @@ $(function(){
 				var $sendBack = $markingContainer.find(".must-be-blank");
 				var $sendForward = $markingContainer.find(".must-be-populated");
 				var allPopulated = $checkboxes.closest("tr").filter(".in-progress").size() == $checkboxes.size();
-				var allBlank = $checkboxes.closest("tr").filter(".in-progress").size() == 0;
+				var allBlank = $checkboxes.closest("tr").filter(".in-progress,.marking-completed").size() == 0;
 				if(allBlank){ $sendBack.removeClass("disabled");} else { $sendBack.addClass("disabled");}
 				if(allPopulated){ $sendForward.removeClass("disabled");} else{ $sendForward.addClass("disabled");}
 			},
@@ -547,15 +547,22 @@ $(function() {
 				var nextMarkerAction = $row.data('nextmarkeraction');
 
 				if(rejected) {
+					$statusContainer.find('.label-warning').remove(); // remove existing label before adding another
 					$statusContainer.append($('<div class="label label-important">Rejected</div>'));
+					$actionContainer.html('No action required.');
 				}
 				else if(markingCompleted) {
+					$statusContainer.find('.label-warning').remove(); // remove existing label before adding another
 					$statusContainer.append($('<div class="label label-success">Marking completed</div>'));
+					$row.addClass("marking-completed");
+					$actionContainer.html('No action required.');
 				}
 				else if(!$statusContainer.find('.marked').length) {
-					$statusContainer.find('.label-warning').remove() // remove existing label before adding another
-					$statusContainer.append($('<span class="label label-info">In Progress</span>'));
-					$row.addClass("in-progress");
+					$statusContainer.find('.label-warning').remove(); // remove existing label before adding another
+					if(!$row.hasClass("in-progress")) {
+						$statusContainer.append($('<span class="label label-info">In Progress</span>'));
+						$row.addClass("in-progress");
+					}
 					$actionContainer.html(nextMarkerAction);
 				}
 

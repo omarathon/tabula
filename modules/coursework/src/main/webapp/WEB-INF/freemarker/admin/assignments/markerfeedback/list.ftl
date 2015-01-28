@@ -16,7 +16,15 @@
 		<#local thisFeedback = item.feedbacks?last />
 		<#local nextMarkerAction>Send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if></#local>
 
-		<tr class="item-container <#if thisFeedback.state.toString == "InProgress">in-progress</#if>"
+		<#assign progressClass>
+			<#if thisFeedback.state.toString == "InProgress">
+				in-progress
+			<#elseif thisFeedback.state.toString == "MarkingCompleted">
+				marking-completed
+			</#if>
+		</#assign>
+
+		<tr class="item-container ${progressClass}"
 			data-contentid="${markingId(u)}"
 			data-markingurl="${onlineMarkingUrls[u.userId]}"
 			data-nextmarkeraction="${nextMarkerAction}">
@@ -61,7 +69,7 @@
 				<#elseif thisFeedback.state.toString == "Rejected">
 					Review feedback and re-send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if>
 				<#elseif thisFeedback.state.toString == "MarkingCompleted">
-					No action required<#if item.nextMarker?has_content> - Sent to ${item.nextMarker.fullName}</#if>
+					No action required.<#if item.nextMarker?has_content> Sent to ${nextRoleName} (${item.nextMarker.fullName})</#if>
 				</#if>
 			</td>
 		</tr>
@@ -70,17 +78,17 @@
 
 <#macro workflowActions nextRoleName previousRoleName currentRoleName>
 <div class="btn-toolbar">
-	<#if previousRoleName?has_content>
-		<a class="use-tooltip form-post btn btn-danger must-be-blank disabled"
-		   title="Return marks and feedback to the ${previousRoleName}. You cannot return in-progress or completed feedback."
-		   data-container="body"
-		   href="<@routes.markingUncompleted assignment marker previousRoleName />"
-		   id="marking-uncomplete-button">
-			<i class="icon-arrow-left"></i> Reject and return to ${previousRoleName}
-		</a>
-	</#if>
-
 	<#if currentRoleName != 'Moderator'>
+		<#if previousRoleName?has_content>
+			<a class="use-tooltip form-post btn btn-danger must-be-blank disabled"
+			   title="Return marks and feedback to the ${previousRoleName}. You cannot return in-progress or completed feedback."
+			   data-container="body"
+			   href="<@routes.markingUncompleted assignment marker previousRoleName />"
+			   id="marking-uncomplete-button">
+				<i class="icon-arrow-left"></i> Reject and return to ${previousRoleName}
+			</a>
+		</#if>
+
 		<a class="use-tooltip form-post btn btn-primary must-be-populated disabled"
 		   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point. You cannot finalise blank feedback."
 		   data-container="body"
