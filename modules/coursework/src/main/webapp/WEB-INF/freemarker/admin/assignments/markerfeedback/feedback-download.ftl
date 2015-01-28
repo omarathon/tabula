@@ -12,7 +12,7 @@
 <body>
 <h2>${feedback.assignment.module.name} (${feedback.assignment.module.code?upper_case})</h2>
 <h2>${feedback.assignment.name}</h2>
-<h3>Feedback for ${user.universityId} </h3>
+<h3>Feedback for ${user.warwickId} </h3>
 
 <#if feedback.hasMarkOrGrade>
 	<div class="mark-and-grade">
