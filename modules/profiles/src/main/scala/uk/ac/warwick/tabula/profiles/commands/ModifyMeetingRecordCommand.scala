@@ -5,6 +5,7 @@ import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils.rejectIfEmptyOrWhitespace
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.MeetingRecordRejectedNotification
 import uk.ac.warwick.tabula.data.{Daoisms, FileDao, MeetingRecordDao}
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.data.model._
@@ -19,6 +20,7 @@ import scala.collection.JavaConverters._
 abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship, val considerAlternatives: Boolean = false)
 	extends Command[MeetingRecord] with Notifies[MeetingRecord, MeetingRecord]
 	with SchedulesNotifications[MeetingRecord, MeetingRecord]
+	with CompletesNotifications[MeetingRecord]
 	with SelfValidating with FormattedHtml
 	with BindListener with Daoisms {
 
@@ -157,5 +159,14 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 			"meeting" -> meeting.id
 		)
 		d.fileAttachments(meeting.attachments.asScala)
+	}
+
+	def notificationsToComplete(commandResult: MeetingRecord): CompletesNotificationsResult = {
+		CompletesNotificationsResult(
+			commandResult.approvals.asScala.flatMap(approval =>
+				notificationService.findActionRequiredNotificationsByEntityAndType[MeetingRecordRejectedNotification](approval)
+			),
+			creator.asSsoUser
+		)
 	}
 }
