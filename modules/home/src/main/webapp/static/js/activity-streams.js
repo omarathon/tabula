@@ -7,6 +7,8 @@ jQuery(function($) {
 
 	// Maps from priority classes to icon classes.
 	var icons = {
+		'priority-complete' : 'icon-ok',
+		'priority-trivial' : 'icon-info-sign',
 		'priority-info' : 'icon-info-sign',
 		'priority-warning' : 'icon-warning-sign',
 		'priority-critical' : 'icon-warning-sign' // same but red.
@@ -20,7 +22,9 @@ jQuery(function($) {
 
 	Activity.prototype.render = function() {
 		var item = this.item;
-		var priority = 'priority-info';
+		var priority = 'priority-complete';
+		if (item.priority >= 0.1) priority = 'priority-trivial';
+		if (item.priority >= 0.25) priority = 'priority-info';
 		if (item.priority >= 0.5) priority = 'priority-warning';
 		if (item.priority >= 0.75) priority = 'priority-critical';
 
@@ -29,6 +33,7 @@ jQuery(function($) {
 		var fullDate = time.format('LLLL');
 		var $timestamp = $('<div>', {'class':'timestamp', title: fullDate}).html(toTimestamp(now, time));
 		var urlTitle = capitalise(item.urlTitle || 'further info');
+		var url = (item.priority >= 0.1) ? $('<p>', {'class': 'url'}).append($('<a></a>', {'href': item.url}).html(urlTitle)) : "";
 
 		return $('<div>', {'class': 'activity ' + priority})
 			.data('notification-id', item._id)
@@ -42,10 +47,9 @@ jQuery(function($) {
 			)
 			.append($('<div>', {'class': 'content'})
 				.append(item.content)
-				.append($('<p>', {'class': 'url'}).append(
-					$('<a></a>', {'href': item.url}).html(urlTitle)
-				)));
-	}
+				.append(url)
+			);
+	};
 
 	function capitalise(text) {
 		if (!text || text.length < 1) return text;
@@ -114,7 +118,7 @@ jQuery(function($) {
 
 		// apply JS behaviour to .activity elements.
 		function wire($activities) {
-			$activities.find('.content').collapsible();
+			$activities.filter(':not(.priority-complete)').find('.content').collapsible();
 		}
 
 		function loadPage(pagination, first) {

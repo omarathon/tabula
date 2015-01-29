@@ -2107,6 +2107,11 @@ ul.nav-pills {
 		}
 	}
 
+	.priority-complete .headline {
+		i { color: @tabulaGreen; }
+		.title { text-decoration: line-through; }
+	}
+	.priority-trivial .headline i { color: @tabulaBlue; }
 	.priority-info .headline i { color: @tabulaBlue; }
 	.priority-warning .headline i { color: @tabulaOrangeLight; }
 	.priority-critical .headline i { color: @tabulaRed; }

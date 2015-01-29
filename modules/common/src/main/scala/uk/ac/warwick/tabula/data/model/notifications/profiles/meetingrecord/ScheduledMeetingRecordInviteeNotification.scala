@@ -47,7 +47,5 @@ class ScheduledMeetingRecordInviteeNotification extends ScheduledMeetingRecordNo
 		}
 	}
 
-	def actionRequired = false
-
 }
 

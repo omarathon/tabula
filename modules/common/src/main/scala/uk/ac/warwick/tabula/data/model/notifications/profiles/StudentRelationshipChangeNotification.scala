@@ -38,7 +38,7 @@ abstract class StudentRelationshipChangeNotification
 			"oldAgents" -> oldAgents
 
 		))
-	def actionRequired = false
+
 	def url: String = Routes.profile.view(relationship.studentMember.get)
 }
 

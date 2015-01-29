@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.events
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{ScheduledNotificationService, NotificationService}
-import uk.ac.warwick.tabula.commands.{SchedulesNotifications, Notifies, Command}
+import uk.ac.warwick.tabula.commands.{CompletesNotifications, SchedulesNotifications, Notifies, Command}
 import uk.ac.warwick.tabula.jobs.{Job, NotifyingJob}
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.data.model.Notification
@@ -40,6 +40,15 @@ trait NotificationHandling extends Logging {
 							scheduledNotificationService.push(scheduledNotification)
 						}
 					}
+				}
+			case _ =>
+		}
+
+		cmd match {
+			case ns: CompletesNotifications[A] =>
+				val notificationResult = ns.notificationsToComplete(result)
+				for (notification <- notificationResult.notifications) {
+					notification.actionCompleted(notificationResult.completedBy)
 				}
 			case _ =>
 		}

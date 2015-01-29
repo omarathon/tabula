@@ -12,7 +12,6 @@ class ScheduledMeetingRecordMissedInviteeNotification
 
 	verbSetting.value = "missed"
 	priority = Warning
-	def actionRequired = false
 
 	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_missed_invitee_notification.ftl"
 

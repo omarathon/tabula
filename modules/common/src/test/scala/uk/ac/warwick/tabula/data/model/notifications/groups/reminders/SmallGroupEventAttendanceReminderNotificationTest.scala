@@ -64,5 +64,6 @@ object SmallGroupEventAttendanceReminderNotificationTest {
 		}
 		bean(){mock[AssignmentMembershipService]}
 		bean(){mock[UserSettingsService]}
+		bean(){mock[NotificationService]}
 	}
 }

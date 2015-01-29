@@ -1,15 +1,18 @@
 package uk.ac.warwick.tabula.coursework.commands
 
-import uk.ac.warwick.tabula.data.model.{Submission, Feedback, Member, Assignment, Module}
-import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, Unaudited}
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.CurrentUser
-import StudentSubmissionAndFeedbackCommand._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
-import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, SubmissionServiceComponent, AutowiringFeedbackServiceComponent, FeedbackServiceComponent}
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.coursework.commands.StudentSubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackPublishedNotification, FeedbackChangeNotification}
+import uk.ac.warwick.tabula.events.NotificationHandling
+import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
+import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, AutowiringSubmissionServiceComponent, FeedbackServiceComponent, SubmissionServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 object StudentSubmissionAndFeedbackCommand {
 	case class StudentSubmissionInformation(
@@ -33,6 +36,7 @@ object StudentSubmissionAndFeedbackCommand {
 	def apply(module: Module, assignment: Assignment, user: CurrentUser) =
 		new CurrentUserSubmissionAndFeedbackCommandInternal(module, assignment, user)
 			with CurrentUserSubmissionAndFeedbackCommandPermissions
+			with CurrentUserSubmissionAndFeedbackNotificationCompletion
 			with AutowiringFeedbackServiceComponent
 			with AutowiringSubmissionServiceComponent
 			with ComposableCommand[StudentSubmissionInformation]
@@ -133,4 +137,23 @@ trait CurrentUserSubmissionAndFeedbackCommandPermissions extends RequiresPermiss
 
 		p.PermissionCheckAny(perms)
 	}
+}
+
+trait CurrentUserSubmissionAndFeedbackNotificationCompletion extends CompletesNotifications[StudentSubmissionInformation] {
+
+	self: NotificationHandling with StudentSubmissionAndFeedbackCommandState =>
+
+	def notificationsToComplete(commandResult: StudentSubmissionInformation): CompletesNotificationsResult = {
+		commandResult.feedback match {
+			case Some(feedbackResult) =>
+				CompletesNotificationsResult(
+					notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackPublishedNotification](feedbackResult) ++
+						notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackChangeNotification](feedbackResult),
+					viewer
+				)
+			case _ =>
+				EmptyCompletesNotificationsResult
+		}
+	}
+
 }

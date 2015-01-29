@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
-import uk.ac.warwick.tabula.commands.{SchedulesNotifications, Notifies, ComposableCommand}
+import uk.ac.warwick.tabula.commands.{CompletesNotifications, SchedulesNotifications, Notifies, ComposableCommand}
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
+import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.forms.Extension
@@ -19,6 +20,7 @@ object EditExtensionCommand {
 			with ModifyExtensionCommandValidation
 			with EditExtensionCommandNotification
 			with EditExtensionCommandScheduledNotification
+			with EditExtensionCommandNotificationCompletion
 			with AutowiringUserLookupComponent
 			with HibernateExtensionPersistenceComponent
 }
@@ -139,4 +141,21 @@ trait EditExtensionCommandScheduledNotification extends SchedulesNotifications[E
 		}
 	}
 
+}
+
+trait EditExtensionCommandNotificationCompletion extends CompletesNotifications[Extension] {
+
+	self: NotificationHandling with ModifyExtensionCommandState =>
+
+	def notificationsToComplete(commandResult: Extension): CompletesNotificationsResult = {
+		if (commandResult.approved || commandResult.rejected)
+			CompletesNotificationsResult(
+				notificationService.findActionRequiredNotificationsByEntityAndType[ExtensionRequestCreatedNotification](commandResult) ++
+					notificationService.findActionRequiredNotificationsByEntityAndType[ExtensionRequestModifiedNotification](commandResult)
+				,
+				submitter.apparentUser
+			)
+		else
+			EmptyCompletesNotificationsResult
+	}
 }
