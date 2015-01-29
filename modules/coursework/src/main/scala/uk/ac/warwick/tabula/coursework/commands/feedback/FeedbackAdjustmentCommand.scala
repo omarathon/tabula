@@ -136,6 +136,12 @@ trait FeedbackAdjustmentCommandDescription extends Describable[Feedback] {
 trait FeedbackAdjustmentNotifier extends Notifies[Feedback, Feedback] {
 	self: FeedbackAdjustmentCommandState =>
 
-	def emit(feedback: Feedback) =
-		Seq(Notification.init(new FeedbackAdjustmentNotification, submitter.apparentUser, feedback, feedback.assignment))
+	def emit(feedback: Feedback) = {
+		if (assignment.hasWorkflow) {
+			Seq(Notification.init(new FeedbackAdjustmentNotification, submitter.apparentUser, feedback, feedback.assignment))
+		} else {
+			Nil
+		}
+	}
+
 }
