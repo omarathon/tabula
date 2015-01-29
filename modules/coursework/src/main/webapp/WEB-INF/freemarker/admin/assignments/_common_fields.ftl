@@ -28,7 +28,7 @@ so that they can be passed around between requests.
 	<#assign disabled = !(canUpdateMarkingWorkflow!true)>
 
 	<@form.labelled_row "markingWorkflow" "Marking workflow">
-		<@f.select path="markingWorkflow" disabled="${disabled?string}">
+		<@f.select path="markingWorkflow" disabled=disabled>
 			<@f.option value="" label="None"/>
 			<#list department.markingWorkflows as markingWorkflow>
 				<@f.option value="${markingWorkflow.id}" label="${markingWorkflow.name} (${markingWorkflow.markingMethod.description})"/>

@@ -50,7 +50,7 @@
 				<@f.option value="Plagarism penalty">Plagarism penalty</@f.option>
 				<@f.option value="Other">Other</@f.option>
 			</@f.select>
-			<@f.input type="text" path="reason" cssClass="hide other-input" placeholder="Enter your reason" disabled="true"/>
+			<@f.input type="text" path="reason" cssClass="hide other-input" placeholder="Enter your reason" disabled=true/>
 			<@f.errors path="reason" cssClass="error" />
 		</@form.field>
 	</@form.row>

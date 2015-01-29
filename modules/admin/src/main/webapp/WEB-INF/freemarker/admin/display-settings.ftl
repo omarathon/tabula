@@ -199,7 +199,7 @@
 										<@f.checkbox
 											path="studentRelationshipExpected[${relationshipType.urlPart}][${courseType.code}]"
 											id="studentRelationshipExpected_${relationshipType.urlPart}_${courseType.code}"
-											disabled="${(!displaySettingsCommand.studentRelationshipDisplayed[relationshipType.id])?string}"
+											disabled=(!displaySettingsCommand.studentRelationshipDisplayed[relationshipType.id])
 										/>
 										${courseType.description}
 									</@form.label>
