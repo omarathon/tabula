@@ -1,4 +1,3 @@
-
 <#escape x as x?html>
 <#compress>
 <h1>${assignment.name}</h1>
@@ -22,8 +21,8 @@
 <a id="submittop"></a>
 
 <#if feedback??>
-
-	<#include "assignment_feedbackdownload.ftl" />
+	<h2>Feedback for ${feedback.universityId}</h2>
+	<#include "_assignment_feedbackdownload.ftl" />
 	<#if features.submissions>
 		<#if submission??>
 			<#include "assignment_submissionthanks.ftl" />

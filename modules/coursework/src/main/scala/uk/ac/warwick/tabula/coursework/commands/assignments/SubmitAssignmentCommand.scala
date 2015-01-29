@@ -1,29 +1,30 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.Transactions._
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.CurrentUser
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{SubmissionReceivedNotification, SubmissionReceiptNotification}
-import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringCourseworkSubmissionService
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, FormValue}
-import uk.ac.warwick.tabula.services.{MonitoringPointProfileTermAssignmentService, ZipService, SubmissionService, FeedbackService}
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.permissions._
-import org.springframework.util.Assert
-import org.springframework.validation.BindingResult
-import org.apache.commons.collections.map.LazyMap
 import org.apache.commons.collections.Factory
+import org.apache.commons.collections.map.LazyMap
+import org.joda.time.DateTime
+import org.springframework.util.Assert
+import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.{FormValue, SavedFormValue}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{SubmissionDueGeneralNotification, SubmissionDueWithExtensionNotification, SubmissionReceiptNotification, SubmissionReceivedNotification}
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringCourseworkSubmissionService
+import uk.ac.warwick.tabula.services.{MonitoringPointProfileTermAssignmentService, SubmissionService, ZipService}
+import uk.ac.warwick.tabula.system.BindListener
+
+import scala.collection.JavaConverters._
 
 class SubmitAssignmentCommand(
-		val module: Module,
-		val assignment: Assignment,
-		val user: CurrentUser
-	) extends Command[Submission] with SelfValidating with BindListener with Notifies[Submission, Submission] {
+	val module: Module,
+	val assignment: Assignment,
+	val user: CurrentUser
+) extends Command[Submission] with SelfValidating with BindListener
+	with Notifies[Submission, Submission] with CompletesNotifications[Submission] {
 
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Create, assignment)
@@ -168,4 +169,13 @@ class SubmitAssignmentCommand(
 		)
 	}
 
+	def notificationsToComplete(commandResult: Submission): CompletesNotificationsResult = {
+		CompletesNotificationsResult(
+			notificationService.findActionRequiredNotificationsByEntityAndType[SubmissionDueGeneralNotification](assignment) ++
+				assignment.findExtension(user.universityId).map(
+					notificationService.findActionRequiredNotificationsByEntityAndType[SubmissionDueWithExtensionNotification]
+				).getOrElse(Seq()),
+			user.apparentUser
+		)
+	}
 }

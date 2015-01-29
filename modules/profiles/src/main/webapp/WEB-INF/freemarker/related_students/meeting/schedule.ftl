@@ -81,7 +81,7 @@
 		<@form.labelled_row "format" "Format">
 			<@f.select path="format" cssClass="input-large">
 				<@f.option disabled=true selected="true" label="Please select one..." />
-				<@f.options items=formats />
+				<@f.options items=formats itemLabel="description" itemValue="code" />
 			</@f.select>
 		</@form.labelled_row>
 

@@ -16,7 +16,18 @@
 		<#local thisFeedback = item.feedbacks?last />
 		<#local nextMarkerAction>Send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if></#local>
 
-		<tr class="item-container" data-contentid="${markingId(u)}" data-markingurl="${onlineMarkingUrls[u.userId]}" data-nextmarkeraction="${nextMarkerAction}">
+		<#assign progressClass>
+			<#if thisFeedback.state.toString == "InProgress">
+				in-progress
+			<#elseif thisFeedback.state.toString == "MarkingCompleted">
+				marking-completed
+			</#if>
+		</#assign>
+
+		<tr class="item-container ${progressClass}"
+			data-contentid="${markingId(u)}"
+			data-markingurl="${onlineMarkingUrls[u.userId]}"
+			data-nextmarkeraction="${nextMarkerAction}">
 			<td class="check-col">
 				<@form.selector_check_row "markerFeedback" thisFeedback.id />
 			</td>
@@ -58,7 +69,7 @@
 				<#elseif thisFeedback.state.toString == "Rejected">
 					Review feedback and re-send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if>
 				<#elseif thisFeedback.state.toString == "MarkingCompleted">
-					No action required<#if item.nextMarker?has_content> - Sent to ${item.nextMarker.fullName}</#if>
+					No action required.<#if item.nextMarker?has_content> Sent to ${nextRoleName} (${item.nextMarker.fullName})</#if>
 				</#if>
 			</td>
 		</tr>
@@ -67,19 +78,19 @@
 
 <#macro workflowActions nextRoleName previousRoleName currentRoleName>
 <div class="btn-toolbar">
-	<#if previousRoleName?has_content>
-		<a class="use-tooltip form-post btn btn-danger"
-		   title="Return marks and feedback to the previous marker. All changes you have made will be discarded. Note that this can only be done if feedback has not been released for this student."
-		   data-container="body"
-		   href="<@routes.markingUncompleted assignment marker previousRoleName />"
-		   id="marking-uncomplete-button">
-			<i class="icon-arrow-left"></i> Reject and return to ${previousRoleName}
-		</a>
-	</#if>
-
 	<#if currentRoleName != 'Moderator'>
-		<a class="use-tooltip form-post btn btn-primary"
-		   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point."
+		<#if previousRoleName?has_content>
+			<a class="use-tooltip form-post btn btn-danger must-be-blank disabled"
+			   title="Return marks and feedback to the ${previousRoleName}. You cannot return in-progress or completed feedback."
+			   data-container="body"
+			   href="<@routes.markingUncompleted assignment marker previousRoleName />"
+			   id="marking-uncomplete-button">
+				<i class="icon-arrow-left"></i> Reject and return to ${previousRoleName}
+			</a>
+		</#if>
+
+		<a class="use-tooltip form-post btn btn-primary must-be-populated disabled"
+		   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point. You cannot finalise blank feedback."
 		   data-container="body"
 		   href="<@routes.markingCompleted assignment marker nextRoleName/>"
 		   id="marking-complete-button">
@@ -161,7 +172,7 @@
 	</div>
 	<#if markerFeedback?has_content>
 		<#list markerFeedback as stage>
-			<div class="well">
+			<div class="well workflow-role">
 				<h3>${stage.roleName}</h3>
 				<@workflowActions stage.nextRoleName stage.previousRoleName!"" stage.roleName!""/>
 				<table class="table
@@ -203,6 +214,7 @@
 					useIframe: true,
 					tableSorterOptions: tsOptions
 				});
+
 			})(jQuery);
 		</script>
 	<#else>

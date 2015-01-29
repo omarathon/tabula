@@ -2000,6 +2000,7 @@ ul.nav-pills {
         list-style: none;
 
         label.checkbox {
+			padding-left: 0px;
           padding-right: 10px;
 
           max-width: 300px;
@@ -2013,6 +2014,7 @@ ul.nav-pills {
 			float: none;
 			margin-right: 0px;
 			vertical-align: top;
+			  margin-left: 0px;
 		  }
         }
       }
@@ -2107,6 +2109,11 @@ ul.nav-pills {
 		}
 	}
 
+	.priority-complete .headline {
+		i { color: @tabulaGreen; }
+		.title { text-decoration: line-through; }
+	}
+	.priority-trivial .headline i { color: @tabulaBlue; }
 	.priority-info .headline i { color: @tabulaBlue; }
 	.priority-warning .headline i { color: @tabulaOrangeLight; }
 	.priority-critical .headline i { color: @tabulaRed; }

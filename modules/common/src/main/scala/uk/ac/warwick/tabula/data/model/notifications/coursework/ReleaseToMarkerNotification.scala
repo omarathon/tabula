@@ -19,7 +19,8 @@ class ReleaseToMarkerNotification
 	with SingleRecipientNotification
 	with UserIdRecipientNotification
 	with AutowiringUserLookupComponent
-	with Logging {
+	with Logging
+	with AllCompletedActionRequiredNotification {
 
 	def this(markerNumber: Int) {
 		this()
@@ -56,6 +57,6 @@ class ReleaseToMarkerNotification
 	def urlTitle = s"$workflowVerb this feedback"
 
 	priority = Warning
-	def actionRequired = true
+
 }
 

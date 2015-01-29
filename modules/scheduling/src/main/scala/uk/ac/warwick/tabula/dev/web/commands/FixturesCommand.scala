@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.services.{SmallGroupService, ModuleAndDepartmentService, RelationshipService}
+import uk.ac.warwick.tabula.services.{FeedbackForSitsService, SmallGroupService, ModuleAndDepartmentService, RelationshipService}
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformationCommand
 import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
@@ -37,6 +37,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	var attendanceMonitoringDao = Wire[AttendanceMonitoringDao]
 	var smallGroupService = Wire[SmallGroupService]
 	var permissionsService = Wire[PermissionsService]
+	var feedbackForSitsService = Wire[FeedbackForSitsService]
 
 	def applyInternal() {
 		setupDepartmentAndModules()
@@ -175,8 +176,20 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				}
 
 				val modules = dept.modules
+
+				for (module <- modules) {
+					for (assignment <- module.assignments) {
+						for (feedback <- assignment.feedbacks) {
+							for (feedbackForSits <- feedbackForSitsService.getByFeedback(feedback)) {
+								session.delete(feedbackForSits)
+							}
+						}
+					}
+				}
+
 				modules.foreach(invalidateAndDeletePermissions[Module])
 				modules.foreach(session.delete)
+
 				dept.modules.clear()
 
 				for (feedbackTemplate <- dept.feedbackTemplates) session.delete(feedbackTemplate)

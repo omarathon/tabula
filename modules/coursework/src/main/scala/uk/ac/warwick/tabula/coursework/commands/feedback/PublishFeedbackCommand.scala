@@ -2,8 +2,8 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.commands.{Notifies, Command, Description, SelfValidating}
-import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackPublishedNotification
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackDueGeneralNotification, FeedbackDueExtensionNotification, FeedbackPublishedNotification}
 import uk.ac.warwick.tabula.data.model.{Notification, Feedback, Assignment, Module}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -26,7 +26,9 @@ object PublishFeedbackCommand {
 }
 
 class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser, val optionalQueueFeedbackForSitsCommand: Option[QueueFeedbackForSitsCommand])
-	extends Command[PublishFeedbackCommand.PublishFeedbackResults] with Notifies[PublishFeedbackCommand.PublishFeedbackResults, Feedback] with SelfValidating {
+	extends Command[PublishFeedbackCommand.PublishFeedbackResults] with Notifies[PublishFeedbackCommand.PublishFeedbackResults, Feedback] with SelfValidating
+	with CompletesNotifications[PublishFeedbackCommand.PublishFeedbackResults] {
+
 	import PublishFeedbackCommand._
 
 	mustBeLinked(mandatory(assignment), mandatory(module))
@@ -113,5 +115,17 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 		.studentIds(getUsersForFeedback map { case(userId, user) => user.getWarwickId })
 
 	def emit(results: PublishFeedbackResults) = results.notifications
+
+	def notificationsToComplete(commandResult: PublishFeedbackCommand.PublishFeedbackResults): CompletesNotificationsResult = {
+		if (!assignment.needsFeedbackPublishing) {
+			CompletesNotificationsResult(
+				notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackDueGeneralNotification](assignment) ++
+					 notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackDueExtensionNotification](assignment),
+				submitter.apparentUser
+			)
+		} else {
+			EmptyCompletesNotificationsResult
+		}
+	}
 
 }

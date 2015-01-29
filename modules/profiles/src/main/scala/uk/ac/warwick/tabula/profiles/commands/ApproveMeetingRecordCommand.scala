@@ -2,12 +2,13 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.{CurrentUser, FeaturesComponent}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{MeetingRecordApprovedNotification, MeetingRecordRejectedNotification}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{EditedMeetingRecordApprovalNotification, NewMeetingRecordApprovalNotification, MeetingRecordApprovedNotification, MeetingRecordRejectedNotification}
 import uk.ac.warwick.tabula.data.model.{MeetingRecordApproval, MeetingRecord, Notification}
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -29,6 +30,7 @@ object ApproveMeetingRecordCommand {
 		with ApproveMeetingRecordPermission
 		with ApproveMeetingRecordValidation
 		with ApproveMeetingRecordNotification
+		with ApproveMeetingRecordNotificationCompletion
 }
 
 class ApproveMeetingRecordCommand (val meeting: MeetingRecord, val user: CurrentUser)
@@ -108,6 +110,19 @@ trait ApproveMeetingRecordNotification extends Notifies[MeetingRecord, MeetingRe
 		else Seq( Notification.init(new MeetingRecordRejectedNotification, agent, Seq(approvals.head) ))
 	}
 
+}
+
+trait ApproveMeetingRecordNotificationCompletion extends CompletesNotifications[MeetingRecord] {
+	self: NotificationHandling with ApproveMeetingRecordState =>
+
+	def notificationsToComplete(commandResult: MeetingRecord): CompletesNotificationsResult = {
+		CompletesNotificationsResult(
+			notificationService.findActionRequiredNotificationsByEntityAndType[NewMeetingRecordApprovalNotification](commandResult) ++
+				notificationService.findActionRequiredNotificationsByEntityAndType[EditedMeetingRecordApprovalNotification](commandResult)
+			,
+			user.apparentUser
+		)
+	}
 }
 
 trait ApproveMeetingRecordState {

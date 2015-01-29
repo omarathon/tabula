@@ -105,6 +105,8 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	var adjustmentComments: String = _
 	var adjustmentReason: String = _
 
+	def hasAdjustments = adjustedGrade.isDefined || adjustedMark.isDefined
+
 	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
 	@JoinColumn(name = "first_marker_feedback")
 	var firstMarkerFeedback: MarkerFeedback = _

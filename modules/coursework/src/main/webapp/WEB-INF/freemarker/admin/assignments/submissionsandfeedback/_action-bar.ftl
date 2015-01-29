@@ -187,17 +187,6 @@
 								<i class="icon-edit"></i> Generic feedback
 							</@fmt.permission_button>
 						</li>
-						<li>
-							<#assign onlinefeedback_url><@routes.feedbackAdjustment assignment /></#assign>
-							<@fmt.permission_button
-							permission='Feedback.Update'
-							scope=assignment
-							action_descr='make adjustments to feedback'
-							tooltip='Apply penalties or make adjustments before publishing feedback'
-							href=onlinefeedback_url>
-								<i class="icon-sort"></i> Adjustments
-							</@fmt.permission_button>
-						</li>
 					<#else>
 						<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 							<li>
@@ -241,6 +230,17 @@
 							</@fmt.permission_button>
 						</li>
 					</#if>
+					<li>
+						<#assign onlinefeedback_url><@routes.feedbackAdjustment assignment /></#assign>
+						<@fmt.permission_button
+						permission='Feedback.Update'
+						scope=assignment
+						action_descr='make adjustments to feedback'
+						tooltip='Apply penalties or make adjustments before publishing feedback'
+						href=onlinefeedback_url>
+							<i class="icon-sort"></i> Adjustments
+						</@fmt.permission_button>
+					</li>
 
 					<#-- Download / Publish / Delete always available -->
 					<li class="must-have-selected">

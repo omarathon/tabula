@@ -142,7 +142,7 @@
 <#macro debugPermission permission scope={} showScopes=true>
 	<#local isTarget=permissionsHelperCommand?? && permissionsHelperCommand.permission?? && (permission.name == permissionsHelperCommand.permission.name && (scope?size == 0 || (scope.id == results.resolvedScope.id)))>
 
-	<#if isTarget><strong class="text-success"></#if>
+	<#if isTarget!false><strong class="text-success"></#if>
 
 	<span class="permission"><i class="icon-lock use-tooltip" title="${permission.name}"></i> ${permission.description}</span>
 	<#if showScopes && scope?? && scope?size != 0>
@@ -151,7 +151,7 @@
 		<i class="icon-globe use-tooltip" title="Granted against any scope" data-placement="right"></i>
 	</#if>
 
-	<#if isTarget></strong></#if>
+	<#if isTarget!false></strong></#if>
 </#macro>
 
 <#macro debugRole role showScopes=true>

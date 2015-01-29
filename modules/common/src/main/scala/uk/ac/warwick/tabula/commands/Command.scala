@@ -52,6 +52,16 @@ trait SchedulesNotifications[A, B] {
 	def scheduledNotifications(notificationTarget: B): Seq[ScheduledNotification[_]]
 }
 
+trait CompletesNotifications[A] {
+	class CompletesNotificationsResult(val notifications: Seq[ActionRequiredNotification], val completedBy: User)
+	object CompletesNotificationsResult {
+		def apply(notifications: Seq[ActionRequiredNotification], completedBy: User) =
+			new CompletesNotificationsResult(notifications, completedBy)
+	}
+	object EmptyCompletesNotificationsResult extends CompletesNotificationsResult(Nil, null)
+	def notificationsToComplete(commandResult: A): CompletesNotificationsResult
+}
+
 
 trait Appliable[A]{
   def apply():A

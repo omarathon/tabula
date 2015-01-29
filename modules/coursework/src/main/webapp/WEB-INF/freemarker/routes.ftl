@@ -27,6 +27,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentedit assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/edit"/></#macro>
 
 <#macro feedbackSummary assignment studentid><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/summary/${studentid}"/></#macro>
+<#macro feedbackAudit assignment studentid><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/audit/${studentid}"/></#macro>
 <#macro plagiarismInvestigation assignment><@_u page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised'/></#macro>
 <#macro onlinefeedback assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/online"/></#macro>
 <#macro feedbackAdjustment assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/adjustments"/></#macro>
@@ -118,7 +119,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro extensionRequest assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/extension"/></#macro>
 <#macro assignmentreceipt assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/resend-receipt"/></#macro>
 <#macro assignmentrequestaccess assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/request-access"/></#macro>
-<#macro feedbackPdf assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/feedback.pdf"/></#macro>
+<#macro feedbackPdf assignment feedback><@_u page="/module/${assignment.module.code}/${assignment.id}/${feedback.universityId}/feedback.pdf"/></#macro>
 <#macro submissionReceiptPdf submission><@_u page="/module/${submission.assignment.module.code}/${submission.assignment.id}/submission-receipt.pdf"/></#macro>
 <#macro submissionReceiptPdf_in_profile assignment><@_u page="/module/${submission.assignment.module.code}/${submission.assignment.id}/${submission.universityId}/submission-receipt.pdf"/></#macro>
 

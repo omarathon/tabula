@@ -141,10 +141,10 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
 	}
 
 	// get's the next marker in the workflow if one exists
-	def getNextMarker(position: FeedbackPosition, assignment:Assignment, universityId: UniversityId): Option[User] = {
+	def getNextMarker(position: Option[FeedbackPosition], assignment:Assignment, universityId: UniversityId): Option[User] = {
 		val markerId = position match {
-			case FirstFeedback => getStudentsSecondMarker(assignment, universityId)
-			case SecondFeedback => getStudentsThirdMarker(assignment, universityId)
+			case Some(FirstFeedback) => getStudentsSecondMarker(assignment, universityId)
+			case Some(SecondFeedback) => getStudentsThirdMarker(assignment, universityId)
 			case _ => None
 		}
 		markerId.map(userLookup.getUserByUserId)
