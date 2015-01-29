@@ -10,7 +10,6 @@ abstract class ExtensionStudentNotification extends ExtensionNotification with S
 	def recipient = student
 	def url = Routes.assignment(assignment)
 	def template: String
-	def actionRequired = false
 
 	def content = FreemarkerModel(template, Map (
 			"assignment" -> assignment,

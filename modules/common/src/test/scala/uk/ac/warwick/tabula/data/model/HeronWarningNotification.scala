@@ -23,7 +23,7 @@ class HeronWarningNotification extends Notification[Heron, Unit]
 	def url: String = "/beware/herons"
 	def urlTitle = "see how evil herons really are"
 	def recipient = item.entity.victim
-	def actionRequired = false
+
 }
 
 @Entity
@@ -40,7 +40,7 @@ with SingleItemNotification[Heron] with SingleRecipientNotification {
 	def url: String = "/beware/herons"
 	def urlTitle = "wallow in glory"
 	def recipient = item.entity.victim
-	def actionRequired = false
+
 }
 
 @Entity

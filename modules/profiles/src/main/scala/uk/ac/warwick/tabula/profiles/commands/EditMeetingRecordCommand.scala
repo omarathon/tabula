@@ -2,15 +2,18 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import org.joda.time.DateTime
 import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.commands.CompletesNotifications
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.EditedMeetingRecordApprovalNotification
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{MeetingRecordRejectedNotification, EditedMeetingRecordApprovalNotification}
 import uk.ac.warwick.tabula.data.model.{Notification, MeetingRecord, ScheduledNotification}
+import collection.JavaConverters._
 
 import scala.language.implicitConversions
 
 class EditMeetingRecordCommand(meetingRecord: MeetingRecord)
-	extends ModifyMeetingRecordCommand(meetingRecord.creator, meetingRecord.relationship) with FormattedHtml {
+	extends ModifyMeetingRecordCommand(meetingRecord.creator, meetingRecord.relationship)
+	with FormattedHtml with CompletesNotifications[MeetingRecord]{
 
 	val meeting = meetingRecord
 
@@ -49,4 +52,13 @@ class EditMeetingRecordCommand(meetingRecord: MeetingRecord)
 	override def scheduledNotifications(result: MeetingRecord) = Seq(
 		new ScheduledNotification[MeetingRecord]("editedMeetingRecordApproval", result, DateTime.now.plusWeeks(1))
 	)
+
+	def notificationsToComplete(commandResult: MeetingRecord): CompletesNotificationsResult = {
+		CompletesNotificationsResult(
+			commandResult.approvals.asScala.flatMap(approval =>
+				notificationService.findActionRequiredNotificationsByEntityAndType[MeetingRecordRejectedNotification](approval)
+			),
+			creator.asSsoUser
+		)
+	}
 }

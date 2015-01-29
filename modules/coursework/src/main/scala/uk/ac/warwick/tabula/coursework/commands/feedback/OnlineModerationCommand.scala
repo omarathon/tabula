@@ -1,21 +1,21 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import org.joda.time.DateTime
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.notifications.coursework.ModeratorRejectedNotification
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.coursework.commands.assignments.FinaliseFeedbackCommand
+import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
+import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{ModeratorRejectedNotification, ReleaseToMarkerNotification, ReturnToMarkerNotification}
+import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Notification, _}
+import uk.ac.warwick.tabula.events.NotificationHandling
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.commands.{UserAware, Notifies, Appliable, CommandInternal, ComposableCommand}
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.{Notification, MarkerFeedback}
-import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.coursework.commands.assignments.FinaliseFeedbackCommand
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.userlookup.User
 
 object OnlineModerationCommand {
 	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser) =
@@ -26,6 +26,7 @@ object OnlineModerationCommand {
 			with CopyFromFormFields
 			with WriteToFormFields
 			with ModerationRejectedNotifier
+			with OnlineModerationNotificationCompletion
 			with FinaliseFeedbackComponentImpl
 			with AutowiringFeedbackServiceComponent
 			with AutowiringFileAttachmentServiceComponent
@@ -37,14 +38,12 @@ object OnlineModerationCommand {
 			}
 }
 
-abstract class OnlineModerationCommand(module: Module, assignment: Assignment, student: User, marker: User, val submitter: CurrentUser)
-	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker)
+abstract class OnlineModerationCommand(module: Module, assignment: Assignment, student: User, val user: User, val submitter: CurrentUser)
+	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, user)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] with ModerationState with UserAware {
 
 	self: FeedbackServiceComponent with FileAttachmentServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy
 		with FinaliseFeedbackComponent =>
-
-	val user = marker
 
 	def markerFeedback = assignment.getMarkerFeedback(student.getWarwickId, marker, SecondFeedback)
 
@@ -126,6 +125,7 @@ trait FinaliseFeedbackComponentImpl extends FinaliseFeedbackComponent {
 }
 
 trait ModerationState {
+	def user: User
 	var approved: Boolean = true
 	var secondMarkerFeedback: MarkerFeedback = _
 }
@@ -139,5 +139,18 @@ trait ModerationRejectedNotifier extends Notifies[MarkerFeedback, MarkerFeedback
 			Notification.init(new ModeratorRejectedNotification, user, Seq(secondMarkerFeedback))
 		)
 		case true => Nil
+	}
+}
+
+trait OnlineModerationNotificationCompletion extends CompletesNotifications[MarkerFeedback] {
+
+	self: ModerationState with NotificationHandling =>
+
+	def notificationsToComplete(commandResult: MarkerFeedback): CompletesNotificationsResult = {
+		CompletesNotificationsResult(
+			notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](secondMarkerFeedback) ++
+				notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](secondMarkerFeedback),
+			user
+		)
 	}
 }

@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.groups.notifications
 
-import uk.ac.warwick.tabula.data.model.notifications.groups.OpenSmallGroupSetsNotification
-import uk.ac.warwick.tabula.{TestBase, Mockito}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet}
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.groups.SmallGroupFixture
 import uk.ac.warwick.tabula.data.model.Notification
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.notifications.groups.OpenSmallGroupSetsStudentSignUpNotification
+import uk.ac.warwick.tabula.groups.SmallGroupFixture
+import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.userlookup.User
 
 class OpenGroupSetNotificationTest extends TestBase with Mockito {
 
 	def createNotification(groups: Seq[SmallGroupSet], actor: User, recipient: User) = {
-		val n = Notification.init(new OpenSmallGroupSetsNotification, actor, groups)
+		val n = Notification.init(new OpenSmallGroupSetsStudentSignUpNotification, actor, groups)
 		n.recipientUserId = recipient.getUserId
 		n
 	}

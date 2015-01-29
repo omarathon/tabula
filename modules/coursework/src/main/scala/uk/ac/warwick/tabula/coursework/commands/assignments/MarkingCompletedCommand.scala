@@ -4,8 +4,9 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
-import uk.ac.warwick.tabula.services.{FeedbackServiceComponent, AutowiringFeedbackServiceComponent, AutowiringUserLookupComponent, UserLookupComponent, AutowiringStateServiceComponent, StateServiceComponent}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{ReturnToMarkerNotification, ModeratorRejectedNotification, ReleaseToMarkerNotification}
+import uk.ac.warwick.tabula.events.NotificationHandling
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConversions._
@@ -25,6 +26,7 @@ object MarkingCompletedCommand {
 			with AutowiringUserLookupComponent
 			with AutowiringStateServiceComponent
 			with AutowiringFeedbackServiceComponent
+			with MarkerCompletedNotificationCompletion
 }
 
 abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User, val submitter: CurrentUser)
@@ -133,4 +135,23 @@ trait MarkingCompletedState {
 trait SecondMarkerReleaseNotifier extends FeedbackReleasedNotifier[Unit] {
 	this: MarkingCompletedState with ReleasedState with UserAware with UserLookupComponent with Logging =>
 	def blankNotification = new ReleaseToMarkerNotification(2)
+}
+
+trait MarkerCompletedNotificationCompletion extends CompletesNotifications[Unit] {
+
+	self: MarkingCompletedState with NotificationHandling =>
+
+	def notificationsToComplete(commandResult: Unit): CompletesNotificationsResult = {
+		val notificationsToComplete = markerFeedback
+			.filter(_.state == MarkingState.MarkingCompleted)
+			.flatMap(mf =>
+				// ModeratorRejectedNotification is tied to the 2nd marker feedback
+				Option(mf.feedback.secondMarkerFeedback)
+					.map(notificationService.findActionRequiredNotificationsByEntityAndType[ModeratorRejectedNotification])
+					.getOrElse(Seq()) ++
+					notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf) ++
+					notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)
+			)
+		CompletesNotificationsResult(notificationsToComplete, marker)
+	}
 }

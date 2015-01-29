@@ -14,6 +14,8 @@ sealed abstract class NotificationPriority (val dbValue: String) {
 
 object NotificationPriority {
 
+	// Notification is complete
+	case object Complete extends NotificationPriority("complete") { def toNumericalValue = 0 }
 	// Notification is trivial; by default this will not generate an email
 	case object Trivial extends NotificationPriority("trivial") { def toNumericalValue = 0.1 }
 	// Notification is for information only
@@ -23,7 +25,7 @@ object NotificationPriority {
 	// Notification is about an action that is super important
 	case object Critical extends NotificationPriority("critical") { def toNumericalValue = 0.75 }
 
-	val values = Set(Trivial, Info, Warning, Critical)
+	val values = Set(Complete, Trivial, Info, Warning, Critical)
 
 	def fromDbValue(value: String): NotificationPriority =
 		if (value == null) null

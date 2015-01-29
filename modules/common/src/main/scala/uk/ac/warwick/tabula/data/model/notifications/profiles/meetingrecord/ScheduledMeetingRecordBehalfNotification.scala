@@ -32,5 +32,4 @@ class ScheduledMeetingRecordBehalfNotification
 
 	def recipient = meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage)).asSsoUser
 
-	def actionRequired = false
 }

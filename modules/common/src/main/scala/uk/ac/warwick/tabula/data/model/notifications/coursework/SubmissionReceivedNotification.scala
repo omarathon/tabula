@@ -83,5 +83,4 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 			.filter(canEmailUser)
 	}
 
-	def actionRequired = false
 }
