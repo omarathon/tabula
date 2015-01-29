@@ -6,50 +6,46 @@ import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.services.FeedbackService
 import uk.ac.warwick.tabula.web.views.PDFView
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
-import uk.ac.warwick.tabula.commands.CommandInternal
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.ComposableCommand
+import uk.ac.warwick.tabula.commands._
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.data.model.Feedback
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.commands.Description
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.Describable
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.PermissionDeniedException
+import uk.ac.warwick.userlookup.User
 
 @Controller
-@RequestMapping(value = Array("/module/{module}/{assignment}/feedback.pdf"))
+@RequestMapping(value = Array("/module/{module}/{assignment}/{student}/feedback.pdf"))
 class DownloadFeedbackAsPdfController extends CourseworkController {
-	
+
 	type DownloadFeedbackAsPdfCommand = Appliable[Feedback]
-	
 	var feedbackService = Wire[FeedbackService]
-	
+
 	@ModelAttribute def command(
 		@PathVariable("module") module: Module,
 		@PathVariable("assignment") assignment: Assignment,
-		user: CurrentUser): DownloadFeedbackAsPdfCommand = {
-			// We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
-			if (!user.loggedIn) {
-				throw new PermissionDeniedException(user, Permissions.Feedback.Read, assignment)
-			}
-		
-			DownloadFeedbackAsPdfCommand(module, assignment, mandatory(feedbackService.getFeedbackByUniId(assignment, user.universityId).filter(_.released)))
+		@PathVariable("student") student: User): DownloadFeedbackAsPdfCommand = {
+
+		// We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
+		if (!user.loggedIn) {
+			throw new PermissionDeniedException(user, Permissions.Feedback.Read, assignment)
+		}
+
+		DownloadFeedbackAsPdfCommand(module, assignment, mandatory(feedbackService.getFeedbackByUniId(assignment, student.getWarwickId)))
 	}
-		
+
 	@RequestMapping
-	def viewAsPdf(command: DownloadFeedbackAsPdfCommand, user: CurrentUser) = {
+	def viewAsPdf(command: DownloadFeedbackAsPdfCommand, @PathVariable("student") student: User) = {
 		new PDFView(
 			"feedback.pdf",
 			"/WEB-INF/freemarker/admin/assignments/markerfeedback/feedback-download.ftl",
-			Map("feedback" -> command.apply(), "user"-> user)
+			Map("feedback" -> command.apply(), "user"-> student)
 		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent
 	}
 

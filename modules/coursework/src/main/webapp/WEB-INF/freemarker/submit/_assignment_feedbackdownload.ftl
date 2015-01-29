@@ -1,5 +1,3 @@
-<h2>Feedback for ${feedback.universityId}</h2>
-	
 <#if features.collectRatings && feedback.collectRatings && isSelf>
 	<div id="feedback-rating-container" class="is-stackable">
 		<!-- fallback for noscript -->
@@ -103,7 +101,7 @@
 </p>
 
 <#if feedback.hasOnlineFeedback || feedback.hasMarkOrGrade || feedback.comments?? || assignment.genericFeedback??>
-	<a href="<@routes.feedbackPdf assignment=assignment />"> Download<#if feedback.attachments?has_content> additional</#if> feedback as a PDF file</a>
+	<a href="<@routes.feedbackPdf assignment=assignment feedback=feedback/>"> Download<#if feedback.attachments?has_content> additional</#if> feedback as a PDF file</a>
 </#if>
 
 
