@@ -23,7 +23,7 @@ class DownloadFeedbackInProfileController extends CourseworkController {
 	var feedbackDao = Wire.auto[FeedbackDao]
 
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("student") student: Member)
-		= new DownloadFeedbackCommand(module, assignment, mandatory(feedbackDao.getFeedbackByUniId(assignment, student.universityId).filter(_.released)))
+		= new DownloadFeedbackCommand(module, assignment, mandatory(feedbackDao.getFeedbackByUniId(assignment, student.universityId).filter(_.released)), student)
 
 	@Autowired var fileServer: FileServer = _
 

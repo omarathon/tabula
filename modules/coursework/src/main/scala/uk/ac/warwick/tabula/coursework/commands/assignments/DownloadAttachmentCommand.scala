@@ -5,8 +5,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.UserLookupService
 
 class DownloadAttachmentCommand(
 		val module: Module, 
@@ -15,8 +13,6 @@ class DownloadAttachmentCommand(
 		val student: Member)
 		extends Command[Option[RenderableFile]] with ReadOnly {
 
-	var userLookup = Wire[UserLookupService]
-	
 	mustBeLinked(mandatory(assignment), mandatory(module))
 
 	PermissionCheckAny(
