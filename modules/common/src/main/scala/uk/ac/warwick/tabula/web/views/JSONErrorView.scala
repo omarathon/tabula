@@ -7,7 +7,7 @@ import org.springframework.validation.Errors
 import org.springframework.context.MessageSource
 import uk.ac.warwick.spring.Wire
 
-class JSONErrorView(val errors: Errors, val additionalData: Map[String, _])  extends JSONView {
+class JSONErrorView(val errors: Errors, val additionalData: Map[String, _]) extends JSONView(Map()) {
 
 	def this(errors: Errors) = this(errors, Map())
 

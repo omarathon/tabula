@@ -28,8 +28,8 @@ import org.joda.time.DateTime
   */
 @RunWith(classOf[JUnitRunner])
 abstract class BrowserTest
-	extends ShouldMatchers
-	with FlatSpec
+	extends FlatSpec
+	with ShouldMatchers
 	with BeforeAndAfter
 	with EventuallyAjax
 	with SpanSugar

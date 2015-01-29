@@ -42,7 +42,7 @@ abstract class AbstractAllocateStudentsToGroupsController extends GroupsControll
 		Mav(renderPath).crumbs(Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 
-	protected def submit(cmd: AllocateStudentsToGroupsCommand, errors: Errors, set: SmallGroupSet, route: String, objects: Pair[String, _]*) = {
+	protected def submit(cmd: AllocateStudentsToGroupsCommand, errors: Errors, set: SmallGroupSet, route: String, objects: (String, _)*) = {
 		cmd.sort()
 		if (errors.hasErrors) {
 			render(set)

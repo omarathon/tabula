@@ -77,10 +77,10 @@ trait FindPointsCommandState {
 	// Bind variables
 	var findSchemes: JList[AttendanceMonitoringScheme] = LazyLists.create()
 	var sets: JList[MonitoringPointSet] = LazyLists.create()
-	var types: JList[AttendanceMonitoringPointType] = LazyLists.create {
+	var types: JList[AttendanceMonitoringPointType] = LazyLists.createWithFactory {
 		() => null
 	}
-	var styles: JList[AttendanceMonitoringPointStyle] = LazyLists.create {
+	var styles: JList[AttendanceMonitoringPointStyle] = LazyLists.createWithFactory {
 		() => null
 	}
 

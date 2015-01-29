@@ -177,7 +177,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	
 	def validateExisting(item: FeedbackItem, errors: Errors)
 
-	private def processFiles(bits: Seq[Pair[String, FileAttachment]]) {
+	private def processFiles(bits: Seq[(String, FileAttachment)]) {
 		
 		def store(itemMap: collection.mutable.Map[String, FeedbackItem], number: String, name: String, file: FileAttachment) =
 			itemMap.getOrElseUpdate(number, new FeedbackItem(uniNumber = number))

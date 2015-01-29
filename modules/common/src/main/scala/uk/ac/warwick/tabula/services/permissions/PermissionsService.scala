@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import uk.ac.warwick.tabula.permissions.Permission
 import scala.reflect._
+import scala.beans.BeanProperty
 import uk.ac.warwick.userlookup.GroupService
 import scala.collection.JavaConverters._
 import uk.ac.warwick.util.cache.{SingularCacheEntryFactory, CacheEntryFactory, Caches}

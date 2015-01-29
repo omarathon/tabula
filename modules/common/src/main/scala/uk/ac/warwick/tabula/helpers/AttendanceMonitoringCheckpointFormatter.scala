@@ -62,13 +62,13 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 		val wrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_0)
 		point.scheme.pointStyle match {
 			case AttendanceMonitoringPointStyle.Date =>
-				val intervalFormatter = Environment.getCurrentEnvironment.getGlobalVariable("intervalFormatter").asInstanceOf[TemplateMethodModel]
+				val intervalFormatter = Environment.getCurrentEnvironment.getGlobalVariable("intervalFormatter").asInstanceOf[TemplateMethodModelEx]
 				intervalFormatter.exec(JList(
 					wrapper.wrap(point.startDate.toDate),
 					wrapper.wrap(point.endDate.toDate)
 				)).asInstanceOf[String]
 			case AttendanceMonitoringPointStyle.Week =>
-				val wholeWeekFormatter = Environment.getCurrentEnvironment.getGlobalVariable("wholeWeekFormatter").asInstanceOf[TemplateMethodModel]
+				val wholeWeekFormatter = Environment.getCurrentEnvironment.getGlobalVariable("wholeWeekFormatter").asInstanceOf[TemplateMethodModelEx]
 				val userFormat = wholeWeekFormatter.exec(JList(
 					wrapper.wrap(point.startWeek),
 					wrapper.wrap(point.endWeek),

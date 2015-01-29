@@ -35,7 +35,7 @@ class Mav() {
 	// CSS classes to add to <body>. See #bodyClasses
 	var classes: List[String] = Nil
 
-	def addObjects(items: Pair[String, Any]*) = {
+	def addObjects(items: (String, Any)*) = {
 		map ++= items
 		this
 	}
@@ -154,10 +154,10 @@ object Mav {
 	 * constructor accepts the same kind of pair list, so "objects:_*" is used to pass the argument
 	 * list through as separate arguments rather than as a single list argument.
 	 */
-	def apply(view: String, objects: Pair[String, _]*) = new Mav(view).addObjects(objects: _*)
+	def apply(view: String, objects: (String, _)*) = new Mav(view).addObjects(objects: _*)
 	def apply(view: String, objects: Map[String, _]) = new Mav(view).addObjects(objects)
 
-	def apply(view: View, objects: Pair[String, _]*) = new Mav(view).addObjects(objects: _*)
+	def apply(view: View, objects: (String, _)*) = new Mav(view).addObjects(objects: _*)
 	def apply(view: View, objects: Map[String, _]) = new Mav(view).addObjects(objects)
 
 }

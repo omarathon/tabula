@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 import uk.ac.warwick.tabula.web.{Breadcrumbs, Mav}
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import scala.annotation.target.field
+import scala.annotation.meta.field
 import scala.annotation.target.param
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.BeanWrapper

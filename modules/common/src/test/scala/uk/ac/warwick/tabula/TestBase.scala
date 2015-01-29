@@ -2,6 +2,8 @@ package uk.ac.warwick.tabula
 
 import java.io.{InputStream, File, StringReader}
 import java.util.concurrent.TimeUnit
+import org.scalatest.Matchers
+
 import scala.collection.JavaConversions._
 import scala.collection.GenSeq
 import org.apache.commons.configuration.PropertiesConfiguration
@@ -12,10 +14,7 @@ import org.joda.time.DateTimeUtils
 import org.joda.time.ReadableInstant
 import org.junit.After
 import org.junit.Before
-import org.scalatest.junit.JUnitSuite
-import org.scalatest.junit.ShouldMatchersForJUnit
-import org.specs.mock.JMocker._
-import org.specs.mock.JMocker.`with`
+import org.scalatest.junit.{AssertionsForJUnit, JUnitSuite}
 import org.springframework.core.io.ClassPathResource
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
@@ -25,7 +24,7 @@ import freemarker.cache.MultiTemplateLoader
 import uk.ac.warwick.sso.client.SSOConfiguration
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.web.views.{UrlMethodModel, ScalaFreemarkerConfiguration}
+import uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.spring.FileUtils
@@ -46,7 +45,7 @@ import uk.ac.warwick.tabula.data.Transactions
   *
   * Also a bunch of methods for generating fake support resources.
   */
-abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with TestHelpers with TestFixtures with Logging{
+abstract class TestBase extends JUnitSuite with Matchers with AssertionsForJUnit with TestHelpers with TestFixtures with Logging{
 	// bring in type so we can be lazy and not have to import @Test
 	type Test = org.junit.Test
 

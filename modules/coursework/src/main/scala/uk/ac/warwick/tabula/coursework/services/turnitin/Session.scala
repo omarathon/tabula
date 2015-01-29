@@ -52,7 +52,7 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	def doRequest(
 		functionId: String, // API function ID (defined in TurnitinMethods object)
 		pdata: Option[FileData], // optional file to put in "pdata" parameter
-		params: Pair[String, String]*): TurnitinResponse = {
+		params: (String, String)*): TurnitinResponse = {
 
 		val req = getRequest(functionId, pdata, params:_*)
 
@@ -83,7 +83,7 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	def getRequest(
 		functionId: String, // API function ID (defined in TurnitinMethods object)
 		pdata: Option[FileData], // optional file to put in "pdata" parameter
-		params: Pair[String, String]*) = {
+		params: (String, String)*) = {
 		
 		val fullParameters = calculateParameters(functionId, params:_*)
 		val postWithParams = turnitin.endpoint.POST << fullParameters
@@ -92,7 +92,7 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 		req
 	}
 	
-	def calculateParameters(functionId: String, params: Pair[String, String]*) = {
+	def calculateParameters(functionId: String, params: (String, String)*) = {
 		val parameters = (Map("fid" -> functionId) ++ commonParameters ++ params).filterNot(nullValue)
 		(parameters + md5hexparam(parameters))
 	}
@@ -104,7 +104,7 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	def doRequestAdvanced(
 		functionId: String, // API function ID
 		pdata: Option[FileData], // optional file to put in "pdata" parameter
-		params: Pair[String, String]*) // POST parameters
+		params: (String, String)*) // POST parameters
 		(transform: Request => Handler[TurnitinResponse]): TurnitinResponse = {
 
 		val parameters = Map("fid" -> functionId) ++ commonParameters ++ params

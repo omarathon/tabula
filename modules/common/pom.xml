@@ -47,6 +47,12 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.scala-lang.modules</groupId>
+			<artifactId>scala-parser-combinators_${scala.major.version}</artifactId>
+			<version>1.0.3</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>
 			<version>${org.springframework.version}</version>
@@ -222,7 +228,7 @@
 		<dependency>
 			<groupId>uk.ac.warwick</groupId>
 			<artifactId>spring-scala-glue_${scala.major.version}</artifactId>
-			<version>1.5</version>
+			<version>1.6</version>
 		</dependency>
 
 		<dependency>
@@ -501,7 +507,7 @@
 
 		<dependency>
 			<groupId>org.springframework.scala</groupId>
-			<artifactId>spring-scala_${scala.major.version}</artifactId>
+			<artifactId>spring-scala</artifactId>
 		</dependency>
 
 		<dependency>
@@ -513,7 +519,7 @@
 		<dependency>
 			<groupId>uk.co.halfninja</groupId>
 			<artifactId>random-name-generator_${scala.major.version}</artifactId>
-			<version>0.1-warwick</version>
+			<version>0.2-warwick</version>
 		</dependency>
 
 		<!-- libphonenumber, for formatting phone numbers -->

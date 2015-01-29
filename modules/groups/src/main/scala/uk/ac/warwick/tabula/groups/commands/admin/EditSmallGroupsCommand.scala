@@ -55,7 +55,7 @@ trait EditSmallGroupsCommandState {
 	def set: SmallGroupSet
 
 	var existingGroups: JMap[String, ExistingGroupProperties] = JHashMap()
-	var newGroups: JList[NewGroupProperties] = LazyLists.create { () => new NewGroupProperties(module, set) }
+	var newGroups: JList[NewGroupProperties] = LazyLists.createWithFactory { () => new NewGroupProperties(module, set) }
 	var defaultMaxGroupSizeEnabled: Boolean = false
 	var defaultMaxGroupSize: Int = SmallGroup.DefaultGroupSize
 }

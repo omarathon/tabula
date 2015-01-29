@@ -4,7 +4,7 @@ import collection.JavaConverters._
 
 import org.scalatest.selenium.WebBrowser
 import org.scalatest.Assertions
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.openqa.selenium.{Cookie, WebDriver}
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.SpanSugar._
@@ -82,7 +82,7 @@ class SessionCache {
 	}
 }
 
-trait WebsignonMethods extends ShouldMatchers  with Eventually{
+trait WebsignonMethods extends Matchers  with Eventually{
 	import WebBrowser._ // include methods like "go to"
 	implicit val webDriver: WebDriver // let the trait know this will be implemented
 	

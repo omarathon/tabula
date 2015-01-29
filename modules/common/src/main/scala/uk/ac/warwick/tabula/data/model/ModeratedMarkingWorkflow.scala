@@ -20,7 +20,7 @@ class ModeratedMarkingWorkflow extends MarkingWorkflow with NoThirdMarker with A
 
 	override def onlineMarkingUrl(assignment: Assignment, marker: User, studentId: String) = {
 		assignment.submissions.asScala.find(_.userId == studentId) match {
-			case None => throw new ItemNotFoundException
+			case None => throw new ItemNotFoundException()
 			case Some(submission) =>
 				if (submission.isReleasedToSecondMarker && getStudentsSecondMarker(assignment, submission.universityId).exists(_ == marker.getUserId))
 					Routes.coursework.admin.assignment.onlineModeration(assignment, marker)
