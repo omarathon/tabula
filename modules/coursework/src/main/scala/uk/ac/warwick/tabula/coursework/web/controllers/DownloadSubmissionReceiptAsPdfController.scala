@@ -35,7 +35,6 @@ class DownloadSubmissionReceiptAsPdfController extends CourseworkController {
 				"submission" -> command.apply()
 			)
 		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent
-
 	}
 
 }
