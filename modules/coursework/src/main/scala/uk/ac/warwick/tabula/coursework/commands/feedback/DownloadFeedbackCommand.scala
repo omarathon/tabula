@@ -19,7 +19,7 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 	student match {
 		case Some(student: StudentMember) => PermissionCheckAny(
 			Seq(CheckablePermission(Permissions.Feedback.Read, feedback),
-				CheckablePermission(Permissions.Submission.Read, student))
+				CheckablePermission(Permissions.Feedback.Read, student))
 		)
 		case _ => PermissionCheck(Permissions.Feedback.Read, feedback)
 	}
