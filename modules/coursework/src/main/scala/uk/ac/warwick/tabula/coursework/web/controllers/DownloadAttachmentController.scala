@@ -23,7 +23,7 @@ class DownloadAttachmentController extends CourseworkController {
 	var submissionService = Wire.auto[SubmissionService]
 
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) 
-		= new DownloadAttachmentCommand(module, assignment, mandatory(submissionService.getSubmissionByUniId(assignment, user.universityId)), currentMember)
+		= new DownloadAttachmentCommand(module, assignment, mandatory(submissionService.getSubmissionByUniId(assignment, user.universityId)), optionalCurrentMember)
 
 	@Autowired var fileServer: FileServer = _
 
@@ -43,7 +43,7 @@ class DownloadAttachmentForStudentController extends CourseworkController {
 	var submissionService = Wire[SubmissionService]
 
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("studentMember") studentMember: Member)
-	= new DownloadAttachmentCommand(module, assignment, mandatory(submissionService.getSubmissionByUniId(assignment, studentMember.universityId)), studentMember)
+	= new DownloadAttachmentCommand(module, assignment, mandatory(submissionService.getSubmissionByUniId(assignment, studentMember.universityId)), Some(studentMember))
 
 	@Autowired var fileServer: FileServer = _
 

@@ -138,7 +138,7 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 			@PathVariable("assignment") assignment: Assignment, 
 			@PathVariable("submissionId") submissionId: String) = {
 		val submission = submissionService.getSubmission(submissionId).get
-		new DownloadAttachmentCommand(module, assignment, mandatory(submission), profileService.getMemberByUser(userLookup.getUserByUserId(submission.userId)).get)
+		new DownloadAttachmentCommand(module, assignment, mandatory(submission), profileService.getMemberByUser(userLookup.getUserByUserId(submission.userId)))
 	}
 
 	@RequestMapping
