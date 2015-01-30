@@ -11,7 +11,7 @@ class MarkingStateUserTypeTest extends TestBase {
 		t.convertToObject("InProgress") should be (InProgress)
 		t.convertToObject("MarkingCompleted") should be (MarkingCompleted)
 		t.convertToObject("Rejected") should be (Rejected)
-		evaluating { t.convertToObject("Q") } should produce [IllegalArgumentException]
+		an [IllegalArgumentException] should be thrownBy { t.convertToObject("Q") }
 	}
   
 	@Test def convertToValue() {

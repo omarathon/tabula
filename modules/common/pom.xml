@@ -507,7 +507,7 @@
 
 		<dependency>
 			<groupId>org.springframework.scala</groupId>
-			<artifactId>spring-scala</artifactId>
+			<artifactId>spring-scala_${scala.major.version}</artifactId>
 		</dependency>
 
 		<dependency>

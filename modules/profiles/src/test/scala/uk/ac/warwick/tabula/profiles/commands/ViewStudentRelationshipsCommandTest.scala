@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentRelationship, StudentRelationshipType, Department}
 import uk.ac.warwick.tabula.helpers.Tap
@@ -28,12 +29,14 @@ class ViewStudentRelationshipsCommandTest extends TestBase with Mockito {
 			r.id = "1"
 			r.agentMember = staff1
 			r.studentMember = student1
+			r.startDate = DateTime.now
 		})
 
 		val studentRel2 = new MemberStudentRelationship().tap(r => {
 			r.id = "2"
 			r.agentMember = staff2
 			r.studentMember = student2
+			r.startDate = DateTime.now
 		})
 	}
 

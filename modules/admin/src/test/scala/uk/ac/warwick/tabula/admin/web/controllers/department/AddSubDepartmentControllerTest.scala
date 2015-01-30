@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.admin.web.Routes
 
-class AddSubDepartmentControllerTest extends TestBase with Mockito {
+class AddSubDepartmentControllerTest extends TestBase with Mockito with org.specs2.mock.mockito.CalledMatchers {
 
 	val controller = new AddSubDepartmentController
 
@@ -36,7 +36,7 @@ class AddSubDepartmentControllerTest extends TestBase with Mockito {
 
 		controller.submit(command, errors).viewName should be (s"redirect:${Routes.department(subDepartment)}")
 
-		there was one (command).apply()
+		there was one(command).apply()
 	}
 
 	@Test def validation {
@@ -46,7 +46,7 @@ class AddSubDepartmentControllerTest extends TestBase with Mockito {
 
 		controller.submit(command, errors).viewName should be("admin/department/add/form")
 
-		there was no (command).apply()
+		there was atMost(0) (command).apply()
 	}
 
 }

@@ -461,6 +461,11 @@
 			<name>SpringSource Milestone Repository</name>
 			<url>http://repo.springsource.org/milestone</url>
 		</repository>
+		<repository>
+			<id>bintray.com.scalaz.releases</id>
+			<name>Scalaz Bintray Repo</name>
+			<url>http://dl.bintray.com/scalaz/releases</url>
+		</repository>
 	</repositories>
 
 	<pluginRepositories>
@@ -485,7 +490,7 @@
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
-				<version>3.1.3</version>
+				<version>3.2.0</version>
 			</plugin>
 
 			<plugin>
@@ -551,6 +556,7 @@
 					<jvmArgs>
 						<jvmArg>-Xms256m</jvmArg>
 						<jvmArg>-Xmx2048m</jvmArg>
+						<jvmArg>-XX:MaxPermSize=512m</jvmArg>
 					</jvmArgs>
 					<args>
 						<arg>-deprecation</arg>
@@ -680,7 +686,7 @@
 				<plugin>
 					<groupId>net.alchim31.maven</groupId>
 					<artifactId>scala-maven-plugin</artifactId>
-					<version>3.1.5</version>
+					<version>3.2.0</version>
 				</plugin>
 
 				<plugin>
@@ -788,7 +794,7 @@
 											scala-maven-plugin
 										</artifactId>
 										<versionRange>
-											[3.1.3,)
+											[3.2.0,)
 										</versionRange>
 										<goals>
 											<goal>add-source</goal>
@@ -1022,7 +1028,7 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
-			<version>1.9.5</version>
+			<version>1.10.19</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -1100,8 +1106,8 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.scala</groupId>
-				<artifactId>spring-scala</artifactId>
-				<version>1.0.0.M2</version>
+				<artifactId>spring-scala_${scala.major.version}</artifactId>
+				<version>1.0.0.RC1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

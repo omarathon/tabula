@@ -42,12 +42,12 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		userLookup.getUserByWarwickUniId(any[String]) answers { id =>
 			userDatabase find {_.getWarwickId == id} getOrElse (new AnonymousUser())
 		}
-		userLookup.getUsersByUserIds(any[JList[String]]) answers { case ids:JList[String @unchecked] =>
-			val users = ids.asScala.map(id=>(id,userDatabase find {_.getUserId == id} getOrElse (new AnonymousUser())))
+		userLookup.getUsersByUserIds(any[JList[String]]) answers { ids =>
+			val users = ids.asInstanceOf[JList[String]].asScala.map(id=>(id,userDatabase find {_.getUserId == id} getOrElse (new AnonymousUser())))
 			JHashMap(users:_*)
 		}
-		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] => 
-			ids.map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
+		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { ids =>
+			ids.asInstanceOf[Seq[String]].map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
 		}
     assignmentMembershipService = {
       val s = new AssignmentMembershipServiceImpl
@@ -56,7 +56,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
     }
 	}
 	
-	@Test def empty {
+	@Test def whenEmpty {
 		val membership = assignmentMembershipService.determineMembership(Nil, Option(nobody)).items
 		membership.size should be (0)
 	}

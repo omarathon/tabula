@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.{FeedbackTemplate, Department}
 import org.springframework.transaction.annotation.Transactional
-import reflect.BeanProperty
+import beans.BeanProperty
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.ZipService

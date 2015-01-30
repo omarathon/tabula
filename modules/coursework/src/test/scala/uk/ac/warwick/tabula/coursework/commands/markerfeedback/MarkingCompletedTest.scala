@@ -28,13 +28,9 @@ import uk.ac.warwick.tabula.Mockito
  */
 
 object MarkingCompletedTest {
-	class Ctx extends FunctionalContext with Mockito with MinimalCommandDependencies
-
-	trait MinimalCommandDependencies extends FunctionalContext with Mockito {
-		delayedInit {
-			singleton() { mock[MaintenanceModeService] }
-			singleton() { mock[EventListener] }
-		}
+	class Ctx extends FunctionalContext with Mockito {
+		bean() { mock[MaintenanceModeService] }
+		bean() { mock[EventListener] }
 	}
 }
 
@@ -53,7 +49,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	}
 
 	@After
-	def after() {
+	def afterTheFeast() {
 		Wire.ignoreMissingBeans = false
 	}
 
@@ -202,7 +198,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			var userLookup = mockUserLookup
 		}
 
-		val notifications = notifier.emit()
+		val notifications = notifier.emit(())
 		notifications.foreach {
 			case n:ReleaseToMarkerNotification => n.userLookup = mockUserLookup
 		}

@@ -237,7 +237,7 @@ object AddSubDepartmentCommandTest {
 
 		bean() {
 			val permissionsService = mock[PermissionsService]
-			permissionsService.ensureUserGroupFor(argThat(anything), argThat(anything))(argThat(anything)) returns UserGroup.ofUsercodes
+			permissionsService.ensureUserGroupFor(anArgThat(anything), anArgThat(anything))(anArgThat(anything)) returns UserGroup.ofUsercodes
 			permissionsService
 		}
 

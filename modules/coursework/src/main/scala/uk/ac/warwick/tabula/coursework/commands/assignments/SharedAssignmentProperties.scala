@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import collection.JavaConversions._
-import reflect.BeanProperty
+import beans.BeanProperty
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.JavaImports._
 import javax.validation.constraints.{ Max, Min }
@@ -70,7 +70,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 		}
 
 		// implicitly fix missing bounds
-		Pair(Option(wordCountMin), Option(wordCountMax)) match {
+		(Option(wordCountMin), Option(wordCountMax)) match {
 			case (Some(min), Some(max)) if (max <= min) => errors.rejectValue("wordCountMax", "assignment.wordCount.outOfRange")
 			case (Some(min), None) => wordCountMax = Assignment.MaximumWordCount
 			case (None, Some(max)) => wordCountMin = 0

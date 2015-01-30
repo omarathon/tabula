@@ -13,7 +13,7 @@ class PermissionUserTypeTest extends TestBase with Mockito {
 		t.convertToObject("Department.Manage") should be (Permissions.Department.Manage)
 		t.convertToObject("Profiles.Read.Core") should be (Permissions.Profiles.Read.Core)
 		t.convertToObject("Masquerade") should be (Permissions.Masquerade)
-		evaluating { t.convertToObject("Q") } should produce [IllegalArgumentException]
+		an [IllegalArgumentException] should be thrownBy { t.convertToObject("Q") }
 	}
 
 	@Test def convertToValue() {

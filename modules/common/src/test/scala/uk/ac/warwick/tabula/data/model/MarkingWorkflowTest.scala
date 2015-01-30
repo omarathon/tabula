@@ -212,7 +212,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		val t = new MarkingMethodUserType
 		t.convertToObject("StudentsChooseMarker") should be (MarkingMethod.StudentsChooseMarker)
 		t.convertToObject("SeenSecondMarkingLegacy") should be (MarkingMethod.SeenSecondMarkingLegacy)
-		evaluating { t.convertToObject("Q") } should produce [IllegalArgumentException]
+		an [IllegalArgumentException] should be thrownBy { t.convertToObject("Q") }
 	}
 
 	@Test def convertToValue() {

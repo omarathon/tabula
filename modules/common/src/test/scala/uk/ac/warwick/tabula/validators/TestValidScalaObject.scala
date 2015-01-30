@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.validators
-import annotation.target.field
+
 import org.hibernate.validator.constraints.NotEmpty
 
 class TestValidScalaObject {

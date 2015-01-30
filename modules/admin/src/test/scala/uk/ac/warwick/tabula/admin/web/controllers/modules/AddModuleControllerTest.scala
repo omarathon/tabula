@@ -58,7 +58,7 @@ class AddModuleControllerTest extends TestBase with Mockito {
 		mav.viewName should be ("admin/modules/add/form")
 		mav.toModel("department") should be (department)
 
-		there was no (command).apply()
+		there was atMost(0) (command).apply()
 	}
 
 }

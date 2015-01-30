@@ -168,14 +168,6 @@ trait TestHelpers extends TestFixtures {
 	  */
 	@After def deleteTemporaryDirs = try{temporaryFiles.par foreach FileUtils.recursiveDelete} catch {case _: Throwable => /* squash! will be cleaned from temp eventually anyway */}
 
-	/** withArgs(a,b,c) translates to
-	  * with(allOf(a,b,c)).
-	  *
-	  * :_* is used to pass varargs from one function to another
-	  * function that also takes varargs.
-	  */
-	def withArg[A](matcher: Matcher[A]*) = `with`(allOf(matcher: _*))
-
 	def withFakeTime(when: ReadableInstant)(fn: => Unit) =
 		try {
 			DateTimeUtils.setCurrentMillisFixed(when.getMillis)
@@ -250,14 +242,6 @@ trait TestHelpers extends TestFixtures {
 		new BePropertyMatcher[AnyRef] { def apply(left: AnyRef) =
 			BePropertyMatchResult(clazz.isAssignableFrom(left.getClass), "an instance of " + clazz.getName)
 		}
-	}
-
-	def containMatching[A](f: (A)=>Boolean) = org.scalatest.matchers.Matcher[GenSeq[A]] { (v:GenSeq[A]) =>
-		org.scalatest.matchers.MatchResult(
-    		v exists f,
-    		"Contained a matching value",
-    		"Contained no matching value"
-		)
 	}
 }
 trait FreemarkerTestHelpers{
