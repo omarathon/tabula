@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.data.model.MarkingMethod.ModeratedMarking
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.{MarkerFeedbackStage, ListMarkerFeedbackCommand}
 import uk.ac.warwick.tabula.web.Mav
@@ -35,6 +36,7 @@ class ListMarkerFeedbackController extends CourseworkController {
 			val maxFeedbackCount = feedbackCounts.foldLeft(0)(_ max _)
 			val hasFirstMarkerFeedback = maxFeedbackCount > 1
 			val hasSecondMarkerFeedback = maxFeedbackCount > 2
+			val isModeration =  assignment.markingWorkflow.markingMethod == ModeratedMarking && assignment.markingWorkflow.secondMarkers.includesUser(marker)
 
 			Mav("admin/assignments/markerfeedback/list",
 				"assignment" -> assignment,
@@ -45,6 +47,7 @@ class ListMarkerFeedbackController extends CourseworkController {
 				"firstMarkerRoleName" -> assignment.markingWorkflow.firstMarkerRoleName,
 				"secondMarkerRoleName" -> assignment.markingWorkflow.secondMarkerRoleName,
 				"thirdMarkerRoleName" -> assignment.markingWorkflow.thirdMarkerRoleName,
+				"isModeration" -> isModeration,
 				"onlineMarkingUrls" -> feedbackItems.map{ items =>
 					items.student.getUserId -> assignment.markingWorkflow.onlineMarkingUrl(assignment, marker, items.student.getUserId)
 				}.toMap,
