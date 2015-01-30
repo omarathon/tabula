@@ -42,7 +42,7 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
 	@Test def applyCommand() { new Fixture { withUser("custard") {
 		feedback.assignment.feedbacks.size should be (1)
 
-		val command = new DownloadFeedbackCommand(feedback.assignment.module, feedback.assignment, feedback, Fixtures.student("123"))
+		val command = new DownloadFeedbackCommand(feedback.assignment.module, feedback.assignment, feedback, Some(Fixtures.student("123")))
 		command.zip = new ZipService
 		command.zip.userLookup = userLookup
 		command.zip.features = Features.empty
