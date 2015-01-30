@@ -10,16 +10,18 @@ class DownloadAttachmentCommand(
 		val module: Module, 
 		val assignment: Assignment, 
 		val submission: Submission,
-		val student: Member)
+		val student: Option[Member])
 		extends Command[Option[RenderableFile]] with ReadOnly {
 
 	mustBeLinked(mandatory(assignment), mandatory(module))
 
-	PermissionCheckAny(
-		Seq(CheckablePermission(Permissions.Submission.Read, submission),
-			CheckablePermission(Permissions.Submission.Read, student))
-	)
-
+	student match {
+		case Some(student: StudentMember) => PermissionCheckAny(
+			Seq(CheckablePermission(Permissions.Submission.Read, submission),
+				CheckablePermission(Permissions.Submission.Read, student))
+		)
+		case _ => PermissionCheck(Permissions.Submission.Read, submission)
+	}
 
 	var filename: String = _
 
