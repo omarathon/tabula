@@ -103,6 +103,14 @@
 		   id="marking-complete-button">
 			Confirm and send to ${nextRoleName} <i class="icon-arrow-right"></i>
 		</a>
+	<#else>
+		<a class="use-tooltip form-post btn btn-success must-be-blank disabled"
+		   title="Bulk approve marks and feedback."
+		   data-container="body"
+		   href="<@routes.bulkApproval assignment marker />"
+		   id="bulk-approve-button">
+			Approve and send to administrator <i class="icon-arrow-right"></i>
+		</a>
 	</#if>
 </div>
 </#macro>
