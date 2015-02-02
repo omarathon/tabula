@@ -47,6 +47,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro markingCompleted assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/marking-completed" /></#macro>
 <#macro markingCompleted assignment marker nextRoleName><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/marking-completed?nextStageRole=${nextRoleName}" /></#macro>
 <#macro markingUncompleted assignment marker previousRoleName><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/marking-uncompleted?previousStageRole=${previousRoleName}" /></#macro>
+<#macro bulkApproval assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/moderation/bulk-approve" /></#macro>
 
 <#macro enrolment module academicYear><@_u page="/admin/module/${module.code}/assignments/enrolment/${academicYear.startYear?c}"/></#macro>
 

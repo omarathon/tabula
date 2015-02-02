@@ -121,7 +121,7 @@
 </p>
 
 <div class="submit-buttons">
-	<input class="btn btn-warn" type="submit" value="Confirm">
+	<input class="btn btn-primary" type="submit" value="Confirm">
 	<a class="btn" href="<@routes.listmarkersubmissions assignment marker />">Cancel</a>
 </div>
 </@f.form>

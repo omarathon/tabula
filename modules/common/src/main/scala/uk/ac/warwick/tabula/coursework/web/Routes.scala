@@ -49,6 +49,9 @@ object Routes {
 					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/marking-uncompleted"
 					def apply(assignment: Assignment, marker: User, previousRole: String) = markerroot(assignment, marker) + "/marking-uncompleted?previousStageRole="+previousRole
 				}
+				object bulkApprove {
+					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/moderation/bulk-approve"
+				}
 				object marksTemplate {
 					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/marks-template"
 				}
@@ -76,7 +79,7 @@ object Routes {
 				object downloadFeedback {
 					object marker {
 						def apply(assignment: Assignment, marker: User, feedbackId: String, filename: String) =
-							markerroot(assignment, marker) + s"/feedback/download/${feedbackId}/${filename}"
+							markerroot(assignment, marker) + s"/feedback/download/$feedbackId/$filename"
 					}
 
 					object all {
