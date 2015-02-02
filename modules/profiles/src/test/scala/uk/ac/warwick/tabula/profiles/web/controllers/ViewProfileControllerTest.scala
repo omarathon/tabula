@@ -2,7 +2,8 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{ProfileService, SecurityService, SmallGroupService, TermService}
-import uk.ac.warwick.tabula.{ItemNotFoundException, Mockito, TestBase}
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.userlookup.User
 
 class ViewProfileControllerTest extends TestBase with Mockito{
 
@@ -18,10 +19,15 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 	courseDetails.mostSignificant = true
 	member.attachStudentCourseDetails(courseDetails)
 	member.mostSignificantCourse = courseDetails
+	member.homeDepartment = Fixtures.department("its")
+
+	val user = new CurrentUser(null, new User(){
+		setDepartmentCode("its")
+	})
 
 	@Test(expected=classOf[ItemNotFoundException])
 	def throwsNonStudentStaff() {
-		withUser("test") {
+		withCurrentUser(user) {
 			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns Nil
 			val emeritusMember = new EmeritusMember()
 			val cmd = controller.viewProfileCommand(emeritusMember)
@@ -30,7 +36,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 
 	@Test
 	def getsProfileCommand() {
-		withUser("test") {
+		withCurrentUser(user) {
 			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns Nil
 			val cmd = controller.viewProfileCommand(member)
 			cmd.value should be(member)
