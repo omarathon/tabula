@@ -257,7 +257,9 @@
 
 				$(".new, .edit-meeting-record", $meetingsSection).on("click", function() {
 					var $this = $(this);
-					getModal($this, $this.attr("href"));
+					if (!$this.closest('details').is('.deleted')) {
+						getModal($this, $this.attr("href"));
+					}
 
 					return false;
 				});
