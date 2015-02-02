@@ -5,12 +5,11 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.data.model.{Member, Submission, Assignment, Module}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.{PermissionDeniedException, CurrentUser}
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, PDFView}
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
 import uk.ac.warwick.tabula.services.{SubmissionServiceComponent, AutowiringSubmissionServiceComponent}
-import uk.ac.warwick.userlookup.User
 
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}/submission-receipt.pdf"))
@@ -25,7 +24,7 @@ class DownloadSubmissionReceiptAsPdfController extends CourseworkController {
 		@PathVariable("module") module: Module,
 		@PathVariable("assignment") assignment: Assignment,
 		user: CurrentUser
-	): DownloadSubmissionReceiptAsPdfCommand = DownloadSubmissionReceiptAsPdfCommand(module, assignment, user)
+	): DownloadSubmissionReceiptAsPdfCommand = DownloadSubmissionReceiptAsPdfCommand(module, assignment, user, currentMember)
 
 	@RequestMapping
 	def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser) = {
@@ -72,22 +71,15 @@ class DownloadSubmissionReceiptForStudentAsPdfController extends CourseworkContr
 object DownloadSubmissionReceiptAsPdfCommand {
 	val RequiredPermission = Permissions.Submission.Read
 
-	def apply(module: Module, assignment: Assignment, user: CurrentUser) =
-		new DownloadSubmissionReceiptAsPdfCommandInternal(module, assignment, user, user.apparentUser)
-			with AutowiringSubmissionServiceComponent
-			with DownloadSubmissionReceiptAsPdfPermissions
-			with ComposableCommand[Submission]
-			with ReadOnly with Unaudited
-
 	def apply(module: Module, assignment: Assignment, user: CurrentUser, studentMember: Member) =
-		new DownloadSubmissionReceiptAsPdfCommandInternal(module, assignment, user, studentMember.asSsoUser)
+		new DownloadSubmissionReceiptAsPdfCommandInternal(module, assignment, user, studentMember)
 			with AutowiringSubmissionServiceComponent
 			with DownloadSubmissionReceiptAsPdfPermissions
 			with ComposableCommand[Submission]
 			with ReadOnly with Unaudited
 }
 
-class DownloadSubmissionReceiptAsPdfCommandInternal(val module: Module, val assignment: Assignment, val viewer: CurrentUser, val student: User)
+class DownloadSubmissionReceiptAsPdfCommandInternal(val module: Module, val assignment: Assignment, val viewer: CurrentUser, val student: Member)
 	extends CommandInternal[Submission]
 		with DownloadSubmissionReceiptAsPdfState {
 	self: SubmissionServiceComponent =>
@@ -110,7 +102,11 @@ trait DownloadSubmissionReceiptAsPdfPermissions extends RequiresPermissionsCheck
 		val submission = mandatory(submissionOption)
 
 		mustBeLinked(submission, assignment)
-		p.PermissionCheck(DownloadSubmissionReceiptAsPdfCommand.RequiredPermission, submission)
+
+		p.PermissionCheckAny(
+			Seq(CheckablePermission(Permissions.Submission.Read, submission),
+				CheckablePermission(Permissions.Submission.Read, student))
+		)
 	}
 }
 
@@ -120,7 +116,7 @@ trait DownloadSubmissionReceiptAsPdfState {
 	def module: Module
 	def assignment: Assignment
 	def viewer: CurrentUser
-	def student: User
+	def student: Member
 
-	lazy val submissionOption = submissionService.getSubmissionByUniId(assignment, student.getWarwickId).filter(_.submitted)
+	lazy val submissionOption = submissionService.getSubmissionByUniId(assignment, student.asSsoUser.getWarwickId).filter(_.submitted)
 }

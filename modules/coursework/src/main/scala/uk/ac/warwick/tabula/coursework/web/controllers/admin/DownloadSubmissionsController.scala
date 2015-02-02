@@ -8,16 +8,15 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.services.fileserver.{RenderableZip, FileServer}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService}
 import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.data.model.{Module, Assignment}
+import uk.ac.warwick.tabula.data.model.{Submission, Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.AdminGetSingleSubmissionCommand
 import javax.servlet.http.HttpServletRequest
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmissionsCommand
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadAttachmentCommand
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
-import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.commands.ApplyWithCallback
 import uk.ac.warwick.userlookup.{User, AnonymousUser}
 
@@ -77,7 +76,7 @@ class DownloadMarkerSubmissionsControllerCurrentUser extends CourseworkControlle
 class DownloadAllSubmissionsController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
-	
+
 	@ModelAttribute def getAllSubmissionsSubmissionCommand(
 			@PathVariable("module") module: Module, 
 			@PathVariable("assignment") assignment: Assignment, 
@@ -94,18 +93,17 @@ class DownloadAllSubmissionsController extends CourseworkController {
 }
 
 @Controller
-@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submissionId}/{filename}.zip"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submission}/{filename}.zip"))
 class DownloadSingleSubmissionController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
-	var submissionService = Wire.auto[SubmissionService]
 	var userLookup = Wire[UserLookupService]
 	
 	@ModelAttribute def getSingleSubmissionCommand(
-			@PathVariable("module") module: Module, 
+			@PathVariable("module") module: Module,
 			@PathVariable("assignment") assignment: Assignment, 
-			@PathVariable("submissionId") submissionId: String) = 
-		new AdminGetSingleSubmissionCommand(module, assignment, mandatory(submissionService.getSubmission(submissionId)))
+			@PathVariable("submission") submission: Submission) =
+		new AdminGetSingleSubmissionCommand(module, assignment, mandatory(submission))
 
 	@RequestMapping
 	def downloadSingle(
@@ -126,18 +124,19 @@ class DownloadSingleSubmissionController extends CourseworkController {
 }
 
 @Controller
-@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submissionId}/{filename}"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submission}/{filename}"))
 class DownloadSingleSubmissionFileController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
-	var submissionService = Wire.auto[SubmissionService]
 	var userLookup = Wire[UserLookupService]
+	var profileService = Wire.auto[ProfileService]
 
 	@ModelAttribute def getSingleSubmissionCommand(
 			@PathVariable("module") module: Module, 
 			@PathVariable("assignment") assignment: Assignment, 
-			@PathVariable("submissionId") submissionId: String) = 
-		new DownloadAttachmentCommand(module, assignment, mandatory(submissionService.getSubmission(submissionId)))
+			@PathVariable("submission") submission: Submission ) = {
+		new DownloadAttachmentCommand(module, assignment, mandatory(submission), profileService.getMemberByUser(userLookup.getUserByUserId(submission.userId)))
+	}
 
 	@RequestMapping
 	def downloadSingle(
