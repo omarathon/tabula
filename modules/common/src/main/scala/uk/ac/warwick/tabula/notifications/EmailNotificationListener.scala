@@ -7,7 +7,7 @@ import org.hibernate.ObjectNotFoundException
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
-import uk.ac.warwick.tabula.data.model.{HasNotificationAttachment, FreemarkerModel, Notification}
+import uk.ac.warwick.tabula.data.model.{ActionRequiredNotification, HasNotificationAttachment, FreemarkerModel, Notification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{Logging, UnicodeEmails}
 import uk.ac.warwick.tabula.services.{NotificationService, RecipientNotificationListener}
@@ -30,10 +30,10 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 	val mailFooter = "\n\nThank you,\nTabula"
 	val replyWarning = "\n\nThis email was sent from an automated system and replies to it will not reach a real person."
 
-	def link(n: Notification[_,_]) = if (n.actionRequired) {
-		s"\n\nYou need to ${n.urlTitle}. Please visit ${topLevelUrl}${n.url}."
+	def link(n: Notification[_,_]) = if (n.isInstanceOf[ActionRequiredNotification]) {
+		s"\n\nYou need to ${n.urlTitle}. Please visit $topLevelUrl${n.url}."
 	} else {
-		s"\n\nTo ${n.urlTitle}, please visit ${topLevelUrl}${n.url}."
+		s"\n\nTo ${n.urlTitle}, please visit $topLevelUrl${n.url}."
 	}
 
 	// add an isEmail property for the model for emails

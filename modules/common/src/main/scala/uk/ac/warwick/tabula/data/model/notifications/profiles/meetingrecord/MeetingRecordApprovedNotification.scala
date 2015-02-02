@@ -16,7 +16,6 @@ class MeetingRecordApprovedNotification
 	def relationship = meeting.relationship
 
 	def verb = "approve"
-	def actionRequired = false
 
 	def title = {
 		val name =

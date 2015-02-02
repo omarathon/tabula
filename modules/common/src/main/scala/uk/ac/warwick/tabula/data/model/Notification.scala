@@ -10,9 +10,10 @@ import org.springframework.util.Assert
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.{UserSettingsService, UserLookupComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
@@ -161,8 +162,6 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	@transient def content: FreemarkerModel
 	@transient def url: String
 
-	@transient def actionRequired: Boolean
-
 	/**
 	 * URL title will be used to generate the links in notifications
 	 *
@@ -301,4 +300,53 @@ trait ConfigurableNotification {
 
 	final def recipients: Seq[User] = if (enabledForDepartment) allRecipients.filter(enabledForUser) else Seq()
 	def allRecipients: Seq[User]
+}
+
+trait ActionRequiredNotification {
+
+	self: Notification[_, _] =>
+
+	@transient var notificationService = Wire[NotificationService]
+
+	@transient final protected val _completed = BooleanSetting("completed", false)
+	protected def completed_=(isCompleted: Boolean) { _completed.value = isCompleted }
+	def completed = _completed.value
+
+	@transient final protected val _completedBy = StringSetting("completedBy", "")
+	protected def completedBy_=(userId: String) { _completedBy.value = userId }
+	def completedBy = _completedBy.value
+
+	@transient final protected val _completedOn = StringSetting("completedOn", "")
+	protected def completedOn_=(dateTime: DateTime) { _completedOn.value = dateTime.getMillis.toString }
+	def completedOn = new DateTime(_completedOn.value.toLong)
+
+	def actionCompleted(user: User)
+
+	def notificationItems: JList[EntityReference[_]] = items.asInstanceOf[JList[EntityReference[_]]]
+
+	def isRecipient(user: User) = recipientNotificationInfos.asScala.exists(_.recipient == user)
+
+}
+
+trait AllCompletedActionRequiredNotification extends ActionRequiredNotification {
+
+	self: Notification[_, _] =>
+
+	override final def actionCompleted(user: User) = transactional() {
+		dismiss(user)
+		completed = true
+		completedBy = user.getUserId
+		completedOn = DateTime.now
+		notificationService.update(Seq(this), user)
+	}
+}
+
+trait RecipientCompletedActionRequiredNotification extends ActionRequiredNotification {
+
+	self: Notification[_, _] =>
+
+	override final def actionCompleted(user: User) = transactional() {
+		dismiss(user)
+		notificationService.update(Seq(this), user)
+	}
 }

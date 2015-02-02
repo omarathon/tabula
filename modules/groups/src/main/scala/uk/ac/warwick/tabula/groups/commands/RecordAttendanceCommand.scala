@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.groups.commands
 
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.notifications.groups.reminders.SmallGroupEventAttendanceReminderNotification
+import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.groups.commands.RecordAttendanceCommand.UniversityId
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringEventAttendanceServiceComponent, AutowiringAttendanceMonitoringEventAttendanceServiceComponent}
 
@@ -37,6 +39,7 @@ object RecordAttendanceCommand {
 			with AutowiringTermServiceComponent
 			with AutowiringMonitoringPointGroupProfileServiceComponent
 			with AutowiringAttendanceMonitoringEventAttendanceServiceComponent
+			with RecordAttendanceNotificationCompletion
 			with AutowiringFeaturesComponent {
 		override lazy val eventName = "RecordAttendance"
 	}
@@ -244,9 +247,9 @@ trait SmallGroupEventInFutureCheck {
 	
 	lazy val isFutureEvent = {
 		// Get the actual end date of the event in this week
-		weekToDateConverter.toLocalDatetime(week, event.day, event.startTime, event.group.groupSet.academicYear).map { eventDateTime =>
+		weekToDateConverter.toLocalDatetime(week, event.day, event.startTime, event.group.groupSet.academicYear).exists(eventDateTime =>
 			eventDateTime.isAfter(LocalDateTime.now())
-		}.getOrElse(false)
+		)
 	}
 }
 
@@ -255,5 +258,23 @@ trait RecordAttendanceDescription extends Describable[(SmallGroupEventOccurrence
 	def describe(d: Description) {
 		d.smallGroupEvent(event)
 		d.property("week", week)
+	}
+}
+
+trait RecordAttendanceNotificationCompletion extends CompletesNotifications[(SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])] {
+
+	self: RecordAttendanceState with NotificationHandling =>
+
+	def notificationsToComplete(commandResult: (SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])): CompletesNotificationsResult = {
+		val event = commandResult._1.event
+		val attendanceIds = commandResult._1.attendance.asScala.map(_.universityId)
+		if (event.group.students.isEmpty || event.group.students.users.map(_.getWarwickId).forall(attendanceIds.contains)) {
+			CompletesNotificationsResult(
+				notificationService.findActionRequiredNotificationsByEntityAndType[SmallGroupEventAttendanceReminderNotification](commandResult._1),
+				user.apparentUser
+			)
+		} else {
+			EmptyCompletesNotificationsResult
+		}
 	}
 }

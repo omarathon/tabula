@@ -37,7 +37,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			When("I click on a students ID")
 			click on cssSelector("h6.toggle-icon")
 			Then("I see the form and the students current marks")
-			eventually(pageSource contains "Actual mark - 41" should be {true})
+			eventuallyAjax(pageSource contains "Actual mark - 41" should be {true})
 
 			When("I populate and submit the form")
 			// as there is a hidden and disabled reason element on the same page we can't use the scala test singleSel
@@ -51,7 +51,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			When("I click on the students ID again")
 			click on cssSelector("h6.toggle-icon")
 			Then("I see the form and the adusted marks are pre-populated")
-			eventually(textField("adjustedMark").value should be ("31"))
+			eventuallyAjax(textField("adjustedMark").value should be ("31"))
 
 			When("I publish the feedback")
 			go to Path(s"/coursework/admin/module/xxx02/assignments/$assignmentId/publish")

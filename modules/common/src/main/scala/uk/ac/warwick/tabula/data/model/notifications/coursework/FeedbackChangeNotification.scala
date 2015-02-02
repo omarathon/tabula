@@ -13,7 +13,8 @@ class FeedbackChangeNotification extends NotificationWithTarget[Feedback, Assign
 	with SingleItemNotification[Feedback]
 	with SingleRecipientNotification
 	with UniversityIdRecipientNotification
-	with AutowiringUserLookupComponent {
+	with AutowiringUserLookupComponent
+	with AllCompletedActionRequiredNotification {
 
 	def feedback = item.entity
 	def assignment = target.entity
@@ -37,5 +38,5 @@ class FeedbackChangeNotification extends NotificationWithTarget[Feedback, Assign
 
 	def url = Routes.assignment.receipt(assignment)
 	def urlTitle = "view your new feedback"
-	def actionRequired = true
+
 }

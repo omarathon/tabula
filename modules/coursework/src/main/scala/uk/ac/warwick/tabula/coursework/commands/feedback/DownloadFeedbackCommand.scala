@@ -10,14 +10,20 @@ import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 
-
-class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, val feedback: Feedback)
+class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, val feedback: Feedback, val student: Option[Member])
 	extends Command[Option[RenderableFile]] with HasCallback[RenderableFile] with ReadOnly {
-	
+
 	notDeleted(assignment)
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Feedback.Read, feedback)
-	
+
+	student match {
+		case Some(student: StudentMember) => PermissionCheckAny(
+			Seq(CheckablePermission(Permissions.Feedback.Read, feedback),
+				CheckablePermission(Permissions.Feedback.Read, student))
+		)
+		case _ => PermissionCheck(Permissions.Feedback.Read, feedback)
+	}
+
 	var zip = Wire.auto[ZipService]
 	var feedbackDao = Wire.auto[FeedbackDao]
 

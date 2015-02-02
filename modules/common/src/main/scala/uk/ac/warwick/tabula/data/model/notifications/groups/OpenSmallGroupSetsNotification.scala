@@ -5,28 +5,17 @@ import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.StudentSignUp
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, Notification, UserIdRecipientNotification}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 object OpenSmallGroupSetsNotification {
 	@transient val templateLocation = "/WEB-INF/freemarker/notifications/groups/open_small_group_student_notification.ftl"
 }
 
-@Entity
-@DiscriminatorValue(value="OpenSmallGroupSets")
-class OpenSmallGroupSetsNotification
+abstract class AbstractOpenSmallGroupSetsNotification
 	extends Notification[SmallGroupSet, Unit]
 	with UserIdRecipientNotification
 	with AutowiringUserLookupComponent {
-
-	override def onPreSave(isNew: Boolean) {
-		// if any of the groups require the student to sign up then the priority should be higher
-		if (entities.exists(_.allocationMethod == StudentSignUp)) {
-			 priority = Warning
-		}
-	}
-
-	def actionRequired = entities.exists(_.allocationMethod == StudentSignUp)
 
 	def verb = "Opened"
 
@@ -63,3 +52,16 @@ class OpenSmallGroupSetsNotification
 	def urlTitle = s"sign up for these $formatsString groups"
 
 }
+
+@Entity
+@DiscriminatorValue(value="OpenSmallGroupSets")
+class OpenSmallGroupSetsStudentSignUpNotification
+	extends AbstractOpenSmallGroupSetsNotification with AllCompletedActionRequiredNotification {
+
+	priority = Warning
+
+}
+
+@Entity
+@DiscriminatorValue(value="OpenSmallGroupSetsOtherSignUp")
+class OpenSmallGroupSetsOtherSignUpNotification extends AbstractOpenSmallGroupSetsNotification

@@ -23,7 +23,7 @@ class OpenSmallGroupSetsNotificationTest extends TestBase {
 		set3.format = SmallGroupFormat.Seminar
 		set3.module = module1
 
-		val notification = Notification.init(new OpenSmallGroupSetsNotification, currentUser.apparentUser, Seq(set1, set2, set3))
+		val notification = Notification.init(new OpenSmallGroupSetsStudentSignUpNotification, currentUser.apparentUser, Seq(set1, set2, set3))
 		notification.title should be ("CS118 seminars are now open for sign up")
 
 		set2.module = module3

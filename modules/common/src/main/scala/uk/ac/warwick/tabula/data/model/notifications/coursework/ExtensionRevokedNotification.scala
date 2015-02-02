@@ -20,7 +20,6 @@ class ExtensionRevokedNotification extends Notification[Assignment, Unit]
 	with AutowiringUserLookupComponent {
 
 	priority = Warning
-	def actionRequired = false
 
 	def assignment = item.entity
 

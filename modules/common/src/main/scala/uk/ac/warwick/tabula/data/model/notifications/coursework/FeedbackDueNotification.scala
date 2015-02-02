@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
-trait FeedbackDueNotification {
+trait FeedbackDueNotification extends AllCompletedActionRequiredNotification {
 
 	self : Notification[_, Unit] with NotificationPreSaveBehaviour =>
 
@@ -33,8 +33,6 @@ trait FeedbackDueNotification {
 			Info
 		}
 	}
-
-	override final def actionRequired = true
 
 	override final def verb = "publish"
 

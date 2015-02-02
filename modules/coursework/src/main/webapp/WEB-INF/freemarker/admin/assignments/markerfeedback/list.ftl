@@ -69,7 +69,7 @@
 				<#elseif thisFeedback.state.toString == "Rejected">
 					Review feedback and re-send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if>
 				<#elseif thisFeedback.state.toString == "MarkingCompleted">
-					No action required<#if item.nextMarker?has_content> - Sent to ${item.nextMarker.fullName}</#if>
+					No action required.<#if item.nextMarker?has_content> Sent to ${nextRoleName} (${item.nextMarker.fullName})</#if>
 				</#if>
 			</td>
 		</tr>

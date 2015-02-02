@@ -25,7 +25,7 @@ abstract class ExtensionRequestRespondedNotification(val verbed: String) extends
 	))
 
 	def recipients = assignment.module.adminDepartment.extensionManagers.users.filterNot(_ == agent)
-	def actionRequired = false
+
 }
 
 @Entity

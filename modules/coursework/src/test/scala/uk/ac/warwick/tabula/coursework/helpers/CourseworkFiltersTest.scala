@@ -4,17 +4,7 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
-import uk.ac.warwick.tabula.coursework.commands.assignments.ExtensionListItem
-import uk.ac.warwick.tabula.coursework.commands.assignments.Student
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
-import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
-import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.data.model.MarkingState
-import uk.ac.warwick.tabula.data.model.OriginalityReport
-import uk.ac.warwick.tabula.data.model.Submission
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, Extension, MarkerSelectField, WordCountField}
 import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
 import org.joda.time.DateTimeConstants
@@ -23,6 +13,11 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, NotInvestigated, SuspectPlagiarised}
+import uk.ac.warwick.tabula.coursework.commands.assignments.Student
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
+import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
+import uk.ac.warwick.tabula.coursework.commands.assignments.ExtensionListItem
+import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
 
 // scalastyle:off magic.number
 class CourseworkFiltersTest extends TestBase with Mockito {
@@ -68,7 +63,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			withinExtension: Boolean=false) =
 		WorkflowItems(
 			enhancedSubmission=submission map { s => SubmissionListItem(s, submissionDownloaded) },
-			enhancedFeedback=feedback map { f => FeedbackListItem(f, feedbackDownloaded, onlineFeedbackViewed) },
+			enhancedFeedback=feedback map { f => FeedbackListItem(f, feedbackDownloaded, onlineFeedbackViewed, new FeedbackForSits) },
 			enhancedExtension=extension map { e => ExtensionListItem(e, withinExtension) }
 		)
 

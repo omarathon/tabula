@@ -21,7 +21,9 @@
 
 <h2>Manage Marks Closure</h2>
 
+<div class="fix-area">
 <@f.form commandName="command" action="${url('/coursework/admin/marksmanagement/departments')}">
+
 
 	<@form.label checkbox=true>
 		<@f.radiobutton path="updatePostgrads" value="false" />
@@ -42,17 +44,21 @@
 		<@department_table "pgMappings" />
 	</div>
 
-<div class="submit-buttons form-actions">
-	<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Saving&hellip;">
-		Save
-	</button>
-	<a class="btn" href="<@routes.home />">Cancel</a>
-</div>
+	<div class="submit-buttons fix-footer">
+		<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Saving&hellip;">
+			Save
+		</button>
+		<a class="btn" href="<@routes.home />">Cancel</a>
+	</div>
 
 </@f.form>
+</div>
 
 <script>
 	(function($) {
+
+		$('.fix-area').fixHeaderFooter();
+
 		var showDegreeType = function() {
 			var value = $('form input[name=updatePostgrads]:checked').val();
 			if (value && value === "true") {
@@ -91,6 +97,7 @@
 		$('.selectOpenAllThisYearAndLastYear').on('click', openAllThisYearAndLastYear);
 		$('.selectOpenAllThisYear').on('click', openAllThisYear);
 		$('.selectCloseAll').on('click', closeAll);
+
 
 	})(jQuery);
 </script>

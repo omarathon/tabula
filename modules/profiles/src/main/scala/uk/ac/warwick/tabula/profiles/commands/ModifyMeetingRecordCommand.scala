@@ -5,10 +5,10 @@ import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils.rejectIfEmptyOrWhitespace
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.{Daoisms, FileDao, MeetingRecordDao}
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
+import uk.ac.warwick.tabula.data.{Daoisms, FileDao, MeetingRecordDao}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.MonitoringPointMeetingRelationshipTermService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordService
@@ -158,4 +158,5 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 		)
 		d.fileAttachments(meeting.attachments.asScala)
 	}
+
 }

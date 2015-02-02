@@ -20,13 +20,13 @@ object ModeratorRejectedNotification {
 class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 	with SingleItemNotification[MarkerFeedback]
 	with SingleRecipientNotification
-	with AutowiringUserLookupComponent {
+	with AutowiringUserLookupComponent
+	with AllCompletedActionRequiredNotification {
 
 	def markerFeedback = item.entity
 	def parentFeedback = markerFeedback.feedback
 	def rejectionFeedback = parentFeedback.secondMarkerFeedback
 	def rejectedFeedback = parentFeedback.firstMarkerFeedback
-	def actionRequired = true
 
 	def assignment = markerFeedback.feedback.assignment
 

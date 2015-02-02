@@ -181,36 +181,40 @@
 		</#if>
 	<#elseif pendingAction && canConvertMeeting>
 		<small class="muted">Pending confirmation. ${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
-		<div class="alert alert-warning">
-			Please confirm whether this scheduled meeting took place.
-		</div>
-		<form method="post" class="scheduled-action" id="meeting-${meeting.id}" action="<@routes.choose_action_scheduled_meeting_record meeting studentCourseDetails.urlSafeId meeting.relationship.relationshipType />" >
-			<@form.row>
-				<@form.field>
-					<label class="radio">
-						<input checked type="radio" name="action" value="confirm" data-formhref="<@routes.confirm_scheduled_meeting_record meeting studentCourseDetails.urlSafeId meeting.relationship.relationshipType />">
-						Confirm
-					</label>
-					<label class="radio">
-						<input type="radio" name="action" value="reschedule" />
-						Reschedule
-					</label>
-					<label class="radio">
-						<input type="radio" name="action" value="missed" class="reject" data-formhref="<@routes.missed_scheduled_meeting_record meeting meeting.relationship.relationshipType />">
-						Record that the meeting did not take place
-					</label>
-				</@form.field>
-			</@form.row>
-			<div class="rejection-comment" style="display:none">
+		<#if meeting.deleted><small class="muted">This meeting has been deleted</small>
+		<#else>
+			<div class="alert alert-warning">
+				Please confirm whether this scheduled meeting took place.
+			</div>
+
+			<form method="post" class="scheduled-action" id="meeting-${meeting.id}" action="<@routes.choose_action_scheduled_meeting_record meeting studentCourseDetails.urlSafeId meeting.relationship.relationshipType />" >
 				<@form.row>
 					<@form.field>
-						<textarea class="big-textarea" name="missedReason"></textarea>
+						<label class="radio">
+							<input checked type="radio" name="action" value="confirm" data-formhref="<@routes.confirm_scheduled_meeting_record meeting studentCourseDetails.urlSafeId meeting.relationship.relationshipType />">
+							Confirm
+						</label>
+						<label class="radio">
+							<input type="radio" name="action" value="reschedule" />
+							Reschedule
+						</label>
+						<label class="radio">
+							<input type="radio" name="action" value="missed" class="reject" data-formhref="<@routes.missed_scheduled_meeting_record meeting meeting.relationship.relationshipType />">
+							Record that the meeting did not take place
+						</label>
 					</@form.field>
 				</@form.row>
-			</div>
-			<div class="ajaxErrors alert alert-error" style="display: none;"></div>
-			<button type="submit" class="btn btn-primary">Submit</button>
-		</form>
+				<div class="rejection-comment" style="display:none">
+					<@form.row>
+						<@form.field>
+							<textarea class="big-textarea" name="missedReason"></textarea>
+						</@form.field>
+					</@form.row>
+				</div>
+				<div class="ajaxErrors alert alert-error" style="display: none;"></div>
+				<button type="submit" class="btn btn-primary">Submit</button>
+			</form>
+		</#if>
 	<#elseif meeting.missed>
 		<div class="alert alert-error rejection">
 			<#if meeting.missedReason?has_content>
