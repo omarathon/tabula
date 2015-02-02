@@ -61,21 +61,23 @@
 					</li>
 				</#list>
 			</ul>
-			<#assign introText>
-			<p>
-				You can now view or manage monitoring points for any students who are enrolled in your department,
-				but whose route is owned by a different department.
-				This means that you will no longer see separate links to monitor students in departments
-				where you have been granted permissions on a specific route.
-			</p>
-			</#assign>
-			<a href="#"
-			   id="no-route-departments-intro"
-			   class="use-introductory auto"
-			   data-hash="${introHash("no-route-departments-intro", "anywhere")}"
-			   data-placement="bottom"
-			   data-html="true"
-			   data-content="${introText}"><i class="icon-question-sign"></i></a>
+			<#if showIntro("no-route-departments-intro", "anywhere")>
+				<#assign introText>
+				<p>
+					You can now view or manage monitoring points for any students who are enrolled in your department,
+					but whose route is owned by a different department.
+					This means that you will no longer see separate links to monitor students in departments
+					where you have been granted permissions on a specific route.
+				</p>
+				</#assign>
+				<a href="#"
+				   id="no-route-departments-intro"
+				   class="use-introductory auto"
+				   data-hash="${introHash("no-route-departments-intro", "anywhere")}"
+				   data-placement="bottom"
+				   data-html="true"
+				   data-content="${introText}"><i class="icon-question-sign"></i></a>
+			</#if>
 		</#if>
 	<#else>
 		<#if user.staff && !hasAnyRelationships>
