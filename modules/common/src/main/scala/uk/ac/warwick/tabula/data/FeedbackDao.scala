@@ -36,6 +36,8 @@ abstract class AbstractFeedbackDao extends FeedbackDao {
 		Option(feedback.firstMarkerFeedback) foreach { _.markDeleted() }
 		Option(feedback.secondMarkerFeedback) foreach { _.markDeleted() }
 		Option(feedback.thirdMarkerFeedback) foreach { _.markDeleted() }
+
+		feedback.clearAttachments()
 		
 		session.delete(feedback)
 	}
