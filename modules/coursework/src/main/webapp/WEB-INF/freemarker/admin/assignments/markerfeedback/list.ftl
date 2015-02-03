@@ -9,11 +9,12 @@
 	</#if>
 </#function>
 
-<#macro listMarkerFeedback items nextRoleName>
+<#macro listMarkerFeedback items nextRoleName isModeration>
 	<#list items as item>
 
 		<#assign u = item.student />
-		<#local thisFeedback = item.feedbacks?last />
+		<#local thisFeedback = item.currentFeedback />
+
 		<#local nextMarkerAction>Send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if></#local>
 
 		<#assign progressClass>
@@ -40,6 +41,12 @@
 				<#assign toggleIcon = "toggle-icon" />
 			</#if>
 			<td class="student-col toggle-cell"><h6 class="${toggleIcon}">${item.student.warwickId!}</h6></td>
+
+			<#if isModeration>
+				<#local previousFeedback = item.previousFeedback />
+				<td class="toggle-cell">${previousFeedback.mark!""}</td>
+				<td class="toggle-cell">${previousFeedback.markerUser.fullName}</td>
+			</#if>
 
 			<td class="status-col toggle-cell content-cell">
 				<dl style="margin: 0; border-bottom: 0;">
@@ -95,6 +102,14 @@
 		   href="<@routes.markingCompleted assignment marker nextRoleName/>"
 		   id="marking-complete-button">
 			Confirm and send to ${nextRoleName} <i class="icon-arrow-right"></i>
+		</a>
+	<#else>
+		<a class="use-tooltip form-post btn btn-success must-be-blank disabled"
+		   title="Bulk approve marks and feedback."
+		   data-container="body"
+		   href="<@routes.bulkApproval assignment marker />"
+		   id="bulk-approve-button">
+			Approve and send to administrator <i class="icon-arrow-right"></i>
 		</a>
 	</#if>
 </div>
@@ -192,11 +207,15 @@
 							<th class="student-col">Last name</th>
 						</#if>
 						<th class="student-col">University ID</th>
+						<#if isModeration>
+							<th class="status-col">Mark</th>
+							<th class="status-col">First marker</th>
+						</#if>
 						<th class="status-col">Status</th>
 						<th class="status-col">Next action</th>
 					</tr></thead>
 					<tbody>
-						<@listMarkerFeedback stage.feedbackItems stage.nextRoleName />
+						<@listMarkerFeedback stage.feedbackItems stage.nextRoleName isModeration />
 					</tbody>
 				</table>
 				<@workflowActions stage.nextRoleName stage.previousRoleName!"" stage.roleName!""/>

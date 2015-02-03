@@ -85,15 +85,15 @@ class MarkingCompletedController extends CourseworkController {
 		@Valid @ModelAttribute("markingCompletedCommand") form: MarkingCompletedCommand,
 		errors: Errors
 	) = {
-		transactional() {
 			if (errors.hasErrors)
 				showForm(module,assignment, marker, form, errors)
 			else {
-				form.preSubmitValidation()
-				form.apply()
-				RedirectBack(assignment, form)
+				transactional() {
+					form.preSubmitValidation()
+					form.apply()
+					RedirectBack(assignment, form)
+				}
 			}
-		}
 	}
 
 }
