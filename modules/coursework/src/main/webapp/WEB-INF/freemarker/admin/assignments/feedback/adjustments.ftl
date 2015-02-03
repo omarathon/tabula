@@ -70,9 +70,22 @@
 				<@f.input path="adjustedMark" cssClass="input-small" />
 				<span class="add-on">%</span>
 			</div>
+			<#if proposedAdjustment??>
+				<div class="late-penalty">
+					<button class="btn btn-mini use-suggested-mark" data-mark="${proposedAdjustment!""}">
+						Use suggested mark - ${proposedAdjustment!""}
+					</button>
+					<a class="use-popover" id="popover-${markingId(command.student)}" data-html="true"
+					   data-original-title="<span class='text-info'><strong>Late penalty calculation</strong></span>"
+					   data-content="The submission was <@fmt.p daysLate "working day" /> late. The suggested penalty
+					   was derived by subtracting ${latePenalty} marks from the actual mark for each day the submission
+					   was late.">
+						<i class="icon-question-sign"></i>
+					</a>
+				</div>
+			</#if>
 			<@f.errors path="adjustedMark" cssClass="error" />
 		</@form.field>
-
 	</@form.row>
 
 	<@form.row>
@@ -81,7 +94,6 @@
 			<@f.input path="adjustedGrade" cssClass="input-small" />
 			<@f.errors path="adjustedGrade" cssClass="error" />
 		</@form.field>
-
 	</@form.row>
 
 	<div class="submit-buttons">

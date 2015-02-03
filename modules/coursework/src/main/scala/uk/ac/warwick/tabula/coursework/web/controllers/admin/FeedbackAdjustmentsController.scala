@@ -35,6 +35,10 @@ class FeedbackAdjustmentsListController extends CourseworkController {
 	}
 }
 
+object FeedbackAdjustmentsController {
+	final val LATE_PENALTY_PER_DAY = 5
+}
+
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/adjustments/{student}"))
 class FeedbackAdjustmentsController extends CourseworkController {
@@ -46,12 +50,30 @@ class FeedbackAdjustmentsController extends CourseworkController {
 		FeedbackAdjustmentCommand(assignment, student, submitter)
 
 	@RequestMapping(method=Array(GET))
-	def showForm(@ModelAttribute("command") command: Appliable[Feedback], errors: Errors, @PathVariable assignment: Assignment, @PathVariable student: User) = {
-		Mav("admin/assignments/feedback/adjustments").noLayout()
+	def showForm(@ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
+							 errors: Errors,
+							 @PathVariable assignment: Assignment,
+							 @PathVariable student: User) = {
+
+		val daysLate = command.submission.map(_.workingDaysLate)
+		val proposedAdjustment = for (actualMark <- command.feedback.actualMark; dl <- daysLate)
+			yield Math.max(0, (actualMark - (FeedbackAdjustmentsController.LATE_PENALTY_PER_DAY * dl)))
+
+
+
+		Mav("admin/assignments/feedback/adjustments", Map(
+			"daysLate" -> daysLate,
+			"proposedAdjustment" -> proposedAdjustment,
+			"latePenalty" -> FeedbackAdjustmentsController.LATE_PENALTY_PER_DAY
+		)).noLayout()
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") command: Appliable[Feedback], errors: Errors, @PathVariable assignment: Assignment, @PathVariable student: User)  = {
+	def submit(@Valid @ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
+						 errors: Errors,
+						 @PathVariable assignment: Assignment,
+						 @PathVariable student: User)  = {
+
 		if (errors.hasErrors) {
 			showForm(command, errors, assignment, student)
 		} else {

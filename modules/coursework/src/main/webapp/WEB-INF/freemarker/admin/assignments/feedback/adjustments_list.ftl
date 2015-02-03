@@ -67,6 +67,7 @@
 
 				$('#container').on('change', 'select[name=reason]', function(e) {
 					var $target = $(e.target);
+
 					var $otherInput = $target.siblings('.other-input');
 					if ($target.val() === "Other") {
 						$otherInput.removeAttr("disabled");
@@ -76,7 +77,16 @@
 							$otherInput.attr("disabled", "disabled");
 						});
 					}
+
+					var $suggestedPenalty = $target.closest('form').find('.late-penalty');
+					if ($target.val() === "Late submission penalty") {
+						$suggestedPenalty.fadeIn(400);
+					} else if ($suggestedPenalty.is(':visible')) {
+						$suggestedPenalty.fadeOut(400);
+					}
+
 				});
+
 
 				$('#container').on('submit', function(e) {
 					var $form = $(e.target);
@@ -86,9 +96,22 @@
 					}
 				});
 
-				// pre-select the other dropdown when editing an existing adjustment with an "other" reason
 				$('#container').on('tabula.expandingTable.parentRowExpanded', function(e){
 					var $content = $(e.target);
+
+					// activate any popovers
+					$content.find('.use-popover').popover();
+
+					// bind suggested mark button
+					$content.find('.use-suggested-mark').on('click', function(e){
+						var $target = $(this);
+						var markInput = $content.find('input[name=adjustedMark]');
+						var mark = $target.data('mark');
+						markInput.val(mark);
+						e.preventDefault();
+					});
+
+					// pre-select the other dropdown when editing an existing adjustment with an "other" reason
 					var $select = $content.find('select[name=reason]');
 					var $otherInput = $content.find('.other-input');
 
@@ -96,6 +119,14 @@
 						$content.find('option[value=Other]').attr("selected", "selected");
 						$otherInput.removeAttr("disabled");
 						$otherInput.show();
+					}
+
+					// show the suggested mark button if late penalty is selected
+					var $suggestedPenalty = $select.closest('form').find('.late-penalty');
+					if ($select.val() === "Late submission penalty") {
+						$suggestedPenalty.show();
+					} else {
+						$suggestedPenalty.hide();
 					}
 				})
 
