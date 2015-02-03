@@ -71,7 +71,7 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
 	def secondMarkers: UnspecifiedTypeUserGroup = {
 		assignmentService match {
 			case Some(service) =>
-				new UserGroupCacheManager(_secondMarkers, service.firstMarkerHelper)
+				new UserGroupCacheManager(_secondMarkers, service.secondMarkerHelper)
 			case _ => _secondMarkers
 		}
 	}
