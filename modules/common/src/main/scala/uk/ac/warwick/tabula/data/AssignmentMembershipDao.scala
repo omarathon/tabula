@@ -66,6 +66,10 @@ trait AssignmentMembershipDao {
 	 */
 	def getSITSEnrolledAssignments(user: User): Seq[Assignment]
 	def getSITSEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet]
+
+	def save(gb: GradeBoundary): Unit
+	def deleteGradeBoundaries(marksCode: String): Unit
+	def getGradeBoundaries(marksCode: String): Seq[GradeBoundary]
 }
 
 @Repository
@@ -230,4 +234,18 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 			.add(not(safeIn("id", ids)))
 			.add(safeIn("academicYear", academicYears))
 			.seq
+
+	def save(gb: GradeBoundary): Unit = {
+		session.saveOrUpdate(gb)
+	}
+
+	def deleteGradeBoundaries(marksCode: String): Unit = {
+		getGradeBoundaries(marksCode).foreach(session.delete)
+	}
+
+	def getGradeBoundaries(marksCode: String): Seq[GradeBoundary] = {
+		session.newCriteria[GradeBoundary]
+			.add(is("marksCode", marksCode))
+			.seq
+	}
 }

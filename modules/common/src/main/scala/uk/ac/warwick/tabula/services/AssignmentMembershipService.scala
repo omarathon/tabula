@@ -1,14 +1,18 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConverters._
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.AssignmentMembershipDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
-import org.springframework.stereotype.Service
-import uk.ac.warwick.spring.Wire
+
+object AssignmentMembershipService {
+	val UndergraduateMarkScheme = "TABULA-UG"
+	val PostgraduateMarkScheme = "TABULA-PG"
+}
 
 trait AssignmentMembershipService {
 	def assignmentManualMembershipHelper: UserGroupMembershipHelperMethods[Assignment]
@@ -60,6 +64,10 @@ trait AssignmentMembershipService {
 	def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[String]
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean
+
+	def save(gb: GradeBoundary): Unit
+	def deleteGradeBoundaries(marksCode: String): Unit
+	def gradeForMark(component: AssessmentComponent, mark: Int): String
 }
 
 
@@ -155,18 +163,42 @@ class AssignmentMembershipServiceImpl
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
 		dao.getUpstreamAssessmentGroupsNotIn(ids, academicYears)
 
+	def save(gb: GradeBoundary): Unit = {
+		dao.save(gb)
+	}
+
+	def deleteGradeBoundaries(marksCode: String): Unit = {
+		dao.deleteGradeBoundaries(marksCode)
+	}
+
+	def gradeForMark(component: AssessmentComponent, mark: Int): Option[String] = {
+		def gradeBoundaryMatchesMark(gb: GradeBoundary) = gb.minimumMark <= mark && gb.maximumMark >= mark
+
+		(component.marksCode match {
+			case code: String => 
+				dao.getGradeBoundaries(code).find(gradeBoundaryMatchesMark)
+			case _ => component.module.degreeType match {
+				case DegreeType.Undergraduate => 
+					dao.getGradeBoundaries(AssignmentMembershipService.UndergraduateMarkScheme).find(gradeBoundaryMatchesMark)
+				case DegreeType.Postgraduate =>
+					dao.getGradeBoundaries(AssignmentMembershipService.PostgraduateMarkScheme).find(gradeBoundaryMatchesMark)
+				case _ => None
+			}
+		}).map(_.grade)
+	}
+
 }
 
 
 
 class AssignmentMembershipInfo(val items: Seq[MembershipItem]) {
 
-	def	sitsCount = items.filter(_.itemType == SitsType).size
+	def	sitsCount = items.count(_.itemType == SitsType)
 	def	totalCount = items.filterNot(_.itemType == ExcludeType).size
-	def includeCount = items.filter(_.itemType == IncludeType).size
-	def excludeCount = items.filter(_.itemType == ExcludeType).size
-	def usedIncludeCount = items.filter(i => i.itemType == IncludeType && !i.extraneous).size
-	def usedExcludeCount = items.filter(i => i.itemType == ExcludeType && !i.extraneous).size
+	def includeCount = items.count(_.itemType == IncludeType)
+	def excludeCount = items.count(_.itemType == ExcludeType)
+	def usedIncludeCount = items.count(i => i.itemType == IncludeType && !i.extraneous)
+	def usedExcludeCount = items.count(i => i.itemType == ExcludeType && !i.extraneous)
 
 }
 
@@ -223,24 +255,22 @@ trait AssignmentMembershipMethods extends Logging {
 
 	def countMembershipWithUniversityIdGroup(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]) = {
 		others match {
-			case Some(group) if !group.universityIds => {
+			case Some(group) if !group.universityIds =>
 				logger.warn("Attempted to use countMembershipWithUniversityIdGroup() with a usercode-type UserGroup. Falling back to determineMembership()")
 				determineMembershipUsers(upstream, others).size
-			}
-			case _ => {
+			case _ =>
 				val sitsUsers = upstream.flatMap { _.members.members }
 
 				val includes = others map { _.knownType.allIncludedIds } getOrElse Nil
 				val excludes = others map { _.knownType.allExcludedIds } getOrElse Nil
 
 				((sitsUsers ++ includes).distinct diff excludes).size
-			}
 		}
 	}
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean = {
-		if (others.map { _.excludesUser(user) }.getOrElse(false)) false
-		else if (others.map { _.includesUser(user) }.getOrElse(false)) true
+		if (others.exists(_.excludesUser(user))) false
+		else if (others.exists(_.includesUser(user))) true
 		else upstream.exists {
 			_.members.staticUserIds.contains(user.getWarwickId) //Yes, definitely Uni ID when checking SITS group
 		}
