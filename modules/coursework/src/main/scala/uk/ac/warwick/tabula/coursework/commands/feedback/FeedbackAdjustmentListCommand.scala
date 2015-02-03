@@ -25,7 +25,7 @@ class FeedbackAdjustmentListCommandInternal(val assignment: Assignment)
 	this : UserLookupComponent =>
 
 	def applyInternal() = {
-		val unpubishedFeedback = assignment.fullFeedback.filterNot(_.released)
+		val unpubishedFeedback = assignment.fullFeedback
 		unpubishedFeedback.map(f => {
 			val student = userLookup.getUserByWarwickUniId(f.universityId)
 			StudentInfo(student, f)
