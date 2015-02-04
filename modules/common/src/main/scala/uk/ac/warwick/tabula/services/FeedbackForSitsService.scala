@@ -32,11 +32,7 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 	def feedbackToLoad: Seq[FeedbackForSits] = feedbackForSitsDao.feedbackToLoad
 	def getByFeedback(feedback: Feedback): Option[FeedbackForSits] = feedbackForSitsDao.getByFeedback(feedback)
 	def queueFeedback(feedback: Feedback, submitter: CurrentUser):FeedbackForSits = {
-		val feedbackForSits = getByFeedback(feedback) match {
-			case Some(existingFeedbackForSits: FeedbackForSits) =>
-				// this feedback been published before
-				existingFeedbackForSits
-			case None =>
+		val feedbackForSits = getByFeedback(feedback).getOrElse {
 				// create a new object for this feedback in the queue
 				val newFeedbackForSits = new FeedbackForSits
 				newFeedbackForSits.firstCreatedOn = DateTime.now
