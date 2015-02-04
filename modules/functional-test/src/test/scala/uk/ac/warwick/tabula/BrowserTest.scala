@@ -11,6 +11,7 @@ import java.util.Properties
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.ie.InternetExplorerDriver
+import org.openqa.selenium.phantomjs.PhantomJSDriver
 import java.io.File
 import java.io.FileInputStream
 import org.scalatest.concurrent.Eventually
@@ -53,6 +54,7 @@ abstract class BrowserTest
 		case "chrome" => new ChromeDriver
 		case "firefox" => new FirefoxDriver
 		case "ie" => new InternetExplorerDriver
+		case "phantomjs" => new PhantomJSDriver
 	}
 
 	// Can be overridden by a test if necessary.
