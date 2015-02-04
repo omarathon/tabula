@@ -1,19 +1,17 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.{SessionComponent, Daoisms}
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
-import uk.ac.warwick.tabula.scheduling.services.UpstreamModuleRegistration
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.system.permissions.{RequiresPermissionsChecking, PermissionsChecking}
+import uk.ac.warwick.tabula.SprCode
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.{Daoisms, SessionComponent}
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.scheduling.services.{AssignmentImporter, UpstreamModuleRegistration}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
 object ImportAssignmentsCommand {
 	def apply() = new ComposableCommand[Unit]
@@ -47,6 +45,8 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 			logger.debug("Imported AssessmentComponents. Importing assessment groups...")
 			doGroups()
 			doGroupMembers()
+			logger.debug("Imported assessment groups. Importing grade boundaries...")
+			doGradeBoundaries()
 		}
 	}
 
@@ -92,7 +92,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
 				var count = 0
 				assignmentImporter.allMembers { r =>
-					if (!registrations.isEmpty && r.differentGroup(registrations.head)) {
+					if (registrations.nonEmpty && r.differentGroup(registrations.head)) {
 						// This element r is for a new group, so save this group and start afresh
 						save(registrations)
 							.foreach { uag => notEmptyGroupIds = notEmptyGroupIds + uag.id }
@@ -107,7 +107,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 				}
 
 				// TAB-1265 Don't forget the very last bunch.
-				if (!registrations.isEmpty) {
+				if (registrations.nonEmpty) {
 					save(registrations)
 						.foreach { uag => notEmptyGroupIds = notEmptyGroupIds + uag.id }
 				}
@@ -146,6 +146,14 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 		benchmark("Import " + groups.size + " groups") {
 			for (group <- groups) {
 				assignmentMembershipService.save(group)
+			}
+		}
+	}
+
+	def doGradeBoundaries() {
+		transactional() {
+			for (gradeBoundary <- logSize(assignmentImporter.getAllGradeBoundaries)) {
+				assignmentMembershipService.save(gradeBoundary)
 			}
 		}
 	}

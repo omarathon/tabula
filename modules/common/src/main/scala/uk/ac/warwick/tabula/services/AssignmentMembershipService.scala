@@ -9,11 +9,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-object AssignmentMembershipService {
-	val UndergraduateMarkScheme = "TABULA-UG"
-	val PostgraduateMarkScheme = "TABULA-PG"
-}
-
 trait AssignmentMembershipService {
 	def assignmentManualMembershipHelper: UserGroupMembershipHelperMethods[Assignment]
 
@@ -67,7 +62,7 @@ trait AssignmentMembershipService {
 
 	def save(gb: GradeBoundary): Unit
 	def deleteGradeBoundaries(marksCode: String): Unit
-	def gradeForMark(component: AssessmentComponent, mark: Int): String
+	def gradeForMark(component: AssessmentComponent, mark: Int): Option[String]
 }
 
 
@@ -177,13 +172,8 @@ class AssignmentMembershipServiceImpl
 		(component.marksCode match {
 			case code: String => 
 				dao.getGradeBoundaries(code).find(gradeBoundaryMatchesMark)
-			case _ => component.module.degreeType match {
-				case DegreeType.Undergraduate => 
-					dao.getGradeBoundaries(AssignmentMembershipService.UndergraduateMarkScheme).find(gradeBoundaryMatchesMark)
-				case DegreeType.Postgraduate =>
-					dao.getGradeBoundaries(AssignmentMembershipService.PostgraduateMarkScheme).find(gradeBoundaryMatchesMark)
-				case _ => None
-			}
+			case _ =>
+				None
 		}).map(_.grade)
 	}
 

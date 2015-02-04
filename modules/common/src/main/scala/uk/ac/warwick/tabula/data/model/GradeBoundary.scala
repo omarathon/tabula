@@ -3,6 +3,17 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence.Entity
 import javax.validation.constraints.NotNull
 
+object GradeBoundary {
+	def apply(marksCode: String, grade: String, minimumMark: Int, maximumMark: Int) = {
+		val gb = new GradeBoundary()
+		gb.grade = grade
+		gb.marksCode = marksCode
+		gb.minimumMark = minimumMark
+		gb.maximumMark = maximumMark
+		gb
+	}
+}
+
 @Entity
 class GradeBoundary extends GeneratedId {
 

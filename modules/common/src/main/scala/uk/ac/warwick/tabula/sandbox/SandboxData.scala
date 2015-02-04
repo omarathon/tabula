@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.sandbox
 
-import uk.ac.warwick.tabula.data.model.DegreeType
+import uk.ac.warwick.tabula.data.model._
 import uk.co.halfninja.randomnames.NameGenerators
 import uk.co.halfninja.randomnames.Gender._
-import uk.ac.warwick.tabula.data.model.Gender
-import uk.ac.warwick.tabula.data.model.CourseType
 
 // scalastyle:off magic.number
 object SandboxData {
@@ -30,19 +28,19 @@ object SandboxData {
 			"arc339" -> Module("Dissertation (Architecture)", "arc339")
 		), Map(
 			"ac801" -> 
-				Route("Architecture", "ac801", DegreeType.Undergraduate, CourseType.UG, false, 
+				Route("Architecture", "ac801", DegreeType.Undergraduate, CourseType.UG, isResearch = false,
 					Seq("arc101", "arc102", "arc103", "arc106", "arc115", "arc129", "arc201", 
 						"arc203", "arc204", "arc210", "arc219",	"arc222", "arc3a1", "arc330", "arc339"), 
 				4200001, 4200100),
 			"ac802" -> 
-				Route("Architecture with Intercalated Year", "ac802", DegreeType.Undergraduate, CourseType.UG, false, 
+				Route("Architecture with Intercalated Year", "ac802", DegreeType.Undergraduate, CourseType.UG, isResearch = false,
 					Seq("arc101", "arc102", "arc103", "arc106", "arc115", "arc129", "arc201", 
 						"arc203", "arc204", "arc210", "arc219",	"arc222", "arc3a1", "arc330", "arc339"), 
 				4200101, 4200130),
 			"ac8p0" -> 
-				Route("Architecture (Research)", "ac8p0", DegreeType.Postgraduate, CourseType.PGR, true, Seq(), 4200201, 4200300),
+				Route("Architecture (Research)", "ac8p0", DegreeType.Postgraduate, CourseType.PGR, isResearch = true, Seq(), 4200201, 4200300),
 			"ac8p1" -> 
-				Route("Architecture (Taught)", "ac8p1", DegreeType.Postgraduate, CourseType.PGT, false, 
+				Route("Architecture (Taught)", "ac8p1", DegreeType.Postgraduate, CourseType.PGT, isResearch = false,
 					Seq("arc222", "arc3a1", "arc330"), 
 				4200301, 4200350)
 		), 5200001, 5200030),
@@ -64,19 +62,19 @@ object SandboxData {
 			"hom339" -> Module("Dissertation (History of Music)", "hom339")
 		), Map(
 			"hm801" -> 
-				Route("History of Music", "hm801", DegreeType.Undergraduate, CourseType.UG, false,
+				Route("History of Music", "hm801", DegreeType.Undergraduate, CourseType.UG, isResearch = false,
 					Seq("hom101", "hom102", "hom103", "hom106", "hom115", "hom129", "hom201", 
 						"hom203", "hom204", "hom210", "hom219",	"hom222", "hom3a1", "hom330", "hom339"), 
 				4300001, 4300100),
 			"hm802" -> 
-				Route("History of Music with Intercalated Year", "hm802", DegreeType.Undergraduate, CourseType.UG, false,
+				Route("History of Music with Intercalated Year", "hm802", DegreeType.Undergraduate, CourseType.UG, isResearch = false,
 					Seq("hom101", "hom102", "hom103", "hom106", "hom115", "hom129", "hom201", 
 						"hom203", "hom204", "hom210", "hom219",	"hom222", "hom3a1", "hom330", "hom339"), 
 				4300101, 4300130),
 			"hm8p0" -> 
-				Route("History of Music (Research)", "hm8p0", DegreeType.Postgraduate, CourseType.PGR, true, Seq(), 4300201, 4300300),
+				Route("History of Music (Research)", "hm8p0", DegreeType.Postgraduate, CourseType.PGR, isResearch = true, Seq(), 4300201, 4300300),
 			"hm8p1" -> 
-				Route("History of Music (Taught)", "hm8p1", DegreeType.Postgraduate, CourseType.PGT, false,
+				Route("History of Music (Taught)", "hm8p1", DegreeType.Postgraduate, CourseType.PGT, isResearch = false,
 					Seq("hom222", "hom3a1", "hom330"), 
 				4300301, 4300350)
 		), 5300001, 5300030),
@@ -85,35 +83,50 @@ object SandboxData {
 			"psp102" -> Module("Professional Speaking", "psp102")
 		), Map(
 			"xp301" -> 
-				Route("Public Speaking", "xp301", DegreeType.Undergraduate, CourseType.UG, false,
+				Route("Public Speaking", "xp301", DegreeType.Undergraduate, CourseType.UG, isResearch = false,
 					Seq("psp101", "psp102"), 
 				4400001, 4400100),
 			"xp302" -> 
-				Route("Public Speaking with Intercalated Year", "xp302", DegreeType.Undergraduate, CourseType.UG, false,
+				Route("Public Speaking with Intercalated Year", "xp302", DegreeType.Undergraduate, CourseType.UG, isResearch = false,
 					Seq("psp101", "psp102"), 
 				4400101, 4400130),
 			"xp3p0" -> 
-				Route("Public Speaking (Research)", "xp3p0", DegreeType.Postgraduate, CourseType.PGR, true, Seq(), 4400201, 4400300),
+				Route("Public Speaking (Research)", "xp3p0", DegreeType.Postgraduate, CourseType.PGR, isResearch = true, Seq(), 4400201, 4400300),
 			"xp3p1" -> 
-				Route("Public Speaking (Taught)", "xp3p1", DegreeType.Postgraduate, CourseType.PGT, false, Seq(), 4400301, 4400350)
+				Route("Public Speaking (Taught)", "xp3p1", DegreeType.Postgraduate, CourseType.PGT, isResearch = false, Seq(), 4400301, 4400350)
 		), 5400001, 5400030),
 		"trn" -> Department("Training Methods", "trn", "I", Map(
 			"trn101" -> Module("Introduction to Tabula Training", "trn101"),
 			"trn102" -> Module("Advanced Sitebuilder Training", "trn102")
 		), Map(
 			"tr301" ->
-				Route("Training Methods", "tr301", DegreeType.Undergraduate, CourseType.UG, false,
+				Route("Training Methods", "tr301", DegreeType.Undergraduate, CourseType.UG, isResearch = false,
 					Seq("trn101", "trn102"),
 					4500001, 4500100),
 			"tr302" ->
-				Route("Training Methods with Intercalated Year", "tr302", DegreeType.Undergraduate, CourseType.UG, false,
+				Route("Training Methods with Intercalated Year", "tr302", DegreeType.Undergraduate, CourseType.UG, isResearch = false,
 					Seq("trn101", "trn102"),
 					4500101, 4500130),
 			"tr3p0" ->
-				Route("Training Methods (Research)", "tr3p0", DegreeType.Postgraduate, CourseType.PGR, true, Seq(), 4500201, 4500300),
+				Route("Training Methods (Research)", "tr3p0", DegreeType.Postgraduate, CourseType.PGR, isResearch = true, Seq(), 4500201, 4500300),
 			"tr3p1" ->
-				Route("Training Methods (Taught)", "tr3p1", DegreeType.Postgraduate, CourseType.PGT, false, Seq(), 4500301, 4500350)
+				Route("Training Methods (Taught)", "tr3p1", DegreeType.Postgraduate, CourseType.PGT, isResearch = false, Seq(), 4500301, 4500350)
 		), 5500001, 5500030)
+	)
+
+	final val GradeBoundaries = Seq(
+		GradeBoundary("TABULA-UG", "1", 80, 100),
+		GradeBoundary("TABULA-UG", "1", 70, 79),
+		GradeBoundary("TABULA-UG", "21", 60, 69),
+		GradeBoundary("TABULA-UG", "22", 50, 49),
+		GradeBoundary("TABULA-UG", "3", 40, 49),
+		GradeBoundary("TABULA-UG", "F", 0, 38),
+		GradeBoundary("TABULA-PG", "A+", 80, 100),
+		GradeBoundary("TABULA-PG", "A", 70, 79),
+		GradeBoundary("TABULA-PG", "B", 60, 69),
+		GradeBoundary("TABULA-PG", "C", 50, 49),
+		GradeBoundary("TABULA-PG", "D", 40, 49),
+		GradeBoundary("TABULA-PG", "E", 0, 38)
 	)
 	
 	def randomName(id: Long, gender: Gender) = {
@@ -134,23 +147,23 @@ object SandboxData {
 			.get
 	
 	case class Department(
-		val name: String, 
-		val code: String, 
-		val facultyCode: String, 
-		val modules: Map[String, Module], 
-		val routes: Map[String, Route],
-		val staffStartId: Int,
-		val staffEndId: Int
+		name: String,
+		code: String,
+		facultyCode: String,
+		modules: Map[String, Module],
+		routes: Map[String, Route],
+		staffStartId: Int,
+		staffEndId: Int
 	)
-	case class Module(val name: String, val code: String)
+	case class Module(name: String, code: String)
 	case class Route(
-		val name: String, 
-		val code: String, 
-		val degreeType: DegreeType,
-		val courseType: CourseType,
-		val isResearch: Boolean,
-		val moduleCodes: Seq[String],
-		val studentsStartId: Int,
-		val studentsEndId: Int
+		name: String,
+		code: String,
+		degreeType: DegreeType,
+		courseType: CourseType,
+		isResearch: Boolean,
+		moduleCodes: Seq[String],
+		studentsStartId: Int,
+		studentsEndId: Int
 	)
 }

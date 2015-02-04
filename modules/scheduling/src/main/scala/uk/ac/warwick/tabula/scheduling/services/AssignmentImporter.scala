@@ -1,25 +1,23 @@
 package uk.ac.warwick.tabula.scheduling.services
 
-import java.sql.ResultSet
-import java.sql.Types
+import java.sql.{ResultSet, Types}
 import javax.sql.DataSource
-import uk.ac.warwick.spring.Wire
 
-import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.stereotype.Service
-import org.springframework.jdbc.core.RowCallbackHandler
-import org.springframework.jdbc.core.SqlParameter
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.jdbc.`object`.MappingSqlQuery
-import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{AssessmentType, UpstreamAssessmentGroup, AssessmentComponent}
-import uk.ac.warwick.tabula.AcademicYear
 import org.springframework.context.annotation.Profile
-import uk.ac.warwick.tabula.sandbox.SandboxData
+import org.springframework.jdbc.`object`.{MappingSqlQuery, MappingSqlQueryWithParameters}
+import org.springframework.jdbc.core.{RowCallbackHandler, SqlParameter}
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentType, GradeBoundary, UpstreamAssessmentGroup}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.sandbox.SandboxData
+
+import scala.collection.JavaConverters._
 
 trait AssignmentImporter {
 	/**
@@ -32,17 +30,20 @@ trait AssignmentImporter {
 	
 	def getAllAssessmentComponents: Seq[AssessmentComponent]
 
+	def getAllGradeBoundaries: Seq[GradeBoundary]
+
 	def yearsToImport = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
 }
 
 @Profile(Array("dev", "test", "production")) @Service
 class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
-	import AssignmentImporter._
+	import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter._
 
 	var sits = Wire[DataSource]("sitsDataSource")
 
 	var upstreamAssessmentGroupQuery: UpstreamAssessmentGroupQuery = _
 	var assessmentComponentQuery: AssessmentComponentQuery = _
+	var gradeBoundaryQuery: GradeBoundaryQuery = _
 	var jdbc: NamedParameterJdbcTemplate = _
 
 	override def afterPropertiesSet() {
@@ -85,6 +86,9 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 	private def convertAssessmentGroupFromSITS(string: String) =
 		if (string == null) AssessmentComponent.NoneAssessmentGroup
 		else string
+
+	def getAllGradeBoundaries: Seq[GradeBoundary] = gradeBoundaryQuery.executeByNamedParam(JMap(
+		"academic_year_code" -> yearsToImportArray)).asScala
 }
 
 @Profile(Array("sandbox")) @Service
@@ -150,7 +154,8 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 			a.inUse = true
 			a
 		}
-	
+
+	def getAllGradeBoundaries: Seq[GradeBoundary] = SandboxData.GradeBoundaries
 }
 
 /**
@@ -210,7 +215,8 @@ object AssignmentImporter {
 			'Students not registered for assessment' as name,
 			'${AssessmentComponent.NoneAssessmentGroup}' as assessment_group,
 			'X' as assessment_code,
-	 		'Y' as in_use
+	 		'Y' as in_use,
+			null as marks_code
 			from $sitsSchema.cam_sms sms
 				join $sitsSchema.cam_ssn ssn -- SSN table holds module registration status
 					on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- mrgs = "Module Registration Status"
@@ -224,7 +230,8 @@ object AssignmentImporter {
 			'Students not registered for assessment' as name,
 			'${AssessmentComponent.NoneAssessmentGroup}' as assessment_group,
 			'X' as assessment_code,
-	 		'Y' as in_use
+	 		'Y' as in_use,
+			null as marks_code
 			from $sitsSchema.cam_smo smo
 				left outer join $sitsSchema.cam_ssn ssn
 					on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
@@ -240,7 +247,8 @@ object AssignmentImporter {
 			${castToString("mab.mab_name")} as name,
 			${castToString("mab.mab_agrp")} as assessment_group,
 			${castToString("mab.ast_code")} as assessment_code,
-	 		${castToString("mab.mab_udf1")} as in_use
+	 		${castToString("mab.mab_udf1")} as in_use,
+			${castToString("mab.mks_code")} as marks_code
 			from $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components
 				join $sitsSchema.cam_mav mav -- Module Availability which indicates which modules are avaiable in the year
 					on mab.map_code = mav.mod_code and
@@ -357,6 +365,16 @@ object AssignmentImporter {
 			$GetAutoUploadedConfirmedModuleRegistrations
 		order by academic_year_code, module_code, mav_occurrence, assessment_group, spr_code"""
 
+	lazy val GetAllGradeBoundaries = s"""
+		select
+			mkc.mks_code as marks_code,
+			mkc.mkc_grade as grade,
+			mkc.mkc_minm as minimum_mark,
+			mkc.mkc_maxm as maximum_mark,
+		from $sitsSchema.cam_mkc mkc
+		where mkc_proc = 'SAS' and mkc_sigs = 'N'
+	"""
+
 	class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
 		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
 		compile()
@@ -371,6 +389,7 @@ object AssignmentImporter {
 				case "Y" | "y" => true
 				case _ => false
 			}
+			a.marksCode = rs.getString("marks_code")
 			a
 		}
 	}
@@ -389,6 +408,18 @@ object AssignmentImporter {
 		ag.assessmentGroup = rs.getString("assessment_group")
 		ag.occurrence = rs.getString("mav_occurrence")
 		ag
+	}
+
+	class GradeBoundaryQuery(ds: DataSource) extends MappingSqlQuery[GradeBoundary](ds, GetAllGradeBoundaries) {
+		compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int) = {
+			val gb = new GradeBoundary
+			gb.marksCode = rs.getString("marks_code")
+			gb.grade = rs.getString("grade")
+			gb.minimumMark = rs.getInt("minimum_mark")
+			gb.maximumMark = rs.getInt("maximum_mark")
+			gb
+		}
 	}
 
 }
