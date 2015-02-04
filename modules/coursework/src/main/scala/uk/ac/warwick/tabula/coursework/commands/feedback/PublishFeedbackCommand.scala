@@ -118,7 +118,7 @@ trait PublishFeedbackCommandState {
 	val submitter: CurrentUser
 
 	var confirm: Boolean = false
-	val sendToSits: Boolean = false
+	var sendToSits: Boolean = false
 
 	def getUsersForFeedback = feedbackService.getUsersForFeedback(assignment)
 
