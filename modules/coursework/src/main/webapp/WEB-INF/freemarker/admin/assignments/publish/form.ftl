@@ -56,7 +56,7 @@ their feedback published. Those students won't be emailed again.
 		<div class="alert alert-warning">
 			<p>Publishing this feedback will cause marks to be queued for upload to SITS.</p>
 			<p>
-				However mark upload is closed for ${assignment.module.adminDepartment.name} <#if assignment.module.degreeType??> (${assignment.module.degreeType.toString} )</#if>
+				However mark upload is closed for ${assignment.module.adminDepartment.name} <#if assignment.module.degreeType??> (${assignment.module.degreeType.toString})</#if>
 				for the academic year ${assignment.academicYear.toString}.
 			</p>
 			<p>
