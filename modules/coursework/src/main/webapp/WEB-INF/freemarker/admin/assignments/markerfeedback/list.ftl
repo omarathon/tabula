@@ -215,6 +215,31 @@
 						<th class="status-col">Next action</th>
 					</tr></thead>
 					<tbody>
+						<#if stage_index == 0>
+							<#list unsubmittedStudents as student>
+								<tr>
+									<td class="check-col"></td>
+									<#if assignment.module.department.showStudentName>
+										<td class="student-col"><h6 class="toggle-icon">${student.firstName}</h6></td>
+										<td class="student-col"><h6>${student.lastName} <@pl.profile_link student.warwickId! /></h6></td>
+										<#assign toggleIcon = "" />
+									<#else>
+										<#assign toggleIcon = "toggle-icon" />
+									</#if>
+									<td class="student-col"><h6 class="${toggleIcon}">${student.warwickId!}</h6></td>
+									<#if isModeration>
+										<td></td>
+										<td></td>
+									</#if>
+									<td class="status-col">
+										<span class="label label-important">Not released</span>
+									</td>
+									<td class="action-col">
+										No action required. Waiting for submission to be released.
+									</td>
+								</tr>
+							</#list>
+						</#if>
 						<@listMarkerFeedback stage.feedbackItems stage.nextRoleName isModeration />
 					</tbody>
 				</table>
