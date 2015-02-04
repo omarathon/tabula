@@ -51,7 +51,6 @@ class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:
 		feedbackService.saveOrUpdate(feedback)
 		if (sendToSits) queueFeedback(feedback, submitter)
 		feedback
-
 	}
 
 	def copyFrom(feedback: Feedback) {

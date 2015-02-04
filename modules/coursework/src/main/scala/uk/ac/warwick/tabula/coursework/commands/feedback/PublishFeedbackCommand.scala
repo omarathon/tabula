@@ -28,7 +28,6 @@ object PublishFeedbackCommand {
 def apply(module: Module, assignment: Assignment, submitter: CurrentUser) =
 	new PublishFeedbackCommandInternal(module, assignment, submitter)
 		with ComposableCommand[PublishFeedbackCommand.PublishFeedbackResults]
-		with AutowiringUserLookupComponent
 		with AutowiringFeedbackServiceComponent
 		with PublishFeedbackCommandState
 		with PublishFeedbackPermissions
