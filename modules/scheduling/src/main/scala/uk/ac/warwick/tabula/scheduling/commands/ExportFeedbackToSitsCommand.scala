@@ -24,7 +24,7 @@ object ExportFeedbackToSitsCommand {
 
 class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] with Logging {
 
-	self: FeedbackForSitsDaoComponent with ExportFeedbackToSitsServiceComponent with FeaturesComponent with FeedbackForSitsDaoComponent =>
+	self: FeedbackForSitsDaoComponent with ExportFeedbackToSitsServiceComponent with FeaturesComponent =>
 
 	override def applyInternal() = transactional() {
 

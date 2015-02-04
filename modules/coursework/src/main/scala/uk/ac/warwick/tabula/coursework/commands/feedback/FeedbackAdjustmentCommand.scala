@@ -25,12 +25,13 @@ object FeedbackAdjustmentCommand {
 			with FeedbackAdjustmentNotifier
 			with AutowiringFeedbackServiceComponent
 			with AutowiringZipServiceComponent
+			with QueuesFeedbackForSits
 }
 
 class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:User, val submitter: CurrentUser)
 	extends CommandInternal[Feedback] with FeedbackAdjustmentCommandState with SubmissionState {
 
-	self: FeedbackServiceComponent with ZipServiceComponent =>
+	self: FeedbackServiceComponent with ZipServiceComponent with QueuesFeedbackForSits =>
 
 	val submission = assignment.findSubmission(student.getWarwickId)
 	val feedback = assignment.findFeedback(student.getWarwickId)
@@ -48,7 +49,9 @@ class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:
 
 		feedback.updatedDate = DateTime.now
 		feedbackService.saveOrUpdate(feedback)
+		if (sendToSits) queueFeedback(feedback, submitter)
 		feedback
+
 	}
 
 	def copyFrom(feedback: Feedback) {
@@ -114,6 +117,7 @@ trait FeedbackAdjustmentCommandState {
 	var comments: String = _
 
 	val submitter: CurrentUser
+	val sendToSits: Boolean = false
 }
 
 trait FeedbackAdjustmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
