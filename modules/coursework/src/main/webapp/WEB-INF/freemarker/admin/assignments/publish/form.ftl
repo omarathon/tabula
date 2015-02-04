@@ -41,7 +41,7 @@ their feedback published. Those students won't be emailed again.
 </#if>
 </p>
 
-<#if features.queueFeedbackForSits && assignment.uploadMarksToSits>
+<#if features.queueFeedbackForSits>
 	<#if assignment.module.adminDepartment.canUploadMarksToSitsForYear(assignment.academicYear, assignment.module)>
 		<div class="alert alert-info">
 			<p>Publishing this feedback will cause marks to be queued for upload to SITS.</p>

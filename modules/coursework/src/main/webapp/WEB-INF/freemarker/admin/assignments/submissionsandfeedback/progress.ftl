@@ -33,7 +33,6 @@
 	<#assign module=assignment.module />
 	<#assign department=module.department />
 	<#assign queueSitsUploadEnabled=features.queueFeedbackForSits />
-	<#assign uploadToSits=assignment.uploadMarksToSits />
 
 	<div class="fix-header pad-when-fixed">
 		<#include "_filter.ftl" />
@@ -249,7 +248,7 @@
 											<#if enhancedFeedback.downloaded><span class="label label-success">Downloaded</span>
 											<#else><span class="label label-info">Published</span>
 											</#if>
-											<#if queueSitsUploadEnabled && uploadToSits>
+											<#if queueSitsUploadEnabled>
 												<#if enhancedFeedback.feedbackForSits??>
 													<#assign feedbackSitsStatus=enhancedFeedback.feedbackForSits.status />
 													<#if feedbackSitsStatus.code == "failed">
