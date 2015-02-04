@@ -36,6 +36,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 
 	var showStudentName = department.showStudentName
 	var plagiarismDetection = department.plagiarismDetectionEnabled
+	var assignmentGradeValidation = department.assignmentGradeValidation
 	var turnitinExcludeBibliography = department.turnitinExcludeBibliography
 	var turnitinExcludeQuotations = department.turnitinExcludeQuotations
 	var turnitinExcludeSmallMatches: Boolean = _ // not saved as part of the settings - just used in the UI
@@ -70,6 +71,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 	override def applyInternal() = transactional() {
 		department.showStudentName = showStudentName
 		department.plagiarismDetectionEnabled = plagiarismDetection
+		department.assignmentGradeValidation = assignmentGradeValidation
 		department.turnitinExcludeBibliography = turnitinExcludeBibliography
 		department.turnitinExcludeQuotations = turnitinExcludeQuotations
 		department.turnitinSmallMatchWordLimit = turnitinSmallMatchWordLimit

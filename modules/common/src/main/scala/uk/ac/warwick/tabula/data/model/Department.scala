@@ -131,10 +131,9 @@ class Department extends GeneratedId
 		val markUploadMap: Option[Map[String, String]] = degreeType match {
 			case DegreeType.Undergraduate => getStringMapSetting(Settings.CanUploadMarksToSitsForYearUg)
 			case DegreeType.Postgraduate => getStringMapSetting(Settings.CanUploadMarksToSitsForYearPg)
-			case _ => {
+			case _ =>
 				logger.warn(s"Can't upload marks for degree type $degreeType since it can't be identified as UG or PG")
 				return false
-			}
 		}
 		// marks are uploadable until a department is explicitly closed for the year by the Exams Office
 		markUploadMap match {
@@ -207,6 +206,9 @@ class Department extends GeneratedId
   def defaultGroupAllocationMethod =
 		getStringSetting(Settings.DefaultGroupAllocationMethod).map(SmallGroupAllocationMethod(_)).getOrElse(SmallGroupAllocationMethod.Default)
   def defaultGroupAllocationMethod_= (method:SmallGroupAllocationMethod) =  settings += (Settings.DefaultGroupAllocationMethod->method.dbValue)
+
+	def assignmentGradeValidation = getBooleanSetting(Settings.AssignmentGradeValidation) getOrElse false
+	def assignmentGradeValidation_= (validation: Boolean) = settings += (Settings.AssignmentGradeValidation -> validation)
 
 	// FIXME belongs in Freemarker
 	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary).fold("")({ raw =>
@@ -423,8 +425,9 @@ object Department {
 		val StudentsCanScheduleMeetings = "studentsCanScheduleMeetings"
 
 		val CanUploadMarksToSitsForYearUg = "canUploadMarksToSitsForYearUG"
-
 		val CanUploadMarksToSitsForYearPg = "canUploadMarksToSitsForYearPG"
+
+		val AssignmentGradeValidation = "assignmentGradeValidation"
 
 	}
 }
