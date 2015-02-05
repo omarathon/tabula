@@ -234,6 +234,7 @@
 					tableSorterOptions: tsOptions
 				});
 
+
 			})(jQuery);
 		</script>
 	<#else>

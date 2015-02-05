@@ -1,11 +1,9 @@
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 <div id="batch-feedback-form">
 	<h1>Submit marks for ${assignment.name}</h1>
 	<ul id="marks-tabs" class="nav nav-tabs">
 		<li class="active"><a href="#upload">Upload</a></li>
-		<li><a href="#webform">Web Form</a></li>
+		<li class="webform-tab"><a href="#webform">Web Form</a></li>
 	</ul>
 	<div class="tab-content">
 		<div class="tab-pane active" id="upload">
@@ -50,7 +48,7 @@
 						</div>
 					</td>
 					<td><input name="actualMark" type="text" /></td>
-					<td><input name="actualGrade" type="text" /></td>
+					<td><input class="grade" name="actualGrade" type="text" <#if isGradeValidation>disabled</#if>/></td>
 				</tr>
 				</tbody>
 			</table>
@@ -58,21 +56,25 @@
 				<div class="fix-area">
 					<input name="isfile" value="false" type="hidden"/>
 					<table class="marksUploadTable">
-						<tr class="mark-header"><th>University ID</th><th>Marks</th><th>Grade</th></tr>
-							<#if marksToDisplay??>
-								<#list marksToDisplay as markItem>
-									<tr class="mark-row">
-										<td>
-											<div class="input-prepend input-append">
-												<span class="add-on"><i class="icon-user"></i></span>
-												<input class="universityId span2" value="${markItem.universityId}" name="marks[${markItem_index}].universityId" type="text" readonly="readonly" />
-											</div>
-										</td>
-										<td><input name="marks[${markItem_index}].actualMark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" /></td>
-										<td><input name="marks[${markItem_index}].actualGrade" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" /></td>
-									</tr>
-								</#list>
-							</#if>
+						<tr class="mark-header">
+							<th>University ID</th>
+							<th>Marks</th>
+							<th>Grade <#if isGradeValidation><@fmt.help_popover id="auto-grade-help" content="The grade is automatically calculated from the SITS mark scheme" /></#if></th>
+						</tr>
+						<#if marksToDisplay??>
+							<#list marksToDisplay as markItem>
+								<tr class="mark-row">
+									<td>
+										<div class="input-prepend input-append">
+											<span class="add-on"><i class="icon-user"></i></span>
+											<input class="universityId span2" value="${markItem.universityId}" name="marks[${markItem_index}].universityId" type="text" readonly="readonly" />
+										</div>
+									</td>
+									<td><input name="marks[${markItem_index}].actualMark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" /></td>
+									<td><input class="grade" name="marks[${markItem_index}].actualGrade" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" <#if isGradeValidation>disabled</#if> /></td>
+								</tr>
+							</#list>
+						</#if>
 					</table>
 					<br /><button class="add-additional-marks btn"><i class="icon-plus"></i> Add</button>
 					<div class="submit-buttons fix-footer">
@@ -88,6 +90,31 @@
 <script>
 	jQuery(function($){
 		$('.fix-area').fixHeaderFooter();
+		// Fire a resize to get the fixed button in the right place
+		$('.webform-tab').on('shown', function(){
+			$(window).trigger('resize');
+		});
+
+		if (${isGradeValidation?string('true','false')}) {
+			var currentRequest = null
+				, doRequest = function() {
+					if (currentRequest != null) {
+						currentRequest.abort();
+					}
+					var data = {'studentMarks': {}}
+						, $this = $(this)
+						, $markRow = $this.closest('tr')
+						, $gradeInput = $markRow.find('input.grade')
+						, universityId = $markRow.find('input.universityId').val();
+					data['studentMarks'][universityId] = $this.val();
+					currentRequest = $.post('<@routes.generateGradesForMarks assignment />', data, function(data) {
+						if (data[universityId] != undefined) {
+							$gradeInput.val(data[universityId]);
+						}
+					});
+				};
+			$('.marksUploadTable').on('keyup', 'input[name*="actualMark"]', doRequest);
+		}
 	});
 </script>
 </#escape>

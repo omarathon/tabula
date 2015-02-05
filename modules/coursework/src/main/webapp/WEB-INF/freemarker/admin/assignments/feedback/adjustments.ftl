@@ -1,3 +1,4 @@
+<#import "*/courses_macros.ftl" as courses_macros />
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#assign finalMarkingStage = (allCompletedMarkerFeedback?? && allCompletedMarkerFeedback?size > 1)>
@@ -76,12 +77,15 @@
 	</@form.row>
 
 	<@form.row>
-		<@form.label path="adjustedGrade">Adjusted grade</@form.label>
-		<@form.field>
-			<@f.input path="adjustedGrade" cssClass="input-small" />
-			<@f.errors path="adjustedGrade" cssClass="error" />
-		</@form.field>
-
+		<#if isGradeValidation>
+			<@courses_macros.autoGradeOnline "adjustedGrade" "Adjusted grade" "adjustedMark" markingId(command.student) />
+		<#else>
+			<@form.label path="adjustedGrade">Adjusted grade</@form.label>
+			<@form.field>
+				<@f.input path="adjustedGrade" cssClass="input-small" />
+				<@f.errors path="adjustedGrade" cssClass="error" />
+			</@form.field>
+		</#if>
 	</@form.row>
 
 	<div class="submit-buttons">

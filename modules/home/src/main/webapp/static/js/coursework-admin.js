@@ -70,7 +70,8 @@ $(function(){
 		listVariable: 'marks',
 		onAdd: function(){
 			$('input.universityId', this).each(function(i, picker){
-				initUserPicker(picker, true);
+				if (initUserPicker)
+					initUserPicker(picker, true);
 			});
 		}
 	});
@@ -625,6 +626,12 @@ $(function() {
 			} else {
 				return resp;
 			}
+		});
+
+		// Initialise any popovers loaded in the new content
+		$('.use-popover').tabulaPopover({
+			trigger: 'click',
+			container: '#container'
 		});
 	});
 

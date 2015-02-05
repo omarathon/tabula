@@ -27,7 +27,8 @@ class FeedbackAdjustmentsListController extends CourseworkController {
 		val studentInfo = listCommand.apply()
 		Mav("admin/assignments/feedback/adjustments_list",
 			"studentInfo" -> studentInfo,
-			"assignment" -> assignment
+			"assignment" -> assignment,
+			"isGradeValidation" -> assignment.module.adminDepartment.assignmentGradeValidation
 		).crumbs(
 			Breadcrumbs.Department(assignment.module.adminDepartment),
 			Breadcrumbs.Module(assignment.module)
@@ -47,7 +48,9 @@ class FeedbackAdjustmentsController extends CourseworkController {
 
 	@RequestMapping(method=Array(GET))
 	def showForm(@ModelAttribute("command") command: Appliable[Feedback], errors: Errors, @PathVariable assignment: Assignment, @PathVariable student: User) = {
-		Mav("admin/assignments/feedback/adjustments").noLayout()
+		Mav("admin/assignments/feedback/adjustments",
+			"isGradeValidation" -> assignment.module.adminDepartment.assignmentGradeValidation
+		).noLayout()
 	}
 
 	@RequestMapping(method = Array(POST))

@@ -31,9 +31,11 @@ class GenerateGradeFromMarkCommandInternal(val module: Module, val assignment: A
 
 	override def applyInternal() = {
 		val membership = assignmentMembershipService.determineMembershipUsers(assignment)
-		val studentMarksMap: Map[User, Int] = studentMarks.asScala.flatMap{case(uniID, mark) =>
-			membership.find(_.getWarwickId == uniID).map(u => u -> mark.toInt)
-		}.toMap
+		val studentMarksMap: Map[User, Int] = studentMarks.asScala
+			.filterNot(_._2 == null)
+			.flatMap{case(uniID, mark) =>
+				membership.find(_.getWarwickId == uniID).map(u => u -> mark.toInt)
+			}.toMap
 
 		val studentAssesmentComponentMap: Map[String, AssessmentComponent] = studentMarksMap.flatMap{case(student, _) =>
 			assignment.assessmentGroups.asScala.find(

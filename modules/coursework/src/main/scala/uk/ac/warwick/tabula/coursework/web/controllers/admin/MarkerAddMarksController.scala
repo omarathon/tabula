@@ -60,7 +60,10 @@ class MarkerAddMarksController extends CourseworkController {
 			}
 		}.sortBy(_.universityId)
 
-		Mav("admin/assignments/markerfeedback/marksform", "marksToDisplay" -> marksToDisplay).crumbs(
+		Mav("admin/assignments/markerfeedback/marksform",
+			"marksToDisplay" -> marksToDisplay,
+			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
+		).crumbs(
 			Breadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment, marker)), "")
 		)
 	}
