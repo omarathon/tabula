@@ -105,9 +105,12 @@
 					// bind suggested mark button
 					$content.find('.use-suggested-mark').on('click', function(e){
 						var $target = $(this);
-						var markInput = $content.find('input[name=adjustedMark]');
+						var $markInput = $content.find('input[name=adjustedMark]');
+						var $commentsTextarea = $content.find('textarea[name=comments]');
 						var mark = $target.data('mark');
-						markInput.val(mark);
+						var comment = $target.data('comment');
+						$markInput.val(mark);
+						$commentsTextarea.val(comment);
 						e.preventDefault();
 					});
 

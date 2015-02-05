@@ -56,13 +56,14 @@ class FeedbackAdjustmentsController extends CourseworkController {
 							 @PathVariable student: User) = {
 
 		val daysLate = command.submission.map(_.workingDaysLate)
-		val proposedAdjustment = for (actualMark <- command.feedback.actualMark; dl <- daysLate)
-			yield Math.max(0, (actualMark - (FeedbackAdjustmentsController.LATE_PENALTY_PER_DAY * dl)))
-
+		val marksSubtracted = daysLate.map(FeedbackAdjustmentsController.LATE_PENALTY_PER_DAY * _)
+		val proposedAdjustment = for(am <- command.feedback.actualMark; ms <- marksSubtracted)
+			yield Math.max(0, (am - ms))
 
 
 		Mav("admin/assignments/feedback/adjustments", Map(
 			"daysLate" -> daysLate,
+			"marksSubtracted" -> marksSubtracted,
 			"proposedAdjustment" -> proposedAdjustment,
 			"latePenalty" -> FeedbackAdjustmentsController.LATE_PENALTY_PER_DAY
 		)).noLayout()

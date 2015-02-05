@@ -2,6 +2,10 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#assign finalMarkingStage = (allCompletedMarkerFeedback?? && allCompletedMarkerFeedback?size > 1)>
 
+<#macro lateness submission=""><#compress>
+	${durationFormatter(submission.deadline, submission.submittedDate)}
+</#compress></#macro>
+
 <#function markingId user>
 	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>
 		<#return user.userId />
@@ -72,7 +76,9 @@
 			</div>
 			<#if proposedAdjustment??>
 				<div class="late-penalty">
-					<button class="btn btn-mini use-suggested-mark" data-mark="${proposedAdjustment!""}">
+					<button class="btn btn-mini use-suggested-mark"
+							data-mark="${proposedAdjustment!""}"
+							data-comment="Your submission was <@lateness command.submission /> late. ${marksSubtracted} marks have been subtracted (${latePenalty} for each working day late).">
 						Use suggested mark - ${proposedAdjustment!""}
 					</button>
 					<a class="use-popover" id="popover-${markingId(command.student)}" data-html="true"
