@@ -44,7 +44,7 @@ class FeedbackAdjustmentsController extends CourseworkController {
 
 	@ModelAttribute("command")
 	def formCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: User, submitter: CurrentUser) =
-		FeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradeFromMarkCommand(mandatory(module), mandatory(assignment)))
+		FeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping(method=Array(GET))
 	def showForm(@ModelAttribute("command") command: Appliable[Feedback], errors: Errors, @PathVariable assignment: Assignment, @PathVariable student: User) = {

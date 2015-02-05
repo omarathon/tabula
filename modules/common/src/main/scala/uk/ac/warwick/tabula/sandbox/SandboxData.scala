@@ -115,18 +115,18 @@ object SandboxData {
 	)
 
 	final val GradeBoundaries = Seq(
-		GradeBoundary("TABULA-UG", "1", 80, 100),
-		GradeBoundary("TABULA-UG", "1", 70, 79),
-		GradeBoundary("TABULA-UG", "21", 60, 69),
-		GradeBoundary("TABULA-UG", "22", 50, 49),
-		GradeBoundary("TABULA-UG", "3", 40, 49),
-		GradeBoundary("TABULA-UG", "F", 0, 38),
-		GradeBoundary("TABULA-PG", "A+", 80, 100),
-		GradeBoundary("TABULA-PG", "A", 70, 79),
-		GradeBoundary("TABULA-PG", "B", 60, 69),
-		GradeBoundary("TABULA-PG", "C", 50, 49),
-		GradeBoundary("TABULA-PG", "D", 40, 49),
-		GradeBoundary("TABULA-PG", "E", 0, 38)
+		GradeBoundary("TABULA-UG", "1", 80, 100, "N"),
+		GradeBoundary("TABULA-UG", "1", 70, 79, "N"),
+		GradeBoundary("TABULA-UG", "21", 60, 69, "N"),
+		GradeBoundary("TABULA-UG", "22", 50, 49, "N"),
+		GradeBoundary("TABULA-UG", "3", 40, 49, "N"),
+		GradeBoundary("TABULA-UG", "F", 0, 39, "N"),
+		GradeBoundary("TABULA-PG", "A+", 80, 100, "N"),
+		GradeBoundary("TABULA-PG", "A", 70, 79, "N"),
+		GradeBoundary("TABULA-PG", "B", 60, 69, "N"),
+		GradeBoundary("TABULA-PG", "C", 50, 49, "N"),
+		GradeBoundary("TABULA-PG", "D", 40, 49, "N"),
+		GradeBoundary("TABULA-PG", "E", 0, 39, "N")
 	)
 	
 	def randomName(id: Long, gender: Gender) = {

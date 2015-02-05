@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{GradeBoundary, AssessmentComponent, Assignment, Module}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssignmentMembershipServiceComponent, AutowiringAssignmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -10,13 +10,13 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
-object GenerateGradeFromMarkCommand {
+object GenerateGradesFromMarkCommand {
 	def apply(module: Module, assignment: Assignment) =
-		new GenerateGradeFromMarkCommandInternal(module, assignment)
+		new GenerateGradesFromMarkCommandInternal(module, assignment)
 			with AutowiringAssignmentMembershipServiceComponent
-			with ComposableCommand[Map[String, Option[String]]]
-			with GenerateGradeFromMarkPermissions
-			with GenerateGradeFromMarkCommandState
+			with ComposableCommand[Map[String, Seq[GradeBoundary]]]
+			with GenerateGradesFromMarkPermissions
+			with GenerateGradesFromMarkCommandState
 			with ReadOnly with Unaudited
 }
 
@@ -24,10 +24,14 @@ trait GeneratesGradesFromMarks {
 	def applyForMarks(marks: Map[String, Int]): Map[String, Option[String]]
 }
 
-class GenerateGradeFromMarkCommandInternal(val module: Module, val assignment: Assignment)
-	extends CommandInternal[Map[String, Option[String]]] with GeneratesGradesFromMarks {
+class GenerateGradesFromMarkCommandInternal(val module: Module, val assignment: Assignment)
+	extends CommandInternal[Map[String, Seq[GradeBoundary]]] with GeneratesGradesFromMarks {
 
-	self: GenerateGradeFromMarkCommandState with AssignmentMembershipServiceComponent =>
+	self: GenerateGradesFromMarkCommandState with AssignmentMembershipServiceComponent =>
+
+	lazy val assignmentUpstreamAssessmentGroupMap = assignment.assessmentGroups.asScala.map(group =>
+		group -> group.toUpstreamAssessmentGroup(assignment.academicYear)
+	).toMap
 
 	override def applyInternal() = {
 		val membership = assignmentMembershipService.determineMembershipUsers(assignment)
@@ -38,26 +42,27 @@ class GenerateGradeFromMarkCommandInternal(val module: Module, val assignment: A
 			}.toMap
 
 		val studentAssesmentComponentMap: Map[String, AssessmentComponent] = studentMarksMap.flatMap{case(student, _) =>
-			assignment.assessmentGroups.asScala.find(
-				_.toUpstreamAssessmentGroup(assignment.academicYear).exists(_.members.includesUser(student))
-			).map(group => student.getWarwickId -> group.assessmentComponent)
+			assignmentUpstreamAssessmentGroupMap.find { case (group, upstreamGroup) =>
+				upstreamGroup.exists(_.members.includesUser(student))
+			}.map{ case (group, _) => student.getWarwickId -> group.assessmentComponent}
 		}.toMap
 
 		studentMarks.asScala.map{case(uniId, mark) =>
-			uniId -> studentAssesmentComponentMap.get(uniId).flatMap(component => assignmentMembershipService.gradeForMark(component, mark))
+			uniId -> studentAssesmentComponentMap.get(uniId).map(component => assignmentMembershipService.gradesForMark(component, mark)).getOrElse(Seq())
 		}.toMap
 	}
 
 	override def applyForMarks(marks: Map[String, Int]) = {
 		studentMarks = marks.mapValues(m => JInteger(Option(m))).asJava
-		applyInternal()
+		val properResult = applyInternal()
+		properResult.mapValues(_.headOption.map(_.grade))
 	}
 
 }
 
-trait GenerateGradeFromMarkPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+trait GenerateGradesFromMarkPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: GenerateGradeFromMarkCommandState =>
+	self: GenerateGradesFromMarkCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assignment, module)
@@ -66,7 +71,7 @@ trait GenerateGradeFromMarkPermissions extends RequiresPermissionsChecking with 
 
 }
 
-trait GenerateGradeFromMarkCommandState {
+trait GenerateGradesFromMarkCommandState {
 	def module: Module
 	def assignment: Assignment
 

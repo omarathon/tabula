@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradeFromMarkCommand
+import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Module, Assignment}
 import uk.ac.warwick.tabula.CurrentUser
@@ -32,7 +32,7 @@ class MarkingCompletedController extends CourseworkController {
 		mandatory(assignment),
 		marker,
 		submitter,
-		GenerateGradeFromMarkCommand(mandatory(module), mandatory(assignment))
+		GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment))
 	)
 
 

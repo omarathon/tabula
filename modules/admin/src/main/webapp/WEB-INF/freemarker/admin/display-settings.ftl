@@ -69,8 +69,8 @@
 			<@form.field>
 				<@form.label checkbox=true>
 					<@f.radiobutton path="assignmentGradeValidation" value="true" />
-					Calculate grade automatically
-					<@fmt.help_popover id="assignmentGradeValidationTrue" content="The 'Grade' text box will be removed and the grade calculated automatically based on the marks scheme defined in SITS for the assessment component"/>
+					Validate grade
+					<@fmt.help_popover id="assignmentGradeValidationTrue" content="The 'Grade' text box will be removed and replaced by a drop-down of valid grades based on the marks scheme defined in SITS for the assessment component. Empty grades will be calculated automatically when uploaded to SITS"/>
 				</@form.label>
 				<@form.label checkbox=true>
 					<@f.radiobutton path="assignmentGradeValidation" value="false" />

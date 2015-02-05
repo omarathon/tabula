@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.{MarkingMethod, Assignment, Module}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
-import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateGradeFromMarkCommand, OnlineMarkerFeedbackFormCommand}
+import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateGradesFromMarkCommand, OnlineMarkerFeedbackFormCommand}
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/online/{student}"))
@@ -33,7 +33,7 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 		student,
 		marker,
 		submitter,
-		GenerateGradeFromMarkCommand(mandatory(module), mandatory(assignment))
+		GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment))
 	)
 
 	@RequestMapping(method = Array(GET, HEAD))

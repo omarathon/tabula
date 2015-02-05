@@ -371,8 +371,9 @@ object AssignmentImporter {
 			mkc.mkc_grade as grade,
 			mkc.mkc_minm as minimum_mark,
 			mkc.mkc_maxm as maximum_mark,
+			mkc.mkc_sigs as signal_status,
 		from $sitsSchema.cam_mkc mkc
-		where mkc_proc = 'SAS' and mkc_sigs = 'N'
+		where mkc_proc = 'SAS' and mkc_minm is not null and mkc_maxm is not null
 	"""
 
 	class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
@@ -413,12 +414,13 @@ object AssignmentImporter {
 	class GradeBoundaryQuery(ds: DataSource) extends MappingSqlQuery[GradeBoundary](ds, GetAllGradeBoundaries) {
 		compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int) = {
-			val gb = new GradeBoundary
-			gb.marksCode = rs.getString("marks_code")
-			gb.grade = rs.getString("grade")
-			gb.minimumMark = rs.getInt("minimum_mark")
-			gb.maximumMark = rs.getInt("maximum_mark")
-			gb
+			GradeBoundary(
+				rs.getString("marks_code"),
+				rs.getString("grade"),
+				rs.getInt("minimum_mark"),
+				rs.getInt("maximum_mark"),
+				rs.getString("signal_status")
+			)
 		}
 	}
 

@@ -62,7 +62,7 @@ trait AssignmentMembershipService {
 
 	def save(gb: GradeBoundary): Unit
 	def deleteGradeBoundaries(marksCode: String): Unit
-	def gradeForMark(component: AssessmentComponent, mark: Int): Option[String]
+	def gradesForMark(component: AssessmentComponent, mark: Int): Seq[GradeBoundary]
 }
 
 
@@ -166,15 +166,15 @@ class AssignmentMembershipServiceImpl
 		dao.deleteGradeBoundaries(marksCode)
 	}
 
-	def gradeForMark(component: AssessmentComponent, mark: Int): Option[String] = {
+	def gradesForMark(component: AssessmentComponent, mark: Int): Seq[GradeBoundary] = {
 		def gradeBoundaryMatchesMark(gb: GradeBoundary) = gb.minimumMark <= mark && gb.maximumMark >= mark
 
-		(component.marksCode match {
+		component.marksCode match {
 			case code: String => 
-				dao.getGradeBoundaries(code).find(gradeBoundaryMatchesMark)
+				dao.getGradeBoundaries(code).filter(gradeBoundaryMatchesMark)
 			case _ =>
-				None
-		}).map(_.grade)
+				Seq()
+		}
 	}
 
 }

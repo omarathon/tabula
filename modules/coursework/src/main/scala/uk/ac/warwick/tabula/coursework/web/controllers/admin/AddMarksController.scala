@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradeFromMarkCommand
+import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.coursework.commands.assignments.AdminAddMarksCommand
@@ -28,7 +28,7 @@ class AddMarksController extends CourseworkController {
 	@Autowired var assignmentMembershipService: AssignmentMembershipService = _
 
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
-		new AdminAddMarksCommand(mandatory(module), mandatory(assignment), user, GenerateGradeFromMarkCommand(mandatory(module), mandatory(assignment)))
+		new AdminAddMarksCommand(mandatory(module), mandatory(assignment), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav: Mav, module: Module) = mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))

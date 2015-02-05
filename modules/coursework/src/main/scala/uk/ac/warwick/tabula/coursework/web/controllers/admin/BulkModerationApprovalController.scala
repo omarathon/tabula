@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.coursework.commands.assignments.{BulkModerationApprovalState, BulkModerationApprovalCommand}
-import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradeFromMarkCommand
+import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
@@ -27,7 +27,7 @@ class BulkModerationApprovalController extends CourseworkController {
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
 		submitter: CurrentUser
-	) = BulkModerationApprovalCommand(mandatory(assignment), marker, submitter, GenerateGradeFromMarkCommand(mandatory(module), mandatory(assignment)))
+	) = BulkModerationApprovalCommand(mandatory(assignment), marker, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
 	def showForm(@ModelAttribute("command") command: Appliable[Unit], errors: Errors): Mav = {

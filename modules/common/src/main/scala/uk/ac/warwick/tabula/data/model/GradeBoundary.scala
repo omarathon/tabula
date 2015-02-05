@@ -4,13 +4,25 @@ import javax.persistence.Entity
 import javax.validation.constraints.NotNull
 
 object GradeBoundary {
-	def apply(marksCode: String, grade: String, minimumMark: Int, maximumMark: Int) = {
+	def apply(marksCode: String, grade: String, minimumMark: Int, maximumMark: Int, signalStatus: String) = {
 		val gb = new GradeBoundary()
 		gb.grade = grade
 		gb.marksCode = marksCode
 		gb.minimumMark = minimumMark
 		gb.maximumMark = maximumMark
+		gb.signalStatus = signalStatus
 		gb
+	}
+
+	private val byGradeOrdering = Ordering.by[GradeBoundary, String]( _.grade )
+
+	implicit val defaultOrdering = new Ordering[GradeBoundary]() {
+		override def compare(x: GradeBoundary, y: GradeBoundary): Int = {
+			if (x.signalStatus == "N" && y.signalStatus == "N") byGradeOrdering.compare(x,y)
+			else if (x.signalStatus == "N") -1
+			else if (y.signalStatus == "N") 1
+			else byGradeOrdering.compare(x,y)
+		}
 	}
 }
 
@@ -28,5 +40,8 @@ class GradeBoundary extends GeneratedId {
 
 	@NotNull
 	var maximumMark: Int = 100
+
+	@NotNull
+	var signalStatus: String = _
 
 }
