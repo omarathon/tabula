@@ -4,7 +4,7 @@ import org.mockito.Mockito._
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, StringFormValue}
-import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Module}
+import uk.ac.warwick.tabula.data.model.{Department, Assignment, Feedback, Module}
 import uk.ac.warwick.tabula.data.{SavedFormValueDao, SavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
@@ -20,6 +20,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 		assignment.collectMarks = true
 		assignment.addDefaultFeedbackFields()
 		val module = new Module
+		module.adminDepartment = new Department
 
 		val student = new User("student"){setWarwickId("student")}
 		val marker = new User("marker")
