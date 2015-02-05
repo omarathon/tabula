@@ -48,6 +48,6 @@ RewriteCond %{REQUEST_URI} !^/api/v1/(.*)
 RewriteCond %{REQUEST_URI} !^/errordocuments/(.*)
 RewriteRule (.*) http://127.0.0.1:${proxy:port}/home$1 [QSA,P,L]
 
-# Else, go straight to Jboss
+# Else, go straight to app server
 RewriteCond %{REQUEST_URI} !^/errordocuments/(.*)
 RewriteRule (.*) http://127.0.0.1:${proxy:port}$1 [QSA,P,L]

@@ -7,24 +7,89 @@ Currently, the modules that are in Tabula are:
 
 - coursework - Coursework Submission, the Assignment Management project that used to be [Horses for Courses](https://bugs.elab.warwick.ac.uk/browse/HFC)
 - profiles - Student Profiles
+- groups - Small Group Teaching management
+- attendance - Monitoring point management and recording
+- admin - Administration & Permissions functions
+- home - Static content and homepage
+- reports - Report generation for other modules
+- api - API-specific details
+
+Note: This is likely to change to being 3 modules: web, reports and api (possibly with common? commands? who knows).
 
 Setting up for development
 ----------
 
-Set up an empty JBoss 5 server.
+Install Tomcat 8 from here: http://tomcat.apache.org/download-80.cgi - on Unix, it makes sense just to extract Tomcat into `/opt` and then symlink it to `/usr/local/tomcat-8` or wherever is convenient. You can then upgrade Tomcat without breaking any configuration by just changing that symlink.
 
-The conf directory should contain:
+Create a new base directory for Tabula's config and deployment, e.g. `/var/tomcat/servers/tabula`. The structure and contents of this directory should be as follows:
 
-- tabula-sso-config.xml modified to your details.
-- tabula.properties modified to your details
+```
+tabula/
+├── bin/
+│   └── setenv.sh
+├── conf/
+│   ├── context.xml
+│   ├── membership-ds.xml
+│   ├── server.xml
+│   ├── sits-ds.xml
+│   ├── tabula-ds.xml
+│   └── web.xml
+├── lib/
+│   ├── log4j.xml
+│   ├── ojdbc6.jar
+│   ├── tabula.properties
+│   └── tabula-sso-config.xml
+├── logs/
+├── temp/
+├── webapps/
+└── work/
+```
 
-You can get versions of these from the servers directory
+The contents of these files are as follows:
 
-Unpack activemq-ra.rar into the deploy directory from http://pkg.elab.warwick.ac.uk/activemq.apache.org/activemq-ra.zip
+### `bin/setenv.sh`
 
-Obtain the datasource files for the app and ADS, and place in the deploy directory - you'll need a TabulaDS and an AcademicDS
+This is a script that's run to set environment variables for the running instance. You'll probably want to use it to set up memory management, JRebel, debugging etc.
 
-You will need to get this configuration added to Web Sign-on for SSO to work.
+A sample file can be found in `config/servers/augustus/bin`
+
+### `conf/context.xml`
+
+This contains resources that are to be included in the server - in this case, just JNDI DataSources. You can use entity XML includes to have these in separate files.
+
+There is a sample `context.xml` and some sample datasources in `config/servers/augustus/conf`
+
+### `conf/server.xml`
+
+Instructions on how to run the server, including what ports to bind to. This is pretty much standard.
+
+There is a sample `server.xml` in `config/servers/augustus/conf`
+
+### `conf/web.xml`
+
+This is just copied from the `conf` directory in the Tomcat 8 install. I couldn't get Tomcat to run without it being copied, which sucks a bit.
+
+### `lib/ojdbc6.jar`
+
+You can get this from http://pkg.elab.warwick.ac.uk/oracle.com/ojdbc6.jar
+
+### `lib/log4j.xml`
+
+Log4J config. An alternative would be to package up a `log4j.properties` with the WARs, but that wouldn't allow us to change config per-server.
+
+### `lib/tabula.properties`
+
+Properties passed into the app. You can get one of these off of tabula-test and then personalise it.
+
+### `lib/tabula-sso-config.xml`
+
+The usual SSO config guff. You will need to get this configuration added to Web Sign-on for SSO to work.
+
+### ActiveMQ
+
+Unpack activemq-ra.rar into the deploy directory from http://pkg.elab.warwick.ac.uk/activemq.apache.org/activemq-ra.zip or install ActiveMQ locally instead. Note that the repository version of ActiveMQ doesn't work on Ubuntu 14.10
+
+### Apache
 
 Set up an Apache vhost referencing the include files in `config/servers/common/vhosts` -
 use `rewrites.inc` for full Tabula development.
@@ -36,7 +101,7 @@ so you may need to define yours with two lines such as
     RewriteMap proxy txt:/etc/apache2/tabulaport.txt
     RewriteMap scheduler txt:/etc/apache2/tabulaport.txt
 
-The above line should point to a file containing this line (assuming default JBoss port 8080):
+The above line should point to a file containing this line (assuming default Tomcat port 8080):
 
     port 8080
 
@@ -52,10 +117,10 @@ Some other useful Maven commands:
 - `mvn -DskipTests -Dmaven.test.skip=true` - also skip test compilation
 - `mvn --projects modules/coursework --also-make` - work on a single module, but make module dependencies like common
 - `mvn -Pdeploy --projects modules/attendance --also-make -DskipTests` - Deploy a single module
-    (Remember JBoss will still deploy old wars unless you delete them!)
+    (Remember Tomcat will still deploy old wars unless you delete them!)
 - `mvn test -Dsurefire.useFile=false` - run tests, showing stack trace of failures in the console
 - `mvn test -Dtest=uk.ac.warwick.tabula.coursework.ApplicationTest` - run a specific test
-- `mvn -Pfunctional-test --projects modules/functional-test clean test` - run functional tests (start JBoss instance first)
+- `mvn -Pfunctional-test --projects modules/functional-test clean test` - run functional tests (start Tomcat instance first)
 - `mvn -Pfunctional-test --projects modules/functional-test clean test -Dtest=CourseworkModuleManagerTest` - run a specific functional test
 - `mvn -Pdev-deploy-views` - syncs the latest Freemarker templates into the deployed app - no need to redeploy
 - `mvn -Pdev-deploy-static` - syncs the latest static content, including compiled assets like LessCSS

@@ -123,7 +123,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 			exceptionHandler.exception(ExceptionContext(token, interestingException, request))
 		} catch {
 			// This is very bad and should never happen - but still try to avoid showing
-			// a plain JBoss exception to the user.
+			// a plain exception to the user.
 			case e: Exception => logger.error("Exception handling exception!", e)
 		}
 

@@ -204,7 +204,7 @@ class UserGroupMembershipHelperCacheService extends QueueListener with Initializ
 		helper.cache.foreach { cache =>
 			cache.remove(user.getUserId)
 
-			// Must also inform other Jbosses - unless we're using a shared distributed cache, i.e. Memcached
+			// Must also inform other app servers - unless we're using a shared distributed cache, i.e. Memcached
 			if (cacheStrategy != CacheStrategy.MemcachedRequired && cacheStrategy != CacheStrategy.MemcachedIfAvailable) {
 				val msg = new UserGroupMembershipHelperCacheBusterMessage
 				msg.cacheName = cache.getName

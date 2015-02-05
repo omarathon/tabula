@@ -7,7 +7,7 @@
   <!-- Clustered token storage so both instances have access -->
   <cluster>
     <enabled>true</enabled>
-    <datasource>java:/TabulaDS</datasource>
+    <datasource>java:comp/env/jdbc/TabulaDS</datasource>
   </cluster>
 	<!-- mode can be 'old' or 'new' this defines if the SSOClientFilter should use 
 		the old WarwickSSO cookie or the newer SSO-SSC-* cookies -->
