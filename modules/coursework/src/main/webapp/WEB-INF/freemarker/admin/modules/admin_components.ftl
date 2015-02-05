@@ -272,50 +272,54 @@
 							<li class="divider"></li>
 						</#if>
 
-
-						<#if assignment.markingWorkflow?? && !assignment.markingWorkflow.studentsChooseMarker>
-							<li>
-								<#assign markers_url><@routes.assignMarkers assignment /></#assign>
-								<@fmt.permission_button
+						<#if assignment.hasWorkflow>
+							<#if !assignment.markingWorkflow.studentsChooseMarker>
+								<li>
+									<#assign markers_url><@routes.assignMarkers assignment /></#assign>
+									<@fmt.permission_button
 									permission='Assignment.Update'
 									scope=assignment
 									action_descr='assign markers'
 									href=markers_url>
-								<i class="icon-user"></i> Assign markers
-							</@fmt.permission_button>
-						  </li>
-						<#elseif (assignment.markingWorkflow.studentsChooseMarker)!false>
-							<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Marking workflow requires students to choose marker"><i class="icon-user"></i> Assign markers </a></li>
+										<i class="icon-user"></i> Assign markers
+									</@fmt.permission_button>
+								</li>
+							<#else>
+								<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Marking workflow requires students to choose marker"><i class="icon-user"></i> Assign markers </a></li>
+							</#if>
 						<#else>
-							<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Marking workflow is not enabled for this assignment"><i class="icon-user"></i> Assign markers </a></li>
-						</#if>
-
-						<#if assignment.collectMarks>
-							<li>
-								<#assign marks_url><@routes.addMarks assignment /></#assign>
-								<@fmt.permission_button
+							<li class="disabled">
+								<a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Marking workflow is not enabled for this assignment">
+									<i class="icon-user"></i>
+									Assign markers
+								</a>
+							</li>
+							<#if assignment.collectMarks>
+								<li>
+									<#assign marks_url><@routes.addMarks assignment /></#assign>
+									<@fmt.permission_button
 									permission='Marks.Create'
 									scope=assignment
 									action_descr='add marks'
 									href=marks_url>
-									<i class="icon-check"></i> Add marks
-								</@fmt.permission_button>
-							</li>
-						<#else>
-							<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Mark collection is not enabled for this assignment."><i class="icon-check"></i> Add marks</a></li>
-						</#if>
-
-						<li>
-							<#assign feedback_url><@routes.addFeedback assignment /></#assign>
-							<@fmt.permission_button
+										<i class="icon-check"></i> Add marks
+									</@fmt.permission_button>
+								</li>
+							<#else>
+								<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Mark collection is not enabled for this assignment."><i class="icon-check"></i> Add marks</a></li>
+							</#if>
+							<li>
+								<#assign feedback_url><@routes.addFeedback assignment /></#assign>
+								<@fmt.permission_button
 								permission='Feedback.Create'
 								scope=assignment
 								action_descr='upload feedback'
 								classes='feedback-link'
 								href=feedback_url>
-								<i class="icon-upload"></i> Upload feedback
-							</@fmt.permission_button>
-						</li>
+									<i class="icon-upload"></i> Upload feedback
+								</@fmt.permission_button>
+							</li>
+						</#if>
 
 						<#if assignment.canPublishFeedback>
 							<li>
@@ -327,11 +331,9 @@
 						<#else>
 							<li class="disabled"><a class="use-tooltip" data-delay="500" data-container="body" title="No current feedback to publish, or the assignment is not yet closed."><i class="icon-envelope-alt"></i> Publish feedback </a></li>
 						</#if>
-
-
 					  </ul>
 					</div>
-					</div>
+				</div>
 
 				</div>
 				<div class="end-assignment-info"></div>

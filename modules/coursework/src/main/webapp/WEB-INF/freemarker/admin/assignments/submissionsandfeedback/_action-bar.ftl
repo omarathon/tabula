@@ -236,7 +236,7 @@
 						permission='Feedback.Update'
 						scope=assignment
 						action_descr='make adjustments to feedback'
-						tooltip='Apply penalties or make adjustments before publishing feedback'
+						tooltip='Apply penalties or make adjustments to mark and grade'
 						href=onlinefeedback_url>
 							<i class="icon-sort"></i> Adjustments
 						</@fmt.permission_button>

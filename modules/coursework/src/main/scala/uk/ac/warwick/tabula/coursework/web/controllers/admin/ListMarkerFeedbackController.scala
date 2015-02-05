@@ -16,6 +16,7 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/list"))
 class ListMarkerFeedbackController extends CourseworkController {
 
+
 	@ModelAttribute("command")
 	def createCommand(@PathVariable assignment: Assignment,
 										@PathVariable module: Module,
@@ -31,7 +32,11 @@ class ListMarkerFeedbackController extends CourseworkController {
 		} else {
 			val markerFeedback = command.apply()
 			val feedbackItems = markerFeedback.flatMap(_.feedbackItems)
-
+			val unsubmittedStudents = {
+				val markersStudents = assignment.markingWorkflow.getMarkersStudents(assignment, marker)
+				val feedbackIds = feedbackItems.map(_.student.getWarwickId)
+				markersStudents.filterNot(student => feedbackIds.contains(student.getWarwickId))
+			}
 			val feedbackCounts: Seq[Int] = feedbackItems.map(_.feedbacks.size)
 			val maxFeedbackCount = feedbackCounts.foldLeft(0)(_ max _)
 			val hasFirstMarkerFeedback = maxFeedbackCount > 1
@@ -51,7 +56,8 @@ class ListMarkerFeedbackController extends CourseworkController {
 				"onlineMarkingUrls" -> feedbackItems.map{ items =>
 					items.student.getUserId -> assignment.markingWorkflow.onlineMarkingUrl(assignment, marker, items.student.getUserId)
 				}.toMap,
-				"marker" -> marker
+				"marker" -> marker,
+				"unsubmittedStudents" -> unsubmittedStudents
 			)
 		}
 	}

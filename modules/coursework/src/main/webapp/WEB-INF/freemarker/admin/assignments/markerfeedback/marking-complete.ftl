@@ -52,47 +52,41 @@
 	</#if>
 
 	<#if (assignment.collectMarks && noMarks?size > 0) >
-		<#if isUserALaterMarker>
-			<div class="alert alert-info">
-				<#if (noMarks?size > 1)>
-					${noFeedback?size} submissions do not have a mark. You will not be able to change this before these submissions are marked by others.
-				<#else>
-					One submission does not have a mark. You will not be able to change this before this submission is marked by others.
-				</#if>
-			</div>
-		<#else>
-			<div class="alert">
-				<#if (noMarks?size > 1)>
-					${noFeedback?size} submissions do not have a mark. You will not be able to add a mark to these submissions later.
-				<#else>
-					One submission does not have a mark. You will not be able to add a mark to this submission later.
-				</#if>
-			</div>
-		</#if>
+		<#assign cantDo><#if isUserALaterMarker>change this before these submissions are marked by others<#else>add a mark to these submissions later</#if></#assign>
+		<#assign count><#if (noMarks?size > 1)>	${noMarks?size} submissions do<#else>One submission does</#if></#assign>
+		<#assign noMarksIds>
+			<ul><#list noMarks as markerFeedback><li>${markerFeedback.feedback.universityId}</li></#list></ul>
+		</#assign>
+		<div class="alert">
+			${count} not have a mark. You will not be able to ${cantDo}.
+			<a class="use-popover" id="popover-marks" data-html="true"
+			   data-original-title="<span class='text-info'><strong>No marks</strong></span>"
+			   data-content="${noMarksIds}">
+				<i class="icon-question-sign"></i>
+			</a>
+		</div>
 	</#if>
 
 	<#if (noFeedback?size > 0) >
-		<#if isUserALaterMarker>
-			<div class="alert alert-info">
-				<#if (noMarks?size > 1)>
-					${noFeedback?size} submissions do not have any feedback files attached.
-					You will not be able to change this before these submissions are marked by others.
-				<#else>
-					One submission does not have any feedback files attached.
-					You will not be able to change this before this submission is marked by others.
-				</#if>
-			</div>
-		<#else>
-			<div class="alert">
-				<#if (noFeedback?size > 1)>
-					${noFeedback?size} submissions do not have any feedback files attached.
-					You will not be able to add feedback files to these submissions later.
-				<#else>
-					One submission does not have any feedback files attached.
-					You will not be able to add feedback files to this submission later.
-				</#if>
-			</div>
-		</#if>
+		<#assign cantDo>
+			<#if isUserALaterMarker>
+				You will not be able to change this before these submissions are marked by others
+			<#else>
+				You will not be able to add feedback files to this submission later
+			</#if>
+		</#assign>
+		<#assign count><#if (noFeedback?size > 1)>${noFeedback?size} submissions do<#else>One submission does</#if></#assign>
+		<#assign noFilesIds>
+		<ul><#list noFeedback as markerFeedback><li>${markerFeedback.feedback.universityId}</li></#list></ul>
+		</#assign>
+		<div class="alert">
+			${count} not have any feedback files attached. ${cantDo}.
+			<a class="use-popover" id="popover-files" data-html="true"
+			   data-original-title="<span class='text-info'><strong>No feedback files</strong></span>"
+			   data-content="${noFilesIds}">
+				<i class="icon-question-sign"></i>
+			</a>
+		</div>
 	</#if>
 
 	<#if isUserALaterMarker>

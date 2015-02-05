@@ -5,7 +5,8 @@ import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.coursework.commands.assignments.AdminAddMarksCommand
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.{PermissionDeniedException, CurrentUser}
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.data.model.Assignment
@@ -37,7 +38,12 @@ class AddMarksController extends CourseworkController {
 			@PathVariable module: Module, 
 			@PathVariable(value = "assignment") assignment: Assignment, 
 			@ModelAttribute cmd: AdminAddMarksCommand, errors: Errors): Mav = {
-		
+
+		if(assignment.hasWorkflow) {
+			logger.error(s"Can't add marks to an assignment with a workflow - ${assignment.id}")
+			throw new PermissionDeniedException(user, Permissions.Feedback.Update, assignment)
+		}
+
 		val members = assignmentMembershipService.determineMembershipUsers(cmd.assignment)
 
 		val marksToDisplay = members.map { member =>
