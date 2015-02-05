@@ -89,6 +89,19 @@ The usual SSO config guff. You will need to get this configuration added to Web 
 
 Unpack activemq-ra.rar into the deploy directory from http://pkg.elab.warwick.ac.uk/activemq.apache.org/activemq-ra.zip or install ActiveMQ locally instead. Note that the repository version of ActiveMQ doesn't work on Ubuntu 14.10
 
+### Java 8 JDK
+
+Note: On Ubuntu, at least, you may need to reboot to clean your environment up after switching JDKs. This sucks, if anyone can improve it, that'll be great.
+
+Add the webupd8team PPA if you haven't already:
+
+```
+sudo add-apt-repository ppa:webupd8team/java
+sudo apt-get update
+```
+
+Set Java 8 as the default JDK: `sudo apt-get install oracle-java8-set-default`
+
 ### Starting Tomcat
 
 You'll need to set two environment variables, `CATALINA_HOME` and `CATALINA_BASE` when starting Tomcat. `CATALINA_HOME` is the directory where Tomcat is installed, and `CATALINA_BASE` is the directory where your config files above are.
