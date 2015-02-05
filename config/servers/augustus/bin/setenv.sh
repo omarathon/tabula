@@ -40,15 +40,23 @@ JVM_REQUIRED_ARGS="-Djava.awt.headless=true -Dfile.encoding=${JVM_FILE_ENCODING}
 #-----------------------------------------------------------------------------------
 
 #
-# Set the authentication to use for remote JMX access. Anything other than "password" or "ssl" will cause remote JMX
+# Set the authentication to use for remote JMX access. Anything other than "password" will cause remote JMX
 # access to be disabled.
 #
-JMX_REMOTE_AUTH=
+JMX_REMOTE_AUTH=password
 
 #
 # The port for remote JMX support if enabled
 #
 JMX_REMOTE_PORT=3333
+
+#
+# If `hostname -i` returns a local address then JMX-RMI communication may fail because the address returned by JMX for
+# the RMI-JMX stub will not resolve for non-local clients. To fix this you will need to explicitly specify the
+# IP address / host name of this server that is reachable / resolvable by JMX clients. e.g.
+# RMI_SERVER_HOSTNAME="-Djava.rmi.server.hostname=non.local.name.of.my.stash.server"
+#
+RMI_SERVER_HOSTNAME="-Djava.rmi.server.hostname=augustus.warwick.ac.uk"
 
 #-----------------------------------------------------------------------------------
 # JMX username/password support
@@ -58,31 +66,6 @@ JMX_REMOTE_PORT=3333
 # The full path to the JMX username/password file used to authenticate remote JMX clients
 #
 #JMX_PASSWORD_FILE=
-
-#-----------------------------------------------------------------------------------
-# JMX SSL support
-#-----------------------------------------------------------------------------------
-
-#
-# The full path to the Java keystore which must contain a key pair used for SSL authentication for JMX
-#
-#JAVA_KEYSTORE=
-
-#
-# The password for JAVA_KEYSTORE
-#
-#JAVA_KEYSTORE_PASSWORD=
-
-#
-# The full path to the Java truststore which must contain the client certificates accepted for SSL authentication
-# of JMX
-#
-#JAVA_TRUSTSTORE=
-
-#
-# The password for JAVA_TRUSTSTORE
-#
-#JAVA_TRUSTSTORE_PASSWORD=
 
 PRGDIR=`dirname "$0"`
 

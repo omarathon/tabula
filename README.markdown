@@ -89,6 +89,28 @@ The usual SSO config guff. You will need to get this configuration added to Web 
 
 Unpack activemq-ra.rar into the deploy directory from http://pkg.elab.warwick.ac.uk/activemq.apache.org/activemq-ra.zip or install ActiveMQ locally instead. Note that the repository version of ActiveMQ doesn't work on Ubuntu 14.10
 
+### Starting Tomcat
+
+You'll need to set two environment variables, `CATALINA_HOME` and `CATALINA_BASE` when starting Tomcat. `CATALINA_HOME` is the directory where Tomcat is installed, and `CATALINA_BASE` is the directory where your config files above are.
+
+You can then use `$CATALINA_HOME/bin/catalina.sh` to start the server in the foreground, or `startup.sh` to start it in the background.
+
+An example startup script for Tabula may be:
+
+```
+#!/bin/bash
+
+# Clear out work and temp because I'm a massive pessimist
+cd /var/tomcat/servers/tabula
+rm -rf work/* temp/*
+
+export CATALINA_HOME=/usr/local/tomcat-8
+export CATALINA_BASE=/var/tomcat/servers/tabula
+
+echo "Starting Tomcat server"
+${CATALINA_HOME}/bin/catalina.sh run $@
+```
+
 ### Apache
 
 Set up an Apache vhost referencing the include files in `config/servers/common/vhosts` -
