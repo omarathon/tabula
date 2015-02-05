@@ -96,6 +96,10 @@
 		</@form.field>
 	</@form.row>
 
+	<div class="alert alert-info">
+		The reason for adjustment and any comments will be made available to students when their feedback is published.
+	</div>
+
 	<div class="submit-buttons">
 		<input class="btn btn-primary" type="submit" value="Save">
 		<a class="btn discard-changes" href="">Cancel</a>

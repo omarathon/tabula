@@ -65,8 +65,8 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			When("I visit the feedback page")
 			go to Path(s"/coursework/module/xxx02/$assignmentId")
 			Then("I can see the adjusted mark only")
-			pageSource contains "Mark: 31" should be {true}
-			pageSource contains "Mark: 41" should be {false}
+			pageSource contains "Adjusted mark: 31" should be {true}
+			pageSource contains "Mark: 41" should be {true}
 		}
 	}
 
