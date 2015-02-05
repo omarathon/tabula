@@ -269,6 +269,8 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		id("js-hint").findElement should be ('empty)
 
 		if (members.nonEmpty) {
+			disableJQueryAnimationsOnHtmlUnit()
+
 			click on linkText("Add students manually")
 			eventually { textArea("massAddUsers").isDisplayed should be {true} }
 

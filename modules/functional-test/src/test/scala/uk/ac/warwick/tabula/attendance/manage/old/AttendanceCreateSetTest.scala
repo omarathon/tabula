@@ -27,6 +27,8 @@ class AttendanceCreateSetTest extends AttendanceFixture with GivenWhenThen{
 
 		And("I can add a new point")
 
+		disableJQueryAnimationsOnHtmlUnit()
+
 		click on cssSelector("a.new-point")
 
 		eventuallyAjax {

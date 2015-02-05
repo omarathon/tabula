@@ -58,12 +58,18 @@ abstract class BrowserTest
 	}
 
 	// Can be overridden by a test if necessary.
-	val htmlUnitBrowserVersion = BrowserVersion.INTERNET_EXPLORER_8
+	val htmlUnitBrowserVersion = BrowserVersion.FIREFOX_24
 
 	def ifHtmlUnitDriver(operation:HtmlUnitDriver=>Unit) = {
 		webDriver match {
 			case h:HtmlUnitDriver=>operation(h)
 			case _=> // do nothing
+		}
+	}
+
+	def disableJQueryAnimationsOnHtmlUnit() {
+		ifHtmlUnitDriver { driver =>
+			executeScript("jQuery.support.transition = false")
 		}
 	}
 

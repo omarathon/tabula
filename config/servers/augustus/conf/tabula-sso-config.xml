@@ -4,7 +4,7 @@
   <httpbasic>
     <allow>true</allow>
   </httpbasic>
-  <!-- Clustered token storage so both jbosses have access -->
+  <!-- Clustered token storage so both instances have access -->
   <cluster>
     <enabled>true</enabled>
     <datasource>java:/TabulaDS</datasource>
