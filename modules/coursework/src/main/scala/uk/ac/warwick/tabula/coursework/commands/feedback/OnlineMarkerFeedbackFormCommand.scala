@@ -14,8 +14,8 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.userlookup.User
 
 object OnlineMarkerFeedbackFormCommand {
-	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser) =
-		new OnlineMarkerFeedbackFormCommand(module, assignment, student, marker, submitter)
+	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		new OnlineMarkerFeedbackFormCommand(module, assignment, student, marker, submitter, gradeGenerator)
 			with ComposableCommand[MarkerFeedback]
 			with MarkerFeedbackStateCopy
 			with OnlineFeedbackFormPermissions
@@ -30,8 +30,14 @@ object OnlineMarkerFeedbackFormCommand {
 		}
 }
 
-abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assignment, student: User, marker: User, val submitter: CurrentUser)
-	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker)
+abstract class OnlineMarkerFeedbackFormCommand(
+	module: Module,
+	assignment: Assignment,
+	student: User,
+	marker: User,
+	val submitter: CurrentUser,
+	val gradeGenerator: GeneratesGradesFromMarks
+)	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] {
 
 	self: FeedbackServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy =>
@@ -123,7 +129,12 @@ trait MarkerFeedbackStateCopy {
 		// save mark and grade
 		if (assignment.collectMarks) {
 			if (mark.hasText) markerFeedback.mark = Some(mark.toInt)
-			if (grade.hasText) markerFeedback.grade = Some(grade)
+
+			if (module.adminDepartment.assignmentGradeValidation) {
+				if (mark.hasText)	markerFeedback.grade = gradeGenerator.applyForMarks(Map(student.getWarwickId -> mark.toInt)).get(student.getWarwickId).flatten
+			} else {
+				if (grade.hasText) markerFeedback.grade = Some(grade)
+			}
 		}
 
 

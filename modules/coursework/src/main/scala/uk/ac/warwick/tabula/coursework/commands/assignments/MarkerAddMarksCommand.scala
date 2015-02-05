@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.coursework.commands.feedback.GeneratesGradesFromMarks
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
@@ -11,7 +12,7 @@ import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.util.StringUtils
 
-class MarkerAddMarksCommand(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser, val firstMarker:Boolean)
+class MarkerAddMarksCommand(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser, val firstMarker:Boolean, gradeGenerator: GeneratesGradesFromMarks)
 	extends AddMarksCommand[List[MarkerFeedback]](module, assignment, marker){
 
 	mustBeLinked(assignment, module)
@@ -63,7 +64,17 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, marker: User
 				case false => None
 			}
 
-			markerFeedback.grade = Option(actualGrade)
+			markerFeedback.grade = {
+				if (module.adminDepartment.assignmentGradeValidation) {
+					if (StringUtils.hasText(actualMark)) {
+						gradeGenerator.applyForMarks(Map(universityId -> actualMark.toInt)).get(universityId).flatten
+					} else {
+						None
+					}
+				} else {
+					Option(actualGrade)
+				}
+			}
 
 			parentFeedback.updatedDate = DateTime.now
 

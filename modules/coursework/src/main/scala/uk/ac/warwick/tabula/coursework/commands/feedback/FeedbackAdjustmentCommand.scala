@@ -16,8 +16,8 @@ object FeedbackAdjustmentCommand {
 
 	final val REASON_SIZE_LIMIT = 600
 
-	def apply(assignment: Assignment, student:User, submitter: CurrentUser) =
-		new FeedbackAdjustmentCommandInternal(assignment, student, submitter)
+	def apply(assignment: Assignment, student:User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		new FeedbackAdjustmentCommandInternal(assignment, student, submitter, gradeGenerator)
 			with ComposableCommand[Feedback]
 			with FeedbackAdjustmentCommandPermissions
 			with FeedbackAdjustmentCommandDescription
@@ -27,7 +27,7 @@ object FeedbackAdjustmentCommand {
 			with AutowiringZipServiceComponent
 }
 
-class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:User, val submitter: CurrentUser)
+class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[Feedback] with FeedbackAdjustmentCommandState with SubmissionState {
 
 	self: FeedbackServiceComponent with ZipServiceComponent =>
@@ -67,7 +67,13 @@ class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:
 		// save mark and grade
 		if (assignment.collectMarks) {
 			feedback.adjustedMark = adjustedMark.maybeText.map(_.toInt)
-			feedback.adjustedGrade = adjustedGrade.maybeText
+			feedback.adjustedGrade = {
+				if (assignment.module.adminDepartment.assignmentGradeValidation) {
+					feedback.adjustedMark.flatMap(mark => gradeGenerator.applyForMarks(Map(student.getWarwickId -> mark)).get(student.getWarwickId).flatten)
+				} else {
+					adjustedGrade.maybeText
+				}
+			}
 			feedback.adjustmentReason = reason
 			feedback.adjustmentComments = comments
 		}

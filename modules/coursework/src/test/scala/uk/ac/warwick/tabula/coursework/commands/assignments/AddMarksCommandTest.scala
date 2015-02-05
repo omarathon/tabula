@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import uk.ac.warwick.tabula.coursework.commands.feedback.GeneratesGradesFromMarks
+
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.{TestBase, RequestInfo, Mockito}
 import uk.ac.warwick.tabula.events.EventHandling
@@ -19,11 +21,12 @@ class AddMarksCommandTest extends TestBase with Mockito {
 	 */
 
 	@Test
-	def emptyMarkField {
+	def emptyMarkField() {
 		withUser("cusebr") {
 			val currentUser = RequestInfo.fromThread.get.user
 			val assignment = newDeepAssignment()
-			val command = new AdminAddMarksCommand(assignment.module, assignment, currentUser)
+			val gradeGenerator = smartMock[GeneratesGradesFromMarks]
+			val command = new AdminAddMarksCommand(assignment.module, assignment, currentUser, gradeGenerator)
 			command.userLookup = mock[UserLookupService]
 			command.userLookup.getUserByWarwickUniId("0672088") answers { id =>
 				currentUser.apparentUser
@@ -48,11 +51,12 @@ class AddMarksCommandTest extends TestBase with Mockito {
 	 * Check that validation allows either mark or grade to be non-empty
 	 */
 	@Transactional @Test
-	def gradeButEmptyMarkField {
+	def gradeButEmptyMarkField() {
 		withUser("cusebr") {
 			val currentUser = RequestInfo.fromThread.get.user
 			val assignment = newDeepAssignment()
-			val command = new AdminAddMarksCommand(assignment.module, assignment, currentUser) {
+			val gradeGenerator = smartMock[GeneratesGradesFromMarks]
+			val command = new AdminAddMarksCommand(assignment.module, assignment, currentUser, gradeGenerator) {
 				override val session = mock[Session]
 			}
 			command.userLookup = mock[UserLookupService]
@@ -86,7 +90,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 			marks5.actualGrade = ""
 
 			command.postExtractValidation(errors)
-			command.marks.filter(_.isValid).size should be (1)
+			command.marks.count(_.isValid) should be (1)
 
 			command.apply()
 		}

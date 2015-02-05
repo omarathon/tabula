@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.coursework.commands.feedback.GeneratesGradesFromMarks
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
 
 import scala.collection.JavaConversions._
@@ -12,7 +13,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.util.StringUtils
 import uk.ac.warwick.tabula.commands.Notifies
 
-class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: CurrentUser)
+class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks)
 	extends AddMarksCommand[Seq[Feedback]](module, assignment, submitter.apparentUser) with Notifies[Seq[Feedback], Feedback] {
 
 	mustBeLinked(assignment, module)
@@ -28,9 +29,15 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 					case Some(m) if m.toString != mark.actualMark => true
 					case _ => false
 				}
-				val gradeChanged = feedback.actualGrade match {
-					case Some(g) if g != mark.actualGrade => true
-					case _ => false
+				val gradeChanged = {
+					if (module.adminDepartment.assignmentGradeValidation) {
+						markChanged
+					} else {
+						feedback.actualGrade match {
+							case Some(g) if g != mark.actualGrade => true
+							case _ => false
+						}
+					}
 				}
 				if (markChanged || gradeChanged){
 					mark.isModified = true
@@ -57,7 +64,17 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 				case false => None
 			}
 
-			feedback.actualGrade = Option(actualGrade)
+			feedback.actualGrade = {
+				if (module.adminDepartment.assignmentGradeValidation) {
+					if (StringUtils.hasText(actualMark)) {
+						gradeGenerator.applyForMarks(Map(universityId -> actualMark.toInt)).get(universityId).flatten
+					} else {
+						None
+					}
+				} else {
+					Option(actualGrade)
+				}
+			}
 
 			feedback.updatedDate = DateTime.now
 

@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
+import uk.ac.warwick.tabula.coursework.commands.feedback.GeneratesGradesFromMarks
 import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
 
 import collection.JavaConversions._
@@ -60,8 +61,8 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	@Test
 	def firstMarkerFinished() {
 		withUser("cuslaj") {
-
-			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
+			val gradeGenerator = smartMock[GeneratesGradesFromMarks]
+			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser, gradeGenerator)
 			command.stateService = stateService
 
 			val students = List("9876004", "0270954", "9170726")
@@ -91,8 +92,8 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	def secondMarkerFinished(){
 		inContext[MarkingCompletedTest.Ctx] {
 		withUser("cuday"){
-
-			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
+			val gradeGenerator = smartMock[GeneratesGradesFromMarks]
+			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser, gradeGenerator)
 			command.stateService = stateService
 			command.userLookup = mockUserLookup
 			val students = List("0672088", "0672089")
@@ -131,8 +132,8 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	def finalMarkingComplete() {
 		inContext[MarkingCompletedTest.Ctx] {
 			withUser("cuslaj") {
-
-				val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
+				val gradeGenerator = smartMock[GeneratesGradesFromMarks]
+				val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser, gradeGenerator)
 
 				assignment.feedbacks.map(addMarkerFeedback(_, ThirdFeedback))
 				assignment.feedbacks.map(addMarkerFeedback(_, SecondFeedback))

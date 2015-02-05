@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineFeedbackFormCommand, OnlineFeedbackCommand}
+import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateGradeFromMarkCommand, OnlineFeedbackFormCommand, OnlineFeedbackCommand}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
@@ -20,7 +20,7 @@ class OnlineFeedbackController extends CourseworkController with AutowiringUserL
 
 	@ModelAttribute
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, submitter: CurrentUser) =
-		OnlineFeedbackCommand(module, assignment, submitter)
+		OnlineFeedbackCommand(mandatory(module), mandatory(assignment), submitter, GenerateGradeFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping
 	def showTable(@ModelAttribute command: OnlineFeedbackCommand, errors: Errors): Mav = {
@@ -53,7 +53,7 @@ class OnlineFeedbackFormController extends CourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable student: User, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
-		OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser)
+		OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser, GenerateGradeFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineFeedbackFormCommand, errors: Errors): Mav = {

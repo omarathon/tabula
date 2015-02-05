@@ -52,10 +52,38 @@
 			</@form.row>
 			<@form.row>
 				<@form.label path="grade">Grade</@form.label>
-				<@form.field>
-					<@f.input path="grade" cssClass="input-small" />
-					<@f.errors path="grade" cssClass="error" />
-				</@form.field>
+				<#if isGradeValidation>
+					<span class="auto-grade" id="auto-grade-${markingId(command.student)}" data-marking-id="${markingId(command.student)}">
+						${command.grade}
+					</span>
+					<script>
+						jQuery(function($){
+							var $gradeSpan = $('#auto-grade-${markingId(command.student)}')
+								, $markInput = $gradeSpan.closest('form').find('input[name=mark]')
+								, currentRequest = null
+								, doRequest = function(){
+									if (currentRequest != null) {
+										currentRequest.abort();
+									}
+									currentRequest = $.post('<@routes.generateGradesForMarks command.assignment />',{
+										'studentMarks' : {
+											'${markingId(command.student)}' : $markInput.val()
+										}
+									}, function(data){
+										if (data['${markingId(command.student)}']) {
+											$gradeSpan.html(data['${markingId(command.student)}']);
+										}
+									});
+								};
+							$markInput.on('keyup', doRequest);
+						});
+					</script>
+				<#else>
+					<@form.field>
+						<@f.input path="grade" cssClass="input-small" />
+						<@f.errors path="grade" cssClass="error" />
+					</@form.field>
+				</#if>
 			</@form.row>
 		</#if>
 

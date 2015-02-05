@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.coursework.commands.feedback._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.data.model.{Feedback, Assignment}
+import uk.ac.warwick.tabula.data.model.{Module, Feedback, Assignment}
 import uk.ac.warwick.userlookup.User
 
 @Controller
@@ -42,8 +42,8 @@ class FeedbackAdjustmentsController extends CourseworkController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def formCommand(@PathVariable assignment: Assignment, @PathVariable student: User, submitter: CurrentUser) =
-		FeedbackAdjustmentCommand(assignment, student, submitter)
+	def formCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: User, submitter: CurrentUser) =
+		FeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradeFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping(method=Array(GET))
 	def showForm(@ModelAttribute("command") command: Appliable[Feedback], errors: Errors, @PathVariable assignment: Assignment, @PathVariable student: User) = {

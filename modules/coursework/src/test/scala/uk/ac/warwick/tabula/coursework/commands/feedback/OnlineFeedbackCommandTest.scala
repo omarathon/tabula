@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Module, Submission}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{Feedback, Submission, Assignment, Module}
 
 
 class OnlineFeedbackCommandTest extends TestBase with Mockito {
@@ -31,7 +31,9 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 		assignment.submissions.add(submission1)
 		assignment.feedbacks.add(feedback2)
 
-		val command = new OnlineFeedbackCommand(module, assignment, new CurrentUser(marker, marker)) with OnlineFeedbackCommandTestSupport
+		val gradeGenerator = smartMock[GeneratesGradesFromMarks]
+
+		val command = new OnlineFeedbackCommand(module, assignment, new CurrentUser(marker, marker), gradeGenerator) with OnlineFeedbackCommandTestSupport
 
 		command.assignmentMembershipService.determineMembershipUsers(assignment) returns Seq(user1, user2, user3)
 

@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.coursework.commands.feedback.GeneratesGradesFromMarks
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{ReturnToMarkerNotification, ModeratorRejectedNotification, ReleaseToMarkerNotification}
@@ -17,8 +18,8 @@ import scala.collection.mutable
 import uk.ac.warwick.tabula.system.BindListener
 
 object MarkingCompletedCommand {
-	def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser) =
-		new MarkingCompletedCommand(module, assignment, marker, submitter)
+	def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		new MarkingCompletedCommand(module, assignment, marker, submitter, gradeGenerator)
 			with ComposableCommand[Unit]
 			with MarkingCompletedCommandPermissions
 			with MarkingCompletedDescription
@@ -29,7 +30,7 @@ object MarkingCompletedCommand {
 			with MarkerCompletedNotificationCompletion
 }
 
-abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User, val submitter: CurrentUser)
+abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[Unit] with Appliable[Unit] with SelfValidating with UserAware with MarkingCompletedState with ReleasedState with BindListener {
 
 	self: StateServiceComponent with FeedbackServiceComponent =>
@@ -82,7 +83,7 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 	}
 
 	private def finaliseFeedback(feedbackForRelease: Seq[MarkerFeedback]) = {
-		val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, feedbackForRelease)
+		val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, feedbackForRelease, gradeGenerator)
 		finaliseFeedbackCommand.apply()
 	}
 }

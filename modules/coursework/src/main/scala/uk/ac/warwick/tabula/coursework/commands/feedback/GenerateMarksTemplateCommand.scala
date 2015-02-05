@@ -66,7 +66,8 @@ class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: A
 			val feedbacks = feedbackService.getStudentFeedback(assignment, member)
 			feedbacks.foreach { feedback =>
 				feedback.actualMark.foreach(marksCell.setCellValue(_))
-				feedback.actualGrade.foreach(gradesCell.setCellValue)
+				if (!module.adminDepartment.assignmentGradeValidation)
+					feedback.actualGrade.foreach(gradesCell.setCellValue)
 			}
 		}
 
@@ -83,7 +84,9 @@ class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: A
 		val header = sheet.createRow(0)
 		header.createCell(0).setCellValue("ID")
 		header.createCell(1).setCellValue("Mark")
-		header.createCell(2).setCellValue("Grade")
+		// TODO could perhaps include the Grade column, but have it calculated based on the grade boundaries
+		if (!module.adminDepartment.assignmentGradeValidation)
+			header.createCell(2).setCellValue("Grade")
 
 		sheet
 	}

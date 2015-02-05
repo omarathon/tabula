@@ -388,7 +388,7 @@ class Assignment
 	// returns extension for a specified student
 	def findExtension(uniId: String) = extensions.find(_.universityId == uniId)
 
-	def membershipInfo = assignmentMembershipService.determineMembership(upstreamAssessmentGroups, Option(members))
+	def membershipInfo: AssignmentMembershipInfo = assignmentMembershipService.determineMembership(upstreamAssessmentGroups, Option(members))
 
 	// converts the assessmentGroups to upstream assessment groups
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =

@@ -17,8 +17,8 @@ import uk.ac.warwick.userlookup.User
 
 
 object OnlineFeedbackFormCommand {
-	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser) =
-		new OnlineFeedbackFormCommand(module, assignment, student, marker, submitter)
+	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		new OnlineFeedbackFormCommand(module, assignment, student, marker, submitter, gradeGenerator)
 			with ComposableCommand[Feedback]
 			with OnlineFeedbackFormPermissions
 			with AutowiringFeedbackServiceComponent
@@ -30,9 +30,14 @@ object OnlineFeedbackFormCommand {
 		}
 }
 
-abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment, student: User, marker: User, val submitter: CurrentUser)
-	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker)
-	with CommandInternal[Feedback] with Appliable[Feedback] {
+abstract class OnlineFeedbackFormCommand(
+	module: Module,
+	assignment: Assignment,
+	student: User,
+	marker: User,
+	val submitter: CurrentUser,
+	val gradeGenerator: GeneratesGradesFromMarks
+) extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker) with CommandInternal[Feedback] with Appliable[Feedback] {
 
 	self: FeedbackServiceComponent with SavedFormValueDaoComponent with FileAttachmentServiceComponent with ZipServiceComponent =>
 
@@ -126,7 +131,13 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 		// save mark and grade
 		if (assignment.collectMarks) {
 			feedback.actualMark = mark.maybeText.map(_.toInt)
-			feedback.actualGrade = grade.maybeText
+			feedback.actualGrade = {
+				if (module.adminDepartment.assignmentGradeValidation) {
+					feedback.actualMark.flatMap(mark => gradeGenerator.applyForMarks(Map(student.getWarwickId -> mark)).get(student.getWarwickId).flatten)
+				} else {
+					grade.maybeText
+				}
+			}
 		}
 
 		// save attachments

@@ -4,6 +4,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{Command, Description}
+import uk.ac.warwick.tabula.coursework.commands.feedback.GeneratesGradesFromMarks
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, MarkerFeedback}
@@ -14,7 +15,7 @@ import scala.collection.JavaConversions._
 /**
  * Copies the appropriate MarkerFeedback item to its parent Feedback ready for processing by administrators
  */
-class FinaliseFeedbackCommand(val assignment: Assignment, val markerFeedbacks:JList[MarkerFeedback])
+class FinaliseFeedbackCommand(val assignment: Assignment, val markerFeedbacks:JList[MarkerFeedback], gradeGenerator: GeneratesGradesFromMarks)
 	extends Command[Unit] {
 
 	var fileDao = Wire.auto[FileDao]
@@ -39,15 +40,21 @@ class FinaliseFeedbackCommand(val assignment: Assignment, val markerFeedbacks:JL
 
 		// save custom fields
 		parent.customFormValues.addAll(markerFeedback.customFormValues.map { formValue =>
-				val newValue = new SavedFormValue()
-				newValue.name = formValue.name
-				newValue.feedback = formValue.markerFeedback.feedback
-				newValue.value = formValue.value
-				newValue
+			val newValue = new SavedFormValue()
+			newValue.name = formValue.name
+			newValue.feedback = formValue.markerFeedback.feedback
+			newValue.value = formValue.value
+			newValue
 		}.toSet[SavedFormValue])
 
 
-		parent.actualGrade = markerFeedback.grade
+		parent.actualGrade = {
+			if (assignment.module.adminDepartment.assignmentGradeValidation) {
+				markerFeedback.mark.flatMap(mark => gradeGenerator.applyForMarks(Map(parent.universityId -> mark)).get(parent.universityId).flatten)
+			} else {
+				markerFeedback.grade
+			}
+		}
 		parent.actualMark = markerFeedback.mark
 
 		parent.updatedDate = DateTime.now

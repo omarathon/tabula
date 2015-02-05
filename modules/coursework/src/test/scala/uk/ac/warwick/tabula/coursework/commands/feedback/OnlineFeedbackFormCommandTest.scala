@@ -1,15 +1,16 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
-import uk.ac.warwick.tabula.data.{SavedFormValueDao, SavedFormValueDaoComponent}
-import uk.ac.warwick.tabula.data.model.{Module, Assignment, Feedback}
-import uk.ac.warwick.userlookup.User
-import collection.JavaConversions._
+import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, StringFormValue}
-import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Module}
+import uk.ac.warwick.tabula.data.{SavedFormValueDao, SavedFormValueDaoComponent}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConversions._
 
 class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 
@@ -35,7 +36,10 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 		savedFormValue.name = Assignment.defaultFeedbackTextFieldName
 		savedFormValue.value = heronRamble
 
-		val command = new OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser)
+		val gradeGenerator = smartMock[GeneratesGradesFromMarks]
+		gradeGenerator.applyForMarks(Map("student" -> 67)) returns Map("student" -> None)
+
+		val command = new OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser, gradeGenerator)
 			with OnlineFeedbackFormCommandTestSupport
 	}
 
@@ -101,7 +105,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 
 			assignment.feedbacks = Seq(existingFeedback)
 
-			val command2 = new OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser)
+			val command2 = new OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser, gradeGenerator)
 				with OnlineFeedbackFormCommandTestSupport
 			command2.mark should be("55")
 			command2.grade should be("2:2")

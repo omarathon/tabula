@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.{MarkingMethod, Assignment, Module}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
-import uk.ac.warwick.tabula.coursework.commands.feedback.OnlineMarkerFeedbackFormCommand
+import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateGradeFromMarkCommand, OnlineMarkerFeedbackFormCommand}
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/online/{student}"))
@@ -21,12 +21,20 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 	validatesSelf[OnlineMarkerFeedbackFormCommand]
 
 	@ModelAttribute("command")
-	def command(@PathVariable student: User,
-							@PathVariable module: Module,
-							@PathVariable assignment: Assignment,
-							@PathVariable marker: User,
-							submitter: CurrentUser) =
-		OnlineMarkerFeedbackFormCommand(module, assignment, student, marker, submitter)
+	def command(
+		@PathVariable student: User,
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable marker: User,
+		submitter: CurrentUser
+	) =	OnlineMarkerFeedbackFormCommand(
+		mandatory(module),
+		mandatory(assignment),
+		student,
+		marker,
+		submitter,
+		GenerateGradeFromMarkCommand(mandatory(module), mandatory(assignment))
+	)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineMarkerFeedbackFormCommand, errors: Errors): Mav = {
@@ -48,7 +56,8 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 			"parentFeedback" -> parentFeedback,
 			"secondMarkerNotes" -> Option(parentFeedback.secondMarkerFeedback).map(_.rejectionComments).orNull,
 			"isModerated" -> (command.assignment.markingWorkflow.markingMethod == MarkingMethod.ModeratedMarking),
-			"isFinalMarking" -> Option(parentFeedback.secondMarkerFeedback).exists(_.state == MarkingCompleted)
+			"isFinalMarking" -> Option(parentFeedback.secondMarkerFeedback).exists(_.state == MarkingCompleted),
+			"isGradeValidation" -> command.module.adminDepartment.assignmentGradeValidation
 		).noLayout()
 	}
 

@@ -225,10 +225,10 @@ trait SubmissionAndFeedbackSpreadsheetExport extends SubmissionAndFeedbackExport
 			prefix(plagiarismData(item), "marking") ++
 			prefix(feedbackData(item), "feedback") ++
 			prefix(adjustmentData(item), "adjustment")
-		).mapValues { v => v match {
+		).mapValues {
 			case Some(any) => any
 			case any => any
-		}}
+		}
 	
 	private def prefix(fields: Seq[String], prefix: String) = fields map { name => prefix + "-" + name }
 	
@@ -348,7 +348,7 @@ trait SubmissionAndFeedbackExport {
 			) ++ (item.submission.allAttachments.find(_.originalityReport != null) match {
 				case Some(a) =>
 					val report = a.originalityReport
-					report.overlap.map { overlap => ("similarity-percentage" -> overlap) }.toMap
+					report.overlap.map { overlap => "similarity-percentage" -> overlap }.toMap
 				case _ => Map()
 			})
 		case _ => Map()
@@ -361,8 +361,8 @@ trait SubmissionAndFeedbackExport {
 				"uploaded" -> item.feedback.createdDate,
 				"released" -> item.feedback.released
 			) ++
-			item.feedback.actualMark.map { mark => ("mark" -> mark) }.toMap ++
-			item.feedback.actualGrade.map { grade => ("grade" -> grade) }.toMap ++
+			item.feedback.actualMark.map { mark => "mark" -> mark }.toMap ++
+			item.feedback.actualGrade.map { grade => "grade" -> grade }.toMap ++
 			Map("downloaded" -> item.downloaded)
 		case None => Map()
 	}

@@ -53,6 +53,10 @@ class ModuleAndDepartmentService extends Logging {
 		moduleDao.getByCode(code.toLowerCase)
 	}
 
+	def getModulesByCodes(codes: Seq[String]) = transactional(readOnly = true) {
+		moduleDao.getAllByCodes(codes.map(_.toLowerCase))
+	}
+
 	def getModuleBySitsCode(sitsModuleCode: String) = transactional(readOnly = true) {
 		Module.stripCats(sitsModuleCode) match {
 			case Some(code) => moduleDao.getByCode(code.toLowerCase)

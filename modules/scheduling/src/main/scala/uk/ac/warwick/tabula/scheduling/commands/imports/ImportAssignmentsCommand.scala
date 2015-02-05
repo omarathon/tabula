@@ -51,16 +51,17 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	}
 
 	def doAssignments() {
-		transactional() {
-			for (assignment <- logSize(assignmentImporter.getAllAssessmentComponents)) {
+		val assessmentComponents = logSize(assignmentImporter.getAllAssessmentComponents)
+		val modules = moduleAndDepartmentService.getModulesByCodes(assessmentComponents.map(_.moduleCode).distinct)
+			.groupBy(_.code).mapValues(_.head)
+		for (assignment <- assessmentComponents) {
+			transactional() {
 				if (assignment.name == null) {
 					// Some SITS data is bad, but try to carry on.
 					assignment.name = "Assessment Component"
 				}
 
-				moduleAndDepartmentService.getModuleByCode(assignment.moduleCodeBasic.toLowerCase).foreach { module =>
-					assignment.module = module
-				}
+				modules.get(assignment.moduleCodeBasic.toLowerCase).foreach(module => assignment.module = module)
 
 				assignmentMembershipService.save(assignment)
 			}
