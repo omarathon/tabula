@@ -45,7 +45,6 @@ class CreatePremarkedAssignmentFixtureCommand extends CommandInternal[Assignment
 		assignment.allowResubmission = false
 		assignment.displayPlagiarismNotice = true
 		assignment.allowExtensions = true
-		assignment.allowExtensionRequests = false
 		assignment.summative = false
 
 		transactional() {
