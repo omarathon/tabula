@@ -39,7 +39,6 @@ class CreatePremarkedAssignmentFixtureCommand extends CommandInternal[Assignment
 		assignment.closeDate = DateTime.now
 		assignment.openEnded = false
 		assignment.collectMarks = true
-		assignment.uploadMarksToSits = true
 		assignment.collectSubmissions = true
 		assignment.restrictSubmissions = true
 		assignment.allowLateSubmissions = true
