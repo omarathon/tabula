@@ -88,11 +88,13 @@ class SubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 					</submission>
 					<marking suspected-plagiarised="false" similarity-percentage="97" />
 					<feedback/>
+					<adjustment/>
 				</student>
 				<student university-id="1234567">
 					<submission submitted="false" late="true"></submission>
 					<marking/>
 					<feedback/>
+					<adjustment/>
 				</student>
 			</students>
 		</assignment>

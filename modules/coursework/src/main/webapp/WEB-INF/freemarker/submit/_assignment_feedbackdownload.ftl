@@ -1,5 +1,3 @@
-<h2>Feedback for ${feedback.universityId}</h2>
-	
 <#if features.collectRatings && feedback.collectRatings && isSelf>
 	<div id="feedback-rating-container" class="is-stackable">
 		<!-- fallback for noscript -->
@@ -12,21 +10,37 @@
 <#if feedback.hasMarkOrGrade>
 	<div class="mark-and-grade">
 		<#if feedback.adjustedMark??>
-			<h3>Mark: ${feedback.adjustedMark}</h3>
+			<h3>Adjusted mark: ${feedback.adjustedMark}</h3>
 		<#elseif feedback.actualMark??>
 			<h3>Mark: ${feedback.actualMark}</h3>
 		</#if>
 		<#if feedback.adjustedGrade??>
-			<h3>Grade: ${feedback.adjustedGrade}</h3>
+			<h3>Adjusted grade: ${feedback.adjustedGrade}</h3>
 		<#elseif feedback.actualGrade??>
 			<h3>Grade: ${feedback.actualGrade}</h3>
 		</#if>
 	</div>
+
+	<#if feedback.hasAdjustments>
+		<div class="alert">
+			<p>
+				<strong>${feedback.adjustmentReason}</strong> - An adjustment has been made to your final mark. The
+				mark shown above will contribute to your final module mark.
+			</p>
+			<#if feedback.adjustmentComments??><p>${feedback.adjustmentComments}</p></#if>
+			<p>Your marks before adjustment were:</p>
+			<#if feedback.actualMark??><div>Mark: ${feedback.actualMark}</div></#if>
+			<#if feedback.actualGrade??><div>Grade: ${feedback.actualGrade}</div></#if>
+		</div>
+	</#if>
 </#if>
 
 <#if assignment.genericFeedback??>
 <div class="feedback-notes">
-<h3>General feedback on the assignment:</h3> ${assignment.genericFeedback!""}
+	<h3>General feedback on the assignment:</h3>
+	<div class="feedback-notes-content">
+		<p>${assignment.genericFeedback!""}</p>
+	</div>
 </div>
 </#if>
 <#if feedback.comments??>
@@ -37,8 +51,7 @@
 	<#else>
 		the student's
 	</#if>
-	 submission</h3> 
-
+	 submission</h3>
 	<div class="feedback-notes-content">
 		${feedback.commentsFormattedHtml!""}
 	</div>
@@ -103,7 +116,7 @@
 </p>
 
 <#if feedback.hasOnlineFeedback || feedback.hasMarkOrGrade || feedback.comments?? || assignment.genericFeedback??>
-	<a href="<@routes.feedbackPdf assignment=assignment />"> Download<#if feedback.attachments?has_content> additional</#if> feedback as a PDF file</a>
+	<a href="<@routes.feedbackPdf assignment=assignment feedback=feedback/>"> Download<#if feedback.attachments?has_content> additional</#if> feedback as a PDF file</a>
 </#if>
 
 

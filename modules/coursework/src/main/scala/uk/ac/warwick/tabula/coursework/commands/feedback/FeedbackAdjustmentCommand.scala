@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackAdjustmentNotification
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{StudentFeedbackAdjustmentNotification, FeedbackAdjustmentNotification}
 import uk.ac.warwick.tabula.data.model.{Notification, Submission, Assignment, Feedback}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -136,6 +136,18 @@ trait FeedbackAdjustmentCommandDescription extends Describable[Feedback] {
 trait FeedbackAdjustmentNotifier extends Notifies[Feedback, Feedback] {
 	self: FeedbackAdjustmentCommandState =>
 
-	def emit(feedback: Feedback) =
-		Seq(Notification.init(new FeedbackAdjustmentNotification, submitter.apparentUser, feedback, feedback.assignment))
+	def emit(feedback: Feedback) = {
+		val studentsNotifications = if (feedback.released) {
+			Seq(Notification.init(new StudentFeedbackAdjustmentNotification, submitter.apparentUser, feedback, feedback.assignment))
+		} else {
+			Nil
+		}
+		val adminsNotifications = if (assignment.hasWorkflow) {
+			Seq(Notification.init(new FeedbackAdjustmentNotification, submitter.apparentUser, feedback, feedback.assignment))
+		} else {
+			Nil
+		}
+		studentsNotifications ++ adminsNotifications
+	}
+
 }

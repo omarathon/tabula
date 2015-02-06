@@ -13,7 +13,10 @@ case class MarkerFeedbackItem (
 	submission: Submission,
 	feedbacks: Seq[MarkerFeedback],
 	nextMarker: Option[User]
-)
+) {
+	def currentFeedback = feedbacks.lastOption
+	def previousFeedback = feedbacks.reverse.tail.headOption
+}
 
 case class MarkerFeedbackStage (
 	roleName: String,

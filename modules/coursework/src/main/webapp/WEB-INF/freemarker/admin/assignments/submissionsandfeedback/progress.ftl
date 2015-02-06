@@ -266,91 +266,101 @@
 										<#else><span class="label label-warning">Not yet published</span>
 										</#if>
 									</#if>
-								<#if student.nextStage??><strong>Next action:</strong> <@action student.nextStage.actionCode student /></#if>
+									<#if student.nextStage??><strong>Next action:</strong> <@action student.nextStage.actionCode student /></#if>
+								</div>
+							</div>
+						</#if>
+
+
+						<#if feedback?? && !(feedback.placeholder)>
+							<#-- not really a stage but the best place to put a link to the feedback summary -->
+							<div class="stage">
+								<i class="icon-eye-open"></i>
+								<a href="<@routes.feedbackSummary assignment student.user.warwickId!''/>"
+								   class="ajax-modal"
+								   data-target="#feedback-modal">
+									View feedback
+								</a>
+							</div>
+
+							<div class="stage">
+								<i class="icon-eye-open"></i>
+								<a href="<@routes.feedbackAudit assignment student.user.warwickId!''/>">
+									View audit
+								</a>
+							</div>
+
+							<#-- If the current action is in this section, then add the next action blowout here -->
+							<#if student.nextStage?? && ['AddMarks','AddFeedback','ReleaseFeedback','DownloadFeedback']?seq_contains(student.nextStage.toString)>
+								<div class="alert pull-right">
+									<strong>Next action:</strong> <@action student.nextStage.actionCode student />
 								</div>
 							</#if>
 
-							<#-- not really a stage but the best place to put a link to the feedback summary -->
-							<#if feedback?? && !(feedback.placeholder)>
-								<div class="stage">
-									<i class="icon-eye-open"></i>
-									<a href="<@routes.feedbackSummary assignment student.user.warwickId!''/>"
-									   class="ajax-modal"
-									   data-target="#feedback-modal">
-										View feedback
-									</a>
-
-								<#-- If the current action is in this section, then add the next action blowout here -->
-								<#if student.nextStage?? && ['AddMarks','AddFeedback','ReleaseFeedback','DownloadFeedback']?seq_contains(student.nextStage.toString)>
-									<div class="alert pull-right">
-										<strong>Next action:</strong> <@action student.nextStage.actionCode student />
+							<#if student.stages?keys?seq_contains('AddMarks')>
+								<@stage student.stages['AddMarks']><#compress>
+									<#if feedback?? && feedback.hasMarkOrGrade>
+										: <#compress>
+											<#if feedback.hasMark>
+												${feedback.actualMark!''}<#if feedback.hasGrade>,</#if>
+											</#if>
+											<#if feedback.hasGrade>
+												grade ${feedback.actualGrade!''}
+											</#if>
+										</#compress>
+									</#if>
+								</#compress></@stage>
+								<#if feedback.adjustmentReason??>
+									<div>
+										<i class="icon-ok"></i> Marks adjusted :
+										<#if feedback.adjustedMark??>${feedback.adjustedMark}</#if><#if feedback.adjustedGrade??>,</#if>
+										<#if feedback.adjustedGrade??> grade ${feedback.adjustedGrade}</#if>
+										 - Reason for adjustment: ${feedback.adjustmentReason!''}
 									</div>
 								</#if>
+							</#if>
 
-								<#if student.stages?keys?seq_contains('AddMarks')>
-									<@stage student.stages['AddMarks']><#compress>
-										<#if feedback?? && feedback.hasMarkOrGrade>
-											: <#compress>
-												<#if feedback.hasMark>
-													${feedback.actualMark!''}<#if feedback.hasGrade>,</#if>
-												</#if>
-												<#if feedback.hasGrade>
-													grade ${feedback.actualGrade!''}
-												</#if>
-											</#compress>
-										</#if>
-									</#compress></@stage>
-									<#if feedback.adjustmentReason??>
-										<div>
-											<i class="icon-ok"></i> Marks adjusted :
-											<#if feedback.adjustedMark??>${feedback.adjustedMark}</#if><#if feedback.adjustedGrade??>,</#if>
-											<#if feedback.adjustedGrade??> grade ${feedback.adjustedGrade}</#if>
-										 	 - Reason for adjustment: ${feedback.adjustmentReason!''}
-										</div>
-									</#if>
-								</#if>
-
-								<#if student.stages?keys?seq_contains('AddFeedback')>
-									<@stage student.stages['AddFeedback']><#compress>
-										<#if feedback?? && (feedback.hasAttachments || feedback.hasOnlineFeedback)>: <#compress>
-											<#local attachments=feedback.attachments />
-											<#if attachments?size gt 0>
-												<#if attachments?size == 1>
-													<#local attachmentExtension = student.coursework.enhancedFeedback.feedback.attachments[0].fileExt>
-												<#else>
-													<#local attachmentExtension = "zip">
-												</#if>
-												<a class="long-running" href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.coursework.enhancedFeedback.feedback.id}/feedback-${student.coursework.enhancedFeedback.feedback.universityId}.${attachmentExtension}'/>"><#compress>
-													${attachments?size}
-													<#if attachments?size == 1> file
-													<#else> files
-													</#if>
-												</#compress></a>
-											<#-- If the feedback was entered online there may not be attachments  -->
-											<#elseif feedback?? && feedback.hasOnlineFeedback>
-												Comments entered online
+							<#if student.stages?keys?seq_contains('AddFeedback')>
+								<@stage student.stages['AddFeedback']><#compress>
+									<#if feedback?? && (feedback.hasAttachments || feedback.hasOnlineFeedback)>: <#compress>
+										<#local attachments=feedback.attachments />
+										<#if attachments?size gt 0>
+											<#if attachments?size == 1>
+												<#local attachmentExtension = student.coursework.enhancedFeedback.feedback.attachments[0].fileExt>
+											<#else>
+												<#local attachmentExtension = "zip">
 											</#if>
-											<#if feedback.updatedDate??><#compress>
-													<@fmt.date date=feedback.updatedDate seconds=true capitalise=true shortMonth=true />
-											</#compress></#if>
+											<a class="long-running" href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.coursework.enhancedFeedback.feedback.id}/feedback-${student.coursework.enhancedFeedback.feedback.universityId}.${attachmentExtension}'/>"><#compress>
+												${attachments?size}
+												<#if attachments?size == 1> file
+												<#else> files
+												</#if>
+											</#compress></a>
+										<#-- If the feedback was entered online there may not be attachments  -->
+										<#elseif feedback?? && feedback.hasOnlineFeedback>
+											Comments entered online
+										</#if>
+										<#if feedback.updatedDate??><#compress>
+												<@fmt.date date=feedback.updatedDate seconds=true capitalise=true shortMonth=true />
 										</#compress></#if>
-									</#compress></@stage>
-								</#if>
+									</#compress></#if>
+								</#compress></@stage>
+							</#if>
 
-								<#if student.stages?keys?seq_contains('ReleaseFeedback')>
-									<@stage student.stages['ReleaseFeedback']><#compress>
-										<#if feedback?? && feedback.releasedDate??><#compress>
-											: <@fmt.date date=feedback.releasedDate seconds=true capitalise=true shortMonth=true />
-										</#compress></#if>
-									</#compress>
-									</@stage>
-								</#if>
+							<#if student.stages?keys?seq_contains('ReleaseFeedback')>
+								<@stage student.stages['ReleaseFeedback']><#compress>
+									<#if feedback?? && feedback.releasedDate??><#compress>
+										: <@fmt.date date=feedback.releasedDate seconds=true capitalise=true shortMonth=true />
+									</#compress></#if>
+								</#compress>
+								</@stage>
+							</#if>
 
-								<#if student.stages?keys?seq_contains('DownloadFeedback')>
-									<@stage student.stages['DownloadFeedback'] />
-								</#if>
-							</div>
+							<#if student.stages?keys?seq_contains('DownloadFeedback')>
+								<@stage student.stages['DownloadFeedback'] />
+							</#if>
 						</#if>
+
 					</div>
 				</#macro>
 

@@ -66,6 +66,7 @@ class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module
 					{ item.coursework.enhancedFeedback.flatMap { _.feedback.comments }.orNull }
 				</feedback> % feedbackData(item) 
 			}
+			{ <adjustment /> % adjustmentData(item) }
 		</student> % identityData(item)
 	}
 
@@ -201,7 +202,8 @@ trait SubmissionAndFeedbackSpreadsheetExport extends SubmissionAndFeedbackExport
 			prefix(submissionStatusFields, "submission") ++
 			(if (assignment.markingWorkflow != null) prefix(markerFields, "marking") else Seq()) ++
 			prefix(plagiarismFields, "marking") ++
-			prefix(feedbackFields, "feedback")
+			prefix(feedbackFields, "feedback") ++
+			prefix(adjustmentFields, "adjustment")
 	}
 	
 	protected def formatData(data: Option[Any]) = data match {
@@ -221,7 +223,8 @@ trait SubmissionAndFeedbackSpreadsheetExport extends SubmissionAndFeedbackExport
 			prefix(submissionStatusData(item), "submission") ++
 			(if (assignment.markingWorkflow != null) prefix(markerData(item), "marking") else Map()) ++
 			prefix(plagiarismData(item), "marking") ++
-			prefix(feedbackData(item), "feedback")
+			prefix(feedbackData(item), "feedback") ++
+			prefix(adjustmentData(item), "adjustment")
 		).mapValues { v => v match {
 			case Some(any) => any
 			case any => any
@@ -255,6 +258,7 @@ trait SubmissionAndFeedbackExport {
 	val markerFields = Seq("first-marker", "second-marker")
 	val plagiarismFields = Seq("suspected-plagiarised", "similarity-percentage")
 	val feedbackFields = Seq("id", "uploaded", "released","mark", "grade", "downloaded")
+	val adjustmentFields = Seq("mark", "grade", "reason")
 	
 	protected def assignmentData: Map[String, Any] = Map(
 		"module-code" -> module.code,
@@ -362,4 +366,14 @@ trait SubmissionAndFeedbackExport {
 			Map("downloaded" -> item.downloaded)
 		case None => Map()
 	}
+
+	protected def adjustmentData(student: Student): Map[String, Any] = {
+		val feedback = student.coursework.enhancedFeedback.map(_.feedback)
+		feedback.filter(_.hasAdjustments).map( feedback => {
+			feedback.adjustedMark.map("mark" -> _).toMap ++
+			feedback.adjustedGrade.map("grade" -> _).toMap ++
+			Map("reason" -> feedback.adjustmentReason)
+		}).getOrElse(Map())
+	}
+
 }

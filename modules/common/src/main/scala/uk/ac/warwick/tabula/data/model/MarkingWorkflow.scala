@@ -72,7 +72,7 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
 	def secondMarkers: UnspecifiedTypeUserGroup = {
 		assignmentService match {
 			case Some(service) =>
-				new UserGroupCacheManager(_secondMarkers, service.firstMarkerHelper)
+				new UserGroupCacheManager(_secondMarkers, service.secondMarkerHelper)
 			case _ => _secondMarkers
 		}
 	}
@@ -113,6 +113,8 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
 
 	// get's the submissions for the given marker
 	def getSubmissions(assignment: Assignment, user: User): Seq[Submission]
+
+	def getMarkersStudents(assignment: Assignment, user: User): Seq[User]
 
 	// get's this workflows role name for the specified position in the workflow
 	def getRoleNameForPosition(position: FeedbackPosition): String = {
@@ -195,6 +197,11 @@ trait AssignmentMarkerMap {
 					getStudentsFirstMarker(assignment, submission.universityId).exists(_ == marker.getUserId)
 			)
 		)
+	}
+
+	def getMarkersStudents(assignment: Assignment, marker: User) = {
+		assignment.firstMarkerMap.get(marker.getUserId).map{_.knownType.users}.getOrElse(Seq()) ++
+		assignment.secondMarkerMap.get(marker.getUserId).map{_.knownType.users}.getOrElse(Seq())
 	}
 
 	// returns all submissions made by students assigned to this marker

@@ -12,22 +12,35 @@
 <body>
 <h2>${feedback.assignment.module.name} (${feedback.assignment.module.code?upper_case})</h2>
 <h2>${feedback.assignment.name}</h2>
-<h3>Feedback for ${user.universityId} </h3>
+<h3>Feedback for ${user.warwickId} </h3>
 
 <#if feedback.hasMarkOrGrade>
 	<div class="mark-and-grade">
 		<#if feedback.adjustedMark??>
-			<h3>Mark: ${feedback.adjustedMark}</h3>
+			<h3>Adjusted mark: ${feedback.adjustedMark}</h3>
 		<#elseif feedback.actualMark??>
 			<h3>Mark: ${feedback.actualMark}</h3>
 		</#if>
 		<#if feedback.adjustedGrade??>
-			<h3>Grade: ${feedback.adjustedGrade}</h3>
+			<h3>Adjusted grade: ${feedback.adjustedGrade}</h3>
 		<#elseif feedback.actualGrade??>
 			<h3>Grade: ${feedback.actualGrade}</h3>
 		</#if>
 	</div>
 </#if>
+<#if feedback.hasAdjustments>
+	<div class="alert">
+		<p>
+			<strong>${feedback.adjustmentReason}</strong> - An adjustment has been made to your final mark. The
+			mark shown above will contribute to your final module mark.
+		</p>
+		<#if feedback.adjustmentComments??><p>${feedback.adjustmentComments}</p></#if>
+		<p>Your marks before adjustment were:</p>
+		<#if feedback.actualMark??><div>Mark: ${feedback.actualMark}</div></#if>
+		<#if feedback.actualGrade??><div>Grade: ${feedback.actualGrade}</div></#if>
+	</div>
+</#if>
+
 
 <#if  feedback.assignment.genericFeedback??>
 <div class="feedback-notes">

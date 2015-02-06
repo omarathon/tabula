@@ -223,7 +223,7 @@
 							<#if hasState>
 								<div class="hidden-desktop visible-print">
 									<span class="label">${currentState.description}</span><br />
-									${command.attendanceMetadata(student.universityId)}
+									${(command.attendanceMetadata(student.universityId))!}
 								</div>
 							</#if>
 							<select id="studentsState-${student.universityId}" name="studentsState[${student.universityId}]" data-universityid="${student.universityId}">
