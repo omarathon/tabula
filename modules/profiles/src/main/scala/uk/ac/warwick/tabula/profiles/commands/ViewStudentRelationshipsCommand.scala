@@ -57,7 +57,7 @@ class ViewStudentRelationshipsCommand(val department: Department, val relationsh
 
 		// count students
 		val studentsInDepartmentCount = profileService.countStudentsByDepartment(department)
-		val studentsWithAgentsCount = unsortedAgentRelationships.map(_.studentId).distinct.size
+		val departmentStudentsWithoutAgentCount = relationshipService.listStudentsWithoutRelationship(relationshipType, department).distinct.size
 
 		val studentIdsInDepartment = unsortedAgentRelationshipsByStudentDept.map(_.studentId).distinct
 		val studentsOutsideDepartmentCount =
@@ -67,7 +67,7 @@ class ViewStudentRelationshipsCommand(val department: Department, val relationsh
 		RelationshipGraph(
 			sortedAgentRelationships,
 			studentsInDepartmentCount + studentsOutsideDepartmentCount,
-			(studentsInDepartmentCount + studentsOutsideDepartmentCount) - studentsWithAgentsCount
+			departmentStudentsWithoutAgentCount
 		)
 	}
 }
