@@ -25,10 +25,10 @@ class StudentFeedbackAdjustmentNotification
 	def feedback: Feedback = item.entity
 
 	def recipient = {
-		val userId = Option(feedback.universityId).getOrElse({
+		val uniId = Option(feedback.universityId).getOrElse({
 			throw new IllegalStateException(s"No student found for ${feedback.universityId}")
 		})
-		userLookup.getUserByUserId(userId)
+		userLookup.getUserByWarwickUniId(uniId)
 	}
 
 	def whatAdjusted = {
