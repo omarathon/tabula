@@ -46,7 +46,10 @@ class AddMarksController extends CourseworkController {
 			noteMarkItem(member, feedback)
 		}.sortBy(_.universityId)
 
-		crumbed(Mav("admin/assignments/marks/marksform", "marksToDisplay" -> marksToDisplay), cmd.module)
+		crumbed(Mav("admin/assignments/marks/marksform",
+			"marksToDisplay" -> marksToDisplay,
+			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
+		), cmd.module)
 
 	}
 

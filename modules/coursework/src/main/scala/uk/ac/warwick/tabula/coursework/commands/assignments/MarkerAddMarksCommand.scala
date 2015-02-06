@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.util.StringUtils
 
 class MarkerAddMarksCommand(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser, val firstMarker:Boolean, gradeGenerator: GeneratesGradesFromMarks)
-	extends AddMarksCommand[List[MarkerFeedback]](module, assignment, marker){
+	extends AddMarksCommand[List[MarkerFeedback]](module, assignment, marker, gradeGenerator){
 
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Marks.Create, assignment)
@@ -64,17 +64,7 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, marker: User
 				case false => None
 			}
 
-			markerFeedback.grade = {
-				if (module.adminDepartment.assignmentGradeValidation) {
-					if (StringUtils.hasText(actualMark)) {
-						gradeGenerator.applyForMarks(Map(universityId -> actualMark.toInt)).get(universityId).flatten
-					} else {
-						None
-					}
-				} else {
-					Option(actualGrade)
-				}
-			}
+			markerFeedback.grade = Option(actualGrade)
 
 			parentFeedback.updatedDate = DateTime.now
 

@@ -21,7 +21,7 @@ object GenerateGradesFromMarkCommand {
 }
 
 trait GeneratesGradesFromMarks {
-	def applyForMarks(marks: Map[String, Int]): Map[String, Option[String]]
+	def applyForMarks(marks: Map[String, Int]): Map[String, Seq[GradeBoundary]]
 }
 
 class GenerateGradesFromMarkCommandInternal(val module: Module, val assignment: Assignment)
@@ -33,10 +33,24 @@ class GenerateGradesFromMarkCommandInternal(val module: Module, val assignment: 
 		group -> group.toUpstreamAssessmentGroup(assignment.academicYear)
 	).toMap
 
+	private def isNotNullAndInt(intString: String): Boolean = {
+		if (intString == null) {
+			false
+		} else {
+			try {
+				intString.toInt
+				true
+			} catch {
+				case _ @ (_: NumberFormatException | _: IllegalArgumentException) =>
+					false
+			}
+		}
+	}
+
 	override def applyInternal() = {
 		val membership = assignmentMembershipService.determineMembershipUsers(assignment)
 		val studentMarksMap: Map[User, Int] = studentMarks.asScala
-			.filterNot(_._2 == null)
+			.filter(s => isNotNullAndInt(s._2))
 			.flatMap{case(uniID, mark) =>
 				membership.find(_.getWarwickId == uniID).map(u => u -> mark.toInt)
 			}.toMap
@@ -48,14 +62,13 @@ class GenerateGradesFromMarkCommandInternal(val module: Module, val assignment: 
 		}.toMap
 
 		studentMarks.asScala.map{case(uniId, mark) =>
-			uniId -> studentAssesmentComponentMap.get(uniId).map(component => assignmentMembershipService.gradesForMark(component, mark)).getOrElse(Seq())
+			uniId -> studentAssesmentComponentMap.get(uniId).map(component => assignmentMembershipService.gradesForMark(component, mark.toInt)).getOrElse(Seq())
 		}.toMap
 	}
 
 	override def applyForMarks(marks: Map[String, Int]) = {
-		studentMarks = marks.mapValues(m => JInteger(Option(m))).asJava
-		val properResult = applyInternal()
-		properResult.mapValues(_.headOption.map(_.grade))
+		studentMarks = marks.mapValues(m => m.toString).asJava
+		applyInternal()
 	}
 
 }
@@ -76,5 +89,5 @@ trait GenerateGradesFromMarkCommandState {
 	def assignment: Assignment
 
 	// Bind variables
-	var studentMarks: JMap[String, Integer] = JHashMap()
+	var studentMarks: JMap[String, String] = JHashMap()
 }

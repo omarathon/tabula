@@ -44,8 +44,8 @@ abstract class OnlineModerationCommand(
 	student: User,
 	val user: User,
 	val submitter: CurrentUser,
-	val gradeGenerator: GeneratesGradesFromMarks
-) extends AbstractOnlineFeedbackFormCommand(module, assignment, student, user) with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback]
+	gradeGenerator: GeneratesGradesFromMarks
+) extends AbstractOnlineFeedbackFormCommand(module, assignment, student, user, gradeGenerator) with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback]
 	with ModerationState with UserAware {
 
 	self: FeedbackServiceComponent with FileAttachmentServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy
@@ -128,7 +128,7 @@ trait FinaliseFeedbackComponentImpl extends FinaliseFeedbackComponent {
 	self: OnlineFeedbackState =>
 
 	def finaliseFeedback(assignment: Assignment, firstMarkerFeedback: MarkerFeedback) {
-		val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, Seq(firstMarkerFeedback).asJava, gradeGenerator)
+		val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, Seq(firstMarkerFeedback).asJava)
 		finaliseFeedbackCommand.apply()
 	}
 }

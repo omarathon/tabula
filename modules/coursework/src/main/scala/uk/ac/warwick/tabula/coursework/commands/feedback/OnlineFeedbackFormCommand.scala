@@ -36,8 +36,8 @@ abstract class OnlineFeedbackFormCommand(
 	student: User,
 	marker: User,
 	val submitter: CurrentUser,
-	val gradeGenerator: GeneratesGradesFromMarks
-) extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker) with CommandInternal[Feedback] with Appliable[Feedback] {
+	gradeGenerator: GeneratesGradesFromMarks
+) extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker, gradeGenerator) with CommandInternal[Feedback] with Appliable[Feedback] {
 
 	self: FeedbackServiceComponent with SavedFormValueDaoComponent with FileAttachmentServiceComponent with ZipServiceComponent =>
 
@@ -131,13 +131,7 @@ abstract class OnlineFeedbackFormCommand(
 		// save mark and grade
 		if (assignment.collectMarks) {
 			feedback.actualMark = mark.maybeText.map(_.toInt)
-			feedback.actualGrade = {
-				if (module.adminDepartment.assignmentGradeValidation) {
-					feedback.actualMark.flatMap(mark => gradeGenerator.applyForMarks(Map(student.getWarwickId -> mark)).get(student.getWarwickId).flatten)
-				} else {
-					grade.maybeText
-				}
-			}
+			feedback.actualGrade = grade.maybeText
 		}
 
 		// save attachments

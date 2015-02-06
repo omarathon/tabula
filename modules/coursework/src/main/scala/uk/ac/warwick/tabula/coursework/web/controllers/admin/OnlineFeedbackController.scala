@@ -1,17 +1,17 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateGradesFromMarkCommand, OnlineFeedbackFormCommand, OnlineFeedbackCommand}
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import javax.validation.Valid
+
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model._
 import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateGradesFromMarkCommand, OnlineFeedbackCommand, OnlineFeedbackFormCommand}
+import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.CurrentUser
-import javax.validation.Valid
-import uk.ac.warwick.tabula.coursework.web.Routes
-
 import uk.ac.warwick.userlookup.User
 
 @Controller
@@ -20,7 +20,7 @@ class OnlineFeedbackController extends CourseworkController with AutowiringUserL
 
 	@ModelAttribute
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, submitter: CurrentUser) =
-		OnlineFeedbackCommand(mandatory(module), mandatory(assignment), submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+		OnlineFeedbackCommand(mandatory(module), mandatory(assignment), submitter)
 
 	@RequestMapping
 	def showTable(@ModelAttribute command: OnlineFeedbackCommand, errors: Errors): Mav = {
@@ -59,7 +59,9 @@ class OnlineFeedbackFormController extends CourseworkController {
 	def showForm(@ModelAttribute("command") command: OnlineFeedbackFormCommand, errors: Errors): Mav = {
 
 		Mav("admin/assignments/feedback/online_feedback",
-			"command" -> command).noLayout()
+			"command" -> command,
+			"isGradeValidation" -> command.module.adminDepartment.assignmentGradeValidation
+		).noLayout()
 	}
 
 	@RequestMapping(method = Array(POST))

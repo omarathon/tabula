@@ -31,9 +31,7 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 		assignment.submissions.add(submission1)
 		assignment.feedbacks.add(feedback2)
 
-		val gradeGenerator = smartMock[GeneratesGradesFromMarks]
-
-		val command = new OnlineFeedbackCommand(module, assignment, new CurrentUser(marker, marker), gradeGenerator) with OnlineFeedbackCommandTestSupport
+		val command = new OnlineFeedbackCommand(module, assignment, new CurrentUser(marker, marker)) with OnlineFeedbackCommandTestSupport
 
 		command.assignmentMembershipService.determineMembershipUsers(assignment) returns Seq(user1, user2, user3)
 

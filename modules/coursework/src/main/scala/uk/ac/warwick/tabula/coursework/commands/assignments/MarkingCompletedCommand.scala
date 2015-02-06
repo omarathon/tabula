@@ -1,25 +1,25 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.coursework.commands.feedback.GeneratesGradesFromMarks
+import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{FeedbackReleasedNotifier, ReleasedState}
 import uk.ac.warwick.tabula.data.model._
-import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{ReturnToMarkerNotification, ModeratorRejectedNotification, ReleaseToMarkerNotification}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{ModeratorRejectedNotification, ReleaseToMarkerNotification, ReturnToMarkerNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.userlookup.User
-import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{ReleasedState, FeedbackReleasedNotifier}
 import uk.ac.warwick.tabula.helpers.Logging
-import scala.collection.mutable
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 object MarkingCompletedCommand {
-	def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
-		new MarkingCompletedCommand(module, assignment, marker, submitter, gradeGenerator)
+	def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser) =
+		new MarkingCompletedCommand(module, assignment, marker, submitter)
 			with ComposableCommand[Unit]
 			with MarkingCompletedCommandPermissions
 			with MarkingCompletedDescription
@@ -30,7 +30,7 @@ object MarkingCompletedCommand {
 			with MarkerCompletedNotificationCompletion
 }
 
-abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
+abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User, val submitter: CurrentUser)
 	extends CommandInternal[Unit] with Appliable[Unit] with SelfValidating with UserAware with MarkingCompletedState with ReleasedState with BindListener {
 
 	self: StateServiceComponent with FeedbackServiceComponent =>
@@ -83,7 +83,7 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 	}
 
 	private def finaliseFeedback(feedbackForRelease: Seq[MarkerFeedback]) = {
-		val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, feedbackForRelease, gradeGenerator)
+		val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, feedbackForRelease)
 		finaliseFeedbackCommand.apply()
 	}
 }

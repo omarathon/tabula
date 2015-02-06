@@ -14,7 +14,7 @@ import org.springframework.util.StringUtils
 import uk.ac.warwick.tabula.commands.Notifies
 
 class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks)
-	extends AddMarksCommand[Seq[Feedback]](module, assignment, submitter.apparentUser) with Notifies[Seq[Feedback], Feedback] {
+	extends AddMarksCommand[Seq[Feedback]](module, assignment, submitter.apparentUser, gradeGenerator) with Notifies[Seq[Feedback], Feedback] {
 
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Marks.Create, assignment)
@@ -64,17 +64,7 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 				case false => None
 			}
 
-			feedback.actualGrade = {
-				if (module.adminDepartment.assignmentGradeValidation) {
-					if (StringUtils.hasText(actualMark)) {
-						gradeGenerator.applyForMarks(Map(universityId -> actualMark.toInt)).get(universityId).flatten
-					} else {
-						None
-					}
-				} else {
-					Option(actualGrade)
-				}
-			}
+			feedback.actualGrade = Option(actualGrade)
 
 			feedback.updatedDate = DateTime.now
 

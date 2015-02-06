@@ -67,13 +67,7 @@ class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:
 		// save mark and grade
 		if (assignment.collectMarks) {
 			feedback.adjustedMark = adjustedMark.maybeText.map(_.toInt)
-			feedback.adjustedGrade = {
-				if (assignment.module.adminDepartment.assignmentGradeValidation) {
-					feedback.adjustedMark.flatMap(mark => gradeGenerator.applyForMarks(Map(student.getWarwickId -> mark)).get(student.getWarwickId).flatten)
-				} else {
-					adjustedGrade.maybeText
-				}
-			}
+			feedback.adjustedGrade = adjustedGrade.maybeText
 			feedback.adjustmentReason = reason
 			feedback.adjustmentComments = comments
 		}
@@ -101,6 +95,14 @@ trait FeedbackAdjustmentCommandValidation extends SelfValidating {
 					errors.rejectValue("adjustedMark", "actualMark.format")
 			}
 		}
+
+		// validate grade is department setting is true
+		if (!errors.hasErrors && adjustedGrade.hasText && assignment.module.adminDepartment.assignmentGradeValidation) {
+			val validGrades = gradeGenerator.applyForMarks(Map(student.getWarwickId -> adjustedMark.toInt))(student.getWarwickId)
+			if (validGrades.nonEmpty && !validGrades.exists(_.grade == adjustedGrade)) {
+				errors.rejectValue("adjustedGrade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
+			}
+		}
 	}
 }
 
@@ -109,6 +111,7 @@ trait FeedbackAdjustmentCommandState {
 	val student: User
 	val feedback: Feedback
 	val submission: Option[Submission]
+	val gradeGenerator: GeneratesGradesFromMarks
 
 	var adjustedMark: String = _
 	var adjustedGrade: String = _

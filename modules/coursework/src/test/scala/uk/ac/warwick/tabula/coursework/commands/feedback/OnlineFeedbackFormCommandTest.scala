@@ -38,7 +38,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 		savedFormValue.value = heronRamble
 
 		val gradeGenerator = smartMock[GeneratesGradesFromMarks]
-		gradeGenerator.applyForMarks(Map("student" -> 67)) returns Map("student" -> None)
+		gradeGenerator.applyForMarks(Map("student" -> 67)) returns Map("student" -> Seq())
 
 		val command = new OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser, gradeGenerator)
 			with OnlineFeedbackFormCommandTestSupport

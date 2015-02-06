@@ -33,7 +33,7 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 		val currentUser = new CurrentUser(realUser = marker, apparentUser = marker)
 
 		val gradeGenerator = smartMock[GeneratesGradesFromMarks]
-		gradeGenerator.applyForMarks(Map("user1" -> 69)) returns Map("user1" -> None)
+		gradeGenerator.applyForMarks(Map("user1" -> 69)) returns Map("user1" -> Seq())
 
 		val command = new OnlineModerationCommand(module, assignment, student, currentUser.apparentUser, currentUser, gradeGenerator) with ModerationCommandSupport
 			with FinaliseFeedbackTestImpl
@@ -96,9 +96,7 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 
 	trait FinaliseFeedbackTestImpl extends FinaliseFeedbackComponent  {
 		def finaliseFeedback(assignment: Assignment, firstMarkerFeedback: MarkerFeedback) {
-			val gradeGenerator = smartMock[GeneratesGradesFromMarks]
-			gradeGenerator.applyForMarks(Map("user1" -> 69)) returns Map("user1" -> None)
-			val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, Seq(firstMarkerFeedback).asJava, gradeGenerator)
+			val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, Seq(firstMarkerFeedback).asJava)
 			finaliseFeedbackCommand.applyInternal()
 		}
 	}

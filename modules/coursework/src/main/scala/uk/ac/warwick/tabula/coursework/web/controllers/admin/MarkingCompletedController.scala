@@ -1,18 +1,19 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Module, Assignment}
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.web.Routes
-import org.springframework.validation.Errors
 import javax.validation.Valid
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.coursework.commands.assignments.MarkingCompletedCommand
+
+import org.springframework.stereotype.Controller
+import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.coursework.commands.assignments.MarkingCompletedCommand
+import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback, Module}
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConversions._
 
 @Controller
@@ -27,13 +28,7 @@ class MarkingCompletedController extends CourseworkController {
 		@PathVariable("assignment") assignment: Assignment,
 		@PathVariable("marker") marker: User,
 		submitter: CurrentUser
-	) = MarkingCompletedCommand(
-		mandatory(module),
-		mandatory(assignment),
-		marker,
-		submitter,
-		GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment))
-	)
+	) = MarkingCompletedCommand(mandatory(module), mandatory(assignment), marker, submitter)
 
 
 	def RedirectBack(assignment: Assignment, command: MarkingCompletedCommand) = {

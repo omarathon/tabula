@@ -11,8 +11,8 @@ import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object OnlineFeedbackCommand {
-	def apply(module: Module, assignment: Assignment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
-		new OnlineFeedbackCommand(module, assignment, submitter, gradeGenerator)
+	def apply(module: Module, assignment: Assignment, submitter: CurrentUser) =
+		new OnlineFeedbackCommand(module, assignment, submitter)
 			with ComposableCommand[Seq[StudentFeedbackGraph]]
 			with OnlineFeedbackPermissions
 			with AutowiringSubmissionServiceComponent
@@ -23,12 +23,8 @@ object OnlineFeedbackCommand {
 			with ReadOnly
 }
 
-abstract class OnlineFeedbackCommand(
-	val module: Module,
-	val assignment: Assignment,
-	val submitter: CurrentUser,
-	val gradeGenerator: GeneratesGradesFromMarks
-) extends CommandInternal[Seq[StudentFeedbackGraph]] with Appliable[Seq[StudentFeedbackGraph]] with OnlineFeedbackState {
+abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser)
+	extends CommandInternal[Seq[StudentFeedbackGraph]] with Appliable[Seq[StudentFeedbackGraph]] with OnlineFeedbackState {
 
 	self: SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with AssignmentMembershipServiceComponent =>
 
@@ -129,7 +125,6 @@ trait OnlineFeedbackState {
 	val module: Module
 	val marker: User
 	val submitter: CurrentUser
-	val gradeGenerator: GeneratesGradesFromMarks
 }
 
 

@@ -36,8 +36,8 @@ abstract class OnlineMarkerFeedbackFormCommand(
 	student: User,
 	marker: User,
 	val submitter: CurrentUser,
-	val gradeGenerator: GeneratesGradesFromMarks
-)	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker)
+	gradeGenerator: GeneratesGradesFromMarks
+)	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker, gradeGenerator)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] {
 
 	self: FeedbackServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy =>
@@ -129,12 +129,7 @@ trait MarkerFeedbackStateCopy {
 		// save mark and grade
 		if (assignment.collectMarks) {
 			if (mark.hasText) markerFeedback.mark = Some(mark.toInt)
-
-			if (module.adminDepartment.assignmentGradeValidation) {
-				if (mark.hasText)	markerFeedback.grade = gradeGenerator.applyForMarks(Map(student.getWarwickId -> mark.toInt)).get(student.getWarwickId).flatten
-			} else {
-				if (grade.hasText) markerFeedback.grade = Some(grade)
-			}
+			if (grade.hasText) markerFeedback.grade = Some(grade)
 		}
 
 

@@ -67,13 +67,7 @@ $(function(){
 		headerClass: 'mark-header',
 		rowClass: 'mark-row',
 		tableClass: 'marksUploadTable',
-		listVariable: 'marks',
-		onAdd: function(){
-			$('input.universityId', this).each(function(i, picker){
-				if (initUserPicker)
-					initUserPicker(picker, true);
-			});
-		}
+		listVariable: 'marks'
 	});
 
 	$('.show-archived-assignments').click(function(e){
