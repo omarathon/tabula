@@ -55,6 +55,7 @@ class OnlineFeedbackFormControllerTest extends TestBase with Mockito {
 		val currentUser = new CurrentUser(marker, marker)
 
 		val command = mock[OnlineFeedbackFormCommand]
+		command.module returns module
 		val controller = new OnlineFeedbackFormController
 	}
 
