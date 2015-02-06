@@ -49,6 +49,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 	override def afterPropertiesSet() {
 		assessmentComponentQuery = new AssessmentComponentQuery(sits)
 		upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(sits)
+		gradeBoundaryQuery = new GradeBoundaryQuery(sits)
 		jdbc = new NamedParameterJdbcTemplate(sits)
 	}
 
@@ -87,8 +88,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 		if (string == null) AssessmentComponent.NoneAssessmentGroup
 		else string
 
-	def getAllGradeBoundaries: Seq[GradeBoundary] = gradeBoundaryQuery.executeByNamedParam(JMap(
-		"academic_year_code" -> yearsToImportArray)).asScala
+	def getAllGradeBoundaries: Seq[GradeBoundary] = gradeBoundaryQuery.execute().asScala
 }
 
 @Profile(Array("sandbox")) @Service
@@ -371,7 +371,7 @@ object AssignmentImporter {
 			mkc.mkc_grade as grade,
 			mkc.mkc_minm as minimum_mark,
 			mkc.mkc_maxm as maximum_mark,
-			mkc.mkc_sigs as signal_status,
+			mkc.mkc_sigs as signal_status
 		from $sitsSchema.cam_mkc mkc
 		where mkc_proc = 'SAS' and mkc_minm is not null and mkc_maxm is not null
 	"""
