@@ -72,7 +72,7 @@
 		<div class="well">
 			<div class="feedback-summary-heading">
 				<h3>Feedback delivered to student</h3>
-				<h5>Published on <@fmt.date feedback.releasedDate /></h5>
+				<#if feedback.releasedDate??><h5>Published on <@fmt.date feedback.releasedDate /></h5></#if>
 			</div>
 			<#include "../../submit/_assignment_feedbackdownload.ftl" />
 		</div>
