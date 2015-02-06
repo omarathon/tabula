@@ -122,8 +122,6 @@ class Assignment
 	var summative: JBoolean = _
 	var dissertation: JBoolean = _
 	var allowExtensions: JBoolean = _
-	var allowExtensionRequests: JBoolean = _
-	// by students
 	var genericFeedback: String = ""
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -532,6 +530,10 @@ class Assignment
 		}
 	}
 
+	def extensionsPossible: Boolean = allowExtensions && !openEnded && module.adminDepartment.allowExtensionRequests
+
+	def newExtensionsCanBeRequested: Boolean = !isClosed && extensionsPossible
+
 	def isMarker(user: User) = isFirstMarker(user) || isSecondMarker(user)
 
 	def isFirstMarker(user: User): Boolean = {
@@ -758,7 +760,6 @@ trait BooleanAssignmentProperties {
 	var allowResubmission: JBoolean = true
 	var displayPlagiarismNotice: JBoolean = true
 	var allowExtensions: JBoolean = true
-	var allowExtensionRequests: JBoolean = false
 	var summative: JBoolean = true
 	var dissertation: JBoolean = false
 	var includeInFeedbackReportWithoutSubmissions: JBoolean = false
@@ -772,7 +773,6 @@ trait BooleanAssignmentProperties {
 		assignment.allowResubmission = allowResubmission
 		assignment.displayPlagiarismNotice = displayPlagiarismNotice
 		assignment.allowExtensions = allowExtensions
-		assignment.allowExtensionRequests = allowExtensionRequests
 		assignment.summative = summative
 		assignment.dissertation = dissertation
 		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions

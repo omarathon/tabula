@@ -35,7 +35,6 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 		assignment.allowResubmission = false
 		assignment.displayPlagiarismNotice = true
 		assignment.allowExtensions = true
-		assignment.allowExtensionRequests = false
 		assignment.summative = false
 	}
 
@@ -75,7 +74,6 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 				newAssignment.allowResubmission.booleanValue should be(false)
 				newAssignment.displayPlagiarismNotice.booleanValue should be(true)
 				newAssignment.allowExtensions.booleanValue should be(true)
-				newAssignment.allowExtensionRequests.booleanValue should be(false)
 				newAssignment.summative.booleanValue should be(false)
 			}
 		}

@@ -10,11 +10,11 @@
 		</a>
 	</#macro>
 
-	<#macro extensionButton extensionRequested isExtended isClosed>
+	<#macro extensionButton extensionRequested isExtended>
 		<p class="extension-button">
 			<#if extensionRequested>
 				<@extensionButtonContents "Review extension request" assignment />
-			<#elseif !isExtended && !isClosed && assignment.module.department.canRequestExtension>
+			<#elseif !isExtended && assignment.newExtensionsCanBeRequested>
 				<@extensionButtonContents "Request an extension" assignment />
 			</#if>
 		</p>
@@ -32,7 +32,7 @@
 			<span class="time-remaining">${extension_time_remaining} <span class="label label-info">Extended</span></span>
 			Extension granted until <@fmt.date date=extension.expiryDate />
 		</p>
-		<#if showIconsAndButtons><@extensionButton extensionRequested isExtended assignment.closed /></#if>
+		<#if showIconsAndButtons><@extensionButton extensionRequested isExtended /></#if>
 	<#elseif assignment.closed>
 		<p class="late deadline">
 			<#if showIconsAndButtons><i class="icon-calendar icon-3x pull-left"></i></#if>
@@ -44,13 +44,13 @@
 				Deadline was <@fmt.date date=assignment.closeDate />
 			</#if>
 		</p>
-		<#if showIconsAndButtons><@extensionButton extensionRequested isExtended assignment.closed /></#if>
+		<#if showIconsAndButtons><@extensionButton extensionRequested isExtended /></#if>
 	<#else>
 		<p class="deadline">
 			<#if showIconsAndButtons><i class="icon-calendar icon-3x pull-left"></i></#if>
 			<span class="time-remaining">${time_remaining}</span>
 			Deadline <@fmt.date date=assignment.closeDate />
 		</p>
-		<#if showIconsAndButtons><@extensionButton extensionRequested isExtended assignment.closed /></#if>
+		<#if showIconsAndButtons><@extensionButton extensionRequested isExtended /></#if>
 	</#if>
 </#if>
