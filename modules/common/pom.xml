@@ -559,7 +559,9 @@
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
 			<version>2.2.9</version>
-			<scope>test</scope>
+			<!-- FIXME We need this for the sandbox (because it uses jdbc:embedded-datasource
+				 to mock up SITS and Membership databases) but that seems incredibly wasteful -->
+			<!--<scope>test</scope>-->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
