@@ -97,6 +97,9 @@ trait RequestExtensionCommandValidation extends SelfValidating {
 		if (!reason.hasText){
 			errors.rejectValue("reason", "extension.reason.provideReasons")
 		}
+		if (!assignment.newExtensionsCanBeRequested) {
+			errors.reject("assignment.extensionRequests.disallowed")
+		}
 	}
 }
 

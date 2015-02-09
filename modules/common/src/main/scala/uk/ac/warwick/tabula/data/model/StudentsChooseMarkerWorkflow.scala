@@ -4,7 +4,7 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 import javax.persistence.{Entity, DiscriminatorValue}
 import uk.ac.warwick.tabula.data.model.MarkingMethod.StudentsChooseMarker
-import uk.ac.warwick.tabula.services.SubmissionService
+import uk.ac.warwick.tabula.services.{UserLookupService, SubmissionService}
 import uk.ac.warwick.spring.Wire
 
 @Entity
@@ -17,6 +17,7 @@ class StudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarker {
 	}
 
 	@transient var submissionService = Wire[SubmissionService]
+	@transient var userLookupService = Wire[UserLookupService]
 
 	def markingMethod = StudentsChooseMarker
 
@@ -27,6 +28,9 @@ class StudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarker {
 			val submission = submissionService.getSubmissionByUniId(assignment, universityId)
 			submission.flatMap(_.getValue(field).map(_.value))
 		}
+
+	def getMarkersStudents(assignment: Assignment, user: User) =
+		getSubmissions(assignment, user).map(s => userLookupService.getUserByWarwickUniId(s.universityId))
 
 	def getSubmissions(assignment: Assignment, user: User) = assignment.markerSelectField.map { markerField =>
 		val releasedSubmission = assignment.submissions.asScala.filter(_.isReleasedForMarking)

@@ -36,6 +36,10 @@ class FeedbackAdjustmentsListController extends CourseworkController {
 	}
 }
 
+object FeedbackAdjustmentsController {
+	final val LATE_PENALTY_PER_DAY = 5
+}
+
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/adjustments/{student}"))
 class FeedbackAdjustmentsController extends CourseworkController {
@@ -47,14 +51,32 @@ class FeedbackAdjustmentsController extends CourseworkController {
 		FeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping(method=Array(GET))
-	def showForm(@ModelAttribute("command") command: Appliable[Feedback], errors: Errors, @PathVariable assignment: Assignment, @PathVariable student: User) = {
-		Mav("admin/assignments/feedback/adjustments",
+	def showForm(@ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
+							 errors: Errors,
+							 @PathVariable assignment: Assignment,
+							 @PathVariable student: User) = {
+
+		val daysLate = command.submission.map(_.workingDaysLate)
+		val marksSubtracted = daysLate.map(FeedbackAdjustmentsController.LATE_PENALTY_PER_DAY * _)
+		val proposedAdjustment = for(am <- command.feedback.actualMark; ms <- marksSubtracted)
+			yield Math.max(0, (am - ms))
+
+
+		Mav("admin/assignments/feedback/adjustments", Map(
+			"daysLate" -> daysLate,
+			"marksSubtracted" -> marksSubtracted,
+			"proposedAdjustment" -> proposedAdjustment,
+			"latePenalty" -> FeedbackAdjustmentsController.LATE_PENALTY_PER_DAY,
 			"isGradeValidation" -> assignment.module.adminDepartment.assignmentGradeValidation
-		).noLayout()
+		)).noLayout()
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") command: Appliable[Feedback], errors: Errors, @PathVariable assignment: Assignment, @PathVariable student: User)  = {
+	def submit(@Valid @ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
+						 errors: Errors,
+						 @PathVariable assignment: Assignment,
+						 @PathVariable student: User)  = {
+
 		if (errors.hasErrors) {
 			showForm(command, errors, assignment, student)
 		} else {

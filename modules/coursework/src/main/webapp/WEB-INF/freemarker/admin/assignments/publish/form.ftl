@@ -41,9 +41,14 @@ their feedback published. Those students won't be emailed again.
 </#if>
 </p>
 
-<#if features.queueFeedbackForSits && assignment.uploadMarksToSits>
+<#if features.queueFeedbackForSits>
+<div class="alert alert-info">
+	<label class="checkbox">
+		<@f.checkbox path="sendToSits" id="sendToSits" />
+		Queue these marks for upload to SITS
+	</label>
 	<#if assignment.module.adminDepartment.canUploadMarksToSitsForYear(assignment.academicYear, assignment.module)>
-		<div class="alert alert-info">
+		<div>
 			<p>Publishing this feedback will cause marks to be queued for upload to SITS.</p>
 			<p>Marks and grades will automatically be uploaded and displayed in the SITS SAT screen as actual marks and grades.</p>
 		</div>
@@ -51,7 +56,7 @@ their feedback published. Those students won't be emailed again.
 		<div class="alert alert-warning">
 			<p>Publishing this feedback will cause marks to be queued for upload to SITS.</p>
 			<p>
-				However mark upload is closed for ${assignment.module.adminDepartment.name} (${assignment.module.degreeType.toString})
+				However mark upload is closed for ${assignment.module.adminDepartment.name} <#if assignment.module.degreeType??> (${assignment.module.degreeType.toString})</#if>
 				for the academic year ${assignment.academicYear.toString}.
 			</p>
 			<p>
@@ -63,6 +68,7 @@ their feedback published. Those students won't be emailed again.
 			</p>
 		</div>
 	</#if>
+</div>
 </#if>
 
 <p>

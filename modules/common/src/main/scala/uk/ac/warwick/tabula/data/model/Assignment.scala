@@ -106,7 +106,6 @@ class Assignment
 	var name: String = _
 	var active: JBoolean = true
 	var archived: JBoolean = false
-	var uploadMarksToSits: JBoolean = false
 
 	var openDate: DateTime = _
 	var closeDate: DateTime = _
@@ -123,8 +122,6 @@ class Assignment
 	var summative: JBoolean = _
 	var dissertation: JBoolean = _
 	var allowExtensions: JBoolean = _
-	var allowExtensionRequests: JBoolean = _
-	// by students
 	var genericFeedback: String = ""
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -533,6 +530,10 @@ class Assignment
 		}
 	}
 
+	def extensionsPossible: Boolean = allowExtensions && !openEnded && module.adminDepartment.allowExtensionRequests
+
+	def newExtensionsCanBeRequested: Boolean = !isClosed && extensionsPossible
+
 	def isMarker(user: User) = isFirstMarker(user) || isSecondMarker(user)
 
 	def isFirstMarker(user: User): Boolean = {
@@ -753,14 +754,12 @@ case class SubmissionsReport(assignment: Assignment) {
 trait BooleanAssignmentProperties {
 	var openEnded: JBoolean = false
 	var collectMarks: JBoolean = true
-	var uploadMarksToSits: JBoolean = false
 	var collectSubmissions: JBoolean = true
 	var restrictSubmissions: JBoolean = false
 	var allowLateSubmissions: JBoolean = true
 	var allowResubmission: JBoolean = true
 	var displayPlagiarismNotice: JBoolean = true
 	var allowExtensions: JBoolean = true
-	var allowExtensionRequests: JBoolean = false
 	var summative: JBoolean = true
 	var dissertation: JBoolean = false
 	var includeInFeedbackReportWithoutSubmissions: JBoolean = false
@@ -768,14 +767,12 @@ trait BooleanAssignmentProperties {
 	def copyBooleansTo(assignment: Assignment) {
 		assignment.openEnded = openEnded
 		assignment.collectMarks = collectMarks
-		assignment.uploadMarksToSits = uploadMarksToSits
 		assignment.collectSubmissions = collectSubmissions
 		assignment.restrictSubmissions = restrictSubmissions
 		assignment.allowLateSubmissions = allowLateSubmissions
 		assignment.allowResubmission = allowResubmission
 		assignment.displayPlagiarismNotice = displayPlagiarismNotice
 		assignment.allowExtensions = allowExtensions
-		assignment.allowExtensionRequests = allowExtensionRequests
 		assignment.summative = summative
 		assignment.dissertation = dissertation
 		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
