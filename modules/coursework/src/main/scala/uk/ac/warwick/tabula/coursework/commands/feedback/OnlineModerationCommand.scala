@@ -18,8 +18,8 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 object OnlineModerationCommand {
-	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser) =
-		new OnlineModerationCommand(module, assignment, student, marker, submitter)
+	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		new OnlineModerationCommand(module, assignment, student, marker, submitter, gradeGenerator)
 			with ComposableCommand[MarkerFeedback]
 			with OnlineFeedbackFormPermissions
 			with MarkerFeedbackStateCopy
@@ -38,9 +38,15 @@ object OnlineModerationCommand {
 			}
 }
 
-abstract class OnlineModerationCommand(module: Module, assignment: Assignment, student: User, val user: User, val submitter: CurrentUser)
-	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, user)
-	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] with ModerationState with UserAware {
+abstract class OnlineModerationCommand(
+	module: Module,
+	assignment: Assignment,
+	student: User,
+	val user: User,
+	val submitter: CurrentUser,
+	gradeGenerator: GeneratesGradesFromMarks
+) extends AbstractOnlineFeedbackFormCommand(module, assignment, student, user, gradeGenerator) with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback]
+	with ModerationState with UserAware {
 
 	self: FeedbackServiceComponent with FileAttachmentServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy
 		with FinaliseFeedbackComponent =>
@@ -118,6 +124,9 @@ trait FinaliseFeedbackComponent {
 }
 
 trait FinaliseFeedbackComponentImpl extends FinaliseFeedbackComponent {
+
+	self: OnlineFeedbackState =>
+
 	def finaliseFeedback(assignment: Assignment, firstMarkerFeedback: MarkerFeedback) {
 		val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, Seq(firstMarkerFeedback).asJava)
 		finaliseFeedbackCommand.apply()

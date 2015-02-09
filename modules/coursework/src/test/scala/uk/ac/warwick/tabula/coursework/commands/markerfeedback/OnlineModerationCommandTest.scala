@@ -1,16 +1,17 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
 import org.mockito.Mockito._
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Feedback, Module, Assignment}
-import uk.ac.warwick.tabula.coursework.commands.feedback._
-import uk.ac.warwick.tabula.data.{SavedFormValueDao, SavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.MarkingState.{ReleasedForMarking, MarkingCompleted, Rejected}
 import uk.ac.warwick.tabula.coursework.commands.assignments.FinaliseFeedbackCommand
+import uk.ac.warwick.tabula.coursework.commands.feedback._
+import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected, ReleasedForMarking}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.{SavedFormValueDao, SavedFormValueDaoComponent}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 class OnlineModerationCommandTest extends TestBase with Mockito {
 	trait Fixture {
@@ -26,11 +27,15 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 		val module = new Module
 		assignment.module = module
 		assignment.collectMarks = true
+		module.adminDepartment = new Department
 
 		val marker = fakeUser("marker")
 		val currentUser = new CurrentUser(realUser = marker, apparentUser = marker)
 
-		val command = new OnlineModerationCommand(module, assignment, student, currentUser.apparentUser, currentUser) with ModerationCommandSupport
+		val gradeGenerator = smartMock[GeneratesGradesFromMarks]
+		gradeGenerator.applyForMarks(Map("user1" -> 69)) returns Map("user1" -> Seq())
+
+		val command = new OnlineModerationCommand(module, assignment, student, currentUser.apparentUser, currentUser, gradeGenerator) with ModerationCommandSupport
 			with FinaliseFeedbackTestImpl
 
 		val testFeedback = new Feedback
@@ -89,7 +94,7 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 		def apply() = new MarkerFeedback()
 	}
 
-	trait FinaliseFeedbackTestImpl extends FinaliseFeedbackComponent {
+	trait FinaliseFeedbackTestImpl extends FinaliseFeedbackComponent  {
 		def finaliseFeedback(assignment: Assignment, firstMarkerFeedback: MarkerFeedback) {
 			val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, Seq(firstMarkerFeedback).asJava)
 			finaliseFeedbackCommand.applyInternal()

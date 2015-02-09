@@ -12,6 +12,7 @@ trait ModuleDao {
 	def saveOrUpdate(teachingInfo: ModuleTeachingInformation)
 	def delete(teachingInfo: ModuleTeachingInformation)
 	def getByCode(code: String): Option[Module]
+	def getAllByCodes(codes: Seq[String]): Seq[Module]
 	def getTeachingInformationByModuleCodeAndDepartmentCode(moduleCode: String, departmentCode: String): Option[ModuleTeachingInformation]
 	def getById(id: String): Option[Module]
 	def stampMissingFromImport(newStaleModuleCodes: Seq[String])
@@ -36,12 +37,18 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 	def getByCode(code: String) = 
 		session.newQuery[Module]("from Module m where code = :code").setString("code", code).uniqueResult
 
+	def getAllByCodes(codes: Seq[String]): Seq[Module] = {
+		session.newCriteria[Module]
+			.add(safeIn("code", codes))
+			.seq
+	}
+
 	def getTeachingInformationByModuleCodeAndDepartmentCode(moduleCode: String, departmentCode: String) =
 		session.newCriteria[ModuleTeachingInformation]
 			.createAlias("module", "module")
 			.createAlias("department", "department")
-			.add(is("module.code", moduleCode.toLowerCase()))
-			.add(is("department.code", departmentCode.toLowerCase()))
+			.add(is("module.code", moduleCode.toLowerCase))
+			.add(is("department.code", departmentCode.toLowerCase))
 			.uniqueResult
 	
 	def getById(id: String) = getById[Module](id)

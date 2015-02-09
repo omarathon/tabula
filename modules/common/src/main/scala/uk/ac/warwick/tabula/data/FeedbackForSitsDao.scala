@@ -14,6 +14,7 @@ trait AutowiringFeedbackForSitsDaoComponent extends FeedbackForSitsDaoComponent 
 
 trait FeedbackForSitsDao {
 	def saveOrUpdate(feedbackForSits: FeedbackForSits)
+	def saveOrUpdate(feedback: Feedback)
 	def feedbackToLoad: Seq[FeedbackForSits]
 	def getByFeedback(feedback: Feedback): Option[FeedbackForSits]
 }
@@ -22,6 +23,7 @@ trait FeedbackForSitsDao {
 class FeedbackForSitsDaoImpl extends FeedbackForSitsDao with Daoisms {
 
 	def saveOrUpdate(feedbackForSits: FeedbackForSits) = session.saveOrUpdate(feedbackForSits)
+	def saveOrUpdate(feedback: Feedback) = session.saveOrUpdate(feedback)
 
 	def feedbackToLoad =
 		session.newCriteria[FeedbackForSits]

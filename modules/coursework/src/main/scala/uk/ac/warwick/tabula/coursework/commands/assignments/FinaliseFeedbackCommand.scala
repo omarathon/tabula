@@ -39,11 +39,11 @@ class FinaliseFeedbackCommand(val assignment: Assignment, val markerFeedbacks:JL
 
 		// save custom fields
 		parent.customFormValues.addAll(markerFeedback.customFormValues.map { formValue =>
-				val newValue = new SavedFormValue()
-				newValue.name = formValue.name
-				newValue.feedback = formValue.markerFeedback.feedback
-				newValue.value = formValue.value
-				newValue
+			val newValue = new SavedFormValue()
+			newValue.name = formValue.name
+			newValue.feedback = formValue.markerFeedback.feedback
+			newValue.value = formValue.value
+			newValue
 		}.toSet[SavedFormValue])
 
 

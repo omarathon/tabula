@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.coursework.commands.feedback._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.data.model.{Feedback, Assignment}
+import uk.ac.warwick.tabula.data.model.{Module, Feedback, Assignment}
 import uk.ac.warwick.userlookup.User
 
 @Controller
@@ -27,7 +27,8 @@ class FeedbackAdjustmentsListController extends CourseworkController {
 		val studentInfo = listCommand.apply()
 		Mav("admin/assignments/feedback/adjustments_list",
 			"studentInfo" -> studentInfo,
-			"assignment" -> assignment
+			"assignment" -> assignment,
+			"isGradeValidation" -> assignment.module.adminDepartment.assignmentGradeValidation
 		).crumbs(
 			Breadcrumbs.Department(assignment.module.adminDepartment),
 			Breadcrumbs.Module(assignment.module)
@@ -46,8 +47,8 @@ class FeedbackAdjustmentsController extends CourseworkController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def formCommand(@PathVariable assignment: Assignment, @PathVariable student: User, submitter: CurrentUser) =
-		FeedbackAdjustmentCommand(assignment, student, submitter)
+	def formCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: User, submitter: CurrentUser) =
+		FeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping(method=Array(GET))
 	def showForm(@ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
@@ -65,7 +66,8 @@ class FeedbackAdjustmentsController extends CourseworkController {
 			"daysLate" -> daysLate,
 			"marksSubtracted" -> marksSubtracted,
 			"proposedAdjustment" -> proposedAdjustment,
-			"latePenalty" -> FeedbackAdjustmentsController.LATE_PENALTY_PER_DAY
+			"latePenalty" -> FeedbackAdjustmentsController.LATE_PENALTY_PER_DAY,
+			"isGradeValidation" -> assignment.module.adminDepartment.assignmentGradeValidation
 		)).noLayout()
 	}
 

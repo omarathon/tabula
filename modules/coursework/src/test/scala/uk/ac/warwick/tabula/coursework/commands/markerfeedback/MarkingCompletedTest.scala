@@ -1,21 +1,20 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
-import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
-
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.coursework.commands.assignments.{MarkingCompletedState, SecondMarkerReleaseNotifier, MarkingCompletedCommand}
-import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services._
 import org.hibernate.Session
-import uk.ac.warwick.tabula.data.SessionComponent
+import org.junit.{After, Before}
 import uk.ac.warwick.spring.Wire
-import org.junit.{Before, After}
-import uk.ac.warwick.tabula.events.EventListener
+import uk.ac.warwick.tabula.{Mockito, _}
 import uk.ac.warwick.tabula.commands.UserAware
+import uk.ac.warwick.tabula.coursework.commands.assignments.{MarkingCompletedCommand, MarkingCompletedState, SecondMarkerReleaseNotifier}
 import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.ReleasedState
+import uk.ac.warwick.tabula.data.SessionComponent
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
+import uk.ac.warwick.tabula.events.EventListener
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.services._
+
+import scala.collection.JavaConversions._
 
 /*
  * Fixed this test by replacing the full appcontext with a minimal functional one as below.
@@ -60,7 +59,6 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	@Test
 	def firstMarkerFinished() {
 		withUser("cuslaj") {
-
 			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
 			command.stateService = stateService
 
@@ -91,7 +89,6 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	def secondMarkerFinished(){
 		inContext[MarkingCompletedTest.Ctx] {
 		withUser("cuday"){
-
 			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
 			command.stateService = stateService
 			command.userLookup = mockUserLookup
@@ -131,7 +128,6 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	def finalMarkingComplete() {
 		inContext[MarkingCompletedTest.Ctx] {
 			withUser("cuslaj") {
-
 				val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
 
 				assignment.feedbacks.map(addMarkerFeedback(_, ThirdFeedback))

@@ -67,12 +67,7 @@ $(function(){
 		headerClass: 'mark-header',
 		rowClass: 'mark-row',
 		tableClass: 'marksUploadTable',
-		listVariable: 'marks',
-		onAdd: function(){
-			$('input.universityId', this).each(function(i, picker){
-				initUserPicker(picker, true);
-			});
-		}
+		listVariable: 'marks'
 	});
 
 	$('.show-archived-assignments').click(function(e){
@@ -625,6 +620,12 @@ $(function() {
 			} else {
 				return resp;
 			}
+		});
+
+		// Initialise any popovers loaded in the new content
+		$('.use-popover').tabulaPopover({
+			trigger: 'click',
+			container: '#container'
 		});
 	});
 

@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS CAM_MAB
 , MAB_AGRP VARCHAR(2) NOT NULL
 , AST_CODE VARCHAR(6) NOT NULL
 , MAB_UDF1 CHAR(1)
+, MKS_CODE VARCHAR(6)
 );
 
 CREATE TABLE IF NOT EXISTS CAM_MAV
@@ -109,20 +110,20 @@ INSERT INTO INS_MOD VALUES ('XX101-30', 'N', 'S-'); -- inactive module
 -- no students registered on CH130, so should show up in list of empty groups
 INSERT INTO CAM_MAV VALUES ('CH130-15', 'Y', '11/12', 'A');
 INSERT INTO CAM_MAV VALUES ('CH130-20', 'Y', '11/12', 'A');
-INSERT INTO CAM_MAB VALUES ('CH130-15', 'A01', 'Chem 130 A01', 'A', 'A', 'Y');
-INSERT INTO CAM_MAB VALUES ('CH130-20', 'A01', 'Chem 130 A01 (20 CATS)', 'A', 'A', 'Y');
+INSERT INTO CAM_MAB VALUES ('CH130-15', 'A01', 'Chem 130 A01', 'A', 'A', 'Y', null);
+INSERT INTO CAM_MAB VALUES ('CH130-20', 'A01', 'Chem 130 A01 (20 CATS)', 'A', 'A', 'Y', null);
 
 -- some more items that don't have corresponding students,
 -- but don't have the right data in other tables to form a complete entry
-INSERT INTO CAM_MAB VALUES ('XX100-30', 'A01', 'Mystery Meat', 'A', 'A', 'Y');
+INSERT INTO CAM_MAB VALUES ('XX100-30', 'A01', 'Mystery Meat', 'A', 'A', 'Y', null);
 INSERT INTO CAM_MAV VALUES ('XX100-30', 'Y', '11/12', 'A');
-INSERT INTO CAM_MAB VALUES ('XX101-30', 'A01', 'Danger Zone', 'A', 'A', 'Y');
+INSERT INTO CAM_MAB VALUES ('XX101-30', 'A01', 'Danger Zone', 'A', 'A', 'Y', null);
 INSERT INTO CAM_MAV VALUES ('XX101-30', 'Y', '11/12', 'A');
 
-INSERT INTO CAM_MAB VALUES ('CH115-30', 'A01', 'Chemicals Essay', 'A', 'A', 'Y');
+INSERT INTO CAM_MAB VALUES ('CH115-30', 'A01', 'Chemicals Essay', 'A', 'A', 'Y', null);
 INSERT INTO CAM_MAV VALUES ('CH115-30', 'Y', '11/12', 'A');
 
-INSERT INTO CAM_MAB VALUES ('CH120-15', 'A01', 'Chemistry Dissertation', 'A', 'A', 'Y');
+INSERT INTO CAM_MAB VALUES ('CH120-15', 'A01', 'Chemistry Dissertation', 'A', 'A', 'Y', null);
 INSERT INTO CAM_MAV VALUES ('CH120-15', 'Y', '11/12', 'A');
 
 -- four students, one permanently withdrawn

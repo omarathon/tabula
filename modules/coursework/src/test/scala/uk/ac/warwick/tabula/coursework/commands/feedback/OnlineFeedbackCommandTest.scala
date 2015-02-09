@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Module, Submission}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{Feedback, Submission, Assignment, Module}
 
 
 class OnlineFeedbackCommandTest extends TestBase with Mockito {

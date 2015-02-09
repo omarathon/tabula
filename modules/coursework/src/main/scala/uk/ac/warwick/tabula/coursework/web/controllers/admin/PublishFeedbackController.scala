@@ -3,7 +3,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.coursework.commands.feedback.{PublishFeedbackCommandState, PublishFeedbackCommand}
+import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateGradesFromMarkCommand, PublishFeedbackCommandState, PublishFeedbackCommand}
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -21,14 +21,17 @@ class PublishFeedbackController extends CourseworkController {
 	validatesSelf[SelfValidating]
 	
 	@ModelAttribute("publishFeedbackCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
-		PublishFeedbackCommand(module, assignment, user)
+		PublishFeedbackCommand(mandatory(module), mandatory(assignment), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 	}
 
 	@RequestMapping(method = Array(HEAD, GET), params = Array("!confirm"))
 	def confirmation(@ModelAttribute("publishFeedbackCommand") command: PublishFeedbackCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) command.prevalidate(errors)
 		Mav("admin/assignments/publish/form",
-			"assignment" -> command.assignment)
+			"assignment" -> command.assignment,
+			"isGradeValidation" -> command.module.adminDepartment.assignmentGradeValidation,
+			"gradeValidation" -> command.validateGrades
+		)
 	}
 
 	@RequestMapping(method = Array(POST))

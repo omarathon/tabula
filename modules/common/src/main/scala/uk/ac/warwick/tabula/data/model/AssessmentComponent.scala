@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
+
+import org.hibernate.annotations.Type
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
-import org.hibernate.annotations.Type
-import uk.ac.warwick.tabula.JavaImports._
 
 
 /**
@@ -75,21 +76,23 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
   ))
 	var upstreamAssessmentGroups: JSet[UpstreamAssessmentGroup] = _
 
+	var marksCode: String = _
+
 	/**
 	 * Returns moduleCode without CATS. e.g. in304
 	 */
-	def moduleCodeBasic: String = Module.stripCats(moduleCode).getOrElse(throw new IllegalArgumentException(s"${moduleCode} did not fit expected module code pattern"))
+	def moduleCodeBasic: String = Module.stripCats(moduleCode).getOrElse(throw new IllegalArgumentException(s"$moduleCode did not fit expected module code pattern"))
 
 	/**
 	 * Returns the CATS as a string if it's present, e.g. 50
 	 */
 	def cats: Option[String] = Module.extractCats(moduleCode)
 
-	def needsUpdatingFrom(other: AssessmentComponent) = (
+	def needsUpdatingFrom(other: AssessmentComponent) =
 		this.name != other.name ||
 		this.module != other.module ||
-		this.inUse != other.inUse
-	)
+		this.inUse != other.inUse ||
+		this.marksCode != other.marksCode
 
 	override def preSave(newRecord: Boolean) {
 		ensureNotNull("name", name)
@@ -108,6 +111,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 		module = other.module
 		name = other.name
 		assessmentType = other.assessmentType
+		marksCode = other.marksCode
 	}
 	
 	def upstreamAssessmentGroups(year: AcademicYear) = membershipService.getUpstreamAssessmentGroups(this, year)

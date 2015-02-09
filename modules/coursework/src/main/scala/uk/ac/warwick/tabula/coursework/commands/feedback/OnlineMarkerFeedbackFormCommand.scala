@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Feedback, MarkerFeedback, Assignment, Module}
 import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand}
-import uk.ac.warwick.tabula.services.{ZipServiceComponent, FileAttachmentServiceComponent, FeedbackServiceComponent, AutowiringZipServiceComponent, AutowiringFileAttachmentServiceComponent, AutowiringFeedbackServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
 import uk.ac.warwick.tabula.data.model.MarkingState.InProgress
 import uk.ac.warwick.tabula.JavaImports._
@@ -14,8 +14,8 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.userlookup.User
 
 object OnlineMarkerFeedbackFormCommand {
-	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser) =
-		new OnlineMarkerFeedbackFormCommand(module, assignment, student, marker, submitter)
+	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		new OnlineMarkerFeedbackFormCommand(module, assignment, student, marker, submitter, gradeGenerator)
 			with ComposableCommand[MarkerFeedback]
 			with MarkerFeedbackStateCopy
 			with OnlineFeedbackFormPermissions
@@ -30,8 +30,14 @@ object OnlineMarkerFeedbackFormCommand {
 		}
 }
 
-abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assignment, student: User, marker: User, val submitter: CurrentUser)
-	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker)
+abstract class OnlineMarkerFeedbackFormCommand(
+	module: Module,
+	assignment: Assignment,
+	student: User,
+	marker: User,
+	val submitter: CurrentUser,
+	gradeGenerator: GeneratesGradesFromMarks
+)	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker, gradeGenerator)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] {
 
 	self: FeedbackServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy =>
