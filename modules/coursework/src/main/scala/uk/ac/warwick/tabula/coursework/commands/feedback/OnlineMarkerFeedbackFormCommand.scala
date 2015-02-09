@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Feedback, MarkerFeedback, Assignment, Module}
 import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand}
-import uk.ac.warwick.tabula.services.{ZipServiceComponent, FileAttachmentServiceComponent, FeedbackServiceComponent, AutowiringZipServiceComponent, AutowiringFileAttachmentServiceComponent, AutowiringFeedbackServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
 import uk.ac.warwick.tabula.data.model.MarkingState.InProgress
 import uk.ac.warwick.tabula.JavaImports._

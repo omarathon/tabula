@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{GradeBoundary, AssessmentComponent, Assignment, Module}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AssignmentMembershipServiceComponent, AutowiringAssignmentMembershipServiceComponent}
+import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, AssignmentMembershipServiceComponent, AutowiringAssignmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
@@ -18,10 +18,6 @@ object GenerateGradesFromMarkCommand {
 			with GenerateGradesFromMarkPermissions
 			with GenerateGradesFromMarkCommandState
 			with ReadOnly with Unaudited
-}
-
-trait GeneratesGradesFromMarks {
-	def applyForMarks(marks: Map[String, Int]): Map[String, Seq[GradeBoundary]]
 }
 
 class GenerateGradesFromMarkCommandInternal(val module: Module, val assignment: Assignment)

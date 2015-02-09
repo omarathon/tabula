@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.joda.time.DateTime
+import org.springframework.util.StringUtils
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.commands.feedback.GeneratesGradesFromMarks
+import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, MarkerFeedback, Module}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.GeneratesGradesFromMarks
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model.{Module, MarkerFeedback, Feedback, Assignment}
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
-import uk.ac.warwick.tabula.permissions.Permissions
-import org.springframework.util.StringUtils
 
 class MarkerAddMarksCommand(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser, val firstMarker:Boolean, gradeGenerator: GeneratesGradesFromMarks)
 	extends AddMarksCommand[List[MarkerFeedback]](module, assignment, marker, gradeGenerator){

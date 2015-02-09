@@ -346,3 +346,7 @@ trait AssignmentMembershipServiceComponent {
 trait AutowiringAssignmentMembershipServiceComponent extends AssignmentMembershipServiceComponent {
 	var assignmentMembershipService = Wire[AssignmentMembershipService]
 }
+
+trait GeneratesGradesFromMarks {
+	def applyForMarks(marks: Map[String, Int]): Map[String, Seq[GradeBoundary]]
+}

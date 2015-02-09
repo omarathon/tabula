@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser}
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{StudentFeedbackAdjustmentNotification, FeedbackAdjustmentNotification}
-import uk.ac.warwick.tabula.data.model.{Notification, Submission, Assignment, Feedback}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackAdjustmentNotification, StudentFeedbackAdjustmentNotification}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Notification, Submission}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, AutowiringFeedbackServiceComponent, ZipServiceComponent, FeedbackServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
 
 object FeedbackAdjustmentCommand {
@@ -25,6 +25,7 @@ object FeedbackAdjustmentCommand {
 			with FeedbackAdjustmentNotifier
 			with AutowiringFeedbackServiceComponent
 			with AutowiringZipServiceComponent
+			with AutowiringFeedbackForSitsServiceComponent
 			with QueuesFeedbackForSits
 }
 
@@ -49,7 +50,7 @@ class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:
 
 		feedback.updatedDate = DateTime.now
 		feedbackService.saveOrUpdate(feedback)
-		if (sendToSits) queueFeedback(feedback, submitter)
+		if (sendToSits) queueFeedback(feedback, submitter, gradeGenerator)
 		feedback
 	}
 

@@ -1,17 +1,17 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.coursework.commands.feedback.GeneratesGradesFromMarks
+import org.springframework.util.StringUtils
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.Notifies
+import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Module, Notification}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.GeneratesGradesFromMarks
 
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model.{Notification, Module, Feedback, Assignment}
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
-import uk.ac.warwick.tabula.permissions.Permissions
-import org.springframework.util.StringUtils
-import uk.ac.warwick.tabula.commands.Notifies
 
 class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks)
 	extends AddMarksCommand[Seq[Feedback]](module, assignment, submitter.apparentUser, gradeGenerator) with Notifies[Seq[Feedback], Feedback] {

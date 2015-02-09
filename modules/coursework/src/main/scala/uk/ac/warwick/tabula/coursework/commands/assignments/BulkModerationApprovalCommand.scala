@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.validation.{Errors, BindingResult}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.coursework.commands.feedback.{GeneratesGradesFromMarks, OnlineFeedbackState, FinaliseFeedbackComponentImpl, FinaliseFeedbackComponent}
+import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineFeedbackState, FinaliseFeedbackComponentImpl, FinaliseFeedbackComponent}
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.data.model._
 import scala.collection.JavaConversions._

@@ -1,4 +1,5 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
+<#import "*/modal_macros.ftl" as modal />
 
 <#macro autoGradeOnline gradePath gradeLabel markPath markingId>
 	<@form.label path="${gradePath}">${gradeLabel}</@form.label>
@@ -238,6 +239,170 @@
 					}
 				});
 			}
+		});
+	</script>
+</#macro>
+
+<#macro feedbackGradeValidation isGradeValidation gradeValidation>
+	<#local gradeValidationClass><#compress>
+		<#if isGradeValidation>
+			<#if gradeValidation.invalid?has_content>error<#elseif gradeValidation.populated?has_content>info</#if>
+		<#else>
+			<#if gradeValidation.populated?has_content || gradeValidation.invalid?has_content>error</#if>
+		</#if>
+	</#compress></#local>
+
+	<#if gradeValidation.populated?has_content || gradeValidation.invalid?has_content>
+		<#if isGradeValidation>
+			<div class="grade-validation alert alert-${gradeValidationClass}" style="display:none;">
+				<#if gradeValidation.invalid?has_content>
+					<#local total = gradeValidation.invalid?keys?size />
+					<p>
+						<a href="#grade-validation-invalid-modal" data-toggle="modal"><@fmt.p total "student" /></a>
+						<#if total==1>
+							has feedback with a grade that is invalid. It will not be uploaded.
+						<#else>
+							have feedback with grades that are invalid. They will not be uploaded.
+						</#if>
+					</p>
+				</#if>
+				<#if gradeValidation.populated?has_content>
+					<#local total = gradeValidation.populated?keys?size />
+					<p>
+						<a href="#grade-validation-populated-modal" data-toggle="modal"><@fmt.p total "student" /></a>
+						<#if total==1>
+							has feedback with a grade that is empty. It will be populated with a default grade.
+						<#else>
+							have feedback with grades that are empty. They will be populated with a default grade.
+						</#if>
+					</p>
+				</#if>
+			</div>
+			<div id="grade-validation-populated-modal" class="modal hide fade">
+				<@modal.header>
+					<h2>Students with empty grades</h2>
+				</@modal.header>
+				<@modal.body>
+					<table class="table table-condensed table-bordered table-striped table-hover">
+						<thead><tr><th>University ID</th><th>Mark</th><th>Populated grade</th></tr></thead>
+						<tbody>
+							<#list gradeValidation.populated?keys as feedback>
+								<tr>
+									<td>${feedback.universityId}</td>
+									<td>
+										<#if feedback.adjustedMark??>
+											${feedback.adjustedMark!}
+										<#else>
+											${feedback.actualMark!}
+										</#if>
+									</td>
+									<td>${mapGet(gradeValidation.populated, feedback)}</td>
+								</tr>
+							</#list>
+						</tbody>
+					</table>
+				</@modal.body>
+			</div>
+			<div id="grade-validation-invalid-modal" class="modal hide fade">
+				<@modal.header>
+					<h2>Students with invalid grades</h2>
+				</@modal.header>
+				<@modal.body>
+					<table class="table table-condensed table-bordered table-striped table-hover">
+						<thead><tr><th>University ID</th><th>Mark</th><th>Grade</th><th>Valid grades</th></tr></thead>
+						<tbody>
+							<#list gradeValidation.invalid?keys as feedback>
+								<tr>
+									<td>${feedback.universityId}</td>
+									<td>
+										<#if feedback.adjustedMark??>
+											${feedback.adjustedMark!}
+										<#else>
+											${feedback.actualMark!}
+										</#if>
+									</td>
+									<td>
+										<#if feedback.adjustedGrade??>
+											${feedback.adjustedGrade!}
+										<#else>
+											${feedback.actualGrade!}
+										</#if>
+									</td>
+									<td>${mapGet(gradeValidation.invalid, feedback)}</td>
+								</tr>
+							</#list>
+						</tbody>
+					</table>
+				</@modal.body>
+			</div>
+		<#else>
+			<div class="grade-validation alert alert-${gradeValidationClass}" style="display:none;">
+				<#local total = gradeValidation.populated?keys?size + gradeValidation.invalid?keys?size />
+				<a href="#grade-validation-modal" data-toggle="modal"><@fmt.p total "student" /></a>
+				<#if total==1>
+					has feedback with a grade that is empty or invalid. It will not be uploaded.
+				<#else>
+					have feedback with grades that are empty or invalid. They will not be uploaded.
+				</#if>
+			</div>
+			<div id="grade-validation-modal" class="modal hide fade">
+				<@modal.header>
+					<h2>Students with empty or invalid grades</h2>
+				</@modal.header>
+				<@modal.body>
+					<table class="table table-condensed table-bordered table-striped table-hover">
+						<thead><tr><th>University ID</th><th>Mark</th><th>Grade</th><th>Valid grades</th></tr></thead>
+						<tbody>
+							<#list gradeValidation.populated?keys as feedback>
+								<tr>
+									<td>${feedback.universityId}</td>
+									<td>
+										<#if feedback.adjustedMark??>
+											${feedback.adjustedMark!}
+										<#else>
+											${feedback.actualMark!}
+										</#if>
+									</td>
+									<td></td>
+									<td></td>
+								</tr>
+							</#list>
+							<#list gradeValidation.invalid?keys as feedback>
+								<tr>
+									<td>${feedback.universityId}</td>
+									<td>
+										<#if feedback.adjustedMark??>
+											${feedback.adjustedMark!}
+										<#else>
+											${feedback.actualMark!}
+										</#if>
+									</td>
+									<td>
+										<#if feedback.adjustedGrade??>
+											${feedback.adjustedGrade!}
+										<#else>
+											${feedback.actualGrade!}
+										</#if>
+									</td>
+									<td>${mapGet(gradeValidation.invalid, feedback)}</td>
+								</tr>
+							</#list>
+						</tbody>
+					</table>
+				</@modal.body>
+			</div>
+		</#if>
+	</#if>
+	<script>
+		jQuery(function($){
+			$('#sendToSits').on('change', function(){
+				var $validationDiv = $('.grade-validation');
+				if ($(this).is(':checked') && ($validationDiv.hasClass('alert-info') || $validationDiv.hasClass('alert-error'))) {
+					$validationDiv.show();
+				} else {
+					$validationDiv.hide();
+				}
+			});
 		});
 	</script>
 </#macro>

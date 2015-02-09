@@ -25,10 +25,11 @@ object PublishFeedbackCommand {
 		badEmails: Seq[BadEmail] = Nil
 	)
 
-def apply(module: Module, assignment: Assignment, submitter: CurrentUser) =
-	new PublishFeedbackCommandInternal(module, assignment, submitter)
+def apply(module: Module, assignment: Assignment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+	new PublishFeedbackCommandInternal(module, assignment, submitter, gradeGenerator)
 		with ComposableCommand[PublishFeedbackCommand.PublishFeedbackResults]
 		with AutowiringFeedbackServiceComponent
+		with AutowiringFeedbackForSitsServiceComponent
 		with PublishFeedbackCommandState
 		with PublishFeedbackPermissions
 		with PublishFeedbackValidation
@@ -38,7 +39,7 @@ def apply(module: Module, assignment: Assignment, submitter: CurrentUser) =
 		with QueuesFeedbackForSits
 }
 
-class PublishFeedbackCommandInternal(val module: Module, val assignment: Assignment, val submitter: CurrentUser)
+class PublishFeedbackCommandInternal(val module: Module, val assignment: Assignment, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[PublishFeedbackCommand.PublishFeedbackResults]{
 
 	self: PublishFeedbackCommandState with QueuesFeedbackForSits =>
@@ -47,13 +48,10 @@ class PublishFeedbackCommandInternal(val module: Module, val assignment: Assignm
 
 	def applyInternal() = {
 
-			val allResults = for {
-				(studentId, user) <- getUsersForFeedback
-				feedback <- assignment.fullFeedback.find { _.universityId == studentId }
-			} yield {
+			val allResults = feedbackToRelease.map {case(studentId, user, feedback) =>
 				feedback.released = true
 				feedback.releasedDate = new DateTime
-				if (sendToSits)	queueFeedback(feedback, submitter)
+				if (sendToSits)	queueFeedback(feedback, submitter, gradeGenerator)
 				generateNotification(studentId, user, feedback)
 			}
 
@@ -111,16 +109,21 @@ trait PublishFeedbackNotificationCompletion extends CompletesNotifications[Publi
 
 trait PublishFeedbackCommandState {
 
-	self: FeedbackServiceComponent =>
+	self: FeedbackServiceComponent with FeedbackForSitsServiceComponent =>
 
 	val module: Module
 	val assignment: Assignment
 	val submitter: CurrentUser
+	val gradeGenerator: GeneratesGradesFromMarks
 
 	var confirm: Boolean = false
 	var sendToSits: Boolean = false
 
-	def getUsersForFeedback = feedbackService.getUsersForFeedback(assignment)
+	lazy val feedbackToRelease = for {
+		(studentId, user) <- feedbackService.getUsersForFeedback(assignment)
+		feedback <- assignment.fullFeedback.find(_.universityId == studentId)
+	} yield (studentId, user, feedback)
+
 
 	// validation done even when showing initial form.
 	def prevalidate(errors: Errors) {
@@ -130,12 +133,16 @@ trait PublishFeedbackCommandState {
 			errors.reject("feedback.publish.nofeedback")
 		}
 	}
+	
+	def validateGrades: ValidateAndPopulateFeedbackResult = {
+		feedbackForSitsService.validateAndPopulateFeedback(feedbackToRelease.map(_._3), gradeGenerator)
+	}
 }
 
-trait QueuesFeedbackForSits extends AutowiringFeedbackForSitsServiceComponent {
+trait QueuesFeedbackForSits extends FeedbackForSitsServiceComponent {
 
-	def queueFeedback(feedback: Feedback, submitter: CurrentUser) =
-		feedbackForSitsService.queueFeedback(feedback, submitter)
+	def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		feedbackForSitsService.queueFeedback(feedback, submitter, gradeGenerator)
 }
 
 trait PublishFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -162,10 +169,10 @@ trait PublishFeedbackValidation extends SelfValidating {
 
 trait PublishFeedbackDescription extends Describable[PublishFeedbackCommand.PublishFeedbackResults] {
 
-	self: PublishFeedbackCommandState =>
+	self: PublishFeedbackCommandState with FeedbackServiceComponent =>
 
 	override def describe(d: Description) {
 		d.assignment(assignment)
-		.studentIds(getUsersForFeedback map { case(userId, user) => user.getWarwickId })
+		.studentIds(feedbackService.getUsersForFeedback(assignment) map { case(userId, user) => user.getWarwickId })
 	}
 }

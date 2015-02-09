@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
+import uk.ac.warwick.tabula.services.GeneratesGradesFromMarks
+
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.{Submission, Assignment, Module}

@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import uk.ac.warwick.tabula.coursework.commands.feedback.GeneratesGradesFromMarks
+import org.hibernate.Session
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.GradeBoundary
+import uk.ac.warwick.tabula.events.EventHandling
+import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, UserLookupService}
+import uk.ac.warwick.tabula.{Mockito, RequestInfo, TestBase}
 
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.{TestBase, RequestInfo, Mockito}
-import uk.ac.warwick.tabula.events.EventHandling
-import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.services.UserLookupService
-import org.springframework.transaction.annotation.Transactional
-import org.hibernate.Session
 
 // scalastyle:off magic.number
 class AddMarksCommandTest extends TestBase with Mockito {

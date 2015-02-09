@@ -1,31 +1,22 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import uk.ac.warwick.tabula.coursework.commands.feedback.GeneratesGradesFromMarks
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException
+import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.UniversityId
+import uk.ac.warwick.tabula.commands.{Command, Description, UploadedFile}
+import uk.ac.warwick.tabula.coursework.services.docconversion.{MarkItem, MarksExtractor}
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module}
+import uk.ac.warwick.tabula.helpers.{FoundUser, LazyLists, Logging, NoUser}
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, UserLookupService}
+import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.{Assignment, Module, FileAttachment}
-import uk.ac.warwick.tabula.coursework.services.docconversion.MarksExtractor
-import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
-import uk.ac.warwick.tabula.helpers.LazyLists
-import uk.ac.warwick.tabula.helpers.NoUser
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.helpers.FoundUser
-import uk.ac.warwick.tabula.UniversityId
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.system.BindListener
-
-import org.springframework.validation.BindingResult
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException
 
 
 abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment, val marker: User, val gradeGenerator: GeneratesGradesFromMarks) extends Command[A]
