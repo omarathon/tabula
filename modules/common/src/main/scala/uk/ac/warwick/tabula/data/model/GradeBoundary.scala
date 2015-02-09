@@ -18,9 +18,9 @@ object GradeBoundary {
 
 	implicit val defaultOrdering = new Ordering[GradeBoundary]() {
 		override def compare(x: GradeBoundary, y: GradeBoundary): Int = {
-			if (x.signalStatus == "N" && y.signalStatus == "N") byGradeOrdering.compare(x,y)
-			else if (x.signalStatus == "N") -1
-			else if (y.signalStatus == "N") 1
+			if (x.isDefault && y.isDefault) byGradeOrdering.compare(x,y)
+			else if (x.isDefault) -1
+			else if (y.isDefault) 1
 			else byGradeOrdering.compare(x,y)
 		}
 	}
@@ -43,5 +43,7 @@ class GradeBoundary extends GeneratedId {
 
 	@NotNull
 	var signalStatus: String = _
+
+	def isDefault = signalStatus == "N"
 
 }

@@ -27,7 +27,7 @@ class GenerateGradeFromMarkController extends CourseworkController {
 		val result = cmd.apply().values.toSeq.headOption.getOrElse(Seq()).sorted
 		val default = {
 			if (selected == null) {
-				result.find(_.signalStatus == "N")
+				result.find(_.isDefault)
 			} else {
 				result.find(_.grade == selected)
 			}
@@ -44,11 +44,11 @@ class GenerateGradeFromMarkController extends CourseworkController {
 		val result = cmd.apply()
 		val defaults = result.map{case(universityId, grades) => universityId -> {
 			if (selected == null) {
-				grades.find(_.signalStatus == "N")
+				grades.find(_.isDefault)
 			} else {
 				selected.asScala.find(_._1 == universityId) match {
 					case Some((_, selectedGrade)) => grades.find(_.grade == selected)
-						case _ => grades.find(_.signalStatus == "N")
+						case _ => grades.find(_.isDefault)
 				}
 			}
 		}}
