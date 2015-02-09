@@ -44,7 +44,8 @@ class OnlineModerationController extends CourseworkController {
 			"command" -> command,
 			"isCompleted" -> isCompleted,
 			"completedDate" -> completedDate,
-			"firstMarkerFeedback" -> firstMarkerFeedback
+			"firstMarkerFeedback" -> firstMarkerFeedback,
+			"isGradeValidation" -> command.module.adminDepartment.assignmentGradeValidation
 		).noLayout()
 	}
 

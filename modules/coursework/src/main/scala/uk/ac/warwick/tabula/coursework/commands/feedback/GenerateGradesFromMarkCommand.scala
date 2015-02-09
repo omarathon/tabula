@@ -29,7 +29,7 @@ class GenerateGradesFromMarkCommandInternal(val module: Module, val assignment: 
 
 	self: GenerateGradesFromMarkCommandState with AssignmentMembershipServiceComponent =>
 
-	lazy val assignmentUpstreamAssessmentGroupMap = assignment.assessmentGroups.asScala.map(group =>
+	lazy val assignmentUpstreamAssessmentGroupMap = assignment.assessmentGroups.asScala.toSeq.map(group =>
 		group -> group.toUpstreamAssessmentGroup(assignment.academicYear)
 	).toMap
 

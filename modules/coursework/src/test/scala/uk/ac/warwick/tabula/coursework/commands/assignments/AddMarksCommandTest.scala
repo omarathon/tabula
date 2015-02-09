@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import uk.ac.warwick.tabula.coursework.commands.feedback.GeneratesGradesFromMarks
+import uk.ac.warwick.tabula.data.model.GradeBoundary
 
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.{TestBase, RequestInfo, Mockito}
@@ -94,6 +95,52 @@ class AddMarksCommandTest extends TestBase with Mockito {
 
 			command.apply()
 		}
+	}
+
+	@Transactional @Test
+	def gradeValidation() {
+		trait Fixture {
+			val currentUser = RequestInfo.fromThread.get.user
+			val assignment = newDeepAssignment()
+			val gradeGenerator = smartMock[GeneratesGradesFromMarks]
+			val command = new AdminAddMarksCommand(assignment.module, assignment, currentUser, gradeGenerator) {
+				override val session = smartMock[Session]
+			}
+			command.userLookup = mock[UserLookupService]
+			command.userLookup.getUserByWarwickUniId("0672088") answers { id =>
+				currentUser.apparentUser
+			}
+			gradeGenerator.applyForMarks(Map("0672088" -> 100)) returns Map("0672088" -> Seq(GradeBoundary(null, "A", 0, 100, null)))
+			assignment.module.adminDepartment.assignmentGradeValidation = true
+		}
+
+		withUser("cusebr") { new Fixture {
+			val errors = new BindException(command, "command")
+
+			val marks1 = command.marks.get(0)
+			marks1.universityId = "0672088"
+			marks1.actualMark = "100"
+			marks1.actualGrade = "F"
+
+			command.postExtractValidation(errors)
+			command.apply()
+
+			errors.hasErrors should be {true}
+		}}
+
+		withUser("cusebr") { new Fixture {
+			val errors = new BindException(command, "command")
+
+			val marks1 = command.marks.get(0)
+			marks1.universityId = "0672088"
+			marks1.actualMark = "100"
+			marks1.actualGrade = "A"
+
+			command.postExtractValidation(errors)
+			command.apply()
+
+			errors.hasErrors should be {false}
+		}}
 	}
 
 }

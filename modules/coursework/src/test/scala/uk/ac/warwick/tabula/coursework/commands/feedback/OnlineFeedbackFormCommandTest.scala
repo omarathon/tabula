@@ -4,7 +4,7 @@ import org.mockito.Mockito._
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, StringFormValue}
-import uk.ac.warwick.tabula.data.model.{Department, Assignment, Feedback, Module}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{SavedFormValueDao, SavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
@@ -149,6 +149,26 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 			command.validate(errors)
 			errors.hasErrors should be {true}
 
+		}
+	}
+
+	@Test
+	def gradeValidation() {
+		trait GradeFixture extends Fixture {
+			module.adminDepartment.assignmentGradeValidation = true
+			val errors = new BindException(command, "command")
+			command.mark = "77"
+			command.gradeGenerator.applyForMarks(Map(student.getWarwickId -> command.mark.toInt)) returns Map(student.getWarwickId -> Seq(GradeBoundary(null, "A", 0, 100, null)))
+		}
+		new GradeFixture {
+			command.grade = "F"
+			command.validate(errors)
+			errors.hasErrors should be {true}
+		}
+		new GradeFixture {
+			command.grade = "A"
+			command.validate(errors)
+			errors.hasErrors should be {false}
 		}
 	}
 }
