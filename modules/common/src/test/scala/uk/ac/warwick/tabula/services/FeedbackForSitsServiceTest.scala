@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.{FeedbackForSitsDao, FeedbackForSitsDaoComponent}
-import uk.ac.warwick.tabula.data.model.FeedbackForSits
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
 import org.joda.time.DateTime
 
@@ -15,8 +15,14 @@ class FeedbackForSitsServiceTest extends TestBase with Mockito {
 	trait Fixture {
 		val service = new AbstractFeedbackForSitsService with ServiceTestSupport
 		val feedback = Fixtures.feedback("someFeedback")
+		feedback.assignment = new Assignment
+		feedback.assignment.module = new Module
+		feedback.assignment.module.adminDepartment = new Department
+		feedback.assignment.module.adminDepartment.assignmentGradeValidation = true
+		feedback.actualMark = Some(100)
 		val submitter = currentUser
 		val gradeGenerator = smartMock[GeneratesGradesFromMarks]
+		gradeGenerator.applyForMarks(Map(feedback.universityId -> feedback.actualMark.get)) returns Map(feedback.universityId -> Seq(GradeBoundary(null, "A", 0, 100, "N")))
 	}
 
 	@Test

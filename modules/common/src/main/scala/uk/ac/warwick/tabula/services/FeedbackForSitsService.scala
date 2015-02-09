@@ -76,7 +76,7 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 					else
 						"valid"
 				case None =>
-					if (validGrades(f.universityId).nonEmpty)
+					if (validGrades.get(f.universityId).isDefined && validGrades(f.universityId).exists(_.signalStatus == "N"))
 						"populated"
 					else
 						"invalid"
@@ -88,7 +88,7 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 				feedbacksToPopulate.map(f => f -> validGrades(f.universityId).find(_.signalStatus == "N").map(_.grade).get).toMap
 			).getOrElse(Map()),
 			parsedFeedbacks.get("invalid").map(feedbacksToPopulate =>
-				feedbacksToPopulate.map(f => f -> validGrades(f.universityId).map(_.grade).mkString(", ")).toMap
+				feedbacksToPopulate.map(f => f -> validGrades.get(f.universityId).map(_.map(_.grade).mkString(", ")).getOrElse("")).toMap
 			).getOrElse(Map())
 		)
 	}
