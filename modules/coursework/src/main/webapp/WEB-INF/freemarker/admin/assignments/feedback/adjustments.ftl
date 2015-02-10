@@ -1,6 +1,4 @@
 <#import "*/courses_macros.ftl" as courses_macros />
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#assign finalMarkingStage = (allCompletedMarkerFeedback?? && allCompletedMarkerFeedback?size > 1)>
 
 <#macro lateness submission=""><#compress>
@@ -110,6 +108,10 @@
 	<div class="alert alert-info">
 		The reason for adjustment and any comments will be made available to students when their feedback is published.
 	</div>
+
+	<#if features.queueFeedbackForSits && command.canBeUploadedToSits>
+		<@courses_macros.uploadToSits assignment=assignment verb="Adjusting" withValidation=false/>
+	</#if>
 
 	<div class="submit-buttons">
 		<input class="btn btn-primary" type="submit" value="Save">

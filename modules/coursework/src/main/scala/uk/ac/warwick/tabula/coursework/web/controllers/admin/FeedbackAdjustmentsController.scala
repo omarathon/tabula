@@ -59,7 +59,7 @@ class FeedbackAdjustmentsController extends CourseworkController {
 		val daysLate = command.submission.map(_.workingDaysLate)
 		val marksSubtracted = daysLate.map(FeedbackAdjustmentsController.LATE_PENALTY_PER_DAY * _)
 		val proposedAdjustment = for(am <- command.feedback.actualMark; ms <- marksSubtracted)
-			yield Math.max(0, (am - ms))
+			yield Math.max(0, am - ms)
 
 
 		Mav("admin/assignments/feedback/adjustments", Map(

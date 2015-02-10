@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
+import collection.JavaConverters._
 
 object FeedbackAdjustmentCommand {
 
@@ -38,6 +39,7 @@ class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:
 	val feedback = assignment.findFeedback(student.getWarwickId)
 		.getOrElse(throw new ItemNotFoundException("Can't adjust for non-existent feedback"))
 	copyFrom(feedback)
+	lazy val canBeUploadedToSits = assignment.assessmentGroups.asScala.map(_.toUpstreamAssessmentGroup(assignment.academicYear)).exists(_.exists(_.members.includesUser(student)))
 
 	def applyInternal() = {
 		copyTo(feedback)
@@ -126,7 +128,7 @@ trait FeedbackAdjustmentCommandState {
 	var comments: String = _
 
 	val submitter: CurrentUser
-	val sendToSits: Boolean = false
+	var sendToSits: Boolean = false
 }
 
 trait FeedbackAdjustmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
