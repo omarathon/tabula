@@ -42,7 +42,7 @@
 			</#if>
 			<td class="student-col toggle-cell"><h6 class="${toggleIcon}">${item.student.warwickId!}</h6></td>
 
-			<#if isModeration>
+			<#if isModeration && item.previousFeedback??>
 				<#local previousFeedback = item.previousFeedback />
 				<td class="toggle-cell">${previousFeedback.mark!""}</td>
 				<td class="toggle-cell">${previousFeedback.markerUser.fullName}</td>
