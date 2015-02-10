@@ -181,7 +181,7 @@ trait RequestExtensionCommandState {
 
 	var file: UploadedFile = new UploadedFile
 	var attachedFiles: JSet[FileAttachment] = JSet()
-	var readGuidelines: JBoolean = false
+	@beans.BeanProperty var readGuidelines: JBoolean = false
 	// true if this command is modifying an existing extension. False otherwise
 	var modified: JBoolean = false
 	var disabilityAdjustment: JBoolean = false

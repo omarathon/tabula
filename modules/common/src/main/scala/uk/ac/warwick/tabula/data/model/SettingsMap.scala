@@ -136,7 +136,7 @@ trait SettingsMap extends HasSettings {
 		this
 	}
 
-	protected def ++=(sets: Pair[String, Any]*): this.type = {
+	protected def ++=(sets: (String, Any)*): this.type = {
 		settings ++= sets
 		this
 	}

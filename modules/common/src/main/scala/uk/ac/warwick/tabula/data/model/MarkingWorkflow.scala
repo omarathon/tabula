@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.AccessType
 import javax.persistence._
 import scala.collection.JavaConversions._
 import uk.ac.warwick.userlookup.User
@@ -21,7 +20,7 @@ import uk.ac.warwick.tabula.web.Routes
 @Table(name="MarkScheme")
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="MarkingMethod", discriminatorType = DiscriminatorType.STRING, length=255)
-@AccessType("field")
+@Access(AccessType.FIELD)
 abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with Serializable {
 
 	type Usercode = String

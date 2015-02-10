@@ -15,7 +15,7 @@ import uk.ac.warwick.spring.Wire
 trait FeedbackService {
 	def getStudentFeedback(assignment: Assignment, warwickId: String): Option[Feedback]
 	def countPublishedFeedback(assignment: Assignment): Int
-	def getUsersForFeedback(assignment: Assignment): Seq[Pair[String, User]]
+	def getUsersForFeedback(assignment: Assignment): Seq[(String, User)]
 	def getFeedbackByUniId(assignment: Assignment, uniId: String): Option[Feedback]
 	def getMarkerFeedbackById(markerFeedbackId: String): Option[MarkerFeedback]
 	def saveOrUpdate(feedback: Feedback)
@@ -32,7 +32,7 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 
 	/* get users whose feedback is not published and who have not submitted work suspected
 	 * of being plagiarised */
-	def getUsersForFeedback(assignment: Assignment): Seq[Pair[String, User]] = {
+	def getUsersForFeedback(assignment: Assignment): Seq[(String, User)] = {
 		val plagiarisedSubmissions = assignment.submissions.filter { submission => submission.suspectPlagiarised }
 		val plagiarisedIds = plagiarisedSubmissions.map { _.universityId }
 		val unreleasedIds = assignment.unreleasedFeedback.map { _.universityId }

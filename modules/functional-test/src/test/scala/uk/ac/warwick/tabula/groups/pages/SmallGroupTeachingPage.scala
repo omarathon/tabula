@@ -2,15 +2,15 @@ package uk.ac.warwick.tabula.groups.pages
 
 import org.openqa.selenium.{WebElement, WebDriver, By}
 import uk.ac.warwick.tabula.{FunctionalTestProperties, BreadcrumbsMatcher}
-import org.scalatest.selenium.WebBrowser.Page
+import org.scalatest.selenium.Page
 import org.scalatest.selenium.WebBrowser
 import scala.collection.JavaConverters._
 import org.scalatest.concurrent.Eventually
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import uk.ac.warwick.tabula.EventuallyAjax
 
 
-class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:WebDriver) extends Page with WebBrowser with	BreadcrumbsMatcher with EventuallyAjax with ShouldMatchers  with GroupSetList {
+class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:WebDriver) extends Page with WebBrowser with	BreadcrumbsMatcher with EventuallyAjax with Matchers  with GroupSetList {
 
 	val url = FunctionalTestProperties.SiteRoot + "/groups/admin/department/" + departmentCode
 
@@ -31,7 +31,7 @@ class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:W
 	}
 }
 
-class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: String)(implicit webDriver: WebDriver) extends Eventually with ShouldMatchers {
+class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: String)(implicit webDriver: WebDriver) extends Eventually with Matchers {
 
 	val groupsetId = {
 		underlying.getAttribute("id").replaceFirst("set-","")
@@ -100,7 +100,7 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 	}
 }
 
-class ModuleGroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: String)(implicit webDriver: WebDriver) extends Eventually with ShouldMatchers {
+class ModuleGroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: String)(implicit webDriver: WebDriver) extends Eventually with Matchers {
 
 	val groupsetId = {
 		val classes = underlying.getAttribute("class").split(" ")
@@ -143,7 +143,7 @@ class ModuleGroupSetInfoSummarySection(val underlying: WebElement, val moduleCod
 	}
 }
 
-class BatchOpenPage(val departmentCode: String)(implicit webDriver: WebDriver) extends Page with WebBrowser with Eventually with ShouldMatchers {
+class BatchOpenPage(val departmentCode: String)(implicit webDriver: WebDriver) extends Page with WebBrowser with Eventually with Matchers {
 	val url = FunctionalTestProperties.SiteRoot + s"/groups/admin/department/${departmentCode}/groups/open"
 
 	def isCurrentPage(): Boolean = {
@@ -161,7 +161,7 @@ class BatchOpenPage(val departmentCode: String)(implicit webDriver: WebDriver) e
 }
 
 trait GroupSetList {
-	this: WebBrowser with EventuallyAjax with ShouldMatchers =>
+	this: WebBrowser with EventuallyAjax with Matchers =>
 
 	def getGroupsetInfo(moduleCode: String, groupsetName: String)(implicit webdriver:WebDriver): Option[GroupSetInfoSummarySection] = {
 
@@ -194,7 +194,7 @@ trait GroupSetList {
 }
 
 trait ModuleAndGroupSetList {
-	this: WebBrowser with EventuallyAjax with ShouldMatchers =>
+	this: WebBrowser with EventuallyAjax with Matchers =>
 
 	def getGroupsetInfo(moduleCode: String, groupsetName: String)(implicit webdriver: WebDriver): Option[ModuleGroupSetInfoSummarySection] = {
 		getModuleInfo(moduleCode).flatMap { module =>

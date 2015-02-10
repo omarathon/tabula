@@ -7,7 +7,7 @@ package uk.ac.warwick.tabula
  * the class name.
  */
 trait ToString {
-	def toStringProps: Seq[Pair[String, Any]]
+	def toStringProps: Seq[(String, Any)]
 	override def toString() = ToString.forObject(this, toStringProps : _*)
 }
 
@@ -16,10 +16,10 @@ trait ToString {
 	*/
 object ToString {
 
-	def forProps(props: Pair[String, Any]*) =
+	def forProps(props: (String, Any)*) =
 		props.map { case (k, v) => k + "=" + v }.mkString("[", ",", "]")
 
-	def forObject(self: AnyRef, props: Pair[String, Any]*) =
+	def forObject(self: AnyRef, props: (String, Any)*) =
 		self.getClass.getSimpleName + forProps(props: _*)
 
 }

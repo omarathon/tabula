@@ -4,6 +4,8 @@ import org.hamcrest.Matchers._
 import uk.ac.warwick.tabula.data.model.{UserGroup, Notification}
 import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek, SmallGroupFormat, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.AnonymousUser
@@ -59,7 +61,7 @@ object SmallGroupEventAttendanceReminderNotificationTest {
 		bean(){mock[RelationshipService]}
 		bean() {
 			val permissionsService = mock[PermissionsService]
-			permissionsService.ensureUserGroupFor(argThat(anything), argThat(anything))(argThat(anything)) returns UserGroup.ofUsercodes
+			permissionsService.ensureUserGroupFor(anArgThat(anything), anArgThat(anything))(anArgThat(anything)) returns UserGroup.ofUsercodes
 			permissionsService
 		}
 		bean(){mock[AssignmentMembershipService]}

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula
 
 import org.hamcrest.{Description, BaseMatcher}
-import org.scalatest.matchers.ShouldMatchers._
+import org.scalatest.Matchers._
 
 /**
  * Some custom Hamcrest matchers. Usually Scalatest matchers are fine,

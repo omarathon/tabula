@@ -4,10 +4,10 @@
   <httpbasic>
     <allow>true</allow>
   </httpbasic>
-  <!-- Clustered token storage so both jbosses have access -->
+  <!-- Clustered token storage so both instances have access -->
   <cluster>
     <enabled>true</enabled>
-    <datasource>java:/TabulaDS</datasource>
+    <datasource>java:comp/env/jdbc/TabulaDS</datasource>
   </cluster>
 	<!-- mode can be 'old' or 'new' this defines if the SSOClientFilter should use 
 		the old WarwickSSO cookie or the newer SSO-SSC-* cookies -->
@@ -47,7 +47,7 @@
 		<providerid>urn:augustus.warwick.ac.uk:tabula:service</providerid>
 		<keystore>
 			<!-- location of the java keystore -->
-			<location>file:/usr/local/jboss/server/tabula/conf/augustus.warwick.ac.uk.keystore</location>
+			<location>file:/etc/apache2/SSL/augustus.warwick.ac.uk.keystore</location>
 			<!-- password for that keystore -->
 			<password>changeit</password>
 			<!-- keystore alias for the client service machine -->

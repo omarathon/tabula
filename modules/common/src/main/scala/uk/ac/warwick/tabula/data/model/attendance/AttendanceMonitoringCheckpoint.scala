@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import javax.persistence.{Column, JoinColumn, FetchType, ManyToOne, Entity}
+import javax.persistence.{Column, JoinColumn, FetchType, ManyToOne, Entity, ForeignKey}
 import uk.ac.warwick.tabula.data.model.{StudentMember, GeneratedId}
 import uk.ac.warwick.spring.Wire
-import org.hibernate.annotations.{ForeignKey, Type}
+import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import javax.validation.constraints.NotNull
 

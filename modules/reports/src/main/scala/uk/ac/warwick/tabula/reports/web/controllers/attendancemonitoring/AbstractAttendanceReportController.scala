@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.reports.web.controllers.attendancemonitoring
 
 import java.io.StringWriter
 
-import freemarker.template.DefaultObjectWrapper
+import freemarker.template.{Configuration, DefaultObjectWrapper}
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Appliable
@@ -53,7 +53,7 @@ abstract class AbstractAttendanceReportController extends ReportsController {
 				)
 		)
 		val intervalFormatter = new IntervalFormatter
-		val wrapper = new DefaultObjectWrapper()
+		val wrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_0)
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 		val allPoints: Seq[Map[String, String]] = result.values.flatMap(_.keySet).toSeq.distinct.sortBy(p => (p.startDate, p.endDate)).map(point =>
 			Map(

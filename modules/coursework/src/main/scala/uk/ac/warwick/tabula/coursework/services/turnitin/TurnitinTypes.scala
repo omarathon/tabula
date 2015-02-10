@@ -28,11 +28,15 @@ class DocumentTitle(val id: String, val extension: String) extends AnyDocumentTi
 object DocumentTitle {
     private val Pattern = new Regex("(.+)\\.(.+?)")
     def apply(id:String, extension:String) = new DocumentTitle(id, extension)
+
     // unapply method is for matching, so you can do e.g. 
     // docTitle match { case DocumentTitle(id, extension) => ... }
     def unapply(thing: Any): Option[(String,String)] = thing match {
-        case Pattern(id, extension) => Some((id, extension))
-        case t:DocumentTitle => Some((t.id, t.extension))
+				case s: CharSequence => s match {
+					case Pattern(id, extension) => Some((id, extension))
+					case _ => None
+				}
+				case t: DocumentTitle => Some((t.id, t.extension))
         case _ => None
     }
 }

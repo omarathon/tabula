@@ -63,7 +63,7 @@ trait ImportSmallGroupSetsFromExternalSystemCommandState extends CurrentSITSAcad
 	def department: Department
 	def user: CurrentUser
 
-	var selected: JList[JBoolean] = LazyLists.create({ () => true })
+	var selected: JList[JBoolean] = LazyLists.createWithFactory { () => true }
 }
 
 trait ImportSmallGroupSetsFromExternalSystemPermissionsRestrictedState {

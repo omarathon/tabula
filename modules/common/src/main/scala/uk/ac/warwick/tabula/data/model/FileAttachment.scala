@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data.model
 import scala.language.postfixOps
 import java.io._
 import com.google.common.io.Files
-import org.hibernate.annotations.AccessType
 import org.joda.time.DateTime
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
@@ -14,7 +13,7 @@ import javax.persistence.CascadeType._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.DetectMimeType._
 
-@Entity @AccessType("field")
+@Entity @Access(AccessType.FIELD)
 class FileAttachment extends GeneratedId {
 	import FileAttachment._
 
@@ -129,9 +128,8 @@ class FileAttachment extends GeneratedId {
 	def isDataEqual(other: Any) = other match {
 		case that: FileAttachment =>
 			if (this.actualDataLength != that.actualDataLength) false
-			else {
-				Files.equal(this.file, that.file)
-			}
+			else if (this.file == null && that.file == null) true
+			else this.file != null && that.file != null && Files.equal(this.file, that.file)
 		case _ => false
 	}
 

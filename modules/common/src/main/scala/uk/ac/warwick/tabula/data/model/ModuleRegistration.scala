@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 
@@ -18,7 +17,7 @@ import org.apache.commons.lang3.builder.CompareToBuilder
 
 
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Ordered[ModuleRegistration] {
 
 	def this(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String) {

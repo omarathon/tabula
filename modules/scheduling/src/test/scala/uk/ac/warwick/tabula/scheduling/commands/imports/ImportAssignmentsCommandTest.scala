@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 import org.hibernate.Session
 import org.scalatest.junit._
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.junit.runner.RunWith
 
 import uk.ac.warwick.tabula.{AcademicYear, CustomHamcrestMatchers, Mockito}
@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.scheduling.services.UpstreamModuleRegistration
 
 @RunWith(classOf[JUnitRunner])
-class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Mockito {
+class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
 	trait Fixture {
 		val mockSession = smartMock[Session]
@@ -37,9 +37,9 @@ class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Moc
 
 		val registrations: Seq[UpstreamModuleRegistration]
 
-		importer.allMembers(any[UpstreamModuleRegistration=>Unit]) answers {
+		importer.allMembers(any[UpstreamModuleRegistration=>Unit]) answers { _ match {
 			case fn: (UpstreamModuleRegistration=>Unit) @unchecked => registrations.foreach(fn)
-		}
+		}}
 	}
 
 	behavior of "doGroupMembers"
@@ -83,11 +83,11 @@ class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Moc
 
 			command.doGroupMembers()
 
-			there was one(membershipService).replaceMembers(argThat(hasModuleCode("HI33M-30")), isEq(Seq("0100001", "0100002")))
-			there was one(membershipService).replaceMembers(argThat(hasModuleCode("HI100-30")), isEq(Seq("0100003", "0100002")))
+			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(Seq("0100001", "0100002")))
+			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(Seq("0100003", "0100002")))
 
 			// The bug is that we don't update any group we don't have moduleregistrations for.
-			there was one(membershipService).replaceMembers(argThat(hasModuleCode("HI900-30")), isEq(Nil))
+			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI900-30")), isEq(Nil))
 
 		}
 	}

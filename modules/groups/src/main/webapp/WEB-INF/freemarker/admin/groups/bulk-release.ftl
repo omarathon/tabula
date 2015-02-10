@@ -46,7 +46,7 @@
                    <@f.checkbox
                    class=module.hasUnreleasedGroupSets(academicYear)?string('collection-checkbox','')
                    path="checkedModules"
-                   disabled=(!module.hasUnreleasedGroupSets(academicYear))?string
+                   disabled=(!module.hasUnreleasedGroupSets(academicYear))
                    value=module.code/>
                 </td>
                 <td>

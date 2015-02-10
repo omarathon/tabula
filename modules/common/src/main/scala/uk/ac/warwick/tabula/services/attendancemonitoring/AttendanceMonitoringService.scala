@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services.attendancemonitoring
 
-import org.codehaus.jackson.annotate.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.joda.time.{LocalDate, DateTime}
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired

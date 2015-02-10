@@ -11,6 +11,7 @@ import java.util.Properties
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.ie.InternetExplorerDriver
+import org.openqa.selenium.phantomjs.PhantomJSDriver
 import java.io.File
 import java.io.FileInputStream
 import org.scalatest.concurrent.Eventually
@@ -28,8 +29,8 @@ import org.joda.time.DateTime
   */
 @RunWith(classOf[JUnitRunner])
 abstract class BrowserTest
-	extends ShouldMatchers
-	with FlatSpec
+	extends FlatSpec
+	with ShouldMatchers
 	with BeforeAndAfter
 	with EventuallyAjax
 	with SpanSugar
@@ -53,15 +54,22 @@ abstract class BrowserTest
 		case "chrome" => new ChromeDriver
 		case "firefox" => new FirefoxDriver
 		case "ie" => new InternetExplorerDriver
+		case "phantomjs" => new PhantomJSDriver
 	}
 
 	// Can be overridden by a test if necessary.
-	val htmlUnitBrowserVersion = BrowserVersion.INTERNET_EXPLORER_8
+	val htmlUnitBrowserVersion = BrowserVersion.FIREFOX_24
 
 	def ifHtmlUnitDriver(operation:HtmlUnitDriver=>Unit) = {
 		webDriver match {
 			case h:HtmlUnitDriver=>operation(h)
 			case _=> // do nothing
+		}
+	}
+
+	def disableJQueryAnimationsOnHtmlUnit() {
+		ifHtmlUnitDriver { driver =>
+			executeScript("jQuery.support.transition = false")
 		}
 	}
 

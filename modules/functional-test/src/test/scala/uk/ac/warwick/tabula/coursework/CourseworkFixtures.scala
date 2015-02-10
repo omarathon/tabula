@@ -23,7 +23,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 		createPremarkedAssignment(TEST_MODULE_CODE)
 
-		val assessmentFuture = future {
+		val assessmentFuture = Future {
 			And("There is an assessment component for module xxx01")
 			createAssessmentComponent("XXX", "XXX01-15", "Cool essay")
 
@@ -35,10 +35,10 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		// Make them at the same time.
 		val concurrentJobs = Seq(
 			assessmentFuture,
-			future { createStudentMember(P.Student1.usercode) },
-			future { createStudentMember(P.Student2.usercode) },
-			future { createStudentMember(P.Student3.usercode) },
-			future { createStudentMember(P.Student4.usercode) }
+			Future { createStudentMember(P.Student1.usercode) },
+			Future { createStudentMember(P.Student2.usercode) },
+			Future { createStudentMember(P.Student3.usercode) },
+			Future { createStudentMember(P.Student4.usercode) }
 		)
 
 		// Wait to complete
@@ -269,6 +269,8 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		id("js-hint").findElement should be ('empty)
 
 		if (members.nonEmpty) {
+			disableJQueryAnimationsOnHtmlUnit()
+
 			click on linkText("Add students manually")
 			eventually { textArea("massAddUsers").isDisplayed should be {true} }
 

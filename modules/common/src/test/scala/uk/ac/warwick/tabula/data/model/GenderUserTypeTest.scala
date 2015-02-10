@@ -11,7 +11,7 @@ class GenderUserTypeTest extends TestBase {
 		t.convertToObject("F") should be (Female)
 		t.convertToObject("N") should be (Other)
 		t.convertToObject("P") should be (Unspecified)
-		evaluating { t.convertToObject("Q") } should produce [IllegalArgumentException]
+		an [IllegalArgumentException] should be thrownBy { t.convertToObject("Q") }
 	}
   
 	@Test def convertToValue() {

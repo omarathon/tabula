@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
-import org.hibernate.annotations.AccessType
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
@@ -29,7 +28,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
  * Depending on context, the usercodes may be university IDs.
  */
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 class UserGroup private(val universityIds: Boolean) extends GeneratedId with UnspecifiedTypeUserGroup with KnownTypeUserGroup {
 
 	/* For Hibernate xx */

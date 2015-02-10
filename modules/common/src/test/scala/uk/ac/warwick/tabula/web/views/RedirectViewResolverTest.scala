@@ -1,12 +1,8 @@
 package uk.ac.warwick.tabula.web.views
 
 import uk.ac.warwick.tabula.TestBase
-import org.junit.Test
 import org.springframework.web.servlet.view.RedirectView
-import org.springframework.mock.web.MockHttpServletResponse
 import uk.ac.warwick.tabula.HttpMocking
-import collection.JavaConversions.asJavaMap
-import collection.mutable
 import org.springframework.web.servlet.DispatcherServlet
 import org.springframework.web.servlet.support.SessionFlashMapManager
 import uk.ac.warwick.tabula.web.controllers.ControllerViews

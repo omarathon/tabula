@@ -38,6 +38,7 @@
         <processorPath useClasspath="true" />
         <module name="admin" />
         <module name="all" />
+        <module name="api" />
         <module name="attendance" />
         <module name="common" />
         <module name="courses" />
@@ -50,19 +51,19 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="admin" target="1.6" />
-      <module name="all" target="1.6" />
-      <module name="attendance" target="1.6" />
-      <module name="attendance (1)" target="1.6" />
-      <module name="common" target="1.6" />
-      <module name="courses" target="1.6" />
-      <module name="functional-test" target="1.6" />
-      <module name="groups" target="1.6" />
-      <module name="home" target="1.6" />
-      <module name="profiles" target="1.6" />
-      <module name="reports" target="1.6" />
-      <module name="scheduling" target="1.6" />
-      <module name="tabula-project" target="1.6" />
+      <module name="admin" target="1.8" />
+      <module name="all" target="1.8" />
+      <module name="api" target="1.8" />
+      <module name="attendance" target="1.8" />
+      <module name="common" target="1.8" />
+      <module name="courses" target="1.8" />
+      <module name="functional-test" target="1.8" />
+      <module name="groups" target="1.8" />
+      <module name="home" target="1.8" />
+      <module name="profiles" target="1.8" />
+      <module name="reports" target="1.8" />
+      <module name="scheduling" target="1.8" />
+      <module name="tabula-project" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -49,7 +49,7 @@
 
 			<@form.labelled_row "relationship" agent_role?cap_first cssClass!"">
 				<@f.select path="relationship" cssClass="input-large">
-					<@f.option disabled="true" selected="true" label="Please select one..." />
+					<@f.option disabled=true selected="true" label="Please select one..." />
 					<@f.options items=allRelationships itemLabel="agentName" />
 				</@f.select>
 				<small class="help-block">
@@ -80,7 +80,7 @@
 
 		<@form.labelled_row "format" "Format">
 			<@f.select path="format" cssClass="input-large">
-				<@f.option disabled="true" selected="true" label="Please select one..." />
+				<@f.option disabled=true selected="true" label="Please select one..." />
 				<@f.options items=formats itemLabel="description" itemValue="code" />
 			</@f.select>
 		</@form.labelled_row>

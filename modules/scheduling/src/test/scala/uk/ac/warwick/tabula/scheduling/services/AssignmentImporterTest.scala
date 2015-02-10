@@ -17,7 +17,7 @@ import scala.collection.mutable.ArrayBuffer
 trait EmbeddedSits {
 	val sits = new EmbeddedDatabaseBuilder().addScript("sits.sql").build()
 
-	@After def after {
+	@After def afterTheFeast {
 		sits.shutdown()
 	}
 }

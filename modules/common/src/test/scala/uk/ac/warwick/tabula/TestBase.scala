@@ -1,6 +1,9 @@
 package uk.ac.warwick.tabula
 
 import java.io.{InputStream, File, StringReader}
+import java.util.concurrent.TimeUnit
+import org.scalatest.Matchers
+
 import scala.collection.JavaConversions._
 import scala.collection.GenSeq
 import org.apache.commons.configuration.PropertiesConfiguration
@@ -11,10 +14,7 @@ import org.joda.time.DateTimeUtils
 import org.joda.time.ReadableInstant
 import org.junit.After
 import org.junit.Before
-import org.scalatest.junit.JUnitSuite
-import org.scalatest.junit.ShouldMatchersForJUnit
-import org.specs.mock.JMocker._
-import org.specs.mock.JMocker.`with`
+import org.scalatest.junit.{AssertionsForJUnit, JUnitSuite}
 import org.springframework.core.io.ClassPathResource
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
@@ -24,7 +24,7 @@ import freemarker.cache.MultiTemplateLoader
 import uk.ac.warwick.sso.client.SSOConfiguration
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.web.views.{UrlMethodModel, ScalaFreemarkerConfiguration}
+import uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.spring.FileUtils
@@ -45,12 +45,12 @@ import uk.ac.warwick.tabula.data.Transactions
   *
   * Also a bunch of methods for generating fake support resources.
   */
-abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with TestHelpers with TestFixtures with Logging{
+abstract class TestBase extends JUnitSuite with Matchers with AssertionsForJUnit with TestHelpers with TestFixtures with Logging{
 	// bring in type so we can be lazy and not have to import @Test
 	type Test = org.junit.Test
 
 	// No test should take longer than a minute
-	val minuteTimeout = new Timeout(60000)
+	val minuteTimeout = new Timeout(60000, TimeUnit.MILLISECONDS)
 	@Rule def timeoutRule = minuteTimeout
 
 	Transactions.enabled = false
@@ -168,14 +168,6 @@ trait TestHelpers extends TestFixtures {
 	  */
 	@After def deleteTemporaryDirs = try{temporaryFiles.par foreach FileUtils.recursiveDelete} catch {case _: Throwable => /* squash! will be cleaned from temp eventually anyway */}
 
-	/** withArgs(a,b,c) translates to
-	  * with(allOf(a,b,c)).
-	  *
-	  * :_* is used to pass varargs from one function to another
-	  * function that also takes varargs.
-	  */
-	def withArg[A](matcher: Matcher[A]*) = `with`(allOf(matcher: _*))
-
 	def withFakeTime(when: ReadableInstant)(fn: => Unit) =
 		try {
 			DateTimeUtils.setCurrentMillisFixed(when.getMillis)
@@ -251,14 +243,6 @@ trait TestHelpers extends TestFixtures {
 			BePropertyMatchResult(clazz.isAssignableFrom(left.getClass), "an instance of " + clazz.getName)
 		}
 	}
-
-	def containMatching[A](f: (A)=>Boolean) = org.scalatest.matchers.Matcher[GenSeq[A]] { (v:GenSeq[A]) =>
-		org.scalatest.matchers.MatchResult(
-    		v exists f,
-    		"Contained a matching value",
-    		"Contained no matching value"
-		)
-	}
 }
 trait FreemarkerTestHelpers{
   class StubFreemarkerMethodModel extends TemplateMethodModelEx with Mockito {
@@ -267,8 +251,8 @@ trait FreemarkerTestHelpers{
     def exec(arguments: util.List[_]): AnyRef = Option(mock.exec(arguments)).getOrElse("")
   }
 
-  class StubFreemarkerDirectiveModel extends TemplateDirectiveModel with TemplateMethodModel with Mockito{
-    val mockMethod: TemplateMethodModel = mock[TemplateMethodModel]
+  class StubFreemarkerDirectiveModel extends TemplateDirectiveModel with TemplateMethodModelEx with Mockito{
+    val mockMethod: TemplateMethodModelEx = mock[TemplateMethodModelEx]
     val mockDirective: TemplateDirectiveModel = mock[TemplateDirectiveModel]
 
     def execute(env: Environment, params: util.Map[_, _], loopVars: Array[TemplateModel], body: TemplateDirectiveBody) {

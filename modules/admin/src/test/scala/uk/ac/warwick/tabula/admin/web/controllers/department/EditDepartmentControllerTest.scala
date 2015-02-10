@@ -47,7 +47,7 @@ class EditDepartmentControllerTest extends TestBase with Mockito {
 
 		controller.submit(command, errors).viewName should be("admin/department/edit/form")
 
-		there was no (command).apply()
+		there was atMost(0) (command).apply()
 	}
 
 }

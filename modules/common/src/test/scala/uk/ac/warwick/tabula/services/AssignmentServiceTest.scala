@@ -146,7 +146,7 @@ class AssignmentServiceTest extends PersistenceTestBase with Mockito {
 		assignmentService.save(assignment)
 		session.flush()
 
-		assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should not be ()
+		assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should not be ('empty)
 		assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2008), module) should be ('empty)
 		assignmentService.getAssignmentByNameYearModule("Blessay", new AcademicYear(2009), module) should be ('empty)
 	}

@@ -17,12 +17,12 @@
         <p>Publish allocations for ${smallGroupSet.name} so they are shown in Tabula to:</p>
         <@form.row "notifyStudents">
             <label class='checkbox ${smallGroupSet.releasedToStudents?string("disabled use-tooltip' title='Already published'","'") }>
-                <@f.checkbox path="notifyStudents" disabled="${smallGroupSet.releasedToStudents?string}"/>Students
+                <@f.checkbox path="notifyStudents" disabled=smallGroupSet.releasedToStudents />Students
             </label>
         </@form.row>
         <@form.row "notifyTutors" >
             <label class="checkbox ${smallGroupSet.releasedToTutors?string('disabled','')}">
-                <@f.checkbox path="notifyTutors" disabled="${smallGroupSet.releasedToTutors?string}"/>Tutors
+                <@f.checkbox path="notifyTutors" disabled=smallGroupSet.releasedToTutors />Tutors
             </label>
         </@form.row>
         <hr>
