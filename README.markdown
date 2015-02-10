@@ -87,7 +87,29 @@ The usual SSO config guff. You will need to get this configuration added to Web 
 
 ### ActiveMQ
 
-Unpack activemq-ra.rar into the deploy directory from http://pkg.elab.warwick.ac.uk/activemq.apache.org/activemq-ra.zip or install ActiveMQ locally instead. Note that the repository version of ActiveMQ doesn't work on Ubuntu 14.10
+Unfortunately, the only way to get this working on Tomcat is to install ActiveMQ locally.
+
+#### Ubuntu 14.04
+
+Install ActiveMQ from the package repo and add a new config with the broker name Tabula.
+
+#### Ubuntu 14.10
+
+The ActiveMQ package in the utopic repo is completely broken, so we'll use an external repo to get the latest version.
+
+```
+sudo apt-add-repository 'deb http://dl.bintray.com/jmkgreen/deb /'
+sudo apt-get update
+sudo apt-get install activemq
+```
+
+Ignore the warning about unauthenticated packages. Once it's finished, edit `/etc/activemq/activemq.xml` and look for where it says `brokerName="localhost"` - change that to `brokerName="tabula"`. Restart ActiveMQ with `sudo service activemq restart`.
+
+Set the following in your `tabula.properties`:
+
+```
+activemq.broker=tcp://localhost:61616
+```
 
 ### Java 8 JDK
 
