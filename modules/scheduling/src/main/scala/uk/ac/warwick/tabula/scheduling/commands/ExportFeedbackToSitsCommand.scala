@@ -41,8 +41,8 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 				logger.warn(f"Not uploading feedback $feedbackId as department ${department.code} is closed")
 			else {
 
-				// first check to see if there is one and only one matching blank row
-				val rowCount = exportFeedbackToSitsService.countMatchingBlankSasRecords(feedbackToLoad)
+				// first check to see if there is one and only one matching row
+				val rowCount = exportFeedbackToSitsService.countMatchingSasRecords(feedbackToLoad)
 
 				if (rowCount == 0) feedbackToLoad.status = Failed
 				else if (rowCount > 1) {
