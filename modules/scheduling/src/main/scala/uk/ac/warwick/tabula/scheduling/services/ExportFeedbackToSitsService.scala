@@ -84,11 +84,11 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
 		val parameterGetter: ParameterGetter = new ParameterGetter(feedbackForSits)
 		val updateQuery = new ExportFeedbackToSitsQuery(sitsDataSource)
 
-		val actualGrade = feedbackForSits.feedback.actualGrade
-		val actualMark = feedbackForSits.feedback.actualMark
+		val grade = feedbackForSits.feedback.latestGrade
+		val mark = feedbackForSits.feedback.latestMark
 		val numRowsChanged =
-			if (actualGrade.isDefined && actualMark.isDefined)
-				updateQuery.updateByNamedParam(parameterGetter.getUpdateParams(actualMark.get, actualGrade.get))
+			if (grade.isDefined && mark.isDefined)
+				updateQuery.updateByNamedParam(parameterGetter.getUpdateParams(mark.get, grade.get))
 		else {
 				0 // issue a warning when the FeedbackForSits record is created, not here
 			}
