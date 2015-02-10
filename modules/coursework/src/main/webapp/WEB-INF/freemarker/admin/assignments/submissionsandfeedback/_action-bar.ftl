@@ -266,6 +266,21 @@
 							<i class="icon-remove"></i> Delete feedback
 						</@fmt.permission_button>
 					</li>
+
+					<#if features.queueFeedbackForSits>
+						<li>
+							<#assign uploadToSitsUrl><@routes.uploadToSits assignment /></#assign>
+							<@fmt.permission_button
+								permission='Feedback.Publish'
+								scope=assignment
+								action_descr='upload feedback to SITS'
+								tooltip='Upload mark and grade to SITS'
+								href=uploadToSitsUrl
+							>
+								<i class="icon-upload"></i> Upload to SITS
+							</@fmt.permission_button>
+						</li>
+					</#if>
 				</ul>
 			</div>
 
