@@ -21,7 +21,7 @@ Setting up for development
 
 Install Tomcat 8 from here: http://tomcat.apache.org/download-80.cgi - on Unix, it makes sense just to extract Tomcat into `/opt` and then symlink it to `/usr/local/tomcat-8` or wherever is convenient. You can then upgrade Tomcat without breaking any configuration by just changing that symlink.
 
-Create a new base directory for Tabula's config and deployment, e.g. `/var/tomcat/servers/tabula`. The structure and contents of this directory should be as follows:
+Create a new base directory for Tabula's config and deployment, e.g. `/var/tomcat/instances/tabula`. The structure and contents of this directory should be as follows:
 
 ```
 tabula/
@@ -44,6 +44,8 @@ tabula/
 ├── webapps/
 └── work/
 ```
+
+On production instances, we symlink `/usr/local/tomcat-8/instances` to `/var/tomcat/instances`.
 
 The contents of these files are as follows:
 
@@ -136,11 +138,11 @@ An example startup script for Tabula may be:
 #!/bin/bash
 
 # Clear out work and temp because I'm a massive pessimist
-cd /var/tomcat/servers/tabula
+cd /var/tomcat/instances/tabula
 rm -rf work/* temp/*
 
 export CATALINA_HOME=/usr/local/tomcat-8
-export CATALINA_BASE=/var/tomcat/servers/tabula
+export CATALINA_BASE=/var/tomcat/instances/tabula
 
 echo "Starting Tomcat server"
 ${CATALINA_HOME}/bin/catalina.sh run $@
