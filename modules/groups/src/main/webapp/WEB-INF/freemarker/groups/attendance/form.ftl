@@ -95,7 +95,11 @@
 
 		<h6 style="margin: -8px 0 12px;">
 			${command.event.day.name} <@fmt.time event.startTime /> - <@fmt.time event.endTime />, Week ${command.week}
+			<#if command.event.tutors.users?has_content>
+				<br /><@fmt.p number=command.event.tutors.users?size singular="Tutor" shownumber=false/>: <#list command.event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>
+			</#if>
 		</h6>
+
 
 		<div class="fix-header">
 			<div class="row-fluid record-attendance-form-header check-all">
