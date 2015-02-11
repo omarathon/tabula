@@ -41,8 +41,9 @@ class RelationshipListTest extends SubDepartmentFixture{
 		go to Path("/profiles/department/xxx/tutor")
 		pageSource should include("1 personal tutee")
 
-		And("The tutor page shows two students without a tutor")
-		pageSource should include("View 2 students with no personal tutor")
+		And("The tutor page shows one student without a tutor")
+		// Student3 is a PGR and they are not expected to have a personal tutor, so is filtered out
+		pageSource should include("View 1 student with no personal tutor")
 	}
 
 	"A sub-departmental administrator" should "be able to see lists of students in his sub-department" in {
