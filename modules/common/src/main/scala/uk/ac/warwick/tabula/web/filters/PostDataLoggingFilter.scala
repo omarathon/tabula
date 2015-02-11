@@ -42,7 +42,7 @@ class PostDataLoggingFilter extends AbstractHttpFilter with Filter {
 	def generateLogLine(request: HttpServletRequest): String = {
 		val data = new StringBuilder()
 
-		data.append(RequestInfo.fromThread.map(_.user.realId).getOrElse(""))
+		data.append("userId=").append(RequestInfo.fromThread.map(_.user.realId).getOrElse(""))
 		data.append(" ")
 		data.append(request.getRequestURI)
 		data.append(" ")

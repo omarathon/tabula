@@ -24,12 +24,12 @@ class PostDataLoggingFilterTest extends TestBase {
 	filter.postLogger.addAppender(appender)
 
 	@Test def noParametersAnonymous {
-		assert(filter.generateLogLine(request) === " /url.php ")
+		assert(filter.generateLogLine(request) === "userId= /url.php ")
 	}
 
 	@Test def noParametersLoggedIn {
 		withUser("ada") {
-			assert(filter.generateLogLine(request) === "ada /url.php ")
+			assert(filter.generateLogLine(request) === "userId=ada /url.php ")
 		}
 	}
 
@@ -37,7 +37,7 @@ class PostDataLoggingFilterTest extends TestBase {
 		request.addParameter("sql", "select SYSDATE from hedgefund where snakes='gravy'")
 		request.addParameter("multiball", Array("baseball","pinball"))
 		withUser("beatrice") {
-			assert(filter.generateLogLine(request) === "beatrice /url.php multiball=baseball&multiball=pinball&sql=select SYSDATE from hedgefund where snakes='gravy'")
+			assert(filter.generateLogLine(request) === "userId=beatrice /url.php multiball=baseball&multiball=pinball&sql=select SYSDATE from hedgefund where snakes='gravy'")
 		}
 	}
 
@@ -56,7 +56,7 @@ class PostDataLoggingFilterTest extends TestBase {
 		request.setMethod("POST")
 		request.addParameter("query", "acomudashun")
 		filter.doFilter(request, response, chain)
-		assert(writer.toString === "POST_LOGGER -  /url.php query=acomudashun\n")
+		assert(writer.toString === "POST_LOGGER - userId= /url.php query=acomudashun\n")
 	}
 
 	@Test def doFilterMultipart {
