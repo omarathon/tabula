@@ -17,18 +17,22 @@ object FeedbackAdjustmentNotification {
 class FeedbackAdjustmentNotification
 	extends NotificationWithTarget[Feedback, Assignment]
 	with SingleItemNotification[Feedback]
-	with SingleRecipientNotification
 	with AutowiringUserLookupComponent {
 
 	def verb = "adjusted"
 	def assignment = target.entity
 	def feedback: Feedback = item.entity
 
-	def recipient = {
-		val userId = assignment.markingWorkflow.getStudentsPrimaryMarker(assignment, feedback.universityId).getOrElse({
-			throw new IllegalStateException(s"No primary marker found for ${feedback.universityId}")
-		})
-		userLookup.getUserByUserId(userId)
+	def recipients = {
+		if (assignment.hasWorkflow) {
+			val userId = assignment.markingWorkflow.getStudentsPrimaryMarker(assignment, feedback.universityId).getOrElse({
+				throw new IllegalStateException(s"No primary marker found for ${feedback.universityId}")
+			})
+			Seq(userLookup.getUserByUserId(userId))
+		} else {
+			Seq()
+		}
+
 	}
 
 	def title = s"${assignment.module.code.toUpperCase} - for ${assignment.name} : Adjustments have been made to feedback for ${feedback.universityId}"
@@ -39,7 +43,7 @@ class FeedbackAdjustmentNotification
 			"feedback" -> feedback
 	))
 
-	def url: String = Routes.admin.assignment.markerFeedback(assignment, recipient)
+	def url: String = recipients.headOption.map(recipient => Routes.admin.assignment.markerFeedback(assignment, recipient)).getOrElse("")
 	def urlTitle = s"Marking for this assignment"
 
 	priority = Info
