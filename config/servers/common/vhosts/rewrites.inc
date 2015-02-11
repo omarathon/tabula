@@ -13,6 +13,8 @@ RewriteRule \.php$ [G,L]
 # static content suffixes
 RewriteRule ^(/static/.*?)\.[0-9]{10,16}$ $1$2 [QSA]
 
+RewriteRule ^/exams(.*)$ /coursework/exams$1 [QSA,L,R=301]
+
 # TAB-46 Rewrite legacy /courses to /coursework
 RewriteRule ^/courses(.*)$ /coursework$1 [QSA,L,R=301]
 
