@@ -2,7 +2,7 @@
 
 <#assign requestPath = (info.requestedUri.path!"") />
 
-<#if requestPath?starts_with('/coursework/exams')>
+<#if requestPath?starts_with('/exams/')>
 	<#assign bodyClass="exams-page" />
 	<#assign siteHeader="Exams Management" />
 	<#assign subsite=true />
