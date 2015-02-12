@@ -42,7 +42,7 @@ object Tier4VisaImporter {
 	var sitsSchema: String = Wire.property("${schema.sits}")
 	var nonTier4VisaTypes: String = Wire.property("${nonTier4VisaTypes}")
 
-	val Tier4VisaSql = f"""
+	def Tier4VisaSql = f"""
  			select count(*) as count from $sitsSchema.srs_vis -- visa details
  			where vis_stuc = :universityId
  			and vis_iuse = 'Y'

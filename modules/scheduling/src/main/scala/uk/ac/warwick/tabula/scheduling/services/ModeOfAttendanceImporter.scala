@@ -83,7 +83,7 @@ case class ModeOfAttendanceInfo(code: String, shortName: String, fullName: Strin
 object ModeOfAttendanceImporter {
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
-	val GetModeOfAttendance = f"""
+	def GetModeOfAttendance = f"""
 		select moa_code, moa_snam, moa_name from $sitsSchema.ins_moa
 		"""
 

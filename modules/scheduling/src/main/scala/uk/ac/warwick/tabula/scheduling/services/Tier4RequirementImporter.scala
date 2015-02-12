@@ -45,7 +45,7 @@ object Tier4RequirementImporter {
 	// there are current students with nationality codes which are not flagged as in
 	// use.
 	// Returns the number of nationalities for the student (1 or 2, which is the most SITS stores) which don't need a visa
-	val GetTier4RequirementSql = f"""
+	def GetTier4RequirementSql = f"""
 			select count(nat_edid) as count from $sitsSchema.srs_nat -- nationality
 			where nat_code in (
 				(select stu_natc from $sitsSchema.ins_stu where stu_code = :universityId),
