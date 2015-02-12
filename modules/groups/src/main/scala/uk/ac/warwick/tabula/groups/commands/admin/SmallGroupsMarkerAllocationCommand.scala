@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.{AssignmentMembershipServiceComponent, AutowiringAssignmentMembershipServiceComponent, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
@@ -23,7 +24,7 @@ case class SetAllocation(set: SmallGroupSet, firstMarkerGroups: Seq[GroupAllocat
 case class GroupAllocation(name: String, tutors: Seq[User], students: Seq[User])
 
 class SmallGroupsMarkerAllocationCommandInternal(val assignment: Assignment)
-	extends CommandInternal[Seq[SetAllocation]]	with SmallGroupsMarkerAllocationCommandState {
+	extends CommandInternal[Seq[SetAllocation]]	with SmallGroupsMarkerAllocationCommandState with Logging {
 
 	self : SmallGroupServiceComponent with AssignmentMembershipServiceComponent =>
 
@@ -50,12 +51,15 @@ class SmallGroupsMarkerAllocationCommandInternal(val assignment: Assignment)
 				getGroupAllocations(assignment.markingWorkflow.secondMarkers.users)
 			)
 		})
+
 		// do not return sets that have groups that don't have at least one tutor who is a marker
 		setAllocations.filterNot( s =>
 			s.firstMarkerGroups.isEmpty ||
 			s.firstMarkerGroups.exists(_.tutors.isEmpty) ||
-			s.secondMarkerGroups.isEmpty ||
-			s.secondMarkerGroups.exists(_.tutors.isEmpty)
+			(assignment.markingWorkflow.hasSecondMarker && (
+				s.secondMarkerGroups.isEmpty ||
+				s.secondMarkerGroups.exists(_.tutors.isEmpty)
+			))
 		)
 	}
 }
@@ -67,6 +71,6 @@ trait SmallGroupsMarkerAllocationCommandState {
 trait SmallGroupsMarkerAllocationCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: SmallGroupsMarkerAllocationCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.SmallGroups.ReadMembership, assignment.module)
+		p.PermissionCheck(Permissions.SmallGroups.ReadMembership, mandatory(assignment))
 	}
 }
