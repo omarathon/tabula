@@ -43,6 +43,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 		session.newCriteria[RecipientNotificationInfo]
 			.createAlias("notification", "notification")
 			.add(is("emailSent", false))
+			.add(is("dismissed", false))
 
 	def unemailedRecipientCount =
 		unemailedRecipientCriteria.count
