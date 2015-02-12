@@ -24,10 +24,10 @@
 			<h3>Feedback</h3>
 			<p>
 				<#if command.actualMark??>
-					Actual mark - ${command.actualMark}<br>
+					Original mark - ${command.actualMark}<br>
 				</#if>
 				<#if command.actualGrade??>
-					Actual grade - ${command.actualGrade}<br>
+					Original grade - ${command.actualGrade}<br>
 				</#if>
 			</p>
 		</div>
