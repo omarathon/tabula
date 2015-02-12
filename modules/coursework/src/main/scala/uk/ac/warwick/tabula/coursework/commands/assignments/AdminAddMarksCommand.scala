@@ -42,6 +42,7 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 				if (markChanged || gradeChanged){
 					mark.isModified = true
 					mark.isPublished = feedback.released
+					mark.hasAdjustment = Seq(feedback.adjustedMark, feedback.adjustedGrade).flatten.nonEmpty
 				}
 			case None =>
 		}
