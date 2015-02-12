@@ -18,7 +18,7 @@ import language.implicitConversions
  *  def getStuff(keys) = dao.getTheStuffs(keys).tap(stuffs=> logger.info(stuffs.map(_.stuffCode).mkString(",")) )
  *
  */
-class Tap[A](any: A) {
+class Tap[A](val any: A) extends AnyVal {
   def tap(f: (A) => Unit): A = {
     f(any)
     any

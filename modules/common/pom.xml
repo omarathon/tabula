@@ -518,6 +518,17 @@
 			<version>0.1-warwick</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+			<version>4.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpmime</artifactId>
+			<version>4.3.1</version>
+		</dependency>
+
 		<!-- libphonenumber, for formatting phone numbers -->
 		<dependency>
 			<groupId>com.googlecode.libphonenumber</groupId>
@@ -561,12 +572,6 @@
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-test-framework</artifactId>
 			<version>${org.apache.lucene.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpmime</artifactId>
-			<version>4.3.1</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
