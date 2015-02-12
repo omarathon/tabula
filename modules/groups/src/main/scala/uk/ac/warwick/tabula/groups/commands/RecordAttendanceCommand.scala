@@ -14,8 +14,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, Sm
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
+import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.helpers.{DateBuilder, FoundUser, LazyMaps}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula._
@@ -226,10 +225,10 @@ trait RecordAttendanceCommandValidation extends SelfValidating {
 	
 }
 
-trait RecordAttendanceCommandPermissions extends RequiresPermissionsChecking {
+trait RecordAttendanceCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: RecordAttendanceState =>
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.SmallGroupEvents.Register, event)
+		p.PermissionCheck(Permissions.SmallGroupEvents.Register, mandatory(event))
 	}
 }
 
