@@ -8,6 +8,7 @@ import org.apache.http.entity.mime.content.ByteArrayBody
 import org.apache.log4j.{PatternLayout, Level, WriterAppender}
 import org.springframework.mock.web.{MockFilterChain, MockHttpServletResponse, MockHttpServletRequest}
 import org.springframework.util.FileCopyUtils
+import uk.ac.warwick.sso.client.SSOClientFilter
 import uk.ac.warwick.tabula.TestBase
 import org.apache.http.entity.ContentType
 
@@ -25,12 +26,23 @@ class PostDataLoggingFilterTest extends TestBase {
 	filter.postLogger.setLevel(Level.INFO)
 	filter.postLogger.addAppender(appender)
 
+	private def withSsoUser(user:String)(fn: =>Unit): Unit = {
+		withUser(user) {
+			try {
+				request.setAttribute(SSOClientFilter.USER_KEY, currentUser.realUser)
+				fn
+			} finally {
+				request.setAttribute(SSOClientFilter.USER_KEY, null)
+			}
+		}
+	}
+
 	@Test def noParametersAnonymous {
 		assert(filter.generateLogLine(request) === "userId= multipart=false /url.php ")
 	}
 
 	@Test def noParametersLoggedIn {
-		withUser("ada") {
+		withSsoUser("ada") {
 			assert(filter.generateLogLine(request) === "userId=ada multipart=false /url.php ")
 		}
 	}
@@ -38,7 +50,7 @@ class PostDataLoggingFilterTest extends TestBase {
 	@Test def withParametersLoggedIn {
 		request.addParameter("sql", "select SYSDATE from hedgefund where snakes='gravy'")
 		request.addParameter("multiball", Array("baseball","pinball"))
-		withUser("beatrice") {
+		withSsoUser("beatrice") {
 			assert(filter.generateLogLine(request) === "userId=beatrice multipart=false /url.php multiball=baseball&multiball=pinball&sql=select SYSDATE from hedgefund where snakes='gravy'")
 		}
 	}
