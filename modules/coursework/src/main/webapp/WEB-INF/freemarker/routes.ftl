@@ -8,7 +8,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 -->
 
-<#macro _u page context='/coursework'><@url context=context page=page /></#macro>
+<#macro _u page context=component.context?default('/coursework')>
+	<@url context=context page=page />
+</#macro>
 
 <#macro home><@_u page="/" /></#macro>
 <#macro departmenthome department><@_u page="/admin/department/${department.code}/" /></#macro>
