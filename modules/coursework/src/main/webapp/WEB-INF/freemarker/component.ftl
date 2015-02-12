@@ -9,6 +9,7 @@
 	<#assign title="Exams Management" />
 	<#assign name="exams" />
 	<#assign context="/exams" />
+	<#assign rootUrl="${topLevelUrl}exams/" />
 	<#assign nonav=false />
 <#else>
 	<#assign bodyClass="coursework-page" />
@@ -17,5 +18,6 @@
 	<#assign title="Coursework Management" />
 	<#assign name="courses" />
 	<#assign context="/coursework" />
+	<#assign rootUrl="${topLevelUrl}coursework/" />
 	<#assign nonav=false />
 </#if>

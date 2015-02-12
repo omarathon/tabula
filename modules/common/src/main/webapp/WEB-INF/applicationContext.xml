@@ -352,6 +352,7 @@
 		<property name="sharedVariables">
 			<map>
 				<entry key="url" value-ref="urlMethodModel" />
+				<entry key="topLevelUrl" value="${toplevel.url}" />
 				<entry key="rootUrl" value="${toplevel.url}${module.context}/" />
 				<entry key="componentName" value="${module.name}" />
 				<entry key="activeSpringProfiles" value="${spring.profiles.active}" />
