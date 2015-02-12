@@ -3,9 +3,9 @@ package uk.ac.warwick.tabula.services.permissions
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.roles.SmallGroupTutor
+import uk.ac.warwick.tabula.roles.{ SmallGroupEventTutor, SmallGroupTutor }
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent}
-import uk.ac.warwick.tabula.roles.SmallGroupTutorRoleDefinition
+import uk.ac.warwick.tabula.roles.{ SmallGroupEventTutorRoleDefinition, SmallGroupTutorRoleDefinition}
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 @Component
@@ -19,16 +19,23 @@ class SmallGroupTutorRoleProvider extends RoleProvider with TaskBenchmarking {
 		}
 	}
 
-	private def getRoles(user: CurrentUser, events: Seq[SmallGroupEvent]) =
-		events.toStream
-		  .filter { _.tutors.includesUser(user.apparentUser) }
-		  .map { _.group }
-			.filter { _.groupSet.releasedToTutors }
-		  .distinct
-		  .map { group =>
-		 	  customRoleFor(group.groupSet.module.adminDepartment)(SmallGroupTutorRoleDefinition, group).getOrElse(SmallGroupTutor(group))
-		 	}
+	private def getRoles(user: CurrentUser, events: Seq[SmallGroupEvent]) = {
+		val validEvents =
+			events.toStream
+				.filter { _.tutors.includesUser(user.apparentUser) }
+				.filter { _.group.groupSet.releasedToTutors }
+
+		val eventRoles = validEvents.map { event =>
+			customRoleFor(event.group.groupSet.module.adminDepartment)(SmallGroupEventTutorRoleDefinition, event).getOrElse(SmallGroupEventTutor(event))
+		}
+
+		val groupRoles = validEvents.map { _.group }.distinct.map { group =>
+			customRoleFor(group.groupSet.module.adminDepartment)(SmallGroupTutorRoleDefinition, group).getOrElse(SmallGroupTutor(group))
+		}
+
+		eventRoles #::: groupRoles
+	}
 	
-	def rolesProvided = Set(classOf[SmallGroupTutor])
+	def rolesProvided = Set(classOf[SmallGroupTutor], classOf[SmallGroupEventTutor])
 	
 }
