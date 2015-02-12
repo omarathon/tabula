@@ -152,6 +152,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 			a.assessmentGroup = "A"
 			a.assessmentType = AssessmentType.Assignment
 			a.inUse = true
+			a.marksCode = "TABULA-UG"
 			a
 		}
 

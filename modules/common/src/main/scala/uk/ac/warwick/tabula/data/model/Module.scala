@@ -100,7 +100,7 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 
 object Module extends Logging {
 
-	private val ModuleCodePatternString = "(?i)([a-z]{2}[a-z0-9][a-z0-9.][a-z0-9])"
+	private val ModuleCodePatternString = "(?i)([a-z]{2,3}[a-z0-9][a-z0-9.][a-z0-9])"
 	// <modulecode> "-" <cats>
 	// where cats can be a decimal number.
 	private val ModuleCatsPattern = new Regex(ModuleCodePatternString + """-(\d+(?:\.\d+)?)""")

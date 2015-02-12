@@ -248,21 +248,21 @@
 											<#if enhancedFeedback.downloaded><span class="label label-success">Downloaded</span>
 											<#else><span class="label label-info">Published</span>
 											</#if>
-											<#if queueSitsUploadEnabled>
-												<#if enhancedFeedback.feedbackForSits??>
-													<#assign feedbackSitsStatus=enhancedFeedback.feedbackForSits.status />
-													<#if feedbackSitsStatus.code == "failed">
-														<span class="label label-important">${feedbackSitsStatus.description}</span>
-													<#elseif feedbackSitsStatus.code == "successful">
-														<span class="label label-success">${feedbackSitsStatus.description}</span>
-													<#else>
-														<span class="label label-info">${feedbackSitsStatus.description}</span>
-													</#if>
-												<#else>
-													<span class="label label-info">Not queued for SITS upload</span>
-												</#if>
-											</#if>
 										<#else><span class="label label-warning">Not yet published</span>
+										</#if>
+										<#if queueSitsUploadEnabled>
+											<#if enhancedFeedback.feedbackForSits??>
+												<#assign feedbackSitsStatus=enhancedFeedback.feedbackForSits.status />
+												<#if feedbackSitsStatus.code == "failed">
+													<span class="label label-important">${feedbackSitsStatus.description}</span>
+												<#elseif feedbackSitsStatus.code == "successful">
+													<span class="label label-success">${feedbackSitsStatus.description}</span>
+												<#else>
+													<span class="label label-info">${feedbackSitsStatus.description}</span>
+												</#if>
+											<#else>
+												<span class="label label-info">Not queued for SITS upload</span>
+											</#if>
 										</#if>
 									</#if>
 									<#if student.nextStage??><strong>Next action:</strong> <@action student.nextStage.actionCode student /></#if>

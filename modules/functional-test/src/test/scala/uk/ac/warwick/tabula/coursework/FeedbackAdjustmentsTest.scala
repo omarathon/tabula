@@ -37,7 +37,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			When("I click on a students ID")
 			click on cssSelector("h6.toggle-icon")
 			Then("I see the form and the students current marks")
-			eventuallyAjax(pageSource contains "Actual mark - 41" should be {true})
+			eventuallyAjax(pageSource contains "Original mark - 41" should be {true})
 
 			When("I populate and submit the form")
 			// as there is a hidden and disabled reason element on the same page we can't use the scala test singleSel
