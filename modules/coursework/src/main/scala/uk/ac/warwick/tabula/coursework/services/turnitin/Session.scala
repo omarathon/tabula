@@ -4,6 +4,7 @@ import dispatch.classic._
 import dispatch.classic.mime.Mime._
 import java.io.IOException
 import org.apache.commons.codec.digest.DigestUtils
+import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.content.FileBody
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.Products._
@@ -132,7 +133,7 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	 * server will explode with a confusing error if you don't provide a Content-Length header.
 	 */
 	def addPdata(file: Option[FileData], req: Request) = file match {
-		case Some(data) if data.file != null => req.add("pdata", new FileBody(data.file, data.name, "application/octet-stream", null))
+		case Some(data) if data.file != null => req.add("pdata", new FileBody(data.file, ContentType.APPLICATION_OCTET_STREAM, data.name))
 		case _ => req
 	}
 
