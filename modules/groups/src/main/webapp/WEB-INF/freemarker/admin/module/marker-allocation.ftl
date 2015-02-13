@@ -76,7 +76,8 @@
 		</div>
 	<#else>
 		<div>
-			I've looked at the Small Group sets for <@fmt.module_name module=assignment.module withFormatting=false /> in ${assignment.academicYear.toString}. Not enough tutors are set up as markers in this workflow.
+			Not enough tutors are set up as markers in the workflow for Small Group sets for
+			<@fmt.module_name module=assignment.module withFormatting=false /> in ${assignment.academicYear.toString}.
 			You need to make sure that every Small Group has tutors who are also markers.
 		</div>
 	</#if>
