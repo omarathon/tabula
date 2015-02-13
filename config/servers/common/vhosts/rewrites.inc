@@ -17,6 +17,7 @@ RewriteRule ^(/static/.*?)\.[0-9]{10,16}$ $1$2 [QSA]
 RewriteRule ^/courses(.*)$ /coursework$1 [QSA,L,R=301]
 
 # Add trailing slash because otherwise ensadness occurs
+RewriteRule ^/exams$ /exams/ [QSA,L,R=301]
 RewriteRule ^/coursework$ /coursework/ [QSA,L,R=301]
 RewriteRule ^/profiles$ /profiles/ [QSA,L,R=301]
 RewriteRule ^/scheduling$ /scheduling/ [QSA,L,R=301]
@@ -29,13 +30,17 @@ RewriteRule ^/reports$ /reports/ [QSA,L,R=301]
 RewriteRule ^/home(.*)$ $1 [QSA,L,R=301]
 
 # Rewrite everything for coursework into the courses module
+RewriteCond %{REQUEST_URI} !^/coursework/exams(.*)
 RewriteRule ^/coursework/(.*)$ http://127.0.0.1:${proxy:port}/courses/$1 [QSA,P,L]
+
+RewriteRule ^/exams/(.*)$ http://127.0.0.1:${proxy:port}/courses/exams/$1 [QSA,P,L]
 
 # Rewrite scheduling directly to the scheduler jboss
 RewriteCond %{REQUEST_URI} ^/scheduling/(.*)
 RewriteRule (.*) http://127.0.0.1:${scheduler:port}$1 [QSA,P,L]
 
 # Rewrite everything that isn't in a module to the home module
+RewriteCond %{REQUEST_URI} !^/exams/(.*)
 RewriteCond %{REQUEST_URI} !^/coursework/(.*)
 RewriteCond %{REQUEST_URI} !^/home/(.*)
 RewriteCond %{REQUEST_URI} !^/profiles/(.*)

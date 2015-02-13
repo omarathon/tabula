@@ -55,7 +55,7 @@
 											| <a href="/settings">Settings</a>
 											| <a href="http://warwick.ac.uk/tabula/manual/" target="_blank">Manual</a>
 											| <a href="http://warwick.ac.uk/tabula/whatsnew/" target="_blank">What's new?</a>
-											| <a class="sso-link" href="<@sso.logoutlink target="${rootUrl}" />">Sign out</a>
+											| <a class="sso-link" href="<@sso.logoutlink target="${component.rootUrl?default(rootUrl)}" />">Sign out</a>
 										<#else>
 											<a class="sso-link" href="<@sso.loginlink />">Sign in</a>
 										</#if>
@@ -209,7 +209,7 @@
 								<#if IS_SSO_PROTECTED!true>
 									<li id="sign-inout-link">
 										<#if user?? && user.loggedIn>
-											<a class="sso-link" href="<@sso.logoutlink target="${rootUrl}" />">Sign out</a>
+											<a class="sso-link" href="<@sso.logoutlink target="${component.rootUrl?default(rootUrl)}" />">Sign out</a>
 										<#else>
 											<a class="sso-link" href="<@sso.loginlink />">Sign in</a>
 										</#if>
