@@ -99,7 +99,7 @@ DEBUG_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=
 JREBEL_SYSTEM_PROPERTIES="-Drebel.workspace.path=/home/mat/workspace"
 
 # General JRebel config
-JREBEL_CONFIG="-Drebel.log=true -Drebel.log.request=true -agentpath:/opt/jrebel/lib/libjrebel64.so"
+JREBEL_CONFIG="-Drebel.log=true -Drebel.log.request=true -agentpath:/opt/jrebel/lib/libjrebel64.so -Drebel.always.rerun.clinit=true"
 
 # Userlookup system properties
 USERLOOKUP_SYSTEM_PROPERTIES="-Duserlookup.ssosUrl=https://websignon.warwick.ac.uk/sentry -Duserlookup.groupservice.type=WarwickGroups -Duserlookup.groupservice.location=http://webgroups.warwick.ac.uk -Duserlookup.disk.store.dir=/tmp/ehcache -Dehcache.disk.store.dir=/tmp/ehcache"

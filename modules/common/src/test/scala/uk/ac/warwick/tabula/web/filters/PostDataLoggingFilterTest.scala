@@ -10,7 +10,7 @@ import org.springframework.mock.web.{MockFilterChain, MockHttpServletResponse, M
 import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.sso.client.SSOClientFilter
 import uk.ac.warwick.tabula.TestBase
-import org.apache.http.entity.ContentType
+import org.apache.http.entity.{StringEntity, ContentType}
 
 class PostDataLoggingFilterTest extends TestBase {
 	val request = new MockHttpServletRequest
@@ -102,5 +102,30 @@ class PostDataLoggingFilterTest extends TestBase {
 
 		// Should only log the text fields, skip the binary parts
 		assert(writer.toString === "POST_LOGGER - userId= multipart=true /url.php confirm=yes\n")
+	}
+
+	@Test(timeout = 1000) def doFilterJson: Unit = {
+		request.setMethod("POST")
+
+		val json = """{"academicYear": "13/14","period": "Autumn","missedPoints": {"1234567": 3}}"""
+
+		val entity = new StringEntity(json, ContentType.APPLICATION_JSON)
+		val baos = new ByteArrayOutputStream
+		entity.writeTo(baos)
+		request.setContentType(entity.getContentType.getValue)
+		request.setContent(baos.toByteArray)
+
+		filter.doFilter(request, response, chain)
+
+		// Read the request completely, as the app would
+		// (using the WRAPPED request passed back into the chain)
+		FileCopyUtils.copyToByteArray(chain.getRequest.getInputStream)
+
+		val future: Future[Unit] = chain.getRequest.getAttribute(filter.futureAttributeName).asInstanceOf[Future[Unit]]
+		// We store the Future of the threaded task
+		future.get()
+
+		// Should only log the text fields, skip the binary parts
+		assert(writer.toString === s"POST_LOGGER - userId= multipart=false /url.php requestBody=$json\n")
 	}
 }

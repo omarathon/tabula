@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
+import uk.ac.warwick.tabula.system.TwoWayConverter
+
 import scala.collection.JavaConversions._
 import uk.ac.warwick.userlookup.User
 import org.springframework.core.convert.converter.Converter
@@ -272,6 +274,7 @@ class MarkingMethodUserType extends AbstractStringUserType[MarkingMethod]{
 	override def convertToValue(state: MarkingMethod) = state.name
 }
 
-class StringToMarkingMethod extends Converter[String, MarkingMethod]{
-	def convert(string:String):MarkingMethod = MarkingMethod.fromCode(string)
+class StringToMarkingMethod extends TwoWayConverter[String, MarkingMethod] {
+	override def convertRight(source: String): MarkingMethod = MarkingMethod.fromCode(source)
+	override def convertLeft(source: MarkingMethod): String = source.name
 }

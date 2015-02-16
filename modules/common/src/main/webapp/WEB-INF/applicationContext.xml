@@ -94,8 +94,71 @@
 		</constructor-arg>
 	</bean>
 
-	<bean id="defaultTypeConverter"
-      class="org.springframework.format.support.FormattingConversionServiceFactoryBean" abstract="true">
+	<util:list id="customConverters">
+		<bean class="uk.ac.warwick.tabula.data.convert.DepartmentCodeConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.ModuleCodeConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.AbstractMeetingRecordIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.MeetingRecordIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.AssessmentComponentIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.AssessmentGroupIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.FeedbackIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.MarkerFeedbackIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.FeedbackTemplateIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.SubmissionIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.MarkingWorkflowIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.MemberUniversityIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.MemberNoteIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.PermissionConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.UserConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.ExtensionIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.RoleDefinitionConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.RoleOverrideConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.model.StringToMarkingMethod"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.MeetingFormatConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.StudentRelationshipTypeConverter" />
+		<bean class="uk.ac.warwick.tabula.data.convert.StudentRelationshipIdConverter" />
+		<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupEventIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupEventOccurrenceIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.DepartmentSmallGroupSetIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.DepartmentSmallGroupIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.DayOfWeekConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.NumberConverterFactory"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.StudentCourseDetailsConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.StudentCourseYearDetailsIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSelfSignUpStateConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.RouteCodeConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetTemplateIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointTemplateIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.JodaLocalDateConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.AttendanceStateConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.ModeOfAttendanceCodeConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.SitsStatusCodeConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.HibernateOrderConverter" />
+		<bean class="uk.ac.warwick.tabula.data.model.AssessmentTypeConverter" />
+		<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointTypeConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.model.CourseTypeConverter" />
+		<bean class="uk.ac.warwick.tabula.data.model.DepartmentFilterRuleConverter" />
+		<bean class="uk.ac.warwick.tabula.data.convert.AbsenceTypeConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.NotificationIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointStyleConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringSchemeIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointTypeConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringTemplateIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringTemplatePointIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetFilterConverter"/>
+	</util:list>
+
+	<bean id="typeConverter"
+      class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
       <description>
       	Converts arguments in various places.
       	Useful to convert @PathVariable arguments from String to the object it represents.
@@ -103,70 +166,7 @@
       	Converters are used when binding request values to command.
       	Formatters are used for displaying command values as a string in views. spring.bind uses formatters.
       </description>
-	    <property name="converters">
-	        <list>
-	            <bean class="uk.ac.warwick.tabula.data.convert.DepartmentCodeConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.ModuleCodeConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.AbstractMeetingRecordIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.MeetingRecordIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.AssessmentComponentIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.AssessmentGroupIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.FeedbackIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.MarkerFeedbackIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.FeedbackTemplateIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.SubmissionIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.MarkingWorkflowIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.MemberUniversityIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.MemberNoteIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.PermissionConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.UserConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.ExtensionIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
-                <bean class="uk.ac.warwick.tabula.data.convert.RoleDefinitionConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.RoleOverrideConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.model.StringToMarkingMethod"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.MeetingFormatConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.StudentRelationshipTypeConverter" />
-				<bean class="uk.ac.warwick.tabula.data.convert.StudentRelationshipIdConverter" />
-	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupEventIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupEventOccurrenceIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.DepartmentSmallGroupSetIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.DepartmentSmallGroupIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.DayOfWeekConverter"/>
-                <bean class="uk.ac.warwick.tabula.data.convert.NumberConverterFactory"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.StudentCourseDetailsConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.StudentCourseYearDetailsIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSelfSignUpStateConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.RouteCodeConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetTemplateIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointTemplateIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.JodaLocalDateConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceStateConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.ModeOfAttendanceCodeConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.SitsStatusCodeConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.HibernateOrderConverter" />
-				<bean class="uk.ac.warwick.tabula.data.model.AssessmentTypeConverter" />
-				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointTypeConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.model.CourseTypeConverter" />
-				<bean class="uk.ac.warwick.tabula.data.model.DepartmentFilterRuleConverter" />
-				<bean class="uk.ac.warwick.tabula.data.convert.AbsenceTypeConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.NotificationIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointStyleConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringSchemeIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointTypeConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringTemplateIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringTemplatePointIdConverter"/>
-				<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetFilterConverter"/>
-	        </list>
-	    </property>
+	    <property name="converters" ref="customConverters" />
 	    <property name="formatters">
 	    	<list>
 	    		<bean class="uk.ac.warwick.tabula.data.convert.JodaLocalDateConverter"/>
@@ -184,8 +184,6 @@
 	        </list>
 	    </property>
 	</bean>
-
-	<import resource="type-converter-context.xml"/>
 
 	<!-- Resolves user from request but can also be used sparingly elsewhere to generate a CurrentUser from Users -->
 	<bean id="currentUserInterceptor" class="uk.ac.warwick.tabula.system.CurrentUserInterceptor" />
@@ -248,6 +246,7 @@
 				<bean class="uk.ac.warwick.tabula.system.XmlReturnValueHandler" />
 			</list>
 		</property>
+		<property name="customConverters" ref="customConverters" />
 	</bean>
 
 	<util:properties id="staticHashes" location="/WEB-INF/static-hashes.properties" />
