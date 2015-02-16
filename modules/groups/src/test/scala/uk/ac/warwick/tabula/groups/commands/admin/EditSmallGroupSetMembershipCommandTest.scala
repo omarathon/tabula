@@ -71,7 +71,7 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 		wireUserLookup(group2.students)
 
 		command.assessmentGroups = set.assessmentGroups
-		command.members = set.members.duplicate()
+		command.members.copyFrom(set.members)
 		command.academicYear = set.academicYear
 
 		command.assignmentMembershipService.determineMembershipUsers(Seq(), Some(set.members)) returns (set.members.users)
