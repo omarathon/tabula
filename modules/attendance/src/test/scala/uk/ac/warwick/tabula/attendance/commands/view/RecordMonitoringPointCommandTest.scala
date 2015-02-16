@@ -43,6 +43,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 		val autumnTerm = new TermImpl(null, null, null, TermType.autumn)
 
 		val scheme1 = new AttendanceMonitoringScheme
+		scheme1.attendanceMonitoringService = None
 		scheme1.department = thisDepartment
 		scheme1.academicYear = AcademicYear(2014)
 		scheme1.members = UserGroup.ofUniversityIds
@@ -51,6 +52,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 		val point1 = Fixtures.attendanceMonitoringPoint(scheme1)
 		point1.id = "123"
 		val scheme2 = new AttendanceMonitoringScheme
+		scheme2.attendanceMonitoringService = None
 		scheme2.department = thisDepartment
 		scheme2.academicYear = AcademicYear(2014)
 		scheme2.members = UserGroup.ofUniversityIds
