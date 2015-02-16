@@ -11,13 +11,13 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers._
 import uk.ac.warwick.tabula.data.model.{FeedbackReportGenerator, Assignment, Department}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{SubmissionService, FeedbackService, AssignmentMembershipService, AuditEventQueryMethods}
+import uk.ac.warwick.tabula.services.{SubmissionService, FeedbackService, AssessmentMembershipService, AuditEventQueryMethods}
 
 class FeedbackReport(department: Department, startDate: DateTime, endDate: DateTime) {
 	import FeedbackReport._
 
 	var auditEventQueryMethods = Wire[AuditEventQueryMethods]
-	var assignmentMembershipService = Wire[AssignmentMembershipService]
+	var assignmentMembershipService = Wire[AssessmentMembershipService]
 	var submissionService = Wire[SubmissionService]
 	var feedbackService = Wire[FeedbackService]
 	val workbook = new XSSFWorkbook()
@@ -191,7 +191,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 
 		val times: Seq[FeedbackCount] = for {
 			submission <- submissions
-			feedback <- feedbackService.getFeedbackByUniId(assignment, submission.universityId)
+			feedback <- feedbackService.getAssignmentFeedbackByUniId(assignment, submission.universityId)
 			if feedback.released
 			publishEventDate <- Option(feedback.releasedDate).orElse {
 				auditEventQueryMethods.publishFeedbackForStudent(assignment, feedback.universityId).headOption.map { _.eventDate }

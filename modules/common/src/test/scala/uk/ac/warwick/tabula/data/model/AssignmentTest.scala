@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.data.model
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.{Fixtures, TestBase}
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants._
 import org.joda.time.DateTimeConstants
@@ -21,7 +21,7 @@ class AssignmentTest extends TestBase {
 
 	@Test def fields() {
 		val assignment = new Assignment
-		assignment.findField(Assignment.defaultCommentFieldName) should not be ('defined)
+		assignment.findField(Assignment.defaultCommentFieldName) should not be 'defined
 		assignment.addDefaultSubmissionFields()
 		assignment.findField(Assignment.defaultCommentFieldName) should be ('defined)
 		assignment.addDefaultFeedbackFields()
@@ -62,7 +62,7 @@ class AssignmentTest extends TestBase {
 		assignment.fullFeedback should be ('empty)
 		assignment.markingWorkflow = new FirstMarkerOnlyWorkflow
 
-		val feedback = new Feedback
+		val feedback = new AssignmentFeedback
 		feedback.assignment = assignment
 		assignment.feedbacks add feedback
 		assignment.fullFeedback should be ('empty)
@@ -79,7 +79,7 @@ class AssignmentTest extends TestBase {
 		assignment.submissionsReport should not be 'hasProblems
 
 		for (i <- 1 to 10) {// 0000001 .. 0000010
-			val feedback = new Feedback(universityId = idFormat(i))
+			val feedback = Fixtures.assignmentFeedback(universityId = idFormat(i))
 			feedback.assignment = assignment
 			feedback.actualMark = Some(i*10)
 			assignment.feedbacks add feedback
@@ -242,8 +242,8 @@ class AssignmentTest extends TestBase {
 	/** Zero-pad integer to a 7 digit string */
 	def idFormat(i:Int) = "%07d" format i
 
-	def mockFeedback(assignment: Assignment):Feedback = {
-		val f = new Feedback()
+	def mockFeedback(assignment: Assignment): AssignmentFeedback = {
+		val f = new AssignmentFeedback()
 		f.assignment = assignment
 		// add a mark so this is not treated like a placeholder
 		f.actualMark = Some(41)

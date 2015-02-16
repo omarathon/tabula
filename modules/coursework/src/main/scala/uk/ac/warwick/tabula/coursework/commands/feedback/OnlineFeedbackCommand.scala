@@ -44,7 +44,7 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 		val students = studentsWithSubmissionOrFeedback ++ unsubmittedStudents
 		students.map { student =>
 			val hasSubmission = submissionService.getSubmissionByUniId(assignment, student.getWarwickId).isDefined
-			val feedback = feedbackService.getFeedbackByUniId(assignment, student.getWarwickId)
+			val feedback = feedbackService.getAssignmentFeedbackByUniId(assignment, student.getWarwickId)
 			val (hasFeedback, hasPublishedFeedback) = feedback match {
 				case Some(f) => (true, f.released.booleanValue)
 				case _ => (false, false)
@@ -88,7 +88,7 @@ abstract class OnlineMarkerFeedbackCommand(
 		submissions.filter(_.isReleasedForMarking).map { submission =>			
 			val student = userLookup.getUserByWarwickUniId(submission.universityId)
 			val hasSubmission = true
-			val feedback = feedbackService.getFeedbackByUniId(assignment, submission.universityId)
+			val feedback = feedbackService.getAssignmentFeedbackByUniId(assignment, submission.universityId)
 			// get all the feedbacks for this user and pick the most recent
 			val markerFeedback = assignment.getAllMarkerFeedbacks(submission.universityId, marker).headOption
 

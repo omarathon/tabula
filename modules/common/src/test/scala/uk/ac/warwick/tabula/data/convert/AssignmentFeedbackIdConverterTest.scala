@@ -4,31 +4,31 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.FeedbackDao
-import uk.ac.warwick.tabula.data.model.Feedback
+import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, Feedback}
 
-class FeedbackIdConverterTest extends TestBase with Mockito {
+class AssignmentFeedbackIdConverterTest extends TestBase with Mockito {
 	
-	val converter = new FeedbackIdConverter
+	val converter = new AssignmentFeedbackIdConverter
 	var service = mock[FeedbackDao]
 	converter.service = service
 	
 	@Test def validInput {
-		val feedback = new Feedback
+		val feedback = new AssignmentFeedback
 		feedback.id = "steve"
 			
-		service.getFeedback("steve") returns (Some(feedback))
+		service.getAssignmentFeedback("steve") returns (Some(feedback))
 		
 		converter.convertRight("steve") should be (feedback)
 	}
 	
 	@Test def invalidInput {
-		service.getFeedback("20X6") returns (None)
+		service.getAssignmentFeedback("20X6") returns (None)
 		
 		converter.convertRight("20X6") should be (null)
 	}
 	
 	@Test def formatting {
-		val feedback = new Feedback
+		val feedback = new AssignmentFeedback
 		feedback.id = "steve"
 		
 		converter.convertLeft(feedback) should be ("steve")

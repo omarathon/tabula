@@ -34,7 +34,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	}
 
 	var assignmentImporter = Wire[AssignmentImporter]
-	var assignmentMembershipService = Wire[AssignmentMembershipService]
+	var assignmentMembershipService = Wire[AssessmentMembershipService]
 	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 	
 	val ImportGroupSize = 100

@@ -91,7 +91,7 @@ trait PermissionsCheckingMethods extends Logging {
 			throw new ItemNotFoundException(set)
 		}
 
-	def mustBeLinked(feedback: Feedback, assignment: Assignment) =
+	def mustBeLinked(feedback: AssignmentFeedback, assignment: Assignment) =
 		if (mandatory(feedback).assignment.id != mandatory(assignment).id) {
 			logger.info("Not displaying feedback as it doesn't belong to specified assignment")
 			throw new ItemNotFoundException(feedback)

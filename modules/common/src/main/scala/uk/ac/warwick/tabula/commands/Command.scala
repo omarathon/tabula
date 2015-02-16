@@ -269,7 +269,10 @@ abstract class Description {
 	 */
 	def feedback(feedback: Feedback) = {
 		property("feedback" -> feedback.id)
-		if (feedback.assignment != null) assignment(feedback.assignment)
+		feedback match {
+			case assignmentFeedback: AssignmentFeedback if assignmentFeedback.assignment != null => assignment(assignmentFeedback.assignment)
+			case examFeedback: ExamFeedback if examFeedback.exam != null => exam(examFeedback.exam)
+		}
 		this
 	}
 
@@ -300,6 +303,12 @@ abstract class Description {
 	def assignment(assignment: Assignment) = {
 		property("assignment" -> assignment.id)
 		if (assignment.module != null) module(assignment.module)
+		this
+	}
+
+	def exam(exam: Exam) = {
+		property("exam" -> exam.id)
+		if (exam.module != null) module(exam.module)
 		this
 	}
 

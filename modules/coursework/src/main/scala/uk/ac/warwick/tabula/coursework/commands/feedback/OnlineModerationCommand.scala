@@ -59,7 +59,7 @@ abstract class OnlineModerationCommand(
 
 		// find the parent feedback or make a new one
 		val parentFeedback = assignment.feedbacks.asScala.find(_.universityId == student.getWarwickId).getOrElse({
-			val newFeedback = new Feedback
+			val newFeedback = new AssignmentFeedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = marker.getWarwickId
 			newFeedback.universityId = student.getWarwickId

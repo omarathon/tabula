@@ -47,7 +47,7 @@ abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assi
 		// get the parent feedback or create one if none exist
 		val feedbacks = studentsWithKnownMarkers.toBuffer.map{ uniId:String =>
 			val parentFeedback = assignment.feedbacks.find(_.universityId == uniId).getOrElse({
-				val newFeedback = new Feedback
+				val newFeedback = new AssignmentFeedback
 				newFeedback.assignment = assignment
 				newFeedback.uploaderId = user.getUserId
 				newFeedback.universityId = uniId
@@ -60,7 +60,7 @@ abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assi
 			parentFeedback
 		}
 
-		val feedbackToUpdate:Seq[Feedback] = feedbacks -- invalidFeedback
+		val feedbackToUpdate:Seq[AssignmentFeedback] = feedbacks -- invalidFeedback
 
 		newReleasedFeedback = feedbackToUpdate map(f => {
 			val markerFeedback = f.retrieveFirstMarkerFeedback
@@ -94,7 +94,7 @@ trait ReleaseForMarkingState {
 
 	var students: JList[String] = JArrayList()
 	var confirm: Boolean = false
-	var invalidFeedback: JList[Feedback] = JArrayList()
+	var invalidFeedback: JList[AssignmentFeedback] = JArrayList()
 
 	var feedbacksUpdated = 0
 }

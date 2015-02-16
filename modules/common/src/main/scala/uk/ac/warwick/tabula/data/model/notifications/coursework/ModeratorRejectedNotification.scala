@@ -28,7 +28,10 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 	def rejectionFeedback = parentFeedback.secondMarkerFeedback
 	def rejectedFeedback = parentFeedback.firstMarkerFeedback
 
-	def assignment = markerFeedback.feedback.assignment
+	def assignment = parentFeedback match {
+		case assignmentFeedback: AssignmentFeedback => assignmentFeedback.assignment
+		case _ => throw new IllegalArgumentException("Exam feedback used in Assignment notification")
+	}
 
 	def verb = "Released"
 

@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import scala.collection.JavaConversions.seqAsJavaList
 import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.{AssignmentDaoComponent, AssignmentDaoImpl, AssignmentMembershipDaoImpl}
+import uk.ac.warwick.tabula.data.{AssignmentDaoComponent, AssignmentDaoImpl, AssessmentMembershipDaoImpl}
 
 // scalastyle:off magic.number
 class UpstreamEntitiesTest extends PersistenceTestBase {
@@ -22,10 +22,10 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 				val markingWorkflowService = null
 			}
 
-			val dao = new AssignmentMembershipDaoImpl
+			val dao = new AssessmentMembershipDaoImpl
 			dao.sessionFactory = sessionFactory
 
-			val assignmentMembershipService = new AssignmentMembershipServiceImpl
+			val assignmentMembershipService = new AssessmentMembershipServiceImpl
 			assignmentMembershipService.dao = dao
 
 			val law = new AssessmentComponent

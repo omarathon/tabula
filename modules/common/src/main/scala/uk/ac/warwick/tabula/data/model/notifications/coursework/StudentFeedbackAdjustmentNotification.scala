@@ -15,8 +15,8 @@ object StudentFeedbackAdjustmentNotification {
 @Entity
 @DiscriminatorValue("StudentFeedbackAdjustment")
 class StudentFeedbackAdjustmentNotification
-	extends NotificationWithTarget[Feedback, Assignment]
-	with SingleItemNotification[Feedback]
+	extends NotificationWithTarget[AssignmentFeedback, Assignment]
+	with SingleItemNotification[AssignmentFeedback]
 	with SingleRecipientNotification
 	with AutowiringUserLookupComponent {
 

@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroupSet}
-import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
 
 /**
  * This entity is basically a many-to-many mapper between
- * assignment/smallgroupset and assessmentcomponent, so
+ * assignment/exam/smallgroupset and assessmentcomponent, so
  * that they can link to multiple assessmentcomponents.
  *
  * It is not directly related to UpstreamAssessmentGroup
@@ -18,10 +18,10 @@ import uk.ac.warwick.spring.Wire
 @Entity
 class AssessmentGroup extends GeneratedId {
 
-	@transient var membershipService = Wire[AssignmentMembershipService]
+	@transient var membershipService = Wire[AssessmentMembershipService]
 
 	/*
-	Either assignment _or_ smallGroupSet will be non-null
+	Either assignment, smallGroupSet _or_ exam will be non-null
 	depending on which type of entity we're linking an
 	AssessmentComponent to...
 	 */
@@ -33,6 +33,13 @@ class AssessmentGroup extends GeneratedId {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "group_set_id")
 	var smallGroupSet: SmallGroupSet = _
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "exam_id")
+	var exam: Exam = _
+
+	def parent: Option[GeneratedId] =
+		Seq(Option(assignment), Option(smallGroupSet), Option(exam)).flatten.headOption
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "upstream_id")
@@ -54,11 +61,12 @@ class AssessmentGroup extends GeneratedId {
 	}
 
 	override def toString = {
-		if ((assignment != null || smallGroupSet != null) && assessmentComponent != null && occurrence != null) {
+		if (parent.isDefined && assessmentComponent != null && occurrence != null) {
 
 			val entityInfo =
 				if (assignment != null) Seq("assignment" -> assignment.id)
-				else Seq("smallGroupSet" -> smallGroupSet.id)
+				else if (smallGroupSet != null) Seq("smallGroupSet" -> smallGroupSet.id)
+				else Seq("exam" -> exam.id)
 
 			val props = entityInfo ++ Seq(
 				"assessmentComponent" -> assessmentComponent.id,

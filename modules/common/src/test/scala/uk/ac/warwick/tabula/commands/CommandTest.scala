@@ -73,7 +73,7 @@ class CommandTest extends TestBase {
 		submission2.id = "submission2Id"
 		submission2.assignment = assignment
 		
-		val feedback = Fixtures.feedback("0000001")
+		val feedback = Fixtures.assignmentFeedback("0000001")
 		feedback.id = "feedbackId"
 		feedback.assignment = assignment
 				

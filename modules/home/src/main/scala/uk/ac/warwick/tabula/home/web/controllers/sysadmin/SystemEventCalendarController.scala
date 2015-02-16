@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.services.{AssignmentMembershipInfo, AssignmentService}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipInfo, AssignmentService}
 import uk.ac.warwick.spring.Wire
 
 @Controller
@@ -38,7 +38,7 @@ class SystemEventCalendarController extends BaseSysadminController {
 			assignments.groupBy { case (assignment, _) => assignment.closeDate.toLocalDate }
 				.toSeq
 				.map { case (date, assignments) =>
-					def count(s: Seq[(Assignment, AssignmentMembershipInfo)]) = s.foldLeft(0) { case (acc, (_, membershipInfo)) => acc + membershipInfo.totalCount }
+					def count(s: Seq[(Assignment, AssessmentMembershipInfo)]) = s.foldLeft(0) { case (acc, (_, membershipInfo)) => acc + membershipInfo.totalCount }
 					val totalCount = count(assignments)
 
 					val countsByDepartment =
@@ -108,7 +108,7 @@ case class FullCalendarEvent(
 )
 
 object FullCalendarEvent {
-	def apply(assignment: Assignment, membershipInfo: AssignmentMembershipInfo): FullCalendarEvent = {
+	def apply(assignment: Assignment, membershipInfo: AssessmentMembershipInfo): FullCalendarEvent = {
 		val shortTimeFormat = DateTimeFormat.shortTime()
 		FullCalendarEvent(
 			title = s"[${membershipInfo.totalCount}] ${assignment.module.code.toUpperCase} ${assignment.name}",

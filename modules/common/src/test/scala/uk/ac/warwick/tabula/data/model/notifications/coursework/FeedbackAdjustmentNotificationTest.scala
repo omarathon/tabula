@@ -21,7 +21,7 @@ class FeedbackAdjustmentNotificationTest extends TestBase with Mockito {
 	val assignment = Fixtures.assignment("hernz")
 	assignment.id = "heronzzzz"
 	assignment.module = module
-	val feedback = Fixtures.feedback(student.getWarwickId)
+	val feedback = Fixtures.assignmentFeedback(student.getWarwickId)
 	feedback.assignment = assignment
 	val workflow = new FirstMarkerOnlyWorkflow()
 	workflow.userLookup = mockLookup

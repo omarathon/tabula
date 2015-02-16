@@ -3,11 +3,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.model.AssessmentGroup
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.system.TwoWayConverter
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
 
 class AssessmentGroupIdConverter extends TwoWayConverter[String, AssessmentGroup] {
 
-	@Autowired var service: AssignmentMembershipService = _
+	@Autowired var service: AssessmentMembershipService = _
 
 	// Converter used for binding request
 	override def convertRight(id: String) = service.getAssessmentGroup(id).orNull

@@ -7,8 +7,7 @@ import org.hibernate.annotations.Type
 import org.springframework.validation.Errors
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{ AbstractBasicUserType, GeneratedId}
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{Exam, AbstractBasicUserType, GeneratedId, Assignment}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserLookupService
@@ -46,11 +45,6 @@ abstract class FormField extends GeneratedId with Logging {
 	@transient var json = JsonObjectMapperFactory.instance
 	@transient var userLookup = Wire.auto[UserLookupService]
 
-	@BeanProperty
-	@ManyToOne(fetch = FetchType.LAZY)
-	@(JoinColumn @field)(name = "assignment_id", updatable = false, nullable = false)
-	var assignment: Assignment = _
-
 	var name: String = _
 	var label: String = _
 	var instructions: String = _
@@ -86,11 +80,10 @@ abstract class FormField extends GeneratedId with Logging {
 		propertiesMap.get(name) match {
 			case Some(null) => default
 			case Some(obj) if classTag[A].runtimeClass.isInstance(obj) => obj.asInstanceOf[A]
-			case Some(obj) => {
+			case Some(obj) =>
 				// TAB-705 warn when we return an unexpected type
 				logger.warn("Expected property %s of type %s, but was %s".format(name, classTag[A].runtimeClass.getName, obj.getClass.getName))
 				default
-			}
 			case _ => default
 		}
 
@@ -127,11 +120,10 @@ trait SimpleValue[A] { self: FormField =>
 
 	override def validate(value: FormValue, errors: Errors) {
 		value match {
-			case s: StringFormValue if s.value != null => {
+			case s: StringFormValue if s.value != null =>
 				val length = s.value.toString.length
 				if (length > FormField.FormFieldMaxSize)
 					errors.rejectValue("value", "textfield.tooLarge", Array[Object](length: JInteger, FormField.FormFieldMaxSize: JInteger), "")
-			}
 			case _ =>
 		}
 	}
@@ -147,8 +139,16 @@ trait SimpleValue[A] { self: FormField =>
 }
 
 @Entity
+abstract class AssignmentFormField extends FormField {
+	@BeanProperty
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "assignment_id")
+	var assignment: Assignment = _
+}
+
+@Entity
 @DiscriminatorValue("comment")
-class CommentField extends FormField with SimpleValue[String] with FormattedHtml {
+class CommentField extends AssignmentFormField with SimpleValue[String] with FormattedHtml {
 	override def isReadOnly = true
 
 	def formattedHtml: String = formattedHtml(Option(value))
@@ -156,12 +156,12 @@ class CommentField extends FormField with SimpleValue[String] with FormattedHtml
 
 @Entity
 @DiscriminatorValue("text")
-class TextField extends FormField with SimpleValue[String] {
+class TextField extends AssignmentFormField with SimpleValue[String] {
 }
 
 @Entity
 @DiscriminatorValue("wordcount")
-class WordCountField extends FormField {
+class WordCountField extends AssignmentFormField {
 	context = FormFieldContext.Submission
 
 	def min: JInteger = getProperty[JInteger]("min", null)
@@ -180,10 +180,9 @@ class WordCountField extends FormField {
 
 	override def validate(value: FormValue, errors: Errors) {
 		value match {
-			case i:IntegerFormValue => {
-				 if (i.value == null) errors.rejectValue("value", "assignment.submit.wordCount.missing")
-				 else if ((min != null && i.value < min) || (max != null && i.value > max)) errors.rejectValue("value", "assignment.submit.wordCount.outOfRange")
-			}
+			case i:IntegerFormValue =>
+				if (i.value == null) errors.rejectValue("value", "assignment.submit.wordCount.missing")
+				else if ((min != null && i.value < min) || (max != null && i.value > max)) errors.rejectValue("value", "assignment.submit.wordCount.outOfRange")
 			case _ => errors.rejectValue("value", "assignment.submit.wordCount.missing") // value was null or wrong type
 		}
 	}
@@ -191,7 +190,7 @@ class WordCountField extends FormField {
 
 @Entity
 @DiscriminatorValue("textarea")
-class TextareaField extends FormField with SimpleValue[String] {}
+class TextareaField extends AssignmentFormField with SimpleValue[String] {}
 
 @Entity
 @DiscriminatorValue("checkbox")
@@ -207,7 +206,7 @@ class CheckboxField extends FormField {
 
 @Entity
 @DiscriminatorValue("marker")
-class MarkerSelectField extends FormField with SimpleValue[String] {
+class MarkerSelectField extends AssignmentFormField with SimpleValue[String] {
 	context = FormFieldContext.Submission
 
 	def markers:Seq[User] = {
@@ -218,21 +217,20 @@ class MarkerSelectField extends FormField with SimpleValue[String] {
 	override def validate(value: FormValue, errors: Errors) {
 		super.validate(value, errors)
 		value match {
-			case v: StringFormValue => {
+			case v: StringFormValue =>
 				Option(v.value) match {
 					case None => errors.rejectValue("value", "marker.missing")
-					case Some(v) if v == "" => errors.rejectValue("value", "marker.missing")
-					case Some(v) if !markers.exists { _.getUserId == v } => errors.rejectValue("value", "marker.invalid")
+					case Some(v1) if v1 == "" => errors.rejectValue("value", "marker.missing")
+					case Some(v1) if !markers.exists { _.getUserId == v1 } => errors.rejectValue("value", "marker.invalid")
 					case _ =>
 				}
-			}
 		}
 	}
 }
 
 @Entity
 @DiscriminatorValue("file")
-class FileField extends FormField {
+class FileField extends AssignmentFormField {
 	def blankFormValue = new FileFormValue(this)
 	def populatedFormValue(savedFormValue: SavedFormValue) = blankFormValue
 
@@ -247,10 +245,10 @@ class FileField extends FormField {
 	override def validate(value: FormValue, errors: Errors) {
 
 		/** Are there any duplicate values (ignoring case)? */
-		def hasDuplicates(names: Seq[String]) = names.size != names.map(_.toLowerCase()).distinct.size
+		def hasDuplicates(names: Seq[String]) = names.size != names.map(_.toLowerCase).distinct.size
 
 		value match {
-			case v: FileFormValue => {
+			case v: FileFormValue =>
 				if (v.file.isMissing) {
 					errors.rejectValue("file", "file.missing")
 				} else if (v.file.size > attachmentLimit) {
@@ -258,7 +256,7 @@ class FileField extends FormField {
 					else errors.rejectValue("file", "file.toomany", Array(attachmentLimit: JInteger), "")
 				} else if (hasDuplicates(v.file.fileNames)) {
 					errors.rejectValue("file", "file.duplicate")
-				} else if (!attachmentTypes.isEmpty) {
+				} else if (attachmentTypes.nonEmpty) {
 					val attachmentStrings = attachmentTypes.map(s => "." + s)
 					val fileNames = v.file.fileNames map (_.toLowerCase)
 					val invalidFiles = fileNames.filter(s => !attachmentStrings.exists(s.endsWith))
@@ -267,9 +265,22 @@ class FileField extends FormField {
 						else errors.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
 					}
 				}
-			}
 		}
 	}
+}
+
+@Entity
+abstract class ExamFormField extends FormField {
+	@BeanProperty
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "exam_id")
+	var exam: Exam = _
+}
+
+@Entity
+@DiscriminatorValue("examText")
+class ExamTextField extends ExamFormField with SimpleValue[String] {
+	context = FormFieldContext.Feedback
 }
 
 sealed abstract class FormFieldContext(val dbValue: String, val description: String)

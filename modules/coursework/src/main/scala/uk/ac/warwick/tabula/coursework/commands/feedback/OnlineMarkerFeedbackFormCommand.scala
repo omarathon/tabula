@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
 
 import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Feedback, MarkerFeedback, Assignment, Module}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
@@ -51,7 +51,7 @@ abstract class OnlineMarkerFeedbackFormCommand(
 
 		// find the parent feedback or make a new one
 		val parentFeedback = assignment.feedbacks.asScala.find(_.universityId == student.getWarwickId).getOrElse({
-			val newFeedback = new Feedback
+			val newFeedback = new AssignmentFeedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = marker.getUserId
 			newFeedback.universityId = student.getWarwickId

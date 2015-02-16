@@ -64,7 +64,7 @@ trait MarkingWorkflowWorld extends TestHelpers {
 
 	def addFeedback(assignment:Assignment){
 		val feedback = assignment.submissions.asScala.map{ s =>
-			val newFeedback = new Feedback
+			val newFeedback = new AssignmentFeedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = "cuslaj"
 			newFeedback.universityId = s.universityId

@@ -22,7 +22,7 @@ class FeedbackSummaryCommandInternal(val assignment: Assignment, val student: Us
 
 	this : FeedbackServiceComponent =>
 
-	def applyInternal() = Option(student.getWarwickId).flatMap(feedbackService.getFeedbackByUniId(assignment, _))
+	def applyInternal() = Option(student.getWarwickId).flatMap(feedbackService.getAssignmentFeedbackByUniId(assignment, _))
 }
 
 trait FeedbackSummaryCommandState {

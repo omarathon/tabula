@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UpstreamAssess
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-class AssignmentMembershipServiceTest extends TestBase with Mockito {
+class AssessmentMembershipServiceTest extends TestBase with Mockito {
 
 	@Test def testDetermineMembership {
 		val userLookup = new MockUserLookup
@@ -24,7 +24,7 @@ class AssignmentMembershipServiceTest extends TestBase with Mockito {
 		val user6 = userLookup.getUserByUserId("fffff")
 		user6.setLastName("Fffff")
 
-		val assignmentMembershipService = new AssignmentMembershipServiceImpl
+		val assignmentMembershipService = new AssessmentMembershipServiceImpl
 		assignmentMembershipService.userLookup = userLookup
 
 		val uag = new UpstreamAssessmentGroup
@@ -54,7 +54,7 @@ class AssignmentMembershipServiceTest extends TestBase with Mockito {
 	}
 
 	@Test def isStudentMember {
-		val service = new AssignmentMembershipServiceImpl
+		val service = new AssessmentMembershipServiceImpl
 
 		val user = new User("cuscav").tap { _.setWarwickId("0672089") }
 

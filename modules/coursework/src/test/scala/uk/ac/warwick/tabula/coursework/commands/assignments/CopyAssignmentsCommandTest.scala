@@ -10,7 +10,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends AssignmentServiceComponent with AssignmentMembershipServiceComponent {
 		val assignmentService = mock[AssignmentService]
-		val assignmentMembershipService = mock[AssignmentMembershipService]
+		val assignmentMembershipService = mock[AssessmentMembershipService]
 		def apply(): Seq[Assignment] = Seq()
 	}
 

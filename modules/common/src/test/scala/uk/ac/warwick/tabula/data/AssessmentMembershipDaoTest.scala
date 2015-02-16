@@ -5,15 +5,15 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.AssessmentComponent
 import uk.ac.warwick.tabula.data.model.AssessmentType
 import uk.ac.warwick.tabula.data.model.AssessmentGroup
-import uk.ac.warwick.tabula.services.AssignmentMembershipServiceImpl
+import uk.ac.warwick.tabula.services.AssessmentMembershipServiceImpl
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import org.junit.Before
 
-class AssignmentMembershipDaoTest extends PersistenceTestBase {
+class AssessmentMembershipDaoTest extends PersistenceTestBase {
 
-	val dao = new AssignmentMembershipDaoImpl
-	val assignmentMembershipService = new AssignmentMembershipServiceImpl
+	val dao = new AssessmentMembershipDaoImpl
+	val assignmentMembershipService = new AssessmentMembershipServiceImpl
 	assignmentMembershipService.dao = dao
 
 	trait Fixture {

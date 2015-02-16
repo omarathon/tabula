@@ -6,6 +6,7 @@ import javax.validation.constraints.NotNull
 
 import org.hibernate.annotations.{AccessType, BatchSize, Type}
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.{JavaImports, AcademicYear}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormattedHtml, SavedFormValue}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -55,20 +56,42 @@ trait FeedbackAttachments {
 	}
 }
 
-@Entity @AccessType("field")
-class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with ToEntityReference with FormattedHtml {
+trait AssessmentFeedback {
 
-	type Entity = Feedback
+	def hasGenericFeedback: Boolean
+
+	def markingWorkflow: MarkingWorkflow
+
+	/**
+	 * Whether ratings are being collected for this feedback.
+	 * Doesn't take into account whether the ratings feature is enabled, so you
+	 * need to check that separately.
+	 */
+	def collectRatings: Boolean
+
+	/**
+	 * Whether marks are being collected for this feedback.
+	 * Doesn't take into account whether the marks feature is enabled, so you
+	 * need to check that separately.
+	 */
+	def collectMarks: Boolean
+
+	def module: Module
+
+	def academicYear: AcademicYear
+
+	def  assessmentGroups: JList[AssessmentGroup]
+}
+
+@Entity
+@AccessType("field")
+@DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
+abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with FormattedHtml with AssessmentFeedback {
 
 	def this(universityId: String) {
 		this()
 		this.universityId = universityId
 	}
-
-	@ManyToOne(fetch = FetchType.LAZY, cascade=Array(PERSIST, MERGE), optional = false)
-	var assignment: Assignment = _
-
-	def permissionsParents = Option(assignment).toStream
 
 	var uploaderId: String = _
 
@@ -140,7 +163,7 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 			(!workflow.hasThirdMarker && !workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
 		}
 
-		Option(assignment.markingWorkflow)
+		Option(markingWorkflow)
 			.filterNot(markingCompleted)
 			.map { workflow =>
 				if (workflow.hasThirdMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
@@ -226,8 +249,6 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 		.filter(_ != null)
 		.filter(_.state == MarkingState.MarkingCompleted)
 
-	def hasGenericFeedback: Boolean = Option(assignment.genericFeedback).isDefined
-
 	/**
 	 * Returns the released flag of this feedback,
 	 * OR false if unset.
@@ -248,21 +269,66 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 		attachments.add(attachment)
 	}
 
-	/**
-	 * Whether ratings are being collected for this feedback.
-	 * Doesn't take into account whether the ratings feature is enabled, so you
-	 * need to check that separately.
-	 */
-	def collectRatings: Boolean = assignment.module.adminDepartment.collectFeedbackRatings
+}
 
-	/**
-	 * Whether marks are being collected for this feedback.
-	 * Doesn't take into account whether the marks feature is enabled, so you
-	 * need to check that separately.
-	 */
-	def collectMarks: Boolean = assignment.collectMarks
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorValue("assignment")
+class AssignmentFeedback extends Feedback with ToEntityReference {
 
-	override def toEntityReference = new FeedbackEntityReference().put(this)
+	type Entity = AssignmentFeedback
+
+	@ManyToOne(fetch = FetchType.LAZY, cascade=Array(PERSIST, MERGE))
+	var assignment: Assignment = _
+
+	def module = assignment.module
+
+	override def markingWorkflow: MarkingWorkflow = assignment.markingWorkflow
+
+	override def hasGenericFeedback: Boolean = Option(assignment.genericFeedback).isDefined
+
+	override def collectMarks: Boolean = assignment.collectMarks
+
+	override def collectRatings: Boolean = assignment.module.adminDepartment.collectFeedbackRatings
+
+	override def academicYear: AcademicYear = assignment.academicYear
+
+	override def assessmentGroups: JavaImports.JList[AssessmentGroup] = assignment.assessmentGroups
+
+	def permissionsParents = Option(assignment).toStream
+
+	override def toEntityReference = new AssignmentFeedbackEntityReference().put(this)
+
+}
+
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorValue("exam")
+class ExamFeedback extends Feedback with ToEntityReference {
+
+	type Entity = ExamFeedback
+
+	@ManyToOne(fetch = FetchType.LAZY, cascade=Array(PERSIST, MERGE))
+	var exam: Exam = _
+
+	def module = exam.module
+
+	override def markingWorkflow: MarkingWorkflow = null
+
+	override def hasGenericFeedback: Boolean = false
+
+	override def collectMarks: Boolean = true
+
+	override def collectRatings: Boolean = false
+
+	override def academicYear: AcademicYear = exam.academicYear
+
+	override def assessmentGroups: JavaImports.JList[AssessmentGroup] = exam.assessmentGroups
+
+	def permissionsParents = Option(exam).toStream
+
+	override def toEntityReference = new ExamFeedbackEntityReference().put(this)
+
 }
 
 object Feedback {

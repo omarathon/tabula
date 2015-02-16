@@ -22,10 +22,10 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		val sub3 = Fixtures.submission(universityId="0000003", userId="student3")
 		val sub4 = Fixtures.submission(universityId="0000004", userId="student4")
 
-		val f1 = Fixtures.feedback(universityId="0000001")
-		val f2 = Fixtures.feedback(universityId="0000002")
-		val f3 = Fixtures.feedback(universityId="0000003")
-		val f4 = Fixtures.feedback(universityId="0000004")
+		val f1 = Fixtures.assignmentFeedback(universityId="0000001")
+		val f2 = Fixtures.assignmentFeedback(universityId="0000002")
+		val f3 = Fixtures.assignmentFeedback(universityId="0000003")
+		val f4 = Fixtures.assignmentFeedback(universityId="0000004")
 
 		assignment.submissions.addAll(Seq(sub1, sub2, sub3, sub4).toList.asJava)
 		assignment.submissions.asScala.toList foreach { _.assignment = assignment }

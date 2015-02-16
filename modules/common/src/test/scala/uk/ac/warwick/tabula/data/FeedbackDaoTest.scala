@@ -13,9 +13,9 @@ class FeedbackDaoTest extends PersistenceTestBase {
 		// TAB-2415
 		session.enableFilter("notDeleted")
 
-		val f1 = Fixtures.feedback("0205225")
-		val f2 = Fixtures.feedback("0205225")
-		val f3 = Fixtures.feedback("0205226")
+		val f1 = Fixtures.assignmentFeedback("0205225")
+		val f2 = Fixtures.assignmentFeedback("0205225")
+		val f3 = Fixtures.assignmentFeedback("0205226")
 
 		val ass1 = Fixtures.assignment("ass1")
 		val ass2 = Fixtures.assignment("ass2")
@@ -59,27 +59,27 @@ class FeedbackDaoTest extends PersistenceTestBase {
 		session.flush()
 		session.clear()
 
-		dao.getFeedback(f1.id) should be (Some(f1))
-		dao.getFeedback(f2.id) should be (Some(f2))
-		dao.getFeedback(f3.id) should be (Some(f3))
-		dao.getFeedback("blah") should be (None)
+		dao.getAssignmentFeedback(f1.id) should be (Some(f1))
+		dao.getAssignmentFeedback(f2.id) should be (Some(f2))
+		dao.getAssignmentFeedback(f3.id) should be (Some(f3))
+		dao.getAssignmentFeedback("blah") should be (None)
 
 		dao.getMarkerFeedback(mf1.id) map { _.feedback } should be (Some(f1))
 		dao.getMarkerFeedback(mf2.id) map { _.feedback } should be (Some(f2))
 		dao.getMarkerFeedback(mf3.id) map { _.feedback } should be (Some(f3))
 		dao.getMarkerFeedback("blah") should be (None)
 
-		dao.getFeedbackByUniId(ass1, "0205225") should be (Some(f1))
-		dao.getFeedbackByUniId(ass2, "0205225") should be (Some(f2))
-		dao.getFeedbackByUniId(ass1, "0205226") should be (Some(f3))
-		dao.getFeedbackByUniId(ass2, "0205226") should be (None)
+		dao.getAssignmentFeedbackByUniId(ass1, "0205225") should be (Some(f1))
+		dao.getAssignmentFeedbackByUniId(ass2, "0205225") should be (Some(f2))
+		dao.getAssignmentFeedbackByUniId(ass1, "0205226") should be (Some(f3))
+		dao.getAssignmentFeedbackByUniId(ass2, "0205226") should be (None)
 		session.flush()
 
-		dao.delete(dao.getFeedback(f1.id).get)
+		dao.delete(dao.getAssignmentFeedback(f1.id).get)
 		session.flush()
 
-		dao.getFeedbackByUniId(ass1, "0205225") should be (None)
-		dao.getFeedback(f1.id) should be (None)
+		dao.getAssignmentFeedbackByUniId(ass1, "0205225") should be (None)
+		dao.getAssignmentFeedback(f1.id) should be (None)
 		dao.getMarkerFeedback(mf1.id) should be (None)
 	}
 

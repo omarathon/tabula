@@ -42,7 +42,7 @@ class RateFeedbackCommandTest extends TestBase {
 	}
 
 	def deepFeedback = {
-		val feedback = Fixtures.feedback("1234567")
+		val feedback = Fixtures.assignmentFeedback("1234567")
 		val assignment = Fixtures.assignment("my assignment")
 		val module = Fixtures.module("cs118", "Introduction to programming")
 		val department = Fixtures.department("cs", "Computer Science")
