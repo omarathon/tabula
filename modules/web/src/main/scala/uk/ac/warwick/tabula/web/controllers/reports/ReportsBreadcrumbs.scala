@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.reports.web
+package uk.ac.warwick.tabula.web.controllers.reports
 
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model
