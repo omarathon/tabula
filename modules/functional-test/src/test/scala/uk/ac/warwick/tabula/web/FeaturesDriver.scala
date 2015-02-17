@@ -35,7 +35,7 @@ trait FeaturesDriver extends BrowserTest with SimpleHttpFetching {
 	}
 	
 	def isFeatureEnabled(name: String) = {
-		Seq("", "/admin", "/attendance", "/coursework", "/groups", "/profiles", "/scheduling").forall { context =>
+		Seq("", "/attendance", "/coursework", "/groups", "/profiles", "/scheduling").forall { context =>
 			val uri = FunctionalTestProperties.SiteRoot + context + "/test/feature/" + name
 			val req = url(uri)
 			

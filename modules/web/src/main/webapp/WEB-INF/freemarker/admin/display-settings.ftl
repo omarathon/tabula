@@ -2,7 +2,9 @@
 <#escape x as x?html>
 	<@fmt.deptheader "Settings" "for" department routes.admin "displaysettings" "" />
 
-<@f.form method="post" class="form-horizontal department-settings-form" action="" commandName="displaySettingsCommand">
+<#assign submitUrl><@routes.admin.displaysettings department /></#assign>
+<@f.form method="post" class="form-horizontal department-settings-form" action=submitUrl commandName="displaySettingsCommand">
+	<input type="hidden" name="returnTo" value="${returnTo}">
 	<@form.row>
 		<@form.label>Week numbering system</@form.label>
 		<@form.field>

@@ -1,7 +1,9 @@
 <#escape x as x?html>
 	<@fmt.deptheader "Notification settings" "for" department routes.admin "notificationsettings" "" />
 
-	<@f.form method="post" class="form-horizontal notification-settings-form" action="" commandName="command">
+	<#assign submitUrl><@routes.admin.notificationsettings department /></#assign>
+	<@f.form method="post" class="form-horizontal notification-settings-form" action=submitUrl commandName="command">
+		<input type="hidden" name="returnTo" value="${returnTo}">
 		<div id="sgt-reminders" class="striped-section collapsible expanded">
 			<fieldset class="clearfix">
 				<h2 class="section-title">
