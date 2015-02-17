@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.validation.{Errors, BindingResult}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.coursework.commands.feedback.{FinaliseFeedbackComponentImpl, FinaliseFeedbackComponent}
+import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineFeedbackState, FinaliseFeedbackComponentImpl, FinaliseFeedbackComponent}
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.data.model._
 import scala.collection.JavaConversions._
@@ -16,8 +16,8 @@ import uk.ac.warwick.userlookup.User
 
 
 object BulkModerationApprovalCommand {
-	def apply(assignment: Assignment, marker: User, submitter: CurrentUser) =
-		new BulkModerationApprovalCommandInternal(assignment, marker, submitter)
+	def apply(assignment: Assignment, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		new BulkModerationApprovalCommandInternal(assignment, marker, submitter, gradeGenerator)
 			with ComposableCommand[Unit]
 			with BulkModerationApprovalPermissions
 			with BulkModerationApprovalDescription
@@ -27,7 +27,7 @@ object BulkModerationApprovalCommand {
 			with FinaliseFeedbackComponentImpl
 }
 
-class BulkModerationApprovalCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser)
+class BulkModerationApprovalCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[Unit] with SelfValidating with BulkModerationApprovalState with BindListener {
 
 	self: StateServiceComponent with FeedbackServiceComponent with FinaliseFeedbackComponent =>
@@ -84,13 +84,15 @@ trait BulkModerationApprovalDescription extends Describable[Unit] {
 	}
 }
 
-trait BulkModerationApprovalState {
+trait BulkModerationApprovalState extends OnlineFeedbackState {
 
 	import uk.ac.warwick.tabula.JavaImports._
 
 	val assignment: Assignment
+	val module = assignment.module
 	val marker: User
 	val submitter: CurrentUser
+	val gradeGenerator: GeneratesGradesFromMarks
 
 	var markerFeedback: JList[MarkerFeedback] = JArrayList()
 	var confirm: Boolean = false

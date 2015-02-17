@@ -316,6 +316,10 @@
 			<url-pattern>/sysadmin/*</url-pattern>
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 		</mapping>
+		<mapping name="postDataLogging">
+		  <filter ref="postDataLoggingFilter" />
+		  <url-pattern>/*</url-pattern>
+		</mapping>
 	</filter-stack>
 
 	<import resource="filters-context.xml" />
@@ -326,6 +330,8 @@
 		p:configLocation="/tabula-sso-config.xml" />
 
 	<bean id="forceLoginFilter" class="uk.ac.warwick.sso.client.ForceLoginFilter" />
+
+  <bean id="postDataLoggingFilter" class="uk.ac.warwick.tabula.web.filters.PostDataLoggingFilter" />
 
 	<bean id="sysadminGroupFilter" class="uk.ac.warwick.sso.client.UserInWebGroupFilter"
 		p:group="${permissions.admin.group}"
@@ -352,6 +358,7 @@
 		<property name="sharedVariables">
 			<map>
 				<entry key="url" value-ref="urlMethodModel" />
+				<entry key="topLevelUrl" value="${toplevel.url}" />
 				<entry key="rootUrl" value="${toplevel.url}${module.context}/" />
 				<entry key="componentName" value="${module.name}" />
 				<entry key="activeSpringProfiles" value="${spring.profiles.active}" />

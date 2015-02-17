@@ -1,18 +1,19 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
-import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackDueGeneralNotification, FeedbackDueExtensionNotification, FeedbackPublishedNotification}
-import uk.ac.warwick.tabula.data.model.{Notification, Feedback, Assignment, Module}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.{UserLookupService, FeedbackService}
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.permissions._
 import language.implicitConversions
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking, PermissionsCheckingMethods}
+import uk.ac.warwick.tabula.events.NotificationHandling
+import uk.ac.warwick.tabula.coursework.commands.feedback.PublishFeedbackCommand.PublishFeedbackResults
 
 object PublishFeedbackCommand {
 	case class MissingUser(universityId: String)
@@ -23,68 +24,44 @@ object PublishFeedbackCommand {
 		missingUsers: Seq[MissingUser] = Nil,
 		badEmails: Seq[BadEmail] = Nil
 	)
+
+def apply(module: Module, assignment: Assignment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+	new PublishFeedbackCommandInternal(module, assignment, submitter, gradeGenerator)
+		with ComposableCommand[PublishFeedbackCommand.PublishFeedbackResults]
+		with AutowiringFeedbackServiceComponent
+		with AutowiringFeedbackForSitsServiceComponent
+		with PublishFeedbackCommandState
+		with PublishFeedbackPermissions
+		with PublishFeedbackValidation
+		with PublishFeedbackDescription
+		with PublishFeedbackNotification
+		with PublishFeedbackNotificationCompletion
+		with QueuesFeedbackForSits
 }
 
-class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser, val optionalQueueFeedbackForSitsCommand: Option[QueueFeedbackForSitsCommand])
-	extends Command[PublishFeedbackCommand.PublishFeedbackResults] with Notifies[PublishFeedbackCommand.PublishFeedbackResults, Feedback] with SelfValidating
-	with CompletesNotifications[PublishFeedbackCommand.PublishFeedbackResults] {
+class PublishFeedbackCommandInternal(val module: Module, val assignment: Assignment, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
+	extends CommandInternal[PublishFeedbackCommand.PublishFeedbackResults]{
+
+	self: PublishFeedbackCommandState with QueuesFeedbackForSits =>
 
 	import PublishFeedbackCommand._
 
-	mustBeLinked(mandatory(assignment), mandatory(module))
-	PermissionCheck(Permissions.Feedback.Publish, assignment)
-
-	var feedbackService = Wire.auto[FeedbackService]
-	var userLookup = Wire.auto[UserLookupService]
-
-	var confirm: Boolean = false
-
-	val queueFeedbackForSitsCommand = optionalQueueFeedbackForSitsCommand match {
-		case Some(cmd: QueueFeedbackForSitsCommand) => cmd
-		case None => new QueueFeedbackForSitsCommand(assignment, submitter)
-	}
-
-	// validation done even when showing initial form.
-	def prevalidate(errors: Errors) {
-		if (!assignment.openEnded && !assignment.isClosed) {
-			errors.reject("feedback.publish.notclosed")
-		} else if (assignment.fullFeedback.isEmpty) {
-			errors.reject("feedback.publish.nofeedback")
-		}
-	}
-
-	def validate(errors: Errors) {
-		prevalidate(errors)
-		if (!confirm) {
-			errors.rejectValue("confirm", "feedback.publish.confirm")
-		}
-	}
-
 	def applyInternal() = {
-		transactional() {
-			if (assignment.uploadMarksToSits) {
-				queueFeedbackForSitsCommand.apply()
-			}
 
-			val users = getUsersForFeedback
-			val allResults = for {
-				(studentId, user) <- users
-				feedback <- assignment.fullFeedback.find { _.universityId == studentId }
-			} yield {
+			val allResults = feedbackToRelease.map {case(studentId, user, feedback) =>
 				feedback.released = true
 				feedback.releasedDate = new DateTime
+				if (sendToSits)	queueFeedback(feedback, submitter, gradeGenerator)
 				generateNotification(studentId, user, feedback)
 			}
-			
-			allResults.foldLeft(PublishFeedbackResults()) { (acc, result) => 
+
+		allResults.foldLeft(PublishFeedbackResults()) { (acc, result) =>
 				PublishFeedbackResults(
 					notifications = acc.notifications ++ result.notifications,
 					missingUsers = acc.missingUsers ++ result.missingUsers,
 					badEmails = acc.badEmails ++ result.badEmails
 				)
 			}
-
-		}
 	}
 
 	private def generateNotification(id:String, user:User, feedback:Feedback) = {
@@ -108,24 +85,94 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 		}
 	}
 
-	def getUsersForFeedback = feedbackService.getUsersForFeedback(assignment)
+}
 
-	def describe(d: Description) = d 
-		.assignment(assignment)
-		.studentIds(getUsersForFeedback map { case(userId, user) => user.getWarwickId })
+trait PublishFeedbackNotification extends Notifies[PublishFeedbackCommand.PublishFeedbackResults, Feedback] {
+	override def emit(results: PublishFeedbackResults) = results.notifications
+}
 
-	def emit(results: PublishFeedbackResults) = results.notifications
+trait PublishFeedbackNotificationCompletion extends CompletesNotifications[PublishFeedbackCommand.PublishFeedbackResults] {
+	self: PublishFeedbackCommandState with NotificationHandling =>
 
 	def notificationsToComplete(commandResult: PublishFeedbackCommand.PublishFeedbackResults): CompletesNotificationsResult = {
 		if (!assignment.needsFeedbackPublishing) {
 			CompletesNotificationsResult(
 				notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackDueGeneralNotification](assignment) ++
-					 notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackDueExtensionNotification](assignment),
+					notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackDueExtensionNotification](assignment),
 				submitter.apparentUser
 			)
 		} else {
 			EmptyCompletesNotificationsResult
 		}
 	}
+}
 
+trait PublishFeedbackCommandState {
+
+	self: FeedbackServiceComponent with FeedbackForSitsServiceComponent =>
+
+	val module: Module
+	val assignment: Assignment
+	val submitter: CurrentUser
+	val gradeGenerator: GeneratesGradesFromMarks
+
+	var confirm: Boolean = false
+	var sendToSits: Boolean = false
+
+	lazy val feedbackToRelease = for {
+		(studentId, user) <- feedbackService.getUsersForFeedback(assignment)
+		feedback <- assignment.fullFeedback.find(_.universityId == studentId)
+	} yield (studentId, user, feedback)
+
+
+	// validation done even when showing initial form.
+	def prevalidate(errors: Errors) {
+		if (!assignment.openEnded && !assignment.isClosed) {
+			errors.reject("feedback.publish.notclosed")
+		} else if (assignment.fullFeedback.isEmpty) {
+			errors.reject("feedback.publish.nofeedback")
+		}
+	}
+	
+	def validateGrades: ValidateAndPopulateFeedbackResult = {
+		feedbackForSitsService.validateAndPopulateFeedback(feedbackToRelease.map(_._3), gradeGenerator)
+	}
+}
+
+trait QueuesFeedbackForSits extends FeedbackForSitsServiceComponent {
+
+	def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		feedbackForSitsService.queueFeedback(feedback, submitter, gradeGenerator)
+}
+
+trait PublishFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+
+	self: PublishFeedbackCommandState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.mustBeLinked(mandatory(assignment), mandatory(module))
+		p.PermissionCheck(Permissions.Feedback.Publish, assignment)
+	}
+}
+
+trait PublishFeedbackValidation extends SelfValidating {
+
+	self: PublishFeedbackCommandState =>
+
+	override def validate(errors: Errors) {
+		prevalidate(errors)
+		if (!confirm) {
+			errors.rejectValue("confirm", "feedback.publish.confirm")
+		}
+	}
+}
+
+trait PublishFeedbackDescription extends Describable[PublishFeedbackCommand.PublishFeedbackResults] {
+
+	self: PublishFeedbackCommandState with FeedbackServiceComponent =>
+
+	override def describe(d: Description) {
+		d.assignment(assignment)
+		.studentIds(feedbackService.getUsersForFeedback(assignment) map { case(userId, user) => user.getWarwickId })
+	}
 }

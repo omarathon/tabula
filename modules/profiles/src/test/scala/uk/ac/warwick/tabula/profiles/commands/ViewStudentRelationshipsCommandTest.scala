@@ -23,6 +23,7 @@ class ViewStudentRelationshipsCommandTest extends TestBase with Mockito {
 		
 		val student1 = Fixtures.student(universityId = "1")
 		val student2 = Fixtures.student(universityId = "2")
+		val student3 = Fixtures.student(universityId = "3")
 
 		val studentRel1 = new MemberStudentRelationship().tap(r => {
 			r.id = "1"
@@ -41,14 +42,16 @@ class ViewStudentRelationshipsCommandTest extends TestBase with Mockito {
 	def applyCombinesStudentsInDepartmentWithStudentsWhoHaveTutorsInDepartment() {
 		new Fixture {
 
-			// two students in the department (sprCode 1, plus another one that we never meet)
-			profileService.countStudentsByDepartment(departmentOfXXX) returns (2)
+
 
 			// sprCode 1 is in the department, and has a tutor
 			relationshipService.listStudentRelationshipsByDepartment(tutorRelType, departmentOfXXX) returns Seq(studentRel1)
 
 			// sprCode 2 is not in the department, but does have a tutor in the department
 			relationshipService.listStudentRelationshipsByStaffDepartment(tutorRelType, departmentOfXXX) returns Seq(studentRel2)
+
+			//
+			relationshipService.listStudentsWithoutRelationship(tutorRelType, departmentOfXXX) returns Seq(student3)
 
 			val command = new ViewStudentRelationshipsCommand(departmentOfXXX, tutorRelType)
 
@@ -62,7 +65,6 @@ class ViewStudentRelationshipsCommandTest extends TestBase with Mockito {
 			//Then I should get the results I expect
 			relationshipInfo.studentMap(SortableAgentIdentifier("111",Some("Smith"))) should be(Seq(studentRel1))
 			relationshipInfo.studentMap(SortableAgentIdentifier("222",Some("Smith"))) should be(Seq(studentRel2))
-			relationshipInfo.studentCount should be(3) // sprCode1, sprCode2, and the other one
 			relationshipInfo.missingCount should be(1) // the other one
 		}
 	}

@@ -33,7 +33,7 @@ class RecordAttendanceController extends GroupsController with AutowiringSmallGr
 	@ModelAttribute
 	def command(@PathVariable event: SmallGroupEvent, @RequestParam week: Int, user: CurrentUser)
 		: RecordAttendanceCommand
-			= RecordAttendanceCommand(event, week, user)
+			= RecordAttendanceCommand(mandatory(event), week, user)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute command: RecordAttendanceCommand): Mav = {

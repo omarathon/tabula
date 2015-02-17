@@ -92,6 +92,9 @@
 										Feedback for this student has already been published. They will be notified that their mark has changed.
 									</div>
 								</#if>
+								<#if item.hasAdjustment>
+									<span class="warning">This student's mark has already been adjusted. The adjusted mark may need to be amended.</span>
+								</#if>
 							</td>
 							<td>
 								<@spring.bind path="actualMark">

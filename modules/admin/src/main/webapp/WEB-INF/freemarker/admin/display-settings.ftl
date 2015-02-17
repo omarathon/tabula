@@ -65,6 +65,22 @@
 		</@form.row>
 
 		<@form.row>
+			<@form.label>Validate feedback grades</@form.label>
+			<@form.field>
+				<@form.label checkbox=true>
+					<@f.radiobutton path="assignmentGradeValidation" value="true" />
+					Validate grade
+					<@fmt.help_popover id="assignmentGradeValidationTrue" content="The 'Grade' text box will be removed and replaced by a drop-down of valid grades based on the marks scheme defined in SITS for the assessment component. Empty grades will be calculated automatically when uploaded to SITS"/>
+				</@form.label>
+				<@form.label checkbox=true>
+					<@f.radiobutton path="assignmentGradeValidation" value="false" />
+					Free-form grades
+					<@fmt.help_popover id="assignmentGradeValidationFalse" content="Any text can be entered for the grade. Note that an invalid grade will prevent the feedback being uploaded to SITS (if and when this is requested)."/>
+				</@form.label>
+			</@form.field>
+		</@form.row>
+
+		<@form.row>
 			<@form.label></@form.label>
 			<@form.field>
 				<@form.label checkbox=true>

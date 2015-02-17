@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.coursework.commands.feedback.OnlineModerationCommand
+import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateGradesFromMarkCommand, OnlineModerationCommand}
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
@@ -20,12 +20,13 @@ class OnlineModerationController extends CourseworkController {
 	validatesSelf[OnlineModerationCommand]
 
 	@ModelAttribute("command")
-	def command(@PathVariable student: User,
-							@PathVariable module: Module,
-							@PathVariable assignment: Assignment,
-							@PathVariable marker: User,
-							submitter: CurrentUser) =
-		OnlineModerationCommand(module, assignment, student, marker, submitter)
+	def command(
+		@PathVariable student: User,
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable marker: User,
+		submitter: CurrentUser
+	) = OnlineModerationCommand(module, assignment, student, marker, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineModerationCommand, errors: Errors): Mav = {
@@ -43,7 +44,8 @@ class OnlineModerationController extends CourseworkController {
 			"command" -> command,
 			"isCompleted" -> isCompleted,
 			"completedDate" -> completedDate,
-			"firstMarkerFeedback" -> firstMarkerFeedback
+			"firstMarkerFeedback" -> firstMarkerFeedback,
+			"isGradeValidation" -> command.module.adminDepartment.assignmentGradeValidation
 		).noLayout()
 	}
 

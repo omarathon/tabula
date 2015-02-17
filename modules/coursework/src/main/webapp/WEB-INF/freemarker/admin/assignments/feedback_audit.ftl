@@ -8,8 +8,10 @@
 	</h5>
 
 	<h4>Student - ${student.fullName} (${student.warwickId}) <@pl.profile_link student.warwickId! /></h4>
-	<#assign submission=auditData.submission />
-	<#include "feedback/_submission_summary.ftl">
+	<#if auditData.submission??>
+		<#assign submission=auditData.submission />
+		<#include "feedback/_submission_summary.ftl">
+	</#if>
 
 	<#list auditData.feedback.allMarkerFeedback as feedback>
 		<#if feedback??>
@@ -69,13 +71,15 @@
 			</div>
 		</#if>
 
-		<div class="well">
-			<div class="feedback-summary-heading">
-				<h3>Feedback delivered to student</h3>
-				<h5>Published on <@fmt.date feedback.releasedDate /></h5>
+		<#if feedback.released>
+			<div class="well">
+				<div class="feedback-summary-heading">
+					<h3>Feedback delivered to student</h3>
+					<#if feedback.releasedDate??><h5>Published on <@fmt.date feedback.releasedDate /></h5></#if>
+				</div>
+				<#include "../../submit/_assignment_feedbackdownload.ftl" />
 			</div>
-			<#include "../../submit/_assignment_feedbackdownload.ftl" />
-		</div>
+		</#if>
 	</#if>
 
 	<div id="profile-modal" class="modal fade profile-subset"></div>

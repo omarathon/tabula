@@ -1,6 +1,5 @@
-<#import "_feedback_summary.ftl" as fs>
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
+<#import "_feedback_summary.ftl" as fs />
+<#import "*/courses_macros.ftl" as courses_macros />
 
 <div class="well">
 	<@fs.feedbackSummary firstMarkerFeedback false />
@@ -56,11 +55,15 @@
 					</@form.row>
 
 					<@form.row>
-						<@form.label path="grade">Suggested Grade</@form.label>
-						<@form.field>
-							<@f.input path="grade" cssClass="input-small" />
-							<@f.errors path="grade" cssClass="error" />
-						</@form.field>
+						<#if isGradeValidation>
+							<@courses_macros.autoGradeOnline "grade" "Suggested Grade" "mark" command.student.warwickId! />
+						<#else>
+							<@form.label path="grade">Suggested Grade</@form.label>
+							<@form.field>
+								<@f.input path="grade" cssClass="input-small" />
+								<@f.errors path="grade" cssClass="error" />
+							</@form.field>
+						</#if>
 					</@form.row>
 					<div class="control-group">
 						<div class="controls">

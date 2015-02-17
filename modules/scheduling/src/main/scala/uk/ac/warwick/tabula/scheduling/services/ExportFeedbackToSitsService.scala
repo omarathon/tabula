@@ -25,7 +25,7 @@ trait AutowiringExportFeedbackToSitsServiceComponent extends ExportFeedbackToSit
 }
 
 trait ExportFeedbackToSitsService {
-	def countMatchingBlankSasRecords(feedbackForSits: FeedbackForSits): Integer
+	def countMatchingSasRecords(feedbackForSits: FeedbackForSits): Integer
 	def exportToSits(feedbackToLoad: FeedbackForSits): Integer
 }
 
@@ -74,7 +74,7 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
 
 	self: SitsDataSourceComponent =>
 
-	def countMatchingBlankSasRecords(feedbackForSits: FeedbackForSits): Integer = {
+	def countMatchingSasRecords(feedbackForSits: FeedbackForSits): Integer = {
 		val countQuery = new CountQuery(sitsDataSource)
 		val parameterGetter: ParameterGetter = new ParameterGetter(feedbackForSits)
 		countQuery.getCount(parameterGetter.getQueryParams)
@@ -84,11 +84,11 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
 		val parameterGetter: ParameterGetter = new ParameterGetter(feedbackForSits)
 		val updateQuery = new ExportFeedbackToSitsQuery(sitsDataSource)
 
-		val actualGrade = feedbackForSits.feedback.actualGrade
-		val actualMark = feedbackForSits.feedback.actualMark
+		val grade = feedbackForSits.feedback.latestGrade
+		val mark = feedbackForSits.feedback.latestMark
 		val numRowsChanged =
-			if (actualGrade.isDefined && actualMark.isDefined)
-				updateQuery.updateByNamedParam(parameterGetter.getUpdateParams(actualMark.get, actualGrade.get))
+			if (grade.isDefined && mark.isDefined)
+				updateQuery.updateByNamedParam(parameterGetter.getUpdateParams(mark.get, grade.get))
 		else {
 				0 // issue a warning when the FeedbackForSits record is created, not here
 			}
@@ -103,12 +103,17 @@ object ExportFeedbackToSitsService {
 	// mav_occur = module occurrence code
 	// psl_code = "Period Slot"
 	// mab_seq = sequence code determining an assessment component
+	// Only upload when the mark/grade is empty or was previously uploaded by Tabula
 	val whereClause = f"""where spr_code in (select spr_code from $sitsSchema.ins_spr where spr_stuc = :studentId)
 		and mod_code like :moduleCodeMatcher
 		and mav_occur in :occurrences
 		and ayr_code = :academicYear
 		and psl_code = 'Y'
 		and mab_seq in :sequences
+		and (
+			sas_actm is null and sas_actg is null
+			or sas_udf1 = 'Tabula'
+		)
 	"""
 
 	final val CountMatchingBlankSasRecordsSql = f"""
@@ -160,7 +165,7 @@ class ExportFeedbackToSitsServiceImpl
 @Profile(Array("sandbox"))
 @Service
 class ExportFeedbackToSitsSandboxService extends ExportFeedbackToSitsService {
-	def countMatchingBlankSasRecords(feedbackForSits: FeedbackForSits) = 0
+	def countMatchingSasRecords(feedbackForSits: FeedbackForSits) = 0
 	def exportToSits(feedbackForSits: FeedbackForSits) = 0
 }
 

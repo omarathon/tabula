@@ -16,6 +16,7 @@ class MarkItem {
 	var isValid = true
 	var isModified = false
 	var isPublished = false
+	var hasAdjustment = false
 
 	def this(universityId: String, actualMark: String, actualGrade: String) = {
 		this()

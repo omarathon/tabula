@@ -1,5 +1,4 @@
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
+<#import "*/courses_macros.ftl" as courses_macros />
 <#assign finalMarkingStage = (allCompletedMarkerFeedback?? && allCompletedMarkerFeedback?size > 1)>
 
 <#macro lateness submission=""><#compress>
@@ -25,10 +24,10 @@
 			<h3>Feedback</h3>
 			<p>
 				<#if command.actualMark??>
-					Actual mark - ${command.actualMark}<br>
+					Original mark - ${command.actualMark}<br>
 				</#if>
 				<#if command.actualGrade??>
-					Actual grade - ${command.actualGrade}<br>
+					Original grade - ${command.actualGrade}<br>
 				</#if>
 			</p>
 		</div>
@@ -95,16 +94,24 @@
 	</@form.row>
 
 	<@form.row>
-		<@form.label path="adjustedGrade">Adjusted grade</@form.label>
-		<@form.field>
-			<@f.input path="adjustedGrade" cssClass="input-small" />
-			<@f.errors path="adjustedGrade" cssClass="error" />
-		</@form.field>
+		<#if isGradeValidation>
+			<@courses_macros.autoGradeOnline "adjustedGrade" "Adjusted grade" "adjustedMark" markingId(command.student) />
+		<#else>
+			<@form.label path="adjustedGrade">Adjusted grade</@form.label>
+			<@form.field>
+				<@f.input path="adjustedGrade" cssClass="input-small" />
+				<@f.errors path="adjustedGrade" cssClass="error" />
+			</@form.field>
+		</#if>
 	</@form.row>
 
 	<div class="alert alert-info">
 		The reason for adjustment and any comments will be made available to students when their feedback is published.
 	</div>
+
+	<#if features.queueFeedbackForSits && command.canBeUploadedToSits>
+		<@courses_macros.uploadToSits assignment=assignment verb="Adjusting" withValidation=false/>
+	</#if>
 
 	<div class="submit-buttons">
 		<input class="btn btn-primary" type="submit" value="Save">

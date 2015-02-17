@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
 class SmallGroupsMarkerAllocationController extends GroupsController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable assignment:Assignment) = {
+	def command(@PathVariable assignment: Assignment) = {
 		SmallGroupsMarkerAllocationCommand(assignment)
 	}
 

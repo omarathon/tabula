@@ -17,8 +17,8 @@ import uk.ac.warwick.userlookup.User
 
 
 object OnlineFeedbackFormCommand {
-	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser) =
-		new OnlineFeedbackFormCommand(module, assignment, student, marker, submitter)
+	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		new OnlineFeedbackFormCommand(module, assignment, student, marker, submitter, gradeGenerator)
 			with ComposableCommand[Feedback]
 			with OnlineFeedbackFormPermissions
 			with AutowiringFeedbackServiceComponent
@@ -30,9 +30,14 @@ object OnlineFeedbackFormCommand {
 		}
 }
 
-abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment, student: User, marker: User, val submitter: CurrentUser)
-	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker)
-	with CommandInternal[Feedback] with Appliable[Feedback] {
+abstract class OnlineFeedbackFormCommand(
+	module: Module,
+	assignment: Assignment,
+	student: User,
+	marker: User,
+	val submitter: CurrentUser,
+	gradeGenerator: GeneratesGradesFromMarks
+) extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker, gradeGenerator) with CommandInternal[Feedback] with Appliable[Feedback] {
 
 	self: FeedbackServiceComponent with SavedFormValueDaoComponent with FileAttachmentServiceComponent with ZipServiceComponent =>
 

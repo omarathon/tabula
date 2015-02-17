@@ -4,6 +4,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Module, Assignment}
@@ -23,11 +24,19 @@ class MarkerAddMarksController extends CourseworkController {
 	@Autowired var assignmentService: AssignmentService = _
 	@Autowired var userLookup: UserLookupService = _
 
-	@ModelAttribute def command(@PathVariable("module") module: Module,
-	                            @PathVariable("assignment") assignment: Assignment,
-															@PathVariable("marker") marker: User,
-															submitter: CurrentUser) =
-		new MarkerAddMarksCommand(module, assignment, marker, submitter, assignment.isFirstMarker(marker))
+	@ModelAttribute def command(
+		@PathVariable("module") module: Module,
+		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable("marker") marker: User,
+		submitter: CurrentUser
+	) = new MarkerAddMarksCommand(
+		mandatory(module),
+		mandatory(assignment),
+		marker,
+		submitter,
+		assignment.isFirstMarker(marker),
+		GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment))
+	)
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def viewMarkUploadForm(@PathVariable module: Module,
@@ -51,7 +60,10 @@ class MarkerAddMarksController extends CourseworkController {
 			}
 		}.sortBy(_.universityId)
 
-		Mav("admin/assignments/markerfeedback/marksform", "marksToDisplay" -> marksToDisplay).crumbs(
+		Mav("admin/assignments/markerfeedback/marksform",
+			"marksToDisplay" -> marksToDisplay,
+			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
+		).crumbs(
 			Breadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment, marker)), "")
 		)
 	}

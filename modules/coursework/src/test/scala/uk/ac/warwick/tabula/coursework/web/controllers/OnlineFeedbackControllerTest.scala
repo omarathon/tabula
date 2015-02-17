@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
-import uk.ac.warwick.tabula.services.{UserLookupComponent, AutowiringUserLookupComponent}
-import uk.ac.warwick.tabula.{MockUserLookup, CurrentUser, Mockito, TestBase}
-import uk.ac.warwick.tabula.coursework.web.controllers.admin.{OnlineFeedbackFormController, OnlineFeedbackController}
-import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineFeedbackFormCommand, OnlineFeedbackCommandTestSupport, OnlineFeedbackCommand}
-import uk.ac.warwick.tabula.data.model.{StudentMember, Department, Module, Assignment}
-import uk.ac.warwick.userlookup.User
 import org.mockito.Mockito._
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineFeedbackCommand, OnlineFeedbackCommandTestSupport, OnlineFeedbackFormCommand}
+import uk.ac.warwick.tabula.coursework.web.controllers.admin.{OnlineFeedbackController, OnlineFeedbackFormController}
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module, StudentMember}
+import uk.ac.warwick.tabula.{CurrentUser, MockUserLookup, Mockito, TestBase}
+import uk.ac.warwick.userlookup.User
 
-class OnlineFeedbackControllerTest extends TestBase {
+class OnlineFeedbackControllerTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val department = new Department
@@ -56,6 +55,7 @@ class OnlineFeedbackFormControllerTest extends TestBase with Mockito {
 		val currentUser = new CurrentUser(marker, marker)
 
 		val command = mock[OnlineFeedbackFormCommand]
+		command.module returns module
 		val controller = new OnlineFeedbackFormController
 	}
 
@@ -70,7 +70,7 @@ class OnlineFeedbackFormControllerTest extends TestBase with Mockito {
 	@Test def controllerShowsFormIfErrors() {
 		new Fixture {
 			val errors = mock[Errors]
-			when(errors.hasErrors) thenReturn(true)
+			when(errors.hasErrors) thenReturn true
 			val mav = controller.submit(command, errors)
 			mav.map("command") should be(command)
 			mav.viewName should be ("admin/assignments/feedback/online_feedback")
@@ -80,7 +80,7 @@ class OnlineFeedbackFormControllerTest extends TestBase with Mockito {
 	@Test def controllerAppliesCommand() {
 		new Fixture {
 			val errors = mock[Errors]
-			when(errors.hasErrors) thenReturn(false)
+			when(errors.hasErrors) thenReturn false
 			val mav = controller.submit(command, errors)
 			there was one(command).apply()
 			mav.viewName should be ("ajax_success")

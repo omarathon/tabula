@@ -1,8 +1,12 @@
 // Lazily loaded user picker object.
+if (!window.UserPicker) {
+	window.UserPicker = {};
+}
 (function ($) { "use strict";
 
 var trim = $.trim;
 var _userPicker = null;
+var exports = window.UserPicker;
 function getUserPicker() {
     var targetWidth = 500, targetHeight=400;
     if (_userPicker == null) {
@@ -117,7 +121,7 @@ $(function(){
     		if ($inputs.length > 1) {
     			var toRemove = $inputs.not(':focus').not(':last').filter(emptyValue).closest('.user-picker-container');
     			toRemove.remove();
-    		};
+    		}
     		
     		// if last picker is nonempty OR focused, append an blank picker.
     		var $last = $inputs.last();
@@ -126,10 +130,12 @@ $(function(){
 	    		var input = $blankInput.clone();
 	    		$collection.append(input);
 	    		initUserPicker(input.find('input')[0], false);
-    		};
+    		}
     	});
     });
 
 });
+
+exports.initUserPicker = initUserPicker;
 
 }(jQuery));

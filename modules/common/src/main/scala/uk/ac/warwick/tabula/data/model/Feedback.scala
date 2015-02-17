@@ -95,12 +95,16 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	var agreedMark: Option[Int] = None
 
+	def latestMark: Option[Int] = Seq(agreedMark, adjustedMark, actualMark).flatten.headOption
+
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var actualGrade: Option[String] = None
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var adjustedGrade: Option[String] = None
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var agreedGrade: Option[String] = None
+
+	def latestGrade: Option[String] = Seq(agreedGrade, adjustedGrade, actualGrade).flatten.headOption
 
 	var adjustmentComments: String = _
 	var adjustmentReason: String = _

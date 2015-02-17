@@ -41,6 +41,7 @@ jQuery.fn.tableForm = function(options) {
             });
             $table.append(newRow);
             onAdd.call(newRow);
+			newRow.trigger('tableFormNewRow');
         });
 
         //options.setup.call($this);

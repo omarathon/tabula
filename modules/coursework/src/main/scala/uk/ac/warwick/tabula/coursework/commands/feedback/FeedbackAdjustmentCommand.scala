@@ -1,23 +1,24 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser}
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{StudentFeedbackAdjustmentNotification, FeedbackAdjustmentNotification}
-import uk.ac.warwick.tabula.data.model.{Notification, Submission, Assignment, Feedback}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackAdjustmentNotification, StudentFeedbackAdjustmentNotification}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Notification, Submission}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, AutowiringFeedbackServiceComponent, ZipServiceComponent, FeedbackServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
+import collection.JavaConverters._
 
 object FeedbackAdjustmentCommand {
 
 	final val REASON_SIZE_LIMIT = 600
 
-	def apply(assignment: Assignment, student:User, submitter: CurrentUser) =
-		new FeedbackAdjustmentCommandInternal(assignment, student, submitter)
+	def apply(assignment: Assignment, student:User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		new FeedbackAdjustmentCommandInternal(assignment, student, submitter, gradeGenerator)
 			with ComposableCommand[Feedback]
 			with FeedbackAdjustmentCommandPermissions
 			with FeedbackAdjustmentCommandDescription
@@ -25,17 +26,20 @@ object FeedbackAdjustmentCommand {
 			with FeedbackAdjustmentNotifier
 			with AutowiringFeedbackServiceComponent
 			with AutowiringZipServiceComponent
+			with AutowiringFeedbackForSitsServiceComponent
+			with QueuesFeedbackForSits
 }
 
-class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:User, val submitter: CurrentUser)
+class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[Feedback] with FeedbackAdjustmentCommandState with SubmissionState {
 
-	self: FeedbackServiceComponent with ZipServiceComponent =>
+	self: FeedbackServiceComponent with ZipServiceComponent with QueuesFeedbackForSits =>
 
 	val submission = assignment.findSubmission(student.getWarwickId)
 	val feedback = assignment.findFeedback(student.getWarwickId)
 		.getOrElse(throw new ItemNotFoundException("Can't adjust for non-existent feedback"))
 	copyFrom(feedback)
+	lazy val canBeUploadedToSits = assignment.assessmentGroups.asScala.map(_.toUpstreamAssessmentGroup(assignment.academicYear)).exists(_.exists(_.members.includesUser(student)))
 
 	def applyInternal() = {
 		copyTo(feedback)
@@ -48,6 +52,7 @@ class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:
 
 		feedback.updatedDate = DateTime.now
 		feedbackService.saveOrUpdate(feedback)
+		if (sendToSits) queueFeedback(feedback, submitter, gradeGenerator)
 		feedback
 	}
 
@@ -95,6 +100,14 @@ trait FeedbackAdjustmentCommandValidation extends SelfValidating {
 					errors.rejectValue("adjustedMark", "actualMark.format")
 			}
 		}
+
+		// validate grade is department setting is true
+		if (!errors.hasErrors && adjustedGrade.hasText && assignment.module.adminDepartment.assignmentGradeValidation) {
+			val validGrades = gradeGenerator.applyForMarks(Map(student.getWarwickId -> adjustedMark.toInt))(student.getWarwickId)
+			if (validGrades.nonEmpty && !validGrades.exists(_.grade == adjustedGrade)) {
+				errors.rejectValue("adjustedGrade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
+			}
+		}
 	}
 }
 
@@ -103,6 +116,7 @@ trait FeedbackAdjustmentCommandState {
 	val student: User
 	val feedback: Feedback
 	val submission: Option[Submission]
+	val gradeGenerator: GeneratesGradesFromMarks
 
 	var adjustedMark: String = _
 	var adjustedGrade: String = _
@@ -114,6 +128,7 @@ trait FeedbackAdjustmentCommandState {
 	var comments: String = _
 
 	val submitter: CurrentUser
+	var sendToSits: Boolean = false
 }
 
 trait FeedbackAdjustmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

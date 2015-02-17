@@ -24,6 +24,8 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
 
 				val currentUser = RequestInfo.fromThread.get.user
 				val assignment = newDeepAssignment()
+				assignment.closeDate = DateTime.now.plusMonths(1)
+				assignment.module.adminDepartment.allowExtensionRequests = true
 
 				val command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
 				command.requestedExpiryDate = DateTime.now.plusMonths(2)

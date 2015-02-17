@@ -24,7 +24,7 @@ object ExportFeedbackToSitsCommand {
 
 class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] with Logging {
 
-	self: FeedbackForSitsDaoComponent with ExportFeedbackToSitsServiceComponent with FeaturesComponent with FeedbackForSitsDaoComponent =>
+	self: FeedbackForSitsDaoComponent with ExportFeedbackToSitsServiceComponent with FeaturesComponent =>
 
 	override def applyInternal() = transactional() {
 
@@ -41,8 +41,8 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 				logger.warn(f"Not uploading feedback $feedbackId as department ${department.code} is closed")
 			else {
 
-				// first check to see if there is one and only one matching blank row
-				val rowCount = exportFeedbackToSitsService.countMatchingBlankSasRecords(feedbackToLoad)
+				// first check to see if there is one and only one matching row
+				val rowCount = exportFeedbackToSitsService.countMatchingSasRecords(feedbackToLoad)
 
 				if (rowCount == 0) feedbackToLoad.status = Failed
 				else if (rowCount > 1) {
@@ -74,15 +74,9 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 			feedbackToLoad.status = Successful
 			feedbackToLoad.dateOfUpload = DateTime.now
 
-			feedback.adjustedMark match {
-				case Some(adjustedMark) => feedbackToLoad.actualMarkLastUploaded = adjustedMark
-				case None => feedback.actualMark.foreach( mark => feedbackToLoad.actualMarkLastUploaded = mark)
-			}
+			feedback.latestMark.foreach( mark => feedbackToLoad.actualMarkLastUploaded = mark)
+			feedback.latestGrade.foreach( grade => feedbackToLoad.actualGradeLastUploaded = grade)
 
-			feedback.adjustedGrade match {
-				case Some(adjustedGrade) => feedbackToLoad.actualGradeLastUploaded = adjustedGrade
-				case None => feedback.actualGrade.foreach( grade => feedbackToLoad.actualGradeLastUploaded = grade)
-			}
 		}
 		else throw new IllegalStateException(s"Unexpected SITS update!  Only expected to update one row, but $expectedRowCount rows were updated " +
 				s"in CAM_SAS for student $studentId, feedback $feedbackId")

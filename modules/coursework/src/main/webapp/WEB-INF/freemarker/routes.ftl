@@ -8,7 +8,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 -->
 
-<#macro _u page context='/coursework'><@url context=context page=page /></#macro>
+<#macro _u page context=component.context?default('/coursework')>
+	<@url context=context page=page />
+</#macro>
 
 <#macro home><@_u page="/" /></#macro>
 <#macro departmenthome department><@_u page="/admin/department/${department.code}/" /></#macro>
@@ -37,6 +39,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro onlinefeedbackform assignment studentid><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/online/${studentid}"/></#macro>
 <#macro markerOnlinefeedbackform assignment studentid marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/feedback/online/${studentid}"/></#macro>
 <#macro markerModerationform assignment studentid marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/feedback/online/moderation/${studentid}"/></#macro>
+<#macro generateGradesForMarks assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/generate-grade"/></#macro>
+<#macro uploadToSits assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/upload-to-sits"/></#macro>
 
 <#macro genericfeedback assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/generic"/></#macro>
 <#macro markerFeedbackFiles assignment markerFeedback><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${markerFeedback.id}/feedback-${markerFeedback.feedback.universityId}.zip"/></#macro>

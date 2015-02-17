@@ -916,7 +916,7 @@
 						<#if showRecordButtons && features.smallGroupTeachingRecordAttendance && !event.unscheduled>
 							<#if can.do("SmallGroupEvents.ViewRegister", event)>
 								<div class="eventRegister">
-									<a class="btn btn-mini" href="<@routes.registerForWeek event week/>&returnTo=${(info.requestedUri!"")?url}" title="Record attendance for <@instanceFormat instance academicYear department />">
+									<a class="btn btn-mini use-tooltip <#if !can.do("SmallGroupEvents.Register", event)>disabled</#if>" href="<@routes.registerForWeek event week/>&returnTo=${(info.requestedUri!"")?url}" title="<#if can.do("SmallGroupEvents.Register", event)>Record attendance for <@instanceFormat instance academicYear department /><#else>You don't have permission to record attendance for <@instanceFormat instance academicYear department /></#if>">
 										Record
 									</a>
 								</div>

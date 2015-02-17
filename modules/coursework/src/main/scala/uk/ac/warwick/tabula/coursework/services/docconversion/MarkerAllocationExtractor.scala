@@ -60,12 +60,13 @@ class MarkerAllocationExtractor() {
 		}
 
 		def parseMarker: Either[MarkerAllocationExtractor.Error, Option[User]] = {
-			val markerId = rowData("agent_id")
-			if (!markerId.hasText) Right(None)
-			else {
-				getUser(markerId)
-					.map(user => Right(Some(user)))
-					.getOrElse(Left(Error("marker_id", rowData, "workflow.allocateMarkers.universityId.notFound")))
+			rowData.get("agent_id") match {
+				case Some(markerId) if markerId.hasText =>
+					getUser(markerId)
+						.map(user => Right(Some(user)))
+						.getOrElse(Left(Error("marker_id", rowData, "workflow.allocateMarkers.universityId.notFound")))
+				case _ =>
+					Left(Error("marker_id", rowData, "workflow.allocateMarkers.universityId.notFound"))
 			}
 		}
 

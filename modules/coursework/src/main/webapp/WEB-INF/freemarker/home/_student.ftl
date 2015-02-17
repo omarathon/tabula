@@ -68,12 +68,12 @@
 										<i class="icon-folder-close icon-white"></i> Submit
 									</a>
 
-									<#if assignment.module.department.allowExtensionRequests && assignment.allowExtensions && !assignment.openEnded>
+									<#if assignment.extensionsPossible>
 										<#if extensionRequested>
 											<a href="<@routes.extensionRequest assignment=assignment />?returnTo=/coursework" class="btn btn-block">
 												<i class="icon-calendar"></i> Review extension request
 											</a>
-										<#elseif !isExtended && !assignment.closed>
+										<#elseif !isExtended && assignment.newExtensionsCanBeRequested>
 											<a href="<@routes.extensionRequest assignment=assignment />?returnTo=/coursework" class="btn btn-block">
 												<i class="icon-calendar"></i> Request extension
 											</a>
