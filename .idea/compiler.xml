@@ -48,6 +48,7 @@
         <module name="profiles" />
         <module name="reports" />
         <module name="scheduling" />
+        <module name="web" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -64,6 +65,7 @@
       <module name="reports" target="1.8" />
       <module name="scheduling" target="1.8" />
       <module name="tabula-project" target="1.8" />
+      <module name="web" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

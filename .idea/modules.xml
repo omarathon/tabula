@@ -10,11 +10,10 @@
       <module fileurl="file://$PROJECT_DIR$/modules/coursework/courses.iml" filepath="$PROJECT_DIR$/modules/coursework/courses.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/functional-test/functional-test.iml" filepath="$PROJECT_DIR$/modules/functional-test/functional-test.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/groups/groups.iml" filepath="$PROJECT_DIR$/modules/groups/groups.iml" />
-      <module fileurl="file://$PROJECT_DIR$/modules/home/home.iml" filepath="$PROJECT_DIR$/modules/home/home.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/profiles/profiles.iml" filepath="$PROJECT_DIR$/modules/profiles/profiles.iml" />
-      <module fileurl="file://$PROJECT_DIR$/modules/reports/reports.iml" filepath="$PROJECT_DIR$/modules/reports/reports.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/scheduling/scheduling.iml" filepath="$PROJECT_DIR$/modules/scheduling/scheduling.iml" />
       <module fileurl="file://$PROJECT_DIR$/tabula-project.iml" filepath="$PROJECT_DIR$/tabula-project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/modules/web/web.iml" filepath="$PROJECT_DIR$/modules/web/web.iml" />
     </modules>
   </component>
 </project>

@@ -93,7 +93,7 @@
 		<!-- Project dependencies -->
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
-			<artifactId>home</artifactId>
+			<artifactId>web</artifactId>
 			<classifier>static-hashes</classifier>
 			<type>zip</type>
 			<scope>provided</scope>

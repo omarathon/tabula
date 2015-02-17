@@ -44,8 +44,8 @@
 							<modules>
 								<webModule>
 									<groupId>uk.ac.warwick.tabula</groupId>
-									<artifactId>home</artifactId>
-									<bundleFileName>home.war</bundleFileName>
+									<artifactId>web</artifactId>
+									<bundleFileName>web.war</bundleFileName>
 									<contextRoot>/</contextRoot>
 								</webModule>
 								<webModule>
@@ -94,13 +94,13 @@
 				<!-- For each module, include both the war type and the pom type - the pom type resolves dependencies into lib/ -->
 				<dependency>
 					<groupId>uk.ac.warwick.tabula</groupId>
-					<artifactId>home</artifactId>
+					<artifactId>web</artifactId>
 					<version>${project.version}</version>
 					<type>war</type>
 				</dependency>
 				<dependency>
 					<groupId>uk.ac.warwick.tabula</groupId>
-					<artifactId>home</artifactId>
+					<artifactId>web</artifactId>
 					<version>${project.version}</version>
 					<type>pom</type>
 				</dependency>

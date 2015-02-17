@@ -68,13 +68,12 @@
 
 	<modules>
 		<module>modules/common</module>
-		<module>modules/home</module>
+		<module>modules/web</module>
 		<module>modules/admin</module>
 		<module>modules/attendance</module>
 		<module>modules/coursework</module>
 		<module>modules/profiles</module>
 		<module>modules/groups</module>
-		<module>modules/reports</module>
 		<module>modules/scheduling</module>
 		<module>modules/api</module>
 
@@ -655,7 +654,7 @@
 							</overlay>
 							<overlay>
 								<groupId>uk.ac.warwick.tabula</groupId>
-								<artifactId>home</artifactId>
+								<artifactId>web</artifactId>
 								<type>zip</type>
 								<classifier>static-hashes</classifier>
 								<includes>
@@ -1049,7 +1048,7 @@
 			</dependency>
 			<dependency>
 				<groupId>uk.ac.warwick.tabula</groupId>
-				<artifactId>home</artifactId>
+				<artifactId>web</artifactId>
 				<version>${project.version}</version>
 				<type>zip</type>
 				<classifier>static-hashes</classifier>
@@ -1078,7 +1077,7 @@
 			</dependency>
 			<dependency>
 				<groupId>uk.ac.warwick.tabula</groupId>
-				<artifactId>home</artifactId>
+				<artifactId>web</artifactId>
 				<version>${project.version}</version>
 				<type>jar</type>
 				<classifier>jar</classifier>
@@ -1086,13 +1085,6 @@
 			<dependency>
 				<groupId>uk.ac.warwick.tabula</groupId>
 				<artifactId>attendance</artifactId>
-				<version>${project.version}</version>
-				<type>jar</type>
-				<classifier>jar</classifier>
-			</dependency>
-			<dependency>
-				<groupId>uk.ac.warwick.tabula</groupId>
-				<artifactId>reports</artifactId>
 				<version>${project.version}</version>
 				<type>jar</type>
 				<classifier>jar</classifier>

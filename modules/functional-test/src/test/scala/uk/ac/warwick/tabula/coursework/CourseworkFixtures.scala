@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 import org.openqa.selenium.By
 import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.LoginDetails
-import uk.ac.warwick.tabula.home.{FixturesDriver, FeaturesDriver}
+import uk.ac.warwick.tabula.web.{FixturesDriver, FeaturesDriver}
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.GivenWhenThen
 

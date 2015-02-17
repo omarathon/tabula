@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.pages
 
 import uk.ac.warwick.tabula.BrowserTest
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.home.FixturesDriver
+import uk.ac.warwick.tabula.web.FixturesDriver
 
 trait SubDepartmentFixture  extends BrowserTest with GivenWhenThen with FixturesDriver{
 	val TEST_UG_ROUTE_CODE="xx123"

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles
 
 import org.scalatest.selenium.WebBrowser.go
 import uk.ac.warwick.tabula.BrowserTest
-import uk.ac.warwick.tabula.home.FeaturesDriver
+import uk.ac.warwick.tabula.web.FeaturesDriver
 import org.scalatest.GivenWhenThen
 
 

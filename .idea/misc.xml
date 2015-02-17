@@ -15,6 +15,7 @@
     <file type="web" url="file://$PROJECT_DIR$/modules/profiles" />
     <file type="web" url="file://$PROJECT_DIR$/modules/reports" />
     <file type="web" url="file://$PROJECT_DIR$/modules/scheduling" />
+    <file type="web" url="file://$PROJECT_DIR$/modules/web" />
   </component>
   <component name="IdProvider" IDEtalkID="5FE0E67EA65D5BCC42D3B9C01843C6B1" />
   <component name="MavenProjectsManager">

@@ -26,8 +26,8 @@ RewriteRule ^/groups$ /groups/ [QSA,L,R=301]
 RewriteRule ^/attendance$ /attendance/ [QSA,L,R=301]
 RewriteRule ^/reports$ /reports/ [QSA,L,R=301]
 
-# Remove /home context
-RewriteRule ^/home(.*)$ $1 [QSA,L,R=301]
+# Remove /web context
+RewriteRule ^/web(.*)$ $1 [QSA,L,R=301]
 
 # Rewrite everything for coursework into the courses module
 RewriteCond %{REQUEST_URI} !^/coursework/exams(.*)
@@ -39,10 +39,10 @@ RewriteRule ^/exams/(.*)$ http://127.0.0.1:${proxy:port}/courses/exams/$1 [QSA,P
 RewriteCond %{REQUEST_URI} ^/scheduling/(.*)
 RewriteRule (.*) http://127.0.0.1:${scheduler:port}$1 [QSA,P,L]
 
-# Rewrite everything that isn't in a module to the home module
+# Rewrite everything that isn't in a module to the web module
 RewriteCond %{REQUEST_URI} !^/exams/(.*)
 RewriteCond %{REQUEST_URI} !^/coursework/(.*)
-RewriteCond %{REQUEST_URI} !^/home/(.*)
+RewriteCond %{REQUEST_URI} !^/web/(.*)
 RewriteCond %{REQUEST_URI} !^/profiles/(.*)
 RewriteCond %{REQUEST_URI} !^/scheduling/(.*)
 RewriteCond %{REQUEST_URI} !^/admin/(.*)
@@ -51,7 +51,7 @@ RewriteCond %{REQUEST_URI} !^/attendance/(.*)
 RewriteCond %{REQUEST_URI} !^/reports/(.*)
 RewriteCond %{REQUEST_URI} !^/api/v1/(.*)
 RewriteCond %{REQUEST_URI} !^/errordocuments/(.*)
-RewriteRule (.*) http://127.0.0.1:${proxy:port}/home$1 [QSA,P,L]
+RewriteRule (.*) http://127.0.0.1:${proxy:port}/web$1 [QSA,P,L]
 
 # Else, go straight to app server
 RewriteCond %{REQUEST_URI} !^/errordocuments/(.*)
