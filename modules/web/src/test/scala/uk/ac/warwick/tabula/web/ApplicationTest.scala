@@ -4,7 +4,7 @@ import org.junit.Test
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.web.web.controllers.sysadmin.SysadminController
+import uk.ac.warwick.tabula.web.controllers.sysadmin.SysadminController
 
 class ApplicationTest extends AppContextTestBase {
     
