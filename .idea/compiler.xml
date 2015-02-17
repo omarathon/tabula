@@ -36,7 +36,6 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="admin" />
         <module name="all" />
         <module name="api" />
         <module name="attendance" />
@@ -46,13 +45,11 @@
         <module name="groups" />
         <module name="home" />
         <module name="profiles" />
-        <module name="reports" />
         <module name="scheduling" />
         <module name="web" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="admin" target="1.8" />
       <module name="all" target="1.8" />
       <module name="api" target="1.8" />
       <module name="attendance" target="1.8" />
@@ -62,7 +59,6 @@
       <module name="groups" target="1.8" />
       <module name="home" target="1.8" />
       <module name="profiles" target="1.8" />
-      <module name="reports" target="1.8" />
       <module name="scheduling" target="1.8" />
       <module name="tabula-project" target="1.8" />
       <module name="web" target="1.8" />

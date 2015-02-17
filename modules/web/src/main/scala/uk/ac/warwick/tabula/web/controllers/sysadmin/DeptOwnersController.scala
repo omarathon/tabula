@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 
 @Controller
 @RequestMapping(Array("/sysadmin/departments/"))
-class DeptDetailsController extends BaseSysadminController {
+class SysadminDeptDetailsController extends BaseSysadminController {
 
 	@RequestMapping
 	def departments = Mav("sysadmin/departments/list",
@@ -60,14 +60,14 @@ trait DepartmentPermissionControllerMethods extends BaseSysadminController {
 }
 
 @Controller @RequestMapping(Array("/sysadmin/departments/{department}/permissions"))
-class DepartmentPermissionController extends BaseSysadminController with DepartmentPermissionControllerMethods {
+class SysadminDepartmentPermissionController extends BaseSysadminController with DepartmentPermissionControllerMethods {
 	@RequestMapping
 	def permissionsForm(@PathVariable("department") department: Department): Mav =
 		form(mandatory(department))
 }
 
 @Controller @RequestMapping(Array("/sysadmin/departments/{department}/permissions"))
-class DepartmentAddPermissionController extends BaseSysadminController with DepartmentPermissionControllerMethods {
+class SysadminDepartmentAddPermissionController extends BaseSysadminController with DepartmentPermissionControllerMethods {
 
 	validatesSelf[SelfValidating]
 
@@ -85,7 +85,7 @@ class DepartmentAddPermissionController extends BaseSysadminController with Depa
 }
 
 @Controller @RequestMapping(Array("/sysadmin/departments/{department}/permissions"))
-class DepartmentRemovePermissionController extends BaseSysadminController with DepartmentPermissionControllerMethods {
+class SysadminDepartmentRemovePermissionController extends BaseSysadminController with DepartmentPermissionControllerMethods {
 
 	validatesSelf[SelfValidating]
 

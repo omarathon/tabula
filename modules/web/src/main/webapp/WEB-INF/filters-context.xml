@@ -7,6 +7,7 @@
 	<filter-stack id="filters" parent="commonFilters" merge="true" xmlns="http://go.warwick.ac.uk/elab-schemas/filterstack">
 		<mapping>
 			<filter ref="forceLoginFilter" />
+			<url-pattern>/admin/*</url-pattern>
 			<url-pattern>/reports/*</url-pattern>
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 			<excluded-url-pattern>/test/*</excluded-url-pattern>

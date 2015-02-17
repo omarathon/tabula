@@ -10,3 +10,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro home><@url context="/" page="/" /></#macro>
 
 <#import "reports/routes.ftl" as reports />
+<#import "admin/routes.ftl" as admin />

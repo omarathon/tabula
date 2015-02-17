@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
 @Controller
 @RequestMapping(Array("/settings/showIntro/{settingHash}"))
-class DismissHiddenIntroController extends HomeController {
+class DismissHiddenIntroController extends TabulaHomepageController {
 
 	validatesSelf[DismissHiddenIntroCommand]
 	

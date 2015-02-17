@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/modules/admin/admin.iml" filepath="$PROJECT_DIR$/modules/admin/admin.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/all/all.iml" filepath="$PROJECT_DIR$/modules/all/all.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/api/api.iml" filepath="$PROJECT_DIR$/modules/api/api.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/attendance/attendance.iml" filepath="$PROJECT_DIR$/modules/attendance/attendance.iml" />

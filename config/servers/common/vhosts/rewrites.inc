@@ -21,7 +21,6 @@ RewriteRule ^/exams$ /exams/ [QSA,L,R=301]
 RewriteRule ^/coursework$ /coursework/ [QSA,L,R=301]
 RewriteRule ^/profiles$ /profiles/ [QSA,L,R=301]
 RewriteRule ^/scheduling$ /scheduling/ [QSA,L,R=301]
-RewriteRule ^/admin$ /admin/ [QSA,L,R=301]
 RewriteRule ^/groups$ /groups/ [QSA,L,R=301]
 RewriteRule ^/attendance$ /attendance/ [QSA,L,R=301]
 
@@ -44,7 +43,6 @@ RewriteCond %{REQUEST_URI} !^/coursework/(.*)
 RewriteCond %{REQUEST_URI} !^/web/(.*)
 RewriteCond %{REQUEST_URI} !^/profiles/(.*)
 RewriteCond %{REQUEST_URI} !^/scheduling/(.*)
-RewriteCond %{REQUEST_URI} !^/admin/(.*)
 RewriteCond %{REQUEST_URI} !^/groups/(.*)
 RewriteCond %{REQUEST_URI} !^/attendance/(.*)
 RewriteCond %{REQUEST_URI} !^/api/v1/(.*)

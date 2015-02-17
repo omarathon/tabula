@@ -69,7 +69,6 @@
 	<modules>
 		<module>modules/common</module>
 		<module>modules/web</module>
-		<module>modules/admin</module>
 		<module>modules/attendance</module>
 		<module>modules/coursework</module>
 		<module>modules/profiles</module>

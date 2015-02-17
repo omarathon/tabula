@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<@fmt.deptheader "View reports" "in" department routes "department" />
+<@fmt.deptheader "View reports" "in" department routes.reports "department" />
 
 <ul>
 	<#list academicYears as year>
