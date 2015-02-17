@@ -24,7 +24,6 @@ RewriteRule ^/scheduling$ /scheduling/ [QSA,L,R=301]
 RewriteRule ^/admin$ /admin/ [QSA,L,R=301]
 RewriteRule ^/groups$ /groups/ [QSA,L,R=301]
 RewriteRule ^/attendance$ /attendance/ [QSA,L,R=301]
-RewriteRule ^/reports$ /reports/ [QSA,L,R=301]
 
 # Remove /web context
 RewriteRule ^/web(.*)$ $1 [QSA,L,R=301]
@@ -48,7 +47,6 @@ RewriteCond %{REQUEST_URI} !^/scheduling/(.*)
 RewriteCond %{REQUEST_URI} !^/admin/(.*)
 RewriteCond %{REQUEST_URI} !^/groups/(.*)
 RewriteCond %{REQUEST_URI} !^/attendance/(.*)
-RewriteCond %{REQUEST_URI} !^/reports/(.*)
 RewriteCond %{REQUEST_URI} !^/api/v1/(.*)
 RewriteCond %{REQUEST_URI} !^/errordocuments/(.*)
 RewriteRule (.*) http://127.0.0.1:${proxy:port}/web$1 [QSA,P,L]
