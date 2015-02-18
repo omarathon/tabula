@@ -2,12 +2,12 @@ package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.tabula.data.Daoisms._
 import org.hibernate.criterion.Restrictions.{eq => is}
-import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Feedback, Assignment}
+import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, MarkerFeedback, Feedback, Assignment}
 import org.springframework.stereotype.Repository
 
 trait FeedbackDao {
-	def getFeedback(id: String): Option[Feedback]
-	def getFeedbackByUniId(assignment: Assignment, uniId: String): Option[Feedback]
+	def getAssignmentFeedback(id: String): Option[AssignmentFeedback]
+	def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String): Option[AssignmentFeedback]
 	def getMarkerFeedback(id: String): Option[MarkerFeedback]
 	def save(feedback: Feedback)
 	def delete(feedback: Feedback)
@@ -18,11 +18,11 @@ trait FeedbackDao {
 abstract class AbstractFeedbackDao extends FeedbackDao {
 	self: ExtendedSessionComponent =>
 
-	override def getFeedback(id: String) = getById[Feedback](id)
+	override def getAssignmentFeedback(id: String) = getById[AssignmentFeedback](id)
 	override def getMarkerFeedback(id: String) = getById[MarkerFeedback](id)
 
-	override def getFeedbackByUniId(assignment: Assignment, uniId: String): Option[Feedback] =
-		session.newCriteria[Feedback]
+	override def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String): Option[AssignmentFeedback] =
+		session.newCriteria[AssignmentFeedback]
 			.add(is("universityId", uniId))
 			.add(is("assignment", assignment))
 			.uniqueResult

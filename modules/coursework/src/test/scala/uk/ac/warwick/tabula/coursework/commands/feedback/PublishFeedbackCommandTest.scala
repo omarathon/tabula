@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 import uk.ac.warwick.tabula.services.GeneratesGradesFromMarks
 import uk.ac.warwick.tabula.{Mockito, CurrentUser, TestBase}
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.Feedback
+import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, Feedback}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
 
@@ -50,7 +50,7 @@ class PublishFeedbackCommandTest extends TestBase with Mockito {
 		val assignment = newDeepAssignment(moduleCode = "IN101")
 		val command = PublishFeedbackCommand(assignment.module, assignment, currentUser, smartMock[GeneratesGradesFromMarks])
 		val errors = new BindException(command, "command")
-		val feedback = new Feedback()
+		val feedback = new AssignmentFeedback
 		feedback.actualMark = Option(41)
 		feedback.assignment = assignment
 		assignment.feedbacks = JArrayList( feedback )

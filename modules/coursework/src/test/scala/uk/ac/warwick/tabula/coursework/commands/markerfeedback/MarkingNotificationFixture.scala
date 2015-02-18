@@ -4,7 +4,7 @@ import collection.JavaConversions._
 import uk.ac.warwick.tabula.{Mockito, Fixtures}
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.data.model.{Department, Module, MarkerFeedback, Assignment, Feedback, UserGroup}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
 
 object MarkingNotificationFixture {
@@ -44,7 +44,7 @@ trait MarkingNotificationFixture extends Mockito {
 	}
 
 	def makeMarkerFeedback(student: User)(linkFunction: (Feedback, MarkerFeedback) => Unit) = {
-		val feedback = new Feedback()
+		val feedback = new AssignmentFeedback
 		feedback.universityId = student.getWarwickId
 		val mf = new MarkerFeedback()
 		mf.feedback = feedback

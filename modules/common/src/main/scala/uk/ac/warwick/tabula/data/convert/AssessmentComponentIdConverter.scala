@@ -2,12 +2,12 @@ package uk.ac.warwick.tabula.data.convert
 import org.springframework.beans.factory.annotation.Autowired
 
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.system.TwoWayConverter
 
 class AssessmentComponentIdConverter extends TwoWayConverter[String, AssessmentComponent] {
 
-	@Autowired var service: AssignmentMembershipService = _
+	@Autowired var service: AssessmentMembershipService = _
 
 	// Converter used for binding request
 	override def convertRight(id: String) = service.getAssessmentComponent(id).orNull

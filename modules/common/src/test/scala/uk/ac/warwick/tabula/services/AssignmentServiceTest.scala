@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{CommentField, FormFieldContext, WordCountField, Extension}
-import uk.ac.warwick.tabula.data.{AssignmentDaoComponent, AssignmentDaoImpl, ExtensionDaoComponent, ExtensionDaoImpl, AssignmentMembershipDaoImpl, DepartmentDaoImpl}
+import uk.ac.warwick.tabula.data.{AssignmentDaoComponent, AssignmentDaoImpl, ExtensionDaoComponent, ExtensionDaoImpl, AssessmentMembershipDaoImpl, DepartmentDaoImpl}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarised
 
@@ -26,7 +26,7 @@ class AssignmentServiceTest extends PersistenceTestBase with Mockito {
 		val secondMarkerHelper = thisSecondMarkerHelper
 		val markingWorkflowService = thisMarkingWorkflowService
 	}
-	val assignmentMembershipService = new AssignmentMembershipServiceImpl
+	val assignmentMembershipService = new AssessmentMembershipServiceImpl
 	val feedbackService = new FeedbackServiceImpl
 	val submissionService = new SubmissionServiceImpl
 	val originalityReportService = new OriginalityReportServiceImpl
@@ -44,7 +44,7 @@ class AssignmentServiceTest extends PersistenceTestBase with Mockito {
 		modAndDeptService.departmentDao = deptDao
 		feedbackService.userLookup = userLookup
 		feedbackService.sessionFactory = sessionFactory
-		val amDao = new AssignmentMembershipDaoImpl
+		val amDao = new AssessmentMembershipDaoImpl
 		amDao.sessionFactory = sessionFactory
 		assignmentMembershipService.dao = amDao
 		assignmentMembershipService.assignmentManualMembershipHelper.sessionFactory = sessionFactory
@@ -174,7 +174,7 @@ class AssignmentServiceTest extends PersistenceTestBase with Mockito {
 
 		assignment.foreach { assmt =>
 			// create a feedback for the assignment, not yet released
-			val feedback = new Feedback
+			val feedback = new AssignmentFeedback
 			feedback.universityId = "0070790"
 			feedback.actualMark = Some(41)
 			feedback.released = false
@@ -261,18 +261,18 @@ class AssignmentServiceTest extends PersistenceTestBase with Mockito {
 
 		val thisStudent = Fixtures.student("1234567")
 
-		val myFeedback = new Feedback
+		val myFeedback = new AssignmentFeedback
 		myFeedback.universityId = ThisUser
 		myFeedback.released = true
 
-		val otherFeedback = new Feedback
+		val otherFeedback = new AssignmentFeedback
 		otherFeedback.universityId = OtherUser
 		otherFeedback.released = true
 
-		val unreleasedFeedback = new Feedback
+		val unreleasedFeedback = new AssignmentFeedback
 		unreleasedFeedback.universityId = ThisUser
 
-		val deletedFeedback = new Feedback
+		val deletedFeedback = new AssignmentFeedback
 		deletedFeedback.universityId = ThisUser
 		deletedFeedback.released = true
 

@@ -13,7 +13,7 @@ class GrantedRoleTest extends TestBase {
 	val assignment = Fixtures.assignment("assignment")
 	val member = Fixtures.staff()
 	
-	val feedback = Fixtures.feedback()
+	val feedback = Fixtures.assignmentFeedback()
 	
 	val roleDefinition = AssignmentSubmitterRoleDefinition
 	

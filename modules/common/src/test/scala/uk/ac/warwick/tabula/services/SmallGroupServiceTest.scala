@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services
 import org.hibernate.annotations.{AccessType, Filter, FilterDef}
 import javax.persistence.{DiscriminatorValue, Entity, NamedQueries}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.tabula.data.{AutowiringAssignmentMembershipDaoComponent, SmallGroupDao, SmallGroupDaoComponent, UserGroupDao, UserGroupDaoComponent}
+import uk.ac.warwick.tabula.data.{AutowiringAssessmentMembershipDaoComponent, SmallGroupDao, SmallGroupDaoComponent, UserGroupDao, UserGroupDaoComponent}
 import uk.ac.warwick.tabula.data.model.{Department, Module, ModuleRegistration}
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Logging
@@ -48,7 +48,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 		val modreg2 = new ModuleRegistration(student.mostSignificantCourseDetails.get, module2, new java.math.BigDecimal(30), new AcademicYear(2013), "A")
 
 		val service = new AbstractSmallGroupService
-			with AutowiringAssignmentMembershipDaoComponent // don't need this component, so autowiring to null is fine
+			with AutowiringAssessmentMembershipDaoComponent // don't need this component, so autowiring to null is fine
 			with SmallGroupMembershipHelpers
 			with UserLookupComponent
 			with UserGroupDaoComponent

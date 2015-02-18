@@ -57,7 +57,7 @@ class SmallGroupSet
 	import SmallGroup._
 
 	@transient var permissionsService = Wire[PermissionsService]
-	@transient var membershipService = Wire[AssignmentMembershipService]
+	@transient var membershipService = Wire[AssessmentMembershipService]
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
 	@transient var smallGroupService = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]

@@ -11,7 +11,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
 
 
 /**
@@ -27,7 +27,7 @@ class DownloadFeedbackSheetsCommand(val module: Module, val assignment: Assignme
 
 	var zipService = Wire.auto[ZipService]
 	var assignmentService = Wire.auto[AssignmentService]
-	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
+	var assignmentMembershipService = Wire.auto[AssessmentMembershipService]
 
 	override def applyInternal():RenderableZip = {
 		if (assignment.feedbackTemplate == null) logger.error("No feedback sheet for assignment - " + assignment.id)

@@ -15,8 +15,8 @@ object FeedbackAdjustmentNotification {
 @Entity
 @DiscriminatorValue("FeedbackAdjustment")
 class FeedbackAdjustmentNotification
-	extends NotificationWithTarget[Feedback, Assignment]
-	with SingleItemNotification[Feedback]
+	extends NotificationWithTarget[AssignmentFeedback, Assignment]
+	with SingleItemNotification[AssignmentFeedback]
 	with AutowiringUserLookupComponent {
 
 	def verb = "adjusted"

@@ -37,7 +37,7 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 		val submission = Fixtures.submission()
 		submission.submitted = true
 
-		val feedback = Fixtures.feedback()
+		val feedback = Fixtures.assignmentFeedback()
 		feedback.released = true
 
 		val extension = Fixtures.extension("0672089", "cuscav")
@@ -47,7 +47,7 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 		assignment.extensions.add(extension)
 
 		command.submissionService.getSubmissionByUniId(assignment, "0672089") returns (Some(submission))
-		command.feedbackService.getFeedbackByUniId(assignment, "0672089") returns (Some(feedback))
+		command.feedbackService.getAssignmentFeedbackByUniId(assignment, "0672089") returns (Some(feedback))
 
 		val info = command.applyInternal()
 		info.submission should be (Some(submission))
@@ -70,7 +70,7 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 		}
 
 		command.submissionService.getSubmissionByUniId(command.assignment, "0672089") returns (None)
-		command.feedbackService.getFeedbackByUniId(command.assignment, "0672089") returns (None)
+		command.feedbackService.getAssignmentFeedbackByUniId(command.assignment, "0672089") returns (None)
 
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)

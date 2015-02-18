@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, FileAttachment}
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
 import uk.ac.warwick.tabula.services.{UserLookupService, ZipService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
@@ -23,7 +23,7 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
 		val department = Fixtures.department(code="ls", name="Life Sciences")
 		val module = Fixtures.module(code="ls101")
 		val assignment = new Assignment
-		val feedback = new Feedback("0123456")
+		val feedback = Fixtures.assignmentFeedback("0123456")
 		feedback.id = "123"
 
 		department.postLoad // force legacy settings

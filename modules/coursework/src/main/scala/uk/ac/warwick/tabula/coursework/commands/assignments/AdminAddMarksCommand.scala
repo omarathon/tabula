@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.Notifies
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
-import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Module, Notification}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.GeneratesGradesFromMarks
 
@@ -51,7 +51,7 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 	override def applyInternal(): List[Feedback] = transactional() {
 		def saveFeedback(universityId: String, actualMark: String, actualGrade: String, isModified: Boolean) = {
 			val feedback = assignment.findFeedback(universityId).getOrElse({
-				val newFeedback = new Feedback
+				val newFeedback = new AssignmentFeedback
 				newFeedback.assignment = assignment
 				newFeedback.uploaderId = submitter.apparentId
 				newFeedback.universityId = universityId
@@ -86,8 +86,11 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 		markList.toList
 	}
 
-	def emit(updatedFeedback: Seq[Feedback]) = updatedReleasedFeedback.map( feedback => {
-		Notification.init(new FeedbackChangeNotification, submitter.apparentUser, feedback, assignment)
-	})
+	def emit(updatedFeedback: Seq[Feedback]) = updatedReleasedFeedback.flatMap {
+		case assignmentFeedback: AssignmentFeedback =>
+			Option(Notification.init(new FeedbackChangeNotification, submitter.apparentUser, assignmentFeedback, assignment))
+		case _ =>
+			None
+	}
 
 }

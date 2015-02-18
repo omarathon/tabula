@@ -39,7 +39,7 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 	def getByFeedback(feedback: Feedback): Option[FeedbackForSits] = feedbackForSitsDao.getByFeedback(feedback)
 	def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks): Option[FeedbackForSits] = {
 		val validatedFeedback = validateAndPopulateFeedback(Seq(feedback), gradeGenerator)
-		if (validatedFeedback.valid.nonEmpty || feedback.assignment.module.adminDepartment.assignmentGradeValidation && validatedFeedback.populated.nonEmpty) {
+		if (validatedFeedback.valid.nonEmpty || feedback.module.adminDepartment.assignmentGradeValidation && validatedFeedback.populated.nonEmpty) {
 			val feedbackForSits = getByFeedback(feedback).getOrElse {
 				// create a new object for this feedback in the queue
 				val newFeedbackForSits = new FeedbackForSits

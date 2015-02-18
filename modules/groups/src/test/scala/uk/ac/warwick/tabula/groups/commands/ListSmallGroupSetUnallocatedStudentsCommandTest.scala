@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.groups.commands
 
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.{CurrentUser, MockUserLookup, TestBase, Mockito}
-import uk.ac.warwick.tabula.services.{UserGroupCacheManager, AssignmentMembershipService, ProfileServiceComponent, ProfileService}
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, AssessmentMembershipService, ProfileServiceComponent, ProfileService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup}
 import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
@@ -25,7 +25,7 @@ class ListSmallGroupSetUnallocatedStudentsCommandTest extends TestBase with Mock
 	trait Fixture {
 		val department = Fixtures.department("in", "IT Services")
 		val userLookup = new MockUserLookup
-		val membershipService = mock[AssignmentMembershipService]
+		val membershipService = mock[AssessmentMembershipService]
 		val profileService = mock[ProfileService]
 		val set = new SmallGroupSet
 

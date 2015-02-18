@@ -20,7 +20,7 @@ object PublishFeedbackCommand {
 	case class BadEmail(user: User, exception: Exception = null)
 	
 	case class PublishFeedbackResults(
-		notifications: Seq[Notification[Feedback, Assignment]] = Nil,
+		notifications: Seq[Notification[AssignmentFeedback, Assignment]] = Nil,
 		missingUsers: Seq[MissingUser] = Nil,
 		badEmails: Seq[BadEmail] = Nil
 	)
@@ -64,7 +64,7 @@ class PublishFeedbackCommandInternal(val module: Module, val assignment: Assignm
 			}
 	}
 
-	private def generateNotification(id:String, user:User, feedback:Feedback) = {
+	private def generateNotification(id:String, user:User, feedback: AssignmentFeedback) = {
 		if (user.isFoundUser) {
 			val email = user.getEmail
 			if (email.hasText) {

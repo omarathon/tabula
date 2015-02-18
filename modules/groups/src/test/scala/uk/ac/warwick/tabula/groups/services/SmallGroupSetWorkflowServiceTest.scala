@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.groups.services
 import uk.ac.warwick.tabula.data.model.{UserGroup, UnspecifiedTypeUserGroup}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.services.{UserGroupCacheManager, AssignmentMembershipService}
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, AssessmentMembershipService}
 import scala.collection.immutable.ListMap
 
 // scalastyle:off magic.number
@@ -61,7 +61,7 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 		set.allocationMethod = SmallGroupAllocationMethod.Random
 
 		// Start with no students
-		set.membershipService = mock[AssignmentMembershipService]
+		set.membershipService = mock[AssessmentMembershipService]
 		set.membershipService.countMembershipWithUniversityIdGroup(set.upstreamAssessmentGroups, Some(set.members)) returns (0)
 
 		// lines were getting a bit long...
@@ -109,7 +109,7 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 		}
 
 		// Add some students
-		set.membershipService = mock[AssignmentMembershipService]
+		set.membershipService = mock[AssessmentMembershipService]
 		set.membershipService.countMembershipWithUniversityIdGroup(set.upstreamAssessmentGroups, Some(set.members)) returns (2)
 
 		{
