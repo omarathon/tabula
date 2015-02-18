@@ -23,6 +23,7 @@ class AddExamCommandInternal(val module: Module) extends CommandInternal[Exam] w
 	override def applyInternal() = {
 		val exam = new Exam
 		examService.saveOrUpdate(exam)
+		exam
 	}
 }
 
@@ -41,7 +42,7 @@ trait AddExamCommandState {
 	def module: Module
 }
 
-trait AddExamCommandDescription extends Describable[Module] {
+trait AddExamCommandDescription extends Describable[Exam] {
 	self: AddExamCommandState =>
 
 	def describe(d: Description) {

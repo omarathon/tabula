@@ -29,5 +29,5 @@ abstract class AbstractExamService extends ExamService {
 
 @Service("examService")
 class ExamServiceImpl
-	extends ExamService
+	extends AbstractExamService
 	with AutowiringExamDaoComponent
