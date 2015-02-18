@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.{BreadcrumbsMatcher, LoginDetails, BrowserTest}
 import org.openqa.selenium.By
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.groups.pages.SmallGroupTeachingPage
-import uk.ac.warwick.tabula.home.{FeaturesDriver, FixturesDriver}
+import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
 
 trait SmallGroupsFixture extends BrowserTest with FixturesDriver with FeaturesDriver {
 

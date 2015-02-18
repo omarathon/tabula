@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.profiles
 
 import scala.xml.Elem
-import uk.ac.warwick.tabula.home.{FeaturesDriver, FixturesDriver}
+import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
 import uk.ac.warwick.tabula.{FunctionalTestAcademicYear, AcademicDateHelper, LoginDetails, FunctionalTestProperties}
 import dispatch.classic._
 import scala.language.postfixOps

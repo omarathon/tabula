@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.profiles
 import uk.ac.warwick.tabula.BrowserTest
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.profiles.pages.ProfilePage
-import uk.ac.warwick.tabula.home.FeaturesDriver
+import uk.ac.warwick.tabula.web.FeaturesDriver
 
 class MemberNotesTest extends BrowserTest with GivenWhenThen with FeaturesDriver {
 

@@ -115,7 +115,7 @@
 						</overlay>
 						<overlay>
 							<groupId>uk.ac.warwick.tabula</groupId>
-							<artifactId>home</artifactId>
+							<artifactId>web</artifactId>
 							<type>zip</type>
 							<classifier>static-hashes</classifier>
 							<includes>
@@ -141,7 +141,7 @@
 			job -->
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
-			<artifactId>home</artifactId>
+			<artifactId>web</artifactId>
 			<classifier>static-hashes</classifier>
 			<type>zip</type>
 			<scope>provided</scope>
@@ -159,7 +159,7 @@
 		</dependency>
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
-			<artifactId>home</artifactId>
+			<artifactId>web</artifactId>
 			<classifier>jar</classifier>
 		</dependency>
 		<dependency>

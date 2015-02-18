@@ -44,15 +44,15 @@
 							<modules>
 								<webModule>
 									<groupId>uk.ac.warwick.tabula</groupId>
-									<artifactId>home</artifactId>
-									<bundleFileName>home.war</bundleFileName>
+									<artifactId>web</artifactId>
+									<bundleFileName>web.war</bundleFileName>
 									<contextRoot>/</contextRoot>
 								</webModule>
 								<webModule>
 									<groupId>uk.ac.warwick.tabula</groupId>
-									<artifactId>admin</artifactId>
-									<bundleFileName>admin.war</bundleFileName>
-									<contextRoot>/admin</contextRoot>
+									<artifactId>api</artifactId>
+									<bundleFileName>api.war</bundleFileName>
+									<contextRoot>/api</contextRoot>
 								</webModule>
 								<webModule>
 									<groupId>uk.ac.warwick.tabula</groupId>
@@ -78,12 +78,6 @@
 									<bundleFileName>attendance.war</bundleFileName>
 									<contextRoot>/attendance</contextRoot>
 								</webModule>
-								<webModule>
-									<groupId>uk.ac.warwick.tabula</groupId>
-									<artifactId>reports</artifactId>
-									<bundleFileName>reports.war</bundleFileName>
-									<contextRoot>/reports</contextRoot>
-								</webModule>
 							</modules>
 						</configuration>
 					</plugin>
@@ -94,26 +88,26 @@
 				<!-- For each module, include both the war type and the pom type - the pom type resolves dependencies into lib/ -->
 				<dependency>
 					<groupId>uk.ac.warwick.tabula</groupId>
-					<artifactId>home</artifactId>
+					<artifactId>web</artifactId>
 					<version>${project.version}</version>
 					<type>war</type>
 				</dependency>
 				<dependency>
 					<groupId>uk.ac.warwick.tabula</groupId>
-					<artifactId>home</artifactId>
+					<artifactId>web</artifactId>
 					<version>${project.version}</version>
 					<type>pom</type>
 				</dependency>
 				
 				<dependency>
 					<groupId>uk.ac.warwick.tabula</groupId>
-					<artifactId>admin</artifactId>
+					<artifactId>api</artifactId>
 					<version>${project.version}</version>
 					<type>war</type>
 				</dependency>
 				<dependency>
 					<groupId>uk.ac.warwick.tabula</groupId>
-					<artifactId>admin</artifactId>
+					<artifactId>api</artifactId>
 					<version>${project.version}</version>
 					<type>pom</type>
 				</dependency>
@@ -166,19 +160,6 @@
 				<dependency>
 					<groupId>uk.ac.warwick.tabula</groupId>
 					<artifactId>attendance</artifactId>
-					<version>${project.version}</version>
-					<type>pom</type>
-				</dependency>
-
-				<dependency>
-					<groupId>uk.ac.warwick.tabula</groupId>
-					<artifactId>reports</artifactId>
-					<version>${project.version}</version>
-					<type>war</type>
-				</dependency>
-				<dependency>
-					<groupId>uk.ac.warwick.tabula</groupId>
-					<artifactId>reports</artifactId>
 					<version>${project.version}</version>
 					<type>pom</type>
 				</dependency>
