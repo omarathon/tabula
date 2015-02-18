@@ -1,23 +1,28 @@
 package uk.ac.warwick.tabula.exams.commands
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.{Exam, Module}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{ExamServiceComponent, AutowiringExamServiceComponent}
 
 object AddExamCommand  {
 	def apply(module: Module) =
 		new AddExamCommandInternal(module)
-			with ComposableCommand[Module]
+			with ComposableCommand[Exam]
 			with AddExamPermissions
 			with AddExamCommandState
 			with AddExamCommandDescription
+			with AutowiringExamServiceComponent
 }
 
-class AddExamCommandInternal(val module: Module) extends CommandInternal[Module] with AddExamCommandState {
+class AddExamCommandInternal(val module: Module) extends CommandInternal[Exam] with AddExamCommandState {
+
+	self: ExamServiceComponent =>
 
 	override def applyInternal() = {
-		module
+		val exam = new Exam
+		examService.saveOrUpdate(exam)
 	}
 }
 

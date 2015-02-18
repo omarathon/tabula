@@ -187,6 +187,10 @@ object Permissions {
 		case object Delete extends Permission("Delete an assignment")
 	}
 
+	object Exam {
+		case object Create extends Permission("Add an exam")
+	}
+
 	object Submission {
 		case object ViewPlagiarismStatus extends Permission("View plagiarism status for a coursework submission")
 		case object ManagePlagiarismStatus extends Permission("Manage a coursework submission's plagiarism status")

@@ -17,6 +17,8 @@ case object ModuleManagerRoleDefinition extends BuiltInRoleDefinition {
 		Assignment.Archive,
 		Assignment.Delete,
 
+		Exam.Create,
+
 		Submission.SendReceipt,
 		Submission.Delete,
 		
