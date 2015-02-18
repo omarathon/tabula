@@ -9,8 +9,7 @@ import org.junit.runner.RunWith
 import uk.ac.warwick.tabula.{AcademicYear, CustomHamcrestMatchers, Mockito}
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, AssessmentMembershipService}
-import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
-import uk.ac.warwick.tabula.scheduling.services.UpstreamModuleRegistration
+import uk.ac.warwick.tabula.data.model.{UpstreamModuleRegistration, UpstreamAssessmentGroup}
 
 @RunWith(classOf[JUnitRunner])
 class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
@@ -28,7 +27,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 		command.moduleAndDepartmentService = moduleService
 
 		moduleService.getModuleByCode(any[String]) returns (None) // Not necessary for this to work
-		membershipService.replaceMembers(any[UpstreamAssessmentGroup], any[Seq[String]]) answers { args =>
+		membershipService.replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamModuleRegistration]]) answers { args =>
 			val uag = args.asInstanceOf[Array[_]](0).asInstanceOf[UpstreamAssessmentGroup]
 			uag.id = "seenGroupId"
 
@@ -49,12 +48,12 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns (Nil)
 
 			val registrations = Seq(
-				UpstreamModuleRegistration("13/14", "0100001/1", "A", "HI33M-30", "A"),
-				UpstreamModuleRegistration("13/14", "0100001/1", "A", "HI100-30", "A"),
-				UpstreamModuleRegistration("13/14", "0100002/1", "A", "HI101-30", "A")
+				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "HI100-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "HI101-30", "A")
 			)
 			command.doGroupMembers()
-			there were three(membershipService).replaceMembers(any[UpstreamAssessmentGroup], any[Seq[String]])
+			there were three(membershipService).replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamModuleRegistration]])
 		}
 	}
 
@@ -73,18 +72,29 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 			}
 
 			val registrations = Seq(
-				UpstreamModuleRegistration("13/14", "0100001/1", "A", "HI33M-30", "A"),
-				UpstreamModuleRegistration("13/14", "0100002/1", "A", "HI33M-30", "A"),
-				UpstreamModuleRegistration("13/14", "0100003/1", "A", "HI100-30", "A"),
-				UpstreamModuleRegistration("13/14", "0100002/1", "A", "HI100-30", "A")
+				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100003/1", "3", "A", "HI100-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "HI100-30", "A")
 			)
 
 			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns (Seq(hi900_30))
 
 			command.doGroupMembers()
 
-			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(Seq("0100001", "0100002")))
-			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(Seq("0100003", "0100002")))
+			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
+				Seq(
+					UpstreamModuleRegistration("13/14","0100001/1","1","A","HI33M-30","A"),
+					UpstreamModuleRegistration("13/14","0100001/2","2","A","HI33M-30","A")
+				)
+			))
+
+			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(
+				Seq(
+					UpstreamModuleRegistration("13/14","0100003/1","3","A","HI100-30","A"),
+					UpstreamModuleRegistration("13/14","0100002/1","2","A","HI100-30","A")
+				)
+			))
 
 			// The bug is that we don't update any group we don't have moduleregistrations for.
 			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI900-30")), isEq(Nil))

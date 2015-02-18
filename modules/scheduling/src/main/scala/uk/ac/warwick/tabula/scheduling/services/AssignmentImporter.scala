@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentType, GradeBoundary, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 
@@ -76,6 +76,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 				callback(UpstreamModuleRegistration(
 					year = rs.getString("academic_year_code"),
 					sprCode = rs.getString("spr_code"),
+					seatNumber = rs.getString("seat_number"),
 					occurrence = rs.getString("mav_occurrence"),
 					moduleCode = rs.getString("module_code"),
 					assessmentGroup = convertAssessmentGroupFromSITS(rs.getString("assessment_group"))))
@@ -117,6 +118,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 			UpstreamModuleRegistration(
 				year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString,
 				sprCode = "%d/1".format(uniId),
+				seatNumber = "0",
 				occurrence = "A",
 				moduleCode = "%s-15".format(moduleCode.toUpperCase),
 				assessmentGroup = "A"
@@ -159,34 +161,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 	def getAllGradeBoundaries: Seq[GradeBoundary] = SandboxData.GradeBoundaries
 }
 
-/**
- * Holds data about an individual student's registration on a single module.
- */
-case class UpstreamModuleRegistration(year: String, sprCode: String, occurrence: String, moduleCode: String, assessmentGroup: String) {
-	def differentGroup(other: UpstreamModuleRegistration) =
-		year != other.year ||
-			occurrence != other.occurrence ||
-			moduleCode != other.moduleCode ||
-			assessmentGroup != other.assessmentGroup
 
-	/**
-	 * Returns an UpstreamAssessmentGroup matching the group attributes.
-	 */
-	def toUpstreamAssignmentGroup = {
-		val g = new UpstreamAssessmentGroup
-		g.academicYear = AcademicYear.parse(year)
-		g.moduleCode = moduleCode
-		g.assessmentGroup = assessmentGroup
-		// for the NONE group, override occurrence to also be NONE, because we create a single UpstreamAssessmentGroup
-		// for each module with group=NONE and occurrence=NONE, and all unallocated students go in there together.
-		g.occurrence =
-			if (assessmentGroup == AssessmentComponent.NoneAssessmentGroup)
-				AssessmentComponent.NoneAssessmentGroup
-			else
-				occurrence
-		g
-	}
-}
 
 object AssignmentImporter {
 	var sitsSchema: String = Wire.property("${schema.sits}")
@@ -295,6 +270,7 @@ object AssignmentImporter {
 	def GetUnconfirmedModuleRegistrations = s"""
 		select
 			sms.ayr_code as academic_year_code,
+			wss_seat as seat_number,
 			spr.spr_code as spr_code,
 			sms.sms_occl as mav_occurrence, -- module occurrence (representing eg day or evening - usually 'A')
 			sms.mod_code as module_code,
@@ -308,6 +284,16 @@ object AssignmentImporter {
 
 					join $sitsSchema.cam_ssn ssn -- SSN holds module registration status
 						on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- module choices confirmed
+
+					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
+						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = sms.ayr_code and wss.wss_modc = sms.mod_code and wss.wss_publ = 'Y'
+
+					left join $sitsSchema.cam_wsm wsm -- WSM is "Slot Modules"
+						on wss.wss_wspc = wsm.wsm_wspc and wsm.wsm_ayrc = wss.wss_ayrc and wsm.wsm_modc = wss.wss_modc
+
+					left join $sitsSchema.cam_mab mab
+						on wsm.wsm_apac = mab.mab_apac and mab.map_code = sms.mod_code --and mab.mab_seq = 'E01'
+
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
 				sms.ayr_code in (:academic_year_code)"""
@@ -317,6 +303,7 @@ object AssignmentImporter {
 		select
 			smo.ayr_code as academic_year_code,
 			spr.spr_code as spr_code,
+			wss.wss_seat as seat_number,
 			smo.mav_occur as mav_occurrence, -- module occurrence (representing eg day or evening - usually 'A')
 			smo.mod_code as module_code,
 			smo.smo_agrp as assessment_group
@@ -331,6 +318,16 @@ object AssignmentImporter {
 
 					join $sitsSchema.cam_ssn ssn
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code and ssn.ssn_mrgs = 'CON' -- confirmed module choices
+
+					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
+						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code and wss.wss_publ = 'Y'
+
+					left join $sitsSchema.cam_wsm wsm -- WSM is "Slot Modules"
+						on wss.wss_wspc = wsm.wsm_wspc and wsm.wsm_ayrc = wss.wss_ayrc and wsm.wsm_modc = wss.wss_modc
+
+					left join $sitsSchema.cam_mab mab
+						on wsm.wsm_apac = mab.mab_apac and mab.map_code = smo.mod_code
+
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
 				smo.ayr_code in (:academic_year_code)"""
@@ -339,6 +336,7 @@ object AssignmentImporter {
 		select
 			smo.ayr_code as academic_year_code,
 			spr.spr_code as spr_code,
+			wss_seat as seat_number,
 			smo.mav_occur as mav_occurrence,
 			smo.mod_code as module_code,
 			smo.smo_agrp as assessment_group
@@ -353,6 +351,16 @@ object AssignmentImporter {
 
 					left outer join $sitsSchema.cam_ssn ssn
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
+
+					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
+						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code and wss.wss_publ = 'Y'
+
+					left join $sitsSchema.cam_wsm wsm -- WSM is "Slot Modules"
+						on wss.wss_wspc = wsm.wsm_wspc and wsm.wsm_ayrc = wss.wss_ayrc and wsm.wsm_modc = wss.wss_modc
+
+					left join $sitsSchema.cam_mab mab
+						on wsm.wsm_apac = mab.mab_apac and mab.map_code = smo.mod_code
+
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
 				smo.ayr_code in (:academic_year_code) and

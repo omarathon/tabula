@@ -43,7 +43,7 @@ trait AssessmentMembershipService {
 
 	def save(assignment: AssessmentComponent): AssessmentComponent
 	def save(group: UpstreamAssessmentGroup)
-	def replaceMembers(group: UpstreamAssessmentGroup, universityIds: Seq[String]): UpstreamAssessmentGroup
+	def replaceMembers(group: UpstreamAssessmentGroup, universityIds: Seq[UpstreamModuleRegistration]): UpstreamAssessmentGroup
 
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
@@ -103,10 +103,10 @@ class AssessmentMembershipServiceImpl
 		(autoEnrolled ++ manuallyEnrolled).distinct
 	}
 
-	def replaceMembers(template: UpstreamAssessmentGroup, universityIds: Seq[String]) = {
-		if (debugEnabled) debugReplace(template, universityIds)
+	def replaceMembers(template: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]) = {
+		if (debugEnabled) debugReplace(template, registrations.map(_.universityId))
 		getUpstreamAssessmentGroup(template).map { group =>
-			group.members.knownType.staticUserIds = universityIds
+			group.members.knownType.replaceStaticUsers(registrations)
 			group
 		} getOrElse {
 			logger.warn("No such assessment group found: " + template.toString)

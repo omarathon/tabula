@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.SprCode
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
@@ -9,7 +8,7 @@ import uk.ac.warwick.tabula.data.{Daoisms, SessionComponent}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.scheduling.services.{AssignmentImporter, UpstreamModuleRegistration}
+import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
@@ -135,10 +134,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	def save(group: Seq[UpstreamModuleRegistration]): Option[UpstreamAssessmentGroup] = {
 		group.headOption.map { head =>
 			val assessmentGroup = head.toUpstreamAssignmentGroup
-			// Convert ModuleRegistrations to simple uni ID strings.
-			val members = group.map{ mr => SprCode.getUniversityId(mr.sprCode)}.distinct
-
-			assignmentMembershipService.replaceMembers(assessmentGroup, members)
+			assignmentMembershipService.replaceMembers(assessmentGroup, group)
 		}
 	}
 
