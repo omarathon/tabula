@@ -288,12 +288,6 @@ object AssignmentImporter {
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
 						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = sms.ayr_code and wss.wss_modc = sms.mod_code and wss.wss_publ = 'Y'
 
-					left join $sitsSchema.cam_wsm wsm -- WSM is "Slot Modules"
-						on wss.wss_wspc = wsm.wsm_wspc and wsm.wsm_ayrc = wss.wss_ayrc and wsm.wsm_modc = wss.wss_modc
-
-					left join $sitsSchema.cam_mab mab
-						on wsm.wsm_apac = mab.mab_apac and mab.map_code = sms.mod_code --and mab.mab_seq = 'E01'
-
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
 				sms.ayr_code in (:academic_year_code)"""
@@ -322,12 +316,6 @@ object AssignmentImporter {
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
 						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code and wss.wss_publ = 'Y'
 
-					left join $sitsSchema.cam_wsm wsm -- WSM is "Slot Modules"
-						on wss.wss_wspc = wsm.wsm_wspc and wsm.wsm_ayrc = wss.wss_ayrc and wsm.wsm_modc = wss.wss_modc
-
-					left join $sitsSchema.cam_mab mab
-						on wsm.wsm_apac = mab.mab_apac and mab.map_code = smo.mod_code
-
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
 				smo.ayr_code in (:academic_year_code)"""
@@ -354,12 +342,6 @@ object AssignmentImporter {
 
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
 						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code and wss.wss_publ = 'Y'
-
-					left join $sitsSchema.cam_wsm wsm -- WSM is "Slot Modules"
-						on wss.wss_wspc = wsm.wsm_wspc and wsm.wsm_ayrc = wss.wss_ayrc and wsm.wsm_modc = wss.wss_modc
-
-					left join $sitsSchema.cam_mab mab
-						on wsm.wsm_apac = mab.mab_apac and mab.map_code = smo.mod_code
 
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
