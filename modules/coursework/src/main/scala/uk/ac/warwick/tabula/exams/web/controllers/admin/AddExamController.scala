@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.exams.commands.{AddExamCommandState, AddExamCommand}
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Controller
@@ -15,6 +15,8 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 class AddExamController extends BaseController {
 
 	type AddExamCommand = Appliable[Exam] with AddExamCommandState
+
+	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
 	def command(@PathVariable("module") module: Module) = AddExamCommand(mandatory(module))

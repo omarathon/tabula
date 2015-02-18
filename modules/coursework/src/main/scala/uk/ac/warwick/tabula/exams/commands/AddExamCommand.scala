@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{ExamServiceComponent, AutowiringExamServiceComponent}
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object AddExamCommand  {
 	def apply(module: Module) =
@@ -27,6 +28,7 @@ class AddExamCommandInternal(val module: Module) extends CommandInternal[Exam] w
 	override def applyInternal() = {
 		val exam = new Exam
 		exam.name = name
+		exam.module = module
 		exam.academicYear = academicYear
 		examService.saveOrUpdate(exam)
 		exam
@@ -64,7 +66,7 @@ trait AddExamValidation extends SelfValidating {
 	self: AddExamCommandState =>
 
 	override def validate(errors: Errors) {
-		if (name == null) {
+		if (!name.hasText) {
 			errors.rejectValue("name", "exam.name.empty")
 		}
 	}
