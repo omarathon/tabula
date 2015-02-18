@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.convert
 
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
 import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao

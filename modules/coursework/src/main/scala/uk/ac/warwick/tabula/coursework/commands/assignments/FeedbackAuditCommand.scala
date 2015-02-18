@@ -30,7 +30,7 @@ class FeedbackAuditCommandInternal(val assignment: Assignment, val student: User
 	lazy val submission = submissionService.getSubmissionByUniId(assignment, student.getWarwickId)
 
 	def applyInternal() = {
-		val feedback = feedbackService.getFeedbackByUniId(assignment, student.getWarwickId)
+		val feedback = feedbackService.getAssignmentFeedbackByUniId(assignment, student.getWarwickId)
 		FeedbackAuditData(submission, feedback)
 	}
 }

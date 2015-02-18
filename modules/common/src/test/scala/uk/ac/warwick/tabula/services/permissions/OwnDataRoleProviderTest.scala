@@ -8,7 +8,7 @@ class OwnDataRoleProviderTest extends TestBase {
 	val provider = new OwnDataRoleProvider
 	
 	val submission = Fixtures.submission("0123456", "cuscav")	
-	val feedback = Fixtures.feedback("0123456")
+	val feedback = Fixtures.assignmentFeedback("0123456")
 	val userSettings = Fixtures.userSettings("cuscav")
 
 	val agent =  Fixtures.user("cuslaj")
@@ -31,7 +31,7 @@ class OwnDataRoleProviderTest extends TestBase {
 		
 		provider.getRolesFor(currentUser, feedback) should be (Seq(FeedbackRecipient(feedback)))
 		
-		provider.getRolesFor(currentUser, Fixtures.feedback()) should be (Seq())
+		provider.getRolesFor(currentUser, Fixtures.assignmentFeedback()) should be (Seq())
 	}
 	
 	@Test def forSettings = withUser("cuscav", "0123456") {

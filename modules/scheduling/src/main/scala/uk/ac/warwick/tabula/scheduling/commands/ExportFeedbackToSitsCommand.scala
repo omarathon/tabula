@@ -35,9 +35,9 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 		for (feedbackToLoad <- feedbacksToLoad) {
 			val feedback = feedbackToLoad.feedback
 			val feedbackId = feedback.id
-			val department = feedback.assignment.module.adminDepartment
+			val department = feedback.module.adminDepartment
 
-			if (!department.canUploadMarksToSitsForYear(feedback.assignment.academicYear, feedback.assignment.module))
+			if (!department.canUploadMarksToSitsForYear(feedback.academicYear, feedback.module))
 				logger.warn(f"Not uploading feedback $feedbackId as department ${department.code} is closed")
 			else {
 

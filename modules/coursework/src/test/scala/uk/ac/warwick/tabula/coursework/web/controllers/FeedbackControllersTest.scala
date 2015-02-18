@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
-import uk.ac.warwick.tabula.data.model.Feedback
+import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, Feedback}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{Mockito, TestBase}
@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.coursework.web.controllers.admin.FeedbackSummaryCont
 class FeedbackControllersTest extends TestBase with Mockito {
 	val controller = new FeedbackSummaryController
 	val command = mock[Appliable[Option[Feedback]]]
-	val feedback = new Feedback
+	val feedback = new AssignmentFeedback
 	command.apply() returns Some(feedback)
 
 	@Test

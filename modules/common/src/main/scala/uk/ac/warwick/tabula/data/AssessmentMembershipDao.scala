@@ -11,18 +11,18 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import scala.collection.JavaConverters._
 
-trait AssignmentMembershipDaoComponent {
-	val membershipDao: AssignmentMembershipDao
+trait AssessmentMembershipDaoComponent {
+	val membershipDao: AssessmentMembershipDao
 }
 
-trait AutowiringAssignmentMembershipDaoComponent extends AssignmentMembershipDaoComponent {
-	val membershipDao = Wire[AssignmentMembershipDao]
+trait AutowiringAssessmentMembershipDaoComponent extends AssessmentMembershipDaoComponent {
+	val membershipDao = Wire[AssessmentMembershipDao]
 }
 
 /**
  * TODO Rename all of this to be less Assignment-centric
  */
-trait AssignmentMembershipDao {
+trait AssessmentMembershipDao {
 	def find(assignment: AssessmentComponent): Option[AssessmentComponent]
 	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
 	def find(group: AssessmentGroup): Option[AssessmentGroup]
@@ -73,7 +73,7 @@ trait AssignmentMembershipDao {
 }
 
 @Repository
-class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
+class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 
 	def getSITSEnrolledAssignments(user: User): Seq[Assignment] =
 		session.newQuery[Assignment]("""select a

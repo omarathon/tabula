@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, StringFormValue}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{SavedFormValueDao, SavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, CurrentUser, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
@@ -80,7 +80,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 	@Test
 	def invalidateZipsWhenUpdatingFeedback() {
 		new Fixture {
-			val existingFeedback = new Feedback("student")
+			val existingFeedback = Fixtures.assignmentFeedback("student")
 			existingFeedback.id = "existingFeedback"
 			assignment.feedbacks.add(existingFeedback)
 
@@ -96,7 +96,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 	@Test
 	def fieldsCopiedWhenUpdatingFeedback() {
 		new Fixture {
-			val existingFeedback = new Feedback("student")
+			val existingFeedback = Fixtures.assignmentFeedback("student")
 			existingFeedback.assignment = assignment
 			existingFeedback.actualGrade = Option("2:2")
 			existingFeedback.actualMark = Option(55)

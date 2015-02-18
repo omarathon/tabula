@@ -7,7 +7,7 @@ import org.hibernate.annotations.{Type, Filter, FilterDef, BatchSize}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, UserGroupCacheManager}
+import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, AssessmentMembershipService, UserGroupCacheManager}
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget

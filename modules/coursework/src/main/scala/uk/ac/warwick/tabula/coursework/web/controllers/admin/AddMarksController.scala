@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.services.FeedbackService
 
 @Controller
@@ -26,7 +26,7 @@ import uk.ac.warwick.tabula.services.FeedbackService
 class AddMarksController extends CourseworkController {
 
 	@Autowired var feedbackService: FeedbackService = _
-	@Autowired var assignmentMembershipService: AssignmentMembershipService = _
+	@Autowired var assignmentMembershipService: AssessmentMembershipService = _
 
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
 		new AdminAddMarksCommand(mandatory(module), mandatory(assignment), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))

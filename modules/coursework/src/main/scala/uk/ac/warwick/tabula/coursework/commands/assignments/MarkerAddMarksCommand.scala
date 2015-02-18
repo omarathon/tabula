@@ -5,7 +5,7 @@ import org.springframework.util.StringUtils
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, MarkerFeedback, Module}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.GeneratesGradesFromMarks
 import uk.ac.warwick.userlookup.User
@@ -44,7 +44,7 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, marker: User
 		def saveFeedback(universityId: String, actualMark: String, actualGrade: String) = {
 
 			val parentFeedback = assignment.feedbacks.find(_.universityId == universityId).getOrElse({
-				val newFeedback = new Feedback
+				val newFeedback = new AssignmentFeedback
 				newFeedback.assignment = assignment
 				newFeedback.uploaderId = marker.getUserId
 				newFeedback.universityId = universityId

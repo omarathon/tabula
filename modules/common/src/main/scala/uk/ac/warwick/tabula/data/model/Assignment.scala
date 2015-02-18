@@ -77,7 +77,7 @@ class Assignment
 	var assignmentService = Wire[AssignmentService]("assignmentService")
 
 	@transient
-	var assignmentMembershipService = Wire[AssignmentMembershipService]("assignmentMembershipService")
+	var assignmentMembershipService = Wire[AssessmentMembershipService]("assignmentMembershipService")
 
 	@transient
 	var feedbackService = Wire[FeedbackService]("feedbackService")
@@ -145,7 +145,7 @@ class Assignment
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)
-	var feedbacks: JList[Feedback] = JArrayList()
+	var feedbacks: JList[AssignmentFeedback] = JArrayList()
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_template_id")
@@ -196,13 +196,13 @@ class Assignment
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)
-	var fields: JList[FormField] = JArrayList()
+	var fields: JList[AssignmentFormField] = JArrayList()
 
 	// IndexColumn is a busted flush for fields because of reuse of non-uniqueness.
 	// Use manual position management on add/removeFields, and in these getters
-	def submissionFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Submission).sortBy(_.position)
+	def submissionFields: Seq[AssignmentFormField] = fields.filter(_.context == FormFieldContext.Submission).sortBy(_.position)
 
-	def feedbackFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
+	def feedbackFields: Seq[AssignmentFormField] = fields.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
 
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "membersgroup_id")
@@ -385,7 +385,7 @@ class Assignment
 	// returns extension for a specified student
 	def findExtension(uniId: String) = extensions.find(_.universityId == uniId)
 
-	def membershipInfo: AssignmentMembershipInfo = assignmentMembershipService.determineMembership(upstreamAssessmentGroups, Option(members))
+	def membershipInfo: AssessmentMembershipInfo = assignmentMembershipService.determineMembership(upstreamAssessmentGroups, Option(members))
 
 	// converts the assessmentGroups to upstream assessment groups
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
@@ -413,7 +413,7 @@ class Assignment
 		_.updatedDate
 	}.updatedDate
 
-	def addField(field: FormField) {
+	def addField(field: AssignmentFormField) {
 		if (field.context == null) throw new IllegalArgumentException("Field with name " + field.name + " has no context specified")
 		if (fields.exists(_.name == field.name)) throw new IllegalArgumentException("Field with name " + field.name + " already exists")
 		field.assignment = this
@@ -492,9 +492,9 @@ class Assignment
 
 	def getUnapprovedExtensions = extensionService.getUnapprovedExtensions(this)
 
-	def addFields(fieldz: FormField*) = for (field <- fieldz) addField(field)
+	def addFields(fieldz: AssignmentFormField*) = for (field <- fieldz) addField(field)
 
-	def addFeedback(feedback: Feedback) {
+	def addFeedback(feedback: AssignmentFeedback) {
 		feedbacks.add(feedback)
 		feedback.assignment = this
 	}

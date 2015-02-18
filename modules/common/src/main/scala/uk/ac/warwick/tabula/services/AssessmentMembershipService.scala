@@ -4,13 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.AssignmentMembershipDao
+import uk.ac.warwick.tabula.data.AssessmentMembershipDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-trait AssignmentMembershipService {
+trait AssessmentMembershipService {
 	def assignmentManualMembershipHelper: UserGroupMembershipHelperMethods[Assignment]
+	def examManualMembershipHelper: UserGroupMembershipHelperMethods[Exam]
 
 	def find(assignment: AssessmentComponent): Option[AssessmentComponent]
 	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
@@ -53,7 +54,7 @@ trait AssignmentMembershipService {
 	 */
 	def countMembershipWithUniversityIdGroup(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Int
 
-	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): AssignmentMembershipInfo
+	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): AssessmentMembershipInfo
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User]
 	def determineMembershipUsers(assignment: Assignment): Seq[User]
 	def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[String]
@@ -68,16 +69,17 @@ trait AssignmentMembershipService {
 
 
 @Service(value = "assignmentMembershipService")
-class AssignmentMembershipServiceImpl
-	extends AssignmentMembershipService
-	with AssignmentMembershipMethods
+class AssessmentMembershipServiceImpl
+	extends AssessmentMembershipService
+	with AssessmentMembershipMethods
 	with UserLookupComponent
 	with Logging {
 
 	@Autowired var userLookup: UserLookupService = _
-	@Autowired var dao: AssignmentMembershipDao = _
+	@Autowired var dao: AssessmentMembershipDao = _
 
 	val assignmentManualMembershipHelper = new UserGroupMembershipHelper[Assignment]("_members")
+	val examManualMembershipHelper = new UserGroupMembershipHelper[Exam]("_members")
 
 	def getEnrolledAssignments(user: User): Seq[Assignment] = {
 		val autoEnrolled =
@@ -181,7 +183,7 @@ class AssignmentMembershipServiceImpl
 
 
 
-class AssignmentMembershipInfo(val items: Seq[MembershipItem]) {
+class AssessmentMembershipInfo(val items: Seq[MembershipItem]) {
 
 	def	sitsCount = items.count(_.itemType == SitsType)
 	def	totalCount = items.filterNot(_.itemType == ExcludeType).size
@@ -192,11 +194,11 @@ class AssignmentMembershipInfo(val items: Seq[MembershipItem]) {
 
 }
 
-trait AssignmentMembershipMethods extends Logging {
+trait AssessmentMembershipMethods extends Logging {
 
-	self: AssignmentMembershipService with UserLookupComponent =>
+	self: AssessmentMembershipService with UserLookupComponent =>
 
-	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): AssignmentMembershipInfo = {
+	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): AssessmentMembershipInfo = {
 		for (group <- upstream) assert(group.members.universityIds)
 
 		val sitsUsers =
@@ -214,7 +216,7 @@ trait AssignmentMembershipMethods extends Logging {
 		val sorted = (includeItems ++ excludeItems ++ sitsItems)
 			.sortBy(membershipItem => (membershipItem.user.getLastName, membershipItem.user.getFirstName))
 
-		new AssignmentMembershipInfo(sorted)
+		new AssessmentMembershipInfo(sorted)
 	}
 
 	/**
@@ -340,11 +342,11 @@ case class MembershipItem(
 }
 
 trait AssignmentMembershipServiceComponent {
-	def assignmentMembershipService: AssignmentMembershipService
+	def assignmentMembershipService: AssessmentMembershipService
 }
 
 trait AutowiringAssignmentMembershipServiceComponent extends AssignmentMembershipServiceComponent {
-	var assignmentMembershipService = Wire[AssignmentMembershipService]
+	var assignmentMembershipService = Wire[AssessmentMembershipService]
 }
 
 trait GeneratesGradesFromMarks {

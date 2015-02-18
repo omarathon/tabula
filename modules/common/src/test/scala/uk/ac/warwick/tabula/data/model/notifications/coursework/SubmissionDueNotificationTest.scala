@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.{Assignment, Notification, Submission}
-import uk.ac.warwick.tabula.services.{AssignmentMembershipService, IncludeType, MembershipItem, UserLookupService}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, IncludeType, MembershipItem, UserLookupService}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
@@ -24,7 +24,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 			override def assignment = SubmissionDueNotificationTest.this.assignment
 		}
 
-		val membershipService = smartMock[AssignmentMembershipService]
+		val membershipService = smartMock[AssessmentMembershipService]
 		membershipService.determineMembershipUsers(assignment) returns(users)
 		notification.membershipService = membershipService
 

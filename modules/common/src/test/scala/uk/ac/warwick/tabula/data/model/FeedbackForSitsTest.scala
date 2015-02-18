@@ -9,7 +9,7 @@ class FeedbackForSitsTest extends TestBase {
 
 	@Test
 	def testInit = withUser("0070790", "cusdx") {
-		val feedback = Fixtures.feedback(currentUser.apparentUser.getWarwickId)
+		val feedback = Fixtures.assignmentFeedback(currentUser.apparentUser.getWarwickId)
 
 		val feedbackForSits = new FeedbackForSits
 		feedbackForSits.feedback = feedback

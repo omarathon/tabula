@@ -505,7 +505,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(submission=Option(submission))) should be {true}
 
 		// Release for marking, no longer fits
-		val feedback = Fixtures.feedback("0672089")
+		val feedback = Fixtures.assignmentFeedback("0672089")
 		assignment.feedbacks.add(feedback)
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
 		submission.isReleasedForMarking should be {true}
@@ -547,7 +547,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(submission=Option(submission))) should be {false}
 
 		// Release for marking and make sure it has a first marker
-		val feedback = Fixtures.feedback("0672089")
+		val feedback = Fixtures.assignmentFeedback("0672089")
 		assignment.feedbacks.add(feedback)
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
 		submission.isReleasedForMarking should be {true}
@@ -590,7 +590,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
 
-		val feedback = Fixtures.feedback("0672089")
+		val feedback = Fixtures.assignmentFeedback("0672089")
 		assignment.feedbacks.add(feedback)
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
 		submission.isReleasedToSecondMarker should be {false}
@@ -632,7 +632,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
 
-		val feedback = Fixtures.feedback("0672089")
+		val feedback = Fixtures.assignmentFeedback("0672089")
 		assignment.feedbacks.add(feedback)
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
 		feedback.secondMarkerFeedback = Fixtures.markerFeedback(feedback)
@@ -869,7 +869,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		// Valid where there's no feedback
 		filter.predicate(student(feedback=None)) should be {true}
 
-		val feedback = new Feedback
+		val feedback = new AssignmentFeedback
 		feedback.actualMark = Option(41)
 		feedback.assignment = assignment
 		filter.predicate(student(feedback=Option(feedback))) should be {false}
@@ -884,7 +884,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		// Valid where there's feedback, but it hasn't been released
 		filter.predicate(student(feedback=None)) should be {false}
 
-		val feedback = Fixtures.feedback("0672089")
+		val feedback = Fixtures.assignmentFeedback("0672089")
 		feedback.actualMark = Option(41)
 		feedback.released = false
 		feedback.assignment = assignment
@@ -902,7 +902,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		// Should pass any assignment, so just check with null
 		filter.applies(null) should be {true}
 
-		val testFeedback = Fixtures.feedback()
+		val testFeedback = Fixtures.assignmentFeedback()
 		testFeedback.actualMark = Option(41)
 		testFeedback.assignment = assignment
 

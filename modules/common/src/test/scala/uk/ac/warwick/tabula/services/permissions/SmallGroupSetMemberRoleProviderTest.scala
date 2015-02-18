@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.{Mockito, CurrentUser, TestBase}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.roles.SmallGroupSetMember
-import uk.ac.warwick.tabula.services.{UserGroupCacheManager, UserLookupService, AssignmentMembershipService}
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, UserLookupService, AssessmentMembershipService}
 import javax.persistence.Entity
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Filter
@@ -29,7 +29,7 @@ class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
 		wireUserLookup(groupSet.members)
 		groupSet.id= "test"
 			
-		val membershipService = mock[AssignmentMembershipService]
+		val membershipService = mock[AssessmentMembershipService]
 		groupSet.membershipService = membershipService
 
 		val memberUser = new User("member")

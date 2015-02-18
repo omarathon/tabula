@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 import scala.util.Random
 
-import uk.ac.warwick.tabula.PersistenceTestBase
+import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 import org.springframework.transaction.annotation.Transactional
 
 // scalastyle:off magic.number
@@ -11,7 +11,7 @@ class MarkerFeedbackTests extends PersistenceTestBase {
 	@Test def fields() {
 
 		val random = new Random
-		val feedback = new Feedback(universityId = idFormat(1))
+		val feedback = Fixtures.assignmentFeedback(universityId = idFormat(1))
 
 		val firstMarkerFeedback = new MarkerFeedback(feedback)
 		val mark1 = random.nextInt(101)
@@ -44,7 +44,7 @@ class MarkerFeedbackTests extends PersistenceTestBase {
 		}
 		
 		val feedback = flushing(session) {
-			val feedback = new Feedback(universityId = idFormat(1))
+			val feedback = Fixtures.assignmentFeedback(universityId = idFormat(1))
 			val assignment = new Assignment
 			feedback.assignment = assignment
 			session.save(assignment)

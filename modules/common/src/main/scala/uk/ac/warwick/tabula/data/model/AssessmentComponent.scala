@@ -7,7 +7,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
 
 
 /**
@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.services.AssignmentMembershipService
 @Table(name="UPSTREAMASSIGNMENT")
 class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Serializable {
 
-	@transient var membershipService = Wire.auto[AssignmentMembershipService]
+	@transient var membershipService = Wire.auto[AssessmentMembershipService]
 
 	/**
 	 * Uppercase module code, with CATS. e.g. IN304-15

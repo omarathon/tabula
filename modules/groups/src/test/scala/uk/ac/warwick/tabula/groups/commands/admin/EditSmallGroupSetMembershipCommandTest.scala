@@ -12,7 +12,7 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 	private trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent with AssignmentMembershipServiceComponent with RemovesUsersFromGroups {
 		val smallGroupService = mock[SmallGroupService]
 		val userLookup = new MockUserLookup
-		var assignmentMembershipService = mock[AssignmentMembershipService]
+		var assignmentMembershipService = mock[AssessmentMembershipService]
 
 		def removeFromGroup(user: User, group: SmallGroup) = group.students.remove(user)
 	}
@@ -43,7 +43,7 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 		}
 
 		set.members = UserGroup.ofUsercodes
-		set.membershipService = mock[AssignmentMembershipService] // Intentionally different to the command's one
+		set.membershipService = mock[AssessmentMembershipService] // Intentionally different to the command's one
 
 		set.members.add(user1)
 		set.members.add(user2)
@@ -92,7 +92,7 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 		command.members.remove(user4)
 		command.members.add(user5)
 
-		command.assignmentMembershipService = mock[AssignmentMembershipService] // Intentionally different to the SmallGroupSet's one
+		command.assignmentMembershipService = mock[AssessmentMembershipService] // Intentionally different to the SmallGroupSet's one
 		command.assignmentMembershipService.determineMembershipUsers(Seq(), Some(set.members)) returns (set.members.users)
 		command.assignmentMembershipService.determineMembershipUsers(Seq(), Some(command.members)) returns (command.members.users)
 		command.applyInternal()
