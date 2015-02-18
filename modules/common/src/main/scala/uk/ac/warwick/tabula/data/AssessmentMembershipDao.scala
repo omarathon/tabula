@@ -82,7 +82,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 					join a.assessmentGroups ag
 					join ag.assessmentComponent.upstreamAssessmentGroups uag
 					join uag.members autoMembership
-					join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId = :universityId
+					join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId.memberId = :universityId
 			where
 					uag.academicYear = a.academicYear and
 					uag.occurrence = ag.occurrence and
@@ -96,7 +96,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 				join sgs.assessmentGroups ag
 				join ag.assessmentComponent.upstreamAssessmentGroups uag
 				join uag.members autoMembership
-				join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId = :universityId
+				join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId.memberId = :universityId
 			where
 				uag.academicYear = sgs.academicYear and
 				uag.occurrence = ag.occurrence and

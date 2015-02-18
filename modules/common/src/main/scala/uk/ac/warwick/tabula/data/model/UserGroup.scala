@@ -132,7 +132,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 		!(excludeUsers contains user) &&
 			(
 				(includeUsers contains user) ||
-				(staticIncludeUsers contains user) ||
+				(staticIncludeUsers.asScala.map(_.memberId) contains user) ||
 				(baseWebgroup != null && groupService.isUserInGroup(user, baseWebgroup)))
 
 	def excludesUserId(user: String) = excludeUsers contains user
