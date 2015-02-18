@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.AccessType
 import javax.persistence._
+import uk.ac.warwick.tabula.system.TwoWayConverter
+
 import scala.collection.JavaConversions._
 import uk.ac.warwick.userlookup.User
 import org.springframework.core.convert.converter.Converter
@@ -21,7 +22,7 @@ import uk.ac.warwick.tabula.web.Routes
 @Table(name="MarkScheme")
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="MarkingMethod", discriminatorType = DiscriminatorType.STRING, length=255)
-@AccessType("field")
+@Access(AccessType.FIELD)
 abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with Serializable {
 
 	type Usercode = String
@@ -273,6 +274,7 @@ class MarkingMethodUserType extends AbstractStringUserType[MarkingMethod]{
 	override def convertToValue(state: MarkingMethod) = state.name
 }
 
-class StringToMarkingMethod extends Converter[String, MarkingMethod]{
-	def convert(string:String):MarkingMethod = MarkingMethod.fromCode(string)
+class StringToMarkingMethod extends TwoWayConverter[String, MarkingMethod] {
+	override def convertRight(source: String): MarkingMethod = MarkingMethod.fromCode(source)
+	override def convertLeft(source: MarkingMethod): String = source.name
 }

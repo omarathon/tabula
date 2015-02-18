@@ -218,7 +218,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			courseCommand.applyInternal()
 
 			rel1.endDate.toLocalDate should be (row.endDate)
-			expectResult(null, "Shouldn't end course that's on a different route")( rel2.endDate )
+			assertResult(null, "Shouldn't end course that's on a different route")( rel2.endDate )
 			rel3.endDate.toLocalDate should be (row.endDate)
 		}
 	}

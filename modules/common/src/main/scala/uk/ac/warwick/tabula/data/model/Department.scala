@@ -7,7 +7,7 @@ import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.xml.NodeSeq
 import javax.persistence._
-import org.hibernate.annotations.{Type, BatchSize, AccessType, ForeignKey}
+import org.hibernate.annotations.{Type, BatchSize}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.roles.SelectorBuiltInRoleDefinition
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-@Entity @AccessType("field")
+@Entity @Access(AccessType.FIELD)
 class Department extends GeneratedId
 	with PostLoadBehaviour with HasSettings with HasNotificationSettings with PermissionsTarget with Serializable with ToEntityReference with Logging{
 

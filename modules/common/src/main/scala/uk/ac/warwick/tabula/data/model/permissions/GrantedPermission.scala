@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model.permissions
 
-import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import javax.persistence._
 import javax.persistence.CascadeType._
@@ -8,12 +7,11 @@ import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import org.hibernate.annotations.ForeignKey
 import scala.reflect._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup, SmallGroupEvent}
 
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
 		name="scope_type",

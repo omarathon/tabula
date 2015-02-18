@@ -11,8 +11,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.BindingResult
-import javax.persistence.{JoinColumn, ManyToOne, OneToMany, Entity}
-import org.hibernate.annotations.AccessType
+import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 
@@ -69,7 +68,7 @@ class FileFormValue(val field: FormField) extends FormValue {
  * The table is called SubmissionValue for LEGACY REASONS. Schema updating
  * is left as an exercise for the Hibernate fanbois.
  */
-@Entity(name = "SubmissionValue") @AccessType("field")
+@Entity(name = "SubmissionValue") @Access(AccessType.FIELD)
 class SavedFormValue extends GeneratedId {
 
 	@ManyToOne(fetch = LAZY)

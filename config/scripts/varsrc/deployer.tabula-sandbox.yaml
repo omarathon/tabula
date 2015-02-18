@@ -7,7 +7,7 @@ apaches:
     balanced_servers:
     - "primary"
     - "secondary"
-    current_jboss:
+    current_instance:
     - "primary"
     - "secondary"
     haproxy: !ruby/object:HAProxy::SocketReader
@@ -19,69 +19,70 @@ build_status: starting
 app: "tabula"
 war_names:
 - scheduling
-- tabula.ear
+- api
+- attendance
+- courses
+- groups
+- profiles
+- web
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "develop"
 build_user: "build"
 builder: !ruby/object:MavenBuilder
   skipTests: true
-  profiles:
-  - skinny
   goal: "-Dscalastyle.skip=true clean install"
 build_artifacts: {
   "errordocuments.tar.gz"  : "/usr/local/apache/htdocs/errordocuments" }
-scheduler_jboss: !ruby/object:Jboss 
+scheduler_instance: !ruby/object:Tomcat
   deployment_state: old
   name: tabula-scheduler
   port: "8280"
   state: running
   mode: smf
-  stop_command: "/usr/sbin/svcadm disable -s jboss:"  
+  stop_command: "/usr/sbin/svcadm disable -s tomcat:"
   war_names:
   - scheduling
   test_path: /scheduling/test/up
   requests: 
      /scheduling/test/up: 200
-jbosses: 
+instances:
   tabula-sandbox:
-  - !ruby/object:Jboss 
+  - !ruby/object:Tomcat
     deployment_state: old
     name: tabula-primary
     haproxy_name: primary
     port: "8080"
     state: running
     mode: smf
-    stop_command: "/usr/sbin/svcadm disable -s jboss:"  
+    stop_command: "/usr/sbin/svcadm disable -s tomcat:"
     excluded_war_names:
     - scheduling
     test_path: /home/test/up
     requests: 
-       /home/test/up: 200
+       /web/test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200
        /groups/test/up: 200
        /attendance/test/up: 200
-       /admin/test/up: 200
-       /reports/test/up: 200
-  - !ruby/object:Jboss 
+       /api/test/up: 200
+  - !ruby/object:Tomcat
     deployment_state: old
     name: tabula-secondary
     haproxy_name: secondary
     port: "8180"
     state: running
     mode: smf
-    stop_command: "/usr/sbin/svcadm disable -s jboss:"  
+    stop_command: "/usr/sbin/svcadm disable -s tomcat:"
     excluded_war_names:
     - scheduling
     test_path: /home/test/up
     requests: 
-       /home/test/up: 200
+       /web/test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200
        /groups/test/up: 200
        /attendance/test/up: 200
-       /admin/test/up: 200
-       /reports/test/up: 200
+       /api/test/up: 200
 lockfile: /tmp/tabula_deploy.running
 notification_emails: n.howes@warwick.ac.uk

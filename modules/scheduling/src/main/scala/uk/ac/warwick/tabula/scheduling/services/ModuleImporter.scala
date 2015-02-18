@@ -138,7 +138,7 @@ object ModuleImporter {
 		  group by substr(mod.mod_code,0,5)
 		"""
 
-	final val GetModuleTeachingDepartmentsSql =	f"""
+	final def GetModuleTeachingDepartmentsSql =	f"""
 		select substr(top.top_code, 0, 5) as code, top.dpt_code as department_code, min(top.top_perc) as percentage
 			from $sitsSchema.cam_top top
 				join $sitsSchema.ins_mod mod
@@ -153,7 +153,7 @@ object ModuleImporter {
 				substr(top.top_code, 0, 5), top.dpt_code
 		"""
 		
-	final val GetRoutesSql = """
+	final def GetRoutesSql = """
 		select 
 		  pwy.pwy_code as code,
 		  pwy.pwy_name as name,

@@ -61,13 +61,13 @@ object ExportAttendanceToSitsService {
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
 	// find the latest row in the Student Absence (SAB) table in SITS for the student
-	final val GetHighestExistingSequence = f"""
+	final def GetHighestExistingSequence = f"""
 		select max(sab_seq2) from $sitsSchema.srs_sab
 		where sab_stuc = :studentId
 	"""
 
 	// insert into Student Absence (SAB) table
-	final val PushToSITSSql = f"""
+	final def PushToSITSSql = f"""
 		insert into $sitsSchema.srs_sab
 		(SAB_STUC,SAB_SEQ2,SAB_RAAC,SAB_ENDD,SAB_AYRC,SAB_UDF2,SAB_UDF3,SAB_UDF4,SAB_UDF5,SAB_UDF9,SAB_UDFJ)
 		values (:studentId, :counter, 'UNAUTH', :now, :academicYear, :deptCode, :courseCode, :recorder, :missedPoints, 'Tabula', :monitoringPeriod )

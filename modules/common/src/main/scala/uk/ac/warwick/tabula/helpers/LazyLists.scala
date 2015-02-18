@@ -27,10 +27,10 @@ object LazyLists {
 		val constructor = classTag[A].runtimeClass.getDeclaredConstructor()
 		val factory = () => constructor.newInstance().asInstanceOf[A]
 		
-		create[A](factory, list)
+		createWithFactory[A](factory, list)
 	}
 	
-	def create[A](fn: () => A, list: JList[A] = JArrayList[A]()): JList[A] =
+	def createWithFactory[A](fn: () => A, list: JList[A] = JArrayList[A]()): JList[A] =
 		LazyList.decorate(list, new FuncFactory(fn)).asInstanceOf[JList[A]]
 
 }

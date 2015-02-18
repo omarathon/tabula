@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations._
+import org.hibernate.annotations.{BatchSize, FilterDef, FilterDefs, Filter, Filters}
 import org.joda.time.LocalDate
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._

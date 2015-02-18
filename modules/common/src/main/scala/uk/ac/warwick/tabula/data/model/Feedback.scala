@@ -4,7 +4,7 @@ import javax.persistence.CascadeType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
 
-import org.hibernate.annotations.{AccessType, BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.{JavaImports, AcademicYear}
 import uk.ac.warwick.tabula.JavaImports._
@@ -83,8 +83,7 @@ trait AssessmentFeedback {
 	def  assessmentGroups: JList[AssessmentGroup]
 }
 
-@Entity
-@AccessType("field")
+@Entity @Access(AccessType.FIELD)
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with FormattedHtml with AssessmentFeedback {
 

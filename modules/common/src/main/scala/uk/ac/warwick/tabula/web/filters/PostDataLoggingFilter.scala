@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.web.filters
 
-import java.io.{InputStream, FilterInputStream, PipedOutputStream, PipedInputStream}
+import java.io._
 import java.util
-import java.util.concurrent.Future
 
 import org.apache.commons.fileupload.FileItemStream
 import org.apache.commons.fileupload.servlet.ServletFileUpload
 import org.apache.commons.fileupload.util.Streams
+import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.sso.client.SSOClientFilter
-import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.util.concurrency.TaskExecutionService
 
 import scala.collection.JavaConverters._
@@ -21,6 +20,7 @@ import org.apache.log4j.Logger
 
 import uk.ac.warwick.util.web.filter.AbstractHttpFilter
 import uk.ac.warwick.tabula.helpers.{Logging, Runnable}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
  * Logs POST data to the POST_LOGGER category, which we append to a post.log file.
@@ -55,7 +55,8 @@ class PostDataLoggingFilter extends AbstractHttpFilter with Filter with Logging 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Logging POST data for request to " + request.getRequestURI())
 			}
-			if (ServletFileUpload.isMultipartContent(request)) {
+
+			if (ServletFileUpload.isMultipartContent(request) || isLogRequestBody(request)) {
 				// Multipart - wrap the request to spy on the body as it's read,
 				// without disturbing the original reader.
 				val forkingRequest = new ForkingInputStreamHttpServletRequest(request)
@@ -110,13 +111,25 @@ class PostDataLoggingFilter extends AbstractHttpFilter with Filter with Logging 
 			}.mkString("&")
 
 			data.append(allParams)
+
+			if (isLogRequestBody(request)) {
+				data.append("requestBody=")
+				data.append(new String(FileCopyUtils.copyToByteArray(request.getInputStream), request.getCharacterEncoding))
+			}
 		}
 
 		data.toString
 	}
+
+	private def isLogRequestBody(request: HttpServletRequest) =
+		request.getContentType.hasText &&
+		request.getContentLength > 0 &&
+		request.getContentLength < PostDataLoggingFilter.MaxRequestBodySizeToLog
 }
 
 object PostDataLoggingFilter {
+
+	val MaxRequestBodySizeToLog = 2 * 1024 * 1024 // 2mb
 
 	/**
 	 * This HttpServletRequestWrapper exposes an InputStream called `secondaryStream`,
@@ -150,12 +163,18 @@ object PostDataLoggingFilter {
 
 				override def read(b: Array[Byte], off: Int, len: Int): Int = {
 					val read = super.read(b, off, len)
+
 					if (read > -1) {
 						outputPipe.write(b, off, read)
 					}
+
 					read
 				}
 
+				override def close() {
+					super.close()
+					outputPipe.close()
+				}
 			}
 		}
 	}

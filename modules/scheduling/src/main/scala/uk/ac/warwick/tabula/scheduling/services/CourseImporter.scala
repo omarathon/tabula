@@ -73,7 +73,7 @@ class SitsCourseImporter extends CourseImporter {
 object SitsCourseImporter {
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
-	val GetCourse = f"""
+	def GetCourse = f"""
 		select crs_code, crs_snam, crs_name, crs_titl from $sitsSchema.srs_crs
 		"""
 

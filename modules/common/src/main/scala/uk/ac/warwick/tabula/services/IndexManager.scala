@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import org.codehaus.jackson.annotate.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.springframework.beans.factory.annotation.{Qualifier, Autowired}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.JavaImports._

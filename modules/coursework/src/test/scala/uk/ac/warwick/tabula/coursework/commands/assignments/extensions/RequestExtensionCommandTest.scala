@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.{TestBase, RequestInfo, Mockito}
 import uk.ac.warwick.tabula.events.EventHandling
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, RelationshipServiceComponent, RelationshipService}
-import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.{RequestExtensionCommandValidation, ExtensionPersistenceComponent, RequestExtensionCommandInternal}
+import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.{RequestExtensionCommandState, RequestExtensionCommandValidation, ExtensionPersistenceComponent, RequestExtensionCommandInternal}
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 import org.joda.time.DateTime

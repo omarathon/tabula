@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence.{JoinColumn, FetchType, ManyToOne, Entity}
+import javax.persistence._
 
-import org.hibernate.annotations.AccessType
 import uk.ac.warwick.tabula.JavaImports._
 
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 class RouteTeachingInformation extends GeneratedId with Serializable {
 
 	def this(r: Route, d: Department, p: JBigDecimal) {

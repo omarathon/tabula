@@ -132,7 +132,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		academicYear = assignment.academicYear
 		feedbackTemplate = assignment.feedbackTemplate
 		if (assignment.members != null) {
-			members = assignment.members.duplicate()
+			members.copyFrom(assignment.members)
 		}
 		copyNonspecificFrom(assignment)
 	}

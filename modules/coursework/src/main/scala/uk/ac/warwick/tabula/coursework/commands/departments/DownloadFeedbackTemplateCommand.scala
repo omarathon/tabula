@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Description, ReadOnly, Command}
 import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
-import reflect.BeanProperty
+import beans.BeanProperty
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.FeedbackTemplate
 import uk.ac.warwick.tabula.permissions._

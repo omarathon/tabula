@@ -3,9 +3,8 @@ package uk.ac.warwick.tabula.services.permissions
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.permissions.{PermissionsSelector, PermissionsTarget, Permission}
 import uk.ac.warwick.tabula.roles._
-import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, GrantedPermission}
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
@@ -32,11 +31,11 @@ trait RoleProvider {
 			customRoleFor(d)(definition, scope)
 		}
 
-	protected def customRoleFor[A <: PermissionsTarget](department: Department)(originalDefinition: RoleDefinition, scope: A): Option[Role] =
+	protected def customRoleFor[A <: PermissionsTarget, B <: PermissionsSelector[B]](department: Department)(originalDefinition: RoleDefinition, scope: A): Option[Role] =
 		department.replacedRoleDefinitionFor(originalDefinition).map { customDefinition => {
 			originalDefinition match {
-				case originalSelectorRoleDefinition: SelectorBuiltInRoleDefinition[A @unchecked] => customDefinition.baseRoleDefinition match {
-					case customBaseSelectorRoleDefinition: SelectorBuiltInRoleDefinition[A @unchecked] =>
+				case originalSelectorRoleDefinition: SelectorBuiltInRoleDefinition[B @unchecked] => customDefinition.baseRoleDefinition match {
+					case customBaseSelectorRoleDefinition: SelectorBuiltInRoleDefinition[B @unchecked] =>
 						val correctedBaseSelectorDefinition = customBaseSelectorRoleDefinition.duplicate(Option(originalSelectorRoleDefinition.selector))
 						val newCustomDefinition = new CustomRoleDefinition
 						newCustomDefinition.baseRoleDefinition = correctedBaseSelectorDefinition

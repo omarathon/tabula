@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.data.model.forms
 
 import java.io.StringReader
-import scala.annotation.target.field
-import collection.JavaConversions._
+import scala.annotation.meta.field
 import org.hibernate.annotations.Type
 import org.springframework.validation.Errors
 import javax.persistence._
@@ -12,11 +11,11 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserLookupService
 import scala.reflect._
+import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JsonObjectMapperFactory
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
-import uk.ac.warwick.tabula.data.model.Gender.{Unspecified, Female, Male}
 
 /**
  * A FormField defines a field to be displayed on an Assignment

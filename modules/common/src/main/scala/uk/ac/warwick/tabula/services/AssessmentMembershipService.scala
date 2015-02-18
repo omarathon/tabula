@@ -268,10 +268,10 @@ trait AssessmentMembershipMethods extends Logging {
 		}
 	}
 
-	private def sameUserIdAs(user: User) = (other: Pair[String, User]) => { user.getUserId == other._2.getUserId }
-	private def in(seq: Seq[Pair[String, User]]) = (other: Pair[String, User]) => { seq exists sameUserIdAs(other._2) }
+	private def sameUserIdAs(user: User) = (other: (String, User)) => { user.getUserId == other._2.getUserId }
+	private def in(seq: Seq[(String, User)]) = (other: (String, User)) => { seq exists sameUserIdAs(other._2) }
 
-	private def makeIncludeItems(includes: Seq[Pair[String, User]], sitsUsers: Seq[Pair[String, User]]) =
+	private def makeIncludeItems(includes: Seq[(String, User)], sitsUsers: Seq[(String, User)]) =
 		includes map {
 			case (id, user) =>
 				val extraneous = sitsUsers exists sameUserIdAs(user)
@@ -283,7 +283,7 @@ trait AssessmentMembershipMethods extends Logging {
 					extraneous = extraneous)
 		}
 
-	private def makeExcludeItems(excludes: Seq[Pair[String, User]], sitsUsers: Seq[Pair[String, User]]) =
+	private def makeExcludeItems(excludes: Seq[(String, User)], sitsUsers: Seq[(String, User)]) =
 		excludes map {
 			case (id, user) =>
 				val extraneous = !(sitsUsers exists sameUserIdAs(user))
@@ -295,7 +295,7 @@ trait AssessmentMembershipMethods extends Logging {
 					extraneous = extraneous)
 		}
 
-	private def makeSitsItems(includes: Seq[Pair[String, User]], excludes: Seq[Pair[String, User]], sitsUsers: Seq[Pair[String, User]]) =
+	private def makeSitsItems(includes: Seq[(String, User)], excludes: Seq[(String, User)], sitsUsers: Seq[(String, User)]) =
 		sitsUsers filterNot in(includes) filterNot in(excludes) map {
 			case (id, user) =>
 				MembershipItem(

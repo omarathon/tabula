@@ -10,7 +10,7 @@ class FormFieldContextUserTypeTest extends TestBase {
 			val ffc = new FormFieldContextUserType
 			ffc.convertToObject("submission") should be (Submission)
 			ffc.convertToObject("feedback") should be (Feedback)
-			evaluating { ffc.convertToObject("disastrous") } should produce [IllegalArgumentException]
+			an [IllegalArgumentException] should be thrownBy { ffc.convertToObject("disastrous") }
 		}
 
 		@Test def convertToValue() {

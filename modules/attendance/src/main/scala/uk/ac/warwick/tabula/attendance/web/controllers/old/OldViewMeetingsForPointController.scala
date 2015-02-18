@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 object OldViewMeetingsForPointCommand {
 	def apply(student: StudentMember, point: MonitoringPoint) =
 		new OldViewMeetingsForPointCommand(student, point)
-		with ComposableCommand[Seq[Pair[MeetingRecord, Seq[String]]]]
+		with ComposableCommand[Seq[(MeetingRecord, Seq[String])]]
 		with OldViewMeetingsForPointPermission
 		with OldViewMeetingsForPointCommandState
 		with AutowiringRelationshipServiceComponent
@@ -26,7 +26,7 @@ object OldViewMeetingsForPointCommand {
 }
 
 class OldViewMeetingsForPointCommand(val student: StudentMember, val point: MonitoringPoint)
-	extends CommandInternal[Seq[Pair[MeetingRecord, Seq[String]]]] with OldViewMeetingsForPointCommandState {
+	extends CommandInternal[Seq[(MeetingRecord, Seq[String])]] with OldViewMeetingsForPointCommandState {
 
 	self: RelationshipServiceComponent with MeetingRecordDaoComponent with TermServiceComponent =>
 
@@ -86,7 +86,7 @@ class OldViewMeetingsForPointController extends AttendanceController {
 		OldViewMeetingsForPointCommand(student, monitoringPoint)
 
 	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[Seq[Pair[MeetingRecord, Seq[String]]]]) = {
+	def home(@ModelAttribute("command") cmd: Appliable[Seq[(MeetingRecord, Seq[String])]]) = {
 		val meetingsStatuses = cmd.apply()
 		Mav("home/old/meetings",
 			"meetingsStatuses" -> meetingsStatuses,

@@ -251,7 +251,7 @@ trait Unaudited { self: Describable[_] =>
  */
 abstract class Description {
 	protected var map = Map[String, Any]()
-	def properties(props: Pair[String, Any]*) = {
+	def properties(props: (String, Any)*) = {
 		map ++= props
 		this
 	}
@@ -259,7 +259,7 @@ abstract class Description {
 		map ++= otherMap
 		this
 	}
-	def property(prop: Pair[String, Any]) = {
+	def property(prop: (String, Any)) = {
 		map += prop
 		this
 	}

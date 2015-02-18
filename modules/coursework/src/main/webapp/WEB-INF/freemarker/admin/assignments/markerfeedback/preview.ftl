@@ -169,7 +169,7 @@
 
 <div class="submit-buttons form-actions">
 <#if hasErrors>
-<input class="btn btn-primary" type="submit" value="Confirm" disabled="true">
+<input class="btn btn-primary" type="submit" value="Confirm" disabled="disabled">
 <#else>
 <input type="hidden" name="confirm" value="true">
 <input class="btn btn-primary" type="submit" value="Confirm">

@@ -47,7 +47,7 @@ trait PopulateStateWithExistingData {
 
 	// linked assessmentGroups
 	assessmentGroups = set.assessmentGroups
-	if (set.members != null) members = set.members.duplicate()
+	if (set.members != null) members.copyFrom(set.members)
 	academicYear = set.academicYear
 }
 

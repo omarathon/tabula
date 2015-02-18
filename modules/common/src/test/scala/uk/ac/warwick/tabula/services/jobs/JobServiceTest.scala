@@ -10,9 +10,6 @@ class JobServiceTest extends TestBase with Mockito {
 	service.jobDao = jobDao
 	
 	@Test def add() {
-		service.jobs = Array()
-		jobDao.findOutstandingInstance(any[JobInstanceImpl]) throws new IllegalArgumentException(s"No Job found to handle '${TestingJob("job").identifier}'")
-
 		service.jobs = Array(new TestingJob)
 		jobDao.findOutstandingInstance(any[JobInstanceImpl]) returns None
 		val inst = service.add(None, TestingJob("job"))

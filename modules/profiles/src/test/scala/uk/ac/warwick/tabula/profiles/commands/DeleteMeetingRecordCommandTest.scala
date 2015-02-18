@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import org.joda.time.DateTimeConstants
-import org.specs.mock.JMocker.{expect => expecting}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, MeetingRecord, StaffMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.services.{MeetingRecordService, MeetingRecordServiceComponent}
@@ -61,9 +60,6 @@ class DeleteMeetingRecordCommandTest extends TestBase with Mockito {
 
 		cmd.applyInternal()
 
-		expecting {
-			one(mockMeetingRecordService).purge(meeting)
-		}
-
+		there was one(mockMeetingRecordService).purge(meeting)
 	}}
 }

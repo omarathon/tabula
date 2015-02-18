@@ -107,7 +107,7 @@ class CreateSmallGroupSetEditPropertiesController extends SmallGroupSetsControll
 	@ModelAttribute("createSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
 		ModifySmallGroupSetCommand.edit(module, set)
 
-	private def renderForm(cmd: EditSmallGroupSetCommand, model: Pair[String, _]*) =
+	private def renderForm(cmd: EditSmallGroupSetCommand, model: (String, _)*) =
 		Mav("admin/groups/new", model:_*).crumbs(Breadcrumbs.DepartmentForYear(cmd.module.adminDepartment, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
 
 	@RequestMapping
@@ -161,7 +161,7 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	@ModelAttribute("editSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
 		ModifySmallGroupSetCommand.edit(module, set)
 
-	private def renderForm(cmd: EditSmallGroupSetCommand, model: Pair[String, _]*) = {
+	private def renderForm(cmd: EditSmallGroupSetCommand, model: (String, _)*) = {
 		Mav("admin/groups/edit", model:_*).crumbs(Breadcrumbs.DepartmentForYear(cmd.module.adminDepartment, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
 	}
 

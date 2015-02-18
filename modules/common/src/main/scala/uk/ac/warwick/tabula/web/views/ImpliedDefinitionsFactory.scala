@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.web.views
 
-import org.apache.tiles.context.TilesRequestContext
+import org.apache.tiles.request.Request
 import org.apache.tiles.definition.UnresolvingLocaleDefinitionsFactory
 import org.apache.tiles.Attribute
 import org.apache.tiles.Definition
 import scala.collection.JavaConversions.mapAsJavaMap
 import uk.ac.warwick.tabula.helpers.Logging
+import scala.collection.JavaConverters._
 
 /**
  * DefinitionsFactory for Tiles, which first tries the default behaviour
@@ -28,7 +29,7 @@ class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with
    * Return a definition if found in XML. Otherwise if it doesn't start with /,
    * generate our own definition based on the base layout
    */
-	override def getDefinition(name: String, ctx: TilesRequestContext) = {
+	override def getDefinition(name: String, ctx: Request) = {
 		if (debugEnabled) logger.debug("Rendering " + name)
 		val name2 = name // TODO figure out why using name directly ends up null
 		super.getDefinition(name, ctx) match {
@@ -41,15 +42,15 @@ class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with
 		}
 	}
 
-	def layoutDefinition(ctx: TilesRequestContext) = {
+	def layoutDefinition(ctx: Request) = {
 		val layout = layoutTemplate(ctx)
 		if (debugEnabled) logger.debug("Using layout template " + layout)
 		super.getDefinition(layout, ctx)
 	}
 
-	def layoutTemplate(ctx: TilesRequestContext) =
-		if (ctx.getRequestScope != null)
-			ctx.getRequestScope.get(LayoutAttribute) match {
+	def layoutTemplate(ctx: Request) =
+		if (ctx.getAvailableScopes.asScala.contains(Request.REQUEST_SCOPE))
+			ctx.getContext(Request.REQUEST_SCOPE).get(LayoutAttribute) match {
 				case name: String => name.trim
 				case _ => DefaultLayout
 			}
