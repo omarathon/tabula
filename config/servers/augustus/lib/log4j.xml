@@ -121,6 +121,9 @@
 	<category name="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
 		<priority value="WARN" />
 	</category>
+	<category name="uk.ac.warwick.tabula.helpers.RequestLevelCaching">
+		<priority value="ERROR" />
+	</category>
 
 	<category name="org.hibernate.SQL">
 		<priority value="DEBUG" />

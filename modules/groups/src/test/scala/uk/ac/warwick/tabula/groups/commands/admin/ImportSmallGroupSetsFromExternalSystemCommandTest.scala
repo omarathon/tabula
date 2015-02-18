@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
 import org.joda.time.LocalTime
+import org.junit.Before
+import uk.ac.warwick.spring.SpringConfigurer
 import uk.ac.warwick.tabula.commands.DescriptionImpl
 import uk.ac.warwick.tabula.data.model.{NamedLocation, Location, Module}
 import uk.ac.warwick.tabula.data.model.groups._
@@ -16,6 +18,11 @@ import uk.ac.warwick.userlookup.User
 import scala.util.Success
 
 class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mockito {
+
+	@Before def tidyUpContext {
+		// TODO it would be better to find where this context is actually coming from
+		SpringConfigurer.applicationContext = null
+	}
 
 	private trait CommandTestSupport extends ModuleTimetableFetchingServiceComponent
 		with ImportSmallGroupSetsFromExternalSystemPermissionsRestrictedState

@@ -96,7 +96,7 @@ class FeedbackDueExtensionNotification
 
 	override final def recipients = {
 		// only send to recipients if the assignments needs feedback publishing and the student actually submitted
-		if (assignment.needsFeedbackPublishing && submission.isDefined) {
+		if (submission.isDefined && assignment.needsFeedbackPublishingFor(extension.universityId)) {
 			val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 			moduleAndDepartmentService.getModuleByCode(assignment.module.code)
 				.getOrElse(throw new IllegalStateException("No such module"))
