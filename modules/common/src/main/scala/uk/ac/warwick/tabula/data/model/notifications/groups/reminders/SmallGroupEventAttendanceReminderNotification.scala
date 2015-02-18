@@ -87,7 +87,7 @@ class SmallGroupEventAttendanceReminderNotification
 				users ++= settings.namedUsers.value
 			}
 
-			if (settings.notifyTutors.value && (users.isEmpty || notifyAllGroups)) {
+			if (event.group.groupSet.releasedToTutors && settings.notifyTutors.value && (users.isEmpty || notifyAllGroups)) {
 				users ++= event.tutors.users
 			}
 

@@ -59,11 +59,11 @@
 					</#list>
 
 					<#list smallGroups as smallGroup>
-					<#assign _groupSet=smallGroup.groupSet />
-					<#assign _module=smallGroup.groupSet.module />
-					<li><a href="<@routes.smallgroup smallGroup />">
-						${_module.code?upper_case} (${_module.name}) ${_groupSet.name}, ${smallGroup.name}
-					</a></li>
+						<#assign _groupSet=smallGroup.groupSet />
+						<#assign _module=smallGroup.groupSet.module />
+						<li><a href="<@routes.smallgroup smallGroup />">
+							${_module.code?upper_case} (${_module.name}) ${_groupSet.nameWithoutModulePrefix}, ${smallGroup.name}
+						</a></li>
 					</#list>
 				</ul>
 			<#elseif is_staff>
