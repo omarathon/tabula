@@ -704,6 +704,14 @@ class Assignment
 		}
 	}
 
+	def needsFeedbackPublishingFor(universityId: String) = {
+		if (openEnded || !collectSubmissions || archived) {
+			false
+		} else {
+			submissions.asScala.find { _.universityId == universityId }.exists(s => !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
+		}
+	}
+
 	def toEntityReference = new AssignmentEntityReference().put(this)
 
 }
