@@ -10,8 +10,8 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 @RequestMapping(value = Array("/exams/admin/module/{module}/exam/new"))
 class AddExamController extends BaseController {
 
-	@ModelAttribute("addExamCommand")
-	def command(@PathVariable("module") module: Module) =	AddExamCommand(mandatory(module))
+	@ModelAttribute("command")
+	def command(@PathVariable("module") module: Module) = AddExamCommand(mandatory(module))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm() = Mav("exams/admin/module/new")

@@ -6,8 +6,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.permissions.Permissions
 
 object AddExamCommand  {
-	def apply(amodule: Module) =
-		new AddExamCommandInternal(amodule)
+	def apply(module: Module) =
+		new AddExamCommandInternal(module)
 			with ComposableCommand[Module]
 			with AddExamPermissions
 			with AddExamCommandState
