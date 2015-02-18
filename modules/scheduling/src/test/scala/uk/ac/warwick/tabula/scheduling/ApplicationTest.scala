@@ -1,15 +1,12 @@
 package uk.ac.warwick.tabula.scheduling
 
-import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.scheduling.web.controllers.sysadmin.SysadminController
-import org.junit.Test
+import uk.ac.warwick.tabula.scheduling.web.controllers.sysadmin.SchedulingSysadminController
 import org.springframework.beans.factory.annotation.Autowired
 
 class ApplicationTest extends AppContextTestBase {
     
-    @Autowired var sysadminController:SysadminController = _
+    @Autowired var sysadminController: SchedulingSysadminController = _
        
     @Test def itWorks = {
     	assert(beans.containsBean("userLookup"))

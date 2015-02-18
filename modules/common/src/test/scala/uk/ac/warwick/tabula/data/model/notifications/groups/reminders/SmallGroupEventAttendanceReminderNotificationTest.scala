@@ -64,7 +64,7 @@ object SmallGroupEventAttendanceReminderNotificationTest {
 			permissionsService.ensureUserGroupFor(anArgThat(anything), anArgThat(anything))(anArgThat(anything)) returns UserGroup.ofUsercodes
 			permissionsService
 		}
-		bean(){mock[AssignmentMembershipService]}
+		bean(){mock[AssessmentMembershipService]}
 		bean(){mock[UserSettingsService]}
 		bean(){mock[NotificationService]}
 	}

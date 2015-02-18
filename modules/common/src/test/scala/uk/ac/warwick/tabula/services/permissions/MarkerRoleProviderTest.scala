@@ -72,7 +72,7 @@ class MarkerRoleProviderTest extends TestBase with Mockito {
 	}
 	
 	@Test def handlesDefault() = withCurrentUser(cuscavUser) {
-		provider.getRolesFor(currentUser, Fixtures.feedback()) should be (Seq())
+		provider.getRolesFor(currentUser, Fixtures.assignmentFeedback()) should be (Seq())
 	}
 
 }

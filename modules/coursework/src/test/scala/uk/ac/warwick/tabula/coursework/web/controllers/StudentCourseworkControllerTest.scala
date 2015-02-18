@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 import uk.ac.warwick.tabula.{Features, FeaturesComponent, Fixtures, TestBase, Mockito}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.MemberOrUser
-import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AssignmentService, AssignmentMembershipServiceComponent, AssignmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssignmentService, AssignmentMembershipServiceComponent, AssignmentServiceComponent}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.{StudentCourseYearDetails, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.{StudentCourseworkGadgetCommandInternal, StudentCourseworkFullScreenCommandInternal}
@@ -25,7 +25,7 @@ class StudentCourseworkControllerTest extends TestBase with Mockito {
 			with AssignmentMembershipServiceComponent
 			with FeaturesComponent {
 		override val assignmentService = smartMock[AssignmentService]
-		override val assignmentMembershipService = smartMock[AssignmentMembershipService]
+		override val assignmentMembershipService = smartMock[AssessmentMembershipService]
 		override val features = {
 			val f = Features.empty
 			f.assignmentMembership = true

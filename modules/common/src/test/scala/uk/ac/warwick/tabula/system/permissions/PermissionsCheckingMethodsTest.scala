@@ -62,7 +62,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 		val ass2 = Fixtures.assignment("my assignment2")
 		ass2.id = "ass2"
 
-		val feedback = Fixtures.feedback()
+		val feedback = Fixtures.assignmentFeedback()
 
 		feedback.assignment = ass1
 

@@ -19,14 +19,12 @@ build_status: starting
 app: "tabula"
 war_names:
 - scheduling
-- admin
 - api
 - attendance
 - courses
 - groups
-- home
 - profiles
-- reports
+- web
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "develop"
@@ -62,13 +60,11 @@ instances:
     - scheduling
     test_path: /home/test/up
     requests: 
-       /home/test/up: 200
+       /web/test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200
        /groups/test/up: 200
        /attendance/test/up: 200
-       /admin/test/up: 200
-       /reports/test/up: 200
        /api/test/up: 200
   - !ruby/object:Tomcat
     deployment_state: old
@@ -82,13 +78,11 @@ instances:
     - scheduling
     test_path: /home/test/up
     requests: 
-       /home/test/up: 200
+       /web/test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200
        /groups/test/up: 200
        /attendance/test/up: 200
-       /admin/test/up: 200
-       /reports/test/up: 200
        /api/test/up: 200
 lockfile: /tmp/tabula_deploy.running
 notification_emails: m.mannion@warwick.ac.uk

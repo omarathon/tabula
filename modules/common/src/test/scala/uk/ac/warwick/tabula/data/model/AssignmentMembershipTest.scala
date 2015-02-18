@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.services.{AssignmentMembershipServiceImpl, AssignmentMembershipService}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceImpl, AssessmentMembershipService}
 import uk.ac.warwick.userlookup.User
 import org.junit.Before
 import uk.ac.warwick.userlookup.AnonymousUser
@@ -30,7 +30,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		user
 	}
 
-  var assignmentMembershipService: AssignmentMembershipService = _
+  var assignmentMembershipService: AssessmentMembershipService = _
 	var userLookup: UserLookupService = _
 	val nobody = UserGroup.ofUsercodes
 
@@ -50,7 +50,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 			ids.asInstanceOf[Seq[String]].map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
 		}
     assignmentMembershipService = {
-      val s = new AssignmentMembershipServiceImpl
+      val s = new AssessmentMembershipServiceImpl
       s.userLookup = userLookup
       s
     }

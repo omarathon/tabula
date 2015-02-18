@@ -14,7 +14,7 @@ class ExportFeedbackToSitsServiceTest extends TestBase {
 		assignment.academicYear = year
 		assignment.module = module
 
-		val feedback = Fixtures.feedback("0070790")
+		val feedback = Fixtures.assignmentFeedback("0070790")
 		feedback.assignment = assignment
 
 		val feedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)

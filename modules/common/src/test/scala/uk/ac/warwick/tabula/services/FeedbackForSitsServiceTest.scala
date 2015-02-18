@@ -14,7 +14,7 @@ class FeedbackForSitsServiceTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val service = new AbstractFeedbackForSitsService with ServiceTestSupport
-		val feedback = Fixtures.feedback("someFeedback")
+		val feedback = Fixtures.assignmentFeedback("someFeedback")
 		feedback.assignment = new Assignment
 		feedback.assignment.module = new Module
 		feedback.assignment.module.adminDepartment = new Department

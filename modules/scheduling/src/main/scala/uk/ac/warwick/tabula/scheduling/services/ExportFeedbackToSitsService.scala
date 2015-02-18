@@ -30,7 +30,7 @@ trait ExportFeedbackToSitsService {
 }
 
 class ParameterGetter(feedbackForSits: FeedbackForSits) {
-	val assessGroups = feedbackForSits.feedback.assignment.assessmentGroups.asScala.toSeq
+	val assessGroups = feedbackForSits.feedback.assessmentGroups.asScala.toSeq
 	val possibleOccurrenceSequencePairs = assessGroups.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence))
 	val occurrences = possibleOccurrenceSequencePairs.map(_._1).mkString(",")
 	val sequences = possibleOccurrenceSequencePairs.map(_._2).mkString(",")
@@ -38,8 +38,8 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 	def getQueryParams: util.HashMap[String, Object] = JHashMap(
 		// for the where clause
 		("studentId", feedbackForSits.feedback.universityId),
-		("academicYear", feedbackForSits.feedback.assignment.academicYear.toString),
-		("moduleCodeMatcher", feedbackForSits.feedback.assignment.module.code.toUpperCase + "%"),
+		("academicYear", feedbackForSits.feedback.academicYear.toString),
+		("moduleCodeMatcher", feedbackForSits.feedback.module.code.toUpperCase + "%"),
 		("now", DateTime.now.toDate),
 
 		// in theory we should look for a record with occurrence and sequence from the same pair,
@@ -52,8 +52,8 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 	def getUpdateParams(mark: Integer, grade: String) = JHashMap(
 		// for the where clause
 		("studentId", feedbackForSits.feedback.universityId),
-		("academicYear", feedbackForSits.feedback.assignment.academicYear.toString),
-		("moduleCodeMatcher", feedbackForSits.feedback.assignment.module.code.toUpperCase + "%"),
+		("academicYear", feedbackForSits.feedback.academicYear.toString),
+		("moduleCodeMatcher", feedbackForSits.feedback.module.code.toUpperCase + "%"),
 		("now", DateTime.now.toDate),
 
 		// in theory we should look for a record with occurrence and sequence from the same pair,

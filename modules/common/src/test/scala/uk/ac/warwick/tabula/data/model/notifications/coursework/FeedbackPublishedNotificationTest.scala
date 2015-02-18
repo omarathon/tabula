@@ -9,7 +9,7 @@ class FeedbackPublishedNotificationTest extends TestBase {
 		val assignment = Fixtures.assignment("5,000 word essay")
 		assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
 
-		val feedback = Fixtures.feedback()
+		val feedback = Fixtures.assignmentFeedback()
 		feedback.assignment = assignment
 
 		val notification = Notification.init(new FeedbackPublishedNotification, currentUser.apparentUser, feedback, assignment)

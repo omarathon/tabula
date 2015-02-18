@@ -14,7 +14,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends SmallGroupServiceComponent with AssignmentMembershipServiceComponent with GeneratesDefaultWeekRanges {
 		val smallGroupService = smartMock[SmallGroupService]
-		val assignmentMembershipService = smartMock[AssignmentMembershipService]
+		val assignmentMembershipService = smartMock[AssessmentMembershipService]
 
 		override def defaultWeekRanges(year: AcademicYear): Seq[WeekRange] = Nil
 	}

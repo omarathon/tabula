@@ -5,11 +5,11 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 
 import scala.collection.JavaConversions._
 import uk.ac.warwick.userlookup.User
-import org.springframework.core.convert.converter.Converter
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{AssignmentServiceUserGroupHelpers, AssignmentService, UserGroupCacheManager, UserLookupService}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /** A MarkingWorkflow defines how an assignment will be marked, including who
   * will be the markers and what rules should be used to decide how submissions
@@ -275,6 +275,6 @@ class MarkingMethodUserType extends AbstractStringUserType[MarkingMethod]{
 }
 
 class StringToMarkingMethod extends TwoWayConverter[String, MarkingMethod] {
-	override def convertRight(source: String): MarkingMethod = MarkingMethod.fromCode(source)
-	override def convertLeft(source: MarkingMethod): String = source.name
+	override def convertRight(source: String): MarkingMethod = source.maybeText.map(MarkingMethod.fromCode).orNull
+	override def convertLeft(source: MarkingMethod): String = Option(source).map { _.name }.orNull
 }

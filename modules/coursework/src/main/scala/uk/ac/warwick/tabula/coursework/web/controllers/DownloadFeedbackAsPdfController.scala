@@ -35,7 +35,7 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
 			throw new PermissionDeniedException(user, Permissions.Feedback.Read, assignment)
 		}
 
-		DownloadFeedbackAsPdfCommand(module, assignment, mandatory(feedbackService.getFeedbackByUniId(assignment, student.universityId)), student)
+		DownloadFeedbackAsPdfCommand(module, assignment, mandatory(feedbackService.getAssignmentFeedbackByUniId(assignment, student.universityId)), student)
 	}
 
 	@RequestMapping

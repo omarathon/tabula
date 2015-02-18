@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateMarksTemplateC
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
 
@@ -19,7 +19,7 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marks-template"))
 class MarksTemplateController extends CourseworkController {
 
-	var assignmentMembershipService = Wire[AssignmentMembershipService]
+	var assignmentMembershipService = Wire[AssessmentMembershipService]
 	
 	@ModelAttribute("command")
 	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =

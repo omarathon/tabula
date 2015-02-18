@@ -163,7 +163,7 @@ trait UpdatesStudentMembership {
 	/**
 	 * Returns a sequence of MembershipItems
 	 */
-	def membershipInfo : AssignmentMembershipInfo = assignmentMembershipService.determineMembership(linkedUpstreamAssessmentGroups, Option(members))
+	def membershipInfo : AssessmentMembershipInfo = assignmentMembershipService.determineMembership(linkedUpstreamAssessmentGroups, Option(members))
 
 }
 
@@ -188,7 +188,7 @@ class UpstreamGroup(val assessmentComponent: AssessmentComponent, val group: Ups
 
 
 class UpstreamGroupPropertyEditor extends AbstractPropertyEditor[UpstreamGroup] {
-	var membershipService = Wire.auto[AssignmentMembershipService]
+	var membershipService = Wire.auto[AssessmentMembershipService]
 
 	override def fromString(id: String) = {
 		def explode = throw new IllegalArgumentException("No unique upstream group which matches id " + id + " is available")

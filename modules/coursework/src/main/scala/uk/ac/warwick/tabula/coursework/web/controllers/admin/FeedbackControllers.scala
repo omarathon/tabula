@@ -29,7 +29,7 @@ class DownloadSelectedFeedbackController extends CourseworkController {
 		@PathVariable("module") module: Module,
 		@PathVariable("assignment") assignment: Assignment,
 		@PathVariable("feedbackId") feedbackId: String
-	) = new AdminGetSingleFeedbackCommand(module, assignment, mandatory(feedbackDao.getFeedback(feedbackId)))
+	) = new AdminGetSingleFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def get(
@@ -52,7 +52,7 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
 		@PathVariable("assignment") assignment: Assignment,
 		@PathVariable("feedbackId") feedbackId: String
 	) =
-		new AdminGetSingleFeedbackFileCommand(module, assignment, mandatory(feedbackDao.getFeedback(feedbackId)))
+		new AdminGetSingleFeedbackFileCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def get(

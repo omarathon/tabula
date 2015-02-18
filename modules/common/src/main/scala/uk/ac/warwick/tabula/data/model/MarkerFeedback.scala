@@ -28,15 +28,20 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	def getFeedbackPosition: FeedbackPosition = feedback.getFeedbackPosition(this)
 
 	def getMarkerUsercode: Option[String] = {
-		val student = feedback.universityId
-		val assignment = feedback.assignment
-		val workflow = assignment.markingWorkflow
-		getFeedbackPosition match {
-			case FirstFeedback => workflow.getStudentsFirstMarker(assignment, student)
-			case SecondFeedback => workflow.getStudentsSecondMarker(assignment, student)
-			case ThirdFeedback => workflow.getStudentsFirstMarker(assignment, student)
+		feedback match {
+			case assignmentFeedback: AssignmentFeedback =>
+				val student = feedback.universityId
+				val assignment = assignmentFeedback.assignment
+				val workflow = assignment.markingWorkflow
+				getFeedbackPosition match {
+					case FirstFeedback => workflow.getStudentsFirstMarker(assignment, student)
+					case SecondFeedback => workflow.getStudentsSecondMarker(assignment, student)
+					case ThirdFeedback => workflow.getStudentsFirstMarker(assignment, student)
+					case _ => None
+				}
 			case _ => None
 		}
+
 	}
 
 	def getMarkerUser: User = userLookup.getUserByUserId(getMarkerUsercode.get)

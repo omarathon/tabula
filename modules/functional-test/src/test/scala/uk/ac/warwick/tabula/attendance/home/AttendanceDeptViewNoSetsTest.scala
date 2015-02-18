@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.attendance.home
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
 import uk.ac.warwick.tabula.BrowserTest
-import uk.ac.warwick.tabula.home.{FixturesDriver, FeaturesDriver}
+import uk.ac.warwick.tabula.web.{FixturesDriver, FeaturesDriver}
 
 class AttendanceDeptViewNoSetsTest  extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen{
 

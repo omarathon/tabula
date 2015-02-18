@@ -21,8 +21,17 @@ trait FeedbackDueNotification extends AllCompletedActionRequiredNotification {
 	@transient private lazy val workingDaysHelper = new WorkingDaysHelperImpl
 
 	protected def daysLeft = {
-		workingDaysHelper.getNumWorkingDays(created.toLocalDate, deadline)
+		val now = created.toLocalDate
+
+		// need an offset, as the helper always includes both start and end date, off-by-one from what we want to show
+		val offset =
+			if (deadline.isBefore(now)) 1
+			else -1 // today or in the future
+
+		workingDaysHelper.getNumWorkingDays(now, deadline) + offset
 	}
+
+	protected def dueToday = created.toLocalDate == deadline
 
 	override final def onPreSave(newRecord: Boolean) {
 		priority = if (daysLeft == 1) {
@@ -68,7 +77,8 @@ class FeedbackDueGeneralNotification
 		"assignment" -> assignment,
 		"daysLeft" -> daysLeft,
 		"dateOnlyFormatter" -> dateOnlyFormatter,
-		"deadline" -> deadline
+		"deadline" -> deadline,
+		"dueToday" -> dueToday
 	))
 }
 
@@ -103,6 +113,7 @@ class FeedbackDueExtensionNotification
 		"assignment" -> assignment,
 		"daysLeft" -> daysLeft,
 		"dateOnlyFormatter" -> dateOnlyFormatter,
-		"deadline" -> deadline
+		"deadline" -> deadline,
+		"dueToday" -> dueToday
 	))
 }

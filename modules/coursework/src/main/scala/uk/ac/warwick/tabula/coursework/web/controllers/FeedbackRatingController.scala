@@ -30,7 +30,7 @@ class FeedbackRatingController extends CourseworkController {
 		@PathVariable("assignment") assignment: Assignment,
 		@PathVariable("module") module: Module,
 		user: CurrentUser) = 
-		new RateFeedbackCommand(module, assignment, mandatory(feedbackDao.getFeedbackByUniId(assignment, user.universityId).filter(_.released)))
+		new RateFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedbackByUniId(assignment, user.universityId).filter(_.released)))
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(command: RateFeedbackCommand): Mav = 

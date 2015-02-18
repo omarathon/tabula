@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AutowiringUserLookupComponent}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AutowiringUserLookupComponent}
 
 import scala.collection.JavaConverters._
 
@@ -80,7 +80,7 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] with SingleItemNotification[Assignment]
 	with SubmissionReminder {
 
-	@transient var membershipService = Wire[AssignmentMembershipService]
+	@transient var membershipService = Wire[AssessmentMembershipService]
 
 	def deadline = assignment.closeDate
 	def assignment = item.entity

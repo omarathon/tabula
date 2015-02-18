@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.util.Random
-import uk.ac.warwick.tabula.{TestBase, PersistenceTestBase}
+import uk.ac.warwick.tabula.{Fixtures, TestBase, PersistenceTestBase}
 import FeedbackTest._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
@@ -22,7 +22,7 @@ class FeedbackTest extends TestBase {
 		assignment.collectMarks = true
 
 		for (i <- 1 to 10){ // 0000001 .. 0000010
-		var feedback = new Feedback(universityId = idFormat(i))
+		var feedback = Fixtures.assignmentFeedback(universityId = idFormat(i))
 			// assign marks to even numbered students
 			if(i % 2 == 0){
 				val newMark = random.nextInt(101)
@@ -38,7 +38,7 @@ class FeedbackTest extends TestBase {
 	}
 
 	@Test def commentField() {
-		val feedback = new Feedback(universityId = "0123456")
+		val feedback = Fixtures.assignmentFeedback(universityId = "0123456")
 		feedback.hasOnlineFeedback should be (false)
 		feedback.commentsFormValue should be (None)
 		feedback.comments should be (None)
@@ -67,7 +67,7 @@ class FeedbackPersistenceTest extends PersistenceTestBase {
 		}
 		
 		val (feedback, feedbackAttachment) = flushing(session) {
-			val feedback = new Feedback(universityId = idFormat(1))
+			val feedback = Fixtures.assignmentFeedback(universityId = idFormat(1))
 			
 			val assignment = new Assignment
 			session.save(assignment)

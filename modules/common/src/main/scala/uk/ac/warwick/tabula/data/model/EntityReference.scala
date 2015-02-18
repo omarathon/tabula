@@ -52,7 +52,13 @@ class SubmissionEntityReference extends EntityReference[Submission] {
 }
 
 @Entity @DiscriminatorValue(value="feedback")
-class FeedbackEntityReference extends EntityReference[Feedback] {
+class AssignmentFeedbackEntityReference extends EntityReference[AssignmentFeedback] {
+	@ManyToOne
+	var entity: Entity = null
+}
+
+@Entity @DiscriminatorValue(value="examFeedback")
+class ExamFeedbackEntityReference extends EntityReference[ExamFeedback] {
 	@ManyToOne
 	var entity: Entity = null
 }
@@ -137,6 +143,12 @@ class OriginalityReportEntityReference extends EntityReference[OriginalityReport
 
 @Entity @DiscriminatorValue(value="department")
 class DepartmentEntityReference extends EntityReference[Department] {
+	@ManyToOne
+	var entity: Entity = null
+}
+
+@Entity @DiscriminatorValue(value="exam")
+class ExamEntityReference extends EntityReference[Exam] {
 	@ManyToOne
 	var entity: Entity = null
 }

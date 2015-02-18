@@ -16,7 +16,7 @@ trait FeedbackService {
 	def getStudentFeedback(assignment: Assignment, warwickId: String): Option[Feedback]
 	def countPublishedFeedback(assignment: Assignment): Int
 	def getUsersForFeedback(assignment: Assignment): Seq[(String, User)]
-	def getFeedbackByUniId(assignment: Assignment, uniId: String): Option[Feedback]
+	def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String): Option[AssignmentFeedback]
 	def getMarkerFeedbackById(markerFeedbackId: String): Option[MarkerFeedback]
 	def saveOrUpdate(feedback: Feedback)
 	def delete(feedback: Feedback)
@@ -51,8 +51,8 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 			.asInstanceOf[Number].intValue
 	}
 
-	def getFeedbackByUniId(assignment: Assignment, uniId: String) = transactional(readOnly = true) {
-		dao.getFeedbackByUniId(assignment, uniId)
+	def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String) = transactional(readOnly = true) {
+		dao.getAssignmentFeedbackByUniId(assignment, uniId)
 	}
 
 	def getMarkerFeedbackById(markerFeedbackId: String): Option[MarkerFeedback] = {

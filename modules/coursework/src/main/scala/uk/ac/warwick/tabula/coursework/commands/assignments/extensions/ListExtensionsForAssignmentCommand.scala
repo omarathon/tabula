@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.ItemNotFoundException
 import org.joda.time.Days
 import uk.ac.warwick.tabula.coursework.helpers.ExtensionGraph
@@ -20,7 +20,7 @@ class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Ass
 
 	if (assignment.openEnded) throw new ItemNotFoundException
 
-	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
+	var assignmentMembershipService = Wire.auto[AssessmentMembershipService]
 	var userLookup = Wire.auto[UserLookupService]
 
 	def applyInternal() = {

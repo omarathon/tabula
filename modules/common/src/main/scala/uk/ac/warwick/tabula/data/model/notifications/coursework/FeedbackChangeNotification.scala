@@ -9,8 +9,8 @@ import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 @Entity
 @DiscriminatorValue(value="FeedbackChange")
-class FeedbackChangeNotification extends NotificationWithTarget[Feedback, Assignment]
-	with SingleItemNotification[Feedback]
+class FeedbackChangeNotification extends NotificationWithTarget[AssignmentFeedback, Assignment]
+	with SingleItemNotification[AssignmentFeedback]
 	with SingleRecipientNotification
 	with UniversityIdRecipientNotification
 	with AutowiringUserLookupComponent

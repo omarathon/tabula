@@ -30,7 +30,7 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 
 		val thisModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 		val thisAssignmentService = smartMock[AssignmentService]
-		val thisAssignmentMembershipService = smartMock[AssignmentMembershipService]
+		val thisAssignmentMembershipService = smartMock[AssessmentMembershipService]
 
 		thisModuleAndDepartmentService.getModuleByCode(module1.code) returns Option(module1)
 		thisModuleAndDepartmentService.getModuleByCode(module2.code) returns Option(module2)

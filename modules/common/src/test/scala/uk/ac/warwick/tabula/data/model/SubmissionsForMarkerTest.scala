@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, MarkerSelectField}
-import uk.ac.warwick.tabula.{TestBase, RequestInfo}
+import uk.ac.warwick.tabula.{Fixtures, TestBase, RequestInfo}
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConversions._
 
@@ -66,10 +66,9 @@ class SubmissionsForMarkerTest  extends TestBase {
 
 	def releaseAllSubmissions(assignment: Assignment){
 		assignment.submissions.foreach{s=>
-			val newFeedback = new Feedback
+			val newFeedback = Fixtures.assignmentFeedback(s.universityId)
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = "test"
-			newFeedback.universityId = s.universityId
 			newFeedback.released = false
 			val markerFeedback = newFeedback.retrieveFirstMarkerFeedback
 			markerFeedback.state = MarkingState.ReleasedForMarking

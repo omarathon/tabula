@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackAdjustmentNotification, StudentFeedbackAdjustmentNotification}
-import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Notification, Submission}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -152,17 +152,21 @@ trait FeedbackAdjustmentNotifier extends Notifies[Feedback, Feedback] {
 	self: FeedbackAdjustmentCommandState =>
 
 	def emit(feedback: Feedback) = {
-		val studentsNotifications = if (feedback.released) {
-			Seq(Notification.init(new StudentFeedbackAdjustmentNotification, submitter.apparentUser, feedback, feedback.assignment))
-		} else {
-			Nil
+		feedback match {
+			case assignmentFeedback: AssignmentFeedback =>
+				val studentsNotifications = if (assignmentFeedback.released) {
+					Seq(Notification.init(new StudentFeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
+				} else {
+					Nil
+				}
+				val adminsNotifications = if (assignment.hasWorkflow) {
+					Seq(Notification.init(new FeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
+				} else {
+					Nil
+				}
+				studentsNotifications ++ adminsNotifications
+			case _ => Seq()
 		}
-		val adminsNotifications = if (assignment.hasWorkflow) {
-			Seq(Notification.init(new FeedbackAdjustmentNotification, submitter.apparentUser, feedback, feedback.assignment))
-		} else {
-			Nil
-		}
-		studentsNotifications ++ adminsNotifications
 	}
 
 }
