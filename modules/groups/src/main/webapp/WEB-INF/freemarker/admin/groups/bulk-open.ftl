@@ -39,7 +39,7 @@
                    <@f.checkbox
                    class=(set.openForSignups == stateChange)?string('','collection-checkbox')
                    path="checkedGroupsets"
-                   disabled=(set.openForSignups == stateChange)?string
+                   disabled=(set.openForSignups == stateChange)
                    value=set.id/>
                 </td>
                 <td>

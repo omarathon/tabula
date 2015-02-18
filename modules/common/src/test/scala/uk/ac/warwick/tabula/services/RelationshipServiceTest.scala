@@ -194,8 +194,10 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 
 		// If there is an old relationship but no current relationship, the relationship should be recreated.
 		// End the current relationships:
-		relStu1Staff3_3rdAttempt.endDate = DateTime.now
-		relStu1Staff4.endDate = DateTime.now
+		relStu1Staff3_3rdAttempt.endDate = DateTime.now.minusMinutes(5)
+		relStu1Staff4.endDate = DateTime.now.minusMinutes(5)
+		session.saveOrUpdate(relStu1Staff3_3rdAttempt)
+		session.saveOrUpdate(relStu1Staff4)
 		session.flush
 		relationshipService.findCurrentRelationships(relationshipType, stu1) should be (Seq())
 

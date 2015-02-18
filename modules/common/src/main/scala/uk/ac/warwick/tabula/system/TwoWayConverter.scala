@@ -1,4 +1,8 @@
 package uk.ac.warwick.tabula.system
+
+import com.fasterxml.jackson.core.{JsonToken, JsonParser}
+import com.fasterxml.jackson.databind.{DeserializationContext, JsonDeserializer}
+import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer
 import org.springframework.core.convert.TypeDescriptor
 import org.springframework.core.convert.converter.GenericConverter
 import org.springframework.core.convert.converter.GenericConverter.ConvertiblePair
@@ -59,4 +63,17 @@ abstract class TwoWayConverter[A <: String: ClassTag, B <: AnyRef: ClassTag] ext
 
 	private def matching(descriptor: TypeDescriptor, manifest: ClassTag[_]) =
 		manifest.runtimeClass.isAssignableFrom(descriptor.getType)
+
+	def asJsonDeserializer: JsonDeserializer[B] = new TwoWayConverterBackedJsonDeserializer[A, B](this)
+}
+
+class TwoWayConverterBackedJsonDeserializer[A <: String: ClassTag, B <: AnyRef: ClassTag](converter: TwoWayConverter[A, B]) extends StdScalarDeserializer[B](converter.typeB.runtimeClass) {
+
+	override def deserialize(p: JsonParser, ctxt: DeserializationContext): B = {
+		p.getCurrentToken match {
+			case JsonToken.VALUE_STRING => converter.convertRight(p.getText.asInstanceOf[A])
+			case _ => throw ctxt.mappingException("expected JSON String")
+		}
+	}
+
 }

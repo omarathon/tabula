@@ -17,7 +17,7 @@ class ViewMeetingsForPointController extends AttendanceController {
 		ViewMeetingsForPointCommand(mandatory(student), mandatory(point))
 
 	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[Seq[Pair[MeetingRecord, Seq[String]]]]) = {
+	def home(@ModelAttribute("command") cmd: Appliable[Seq[(MeetingRecord, Seq[String])]]) = {
 		val meetingsStatuses = cmd.apply()
 		Mav("home/meetings",
 			"meetingsStatuses" -> meetingsStatuses,

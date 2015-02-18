@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 
@@ -16,7 +15,7 @@ import org.apache.commons.lang3.builder.CompareToBuilder
  */
 
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 class AccreditedPriorLearning() extends GeneratedId	with PermissionsTarget with ToString with Ordered[AccreditedPriorLearning] {
 	def this(studentCourseDetails: StudentCourseDetails,
 		award: Award,

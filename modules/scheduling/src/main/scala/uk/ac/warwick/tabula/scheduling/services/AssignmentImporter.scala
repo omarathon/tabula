@@ -209,7 +209,7 @@ object AssignmentImporter {
 		* SMO holds confirmed module registrations and is included to catch module registrations in departments which
 		* upload module registrations after confirmation.
 		*/
-	lazy val GetAssessmentsQuery = s"""
+	def GetAssessmentsQuery = s"""
 		select distinct
 			sms.mod_code as module_code,
 			'${AssessmentComponent.NoneAssessmentGroup}' as seq,
@@ -260,7 +260,7 @@ object AssignmentImporter {
 			where	mod.mod_iuse = 'Y' and -- in use
 						mod.mot_code not in ('S-', 'D')""" // MOT = module type code - not suspended, discontinued?
 
-	lazy val GetAllAssessmentGroups = s"""
+	def GetAllAssessmentGroups = s"""
 		select distinct
 			mav.ayr_code as academic_year_code,
 			mav.mod_code as module_code,
@@ -292,7 +292,7 @@ object AssignmentImporter {
 						mav.ayr_code in (:academic_year_code)"""
 
 	// for students who register for modules through SITS,this gets their assessments before their choices are confirmed
-	lazy val GetUnconfirmedModuleRegistrations = s"""
+	def GetUnconfirmedModuleRegistrations = s"""
 		select
 			sms.ayr_code as academic_year_code,
 			spr.spr_code as spr_code,
@@ -313,7 +313,7 @@ object AssignmentImporter {
 				sms.ayr_code in (:academic_year_code)"""
 
 	// this gets a student's assessments from the SMO table, which stores confirmed module choices
-	lazy val GetConfirmedModuleRegistrations = s"""
+	def GetConfirmedModuleRegistrations = s"""
 		select
 			smo.ayr_code as academic_year_code,
 			spr.spr_code as spr_code,
@@ -335,7 +335,7 @@ object AssignmentImporter {
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
 				smo.ayr_code in (:academic_year_code)"""
 
-	lazy val GetAutoUploadedConfirmedModuleRegistrations = s"""
+	def GetAutoUploadedConfirmedModuleRegistrations = s"""
 		select
 			smo.ayr_code as academic_year_code,
 			spr.spr_code as spr_code,
@@ -358,7 +358,7 @@ object AssignmentImporter {
 				smo.ayr_code in (:academic_year_code) and
 				ssn.ssn_sprc is null -- no matching SSN"""
 
-	lazy val GetAllAssessmentGroupMembers = s"""
+	def GetAllAssessmentGroupMembers = s"""
 			$GetUnconfirmedModuleRegistrations
 				union all
 			$GetConfirmedModuleRegistrations
@@ -366,7 +366,7 @@ object AssignmentImporter {
 			$GetAutoUploadedConfirmedModuleRegistrations
 		order by academic_year_code, module_code, mav_occurrence, assessment_group, spr_code"""
 
-	lazy val GetAllGradeBoundaries = s"""
+	def GetAllGradeBoundaries = s"""
 		select
 			mkc.mks_code as marks_code,
 			mkc.mkc_grade as grade,

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model.groups
 
 import javax.persistence._
 
-import org.hibernate.annotations.{AccessType, BatchSize}
+import org.hibernate.annotations.BatchSize
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.TermService
 
-@AccessType("field")
+@Access(AccessType.FIELD)
 @Entity
 @Table(uniqueConstraints = Array(
 	new UniqueConstraint(columnNames = Array("event_id", "week"))

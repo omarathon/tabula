@@ -133,9 +133,9 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 			students.find(_.getWarwickId == id).getOrElse(new AnonymousUser)
 		}
 
-		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] =>
+		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { _ match { case ids: Seq[String @unchecked] =>
 			ids.map(id => (id, students.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
-		}
+		}}
 	}
 
 	@Test

@@ -2,8 +2,7 @@ package uk.ac.warwick.tabula.helpers
 
 import uk.ac.warwick.tabula.TestBase
 import org.joda.time.{DateTime, Interval}
-import freemarker.template.TemplateModel
-import freemarker.template.SimpleHash
+import freemarker.template.{ObjectWrapper, TemplateModel, SimpleHash}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter.{IncludeDays, Hour12OptionalMins}
 
@@ -101,7 +100,7 @@ class IntervalFormatterTest extends TestBase {
 		val args: JList[TemplateModel] = JArrayList()
 		
 		// Use a SimpleHash as a workaround to wrapping things manually
-		val model = new SimpleHash
+		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		model.put("start", new DateTime(2012,10,10,/**/9,15,7))
 		model.put("end", new DateTime(2012,11,5,/**/0,0,7))
 		

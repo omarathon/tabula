@@ -20,8 +20,8 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 	trait CommandTestSupport extends ProfileServiceComponent {
 		val profileService = mock[ProfileService]
 
-		// this seems to need the 'argThat(anything)' matcher to correctly set up a catch-all mocked method, 'any' just isn't good enough
-		profileService.findStudentsByRestrictions(argThat(anything), argThat(anything), argThat(anything), argThat(anything), argThat(anything)) returns ((0, Seq(new StudentMember)))
+		// this seems to need the 'anArgThat(anything)' matcher to correctly set up a catch-all mocked method, 'any' just isn't good enough
+		profileService.findStudentsByRestrictions(anArgThat(anything), anArgThat(anything), anArgThat(anything), anArgThat(anything), anArgThat(anything)) returns ((0, Seq(new StudentMember)))
 	}
 
 	trait Fixture {
@@ -78,8 +78,8 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 		there was one(command.profileService).findStudentsByRestrictions(
 			isEq(department),
-			argThat(seqToStringMatches(expectedRestrictions)),
-			argThat(seqToStringMatches(Seq(ScalaOrder.asc("lastName"), ScalaOrder.asc("firstName")))),
+			anArgThat(seqToStringMatches(expectedRestrictions)),
+			anArgThat(seqToStringMatches(Seq(ScalaOrder.asc("lastName"), ScalaOrder.asc("firstName")))),
 			isEq(50),
 			isEq(0)
 		)
@@ -143,8 +143,8 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 		there was one(command.profileService).findStudentsByRestrictions(
 			isEq(department),
-			argThat(seqToStringMatches(expectedRestrictions)),
-			argThat(seqToStringMatches(Seq(ScalaOrder.asc("lastName"), ScalaOrder.asc("firstName")))),
+			anArgThat(seqToStringMatches(expectedRestrictions)),
+			anArgThat(seqToStringMatches(Seq(ScalaOrder.asc("lastName"), ScalaOrder.asc("firstName")))),
 			isEq(10),
 			isEq(20)
 		)
@@ -172,8 +172,8 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 		there was one(command.profileService).findStudentsByRestrictions(
 			isEq(department),
-			argThat(seqToStringMatches(expectedRestrictions)),
-			argThat(seqToStringMatches(expectedOrders)),
+			anArgThat(seqToStringMatches(expectedRestrictions)),
+			anArgThat(seqToStringMatches(expectedOrders)),
 			isEq(50),
 			isEq(0)
 		)

@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.groups
 import javax.persistence.CascadeType._
 import javax.persistence._
 
-import org.hibernate.annotations.{AccessType, Type}
+import org.hibernate.annotations.Type
 import org.joda.time.LocalTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ToString
@@ -35,7 +35,7 @@ object SmallGroupEvent {
 }
 
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget with Serializable {
 	import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent._
 

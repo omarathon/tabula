@@ -38,7 +38,7 @@ class JsonTest extends TestBase {
 	@Test def parseNumbers {
 		val props = """{"age" : 23, "filetypes":["pdf","doc","docx"]}"""
 		val map = m.readValue(new StringReader(props), classOf[Map[String,Any]])
-		map("filetypes").asInstanceOf[scala.collection.mutable.Buffer[_]].toSeq should equal (Seq("pdf","doc","docx"))
+		map("filetypes").asInstanceOf[Seq[_]] should equal (Seq("pdf","doc","docx"))
 		map("age").asInstanceOf[Int] should be (23)
 	}
 

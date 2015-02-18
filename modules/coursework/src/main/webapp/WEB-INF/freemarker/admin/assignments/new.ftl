@@ -15,7 +15,7 @@ the comments textarea needs to maintain newlines.
 <div class="alert alert-success">
 <i class="icon-info-sign"></i>
 Some fields have been pre-filled from another recently created assignment for convenience.
-<a href="?prefillFromRecent=false">Don't do this</a>
+<a href="${url('/coursework/admin/module/${module.code}/assignments/new')}?prefillFromRecent=false">Don't do this</a>
 </div>
 </#if>
 

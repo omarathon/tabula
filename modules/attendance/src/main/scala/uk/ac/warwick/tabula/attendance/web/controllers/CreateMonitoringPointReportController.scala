@@ -11,7 +11,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import javax.servlet.http.HttpServletResponse
 import org.springframework.http.{MediaType, HttpStatus}
-import org.codehaus.jackson.annotate.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.ProfileService
 import scala.collection.JavaConverters._
@@ -27,7 +27,7 @@ class CreateMonitoringPointReportController extends AttendanceController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department, user: CurrentUser) =
+	def command(@PathVariable department: Department, user: CurrentUser): CreateMonitoringPointReportCommand =
 		CreateMonitoringPointReportCommand(department, user)
 
 	@RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))

@@ -24,8 +24,7 @@ class IcalView(var ical: Calendar) extends View {
 			case _ => "attachment"
 		}
 
-		response.setContentType(getContentType)
-		response.setCharacterEncoding("UTF-8")
+		response.setContentType(s"$getContentType; charset=UTF-8")
 		response.setHeader("Content-Disposition", dispositionHeader)
 		new CalendarOutputter().output(ical, response.getWriter)
 	}

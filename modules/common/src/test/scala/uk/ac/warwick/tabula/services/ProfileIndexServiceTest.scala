@@ -233,7 +233,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 
 		implicit val executionService = ExecutionContext.fromExecutor( Executors.newFixedThreadPool(5) )
 
-		val futures = for (i <- 1 to ThreadCount) yield future {
+		val futures = for (i <- 1 to ThreadCount) yield Future {
 			indexer.find("mathew james mannion", Seq(dept), Set(), false)
 		}
 

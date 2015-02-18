@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import org.springframework.beans.factory.annotation.{Autowired, Configurable}
-import reflect.BeanProperty
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.{AssignmentService, ZipService}
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip

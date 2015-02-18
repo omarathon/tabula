@@ -20,9 +20,9 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 		user.setWarwickId("01234")
 		
 		val userDatabase = Seq(user)
-		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] =>
+		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { ids => ids match { case ids: Seq[String @unchecked] =>
 			ids.map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
-		}
+		}}
 
 		val testGroupSet = new SmallGroupSetBuilder().withId("set1").withGroups(Seq(testGroup)).build
 		val allocateCommand = new AllocateSelfToGroupCommand(user, testGroupSet)

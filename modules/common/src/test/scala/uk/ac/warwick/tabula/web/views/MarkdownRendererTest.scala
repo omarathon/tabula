@@ -30,7 +30,7 @@ class MarkdownRendererTest extends TestBase {
 
 		// Check multithreadedness by rendering a lot at once.
 		val results = (1 to 10).map (
-			i => future { renderer.renderMarkdown(input + i) 	}
+			i => Future { renderer.renderMarkdown(input + i) 	}
 		)
 
 		for (result <- results) {

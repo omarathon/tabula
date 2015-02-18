@@ -34,7 +34,7 @@ class ContextProfileInitializerTest extends TestBase {
 		)
 	}
 	
-	def mockProperties(pairs:Pair[String,String]*) = 
+	def mockProperties(pairs:(String, String)*) =
 		new MockPropertySource {
 			for ((key, value) <- pairs) {
 				setProperty(key, value)

@@ -33,6 +33,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 		val student2rel = new MemberStudentRelationship
 		student2rel.studentMember = student2
 		val scheme1 = new AttendanceMonitoringScheme
+		scheme1.attendanceMonitoringService = None
 		scheme1.pointStyle = AttendanceMonitoringPointStyle.Week
 		scheme1.department = dept1
 		scheme1.academicYear = AcademicYear(2014)
@@ -43,6 +44,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 		val scheme1point2 = Fixtures.attendanceMonitoringPoint(scheme1, "point2", 1, 2)
 		scheme1point2.id = "2345"
 		val scheme2 = new AttendanceMonitoringScheme
+		scheme2.attendanceMonitoringService = None
 		scheme2.pointStyle = AttendanceMonitoringPointStyle.Week
 		scheme2.department = dept2
 		scheme2.academicYear = AcademicYear(2014)

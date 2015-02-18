@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
 
-import org.hibernate.annotations.{Type, BatchSize, AccessType}
+import org.hibernate.annotations.{Type, BatchSize}
 import org.joda.time.{LocalDate, DateTime}
 
 import javax.persistence._
@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, SuspectPlagiarised}
 
-@Entity @AccessType("field")
+@Entity @Access(AccessType.FIELD)
 class Submission extends GeneratedId with PermissionsTarget with ToEntityReference with FeedbackReportGenerator {
 
 	type Entity = Submission

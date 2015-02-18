@@ -2,9 +2,9 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
-import javax.persistence.{CascadeType, Entity, _}
+import javax.persistence._
 
-import org.hibernate.annotations.{Filter, FilterDef, AccessType, BatchSize, Type}
+import org.hibernate.annotations.{Filter, FilterDef, BatchSize, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -24,7 +24,7 @@ object Exam {
 @FilterDef(name = Exam.NotDeletedFilter, defaultCondition = "deleted = 0")
 @Filter(name = Exam.NotDeletedFilter)
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 class Exam
 	extends GeneratedId
 	with CanBeDeleted

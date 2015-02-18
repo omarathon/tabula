@@ -9,7 +9,7 @@ class AddressTypeTest extends TestBase {
 		val t = new AddressTypeUserType
 		t.convertToObject("H") should be (Home)
 		t.convertToObject("C") should be (TermTime)
-		evaluating { t.convertToObject("Q") } should produce [IllegalArgumentException]
+		an [IllegalArgumentException] should be thrownBy { t.convertToObject("Q") }
 	}
   
 	@Test def convertToValue() {

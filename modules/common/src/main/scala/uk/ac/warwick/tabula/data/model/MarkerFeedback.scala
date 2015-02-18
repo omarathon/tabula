@@ -1,19 +1,19 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
-import org.hibernate.annotations._
 import org.joda.time.DateTime
 import javax.persistence._
+import javax.persistence.ForeignKey
+import org.hibernate.annotations.{BatchSize, Fetch, FetchMode, Type}
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
-import org.hibernate.annotations.AccessType
 import javax.persistence.Entity
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 
-@Entity @AccessType("field")
+@Entity @Access(AccessType.FIELD)
 class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityReference with CanBeDeleted {
 	type Entity = MarkerFeedback
 

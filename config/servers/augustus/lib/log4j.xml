@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<!-- ===================================================================== -->
+<!--                                                                       -->
+<!--  Log4j Configuration                                                  -->
+<!--                                                                       -->
+<!-- ===================================================================== -->
+
+<!-- $Id: log4j.xml,v 1.8 2010/09/22 17:04:00 cuscav Exp $ -->
+
+<!--
+   | For more configuration infromation and examples see the Jakarta Log4j
+   | owebsite: http://jakarta.apache.org/log4j
+ -->
+
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+
+	<!-- ================================= -->
+	<!-- Preserve messages in a local file -->
+	<!-- ================================= -->
+
+	<!-- A time/date based rolling appender -->
+	<appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="${catalina.base}/logs/server.log"/>
+		<param name="Append" value="true"/>
+		<param name="Threshold" value="INFO"/>
+		<param name="Encoding" value="UTF-8"/>
+
+		<!-- Rollover at midnight each day -->
+		<param name="DatePattern" value="'.'yyyy-MM-dd"/>
+
+
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- The default pattern: Date Priority [Category] Message\n -->
+			<param name="ConversionPattern" value="%d %-5p [%c] %m%n"/>
+		</layout>
+	</appender>
+
+	<appender name="DEBUG" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="${catalina.base}/logs/debug.log"/>
+		<param name="Append" value="true"/>
+		<param name="Threshold" value="DEBUG"/>
+		<param name="Encoding" value="UTF-8"/>
+
+		<!-- Rollover at midnight each day -->
+		<param name="DatePattern" value="'.'yyyy-MM-dd"/>
+
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- The default pattern: Date Priority [Category] Message\n -->
+			<param name="ConversionPattern" value="%d %-5p %t [%c] %m%n"/>
+		</layout>
+	</appender>
+
+	<!-- Syslog events -->
+	<appender name="SYSLOG"
+			  class="org.apache.log4j.net.SyslogAppender">
+		<param name="Threshold" value="INFO" />
+		<param name="Facility" value="LOCAL1" />
+
+		<!-- param name="FacilityPrinting" value="false"/ -->
+		<param name="SyslogHost" value="splunk.warwick.ac.uk" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- The default pattern, but with category truncated: Date Priority Message\n -->
+			<param name="ConversionPattern"
+				   value="%d{yyyy-MM-dd HH:mm:ss,SSSZ} %-5p [%c{1}](%t) %m%n" />
+		</layout>
+	</appender>
+
+
+	<!-- ============================== -->
+	<!-- Append messages to the console -->
+	<!-- ============================== -->
+
+	<appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out"/>
+		<param name="Threshold" value="INFO"/>
+		<param name="Encoding" value="UTF-8"/>
+
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- The default pattern: Date Priority [Category] Message\n -->
+			<param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%c{1}] %m%n"/>
+		</layout>
+	</appender>
+
+
+	<!-- ================ -->
+	<!-- Limit categories -->
+	<!-- ================ -->
+	<category name="uk.ac.warwick.portal.dao.oauth.OAuthStoreImpl">
+		<priority value="DEBUG"/>
+	</category>
+
+	<!-- Limit the org.apache category to INFO as its DEBUG is verbose -->
+	<category name="org.apache">
+		<priority value="INFO"/>
+	</category>
+	<!-- stop SSOCF from moaning -->
+	<category name="uk.ac.warwick.sso.client.SSOClientFilter">
+		<priority value="ERROR"/>
+	</category>
+	<category name="org.hibernate.dialect.Dialect">
+		<priority value="WARN"/>
+	</category>
+	<category name="org">
+		<priority value="INFO"/>
+	</category>
+	<category name="uk.ac.warwick.userlookup">
+		<priority value="INFO"/>
+	</category>
+	<category name="uk.ac.warwick.tabula">
+		<priority value="INFO" />
+	</category>
+	<category name="uk.ac.warwick.tabula.services.SecurityService">
+		<priority value="DEBUG" />
+	</category>
+	<category name="uk.ac.warwick.tabula.system.exceptions.LoggingExceptionHandler">
+		<priority value="DEBUG" />
+	</category>
+	<category name="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+		<priority value="WARN" />
+	</category>
+
+	<category name="org.hibernate.SQL">
+		<priority value="DEBUG" />
+	</category>
+
+	<category name="uk.ac.warwick.tabula.services.ProfileIndexService">
+		<priority value="DEBUG" />
+	</category>
+
+	<!--   <category name="STDOUT">
+			 <priority value="WARN" />
+	   </category> -->
+
+	<!-- ======================= -->
+	<!-- Setup the Root category -->
+	<!-- ======================= -->
+
+	<root>
+		<priority value="DEBUG"/>
+		<appender-ref ref="CONSOLE"/>
+		<appender-ref ref="FILE"/>
+		<appender-ref ref="DEBUG"/>
+	</root>
+
+
+</log4j:configuration>

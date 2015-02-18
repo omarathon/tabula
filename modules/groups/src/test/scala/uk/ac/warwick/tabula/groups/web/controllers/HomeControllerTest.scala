@@ -28,9 +28,9 @@ class HomeControllerTest extends TestBase with Mockito{
 		allocatedUser.setUserId("allocated")
 		
 		val userDatabase = Seq(unallocatedUser, allocatedUser)
-		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] =>
+		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { _ match { case ids: Seq[String @unchecked] =>
 			ids.map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
-		}
+		}}
 
 		val group1 = new SmallGroupBuilder()
 			.withStudents(createUserGroup(Seq(allocatedUser)))

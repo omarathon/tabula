@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.forms
 
 import scala.collection.JavaConversions._
-import org.hibernate.annotations.{BatchSize, Type, AccessType}
+import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.{Days, DateTime}
 import javax.persistence._
 import javax.persistence.CascadeType._
@@ -17,7 +17,7 @@ import java.sql.Types
 import uk.ac.warwick.tabula.DateFormats
 import org.springframework.format.annotation.DateTimeFormat
 
-@Entity @AccessType("field")
+@Entity @Access(AccessType.FIELD)
 class Extension extends GeneratedId with PermissionsTarget with ToEntityReference {
 
 	type Entity = Extension

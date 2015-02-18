@@ -22,11 +22,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.EqualsBuilder
 import javax.persistence.CascadeType
 import javax.persistence.Entity
-import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.FilterDefs
 import org.hibernate.annotations.Filters
 import org.hibernate.annotations.BatchSize
-import org.hibernate.annotations.ForeignKey
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Filter
@@ -63,7 +61,7 @@ object Member {
 		new Filter(name = Member.FreshOnlyFilter)
 	))
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
 		name="userType",

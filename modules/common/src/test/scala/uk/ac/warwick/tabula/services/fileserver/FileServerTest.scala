@@ -30,7 +30,7 @@ class FileServerTest extends TestBase with Mockito {
 		implicit val res = new MockHttpServletResponse
 		
 		val dao = mock[FileDao]
-		dao.getData(anyString()) returns (None)
+		dao.getData(anyString) returns (None)
 		
 		val a = new FileAttachment
 		a.fileDao = dao
@@ -49,7 +49,7 @@ class FileServerTest extends TestBase with Mockito {
 		implicit val res = new MockHttpServletResponse
 		
 		val dao = mock[FileDao]
-		dao.getData(anyString()) returns (Some(tmpFile))
+		dao.getData(anyString) returns (Some(tmpFile))
 		
 		val a = new FileAttachment
 		a.fileDao = dao
@@ -72,7 +72,7 @@ class FileServerTest extends TestBase with Mockito {
 		implicit val res = new MockHttpServletResponse
 
 		val dao = mock[FileDao]
-		dao.getData(anyString()) returns (Some(tmpFile))
+		dao.getData(anyString) returns (Some(tmpFile))
 
 		val a = new FileAttachment
 		a.fileDao = dao
@@ -109,7 +109,7 @@ class FileServerTest extends TestBase with Mockito {
 		implicit val res = new MockHttpServletResponse
 		
 		val dao = mock[FileDao]
-		dao.getData(anyString()) returns (Some(tmpFile))
+		dao.getData(anyString) returns (Some(tmpFile))
 		
 		val a = new FileAttachment
 		a.fileDao = dao

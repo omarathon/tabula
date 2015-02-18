@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula
 
 
-import org.codehaus.jackson.annotate.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Value

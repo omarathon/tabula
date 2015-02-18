@@ -42,7 +42,7 @@ class SandboxSupervisorImporter extends SupervisorImporter {
 object SupervisorImporter {
 	var sitsSchema: String = Wire.property("${schema.sits}")
 
-	val GetSupervisorsSql = f"""
+	def GetSupervisorsSql = f"""
 		select
 			prs_udf1,
 			rdx_perc -- percentage

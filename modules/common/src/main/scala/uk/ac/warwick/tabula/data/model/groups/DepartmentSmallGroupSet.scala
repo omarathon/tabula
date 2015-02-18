@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.groups
 import javax.persistence._
 import javax.persistence.CascadeType._
 import javax.validation.constraints.NotNull
-import org.hibernate.annotations.{Type, Filter, FilterDef, AccessType, BatchSize}
+import org.hibernate.annotations.{Type, Filter, FilterDef, BatchSize}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -33,7 +33,7 @@ object DepartmentSmallGroupSet {
 @FilterDef(name = DepartmentSmallGroupSet.NotDeletedFilter, defaultCondition = "deleted = 0")
 @Filter(name = DepartmentSmallGroupSet.NotDeletedFilter)
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 class DepartmentSmallGroupSet
 	extends GeneratedId
 	with CanBeDeleted

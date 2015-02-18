@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula
 
-import org.codehaus.jackson.annotate.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.Test
 

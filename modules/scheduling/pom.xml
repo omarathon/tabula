@@ -47,7 +47,7 @@
 			</build>
 		</profile>
 	
-		<!-- deploy to jboss -->
+		<!-- deploy to container -->
 		<profile>
 			<id>deploy</id>
 
@@ -62,12 +62,12 @@
 								<phase>install</phase>
 								<configuration>
 									<target>
-										<sync todir="${deploy.dir}/${project.artifactId}.war">
+										<sync todir="${deploy.dir}/${project.artifactId}">
 											<fileset
 												dir="${project.build.directory}/${project.build.finalName}" />
 										</sync>
 										<touch
-											file="${deploy.dir}/${project.artifactId}.war/WEB-INF/web.xml" />
+											file="${deploy.dir}/${project.artifactId}/WEB-INF/web.xml" />
 									</target>
 								</configuration>
 								<goals>
@@ -115,7 +115,7 @@
 						</overlay>
 						<overlay>
 							<groupId>uk.ac.warwick.tabula</groupId>
-							<artifactId>home</artifactId>
+							<artifactId>web</artifactId>
 							<type>zip</type>
 							<classifier>static-hashes</classifier>
 							<includes>
@@ -141,7 +141,7 @@
 			job -->
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
-			<artifactId>home</artifactId>
+			<artifactId>web</artifactId>
 			<classifier>static-hashes</classifier>
 			<type>zip</type>
 			<scope>provided</scope>
@@ -159,7 +159,7 @@
 		</dependency>
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
-			<artifactId>home</artifactId>
+			<artifactId>web</artifactId>
 			<classifier>jar</classifier>
 		</dependency>
 		<dependency>
@@ -172,7 +172,7 @@
 
 		<dependency>
 			<groupId>uk.ac.warwick.util</groupId>
-			<artifactId>warwickutils-httpclient4</artifactId>
+			<artifactId>warwickutils_spring4-httpclient4</artifactId>
 			<version>${warwickutils.version}</version>
 			<exclusions>
 				<exclusion>

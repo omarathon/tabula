@@ -31,10 +31,10 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito {
 	}
 
 	var userLookup: UserLookupService = smartMock[UserLookupService]
-	userLookup.getUsersByUserIds(any[JList[String]]) answers { case ids: JList[String @unchecked] =>
+	userLookup.getUsersByUserIds(any[JList[String]]) answers { _ match { case ids: JList[String @unchecked] =>
 		val users = ids.asScala.map(id=>(id,new User(id)))
 		JHashMap(users:_*)
-	}
+	}}
 
 	userLookup.getUserByUserId(any[String]) answers { id =>
 		userDatabase find {_.getUserId == id} getOrElse new AnonymousUser

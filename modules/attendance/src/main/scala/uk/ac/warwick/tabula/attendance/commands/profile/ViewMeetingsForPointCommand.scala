@@ -12,7 +12,7 @@ import scala.collection.mutable
 object ViewMeetingsForPointCommand {
 	def apply(student: StudentMember, point: AttendanceMonitoringPoint) =
 		new ViewMeetingsForPointCommand(student, point)
-			with ComposableCommand[Seq[Pair[MeetingRecord, Seq[String]]]]
+			with ComposableCommand[Seq[(MeetingRecord, Seq[String])]]
 			with ViewMeetingsForPointPermission
 			with ViewMeetingsForPointCommandState
 			with AutowiringRelationshipServiceComponent
@@ -21,7 +21,7 @@ object ViewMeetingsForPointCommand {
 }
 
 class ViewMeetingsForPointCommand(val student: StudentMember, val point: AttendanceMonitoringPoint)
-	extends CommandInternal[Seq[Pair[MeetingRecord, Seq[String]]]] with ViewMeetingsForPointCommandState {
+	extends CommandInternal[Seq[(MeetingRecord, Seq[String])]] with ViewMeetingsForPointCommandState {
 
 	self: RelationshipServiceComponent with MeetingRecordDaoComponent =>
 

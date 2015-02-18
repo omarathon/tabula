@@ -5,7 +5,7 @@ import javax.persistence._
 import javax.persistence.CascadeType._
 import javax.validation.constraints.NotNull
 import org.joda.time.DateTime
-import org.hibernate.annotations.{Type, Filter, FilterDef, AccessType, BatchSize}
+import org.hibernate.annotations.{Type, Filter, FilterDef, BatchSize}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
@@ -41,7 +41,7 @@ object SmallGroupSet {
 @FilterDef(name = SmallGroupSet.NotDeletedFilter, defaultCondition = "deleted = 0")
 @Filter(name = SmallGroupSet.NotDeletedFilter)
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 class SmallGroupSet
 		extends GeneratedId
 		with CanBeDeleted

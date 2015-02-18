@@ -91,6 +91,7 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 			setupUnapprovedExtension(assignmentName, assignmentId)
 
 			When("I disallow extensions")
+			disableJQueryAnimationsOnHtmlUnit()
 			checkbox("allowExtensions").clear()
 			submit()
 
@@ -118,8 +119,10 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 			setupUnapprovedExtension(assignmentName, assignmentId)
 
 			And("I disallow extensions and await a modal confirmation")
+			disableJQueryAnimationsOnHtmlUnit()
 			checkbox("allowExtensions").clear()
 			submit()
+
 			val modal = find(cssSelector(".modal.in"))
 			eventually {
 				modal.isDefined should be (true)

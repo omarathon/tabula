@@ -5,13 +5,13 @@ import javax.persistence._
 import javax.validation.constraints.NotNull
 
 import org.hibernate.`type`.StandardBasicTypes
-import org.hibernate.annotations.{AccessType, Type}
+import org.hibernate.annotations.Type
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.{PermissionsSelector, PermissionsTarget}
 import uk.ac.warwick.tabula.services.RelationshipService
 
-@Entity @AccessType("field")
+@Entity @Access(AccessType.FIELD)
 class StudentRelationshipType extends PermissionsTarget with PermissionsSelector[StudentRelationshipType] with IdEquality {
 
 	@Id

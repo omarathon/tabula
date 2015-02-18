@@ -5,6 +5,8 @@ import uk.ac.warwick.tabula.JsonObjectMapperFactory
 import uk.ac.warwick.tabula.MockUserLookup
 import java.io.StringWriter
 
+import uk.ac.warwick.tabula.web.controllers.common.UserPickerController
+
 class UserPickerControllerTest extends TestBase {
 	
 	val controller = new UserPickerController
