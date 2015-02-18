@@ -22,7 +22,7 @@ import scala.beans.BeanProperty
 class SysadminREPL extends BaseSysadminController with BeanFactoryAware {
 
 	@BeanProperty var beanFactory: BeanFactory = _
-	@Autowired var assignmentService: AssignmentService = _
+	@Autowired var assignmentService: AssessmentService = _
 	@Autowired var moduleAndDepartmentService: ModuleAndDepartmentService = _
 
 	val spel: SpelExpressionParser = new SpelExpressionParser

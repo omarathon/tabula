@@ -6,19 +6,19 @@ import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model._
 import org.joda.time.{Interval, DateTimeConstants, DateMidnight, DateTime}
 
-class MonitoringPointProfileTermAssignmentServiceTest extends TestBase with Mockito {
+class MonitoringPointProfileTermAssessmentServiceTest extends TestBase with Mockito {
 
 	val mockProfileService = mock[ProfileService]
 	val mockMonitoringPointService = mock[MonitoringPointService]
 	val mockModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 	val mockTermService = mock[TermService]
-	val mockAssignmentService = mock[AssignmentService]
+	val mockAssignmentService = mock[AssessmentService]
 
 	trait ServiceTestSupport extends MonitoringPointServiceComponent
-		with TermServiceComponent	with ProfileServiceComponent with AssignmentServiceComponent {
+		with TermServiceComponent	with ProfileServiceComponent with AssessmentServiceComponent {
 
 		val monitoringPointService = mockMonitoringPointService
-		val assignmentService = mockAssignmentService
+		val assessmentService = mockAssignmentService
 		val profileService = mockProfileService
 		val termService = mockTermService
 

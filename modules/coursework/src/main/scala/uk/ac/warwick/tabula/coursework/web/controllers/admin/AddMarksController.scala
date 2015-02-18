@@ -31,7 +31,7 @@ class AddMarksController extends CourseworkController {
 
 	type AdminAddMarksCommand = Appliable[Seq[Feedback]] with PostExtractValidation
 
-	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser): AdminAddMarksCommand =
+	@ModelAttribute("adminAddMarksCommand") def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser): AdminAddMarksCommand =
 		AdminAddMarksCommand(mandatory(module), mandatory(assignment), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	// Add the common breadcrumbs to the model.
@@ -41,7 +41,7 @@ class AddMarksController extends CourseworkController {
 	def viewMarkUploadForm(
 			@PathVariable module: Module, 
 			@PathVariable assignment: Assignment,
-			@ModelAttribute cmd: AdminAddMarksCommand, errors: Errors
+			@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
 	) = {
 
 		if(assignment.hasWorkflow) {
@@ -86,7 +86,7 @@ class AddMarksController extends CourseworkController {
 	def confirmBatchUpload(
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
-		@ModelAttribute cmd: AdminAddMarksCommand, errors: Errors
+		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
 	) = {
 		if (errors.hasErrors) viewMarkUploadForm(module, assignment, cmd, errors)
 		else {
@@ -99,7 +99,7 @@ class AddMarksController extends CourseworkController {
 	def doUpload(
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
-		@ModelAttribute cmd: AdminAddMarksCommand, errors: Errors
+		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
 	) = {
 		bindAndValidate(module, cmd, errors)
 		cmd.apply()

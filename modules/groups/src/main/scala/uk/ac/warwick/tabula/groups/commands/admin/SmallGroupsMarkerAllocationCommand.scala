@@ -33,7 +33,7 @@ class SmallGroupsMarkerAllocationCommandInternal(val assignment: Assignment)
 
 	def applyInternal() = {
 		val sets = smallGroupService.getSmallGroupSets(module, academicYear)
-		val validStudents = assignmentMembershipService.determineMembershipUsers(assignment)
+		val validStudents = assessmentMembershipService.determineMembershipUsers(assignment)
 
 		val setAllocations = sets.map(set => {
 			def getGroupAllocations(markers: Seq[User]) = set.groups.asScala.map(group => {

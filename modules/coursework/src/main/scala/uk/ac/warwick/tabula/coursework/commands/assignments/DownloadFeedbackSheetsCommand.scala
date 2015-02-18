@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.services.{AssignmentService, ZipService}
+import uk.ac.warwick.tabula.services.{AssessmentService, ZipService}
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip
 import uk.ac.warwick.tabula.commands.{ApplyWithCallback, ReadOnly, Command, Description}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -24,7 +24,7 @@ class DownloadFeedbackSheetsCommand(val module: Module, val assignment: Assignme
 	var members: Seq[User] = _
 
 	var zipService = Wire.auto[ZipService]
-	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentService = Wire.auto[AssessmentService]
 	var assignmentMembershipService = Wire.auto[AssessmentMembershipService]
 
 	override def applyInternal():RenderableZip = {

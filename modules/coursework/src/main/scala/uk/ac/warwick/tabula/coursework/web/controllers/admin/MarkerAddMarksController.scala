@@ -14,22 +14,22 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback, Module}
-import uk.ac.warwick.tabula.services.{AssignmentService, UserLookupService}
+import uk.ac.warwick.tabula.services.{AssessmentService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/marks"))
 class MarkerAddMarksController extends CourseworkController {
 
-	@Autowired var assignmentService: AssignmentService = _
+	@Autowired var assignmentService: AssessmentService = _
 	@Autowired var userLookup: UserLookupService = _
 
 	type MarkerAddMarksCommand = Appliable[List[MarkerFeedback]] with PostExtractValidation
 
-	@ModelAttribute def command(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment: Assignment,
-		@PathVariable("marker") marker: User,
+	@ModelAttribute("markerAddMarksCommand") def command(
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable marker: User,
 		submitter: CurrentUser
 	) = MarkerAddMarksCommand(
 		mandatory(module),
@@ -45,7 +45,7 @@ class MarkerAddMarksController extends CourseworkController {
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
-		@ModelAttribute cmd: MarkerAddMarksCommand, errors: Errors
+		@ModelAttribute("markerAddMarksCommand") cmd: MarkerAddMarksCommand, errors: Errors
 	) = {
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 		val markerFeedbacks = submissions.flatMap(s => assignment.getMarkerFeedbackForCurrentPosition(s.universityId, user.apparentUser))
@@ -90,7 +90,7 @@ class MarkerAddMarksController extends CourseworkController {
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
-		@ModelAttribute cmd: MarkerAddMarksCommand,
+		@ModelAttribute("markerAddMarksCommand") cmd: MarkerAddMarksCommand,
 		errors: Errors
 	) = {
 		if (errors.hasErrors) viewMarkUploadForm(module, assignment, marker, cmd, errors)
@@ -105,7 +105,7 @@ class MarkerAddMarksController extends CourseworkController {
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
-		@ModelAttribute cmd: MarkerAddMarksCommand, errors: Errors
+		@ModelAttribute("markerAddMarksCommand") cmd: MarkerAddMarksCommand, errors: Errors
 	) = {
 		bindAndValidate(assignment, cmd, errors)
 		cmd.apply()

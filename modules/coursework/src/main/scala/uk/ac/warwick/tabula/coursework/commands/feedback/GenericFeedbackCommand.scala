@@ -4,13 +4,13 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringAssignmentServiceComponent, AssignmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringAssessmentServiceComponent, AssessmentServiceComponent}
 
 object GenericFeedbackCommand {
 	def apply(module: Module, assignment: Assignment) =
 		new GenericFeedbackCommand(module, assignment)
 			with ComposableCommand[Assignment]
-			with AutowiringAssignmentServiceComponent
+			with AutowiringAssessmentServiceComponent
 			with GenericFeedbackPermissions
 			with GenericFeedbackFormDescription[Assignment] {
 			override lazy val eventName = "GenericFeedback"
@@ -19,13 +19,13 @@ object GenericFeedbackCommand {
 
 abstract class GenericFeedbackCommand (val module: Module, val assignment: Assignment)
 	extends CommandInternal[Assignment] with Appliable[Assignment] with GenericFeedbackState {
-	this: AssignmentServiceComponent =>
+	this: AssessmentServiceComponent =>
 
 	genericFeedback = assignment.genericFeedback
 
 	def applyInternal() : Assignment = {
 		assignment.genericFeedback = genericFeedback
-		assignmentService.save(assignment)
+		assessmentService.save(assignment)
 		assignment
 	}
 }

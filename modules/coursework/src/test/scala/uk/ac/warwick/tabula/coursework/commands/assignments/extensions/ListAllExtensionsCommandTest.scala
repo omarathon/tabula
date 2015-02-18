@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.tabula.data.AssignmentDao
+import uk.ac.warwick.tabula.data.AssessmentDao
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.UserLookupService
 
@@ -21,7 +21,7 @@ class ListAllExtensionsCommandTest extends TestBase with Mockito {
 		assignment1.extensions.add(extension1)
 		extension1.assignment = assignment1
 
-		val assignmentDao = smartMock[AssignmentDao]
+		val assignmentDao = smartMock[AssessmentDao]
 		assignmentDao.getAssignments(dept, year) returns (Seq(assignment1))
 
 	}

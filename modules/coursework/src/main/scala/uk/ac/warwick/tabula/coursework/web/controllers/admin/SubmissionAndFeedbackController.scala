@@ -38,7 +38,7 @@ import org.springframework.validation.Errors
 class SubmissionAndFeedbackController extends CourseworkController {
 
 	var auditIndexService = Wire[AuditEventIndexService]
-	var assignmentService = Wire[AssignmentService]
+	var assignmentService = Wire[AssessmentService]
 	var userLookup = Wire[UserLookupService]
 	var features = Wire[Features]
 

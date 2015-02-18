@@ -27,7 +27,7 @@ class AssignMarkersTemplateCommandInternal(val assignment:Assignment) extends Co
 	with AutowiringAssignmentMembershipServiceComponent
 	with AutowiringUserLookupComponent {
 
-	val students = assignmentMembershipService.determineMembershipUsers(assignment)
+	val students = assessmentMembershipService.determineMembershipUsers(assignment)
 
 	def applyInternal() = {
 		val workbook = generateWorkbook

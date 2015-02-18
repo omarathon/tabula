@@ -9,7 +9,7 @@ import uk.ac.warwick.userlookup.Group
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssessmentService
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.ActivityService
@@ -29,11 +29,11 @@ import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkHomepageCommand
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentServiceComponent
-import uk.ac.warwick.tabula.services.AssignmentServiceComponent
+import uk.ac.warwick.tabula.services.AssessmentServiceComponent
 import uk.ac.warwick.tabula.FeaturesComponent
 import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringActivityServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringAssignmentServiceComponent
+import uk.ac.warwick.tabula.services.AutowiringAssessmentServiceComponent
 import uk.ac.warwick.tabula.AutowiringFeaturesComponent
 import uk.ac.warwick.tabula.services.ActivityServiceComponent
 import uk.ac.warwick.tabula.services.SecurityServiceComponent
@@ -86,7 +86,7 @@ object CourseworkHomepageCommand {
 		new CourseworkHomepageCommandInternal(user)
 			with ComposableCommand[Option[CourseworkHomepageInformation]]
 			with AutowiringModuleAndDepartmentServiceComponent
-			with AutowiringAssignmentServiceComponent
+			with AutowiringAssessmentServiceComponent
 			with AutowiringActivityServiceComponent
 			with AutowiringSecurityServiceComponent
 			with PubliclyVisiblePermissions with ReadOnly with Unaudited
@@ -94,7 +94,7 @@ object CourseworkHomepageCommand {
 
 class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandInternal[Option[CourseworkHomepageInformation]] with TaskBenchmarking {
 	self: ModuleAndDepartmentServiceComponent with 
-		  AssignmentServiceComponent with 
+		  AssessmentServiceComponent with
 		  ActivityServiceComponent with 
 		  SecurityServiceComponent =>
 	
@@ -108,7 +108,7 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 			val pagedActivities = benchmarkTask("Get noteworthy submissions") { activityService.getNoteworthySubmissions(user) }
 
 			val assignmentsForMarking = benchmarkTask("Get assignments for marking") {
-				assignmentService.getAssignmentWhereMarker(user.apparentUser).sortBy(_.closeDate)
+				assessmentService.getAssignmentWhereMarker(user.apparentUser).sortBy(_.closeDate)
 			}
 			// add the number of submissions to each assignment for marking
 			val assignmentsForMarkingInfo = benchmarkTask("Get markers submissions") { 

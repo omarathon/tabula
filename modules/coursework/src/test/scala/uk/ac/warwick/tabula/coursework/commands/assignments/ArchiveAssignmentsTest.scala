@@ -9,8 +9,8 @@ import uk.ac.warwick.tabula.Fixtures
 
 class ArchiveAssignmentsTest  extends TestBase with Mockito {
 
-	trait CommandTestSupport extends AssignmentServiceComponent {
-		val assignmentService = mock[AssignmentService]
+	trait CommandTestSupport extends AssessmentServiceComponent {
+		val assessmentService = mock[AssessmentService]
 		def apply(): Seq[Assignment] = Seq()
 	}
 
@@ -30,11 +30,11 @@ class ArchiveAssignmentsTest  extends TestBase with Mockito {
 			command.assignments = Seq(assignment)
 			assignment.archived.booleanValue should be(true)
 			command.applyInternal()
-			verify(command.assignmentService, never).save(assignment)
+			verify(command.assessmentService, never).save(assignment)
 
 			assignment.archived = false
 			command.applyInternal()
-			there was one(command.assignmentService).save(assignment)
+			there was one(command.assessmentService).save(assignment)
 			assignment.archived.booleanValue should be(true)
 
 		}

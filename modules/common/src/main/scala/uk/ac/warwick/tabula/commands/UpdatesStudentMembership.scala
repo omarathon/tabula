@@ -113,7 +113,7 @@ trait UpdatesStudentMembership {
 		}
 
 		// now get implicit membership list from upstream
-		val upstreamMembers = existingGroups.map(assignmentMembershipService.determineMembershipUsers(_, existingMembers)).getOrElse(Seq())
+		val upstreamMembers = existingGroups.map(assessmentMembershipService.determineMembershipUsers(_, existingMembers)).getOrElse(Seq())
 
 		for (user <- usersToAdd.distinct) {
 			if (members.excludes.contains(user)) {
@@ -149,8 +149,8 @@ trait UpdatesStudentMembership {
 	 */
 	lazy val availableUpstreamGroups: Seq[UpstreamGroup] = {
 		for {
-			ua <- assignmentMembershipService.getAssessmentComponents(module)
-			uag <- assignmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
+			ua <- assessmentMembershipService.getAssessmentComponents(module)
+			uag <- assessmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
 		} yield new UpstreamGroup(ua, uag)
 	}
 
@@ -163,7 +163,7 @@ trait UpdatesStudentMembership {
 	/**
 	 * Returns a sequence of MembershipItems
 	 */
-	def membershipInfo : AssessmentMembershipInfo = assignmentMembershipService.determineMembership(linkedUpstreamAssessmentGroups, Option(members))
+	def membershipInfo : AssessmentMembershipInfo = assessmentMembershipService.determineMembership(linkedUpstreamAssessmentGroups, Option(members))
 
 }
 

@@ -309,7 +309,7 @@ object AgentPointRecordCommandTest {
 	class MinimalCommandContext extends FunctionalContext with Mockito {
 		bean() { smartMock[Features] }
 		bean() { smartMock[ProfileService] }
-		bean() { smartMock[AssignmentService] }
+		bean() { smartMock[AssessmentService] }
 		bean() { smartMock[RelationshipService] }
 		bean() { smartMock[UserLookupService] }
 		bean() { smartMock[ModuleAndDepartmentService] }

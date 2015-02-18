@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 import uk.ac.warwick.tabula.data.model.{Submission, Assignment}
 import uk.ac.warwick.tabula.commands.{TaskBenchmarking, CommandInternal}
 import uk.ac.warwick.tabula.coursework.web.controllers.StudentCourseworkCommand.StudentAssignments
-import uk.ac.warwick.tabula.services.{AssignmentMembershipServiceComponent, AssignmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AssignmentMembershipServiceComponent, AssessmentServiceComponent}
 import uk.ac.warwick.tabula.FeaturesComponent
 import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
@@ -23,7 +23,7 @@ object StudentCourseworkCommand extends CourseworkCommandTypes {
 
 trait StudentCourseworkCommandInternal
 	extends CommandInternal[StudentAssignments] {
-	self: AssignmentServiceComponent with
+	self: AssessmentServiceComponent with
 		AssignmentMembershipServiceComponent with
 		FeaturesComponent with
 		StudentCourseworkCommandHelper =>
@@ -38,7 +38,7 @@ trait StudentCourseworkCommandHelper
 	extends CourseworkCommandTypes
 	with TaskBenchmarking {
 
-	self: AssignmentServiceComponent with
+	self: AssessmentServiceComponent with
 		AssignmentMembershipServiceComponent with
 		FeaturesComponent =>
 

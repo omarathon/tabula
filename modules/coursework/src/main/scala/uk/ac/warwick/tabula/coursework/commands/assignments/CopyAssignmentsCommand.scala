@@ -16,7 +16,7 @@ object CopyAssignmentsCommand {
 			with ComposableCommand[Seq[Assignment]]
 			with CopyAssignmentsPermissions
 			with CopyAssignmentsDescription
-			with AutowiringAssignmentServiceComponent
+			with AutowiringAssessmentServiceComponent
 			with AutowiringAssignmentMembershipServiceComponent {
 				override lazy val eventName = "CopyAssignmentsFromPrevious"
 			}
@@ -25,7 +25,7 @@ object CopyAssignmentsCommand {
 abstract class CopyAssignmentsCommand(val department: Department, val modules: Seq[Module]) extends CommandInternal[Seq[Assignment]]
 	with Appliable[Seq[Assignment]] with CopyAssignmentsState with FindAssignmentFields {
 
-	self: AssignmentServiceComponent with AssignmentMembershipServiceComponent =>
+	self: AssessmentServiceComponent with AssignmentMembershipServiceComponent =>
 
 	def applyInternal(): Seq[Assignment] = {
 
@@ -34,13 +34,13 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 		if (archive) {
 			for (assignment <- scalaAssignments.filterNot(_.archived)) {
 				assignment.archived = true
-				assignmentService.save(assignment)
+				assessmentService.save(assignment)
 			}
 		}
 
 		scalaAssignments.map { assignment =>
 			val newAssignment = copy(assignment)
-			assignmentService.save(newAssignment)
+			assessmentService.save(newAssignment)
 			newAssignment
 		}
 	}

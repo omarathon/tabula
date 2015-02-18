@@ -27,7 +27,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 			val currentUser = RequestInfo.fromThread.get.user
 			val validator = new PostExtractValidation with AdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with AdminAddMarksCommandValidation {
 				val module: Module = thisAssignment.module
-				val assignment: Assignment = thisAssignment
+				val assessment: Assignment = thisAssignment
 				val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
 				val userLookup: UserLookupService = smartMock[UserLookupService]
 				val submitter: CurrentUser = null
@@ -59,7 +59,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 			val currentUser = RequestInfo.fromThread.get.user
 			val validator = new PostExtractValidation with AdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with AdminAddMarksCommandValidation {
 				val module: Module = thisAssignment.module
-				val assignment: Assignment = thisAssignment
+				val assessment: Assignment = thisAssignment
 				val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
 				val userLookup: UserLookupService = smartMock[UserLookupService]
 				val submitter: CurrentUser = null
@@ -105,7 +105,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 			val newAssignment = newDeepAssignment()
 			val validator = new PostExtractValidation with AdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with AdminAddMarksCommandValidation {
 				val module: Module = newAssignment.module
-				val assignment: Assignment = newAssignment
+				val assessment: Assignment = newAssignment
 				val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
 				val userLookup: UserLookupService = smartMock[UserLookupService]
 				val submitter: CurrentUser = null

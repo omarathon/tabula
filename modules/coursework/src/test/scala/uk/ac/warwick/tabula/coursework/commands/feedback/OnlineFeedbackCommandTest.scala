@@ -33,7 +33,7 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 
 		val command = new OnlineFeedbackCommand(module, assignment, new CurrentUser(marker, marker)) with OnlineFeedbackCommandTestSupport
 
-		command.assignmentMembershipService.determineMembershipUsers(assignment) returns Seq(user1, user2, user3)
+		command.assessmentMembershipService.determineMembershipUsers(assignment) returns Seq(user1, user2, user3)
 
 		command.userLookup.registerUserObjects(user1,user2)
 
@@ -81,6 +81,6 @@ trait OnlineFeedbackCommandTestSupport extends SubmissionServiceComponent with F
 	val userLookup = new MockUserLookup
 	val submissionService = mock[SubmissionService]
 	val feedbackService = mock[FeedbackService]
-	var assignmentMembershipService = mock[AssessmentMembershipService]
+	var assessmentMembershipService = mock[AssessmentMembershipService]
 	def apply(): Seq[StudentFeedbackGraph] = Seq()
 }

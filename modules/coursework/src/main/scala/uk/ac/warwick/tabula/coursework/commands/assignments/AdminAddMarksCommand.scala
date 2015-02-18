@@ -15,8 +15,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConversions._
 
 object AdminAddMarksCommand {
-	def apply(module: Module, assignment: Assignment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
-		new AdminAddMarksCommandInternal(module, assignment, submitter, gradeGenerator)
+	def apply(module: Module, assessment: Assessment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		new AdminAddMarksCommandInternal(module, assessment, submitter, gradeGenerator)
 			with AutowiringFeedbackServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringMarksExtractorComponent
@@ -30,16 +30,24 @@ object AdminAddMarksCommand {
 			with AddMarksCommandBindListener
 }
 
-class AdminAddMarksCommandInternal(val module: Module, val assignment: Assignment, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
+class AdminAddMarksCommandInternal(val module: Module, val assessment: Assessment, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[Seq[Feedback]] {
 
 	self: AdminAddMarksCommandState with FeedbackServiceComponent =>
 
 	override def applyInternal(): List[Feedback] = transactional() {
 		def saveFeedback(universityId: String, actualMark: String, actualGrade: String, isModified: Boolean) = {
-			val feedback = assignment.findFeedback(universityId).getOrElse({
-				val newFeedback = new AssignmentFeedback
-				newFeedback.assignment = assignment
+			val feedback = assessment.findFeedback(universityId).getOrElse({
+				val newFeedback = assessment match {
+					case assignment: Assignment =>
+						val f = new AssignmentFeedback
+						f.assignment = assignment
+						f
+					case exam: Exam =>
+						val f = new ExamFeedback
+						f.exam = exam
+						f
+				}
 				newFeedback.uploaderId = submitter.apparentId
 				newFeedback.universityId = universityId
 				newFeedback.released = false
@@ -81,7 +89,7 @@ trait AdminAddMarksCommandValidation extends ValidatesMarkItem {
 	
 	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded
-		assignment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId && (feedback.hasMark || feedback.hasGrade) } match {
+		assessment.allFeedback.find { (feedback) => feedback.universityId == mark.universityId && (feedback.hasMark || feedback.hasGrade) } match {
 			case Some(feedback) =>
 				val markChanged = feedback.actualMark match {
 					case Some(m) if m.toString != mark.actualMark => true
@@ -114,7 +122,11 @@ trait AdminAddMarksDescription extends Describable[Seq[Feedback]] {
 	override lazy val eventName = "AdminAddMarks"
 
 	override def describe(d: Description) {
-		d.assignment(assignment)
+		assessment match {
+			case assignment: Assignment => d.assignment(assignment)
+			case exam: Exam => d.exam(exam)
+		}
+
 	}
 }
 
@@ -124,7 +136,7 @@ trait AdminAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
 	
 	def emit(updatedFeedback: Seq[Feedback]) = updatedReleasedFeedback.flatMap {
 		case assignmentFeedback: AssignmentFeedback =>
-			Option(Notification.init(new FeedbackChangeNotification, submitter.apparentUser, assignmentFeedback, assignment))
+			Option(Notification.init(new FeedbackChangeNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
 		case _ =>
 			None
 	}
@@ -135,8 +147,8 @@ trait AdminAddMarksPermissions extends RequiresPermissionsChecking with Permissi
 	self: AdminAddMarksCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(assignment, module)
-		p.PermissionCheck(Permissions.Marks.Create, assignment)
+		p.mustBeLinked(assessment, module)
+		p.PermissionCheck(Permissions.Marks.Create, assessment)
 	}
 
 }

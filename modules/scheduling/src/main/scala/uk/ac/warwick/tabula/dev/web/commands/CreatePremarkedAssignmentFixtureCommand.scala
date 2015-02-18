@@ -15,7 +15,7 @@ class CreatePremarkedAssignmentFixtureCommand extends CommandInternal[Assignment
 
 	this: TransactionalComponent =>
 
-	val assignmentSrv = Wire[AssignmentService]
+	val assignmentSrv = Wire[AssessmentService]
 	val userLookup = Wire[UserLookupService]
 	val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 	val markingWorkflowService = Wire[MarkingWorkflowService]

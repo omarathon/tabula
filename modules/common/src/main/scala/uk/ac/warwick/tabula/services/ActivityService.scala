@@ -26,7 +26,7 @@ class ActivityService {
 	private val StreamSize = 8
 	
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
-	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentService = Wire.auto[AssessmentService]
 	var auditIndexService = Wire.auto[AuditEventNoteworthySubmissionsService]
 
 	// first page

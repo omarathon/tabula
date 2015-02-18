@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.coursework.services.docconversion.{MarkItem, MarksExtractorComponent}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module}
+import uk.ac.warwick.tabula.data.model.{Assessment, FileAttachment, Module}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{FoundUser, LazyLists, NoUser}
 import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, UserLookupComponent}
@@ -138,7 +138,7 @@ trait AddMarksCommandBindListener extends BindListener {
 
 trait AddMarksCommandState {
 	def module: Module
-	def assignment: Assignment
+	def assessment: Assessment
 	def gradeGenerator: GeneratesGradesFromMarks
 
 	val validAttachmentStrings = Seq(".xlsx")

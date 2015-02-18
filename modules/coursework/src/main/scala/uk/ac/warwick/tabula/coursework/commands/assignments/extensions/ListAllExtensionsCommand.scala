@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.AssignmentDao
+import uk.ac.warwick.tabula.data.AssessmentDao
 import uk.ac.warwick.tabula.coursework.helpers.ExtensionGraph
 
 class ListAllExtensionsCommand(val department: Department)
@@ -21,7 +21,7 @@ class ListAllExtensionsCommand(val department: Department)
 	// Extension.Read permission, we would need to make this less strict.
 	PermissionCheck(Permissions.Extension.Read, mandatory(department))
 
-	var assignmentDao = Wire.auto[AssignmentDao]
+	var assignmentDao = Wire.auto[AssessmentDao]
 	var userLookup = Wire[UserLookupService]
 
 	def applyInternal(): Seq[ExtensionGraph] = {

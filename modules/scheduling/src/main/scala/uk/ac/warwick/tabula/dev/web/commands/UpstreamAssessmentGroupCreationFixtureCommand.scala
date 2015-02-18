@@ -26,7 +26,7 @@ class UpstreamAssessmentGroupCreationFixtureCommandInternal extends CommandInter
 		 group.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 		 group.members.knownType.staticUserIds = universityIds.asScala
 
-		 assignmentMembershipService.save(group)
+		 assessmentMembershipService.save(group)
 		 group
 	 }
 

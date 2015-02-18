@@ -7,7 +7,7 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.userlookup.User
 import org.springframework.core.convert.converter.Converter
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{AssignmentServiceUserGroupHelpers, AssignmentService, UserGroupCacheManager, UserLookupService}
+import uk.ac.warwick.tabula.services.{AssignmentServiceUserGroupHelpers, AssessmentService, UserGroupCacheManager, UserLookupService}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.web.Routes
 
@@ -45,7 +45,7 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
 		Routes.coursework.admin.assignment.markerFeedback.onlineFeedback(assignment, marker)
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
-	@transient var assignmentService = Wire.option[AssignmentService with AssignmentServiceUserGroupHelpers]
+	@transient var assignmentService = Wire.option[AssessmentService with AssignmentServiceUserGroupHelpers]
 
 	/** The group of first markers. */
 	@OneToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)

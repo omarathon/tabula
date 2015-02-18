@@ -414,7 +414,7 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		schemeWithExistingAssignmentPoint.points.add(existingAssignmentPoint)
 		existingAssignmentPoint.moduleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 		existingAssignmentPoint.moduleAndDepartmentService.getModuleById("1") returns Option(module)
-		existingAssignmentPoint.assignmentService = smartMock[AssignmentService]
+		existingAssignmentPoint.assignmentService = smartMock[AssessmentService]
 		existingAssignmentPoint.assignmentService.getAssignmentById("1") returns Option(assignment)
 
 		new Fixture {

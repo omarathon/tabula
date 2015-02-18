@@ -81,14 +81,14 @@ trait MarkerAddMarksCommandValidation extends ValidatesMarkItem {
 
 	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded
-		assignment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId} match {
+		assessment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId} match {
 			case Some(feedback) =>
-				if (assignment.isFirstMarker(marker)
+				if (assessment.isFirstMarker(marker)
 					&& feedback.firstMarkerFeedback != null
 					&& (feedback.firstMarkerFeedback.hasMark || feedback.firstMarkerFeedback.hasGrade)
 				)
 					mark.isModified = true
-				else if (assignment.isSecondMarker(marker)
+				else if (assessment.isSecondMarker(marker)
 					&& feedback.secondMarkerFeedback != null
 					&& (feedback.secondMarkerFeedback.hasMark || feedback.secondMarkerFeedback.hasGrade)
 				)
@@ -105,7 +105,7 @@ trait MarkerAddMarksDescription extends Describable[List[MarkerFeedback]] {
 	override lazy val eventName = "MarkerAddMarks"
 
 	override def describe(d: Description) {
-		d.assignment(assignment)
+		d.assignment(assessment)
 	}
 }
 
@@ -114,10 +114,10 @@ trait MarkerAddMarksPermissions extends RequiresPermissionsChecking with Permiss
 	self: MarkerAddMarksCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(assignment, module)
-		p.PermissionCheck(Permissions.Marks.Create, assignment)
+		p.mustBeLinked(assessment, module)
+		p.PermissionCheck(Permissions.Marks.Create, assessment)
 		if(submitter.apparentUser != marker) {
-			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
+			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assessment)
 		}
 	}
 
@@ -126,4 +126,6 @@ trait MarkerAddMarksPermissions extends RequiresPermissionsChecking with Permiss
 trait MarkerAddMarksCommandState extends AddMarksCommandState {
 	def marker: User
 	def submitter: CurrentUser
+	def assignment: Assignment
+	override def assessment = assignment
 }
