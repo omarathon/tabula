@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.exams.commands
 
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Exam, Module}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{ExamServiceComponent, AutowiringExamServiceComponent}
-import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object AddExamCommand  {
 	def apply(module: Module) =
@@ -16,21 +16,21 @@ object AddExamCommand  {
 			with AddExamCommandState
 			with AddExamCommandDescription
 			with AddExamValidation
-			with AutowiringExamServiceComponent
+			with AutowiringAssessmentServiceComponent
 			with CurrentSITSAcademicYear
 
 }
 
 class AddExamCommandInternal(val module: Module) extends CommandInternal[Exam] with AddExamCommandState {
 
-	self: ExamServiceComponent with CurrentSITSAcademicYear =>
+	self: AssessmentServiceComponent with CurrentSITSAcademicYear =>
 
 	override def applyInternal() = {
 		val exam = new Exam
 		exam.name = name
 		exam.module = module
 		exam.academicYear = academicYear
-		examService.saveOrUpdate(exam)
+		assessmentService.save(exam)
 		exam
 	}
 }
@@ -66,6 +66,7 @@ trait AddExamValidation extends SelfValidating {
 	self: AddExamCommandState =>
 
 	override def validate(errors: Errors) {
+
 		if (!name.hasText) {
 			errors.rejectValue("name", "exam.name.empty")
 		}

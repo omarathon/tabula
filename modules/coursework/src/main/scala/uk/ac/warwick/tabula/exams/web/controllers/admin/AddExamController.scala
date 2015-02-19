@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.exams.web.controllers.admin
 
 
+import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
+
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
@@ -17,7 +19,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Controller
 @RequestMapping(value = Array("/exams/admin/module/{module}/exam/new"))
-class AddExamController extends BaseController {
+class AddExamController extends ExamsController {
 
 	type AddExamCommand = Appliable[Exam] with AddExamCommandState
 
@@ -31,7 +33,7 @@ class AddExamController extends BaseController {
 	def command(@PathVariable("module") module: Module) = AddExamCommand(mandatory(module))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@ModelAttribute("command") cmd: AddExamCommand) = Mav("exams/admin/module/new")
+	def showForm(@ModelAttribute("command") cmd: AddExamCommand) = Mav("exams/admin/new")
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid @ModelAttribute("command") cmd: AddExamCommand, errors: Errors) = {
