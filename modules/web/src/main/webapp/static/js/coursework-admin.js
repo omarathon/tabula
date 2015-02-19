@@ -198,18 +198,18 @@ $(function(){
 
 	$('.marker-feedback-table').bigList(
 		$.extend(biglistOptions, {
-			onSomeChecked : function() {
+			onSomeChecked: function() {
 				var $markingContainer = $(this).closest(".workflow-role");
 				var $checkboxes = $markingContainer.find("input[type=checkbox][name=markerFeedback]:checked");
 				var $sendBack = $markingContainer.find(".must-be-blank");
 				var $sendForward = $markingContainer.find(".must-be-populated");
 				var allPopulated = $checkboxes.closest("tr").filter(".in-progress").size() == $checkboxes.size();
 				var allBlank = $checkboxes.closest("tr").filter(".in-progress,.marking-completed").size() == 0;
-				if(allBlank){ $sendBack.removeClass("disabled");} else { $sendBack.addClass("disabled");}
-				if(allPopulated){ $sendForward.removeClass("disabled");} else{ $sendForward.addClass("disabled");}
+				if (allBlank) { $sendBack.removeClass("disabled");} else { $sendBack.addClass("disabled");}
+				if (allPopulated) { $sendForward.removeClass("disabled");} else{ $sendForward.addClass("disabled");}
 			},
 
-			onNoneChecked : function($table) {
+			onNoneChecked: function($table) {
 				var $markingContainer = $(this).closest(".workflow-role");
 				var $sendBack = $markingContainer.find(".must-be-blank");
 				var $sendForward = $markingContainer.find(".must-be-populated");
@@ -561,6 +561,7 @@ $(function() {
 					$actionContainer.html(nextMarkerAction);
 				}
 
+				$row.find('input[type="checkbox"]').first().trigger('change');
 				$row.next('tr').trigger('tabula.expandingTable.toggle');
 
 				return "";

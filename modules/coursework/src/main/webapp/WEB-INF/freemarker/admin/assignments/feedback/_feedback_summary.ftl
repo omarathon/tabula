@@ -3,7 +3,7 @@
 	<#if isModerated?? && isModerated && feedback.feedbackPosition.toString == "SecondFeedback">
 		<div class="feedback-summary-heading">
 			<h3>Moderation</h3>
-			<h5>${feedback.markerUser.fullName}  <small>- <#if showDates><@fmt.date feedback.uploadedDate /></#if></small></h5>
+			<h5>${feedback.markerUser.fullName} <#if showDates><small>- <@fmt.date feedback.uploadedDate /></small></#if></h5>
 			<div class="clearfix"></div>
 		</div>
 		<div class="${feedback.feedbackPosition.toString} feedback-summary" >
@@ -11,7 +11,8 @@
 				<#if feedback.rejectionComments?has_content>
 					<div class="feedback-comments">
 						<h5>Feedback Comments</h5>
-					${feedback.rejectionComments}
+
+						<p>${feedback.rejectionComments}</p>
 					</div>
 				<#else>
 					<div class="feedback-comments"><h5>No feedback comments added.</h5></div>
@@ -21,7 +22,7 @@
 	<#else>
 		<div class="feedback-summary-heading">
 			<h3>${feedback.feedbackPosition.description}</h3>
-			<h5>${feedback.markerUser.fullName} <small>- <#if showDates><@fmt.date feedback.uploadedDate /></#if></small></h5>
+			<h5>${feedback.markerUser.fullName} <#if showDates><small>- <@fmt.date feedback.uploadedDate /></small></#if></h5>
 			<div class="clearfix"></div>
 		</div>
 		<div class="${feedback.feedbackPosition.toString} feedback-summary" >
@@ -75,7 +76,7 @@
 
 <#macro secondMarkerNotes feedback isModerated>
 	<#if isModerated?? && !isModerated && feedback.rejectionComments?? && feedback.feedbackPosition.toString == "SecondFeedback">
-	<div class="feedback-notes alert-info">
+	<div class="feedback-notes alert alert-info">
 		<h3>Notes from Second Marker</h3>
 		<p>${feedback.rejectionComments!""}</p>
 	</div>
