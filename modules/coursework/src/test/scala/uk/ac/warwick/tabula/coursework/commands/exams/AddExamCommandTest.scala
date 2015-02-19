@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.exams
 
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.commands.CurrentSITSAcademicYear
 import uk.ac.warwick.tabula.exams.commands.{AddExamValidation, AddExamCommandInternal, AddExamCommandState}
 import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
