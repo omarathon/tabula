@@ -2,15 +2,15 @@ package uk.ac.warwick.tabula.system.permissions
 
 import org.springframework.util.Assert
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.{SubmitPermissionDeniedException, CurrentUser, PermissionDeniedException, ItemNotFoundException}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroup, DepartmentSmallGroupSet, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroup, SmallGroupEvent, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, RoleOverride}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.permissions.Permission
-import scala.reflect.ClassTag
+import uk.ac.warwick.tabula.permissions.{Permission, _}
 import uk.ac.warwick.tabula.services.SecurityService
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException, PermissionDeniedException, SubmitPermissionDeniedException}
+
 import scala.collection.mutable
-import uk.ac.warwick.tabula.data.model.permissions.{RoleOverride, CustomRoleDefinition}
+import scala.reflect.ClassTag
 
 /**
  * Trait that allows classes to call ActionCheck() in their inline definitions
@@ -60,11 +60,11 @@ trait PermissionsCheckingMethods extends Logging {
 			logger.info("Not displaying module as it doesn't belong to specified department")
 			throw new ItemNotFoundException(module)
 		}
-	
-	def mustBeLinked(assignment: Assignment, module: Module) =
-		if (mandatory(assignment).module.id != mandatory(module).id) {
-			logger.info("Not displaying assignment as it doesn't belong to specified module")
-			throw new ItemNotFoundException(assignment)
+
+	def mustBeLinked(assessment: Assessment, module: Module) =
+		if (mandatory(assessment).module.id != mandatory(module).id) {
+			logger.info("Not displaying assessment as it doesn't belong to specified module")
+			throw new ItemNotFoundException(assessment)
 		}
 	
 	def mustBeLinked(set: SmallGroupSet, module: Module) =

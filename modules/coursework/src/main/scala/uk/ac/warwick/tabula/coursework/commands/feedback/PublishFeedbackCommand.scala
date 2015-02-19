@@ -48,12 +48,12 @@ class PublishFeedbackCommandInternal(val module: Module, val assignment: Assignm
 
 	def applyInternal() = {
 
-			val allResults = feedbackToRelease.map {case(studentId, user, feedback) =>
-				feedback.released = true
-				feedback.releasedDate = new DateTime
-				if (sendToSits)	queueFeedback(feedback, submitter, gradeGenerator)
-				generateNotification(studentId, user, feedback)
-			}
+		val allResults = feedbackToRelease.map {case(studentId, user, feedback) =>
+			feedback.released = true
+			feedback.releasedDate = new DateTime
+			if (sendToSits)	queueFeedback(feedback, submitter, gradeGenerator)
+			generateNotification(studentId, user, feedback)
+		}
 
 		allResults.foldLeft(PublishFeedbackResults()) { (acc, result) =>
 				PublishFeedbackResults(
@@ -64,24 +64,28 @@ class PublishFeedbackCommandInternal(val module: Module, val assignment: Assignm
 			}
 	}
 
-	private def generateNotification(id:String, user:User, feedback: AssignmentFeedback) = {
-		if (user.isFoundUser) {
-			val email = user.getEmail
-			if (email.hasText) {
-				val n = Notification.init(new FeedbackPublishedNotification, submitter.apparentUser, Seq(feedback), feedback.assignment)
-				n.recipientUniversityId = user.getWarwickId
-				PublishFeedbackResults(
-					notifications = Seq(n)
-				)
-			} else {
-				PublishFeedbackResults(
-					badEmails = Seq(PublishFeedbackCommand.BadEmail(user))
-				)
-			}
-		} else {
-			PublishFeedbackResults(
-				missingUsers = Seq(PublishFeedbackCommand.MissingUser(id))
-			)
+	private def generateNotification(id: String, user: User, feedback: Feedback) = {
+		feedback match {
+			case assignmentFeedback: AssignmentFeedback =>
+				if (user.isFoundUser) {
+					val email = user.getEmail
+					if (email.hasText) {
+						val n = Notification.init(new FeedbackPublishedNotification, submitter.apparentUser, Seq(assignmentFeedback), assignmentFeedback.assignment)
+						n.recipientUniversityId = user.getWarwickId
+						PublishFeedbackResults(
+							notifications = Seq(n)
+						)
+					} else {
+						PublishFeedbackResults(
+							badEmails = Seq(PublishFeedbackCommand.BadEmail(user))
+						)
+					}
+				} else {
+					PublishFeedbackResults(
+						missingUsers = Seq(PublishFeedbackCommand.MissingUser(id))
+					)
+				}
+			case _ => PublishFeedbackResults()
 		}
 	}
 

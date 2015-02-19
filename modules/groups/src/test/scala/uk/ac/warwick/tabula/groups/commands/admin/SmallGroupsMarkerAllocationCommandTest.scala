@@ -103,7 +103,7 @@ class SmallGroupsMarkerAllocationCommandTest extends TestBase with Mockito {
 				groupsService
 			}
 
-			def assignmentMembershipService: AssessmentMembershipService = {
+			def assessmentMembershipService: AssessmentMembershipService = {
 				val membershipService = mock[AssessmentMembershipService]
 				membershipService.determineMembershipUsers(assignment) returns Seq(student1, student2, student3)
 				membershipService

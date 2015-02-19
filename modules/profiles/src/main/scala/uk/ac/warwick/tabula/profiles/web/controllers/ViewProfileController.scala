@@ -31,7 +31,7 @@ abstract class ViewProfileController extends ProfilesController {
 	var userLookup = Wire[UserLookupService]
 	var smallGroupService = Wire[SmallGroupService]
 	var memberNoteService = Wire[MemberNoteService]
-	var assignmentService = Wire[AssignmentService]
+	var assignmentService = Wire[AssessmentService]
 	var termService = Wire[TermService]
 
 	@ModelAttribute("searchProfilesCommand")

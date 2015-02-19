@@ -64,7 +64,7 @@ abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: 
 			assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
 		}
 		val moduleMembers = benchmarkTask("Get module membership") {
-			assignmentMembershipService.determineMembershipUsers(assignment)
+			assessmentMembershipService.determineMembershipUsers(assignment)
 		}
 		val unsubmittedMembers = moduleMembers.filterNot(m => uniIdsWithSubmissionOrFeedback.contains(m.getWarwickId))
 

@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.coursework.commands.assignments.ReleaseForMarkingCommand
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{AssignmentService, AssignmentServiceComponent, FeedbackService, FeedbackServiceComponent, StateService, StateServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent, FeedbackService, FeedbackServiceComponent, StateService, StateServiceComponent}
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
 
 import scala.collection.JavaConversions._
@@ -12,9 +12,9 @@ import scala.collection.JavaConverters._
 
 class ReleaseForMarkingTest extends TestBase with Mockito {
 
-	trait TestSupport extends AssignmentServiceComponent with StateServiceComponent with FeedbackServiceComponent {
+	trait TestSupport extends AssessmentServiceComponent with StateServiceComponent with FeedbackServiceComponent {
 
-		val assignmentService = smartMock[AssignmentService]
+		val assessmentService = smartMock[AssessmentService]
 		val stateService = smartMock[StateService]
 		val feedbackService = smartMock[FeedbackService]
 		def apply(): List[Feedback] = List()

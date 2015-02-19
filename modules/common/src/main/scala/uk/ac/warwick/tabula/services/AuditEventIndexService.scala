@@ -296,7 +296,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		"attachments")
 
 	@Autowired var service: AuditEventService = _
-	@Autowired var assignmentService: AssignmentService = _
+	@Autowired var assignmentService: AssessmentService = _
 	@Value("${filesystem.index.audit.dir}") override var indexPath: File = _
 	@Value("${audit.index.weeksbacklog}") var weeksBacklog: Int = _
 

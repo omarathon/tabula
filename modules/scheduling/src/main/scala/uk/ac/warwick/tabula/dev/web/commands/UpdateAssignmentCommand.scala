@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.dev.web.commands
 
 import uk.ac.warwick.tabula.commands.{Unaudited, ComposableCommand, CommandInternal}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssessmentService
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, Daoisms, TransactionalComponent, DepartmentDao}
 import uk.ac.warwick.tabula.data.model.Assignment
@@ -15,7 +15,7 @@ class UpdateAssignmentCommand extends CommandInternal[Seq[Assignment]] {
 
 	type AssignmentUpdate = Assignment => Unit
 
-	val assignmentSrv = Wire[AssignmentService]
+	val assignmentSrv = Wire[AssessmentService]
 	val departmentDao = Wire[DepartmentDao]
 
 	var assignmentName: String = _

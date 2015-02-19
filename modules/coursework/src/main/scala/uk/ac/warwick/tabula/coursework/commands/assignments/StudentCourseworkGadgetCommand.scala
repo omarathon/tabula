@@ -10,9 +10,9 @@ import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.AssignmentMembershipServiceComponent
-import uk.ac.warwick.tabula.services.AssignmentServiceComponent
+import uk.ac.warwick.tabula.services.AssessmentServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringAssignmentMembershipServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringAssignmentServiceComponent
+import uk.ac.warwick.tabula.services.AutowiringAssessmentServiceComponent
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.userlookup.User
@@ -24,7 +24,7 @@ object StudentCourseworkGadgetCommand {
 		new StudentCourseworkGadgetCommandInternal(studentCourseYearDetails)
 			with ComposableCommand[StudentAssignments]
 			with AutowiringFeaturesComponent
-			with AutowiringAssignmentServiceComponent
+			with AutowiringAssessmentServiceComponent
 			with AutowiringAssignmentMembershipServiceComponent
 			with StudentCourseworkCommandHelper
 			with StudentCourseworkGadgetCommandPermissions
@@ -33,21 +33,21 @@ object StudentCourseworkGadgetCommand {
 
 class StudentCourseworkGadgetCommandInternal(val studentCourseYearDetails: StudentCourseYearDetails)
 	extends StudentCourseworkGadgetCommandState with StudentCourseworkCommandInternal{
-	self: AssignmentServiceComponent with
+	self: AssessmentServiceComponent with
 		AssignmentMembershipServiceComponent with
 		FeaturesComponent with
 		StudentCourseworkCommandHelper =>
 
 	override lazy val overridableAssignmentsWithFeedback = {
-		assignmentService.getAssignmentsWithFeedback(studentCourseYearDetails)
+		assessmentService.getAssignmentsWithFeedback(studentCourseYearDetails)
 	}
 
 	override lazy val overridableEnrolledAssignments = {
-		val allAssignments = assignmentMembershipService.getEnrolledAssignments(studentCourseYearDetails.studentCourseDetails.student.asSsoUser)
-		assignmentService.filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
+		val allAssignments = assessmentMembershipService.getEnrolledAssignments(studentCourseYearDetails.studentCourseDetails.student.asSsoUser)
+		assessmentService.filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
 	}
 
-	override lazy val overridableAssignmentsWithSubmission = assignmentService.getAssignmentsWithSubmission(studentCourseYearDetails)
+	override lazy val overridableAssignmentsWithSubmission = assessmentService.getAssignmentsWithSubmission(studentCourseYearDetails)
 
 	override val user: User = student.asSsoUser
 	override val universityId: String = student.universityId

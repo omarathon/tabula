@@ -98,8 +98,8 @@ class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmall
 		} else {
 			// TAB-2535 Automatically link to any available upstream groups
 			for {
-				ua <- assignmentMembershipService.getAssessmentComponents(module)
-				uag <- assignmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
+				ua <- assessmentMembershipService.getAssessmentComponents(module)
+				uag <- assessmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
 			} {
 				val ag = new AssessmentGroup
 				ag.assessmentComponent = ua

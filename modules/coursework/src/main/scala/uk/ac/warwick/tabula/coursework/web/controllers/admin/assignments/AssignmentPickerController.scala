@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssessmentService
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.web.views.JSONView
@@ -50,7 +50,7 @@ class AssignmentPickerController extends CourseworkController {
 class AssignmentPickerCommand(module: Module) extends Command[Seq[Assignment]] with ReadOnly with Unaudited {
 	PermissionCheck(Permissions.Assignment.Read, module)
 	
-	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentService = Wire.auto[AssessmentService]
 	
 	var searchTerm: String = ""
 		

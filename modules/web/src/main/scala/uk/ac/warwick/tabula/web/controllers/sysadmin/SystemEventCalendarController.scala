@@ -7,14 +7,14 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.services.{AssessmentMembershipInfo, AssignmentService}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipInfo, AssessmentService}
 import uk.ac.warwick.spring.Wire
 
 @Controller
 @RequestMapping(Array("/sysadmin/event-calendar"))
 class SystemEventCalendarController extends BaseSysadminController {
 
-	var assignmentService = Wire[AssignmentService]
+	var assignmentService = Wire[AssessmentService]
 
 	@RequestMapping def view = Mav("sysadmin/event-calendar")
 

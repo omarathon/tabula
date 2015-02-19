@@ -11,13 +11,13 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 	val mockProfileService = smartMock[ProfileService]
 	val mockAttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 	val mockModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
-	val mockAssignmentService = smartMock[AssignmentService]
+	val mockAssignmentService = smartMock[AssessmentService]
 
 	trait ServiceTestSupport extends AttendanceMonitoringServiceComponent
-		with ProfileServiceComponent with AssignmentServiceComponent {
+		with ProfileServiceComponent with AssessmentServiceComponent {
 
 		val attendanceMonitoringService = mockAttendanceMonitoringService
-		val assignmentService = mockAssignmentService
+		val assessmentService = mockAssignmentService
 		val profileService = mockProfileService
 	}
 

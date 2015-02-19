@@ -544,7 +544,7 @@ trait MonitoringPointProfileTermAssignmentService {
 
 abstract class AbstractMonitoringPointProfileTermAssignmentService extends MonitoringPointProfileTermAssignmentService {
 
-	self: MonitoringPointServiceComponent with ProfileServiceComponent with TermServiceComponent with AssignmentServiceComponent =>
+	self: MonitoringPointServiceComponent with ProfileServiceComponent with TermServiceComponent with AssessmentServiceComponent =>
 
 	def getCheckpointsForSubmission(submission: Submission): Seq[MonitoringCheckpoint] = {
 		if (submission.isLate) {
@@ -619,7 +619,7 @@ abstract class AbstractMonitoringPointProfileTermAssignmentService extends Monit
 			if (point.assignmentSubmissionIsDisjunction) {
 				true
 			} else {
-				val submissions = assignmentService.getSubmissionsForAssignmentsBetweenDates(
+				val submissions = assessmentService.getSubmissionsForAssignmentsBetweenDates(
 					studentMember.universityId,
 					weekNumberToDate(point.validFromWeek, DayOfWeek.Monday),
 					weekNumberToDate(point.requiredFromWeek + 1, DayOfWeek.Monday)
@@ -631,7 +631,7 @@ abstract class AbstractMonitoringPointProfileTermAssignmentService extends Monit
 			if (point.assignmentSubmissionQuantity == 1) {
 				true
 			} else {
-				val submissions = (assignmentService.getSubmissionsForAssignmentsBetweenDates(
+				val submissions = (assessmentService.getSubmissionsForAssignmentsBetweenDates(
 						studentMember.universityId,
 						weekNumberToDate(point.validFromWeek, DayOfWeek.Monday),
 						weekNumberToDate(point.requiredFromWeek + 1, DayOfWeek.Monday)
@@ -645,9 +645,9 @@ abstract class AbstractMonitoringPointProfileTermAssignmentService extends Monit
 }
 
 @Service("monitoringPointProfileTermAssignmentService")
-class MonitoringPointProfileTermAssignmentServiceImpl
+class MonitoringPointProfileTermAssessmentServiceImpl
 	extends AbstractMonitoringPointProfileTermAssignmentService
 	with AutowiringMonitoringPointServiceComponent
 	with AutowiringProfileServiceComponent
 	with AutowiringTermServiceComponent
-	with AutowiringAssignmentServiceComponent
+	with AutowiringAssessmentServiceComponent

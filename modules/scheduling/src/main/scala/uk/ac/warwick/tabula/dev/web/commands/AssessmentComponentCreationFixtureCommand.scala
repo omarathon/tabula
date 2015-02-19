@@ -28,7 +28,7 @@ class AssessmentComponentCreationFixtureCommandInternal extends CommandInternal[
 		ac.name = name
 		ac.inUse = inUse
 
-		assignmentMembershipService.save(ac)
+		assessmentMembershipService.save(ac)
 	}
 
 }

@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.commands.UpstreamGroupPropertyEditor
 @RequestMapping(value = Array("/admin/module/{module}/assignments/new"))
 class AddAssignmentController extends CourseworkController {
 
-	@Autowired var assignmentService: AssignmentService = _
+	@Autowired var assignmentService: AssessmentService = _
 
 	@ModelAttribute("academicYearChoices") def academicYearChoices: JList[AcademicYear] = {
 		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2).asJava

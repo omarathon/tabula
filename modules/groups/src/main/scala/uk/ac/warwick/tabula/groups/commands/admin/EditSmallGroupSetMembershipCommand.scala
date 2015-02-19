@@ -108,7 +108,7 @@ trait ModifiesSmallGroupSetMembership extends UpdatesStudentMembership with Spec
 			template.assessmentComponent = ug.assessmentComponent
 			template.occurrence = ug.occurrence
 			template.smallGroupSet = set
-			assignmentMembershipService.getAssessmentGroup(template) orElse Some(template)
+			assessmentMembershipService.getAssessmentGroup(template) orElse Some(template)
 		}).distinct.asJava
 	}
 
@@ -120,10 +120,10 @@ trait SmallGroupAutoDeregistration {
 
 	def autoDeregister(fn: () => SmallGroupSet) = {
 		val oldUsers =
-			assignmentMembershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Option(set.members)).toSet
+			assessmentMembershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Option(set.members)).toSet
 
 		val newUsers =
-			assignmentMembershipService.determineMembershipUsers(linkedUpstreamAssessmentGroups, Option(members)).toSet
+			assessmentMembershipService.determineMembershipUsers(linkedUpstreamAssessmentGroups, Option(members)).toSet
 
 		val updatedSet = fn()
 

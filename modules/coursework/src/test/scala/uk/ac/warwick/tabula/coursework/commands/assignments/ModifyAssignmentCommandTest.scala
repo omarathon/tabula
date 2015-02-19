@@ -85,7 +85,7 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito {
 
 		module.assignments.add(assignment)
 
-		val mockAssignmentService = smartMock[AssignmentService]
+		val mockAssignmentService = smartMock[AssessmentService]
 		assignment.assignmentService = mockAssignmentService
 		mockAssignmentService.getAssignmentByNameYearModule(assignment.name, assignment.academicYear, assignment.module) returns Seq(assignment)
 
@@ -186,7 +186,7 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito {
 	@Test def includeAndExcludeUsers() { new Fixture {
 		val cmd = new EditAssignmentCommand(module, assignment, currentUser)
 		cmd.service = mockAssignmentService
-		cmd.assignmentMembershipService = mockAssignmentMembershipService
+		cmd.assessmentMembershipService = mockAssignmentMembershipService
 		cmd.userLookup = userLookup
 
 		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
@@ -229,7 +229,7 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito {
 		val cmd = new EditAssignmentCommand(module, assignment, currentUser)
 
 		cmd.service = mockAssignmentService
-		cmd.assignmentMembershipService = mockAssignmentMembershipService
+		cmd.assessmentMembershipService = mockAssignmentMembershipService
 		cmd.maintenanceMode = smartMock[MaintenanceModeService]
 		cmd.listener = smartMock[EventListener]
 		cmd.scheduledNotificationService = smartMock[ScheduledNotificationService]
