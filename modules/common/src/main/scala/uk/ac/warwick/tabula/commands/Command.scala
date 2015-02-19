@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands
 
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.{NotificationHandling, EventHandling, Event, EventDescription}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, RequestInfo, JavaImports}
@@ -269,7 +270,7 @@ abstract class Description {
 	 */
 	def feedback(feedback: Feedback) = {
 		property("feedback" -> feedback.id)
-		feedback match {
+		HibernateHelpers.initialiseAndUnproxy(feedback) match {
 			case assignmentFeedback: AssignmentFeedback if assignmentFeedback.assignment != null => assignment(assignmentFeedback.assignment)
 			case examFeedback: ExamFeedback if examFeedback.exam != null => exam(examFeedback.exam)
 		}

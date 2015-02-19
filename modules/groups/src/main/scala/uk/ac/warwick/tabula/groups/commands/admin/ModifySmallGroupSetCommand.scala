@@ -25,7 +25,7 @@ object ModifySmallGroupSetCommand {
 			with CreateSmallGroupSetDescription
 			with ModifySmallGroupSetValidation
 			with AutowiringSmallGroupServiceComponent
-			with AutowiringAssignmentMembershipServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
 			with GeneratesDefaultWeekRangesWithTermService
 			with AutowiringTermServiceComponent
 
@@ -76,7 +76,7 @@ trait EditSmallGroupSetCommandState extends ModifySmallGroupSetCommandState {
 }
 
 class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmallGroupSetCommandInternal with CreateSmallGroupSetCommandState {
-	self: SmallGroupServiceComponent with AssignmentMembershipServiceComponent with GeneratesDefaultWeekRanges =>
+	self: SmallGroupServiceComponent with AssessmentMembershipServiceComponent with GeneratesDefaultWeekRanges =>
 
 	override def applyInternal() = transactional() {
 		val set = new SmallGroupSet(module)
@@ -98,8 +98,8 @@ class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmall
 		} else {
 			// TAB-2535 Automatically link to any available upstream groups
 			for {
-				ua <- assignmentMembershipService.getAssessmentComponents(module)
-				uag <- assignmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
+				ua <- assessmentMembershipService.getAssessmentComponents(module)
+				uag <- assessmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
 			} {
 				val ag = new AssessmentGroup
 				ag.assessmentComponent = ua

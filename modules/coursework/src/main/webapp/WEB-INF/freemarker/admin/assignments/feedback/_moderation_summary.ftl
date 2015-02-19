@@ -33,12 +33,12 @@
 				<h5>No mark or grade added.</h5>
 			</#if>
 			<#if moderationFeedback.rejectionComments?has_content>
-			<div class="feedback-comments">
-				<h5>Feedback Comments</h5>
+				<div class="feedback-comments">
+					<h5>Feedback Comments</h5>
 			<#else>
-			<div>
+				<div>
 			</#if>
-				${moderationFeedback.rejectionComments!"<h5>No feedback comments added.</h5>"}
+				<p>${moderationFeedback.rejectionComments!"<h5>No feedback comments added.</h5>"}</p>
 			</div>
 	</div>
 

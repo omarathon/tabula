@@ -4,14 +4,13 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
 
-import org.hibernate.annotations.{Filter, FilterDef, BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.forms._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserGroupCacheManager}
 
 import scala.collection.JavaConverters._
@@ -26,9 +25,7 @@ object Exam {
 @Entity
 @Access(AccessType.FIELD)
 class Exam
-	extends GeneratedId
-	with CanBeDeleted
-	with PermissionsTarget
+	extends Assessment
 	with ToEntityReference
 	with PostLoadBehaviour
 	with Serializable {
@@ -40,22 +37,23 @@ class Exam
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "module_id")
-	var module: Module = _
+	override var module: Module = _
 
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
-	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
+	override var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
 
-	var name: String = _
+	override var name: String = _
 
 	@OneToMany(mappedBy = "exam", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size = 200)
-	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
+	override var assessmentGroups: JList[AssessmentGroup] = JArrayList()
 
 	@OneToMany(mappedBy = "exam", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)
 	var feedbacks: JList[ExamFeedback] = JArrayList()
+	override def allFeedback = feedbacks.asScala
 
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
 	@OneToMany(mappedBy = "exam", fetch = LAZY, cascade = Array(ALL))
@@ -68,13 +66,13 @@ class Exam
 	@JoinColumn(name = "membersgroup_id")
 	private var _members: UserGroup = UserGroup.ofUsercodes
 
-	def members: UnspecifiedTypeUserGroup = {
+	override def members: UnspecifiedTypeUserGroup = {
 		Option(_members).map {
 			new UserGroupCacheManager(_, examMembershipService.assignmentManualMembershipHelper)
 		}.orNull
 	}
 
-	def members_=(group: UserGroup) {
+	override def members_=(group: UserGroup) {
 		_members = group
 	}
 
@@ -96,7 +94,7 @@ class Exam
 		fields.add(field)
 	}
 
-	def addDefaultFeedbackFields() {
+	override def addDefaultFeedbackFields() {
 		val feedback = new ExamTextField
 		feedback.name = Exam.defaultFeedbackTextFieldName
 		feedback.value = ""
@@ -105,12 +103,12 @@ class Exam
 		addField(feedback)
 	}
 
-	def addDefaultFields() {
+	override def addDefaultFields() {
 		addDefaultFeedbackFields()
 	}
 
-	def permissionsParents = Option(module).toStream
+	override def permissionsParents = Option(module).toStream
 
-	def toEntityReference = new ExamEntityReference().put(this)
+	override def toEntityReference = new ExamEntityReference().put(this)
 
 }

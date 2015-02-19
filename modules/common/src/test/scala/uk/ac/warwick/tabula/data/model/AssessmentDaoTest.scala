@@ -2,12 +2,12 @@ package uk.ac.warwick.tabula.data.model
 
 import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures, AcademicYear}
 import org.junit.Before
-import uk.ac.warwick.tabula.data.AssignmentDaoImpl
+import uk.ac.warwick.tabula.data.AssessmentDaoImpl
 import org.joda.time.DateTime
 
-class AssignmentDaoTest extends PersistenceTestBase {
+class AssessmentDaoTest extends PersistenceTestBase {
 
-	val dao = new AssignmentDaoImpl
+	val dao = new AssessmentDaoImpl
 
 	trait Fixture {
 		val dept = Fixtures.department("in")

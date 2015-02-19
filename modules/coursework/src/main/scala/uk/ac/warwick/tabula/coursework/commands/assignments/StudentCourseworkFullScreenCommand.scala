@@ -8,10 +8,10 @@ import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.AssignmentMembershipServiceComponent
-import uk.ac.warwick.tabula.services.AssignmentServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringAssignmentMembershipServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringAssignmentServiceComponent
+import uk.ac.warwick.tabula.services.AssessmentMembershipServiceComponent
+import uk.ac.warwick.tabula.services.AssessmentServiceComponent
+import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
+import uk.ac.warwick.tabula.services.AutowiringAssessmentServiceComponent
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.coursework.web.controllers.StudentCourseworkCommand.StudentAssignments
@@ -23,8 +23,8 @@ object StudentCourseworkFullScreenCommand {
 		new StudentCourseworkFullScreenCommandInternal(memberOrUser)
 			with ComposableCommand[StudentAssignments]
 			with StudentCourseworkFullScreenCommandPermissions
-			with AutowiringAssignmentServiceComponent
-			with AutowiringAssignmentMembershipServiceComponent
+			with AutowiringAssessmentServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
 			with AutowiringFeaturesComponent
 			with StudentCourseworkCommandHelper
 			with ReadOnly with Unaudited
@@ -33,16 +33,16 @@ object StudentCourseworkFullScreenCommand {
 class StudentCourseworkFullScreenCommandInternal(val memberOrUser: MemberOrUser) extends StudentCourseworkCommandInternal
 	with StudentCourseworkFullScreenCommandState {
 
-	self: AssignmentServiceComponent with
-		  AssignmentMembershipServiceComponent with
+	self: AssessmentServiceComponent with
+		  AssessmentMembershipServiceComponent with
 		  FeaturesComponent with
 			StudentCourseworkCommandHelper =>
 
-	override lazy val overridableAssignmentsWithFeedback = assignmentService.getAssignmentsWithFeedback(memberOrUser.universityId)
+	override lazy val overridableAssignmentsWithFeedback = assessmentService.getAssignmentsWithFeedback(memberOrUser.universityId)
 
-	override lazy val overridableEnrolledAssignments = assignmentMembershipService.getEnrolledAssignments(memberOrUser.asUser)
+	override lazy val overridableEnrolledAssignments = assessmentMembershipService.getEnrolledAssignments(memberOrUser.asUser)
 
-	override lazy val overridableAssignmentsWithSubmission = assignmentService.getAssignmentsWithSubmission(memberOrUser.universityId)
+	override lazy val overridableAssignmentsWithSubmission = assessmentService.getAssignmentsWithSubmission(memberOrUser.universityId)
 
 	override val universityId: String = memberOrUser.universityId
 

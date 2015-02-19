@@ -14,7 +14,7 @@ class SubmitToTurnitinJobTest extends TestBase with Mockito with JobTestHelp {
 	
 	@Test def run {
 		val job = new SubmitToTurnitinJob
-		job.assignmentService = mock[AssignmentService]
+		job.assignmentService = mock[AssessmentService]
 		job.api = mock[Turnitin]
 		
 		val assignment = newDeepAssignment()

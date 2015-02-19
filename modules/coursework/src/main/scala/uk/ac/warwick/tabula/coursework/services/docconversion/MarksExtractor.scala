@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.services.docconversion
 
+import uk.ac.warwick.spring.Wire
+
 import scala.collection.JavaConversions._
 import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader}
@@ -47,5 +49,13 @@ class MarksExtractor {
 		}
 		markItems
 	}
+}
+
+trait MarksExtractorComponent {
+	val marksExtractor: MarksExtractor
+}
+
+trait AutowiringMarksExtractorComponent extends MarksExtractorComponent {
+	val marksExtractor = Wire[MarksExtractor]
 }
 

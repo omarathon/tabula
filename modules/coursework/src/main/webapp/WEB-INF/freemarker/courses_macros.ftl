@@ -56,7 +56,7 @@
 	</script>
 </#macro>
 
-<#macro marksForm assignment templateUrl formUrl commandName cancelUrl>
+<#macro marksForm assignment templateUrl formUrl commandName cancelUrl generateUrl>
 	<div id="batch-feedback-form">
 		<h1>Submit marks for ${assignment.name}</h1>
 		<ul id="marks-tabs" class="nav nav-tabs">
@@ -179,7 +179,7 @@
 						data['selected'] = {};
 						data['selected'][universityId] = ($select.is(':visible')) ? $select.val() : $gradeInput.val();
 					}
-					currentRequest = $.ajax('<@routes.generateGradesForMarks assignment />',{
+					currentRequest = $.ajax('${generateUrl}',{
 						'type': 'POST',
 						'data': data,
 						success: function(data) {
@@ -216,7 +216,7 @@
 					currentData['selected'][universityId] = ($select.is(':visible')) ? $select.val() : $gradeInput.val();
 					$gradeInput.hide();
 				});
-				$.ajax('<@routes.generateGradesForMarks assignment />/multiple',{
+				$.ajax('${generateUrl}/multiple',{
 					'type': 'POST',
 					'data': currentData,
 					success: function(data) {

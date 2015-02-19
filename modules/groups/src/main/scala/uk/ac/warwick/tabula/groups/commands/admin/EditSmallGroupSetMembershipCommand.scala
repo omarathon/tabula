@@ -16,7 +16,7 @@ object EditSmallGroupSetMembershipCommand {
 	def apply(module: Module, set: SmallGroupSet) =
 		new EditSmallGroupSetMembershipCommandInternal(module, set)
 			with AutowiringUserLookupComponent
-			with AutowiringAssignmentMembershipServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
 			with ComposableCommand[SmallGroupSet]
 			with SmallGroupAutoDeregistration
 			with RemovesUsersFromGroupsCommand
@@ -34,7 +34,7 @@ object EditSmallGroupSetMembershipCommand {
 	def stub(module: Module, set: SmallGroupSet) =
 		new StubEditSmallGroupSetMembershipCommand(module, set)
 			with AutowiringUserLookupComponent
-			with AutowiringAssignmentMembershipServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
 			with ComposableCommand[SmallGroupSet]
 			with ModifiesSmallGroupSetMembership
 			with StubEditSmallGroupSetMembershipPermissions
@@ -52,7 +52,7 @@ trait PopulateStateWithExistingData {
 }
 
 class EditSmallGroupSetMembershipCommandInternal(val module: Module, val set: SmallGroupSet, val updateStudentMembershipGroupIsUniversityIds: Boolean = true) extends CommandInternal[SmallGroupSet] with EditSmallGroupSetMembershipCommandState {
-	self: SmallGroupServiceComponent with SmallGroupAutoDeregistration with ModifiesSmallGroupSetMembership with UserLookupComponent with AssignmentMembershipServiceComponent =>
+	self: SmallGroupServiceComponent with SmallGroupAutoDeregistration with ModifiesSmallGroupSetMembership with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
 	def copyTo(set: SmallGroupSet) {
 		set.assessmentGroups.clear()
@@ -86,7 +86,7 @@ trait EditSmallGroupSetMembershipCommandState extends CurrentSITSAcademicYear {
 }
 
 trait ModifiesSmallGroupSetMembership extends UpdatesStudentMembership with SpecifiesGroupType {
-	self: EditSmallGroupSetMembershipCommandState with UserLookupComponent with AssignmentMembershipServiceComponent =>
+	self: EditSmallGroupSetMembershipCommandState with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
 	// start complicated membership stuff
 
@@ -108,7 +108,7 @@ trait ModifiesSmallGroupSetMembership extends UpdatesStudentMembership with Spec
 			template.assessmentComponent = ug.assessmentComponent
 			template.occurrence = ug.occurrence
 			template.smallGroupSet = set
-			assignmentMembershipService.getAssessmentGroup(template) orElse Some(template)
+			assessmentMembershipService.getAssessmentGroup(template) orElse Some(template)
 		}).distinct.asJava
 	}
 
@@ -116,14 +116,14 @@ trait ModifiesSmallGroupSetMembership extends UpdatesStudentMembership with Spec
 }
 
 trait SmallGroupAutoDeregistration {
-	self: AssignmentMembershipServiceComponent with EditSmallGroupSetMembershipCommandState with ModifiesSmallGroupSetMembership with RemovesUsersFromGroups =>
+	self: AssessmentMembershipServiceComponent with EditSmallGroupSetMembershipCommandState with ModifiesSmallGroupSetMembership with RemovesUsersFromGroups =>
 
 	def autoDeregister(fn: () => SmallGroupSet) = {
 		val oldUsers =
-			assignmentMembershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Option(set.members)).toSet
+			assessmentMembershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Option(set.members)).toSet
 
 		val newUsers =
-			assignmentMembershipService.determineMembershipUsers(linkedUpstreamAssessmentGroups, Option(members)).toSet
+			assessmentMembershipService.determineMembershipUsers(linkedUpstreamAssessmentGroups, Option(members)).toSet
 
 		val updatedSet = fn()
 
@@ -167,7 +167,7 @@ trait EditSmallGroupSetMembershipValidation extends SelfValidating {
 }
 
 class StubEditSmallGroupSetMembershipCommand(val module: Module, val set: SmallGroupSet, val updateStudentMembershipGroupIsUniversityIds: Boolean = true) extends CommandInternal[SmallGroupSet] with EditSmallGroupSetMembershipCommandState {
-	self: ModifiesSmallGroupSetMembership with UserLookupComponent with AssignmentMembershipServiceComponent =>
+	self: ModifiesSmallGroupSetMembership with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
 	override def applyInternal() = throw new UnsupportedOperationException
 }

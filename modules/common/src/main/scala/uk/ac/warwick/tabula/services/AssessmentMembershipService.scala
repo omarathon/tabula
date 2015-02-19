@@ -56,7 +56,7 @@ trait AssessmentMembershipService {
 
 	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): AssessmentMembershipInfo
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User]
-	def determineMembershipUsers(assignment: Assignment): Seq[User]
+	def determineMembershipUsers(assessment: Assessment): Seq[User]
 	def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[String]
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean
@@ -239,10 +239,10 @@ trait AssessmentMembershipMethods extends Logging {
 	}
 
 	/**
-	 * Returns a simple list of User objects for students who are enrolled on this assignment. May be empty.
+	 * Returns a simple list of User objects for students who are enrolled on this assessment. May be empty.
 	 */
-	def determineMembershipUsers(assignment: Assignment): Seq[User] = {
-		determineMembershipUsers(assignment.upstreamAssessmentGroups, Option(assignment.members))
+	def determineMembershipUsers(assessment: Assessment): Seq[User] = {
+		determineMembershipUsers(assessment.upstreamAssessmentGroups, Option(assessment.members))
 	}
 
 	def countMembershipWithUniversityIdGroup(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]) = {
@@ -341,12 +341,12 @@ case class MembershipItem(
 	def itemTypeString = itemType.value
 }
 
-trait AssignmentMembershipServiceComponent {
-	def assignmentMembershipService: AssessmentMembershipService
+trait AssessmentMembershipServiceComponent {
+	def assessmentMembershipService: AssessmentMembershipService
 }
 
-trait AutowiringAssignmentMembershipServiceComponent extends AssignmentMembershipServiceComponent {
-	var assignmentMembershipService = Wire[AssessmentMembershipService]
+trait AutowiringAssessmentMembershipServiceComponent extends AssessmentMembershipServiceComponent {
+	var assessmentMembershipService = Wire[AssessmentMembershipService]
 }
 
 trait GeneratesGradesFromMarks {

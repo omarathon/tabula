@@ -33,7 +33,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		beanFactory.getBeanDefinition(any[String]) returns (beanDefinition)
 		beanDefinition.isAutowireCandidate returns (true)
 
-		applicationContext.getBean("assignmentService") returns (smartMock[AssignmentService])
+		applicationContext.getBean("assignmentService") returns (smartMock[AssessmentService])
 		applicationContext.getBean("assignmentMembershipService") returns (smartMock[AssessmentMembershipService])
 		applicationContext.getBean("feedbackService") returns (smartMock[FeedbackService])
 		applicationContext.getBean("extensionService") returns (extensionService)

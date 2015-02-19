@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import org.hibernate.Session
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.GradeBoundary
+import uk.ac.warwick.tabula.data.model.{Assignment, GradeBoundary, Module}
 import uk.ac.warwick.tabula.events.EventHandling
-import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, UserLookupService}
-import uk.ac.warwick.tabula.{Mockito, RequestInfo, TestBase}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.{CurrentUser, Mockito, RequestInfo, TestBase}
 
 import scala.collection.JavaConversions._
 
@@ -14,6 +13,8 @@ import scala.collection.JavaConversions._
 class AddMarksCommandTest extends TestBase with Mockito {
 
 	EventHandling.enabled = false
+
+	val thisAssignment = newDeepAssignment()
 
 	/**
 	 * Check that validation marks an empty mark as an invalid row
@@ -24,26 +25,28 @@ class AddMarksCommandTest extends TestBase with Mockito {
 	def emptyMarkField() {
 		withUser("cusebr") {
 			val currentUser = RequestInfo.fromThread.get.user
-			val assignment = newDeepAssignment()
-			val gradeGenerator = smartMock[GeneratesGradesFromMarks]
-			val command = new AdminAddMarksCommand(assignment.module, assignment, currentUser, gradeGenerator)
-			command.userLookup = mock[UserLookupService]
-			command.userLookup.getUserByWarwickUniId("0672088") answers { id =>
+			val validator = new PostExtractValidation with AdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with AdminAddMarksCommandValidation {
+				val module: Module = thisAssignment.module
+				val assessment: Assignment = thisAssignment
+				val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
+				val userLookup: UserLookupService = smartMock[UserLookupService]
+				val submitter: CurrentUser = null
+			}
+			validator.userLookup.getUserByWarwickUniId("0672088") answers { id =>
 				currentUser.apparentUser
 			}
 
-			val errors = new BindException(command, "command")
+			val errors = new BindException(validator, "command")
 
-			val marks1 = command.marks.get(0)
+			val marks1 = validator.marks.get(0)
 			marks1.universityId = "0672088"
 			marks1.actualMark = ""
 
-			val marks2 = command.marks.get(1)
+			val marks2 = validator.marks.get(1)
 			marks2.universityId = "1235"
 			marks2.actualMark = "5"
 
-			command.postExtractValidation(errors)
-			command.apply()
+			validator.postExtractValidation(errors)
 		}
 	}
 
@@ -54,45 +57,44 @@ class AddMarksCommandTest extends TestBase with Mockito {
 	def gradeButEmptyMarkField() {
 		withUser("cusebr") {
 			val currentUser = RequestInfo.fromThread.get.user
-			val assignment = newDeepAssignment()
-			val gradeGenerator = smartMock[GeneratesGradesFromMarks]
-			val command = new AdminAddMarksCommand(assignment.module, assignment, currentUser, gradeGenerator) {
-				override val session = mock[Session]
+			val validator = new PostExtractValidation with AdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with AdminAddMarksCommandValidation {
+				val module: Module = thisAssignment.module
+				val assessment: Assignment = thisAssignment
+				val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
+				val userLookup: UserLookupService = smartMock[UserLookupService]
+				val submitter: CurrentUser = null
 			}
-			command.userLookup = mock[UserLookupService]
-			command.userLookup.getUserByWarwickUniId("0672088") answers { id =>
+			validator.userLookup.getUserByWarwickUniId("0672088") answers { id =>
 				currentUser.apparentUser
 			}
 
-			val errors = new BindException(command, "command")
+			val errors = new BindException(validator, "command")
 
-			val marks1 = command.marks.get(0)
+			val marks1 = validator.marks.get(0)
 			marks1.universityId = "0672088"
 			marks1.actualMark = ""
 			marks1.actualGrade = "EXCELLENT"
 
-			val marks2 = command.marks.get(1)
+			val marks2 = validator.marks.get(1)
 			marks2.universityId = "55555"
 			marks2.actualMark = "65"
 
-			val marks3 = command.marks.get(2)
+			val marks3 = validator.marks.get(2)
 			marks3.universityId = "1235"
 			marks3.actualMark = "A"
 
-			val marks4 = command.marks.get(3)
+			val marks4 = validator.marks.get(3)
 			marks4.universityId = ""
 			marks4.actualMark = "80"
 			marks4.actualGrade = "EXCELLENT"
 
-			val marks5 = command.marks.get(4)
+			val marks5 = validator.marks.get(4)
 			marks5.universityId = "0672088"
 			marks5.actualMark = ""
 			marks5.actualGrade = ""
 
-			command.postExtractValidation(errors)
-			command.marks.count(_.isValid) should be (1)
-
-			command.apply()
+			validator.postExtractValidation(errors)
+			validator.marks.count(_.isValid) should be (1)
 		}
 	}
 
@@ -100,43 +102,43 @@ class AddMarksCommandTest extends TestBase with Mockito {
 	def gradeValidation() {
 		trait Fixture {
 			val currentUser = RequestInfo.fromThread.get.user
-			val assignment = newDeepAssignment()
-			val gradeGenerator = smartMock[GeneratesGradesFromMarks]
-			val command = new AdminAddMarksCommand(assignment.module, assignment, currentUser, gradeGenerator) {
-				override val session = smartMock[Session]
+			val newAssignment = newDeepAssignment()
+			val validator = new PostExtractValidation with AdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with AdminAddMarksCommandValidation {
+				val module: Module = newAssignment.module
+				val assessment: Assignment = newAssignment
+				val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
+				val userLookup: UserLookupService = smartMock[UserLookupService]
+				val submitter: CurrentUser = null
 			}
-			command.userLookup = mock[UserLookupService]
-			command.userLookup.getUserByWarwickUniId("0672088") answers { id =>
+			validator.userLookup.getUserByWarwickUniId("0672088") answers { id =>
 				currentUser.apparentUser
 			}
-			gradeGenerator.applyForMarks(Map("0672088" -> 100)) returns Map("0672088" -> Seq(GradeBoundary(null, "A", 0, 100, null)))
-			assignment.module.adminDepartment.assignmentGradeValidation = true
+			validator.gradeGenerator.applyForMarks(Map("0672088" -> 100)) returns Map("0672088" -> Seq(GradeBoundary(null, "A", 0, 100, null)))
+			newAssignment.module.adminDepartment.assignmentGradeValidation = true
 		}
 
 		withUser("cusebr") { new Fixture {
-			val errors = new BindException(command, "command")
+			val errors = new BindException(validator, "command")
 
-			val marks1 = command.marks.get(0)
+			val marks1 = validator.marks.get(0)
 			marks1.universityId = "0672088"
 			marks1.actualMark = "100"
 			marks1.actualGrade = "F"
 
-			command.postExtractValidation(errors)
-			command.apply()
+			validator.postExtractValidation(errors)
 
 			errors.hasErrors should be {true}
 		}}
 
 		withUser("cusebr") { new Fixture {
-			val errors = new BindException(command, "command")
+			val errors = new BindException(validator, "command")
 
-			val marks1 = command.marks.get(0)
+			val marks1 = validator.marks.get(0)
 			marks1.universityId = "0672088"
 			marks1.actualMark = "100"
 			marks1.actualGrade = "A"
 
-			command.postExtractValidation(errors)
-			command.apply()
+			validator.postExtractValidation(errors)
 
 			errors.hasErrors should be {false}
 		}}

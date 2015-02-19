@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model._
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssessmentService
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
@@ -26,7 +26,7 @@ class DownloadSelectedFeedbackCommand(
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Read, assignment)
 	
-	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentService = Wire.auto[AssessmentService]
 	var zipService = Wire.auto[ZipService]
 	var feedbackDao = Wire.auto[FeedbackDao]
 	

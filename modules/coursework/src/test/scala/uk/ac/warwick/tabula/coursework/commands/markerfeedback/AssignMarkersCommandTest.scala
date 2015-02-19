@@ -4,7 +4,7 @@ import collection.JavaConverters._
 
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.coursework.commands.assignments._
-import uk.ac.warwick.tabula.services.{AssignmentServiceComponent, AssignmentService}
+import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AssessmentService}
 import uk.ac.warwick.tabula.data.{UserGroupDao, UserGroupDaoComponent}
 
 // scalastyle:off magic.number
@@ -12,8 +12,8 @@ class AssignMarkersCommandTest extends TestBase with Mockito {
 
 	@Test
 	def assignMarkers() { new MarkingWorkflowWorld {
-		val command = new AssignMarkersCommand(assignment.module, assignment) with AssignMarkersCommandState with AssignmentServiceComponent with UserGroupDaoComponent {
-			val assignmentService = smartMock[AssignmentService]
+		val command = new AssignMarkersCommand(assignment.module, assignment) with AssignMarkersCommandState with AssessmentServiceComponent with UserGroupDaoComponent {
+			val assessmentService = smartMock[AssessmentService]
 			val userGroupDao = smartMock[UserGroupDao]
 		}
 

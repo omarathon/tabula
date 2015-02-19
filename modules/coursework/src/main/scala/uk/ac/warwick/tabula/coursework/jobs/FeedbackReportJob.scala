@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.helpers.{SpreadsheetHelpers, Logging}
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.services.jobs.JobInstance
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, AssignmentService}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, AssessmentService}
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.spring.Wire
 import org.springframework.mail.javamail.{MimeMessageHelper, MimeMailMessage}
@@ -35,7 +35,7 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 
 	implicit var freemarker: Configuration = Wire.auto[Configuration]
 	var departmentService: ModuleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
-	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentService = Wire.auto[AssessmentService]
 
 	@Resource(name = "mailSender") var mailer: WarwickMailSender = _
 

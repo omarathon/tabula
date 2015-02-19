@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
+import uk.ac.warwick.tabula.data.HibernateHelpers
+
 import scala.collection.JavaConversions._
 import org.joda.time.DateTime
 import javax.persistence._
@@ -28,7 +30,8 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	def getFeedbackPosition: FeedbackPosition = feedback.getFeedbackPosition(this)
 
 	def getMarkerUsercode: Option[String] = {
-		feedback match {
+		// Very fuck you, Hibernate
+		HibernateHelpers.initialiseAndUnproxy(feedback) match {
 			case assignmentFeedback: AssignmentFeedback =>
 				val student = feedback.universityId
 				val assignment = assignmentFeedback.assignment

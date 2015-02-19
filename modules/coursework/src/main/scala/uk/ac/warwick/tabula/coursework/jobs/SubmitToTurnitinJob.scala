@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.commands.Describable
 import uk.ac.warwick.tabula.coursework.commands.turnitin.TurnitinTrait
 import uk.ac.warwick.tabula.data.model.{Notification, Assignment, OriginalityReport}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssessmentService
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.coursework.services.turnitin.Turnitin._
 import uk.ac.warwick.tabula.coursework.services.turnitin._
@@ -45,7 +45,7 @@ class SubmitToTurnitinJob extends Job
 
 	val identifier = SubmitToTurnitinJob.identifier
 
-	@Autowired var assignmentService: AssignmentService = _
+	@Autowired var assignmentService: AssessmentService = _
 	@Autowired var originalityReportService: OriginalityReportService = _
 
 	val WaitingRetries = 50

@@ -20,6 +20,6 @@
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd
 		http://go.warwick.ac.uk/elab-schemas/filterstack http://go.warwick.ac.uk/elab-schemas/filters.xsd">
 
-	<bean id="assignmentService" class="uk.ac.warwick.tabula.services.AssignmentServiceImpl" />
+	<bean id="assignmentService" class="uk.ac.warwick.tabula.services.AssessmentServiceImpl" />
 	
 </beans>

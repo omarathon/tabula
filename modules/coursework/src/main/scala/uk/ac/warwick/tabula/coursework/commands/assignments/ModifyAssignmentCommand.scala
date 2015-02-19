@@ -10,7 +10,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{AutowiringAssignmentMembershipServiceComponent, AutowiringUserLookupComponent, AssignmentService}
+import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringUserLookupComponent, AssessmentService}
 
 
 /**
@@ -24,10 +24,10 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		with CurrentSITSAcademicYear
 		with SchedulesNotifications[Assignment, Assignment]
 		with AutowiringUserLookupComponent
-		with AutowiringAssignmentMembershipServiceComponent
+		with AutowiringAssessmentMembershipServiceComponent
 		with UpdatesStudentMembership {
 
-	var service = Wire.auto[AssignmentService]
+	var service = Wire.auto[AssessmentService]
 
 	def assignment: Assignment
 
@@ -149,7 +149,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 			template.assessmentComponent = ug.assessmentComponent
 			template.occurrence = ug.occurrence
 			template.assignment = assignment
-			assignmentMembershipService.getAssessmentGroup(template) orElse Some(template)
+			assessmentMembershipService.getAssessmentGroup(template) orElse Some(template)
 		}).distinct.asJava
 	}
 

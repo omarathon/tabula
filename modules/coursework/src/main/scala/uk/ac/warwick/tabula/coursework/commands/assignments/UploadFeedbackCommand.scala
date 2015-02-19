@@ -87,7 +87,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	var zipService = Wire.auto[ZipService]
 	var userLookup = Wire.auto[UserLookupService]
 	var fileDao = Wire.auto[FileDao]
-	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentService = Wire.auto[AssessmentService]
 	var stateService = Wire.auto[StateService]
 
 	/* for single upload */
