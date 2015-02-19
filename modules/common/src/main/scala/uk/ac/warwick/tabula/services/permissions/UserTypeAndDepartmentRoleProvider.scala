@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.roles.UniversityMemberRole
 import uk.ac.warwick.tabula.roles.StaffRole
-import uk.ac.warwick.tabula.roles.StudentRole
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 @Component
@@ -25,9 +24,6 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider with TaskB
 		val memberRole = customRoleFor(Option(member.homeDepartment))(UniversityMemberRoleDefinition, member).getOrElse(UniversityMemberRole(member))
 		
 		memberRole #:: (member.userType match {
-			case Student => member.touchedDepartments.map { department => 
-				customRoleFor(department)(StudentRoleDefinition, department).getOrElse(StudentRole(department)) 
-			}
 			case Staff => member.affiliatedDepartments.map { department => 
 				customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department)) 
 			}
@@ -40,16 +36,14 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider with TaskB
 
 	/**
 	 * In the case of users not having a member record, we give out definitions based on their SSO
-	 * attributes. This is potentially leaky in terms of PGRs, who would normally get StudentRoleDefinition
-	 * but will in fact get SSOStaffRoleDefinition instead; the reason for SSOStaffRole existing is
-	 * to make sure we don't expose anything truly sensitive in it.
+	 * attributes. This is potentially leaky in terms of PGRs, who will get SSOStaffRoleDefinition;
+	 * the reason for SSOStaffRole existing is to make sure we don't expose anything truly sensitive in it.
 	 */
 	private def getRolesForSSO(user: CurrentUser) =
 		if (user.departmentCode.hasText) {
 			departmentService.get.getDepartmentByCode(user.departmentCode.toLowerCase) match {
 				case Some(department) =>
 					if (user.isStaff) Stream(customRoleFor(department)(SSOStaffRoleDefinition, department).getOrElse(SSOStaffRole(department)))
-					else if (user.isStudent) Stream(customRoleFor(department)(StudentRoleDefinition, department).getOrElse(StudentRole(department)))
 					else Stream.empty
 				case None => Stream.empty
 			}
@@ -65,6 +59,6 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider with TaskB
 		} else Stream.empty
 	}
 	
-	def rolesProvided = Set(classOf[StudentRole], classOf[StaffRole], classOf[UniversityMemberRole])
+	def rolesProvided = Set(classOf[StaffRole], classOf[UniversityMemberRole])
 	
 }

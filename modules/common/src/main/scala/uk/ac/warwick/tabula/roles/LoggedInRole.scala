@@ -15,7 +15,8 @@ case object LoggedInRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	)
 
 	GrantsScopelessPermission(
-		UserPicker //TAB-2951
+		UserPicker, // TAB-2951
+		MonitoringPointTemplates.View
 	)
 
 }
