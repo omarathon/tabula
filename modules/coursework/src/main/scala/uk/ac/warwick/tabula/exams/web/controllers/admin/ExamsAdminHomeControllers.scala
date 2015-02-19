@@ -58,7 +58,7 @@ class ExamsAdminHomeController extends ExamsController {
 }
 
 @Controller
-@RequestMapping(Array("/exams/admin", "/exams/admin"))
+@RequestMapping(Array("/exams/admin"))
 class ExamsAdminHomeDefaultAcademicYearController extends ExamsController {
 
 	@RequestMapping(value = Array("/department/{department}"), method = Array(GET, HEAD))
