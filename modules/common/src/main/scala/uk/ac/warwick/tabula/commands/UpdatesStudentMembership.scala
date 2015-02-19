@@ -12,7 +12,7 @@ import scala.collection.mutable.ListBuffer
 import uk.ac.warwick.userlookup.User
 
 trait UpdatesStudentMembership {
-	self: CurrentSITSAcademicYear with SpecifiesGroupType with UserLookupComponent with AssignmentMembershipServiceComponent =>
+	self: CurrentSITSAcademicYear with SpecifiesGroupType with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
 	// needs a module to determine the possible options from SITS
 	def module: Module

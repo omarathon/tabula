@@ -17,7 +17,7 @@ object CopyAssignmentsCommand {
 			with CopyAssignmentsPermissions
 			with CopyAssignmentsDescription
 			with AutowiringAssessmentServiceComponent
-			with AutowiringAssignmentMembershipServiceComponent {
+			with AutowiringAssessmentMembershipServiceComponent {
 				override lazy val eventName = "CopyAssignmentsFromPrevious"
 			}
 }
@@ -25,7 +25,7 @@ object CopyAssignmentsCommand {
 abstract class CopyAssignmentsCommand(val department: Department, val modules: Seq[Module]) extends CommandInternal[Seq[Assignment]]
 	with Appliable[Seq[Assignment]] with CopyAssignmentsState with FindAssignmentFields {
 
-	self: AssessmentServiceComponent with AssignmentMembershipServiceComponent =>
+	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
 
 	def applyInternal(): Seq[Assignment] = {
 

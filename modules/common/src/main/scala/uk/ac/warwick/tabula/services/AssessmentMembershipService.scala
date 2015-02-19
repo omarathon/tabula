@@ -341,11 +341,11 @@ case class MembershipItem(
 	def itemTypeString = itemType.value
 }
 
-trait AssignmentMembershipServiceComponent {
+trait AssessmentMembershipServiceComponent {
 	def assessmentMembershipService: AssessmentMembershipService
 }
 
-trait AutowiringAssignmentMembershipServiceComponent extends AssignmentMembershipServiceComponent {
+trait AutowiringAssessmentMembershipServiceComponent extends AssessmentMembershipServiceComponent {
 	var assessmentMembershipService = Wire[AssessmentMembershipService]
 }
 

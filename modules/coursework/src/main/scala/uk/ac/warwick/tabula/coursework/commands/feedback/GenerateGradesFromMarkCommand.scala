@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, AssignmentMembershipServiceComponent, AutowiringAssignmentMembershipServiceComponent}
+import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
@@ -13,7 +13,7 @@ import scala.collection.JavaConverters._
 object GenerateGradesFromMarkCommand {
 	def apply(module: Module, assessment: Assessment) =
 		new GenerateGradesFromMarkCommandInternal(module, assessment)
-			with AutowiringAssignmentMembershipServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
 			with ComposableCommand[Map[String, Seq[GradeBoundary]]]
 			with GenerateGradesFromMarkPermissions
 			with GenerateGradesFromMarkCommandState
@@ -23,7 +23,7 @@ object GenerateGradesFromMarkCommand {
 class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: Assessment)
 	extends CommandInternal[Map[String, Seq[GradeBoundary]]] with GeneratesGradesFromMarks {
 
-	self: GenerateGradesFromMarkCommandState with AssignmentMembershipServiceComponent =>
+	self: GenerateGradesFromMarkCommandState with AssessmentMembershipServiceComponent =>
 
 	lazy val assignmentUpstreamAssessmentGroupMap = assessment.assessmentGroups.asScala.toSeq.map(group =>
 		group -> group.toUpstreamAssessmentGroup(assessment.academicYear)

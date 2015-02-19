@@ -24,7 +24,7 @@ object AddAssignmentsCommand {
 		new AddAssignmentsCommandInternal(department, user)
 			with AutowiringModuleAndDepartmentServiceComponent
 			with AutowiringAssessmentServiceComponent
-			with AutowiringAssignmentMembershipServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
 			with ComposableCommand[Seq[Assignment]]
 			with PopulatesAddAssignmentsCommand
 			with AddAssignmentsCommandOnBind
@@ -75,7 +75,7 @@ class AssignmentItem(
 
 class AddAssignmentsCommandInternal(val department: Department, val user: CurrentUser) extends CommandInternal[Seq[Assignment]] {
 
-	self: AddAssignmentsCommandState with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssignmentMembershipServiceComponent =>
+	self: AddAssignmentsCommandState with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
 
 	override def applyInternal() = {
 		assignmentItems.asScala.filter(_.include).map(item => {
@@ -120,7 +120,7 @@ class AddAssignmentsCommandInternal(val department: Department, val user: Curren
 
 trait PopulatesAddAssignmentsCommand extends PopulateOnForm {
 
-	self: AddAssignmentsCommandState with AssignmentMembershipServiceComponent =>
+	self: AddAssignmentsCommandState with AssessmentMembershipServiceComponent =>
 
 	override def populate() = {
 		assignmentItems.clear()
@@ -156,7 +156,7 @@ trait PopulatesAddAssignmentsCommand extends PopulateOnForm {
 
 trait AddAssignmentsCommandOnBind extends BindListener {
 
-	self: AddAssignmentsCommandState with AssignmentMembershipServiceComponent =>
+	self: AddAssignmentsCommandState with AssessmentMembershipServiceComponent =>
 
 	override def onBind(result: BindingResult) = {
 		// re-attach UpstreamAssessmentGroup objects based on the other properties
