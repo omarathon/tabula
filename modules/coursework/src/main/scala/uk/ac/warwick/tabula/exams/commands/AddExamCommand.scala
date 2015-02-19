@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.exams.commands
 
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Exam, Module}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -9,21 +10,20 @@ import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAsse
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object AddExamCommand  {
-	def apply(module: Module) =
-		new AddExamCommandInternal(module)
+	def apply(module: Module, academicYear: AcademicYear) =
+		new AddExamCommandInternal(module, academicYear)
 			with ComposableCommand[Exam]
 			with AddExamPermissions
 			with AddExamCommandState
 			with AddExamCommandDescription
 			with AddExamValidation
 			with AutowiringAssessmentServiceComponent
-			with CurrentSITSAcademicYear
 
 }
 
-class AddExamCommandInternal(val module: Module) extends CommandInternal[Exam] with AddExamCommandState {
+class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear) extends CommandInternal[Exam] with AddExamCommandState {
 
-	self: AssessmentServiceComponent with CurrentSITSAcademicYear =>
+	self: AssessmentServiceComponent =>
 
 	override def applyInternal() = {
 		val exam = new Exam
@@ -48,6 +48,7 @@ trait AddExamPermissions extends RequiresPermissionsChecking with PermissionsChe
 
 trait AddExamCommandState {
 	def module: Module
+	def academicYear: AcademicYear
 
 	// bind variables
 	var name: String = _

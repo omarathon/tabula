@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Controller
-@RequestMapping(value = Array("/exams/admin/module/{module}/exam/new"))
+@RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exam/new"))
 class AddExamController extends ExamsController {
 
 	type AddExamCommand = Appliable[Exam] with AddExamCommandState
@@ -30,7 +30,9 @@ class AddExamController extends ExamsController {
 	}
 
 	@ModelAttribute("command")
-	def command(@PathVariable("module") module: Module) = AddExamCommand(mandatory(module))
+	def command(
+		 @PathVariable("module") module: Module,
+		 @PathVariable("academicYear") academicYear : AcademicYear) = AddExamCommand(mandatory(module), mandatory(academicYear))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@ModelAttribute("command") cmd: AddExamCommand) = Mav("exams/admin/new")
