@@ -4,13 +4,11 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
 
-import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
+import org.hibernate.annotations.{Filter, FilterDef, BatchSize, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.forms._
-import uk.ac.warwick.tabula.services.UserGroupCacheManager
 
 import scala.collection.JavaConverters._
 
@@ -26,7 +24,6 @@ object Exam {
 class Exam
 	extends Assessment
 	with ToEntityReference
-	with PostLoadBehaviour
 	with Serializable {
 
 	type Entity = Exam
@@ -57,30 +54,6 @@ class Exam
 	var fields: JList[ExamFormField] = JArrayList()
 
 	def feedbackFields: Seq[ExamFormField] = fields.asScala.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
-
-	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
-	@JoinColumn(name = "membersgroup_id")
-	private var _members: UserGroup = UserGroup.ofUsercodes
-
-	override def members: UnspecifiedTypeUserGroup = {
-		Option(_members).map {
-			new UserGroupCacheManager(_, assessmentMembershipService.assignmentManualMembershipHelper)
-		}.orNull
-	}
-
-	override def members_=(group: UserGroup) {
-		_members = group
-	}
-
-	// TAB-1446 If hibernate sets members to null, make a new empty usergroup
-	override def postLoad() {
-		ensureMembersGroup
-	}
-
-	def ensureMembersGroup = {
-		if (_members == null) _members = UserGroup.ofUsercodes
-		_members
-	}
 
 	def addField(field: ExamFormField) {
 		if (field.context == null) throw new IllegalArgumentException("Field with name " + field.name + " has no context specified")

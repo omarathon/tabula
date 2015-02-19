@@ -43,7 +43,7 @@ trait AssessmentMembershipService {
 
 	def save(assignment: AssessmentComponent): AssessmentComponent
 	def save(group: UpstreamAssessmentGroup)
-	def replaceMembers(group: UpstreamAssessmentGroup, universityIds: Seq[String]): UpstreamAssessmentGroup
+	def replaceMembers(group: UpstreamAssessmentGroup, universityIds: Seq[UpstreamModuleRegistration]): UpstreamAssessmentGroup
 
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
@@ -55,6 +55,7 @@ trait AssessmentMembershipService {
 	def countMembershipWithUniversityIdGroup(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Int
 
 	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): AssessmentMembershipInfo
+	def determineMembership(assessment: Assessment): AssessmentMembershipInfo
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User]
 	def determineMembershipUsers(assessment: Assessment): Seq[User]
 	def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[String]
@@ -103,10 +104,10 @@ class AssessmentMembershipServiceImpl
 		(autoEnrolled ++ manuallyEnrolled).distinct
 	}
 
-	def replaceMembers(template: UpstreamAssessmentGroup, universityIds: Seq[String]) = {
-		if (debugEnabled) debugReplace(template, universityIds)
+	def replaceMembers(template: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]) = {
+		if (debugEnabled) debugReplace(template, registrations.map(_.universityId))
 		getUpstreamAssessmentGroup(template).map { group =>
-			group.members.knownType.staticUserIds = universityIds
+			group.members.knownType.replaceStaticUsers(registrations)
 			group
 		} getOrElse {
 			logger.warn("No such assessment group found: " + template.toString)
@@ -219,12 +220,28 @@ trait AssessmentMembershipMethods extends Logging {
 		new AssessmentMembershipInfo(sorted)
 	}
 
+	def determineMembership(assessment: Assessment) : AssessmentMembershipInfo = assessment match {
+		case a: Assignment => determineMembership(a.upstreamAssessmentGroups, Option(a.members))
+		case e: Exam => determineMembership(e.upstreamAssessmentGroups, None)
+	}
+
 	/**
 	 * Returns just a list of User objects who are on this assessment group.
 	 */
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User] = {
 		determineMembership(upstream, others).items filter notExclude map toUser filter notNull filter notAnonymous
 	}
+
+	/**
+	 * Returns a simple list of User objects for students who are enrolled on this assessment. May be empty.
+	 */
+	def determineMembershipUsers(assessment: Assessment): Seq[User] = assessment match {
+		case a: Assignment => determineMembershipUsers(a.upstreamAssessmentGroups, Option(a.members))
+		case e: Exam => determineSitsMembership(e.upstreamAssessmentGroups)
+	}
+
+	private def determineSitsMembership(upstream: Seq[UpstreamAssessmentGroup]) =
+		upstream.flatMap(_.sortedMembers).distinct.sortBy(_.position).map(_.memberId).map(userLookup.getUserByWarwickUniId)
 
 	def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[String] = {
 		others.foreach { g => assert(g.universityIds) }
@@ -236,13 +253,6 @@ trait AssessmentMembershipMethods extends Logging {
 		val excludes = others.map(_.knownType.excludedUserIds).getOrElse(Nil)
 
 		(sitsUsers ++ includes).distinct diff excludes.distinct
-	}
-
-	/**
-	 * Returns a simple list of User objects for students who are enrolled on this assessment. May be empty.
-	 */
-	def determineMembershipUsers(assessment: Assessment): Seq[User] = {
-		determineMembershipUsers(assessment.upstreamAssessmentGroups, Option(assessment.members))
 	}
 
 	def countMembershipWithUniversityIdGroup(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]) = {

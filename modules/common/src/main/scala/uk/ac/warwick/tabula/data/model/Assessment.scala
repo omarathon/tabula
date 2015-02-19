@@ -16,8 +16,6 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 	var academicYear: AcademicYear
 	var name: String
 	var assessmentGroups: JList[AssessmentGroup]
-	def members: UnspecifiedTypeUserGroup
-	def members_=(group: UserGroup)
 	def addDefaultFeedbackFields(): Unit
 	def addDefaultFields(): Unit
 
@@ -39,5 +37,6 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 			_.toUpstreamAssessmentGroup(academicYear)
 		}
 
-	def membershipInfo: AssessmentMembershipInfo = assessmentMembershipService.determineMembership(upstreamAssessmentGroups, Option(members))
+	// Gets a breakdown of the membership for this assessment. Note that this cannot be sorted by seat order
+	def membershipInfo: AssessmentMembershipInfo = assessmentMembershipService.determineMembership(this)
 }

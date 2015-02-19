@@ -203,13 +203,13 @@ class Assignment
 	@JoinColumn(name = "membersgroup_id")
 	private var _members: UserGroup = UserGroup.ofUsercodes
 
-	override def members: UnspecifiedTypeUserGroup = {
+	def members: UnspecifiedTypeUserGroup = {
 		Option(_members).map {
 			new UserGroupCacheManager(_, assessmentMembershipService.assignmentManualMembershipHelper)
 		}.orNull
 	}
 
-	override def members_=(group: UserGroup) {
+	def members_=(group: UserGroup) {
 		_members = group
 	}
 

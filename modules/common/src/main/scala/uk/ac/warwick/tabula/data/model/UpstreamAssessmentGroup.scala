@@ -36,6 +36,10 @@ class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
 	@JoinColumn(name = "membersgroup_id")
 	var members: UserGroup = UserGroup.ofUniversityIds
 
+	// UpstreamAssessmentGroups only ever use the static users in the UserGroup
+	// you can access this directly to get a list of members by seatOrder
+	def sortedMembers = members.sortedStaticMembers
+
 	override def preSave(newRecord: Boolean) {
 		if (!members.universityIds) throw new IllegalStateException
 	}
