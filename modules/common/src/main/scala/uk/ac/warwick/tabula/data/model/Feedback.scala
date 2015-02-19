@@ -269,8 +269,6 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 		attachments.add(attachment)
 	}
 
-	def feedbackType: Feedback.FeedbackType[_ <: Feedback]
-
 }
 
 @Entity @DiscriminatorValue("assignment")
@@ -298,8 +296,6 @@ class AssignmentFeedback extends Feedback with ToEntityReference {
 	def permissionsParents = Option(assignment).toStream
 
 	override def toEntityReference = new AssignmentFeedbackEntityReference().put(this)
-
-	override def feedbackType = Feedback.FeedbackType.Assignment
 
 }
 
@@ -329,18 +325,10 @@ class ExamFeedback extends Feedback with ToEntityReference {
 
 	override def toEntityReference = new ExamFeedbackEntityReference().put(this)
 
-	override def feedbackType = Feedback.FeedbackType.Exam
-
 }
 
 object Feedback {
 	val PublishDeadlineInWorkingDays = 20
-
-	sealed abstract class FeedbackType[A <: Feedback]
-	object FeedbackType {
-		case object Assignment extends FeedbackType[AssignmentFeedback]
-		case object Exam extends FeedbackType[ExamFeedback]
-	}
 }
 
 object FeedbackPosition {
