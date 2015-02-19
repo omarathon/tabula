@@ -230,14 +230,15 @@
 							</@fmt.permission_button>
 						</li>
 					</#if>
-					<li>
+					<li class="must-have-selected">
 						<#assign onlinefeedback_url><@routes.feedbackAdjustment assignment /></#assign>
 						<@fmt.permission_button
-						permission='Feedback.Update'
-						scope=assignment
-						action_descr='make adjustments to feedback'
-						tooltip='Apply penalties or make adjustments to mark and grade'
-						href=onlinefeedback_url>
+							permission='Feedback.Update'
+							scope=assignment
+							action_descr='make adjustments to feedback'
+							classes='form-post'
+							tooltip='Apply penalties or make adjustments to mark and grade'
+							href=onlinefeedback_url>
 							<i class="icon-sort"></i> Adjustments
 						</@fmt.permission_button>
 					</li>

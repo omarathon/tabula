@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.coursework.commands.StudentSubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackPublishedNotification, FeedbackChangeNotification}
@@ -98,7 +99,7 @@ abstract class StudentSubmissionAndFeedbackCommandInternal(val module: Module, v
 
 		StudentSubmissionInformation(
 			submission = submission,
-			feedback = feedback,
+			feedback = HibernateHelpers.initialiseAndUnproxy(feedback),
 			extension = extension,
 
 			isExtended = assignment.isWithinExtension(studentUser),

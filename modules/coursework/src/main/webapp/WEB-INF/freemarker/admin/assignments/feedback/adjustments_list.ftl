@@ -1,7 +1,6 @@
 <#import "../turnitin/_report_macro.ftl" as tin />
 <#import "../submissionsandfeedback/_submission_details.ftl" as sd />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-<div id="profile-modal" class="modal fade profile-subset"></div>
 
 <#function markingId user>
 	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>
@@ -36,6 +35,9 @@
 <#escape x as x?html>
 	<h1>Feedback adjustment</h1>
 	<h5><span class="muted">for</span> ${assignment.name} (${assignment.module.code?upper_case})</h5>
+
+	<div id="profile-modal" class="modal fade profile-subset"></div>
+
 	<#if studentInfo?size gt 0>
 		<table id="feedback-adjustment" class="students table table-bordered table-striped tabula-greenLight sticky-table-headers expanding-table">
 			<thead>
@@ -137,6 +139,35 @@
 		</script>
 
 	<#else>
-		<p>There are no items of feedback that can be adjusted. You can only make adjustments to feedback that has been marked but not yet published.</p>
+		<p>There are no items of feedback that can be adjusted.</p>
 	</#if>
+
+	<#if noFeedbackStudentInfo?size gt 0>
+		<p>The following <@fmt.p noFeedbackStudentInfo?size "student does" "students do" /> not have feedback that can be adjusted. You can only make adjustments to feedback that has been marked but not yet published.</p>
+
+		<table class="students table table-bordered table-striped tabula-greenLight">
+			<thead>
+			<tr>
+				<th class="student-col">First name</th>
+				<th class="student-col">Last name</th>
+				<th class="student-col">University ID</th>
+			</tr>
+			</thead>
+			<tbody>
+				<#list noFeedbackStudentInfo as info>
+					<tr>
+						<td class="student-col"><h6>${info.student.firstName}</h6></td>
+						<td class="student-col">
+							<h6>${info.student.lastName}&nbsp;<@pl.profile_link info.student.warwickId! /></h6>
+						</td>
+						<td>
+							${info.student.warwickId!}
+						</td>
+					</tr>
+				</#list>
+			</tbody>
+		</table>
+	</#if>
+
+	<p><a class="btn" href="<@routes.assignmentsubmissionsandfeedback assignment />"><i class="icon-reply"></i> Return to previous page</a></p>
 </#escape>

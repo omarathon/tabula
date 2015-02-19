@@ -84,6 +84,7 @@ trait AssessmentFeedback {
 }
 
 @Entity @Access(AccessType.FIELD)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with FormattedHtml with AssessmentFeedback {
 
@@ -268,11 +269,11 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 		attachments.add(attachment)
 	}
 
+	def feedbackType: Feedback.FeedbackType[_ <: Feedback]
+
 }
 
-@Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue("assignment")
+@Entity @DiscriminatorValue("assignment")
 class AssignmentFeedback extends Feedback with ToEntityReference {
 
 	type Entity = AssignmentFeedback
@@ -298,11 +299,11 @@ class AssignmentFeedback extends Feedback with ToEntityReference {
 
 	override def toEntityReference = new AssignmentFeedbackEntityReference().put(this)
 
+	override def feedbackType = Feedback.FeedbackType.Assignment
+
 }
 
-@Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue("exam")
+@Entity @DiscriminatorValue("exam")
 class ExamFeedback extends Feedback with ToEntityReference {
 
 	type Entity = ExamFeedback
@@ -328,10 +329,18 @@ class ExamFeedback extends Feedback with ToEntityReference {
 
 	override def toEntityReference = new ExamFeedbackEntityReference().put(this)
 
+	override def feedbackType = Feedback.FeedbackType.Exam
+
 }
 
 object Feedback {
 	val PublishDeadlineInWorkingDays = 20
+
+	sealed abstract class FeedbackType[A <: Feedback]
+	object FeedbackType {
+		case object Assignment extends FeedbackType[AssignmentFeedback]
+		case object Exam extends FeedbackType[ExamFeedback]
+	}
 }
 
 object FeedbackPosition {
