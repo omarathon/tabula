@@ -1,11 +1,16 @@
 package uk.ac.warwick.tabula.data.model
 
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentMembershipInfo}
 import collection.JavaConverters._
 
 trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
+
+	@transient
+	var assessmentMembershipService = Wire[AssessmentMembershipService]("assignmentMembershipService")
 
 	var module: Module
 	var academicYear: AcademicYear
@@ -33,4 +38,6 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 		assessmentGroups.asScala.flatMap {
 			_.toUpstreamAssessmentGroup(academicYear)
 		}
+
+	def membershipInfo: AssessmentMembershipInfo = assessmentMembershipService.determineMembership(upstreamAssessmentGroups, Option(members))
 }

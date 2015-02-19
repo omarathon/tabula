@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.AssessmentMembershipService
 class EditAssignmentCommandTest extends TestBase with Mockito {
   @Test def instantiate {
     val assignment = new Assignment()
-		assignment.assignmentMembershipService = mock[AssessmentMembershipService]
+		assignment.assessmentMembershipService = mock[AssessmentMembershipService]
 
     assignment.addDefaultFields()
     assignment.module = new Module()

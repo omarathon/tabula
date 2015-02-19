@@ -43,6 +43,8 @@ trait AssessmentDao {
 	def findAssignmentsByNameOrModule(query: String): Seq[Assignment]
 
 	def getAssignmentsClosingBetween(startInclusive: DateTime, endExclusive: DateTime): Seq[Assignment]
+
+	def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]]
 }
 
 @Repository
@@ -138,4 +140,11 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 			.addOrder(asc("closeDate"))
 			.seq
 
+	def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]] =
+		session.newCriteria[Exam]
+			.add(safeIn("module", modules))
+			.add(is("academicYear", academicYear))
+			.add(isNot("deleted", true))
+			.seq
+			.groupBy(_.module)
 }

@@ -622,7 +622,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
 		val assignment1 = newDeepAssignment("ch101")
 		assignment1.academicYear = year
-		assignment1.assignmentMembershipService = assignmentMembershipService
+		assignment1.assessmentMembershipService = assignmentMembershipService
 		wireUserLookup(assignment1.members)
 
 		val department1 = assignment1.module.adminDepartment
@@ -634,7 +634,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		val assignment2 = newDeepAssignment("ch101")
 		assignment2.module = assignment1.module
 		assignment2.academicYear = year
-		assignment2.assignmentMembershipService = assignmentMembershipService
+		assignment2.assessmentMembershipService = assignmentMembershipService
 		wireUserLookup(assignment2.members)
 
 		val department2 = assignment2.module.adminDepartment

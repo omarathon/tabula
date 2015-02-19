@@ -126,7 +126,7 @@ trait ReportWorld extends TestBase with Mockito {
 
 	def addAssignment(id: String, name: String, closeDate: DateTime, numberOfStudents: Int, lateModNumber: Int, module: Module) = {
 		val assignment = new Assignment(module)
-		assignment.assignmentMembershipService = assignmentMembershipService
+		assignment.assessmentMembershipService = assignmentMembershipService
 		assignment.extensionService = extensionService
 		assignment.setDefaultBooleanProperties()
 		assignment.id = id
