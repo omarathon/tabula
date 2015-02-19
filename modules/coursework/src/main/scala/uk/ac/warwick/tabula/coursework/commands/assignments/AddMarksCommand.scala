@@ -2,52 +2,23 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException
 import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.UniversityId
-import uk.ac.warwick.tabula.commands.{Command, Description, UploadedFile}
-import uk.ac.warwick.tabula.coursework.services.docconversion.{MarkItem, MarksExtractor}
-import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.commands.UploadedFile
+import uk.ac.warwick.tabula.coursework.services.docconversion.{MarkItem, MarksExtractorComponent}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module}
-import uk.ac.warwick.tabula.helpers.{FoundUser, LazyLists, Logging, NoUser}
+import uk.ac.warwick.tabula.data.model.{Assessment, FileAttachment, Module}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, UserLookupService}
+import uk.ac.warwick.tabula.helpers.{FoundUser, LazyLists, NoUser}
+import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, UserLookupComponent}
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 
+trait ValidatesMarkItem {
 
-abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment, val marker: User, val gradeGenerator: GeneratesGradesFromMarks) extends Command[A]
-	with Daoisms with Logging with BindListener {
-
-	val validAttachmentStrings = Seq(".xlsx")
-	var userLookup = Wire.auto[UserLookupService]
-	var marksExtractor = Wire.auto[MarksExtractor]
-  
-	var file: UploadedFile = new UploadedFile
-	var marks: JList[MarkItem] = LazyLists.create()
-
-	private def filenameOf(path: String) = new java.io.File(path).getName
-
-	def postExtractValidation(errors: Errors) {
-		val uniIdsSoFar: mutable.Set[String] = mutable.Set()
-
-		if (marks != null && !marks.isEmpty) {
-			for (i <- 0 until marks.length) {
-				val mark = marks.get(i)
-				val newPerson = if (mark.universityId != null){
-					uniIdsSoFar.add(mark.universityId)
-				} else {
-					false
-				}
-				errors.pushNestedPath("marks[" + i + "]")
-				mark.isValid = validateMarkItem(mark, errors, newPerson)
-				errors.popNestedPath()
-			}
-		}
-	}
+	self: UserLookupComponent with AddMarksCommandState =>
 
 	def checkMarkUpdated(mark: MarkItem)
 
@@ -100,11 +71,39 @@ abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment
 		}
 
 		if (!mark.actualMark.hasText && !mark.actualGrade.hasText) {
-			// If a row has no mark or grade, we will quietly ignore it 
+			// If a row has no mark or grade, we will quietly ignore it
 			hasErrors = true
 		}
 		!hasErrors
 	}
+}
+
+trait PostExtractValidation {
+
+	self: AddMarksCommandState with ValidatesMarkItem =>
+
+	def postExtractValidation(errors: Errors) {
+		val uniIdsSoFar: mutable.Set[String] = mutable.Set()
+
+		if (marks != null && !marks.isEmpty) {
+			for (i <- 0 until marks.length) {
+				val mark = marks.get(i)
+				val newPerson = if (mark.universityId != null){
+					uniIdsSoFar.add(mark.universityId)
+				} else {
+					false
+				}
+				errors.pushNestedPath("marks[" + i + "]")
+				mark.isValid = validateMarkItem(mark, errors, newPerson)
+				errors.popNestedPath()
+			}
+		}
+	}
+}
+
+trait AddMarksCommandBindListener extends BindListener {
+
+	self: AddMarksCommandState with MarksExtractorComponent =>
 
 	override def onBind(result:BindingResult) {
 		val fileNames = file.fileNames map (_.toLowerCase)
@@ -121,7 +120,7 @@ abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment
 				if (!file.attached.isEmpty) {
 					processFiles(file.attached)
 				}
-	
+
 				def processFiles(files: Seq[FileAttachment]) {
 					for (file <- files.filter(_.hasData)) {
 						try {
@@ -135,7 +134,14 @@ abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment
 			}
 		}
 	}
+}
 
-	def describe(d: Description) = d.assignment(assignment)
+trait AddMarksCommandState {
+	def module: Module
+	def assessment: Assessment
+	def gradeGenerator: GeneratesGradesFromMarks
 
+	val validAttachmentStrings = Seq(".xlsx")
+	var file: UploadedFile = new UploadedFile
+	var marks: JList[MarkItem] = LazyLists.create()
 }

@@ -3,25 +3,27 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms._
-import uk.ac.warwick.tabula.data.{AssignmentDaoComponent, AutowiringAssignmentDaoComponent}
+import uk.ac.warwick.tabula.data.{AssessmentDaoComponent, AutowiringAssessmentDaoComponent}
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 import org.joda.time.DateTime
 
-trait AssignmentServiceComponent {
-	def assignmentService: AssignmentService
+trait AssessmentServiceComponent {
+	def assessmentService: AssessmentService
 }
 
-trait AutowiringAssignmentServiceComponent extends AssignmentServiceComponent {
-	var assignmentService = Wire[AssignmentService]
+trait AutowiringAssessmentServiceComponent extends AssessmentServiceComponent {
+	var assessmentService = Wire[AssessmentService]
 }
 
 /**
  * Service providing access to Assignments and related objects.
  */
-trait AssignmentService {
+trait AssessmentService {
 	def getAssignmentById(id: String): Option[Assignment]
+	def getExamById(id: String): Option[Exam]
+
 	def save(assignment: Assignment): Unit
 
 	def deleteFormField(field: FormField) : Unit
@@ -55,25 +57,27 @@ trait AssignmentService {
 
 }
 
-abstract class AbstractAssignmentService extends AssignmentService {
-	self: AssignmentDaoComponent with AssignmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent =>
+abstract class AbstractAssessmentService extends AssessmentService {
+	self: AssessmentDaoComponent with AssignmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent =>
 
-	def getAssignmentById(id: String): Option[Assignment] = assignmentDao.getAssignmentById(id)
-	def save(assignment: Assignment): Unit = assignmentDao.save(assignment)
+	def getAssignmentById(id: String): Option[Assignment] = assessmentDao.getAssignmentById(id)
+	def getExamById(id: String): Option[Exam] = assessmentDao.getExamById(id)
 
-	def deleteFormField(field: FormField) : Unit = assignmentDao.deleteFormField(field)
+	def save(assignment: Assignment): Unit = assessmentDao.save(assignment)
+
+	def deleteFormField(field: FormField) : Unit = assessmentDao.deleteFormField(field)
 
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment] =
-		assignmentDao.getAssignmentByNameYearModule(name, year, module)
+		assessmentDao.getAssignmentByNameYearModule(name, year, module)
 
-	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] = assignmentDao.getAssignmentsWithFeedback(universityId)
+	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] = assessmentDao.getAssignmentsWithFeedback(universityId)
 
 	def getAssignmentsWithFeedback(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
 		val allAssignments = getAssignmentsWithFeedback(studentCourseYearDetails.studentCourseDetails.student.universityId)
 		filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
 	}
 
-	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] = assignmentDao.getAssignmentsWithSubmission(universityId)
+	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] = assessmentDao.getAssignmentsWithSubmission(universityId)
 
 	def getAssignmentsWithSubmission(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
 		val allAssignments = getAssignmentsWithSubmission(studentCourseYearDetails.studentCourseDetails.student.universityId)
@@ -81,7 +85,7 @@ abstract class AbstractAssignmentService extends AssignmentService {
 	}
 
 	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
-		assignmentDao.getSubmissionsForAssignmentsBetweenDates(universityId, startInclusive, endExclusive)
+		assessmentDao.getSubmissionsForAssignmentsBetweenDates(universityId, startInclusive, endExclusive)
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment] = {
 		(firstMarkerHelper.findBy(user) ++ secondMarkerHelper.findBy(user))
@@ -99,11 +103,11 @@ abstract class AbstractAssignmentService extends AssignmentService {
 	/**
 	 * Find a recent assignment within this module or possible department.
 	 */
-	def recentAssignment(department: Department): Option[Assignment] = assignmentDao.recentAssignment(department)
+	def recentAssignment(department: Department): Option[Assignment] = assessmentDao.recentAssignment(department)
 
-	def getAssignmentsByName(partialName: String, department: Department): Seq[Assignment] = assignmentDao.getAssignmentsByName(partialName, department)
+	def getAssignmentsByName(partialName: String, department: Department): Seq[Assignment] = assessmentDao.getAssignmentsByName(partialName, department)
 
-	def findAssignmentsByNameOrModule(query: String): Seq[Assignment] = assignmentDao.findAssignmentsByNameOrModule(query)
+	def findAssignmentsByNameOrModule(query: String): Seq[Assignment] = assessmentDao.findAssignmentsByNameOrModule(query)
 
 	def filterAssignmentsByCourseAndYear(assignments: Seq[Assignment], studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
 		assignments
@@ -118,7 +122,7 @@ abstract class AbstractAssignmentService extends AssignmentService {
 		)
 	}
 
-	def getAssignmentsClosingBetween(start: DateTime, end: DateTime) = assignmentDao.getAssignmentsClosingBetween(start, end)
+	def getAssignmentsClosingBetween(start: DateTime, end: DateTime) = assessmentDao.getAssignmentsClosingBetween(start, end)
 }
 
 trait AssignmentServiceUserGroupHelpers {
@@ -132,9 +136,9 @@ trait AssignmentServiceUserGroupHelpersImpl extends AssignmentServiceUserGroupHe
 }
 
 @Service(value = "assignmentService")
-class AssignmentServiceImpl
-	extends AbstractAssignmentService
-	with AutowiringAssignmentDaoComponent
+class AssessmentServiceImpl
+	extends AbstractAssessmentService
+	with AutowiringAssessmentDaoComponent
 	with AutowiringMarkingWorkflowServiceComponent
 	with AssignmentServiceUserGroupHelpersImpl
 

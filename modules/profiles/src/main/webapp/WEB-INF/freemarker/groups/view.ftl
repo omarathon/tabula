@@ -6,7 +6,7 @@
 	<#assign _groupSet=smallGroup.groupSet />
 	<#assign _module=smallGroup.groupSet.module />
 
-    <h1>${_module.code?upper_case} ${_groupSet.name}, ${smallGroup.name}</h1>
+    <h1>${_module.code?upper_case} ${_groupSet.nameWithoutModulePrefix}, ${smallGroup.name}</h1>
 
 	<@student_macros.table students=tutees is_relationship=false />
 	

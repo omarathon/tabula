@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssessmentService
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.SubmissionService
 

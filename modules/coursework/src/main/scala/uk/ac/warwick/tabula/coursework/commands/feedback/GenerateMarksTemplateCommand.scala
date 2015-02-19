@@ -4,7 +4,7 @@ import org.apache.poi.ss.usermodel.{ComparisonOperator, IndexedColors}
 import org.apache.poi.ss.util.{CellRangeAddress, WorkbookUtil}
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, Module}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, FeedbackServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -20,8 +20,8 @@ object GenerateOwnMarksTemplateCommand {
 }
 
 object GenerateMarksTemplateCommand {
-	def apply(module: Module, assignment: Assignment, members: Seq[String]) =
-		new GenerateMarksTemplateCommandInternal(module, assignment, members)
+	def apply(module: Module, assessment: Assessment, members: Seq[String]) =
+		new GenerateMarksTemplateCommandInternal(module, assessment, members)
 			with AutowiringFeedbackServiceComponent
 			with ComposableCommand[XSSFWorkbook]
 			with GenerateAllMarksTemplatePermissions
@@ -32,30 +32,30 @@ object GenerateMarksTemplateCommand {
 object MarksTemplateCommand {
 
 	// util to replace unsafe characters with spaces
-	def safeAssignmentName(assignment: Assignment) = WorkbookUtil.createSafeSheetName(trimmedAssignmentName(assignment))
+	def safeAssessmentName(assessment: Assessment) = WorkbookUtil.createSafeSheetName(trimmedAssignmentName(assessment))
 
 	val MaxSpreadsheetNameLength = 31
-	val MaxAssignmentNameLength = MaxSpreadsheetNameLength - "Marks for ".length
+	val MaxAssessmentNameLength = MaxSpreadsheetNameLength - "Marks for ".length
 
 	// trim the assignment name down to 21 characters. Excel sheet names must be 31 chars or less so
 	// "Marks for " = 10 chars + assignment name (max 21) = 31
-	def trimmedAssignmentName(assignment: Assignment) = {
-		if (assignment.name.length > MaxAssignmentNameLength)
-			assignment.name.substring(0, MaxAssignmentNameLength)
+	def trimmedAssignmentName(assessment: Assessment) = {
+		if (assessment.name.length > MaxAssessmentNameLength)
+			assessment.name.substring(0, MaxAssessmentNameLength)
 		else
-			assignment.name
+			assessment.name
 	}
 
 }
 
-class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: Assignment, val members: Seq[String]) extends CommandInternal[XSSFWorkbook] {
+class GenerateMarksTemplateCommandInternal(val module: Module, val assessment: Assessment, val members: Seq[String]) extends CommandInternal[XSSFWorkbook] {
 
 	self: FeedbackServiceComponent =>
 
 	override def applyInternal() = {
 
 		val workbook = new XSSFWorkbook()
-		val sheet = generateNewMarkSheet(assignment, workbook)
+		val sheet = generateNewMarkSheet(assessment, workbook)
 
 		// populate the mark sheet with ids
 		for ((member, i) <- members.zipWithIndex) {
@@ -63,7 +63,7 @@ class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: A
 			row.createCell(0).setCellValue(member)
 			val marksCell = row.createCell(1)
 			val gradesCell = row.createCell(2)
-			val feedbacks = feedbackService.getStudentFeedback(assignment, member)
+			val feedbacks = feedbackService.getStudentFeedback(assessment, member)
 			feedbacks.foreach { feedback =>
 				feedback.actualMark.foreach(marksCell.setCellValue(_))
 				feedback.actualGrade.foreach(gradesCell.setCellValue)
@@ -76,8 +76,8 @@ class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: A
 		workbook
 	}
 
-	private def generateNewMarkSheet(assignment: Assignment, workbook: XSSFWorkbook) = {
-		val sheet = workbook.createSheet("Marks for " + MarksTemplateCommand.safeAssignmentName(assignment))
+	private def generateNewMarkSheet(assessment: Assessment, workbook: XSSFWorkbook) = {
+		val sheet = workbook.createSheet("Marks for " + MarksTemplateCommand.safeAssessmentName(assessment))
 
 		// add header row
 		val header = sheet.createRow(0)
@@ -105,17 +105,17 @@ class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: A
 
 trait GenerateMarksTemplateCommandState {
 	def module: Module
-	def assignment: Assignment
+	def assessment: Assessment
 }
 
 trait GenerateOwnMarksTemplatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
 	self: GenerateMarksTemplateCommandState =>
 
-	mustBeLinked(assignment, module)
+	mustBeLinked(assessment, module)
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Marks.DownloadOwnTemplate, assignment)
+		p.PermissionCheck(Permissions.Marks.DownloadOwnTemplate, assessment)
 	}
 
 }
@@ -124,10 +124,10 @@ trait GenerateAllMarksTemplatePermissions extends RequiresPermissionsChecking wi
 
 	self: GenerateMarksTemplateCommandState =>
 
-	mustBeLinked(assignment, module)
+	mustBeLinked(assessment, module)
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Marks.DownloadTemplate, assignment)
+		p.PermissionCheck(Permissions.Marks.DownloadTemplate, assessment)
 	}
 
 }

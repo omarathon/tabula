@@ -3,41 +3,36 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 import org.joda.time.DateTime
 import org.springframework.util.StringUtils
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Describable, Description}
+import uk.ac.warwick.tabula.coursework.services.docconversion.{AutowiringMarksExtractorComponent, MarkItem}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Module, _}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.GeneratesGradesFromMarks
+import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, AutowiringUserLookupComponent, FeedbackServiceComponent, GeneratesGradesFromMarks, UserLookupComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
 
-class MarkerAddMarksCommand(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser, val firstMarker:Boolean, gradeGenerator: GeneratesGradesFromMarks)
-	extends AddMarksCommand[List[MarkerFeedback]](module, assignment, marker, gradeGenerator){
+object MarkerAddMarksCommand {
+	def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser, firstMarker: Boolean, gradeGenerator: GeneratesGradesFromMarks) =
+		new MarkerAddMarksCommandInternal(module, assignment, marker, submitter, firstMarker, gradeGenerator)
+			with AutowiringFeedbackServiceComponent
+			with AutowiringUserLookupComponent
+			with AutowiringMarksExtractorComponent
+			with ComposableCommand[List[MarkerFeedback]]
+			with MarkerAddMarksDescription
+			with MarkerAddMarksPermissions
+			with MarkerAddMarksCommandValidation
+			with MarkerAddMarksCommandState
+			with PostExtractValidation
+			with AddMarksCommandBindListener
+}
 
-	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Marks.Create, assignment)
-	if(submitter.apparentUser != marker) {
-		PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
-	}
+class MarkerAddMarksCommandInternal(val module: Module, val assignment: Assignment, val marker: User, val submitter: CurrentUser, val firstMarker: Boolean, val gradeGenerator: GeneratesGradesFromMarks)
+	extends CommandInternal[List[MarkerFeedback]] {
 
-	override def checkMarkUpdated(mark: MarkItem) {
-		// Warn if marks for this student are already uploaded
-		assignment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId} match {
-			case Some(feedback) =>
-				if (assignment.isFirstMarker(marker)
-					&& feedback.firstMarkerFeedback != null
-					&& (feedback.firstMarkerFeedback.hasMark || feedback.firstMarkerFeedback.hasGrade)
-				)
-					mark.isModified = true
-				else if (assignment.isSecondMarker(marker)
-					&& feedback.secondMarkerFeedback != null
-					&& (feedback.secondMarkerFeedback.hasMark || feedback.secondMarkerFeedback.hasGrade)
-				)
-					mark.isModified = true
-			case None =>
-		}
-	}
+	self: MarkerAddMarksCommandState with FeedbackServiceComponent =>
 
 	override def applyInternal(): List[MarkerFeedback] = transactional() {
 
@@ -68,8 +63,8 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, marker: User
 
 			parentFeedback.updatedDate = DateTime.now
 
-			session.saveOrUpdate(parentFeedback)
-			session.saveOrUpdate(markerFeedback)
+			feedbackService.saveOrUpdate(parentFeedback)
+			feedbackService.save(markerFeedback)
 			markerFeedback
 		}
 
@@ -78,4 +73,59 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, marker: User
 		markList.toList
 	}
 
+}
+
+trait MarkerAddMarksCommandValidation extends ValidatesMarkItem {
+
+	self: MarkerAddMarksCommandState with UserLookupComponent =>
+
+	override def checkMarkUpdated(mark: MarkItem) {
+		// Warn if marks for this student are already uploaded
+		assessment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId} match {
+			case Some(feedback) =>
+				if (assessment.isFirstMarker(marker)
+					&& feedback.firstMarkerFeedback != null
+					&& (feedback.firstMarkerFeedback.hasMark || feedback.firstMarkerFeedback.hasGrade)
+				)
+					mark.isModified = true
+				else if (assessment.isSecondMarker(marker)
+					&& feedback.secondMarkerFeedback != null
+					&& (feedback.secondMarkerFeedback.hasMark || feedback.secondMarkerFeedback.hasGrade)
+				)
+					mark.isModified = true
+			case None =>
+		}
+	}
+}
+
+trait MarkerAddMarksDescription extends Describable[List[MarkerFeedback]] {
+
+	self: MarkerAddMarksCommandState =>
+
+	override lazy val eventName = "MarkerAddMarks"
+
+	override def describe(d: Description) {
+		d.assignment(assessment)
+	}
+}
+
+trait MarkerAddMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+
+	self: MarkerAddMarksCommandState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.mustBeLinked(assessment, module)
+		p.PermissionCheck(Permissions.Marks.Create, assessment)
+		if(submitter.apparentUser != marker) {
+			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assessment)
+		}
+	}
+
+}
+
+trait MarkerAddMarksCommandState extends AddMarksCommandState {
+	def marker: User
+	def submitter: CurrentUser
+	def assignment: Assignment
+	override def assessment = assignment
 }

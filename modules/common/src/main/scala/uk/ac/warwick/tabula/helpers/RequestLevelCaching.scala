@@ -1,9 +1,14 @@
 package uk.ac.warwick.tabula.helpers
 
-import scala.collection.mutable
-import uk.ac.warwick.tabula.{EarlyRequestInfo, RequestInfo}
+import org.apache.log4j.Logger
 
-trait RequestLevelCaching[A, B] extends Logging {
+import scala.collection.mutable
+import uk.ac.warwick.tabula.EarlyRequestInfo
+
+trait RequestLevelCaching[A, B] {
+
+	// Don't extend Logging, because we want a custom logger name
+	@transient private lazy val requestLevelCachingLogger = Logger.getLogger(classOf[RequestLevelCaching[A, B]])
 
 	// Uses EarlyRequestInfo which is available before the full RequestInfo, since we need some caching
 	// for permissions lookups to create the CurrentUser.
@@ -12,12 +17,15 @@ trait RequestLevelCaching[A, B] extends Logging {
 	def cachedBy(key: A)(default: => B) = cache match {
 		case Some(cache) => cache.getOrElseUpdate(key, default)
 		case _ => {
-			logger.warn("Tried to call a request level cache outside of a request!")
+			// Include error to get stack trace
+			requestLevelCachingLogger.warn("Calling a request level cache outside of a request", new RequestLevelCachingError)
 			default
 		}
 	}
 
 }
+
+class RequestLevelCachingError extends Error
 
 object RequestLevelCache {
 	type Cache[A, B] = mutable.Map[A, B]

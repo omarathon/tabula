@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.{Assignment, StudentMember, Submission}
-import uk.ac.warwick.tabula.services.{AssignmentServiceComponent, AutowiringAssignmentServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent}
 
 trait AttendanceMonitoringCourseworkSubmissionServiceComponent {
 	def attendanceMonitoringCourseworkSubmissionService: AttendanceMonitoringCourseworkSubmissionService
@@ -22,7 +22,7 @@ trait AttendanceMonitoringCourseworkSubmissionService {
 
 abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends AttendanceMonitoringCourseworkSubmissionService {
 
-	self: ProfileServiceComponent with AttendanceMonitoringServiceComponent with AssignmentServiceComponent =>
+	self: ProfileServiceComponent with AttendanceMonitoringServiceComponent with AssessmentServiceComponent =>
 
 	def getCheckpoints(submission: Submission): Seq[AttendanceMonitoringCheckpoint] = {
 		if (submission.isLate) {
@@ -85,7 +85,7 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
 			if (point.assignmentSubmissionIsDisjunction) {
 				true
 			} else {
-				val submissions = assignmentService.getSubmissionsForAssignmentsBetweenDates(
+				val submissions = assessmentService.getSubmissionsForAssignmentsBetweenDates(
 					studentMember.universityId,
 					point.startDate.toDateTimeAtStartOfDay,
 					point.endDate.plusDays(1).toDateTimeAtStartOfDay
@@ -95,7 +95,7 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
 			}
 		} else {
 			def allSubmissions = {
-				assignmentService.getSubmissionsForAssignmentsBetweenDates(
+				assessmentService.getSubmissionsForAssignmentsBetweenDates(
 					studentMember.universityId,
 					point.startDate.toDateTimeAtStartOfDay,
 					point.endDate.plusDays(1).toDateTimeAtStartOfDay
@@ -126,4 +126,4 @@ class AttendanceMonitoringCourseworkSubmissionServiceImpl
 	extends AbstractAttendanceMonitoringCourseworkSubmissionService
 	with AutowiringAttendanceMonitoringServiceComponent
 	with AutowiringProfileServiceComponent
-	with AutowiringAssignmentServiceComponent
+	with AutowiringAssessmentServiceComponent

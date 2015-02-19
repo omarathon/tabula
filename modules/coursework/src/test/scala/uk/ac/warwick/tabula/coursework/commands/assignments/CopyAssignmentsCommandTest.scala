@@ -8,9 +8,9 @@ import org.joda.time.DateTime
 
 class CopyAssignmentsCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends AssignmentServiceComponent with AssignmentMembershipServiceComponent {
-		val assignmentService = mock[AssignmentService]
-		val assignmentMembershipService = mock[AssessmentMembershipService]
+	trait CommandTestSupport extends AssessmentServiceComponent with AssignmentMembershipServiceComponent {
+		val assessmentService = mock[AssessmentService]
+		val assessmentMembershipService = mock[AssessmentMembershipService]
 		def apply(): Seq[Assignment] = Seq()
 	}
 
@@ -46,8 +46,8 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			command.archive = true
 			val newAssignment = command.applyInternal().get(0)
 
-			there was one(command.assignmentService).save(assignment)
-			there was one(command.assignmentService).save(newAssignment)
+			there was one(command.assessmentService).save(assignment)
+			there was one(command.assessmentService).save(newAssignment)
 		}
 	}
 
@@ -90,7 +90,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 				group.assignment = assignment
 				group.occurrence = "A"
 				group.assessmentComponent = Fixtures.upstreamAssignment(Fixtures.module("bs101"), 1)
-				group.membershipService = command.assignmentMembershipService
+				group.membershipService = command.assessmentMembershipService
 				group
 			}
 
@@ -99,7 +99,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 				group.assignment = assignment
 				group.occurrence = "B"
 				group.assessmentComponent = Fixtures.upstreamAssignment(Fixtures.module("bs102"), 2)
-				group.membershipService = command.assignmentMembershipService
+				group.membershipService = command.assessmentMembershipService
 				group
 			}
 
@@ -123,7 +123,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 				template
 			}
 
-			command.assignmentMembershipService.getUpstreamAssessmentGroup(any[UpstreamAssessmentGroup]) answers { t =>
+			command.assessmentMembershipService.getUpstreamAssessmentGroup(any[UpstreamAssessmentGroup]) answers { t =>
 				val template = t.asInstanceOf[UpstreamAssessmentGroup]
 				if (template.occurrence == "A")
 					Some(Fixtures.assessmentGroup(template1.academicYear, ag1.assessmentComponent.assessmentGroup, ag1.assessmentComponent.moduleCode, ag1.occurrence))

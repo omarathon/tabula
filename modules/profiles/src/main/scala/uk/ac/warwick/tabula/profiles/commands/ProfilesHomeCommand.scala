@@ -1,17 +1,12 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceComponent
-import uk.ac.warwick.tabula.services.RelationshipServiceComponent
-import uk.ac.warwick.tabula.services.SmallGroupServiceComponent
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.FeaturesComponent
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.CommandInternal
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.AutowiringFeaturesComponent
-import uk.ac.warwick.tabula.services.AutowiringSmallGroupServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringRelationshipServiceComponent
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.system.permissions.Public
@@ -33,7 +28,8 @@ object ProfilesHomeCommand {
 			with Command[ProfilesHomeInformation] 
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringRelationshipServiceComponent 
-			with AutowiringModuleAndDepartmentServiceComponent 
+			with AutowiringModuleAndDepartmentServiceComponent
+			with AutowiringSecurityServiceComponent
 			with Public with ReadOnly with Unaudited
 		
 }
@@ -41,13 +37,23 @@ object ProfilesHomeCommand {
 abstract class ProfilesHomeCommand(val user: CurrentUser, val currentMember: Option[Member])
 	extends CommandInternal[ProfilesHomeInformation] with TaskBenchmarking {
 
-	self: FeaturesComponent with SmallGroupServiceComponent with RelationshipServiceComponent with ModuleAndDepartmentServiceComponent =>
+	self: FeaturesComponent with SmallGroupServiceComponent with RelationshipServiceComponent with ModuleAndDepartmentServiceComponent with SecurityServiceComponent =>
 
 	override def applyInternal() = {
 		if (user.isStaff) {
 			val smallGroups =
 				if (features.smallGroupTeachingTutorView) benchmarkTask("Find all small groups with user as tutor") { 
-					smallGroupService.findSmallGroupsByTutor(user.apparentUser) 
+					smallGroupService.findSmallGroupsByTutor(user.apparentUser)
+						.filter { group =>
+							!group.groupSet.deleted &&
+							(
+								// The set is visible to tutors; OR
+								group.groupSet.releasedToTutors ||
+
+								// I have permission to view the membership of the set anyway
+								securityService.can(user, Permissions.SmallGroups.ReadMembership, group)
+							)
+						}
 				}
 				else Nil
 				

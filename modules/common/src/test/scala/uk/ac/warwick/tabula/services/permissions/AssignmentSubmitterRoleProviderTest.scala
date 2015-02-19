@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.roles.AssignmentSubmitter
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssessmentService
 import org.mockito.Matchers._
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.model.UserGroup

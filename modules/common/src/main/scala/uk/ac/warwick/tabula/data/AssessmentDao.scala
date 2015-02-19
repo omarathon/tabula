@@ -1,26 +1,27 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Submission, Department, Module, Assignment}
-import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.forms.FormField
-import org.joda.time.DateTime
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
-import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.Order._
+import org.hibernate.criterion.Restrictions._
+import org.joda.time.DateTime
+import org.springframework.stereotype.Repository
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.forms.FormField
+import uk.ac.warwick.tabula.data.model._
 
-trait AssignmentDaoComponent {
-	val assignmentDao: AssignmentDao
+trait AssessmentDaoComponent {
+	val assessmentDao: AssessmentDao
 }
 
-trait AutowiringAssignmentDaoComponent extends AssignmentDaoComponent {
-	val assignmentDao = Wire[AssignmentDao]
+trait AutowiringAssessmentDaoComponent extends AssessmentDaoComponent {
+	val assessmentDao = Wire[AssessmentDao]
 }
 
-trait AssignmentDao {
+trait AssessmentDao {
 
 	def getAssignmentById(id: String): Option[Assignment]
+	def getExamById(id: String): Option[Exam]
+
 	def save(assignment: Assignment): Unit
 
 	def deleteFormField(field: FormField): Unit
@@ -45,9 +46,11 @@ trait AssignmentDao {
 }
 
 @Repository
-class AssignmentDaoImpl extends AssignmentDao with Daoisms {
+class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 
 	def getAssignmentById(id: String) = getById[Assignment](id)
+	def getExamById(id: String) = getById[Exam](id)
+
 	def save(assignment: Assignment) = session.saveOrUpdate(assignment)
 
 	def deleteFormField(field: FormField) {

@@ -6,12 +6,12 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, AssignmentService}
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, AssessmentService}
 
 class CreateExtensionFixtureCommand extends CommandInternal[Extension] {
 	this: TransactionalComponent with UserLookupComponent =>
 
-	var assignmentService: AssignmentService = Wire[AssignmentService]
+	var assignmentService: AssessmentService = Wire[AssessmentService]
 
 	var userId: String = _
 	var assignmentId: String = _

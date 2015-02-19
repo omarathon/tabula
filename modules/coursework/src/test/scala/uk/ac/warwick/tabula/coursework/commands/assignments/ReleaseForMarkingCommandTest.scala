@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.{FirstMarkersMap, Feedback, UserGroup, Assignment, Module}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.Tap.tap
-import uk.ac.warwick.tabula.services.{FeedbackServiceComponent, StateServiceComponent, AssignmentServiceComponent, AssignmentService, FeedbackService, StateService}
+import uk.ac.warwick.tabula.services.{FeedbackServiceComponent, StateServiceComponent, AssessmentServiceComponent, AssessmentService, FeedbackService, StateService}
 
 class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 
@@ -100,10 +100,10 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 	}
 }
 
-trait ReleaseForMarkingCommandTestSupport extends AssignmentServiceComponent with StateServiceComponent
+trait ReleaseForMarkingCommandTestSupport extends AssessmentServiceComponent with StateServiceComponent
 with FeedbackServiceComponent with Mockito {
 
-	val assignmentService = mock[AssignmentService]
+	val assessmentService = mock[AssessmentService]
 	val stateService = mock[StateService]
 	val feedbackService = mock[FeedbackService]
 	def apply(): List[Feedback] = List()

@@ -7,21 +7,21 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{CommentField, FormFieldContext, WordCountField, Extension}
-import uk.ac.warwick.tabula.data.{AssignmentDaoComponent, AssignmentDaoImpl, ExtensionDaoComponent, ExtensionDaoImpl, AssessmentMembershipDaoImpl, DepartmentDaoImpl}
+import uk.ac.warwick.tabula.data.{AssessmentDaoComponent, AssessmentDaoImpl, ExtensionDaoComponent, ExtensionDaoImpl, AssessmentMembershipDaoImpl, DepartmentDaoImpl}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarised
 
 // scalastyle:off magic.number
-class AssignmentServiceTest extends PersistenceTestBase with Mockito {
+class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
-	val thisAssignmentDao = new AssignmentDaoImpl
+	val thisAssignmentDao = new AssessmentDaoImpl
 	val thisFirstMarkerHelper = smartMock[UserGroupMembershipHelper[MarkingWorkflow]]
 	val thisSecondMarkerHelper = smartMock[UserGroupMembershipHelper[MarkingWorkflow]]
 	val thisMarkingWorkflowService = smartMock[MarkingWorkflowService]
 
-	val assignmentService = new AbstractAssignmentService with AssignmentDaoComponent
+	val assignmentService = new AbstractAssessmentService with AssessmentDaoComponent
 		with AssignmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent {
-		val assignmentDao = thisAssignmentDao
+		val assessmentDao = thisAssignmentDao
 		val firstMarkerHelper = thisFirstMarkerHelper
 		val secondMarkerHelper = thisSecondMarkerHelper
 		val markingWorkflowService = thisMarkingWorkflowService
@@ -85,7 +85,7 @@ class AssignmentServiceTest extends PersistenceTestBase with Mockito {
 
 		assignment.fields.get(1)
 
-		assignmentService.assignmentDao.isFilterEnabled("notDeleted") should be (false)
+		assignmentService.assessmentDao.isFilterEnabled("notDeleted") should be (false)
 		assignmentService.getAssignmentById(assignment.id) should be (Some(assignment))
 		session.enableFilter("notDeleted")
 		assignmentService.getAssignmentById(assignment.id) should be (None)

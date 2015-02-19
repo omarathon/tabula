@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, Command, CommandInternal, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.{AssignmentServiceComponent, AutowiringAssignmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
@@ -36,7 +36,7 @@ class AssignmentSearchPickerController extends BaseController {
 
 class AssignmentSearchPickerCommand extends CommandInternal[Seq[Assignment]] {
 
-	self: AssignmentServiceComponent =>
+	self: AssessmentServiceComponent =>
 
 	var query: String = _
 
@@ -44,13 +44,13 @@ class AssignmentSearchPickerCommand extends CommandInternal[Seq[Assignment]] {
 		if (query.isEmptyOrWhitespace) {
 			Seq()
 		} else {
-			assignmentService.findAssignmentsByNameOrModule(query)
+			assessmentService.findAssignmentsByNameOrModule(query)
 		}
 	}
 
 }
 
 object AssignmentSearchPickerCommand {
-	def apply() = new AssignmentSearchPickerCommand with Command[Seq[Assignment]] with AutowiringAssignmentServiceComponent
+	def apply() = new AssignmentSearchPickerCommand with Command[Seq[Assignment]] with AutowiringAssessmentServiceComponent
 	with ReadOnly with Unaudited with Public
 }
