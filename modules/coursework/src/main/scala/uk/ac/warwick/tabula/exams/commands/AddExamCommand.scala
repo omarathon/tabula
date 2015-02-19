@@ -41,7 +41,7 @@ trait AddExamPermissions extends RequiresPermissionsChecking with PermissionsChe
 	self: AddExamCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Department.Manage, module.adminDepartment)
+		p.PermissionCheck(Permissions.Assignment.Create, module)
 	}
 
 }
