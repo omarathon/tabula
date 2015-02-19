@@ -11,8 +11,6 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 	var academicYear: AcademicYear
 	var name: String
 	var assessmentGroups: JList[AssessmentGroup]
-	def members: UnspecifiedTypeUserGroup
-	def members_=(group: UserGroup)
 	def addDefaultFeedbackFields(): Unit
 	def addDefaultFields(): Unit
 

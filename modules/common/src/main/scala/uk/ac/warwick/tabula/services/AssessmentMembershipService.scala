@@ -238,11 +238,15 @@ trait AssessmentMembershipMethods extends Logging {
 		(sitsUsers ++ includes).distinct diff excludes.distinct
 	}
 
+	def determineSitsMembership(upstream: Seq[UpstreamAssessmentGroup]) =
+		upstream.flatMap(_.sortedMembers).distinct.sortBy(_.position).map(_.memberId).map(userLookup.getUserByWarwickUniId)
+
 	/**
 	 * Returns a simple list of User objects for students who are enrolled on this assessment. May be empty.
 	 */
-	def determineMembershipUsers(assessment: Assessment): Seq[User] = {
-		determineMembershipUsers(assessment.upstreamAssessmentGroups, Option(assessment.members))
+	def determineMembershipUsers(assessment: Assessment): Seq[User] = assessment match {
+		case a: Assignment => determineMembershipUsers(a.upstreamAssessmentGroups, Option(a.members))
+		case e: Exam => determineSitsMembership(e.upstreamAssessmentGroups)
 	}
 
 	def countMembershipWithUniversityIdGroup(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]) = {

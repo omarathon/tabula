@@ -144,7 +144,8 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 	def size = members.size
 
 	def members: Seq[String] = allIncludedIds diff allExcludedIds
-		
+	def sortedStaticMembers: Seq[OrderedGroupMember] = staticIncludeUsers.asScala.sortBy(_.position)
+
 	def allIncludedIds: Seq[String] = (staticIncludeUsers.asScala.map(_.memberId) ++ includeUsers.asScala.toSeq ++ webgroupMembers).distinct
 	def allExcludedIds: Seq[String] = excludeUsers.asScala.toSeq
 
