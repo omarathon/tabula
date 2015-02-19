@@ -77,7 +77,7 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 }
 
 // Implements the dependencies declared by the command
-trait OnlineFeedbackCommandTestSupport extends SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with AssignmentMembershipServiceComponent with Mockito {
+trait OnlineFeedbackCommandTestSupport extends SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with AssessmentMembershipServiceComponent with Mockito {
 	val userLookup = new MockUserLookup
 	val submissionService = mock[SubmissionService]
 	val feedbackService = mock[FeedbackService]

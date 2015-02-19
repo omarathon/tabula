@@ -8,7 +8,7 @@ import org.joda.time.DateTime
 
 class CopyAssignmentsCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends AssessmentServiceComponent with AssignmentMembershipServiceComponent {
+	trait CommandTestSupport extends AssessmentServiceComponent with AssessmentMembershipServiceComponent {
 		val assessmentService = mock[AssessmentService]
 		val assessmentMembershipService = mock[AssessmentMembershipService]
 		def apply(): Seq[Assignment] = Seq()

@@ -9,9 +9,9 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.AssignmentMembershipServiceComponent
+import uk.ac.warwick.tabula.services.AssessmentMembershipServiceComponent
 import uk.ac.warwick.tabula.services.AssessmentServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringAssignmentMembershipServiceComponent
+import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringAssessmentServiceComponent
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
@@ -25,7 +25,7 @@ object StudentCourseworkGadgetCommand {
 			with ComposableCommand[StudentAssignments]
 			with AutowiringFeaturesComponent
 			with AutowiringAssessmentServiceComponent
-			with AutowiringAssignmentMembershipServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
 			with StudentCourseworkCommandHelper
 			with StudentCourseworkGadgetCommandPermissions
 			with ReadOnly with Unaudited
@@ -34,7 +34,7 @@ object StudentCourseworkGadgetCommand {
 class StudentCourseworkGadgetCommandInternal(val studentCourseYearDetails: StudentCourseYearDetails)
 	extends StudentCourseworkGadgetCommandState with StudentCourseworkCommandInternal{
 	self: AssessmentServiceComponent with
-		AssignmentMembershipServiceComponent with
+		AssessmentMembershipServiceComponent with
 		FeaturesComponent with
 		StudentCourseworkCommandHelper =>
 

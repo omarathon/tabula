@@ -48,13 +48,13 @@
 							<a class="long-running use-tooltip form-post"
 								 href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>"
 								 title="Download the submission files for the selected students as a ZIP file."
-								 data-container="body"><i class="icon-download"></i> Download submission
+								 data-container="body"><i class="icon-download icon-fixed-width"></i> Download submission
 							</a>
 						</li>
 						<li class="must-have-selected">
 							<#assign deletesubmissionurl><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
 							<@fmt.permission_button permission='Submission.Delete' scope=module action_descr='delete submission' classes="form-post" href=deletesubmissionurl tooltip='Delete submission' >
-								<i class="icon-remove"></i> Delete submission
+								<i class="icon-remove icon-fixed-width"></i> Delete submission
 							</@fmt.permission_button>
 						</li>
 					</ul>
@@ -79,14 +79,14 @@
 							<li>
 								<#assign checkplagiarism_url><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/turnitin' /></#assign>
 								<@fmt.permission_button permission='Submission.CheckForPlagiarism' scope=assignment action_descr='check for plagiarism' href=checkplagiarism_url tooltip='Check for plagiarism'>
-									<i class="icon-book"></i> Check for plagiarism
+									<i class="icon-book icon-fixed-width"></i> Check for plagiarism
 								</@fmt.permission_button>
 							</li>
 						</#if>
 						<li class="must-have-selected">
 							<#assign markplagiarised_url><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' /></#assign>
 							<@fmt.permission_button permission='Submission.ManagePlagiarismStatus' scope=assignment action_descr='mark plagiarised' href=markplagiarised_url id="mark-plagiarised-selected-button" tooltip="Toggle whether the selected student submissions are possibly plagiarised" data_attr='data-container=body'>
-								<i class="icon-exclamation-sign"></i> Mark plagiarised
+								<i class="icon-exclamation-sign icon-fixed-width"></i> Mark plagiarised
 							</@fmt.permission_button>
 						</li>
 					</ul>
@@ -122,11 +122,11 @@
 										scope=assignment
 										action_descr='assign markers'
 										href=markers_url>
-			            	<i class="icon-user"></i> Assign markers
+			            	<i class="icon-user icon-fixed-width"></i> Assign markers
 			            </@fmt.permission_button>
 								</li>
 							<#else>
-								<li class="disabled"><a><i class="icon-user"></i> Assign markers </a></li>
+								<li class="disabled"><a><i class="icon-user icon-fixed-width"></i> Assign markers </a></li>
 							</#if>
 							<li class="must-have-selected">
 								<#assign releaseForMarking_url><@routes.releaseForMarking assignment /></#assign>
@@ -139,7 +139,7 @@
 									id="release-submissions-button"
 									tooltip="Release the submissions for marking. First markers will be able to download their submissions."
 									data_attr='data-container=body'>
-									<i class="icon-inbox"></i> Release selected for marking
+									<i class="icon-inbox icon-fixed-width"></i> Release selected for marking
 								</@fmt.permission_button>
 							</li>
 							<li class="must-have-selected">
@@ -153,7 +153,7 @@
 								id="return-submissions-button"
 								tooltip="Return the submissions for marking. The last marker in the workflow will be able to update their feedback. You can only return feedback that has not been published."
 								data_attr='data-container=body'>
-									<i class="icon-arrow-left"></i> Return selected for marking
+									<i class="icon-arrow-left icon-fixed-width"></i> Return selected for marking
 								</@fmt.permission_button>
 							</li>
 						</ul>
@@ -184,7 +184,7 @@
 							action_descr='add general feedback for all students'
 							tooltip='Add general feedback that will be sent to all students'
 							href=onlinefeedback_url>
-								<i class="icon-edit"></i> Generic feedback
+								<i class="icon-edit icon-fixed-width"></i> Generic feedback
 							</@fmt.permission_button>
 						</li>
 					<#else>
@@ -193,7 +193,7 @@
 								<a class="long-running use-tooltip"
 								   href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>"
 								   title="Download feedback templates for all students as a ZIP file."
-								   data-container="body"><i class="icon-download"></i> Download templates
+								   data-container="body"><i class="icon-download icon-fixed-width"></i> Download templates
 								</a>
 							</li>
 							<li class="divider"></li>
@@ -205,7 +205,7 @@
 							scope=assignment
 							action_descr='add marks'
 							href=marks_url>
-								<i class="icon-check"></i> Add marks
+								<i class="icon-check icon-fixed-width"></i> Add marks
 							</@fmt.permission_button>
 						</li>
 						<li>
@@ -215,7 +215,7 @@
 							scope=assignment
 							action_descr='manage online feedback'
 							href=onlinefeedback_url>
-								<i class="icon-edit"></i> Online feedback
+								<i class="icon-edit icon-fixed-width"></i> Online feedback
 							</@fmt.permission_button>
 						</li>
 						<li>
@@ -226,7 +226,7 @@
 							action_descr='upload feedback'
 							classes='feedback-link'
 							href=feedback_url>
-								<i class="icon-upload"></i> Upload feedback
+								<i class="icon-upload icon-fixed-width"></i> Upload feedback
 							</@fmt.permission_button>
 						</li>
 					</#if>
@@ -239,7 +239,7 @@
 							classes='form-post'
 							tooltip='Apply penalties or make adjustments to mark and grade'
 							href=onlinefeedback_url>
-							<i class="icon-sort"></i> Adjustments
+							<i class="icon-sort icon-fixed-width"></i> Adjustments
 						</@fmt.permission_button>
 					</li>
 
@@ -248,23 +248,23 @@
 						<a class="long-running use-tooltip form-post"
 							 href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>"
 							 title="Download the feedback files for the selected students as a ZIP file."
-							 data-container="body"><i class="icon-download"></i> Download feedback
+							 data-container="body"><i class="icon-download icon-fixed-width"></i> Download feedback
 						</a>
 					</li>
 					<#if assignment.canPublishFeedback>
 						<li>
 							<#assign publishfeedbackurl><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/publish'/></#assign>
 							<@fmt.permission_button permission='Feedback.Publish' scope=assignment type='a' action_descr='release feedback to students' tooltip="Release feedback to students" href=publishfeedbackurl>
-								<i class="icon-share"></i> Publish feedback
+								<i class="icon-share icon-fixed-width"></i> Publish feedback
 							</@fmt.permission_button>
 						</li>
 					<#else>
-						<li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish, or the assignment is not yet closed."><i class="icon-share"></i> Publish feedback</a></li>
+						<li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish, or the assignment is not yet closed."><i class="icon-share icon-fixed-width"></i> Publish feedback</a></li>
 					</#if>
 					<li class="must-have-selected">
 						<#assign deletefeedback_url><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
 						<@fmt.permission_button permission='Feedback.Delete' scope=assignment action_descr='delete feedback' classes="form-post" href=deletefeedback_url tooltip='Delete feedback'>
-							<i class="icon-remove"></i> Delete feedback
+							<i class="icon-remove icon-fixed-width"></i> Delete feedback
 						</@fmt.permission_button>
 					</li>
 
@@ -278,7 +278,7 @@
 								tooltip='Upload mark and grade to SITS'
 								href=uploadToSitsUrl
 							>
-								<i class="icon-upload"></i> Upload to SITS
+								<i class="icon-upload icon-fixed-width"></i> Upload to SITS
 							</@fmt.permission_button>
 						</li>
 					</#if>

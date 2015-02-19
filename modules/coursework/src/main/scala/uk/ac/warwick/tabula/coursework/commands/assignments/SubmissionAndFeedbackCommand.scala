@@ -26,7 +26,7 @@ import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
 object SubmissionAndFeedbackCommand {
 	def apply(module: Module, assignment: Assignment) =
 		new SubmissionAndFeedbackCommand(module, assignment)
-		with AutowiringAssignmentMembershipServiceComponent
+		with AutowiringAssessmentMembershipServiceComponent
 		with AutowiringUserLookupComponent
 		with AutowiringFeedbackForSitsServiceComponent
 }
@@ -34,7 +34,7 @@ object SubmissionAndFeedbackCommand {
 abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment)
 	extends Command[SubmissionAndFeedbackResults] with Unaudited with ReadOnly with SelfValidating {
 
-	self: AssignmentMembershipServiceComponent with UserLookupComponent with FeedbackForSitsServiceComponent =>
+	self: AssessmentMembershipServiceComponent with UserLookupComponent with FeedbackForSitsServiceComponent =>
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Read, assignment)

@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 
 class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
-	private trait CommandTestSupport extends SmallGroupServiceComponent with AssignmentMembershipServiceComponent with GeneratesDefaultWeekRanges {
+	private trait CommandTestSupport extends SmallGroupServiceComponent with AssessmentMembershipServiceComponent with GeneratesDefaultWeekRanges {
 		val smallGroupService = smartMock[SmallGroupService]
 		val assessmentMembershipService = smartMock[AssessmentMembershipService]
 

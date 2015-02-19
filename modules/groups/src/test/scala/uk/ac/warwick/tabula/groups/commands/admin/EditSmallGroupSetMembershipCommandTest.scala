@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services._
 
 class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 
-	private trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent with AssignmentMembershipServiceComponent with RemovesUsersFromGroups {
+	private trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent with AssessmentMembershipServiceComponent with RemovesUsersFromGroups {
 		val smallGroupService = mock[SmallGroupService]
 		val userLookup = new MockUserLookup
 		var assessmentMembershipService = mock[AssessmentMembershipService]

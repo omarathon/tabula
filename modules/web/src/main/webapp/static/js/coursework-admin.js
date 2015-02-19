@@ -176,10 +176,10 @@ $(function(){
 			}
 			$('.submission-feedback-list,.submission-list,.coursework-progress-table').data("all-plagiarised", allPlagiarised);
 			if (allPlagiarised) {
-				$('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign"></i> Unmark plagiarised');
+				$('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign icon-fixed-width"></i> Unmark plagiarised');
 			}
 			else {
-				$('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign"></i> Mark plagiarised');
+				$('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign icon-fixed-width"></i> Mark plagiarised');
 			}
 		}
 	};
