@@ -80,7 +80,7 @@ trait AssessmentFeedback {
 
 	def academicYear: AcademicYear
 
-	def  assessmentGroups: JList[AssessmentGroup]
+	def assessmentGroups: JList[AssessmentGroup]
 }
 
 @Entity @Access(AccessType.FIELD)

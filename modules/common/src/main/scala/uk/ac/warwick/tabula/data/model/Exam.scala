@@ -6,12 +6,11 @@ import javax.persistence._
 
 import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
 import org.joda.time.DateTime
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.forms._
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserGroupCacheManager}
+import uk.ac.warwick.tabula.services.UserGroupCacheManager
 
 import scala.collection.JavaConverters._
 
@@ -31,9 +30,6 @@ class Exam
 	with Serializable {
 
 	type Entity = Exam
-
-	@transient
-	var examMembershipService = Wire[AssessmentMembershipService]("assignmentMembershipService")
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "module_id")
@@ -68,7 +64,7 @@ class Exam
 
 	override def members: UnspecifiedTypeUserGroup = {
 		Option(_members).map {
-			new UserGroupCacheManager(_, examMembershipService.assignmentManualMembershipHelper)
+			new UserGroupCacheManager(_, assessmentMembershipService.assignmentManualMembershipHelper)
 		}.orNull
 	}
 
@@ -105,6 +101,13 @@ class Exam
 
 	override def addDefaultFields() {
 		addDefaultFeedbackFields()
+	}
+
+	def requiresMarks: Int = {
+		membershipInfo.items.count(info => {
+			val feedback = allFeedback.find(_.universityId == info.universityId.getOrElse(""))
+			feedback.isEmpty || feedback.get.latestMark.isEmpty
+		})
 	}
 
 	override def permissionsParents = Option(module).toStream

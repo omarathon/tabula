@@ -1,7 +1,7 @@
 <#import "*/courses_macros.ftl" as courses_macros />
 <#assign templateUrl><@routes.examMarkstemplate exam=exam /></#assign>
-<#assign formUrl>${url('/exams/admin/module/${module.code}/exams/${exam.id}/marks')}</#assign>
-<#assign cancelUrl><@routes.depthome module=exam.module /></#assign>
+<#assign formUrl><@routes.examAddMarks exam /></#assign>
+<#assign cancelUrl><@routes.departmentHomeWithYear module=exam.module academicYear=exam.academicYear /></#assign>
 <#assign generateUrl><@routes.generateExamGradesForMarks exam=exam /></#assign>
 <@courses_macros.marksForm
 	assignment = exam
