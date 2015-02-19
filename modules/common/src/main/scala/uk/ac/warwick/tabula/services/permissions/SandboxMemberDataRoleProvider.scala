@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.services.permissions
 
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.roles.StudentRole
 import uk.ac.warwick.tabula.roles.StaffRole
 import uk.ac.warwick.tabula.roles.UniversityMemberRole
 import uk.ac.warwick.tabula.CurrentUser
@@ -34,13 +33,12 @@ class SandboxMemberDataRoleProvider extends ScopelessRoleProvider with TaskBench
 			}
 			
 			UniversityMemberRole(member) #:: (member.userType match {
-				case Student => allDepartments map StudentRole
 				case Staff | Emeritus => allDepartments map StaffRole
-				case _ => Stream.empty
+				case _ => Stream.empty[Role]
 			})
 		} else Stream.empty
 	}
 	
-	def rolesProvided = Set(classOf[StudentRole], classOf[StaffRole], classOf[UniversityMemberRole])
+	def rolesProvided = Set(classOf[StaffRole], classOf[UniversityMemberRole])
 
 }
