@@ -76,6 +76,13 @@ class Exam
 		addDefaultFeedbackFields()
 	}
 
+	def requiresMarks: Int = {
+		membershipInfo.items.count(info => {
+			val feedback = allFeedback.find(_.universityId == info.universityId.getOrElse(""))
+			feedback.isEmpty || feedback.get.latestMark.isEmpty
+		})
+	}
+
 	override def permissionsParents = Option(module).toStream
 
 	override def toEntityReference = new ExamEntityReference().put(this)

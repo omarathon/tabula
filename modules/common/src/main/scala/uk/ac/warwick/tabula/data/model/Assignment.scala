@@ -74,9 +74,6 @@ class Assignment
 	var assignmentService = Wire[AssessmentService]("assignmentService")
 
 	@transient
-	var assignmentMembershipService = Wire[AssessmentMembershipService]("assignmentMembershipService")
-
-	@transient
 	var feedbackService = Wire[FeedbackService]("feedbackService")
 
 	@transient
@@ -208,7 +205,7 @@ class Assignment
 
 	def members: UnspecifiedTypeUserGroup = {
 		Option(_members).map {
-			new UserGroupCacheManager(_, assignmentMembershipService.assignmentManualMembershipHelper)
+			new UserGroupCacheManager(_, assessmentMembershipService.assignmentManualMembershipHelper)
 		}.orNull
 	}
 
@@ -383,8 +380,6 @@ class Assignment
 	// returns extension for a specified student
 	def findExtension(uniId: String) = extensions.find(_.universityId == uniId)
 
-	def membershipInfo: AssessmentMembershipInfo = assignmentMembershipService.determineMembership(upstreamAssessmentGroups, Option(members))
-
 	/**
 	 * Whether the assignment is not archived or deleted.
 	 */
@@ -509,7 +504,7 @@ class Assignment
 			// users can always submit to assignments if they have a submission or piece of feedback
 			submissions.asScala.exists(_.universityId == user.getWarwickId) ||
 				fullFeedback.exists(_.universityId == user.getWarwickId) ||
-				assignmentMembershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
+				assessmentMembershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
 		} else {
 			true
 		}

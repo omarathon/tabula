@@ -31,7 +31,7 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 		assignment.module = Fixtures.module("in101")
 		assignment.module.adminDepartment = Fixtures.department("in")
 		
-		assignment.assignmentMembershipService = assignmentMembershipService
+		assignment.assessmentMembershipService = assignmentMembershipService
 		assignment.restrictSubmissions = true
 		
 		assignmentMembershipService.isStudentMember(
@@ -44,7 +44,7 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 	
 	@Test def cannotSubmit = withUser("cuscav") {
 		val assignment = Fixtures.assignment("my assignment")
-		assignment.assignmentMembershipService = assignmentMembershipService
+		assignment.assessmentMembershipService = assignmentMembershipService
 		assignment.restrictSubmissions = true
 		
 		assignmentMembershipService.isStudentMember(

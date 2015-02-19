@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.exams.web
 
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.web.BreadCrumb
 
@@ -14,18 +15,18 @@ object ExamsBreadcrumbs {
 	/**
 	 * Special case breadcrumb for the department admin page.
 	 */
-	case class Department(department: model.Department) extends Abstract {
+	case class Department(department: model.Department, academicYear: AcademicYear) extends Abstract {
 		val title = department.name
-		val url = Some(Routes.admin.department(department))
+		val url = Some(Routes.admin.department(department, academicYear))
 	}
 
 	/**
 	 * Special case breadcrumb for a module admin page.
 	 * Text is the module code, showing the name as a tooltip on hover.
 	 */
-	case class Module(module: model.Module) extends Abstract {
+	case class Module(module: model.Module, academicYear: AcademicYear) extends Abstract {
 		val title = module.code.toUpperCase
-		val url = Some(Routes.admin.module(module))
+		val url = Some(Routes.admin.module(module, academicYear))
 		override val tooltip = module.name
 	}
 

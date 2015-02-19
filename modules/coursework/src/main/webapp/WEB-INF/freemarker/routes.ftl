@@ -138,5 +138,11 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 
 <#-- Exams -->
+<#macro examAddMarks exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/marks" /></#macro>
 <#macro generateExamGradesForMarks exam><@_u page="/admin/module/${exam.module.code}/exams/${exam.id}/generate-grade"/></#macro>
-<#macro examMarkstemplate exam><@_u page="/admin/module/${exam.module.code}/exams/${exam.id}/marks-template" /></#macro>
+<#macro examMarkstemplate exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/marks-template" /></#macro>
+<#macro createExam module academicYear><@_u page="/admin/module/${module.code}/${academicYear.startYear?c}/exams/new" /></#macro>
+<#macro editExam exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/edit" /></#macro>
+<#macro moduleHomeWithYear module academicYear><@_u page="/admin/module/${module.code}/${academicYear.startYear?c}" /></#macro>
+<#macro departmentHomeWithYearNoModule department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}" /></#macro>
+<#macro departmentHomeWithYear module academicYear><@_u page="/admin/department/${module.department.code}/${academicYear.startYear?c}/#module-${module.code}" /></#macro>
