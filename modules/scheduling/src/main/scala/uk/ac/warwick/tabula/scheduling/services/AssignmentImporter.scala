@@ -270,7 +270,7 @@ object AssignmentImporter {
 	def GetUnconfirmedModuleRegistrations = s"""
 		select
 			sms.ayr_code as academic_year_code,
-			wss_seat as seat_number,
+			wss.wss_seat as seat_number,
 			spr.spr_code as spr_code,
 			sms.sms_occl as mav_occurrence, -- module occurrence (representing eg day or evening - usually 'A')
 			sms.mod_code as module_code,
@@ -324,7 +324,7 @@ object AssignmentImporter {
 		select
 			smo.ayr_code as academic_year_code,
 			spr.spr_code as spr_code,
-			wss_seat as seat_number,
+			wss.wss_seat as seat_number,
 			smo.mav_occur as mav_occurrence,
 			smo.mod_code as module_code,
 			smo.smo_agrp as assessment_group
