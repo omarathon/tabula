@@ -257,12 +257,10 @@
 
 				$(".new, .edit-meeting-record", $innerMeetingsSection).on("click", function(e) {
 					e.preventDefault();
-					console.log("hello " + e.isDefaultPrevented());
 					var $this = $(this);
 					if (!$this.closest('details').is('.deleted')) {
 						getModal($this, $this.attr("href"));
 					}
-					console.log("hello again " + e.isDefaultPrevented());
 					return false;
 				});
 
