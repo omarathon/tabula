@@ -262,7 +262,7 @@ trait StudentCourseProperties extends BasicStudentCourseProperties {
 	var statusOnCourse: SitsStatus = _
 }
 
-sealed abstract class CourseType(val code: String, val level: String, val description: String, val courseCodeChar: Char) extends Convertible[String] {
+sealed abstract class CourseType(val code: String, val level: String, val description: String, val courseCodeChar: Char) extends Convertible[String] with Product with Serializable {
 	def value = code
 }
 

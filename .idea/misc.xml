@@ -22,6 +22,11 @@
         <option value="$PROJECT_DIR$/pom.xml" />
       </list>
     </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/modules/functional-test/pom.xml" />
+      </set>
+    </option>
   </component>
   <component name="ProjectResources">
     <resource url="http://ehcache.org/ehcache.xsd" location="$PROJECT_DIR$/modules/common/src/main/resources/ehcache.xsd" />

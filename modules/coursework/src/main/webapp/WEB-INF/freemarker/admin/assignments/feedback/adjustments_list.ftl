@@ -143,7 +143,7 @@
 	</#if>
 
 	<#if noFeedbackStudentInfo?size gt 0>
-		<p>The following <@fmt.p noFeedbackStudentInfo?size "student does" "students do" /> not have feedback that can be adjusted. You can only make adjustments to feedback that has been marked but not yet published.</p>
+		<p><@fmt.p noFeedbackStudentInfo?size "student does" "students do" /> not have feedback that can be adjusted. You can only make adjustments to feedback that has been marked but not yet published.</p>
 
 		<table class="students table table-bordered table-striped tabula-greenLight">
 			<thead>
