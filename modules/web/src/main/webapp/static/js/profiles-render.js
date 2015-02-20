@@ -23,57 +23,57 @@
 						container.find('.use-tooltip').trigger('mouseout');
 					})
 					.typeahead({
-					source: function(query, process) {
-						if (xhr != null) {
-							xhr.abort();
-							xhr = null;
-						}
+						source: function(query, process) {
+							if (xhr != null) {
+								xhr.abort();
+								xhr = null;
+							}
 
-						query = $.trim(query);
-						if (query.length < 3) { process([]); return; }
+							query = $.trim(query);
+							if (query.length < 3) { process([]); return; }
 
-						// At least one of the search terms must have more than 1 character
-						var terms = query.split(/\s+/g);
-						if ($.grep(terms, function(term) { return term.length > 1; }).length == 0) {
-							process([]); return;
-						}
+							// At least one of the search terms must have more than 1 character
+							var terms = query.split(/\s+/g);
+							if ($.grep(terms, function(term) { return term.length > 1; }).length == 0) {
+								process([]); return;
+							}
 
-						$spinner.spin('small');
-						xhr = $.get(target, { query : query }, function(data) {
-							$spinner.spin(false);
+							$spinner.spin('small');
+							xhr = $.get(target, { query : query }, function(data) {
+								$spinner.spin(false);
 
-							var members = [];
+								var members = [];
 
-							$.each(data, function(i, member) {
-								var item = member.name + "|" + member.id + "|" + member.userId + "|" + member.description;
-								members.push(item);
-							});
+								$.each(data, function(i, member) {
+									var item = member.name + "|" + member.id + "|" + member.userId + "|" + member.description;
+									members.push(item);
+								});
 
-							process(members);
-						}).error(function(jqXHR, textStatus, errorThrown) { if (textStatus != "abort") $spinner.spin(false); });
-					},
+								process(members);
+							}).error(function(jqXHR, textStatus, errorThrown) { if (textStatus != "abort") $spinner.spin(false); });
+						},
 
-					matcher: function(item) { return true; },
-					sorter: function(items) { return items; }, // use 'as-returned' sort
-					highlighter: function(item) {
-						var member = item.split("|");
-						return '<img src="/profiles/view/photo/' + member[1] + '.jpg?size=tinythumbnail" class="photo pull-right"><h3 class="name">' + member[0] + '</h3><div class="description">' + member[3] + '</div>';
-					},
+						matcher: function(item) { return true; },
+						sorter: function(items) { return items; }, // use 'as-returned' sort
+						highlighter: function(item) {
+							var member = item.split("|");
+							return '<img src="/profiles/view/photo/' + member[1] + '.jpg?size=tinythumbnail" class="photo pull-right"><h3 class="name">' + member[0] + '</h3><div class="description">' + member[3] + '</div>';
+						},
 
-					updater: function(item) {
-						var member = item.split("|");
-						window.location = '/profiles/view/' + member[1];
+						updater: function(item) {
+							var member = item.split("|");
+							window.location = '/profiles/view/' + member[1];
 
-						return member[0];
-					},
-					minLength:3
-				});
+							return member[0];
+						},
+						minLength:3
+					});
 			});
 		});
 	});
 
 	// make chevron rotate when "More details" clicked
-    $(function() {
+	$(function() {
 		$(".expandable-course-details").on("click", "h6", function() {
 			$(this).find("i").toggleClass("icon-chevron-right").toggleClass("icon-chevron-down").toggleClass("expanded");
 		});
@@ -113,14 +113,14 @@
 					// wipe any existing state information for the submit protection
 					$form.removeData('submitOnceSubmitted');
 
-	//				// firefox fix
-	//				var wait = setInterval(function() {
-	//					var h = $f.find("body").height();
-	//					if (h > 0) {
-	//						clearInterval(wait);
-	//						$m.find(".modal-body").animate({ height: h });
-	//					}
-	//				}, 300); // this didn't work for me (ZLJ) at 150 but did at 200; upping to 300 to include safety margin
+					//				// firefox fix
+					//				var wait = setInterval(function() {
+					//					var h = $f.find("body").height();
+					//					if (h > 0) {
+					//						clearInterval(wait);
+					//						$m.find(".modal-body").animate({ height: h });
+					//					}
+					//				}, 300); // this didn't work for me (ZLJ) at 150 but did at 200; upping to 300 to include safety margin
 
 					// show-time
 					$m.modal("show");
@@ -135,25 +135,25 @@
 					target.replaceWith(source);
 					$('details').details();
 					// rebind all of this stuff to the new UI
-					decorateMeetingRecords();
+					decorateMeetingRecords(source);
 					$m.modal("hide");
 				} else {
 					/*
-						TODO more user-friendly fall-back?
-						This is where you end up with an unexpected failure, eg. permission failure, mangled URL etc.
-						The default is to reload the original profile page. Not sure if there's something more helpful
-						we could/should do here.
-					*/
+					 TODO more user-friendly fall-back?
+					 This is where you end up with an unexpected failure, eg. permission failure, mangled URL etc.
+					 The default is to reload the original profile page. Not sure if there's something more helpful
+					 we could/should do here.
+					 */
 					$m.modal('hide');
 					document.location.reload(true);
 				}
 			}
 
 
-			function decorateMeetingRecords(){
+			function decorateMeetingRecords($innerMeetingsSection){
 
 				// delete meeting records
-				$('a.delete-meeting-record', $meetingsSection).on('click', function() {
+				$('a.delete-meeting-record', $innerMeetingsSection).on('click', function() {
 					var $this = $(this);
 					var $details = $this.closest('details');
 
@@ -175,7 +175,7 @@
 				});
 
 				// restore meeting records
-				$('a.restore-meeting-record', $meetingsSection).on('click', function() {
+				$('a.restore-meeting-record', $innerMeetingsSection).on('click', function() {
 					var $this = $(this);
 					var $details = $this.closest('details');
 
@@ -193,7 +193,7 @@
 				});
 
 				// purge meeting records
-				$('a.purge-meeting-record', $meetingsSection).on('click', function() {
+				$('a.purge-meeting-record', $innerMeetingsSection).on('click', function() {
 					var $this = $(this);
 					var $details = $this.closest('details');
 
@@ -210,7 +210,7 @@
 				});
 
 				// show rejection comment box
-				$('input.reject', $meetingsSection).each( function() {
+				$('input.reject', $innerMeetingsSection).each( function() {
 					var $this = $(this);
 					var $form = $this.closest('form');
 					var $commentBox = $form.find('.rejection-comment');
@@ -218,7 +218,7 @@
 				});
 
 				// make modal links use ajax
-				$('.meeting-record-toolbar, details.meeting.normal', $meetingsSection).tabulaAjaxSubmit(function() {
+				$('.meeting-record-toolbar, details.meeting.normal', $innerMeetingsSection).tabulaAjaxSubmit(function() {
 					document.location.reload(true);
 				});
 
@@ -255,12 +255,14 @@
 					});
 				};
 
-				$(".new, .edit-meeting-record", $meetingsSection).on("click", function() {
+				$(".new, .edit-meeting-record", $innerMeetingsSection).on("click", function(e) {
+					e.preventDefault();
+					console.log("hello " + e.isDefaultPrevented());
 					var $this = $(this);
 					if (!$this.closest('details').is('.deleted')) {
 						getModal($this, $this.attr("href"));
 					}
-
+					console.log("hello again " + e.isDefaultPrevented());
 					return false;
 				});
 
@@ -277,7 +279,7 @@
 
 				// Scheduled meetings
 
-				$('form.scheduled-action', $meetingsSection).on('submit', function(event){
+				$('form.scheduled-action', $innerMeetingsSection).on('submit', function(event){
 					event.preventDefault();
 					var $this = $(this), checkedInput = $this.find('input:checked');
 					$this.find('div.ajaxErrors').hide();
@@ -302,7 +304,7 @@
 
 			}
 			// call on page load
-			decorateMeetingRecords();
+			decorateMeetingRecords($meetingsSection);
 
 
 		});
@@ -311,8 +313,8 @@
 
 	//MEMBERNOTE STUFF
 
-	  //Iframe onload function call - sets size and binds iframe submit click to modal
-	  window.noteFrameLoad = function(frame) {
+	//Iframe onload function call - sets size and binds iframe submit click to modal
+	window.noteFrameLoad = function(frame) {
 
 		if($(frame).contents().find("form").length == 0){
 			//Handle empty response from iframe form submission
@@ -329,7 +331,7 @@
 		}
 	}
 
-    $(function() {
+	$(function() {
 		// Bind click to load create-edit member note
 		$("#membernote-details").on("click", ".create, .edit", function(e) {
 			if ($(this).hasClass("disabled")) return false;
@@ -343,7 +345,7 @@
 			return false; //stop propagation and prevent default
 		});
 
-        //Bind click events for toolbar
+		//Bind click events for toolbar
 		$('.member-note-toolbar a:not(.edit)').on('click', function(e) {
 
 			var $this = $(this);
@@ -365,17 +367,17 @@
 						$details.slideUp("slow")
 					}
 				}
-                $details.removeClass("processing");
+				$details.removeClass("processing");
 			}, "json");
 
 			return false; //stop propagation and prevent default
 		});
 
 	});
-    //END OF MEMBERNOTE STUFF
+	//END OF MEMBERNOTE STUFF
 
 	// TIMETABLE STUFF
-    $(function() {
+	$(function() {
 		function getEvents(studentId, $container){
 			return function (start, end, callback){
 				var complete = false;
@@ -409,7 +411,7 @@
 						complete = true;
 						$container.fadeTo('fast', 1);
 					}
-			  });
+				});
 			};
 		}
 		function onViewUpdate(view,element){
@@ -520,7 +522,7 @@
 			});
 		}
 
-        $(".fullCalendar").each(function(){
+		$(".fullCalendar").each(function(){
 			createCalendar(
 				$(this),
 				$(this).data('viewname'),
