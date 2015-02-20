@@ -1,18 +1,21 @@
 package uk.ac.warwick.tabula.data.model
 
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentMembershipInfo}
 import collection.JavaConverters._
 
 trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
+
+	@transient
+	var assessmentMembershipService = Wire[AssessmentMembershipService]("assignmentMembershipService")
 
 	var module: Module
 	var academicYear: AcademicYear
 	var name: String
 	var assessmentGroups: JList[AssessmentGroup]
-	def members: UnspecifiedTypeUserGroup
-	def members_=(group: UserGroup)
 	def addDefaultFeedbackFields(): Unit
 	def addDefaultFields(): Unit
 
@@ -33,4 +36,7 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 		assessmentGroups.asScala.flatMap {
 			_.toUpstreamAssessmentGroup(academicYear)
 		}
+
+	// Gets a breakdown of the membership for this assessment. Note that this cannot be sorted by seat order
+	def membershipInfo: AssessmentMembershipInfo = assessmentMembershipService.determineMembership(this)
 }

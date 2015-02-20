@@ -258,8 +258,6 @@
 					useIframe: true,
 					tableSorterOptions: tsOptions
 				});
-
-
 			})(jQuery);
 		</script>
 	<#else>

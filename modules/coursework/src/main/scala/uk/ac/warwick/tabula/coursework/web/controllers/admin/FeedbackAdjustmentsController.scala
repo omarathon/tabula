@@ -16,17 +16,21 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/adjustments"))
 class FeedbackAdjustmentsListController extends CourseworkController {
 
+	type FeedbackAdjustmentListCommand = Appliable[Seq[StudentInfo]]
+
 	@ModelAttribute("listCommand")
-	def listCommand(@PathVariable assignment: Assignment) =
+	def listCommand(@PathVariable assignment: Assignment): FeedbackAdjustmentListCommand =
 		FeedbackAdjustmentListCommand(assignment)
 
-	@RequestMapping(method=Array(GET))
+	@RequestMapping
 	def list(@PathVariable assignment: Assignment,
-					 @ModelAttribute("listCommand") listCommand: Appliable[Seq[StudentInfo]]
+					 @ModelAttribute("listCommand") listCommand: FeedbackAdjustmentListCommand
 	) = {
-		val studentInfo = listCommand.apply()
+		val (studentInfo, noFeedbackStudentInfo) = listCommand.apply().partition { _.feedback.isDefined }
+
 		Mav("admin/assignments/feedback/adjustments_list",
 			"studentInfo" -> studentInfo,
+			"noFeedbackStudentInfo" -> noFeedbackStudentInfo,
 			"assignment" -> assignment,
 			"isGradeValidation" -> assignment.module.adminDepartment.assignmentGradeValidation
 		).crumbs(

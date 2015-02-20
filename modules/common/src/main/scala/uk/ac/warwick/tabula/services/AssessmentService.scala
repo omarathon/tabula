@@ -56,6 +56,8 @@ trait AssessmentService {
 
 	def getAssignmentsClosingBetween(startInclusive: DateTime, endExclusive: DateTime): Seq[Assignment]
 
+	def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]]
+
 }
 
 abstract class AbstractAssessmentService extends AssessmentService {
@@ -125,6 +127,9 @@ abstract class AbstractAssessmentService extends AssessmentService {
 	}
 
 	def getAssignmentsClosingBetween(start: DateTime, end: DateTime) = assessmentDao.getAssignmentsClosingBetween(start, end)
+
+	def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]] =
+		assessmentDao.getExamsByModules(modules, academicYear)
 }
 
 trait AssignmentServiceUserGroupHelpers {

@@ -38,8 +38,8 @@ import uk.ac.warwick.tabula.AutowiringFeaturesComponent
 import uk.ac.warwick.tabula.services.ActivityServiceComponent
 import uk.ac.warwick.tabula.services.SecurityServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringSecurityServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringAssignmentMembershipServiceComponent
-import uk.ac.warwick.tabula.services.AssignmentMembershipServiceComponent
+import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
+import uk.ac.warwick.tabula.services.AssessmentMembershipServiceComponent
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.commands.Appliable

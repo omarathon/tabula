@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.{CommandInternal, Unaudited, ReadOnly, Comp
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.permissions.Permissions
 
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, AutowiringAssignmentMembershipServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
@@ -24,7 +24,7 @@ object AssignMarkersTemplateCommand {
 }
 
 class AssignMarkersTemplateCommandInternal(val assignment:Assignment) extends CommandInternal[ExcelView]
-	with AutowiringAssignmentMembershipServiceComponent
+	with AutowiringAssessmentMembershipServiceComponent
 	with AutowiringUserLookupComponent {
 
 	val students = assessmentMembershipService.determineMembershipUsers(assignment)

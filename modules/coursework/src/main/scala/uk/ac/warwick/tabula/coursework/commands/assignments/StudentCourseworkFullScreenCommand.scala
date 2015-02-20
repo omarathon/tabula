@@ -8,9 +8,9 @@ import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.AssignmentMembershipServiceComponent
+import uk.ac.warwick.tabula.services.AssessmentMembershipServiceComponent
 import uk.ac.warwick.tabula.services.AssessmentServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringAssignmentMembershipServiceComponent
+import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringAssessmentServiceComponent
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
@@ -24,7 +24,7 @@ object StudentCourseworkFullScreenCommand {
 			with ComposableCommand[StudentAssignments]
 			with StudentCourseworkFullScreenCommandPermissions
 			with AutowiringAssessmentServiceComponent
-			with AutowiringAssignmentMembershipServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
 			with AutowiringFeaturesComponent
 			with StudentCourseworkCommandHelper
 			with ReadOnly with Unaudited
@@ -34,7 +34,7 @@ class StudentCourseworkFullScreenCommandInternal(val memberOrUser: MemberOrUser)
 	with StudentCourseworkFullScreenCommandState {
 
 	self: AssessmentServiceComponent with
-		  AssignmentMembershipServiceComponent with
+		  AssessmentMembershipServiceComponent with
 		  FeaturesComponent with
 			StudentCourseworkCommandHelper =>
 

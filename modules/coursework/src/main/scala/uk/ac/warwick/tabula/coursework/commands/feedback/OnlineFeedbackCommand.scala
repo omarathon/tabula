@@ -18,7 +18,7 @@ object OnlineFeedbackCommand {
 			with AutowiringSubmissionServiceComponent
 			with AutowiringFeedbackServiceComponent
 			with AutowiringUserLookupComponent
-			with AutowiringAssignmentMembershipServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
 			with Unaudited
 			with ReadOnly
 }
@@ -26,7 +26,7 @@ object OnlineFeedbackCommand {
 abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser)
 	extends CommandInternal[Seq[StudentFeedbackGraph]] with Appliable[Seq[StudentFeedbackGraph]] with OnlineFeedbackState {
 
-	self: SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with AssignmentMembershipServiceComponent =>
+	self: SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
 	val marker = submitter.apparentUser
 

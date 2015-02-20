@@ -5,6 +5,7 @@ import org.springframework.util.StringUtils
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.coursework.services.docconversion.{AutowiringMarksExtractorComponent, MarkItem}
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
@@ -134,12 +135,12 @@ trait AdminAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
 	
 	self: AdminAddMarksCommandState =>
 	
-	def emit(updatedFeedback: Seq[Feedback]) = updatedReleasedFeedback.flatMap {
+	def emit(updatedFeedback: Seq[Feedback]) = updatedReleasedFeedback.flatMap { feedback => HibernateHelpers.initialiseAndUnproxy(feedback) match {
 		case assignmentFeedback: AssignmentFeedback =>
 			Option(Notification.init(new FeedbackChangeNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
 		case _ =>
 			None
-	}
+	}}
 }
 
 trait AdminAddMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

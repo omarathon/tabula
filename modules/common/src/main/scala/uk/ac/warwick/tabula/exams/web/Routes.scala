@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.exams.web
 
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 
 /**
@@ -14,10 +15,11 @@ object Routes {
 	def home = context + "/"
 
 	object admin {
-		def department(department: Department) = context + "/admin/department/%s/" format encoded(department.code)
+		def department(department: Department, academicYear: AcademicYear) =
+			context + "/admin/department/%s/%s" format(encoded(department.code), encoded(academicYear.startYear.toString))
 
 		object module {
-			def apply(module: Module) = department(module.adminDepartment) + "#module-" + encoded(module.code)
+			def apply(module: Module, academicYear: AcademicYear) = department(module.adminDepartment, academicYear) + "#module-" + encoded(module.code)
 		}
 
 	}

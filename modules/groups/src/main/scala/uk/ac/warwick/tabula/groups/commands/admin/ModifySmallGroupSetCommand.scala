@@ -25,7 +25,7 @@ object ModifySmallGroupSetCommand {
 			with CreateSmallGroupSetDescription
 			with ModifySmallGroupSetValidation
 			with AutowiringSmallGroupServiceComponent
-			with AutowiringAssignmentMembershipServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
 			with GeneratesDefaultWeekRangesWithTermService
 			with AutowiringTermServiceComponent
 
@@ -76,7 +76,7 @@ trait EditSmallGroupSetCommandState extends ModifySmallGroupSetCommandState {
 }
 
 class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmallGroupSetCommandInternal with CreateSmallGroupSetCommandState {
-	self: SmallGroupServiceComponent with AssignmentMembershipServiceComponent with GeneratesDefaultWeekRanges =>
+	self: SmallGroupServiceComponent with AssessmentMembershipServiceComponent with GeneratesDefaultWeekRanges =>
 
 	override def applyInternal() = transactional() {
 		val set = new SmallGroupSet(module)

@@ -7,8 +7,9 @@
 <#assign hasErrors=status.errors.allErrors?size gt 0 />
 </@spring.bind>
 
+<#assign formUrl><@routes.examAddMarks exam /></#assign>
 <div class="fix-area">
-	<@f.form method="post" action="${url('/exams/admin/module/${module.code}/exams/${exam.id}/marks')}" commandName=commandName>
+	<@f.form method="post" action="${formUrl}" commandName=commandName>
 	
 	<#assign isfile=RequestParameters.isfile/>
 	
@@ -117,7 +118,7 @@
 	<div class="submit-buttons fix-footer">
 		<input type="hidden" name="confirm" value="true">
 		<input class="btn btn-primary" type="submit" value="Confirm">
-		<a class="btn" href="<@routes.depthome module=exam.module />">Cancel</a>
+		<a class="btn" href="<@routes.departmentHomeWithYear module=exam.module academicYear=exam.academicYear/>">Cancel</a>
 	</div>
 	</@f.form>
 </div>

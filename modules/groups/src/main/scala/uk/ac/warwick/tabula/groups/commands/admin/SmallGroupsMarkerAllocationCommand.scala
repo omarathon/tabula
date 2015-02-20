@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.groups.commands.admin
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.services.{AssignmentMembershipServiceComponent, AutowiringAssignmentMembershipServiceComponent, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands._
@@ -16,7 +16,7 @@ object SmallGroupsMarkerAllocationCommand {
 			with ComposableCommand[Seq[SetAllocation]]
 			with SmallGroupsMarkerAllocationCommandPermissions
 			with AutowiringSmallGroupServiceComponent
-			with AutowiringAssignmentMembershipServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
 			with Unaudited
 }
 
@@ -26,7 +26,7 @@ case class GroupAllocation(name: String, tutors: Seq[User], students: Seq[User])
 class SmallGroupsMarkerAllocationCommandInternal(val assignment: Assignment)
 	extends CommandInternal[Seq[SetAllocation]]	with SmallGroupsMarkerAllocationCommandState with Logging {
 
-	self : SmallGroupServiceComponent with AssignmentMembershipServiceComponent =>
+	self : SmallGroupServiceComponent with AssessmentMembershipServiceComponent =>
 
 	val module = assignment.module
 	val academicYear = assignment.academicYear

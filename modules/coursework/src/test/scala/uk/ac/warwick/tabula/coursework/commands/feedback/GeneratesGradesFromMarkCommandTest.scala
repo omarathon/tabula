@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{AssessmentGroup, GradeBoundary, UpstreamAssessmentGroup, UserGroup}
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssignmentMembershipServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends GenerateGradesFromMarkCommandState with AssignmentMembershipServiceComponent
+	trait CommandTestSupport extends GenerateGradesFromMarkCommandState with AssessmentMembershipServiceComponent
 
 	trait Fixture {
 		val module = Fixtures.module("its01")

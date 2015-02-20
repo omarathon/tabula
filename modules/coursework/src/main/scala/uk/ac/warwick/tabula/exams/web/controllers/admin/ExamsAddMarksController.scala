@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.coursework.commands.assignments.{AdminAddMarksCommand, PostExtractValidation}
 import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
 @Controller
-@RequestMapping(value = Array("/exams/admin/module/{module}/exams/{exam}/marks"))
+@RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/marks"))
 class ExamsAddMarksController extends ExamsController {
 
 	@Autowired var feedbackService: FeedbackService = _
@@ -30,12 +30,16 @@ class ExamsAddMarksController extends ExamsController {
 		AdminAddMarksCommand(mandatory(module), mandatory(exam), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(exam)))
 
 	// Add the common breadcrumbs to the model.
-	def crumbed(mav: Mav, module: Module) = mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
+	def crumbed(mav: Mav, module: Module, academicYear: AcademicYear) = mav.crumbs(
+		Breadcrumbs.Department(module.adminDepartment, academicYear),
+		Breadcrumbs.Module(module, academicYear)
+	)
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def viewMarkUploadForm(
 		@PathVariable module: Module,
 		@PathVariable exam: Exam,
+		@PathVariable academicYear: AcademicYear,
 		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
 	) = {
 		val members = examMembershipService.determineMembershipUsers(exam)
@@ -48,7 +52,7 @@ class ExamsAddMarksController extends ExamsController {
 		crumbed(Mav("exams/admin/marks/marksform",
 			"marksToDisplay" -> marksToDisplay,
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
-		), module)
+		), module, academicYear)
 
 	}
 
@@ -75,12 +79,13 @@ class ExamsAddMarksController extends ExamsController {
 	def confirmBatchUpload(
 		@PathVariable module: Module,
 		@PathVariable exam: Exam,
+		@PathVariable academicYear: AcademicYear,
 		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
 	) = {
-		if (errors.hasErrors) viewMarkUploadForm(module, exam, cmd, errors)
+		if (errors.hasErrors) viewMarkUploadForm(module, exam, academicYear, cmd, errors)
 		else {
 			bindAndValidate(module, cmd, errors)
-			crumbed(Mav("exams/admin/marks/markspreview"), module)
+			crumbed(Mav("exams/admin/marks/markspreview"), module, academicYear)
 		}
 	}
 
@@ -88,11 +93,12 @@ class ExamsAddMarksController extends ExamsController {
 	def doUpload(
 		@PathVariable module: Module,
 		@PathVariable exam: Exam,
+		@PathVariable academicYear: AcademicYear,
 		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
 	) = {
 		bindAndValidate(module, cmd, errors)
 		cmd.apply()
-		Redirect(Routes.admin.module(module))
+		Redirect(Routes.admin.module(module, academicYear))
 	}
 
 	private def bindAndValidate(module: Module, cmd: AdminAddMarksCommand, errors: Errors) {

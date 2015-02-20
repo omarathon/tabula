@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackAdjustmentNotification, StudentFeedbackAdjustmentNotification}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -152,7 +153,7 @@ trait FeedbackAdjustmentNotifier extends Notifies[Feedback, Feedback] {
 	self: FeedbackAdjustmentCommandState =>
 
 	def emit(feedback: Feedback) = {
-		feedback match {
+		HibernateHelpers.initialiseAndUnproxy(feedback) match {
 			case assignmentFeedback: AssignmentFeedback =>
 				val studentsNotifications = if (assignmentFeedback.released) {
 					Seq(Notification.init(new StudentFeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))

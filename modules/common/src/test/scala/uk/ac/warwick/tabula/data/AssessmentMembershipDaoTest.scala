@@ -30,16 +30,16 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 		session.save(module2)
 
 		val assignment1 = Fixtures.assignment("assignment 1")
-		assignment1.assignmentMembershipService = assignmentMembershipService
+		assignment1.assessmentMembershipService = assignmentMembershipService
 
 		val assignment2 = Fixtures.assignment("assignment 2")
-		assignment2.assignmentMembershipService = assignmentMembershipService
+		assignment2.assessmentMembershipService = assignmentMembershipService
 
 		val assignment3 = Fixtures.assignment("assignment 3")
-		assignment3.assignmentMembershipService = assignmentMembershipService
+		assignment3.assessmentMembershipService = assignmentMembershipService
 
 		val assignment4 = Fixtures.assignment("assignment 4")
-		assignment4.assignmentMembershipService = assignmentMembershipService
+		assignment4.assessmentMembershipService = assignmentMembershipService
 
 		module1.assignments.add(assignment1)
 		module1.assignments.add(assignment2)

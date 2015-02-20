@@ -66,7 +66,7 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 	
 	@Test def applyCommand() { new Fixture { withUser("cuscav") {
 		val cmd = new AddAssignmentsCommandInternal(thisDepartment, currentUser) with AddAssignmentsCommandState
-			with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssignmentMembershipServiceComponent {
+			with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent {
 			val moduleAndDepartmentService = thisModuleAndDepartmentService
 			val assessmentService = thisAssignmentService
 			val assessmentMembershipService = thisAssignmentMembershipService
@@ -103,7 +103,7 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 
 	@Test	def optionsMapBinding() { new Fixture {
 		val cmd = new AddAssignmentsCommandInternal(null, null) with AddAssignmentsCommandState
-			with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssignmentMembershipServiceComponent {
+			with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent {
 			val moduleAndDepartmentService = thisModuleAndDepartmentService
 			val assessmentService = thisAssignmentService
 			val assessmentMembershipService = thisAssignmentMembershipService

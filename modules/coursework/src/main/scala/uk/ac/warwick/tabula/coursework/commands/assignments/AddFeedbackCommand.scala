@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
 
@@ -99,11 +100,11 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, marker: User, c
 	}
 
 	def emit(updatedFeedback: Seq[Feedback]) = {
-		updatedFeedback.filter(_.released).flatMap {
+		updatedFeedback.filter(_.released).flatMap { feedback => HibernateHelpers.initialiseAndUnproxy(feedback) match {
 			case assignmentFeedback: AssignmentFeedback =>
 				Option(Notification.init(new FeedbackChangeNotification, marker, assignmentFeedback, assignment))
 			case _ =>
 				None
-		}
+		}}
 	}
 }

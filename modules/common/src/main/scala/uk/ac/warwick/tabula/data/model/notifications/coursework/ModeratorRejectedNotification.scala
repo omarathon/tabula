@@ -4,6 +4,7 @@ import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
@@ -28,7 +29,7 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 	def rejectionFeedback = parentFeedback.secondMarkerFeedback
 	def rejectedFeedback = parentFeedback.firstMarkerFeedback
 
-	def assignment = parentFeedback match {
+	def assignment = HibernateHelpers.initialiseAndUnproxy(parentFeedback) match {
 		case assignmentFeedback: AssignmentFeedback => assignmentFeedback.assignment
 		case _ => throw new IllegalArgumentException("Exam feedback used in Assignment notification")
 	}

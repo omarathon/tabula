@@ -4,11 +4,11 @@ import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudi
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.data.model.{AssessmentType, AssessmentComponent}
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent, AutowiringAssignmentMembershipServiceComponent, AssignmentMembershipServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent, AutowiringAssessmentMembershipServiceComponent, AssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class AssessmentComponentCreationFixtureCommandInternal extends CommandInternal[AssessmentComponent] {
-	self: AssignmentMembershipServiceComponent with ModuleAndDepartmentServiceComponent with TransactionalComponent =>
+	self: AssessmentMembershipServiceComponent with ModuleAndDepartmentServiceComponent with TransactionalComponent =>
 
 	var moduleCode: String = _
 	var assessmentGroup = "A"
@@ -37,7 +37,7 @@ object AssessmentComponentCreationFixtureCommand {
 	def apply()={
 		new AssessmentComponentCreationFixtureCommandInternal
 			with ComposableCommand[AssessmentComponent]
-			with AutowiringAssignmentMembershipServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
 			with AutowiringModuleAndDepartmentServiceComponent
 			with AutowiringTransactionalComponent
 			with Unaudited

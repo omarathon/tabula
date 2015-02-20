@@ -80,10 +80,11 @@ trait AssessmentFeedback {
 
 	def academicYear: AcademicYear
 
-	def  assessmentGroups: JList[AssessmentGroup]
+	def assessmentGroups: JList[AssessmentGroup]
 }
 
 @Entity @Access(AccessType.FIELD)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with FormattedHtml with AssessmentFeedback {
 
@@ -270,9 +271,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 
 }
 
-@Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue("assignment")
+@Entity @DiscriminatorValue("assignment")
 class AssignmentFeedback extends Feedback with ToEntityReference {
 
 	type Entity = AssignmentFeedback
@@ -300,9 +299,7 @@ class AssignmentFeedback extends Feedback with ToEntityReference {
 
 }
 
-@Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue("exam")
+@Entity @DiscriminatorValue("exam")
 class ExamFeedback extends Feedback with ToEntityReference {
 
 	type Entity = ExamFeedback

@@ -65,7 +65,7 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 		
 		userLookup.groupService.groupMap += ("in-elab" -> webgroup)
 			
-		group.members should be (Seq("cuscav", "curef", "sb_systemtest", "cusebr"))
+		group.members should be (Seq("sb_systemtest", "cuscav", "curef", "cusebr"))
 	}
 	
 	@Test def copy {
