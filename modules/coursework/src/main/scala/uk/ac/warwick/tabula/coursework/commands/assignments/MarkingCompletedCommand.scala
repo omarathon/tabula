@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 object MarkingCompletedCommand {
@@ -37,13 +37,13 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 
 	override def onBind(result: BindingResult) {
 		// filter out any feedbacks where the current user is not the marker
-		markerFeedback = markerFeedback.filter(_.getMarkerUser == user)
+		markerFeedback = markerFeedback.asScala.filter(_.getMarkerUser == user).asJava
 	}
 
 	def preSubmitValidation() {
-		noMarks = markerFeedback.filter(!_.hasMark)
-		noFeedback = markerFeedback.filter(!_.hasFeedback)
-		releasedFeedback = markerFeedback.filter(_.state == MarkingState.MarkingCompleted)
+		noMarks = markerFeedback.asScala.filter(!_.hasMark)
+		noFeedback = markerFeedback.asScala.filter(!_.hasFeedback)
+		releasedFeedback = markerFeedback.asScala.filter(_.state == MarkingState.MarkingCompleted)
 	}
 
 	def validate(errors: Errors) {
@@ -53,7 +53,7 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 
 	def applyInternal() {
 		// do not update previously released feedback
-		val feedbackForRelease = markerFeedback -- releasedFeedback
+		val feedbackForRelease = markerFeedback.asScala -- releasedFeedback
 
 		feedbackForRelease.foreach(stateService.updateState(_, MarkingState.MarkingCompleted))
 
@@ -61,11 +61,11 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 	}
 
 	private def releaseNextMarkerFeedbackOrFinalise(feedbackForRelease: mutable.Buffer[MarkerFeedback]) {
-		newReleasedFeedback = feedbackForRelease.flatMap(nextMarkerFeedback).map{ nextMarkerFeedback =>
+		newReleasedFeedback = (feedbackForRelease.flatMap(nextMarkerFeedback).map{ nextMarkerFeedback =>
 			stateService.updateState(nextMarkerFeedback, MarkingState.ReleasedForMarking)
 			feedbackService.save(nextMarkerFeedback)
 			nextMarkerFeedback
-		}
+		}).asJava
 
 		val feedbackToFinalise = feedbackForRelease.filter(!nextMarkerFeedback(_).isDefined)
 		if (feedbackToFinalise.nonEmpty)
@@ -83,7 +83,7 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 	}
 
 	private def finaliseFeedback(feedbackForRelease: Seq[MarkerFeedback]) = {
-		val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, feedbackForRelease)
+		val finaliseFeedbackCommand = FinaliseFeedbackCommand(assignment, feedbackForRelease, user)
 		finaliseFeedbackCommand.apply()
 	}
 }
@@ -104,7 +104,7 @@ trait MarkingCompletedDescription extends Describable[Unit] {
 
 	override def describe(d: Description){
 		d.assignment(assignment)
-			.property("students" -> markerFeedback.map(_.feedback.universityId))
+			.property("students" -> markerFeedback.asScala.map(_.feedback.universityId))
 	}
 
 	override def describeResult(d: Description){
@@ -123,9 +123,9 @@ trait MarkingCompletedState {
 
 	var markerFeedback: JList[MarkerFeedback] = JArrayList()
 
-	var noMarks: JList[MarkerFeedback] = JArrayList()
-	var noFeedback: JList[MarkerFeedback] = JArrayList()
-	var releasedFeedback: JList[MarkerFeedback] = JArrayList()
+	var noMarks: Seq[MarkerFeedback] = Nil
+	var noFeedback: Seq[MarkerFeedback] = Nil
+	var releasedFeedback: Seq[MarkerFeedback] = Nil
 
 	var onlineMarking: Boolean = false
 	var confirm: Boolean = false
@@ -143,7 +143,7 @@ trait MarkerCompletedNotificationCompletion extends CompletesNotifications[Unit]
 	self: MarkingCompletedState with NotificationHandling =>
 
 	def notificationsToComplete(commandResult: Unit): CompletesNotificationsResult = {
-		val notificationsToComplete = markerFeedback
+		val notificationsToComplete = markerFeedback.asScala
 			.filter(_.state == MarkingState.MarkingCompleted)
 			.flatMap(mf =>
 				// ModeratorRejectedNotification is tied to the 2nd marker feedback

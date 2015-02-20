@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{UserAware, Appliable}
 import uk.ac.warwick.tabula.coursework.commands.assignments.FinaliseFeedbackCommand
 import uk.ac.warwick.tabula.coursework.commands.feedback._
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected, ReleasedForMarking}
@@ -94,9 +94,11 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 		def apply() = new MarkerFeedback()
 	}
 
-	trait FinaliseFeedbackTestImpl extends FinaliseFeedbackComponent  {
+	trait FinaliseFeedbackTestImpl extends FinaliseFeedbackComponent {
+		self: UserAware =>
+
 		def finaliseFeedback(assignment: Assignment, firstMarkerFeedback: MarkerFeedback) {
-			val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, Seq(firstMarkerFeedback).asJava)
+			val finaliseFeedbackCommand = FinaliseFeedbackCommand(assignment, Seq(firstMarkerFeedback), user)
 			finaliseFeedbackCommand.applyInternal()
 		}
 	}

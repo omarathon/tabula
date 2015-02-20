@@ -298,6 +298,11 @@ abstract class Description {
 	
 	def fileAttachments(attachments: Seq[FileAttachment]) = property("attachments" -> attachments.map(_.id))
 
+	def assessment(assessment: Assessment) = assessment match {
+		case a: Assignment => assignment(a)
+		case e: Exam => exam(e)
+	}
+
 	/**
 	 * Record assignment, plus its module and department if available.
 	 */
