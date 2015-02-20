@@ -12,6 +12,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
+import scala.util.Try
+
 /**
  * Wherever a group of users is referenced in the app, it will be
  * stored as a UserGroup.
@@ -84,7 +86,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 			val m = new OrderedGroupMember
 			m.memberId = member.universityId
 			m.userGroup = this
-			m.position = Some(member.seatNumber.toInt)
+			m.position = Try(member.seatNumber.toInt).toOption
 			m
 		})
 		staticIncludeUsers.clear()
