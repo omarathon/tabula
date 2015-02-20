@@ -113,6 +113,7 @@ abstract class Features {
 	@Value("${features.reports:true}") var reports = defaults.reports
 	@Value("${features.queueFeedbackForSits:false}") var queueFeedbackForSits = defaults.queueFeedbackForSits
 	@Value("${features.scheduling.exportFeedbackToSits:false}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
+	@Value("${features.exams:false}") var exams = defaults.exams
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -216,6 +217,7 @@ class FeaturesMessage {
 	@BeanProperty var schedulingSanityCheckFilesystem = true
 	@BeanProperty var schedulingExportAttendanceToSits = true
 	@BeanProperty var schedulingExportFeedbackToSits = false
+	@BeanProperty var exams = false
 
 	@BeanProperty var reports = true
 }

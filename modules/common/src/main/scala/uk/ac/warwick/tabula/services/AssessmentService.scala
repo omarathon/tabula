@@ -25,6 +25,7 @@ trait AssessmentService {
 	def getExamById(id: String): Option[Exam]
 
 	def save(assignment: Assignment): Unit
+	def save(exam: Exam): Unit
 
 	def deleteFormField(field: FormField) : Unit
 
@@ -66,6 +67,7 @@ abstract class AbstractAssessmentService extends AssessmentService {
 	def getExamById(id: String): Option[Exam] = assessmentDao.getExamById(id)
 
 	def save(assignment: Assignment): Unit = assessmentDao.save(assignment)
+	def save(exam: Exam): Unit = assessmentDao.save(exam)
 
 	def deleteFormField(field: FormField) : Unit = assessmentDao.deleteFormField(field)
 

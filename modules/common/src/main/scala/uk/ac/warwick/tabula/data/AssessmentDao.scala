@@ -23,6 +23,7 @@ trait AssessmentDao {
 	def getExamById(id: String): Option[Exam]
 
 	def save(assignment: Assignment): Unit
+	def save(exam: Exam): Unit
 
 	def deleteFormField(field: FormField): Unit
 
@@ -54,6 +55,7 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 	def getExamById(id: String) = getById[Exam](id)
 
 	def save(assignment: Assignment) = session.saveOrUpdate(assignment)
+	def save(exam: Exam) = session.saveOrUpdate(exam)
 
 	def deleteFormField(field: FormField) {
 		session.delete(field)
