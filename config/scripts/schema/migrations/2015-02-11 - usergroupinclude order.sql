@@ -6,7 +6,7 @@ ADD (
 );
 
 -- set a GUID for all of the existing rows (note oracle generateed GUID's are often sequential so may look almost identical)
-UPDATE usergroupstatic SET id = sys_guid();
+UPDATE usergroupstatic SET id = sys_guid() where id is null;
 
 -- set the id as a primary key once all rows have a value
 ALTER TABLE usergroupstatic ADD CONSTRAINT usergroupstatic_pk PRIMARY KEY (id);
