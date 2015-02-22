@@ -43,7 +43,7 @@ class FinaliseFeedbackNotificationTest extends TestBase with Mockito with Freema
 		new SingleItemFixture {
 			val notificationContent = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
 			notificationContent should be (
-				"""1 submission for CS118 5,000 word essay has been marked and is ready to be released to students:
+				"""1 submission for CS118 5,000 word essay has been marked and is ready to be published to students:
 					|
 					|* 0000001""".stripMargin
 			)
@@ -54,7 +54,7 @@ class FinaliseFeedbackNotificationTest extends TestBase with Mockito with Freema
 		new MultipleItemsFixture {
 			val notificationContent = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
 			notificationContent should be (
-				"""3 submissions for CS118 5,000 word essay have been marked and are ready to be released to students:
+				"""3 submissions for CS118 5,000 word essay have been marked and are ready to be published to students:
 					|
 					|* 0000001
 					|* 0000002

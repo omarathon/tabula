@@ -42,7 +42,7 @@ class NotificationSettingsCommandTest extends TestBase with Mockito {
 			commandInternal.smallGroupEventAttendanceReminderNotifyFirstNonEmptyGroupOnly should be (true)
 
 			commandInternal.finaliseFeedbackNotificationEnabled should be (true)
-			commandInternal.finaliseFeedbackNotificationNotifyModuleManagers should be (true)
+			commandInternal.finaliseFeedbackNotificationNotifyModuleManagers should be (false)
 			commandInternal.finaliseFeedbackNotificationNotifyDepartmentAdministrators should be (false)
 			commandInternal.finaliseFeedbackNotificationNotifyFirstNonEmptyGroupOnly should be (true)
 		}
