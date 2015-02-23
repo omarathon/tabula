@@ -217,6 +217,12 @@
 	   'tabula.slideMoreOptions.hidden' event when it is hidden.
 	*/
 	jQuery.fn.slideMoreOptions = function($slidingDiv, showWhenChecked) {
+		if ($(this).hasClass('slideMoreOptions-init')) {
+			return false;
+		} else {
+			$(this).addClass('slideMoreOptions-init')
+		}
+
 		var $this = $(this);
 		var name = $this.attr("name");
 		var $form = $this.closest('form');
@@ -256,6 +262,12 @@
 
 	// submit bootstrap form using Ajax
 	jQuery.fn.tabulaAjaxSubmit = function(successCallback) {
+		if ($(this).hasClass('tabulaAjaxSubmit-init')) {
+			return false;
+		} else {
+			$(this).addClass('tabulaAjaxSubmit-init')
+		}
+
 		$(this).on('submit', 'form', function(e){
 			e.preventDefault();
 			var $form = $(this);
