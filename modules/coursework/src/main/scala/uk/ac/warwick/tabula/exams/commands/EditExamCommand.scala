@@ -1,17 +1,16 @@
 package uk.ac.warwick.tabula.exams.commands
 
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Exam, Module}
+import uk.ac.warwick.tabula.data.model.Exam
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object EditExamCommand {
-	def apply(module: Module, academicYear: AcademicYear, exam: Exam) =
-		new EditExamCommandInternal(module, academicYear, exam)
+	def apply(exam: Exam) =
+		new EditExamCommandInternal(exam)
 			with ComposableCommand[Exam]
 			with EditExamPermissions
 			with EditExamCommandState
@@ -21,15 +20,13 @@ object EditExamCommand {
 			with AutowiringAssessmentServiceComponent
 }
 
-class EditExamCommandInternal(val module: Module, val academicYear: AcademicYear, val exam: Exam)
+class EditExamCommandInternal(val exam: Exam)
 	extends CommandInternal[Exam] with EditExamCommandState {
 
 	self: AssessmentServiceComponent =>
 
 	override def applyInternal() = {
 		exam.name = name
-		exam.module = module
-		exam.academicYear = academicYear
 		assessmentService.save(exam)
 		exam
 	}
@@ -40,17 +37,14 @@ trait EditExamPermissions extends RequiresPermissionsChecking with PermissionsCh
 	self: EditExamCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Assignment.Create, module)
+		p.PermissionCheck(Permissions.Assignment.Create, exam)
 	}
-
 }
 
 trait EditExamCommandState {
-	def module: Module
-	def academicYear: AcademicYear
+
 	def exam: Exam
 
-	// bind variables
 	var name: String = _
 }
 

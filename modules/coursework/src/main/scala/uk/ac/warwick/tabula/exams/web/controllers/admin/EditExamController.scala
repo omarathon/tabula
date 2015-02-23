@@ -22,23 +22,33 @@ class EditExamController extends ExamsController {
 
 	@ModelAttribute("command")
 	def command(
-		@PathVariable("module") module: Module,
-		@PathVariable("academicYear") academicYear : AcademicYear,
-		@PathVariable("exam") exam : Exam) = EditExamCommand(mandatory(module), mandatory(academicYear), mandatory(exam))
+		@PathVariable("exam") exam : Exam) = EditExamCommand(mandatory(exam))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@ModelAttribute("command") cmd: EditExamCommand) = {
-		cmd.populate()
-		Mav("exams/admin/edit")
+	def showForm(
+			@ModelAttribute("command") cmd: EditExamCommand,
+			@ModelAttribute("module") module: Module,
+			@ModelAttribute("academicYear") academicYear: AcademicYear
+	) = {
+			cmd.populate()
+			Mav("exams/admin/edit",
+				"module" -> module,
+				"academicYear" -> academicYear
+			)
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: EditExamCommand, errors: Errors) = {
-		if (errors.hasErrors) {
-			showForm(cmd)
-		} else {
-			cmd.apply()
-			Redirect(Routes.home)
-		}
+	def submit(
+			@Valid @ModelAttribute("command") cmd: EditExamCommand,
+			@ModelAttribute("module") module: Module,
+			@ModelAttribute("academicYear") academicYear: AcademicYear,
+			errors: Errors
+	) = {
+			if (errors.hasErrors) {
+				showForm(cmd, module, academicYear)
+			} else {
+				cmd.apply()
+				Redirect(Routes.home)
+			}
 	}
 }

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.exams
 
-import uk.ac.warwick.tabula.exams.commands.{AddExamCommandState, AddExamValidation, EditExamCommandInternal, EditExamCommandState}
+import uk.ac.warwick.tabula.exams.commands._
 import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
@@ -14,11 +14,13 @@ class EditExamCommandTest extends TestBase with Mockito {
 		val module = Fixtures.module("ab123", "Test module")
 		val academicYear = new AcademicYear(2014)
 		val exam = Fixtures.exam("Exam 1")
-		val command = new EditExamCommandInternal(module, academicYear, exam) with CommandTestSupport
+		exam.module=module
+		exam.academicYear=academicYear
 
-		val validator = new AddExamValidation with AddExamCommandState {
-			def module = command.module
-			def academicYear = command.academicYear
+		val command = new EditExamCommandInternal(exam) with CommandTestSupport
+
+		val validator = new EditExamValidation with EditExamCommandState {
+				def exam = command.exam
 		}
 	}
 
