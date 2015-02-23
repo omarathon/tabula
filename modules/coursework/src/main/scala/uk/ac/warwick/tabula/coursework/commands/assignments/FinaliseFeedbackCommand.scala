@@ -93,3 +93,16 @@ trait FinaliseFeedbackNotifier extends Notifies[Seq[Feedback], Seq[Feedback]] {
 		Seq(Notification.init(new FinaliseFeedbackNotification, user, feedbacks.filterNot { _.checkedReleased }, assignment))
 	}
 }
+
+trait FinaliseFeedbackComponent {
+	def finaliseFeedback(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback])
+}
+
+trait FinaliseFeedbackComponentImpl extends FinaliseFeedbackComponent {
+	self: UserAware =>
+
+	def finaliseFeedback(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback]) {
+		val finaliseFeedbackCommand = FinaliseFeedbackCommand(assignment, markerFeedbacks, user)
+		finaliseFeedbackCommand.apply()
+	}
+}

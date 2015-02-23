@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.validation.{Errors, BindingResult}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineFeedbackState, FinaliseFeedbackComponentImpl, FinaliseFeedbackComponent}
+import uk.ac.warwick.tabula.coursework.commands.feedback.OnlineFeedbackState
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.data.model._
 import scala.collection.JavaConversions._
@@ -50,7 +50,7 @@ class BulkModerationApprovalCommandInternal(val assignment: Assignment, val mark
 
 			// copy the first markers comments to the parent feedback and save
 			val firstMarkerFeedback = parentFeedback.retrieveFirstMarkerFeedback
-			finaliseFeedback(assignment, firstMarkerFeedback)
+			finaliseFeedback(assignment, Seq(firstMarkerFeedback))
 			parentFeedback.updatedDate = DateTime.now
 			feedbackService.saveOrUpdate(parentFeedback)
 

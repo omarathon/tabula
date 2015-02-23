@@ -2,8 +2,9 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{Module, Assignment}
-import uk.ac.warwick.tabula.coursework.commands.assignments.ReleaseForMarkingCommand
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.data.model.{Feedback, Module, Assignment}
+import uk.ac.warwick.tabula.coursework.commands.assignments.{ReleaseForMarkingState, ReleaseForMarkingCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.Transactions._
@@ -15,13 +16,15 @@ import uk.ac.warwick.tabula.CurrentUser
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/release-submissions"))
 class ReleaseForMarkingController extends CourseworkController {
 
+	type ReleaseForMarkingCommand = Appliable[List[Feedback]] with ReleaseForMarkingState
+
 	@ModelAttribute("releaseForMarkingCommand")
 	def command(@PathVariable("module") module: Module,
 				@PathVariable("assignment") assignment: Assignment,
 				user: CurrentUser
-				) = ReleaseForMarkingCommand(module, assignment, user.apparentUser)
+				): ReleaseForMarkingCommand = ReleaseForMarkingCommand(module, assignment, user.apparentUser)
 
-	validatesSelf[ReleaseForMarkingCommand]
+	validatesSelf[SelfValidating]
 
 	def confirmView(assignment: Assignment) = Mav("admin/assignments/submissionsandfeedback/release-submission",
 		"assignment" -> assignment)
@@ -34,8 +37,7 @@ class ReleaseForMarkingController extends CourseworkController {
 	def get(@PathVariable("assignment") assignment: Assignment) = RedirectBack(assignment)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm( @ModelAttribute("releaseForMarkingCommand") cmd: ReleaseForMarkingCommand, errors: Errors) = {
-		cmd.preSubmitValidation()
+	def showForm(@ModelAttribute("releaseForMarkingCommand") cmd: ReleaseForMarkingCommand, errors: Errors) = {
 		confirmView(cmd.assignment)
 	}
 
@@ -45,7 +47,6 @@ class ReleaseForMarkingController extends CourseworkController {
 			if (errors.hasErrors)
 				showForm(cmd, errors)
 			else {
-				cmd.preSubmitValidation()
 				cmd.apply()
 				RedirectBack(cmd.assignment)
 			}

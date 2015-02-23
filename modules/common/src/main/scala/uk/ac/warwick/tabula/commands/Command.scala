@@ -507,7 +507,7 @@ trait PopulateOnForm {
 
 
 trait ComposableCommand[A] extends Command[A] with PerformsPermissionsChecking {
-	this:CommandInternal[A] with Describable[A] with RequiresPermissionsChecking=>
+	self: CommandInternal[A] with Describable[A] with RequiresPermissionsChecking =>
 }
 
 /**

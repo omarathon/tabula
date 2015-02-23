@@ -28,30 +28,30 @@ object MarkingCompletedCommand {
 			with AutowiringStateServiceComponent
 			with AutowiringFeedbackServiceComponent
 			with MarkerCompletedNotificationCompletion
+			with FinaliseFeedbackComponentImpl
 }
 
 abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User, val submitter: CurrentUser)
-	extends CommandInternal[Unit] with Appliable[Unit] with SelfValidating with UserAware with MarkingCompletedState with ReleasedState with BindListener {
+	extends CommandInternal[Unit] with SelfValidating with UserAware with MarkingCompletedState with ReleasedState with BindListener with NextMarkerFeedback {
 
-	self: StateServiceComponent with FeedbackServiceComponent =>
+	self: StateServiceComponent with FeedbackServiceComponent with FinaliseFeedbackComponent =>
 
 	override def onBind(result: BindingResult) {
 		// filter out any feedbacks where the current user is not the marker
 		markerFeedback = markerFeedback.asScala.filter(_.getMarkerUser == user).asJava
-	}
 
-	def preSubmitValidation() {
+		// Pre-submit validation
 		noMarks = markerFeedback.asScala.filter(!_.hasMark)
 		noFeedback = markerFeedback.asScala.filter(!_.hasFeedback)
 		releasedFeedback = markerFeedback.asScala.filter(_.state == MarkingState.MarkingCompleted)
 	}
 
-	def validate(errors: Errors) {
+	override def validate(errors: Errors) {
 		if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
 		if (markerFeedback.isEmpty) errors.rejectValue("students", "markerFeedback.finishMarking.noStudents")
 	}
 
-	def applyInternal() {
+	override def applyInternal() {
 		// do not update previously released feedback
 		val feedbackForRelease = markerFeedback.asScala -- releasedFeedback
 
@@ -69,9 +69,11 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 
 		val feedbackToFinalise = feedbackForRelease.filter(!nextMarkerFeedback(_).isDefined)
 		if (feedbackToFinalise.nonEmpty)
-			finaliseFeedback(feedbackToFinalise)
+			finaliseFeedback(assignment, feedbackToFinalise)
 	}
+}
 
+trait NextMarkerFeedback {
 	def nextMarkerFeedback(markerFeedback: MarkerFeedback): Option[MarkerFeedback] = {
 		markerFeedback.getFeedbackPosition match {
 			case FirstFeedback if markerFeedback.feedback.markingWorkflow.hasSecondMarker =>
@@ -80,11 +82,6 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 				Option(markerFeedback.feedback.retrieveThirdMarkerFeedback)
 			case _ => None
 		}
-	}
-
-	private def finaliseFeedback(feedbackForRelease: Seq[MarkerFeedback]) = {
-		val finaliseFeedbackCommand = FinaliseFeedbackCommand(assignment, feedbackForRelease, user)
-		finaliseFeedbackCommand.apply()
 	}
 }
 
@@ -134,7 +131,7 @@ trait MarkingCompletedState {
 }
 
 trait SecondMarkerReleaseNotifier extends FeedbackReleasedNotifier[Unit] {
-	this: MarkingCompletedState with ReleasedState with UserAware with UserLookupComponent with Logging =>
+	self: MarkingCompletedState with ReleasedState with UserAware with UserLookupComponent with Logging =>
 	def blankNotification = new ReleaseToMarkerNotification(2)
 }
 
