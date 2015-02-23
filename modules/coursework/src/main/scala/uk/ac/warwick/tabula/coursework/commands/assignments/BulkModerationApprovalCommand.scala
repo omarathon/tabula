@@ -28,9 +28,11 @@ object BulkModerationApprovalCommand {
 }
 
 class BulkModerationApprovalCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
-	extends CommandInternal[Unit] with SelfValidating with BulkModerationApprovalState with BindListener {
+	extends CommandInternal[Unit] with SelfValidating with BulkModerationApprovalState with BindListener with UserAware {
 
 	self: StateServiceComponent with FeedbackServiceComponent with FinaliseFeedbackComponent =>
+
+	val user = marker
 
 	override def onBind(result: BindingResult) {
 		// filter out any feedbacks where the current user is not the marker
