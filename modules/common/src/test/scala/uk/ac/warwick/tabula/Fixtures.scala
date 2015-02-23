@@ -14,6 +14,12 @@ import uk.ac.warwick.userlookup.User
 // scalastyle:off magic.number
 object Fixtures extends Mockito {
 
+	def exam(name: String) : Exam =  {
+		val exam = new Exam()
+		exam.name = name
+		exam
+	}
+
 	def submission(universityId: String = "0123456", userId: String = "cuspxp") = {
 		val s = new Submission
 		s.universityId = universityId
