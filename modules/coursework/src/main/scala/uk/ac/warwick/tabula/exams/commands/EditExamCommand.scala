@@ -13,7 +13,7 @@ object EditExamCommand {
 			with EditExamPermissions
 			with EditExamCommandState
 			with EditExamCommandDescription
-			with PopulateEditExamCommandInternal
+			with PopulateEditExamCommand
 			with ExamValidation
 			with AutowiringAssessmentServiceComponent
 }
@@ -54,11 +54,8 @@ trait EditExamCommandDescription extends Describable[Exam] {
 	}
 }
 
-trait PopulateEditExamCommandInternal extends PopulateOnForm {
+trait PopulateEditExamCommand {
 
 	self: EditExamCommandState =>
-
-	override def populate() = {
-		name = exam.name
-	}
+	name = exam.name
 }

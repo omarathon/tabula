@@ -5,7 +5,7 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Exam
 import uk.ac.warwick.tabula.exams.commands.{EditExamCommand, EditExamCommandState}
 import uk.ac.warwick.tabula.exams.web.Routes
@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 @RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exam/{exam}/edit"))
 class EditExamController extends ExamsController {
 
-	type EditExamCommand = Appliable[Exam] with EditExamCommandState with PopulateOnForm
+	type EditExamCommand = Appliable[Exam] with EditExamCommandState
 
 	validatesSelf[SelfValidating]
 
@@ -27,7 +27,6 @@ class EditExamController extends ExamsController {
 	def showForm(
 			@ModelAttribute("command") cmd: EditExamCommand
 	) = {
-			cmd.populate()
 			Mav("exams/admin/edit")
 	}
 
