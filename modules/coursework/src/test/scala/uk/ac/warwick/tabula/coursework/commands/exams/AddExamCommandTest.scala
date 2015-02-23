@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.exams
 
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.exams.commands.{AddExamValidation, AddExamCommandInternal, AddExamCommandState}
+import uk.ac.warwick.tabula.exams.commands.{AddExamCommandInternal, AddExamCommandState, ExamValidation}
 import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
@@ -16,7 +16,7 @@ class AddExamCommandTest extends TestBase with Mockito {
 		val academicYear = new AcademicYear(2014)
 		val command = new AddExamCommandInternal(module, academicYear) with CommandTestSupport
 
-		val validator = new AddExamValidation with AddExamCommandState {
+		val validator = new ExamValidation with AddExamCommandState {
 			def module = command.module
 			def academicYear = command.academicYear
 		}
