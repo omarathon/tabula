@@ -68,6 +68,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: Us
 			markerFeedback.addAttachment(attachment)
 		}
 
+		markerFeedback.state = InProgress
 		parentFeedback.updatedDate = DateTime.now
 
 		session.saveOrUpdate(parentFeedback)
