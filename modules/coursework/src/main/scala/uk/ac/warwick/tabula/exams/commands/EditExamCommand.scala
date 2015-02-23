@@ -37,7 +37,7 @@ trait EditExamPermissions extends RequiresPermissionsChecking with PermissionsCh
 	self: EditExamCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Assignment.Create, exam)
+		p.PermissionCheck(Permissions.Assignment.Create, exam.module)
 	}
 }
 
