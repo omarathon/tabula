@@ -139,7 +139,7 @@
 			</#if>
 		</td>
 		<#noescape>
-		<@spring.bind path="file.attached" htmlEscape="false">
+		<@spring.bind path="file.attached" htmlEscape=false>
 		<td>
 			<#-- FIXME should be able to spring:bind to a list, not have to manually specify it like this -->
 			<ul class="file-list">
