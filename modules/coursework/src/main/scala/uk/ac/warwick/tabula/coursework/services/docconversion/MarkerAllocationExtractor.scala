@@ -42,6 +42,8 @@ class MarkerAllocationExtractor() {
 
 	def parseRow(rowData: Map[String, String], workflow: MarkingWorkflow): ParsedRow = {
 
+		lazy val allMarkers = workflow.firstMarkers.knownType.members ++  workflow.secondMarkers.knownType.members
+
 		def getUser(id: String): Option[User] = {
 			val user = userLookup.getUserByWarwickUniId(id)
 			if (user.isFoundUser) Some(user)
@@ -62,9 +64,13 @@ class MarkerAllocationExtractor() {
 		def parseMarker: Either[MarkerAllocationExtractor.Error, Option[User]] = {
 			rowData.get("agent_id") match {
 				case Some(markerId) if markerId.hasText =>
-					getUser(markerId)
-						.map(user => Right(Some(user)))
-						.getOrElse(Left(Error("marker_id", rowData, "workflow.allocateMarkers.universityId.notFound")))
+					if (!allMarkers.contains(markerId)) {
+						Left(Error("marker_id", rowData, "workflow.allocateMarkers.notMarker"))
+					} else {
+						getUser(markerId)
+							.map(user => Right(Some(user)))
+							.getOrElse(Left(Error("marker_id", rowData, "workflow.allocateMarkers.universityId.notFound")))
+					}
 				case _ =>
 					Left(Error("marker_id", rowData, "workflow.allocateMarkers.universityId.notFound"))
 			}
