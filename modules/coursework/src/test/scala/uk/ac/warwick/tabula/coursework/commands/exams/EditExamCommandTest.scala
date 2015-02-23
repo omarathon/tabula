@@ -19,7 +19,7 @@ class EditExamCommandTest extends TestBase with Mockito {
 
 		val command = new EditExamCommandInternal(exam) with CommandTestSupport
 
-		val validator = new EditExamValidation with EditExamCommandState {
+		val validator = new ExamValidation with EditExamCommandState {
 				def exam = command.exam
 		}
 	}

@@ -31,10 +31,7 @@ class EditExamController extends ExamsController {
 			@ModelAttribute("academicYear") academicYear: AcademicYear
 	) = {
 			cmd.populate()
-			Mav("exams/admin/edit",
-				"module" -> module,
-				"academicYear" -> academicYear
-			)
+			Mav("exams/admin/edit")
 	}
 
 	@RequestMapping(method = Array(POST))

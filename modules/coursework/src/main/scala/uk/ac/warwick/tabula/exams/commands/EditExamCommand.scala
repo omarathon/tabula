@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.exams.commands
 
-import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Exam
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -16,7 +14,7 @@ object EditExamCommand {
 			with EditExamCommandState
 			with EditExamCommandDescription
 			with PopulateEditExamCommandInternal
-			with EditExamValidation
+			with ExamValidation
 			with AutowiringAssessmentServiceComponent
 }
 
@@ -41,11 +39,10 @@ trait EditExamPermissions extends RequiresPermissionsChecking with PermissionsCh
 	}
 }
 
-trait EditExamCommandState {
+trait EditExamCommandState extends ExamState {
 
 	def exam: Exam
 
-	var name: String = _
 }
 
 trait EditExamCommandDescription extends Describable[Exam] {
@@ -54,18 +51,6 @@ trait EditExamCommandDescription extends Describable[Exam] {
 
 	def describe(d: Description) {
 		d.exam(exam)
-	}
-}
-
-trait EditExamValidation extends SelfValidating {
-
-	self: EditExamCommandState =>
-
-	override def validate(errors: Errors) {
-
-		if (!name.hasText) {
-			errors.rejectValue("name", "exam.name.empty")
-		}
 	}
 }
 

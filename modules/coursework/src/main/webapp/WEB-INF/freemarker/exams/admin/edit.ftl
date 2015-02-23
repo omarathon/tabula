@@ -1,8 +1,8 @@
 <#if features.exams>
 	<#escape x as x?html>
-	<h1>Edit exam for <@fmt.module_name module /></h1>
+	<h1>Edit exam for <@fmt.module_name exam.module /></h1>
 
-	<@f.form method="post" action="${url('/exams/admin/module/${module.code}/${exam.academicYear.startYear?c}/exam/${exam.id}/edit')}" commandName="command" cssClass="form-horizontal">
+	<@f.form method="post" action="${url('/exams/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exam/${exam.id}/edit')}" commandName="command" cssClass="form-horizontal">
 
 		<@form.labelled_row "name" "Exam name">
 			<@f.input path="name" cssClass="text" />
@@ -14,7 +14,7 @@
 
 		<div class="submit-buttons form-actions">
 			<input type="submit" value="Update" class="btn btn-primary">
-			<a class="btn" href="<@routes.depthome module=module />">Cancel</a>
+			<a class="btn" href="<@routes.depthome module=exam.module />">Cancel</a>
 		</div>
 
 	</@f.form>
