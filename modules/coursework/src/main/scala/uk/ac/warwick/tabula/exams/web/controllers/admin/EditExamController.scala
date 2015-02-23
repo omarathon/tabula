@@ -5,9 +5,8 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
-import uk.ac.warwick.tabula.data.model.{Exam, Module}
+import uk.ac.warwick.tabula.data.model.Exam
 import uk.ac.warwick.tabula.exams.commands.{EditExamCommand, EditExamCommandState}
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
@@ -26,9 +25,7 @@ class EditExamController extends ExamsController {
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(
-			@ModelAttribute("command") cmd: EditExamCommand,
-			@ModelAttribute("module") module: Module,
-			@ModelAttribute("academicYear") academicYear: AcademicYear
+			@ModelAttribute("command") cmd: EditExamCommand
 	) = {
 			cmd.populate()
 			Mav("exams/admin/edit")
@@ -37,12 +34,10 @@ class EditExamController extends ExamsController {
 	@RequestMapping(method = Array(POST))
 	def submit(
 			@Valid @ModelAttribute("command") cmd: EditExamCommand,
-			@ModelAttribute("module") module: Module,
-			@ModelAttribute("academicYear") academicYear: AcademicYear,
 			errors: Errors
 	) = {
 			if (errors.hasErrors) {
-				showForm(cmd, module, academicYear)
+				showForm(cmd)
 			} else {
 				cmd.apply()
 				Redirect(Routes.home)
