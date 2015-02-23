@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.coursework.commands.assignments.FinaliseFeedbackCommand
+import uk.ac.warwick.tabula.coursework.commands.assignments.{FinaliseFeedbackComponent, FinaliseFeedbackComponentImpl, FinaliseFeedbackCommand}
 import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{ModeratorRejectedNotification, ReleaseToMarkerNotification, ReturnToMarkerNotification}
@@ -75,7 +75,7 @@ abstract class OnlineModerationCommand(
 		// if the second-marker feedback is already rejected then do nothing - UI should prevent this
 		if(secondMarkerFeedback.state != Rejected){
 			if (approved) {
-				finaliseFeedback(assignment, firstMarkerFeedback)
+				finaliseFeedback(assignment, Seq(firstMarkerFeedback))
 				secondMarkerFeedback.state = MarkingCompleted
 			} else {
 				markerFeedback.foreach(_.state = Rejected)
@@ -119,29 +119,13 @@ abstract class OnlineModerationCommand(
 
 }
 
-trait FinaliseFeedbackComponent {
-	def finaliseFeedback(assignment: Assignment, markerFeedback: MarkerFeedback)
-}
-
-trait FinaliseFeedbackComponentImpl extends FinaliseFeedbackComponent {
-
-	self: OnlineFeedbackState =>
-
-	def finaliseFeedback(assignment: Assignment, firstMarkerFeedback: MarkerFeedback) {
-		val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, Seq(firstMarkerFeedback).asJava)
-		finaliseFeedbackCommand.apply()
-	}
-}
-
 trait ModerationState {
-	def user: User
 	var approved: Boolean = true
 	var secondMarkerFeedback: MarkerFeedback = _
 }
 
 trait ModerationRejectedNotifier extends Notifies[MarkerFeedback, MarkerFeedback] {
-
-	this: ModerationState with UserAware with UserLookupComponent with Logging =>
+	self: ModerationState with UserAware with UserLookupComponent with Logging =>
 
 	def emit(rejectedFeedback: MarkerFeedback): Seq[Notification[MarkerFeedback, Unit]] = approved match {
 		case false => Seq (
@@ -152,8 +136,7 @@ trait ModerationRejectedNotifier extends Notifies[MarkerFeedback, MarkerFeedback
 }
 
 trait OnlineModerationNotificationCompletion extends CompletesNotifications[MarkerFeedback] {
-
-	self: ModerationState with NotificationHandling =>
+	self: ModerationState with UserAware with NotificationHandling =>
 
 	def notificationsToComplete(commandResult: MarkerFeedback): CompletesNotificationsResult = {
 		CompletesNotificationsResult(

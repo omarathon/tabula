@@ -86,7 +86,7 @@ trait AssessmentFeedback {
 @Entity @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
-abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with FormattedHtml with AssessmentFeedback {
+abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with FormattedHtml with AssessmentFeedback with ToEntityReference {
 
 	def this(universityId: String) {
 		this()
@@ -272,7 +272,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 }
 
 @Entity @DiscriminatorValue("assignment")
-class AssignmentFeedback extends Feedback with ToEntityReference {
+class AssignmentFeedback extends Feedback {
 
 	type Entity = AssignmentFeedback
 
@@ -300,7 +300,7 @@ class AssignmentFeedback extends Feedback with ToEntityReference {
 }
 
 @Entity @DiscriminatorValue("exam")
-class ExamFeedback extends Feedback with ToEntityReference {
+class ExamFeedback extends Feedback {
 
 	type Entity = ExamFeedback
 

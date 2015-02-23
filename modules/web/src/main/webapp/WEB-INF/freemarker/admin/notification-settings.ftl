@@ -81,6 +81,72 @@
 			</fieldset>
 		</div>
 
+		<div id="sgt-reminders" class="striped-section collapsible expanded">
+			<fieldset class="clearfix">
+				<h2 class="section-title">
+					Coursework marking workflow "send to administrator" notifications
+				</h2>
+				<div class="striped-section-contents">
+					<div class="item-info">
+						<h5>Why are they sent?</h5>
+
+						<p>When marking workflows are used to mark coursework submissions, it can be difficult to
+						   keep track of when feedback has been "completed" by the final marker and has been sent
+						   to an administrator, so that it can be released to students.</p>
+
+						<p>Tabula will send a notification when the final marker selects relevant submissions and
+						   clicks on the "Send to administrator" button.</p>
+
+						<@form.label checkbox=true>
+							<@f.checkbox path="finaliseFeedbackNotificationEnabled" id="finaliseFeedbackNotificationEnabled" />
+							Turn on these notifications
+						</@form.label>
+						<@f.errors path="finaliseFeedbackNotificationEnabled" cssClass="error" />
+					</div>
+
+					<div class="item-info">
+						<h5>When are they sent?</h5>
+
+						<ul>
+							<li>Each time a final marker selects one or more submissions and chooses "send to administrator"</li>
+						</ul>
+					</div>
+
+					<div class="item-info">
+						<h5>Who will receive them?</h5>
+
+						<p>Unless an individual has opted out of marking completed notifications, the following groups
+							of people will receive notifications: </p>
+
+						<ul>
+							<li><@form.label checkbox=true>
+								<@f.checkbox path="finaliseFeedbackNotificationNotifyModuleManagers" id="finaliseFeedbackNotificationNotifyModuleManagers" />
+								Module Managers
+							</@form.label></li>
+
+							<li><@form.label checkbox=true>
+								<@f.checkbox path="finaliseFeedbackNotificationNotifyDepartmentAdministrators" id="finaliseFeedbackNotificationNotifyDepartmentAdministrators" />
+								Departmental Administrators
+							</@form.label></li>
+						</ul>
+
+						<p>These notifications can be sent to all the selected groups of people, or only to the first group
+							with someone in it (e.g. Departmental Administrators will only be notified if there are no Module
+							Managers for that module).</p>
+
+						<@form.label checkbox=true>
+							<@f.radiobutton path="finaliseFeedbackNotificationNotifyFirstNonEmptyGroupOnly" value="false" />
+							Notify all selected groups of people
+						</@form.label>
+						<@form.label checkbox=true>
+							<@f.radiobutton path="finaliseFeedbackNotificationNotifyFirstNonEmptyGroupOnly" value="true" />
+							Only notify the first matching group of people
+						</@form.label>
+					</div>
+				</div>
+			</fieldset>
+		</div>
+
 		<div class="submit-buttons">
 			<input type="submit" value="Save" class="btn btn-primary">
 			<#if (returnTo!"")?length gt 0>

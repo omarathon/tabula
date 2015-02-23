@@ -6,8 +6,8 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.coursework.commands.assignments.MarkingCompletedCommand
+import uk.ac.warwick.tabula.commands.{UserAware, Appliable, SelfValidating}
+import uk.ac.warwick.tabula.coursework.commands.assignments.{NextMarkerFeedback, MarkingCompletedState, MarkingCompletedCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.Transactions._
@@ -21,6 +21,7 @@ import scala.collection.JavaConversions._
 class MarkingCompletedController extends CourseworkController {
 
 	validatesSelf[SelfValidating]
+	type MarkingCompletedCommand = Appliable[Unit] with MarkingCompletedState with UserAware with NextMarkerFeedback
 
 	@ModelAttribute("markingCompletedCommand")
 	def command(
@@ -28,11 +29,11 @@ class MarkingCompletedController extends CourseworkController {
 		@PathVariable("assignment") assignment: Assignment,
 		@PathVariable("marker") marker: User,
 		submitter: CurrentUser
-	) = MarkingCompletedCommand(mandatory(module), mandatory(assignment), marker, submitter)
+	): MarkingCompletedCommand = MarkingCompletedCommand(mandatory(module), mandatory(assignment), marker, submitter)
 
 
 	def RedirectBack(assignment: Assignment, command: MarkingCompletedCommand) = {
-		if(command.onlineMarking){
+		if (command.onlineMarking) {
 			Redirect(Routes.admin.assignment.markerFeedback.onlineFeedback(assignment, command.user))
 		} else {
 			Redirect(Routes.admin.assignment.markerFeedback(assignment, command.user))
@@ -51,11 +52,9 @@ class MarkingCompletedController extends CourseworkController {
 		@ModelAttribute("markingCompletedCommand") form: MarkingCompletedCommand,
 		errors: Errors
 	) = {
-		form.preSubmitValidation()
-
-		val isUserALaterMarker = form.markerFeedback.exists{ markerFeedback =>
+		val isUserALaterMarker = form.markerFeedback.exists { markerFeedback =>
 			def checkNextMarkerFeedbackForMarker(thisMarkerFeedback: MarkerFeedback): Boolean = {
-				form.nextMarkerFeedback(thisMarkerFeedback).exists{ mf =>
+				form.nextMarkerFeedback(thisMarkerFeedback).exists { mf =>
 					if (mf.getMarkerUsercode.getOrElse("") == user.apparentId)
 						true
 					else
@@ -92,7 +91,6 @@ class MarkingCompletedController extends CourseworkController {
 				showForm(module,assignment, marker, form, errors)
 			else {
 				transactional() {
-					form.preSubmitValidation()
 					form.apply()
 					RedirectBack(assignment, form)
 				}

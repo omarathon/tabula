@@ -2,12 +2,13 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
+import uk.ac.warwick.tabula.system.BindListener
 
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services._
-import org.springframework.validation.Errors
+import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
 import scala.collection.JavaConverters._
@@ -31,10 +32,10 @@ object ReleaseForMarkingCommand {
 
 
 abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, val user: User)
-	extends CommandInternal[List[Feedback]] with Appliable[List[Feedback]] with ReleaseForMarkingState with ReleasedState
+	extends CommandInternal[List[Feedback]] with Appliable[List[Feedback]] with ReleaseForMarkingState with ReleasedState with BindListener
 	with SelfValidating with UserAware {
 
-	this: AssessmentServiceComponent with StateServiceComponent with FeedbackServiceComponent =>
+	self: AssessmentServiceComponent with StateServiceComponent with FeedbackServiceComponent =>
 
 	// we must go via the marking workflow directly to determine if the student has a marker - not all workflows use the markerMap on assignment
 	def studentsWithKnownMarkers:Seq[String] = students.filter(assignment.markingWorkflow.studentHasMarker(assignment, _))
@@ -43,7 +44,7 @@ abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assi
 	def studentsWithoutKnownMarkers:Seq[String] = students -- studentsWithKnownMarkers
 	def studentsAlreadyReleased = invalidFeedback.asScala.map(f=>f.universityId)
 
-	def applyInternal() = {
+	override def applyInternal() = {
 		// get the parent feedback or create one if none exist
 		val feedbacks = studentsWithKnownMarkers.toBuffer.map{ uniId:String =>
 			val parentFeedback = assignment.feedbacks.find(_.universityId == uniId).getOrElse({
@@ -72,7 +73,7 @@ abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assi
 		feedbackToUpdate.toList
 	}
 
-	def preSubmitValidation() {
+	override def onBind(result: BindingResult) {
 		invalidFeedback = for {
 			universityId <- students
 			parentFeedback <- assignment.feedbacks.find(_.universityId == universityId)
@@ -80,7 +81,7 @@ abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assi
 		} yield parentFeedback
 	}
 
-	def validate(errors: Errors) {
+	override def validate(errors: Errors) {
 		if (!confirm) errors.rejectValue("confirm", "submission.release.for.marking.confirm")
 	}
 
