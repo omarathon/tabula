@@ -14,12 +14,23 @@
 	>
 		<i class="icon-check"></i> Add marks
 	</@fmt.permission_button>
+
+	<#assign upload_url><@routes.uploadExamToSits exam /></#assign>
+	<@fmt.permission_button
+		permission='Feedback.Publish'
+		scope=exam
+		action_descr='upload feedback to SITS'
+		tooltip='Upload mark and grade to SITS'
+		href=upload_url
+		classes='btn'
+	>
+		<i class="icon-upload icon-fixed-width"></i> Upload to SITS
+	</@fmt.permission_button>
 </div>
 
 <table class="table table-bordered table-striped table-condensed feedback-table">
 	<thead>
 		<tr>
-			<th style="width: 20px; padding-right: 5px;" class="for-check-all"></th>
 			<th class="sortable">Seat order</th>
 			<th class="sortable">Student</th>
 			<th colspan="2">Original</th>
@@ -27,7 +38,7 @@
 			<th colspan="4">SITS upload</th>
 		</tr>
 		<tr>
-			<th colspan="3"></th>
+			<th colspan="2"></th>
 			<th class="sortable">Mark</th>
 			<th class="sortable">Grade</th>
 			<th class="sortable">Mark</th>
@@ -43,9 +54,6 @@
 			<#assign hasFeedback = mapGet(feedbackMap, student)?? />
 			<#assign hasSitsStatus = hasFeedback && mapGet(sitsStatusMap, mapGet(feedbackMap, student))?? />
 			<tr>
-				<td>
-
-				</td>
 				<td>${student_index + 1}</td>
 				<td>
 					<#if module.department.showStudentName>
