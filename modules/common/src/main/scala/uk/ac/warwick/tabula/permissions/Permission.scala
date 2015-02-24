@@ -69,7 +69,7 @@ object PermissionsSelector {
 		override def hashCode = id.hashCode
 
 		override def equals(other: Any) = other match {
-			case that: PermissionsSelector[A] =>
+			case that: PermissionsSelector[A @unchecked] =>
 				new EqualsBuilder()
 					.append(id, that.id)
 					.build()

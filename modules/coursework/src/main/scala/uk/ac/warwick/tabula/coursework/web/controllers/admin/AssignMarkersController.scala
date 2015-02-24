@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.{UserGroup, Assignment, Module}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.services.{AssignmentMembershipService, UserLookupService}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserLookupService}
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.userlookup.User
 
@@ -32,7 +32,7 @@ class AssignMarkersController extends CourseworkController {
 
 	@Autowired var userLookup: UserLookupService = _
 
-	@Autowired var assignmentMembershipService: AssignmentMembershipService = _
+	@Autowired var assignmentMembershipService: AssessmentMembershipService = _
 
 	@ModelAttribute("command")
 	def getCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =

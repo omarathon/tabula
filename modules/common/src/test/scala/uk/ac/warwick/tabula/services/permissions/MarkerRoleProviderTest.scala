@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services.permissions
 
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssessmentService
 import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase, Fixtures}
 import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConversions._
@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.helpers.Promises._
 
 class MarkerRoleProviderTest extends TestBase with Mockito {
 
-	val mockAssignmentService = smartMock[AssignmentService]
+	val mockAssignmentService = smartMock[AssessmentService]
 	val provider = new MarkerRoleProvider {
 		override val assignmentService = promise { mockAssignmentService }
 	}
@@ -72,7 +72,7 @@ class MarkerRoleProviderTest extends TestBase with Mockito {
 	}
 	
 	@Test def handlesDefault() = withCurrentUser(cuscavUser) {
-		provider.getRolesFor(currentUser, Fixtures.feedback()) should be (Seq())
+		provider.getRolesFor(currentUser, Fixtures.assignmentFeedback()) should be (Seq())
 	}
 
 }

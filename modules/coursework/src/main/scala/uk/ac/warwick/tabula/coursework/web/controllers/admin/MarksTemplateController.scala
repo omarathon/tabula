@@ -10,16 +10,17 @@ import uk.ac.warwick.tabula.coursework.commands.feedback.MarksTemplateCommand._
 import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateMarksTemplateCommand, GenerateOwnMarksTemplateCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.data.model.{Exam, Assignment, Module}
+import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marks-template"))
-class MarksTemplateController extends CourseworkController {
+class AssignmentMarksTemplateController extends CourseworkController {
 
-	var assignmentMembershipService = Wire[AssignmentMembershipService]
+	var assignmentMembershipService = Wire[AssessmentMembershipService]
 	
 	@ModelAttribute("command")
 	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
@@ -31,14 +32,14 @@ class MarksTemplateController extends CourseworkController {
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable("assignment") assignment: Assignment) = {
-		new ExcelView(safeAssignmentName(assignment) + " marks.xlsx", cmd.apply())
+		new ExcelView(safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
 	}
 }
 
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/marks-template"))
-class MarkerMarksTemplateController extends CourseworkController {
+class AssignmentMarkerMarksTemplateController extends CourseworkController {
 
 	@ModelAttribute("command")
 	def command(
@@ -54,16 +55,36 @@ class MarkerMarksTemplateController extends CourseworkController {
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable("assignment") assignment: Assignment) = {
-		new ExcelView(safeAssignmentName(assignment) + " marks.xlsx", cmd.apply())
+		new ExcelView(safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
 	}
 }
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/marks-template"))
-class CurrentMarkerMarksTemplateController extends CourseworkController {
+class CurrentAssignmentMarkerMarksTemplateController extends CourseworkController {
 
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
 		Redirect(Routes.admin.assignment.markerFeedback.marksTemplate(assignment, currentUser.apparentUser))
+	}
+}
+
+@Controller
+@RequestMapping(value = Array("/exams/admin/module/{module}/exams/{exam}/marks-template"))
+class ExamMarksTemplateController extends ExamsController {
+
+	var examMembershipService = Wire[AssessmentMembershipService]
+
+	@ModelAttribute("command")
+	def command(@PathVariable module: Module, @PathVariable exam: Exam) =
+		GenerateMarksTemplateCommand(
+			mandatory(module),
+			mandatory(exam),
+			examMembershipService.determineMembershipUsers(exam).map(_.getWarwickId)
+		)
+
+	@RequestMapping(method = Array(HEAD, GET))
+	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable exam: Exam) = {
+		new ExcelView(safeAssessmentName(exam) + " marks.xlsx", cmd.apply())
 	}
 }

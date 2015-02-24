@@ -12,9 +12,9 @@ import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 
 class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
-	private trait CommandTestSupport extends SmallGroupServiceComponent with AssignmentMembershipServiceComponent with GeneratesDefaultWeekRanges {
+	private trait CommandTestSupport extends SmallGroupServiceComponent with AssessmentMembershipServiceComponent with GeneratesDefaultWeekRanges {
 		val smallGroupService = smartMock[SmallGroupService]
-		val assignmentMembershipService = smartMock[AssignmentMembershipService]
+		val assessmentMembershipService = smartMock[AssessmentMembershipService]
 
 		override def defaultWeekRanges(year: AcademicYear): Seq[WeekRange] = Nil
 	}
@@ -45,7 +45,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command.name = "Set name"
 		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
-		command.assignmentMembershipService.getAssessmentComponents(module) returns (Seq())
+		command.assessmentMembershipService.getAssessmentComponents(module) returns (Seq())
 
 		val set = command.applyInternal()
 		set.name should be ("Set name")
@@ -65,9 +65,9 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		val ac2 = Fixtures.upstreamAssignment(Fixtures.module("in102"), 2)
 		val upstream2 = Fixtures.assessmentGroup(ac2)
 
-		command.assignmentMembershipService.getAssessmentComponents(module) returns (Seq(ac1, ac2))
-		command.assignmentMembershipService.getUpstreamAssessmentGroups(ac1, command.academicYear) returns (Seq(upstream1))
-		command.assignmentMembershipService.getUpstreamAssessmentGroups(ac2, command.academicYear) returns (Seq(upstream2))
+		command.assessmentMembershipService.getAssessmentComponents(module) returns (Seq(ac1, ac2))
+		command.assessmentMembershipService.getUpstreamAssessmentGroups(ac1, command.academicYear) returns (Seq(upstream1))
+		command.assessmentMembershipService.getUpstreamAssessmentGroups(ac2, command.academicYear) returns (Seq(upstream2))
 
 		val set = command.applyInternal()
 		set.name should be ("Set name")

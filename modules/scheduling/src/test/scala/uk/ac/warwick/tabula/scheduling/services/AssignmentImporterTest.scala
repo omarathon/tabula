@@ -10,14 +10,13 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
-import uk.ac.warwick.tabula.data.model.AssessmentComponent
+import uk.ac.warwick.tabula.data.model.{UpstreamModuleRegistration, UpstreamAssessmentGroup, AssessmentComponent}
 import scala.collection.mutable.ArrayBuffer
 
 trait EmbeddedSits {
 	val sits = new EmbeddedDatabaseBuilder().addScript("sits.sql").build()
 
-	@After def after {
+	@After def afterTheFeast {
 		sits.shutdown()
 	}
 }

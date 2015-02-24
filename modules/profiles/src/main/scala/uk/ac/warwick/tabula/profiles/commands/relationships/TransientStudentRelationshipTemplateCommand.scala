@@ -71,7 +71,7 @@ trait TransientStudentRelationshipTemplateCommandState {
 
 	// Bind variables
 
-	var unallocated: JList[Member] = LazyLists.create { () => null } // grower, not a shower
+	var unallocated: JList[Member] = LazyLists.createWithFactory { () => null } // grower, not a shower
 	var mapping: JMap[Member, JList[Member]] =
 		LazyMaps.create { key: Member => JArrayList(): JList[Member] }.asJava
 	var additionalAgents: JList[String] = JArrayList()

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Module, Submission}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 
 
@@ -22,9 +22,9 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 
 		val submission1 = new Submission("user1")
 
-		val feedback1 = new Feedback
+		val feedback1 = new AssignmentFeedback
 		feedback1.assignment = assignment 
-		val feedback2 = new Feedback("user2")
+		val feedback2 = Fixtures.assignmentFeedback("user2")
 		feedback2.released = true
 		feedback2.assignment = assignment
 
@@ -33,15 +33,15 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 
 		val command = new OnlineFeedbackCommand(module, assignment, new CurrentUser(marker, marker)) with OnlineFeedbackCommandTestSupport
 
-		command.assignmentMembershipService.determineMembershipUsers(assignment) returns Seq(user1, user2, user3)
+		command.assessmentMembershipService.determineMembershipUsers(assignment) returns Seq(user1, user2, user3)
 
 		command.userLookup.registerUserObjects(user1,user2)
 
 		command.submissionService.getSubmissionByUniId(assignment, "user1") returns Some(submission1)
 		command.submissionService.getSubmissionByUniId(assignment, "user2") returns None
 
-		command.feedbackService.getFeedbackByUniId(assignment, "user1") returns Some(feedback1)
-		command.feedbackService.getFeedbackByUniId(assignment, "user2") returns Some(feedback2)
+		command.feedbackService.getAssignmentFeedbackByUniId(assignment, "user1") returns Some(feedback1)
+		command.feedbackService.getAssignmentFeedbackByUniId(assignment, "user2") returns Some(feedback2)
 
 	}
 
@@ -50,8 +50,8 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 	def commandApply() {
 		new Fixture {
 			val feedbackGraphs = command.applyInternal()
-			there was one(command.feedbackService).getFeedbackByUniId(assignment, "user1")
-			there was one(command.feedbackService).getFeedbackByUniId(assignment, "user2")
+			there was one(command.feedbackService).getAssignmentFeedbackByUniId(assignment, "user1")
+			there was one(command.feedbackService).getAssignmentFeedbackByUniId(assignment, "user2")
 
 			there was one(command.submissionService).getSubmissionByUniId(assignment, "user1")
 			there was one(command.submissionService).getSubmissionByUniId(assignment, "user2")
@@ -77,10 +77,10 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 }
 
 // Implements the dependencies declared by the command
-trait OnlineFeedbackCommandTestSupport extends SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with AssignmentMembershipServiceComponent with Mockito {
+trait OnlineFeedbackCommandTestSupport extends SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with AssessmentMembershipServiceComponent with Mockito {
 	val userLookup = new MockUserLookup
 	val submissionService = mock[SubmissionService]
 	val feedbackService = mock[FeedbackService]
-	var assignmentMembershipService = mock[AssignmentMembershipService]
+	var assessmentMembershipService = mock[AssessmentMembershipService]
 	def apply(): Seq[StudentFeedbackGraph] = Seq()
 }

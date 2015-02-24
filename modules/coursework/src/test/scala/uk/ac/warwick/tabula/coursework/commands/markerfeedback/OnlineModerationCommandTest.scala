@@ -38,7 +38,7 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 		val command = new OnlineModerationCommand(module, assignment, student, currentUser.apparentUser, currentUser, gradeGenerator) with ModerationCommandSupport
 			with FinaliseFeedbackTestImpl
 
-		val testFeedback = new Feedback
+		val testFeedback = new AssignmentFeedback
 		testFeedback.universityId = "user1"
 		assignment.feedbacks.add(testFeedback)
 		val firstMarkerFeedback = new MarkerFeedback {
@@ -50,7 +50,7 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 		testFeedback.firstMarkerFeedback = firstMarkerFeedback
 		testFeedback.secondMarkerFeedback = secondMarkerFeedback
 
-		when (command.feedbackService.getFeedbackByUniId(assignment, "user1")) thenReturn Some(testFeedback)
+		when (command.feedbackService.getAssignmentFeedbackByUniId(assignment, "user1")) thenReturn Some(testFeedback)
 	}
 
 

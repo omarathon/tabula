@@ -1,14 +1,15 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.AccessType
 import javax.persistence._
+import uk.ac.warwick.tabula.system.TwoWayConverter
+
 import scala.collection.JavaConversions._
 import uk.ac.warwick.userlookup.User
-import org.springframework.core.convert.converter.Converter
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{AssignmentServiceUserGroupHelpers, AssignmentService, UserGroupCacheManager, UserLookupService}
+import uk.ac.warwick.tabula.services.{AssignmentServiceUserGroupHelpers, AssessmentService, UserGroupCacheManager, UserLookupService}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /** A MarkingWorkflow defines how an assignment will be marked, including who
   * will be the markers and what rules should be used to decide how submissions
@@ -21,7 +22,7 @@ import uk.ac.warwick.tabula.web.Routes
 @Table(name="MarkScheme")
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="MarkingMethod", discriminatorType = DiscriminatorType.STRING, length=255)
-@AccessType("field")
+@Access(AccessType.FIELD)
 abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with Serializable {
 
 	type Usercode = String
@@ -44,7 +45,7 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
 		Routes.coursework.admin.assignment.markerFeedback.onlineFeedback(assignment, marker)
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
-	@transient var assignmentService = Wire.option[AssignmentService with AssignmentServiceUserGroupHelpers]
+	@transient var assignmentService = Wire.option[AssessmentService with AssignmentServiceUserGroupHelpers]
 
 	/** The group of first markers. */
 	@OneToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)
@@ -273,6 +274,7 @@ class MarkingMethodUserType extends AbstractStringUserType[MarkingMethod]{
 	override def convertToValue(state: MarkingMethod) = state.name
 }
 
-class StringToMarkingMethod extends Converter[String, MarkingMethod]{
-	def convert(string:String):MarkingMethod = MarkingMethod.fromCode(string)
+class StringToMarkingMethod extends TwoWayConverter[String, MarkingMethod] {
+	override def convertRight(source: String): MarkingMethod = source.maybeText.map(MarkingMethod.fromCode).orNull
+	override def convertLeft(source: MarkingMethod): String = Option(source).map { _.name }.orNull
 }

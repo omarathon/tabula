@@ -34,12 +34,12 @@
 		<@form.labelled_row "pointStyle" "Date format">
 			<@f.hidden path="pointStyle" />
 			<@form.label clazz="radio" checkbox=true>
-				<@f.radiobutton path="pointStyle" value="week" disabled="true" />
+				<@f.radiobutton path="pointStyle" value="week" disabled=true />
 					term weeks
 				<@fmt.help_popover id="pointStyle-week" content="Create points which cover term weeks e.g. Personal tutor meeting weeks 2-3" />
 			</@form.label>
 			<@form.label clazz="radio" checkbox=true>
-				<@f.radiobutton path="pointStyle" value="date" disabled="true" />
+				<@f.radiobutton path="pointStyle" value="date" disabled=true />
 				calendar dates
 				<@fmt.help_popover id="pointStyle-date" content="Create points which use calendar dates e.g. Supervision 1st-31st October" />
 			</@form.label>

@@ -28,7 +28,7 @@ class PermissionDeniedException(
 	val user: CurrentUser,
 	val permission: Permission,
 	val scope: Any,
-	cause: Throwable = null) extends RuntimeException(s"${user} can't perform ${permission} on ${scope}", cause) with UserError with PermissionsError {
+	cause: Throwable = null) extends RuntimeException(s"${user} can't perform ${permission} on ${scope match { case Some(o) => o; case _ => scope }}", cause) with UserError with PermissionsError {
 	override val statusCode = HttpStatus.SC_FORBIDDEN
 }
 	
@@ -37,6 +37,6 @@ class PermissionDeniedException(
  * the submission/feedback/info page for an assignment. It is just so the
  * exception resolver can send it off to a specific error page.
  */
-class SubmitPermissionDeniedException(assignment: Assignment) extends RuntimeException() with UserError with PermissionsError {
+class SubmitPermissionDeniedException(user: CurrentUser, assignment: Assignment) extends RuntimeException(s"${user} can't submit assignment ${assignment}") with UserError with PermissionsError {
 	override val statusCode = HttpStatus.SC_FORBIDDEN
 }

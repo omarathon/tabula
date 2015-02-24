@@ -46,6 +46,8 @@ class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixt
 			// members should be empty, so no manually enrolled members at all
 			allFeatures(members)
 
+			disableJQueryAnimationsOnHtmlUnit()
+
 			click on linkText("Add link to SITS")
 			eventually { className("link-sits").element.isDisplayed should be (true) }
 

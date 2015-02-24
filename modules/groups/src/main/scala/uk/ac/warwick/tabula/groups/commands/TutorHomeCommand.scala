@@ -9,13 +9,7 @@ import uk.ac.warwick.tabula.services.{SecurityService, SmallGroupService}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.permissions.Public
 
-// TODO extend shared trait when CM and RA have committed it.
-trait Applicable[A] {
-	def apply(): A
-}
-
-
-trait TutorHomeCommand extends Applicable[Map[Module, Map[SmallGroupSet, Seq[SmallGroup]]]]
+trait TutorHomeCommand extends Appliable[Map[Module, Map[SmallGroupSet, Seq[SmallGroup]]]]
 
 /** Gets the data for a tutor's view of all small groups they're tutor of.
   *

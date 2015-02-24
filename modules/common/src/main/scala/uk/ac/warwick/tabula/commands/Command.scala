@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands
 
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.{NotificationHandling, EventHandling, Event, EventDescription}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, RequestInfo, JavaImports}
@@ -251,7 +252,7 @@ trait Unaudited { self: Describable[_] =>
  */
 abstract class Description {
 	protected var map = Map[String, Any]()
-	def properties(props: Pair[String, Any]*) = {
+	def properties(props: (String, Any)*) = {
 		map ++= props
 		this
 	}
@@ -259,7 +260,7 @@ abstract class Description {
 		map ++= otherMap
 		this
 	}
-	def property(prop: Pair[String, Any]) = {
+	def property(prop: (String, Any)) = {
 		map += prop
 		this
 	}
@@ -269,7 +270,10 @@ abstract class Description {
 	 */
 	def feedback(feedback: Feedback) = {
 		property("feedback" -> feedback.id)
-		if (feedback.assignment != null) assignment(feedback.assignment)
+		HibernateHelpers.initialiseAndUnproxy(feedback) match {
+			case assignmentFeedback: AssignmentFeedback if assignmentFeedback.assignment != null => assignment(assignmentFeedback.assignment)
+			case examFeedback: ExamFeedback if examFeedback.exam != null => exam(examFeedback.exam)
+		}
 		this
 	}
 
@@ -300,6 +304,12 @@ abstract class Description {
 	def assignment(assignment: Assignment) = {
 		property("assignment" -> assignment.id)
 		if (assignment.module != null) module(assignment.module)
+		this
+	}
+
+	def exam(exam: Exam) = {
+		property("exam" -> exam.id)
+		if (exam.module != null) module(exam.module)
 		this
 	}
 

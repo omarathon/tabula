@@ -144,7 +144,7 @@ class SysadminIndexProfilesController extends BaseSysadminController {
 
 @Controller
 @RequestMapping(Array("/sysadmin/import"))
-class SysadminController extends BaseSysadminController {
+class SchedulingSysadminController extends BaseSysadminController {
 
 	@RequestMapping(method = Array(POST))
 	def importModules = {

@@ -32,12 +32,12 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
 		user4.setUserId("user4")
     
     val userDatabase = Seq(user1, user2, user3, user4)
-		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] =>
+		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { _ match { case ids: Seq[String @unchecked] =>
 			ids.map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
-		}
-		userLookup.getUserByUserId(any[String]) answers { case id: String @unchecked =>
+		}}
+		userLookup.getUserByUserId(any[String]) answers { _ match { case id: String @unchecked =>
 			userDatabase.find {_.getUserId == id}.getOrElse (new AnonymousUser())
-		}
+		}}
 
     val eventA = new SmallGroupEventBuilder().withTutors(createUserGroup(Seq("tutor1","tutor2"),identifierIsUniNumber = false)).build
     val groupA = new SmallGroupBuilder()

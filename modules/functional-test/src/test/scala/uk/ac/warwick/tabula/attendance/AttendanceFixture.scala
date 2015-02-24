@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance
 
-import uk.ac.warwick.tabula.home.{FeaturesDriver, FixturesDriver}
+import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
 import uk.ac.warwick.tabula.BrowserTest
 
 class AttendanceFixture extends BrowserTest with FeaturesDriver with FixturesDriver {

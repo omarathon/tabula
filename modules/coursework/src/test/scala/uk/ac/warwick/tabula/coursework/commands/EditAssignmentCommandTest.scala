@@ -4,12 +4,12 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.EditAssignmentComman
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
 
 class EditAssignmentCommandTest extends TestBase with Mockito {
   @Test def instantiate {
     val assignment = new Assignment()
-		assignment.assignmentMembershipService = mock[AssignmentMembershipService]
+		assignment.assessmentMembershipService = mock[AssessmentMembershipService]
 
     assignment.addDefaultFields()
     assignment.module = new Module()

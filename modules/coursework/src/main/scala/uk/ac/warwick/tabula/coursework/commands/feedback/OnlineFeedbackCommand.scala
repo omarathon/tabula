@@ -18,7 +18,7 @@ object OnlineFeedbackCommand {
 			with AutowiringSubmissionServiceComponent
 			with AutowiringFeedbackServiceComponent
 			with AutowiringUserLookupComponent
-			with AutowiringAssignmentMembershipServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
 			with Unaudited
 			with ReadOnly
 }
@@ -26,7 +26,7 @@ object OnlineFeedbackCommand {
 abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser)
 	extends CommandInternal[Seq[StudentFeedbackGraph]] with Appliable[Seq[StudentFeedbackGraph]] with OnlineFeedbackState {
 
-	self: SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with AssignmentMembershipServiceComponent =>
+	self: SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
 	val marker = submitter.apparentUser
 
@@ -38,13 +38,13 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 
 	  val studentsWithSubmissionOrFeedbackUniversityIds = studentsWithSubmissionOrFeedback.map(_.getWarwickId)
 
-		val unsubmittedStudents = assignmentMembershipService.determineMembershipUsers(assignment)
+		val unsubmittedStudents = assessmentMembershipService.determineMembershipUsers(assignment)
 				.filterNot { x => studentsWithSubmissionOrFeedbackUniversityIds.contains(x.getWarwickId) }
 
 		val students = studentsWithSubmissionOrFeedback ++ unsubmittedStudents
 		students.map { student =>
 			val hasSubmission = submissionService.getSubmissionByUniId(assignment, student.getWarwickId).isDefined
-			val feedback = feedbackService.getFeedbackByUniId(assignment, student.getWarwickId)
+			val feedback = feedbackService.getAssignmentFeedbackByUniId(assignment, student.getWarwickId)
 			val (hasFeedback, hasPublishedFeedback) = feedback match {
 				case Some(f) => (true, f.released.booleanValue)
 				case _ => (false, false)
@@ -88,7 +88,7 @@ abstract class OnlineMarkerFeedbackCommand(
 		submissions.filter(_.isReleasedForMarking).map { submission =>			
 			val student = userLookup.getUserByWarwickUniId(submission.universityId)
 			val hasSubmission = true
-			val feedback = feedbackService.getFeedbackByUniId(assignment, submission.universityId)
+			val feedback = feedbackService.getAssignmentFeedbackByUniId(assignment, submission.universityId)
 			// get all the feedbacks for this user and pick the most recent
 			val markerFeedback = assignment.getAllMarkerFeedbacks(submission.universityId, marker).headOption
 

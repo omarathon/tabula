@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.annotations.{Type, BatchSize}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{TermService, AssignmentService, ModuleAndDepartmentService, RelationshipService}
+import uk.ac.warwick.tabula.services.{TermService, AssessmentService, ModuleAndDepartmentService, RelationshipService}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.AcademicYear
@@ -80,7 +80,7 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
 	@transient
-	var assignmentService = Wire[AssignmentService]
+	var assignmentService = Wire[AssessmentService]
 
 	@transient
 	var termService = Wire[TermService]

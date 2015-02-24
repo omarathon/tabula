@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import org.springframework.beans.factory.annotation.{Autowired, Configurable}
-import reflect.BeanProperty
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.services.{AssignmentService, ZipService}
+import uk.ac.warwick.tabula.services.{AssessmentService, ZipService}
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip
 import uk.ac.warwick.tabula.commands.{ApplyWithCallback, ReadOnly, Command, Description}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -11,7 +9,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
 
 
 /**
@@ -26,8 +24,8 @@ class DownloadFeedbackSheetsCommand(val module: Module, val assignment: Assignme
 	var members: Seq[User] = _
 
 	var zipService = Wire.auto[ZipService]
-	var assignmentService = Wire.auto[AssignmentService]
-	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
+	var assignmentService = Wire.auto[AssessmentService]
+	var assignmentMembershipService = Wire.auto[AssessmentMembershipService]
 
 	override def applyInternal():RenderableZip = {
 		if (assignment.feedbackTemplate == null) logger.error("No feedback sheet for assignment - " + assignment.id)

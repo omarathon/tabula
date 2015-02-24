@@ -115,7 +115,7 @@
 			</#if>
 		</td>
 		<#noescape>
-		<@spring.bind path="file.attached" htmlEscape="false">
+		<@spring.bind path="file.attached" htmlEscape=false>
 		<td>
 			<#-- FIXME should be able to spring:bind to a list, not have to manually specify it like this -->
 			<ul class="file-list">
@@ -150,7 +150,7 @@
 
 <div class="submit-buttons form-actions">
 <#if hasErrors>
-<input class="btn btn-primary" type="submit" value="Confirm" disabled="true">
+<input class="btn btn-primary" type="submit" value="Confirm" disabled="disabled">
 <#else>
 <input type="hidden" name="confirm" value="true">
 <input class="btn btn-primary" type="submit" value="Confirm">

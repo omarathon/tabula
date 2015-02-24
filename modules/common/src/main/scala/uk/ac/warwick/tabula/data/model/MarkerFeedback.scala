@@ -1,19 +1,21 @@
 package uk.ac.warwick.tabula.data.model
 
+import uk.ac.warwick.tabula.data.HibernateHelpers
+
 import scala.collection.JavaConversions._
-import org.hibernate.annotations._
 import org.joda.time.DateTime
 import javax.persistence._
+import javax.persistence.ForeignKey
+import org.hibernate.annotations.{BatchSize, Fetch, FetchMode, Type}
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
-import org.hibernate.annotations.AccessType
 import javax.persistence.Entity
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 
-@Entity @AccessType("field")
+@Entity @Access(AccessType.FIELD)
 class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityReference with CanBeDeleted {
 	type Entity = MarkerFeedback
 
@@ -28,15 +30,21 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	def getFeedbackPosition: FeedbackPosition = feedback.getFeedbackPosition(this)
 
 	def getMarkerUsercode: Option[String] = {
-		val student = feedback.universityId
-		val assignment = feedback.assignment
-		val workflow = assignment.markingWorkflow
-		getFeedbackPosition match {
-			case FirstFeedback => workflow.getStudentsFirstMarker(assignment, student)
-			case SecondFeedback => workflow.getStudentsSecondMarker(assignment, student)
-			case ThirdFeedback => workflow.getStudentsFirstMarker(assignment, student)
+		// Very fuck you, Hibernate
+		HibernateHelpers.initialiseAndUnproxy(feedback) match {
+			case assignmentFeedback: AssignmentFeedback =>
+				val student = feedback.universityId
+				val assignment = assignmentFeedback.assignment
+				val workflow = assignment.markingWorkflow
+				getFeedbackPosition match {
+					case FirstFeedback => workflow.getStudentsFirstMarker(assignment, student)
+					case SecondFeedback => workflow.getStudentsSecondMarker(assignment, student)
+					case ThirdFeedback => workflow.getStudentsFirstMarker(assignment, student)
+					case _ => None
+				}
 			case _ => None
 		}
+
 	}
 
 	def getMarkerUser: User = userLookup.getUserByUserId(getMarkerUsercode.get)

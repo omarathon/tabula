@@ -6,15 +6,12 @@ import uk.ac.warwick.tabula.services.ZipService
 import org.springframework.beans.factory.annotation.Autowired
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model._
 import org.springframework.beans.factory.annotation.Configurable
-import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssessmentService
 import uk.ac.warwick.tabula.data.FeedbackDao
-import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 
@@ -29,7 +26,7 @@ class DownloadSelectedFeedbackCommand(
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Read, assignment)
 	
-	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentService = Wire.auto[AssessmentService]
 	var zipService = Wire.auto[ZipService]
 	var feedbackDao = Wire.auto[FeedbackDao]
 	
@@ -37,14 +34,14 @@ class DownloadSelectedFeedbackCommand(
 
     var students: JList[String] = JArrayList()
     
-    var feedbacks: JList[Feedback] = _
+    var feedbacks: JList[AssignmentFeedback] = _
     
     override def applyInternal(): RenderableZip = {
 		if (students.isEmpty) throw new ItemNotFoundException
 
 		feedbacks = for (
 			uniId <- students;
-			feedback <- feedbackDao.getFeedbackByUniId(assignment, uniId) // assignmentService.getSubmissionByUniId(assignment, uniId)
+			feedback <- feedbackDao.getAssignmentFeedbackByUniId(assignment, uniId) // assignmentService.getSubmissionByUniId(assignment, uniId)
 		) yield feedback
 
         

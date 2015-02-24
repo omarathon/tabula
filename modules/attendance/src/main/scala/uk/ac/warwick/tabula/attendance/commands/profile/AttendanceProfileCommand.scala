@@ -40,7 +40,6 @@ class AttendanceProfileCommandInternal(val student: StudentMember, val academicY
 			}
 		}
 	}
-
 }
 
 trait AttendanceProfilePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

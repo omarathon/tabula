@@ -21,8 +21,8 @@ object Fixtures extends Mockito {
 		s
 	}
 
-	def feedback(universityId: String = "0123456") = {
-		val f = new Feedback
+	def assignmentFeedback(universityId: String = "0123456") = {
+		val f = new AssignmentFeedback
 		f.universityId = universityId
 		f
 	}

@@ -15,7 +15,7 @@ trait GroupsObjects[A >: Null, B >: Null] extends PopulateOnForm {
 	var mapping: JMap[B, JList[A]] =
 		LazyMaps.create { key: B => JArrayList(): JList[A] }.asJava
 	
-	var unallocated: JList[A] = LazyLists.create { () => null } // grower, not a shower
+	var unallocated: JList[A] = LazyLists.createWithFactory { () => null } // grower, not a shower
 
 	def populate(): Unit
 	def sort(): Unit

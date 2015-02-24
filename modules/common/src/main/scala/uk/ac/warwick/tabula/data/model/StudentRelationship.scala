@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 
-import org.hibernate.annotations.AccessType
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -10,7 +9,7 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.{SprCode, ToString}
 
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "agent_type")
 /*

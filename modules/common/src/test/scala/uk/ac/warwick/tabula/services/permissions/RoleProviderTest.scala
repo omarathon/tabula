@@ -21,7 +21,7 @@ class RoleProviderTest extends TestBase with Mockito {
 		}
 
 		val customWildcardSelectorRoleDefinition = new CustomRoleDefinition
-		customWildcardSelectorRoleDefinition.baseRoleDefinition = StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any)
+		customWildcardSelectorRoleDefinition.baseRoleDefinition = StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any[StudentRelationshipType])
 		customWildcardSelectorRoleDefinition.replacesBaseDefinition = true
 		val department = Fixtures.department("its")
 		department.customRoleDefinitions = JArrayList(customWildcardSelectorRoleDefinition)
@@ -34,12 +34,12 @@ class RoleProviderTest extends TestBase with Mockito {
 			case customRoleDefinition: CustomRoleDefinition =>
 				// Check original hasn't been changed (otherwise the restricted selector is persisted)
 				department.customRoleDefinitions.size should be (1)
-				department.customRoleDefinitions.get(0).builtInBaseRoleDefinition.asInstanceOf[SelectorBuiltInRoleDefinition[_]].selector should be (PermissionsSelector.Any)
+				department.customRoleDefinitions.get(0).builtInBaseRoleDefinition.asInstanceOf[SelectorBuiltInRoleDefinition[StudentRelationshipType]].selector should be (PermissionsSelector.Any[StudentRelationshipType])
 				customRoleDefinition.baseRoleDefinition match {
 					case selectorDefinition: SelectorBuiltInRoleDefinition[_] =>
 						selectorDefinition.selector should be(personalTutorRelationshipType)
 					case _ =>
-						assert(condition = false, "customRole.head.definition should be a SelectorBuiltInRoleDefinition")
+						fail("customRole.head.definition should be a SelectorBuiltInRoleDefinition")
 				}
 		}
 	}

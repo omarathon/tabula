@@ -4,7 +4,7 @@ import javax.persistence.CascadeType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
 
-import org.hibernate.annotations.{BatchSize, AccessType}
+import org.hibernate.annotations.BatchSize
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
@@ -26,7 +26,7 @@ object DepartmentSmallGroup {
 }
 
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 class DepartmentSmallGroup
 	extends GeneratedId
 	with ToString

@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.coursework.services.docconversion.MarkerAllocationEx
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkerAllocationExtractor.{NoMarker, SecondMarker, FirstMarker, ParsedRow}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{AutowiringAssignmentServiceComponent, AssignmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringAssessmentServiceComponent, AssessmentServiceComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -24,14 +24,14 @@ object AssignMarkersCommand {
 		with AssignMarkersPermission
 		with AssignMarkersDescription
 		with AssignMarkersCommandState
-		with AutowiringAssignmentServiceComponent
+		with AutowiringAssessmentServiceComponent
 		with AutowiringUserGroupDaoComponent
 }
 
 class AssignMarkersCommand(val module: Module, val assignment: Assignment)
 	extends CommandInternal[Assignment] with BindListener {
 
-	self: AssignMarkersCommandState with AssignmentServiceComponent with UserGroupDaoComponent =>
+	self: AssignMarkersCommandState with AssessmentServiceComponent with UserGroupDaoComponent =>
 
 	var alloctaionExtractor = Wire[MarkerAllocationExtractor]
 	var file: UploadedFile = new UploadedFile
@@ -80,7 +80,7 @@ class AssignMarkersCommand(val module: Module, val assignment: Assignment)
 			SecondMarkersMap(assignment, markerId, group)
 		}.toSeq.asJava)
 
-		assignmentService.save(assignment)
+		assessmentService.save(assignment)
 		assignment
 	}
 

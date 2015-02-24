@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands
 
-import uk.ac.warwick.tabula.data.model.Feedback
+import uk.ac.warwick.tabula.data.HibernateHelpers
+import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, ExamFeedback, Feedback}
 import uk.ac.warwick.tabula.commands.{Description, Describable, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -26,7 +27,12 @@ trait ViewOnlineFeedbackCommandDescription extends Describable[Feedback] {
 
 	override lazy val eventName = "ViewOnlineFeedback"
 
-	def describe(d: Description) = d.assignment(feedback.assignment).properties("student" -> feedback.universityId)
+	def describe(d: Description) = HibernateHelpers.initialiseAndUnproxy(feedback) match {
+		case assignmentFeedback: AssignmentFeedback =>
+			d.assignment(assignmentFeedback.assignment).properties("student" -> feedback.universityId)
+		case examFeedback: ExamFeedback =>
+			d.exam(examFeedback.exam).properties("student" -> feedback.universityId)
+	}
 }
 
 trait ViewOnlineFeedbackCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

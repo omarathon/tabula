@@ -24,7 +24,7 @@ abstract class AbstractEditSmallGroupsController extends GroupsController {
 
 	protected def renderPath: String
 
-	protected def render(set: SmallGroupSet, model: Pair[String, _]*) = {
+	protected def render(set: SmallGroupSet, model: (String, _)*) = {
 		Mav(renderPath, model:_*).crumbs(Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 

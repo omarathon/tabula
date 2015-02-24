@@ -30,7 +30,7 @@ trait ExportFeedbackToSitsService {
 }
 
 class ParameterGetter(feedbackForSits: FeedbackForSits) {
-	val assessGroups = feedbackForSits.feedback.assignment.assessmentGroups.asScala.toSeq
+	val assessGroups = feedbackForSits.feedback.assessmentGroups.asScala.toSeq
 	val possibleOccurrenceSequencePairs = assessGroups.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence))
 	val occurrences = possibleOccurrenceSequencePairs.map(_._1).mkString(",")
 	val sequences = possibleOccurrenceSequencePairs.map(_._2).mkString(",")
@@ -38,8 +38,8 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 	def getQueryParams: util.HashMap[String, Object] = JHashMap(
 		// for the where clause
 		("studentId", feedbackForSits.feedback.universityId),
-		("academicYear", feedbackForSits.feedback.assignment.academicYear.toString),
-		("moduleCodeMatcher", feedbackForSits.feedback.assignment.module.code.toUpperCase + "%"),
+		("academicYear", feedbackForSits.feedback.academicYear.toString),
+		("moduleCodeMatcher", feedbackForSits.feedback.module.code.toUpperCase + "%"),
 		("now", DateTime.now.toDate),
 
 		// in theory we should look for a record with occurrence and sequence from the same pair,
@@ -52,8 +52,8 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 	def getUpdateParams(mark: Integer, grade: String) = JHashMap(
 		// for the where clause
 		("studentId", feedbackForSits.feedback.universityId),
-		("academicYear", feedbackForSits.feedback.assignment.academicYear.toString),
-		("moduleCodeMatcher", feedbackForSits.feedback.assignment.module.code.toUpperCase + "%"),
+		("academicYear", feedbackForSits.feedback.academicYear.toString),
+		("moduleCodeMatcher", feedbackForSits.feedback.module.code.toUpperCase + "%"),
 		("now", DateTime.now.toDate),
 
 		// in theory we should look for a record with occurrence and sequence from the same pair,
@@ -104,7 +104,7 @@ object ExportFeedbackToSitsService {
 	// psl_code = "Period Slot"
 	// mab_seq = sequence code determining an assessment component
 	// Only upload when the mark/grade is empty or was previously uploaded by Tabula
-	val whereClause = f"""where spr_code in (select spr_code from $sitsSchema.ins_spr where spr_stuc = :studentId)
+	def whereClause = f"""where spr_code in (select spr_code from $sitsSchema.ins_spr where spr_stuc = :studentId)
 		and mod_code like :moduleCodeMatcher
 		and mav_occur in :occurrences
 		and ayr_code = :academicYear
@@ -116,7 +116,7 @@ object ExportFeedbackToSitsService {
 		)
 	"""
 
-	final val CountMatchingBlankSasRecordsSql = f"""
+	final def CountMatchingBlankSasRecordsSql = f"""
 		select count(*) from $sitsSchema.cam_sas $whereClause
 	"""
 
@@ -131,7 +131,7 @@ object ExportFeedbackToSitsService {
 	// SAS_PRCS = Process Status - Value of I enables overall marks to be calculated in SITS
 	// SAS_PROC = Current Process - Value of SAS enabled overall marks to be calculated in SITS
 	// SAS_UDF1, SAS_UDF2 - user defined fields used for audit
-	final val UpdateSITSFeedbackSql = f"""
+	final def UpdateSITSFeedbackSql = f"""
 		update $sitsSchema.cam_sas
 		set sas_actm = :actualMark,
 			sas_actg = :actualGrade,

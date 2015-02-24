@@ -15,7 +15,7 @@ class CreatePremarkedAssignmentFixtureCommand extends CommandInternal[Assignment
 
 	this: TransactionalComponent =>
 
-	val assignmentSrv = Wire[AssignmentService]
+	val assignmentSrv = Wire[AssessmentService]
 	val userLookup = Wire[UserLookupService]
 	val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 	val markingWorkflowService = Wire[MarkingWorkflowService]
@@ -84,7 +84,7 @@ class CreatePremarkedAssignmentFixtureCommand extends CommandInternal[Assignment
 			assignment.submissions = submissions.asJava
 
 			val feedbacks = CreatePremarkedAssignmentFixtureCommand.students.map(student => {
-				val f = new Feedback
+				val f = new AssignmentFeedback
 				f.universityId = student.universityId
 				f.assignment = assignment
 				f.uploaderId = "tabula-functest-admin1"

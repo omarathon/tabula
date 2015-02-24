@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import scala.collection.JavaConversions.seqAsJavaList
 import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.{AssignmentDaoComponent, AssignmentDaoImpl, AssignmentMembershipDaoImpl}
+import uk.ac.warwick.tabula.data.{AssessmentDaoComponent, AssessmentDaoImpl, AssessmentMembershipDaoImpl}
 
 // scalastyle:off magic.number
 class UpstreamEntitiesTest extends PersistenceTestBase {
@@ -11,21 +11,21 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 	@Test def associations() {
 		transactional { t =>
 
-			val thisAssignmentDao = new AssignmentDaoImpl
+			val thisAssignmentDao = new AssessmentDaoImpl
 			thisAssignmentDao.sessionFactory = sessionFactory
 
-			val assignmentService = new AbstractAssignmentService with AssignmentDaoComponent
+			val assignmentService = new AbstractAssessmentService with AssessmentDaoComponent
 				with AssignmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent {
-				val assignmentDao = thisAssignmentDao
+				val assessmentDao = thisAssignmentDao
 				val firstMarkerHelper = null
 				val secondMarkerHelper = null
 				val markingWorkflowService = null
 			}
 
-			val dao = new AssignmentMembershipDaoImpl
+			val dao = new AssessmentMembershipDaoImpl
 			dao.sessionFactory = sessionFactory
 
-			val assignmentMembershipService = new AssignmentMembershipServiceImpl
+			val assignmentMembershipService = new AssessmentMembershipServiceImpl
 			assignmentMembershipService.dao = dao
 
 			val law = new AssessmentComponent
@@ -48,7 +48,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 
 			val law2010 = new Assignment
 			law2010.assignmentService = assignmentService
-			law2010.assignmentMembershipService = assignmentMembershipService
+			law2010.assessmentMembershipService = assignmentMembershipService
 			law2010.name = "Cool Essay!"
 			law2010.academicYear = new AcademicYear(2010)
 			law2010.assessmentGroups = List(assessmentGroup2010)
@@ -57,7 +57,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			val law2011 = new Assignment
 			law2011.name = "Cool Essay?"
 			law2011.assignmentService = assignmentService
-			law2011.assignmentMembershipService = assignmentMembershipService
+			law2011.assessmentMembershipService = assignmentMembershipService
 			law2011.academicYear = new AcademicYear(2011)
 			law2011.assessmentGroups = List(assessmentGroup2011)
 			assessmentGroup2011.assignment = law2011
@@ -65,7 +65,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			// Not linked to an upstream assignment
 			val law2012 = new Assignment
 			law2012.assignmentService = assignmentService
-			law2012.assignmentMembershipService = assignmentMembershipService
+			law2012.assessmentMembershipService = assignmentMembershipService
 			law2012.name = "Cool Essay?"
 			law2012.academicYear = new AcademicYear(2011)
 

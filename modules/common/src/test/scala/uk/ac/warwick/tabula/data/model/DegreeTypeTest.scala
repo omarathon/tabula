@@ -11,7 +11,7 @@ class DegreeTypeTest extends TestBase {
 		t.convertToObject("PG") should be (Postgraduate)
 		t.convertToObject("IS") should be (InService)
 		t.convertToObject("PGCE") should be (PGCE)
-		evaluating { t.convertToObject("Q") } should produce [IllegalArgumentException]
+		an [IllegalArgumentException] should be thrownBy { t.convertToObject("Q") }
 	}
   
 	@Test def convertToValue() {

@@ -12,7 +12,7 @@ import scala.collection.mutable.ListBuffer
 import uk.ac.warwick.userlookup.User
 
 trait UpdatesStudentMembership {
-	self: CurrentSITSAcademicYear with SpecifiesGroupType with UserLookupComponent with AssignmentMembershipServiceComponent =>
+	self: CurrentSITSAcademicYear with SpecifiesGroupType with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
 	// needs a module to determine the possible options from SITS
 	def module: Module
@@ -113,7 +113,7 @@ trait UpdatesStudentMembership {
 		}
 
 		// now get implicit membership list from upstream
-		val upstreamMembers = existingGroups.map(assignmentMembershipService.determineMembershipUsers(_, existingMembers)).getOrElse(Seq())
+		val upstreamMembers = existingGroups.map(assessmentMembershipService.determineMembershipUsers(_, existingMembers)).getOrElse(Seq())
 
 		for (user <- usersToAdd.distinct) {
 			if (members.excludes.contains(user)) {
@@ -149,8 +149,8 @@ trait UpdatesStudentMembership {
 	 */
 	lazy val availableUpstreamGroups: Seq[UpstreamGroup] = {
 		for {
-			ua <- assignmentMembershipService.getAssessmentComponents(module)
-			uag <- assignmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
+			ua <- assessmentMembershipService.getAssessmentComponents(module)
+			uag <- assessmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
 		} yield new UpstreamGroup(ua, uag)
 	}
 
@@ -163,7 +163,7 @@ trait UpdatesStudentMembership {
 	/**
 	 * Returns a sequence of MembershipItems
 	 */
-	def membershipInfo : AssignmentMembershipInfo = assignmentMembershipService.determineMembership(linkedUpstreamAssessmentGroups, Option(members))
+	def membershipInfo : AssessmentMembershipInfo = assessmentMembershipService.determineMembership(linkedUpstreamAssessmentGroups, Option(members))
 
 }
 
@@ -188,7 +188,7 @@ class UpstreamGroup(val assessmentComponent: AssessmentComponent, val group: Ups
 
 
 class UpstreamGroupPropertyEditor extends AbstractPropertyEditor[UpstreamGroup] {
-	var membershipService = Wire.auto[AssignmentMembershipService]
+	var membershipService = Wire.auto[AssessmentMembershipService]
 
 	override def fromString(id: String) = {
 		def explode = throw new IllegalArgumentException("No unique upstream group which matches id " + id + " is available")

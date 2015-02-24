@@ -209,7 +209,7 @@
 		</#if>
 	</#local>
 	<#local ajaxTarget>meetings-target-${relationshipType.urlPart}-${studentCourseDetails.urlSafeId}-${studentCourseYearDetails.academicYear.startYear?c}</#local>
-	<div id="${ajaxTarget}"><i class="icon-spinner icon-spin"></i><em> Loading meetings&hellip;</em></div>
+	<div id="${ajaxTarget}" class="meetings-target"><i class="icon-spinner icon-spin"></i><em> Loading meetings&hellip;</em></div>
 	<script>
 		jQuery(function($){
 			$.get('${ajaxRoute}', function(data){

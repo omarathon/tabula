@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.groups
 import javax.persistence.CascadeType._
 import javax.persistence._
 
-import org.hibernate.annotations.{AccessType, BatchSize}
+import org.hibernate.annotations.BatchSize
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
@@ -40,7 +40,7 @@ object SmallGroup {
  * Represents a single small teaching group within a group set.
  */
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 class SmallGroup
 		extends GeneratedId
 		with ToString

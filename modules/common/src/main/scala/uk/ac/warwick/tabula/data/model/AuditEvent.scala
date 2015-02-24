@@ -89,7 +89,7 @@ case class AuditEvent(
 	private def stringListProperty(name: String): Seq[String] =
 		relatedParsedData
 			.flatMap { _.get(name) }
-			.flatMap { _.asInstanceOf[collection.mutable.Buffer[String]] }
+			.flatMap { _.asInstanceOf[Seq[String]] }
 
 	/**
 	 * Convert to an Event object (losing the stage information). There's usually

@@ -116,7 +116,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 			p.cssClass should be ("success")
 		}
 		
-		val feedback = Fixtures.feedback("0672089")
+		val feedback = Fixtures.assignmentFeedback("0672089")
 		feedback.assignment = assignment
 		feedback.attachments.add(new FileAttachment)
 		assignment.genericFeedback = "Thanks for not including herons"

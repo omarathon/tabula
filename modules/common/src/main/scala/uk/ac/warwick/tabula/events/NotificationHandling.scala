@@ -14,11 +14,10 @@ trait NotificationHandling extends Logging {
 	var scheduledNotificationService = Wire.auto[ScheduledNotificationService]
 
 	def notify[A, B, C](cmd: Command[A])(f: => A): A = {
-
 		val result = f
 
 		cmd match {
-			case ns: Notifies[A, B] =>
+			case ns: Notifies[A @unchecked, B @unchecked] =>
 				for (notification <- ns.emit(result)) {
 					notificationService.push(notification)
 				}
@@ -26,7 +25,7 @@ trait NotificationHandling extends Logging {
 		}
 
 		cmd match {
-			case sn: SchedulesNotifications[A, C] =>
+			case sn: SchedulesNotifications[A @unchecked, C @unchecked] =>
 
 				val notificationTargets = sn.transformResult(result)
 
@@ -45,7 +44,7 @@ trait NotificationHandling extends Logging {
 		}
 
 		cmd match {
-			case ns: CompletesNotifications[A] =>
+			case ns: CompletesNotifications[A @unchecked] =>
 				val notificationResult = ns.notificationsToComplete(result)
 				for (notification <- notificationResult.notifications) {
 					notification.actionCompleted(notificationResult.completedBy)
@@ -71,7 +70,7 @@ trait JobNotificationHandling {
 
 	def notify[A](instance: JobInstance, job: Job) {
 		job match {
-			case ns: NotifyingJob[A] => for (notification <- ns.popNotifications(instance)) {
+			case ns: NotifyingJob[A @unchecked] => for (notification <- ns.popNotifications(instance)) {
 				notificationService.push(notification)
 			}
 			case _ => // do nothing. This job doesn't notify

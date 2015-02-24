@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.commands.{Notifies, Appliable, UserAware, Description}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
-import uk.ac.warwick.tabula.services.{UserGroupCacheManager, UserLookupService, AssignmentMembershipService}
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, UserLookupService, AssessmentMembershipService}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
 import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup, Department}
@@ -133,14 +133,14 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 			students.find(_.getWarwickId == id).getOrElse(new AnonymousUser)
 		}
 
-		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] =>
+		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { _ match { case ids: Seq[String @unchecked] =>
 			ids.map(id => (id, students.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
-		}
+		}}
 	}
 
 	@Test
 	def notifiesEachAffectedUser() { new NotificationFixture {
-		val membershipService = mock[AssignmentMembershipService]
+		val membershipService = mock[AssessmentMembershipService]
 		
 		val dept = new Department
 		

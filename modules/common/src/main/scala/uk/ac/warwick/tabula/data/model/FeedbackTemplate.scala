@@ -3,11 +3,11 @@ package uk.ac.warwick.tabula.data.model
 import scala.collection.JavaConverters._
 import javax.persistence._
 import javax.persistence.CascadeType._
-import org.hibernate.annotations.{BatchSize, AccessType}
+import org.hibernate.annotations.BatchSize
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
-@Entity @AccessType("field")
+@Entity @Access(AccessType.FIELD)
 class FeedbackTemplate extends GeneratedId with PermissionsTarget {
 
 	var name:String = _

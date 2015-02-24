@@ -5,11 +5,11 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
-import reflect.BeanProperty
+import beans.BeanProperty
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MarkingWorkflowDao
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.AssignmentServiceComponent
+import uk.ac.warwick.tabula.services.AssessmentServiceComponent
 import uk.ac.warwick.tabula.services.MarkingWorkflowServiceComponent
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods

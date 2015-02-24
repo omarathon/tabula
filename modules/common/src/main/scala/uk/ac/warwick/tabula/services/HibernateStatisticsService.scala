@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.util.queue.conversion.ItemType
 import uk.ac.warwick.tabula.data.Daoisms
-import org.codehaus.jackson.annotate.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import scala.beans.BeanProperty
 import org.hibernate.stat.Statistics
 import org.joda.time.format.DateTimeFormat

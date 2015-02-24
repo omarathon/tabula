@@ -1,13 +1,18 @@
 package uk.ac.warwick.tabula.data.model
 
+import javax.persistence.CascadeType._
+
+import org.hibernate.annotations.Type
+
 import scala.collection.JavaConverters._
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
-import org.hibernate.annotations.AccessType
 import uk.ac.warwick.tabula.helpers.StringUtils._
+
+import scala.util.Try
 
 /**
  * Wherever a group of users is referenced in the app, it will be
@@ -29,7 +34,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
  * Depending on context, the usercodes may be university IDs.
  */
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 class UserGroup private(val universityIds: Boolean) extends GeneratedId with UnspecifiedTypeUserGroup with KnownTypeUserGroup {
 
 	/* For Hibernate xx */
@@ -40,17 +45,16 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 
 	var baseWebgroup: String = _
 
-	def baseWebgroupSize = groupService.getGroupInfo(baseWebgroup).getSize()
+	def baseWebgroupSize = groupService.getGroupInfo(baseWebgroup).getSize
 
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupInclude", joinColumns = Array(
 		new JoinColumn(name = "group_id", referencedColumnName = "id")))
 	private val includeUsers: JList[String] = JArrayList()
 
-	@ElementCollection @Column(name = "usercode")
-	@JoinTable(name = "UserGroupStatic", joinColumns = Array(
-		new JoinColumn(name = "group_id", referencedColumnName = "id")))
-	private val staticIncludeUsers: JList[String] = JArrayList()
+	@OneToMany(mappedBy = "userGroup", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@OrderBy("position")
+	private val staticIncludeUsers: JList[OrderedGroupMember] = JArrayList()
 
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupExclude", joinColumns = Array(
@@ -63,10 +67,30 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 		includeUsers.addAll(userIds.asJava)
 	}
 
-	def staticUserIds: Seq[String] = staticIncludeUsers.asScala
+	def staticUserIds: Seq[String] = staticIncludeUsers.asScala.map(_.memberId)
 	def staticUserIds_=(userIds: Seq[String]) {
+
+		val newMembers = userIds.map(uid => {
+			val group = new OrderedGroupMember
+			group.memberId = uid
+			group.userGroup = this
+			group
+		})
+
 		staticIncludeUsers.clear()
-		staticIncludeUsers.addAll(userIds.asJava)
+		staticIncludeUsers.addAll(newMembers.asJava)
+	}
+
+	def replaceStaticUsers(registrations: Seq[UpstreamModuleRegistration]) {
+		val newMembers = registrations.map(member => {
+			val m = new OrderedGroupMember
+			m.memberId = member.universityId
+			m.userGroup = this
+			m.position = Try(member.seatNumber.toInt).toOption
+			m
+		})
+		staticIncludeUsers.clear()
+		staticIncludeUsers.addAll(newMembers.asJava)
 	}
 
 	def excludedUserIds: Seq[String] = excludeUsers.asScala
@@ -110,7 +134,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 		!(excludeUsers contains user) &&
 			(
 				(includeUsers contains user) ||
-				(staticIncludeUsers contains user) ||
+				(staticIncludeUsers.asScala.map(_.memberId) contains user) ||
 				(baseWebgroup != null && groupService.isUserInGroup(user, baseWebgroup)))
 
 	def excludesUserId(user: String) = excludeUsers contains user
@@ -122,8 +146,9 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 	def size = members.size
 
 	def members: Seq[String] = allIncludedIds diff allExcludedIds
-		
-	def allIncludedIds: Seq[String] = (includeUsers.asScala.toSeq ++ staticIncludeUsers.asScala ++ webgroupMembers).distinct
+	def sortedStaticMembers: Seq[OrderedGroupMember] = staticIncludeUsers.asScala.sortBy(_.position)
+
+	def allIncludedIds: Seq[String] = (staticIncludeUsers.asScala.map(_.memberId) ++ includeUsers.asScala.toSeq ++ webgroupMembers).distinct
 	def allExcludedIds: Seq[String] = excludeUsers.asScala.toSeq
 
 	private def getIdFromUser(user:User):String = {
@@ -134,8 +159,8 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 	}
 	private def getUsersFromIds(ids: Seq[String]): Seq[User] = ids match {
 		case Nil => Nil
-		case ids if universityIds => userLookup.getUsersByWarwickUniIds(ids).values.toSeq
-		case ids => userLookup.getUsersByUserIds(ids.asJava).values.asScala.toSeq
+		case list if universityIds => userLookup.getUsersByWarwickUniIds(list).values.toSeq
+		case list => userLookup.getUsersByUserIds(list.asJava).values.asScala.toSeq
 	}
 
 	def users: Seq[User] = getUsersFromIds(members)
@@ -168,7 +193,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 
 	def hasSameMembersAs(other:UnspecifiedTypeUserGroup):Boolean ={
 		other match {
-			case otherUg:UserGroup if otherUg.universityIds == this.universityIds=> (this.members == otherUg.members)
+			case otherUg:UserGroup if otherUg.universityIds == this.universityIds => this.members == otherUg.members
 			case _ => this.users == other.users
 		}
 	}
@@ -243,4 +268,19 @@ trait KnownTypeUserGroup extends UnspecifiedTypeUserGroup {
 
 	def includesUserId(userId: String): Boolean
 	def excludesUserId(userId: String): Boolean
+}
+
+@Entity(name="usergroupstatic")
+@Access(AccessType.FIELD)
+class OrderedGroupMember() extends GeneratedId {
+
+	@Column(name="usercode")
+	var memberId: String = _
+
+	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
+	@JoinColumn(name="group_id")
+	var userGroup: UserGroup = _
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+	var position: Option[Int] = _
 }

@@ -2,19 +2,19 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{AssessmentGroup, GradeBoundary, UpstreamAssessmentGroup, UserGroup}
-import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AssignmentMembershipServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends GenerateGradesFromMarkCommandState with AssignmentMembershipServiceComponent
+	trait CommandTestSupport extends GenerateGradesFromMarkCommandState with AssessmentMembershipServiceComponent
 
 	trait Fixture {
 		val module = Fixtures.module("its01")
 		val assignment = Fixtures.assignment("Test")
 		assignment.academicYear = AcademicYear(2014)
-		val mockAssignmentMembershipService = smartMock[AssignmentMembershipService]
+		val mockAssignmentMembershipService = smartMock[AssessmentMembershipService]
 		val studentUser = new User("student")
 		studentUser.setWarwickId("studentUniId")
 		val assessmentGroup = new AssessmentGroup
@@ -32,7 +32,7 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
 		mockAssignmentMembershipService.determineMembershipUsers(assignment) returns Seq(studentUser)
 
 		val command = new GenerateGradesFromMarkCommandInternal(module, assignment) with CommandTestSupport {
-			val assignmentMembershipService = mockAssignmentMembershipService
+			val assessmentMembershipService = mockAssignmentMembershipService
 		}
 	}
 

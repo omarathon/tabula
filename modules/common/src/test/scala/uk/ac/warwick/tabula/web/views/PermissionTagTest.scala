@@ -3,13 +3,10 @@ package uk.ac.warwick.tabula.web.views
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.JavaImports._
-import freemarker.template.TemplateModel
-import freemarker.template.SimpleHash
+import freemarker.template._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.Fixtures
-import freemarker.template.TemplateDirectiveBody
 import freemarker.core.Environment
-import freemarker.template.Template
 import java.io.StringWriter
 import java.io.StringReader
 
@@ -24,7 +21,7 @@ class PermissionTagTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in")
 		
 		// Use a SimpleHash as a workaround to wrapping things manually
-		val model = new SimpleHash
+		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		model.put("permissionName", "Module.Create")
 		model.put("scope", dept)
 		
@@ -48,7 +45,7 @@ class PermissionTagTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in")
 		
 		// Use a SimpleHash as a workaround to wrapping things manually
-		val model = new SimpleHash
+		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		model.put("permissionName", "Module.Create")
 		model.put("scope", dept)
 		

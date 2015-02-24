@@ -31,10 +31,10 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito {
 	}
 
 	var userLookup: UserLookupService = smartMock[UserLookupService]
-	userLookup.getUsersByUserIds(any[JList[String]]) answers { case ids: JList[String @unchecked] =>
+	userLookup.getUsersByUserIds(any[JList[String]]) answers { _ match { case ids: JList[String @unchecked] =>
 		val users = ids.asScala.map(id=>(id,new User(id)))
 		JHashMap(users:_*)
-	}
+	}}
 
 	userLookup.getUserByUserId(any[String]) answers { id =>
 		userDatabase find {_.getUserId == id} getOrElse new AnonymousUser
@@ -85,12 +85,12 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito {
 
 		module.assignments.add(assignment)
 
-		val mockAssignmentService = smartMock[AssignmentService]
+		val mockAssignmentService = smartMock[AssessmentService]
 		assignment.assignmentService = mockAssignmentService
 		mockAssignmentService.getAssignmentByNameYearModule(assignment.name, assignment.academicYear, assignment.module) returns Seq(assignment)
 
-		val mockAssignmentMembershipService = smartMock[AssignmentMembershipService]
-		assignment.assignmentMembershipService = mockAssignmentMembershipService
+		val mockAssignmentMembershipService = smartMock[AssessmentMembershipService]
+		assignment.assessmentMembershipService = mockAssignmentMembershipService
 		mockAssignmentMembershipService.determineMembershipUsers(any[Seq[UpstreamAssessmentGroup]], any[Option[UnspecifiedTypeUserGroup]]) returns Seq()
 
 		val mockExtensionService = smartMock[ExtensionService]
@@ -186,7 +186,7 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito {
 	@Test def includeAndExcludeUsers() { new Fixture {
 		val cmd = new EditAssignmentCommand(module, assignment, currentUser)
 		cmd.service = mockAssignmentService
-		cmd.assignmentMembershipService = mockAssignmentMembershipService
+		cmd.assessmentMembershipService = mockAssignmentMembershipService
 		cmd.userLookup = userLookup
 
 		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
@@ -229,7 +229,7 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito {
 		val cmd = new EditAssignmentCommand(module, assignment, currentUser)
 
 		cmd.service = mockAssignmentService
-		cmd.assignmentMembershipService = mockAssignmentMembershipService
+		cmd.assessmentMembershipService = mockAssignmentMembershipService
 		cmd.maintenanceMode = smartMock[MaintenanceModeService]
 		cmd.listener = smartMock[EventListener]
 		cmd.scheduledNotificationService = smartMock[ScheduledNotificationService]

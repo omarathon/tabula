@@ -16,6 +16,7 @@ object Routes {
 	val attendance = tabula.attendance.web.Routes
 	val admin      = tabula.admin.web.Routes
 	val sysadmin   = tabula.sysadmin.web.Routes
+	val reports    = tabula.reports.web.Routes
 	val scheduling = tabula.scheduling.web.Routes
 
 }

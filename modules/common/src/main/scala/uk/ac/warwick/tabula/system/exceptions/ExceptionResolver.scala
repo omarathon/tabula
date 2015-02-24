@@ -16,17 +16,13 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.ControllerViews
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.util.core.ExceptionUtils
-import uk.ac.warwick.tabula.system.exceptions._
 import org.springframework.beans.TypeMismatchException
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.system.{CurrentUserInterceptor, RequestInfoInterceptor}
-import uk.ac.warwick.tabula.SubmitPermissionDeniedException
 import uk.ac.warwick.tabula.PermissionsError
 import org.springframework.web.multipart.MultipartException
 import org.apache.http.HttpStatus
 import org.springframework.web.bind.MissingServletRequestParameterException
-import uk.ac.warwick.tabula.ParameterMissingException
 import uk.ac.warwick.tabula.ParameterMissingException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.servlet.mvc.condition.{ConsumesRequestCondition, ProducesRequestCondition}
@@ -127,7 +123,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 			exceptionHandler.exception(ExceptionContext(token, interestingException, request))
 		} catch {
 			// This is very bad and should never happen - but still try to avoid showing
-			// a plain JBoss exception to the user.
+			// a plain exception to the user.
 			case e: Exception => logger.error("Exception handling exception!", e)
 		}
 

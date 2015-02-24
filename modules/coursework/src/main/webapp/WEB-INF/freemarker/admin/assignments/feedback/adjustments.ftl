@@ -53,7 +53,7 @@
 				<@f.option value="Plagarism penalty">Plagarism penalty</@f.option>
 				<@f.option value="Other">Other</@f.option>
 			</@f.select>
-			<@f.input type="text" path="reason" cssClass="hide other-input" placeholder="Enter your reason" disabled="true"/>
+			<@f.input type="text" path="reason" cssClass="hide other-input" placeholder="Enter your reason" disabled=true/>
 			<@f.errors path="reason" cssClass="error" />
 		</@form.field>
 	</@form.row>
@@ -81,7 +81,7 @@
 						Use suggested mark - ${proposedAdjustment!""}
 					</button>
 					<a class="use-popover" id="popover-${markingId(command.student)}" data-html="true"
-					   data-original-title="<span class='text-info'><strong>Late penalty calculation</strong></span>"
+					   data-original-title="Late penalty calculation"
 					   data-content="The submission was <@fmt.p daysLate "working day" /> late. The suggested penalty
 					   was derived by subtracting ${latePenalty} marks from the actual mark for each day the submission
 					   was late.">

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.{AssignmentMembershipDao, AssignmentMembershipDaoComponent, AutowiringAssignmentMembershipDaoComponent, AutowiringSmallGroupDaoComponent, AutowiringUserGroupDaoComponent, SmallGroupDaoComponent, UserGroupDaoComponent}
+import uk.ac.warwick.tabula.data.{AssessmentMembershipDao, AssessmentMembershipDaoComponent, AutowiringAssessmentMembershipDaoComponent, AutowiringSmallGroupDaoComponent, AutowiringUserGroupDaoComponent, SmallGroupDaoComponent, UserGroupDaoComponent}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Logging
@@ -73,7 +73,7 @@ trait SmallGroupService {
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
 	self: SmallGroupDaoComponent
-		with AssignmentMembershipDaoComponent
+		with AssessmentMembershipDaoComponent
 		with SmallGroupMembershipHelpers
 		with UserLookupComponent
 		with UserGroupDaoComponent
@@ -261,7 +261,7 @@ trait SmallGroupMembershipHelpers {
 	val groupSetManualMembersHelper: UserGroupMembershipHelper[SmallGroupSet]
 	val departmentStudentGroupHelper: UserGroupMembershipHelper[DepartmentSmallGroup]
 	val departmentGroupSetManualMembersHelper: UserGroupMembershipHelper[DepartmentSmallGroupSet]
-	val membershipDao: AssignmentMembershipDao
+	val membershipDao: AssessmentMembershipDao
 }
 
 // new up UGMHs which will Wire.auto() their dependencies
@@ -283,7 +283,7 @@ trait SmallGroupMembershipHelpersImpl extends SmallGroupMembershipHelpers {
 class SmallGroupServiceImpl
 	extends AbstractSmallGroupService
 		with AutowiringSmallGroupDaoComponent
-		with AutowiringAssignmentMembershipDaoComponent
+		with AutowiringAssessmentMembershipDaoComponent
 	  with SmallGroupMembershipHelpersImpl
 	  with AutowiringUserLookupComponent
 		with UserLookupComponent

@@ -2,10 +2,11 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
+import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.coursework.commands.assignments.AdminAddMarksCommand
+import uk.ac.warwick.tabula.coursework.commands.assignments.{PostExtractValidation, AdminAddMarksCommand}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.{PermissionDeniedException, CurrentUser}
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -18,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.services.FeedbackService
 
 @Controller
@@ -26,10 +27,12 @@ import uk.ac.warwick.tabula.services.FeedbackService
 class AddMarksController extends CourseworkController {
 
 	@Autowired var feedbackService: FeedbackService = _
-	@Autowired var assignmentMembershipService: AssignmentMembershipService = _
+	@Autowired var assignmentMembershipService: AssessmentMembershipService = _
 
-	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
-		new AdminAddMarksCommand(mandatory(module), mandatory(assignment), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+	type AdminAddMarksCommand = Appliable[Seq[Feedback]] with PostExtractValidation
+
+	@ModelAttribute("adminAddMarksCommand") def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser): AdminAddMarksCommand =
+		AdminAddMarksCommand(mandatory(module), mandatory(assignment), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav: Mav, module: Module) = mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
@@ -37,15 +40,16 @@ class AddMarksController extends CourseworkController {
 	@RequestMapping(method = Array(HEAD, GET))
 	def viewMarkUploadForm(
 			@PathVariable module: Module, 
-			@PathVariable(value = "assignment") assignment: Assignment, 
-			@ModelAttribute cmd: AdminAddMarksCommand, errors: Errors): Mav = {
+			@PathVariable assignment: Assignment,
+			@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
+	) = {
 
 		if(assignment.hasWorkflow) {
 			logger.error(s"Can't add marks to an assignment with a workflow - ${assignment.id}")
 			throw new PermissionDeniedException(user, Permissions.Feedback.Update, assignment)
 		}
 
-		val members = assignmentMembershipService.determineMembershipUsers(cmd.assignment)
+		val members = assignmentMembershipService.determineMembershipUsers(assignment)
 
 		val marksToDisplay = members.map { member =>
 			val feedback = feedbackService.getStudentFeedback(assignment, member.getWarwickId)
@@ -55,11 +59,11 @@ class AddMarksController extends CourseworkController {
 		crumbed(Mav("admin/assignments/marks/marksform",
 			"marksToDisplay" -> marksToDisplay,
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
-		), cmd.module)
+		), module)
 
 	}
 
-	def noteMarkItem(member: User, feedback: Option[Feedback]) = {
+	private def noteMarkItem(member: User, feedback: Option[Feedback]) = {
 
 		logger.debug("in noteMarkItem (logger.debug)")
 
@@ -79,8 +83,11 @@ class AddMarksController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def confirmBatchUpload(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment, 
-						   @ModelAttribute cmd: AdminAddMarksCommand, errors: Errors): Mav = {
+	def confirmBatchUpload(
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
+	) = {
 		if (errors.hasErrors) viewMarkUploadForm(module, assignment, cmd, errors)
 		else {
 			bindAndValidate(module, cmd, errors)
@@ -89,8 +96,11 @@ class AddMarksController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def doUpload(@PathVariable module: Module, @PathVariable(value = "assignment") assignment: Assignment, 
-				 @ModelAttribute cmd: AdminAddMarksCommand, errors: Errors): Mav = {
+	def doUpload(
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
+	) = {
 		bindAndValidate(module, cmd, errors)
 		cmd.apply()
 		Redirect(Routes.admin.module(module))

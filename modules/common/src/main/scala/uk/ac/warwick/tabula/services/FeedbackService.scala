@@ -13,10 +13,10 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 
 trait FeedbackService {
-	def getStudentFeedback(assignment: Assignment, warwickId: String): Option[Feedback]
+	def getStudentFeedback(assessment: Assessment, warwickId: String): Option[Feedback]
 	def countPublishedFeedback(assignment: Assignment): Int
-	def getUsersForFeedback(assignment: Assignment): Seq[Pair[String, User]]
-	def getFeedbackByUniId(assignment: Assignment, uniId: String): Option[Feedback]
+	def getUsersForFeedback(assignment: Assignment): Seq[(String, User)]
+	def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String): Option[AssignmentFeedback]
 	def getMarkerFeedbackById(markerFeedbackId: String): Option[MarkerFeedback]
 	def saveOrUpdate(feedback: Feedback)
 	def delete(feedback: Feedback)
@@ -32,7 +32,7 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 
 	/* get users whose feedback is not published and who have not submitted work suspected
 	 * of being plagiarised */
-	def getUsersForFeedback(assignment: Assignment): Seq[Pair[String, User]] = {
+	def getUsersForFeedback(assignment: Assignment): Seq[(String, User)] = {
 		val plagiarisedSubmissions = assignment.submissions.filter { submission => submission.suspectPlagiarised }
 		val plagiarisedIds = plagiarisedSubmissions.map { _.universityId }
 		val unreleasedIds = assignment.unreleasedFeedback.map { _.universityId }
@@ -40,8 +40,8 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 		userLookup.getUsersByWarwickUniIds(unplagiarisedUnreleasedIds).toSeq
 	}
 
-	def getStudentFeedback(assignment: Assignment, uniId: String) = {
-		assignment.findFullFeedback(uniId)
+	def getStudentFeedback(assessment: Assessment, uniId: String) = {
+		assessment.findFullFeedback(uniId)
 	}
 
 	def countPublishedFeedback(assignment: Assignment): Int = {
@@ -51,8 +51,8 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 			.asInstanceOf[Number].intValue
 	}
 
-	def getFeedbackByUniId(assignment: Assignment, uniId: String) = transactional(readOnly = true) {
-		dao.getFeedbackByUniId(assignment, uniId)
+	def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String) = transactional(readOnly = true) {
+		dao.getAssignmentFeedbackByUniId(assignment, uniId)
 	}
 
 	def getMarkerFeedbackById(markerFeedbackId: String): Option[MarkerFeedback] = {

@@ -1,11 +1,10 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 
 import javax.persistence._
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{SprCode, AcademicYear}
 import uk.ac.warwick.tabula.system.permissions._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.apache.commons.lang3.builder.CompareToBuilder
@@ -18,7 +17,7 @@ import org.apache.commons.lang3.builder.CompareToBuilder
 
 
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Ordered[ModuleRegistration] {
 
 	def this(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String) {
@@ -80,4 +79,36 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 			.append(occurrence, that.occurrence)
 			.build()
 
+}
+
+/**
+ * Holds data about an individual student's registration on a single module.
+ */
+case class UpstreamModuleRegistration(year: String, sprCode: String, seatNumber: String, occurrence: String, moduleCode: String, assessmentGroup: String) {
+
+	def universityId = SprCode.getUniversityId(sprCode)
+
+	def differentGroup(other: UpstreamModuleRegistration) =
+		year != other.year ||
+			occurrence != other.occurrence ||
+			moduleCode != other.moduleCode ||
+			assessmentGroup != other.assessmentGroup
+
+	/**
+	 * Returns an UpstreamAssessmentGroup matching the group attributes.
+	 */
+	def toUpstreamAssignmentGroup = {
+		val g = new UpstreamAssessmentGroup
+		g.academicYear = AcademicYear.parse(year)
+		g.moduleCode = moduleCode
+		g.assessmentGroup = assessmentGroup
+		// for the NONE group, override occurrence to also be NONE, because we create a single UpstreamAssessmentGroup
+		// for each module with group=NONE and occurrence=NONE, and all unallocated students go in there together.
+		g.occurrence =
+			if (assessmentGroup == AssessmentComponent.NoneAssessmentGroup)
+				AssessmentComponent.NoneAssessmentGroup
+			else
+				occurrence
+		g
+	}
 }

@@ -19,9 +19,8 @@ import uk.ac.warwick.tabula.JavaImports._
  * deal with the various Scala collection classes, so we don't
  * have to convert them to Java collections manually every time.
  */
-class ScalaFreemarkerConfiguration extends Configuration with ServletContextAware {
+class ScalaFreemarkerConfiguration extends Configuration(Configuration.VERSION_2_3_0) with ServletContextAware {
 	// Default constructor init
-	this.setStrictSyntaxMode(true)
 	this.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX)	
 	this.setAutoIncludes(List("/WEB-INF/freemarker/prelude.ftl"))
 	

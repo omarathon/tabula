@@ -56,7 +56,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 		} else Nil
 
 		val feedbacks = if (shouldDeleteFeedback) {
-			val feedbacks = for (uniId <- students; feedback <- feedbackService.getFeedbackByUniId(assignment, uniId)) yield {
+			val feedbacks = for (uniId <- students; feedback <- feedbackService.getAssignmentFeedbackByUniId(assignment, uniId)) yield {
 				feedbackService.delete(mandatory(feedback))
 				feedback
 			}
@@ -72,7 +72,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 			if (mandatory(submission).assignment != assignment) errors.reject("submission.bulk.wrongassignment")
 		}
 
-		for (uniId <- students; feedback <- feedbackService.getFeedbackByUniId(assignment, uniId)) {
+		for (uniId <- students; feedback <- feedbackService.getAssignmentFeedbackByUniId(assignment, uniId)) {
 			if (mandatory(feedback).assignment != assignment) errors.reject("feedback.bulk.wrongassignment")
 		}
 		

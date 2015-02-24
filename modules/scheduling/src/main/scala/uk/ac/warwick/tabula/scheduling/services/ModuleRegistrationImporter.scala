@@ -106,7 +106,7 @@ object ModuleRegistrationImporter {
 	//
 	// Although the 3 queries aren't unioned in SQL now, the column names still need to match.
 
-	val UnconfirmedModuleRegistrations = s"""
+	def UnconfirmedModuleRegistrations = s"""
 			select scj_code, sms.mod_code, sms.sms_mcrd as credit, sms.sms_agrp as assess_group,
 			sms.ses_code, -- e.g. C for core or O for option
 			sms.ayr_code, sms_occl as occurrence,
@@ -127,7 +127,7 @@ object ModuleRegistrationImporter {
 				where stu.stu_code = :universityId"""
 
 	// The check on SMO_RTSC excludes WMG cancelled modules or module registrations
-	val ConfirmedModuleRegistrations = s"""
+	def ConfirmedModuleRegistrations = s"""
 			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
 			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence,
 			smr_agrm, -- agreed overall module mark
@@ -155,7 +155,7 @@ object ModuleRegistrationImporter {
 
 	// the left outer join to SSN excludes rows with a matching SSN since is only matching where SSN_SPRC is null
 	// but that column has a non-null constraint
-	val AutoUploadedConfirmedModuleRegistrations = s"""
+	def AutoUploadedConfirmedModuleRegistrations = s"""
 			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
 			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence, smr_agrm, smr_agrg
 				from $sitsSchema.ins_stu stu

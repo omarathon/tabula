@@ -55,7 +55,7 @@ abstract class OnlineFeedbackFormCommand(
 	def applyInternal(): Feedback = {
 
 		val feedback = assignment.findFeedback(student.getWarwickId).getOrElse({
-			val newFeedback = new Feedback
+			val newFeedback = new AssignmentFeedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = marker.getUserId
 			newFeedback.universityId = student.getWarwickId

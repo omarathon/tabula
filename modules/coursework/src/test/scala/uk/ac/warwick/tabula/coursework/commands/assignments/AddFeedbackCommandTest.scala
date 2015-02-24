@@ -53,7 +53,7 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 		cmd.items.add(item)
 		
 		// Add an existing feedback with the same name and content - will be ignored
-		val feedback = Fixtures.feedback("1010101")
+		val feedback = Fixtures.assignmentFeedback("1010101")
 		feedback.addAttachment(a)
 
 		// Add an existing feedback with the same name but different content - will be overwritten

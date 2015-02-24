@@ -74,7 +74,7 @@ object SitsLevelImporter {
 
 	// the level table in SITS holds value such as
 	// 1 (Undergraduate Level 1, M1 (taught PG) and M2 (research PG).
-	val GetLevel = f"""
+	def GetLevel = f"""
 		select lev_code, lev_snam, lev_name from $sitsSchema.cam_lev
 		"""
 

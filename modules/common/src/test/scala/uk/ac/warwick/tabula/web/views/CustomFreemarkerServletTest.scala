@@ -5,10 +5,8 @@ import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.RequestInfo
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
-import freemarker.template.Template
-import freemarker.template.TemplateModel
+import freemarker.template.{ObjectWrapper, Template, TemplateModel, SimpleHash}
 import java.io.StringReader
-import freemarker.template.SimpleHash
 import freemarker.template.utility.DeepUnwrap
 
 class CustomFreemarkerServletTest extends TestBase with Mockito {
@@ -20,7 +18,7 @@ class CustomFreemarkerServletTest extends TestBase with Mockito {
 		val res = new MockHttpServletResponse
 		
 		val template = new Template("mytemplate", new StringReader(""), null)
-		val model = new SimpleHash
+		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		model.put("contentType", "text/plain")
 		
 		servlet.preTemplateProcess(req, res, template, model)

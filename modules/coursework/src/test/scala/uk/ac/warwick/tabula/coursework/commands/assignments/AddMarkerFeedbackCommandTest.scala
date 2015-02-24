@@ -48,7 +48,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		cmd.items.add(item)
 		
 		// Add an existing feedback with the same name
-		val feedback = Fixtures.feedback("1010101")
+		val feedback = Fixtures.assignmentFeedback("1010101")
 		feedback.addAttachment(a)
 		assignment.feedbacks.add(feedback)
 		feedback.assignment = assignment
@@ -83,7 +83,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		cmd.items.add(item)
 		
 		// Add an existing feedback with the same name
-		val feedback = Fixtures.feedback("1010101")
+		val feedback = Fixtures.assignmentFeedback("1010101")
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
 		feedback.firstMarkerFeedback.addAttachment(a)
 		assignment.feedbacks.add(feedback)

@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
 
@@ -21,7 +22,7 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, marker: User, c
 
 		def saveFeedback(uniNumber: String, file: UploadedFile):Option[Feedback] = {
 			val feedback = assignment.findFeedback(uniNumber).getOrElse({
-				val newFeedback = new Feedback
+				val newFeedback = new AssignmentFeedback
 				newFeedback.assignment = assignment
 				newFeedback.uploaderId = marker.getUserId
 				newFeedback.universityId = uniNumber
@@ -99,8 +100,11 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, marker: User, c
 	}
 
 	def emit(updatedFeedback: Seq[Feedback]) = {
-		updatedFeedback.filter(_.released).map(feedback => {
-			Notification.init(new FeedbackChangeNotification, marker, feedback, assignment)
-		})
+		updatedFeedback.filter(_.released).flatMap { feedback => HibernateHelpers.initialiseAndUnproxy(feedback) match {
+			case assignmentFeedback: AssignmentFeedback =>
+				Option(Notification.init(new FeedbackChangeNotification, marker, assignmentFeedback, assignment))
+			case _ =>
+				None
+		}}
 	}
 }

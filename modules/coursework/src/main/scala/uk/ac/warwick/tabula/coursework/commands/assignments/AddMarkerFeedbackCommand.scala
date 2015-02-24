@@ -6,7 +6,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.MarkingState._
-import uk.ac.warwick.tabula.data.model.{Feedback, Assignment, MarkerFeedback, Module}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands.{UploadedFile, Description}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.helpers.LazyLists
@@ -47,7 +47,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: Us
 	private def saveMarkerFeedback(uniNumber: String, file: UploadedFile) = {
 		// find the parent feedback or make a new one
 		val parentFeedback = assignment.feedbacks.find(_.universityId == uniNumber).getOrElse({
-			val newFeedback = new Feedback
+			val newFeedback = new AssignmentFeedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = marker.getUserId
 			newFeedback.universityId = uniNumber
@@ -68,6 +68,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: Us
 			markerFeedback.addAttachment(attachment)
 		}
 
+		markerFeedback.state = InProgress
 		parentFeedback.updatedDate = DateTime.now
 
 		session.saveOrUpdate(parentFeedback)

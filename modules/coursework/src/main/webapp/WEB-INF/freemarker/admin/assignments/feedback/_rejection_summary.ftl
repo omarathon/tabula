@@ -33,9 +33,9 @@
 		<div class="feedback-comments">
 			<h5>Feedback Comments</h5>
 		<#else>
-		<div>
+			<div>
 		</#if>
-		${secondMarkerFeedback.rejectionComments!"<h5>No feedback comments added.</h5>"}
+			<p>${secondMarkerFeedback.rejectionComments!"<h5>No feedback comments added.</h5>"}</p>
 		</div>
 
 

@@ -27,7 +27,7 @@ import org.hibernate.proxy.HibernateProxyHelper
  * A implementation of BeansWrapper that support native Scala basic and collection types
  * in Freemarker template engine.
  */
-class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
+class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_0) with Logging {
 	
 	var securityService = Wire[SecurityService]
 

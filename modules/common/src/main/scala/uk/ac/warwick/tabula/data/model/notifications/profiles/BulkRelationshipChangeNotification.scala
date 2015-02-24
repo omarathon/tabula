@@ -7,8 +7,10 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 
+import scala.annotation.meta.getter
+
 abstract class BulkRelationshipChangeNotification extends Notification[StudentRelationship, Unit] {
-	@transient val templateLocation: String
+	@(transient @getter) val templateLocation: String
 
 	def relationshipType = entities(0).relationshipType
 

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import uk.ac.warwick.tabula.{Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{ AssignmentService, AssignmentServiceComponent}
+import uk.ac.warwick.tabula.services.{ AssessmentService, AssessmentServiceComponent}
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 
 
@@ -23,14 +23,14 @@ class GenericFeedbackCommandTest extends TestBase with Mockito {
 		new Fixture {
 			assignment.genericFeedback should be("")
 			val result = command.applyInternal()
-			there was one(command.assignmentService).save(assignment)
+			there was one(command.assessmentService).save(assignment)
 			assignment.genericFeedback should be(heronRant)
 		}
 	}
 }
 
 // Implements the dependencies declared by the command
-trait GenericFeedbackCommandTestSupport extends AssignmentServiceComponent with Mockito {
-	val assignmentService = mock[AssignmentService]
+trait GenericFeedbackCommandTestSupport extends AssessmentServiceComponent with Mockito {
+	val assessmentService = mock[AssessmentService]
 	def apply(): Assignment = null
 }

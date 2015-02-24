@@ -17,18 +17,6 @@ class ViewMonitoringPointSetsCommandTest extends TestBase with Mockito {
 		}
 	}
 
-	@Ignore @Test
-	def stateGrouping() {
-		new StateFixture {
-			val points = JArrayList(
-				new MonitoringPoint,
-				new MonitoringPoint
-			)
-			mockSet.points = points
-			state.monitoringPointsByTerm
-		}
-	}
-
 	trait StateFixture {
 		val mockSet = new MonitoringPointSet
 		mockSet.route = new Route

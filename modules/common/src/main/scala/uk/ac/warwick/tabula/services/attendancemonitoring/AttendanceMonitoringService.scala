@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services.attendancemonitoring
 
-import org.codehaus.jackson.annotate.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.joda.time.{LocalDate, DateTime}
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
@@ -223,7 +223,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 			val beginDate = beginDates.min
 			val schemes = findSchemesForStudent(student.universityId, student.userId, departmentOption, academicYear)
 			schemes.flatMap(_.points.asScala).filter(p =>
-				p.startDate.isAfter(beginDate) || p.startDate.isEqual(beginDate)
+				p.endDate.isAfter(beginDate)
 			)
 		} else {
 			Seq()
@@ -233,7 +233,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def listStudentsPoints(studentData: AttendanceMonitoringStudentData, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
 		val schemes = findSchemesForStudent(studentData.universityId, studentData.userId, Option(department), academicYear)
 		schemes.flatMap(_.points.asScala).filter(p =>
-			p.startDate.isAfter(studentData.scdBeginDate) || p.startDate.isEqual(studentData.scdBeginDate)
+			p.endDate.isAfter(studentData.scdBeginDate)
 		)
 	}
 

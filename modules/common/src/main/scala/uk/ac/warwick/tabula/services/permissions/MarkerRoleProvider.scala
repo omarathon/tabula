@@ -9,12 +9,12 @@ import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.{Marker, MarkerRoleDefinition, Role}
-import uk.ac.warwick.tabula.services.AssignmentService
+import uk.ac.warwick.tabula.services.AssessmentService
 
 @Component
 class MarkerRoleProvider extends RoleProvider with TaskBenchmarking with RequestLevelCaching[(CurrentUser, String), Seq[Assignment]] {
 
-	val assignmentService = promise { Wire[AssignmentService] }
+	val assignmentService = promise { Wire[AssessmentService] }
 	
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for MarkerRoleProvider") {
 		def getRoles(assignmentsForMarker: Stream[Assignment]) = assignmentsForMarker.map{ assignment =>

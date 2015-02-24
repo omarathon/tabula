@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.{Mockito, AcademicYear, TestBase}
 import org.junit.Test
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{UpstreamAssessmentGroup, Module, UserGroup}
-import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, AssignmentMembershipService}
+import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, AssessmentMembershipService}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import scala.collection.JavaConverters._
 import org.mockito.Mockito._
@@ -33,7 +33,7 @@ class SmallGroupSetTest extends TestBase with Mockito{
     source.members = UserGroup.ofUniversityIds.tap(_.addUserId("test user"))
     source.defaultTutors = (UserGroup.ofUniversityIds.tap(_.addUserId("test tutor")))
 
-    source.membershipService = mock[AssignmentMembershipService]
+    source.membershipService = mock[AssessmentMembershipService]
     source.module = new Module
     source.name = "test name"
     source.permissionsService = mock[PermissionsService]

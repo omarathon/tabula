@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.services.{AssignmentMembershipServiceImpl, AssignmentMembershipService}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceImpl, AssessmentMembershipService}
 import uk.ac.warwick.userlookup.User
 import org.junit.Before
 import uk.ac.warwick.userlookup.AnonymousUser
@@ -30,7 +30,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		user
 	}
 
-  var assignmentMembershipService: AssignmentMembershipService = _
+  var assignmentMembershipService: AssessmentMembershipService = _
 	var userLookup: UserLookupService = _
 	val nobody = UserGroup.ofUsercodes
 
@@ -42,21 +42,21 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		userLookup.getUserByWarwickUniId(any[String]) answers { id =>
 			userDatabase find {_.getWarwickId == id} getOrElse (new AnonymousUser())
 		}
-		userLookup.getUsersByUserIds(any[JList[String]]) answers { case ids:JList[String @unchecked] =>
-			val users = ids.asScala.map(id=>(id,userDatabase find {_.getUserId == id} getOrElse (new AnonymousUser())))
+		userLookup.getUsersByUserIds(any[JList[String]]) answers { ids =>
+			val users = ids.asInstanceOf[JList[String]].asScala.map(id=>(id,userDatabase find {_.getUserId == id} getOrElse (new AnonymousUser())))
 			JHashMap(users:_*)
 		}
-		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] => 
-			ids.map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
+		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { ids =>
+			ids.asInstanceOf[Seq[String]].map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
 		}
     assignmentMembershipService = {
-      val s = new AssignmentMembershipServiceImpl
+      val s = new AssessmentMembershipServiceImpl
       s.userLookup = userLookup
       s
     }
 	}
 	
-	@Test def empty {
+	@Test def whenEmpty {
 		val membership = assignmentMembershipService.determineMembership(Nil, Option(nobody)).items
 		membership.size should be (0)
 	}

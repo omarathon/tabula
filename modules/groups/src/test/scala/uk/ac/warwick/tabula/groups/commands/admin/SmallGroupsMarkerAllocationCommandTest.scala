@@ -96,15 +96,15 @@ class SmallGroupsMarkerAllocationCommandTest extends TestBase with Mockito {
 		smallGroupSetA.groups.add(smallGroupA2)
 
 
-		trait MockServices extends SmallGroupServiceComponent with AssignmentMembershipServiceComponent {
+		trait MockServices extends SmallGroupServiceComponent with AssessmentMembershipServiceComponent {
 			def smallGroupService: SmallGroupService = {
 				val groupsService = mock[SmallGroupService]
 				groupsService.getSmallGroupSets(assignment.module, assignment.academicYear) returns Seq(smallGroupSetA)
 				groupsService
 			}
 
-			def assignmentMembershipService: AssignmentMembershipService = {
-				val membershipService = mock[AssignmentMembershipService]
+			def assessmentMembershipService: AssessmentMembershipService = {
+				val membershipService = mock[AssessmentMembershipService]
 				membershipService.determineMembershipUsers(assignment) returns Seq(student1, student2, student3)
 				membershipService
 			}

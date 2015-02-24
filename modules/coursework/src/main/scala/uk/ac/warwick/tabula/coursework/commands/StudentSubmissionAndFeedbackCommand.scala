@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.coursework.commands.StudentSubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackPublishedNotification, FeedbackChangeNotification}
@@ -51,7 +52,7 @@ trait StudentSubmissionAndFeedbackCommandState {
 	def studentUser: User
 	def viewer: User
 
-	lazy val feedback = feedbackService.getFeedbackByUniId(assignment, studentUser.getWarwickId).filter(_.released)
+	lazy val feedback = feedbackService.getAssignmentFeedbackByUniId(assignment, studentUser.getWarwickId).filter(_.released)
 	lazy val submission = submissionService.getSubmissionByUniId(assignment, studentUser.getWarwickId).filter { _.submitted }
 }
 
@@ -98,7 +99,7 @@ abstract class StudentSubmissionAndFeedbackCommandInternal(val module: Module, v
 
 		StudentSubmissionInformation(
 			submission = submission,
-			feedback = feedback,
+			feedback = HibernateHelpers.initialiseAndUnproxy(feedback),
 			extension = extension,
 
 			isExtended = assignment.isWithinExtension(studentUser),
@@ -145,7 +146,7 @@ trait CurrentUserSubmissionAndFeedbackNotificationCompletion extends CompletesNo
 
 	def notificationsToComplete(commandResult: StudentSubmissionInformation): CompletesNotificationsResult = {
 		commandResult.feedback match {
-			case Some(feedbackResult) =>
+			case Some(feedbackResult: AssignmentFeedback) =>
 				CompletesNotificationsResult(
 					notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackPublishedNotification](feedbackResult) ++
 						notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackChangeNotification](feedbackResult),

@@ -21,7 +21,7 @@ branch: "master"
 build_user: "nick"
 ant_path: "ant"
 ant_package_target: "clean package"
-scheduler_jboss: !ruby/object:Jboss 
+scheduler_instance: !ruby/object:Jboss
   deployment_state: old
   name: courses
   port: "8080"
@@ -31,7 +31,7 @@ scheduler_jboss: !ruby/object:Jboss
   test_path: /courses/module/ch155
   requests: 
     /courses/module/ch155: 200
-jbosses: 
+instances:
   java-monkey:
   - !ruby/object:Jboss 
     deployment_state: old

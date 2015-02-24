@@ -29,8 +29,8 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 		thisDepartment.modules.add(module3)
 
 		val thisModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
-		val thisAssignmentService = smartMock[AssignmentService]
-		val thisAssignmentMembershipService = smartMock[AssignmentMembershipService]
+		val thisAssignmentService = smartMock[AssessmentService]
+		val thisAssignmentMembershipService = smartMock[AssessmentMembershipService]
 
 		thisModuleAndDepartmentService.getModuleByCode(module1.code) returns Option(module1)
 		thisModuleAndDepartmentService.getModuleByCode(module2.code) returns Option(module2)
@@ -41,12 +41,12 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 
 	@Test def validate(): Unit = new Fixture { withUser("cuscav") {
 		val validator = new AddAssignmentsValidation with AddAssignmentsCommandState
-			with ModuleAndDepartmentServiceComponent with AssignmentServiceComponent {
+			with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent {
 
 			val department = thisDepartment
 			val user = currentUser
 			val moduleAndDepartmentService = thisModuleAndDepartmentService
-			val assignmentService = thisAssignmentService
+			val assessmentService = thisAssignmentService
 		}
 
 		validator.academicYear = new AcademicYear(2012)
@@ -66,10 +66,10 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 	
 	@Test def applyCommand() { new Fixture { withUser("cuscav") {
 		val cmd = new AddAssignmentsCommandInternal(thisDepartment, currentUser) with AddAssignmentsCommandState
-			with ModuleAndDepartmentServiceComponent with AssignmentServiceComponent with AssignmentMembershipServiceComponent {
+			with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent {
 			val moduleAndDepartmentService = thisModuleAndDepartmentService
-			val assignmentService = thisAssignmentService
-			val assignmentMembershipService = thisAssignmentMembershipService
+			val assessmentService = thisAssignmentService
+			val assessmentMembershipService = thisAssignmentMembershipService
 		}
 
 		cmd.academicYear = new AcademicYear(2012)
@@ -103,10 +103,10 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 
 	@Test	def optionsMapBinding() { new Fixture {
 		val cmd = new AddAssignmentsCommandInternal(null, null) with AddAssignmentsCommandState
-			with ModuleAndDepartmentServiceComponent with AssignmentServiceComponent with AssignmentMembershipServiceComponent {
+			with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent {
 			val moduleAndDepartmentService = thisModuleAndDepartmentService
-			val assignmentService = thisAssignmentService
-			val assignmentMembershipService = thisAssignmentMembershipService
+			val assessmentService = thisAssignmentService
+			val assessmentMembershipService = thisAssignmentMembershipService
 		}
 		val binder = new CustomDataBinder(cmd, "cmd") with NoAutoGrownNestedPaths
 		val pvs = new MutablePropertyValues()

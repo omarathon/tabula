@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations._
+import org.hibernate.annotations.{BatchSize, Type}
 import javax.persistence._
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
-import org.hibernate.annotations.AccessType
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import javax.persistence.Entity
@@ -15,7 +14,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 
 
-@Entity @AccessType("field")
+@Entity @Access(AccessType.FIELD)
 class MemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget with FormattedHtml {
 
 	@transient

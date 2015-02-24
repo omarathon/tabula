@@ -1,14 +1,10 @@
 package uk.ac.warwick.tabula.web.views
 
-import freemarker.template.TemplateMethodModel
-import freemarker.template.TemplateDirectiveModel
-import freemarker.template.TemplateDirectiveBody
-import freemarker.template.TemplateModel
+import freemarker.template._
 import freemarker.core.Environment
 import org.springframework.beans.factory.annotation.Value
 import java.util.Properties
 import javax.annotation.Resource
-import freemarker.template.SimpleScalar
 import java.net.URLEncoder
 import uk.ac.warwick.util.web.EscapingUriParser
 import uk.ac.warwick.tabula.JavaImports._
@@ -16,7 +12,7 @@ import uk.ac.warwick.tabula.JavaImports._
 /**
  *
  */
-class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModel {
+class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModelEx {
 
 	// Default behaviour now is to assume provided path is relative to root, i.e. includes the servlet context.
 	// So either pass the whole path as the page, OR explicitly specify context in the macro if you know it.

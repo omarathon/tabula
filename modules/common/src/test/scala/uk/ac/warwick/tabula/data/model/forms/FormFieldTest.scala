@@ -9,7 +9,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{UserGroup, UnspecifiedTypeUserGroup, FileAttachment, Assignment}
-import uk.ac.warwick.tabula.services.{UserGroupCacheManager, AssignmentService}
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, AssessmentService}
 
 // scalastyle:off magic.number
 class FormFieldTest extends TestBase with Mockito {
@@ -302,7 +302,7 @@ class FormFieldTest extends TestBase with Mockito {
 	@Test def maintainFieldOrder()
 	{
 		val assignment = new Assignment
-		assignment.assignmentService = mock[AssignmentService]
+		assignment.assignmentService = mock[AssessmentService]
 		assignment.addDefaultSubmissionFields()
 
 		val commentField = assignment.findField(Assignment.defaultCommentFieldName).get

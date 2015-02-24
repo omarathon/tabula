@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations._
+import org.hibernate.annotations.{BatchSize, FilterDef, FilterDefs, Filter, Filters}
 import org.joda.time.LocalDate
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
@@ -262,7 +262,7 @@ trait StudentCourseProperties extends BasicStudentCourseProperties {
 	var statusOnCourse: SitsStatus = _
 }
 
-sealed abstract class CourseType(val code: String, val level: String, val description: String, val courseCodeChar: Char) extends Convertible[String] {
+sealed abstract class CourseType(val code: String, val level: String, val description: String, val courseCodeChar: Char) extends Convertible[String] with Product with Serializable {
 	def value = code
 }
 

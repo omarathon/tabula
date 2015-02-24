@@ -74,7 +74,6 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 		notifications.foreach(dao.save)
 
 		session.flush()
-		session.clear()
 
 		dao.getScheduledNotifications(heron) should be (Seq(n1, n3))
 		dao.getScheduledNotifications(heron2) should be (Seq(n2))

@@ -1,27 +1,26 @@
 package uk.ac.warwick.tabula.data.model
 
+import javax.persistence.CascadeType._
+import javax.persistence.FetchType._
+import javax.persistence._
+
+import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
+import org.joda.time.{DateTime, LocalDate}
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.data.model.forms.{WordCountField, _}
+import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import javax.persistence._
-import javax.persistence.FetchType._
-import javax.persistence.CascadeType._
-import org.hibernate.annotations.{ForeignKey, Filter, FilterDef, AccessType, BatchSize, Type}
-import org.joda.time.{LocalDate, DateTime}
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.tabula.data.model.forms._
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.forms.WordCountField
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
 import scala.reflect._
-import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
-import uk.ac.warwick.tabula.data.PostLoadBehaviour
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 
 object Assignment {
@@ -58,26 +57,21 @@ object Assignment {
 @FilterDef(name = Assignment.NotDeletedFilter, defaultCondition = "deleted = 0")
 @Filter(name = Assignment.NotDeletedFilter)
 @Entity
-@AccessType("field")
+@Access(AccessType.FIELD)
 class Assignment
-		extends GeneratedId
-		with CanBeDeleted
+		extends Assessment
 		with ToString
-		with PermissionsTarget
 		with HasSettings
 		with PostLoadBehaviour
 		with Serializable
 		with ToEntityReference {
 
-	import Assignment._
+	import uk.ac.warwick.tabula.data.model.Assignment._
 
 	type Entity = Assignment
 
 	@transient
-	var assignmentService = Wire[AssignmentService]("assignmentService")
-
-	@transient
-	var assignmentMembershipService = Wire[AssignmentMembershipService]("assignmentMembershipService")
+	var assignmentService = Wire[AssessmentService]("assignmentService")
 
 	@transient
 	var feedbackService = Wire[FeedbackService]("feedbackService")
@@ -96,14 +90,14 @@ class Assignment
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
-	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
+	override var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.StringListUserType")
 	var fileExtensions: Seq[String] = _
 
 	var attachmentLimit: Int = 1
 
-	var name: String = _
+	override var name: String = _
 	var active: JBoolean = true
 	var archived: JBoolean = false
 
@@ -126,13 +120,13 @@ class Assignment
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "module_id")
-	var module: Module = _
+	override var module: Module = _
 
-	def permissionsParents = Option(module).toStream
+	override def permissionsParents = Option(module).toStream
 
 	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size = 200)
-	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
+	override var assessmentGroups: JList[AssessmentGroup] = JArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@OrderBy("submittedDate")
@@ -145,7 +139,8 @@ class Assignment
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)
-	var feedbacks: JList[Feedback] = JArrayList()
+	var feedbacks: JList[AssignmentFeedback] = JArrayList()
+	override def allFeedback = feedbacks.asScala
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_template_id")
@@ -196,13 +191,13 @@ class Assignment
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)
-	var fields: JList[FormField] = JArrayList()
+	var fields: JList[AssignmentFormField] = JArrayList()
 
 	// IndexColumn is a busted flush for fields because of reuse of non-uniqueness.
 	// Use manual position management on add/removeFields, and in these getters
-	def submissionFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Submission).sortBy(_.position)
+	def submissionFields: Seq[AssignmentFormField] = fields.filter(_.context == FormFieldContext.Submission).sortBy(_.position)
 
-	def feedbackFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
+	def feedbackFields: Seq[AssignmentFormField] = fields.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
 
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "membersgroup_id")
@@ -210,7 +205,7 @@ class Assignment
 
 	def members: UnspecifiedTypeUserGroup = {
 		Option(_members).map {
-			new UserGroupCacheManager(_, assignmentMembershipService.assignmentManualMembershipHelper)
+			new UserGroupCacheManager(_, assessmentMembershipService.assignmentManualMembershipHelper)
 		}.orNull
 	}
 
@@ -276,7 +271,7 @@ class Assignment
 	 * Before we allow customising of assignment feedback forms, we just want the basic
 	 * fields to allow you to enter a comment.
 	 */
-	def addDefaultFeedbackFields() {
+	override def addDefaultFeedbackFields() {
 		val feedback = new TextField
 		feedback.name = defaultFeedbackTextFieldName
 		feedback.value = ""
@@ -285,7 +280,7 @@ class Assignment
 		addField(feedback)
 	}
 
-	def addDefaultFields() {
+	override def addDefaultFields() {
 		addDefaultSubmissionFields()
 		addDefaultFeedbackFields()
 	}
@@ -385,14 +380,6 @@ class Assignment
 	// returns extension for a specified student
 	def findExtension(uniId: String) = extensions.find(_.universityId == uniId)
 
-	def membershipInfo: AssignmentMembershipInfo = assignmentMembershipService.determineMembership(upstreamAssessmentGroups, Option(members))
-
-	// converts the assessmentGroups to upstream assessment groups
-	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
-		assessmentGroups.asScala.flatMap {
-			_.toUpstreamAssessmentGroup(academicYear)
-		}
-
 	/**
 	 * Whether the assignment is not archived or deleted.
 	 */
@@ -413,7 +400,7 @@ class Assignment
 		_.updatedDate
 	}.updatedDate
 
-	def addField(field: FormField) {
+	def addField(field: AssignmentFormField) {
 		if (field.context == null) throw new IllegalArgumentException("Field with name " + field.name + " has no context specified")
 		if (fields.exists(_.name == field.name)) throw new IllegalArgumentException("Field with name " + field.name + " already exists")
 		field.assignment = this
@@ -458,8 +445,7 @@ class Assignment
 			case _ => None
 		}
 
-	// feedback that has been been through the marking process (not placeholders for marker feedback)
-	def fullFeedback = feedbacks.filterNot(_.isPlaceholder).toSeq
+
 
 	def countFullFeedback = fullFeedback.size
 
@@ -492,9 +478,9 @@ class Assignment
 
 	def getUnapprovedExtensions = extensionService.getUnapprovedExtensions(this)
 
-	def addFields(fieldz: FormField*) = for (field <- fieldz) addField(field)
+	def addFields(fieldz: AssignmentFormField*) = for (field <- fieldz) addField(field)
 
-	def addFeedback(feedback: Feedback) {
+	def addFeedback(feedback: AssignmentFeedback) {
 		feedbacks.add(feedback)
 		feedback.assignment = this
 	}
@@ -507,12 +493,6 @@ class Assignment
 	// returns the submission for a specified student
 	def findSubmission(uniId: String) = submissions.find(_.universityId == uniId)
 
-	// returns feedback for a specified student
-	def findFeedback(uniId: String) = feedbacks.find(_.universityId == uniId)
-
-	// returns feedback for a specified student
-	def findFullFeedback(uniId: String) = fullFeedback.find(_.universityId == uniId)
-
 	// Help views decide whether to show a publish button.
 	def canPublishFeedback: Boolean =
 		fullFeedback.nonEmpty &&
@@ -524,7 +504,7 @@ class Assignment
 			// users can always submit to assignments if they have a submission or piece of feedback
 			submissions.asScala.exists(_.universityId == user.getWarwickId) ||
 				fullFeedback.exists(_.universityId == user.getWarwickId) ||
-				assignmentMembershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
+				assessmentMembershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
 		} else {
 			true
 		}
@@ -603,7 +583,7 @@ class Assignment
 	}
 
 	private def getUpToThirdFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
-		if (this.markingWorkflow.hasThirdMarker && this.markingWorkflow.getStudentsThirdMarker(this, feedback.universityId).exists(_ == user.getUserId)) {
+		if (this.markingWorkflow.hasThirdMarker && this.markingWorkflow.getStudentsThirdMarker(this, feedback.universityId).contains(user.getUserId)) {
 			Seq(feedback.retrieveThirdMarkerFeedback, feedback.retrieveSecondMarkerFeedback, feedback.retrieveFirstMarkerFeedback)
 		} else {
 			getUpToSecondFeedbacks(user, feedback)
@@ -611,7 +591,7 @@ class Assignment
 	}
 
 	private def getUpToSecondFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
-		if (this.markingWorkflow.hasSecondMarker && this.markingWorkflow.getStudentsSecondMarker(this, feedback.universityId).exists(_ == user.getUserId)) {
+		if (this.markingWorkflow.hasSecondMarker && this.markingWorkflow.getStudentsSecondMarker(this, feedback.universityId).contains(user.getUserId)) {
 			Seq(feedback.retrieveSecondMarkerFeedback, feedback.retrieveFirstMarkerFeedback)
 		} else {
 			getUpToFirstFeedbacks(user, feedback)
@@ -619,7 +599,7 @@ class Assignment
 	}
 
 	private def getUpToFirstFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
-		if (this.markingWorkflow.getStudentsFirstMarker(this, feedback.universityId).exists(_ == user.getUserId)) {
+		if (this.markingWorkflow.getStudentsFirstMarker(this, feedback.universityId).contains(user.getUserId)) {
 			Seq(feedback.retrieveFirstMarkerFeedback)
 		} else {
 			Seq()
@@ -701,6 +681,14 @@ class Assignment
 			false
 		} else {
 			submissions.asScala.exists(s => !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
+		}
+	}
+
+	def needsFeedbackPublishingFor(universityId: String) = {
+		if (openEnded || !collectSubmissions || archived) {
+			false
+		} else {
+			submissions.asScala.find { _.universityId == universityId }.exists(s => !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
 		}
 	}
 

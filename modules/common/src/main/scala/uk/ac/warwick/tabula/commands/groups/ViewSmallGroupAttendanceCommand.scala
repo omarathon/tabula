@@ -113,7 +113,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 		
 	import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand._
 	
-	if (!group.groupSet.collectAttendance) throw new ItemNotFoundException
+	if (!group.groupSet.collectAttendance) throw new ItemNotFoundException()
 	
 	override def applyInternal() = {
 		val occurrences = benchmarkTask("Get all small group event occurrences for the group") { smallGroupService.findAttendanceByGroup(group) }

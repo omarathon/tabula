@@ -4,7 +4,7 @@ import org.joda.time.{LocalDate, DateTime}
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.{GeneratedId, Assignment, Module, MeetingFormat, StudentRelationshipType, HasSettings}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{AssignmentService, ModuleAndDepartmentService, RelationshipService}
+import uk.ac.warwick.tabula.services.{AssessmentService, ModuleAndDepartmentService, RelationshipService}
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConverters._
 import javax.validation.constraints.NotNull
@@ -118,7 +118,7 @@ trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehavio
 	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
 	@transient
-	var assignmentService = Wire[AssignmentService]
+	var assignmentService = Wire[AssessmentService]
 
 	// Setting for MonitoringPointType.Meeting
 	def meetingRelationships = getStringSeqSetting(Settings.MeetingRelationships, Seq())

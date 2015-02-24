@@ -56,7 +56,7 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 		schemes.add(scheme1)
 
 		attendanceMonitoringService.generatePointsFromTemplateScheme(templateScheme, academicYear) returns points
-		profileService.getAllMembersWithUniversityIds(argThat(anything)) returns Nil
+		profileService.getAllMembersWithUniversityIds(anArgThat(anything)) returns Nil
 		attendanceMonitoringService.listAllSchemes(department) returns Seq(scheme)
 
 	}

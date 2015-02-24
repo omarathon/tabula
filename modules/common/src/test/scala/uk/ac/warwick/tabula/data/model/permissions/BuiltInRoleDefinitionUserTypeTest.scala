@@ -14,7 +14,7 @@ class BuiltInRoleDefinitionUserTypeTest extends TestBase with Mockito {
 		t.convertToObject("ModuleManagerRoleDefinition") should be (ModuleManagerRoleDefinition)
 		t.convertToObject("SettingsOwnerRoleDefinition") should be (SettingsOwnerRoleDefinition)
 		t.convertToObject("SubmitterRoleDefinition") should be (SubmitterRoleDefinition)
-		evaluating { t.convertToObject("Q") } should produce [IllegalArgumentException]
+		an [IllegalArgumentException] should be thrownBy { t.convertToObject("Q") }
 	}
   
 	@Test def convertToValue() {

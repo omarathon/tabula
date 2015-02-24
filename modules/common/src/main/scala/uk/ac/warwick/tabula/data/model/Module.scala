@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 
-import org.hibernate.annotations.{Type, BatchSize, ForeignKey}
+import org.hibernate.annotations.{Type, BatchSize}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear

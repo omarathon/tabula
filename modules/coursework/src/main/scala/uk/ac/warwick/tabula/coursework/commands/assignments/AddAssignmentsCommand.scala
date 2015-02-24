@@ -23,8 +23,8 @@ object AddAssignmentsCommand {
 	def apply(department: Department, user: CurrentUser) =
 		new AddAssignmentsCommandInternal(department, user)
 			with AutowiringModuleAndDepartmentServiceComponent
-			with AutowiringAssignmentServiceComponent
-			with AutowiringAssignmentMembershipServiceComponent
+			with AutowiringAssessmentServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
 			with ComposableCommand[Seq[Assignment]]
 			with PopulatesAddAssignmentsCommand
 			with AddAssignmentsCommandOnBind
@@ -46,7 +46,7 @@ class AssignmentItem(
 
 	def this() = this(true, null, null)
 
-	var assignmentService = Wire.auto[AssignmentService]
+	var assignmentService = Wire.auto[AssessmentService]
 
 	// set after bind
 	var assessmentGroup: Option[UpstreamAssessmentGroup] = _
@@ -75,12 +75,12 @@ class AssignmentItem(
 
 class AddAssignmentsCommandInternal(val department: Department, val user: CurrentUser) extends CommandInternal[Seq[Assignment]] {
 
-	self: AddAssignmentsCommandState with ModuleAndDepartmentServiceComponent with AssignmentServiceComponent with AssignmentMembershipServiceComponent =>
+	self: AddAssignmentsCommandState with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
 
 	override def applyInternal() = {
 		assignmentItems.asScala.filter(_.include).map(item => {
 			val assignment = new Assignment()
-			assignment.assignmentService = assignmentService
+			assignment.assignmentService = assessmentService
 			assignment.addDefaultFields()
 			assignment.academicYear = academicYear
 			assignment.name = item.name
@@ -97,16 +97,16 @@ class AddAssignmentsCommandInternal(val department: Department, val user: Curren
 			// Do open-ended afterwards; it's a date item that we're copying, not from shared options
 			assignment.openEnded = item.openEnded
 
-			assignmentService.save(assignment)
+			assessmentService.save(assignment)
 
 			val assessmentGroup = new AssessmentGroup
 			assessmentGroup.occurrence = item.occurrence
 			assessmentGroup.assessmentComponent = item.upstreamAssignment
 			assessmentGroup.assignment = assignment
-			assignmentMembershipService.save(assessmentGroup)
+			assessmentMembershipService.save(assessmentGroup)
 
 			assignment.assessmentGroups.add(assessmentGroup)
-			assignmentService.save(assignment)
+			assessmentService.save(assignment)
 			assignment
 		})
 	}
@@ -120,7 +120,7 @@ class AddAssignmentsCommandInternal(val department: Department, val user: Curren
 
 trait PopulatesAddAssignmentsCommand extends PopulateOnForm {
 
-	self: AddAssignmentsCommandState with AssignmentMembershipServiceComponent =>
+	self: AddAssignmentsCommandState with AssessmentMembershipServiceComponent =>
 
 	override def populate() = {
 		assignmentItems.clear()
@@ -141,8 +141,8 @@ trait PopulatesAddAssignmentsCommand extends PopulateOnForm {
 
 	private def fetchAssignmentItems(): JList[AssignmentItem] = {
 		for {
-			upstreamAssignment <- assignmentMembershipService.getAssessmentComponents(department, includeSubDepartments)
-			assessmentGroup <- assignmentMembershipService.getUpstreamAssessmentGroups(upstreamAssignment, academicYear).sortBy{ _.occurrence }
+			upstreamAssignment <- assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments)
+			assessmentGroup <- assessmentMembershipService.getUpstreamAssessmentGroups(upstreamAssignment, academicYear).sortBy{ _.occurrence }
 		} yield {
 			val item = new AssignmentItem(
 				include = shouldIncludeByDefault(upstreamAssignment),
@@ -156,12 +156,12 @@ trait PopulatesAddAssignmentsCommand extends PopulateOnForm {
 
 trait AddAssignmentsCommandOnBind extends BindListener {
 
-	self: AddAssignmentsCommandState with AssignmentMembershipServiceComponent =>
+	self: AddAssignmentsCommandState with AssessmentMembershipServiceComponent =>
 
 	override def onBind(result: BindingResult) = {
 		// re-attach UpstreamAssessmentGroup objects based on the other properties
 		for (item <- assignmentItems.asScala if item.assessmentGroup == null) {
-			item.assessmentGroup = assignmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
+			item.assessmentGroup = assessmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
 				this.academicYear = academicYear
 				this.occurrence = item.occurrence
 				this.moduleCode = item.upstreamAssignment.moduleCode
@@ -173,7 +173,7 @@ trait AddAssignmentsCommandOnBind extends BindListener {
 
 trait AddAssignmentsValidation extends SelfValidating with Logging {
 
-	self: AddAssignmentsCommandState with ModuleAndDepartmentServiceComponent with AssignmentServiceComponent =>
+	self: AddAssignmentsCommandState with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent =>
 
 	override def validate(errors: Errors) {
 		ValidationUtils.rejectIfEmpty(errors, "academicYear", "NotEmpty")
@@ -210,7 +210,7 @@ trait AddAssignmentsValidation extends SelfValidating with Logging {
 		val modules = LazyMaps.create { (code: String) => moduleAndDepartmentService.getModuleByCode(code.toLowerCase).orNull }
 
 		for (item <- items) {
-			for (existingAssignment <- assignmentService.getAssignmentByNameYearModule(item.name, academicYear, modules(item.upstreamAssignment.moduleCodeBasic))) {
+			for (existingAssignment <- assessmentService.getAssignmentByNameYearModule(item.name, academicYear, modules(item.upstreamAssignment.moduleCodeBasic))) {
 				val path = "assignmentItems[%d]" format assignmentItems.indexOf(item)
 				errors.rejectValue(path, "name.duplicate.assignment", Array(item.name), null)
 			}

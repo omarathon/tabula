@@ -94,7 +94,7 @@ object AccreditedPriorLearningImporter {
 	// Choose the most significant course, flagged by SCJ_UDFA value of Y in the Student Course Join (SCJ) table
 	// if there is one for the student's SPR (Student Programme Route) record.
 	// If there is no most signif SCJ for this SPR, choose the SCJ with the max sequence number.
-	val AccreditedPriorLearning = f"""
+	def AccreditedPriorLearning = f"""
 		select scj.scj_code, -- Student Course Join code
 			sac.awd_code,  -- award code, e.g. "BA"
 			sac.sac_seq, -- sequence code on the Student Award Credits table
