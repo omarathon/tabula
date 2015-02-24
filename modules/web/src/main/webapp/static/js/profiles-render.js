@@ -81,232 +81,203 @@
 
 
 	// MEETING RECORD STUFF
-	exports.SetupMeetingRecords = function(containerSelector) {
-		var $meetingsSection = (containerSelector != undefined && containerSelector.length > 0) ? $(containerSelector) : $('section.meetings');
+	function scrollToOpenDetails() {
+		var $openMeetingDetails = $(".meetings-target details.open").first();
+		if ($openMeetingDetails.length) {
+			var offset = window.getNavigationHeight || 0;
+			$("html, body").animate({
+				scrollTop: $openMeetingDetails.offset().top - offset
+			}, 300);
+		}
+	}
 
-		$(function() {
-			function scrollToOpenDetails() {
-				var $openMeetingDetails = $("details.open", $meetingsSection).first();
-				if ($openMeetingDetails.length) {
-					var offset = window.getNavigationHeight || 0;
-					$("html, body").animate({
-						scrollTop: $openMeetingDetails.offset().top - offset
-					}, 300);
-				}
+	function frameLoad(frame) {
+		var $f = $(frame).contents(), $m = $("#modal");
+
+		// reset slow load spinner
+		$m.tabulaPrepareSpinners();
+
+		if ($f.find("#meeting-record-form").length == 1) {
+			// unhide the iframe
+			$m.find('.modal-body').slideDown();
+
+			// reset datepicker & submit protection
+			var $form = $m.find('form.double-submit-protection');
+			$form.tabulaSubmitOnce();
+			$form.find(".btn").removeClass('disabled');
+			// wipe any existing state information for the submit protection
+			$form.removeData('submitOnceSubmitted');
+
+			// show-time
+			$m.modal("show");
+			$m.off('shown.frameLoad').on('shown.frameLoad', function(){
+				$f.find("[name='title']").focus();
+			});
+		} else if ($f.find("section.meetings").length == 1) {
+			var source =$f.find("section.meetings");
+			var targetClass = source.attr('data-target-container');
+			var target = $("section."+targetClass);
+			// bust the returned content out to the original page, and kill the modal
+			target.replaceWith(source);
+			$('details').details();
+			Profiles.SetupMeetingRecords();
+			$m.modal("hide");
+		} else {
+			/*
+			 TODO more user-friendly fall-back?
+			 This is where you end up with an unexpected failure, eg. permission failure, mangled URL etc.
+			 The default is to reload the original profile page. Not sure if there's something more helpful
+			 we could/should do here.
+			 */
+			$m.modal('hide');
+			document.location.reload(true);
+		}
+	}
+
+	// named handler that can be unbound
+	function iframeHandler() {
+		frameLoad(this);
+		$(this).off('load', iframeHandler);
+	}
+
+	function getModal($this, targetUrl) {
+		var $m = $("#modal");
+		$.get(targetUrl + "?modal", function(data) {
+			$m.html(data);
+			var $mb = $m.find(".modal-body").empty();
+			var iframeMarkup = "<iframe frameBorder='0' scrolling='no' style='height:100%;width:100%;' id='modal-content'></iframe>";
+			$(iframeMarkup)
+				.off('load').on('load', iframeHandler)
+				.attr("src", targetUrl + "?iframe")
+				.appendTo($mb);
+		}).fail(function() {
+			if (!$('#meeting-modal-failure').length) {
+				var $error = $('<p id="meeting-modal-failure" class="alert alert-error hide"><i class="icon-warning-sign"></i> Sorry, I\'m unable to edit meeting records for this student at the moment.</p>');
+				$this.before($error);
+				$error.slideDown();
 			}
+		});
+	}
 
-			function frameLoad(frame) {
-				var $m = $("#modal");
-				var $f = $(frame).contents();
+	// Needs to be called whenever meetings are updated (can be called multiple times)
+	exports.SetupMeetingRecords = function(){
+		// show rejection comment box
+		$('input.reject').each( function() {
+			var $this = $(this);
+			var $form = $this.closest('form');
+			var $commentBox = $form.find('.rejection-comment');
+			$this.slideMoreOptions($commentBox, true);
+		});
 
-				// reset slow load spinner
-				$m.tabulaPrepareSpinners();
-
-				if ($f.find("#meeting-record-form").length == 1) {
-					// unhide the iframe
-					$m.find('.modal-body').slideDown();
-
-					// reset datepicker & submit protection
-					var $form = $m.find('form.double-submit-protection');
-					$form.tabulaSubmitOnce();
-					$form.find(".btn").removeClass('disabled');
-					// wipe any existing state information for the submit protection
-					$form.removeData('submitOnceSubmitted');
-
-					//				// firefox fix
-					//				var wait = setInterval(function() {
-					//					var h = $f.find("body").height();
-					//					if (h > 0) {
-					//						clearInterval(wait);
-					//						$m.find(".modal-body").animate({ height: h });
-					//					}
-					//				}, 300); // this didn't work for me (ZLJ) at 150 but did at 200; upping to 300 to include safety margin
-
-					// show-time
-					$m.modal("show");
-					$m.on("shown", function() {
-						$f.find("[name='title']").focus();
-					});
-				} else if ($f.find("section.meetings").length == 1) {
-					var source =$f.find("section.meetings");
-					var targetClass = source.attr('data-target-container');
-					var target = $("section."+targetClass);
-					// bust the returned content out to the original page, and kill the modal
-					target.replaceWith(source);
-					$('details').details();
-					// rebind all of this stuff to the new UI
-					decorateMeetingRecords(source);
-					$m.modal("hide");
-				} else {
-					/*
-					 TODO more user-friendly fall-back?
-					 This is where you end up with an unexpected failure, eg. permission failure, mangled URL etc.
-					 The default is to reload the original profile page. Not sure if there's something more helpful
-					 we could/should do here.
-					 */
-					$m.modal('hide');
-					document.location.reload(true);
-				}
-			}
-
-
-			function decorateMeetingRecords($innerMeetingsSection){
-
-				// delete meeting records
-				$('a.delete-meeting-record', $innerMeetingsSection).on('click', function() {
-					var $this = $(this);
-					var $details = $this.closest('details');
-
-					if (!$details.hasClass("deleted")) {
-						$details.addClass("processing");
-						var url = $this.attr("href");
-						$.post(url, function(data) {
-							if (data.status == "successful") {
-								$details.addClass("deleted muted");
-							} else if (data.status == "error") {
-								// TAB-2487 was hard to spot because nothing is done with failed ajax
-								// TODO - come up with a better way of reporting JSONErrorView failures app wide
-								alert(data.errors[0]); // alert the first error.
-							}
-							$details.removeClass("processing");
-						}, "json");
-					}
-					return false;
-				});
-
-				// restore meeting records
-				$('a.restore-meeting-record', $innerMeetingsSection).on('click', function() {
-					var $this = $(this);
-					var $details = $this.closest('details');
-
-					if ($details.hasClass("deleted")) {
-						$details.addClass("processing");
-						var url = $this.attr("href");
-						$.post(url, function(data) {
-							if (data.status == "successful") {
-								$details.removeClass("deleted muted");
-							}
-							$details.removeClass("processing");
-						}, "json");
-					}
-					return false;
-				});
-
-				// purge meeting records
-				$('a.purge-meeting-record', $innerMeetingsSection).on('click', function() {
-					var $this = $(this);
-					var $details = $this.closest('details');
-
-					if ($details.hasClass("deleted")) {
-						$details.addClass("processing");
-						var url = $this.attr("href");
-						$.post(url, function(data) {
-							if (data.status == "successful") {
-								$details.remove();
-							}
-						}, "json");
-					}
-					return false;
-				});
-
-				// show rejection comment box
-				$('input.reject', $innerMeetingsSection).each( function() {
-					var $this = $(this);
-					var $form = $this.closest('form');
-					var $commentBox = $form.find('.rejection-comment');
-					$this.slideMoreOptions($commentBox, true);
-				});
-
-				// make modal links use ajax
-				$('.meeting-record-toolbar, details.meeting.normal', $innerMeetingsSection).tabulaAjaxSubmit(function() {
-					document.location.reload(true);
-				});
-
-				var $m = $("#modal");
-
-				scrollToOpenDetails();
-
-				/* load form into modal, with picker enabled
-				 * click selector must be specific otherwise the click event will propagate up past the section element
-				 * these HTML5 elements have default browser driven behaviour that is hard to override.
-				 */
-
-				// named handler that can be unbound
-				var iframeHandler = function() {
-					frameLoad(this);
-					$(this).off('load', iframeHandler);
-				};
-
-				var getModal = function($this, targetUrl) {
-					$.get(targetUrl + "?modal", function(data) {
-						$m.html(data);
-						var $mb = $m.find(".modal-body").empty();
-						var iframeMarkup = "<iframe frameBorder='0' scrolling='no' style='height:100%;width:100%;' id='modal-content'></iframe>";
-						$(iframeMarkup)
-							.off('load').on('load', iframeHandler)
-							.attr("src", targetUrl + "?iframe")
-							.appendTo($mb);
-					}).fail(function() {
-						if (!$('#meeting-modal-failure').length) {
-							var $error = $('<p id="meeting-modal-failure" class="alert alert-error hide"><i class="icon-warning-sign"></i> Sorry, I\'m unable to edit meeting records for this student at the moment.</p>');
-							$this.before($error);
-							$error.slideDown();
-						}
-					});
-				};
-
-				$(".new, .edit-meeting-record", $innerMeetingsSection).on("click", function(e) {
-					e.preventDefault();
-					var $this = $(this);
-					if (!$this.closest('details').is('.deleted')) {
-						getModal($this, $this.attr("href"));
-					}
-					return false;
-				});
-
-				$m.on('submit', 'form', function(e){
-					e.preventDefault();
-					// reattach the load handler and submit the inner form in the iframe
-					$m.find('iframe')
-						.off('load').on('load', iframeHandler)
-						.contents().find('form').submit();
-
-					// hide the iframe, so we don't get a FOUC
-					$m.find('.modal-body').slideUp();
-				});
-
-				// Scheduled meetings
-
-				$('form.scheduled-action', $innerMeetingsSection).on('submit', function(event){
-					event.preventDefault();
-					var $this = $(this), checkedInput = $this.find('input:checked');
-					$this.find('div.ajaxErrors').hide();
-					switch (checkedInput.val()) {
-						case "confirm": {
-							getModal($this, checkedInput.data('formhref'));
-						} break;
-						case "reschedule": {
-							$this.closest('details').find('.meeting-record-toolbar .edit-meeting-record').trigger('click');
-						} break;
-						case "missed": {
-							$.post(checkedInput.data('formhref'), $this.serialize(), function(data){
-								if(data.status === "successful") {
-									document.location.reload(true);
-								} else {
-									$this.find('div.ajaxErrors').empty().html(data.errors.join('<br />')).show();
-								}
-							});
-						} break;
-					}
-				});
-
-			}
-			// call on page load
-			decorateMeetingRecords($meetingsSection);
-
-
+		// make modal links use ajax
+		$('.meeting-record-toolbar, details.meeting.normal').tabulaAjaxSubmit(function() {
+			document.location.reload(true);
 		});
 	};
+
+	// Event handlers
+	$(function() {
+		var $m = $("#modal");
+		$m.on('submit', 'form', function(e){
+			e.preventDefault();
+			// reattach the load handler and submit the inner form in the iframe
+			$m.find('iframe')
+				.off('load').on('load', iframeHandler)
+				.contents().find('form').submit();
+
+			// hide the iframe, so we don't get a FOUC
+			$m.find('.modal-body').slideUp();
+		});
+
+		$('.meetings-target').on('click', 'a.delete-meeting-record', function(e) {
+			// delete meeting records
+			var $this = $(this);
+			var $details = $this.closest('details');
+
+			if (!$details.hasClass("deleted")) {
+				$details.addClass("processing");
+				var url = $this.attr("href");
+				$.post(url, function(data) {
+					if (data.status == "successful") {
+						$details.addClass("deleted muted");
+					} else if (data.status == "error") {
+						// TAB-2487 was hard to spot because nothing is done with failed ajax
+						// TODO - come up with a better way of reporting JSONErrorView failures app wide
+						alert(data.errors[0]); // alert the first error.
+					}
+					$details.removeClass("processing");
+				}, "json");
+			}
+			e.preventDefault();
+			return false;
+
+		}).on('click', 'a.restore-meeting-record', function(e) {
+			// restore meeting records
+			var $this = $(this);
+			var $details = $this.closest('details');
+
+			if ($details.hasClass("deleted")) {
+				$details.addClass("processing");
+				var url = $this.attr("href");
+				$.post(url, function(data) {
+					if (data.status == "successful") {
+						$details.removeClass("deleted muted");
+					}
+					$details.removeClass("processing");
+				}, "json");
+			}
+			e.preventDefault();
+			return false;
+
+		}).on('click', 'a.purge-meeting-record', function(e) {
+			// purge meeting records
+			var $this = $(this);
+			var $details = $this.closest('details');
+
+			if ($details.hasClass("deleted")) {
+				$details.addClass("processing");
+				var url = $this.attr("href");
+				$.post(url, function(data) {
+					if (data.status == "successful") {
+						$details.remove();
+					}
+				}, "json");
+			}
+			return false;
+
+		}).on('click', '.new, .edit-meeting-record', function(e) {
+			var $this = $(this);
+			if (!$this.closest('details').is('.deleted')) {
+				getModal($this, $this.attr("href"));
+			}
+			e.preventDefault();
+			return false;
+
+		}).on('submit', 'form.scheduled-action', function(e) {
+			// Scheduled meetings
+			e.preventDefault();
+			var $this = $(this), checkedInput = $this.find('input:checked');
+			$this.find('div.ajaxErrors').hide();
+			switch (checkedInput.val()) {
+				case "confirm": {
+					getModal($this, checkedInput.data('formhref'));
+				} break;
+				case "reschedule": {
+					$this.closest('details').find('.meeting-record-toolbar .edit-meeting-record').trigger('click');
+				} break;
+				case "missed": {
+					$.post(checkedInput.data('formhref'), $this.serialize(), function(data){
+						if(data.status === "successful") {
+							document.location.reload(true);
+						} else {
+							$this.find('div.ajaxErrors').empty().html(data.errors.join('<br />')).show();
+						}
+					});
+				} break;
+			}
+		});
+		scrollToOpenDetails();
+	});
 	//END MEETING RECORD APPROVAL STUFF
 
 	//MEMBERNOTE STUFF
