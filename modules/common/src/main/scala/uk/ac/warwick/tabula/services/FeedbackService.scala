@@ -22,6 +22,7 @@ trait FeedbackService {
 	def delete(feedback: Feedback)
 	def save(feedback: MarkerFeedback)
 	def delete(feedback: MarkerFeedback)
+	def getExamFeedbackMap(exam: Exam, users: Seq[User]): Map[User, ExamFeedback]
 }
 
 @Service(value = "feedbackService")
@@ -82,6 +83,9 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 
 		dao.delete(markerFeedback)
 	}
+
+	def getExamFeedbackMap(exam: Exam, users: Seq[User]): Map[User, ExamFeedback] =
+		dao.getExamFeedbackMap(exam, users)
 
 }
 

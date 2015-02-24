@@ -70,11 +70,16 @@
 					<#if membershipInfo.totalCount == 0>
 						<span class="label">No enrolled students</span>
 					<#else>
-						<span class="label"><@fmt.p membershipInfo.sitsCount "enrolled student"/> from SITS</span>
+						<i class="icon-file"></i>
+						<a href="<@routes.viewExam exam />">
+							<span class="use-tooltip" title="View all students and feedback">
+								<@fmt.p membershipInfo.sitsCount "enrolled student"/> from SITS
+							</span>
+						</a>
 					</#if>
 					<#local requiresMarks = exam.requiresMarks />
 					<#if (requiresMarks > 0)>
-						<span class="label label-warning"><@fmt.p requiresMarks "student"/> require marks</span>
+						<br/><span class="label label-warning"><@fmt.p number=requiresMarks singular="student requires" plural="students require"/> marks</span>
 					</#if>
 				</div>
 

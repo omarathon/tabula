@@ -17,6 +17,7 @@ trait FeedbackForSitsDao {
 	def saveOrUpdate(feedback: Feedback)
 	def feedbackToLoad: Seq[FeedbackForSits]
 	def getByFeedback(feedback: Feedback): Option[FeedbackForSits]
+	def getByFeedbacks(feedbacks: Seq[Feedback]): Map[Feedback, FeedbackForSits]
 }
 
 @Repository
@@ -34,5 +35,11 @@ class FeedbackForSitsDaoImpl extends FeedbackForSitsDao with Daoisms {
 		session.newCriteria[FeedbackForSits]
 			.add(is("feedback", feedback))
 			.uniqueResult
+	}
+
+	def getByFeedbacks(feedbacks: Seq[Feedback]): Map[Feedback, FeedbackForSits] = {
+		session.newCriteria[FeedbackForSits]
+			.add(safeIn("feedback", feedbacks))
+			.seq.groupBy(_.feedback).mapValues(_.head)
 	}
 }
