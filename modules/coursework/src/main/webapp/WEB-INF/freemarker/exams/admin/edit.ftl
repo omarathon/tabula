@@ -2,7 +2,9 @@
 	<#escape x as x?html>
 	<h1>Edit exam for <@fmt.module_name exam.module /></h1>
 
-	<@f.form method="post" action="${url('/exams/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/edit')}" commandName="command" cssClass="form-horizontal">
+	<#assign updateExamUrl><@routes.editExam exam /></#assign>
+
+	<@f.form method="post" action="${updateExamUrl}" commandName="command" cssClass="form-horizontal">
 
 		<@form.labelled_row "name" "Exam name">
 			<@f.input path="name" cssClass="text" />
