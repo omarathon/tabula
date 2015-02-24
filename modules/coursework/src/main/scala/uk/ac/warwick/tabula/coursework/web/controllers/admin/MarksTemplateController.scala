@@ -70,7 +70,7 @@ class CurrentAssignmentMarkerMarksTemplateController extends CourseworkControlle
 }
 
 @Controller
-@RequestMapping(value = Array("/exams/admin/module/{module}/exams/{exam}/marks-template"))
+@RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/marks-template"))
 class ExamMarksTemplateController extends ExamsController {
 
 	var examMembershipService = Wire[AssessmentMembershipService]

@@ -18,6 +18,7 @@ trait FeedbackForSitsService {
 	def saveOrUpdate(feedbackForSits: FeedbackForSits)
 	def feedbackToLoad: Seq[FeedbackForSits]
 	def getByFeedback(feedback: Feedback): Option[FeedbackForSits]
+	def getByFeedbacks(feedbacks: Seq[Feedback]): Map[Feedback, FeedbackForSits]
 	def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks): Option[FeedbackForSits]
 	def validateAndPopulateFeedback(feedbacks: Seq[Feedback], gradeGenerator: GeneratesGradesFromMarks): ValidateAndPopulateFeedbackResult
 }
@@ -34,9 +35,18 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 
 	self: FeedbackForSitsDaoComponent =>
 
-	def saveOrUpdate(feedbackForSits: FeedbackForSits) = feedbackForSitsDao.saveOrUpdate(feedbackForSits)
-	def feedbackToLoad: Seq[FeedbackForSits] = feedbackForSitsDao.feedbackToLoad
-	def getByFeedback(feedback: Feedback): Option[FeedbackForSits] = feedbackForSitsDao.getByFeedback(feedback)
+	def saveOrUpdate(feedbackForSits: FeedbackForSits) =
+		feedbackForSitsDao.saveOrUpdate(feedbackForSits)
+
+	def feedbackToLoad: Seq[FeedbackForSits] =
+		feedbackForSitsDao.feedbackToLoad
+
+	def getByFeedback(feedback: Feedback): Option[FeedbackForSits] =
+		feedbackForSitsDao.getByFeedback(feedback)
+
+	def getByFeedbacks(feedbacks: Seq[Feedback]): Map[Feedback, FeedbackForSits] =
+		feedbackForSitsDao.getByFeedbacks(feedbacks)
+
 	def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks): Option[FeedbackForSits] = {
 		val validatedFeedback = validateAndPopulateFeedback(Seq(feedback), gradeGenerator)
 		if (validatedFeedback.valid.nonEmpty || feedback.module.adminDepartment.assignmentGradeValidation && validatedFeedback.populated.nonEmpty) {
