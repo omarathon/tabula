@@ -24,11 +24,7 @@ class EditExamController extends ExamsController {
 		@PathVariable("exam") exam : Exam) = EditExamCommand(mandatory(exam))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(
-			@ModelAttribute("command") cmd: EditExamCommand
-	) = {
-			Mav("exams/admin/edit")
-	}
+	def showForm(@ModelAttribute("command") cmd: EditExamCommand) = Mav("exams/admin/edit")
 
 	@RequestMapping(method = Array(POST))
 	def submit(
