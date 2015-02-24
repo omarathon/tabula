@@ -49,10 +49,10 @@ trait UserGroupMembershipHelperMethods[A <: StringId with Serializable] {
  */
 private[services] class UserGroupMembershipHelper[A <: StringId with Serializable : ClassTag] (val path: String, val checkUniversityIds: Boolean = true)
 	extends UserGroupMembershipHelperMethods[A]
-		with UserGroupMembershipHelperLookup
-		with Daoisms
-		with AutowiringUserLookupComponent
-		with Logging {
+	with UserGroupMembershipHelperLookup
+	with Daoisms
+	with AutowiringUserLookupComponent
+	with Logging {
 
 	val runtimeClass = classTag[A].runtimeClass
 
@@ -105,7 +105,7 @@ trait UserGroupMembershipHelperLookup {
 		val universityIdsClause =
 			if (checkUniversityIds) s""" or (
 					$prop.universityIds = true and
-					((:universityId in elements($prop.staticIncludeUsers)
+					((:universityId in (select memberId from usergroupstatic where userGroup = r.$prop)
 					or :universityId in elements($prop.includeUsers))
 					and :universityId not in elements($prop.excludeUsers))
 				)"""
@@ -118,7 +118,7 @@ trait UserGroupMembershipHelperLookup {
 			where
 				(
 					$prop.universityIds = false and
-					((:userId in elements($prop.staticIncludeUsers)
+					((:userId in (select memberId from usergroupstatic where userGroup = r.$prop)
 					or :userId in elements($prop.includeUsers))
 					and :userId not in elements($prop.excludeUsers))
 				) $universityIdsClause
@@ -339,15 +339,15 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
 
 	override def toString =
 		new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append(underlying)
-				.append(helper)
-				.build()
+			.append(underlying)
+			.append(helper)
+			.build()
 
 	override def hashCode() =
 		new HashCodeBuilder()
-				.append(underlying)
-				.append(helper)
-				.build()
+			.append(underlying)
+			.append(helper)
+			.build()
 
 	override def equals(other: Any) = other match {
 		case that: UserGroupCacheManager =>
