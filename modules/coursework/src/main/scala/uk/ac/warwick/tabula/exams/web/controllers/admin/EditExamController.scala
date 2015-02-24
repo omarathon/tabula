@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 
 @Controller
-@RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exam/{exam}/edit"))
+@RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/edit"))
 class EditExamController extends ExamsController {
 
 	type EditExamCommand = Appliable[Exam] with EditExamCommandState
@@ -39,7 +39,7 @@ class EditExamController extends ExamsController {
 				showForm(cmd)
 			} else {
 				cmd.apply()
-				Redirect(Routes.home)
+				Redirect(Routes.admin.module(cmd.exam.module, cmd.exam.academicYear))
 			}
 	}
 }
