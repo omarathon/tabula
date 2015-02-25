@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.exams.commands
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Exam, Module}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object AddExamCommand  {
@@ -17,13 +17,24 @@ object AddExamCommand  {
 			with AddExamCommandState
 			with AddExamCommandDescription
 			with ExamValidation
+			with UpdatesStudentMembership
 			with AutowiringAssessmentServiceComponent
-
+			with AutowiringAssessmentMembershipServiceComponent
+			with CurrentSITSAcademicYear
+			with AutowiringUserLookupComponent
+			with SpecifiesGroupType {
+		}
 }
 
-class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear) extends CommandInternal[Exam] with AddExamCommandState {
+class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
+	extends CommandInternal[Exam]
+	with AddExamCommandState
+	with UpdatesStudentMembership {
 
-	self: AssessmentServiceComponent =>
+	self: AssessmentServiceComponent with UserLookupComponent  with CurrentSITSAcademicYear with SpecifiesGroupType
+	with AssessmentMembershipServiceComponent =>
+
+	def exam:Exam
 
 	override def applyInternal() = {
 		val exam = new Exam
@@ -33,6 +44,11 @@ class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
 		assessmentService.save(exam)
 		exam
 	}
+
+	//these are not really required for adding exams
+	val existingGroups = Option(exam).map(_.upstreamAssessmentGroups)
+	val existingMembers = {Option[Seq[UnspecifiedTypeUserGroup]]_}
+	override def updateAssessmentGroups(): Unit = {}
 }
 
 
@@ -47,6 +63,7 @@ trait AddExamPermissions extends RequiresPermissionsChecking with PermissionsChe
 }
 
 trait ExamState {
+	val updateStudentMembershipGroupIsUniversityIds:Boolean=false
 	// bind variables
 	var name: String = _
 }

@@ -29,6 +29,7 @@ class AddExamController extends ExamsController {
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@ModelAttribute("command") cmd: AddExamCommand) = Mav("exams/admin/new")
 
+
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid @ModelAttribute("command") cmd: AddExamCommand, errors: Errors) = {
 		if (errors.hasErrors) {
