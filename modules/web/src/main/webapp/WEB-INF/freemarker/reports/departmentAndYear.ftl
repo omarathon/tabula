@@ -3,7 +3,7 @@
 <#macro deptheaderroutemacro dept>
 	<@routes.reports.departmentWithYear dept academicYear />
 </#macro>
-<#assign deptheaderroute = deptheaderroutemacro in routes/>
+<#assign deptheaderroute = deptheaderroutemacro in routes.reports />
 <@fmt.deptheader "View reports for ${academicYear.toString}" "in" department routes.reports "deptheaderroute" />
 
 <#if (academicYear.startYear >= 2014)>
