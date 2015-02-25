@@ -14,11 +14,11 @@ class ZipCreatorTest extends TestBase {
 	
 	@Test def itWorks {
 		val items = Seq(
-				ZipFileItem("one.txt", new ByteArrayInputStream("one".getBytes("UTF-8"))),
-				ZipFileItem("two.txt", new ByteArrayInputStream("two".getBytes("UTF-8"))),
+				ZipFileItem("one.txt", new ByteArrayInputStream("one".getBytes("UTF-8")), 3),
+				ZipFileItem("two.txt", new ByteArrayInputStream("two".getBytes("UTF-8")), 3),
 				ZipFolderItem("folder", Seq(
-						ZipFileItem("three.txt", new ByteArrayInputStream("three".getBytes("UTF-8"))),
-						ZipFileItem("four.txt", new ByteArrayInputStream("four".getBytes("UTF-8")))
+						ZipFileItem("three.txt", new ByteArrayInputStream("three".getBytes("UTF-8")), 5),
+						ZipFileItem("four.txt", new ByteArrayInputStream("four".getBytes("UTF-8")), 4)
 				))
 		)
 		

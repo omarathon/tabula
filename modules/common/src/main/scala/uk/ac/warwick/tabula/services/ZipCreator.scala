@@ -4,13 +4,14 @@ import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
-import scala.annotation.implicitNotFound
+import org.apache.http.HttpStatus
+import uk.ac.warwick.tabula.system.exceptions.UserError
+
 import scala.collection.mutable.ListBuffer
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.UnicodeExtraFieldPolicy
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import uk.ac.warwick.tabula.helpers.Logging
-import org.hibernate.id.GUIDGenerator
 import java.util.UUID
 import java.util.zip.Deflater
 import uk.ac.warwick.util.core.spring.FileUtils
@@ -19,13 +20,16 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 /**
  * An item in a Zip file. Can be a file or a folder.
  */
-trait ZipItem {
-	val name: String
+sealed trait ZipItem {
+	def name: String
+	def length: Long
 }
-case class ZipFileItem(val name: String, val input: InputStream) extends ZipItem
-case class ZipFolderItem(val name: String, startItems: Seq[ZipItem] = Nil) extends ZipItem {
+case class ZipFileItem(name: String, input: InputStream, length: Long) extends ZipItem
+case class ZipFolderItem(name: String, startItems: Seq[ZipItem] = Nil) extends ZipItem {
 	var items: ListBuffer[ZipItem] = ListBuffer()
 	items.appendAll(startItems)
+
+	def length = items.map { _.length }.sum
 }
 
 /**
@@ -59,6 +63,7 @@ trait ZipCreator extends Logging {
 	 * invalidateZip whenever the contents of the zip would change, otherwise
 	 * it becomes stale.
 	 */
+	@throws[ZipRequestTooLargeError]("if the file doesn't exist and the items are too large to be zipped")
 	def getZip(name: String, items: Seq[ZipItem]) = {
 		val file = fileForName(name)
 		if (!file.exists) writeToFile(file, items)
@@ -68,15 +73,22 @@ trait ZipCreator extends Logging {
 	/**
 	 * Create a new Zip with a randomly generated name.
 	 */
+	@throws[ZipRequestTooLargeError]("if the items are too large to be zipped")
 	def createUnnamedZip(items: Seq[ZipItem]) = {
 		val file = unusedFile
 		writeToFile(file, items)
 		file
 	}
+
+	private def isOverSizeLimit(items: Seq[ZipItem]) =
+		items.map { _.length }.sum > MaxZipItemsSizeInBytes
 	
 	private val CompressionLevel = Deflater.BEST_COMPRESSION
 
+	@throws[ZipRequestTooLargeError]("if the items are too large to be zipped")
 	private def writeToFile(file: File, items: Seq[ZipItem]) = {
+		if (isOverSizeLimit(items)) throw new ZipRequestTooLargeError
+
 		file.getParentFile.mkdirs
 		openZipStream(file) { (zip) =>
 			zip.setLevel(CompressionLevel)
@@ -94,25 +106,24 @@ trait ZipCreator extends Logging {
 		.find(!_.exists)
 		.getOrElse(throw new IllegalStateException("Couldn't find unique filename"))
 
-	private def randomUUID = UUID.randomUUID.toString().replace("-", "")
+	private def randomUUID = UUID.randomUUID.toString.replace("-", "")
 
 	/**
 	 * Invalidates a previously created zip, by deleting its file.
 	 *
 	 * @param name The name as passed to getZip when creating the file.
 	 */
-	def invalidate(name: String) = fileForName(name).delete();
+	def invalidate(name: String) = fileForName(name).delete()
 
 	private def fileForName(name: String) = new File(zipDir, name + ".zip")
 
 	private def writeItems(items: Seq[ZipItem], zip: ZipArchiveOutputStream) {
 		def writeFolder(basePath: String, items: Seq[ZipItem]) {
 			for (item <- items) item match {
-				case file: ZipFileItem => {
+				case file: ZipFileItem =>
 					zip.putArchiveEntry(new ZipArchiveEntry(basePath + trunc(file.name, MaxFileLength)))
 					copy(file.input, zip)
 					zip.closeArchiveEntry()
-				}
 				case folder: ZipFolderItem => writeFolder(basePath + trunc(folder.name, MaxFolderLength) + "/", folder.items)
 			}
 		}
@@ -133,18 +144,17 @@ trait ZipCreator extends Logging {
 	 * is deleted.
 	 */
 	private def openZipStream(file: File)(fn: (ZipArchiveOutputStream) => Unit) {
-		var zip: ZipArchiveOutputStream = null;
+		var zip: ZipArchiveOutputStream = null
 		try {
 			zip = new ZipArchiveOutputStream(file)
 			fn(zip)
 		} catch {
-			case e: Exception => {
+			case e: Exception =>
 				logger.error("Exception creating zip file, deleting %s" format file)
 				file.delete
 				throw e
-			}
 		} finally {
-			if (zip != null) zip.close
+			if (zip != null) zip.close()
 		}
 	}
 	
@@ -161,13 +171,19 @@ trait ZipCreator extends Logging {
 				os.write(buffer, 0, read)
 			}
 		} finally {
-			is.close
+			is.close()
 		}
 	}
 
 }
 
 object ZipCreator {
+	val MaxZipItemsSizeInBytes = 2L * 1024 * 1024 * 1024 // 2gb
+
 	val MaxFolderLength = 20
 	val MaxFileLength = 100
+}
+
+class ZipRequestTooLargeError extends java.lang.RuntimeException() with UserError {
+	override val statusCode = HttpStatus.SC_REQUEST_TOO_LONG
 }

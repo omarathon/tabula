@@ -67,12 +67,12 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 
 	private def getFeedbackZipItems(feedback: Feedback): Seq[ZipItem] =
 		feedback.attachments.asScala.map { (attachment) =>
-			new ZipFileItem(feedback.universityId + " - " + attachment.name, attachment.dataStream)
+			ZipFileItem(feedback.universityId + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
 		}
 	
 	private def getMarkerFeedbackZipItems(markerFeedback: MarkerFeedback): Seq[ZipItem] =
 		markerFeedback.attachments.asScala.filter { _.hasData }.map { attachment =>
-			new ZipFileItem(markerFeedback.feedback.universityId + " - " + attachment.name, attachment.dataStream)
+			ZipFileItem(markerFeedback.feedback.universityId + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
 		}
 
 	/**
@@ -100,7 +100,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 				s"${user.getFullName} - ${submission.universityId}"
 			}
 
-			new ZipFileItem(code + " - " + userIdentifier + " - " + attachment.name, attachment.dataStream)
+			ZipFileItem(code + " - " + userIdentifier + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
 		}
 
 		if (features.feedbackTemplates){
@@ -145,7 +145,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 		val templateFile = assignment.feedbackTemplate.attachment
 		val zipItems:Seq[ZipItem] = for (user <- users) yield {
 			val filename = assignment.module.code + " - " + user.getWarwickId + " - " + templateFile.name
-			new ZipFileItem(filename, templateFile.dataStream)
+			ZipFileItem(filename, templateFile.dataStream, templateFile.actualDataLength)
 		}
 		createUnnamedZip(zipItems)
 	}
@@ -157,7 +157,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	def generateFeedbackSheet(submission: Submission): Seq[ZipItem] = {
 		// wrap template in an option to deal with nulls
 		Option(submission.assignment.feedbackTemplate) match {
-			case Some(t) => Seq(new ZipFileItem(submission.zipFileName(t.attachment), t.attachment.dataStream))
+			case Some(t) => Seq(ZipFileItem(submission.zipFileName(t.attachment), t.attachment.dataStream, t.attachment.actualDataLength))
 			case None => Seq()
 		}
 	}
@@ -167,7 +167,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	
 	private def getMeetingRecordZipItems(meetingRecord: AbstractMeetingRecord): Seq[ZipItem] =
 		meetingRecord.attachments.asScala.map { (attachment) =>
-			new ZipFileItem(attachment.name, attachment.dataStream)
+			ZipFileItem(attachment.name, attachment.dataStream, attachment.actualDataLength)
 		}
 
 	def getSomeMemberNoteAttachmentsZip(memberNote: MemberNote): File =
@@ -175,7 +175,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 
 	private def getMemberNoteZipItems(memberNote: MemberNote): Seq[ZipItem] =
 		memberNote.attachments.asScala.map { (attachment) =>
-			new ZipFileItem(attachment.name, attachment.dataStream)
+			ZipFileItem(attachment.name, attachment.dataStream, attachment.actualDataLength)
 		}
 }
 
