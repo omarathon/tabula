@@ -109,7 +109,7 @@ class AddAssignmentsCommandInternal(val department: Department, val user: Curren
 			assessmentService.save(assignment)
 			assignment
 		})
-	}
+	}CommandState
 
 	private def findModule(upstreamAssignment: AssessmentComponent): Option[Module] = {
 		val moduleCode = upstreamAssignment.moduleCodeBasic.toLowerCase
