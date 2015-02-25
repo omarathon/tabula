@@ -84,6 +84,19 @@
 		border-top-width: 0;
 		padding: 8px 12px 12px;
 	}
+
+	// TAB-3283 Disabled coloured buttons should be grey when disabled
+	.btn-primary,
+	.btn-warning,
+	.btn-danger,
+	.btn-success,
+	.btn-info,
+	.btn-inverse {
+		&.disabled,
+		&[disabled] {
+			.buttonBackground(@btnBackground, @btnBackgroundHighlight, @grayDark, 0 1px 1px rgba(255,255,255,.75));
+		}
+	}
 }
 
 // TAB-558 override Bootstrap max-width on tables, so that Chrome will trigger the display the pop-out table link
