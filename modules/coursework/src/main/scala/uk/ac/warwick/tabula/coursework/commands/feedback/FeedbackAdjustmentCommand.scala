@@ -43,7 +43,7 @@ class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:
 	lazy val canBeUploadedToSits = assignment.assessmentGroups.asScala.map(_.toUpstreamAssessmentGroup(assignment.academicYear)).exists(_.exists(_.members.includesUser(student)))
 
 	def applyInternal() = {
-		copyTo(feedback)
+		val newMark = copyTo(feedback)
 
 		// if we are updating existing feedback then invalidate any cached feedback zips
 		if(feedback.id != null) {
@@ -53,6 +53,7 @@ class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:
 
 		feedback.updatedDate = DateTime.now
 		feedbackService.saveOrUpdate(feedback)
+		newMark.map(feedbackService.saveOrUpdate)
 		if (sendToSits) queueFeedback(feedback, submitter, gradeGenerator)
 		feedback
 	}
@@ -69,13 +70,14 @@ class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:
 		}
 	}
 
-	def copyTo(feedback: Feedback) {
+	def copyTo(feedback: Feedback): Option[Mark] = {
 		// save mark and grade
 		if (assignment.collectMarks) {
-			feedback.adjustedMark = adjustedMark.maybeText.map(_.toInt)
-			feedback.adjustedGrade = adjustedGrade.maybeText
-			feedback.adjustmentReason = reason
-			feedback.adjustmentComments = comments
+			Some(
+				feedback.addMark(submitter.userId, MarkType.Adjustment, adjustedMark.toInt, adjustedGrade.maybeText, reason, comments)
+			)
+		} else {
+			None
 		}
 	}
 

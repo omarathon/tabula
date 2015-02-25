@@ -60,8 +60,11 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 			saveOrUpdate(feedbackForSits)
 
 			if (validatedFeedback.populated.nonEmpty) {
-				if (feedback.adjustedMark.isDefined) {
-					feedback.adjustedGrade = Some(validatedFeedback.populated(feedback))
+				if (feedback.latestAdjustment.isDefined) {
+					feedback.latestAdjustment.map(m => {
+						m.grade = Some(validatedFeedback.populated(feedback))
+						feedbackForSitsDao.saveOrUpdate(m)
+					})
 				} else {
 					feedback.actualGrade = Some(validatedFeedback.populated(feedback))
 				}
