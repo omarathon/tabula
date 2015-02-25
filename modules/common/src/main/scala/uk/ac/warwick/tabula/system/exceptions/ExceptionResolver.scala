@@ -114,6 +114,10 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 
 		val interestingException = ExceptionUtils.getInterestingThrowable(exception, Array(classOf[ServletException]))
 
+		if (interestingException != null) {
+			logger.info(s"Handling exception ${interestingException.getClass.getName} (${interestingException.getMessage})")
+		}
+
 		val mav = Mav(defaultView,
 			"originalException" -> exception,
 			"exception" -> interestingException,
