@@ -143,7 +143,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	def latestMark: Option[Int] =
 		(Stream(agreedMark) ++ marks.asScala.toStream.map(m => Option(m.mark)) ++ Stream(actualMark)).flatten.headOption
 	def latestGrade: Option[String] =
-		(Stream(agreedGrade) ++ marks.asScala.toStream.map(_.grade) ++ Stream(actualGrade)).flatten.headOption
+		(Stream(agreedGrade) ++ marks.asScala.toStream.map(m => Option(m.grade).flatten) ++ Stream(actualGrade)).flatten.headOption
 
 	def latestAdjustment: Option[Mark] = marks.asScala.find(_.markType == MarkType.Adjustment)
 	def hasAdjustments = latestAdjustment.isDefined
