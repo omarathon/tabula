@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Exam, Module}
-import uk.ac.warwick.tabula.exams.commands.{AddExamCommand, AddExamCommandState}
+import uk.ac.warwick.tabula.exams.commands.{ModifiesExamMembership, AddExamCommand, AddExamCommandState}
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 
@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 @RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/new"))
 class AddExamController extends ExamsController {
 
-	type AddExamCommand = Appliable[Exam] with AddExamCommandState
+	type AddExamCommand = Appliable[Exam] with AddExamCommandState with ModifiesExamMembership
 
 	validatesSelf[SelfValidating]
 
@@ -36,7 +36,7 @@ class AddExamController extends ExamsController {
 			showForm(cmd)
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin.module(cmd.module, cmd.academicYear))
+			Redirect(Routes.admin.module(cmd.module, cmd.examAcademicYear))
 		}
 	}
 }

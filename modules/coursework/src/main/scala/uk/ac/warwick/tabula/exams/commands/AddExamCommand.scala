@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConverters._
 
 object AddExamCommand  {
@@ -45,7 +46,7 @@ class AddExamCommandInternal(val module: Module, val examAcademicYear: AcademicY
 
 		exam.assessmentGroups.clear()
 		exam.assessmentGroups.addAll(assessmentGroups)
-		for (group <- exam.assessmentGroups if group.assignment == null) {
+		for (group <- exam.assessmentGroups if group.exam == null) {
 			group.exam = exam
 		}
 		assessmentService.save(exam)

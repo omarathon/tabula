@@ -18,7 +18,7 @@ object EditExamCommand {
 			with AutowiringAssessmentServiceComponent
 }
 
-class EditExamCommandInternal(val exam: Exam)
+class EditExamCommandInternal(override val exam: Exam)
 	extends CommandInternal[Exam] with EditExamCommandState {
 
 	self: AssessmentServiceComponent =>
