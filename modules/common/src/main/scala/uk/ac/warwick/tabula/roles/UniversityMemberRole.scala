@@ -30,6 +30,10 @@ case object UniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefini
 		Profiles.Read.TimetablePrivateFeed,
 		Profiles.Read.Disability,
 
+		MemberNotes.Read,
+		Profiles.Read.ModuleRegistration.Core,
+		Profiles.Read.ModuleRegistration.Results,
+
     Profiles.Read.RelationshipStudents(PermissionsSelector.Any[StudentRelationshipType]),
 
     Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]),
