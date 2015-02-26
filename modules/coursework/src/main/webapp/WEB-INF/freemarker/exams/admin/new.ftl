@@ -1,3 +1,5 @@
+<#include "*/sits_groups.ftl" />
+
 <#if features.exams>
 	<#escape x as x?html>
 	<h1>Create exam for <@fmt.module_name module /></h1>
@@ -14,11 +16,12 @@
 		<span class="uneditable-value">${academicYear.toString} <span class="hint">(can't be changed)</span></span>
 		</@form.labelled_row>
 
+		<@sits_groups command />
+
 		<div class="submit-buttons form-actions">
 			<input type="submit" value="Create" class="btn btn-primary">
 			<a class="btn" href="<@routes.depthome module=module />">Cancel</a>
 		</div>
-
 	</@f.form>
 
 	</#escape>

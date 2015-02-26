@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConverters._
 
@@ -70,6 +71,7 @@ trait ExamState {
 	val updateStudentMembershipGroupIsUniversityIds:Boolean=false
 	// bind variables
 	var name: String = _
+	//var selectedAssessmentGroups: JList[AssessmentGroup] = _
 	def exam: Exam = null
 
 }

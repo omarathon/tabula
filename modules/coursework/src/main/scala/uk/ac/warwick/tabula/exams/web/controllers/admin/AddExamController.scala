@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Exam, Module}
-import uk.ac.warwick.tabula.exams.commands.{ModifiesExamMembership, AddExamCommand, AddExamCommandState}
+import uk.ac.warwick.tabula.exams.commands.{AddExamCommand, AddExamCommandState, ModifiesExamMembership}
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 
@@ -27,7 +27,12 @@ class AddExamController extends ExamsController {
 		 @PathVariable("academicYear") academicYear : AcademicYear) = AddExamCommand(mandatory(module), mandatory(academicYear))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@ModelAttribute("command") cmd: AddExamCommand) = Mav("exams/admin/new")
+	def showForm(@ModelAttribute("command") cmd: AddExamCommand) = {
+		Mav("exams/admin/new",
+			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
+			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
+			"assessmentGroups" -> cmd.assessmentGroups)
+	}
 
 
 	@RequestMapping(method = Array(POST))
