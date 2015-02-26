@@ -1,6 +1,9 @@
 package uk.ac.warwick.tabula.data.model.notifications.groups.reminders
 
+import javax.sql.DataSource
+
 import org.hamcrest.Matchers._
+import org.hibernate.{Session, SessionFactory}
 import uk.ac.warwick.tabula.data.model.{UserGroup, Notification}
 import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek, SmallGroupFormat, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula._
@@ -67,5 +70,13 @@ object SmallGroupEventAttendanceReminderNotificationTest {
 		bean(){mock[AssessmentMembershipService]}
 		bean(){mock[UserSettingsService]}
 		bean(){mock[NotificationService]}
+		bean(){
+			val sessionFactory = smartMock[SessionFactory]
+			val session = smartMock[Session]
+			sessionFactory.getCurrentSession returns session
+			sessionFactory.openSession() returns session
+			sessionFactory
+		}
+		bean("dataSource"){mock[DataSource]}
 	}
 }

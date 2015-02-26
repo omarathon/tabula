@@ -360,6 +360,8 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		group.occurrence = "A"
 		group.assessmentGroup = "A"
 		group.academicYear = new AcademicYear(2010)
+
+		group.members.sessionFactory = sessionFactory
 		group.members.staticUserIds = Seq("rob","kev","bib")
 
 		assignmentMembershipService.save(group)
@@ -504,6 +506,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		upstreamGroup.occurrence = "A"
 		upstreamGroup.assessmentGroup = "A"
 		upstreamGroup.academicYear = new AcademicYear(2010)
+		upstreamGroup.members.sessionFactory = sessionFactory
 		upstreamGroup.members.staticUserIds = Seq("rob","kev","bib")
 
 		assignmentMembershipService.save(upstreamGroup)
@@ -695,10 +698,13 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     upstreamAg3.academicYear = year
     upstreamAg3.occurrence = "C"
 
+		upstreamAg1.members.sessionFactory = sessionFactory
     upstreamAg1.members.staticUserIds = Seq("0000001", "0000002")
 
+		upstreamAg2.members.sessionFactory = sessionFactory
 		upstreamAg2.members.staticUserIds = Seq("0000002", "0000003")
 
+		upstreamAg3.members.sessionFactory = sessionFactory
 		upstreamAg3.members.staticUserIds = Seq("0000001", "0000002", "0000003", "0000004", "0000005")
 
 		assignmentMembershipService.save(upstreamAg1)

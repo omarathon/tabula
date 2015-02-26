@@ -1,5 +1,8 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
+import javax.sql.DataSource
+
+import org.hibernate.{Session, SessionFactory}
 import uk.ac.warwick.tabula.services.{RelationshipService, UserLookupService, ModuleAndDepartmentServiceComponent, ModuleAndDepartmentService}
 import uk.ac.warwick.tabula.{FunctionalContextTesting, FunctionalContext, TestBase, Mockito, Fixtures}
 import uk.ac.warwick.tabula.data.model.{UserGroup, Department}
@@ -243,5 +246,13 @@ object AddSubDepartmentCommandTest {
 
 		bean(){mock[UserLookupService]}
 		bean(){mock[RelationshipService]}
+		bean(){
+			val sessionFactory = smartMock[SessionFactory]
+			val session = smartMock[Session]
+			sessionFactory.getCurrentSession returns session
+			sessionFactory.openSession() returns session
+			sessionFactory
+		}
+		bean("dataSource"){mock[DataSource]}
 	}
 }

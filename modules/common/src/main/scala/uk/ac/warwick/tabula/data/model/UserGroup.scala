@@ -182,7 +182,6 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 		assert(this.universityIds == otherGroup.universityIds, "Can only copy from a group with same type of users")
 
 		val other = otherGroup.knownType
-
 		baseWebgroup = other.baseWebgroup
 		includedUserIds = other.includedUserIds
 		excludedUserIds = other.excludedUserIds
@@ -191,6 +190,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 
 	def duplicate(): UserGroup = {
 		val newGroup = new UserGroup(this.universityIds)
+		newGroup.sessionFactory = this.sessionFactory
 		newGroup.copyFrom(this)
 		newGroup.userLookup = this.userLookup
 		newGroup

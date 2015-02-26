@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula
 
 import java.math
 
+import org.hibernate.{Session, SessionFactory}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceMonitoringScheme, AttendanceState, MonitoringCheckpoint, MonitoringPoint}
@@ -135,11 +136,16 @@ object Fixtures extends Mockito {
 	}
 
 	def assessmentGroup(academicYear: AcademicYear, code: String, module: String, occurrence: String) = {
+		val sessionFactory = smartMock[SessionFactory]
+		val session = smartMock[Session]
+		sessionFactory.getCurrentSession returns session
+		sessionFactory.openSession() returns session
 		val group = new UpstreamAssessmentGroup
 		group.academicYear = academicYear
 		group.assessmentGroup = code
 		group.moduleCode = module
 		group.occurrence = occurrence
+		group.members.sessionFactory = sessionFactory
 		group.members.staticUserIds = Seq(
 			"0123456",
 			"0123457",
