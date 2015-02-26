@@ -80,7 +80,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 
 		staticIncludeUsers.clear()
 		// TAB-3343 - force deletions before inserts
-		session.flush()
+		optionalSession.foreach { _.flush() }
 		staticIncludeUsers.addAll(newMembers.asJava)
 	}
 
@@ -94,7 +94,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 		})
 		staticIncludeUsers.clear()
 		// TAB-3343 - force deletions before inserts
-		session.flush()
+		optionalSession.foreach { _.flush() }
 		staticIncludeUsers.addAll(newMembers.asJava)
 	}
 

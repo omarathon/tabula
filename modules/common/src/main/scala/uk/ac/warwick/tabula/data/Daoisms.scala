@@ -101,24 +101,35 @@ object Daoisms extends HelperRestrictions {
  * different data source you'll need to look elsewhere.
  */
 trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with HibernateHelpers {
-	@transient var dataSource = Wire[DataSource]("dataSource")
-	@transient var sessionFactory = Wire.auto[SessionFactory]
+	@transient private var _dataSource = Wire.option[DataSource]("dataSource")
+	def dataSource = _dataSource.orNull
+	def dataSource_=(dataSource: DataSource) { _dataSource = Option(dataSource) }
 
-	protected def session = {
-		val session = sessionFactory.getCurrentSession
-		session.enableFilter(Member.FreshOnlyFilter)
-		session.enableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
-		session.enableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
-		session
-	}
+	@transient private var _sessionFactory = Wire.option[SessionFactory]
+	def sessionFactory = _sessionFactory.orNull
+	def sessionFactory_=(sessionFactory: SessionFactory) { _sessionFactory = Option(sessionFactory) }
 
-	protected def sessionWithoutFreshFilters = {
-		val session = sessionFactory.getCurrentSession
-		session.disableFilter(Member.FreshOnlyFilter)
-		session.disableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
-		session.disableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
-		session
-	}
+	protected def optionalSession =
+		_sessionFactory.flatMap { sf => Option(sf.getCurrentSession) }
+			.map { session =>
+				session.enableFilter(Member.FreshOnlyFilter)
+				session.enableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
+				session.enableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
+				session
+			}
+
+	protected def session = optionalSession.orNull
+
+	protected def optionalSessionWithoutFreshFilters =
+		_sessionFactory.flatMap { sf => Option(sf.getCurrentSession) }
+			.map { session =>
+				session.disableFilter(Member.FreshOnlyFilter)
+				session.disableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
+				session.disableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
+				session
+			}
+
+	protected def sessionWithoutFreshFilters = optionalSessionWithoutFreshFilters.orNull
 
 	/**
 	 * Do some work in a new session. Only needed outside of a request,
