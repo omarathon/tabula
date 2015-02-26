@@ -19,6 +19,7 @@ trait FeedbackService {
 	def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String): Option[AssignmentFeedback]
 	def getMarkerFeedbackById(markerFeedbackId: String): Option[MarkerFeedback]
 	def saveOrUpdate(feedback: Feedback)
+	def saveOrUpdate(mark: Mark)
 	def delete(feedback: Feedback)
 	def save(feedback: MarkerFeedback)
 	def delete(feedback: MarkerFeedback)
@@ -66,6 +67,10 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 	
 	def saveOrUpdate(feedback:Feedback){
 		session.saveOrUpdate(feedback)
+	}
+
+	def saveOrUpdate(mark: Mark) {
+		session.saveOrUpdate(mark)
 	}
 
 	def save(feedback: MarkerFeedback) = transactional() {
