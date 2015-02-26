@@ -53,7 +53,7 @@ class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:
 
 		feedback.updatedDate = DateTime.now
 		feedbackService.saveOrUpdate(feedback)
-		newMark.map(feedbackService.saveOrUpdate)
+		newMark.foreach(feedbackService.saveOrUpdate)
 		if (sendToSits) queueFeedback(feedback, submitter, gradeGenerator)
 		feedback
 	}

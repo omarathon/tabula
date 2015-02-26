@@ -119,7 +119,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	@OneToMany(mappedBy = "feedback", cascade = Array(PERSIST,MERGE,REFRESH), fetch = FetchType.LAZY)
 	@OrderBy("uploadedDate DESC")
 	@BatchSize(size=200)
-	var _marks: JList[Mark] = JArrayList()
+	private val _marks: JList[Mark] = JArrayList()
 	def marks = _marks
 	def addMark(uploaderId: String, markType: MarkType, mark: Int, grade: Option[String], reason: String, comments: String = null) = {
 		val newMark = new Mark
