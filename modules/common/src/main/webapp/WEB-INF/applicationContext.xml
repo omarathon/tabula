@@ -317,10 +317,10 @@
 			<url-pattern>/sysadmin/*</url-pattern>
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 		</mapping>
-		<mapping name="postDataLogging">
+		<!--<mapping name="postDataLogging">
 		  <filter ref="postDataLoggingFilter" />
 		  <url-pattern>/*</url-pattern>
-		</mapping>
+		</mapping>-->
 	</filter-stack>
 
 	<import resource="filters-context.xml" />
