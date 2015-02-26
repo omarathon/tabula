@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence.CascadeType._
 
 import org.hibernate.annotations.Type
+import uk.ac.warwick.tabula.data.Daoisms
 
 import scala.collection.JavaConverters._
 import javax.persistence._
@@ -35,7 +36,7 @@ import scala.util.Try
  */
 @Entity
 @Access(AccessType.FIELD)
-class UserGroup private(val universityIds: Boolean) extends GeneratedId with UnspecifiedTypeUserGroup with KnownTypeUserGroup {
+class UserGroup private(val universityIds: Boolean) extends GeneratedId with UnspecifiedTypeUserGroup with KnownTypeUserGroup with Daoisms {
 
 	/* For Hibernate xx */
 	def this() { this(false) }
@@ -78,6 +79,8 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 		})
 
 		staticIncludeUsers.clear()
+		// TAB-3343 - force deletions before inserts
+		session.flush()
 		staticIncludeUsers.addAll(newMembers.asJava)
 	}
 
@@ -90,6 +93,8 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 			m
 		})
 		staticIncludeUsers.clear()
+		// TAB-3343 - force deletions before inserts
+		session.flush()
 		staticIncludeUsers.addAll(newMembers.asJava)
 	}
 
