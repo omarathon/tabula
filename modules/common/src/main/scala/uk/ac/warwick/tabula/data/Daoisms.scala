@@ -122,7 +122,7 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 	protected def session = optionalSession.orNull
 
 	protected def optionalSessionWithoutFreshFilters =
-		_sessionFactory.flatMap { sf => Option(sf.getCurrentSession) }
+		_sessionFactory.flatMap { sf => Try(sf.getCurrentSession).toOption }
 			.map { session =>
 				session.disableFilter(Member.FreshOnlyFilter)
 				session.disableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
