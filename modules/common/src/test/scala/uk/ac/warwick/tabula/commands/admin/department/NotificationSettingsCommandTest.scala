@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.admin.department
 
 import uk.ac.warwick.tabula.commands.{Appliable, Description}
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.notifications.coursework.FinaliseFeedbackNotificationSettings
 import uk.ac.warwick.tabula.data.model.notifications.groups.reminders.SmallGroupEventAttendanceReminderNotificationSettings
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -39,6 +40,11 @@ class NotificationSettingsCommandTest extends TestBase with Mockito {
 			commandInternal.smallGroupEventAttendanceReminderNotifyModuleManagers should be (true)
 			commandInternal.smallGroupEventAttendanceReminderNotifyDepartmentAdministrators should be (false)
 			commandInternal.smallGroupEventAttendanceReminderNotifyFirstNonEmptyGroupOnly should be (true)
+
+			commandInternal.finaliseFeedbackNotificationEnabled should be (true)
+			commandInternal.finaliseFeedbackNotificationNotifyModuleManagers should be (false)
+			commandInternal.finaliseFeedbackNotificationNotifyDepartmentAdministrators should be (false)
+			commandInternal.finaliseFeedbackNotificationNotifyFirstNonEmptyGroupOnly should be (true)
 		}
 	}
 
@@ -52,6 +58,11 @@ class NotificationSettingsCommandTest extends TestBase with Mockito {
 			commandInternal.smallGroupEventAttendanceReminderNotifyDepartmentAdministrators = true
 			commandInternal.smallGroupEventAttendanceReminderNotifyFirstNonEmptyGroupOnly = true
 
+			commandInternal.finaliseFeedbackNotificationEnabled = true
+			commandInternal.finaliseFeedbackNotificationNotifyModuleManagers = false
+			commandInternal.finaliseFeedbackNotificationNotifyDepartmentAdministrators = true
+			commandInternal.finaliseFeedbackNotificationNotifyFirstNonEmptyGroupOnly = true
+
 			commandInternal.applyInternal()
 
 			val smallGroupEventAttendanceReminderSettings = new SmallGroupEventAttendanceReminderNotificationSettings(testDepartment.notificationSettings("SmallGroupEventAttendanceReminder"))
@@ -62,6 +73,13 @@ class NotificationSettingsCommandTest extends TestBase with Mockito {
 			smallGroupEventAttendanceReminderSettings.notifyModuleManagers.value should be (false)
 			smallGroupEventAttendanceReminderSettings.notifyDepartmentAdministrators.value should be (true)
 			smallGroupEventAttendanceReminderSettings.notifyFirstNonEmptyGroupOnly.value should be (true)
+
+			val finaliseFeedbackNotificationSettings = new FinaliseFeedbackNotificationSettings(testDepartment.notificationSettings("FinaliseFeedback"))
+
+			finaliseFeedbackNotificationSettings.enabled.value should be (true)
+			finaliseFeedbackNotificationSettings.notifyModuleManagers.value should be (false)
+			finaliseFeedbackNotificationSettings.notifyDepartmentAdministrators.value should be (true)
+			finaliseFeedbackNotificationSettings.notifyFirstNonEmptyGroupOnly.value should be (true)
 		}
 	}
 

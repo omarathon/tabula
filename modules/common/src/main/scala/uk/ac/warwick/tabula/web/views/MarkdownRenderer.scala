@@ -8,8 +8,10 @@ trait MarkdownRenderer {
 
 trait MarkdownRendererImpl extends MarkdownRenderer {
 	private val markdownOptions = Extensions.AUTOLINKS
+	private val markdownMaxParseTimeMs = 5 * 1000 // 5 seconds (2 seconds is default)
+
 	// PegDownProcessor not threadsafe, so we get a new one each time.
-	def markdown = new PegDownProcessor(markdownOptions)
+	def markdown = new PegDownProcessor(markdownOptions, markdownMaxParseTimeMs)
 
 	override def renderMarkdown(source: String) =
 		markdown.markdownToHtml(source)

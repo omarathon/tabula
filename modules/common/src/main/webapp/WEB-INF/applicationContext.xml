@@ -65,6 +65,7 @@
 				<entry key="uk.ac.warwick.tabula.system.exceptions.FileUploadException" value="errors/fileUpload" />
 				<entry key="uk.ac.warwick.tabula.ParameterMissingException" value="errors/parameterMissing" />
 				<entry key="uk.ac.warwick.tabula.services.CannotPerformWriteOperationException" value="errors/readOnlyMasquerade" />
+				<entry key="uk.ac.warwick.tabula.services.ZipRequestTooLargeError" value="errors/zipTooBig" />
 			</map>
 		</property>
 	</bean>

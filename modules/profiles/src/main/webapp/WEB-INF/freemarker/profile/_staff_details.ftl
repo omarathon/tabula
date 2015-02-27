@@ -11,6 +11,8 @@
 <div class="tabbable" data-default-view="${defaultView}">
 
 	<ol class="panes">
+		<@profile_macros.timetablePane profile />
+
 		<#-- The url for staff only shows groups for current user - if staff profiles become viewable by more people this needs to change -->
 		<#if isSelf && (smallGroups?size > 0)>
 			<li id="sg-pane" style="display:none;" data-title="Groups">
@@ -18,8 +20,6 @@
 				<#include "_small_groups.ftl" />
 			</li>
 		</#if>
-
-		<@profile_macros.timetablePane profile />
 
 		<#if isSelf && (viewerRelationshipTypes?size > 0)>
 			<li id="attendance-pane" data-title="Monitoring Points">

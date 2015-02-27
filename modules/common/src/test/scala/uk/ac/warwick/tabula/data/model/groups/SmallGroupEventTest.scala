@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model.groups
 
+import org.hibernate.{Session, SessionFactory}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
@@ -7,8 +8,13 @@ import uk.ac.warwick.tabula.data.model.{NamedLocation, UserGroup}
 
 class SmallGroupEventTest extends TestBase with Mockito{
 
+	val mockSessionFactory = smartMock[SessionFactory]
+	val mockSession = smartMock[Session]
+	mockSessionFactory.getCurrentSession returns mockSession
+	mockSessionFactory.openSession() returns mockSession
+
   @Test
-  def canDuplicate(){
+  def duplicate(){
     val source = new SmallGroupEvent
     source.id = "testId"
     source.day = DayOfWeek.Monday
@@ -19,6 +25,7 @@ class SmallGroupEventTest extends TestBase with Mockito{
     source.startTime = new LocalTime(12,0,0,0)
     source.title= "test title"
     source.tutors = UserGroup.ofUsercodes
+		source.tutors.asInstanceOf[UserGroup].sessionFactory = mockSessionFactory
     source.weekRanges = Seq(WeekRange(1))
 
     val targetGroup = new SmallGroup()
@@ -32,7 +39,7 @@ class SmallGroupEventTest extends TestBase with Mockito{
     clone.permissionsService should be(source.permissionsService)
     clone.startTime should be(source.startTime)
     clone.title should be(source.title)
-    clone.tutors should not be(source.tutors) // just check they're different instances
+    clone.tutors should not be source.tutors // just check they're different instances
     clone.weekRanges should be(source.weekRanges)
 
 

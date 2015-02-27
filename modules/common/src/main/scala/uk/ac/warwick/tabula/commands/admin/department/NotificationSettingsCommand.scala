@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.admin.department
 import uk.ac.warwick.tabula.commands.{Description, Describable, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.notifications.coursework.FinaliseFeedbackNotificationSettings
 import uk.ac.warwick.tabula.data.model.notifications.groups.reminders.SmallGroupEventAttendanceReminderNotificationSettings
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, ModuleAndDepartmentServiceComponent, AutowiringModuleAndDepartmentServiceComponent}
@@ -37,6 +38,20 @@ trait NotificationSettingsCommandState {
 //	var smallGroupEventAttendanceReminderNamedUsers: JList[String] = JArrayList()
 
 	var smallGroupEventAttendanceReminderNotifyFirstNonEmptyGroupOnly: Boolean = _
+
+	lazy val finaliseFeedbackNotificationSettings = new FinaliseFeedbackNotificationSettings(department.notificationSettings("FinaliseFeedback"))
+
+	var finaliseFeedbackNotificationEnabled: Boolean = _
+
+	var finaliseFeedbackNotificationNotifyModuleManagers: Boolean = _
+	var finaliseFeedbackNotificationNotifyDepartmentAdministrators: Boolean = _
+
+	// Not currently in use
+	//	var finaliseFeedbackNotificationNotifyNamedUsers: Boolean = _
+	//	var finaliseFeedbackNotificationrNotifyNamedUsersFirst: Boolean = _
+	//	var finaliseFeedbackNotificationNamedUsers: JList[String] = JArrayList()
+
+	var finaliseFeedbackNotificationNotifyFirstNonEmptyGroupOnly: Boolean = _
 }
 
 trait PopulateNotificationSettingsCommandState {
@@ -57,6 +72,20 @@ trait PopulateNotificationSettingsCommandState {
 //	)
 
 	smallGroupEventAttendanceReminderNotifyFirstNonEmptyGroupOnly = smallGroupEventAttendanceReminderSettings.notifyFirstNonEmptyGroupOnly.value
+
+	finaliseFeedbackNotificationEnabled = finaliseFeedbackNotificationSettings.enabled.value
+
+	finaliseFeedbackNotificationNotifyModuleManagers = finaliseFeedbackNotificationSettings.notifyModuleManagers.value
+	finaliseFeedbackNotificationNotifyDepartmentAdministrators = finaliseFeedbackNotificationSettings.notifyDepartmentAdministrators.value
+
+	// Not currently in use
+	//	finaliseFeedbackNotificationNotifyNamedUsers = finaliseFeedbackNotificationSettings.notifyNamedUsers.value
+	//	finaliseFeedbackNotificationNotifyNamedUsersFirst = finaliseFeedbackNotificationSettings.notifyNamedUsersFirst.value
+	//	finaliseFeedbackNotificationNamedUsers.addAll(
+	//		finaliseFeedbackNotificationSettings.namedUsers.value.map { _.getUserId }.filter { _.hasText }.asJavaCollection
+	//	)
+
+	finaliseFeedbackNotificationNotifyFirstNonEmptyGroupOnly = finaliseFeedbackNotificationSettings.notifyFirstNonEmptyGroupOnly.value
 }
 
 class NotificationSettingsCommandInternal(val department: Department) extends CommandInternal[Department] with NotificationSettingsCommandState {
@@ -76,6 +105,18 @@ class NotificationSettingsCommandInternal(val department: Department) extends Co
 //		smallGroupEventAttendanceReminderSettings.namedUsers.value = smallGroupEventAttendanceReminderNamedUsers.asScala.map(userLookup.getUserByUserId).filter(_.isFoundUser).toList
 
 		smallGroupEventAttendanceReminderSettings.notifyFirstNonEmptyGroupOnly.value = smallGroupEventAttendanceReminderNotifyFirstNonEmptyGroupOnly
+
+		finaliseFeedbackNotificationSettings.enabled.value = finaliseFeedbackNotificationEnabled
+
+		finaliseFeedbackNotificationSettings.notifyModuleManagers.value = finaliseFeedbackNotificationNotifyModuleManagers
+		finaliseFeedbackNotificationSettings.notifyDepartmentAdministrators.value = finaliseFeedbackNotificationNotifyDepartmentAdministrators
+
+		// Not currently in use
+		//		finaliseFeedbackNotificationSettings.notifyNamedUsers.value = finaliseFeedbackNotificationNotifyNamedUsers
+		//		finaliseFeedbackNotificationSettings.notifyNamedUsersFirst.value = finaliseFeedbackNotificationNotifyNamedUsersFirst
+		//		finaliseFeedbackNotificationSettings.namedUsers.value = finaliseFeedbackNotificationNamedUsers.asScala.map(userLookup.getUserByUserId).filter(_.isFoundUser).toList
+
+		finaliseFeedbackNotificationSettings.notifyFirstNonEmptyGroupOnly.value = finaliseFeedbackNotificationNotifyFirstNonEmptyGroupOnly
 
 		moduleAndDepartmentService.save(department)
 		department
@@ -98,4 +139,5 @@ trait NotificationSettingsDescription extends Describable[Department] {
 	override def describeResult(d: Description, result: Department) =
 		d.department(department)
 		 .property("SmallGroupEventAttendanceReminder", department.notificationSettings("SmallGroupEventAttendanceReminder"))
+		 .property("FinaliseFeedback", department.notificationSettings("FinaliseFeedback"))
 }

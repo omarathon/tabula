@@ -1,18 +1,20 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.criterion.{PropertySubqueryExpression, DetachedCriteria}
-import org.hibernate.{Hibernate, SessionFactory, Session}
 import javax.sql.DataSource
-import uk.ac.warwick.tabula.data.model.{StudentCourseYearDetails, CanBeDeleted, Member, StudentCourseDetails}
-import uk.ac.warwick.spring.Wire
-import language.implicitConversions
-import scala.reflect._
-import org.hibernate.proxy.HibernateProxy
+
 import org.hibernate.criterion.Restrictions._
+import org.hibernate.criterion.{DetachedCriteria, PropertySubqueryExpression}
+import org.hibernate.proxy.HibernateProxy
+import org.hibernate.{Hibernate, Session, SessionFactory}
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Daoisms.NiceQueryCreator
-import scala.collection.IterableLike
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.{CanBeDeleted, Member, StudentCourseDetails, StudentCourseYearDetails}
 import uk.ac.warwick.tabula.helpers.Logging
+
+import scala.collection.JavaConverters._
+import scala.language.implicitConversions
+import scala.reflect._
+import scala.util.Try
 
 /** Trait for self-type annotation, declaring availability of a Session. */
 trait SessionComponent{
@@ -100,24 +102,35 @@ object Daoisms extends HelperRestrictions {
  * different data source you'll need to look elsewhere.
  */
 trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with HibernateHelpers {
-	var dataSource = Wire[DataSource]("dataSource")
-	var sessionFactory = Wire.auto[SessionFactory]
+	@transient private var _dataSource = Wire.option[DataSource]("dataSource")
+	def dataSource = _dataSource.orNull
+	def dataSource_=(dataSource: DataSource) { _dataSource = Option(dataSource) }
 
-	protected def session = {
-		val session = sessionFactory.getCurrentSession
-		session.enableFilter(Member.FreshOnlyFilter)
-		session.enableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
-		session.enableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
-		session
-	}
+	@transient private var _sessionFactory = Wire.option[SessionFactory]
+	def sessionFactory = _sessionFactory.orNull
+	def sessionFactory_=(sessionFactory: SessionFactory) { _sessionFactory = Option(sessionFactory) }
 
-	protected def sessionWithoutFreshFilters = {
-		val session = sessionFactory.getCurrentSession
-		session.disableFilter(Member.FreshOnlyFilter)
-		session.disableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
-		session.disableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
-		session
-	}
+	protected def optionalSession =
+		_sessionFactory.flatMap { sf => Try(sf.getCurrentSession).toOption }
+			.map { session =>
+				session.enableFilter(Member.FreshOnlyFilter)
+				session.enableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
+				session.enableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
+				session
+			}
+
+	protected def session = optionalSession.orNull
+
+	protected def optionalSessionWithoutFreshFilters =
+		_sessionFactory.flatMap { sf => Option(sf.getCurrentSession) }
+			.map { session =>
+				session.disableFilter(Member.FreshOnlyFilter)
+				session.disableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
+				session.disableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
+				session
+			}
+
+	protected def sessionWithoutFreshFilters = optionalSessionWithoutFreshFilters.orNull
 
 	/**
 	 * Do some work in a new session. Only needed outside of a request,

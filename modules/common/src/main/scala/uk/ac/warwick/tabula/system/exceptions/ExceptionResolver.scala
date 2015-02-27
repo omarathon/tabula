@@ -108,9 +108,15 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 		catch { case throwable: Throwable => handle(throwable, None, None); throw throwable }
 
 	private def handle(exception: Throwable, request: Option[HttpServletRequest], response: Option[HttpServletResponse]) = {
+		logger.info(s"Handling exception ${exception.getClass.getName} (${exception.getMessage})")
+
 		val token = ExceptionTokens.newToken
 
 		val interestingException = ExceptionUtils.getInterestingThrowable(exception, Array(classOf[ServletException]))
+
+		if (interestingException != null) {
+			logger.info(s"Handling exception ${interestingException.getClass.getName} (${interestingException.getMessage})")
+		}
 
 		val mav = Mav(defaultView,
 			"originalException" -> exception,
@@ -141,7 +147,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 
 		request.foreach { request =>
 			def convertToJSON() {
-				mav.viewName == null
+				mav.viewName = null
 				mav.view = new JSONView(Map(
 					"success" -> false,
 					"status" -> statusCode,

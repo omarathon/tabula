@@ -74,6 +74,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			group2010.occurrence = "A"
 			group2010.assessmentGroup = "A"
 			group2010.academicYear = new AcademicYear(2010)
+			group2010.members.sessionFactory = sessionFactory
 			group2010.members.staticUserIds = Seq("rob","kev","bib")
 
 			val group2011 = new UpstreamAssessmentGroup
@@ -81,6 +82,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			group2011.occurrence = "A"
 			group2011.assessmentGroup = "A"
 			group2011.academicYear = new AcademicYear(2011)
+			group2011.members.sessionFactory = sessionFactory
 			group2011.members.staticUserIds = Seq("hog","dod","han")
 
 			// similar group but doesn't match the occurence of any assignment above, so ignored.
@@ -89,6 +91,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			otherGroup.occurrence = "B"
 			otherGroup.assessmentGroup = "A"
 			otherGroup.academicYear = new AcademicYear(2011)
+			otherGroup.members.sessionFactory = sessionFactory
 			otherGroup.members.staticUserIds = Seq("hog","dod","han")
 
 			val member = new StaffMember

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormattedHtml, SavedFormValue}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 
 trait FeedbackAttachments {
@@ -27,15 +27,15 @@ trait FeedbackAttachments {
 
 	def mostRecentAttachmentUpload =
 		if (attachments.isEmpty) null
-		else attachments.maxBy { _.dateUploaded }.dateUploaded
+		else attachments.asScala.maxBy { _.dateUploaded }.dateUploaded
 
 	/* Adds new attachments to the feedback. Ignores feedback that has already been uploaded and overwrites attachments
 	   with the same name as exiting attachments. Returns the attachments that wern't ignored. */
 	def addAttachments(fileAttachments: Seq[FileAttachment]) : Seq[FileAttachment] = fileAttachments.filter { a =>
-		val isIdentical = attachments.exists(f => f.name == a.name && f.isDataEqual(a))
+		val isIdentical = attachments.asScala.exists(f => f.name == a.name && f.isDataEqual(a))
 		if (!isIdentical) {
 			// if an attachment with the same name as this one exists then replace it
-			val duplicateAttachment = attachments.find(_.name == a.name)
+			val duplicateAttachment = attachments.asScala.find(_.name == a.name)
 			duplicateAttachment.foreach(removeAttachment)
 			addAttachment(a)
 		}
@@ -49,7 +49,7 @@ trait FeedbackAttachments {
 	}
 
 	def clearAttachments() {
-		for(attachment <- attachments){
+		for(attachment <- attachments.asScala){
 			attachment.feedback = null
 		}
 		attachments.clear()
@@ -86,7 +86,7 @@ trait AssessmentFeedback {
 @Entity @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
-abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with FormattedHtml with AssessmentFeedback {
+abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with FormattedHtml with AssessmentFeedback with ToEntityReference {
 
 	def this(universityId: String) {
 		this()
@@ -113,26 +113,44 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	var actualMark: Option[Int] = None
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
-	var adjustedMark: Option[Int] = None
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
-	var agreedMark: Option[Int] = None
-
-	def latestMark: Option[Int] = Seq(agreedMark, adjustedMark, actualMark).flatten.headOption
-
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var actualGrade: Option[String] = None
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
-	var adjustedGrade: Option[String] = None
+
+	@OneToMany(mappedBy = "feedback", cascade = Array(PERSIST,MERGE,REFRESH), fetch = FetchType.LAZY)
+	@OrderBy("uploadedDate DESC")
+	@BatchSize(size=200)
+	private val _marks: JList[Mark] = JArrayList()
+	def marks = _marks
+	def addMark(uploaderId: String, markType: MarkType, mark: Int, grade: Option[String], reason: String, comments: String = null) = {
+		val newMark = new Mark
+		newMark.feedback = this
+		newMark.mark = mark
+		newMark.grade = grade
+		newMark.reason = reason
+		newMark.comments = comments
+		newMark.markType = markType
+		newMark.uploaderId = uploaderId
+		newMark.uploadedDate = DateTime.now
+		_marks.add(newMark)
+		newMark
+	}
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+	var agreedMark: Option[Int] = None
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var agreedGrade: Option[String] = None
 
-	def latestGrade: Option[String] = Seq(agreedGrade, adjustedGrade, actualGrade).flatten.headOption
+	def latestMark: Option[Int] =
+		(Stream(agreedMark) ++ marks.asScala.toStream.map(m => Option(m.mark)) ++ Stream(actualMark)).flatten.headOption
+	def latestGrade: Option[String] =
+		(Stream(agreedGrade) ++ marks.asScala.toStream.map(m => Option(m.grade).flatten) ++ Stream(actualGrade)).flatten.headOption
 
-	var adjustmentComments: String = _
-	var adjustmentReason: String = _
-
-	def hasAdjustments = adjustedGrade.isDefined || adjustedMark.isDefined
+	def latestAdjustment: Option[Mark] = marks.asScala.find(_.markType == MarkType.Adjustment)
+	def hasAdjustments = latestAdjustment.isDefined
+	def adjustedMark: Option[Int] = latestAdjustment.map(_.mark)
+	def adjustedGrade: Option[String] = latestAdjustment.map(_.grade).flatten
+	def adjustmentComments: String = latestAdjustment.map(_.comments).orNull
+	def adjustmentReason: String = latestAdjustment.map(_.reason).orNull
 
 	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
 	@JoinColumn(name = "first_marker_feedback")
@@ -193,14 +211,14 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	val customFormValues: JSet[SavedFormValue] = JHashSet()
 
 	def clearCustomFormValues(): Unit = {
-		customFormValues.foreach { v =>
+		customFormValues.asScala.foreach { v =>
 			v.feedback = null
 		}
 		customFormValues.clear()
 	}
 
 	// FormValue containing the per-user online feedback comment
-	def commentsFormValue = customFormValues.find(_.name == Assignment.defaultFeedbackTextFieldName)
+	def commentsFormValue = customFormValues.asScala.find(_.name == Assignment.defaultFeedbackTextFieldName)
 
 	def comments: Option[String] = commentsFormValue.map(_.value)
 
@@ -272,7 +290,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 }
 
 @Entity @DiscriminatorValue("assignment")
-class AssignmentFeedback extends Feedback with ToEntityReference {
+class AssignmentFeedback extends Feedback {
 
 	type Entity = AssignmentFeedback
 
@@ -300,7 +318,7 @@ class AssignmentFeedback extends Feedback with ToEntityReference {
 }
 
 @Entity @DiscriminatorValue("exam")
-class ExamFeedback extends Feedback with ToEntityReference {
+class ExamFeedback extends Feedback {
 
 	type Entity = ExamFeedback
 

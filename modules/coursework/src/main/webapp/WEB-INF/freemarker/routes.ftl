@@ -146,3 +146,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro moduleHomeWithYear module academicYear><@_u page="/admin/module/${module.code}/${academicYear.startYear?c}" /></#macro>
 <#macro departmentHomeWithYearNoModule department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}" /></#macro>
 <#macro departmentHomeWithYear module academicYear><@_u page="/admin/department/${module.department.code}/${academicYear.startYear?c}/#module-${module.code}" /></#macro>
+<#macro viewExam exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}" /></#macro>
+<#macro uploadExamToSits exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/upload-to-sits"/></#macro>

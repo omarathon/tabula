@@ -1,7 +1,13 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import javax.sql.DataSource
+
+import org.hamcrest.Matchers._
+import org.hibernate.{Session, SessionFactory}
 import org.joda.time.{DateTime, DateTimeConstants}
+import org.junit.{After, Before}
 import org.springframework.validation.BindException
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.CurrentSITSAcademicYear
@@ -10,13 +16,16 @@ import uk.ac.warwick.tabula.data.model.forms.ExtensionState.Unreviewed
 import uk.ac.warwick.tabula.data.model.{UpstreamAssessmentGroup, Notification, UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.events.EventListener
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
 // scalastyle:off magic.number
-class ModifyAssignmentCommandTest extends TestBase with Mockito {
+class ModifyAssignmentCommandTest extends TestBase with Mockito with FunctionalContextTesting {
+
+	import ModifyAssignmentCommandTest.MinimalCommandContext
 
 	var userDatabase = Seq(
 		("0000000", "aaslat", "aaaaa"),
@@ -183,7 +192,17 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito {
 		errors.getErrorCount should be (0)
 	}}
 
-	@Test def includeAndExcludeUsers() { new Fixture {
+	@Before
+	def before() {
+		Wire.ignoreMissingBeans = true
+	}
+
+	@After
+	def afterTheFeast() {
+		Wire.ignoreMissingBeans = false
+	}
+
+	@Test def includeAndExcludeUsers(): Unit = inContext[MinimalCommandContext] { new Fixture {
 		val cmd = new EditAssignmentCommand(module, assignment, currentUser)
 		cmd.service = mockAssignmentService
 		cmd.assessmentMembershipService = mockAssignmentMembershipService
@@ -222,7 +241,7 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito {
 		cmd.members.excludes.size should be(0)
 	}}
 
-	@Test def purgeExtensionRequests() { new Fixture {
+	@Test def purgeExtensionRequests(): Unit = inContext[MinimalCommandContext] { new Fixture {
 		assignment.extensions.size should be (2)
 		assignment.countUnapprovedExtensions should be (1)
 
@@ -244,4 +263,17 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito {
 		ns.notifications.map(_.verb).toSeq.sorted should be (Seq("reject", "respond").sorted)
 	}}
 
+}
+
+object ModifyAssignmentCommandTest {
+	class MinimalCommandContext extends FunctionalContext with Mockito {
+		bean(){
+			val sessionFactory = smartMock[SessionFactory]
+			val session = smartMock[Session]
+			sessionFactory.getCurrentSession returns session
+			sessionFactory.openSession() returns session
+			sessionFactory
+		}
+		bean("dataSource"){mock[DataSource]}
+	}
 }

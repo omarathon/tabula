@@ -5,7 +5,7 @@ import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.profiles.pages.ProfilePage
 import uk.ac.warwick.tabula.web.FeaturesDriver
 
-class MemberNotesTest extends BrowserTest with GivenWhenThen with FeaturesDriver {
+class MemberNotesTest extends BrowserTest with GivenWhenThen with FeaturesDriver with StudentProfileFixture {
 
 	"A student" should "be able to view their member notes" in {
 

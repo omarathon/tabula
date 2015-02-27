@@ -330,6 +330,13 @@
 				</tbody>
 			</table>
 
+			<#assign users=[] />
+			<#list students as student>
+				<#assign users = users + [student.user] />
+			</#list>
+
+			<p><@fmt.bulk_email_students users /></p>
+
 			<script type="text/javascript">
 				(function($) {
 					$('.fixed-container').fixHeaderFooter();

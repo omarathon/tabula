@@ -16,7 +16,7 @@ object AddExamCommand  {
 			with AddExamPermissions
 			with AddExamCommandState
 			with AddExamCommandDescription
-			with AddExamValidation
+			with ExamValidation
 			with AutowiringAssessmentServiceComponent
 
 }
@@ -46,12 +46,14 @@ trait AddExamPermissions extends RequiresPermissionsChecking with PermissionsChe
 
 }
 
-trait AddExamCommandState {
-	def module: Module
-	def academicYear: AcademicYear
-
+trait ExamState {
 	// bind variables
 	var name: String = _
+}
+
+trait AddExamCommandState extends ExamState {
+	def module: Module
+	def academicYear: AcademicYear
 }
 
 trait AddExamCommandDescription extends Describable[Exam] {
@@ -62,9 +64,9 @@ trait AddExamCommandDescription extends Describable[Exam] {
 	}
 }
 
-trait AddExamValidation extends SelfValidating {
+trait ExamValidation extends SelfValidating {
 
-	self: AddExamCommandState =>
+	self: ExamState =>
 
 	override def validate(errors: Errors) {
 

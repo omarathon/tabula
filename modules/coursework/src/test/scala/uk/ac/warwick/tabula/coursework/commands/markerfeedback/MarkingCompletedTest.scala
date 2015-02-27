@@ -5,7 +5,7 @@ import org.junit.{After, Before}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.{Mockito, _}
 import uk.ac.warwick.tabula.commands.UserAware
-import uk.ac.warwick.tabula.coursework.commands.assignments.{MarkingCompletedCommand, MarkingCompletedState, SecondMarkerReleaseNotifier}
+import uk.ac.warwick.tabula.coursework.commands.assignments._
 import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.ReleasedState
 import uk.ac.warwick.tabula.data.SessionComponent
 import uk.ac.warwick.tabula.data.model._
@@ -35,12 +35,7 @@ object MarkingCompletedTest {
 
 class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mockito with FunctionalContextTesting with FeedbackServiceComponent {
 
-	val mockSession = mock[Session]
-	var stateService: StateService = new ComposableStateServiceImpl with SessionComponent {
-		def session = mockSession
-	}
-
-	var feedbackService: FeedbackService = mock[FeedbackService]
+	val feedbackService = mock[FeedbackService]
 
 	@Before
 	def before() {
@@ -52,22 +47,42 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		Wire.ignoreMissingBeans = false
 	}
 
+	private trait CommandTestSupport extends StateServiceComponent with FeedbackServiceComponent with FinaliseFeedbackTestImpl {
+		self: UserAware =>
+
+		val mockSession = mock[Session]
+		val stateService: StateService = new ComposableStateServiceImpl with SessionComponent {
+			def session = mockSession
+		}
+
+		val feedbackService = MarkingCompletedTest.this.feedbackService
+	}
+
+	trait FinaliseFeedbackTestImpl extends FinaliseFeedbackComponent {
+		self: UserAware =>
+
+		def finaliseFeedback(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback]) {
+			val finaliseFeedbackCommand = FinaliseFeedbackCommand(assignment, markerFeedbacks, user)
+			finaliseFeedbackCommand.applyInternal()
+		}
+	}
+
+	private trait CommandFixture {
+		val command =
+			new MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
+				with CommandTestSupport
+	}
+
 	@Test
 	def firstMarkerFinished() {
-		withUser("cuslaj") {
-			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
-			command.stateService = stateService
-
+		withUser("cuslaj") { new CommandFixture {
 			val students = List("9876004", "0270954", "9170726")
 			command.markerFeedback = assignment.feedbacks.filter(f => students.contains(f.universityId)).map(_.firstMarkerFeedback)
 
 			command.onBind(null)
 
-			command.preSubmitValidation()
 			command.noFeedback.size should be (3)
 			command.noMarks.size should be (3)
-
-			command.feedbackService = feedbackService
 
 			command.applyInternal()
 			val releasedFeedback = assignment.feedbacks.map(_.firstMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
@@ -75,8 +90,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 
 			val secondMarkerFeedback = assignment.feedbacks.flatMap(f => Option(f.secondMarkerFeedback)).filter(_.state == MarkingState.ReleasedForMarking)
 			secondMarkerFeedback.size should be (3)
-
-		}
+		}}
 	}
 
 
@@ -84,10 +98,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	@Test
 	def secondMarkerFinished(){
 		inContext[MarkingCompletedTest.Ctx] {
-		withUser("cuday"){
-			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
-			command.stateService = stateService
-			command.userLookup = mockUserLookup
+		withUser("cuday") { new CommandFixture {
 			val students = List("0672088", "0672089")
 			assignment.feedbacks.map(addMarkerFeedback(_, SecondFeedback))
 			val feedbacks = assignment.feedbacks.filter(f => students.contains(f.universityId))
@@ -95,11 +106,8 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			setFirstMarkerFeedbackState(MarkingState.MarkingCompleted)
 			command.onBind(null)
 
-			command.preSubmitValidation()
 			command.noFeedback.size should be (2)
 			command.noMarks.size should be (2)
-
-			command.feedbackService = feedbackService
 
 			command.applyInternal()
 
@@ -113,35 +121,26 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 
 			val finalFeedback = assignment.feedbacks.flatMap(f => Option(f.thirdMarkerFeedback)).filter(_.state == MarkingState.ReleasedForMarking)
 			finalFeedback.size should be (2)
-
-
-		}
-		}
+		}}}
 	}
 
 
 	@Test
 	def finalMarkingComplete() {
 		inContext[MarkingCompletedTest.Ctx] {
-			withUser("cuslaj") {
-				val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
-
+			withUser("cuslaj") { new CommandFixture {
 				assignment.feedbacks.map(addMarkerFeedback(_, ThirdFeedback))
 				assignment.feedbacks.map(addMarkerFeedback(_, SecondFeedback))
 				setFinalMarkerFeedbackState(MarkingState.InProgress)
 				setFirstMarkerFeedbackState(MarkingState.MarkingCompleted)
 				setSecondMarkerFeedbackState(MarkingState.MarkingCompleted)
 
-				command.stateService = stateService
-
 				val students = List("9876004", "0270954", "9170726")
 				command.markerFeedback = assignment.feedbacks.filter(f => students.contains(f.universityId)).map(_.thirdMarkerFeedback)
 
 				command.onBind(null)
 
-				command.feedbackService = feedbackService
 
-				command.preSubmitValidation()
 				command.noFeedback.size should be(3)
 				command.noMarks.size should be(3)
 
@@ -158,8 +157,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 				val releasedFeedback = assignment.feedbacks.map(_.thirdMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
 				releasedFeedback.size should be(3)
 			}
-
-		}
+		}}
 	}
 
 
@@ -208,7 +206,5 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		notifications(1).entities should contain(mf2)
 
 	}}
-
-
 
 }

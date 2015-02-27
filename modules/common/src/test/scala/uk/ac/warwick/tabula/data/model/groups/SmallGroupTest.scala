@@ -1,15 +1,10 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
-import junit.framework.Test
-import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import org.hibernate.{Session, SessionFactory}
 import uk.ac.warwick.tabula.data.model.UserGroup
-import org.mockito.Mockito._
-import org.mockito.Matchers._
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.services.SmallGroupService
 
 import scala.util.Random
 
@@ -21,6 +16,11 @@ class SmallGroupTest extends TestBase with Mockito {
 
   val notEquivalentEvent = newEventWithMockedServices
   notEquivalentEvent.day = DayOfWeek.Monday
+
+	val sessionFactory = smartMock[SessionFactory]
+	val session = smartMock[Session]
+	sessionFactory.getCurrentSession returns session
+	sessionFactory.openSession() returns session
 
 	def newSmallGroupWithMockedServices = {
 		val group = new SmallGroup()
@@ -37,45 +37,45 @@ class SmallGroupTest extends TestBase with Mockito {
 	}
 
   @Test
-  def hasEquivalentEventsToReturnsTrueForSameGroup() {
+  def equivalentEventsToReturnsTrueForSameGroup() {
     val group = newSmallGroupWithMockedServices
 
-    group.hasEquivalentEventsTo(group) should be(true)
+    group.hasEquivalentEventsTo(group) should be{true}
   }
 
   @Test
-  def hasEquivalentEventsToReturnsTrueForGroupsWithNoEvents(){
+  def equivalentEventsToReturnsTrueForGroupsWithNoEvents(){
     val group = newSmallGroupWithMockedServices
-    group.hasEquivalentEventsTo(newSmallGroupWithMockedServices) should be (true)
+    group.hasEquivalentEventsTo(newSmallGroupWithMockedServices) should be {true}
   }
 
   @Test
-  def hasEquivalentEventsToReturnsTrueForGroupsWithEquivalentEvents(){
+  def equivalentEventsToReturnsTrueForGroupsWithEquivalentEvents(){
 
     val group = newSmallGroupWithMockedServices
     group.addEvent(event)
     val group2 = newSmallGroupWithMockedServices
     group2.addEvent(equivalentEvent)
-    group.hasEquivalentEventsTo(group2) should be (true)
+    group.hasEquivalentEventsTo(group2) should be {true}
   }
 
   @Test
-  def hasEquivalentEventsToReturnsFalseForGroupsWithNonEquivalentEvents(){
+  def equivalentEventsToReturnsFalseForGroupsWithNonEquivalentEvents(){
     val group = newSmallGroupWithMockedServices
     group.addEvent(event)
     val group2 = newSmallGroupWithMockedServices
     group2.addEvent(notEquivalentEvent)
-    group.hasEquivalentEventsTo(group2) should be (false)
+    group.hasEquivalentEventsTo(group2) should be {false}
   }
 
   @Test
-  def hasEquivalentEventsToReturnsFalseForGroupsWithSubsetOfEvents(){
+  def equivalentEventsToReturnsFalseForGroupsWithSubsetOfEvents(){
     val group = newSmallGroupWithMockedServices
     group.addEvent(event)
     val group2 = newSmallGroupWithMockedServices
     group2.addEvent(event)
 		group2.addEvent(notEquivalentEvent)
-    group.hasEquivalentEventsTo(group2) should be (false)
+    group.hasEquivalentEventsTo(group2) should be {false}
   }
 
   @Test
@@ -100,6 +100,7 @@ class SmallGroupTest extends TestBase with Mockito {
 
 		// would be nice to use a mock here, but they don't work well with GeneratedId classes
 		val studentsGroup = UserGroup.ofUniversityIds
+		studentsGroup.sessionFactory = sessionFactory
 		studentsGroup.addUserId("test user")
     source.students = studentsGroup
 
@@ -116,20 +117,20 @@ class SmallGroupTest extends TestBase with Mockito {
     // id is not copeied, otherwise it wouldn't be transient
     target.id should be(source.id)
     target.name should be(source.name)
-    target.groupSet should not be(source.groupSet)
+    target.groupSet should not be source.groupSet
     target.groupSet should be(targetSet)
     target.maxGroupSize should be(source.maxGroupSize)
 
     target.permissionsService should be(source.permissionsService)
-    target.students should not be(source.students)
-		target.students.hasSameMembersAs(source.students) should be(true)
+    target.students should not be source.students
+		target.students.hasSameMembersAs(source.students) should be{true}
     target.events.size should be(1)
     target.events.head should be(clonedEvent)
 
   }
 
 	@Test
-	def isFullReportsFullnessWhenGroupSizeLimitsEnabled(){
+	def fullReportsFullnessWhenGroupSizeLimitsEnabled(){
 
 		// set up a group with 1 member, with group size limits enabled
 		val group = newSmallGroupWithMockedServices
@@ -139,7 +140,7 @@ class SmallGroupTest extends TestBase with Mockito {
 
 
 		group.maxGroupSize = 2
-		group should not be('full)
+		group should not be 'full
 
 		group.maxGroupSize = 1
 		group should be('full)
@@ -150,7 +151,7 @@ class SmallGroupTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def isFullIsFalseWhenGroupSizeLimitsNotEnabled(){
+	def fullIsFalseWhenGroupSizeLimitsNotEnabled(){
 
 		// set up a group with 1 member, with group size limits enabled
 		val group = newSmallGroupWithMockedServices
@@ -160,13 +161,13 @@ class SmallGroupTest extends TestBase with Mockito {
 
 
 		group.maxGroupSize = 2
-		group should not be('full)
+		group should not be 'full
 
 		group.maxGroupSize = 1
-		group should not be('full)
+		group should not be 'full
 
 		group.maxGroupSize = 0
-		group should not be('full)
+		group should not be 'full
 	}
 
 	@Test

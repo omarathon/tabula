@@ -1,5 +1,8 @@
 package uk.ac.warwick.tabula.attendance.commands
 
+import javax.sql.DataSource
+
+import org.hibernate.{Session, SessionFactory}
 import uk.ac.warwick.tabula.attendance.commands.agent.old.{AgentPointRecordCommandState, AgentPointRecordDescription, AgentPointRecordPermissions, AgentPointRecordValidation, AgentPointRecordCommand}
 
 import scala.collection.JavaConverters._
@@ -325,5 +328,13 @@ object AgentPointRecordCommandTest {
 			permissionsService.ensureUserGroupFor(anArgThat(anything), anArgThat(anything))(anArgThat(anything)) returns UserGroup.ofUsercodes
 			permissionsService
 		}
+		bean(){
+			val sessionFactory = smartMock[SessionFactory]
+			val session = smartMock[Session]
+			sessionFactory.getCurrentSession returns session
+			sessionFactory.openSession() returns session
+			sessionFactory
+		}
+		bean("dataSource"){mock[DataSource]}
 	}
 }

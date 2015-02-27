@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence.CascadeType._
 
 import org.hibernate.annotations.Type
+import uk.ac.warwick.tabula.data.Daoisms
 
 import scala.collection.JavaConverters._
 import javax.persistence._
@@ -35,7 +36,7 @@ import scala.util.Try
  */
 @Entity
 @Access(AccessType.FIELD)
-class UserGroup private(val universityIds: Boolean) extends GeneratedId with UnspecifiedTypeUserGroup with KnownTypeUserGroup {
+class UserGroup private(val universityIds: Boolean) extends GeneratedId with UnspecifiedTypeUserGroup with KnownTypeUserGroup with Daoisms {
 
 	/* For Hibernate xx */
 	def this() { this(false) }
@@ -77,7 +78,12 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 			group
 		})
 
-		staticIncludeUsers.clear()
+		if (!staticIncludeUsers.isEmpty()) {
+			staticIncludeUsers.clear()
+			// TAB-3343 - force deletions before inserts
+			optionalSession.foreach { _.flush() }
+		}
+
 		staticIncludeUsers.addAll(newMembers.asJava)
 	}
 
@@ -89,7 +95,13 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 			m.position = Try(member.seatNumber.toInt).toOption
 			m
 		})
-		staticIncludeUsers.clear()
+
+		if (!staticIncludeUsers.isEmpty()) {
+			staticIncludeUsers.clear()
+			// TAB-3343 - force deletions before inserts
+			optionalSession.foreach { _.flush() }
+		}
+
 		staticIncludeUsers.addAll(newMembers.asJava)
 	}
 
@@ -177,7 +189,6 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 		assert(this.universityIds == otherGroup.universityIds, "Can only copy from a group with same type of users")
 
 		val other = otherGroup.knownType
-
 		baseWebgroup = other.baseWebgroup
 		includedUserIds = other.includedUserIds
 		excludedUserIds = other.excludedUserIds
@@ -186,6 +197,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 
 	def duplicate(): UserGroup = {
 		val newGroup = new UserGroup(this.universityIds)
+		newGroup.sessionFactory = this.sessionFactory
 		newGroup.copyFrom(this)
 		newGroup.userLookup = this.userLookup
 		newGroup

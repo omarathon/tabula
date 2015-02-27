@@ -10,8 +10,8 @@ import uk.ac.warwick.tabula.helpers.Logging
 
 trait NotificationHandling extends Logging {
 
-	var notificationService = Wire.auto[NotificationService]
-	var scheduledNotificationService = Wire.auto[ScheduledNotificationService]
+	var notificationService = Wire[NotificationService]
+	var scheduledNotificationService = Wire[ScheduledNotificationService]
 
 	def notify[A, B, C](cmd: Command[A])(f: => A): A = {
 		val result = f
