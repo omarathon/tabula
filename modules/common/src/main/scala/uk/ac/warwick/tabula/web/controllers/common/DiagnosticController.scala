@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers.common
 
-import java.io.Writer
+import java.io.{IOException, Writer}
+import javax.servlet.http.HttpServletResponse
 
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.stereotype.Controller
@@ -29,10 +30,15 @@ class DiagnosticController extends Logging {
 	@RequestMapping(Array("/error-command")) def errCommand = {
 		val command = new NullCommand
 		logger.info("About to throw an exception")
-		command will {
+		command will { () =>
 			logger.info("Yep, definitely throwing...")
 			throw new RuntimeException("Deliberately generated exception")
 		}
 		command.apply()
+	}
+
+	@RequestMapping(Array("/error/client-abort")) def clientAbortError(response: HttpServletResponse) = {
+		response.getOutputStream.print("fuuuuuuuuuuuuuuuuu")
+		throw Class.forName("org.apache.catalina.connector.ClientAbortException").newInstance().asInstanceOf[IOException]
 	}
 }

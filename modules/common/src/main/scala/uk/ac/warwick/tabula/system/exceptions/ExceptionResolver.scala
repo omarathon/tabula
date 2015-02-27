@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.system.exceptions
 
+import java.io.IOException
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import org.springframework.beans.factory.annotation.Autowired
@@ -89,6 +91,8 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 
 			// TAB-411 also redirect to signin for submit permission denied if not logged in (and not ajax request)
 			case permDenied: PermissionsError if (!loggedIn && !isAjaxRequest) => RedirectToSignin()
+
+			case e: IOException if ExceptionHandler.isClientAbortException(e) => Mav(null.asInstanceOf[String])
 
 			// TAB-567 wrap MultipartException in UserError so it doesn't get logged as an error
 			case uploadError: MultipartException => handle(new FileUploadException(uploadError), request, response)

@@ -30,6 +30,11 @@ object ExceptionHandler {
 		exception.printStackTrace(writer)
 		stringWriter.toString
 	}
+
+	// Check for this exception without needing it on the classpath
+	private val ClientAbortException = "org.apache.catalina.connector.ClientAbortException"
+
+	def isClientAbortException(e: IOException) = e.getClass.getName == ClientAbortException
 }
 
 trait ExceptionHandler {
@@ -58,13 +63,10 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
 	@Autowired var freemarker: FreemarkerConfiguration = _
 	var template: Template = _
 
-	// Check for this exception without needing it on the classpath
-	private val ClientAbortException = "org.apache.catalina.connector.ClientAbortException"
-
 	override def exception(context: ExceptionContext) = context.exception match {
 		case userError: UserError => {}
 		case handled: HandledException => {}
-		case e: IOException if e.getClass.getName equals ClientAbortException => {} // cancelled download.
+		case e: IOException if ExceptionHandler.isClientAbortException(e) => {} // cancelled download.
 		case e => {
 			try {
 				val message = makeEmail(context)
