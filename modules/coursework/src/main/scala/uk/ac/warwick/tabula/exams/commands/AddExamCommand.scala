@@ -26,7 +26,7 @@ object AddExamCommand  {
 			with CurrentSITSAcademicYear
 			with AutowiringUserLookupComponent
 			with SpecifiesGroupType
-			with ModifiesExamMembership{
+			with ModifiesExamMembership {
 		}
 }
 

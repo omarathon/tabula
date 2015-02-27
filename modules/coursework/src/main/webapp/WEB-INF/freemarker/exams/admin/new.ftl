@@ -1,7 +1,10 @@
-<#include "*/sits_groups.ftl" />
+<#escape x as x?html>
 
 <#if features.exams>
-	<#escape x as x?html>
+
+	<#include "*/sits_groups.ftl" />
+	<#--<#import "*/membership_picker_macros.ftl" as membership_picker />-->
+
 	<h1>Create exam for <@fmt.module_name module /></h1>
 
 	<#assign createExamUrl><@routes.createExam module academicYear /></#assign>
@@ -16,7 +19,9 @@
 		<span class="uneditable-value">${academicYear.toString} <span class="hint">(can't be changed)</span></span>
 		</@form.labelled_row>
 
-		<@sits_groups command />
+		<#--<@membership_picker.header command />-->
+		<#--<@membership_picker.fieldset command 'exam' 'exam' submitUrl />-->
+		<@exams_sits_groups command />
 
 		<div class="submit-buttons form-actions">
 			<input type="submit" value="Create" class="btn btn-primary">
@@ -24,5 +29,5 @@
 		</div>
 	</@f.form>
 
-	</#escape>
 </#if>
+</#escape>

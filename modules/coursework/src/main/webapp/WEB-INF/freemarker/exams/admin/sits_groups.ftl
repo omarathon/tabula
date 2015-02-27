@@ -1,8 +1,7 @@
-<#macro sits_groups command >
+<#macro exams_sits_groups command >
 
 	<#if command.availableUpstreamGroups?has_content>
-	<div class="modal-body">
-
+	<div>
 		<table id="sits-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-orangeLight">
 			<thead>
 			<tr>
@@ -19,6 +18,7 @@
 			<tbody>
 				<#list command.availableUpstreamGroups as available>
 					<#local isLinked = available.isLinked(command.assessmentGroups) />
+					<@f.hidden id="upstreamGroups${available_index}" name="upstreamGroups[${available_index}]"  value="${available.id}" cssClass="upstreamGroups" />
 				<tr>
 					<td><input type="checkbox" id="chk-${available.id}" name="assessmentGroups" value="${available.id}"></td>
 					<td><label for="chk-${available.id}">${available.name}<#if isLinked> <span class="label label-success">Linked</span></#if></label></td>
