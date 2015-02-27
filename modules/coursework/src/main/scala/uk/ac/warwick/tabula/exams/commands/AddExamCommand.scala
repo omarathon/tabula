@@ -53,9 +53,7 @@ class AddExamCommandInternal(val module: Module, val examAcademicYear: AcademicY
 		assessmentService.save(exam)
 		exam
 	}
-
 }
-
 
 trait AddExamPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
@@ -71,9 +69,7 @@ trait ExamState {
 	val updateStudentMembershipGroupIsUniversityIds:Boolean=false
 	// bind variables
 	var name: String = _
-	//var selectedAssessmentGroups: JList[AssessmentGroup] = _
 	def exam: Exam = null
-
 }
 
 trait AddExamCommandState extends ExamState {
