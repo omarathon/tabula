@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 import scala.reflect._
+import scala.util.Try
 
 /** Trait for self-type annotation, declaring availability of a Session. */
 trait SessionComponent{
@@ -110,7 +111,7 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 	def sessionFactory_=(sessionFactory: SessionFactory) { _sessionFactory = Option(sessionFactory) }
 
 	protected def optionalSession =
-		_sessionFactory.flatMap { sf => Option(sf.getCurrentSession) }
+		_sessionFactory.flatMap { sf => Try(sf.getCurrentSession).toOption }
 			.map { session =>
 				session.enableFilter(Member.FreshOnlyFilter)
 				session.enableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
