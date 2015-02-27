@@ -83,6 +83,10 @@ class Exam
 		})
 	}
 
+	override val collectMarks: JBoolean = true
+
+	override val hasWorkflow = false
+
 	override def permissionsParents = Option(module).toStream
 
 	override def toEntityReference = new ExamEntityReference().put(this)

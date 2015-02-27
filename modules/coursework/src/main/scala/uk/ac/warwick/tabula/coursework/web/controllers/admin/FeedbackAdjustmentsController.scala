@@ -21,11 +21,12 @@ class FeedbackAdjustmentsListController extends CourseworkController {
 
 	@ModelAttribute("listCommand")
 	def listCommand(@PathVariable assignment: Assignment): FeedbackAdjustmentListCommand =
-		FeedbackAdjustmentListCommand(assignment)
+		FeedbackAdjustmentListCommand(mandatory(assignment))
 
 	@RequestMapping
-	def list(@PathVariable assignment: Assignment,
-					 @ModelAttribute("listCommand") listCommand: FeedbackAdjustmentListCommand
+	def list(
+		@PathVariable assignment: Assignment,
+		@ModelAttribute("listCommand") listCommand: FeedbackAdjustmentListCommand
 	) = {
 		val (studentInfo, noFeedbackStudentInfo) = listCommand.apply().partition { _.feedback.isDefined }
 
@@ -58,15 +59,18 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 
 	@ModelAttribute("command")
 	def formCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: User, submitter: CurrentUser) =
-		FeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+		AssignmentFeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping(method=Array(GET))
-	def showForm(@ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
-							 @PathVariable assignment: Assignment) = {
+	def showForm(
+		@ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
+		@PathVariable assignment: Assignment,
+		@PathVariable student: User
+	) = {
+		val submission = assignment.findSubmission(student.getWarwickId)
+		val daysLate = submission.map { _.workingDaysLate }
 
-		val daysLate = command.submission.map { _.workingDaysLate }
-
-		val courseType = command.submission.flatMap { submission =>
+		val courseType = submission.flatMap { submission =>
 			profileService.getMemberByUniversityId(submission.universityId)
 				.collect { case stu: StudentMember => stu }
 				.flatMap { _.mostSignificantCourseDetails }
@@ -90,12 +94,14 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
-						 errors: Errors,
-						 @PathVariable assignment: Assignment)  = {
-
+	def submit(
+		@Valid @ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
+		errors: Errors,
+		@PathVariable assignment: Assignment,
+		@PathVariable student: User
+	) = {
 		if (errors.hasErrors) {
-			showForm(command, assignment)
+			showForm(command, assignment, student)
 		} else {
 			command.apply()
 			Mav("ajax_success").noLayout()
