@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula
 import javax.sql.DataSource
 
 import org.hibernate.{Session, SessionFactory}
-import org.junit.{Before, AfterClass}
+import org.junit.Before
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory
@@ -42,12 +42,6 @@ trait ContextSetup {
 	@Before def setupCtx() {
 		
 	}
-}
-
-object AppContextTestBase {
-  @AfterClass def tearDownCtx() {
-    uk.ac.warwick.spring.SpringConfigurer.applicationContext = null
-  } 
 }
 
 trait TransactionalTesting {
