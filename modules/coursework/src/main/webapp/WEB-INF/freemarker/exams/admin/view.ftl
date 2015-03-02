@@ -15,6 +15,17 @@
 		<i class="icon-check"></i> Add marks
 	</@fmt.permission_button>
 
+	<#assign adjust_url><@routes.examFeedbackAdjustment exam /></#assign>
+	<@fmt.permission_button
+		permission='Feedback.Update'
+		scope=exam
+		action_descr='adjust marks'
+		href=adjust_url
+		classes='btn'
+	>
+		<i class="icon-sort"></i> Adjustments
+	</@fmt.permission_button>
+
 	<#assign upload_url><@routes.uploadExamToSits exam /></#assign>
 	<@fmt.permission_button
 		permission='Feedback.Publish'
@@ -24,7 +35,7 @@
 		href=upload_url
 		classes='btn'
 	>
-		<i class="icon-upload icon-fixed-width"></i> Upload to SITS
+		<i class="icon-upload"></i> Upload to SITS
 	</@fmt.permission_button>
 </div>
 
