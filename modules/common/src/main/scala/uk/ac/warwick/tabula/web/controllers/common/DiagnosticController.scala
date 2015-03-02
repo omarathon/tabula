@@ -38,7 +38,7 @@ class DiagnosticController extends Logging {
 	}
 
 	@RequestMapping(Array("/error/client-abort")) def clientAbortError(response: HttpServletResponse) = {
-		response.getOutputStream.print("fuuuuuuuuuuuuuuuuu")
+		response.getOutputStream.print("Partial content downlo")
 		throw Class.forName("org.apache.catalina.connector.ClientAbortException").newInstance().asInstanceOf[IOException]
 	}
 }
