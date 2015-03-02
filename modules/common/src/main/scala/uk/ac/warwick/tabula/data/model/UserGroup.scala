@@ -78,9 +78,12 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 			group
 		})
 
-		staticIncludeUsers.clear()
-		// TAB-3343 - force deletions before inserts
-		optionalSession.foreach { _.flush() }
+		if (!staticIncludeUsers.isEmpty()) {
+			staticIncludeUsers.clear()
+			// TAB-3343 - force deletions before inserts
+			optionalSession.foreach { _.flush() }
+		}
+
 		staticIncludeUsers.addAll(newMembers.asJava)
 	}
 
@@ -92,9 +95,13 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 			m.position = Try(member.seatNumber.toInt).toOption
 			m
 		})
-		staticIncludeUsers.clear()
-		// TAB-3343 - force deletions before inserts
-		optionalSession.foreach { _.flush() }
+
+		if (!staticIncludeUsers.isEmpty()) {
+			staticIncludeUsers.clear()
+			// TAB-3343 - force deletions before inserts
+			optionalSession.foreach { _.flush() }
+		}
+
 		staticIncludeUsers.addAll(newMembers.asJava)
 	}
 
