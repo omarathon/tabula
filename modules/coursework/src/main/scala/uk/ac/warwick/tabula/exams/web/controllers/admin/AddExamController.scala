@@ -5,11 +5,12 @@ import javax.validation.Valid
 
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.WebDataBinder
+import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, UpstreamGroup, UpstreamGroupPropertyEditor}
 import uk.ac.warwick.tabula.data.model.{Exam, Module}
-import uk.ac.warwick.tabula.exams.commands.{AddExamCommand, AddExamCommandState}
+import uk.ac.warwick.tabula.exams.commands.{AddExamCommand, AddExamCommandState, ModifiesExamMembership}
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 
@@ -17,7 +18,7 @@ import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 @RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/new"))
 class AddExamController extends ExamsController {
 
-	type AddExamCommand = Appliable[Exam] with AddExamCommandState
+	type AddExamCommand = Appliable[Exam] with AddExamCommandState with ModifiesExamMembership
 
 	validatesSelf[SelfValidating]
 
@@ -27,10 +28,18 @@ class AddExamController extends ExamsController {
 		 @PathVariable("academicYear") academicYear : AcademicYear) = AddExamCommand(mandatory(module), mandatory(academicYear))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@ModelAttribute("command") cmd: AddExamCommand) = Mav("exams/admin/new")
+	def showForm(@ModelAttribute("command") cmd: AddExamCommand) = {
+		cmd.afterBind()
+		Mav("exams/admin/new",
+			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
+			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
+			"assessmentGroups" -> cmd.assessmentGroups)
+	}
+
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid @ModelAttribute("command") cmd: AddExamCommand, errors: Errors) = {
+		cmd.afterBind()
 		if (errors.hasErrors) {
 			showForm(cmd)
 		} else {
@@ -38,4 +47,10 @@ class AddExamController extends ExamsController {
 			Redirect(Routes.admin.module(cmd.module, cmd.academicYear))
 		}
 	}
+
+	@InitBinder
+	def upstreamGroupBinder(binder: WebDataBinder) {
+		binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
+	}
+
 }

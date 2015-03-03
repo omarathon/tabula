@@ -3,11 +3,14 @@ package uk.ac.warwick.tabula.exams.commands
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Exam, Module}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
+import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConverters._
 
 object AddExamCommand  {
 	def apply(module: Module, academicYear: AcademicYear) =
@@ -17,24 +20,41 @@ object AddExamCommand  {
 			with AddExamCommandState
 			with AddExamCommandDescription
 			with ExamValidation
+			with UpdatesStudentMembership
 			with AutowiringAssessmentServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
+			with HasAcademicYear
+			with AutowiringUserLookupComponent
+			with SpecifiesGroupType
+			with ModifiesExamMembership {
 
+		}
 }
 
-class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear) extends CommandInternal[Exam] with AddExamCommandState {
+class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
+	extends CommandInternal[Exam]
+	with AddExamCommandState
+	with UpdatesStudentMembership
+	with ModifiesExamMembership {
 
-	self: AssessmentServiceComponent =>
+	self: AssessmentServiceComponent with UserLookupComponent  with HasAcademicYear with SpecifiesGroupType
+	with AssessmentMembershipServiceComponent =>
 
 	override def applyInternal() = {
 		val exam = new Exam
 		exam.name = name
 		exam.module = module
 		exam.academicYear = academicYear
+
+		exam.assessmentGroups.clear()
+		exam.assessmentGroups.addAll(assessmentGroups)
+		for (group <- exam.assessmentGroups if group.exam == null) {
+			group.exam = exam
+		}
 		assessmentService.save(exam)
 		exam
 	}
 }
-
 
 trait AddExamPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
@@ -47,8 +67,10 @@ trait AddExamPermissions extends RequiresPermissionsChecking with PermissionsChe
 }
 
 trait ExamState {
+	val updateStudentMembershipGroupIsUniversityIds:Boolean=false
 	// bind variables
 	var name: String = _
+	def exam: Exam = null
 }
 
 trait AddExamCommandState extends ExamState {
@@ -75,4 +97,25 @@ trait ExamValidation extends SelfValidating {
 		}
 	}
 
+}
+
+trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGroupType {
+	self: ExamState with HasAcademicYear with UserLookupComponent with AssessmentMembershipServiceComponent =>
+
+	// start complicated membership stuff
+
+	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroup]] = Option(exam).map { _.upstreamAssessmentGroups }
+	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = None //Option(exam).map { _.members }
+
+	def updateAssessmentGroups() {
+		assessmentGroups = upstreamGroups.asScala.flatMap ( ug => {
+			val template = new AssessmentGroup
+			template.assessmentComponent = ug.assessmentComponent
+			template.occurrence = ug.occurrence
+			template.exam = exam
+			assessmentMembershipService.getAssessmentGroup(template) orElse Some(template)
+		}).distinct.asJava
+	}
+
+	// end of complicated membership stuff
 }

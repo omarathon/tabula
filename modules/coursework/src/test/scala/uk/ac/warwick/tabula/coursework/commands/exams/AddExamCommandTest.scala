@@ -1,14 +1,21 @@
 package uk.ac.warwick.tabula.coursework.commands.exams
 
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.commands.{HasAcademicYear, SpecifiesGroupType}
 import uk.ac.warwick.tabula.exams.commands.{AddExamCommandInternal, AddExamCommandState, ExamValidation}
-import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent}
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.services._
 
 class AddExamCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends AddExamCommandState with AssessmentServiceComponent {
+	trait CommandTestSupport extends AddExamCommandState with AssessmentServiceComponent
+		with UserLookupComponent
+		with HasAcademicYear
+		with SpecifiesGroupType
+		with AssessmentMembershipServiceComponent {
 		val assessmentService = mock[AssessmentService]
+		val userLookup = new MockUserLookup
+		var assessmentMembershipService = mock[AssessmentMembershipService]
 	}
 
 	trait Fixture {
