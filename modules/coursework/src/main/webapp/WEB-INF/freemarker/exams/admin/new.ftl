@@ -2,7 +2,7 @@
 
 <#if features.exams>
 
-	<#include "*/sits_groups.ftl" />
+	<#import "*/sits_groups.ftl" as sits_groups />
 
 	<h1>Create exam for <@fmt.module_name module /></h1>
 
@@ -18,7 +18,7 @@
 		<span class="uneditable-value">${academicYear.toString} <span class="hint">(can't be changed)</span></span>
 		</@form.labelled_row>
 
-		<@exams_sits_groups command />
+		<@sits_groups.exams_sits_groups command />
 
 		<div class="submit-buttons form-actions">
 			<input type="submit" value="Create" class="btn btn-primary">
@@ -32,7 +32,7 @@
 <script>
 	jQuery(function ($) {
 
-		$('#newExamForm').submit(function (){
+		$('#newExamForm').on('submit',function (){
 			$('.upstreamGroupsHidden').remove();
 			$('.upstreamGroups:checked').each(function(i,input) {
 				$('<input>', { 'class': 'upstreamGroupsHidden', type: 'hidden', name: 'upstreamGroups['+i+']', value:input.value }).appendTo('#sits-table');

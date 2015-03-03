@@ -13,8 +13,8 @@ import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConverters._
 
 object AddExamCommand  {
-	def apply(module: Module, academicYear: AcademicYear) =
-		new AddExamCommandInternal(module, academicYear)
+	def apply(module: Module, academicYear1: AcademicYear) =
+		new AddExamCommandInternal(module, academicYear1)
 			with ComposableCommand[Exam]
 			with AddExamPermissions
 			with AddExamCommandState
@@ -23,10 +23,12 @@ object AddExamCommand  {
 			with UpdatesStudentMembership
 			with AutowiringAssessmentServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent
-			with CurrentSITSAcademicYear
+			with HasAcademicYear
 			with AutowiringUserLookupComponent
 			with SpecifiesGroupType
 			with ModifiesExamMembership {
+
+			override def academicYear: AcademicYear = academicYear1
 		}
 }
 
@@ -36,7 +38,7 @@ class AddExamCommandInternal(val module: Module, val examAcademicYear: AcademicY
 	with UpdatesStudentMembership
 	with ModifiesExamMembership {
 
-	self: AssessmentServiceComponent with UserLookupComponent  with CurrentSITSAcademicYear with SpecifiesGroupType
+	self: AssessmentServiceComponent with UserLookupComponent  with HasAcademicYear with SpecifiesGroupType
 	with AssessmentMembershipServiceComponent =>
 
 	override def applyInternal() = {
@@ -99,16 +101,13 @@ trait ExamValidation extends SelfValidating {
 }
 
 trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGroupType {
-	self: ExamState with CurrentSITSAcademicYear with UserLookupComponent with AssessmentMembershipServiceComponent =>
+	self: ExamState with HasAcademicYear with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
 	// start complicated membership stuff
 
 	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroup]] = Option(exam).map { _.upstreamAssessmentGroups }
 	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = None //Option(exam).map { _.members }
 
-		/**
-	 * Convert Spring-bound upstream group references to an AssessmentGroup buffer
-	 */
 	def updateAssessmentGroups() {
 		assessmentGroups = upstreamGroups.asScala.flatMap ( ug => {
 			val template = new AssessmentGroup
