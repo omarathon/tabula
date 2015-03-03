@@ -68,11 +68,11 @@
 		</script>
 
 	<#else>
-		<p>There are no items of feedback that can be adjusted.</p>
+		<p>There are no marks that can be adjusted.</p>
 	</#if>
 
 	<#if noFeedbackStudentInfo?size gt 0>
-		<p><@fmt.p noFeedbackStudentInfo?size "student does" "students do" /> not have feedback you can adjust. You can only adjust feedback once marking is completed.</p>
+		<p><@fmt.p noFeedbackStudentInfo?size "student does" "students do" /> not have marks you can adjust. You can only adjust marks once marking is completed.</p>
 
 		<table class="students table table-bordered table-striped tabula-greenLight">
 			<thead>
