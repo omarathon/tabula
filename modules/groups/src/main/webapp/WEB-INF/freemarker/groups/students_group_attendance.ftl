@@ -30,7 +30,9 @@
 										</div>
 									</th>
 								</#list>
-								<th class="sortable"></th>
+								<th class="sortable">
+									<i title="Missed events" class="icon-remove icon-fixed-width unauthorised"></i>
+								</th>
 							</tr>
 						</thead>
 						<tbody>
