@@ -13,8 +13,8 @@ import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConverters._
 
 object AddExamCommand  {
-	def apply(module: Module, academicYear1: AcademicYear) =
-		new AddExamCommandInternal(module, academicYear1)
+	def apply(module: Module, academicYear: AcademicYear) =
+		new AddExamCommandInternal(module, academicYear)
 			with ComposableCommand[Exam]
 			with AddExamPermissions
 			with AddExamCommandState
@@ -28,11 +28,10 @@ object AddExamCommand  {
 			with SpecifiesGroupType
 			with ModifiesExamMembership {
 
-			override def academicYear: AcademicYear = academicYear1
 		}
 }
 
-class AddExamCommandInternal(val module: Module, val examAcademicYear: AcademicYear)
+class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
 	extends CommandInternal[Exam]
 	with AddExamCommandState
 	with UpdatesStudentMembership
@@ -45,7 +44,7 @@ class AddExamCommandInternal(val module: Module, val examAcademicYear: AcademicY
 		val exam = new Exam
 		exam.name = name
 		exam.module = module
-		exam.academicYear = examAcademicYear
+		exam.academicYear = academicYear
 
 		exam.assessmentGroups.clear()
 		exam.assessmentGroups.addAll(assessmentGroups)
@@ -76,7 +75,7 @@ trait ExamState {
 
 trait AddExamCommandState extends ExamState {
 	def module: Module
-	def examAcademicYear: AcademicYear
+	def academicYear: AcademicYear
 }
 
 trait AddExamCommandDescription extends Describable[Exam] {

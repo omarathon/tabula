@@ -5,14 +5,14 @@ import javax.validation.Valid
 
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
+import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.{UpstreamGroupPropertyEditor, UpstreamGroup, Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, UpstreamGroup, UpstreamGroupPropertyEditor}
 import uk.ac.warwick.tabula.data.model.{Exam, Module}
 import uk.ac.warwick.tabula.exams.commands.{AddExamCommand, AddExamCommandState, ModifiesExamMembership}
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
-import org.springframework.web.bind.WebDataBinder
 
 @Controller
 @RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/new"))
@@ -44,7 +44,7 @@ class AddExamController extends ExamsController {
 			showForm(cmd)
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin.module(cmd.module, cmd.examAcademicYear))
+			Redirect(Routes.admin.module(cmd.module, cmd.academicYear))
 		}
 	}
 
