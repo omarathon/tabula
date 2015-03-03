@@ -15,13 +15,15 @@
 	</#if>
 
 	<@spring.bind path="markerFeedback">
-		<@form.errors path="markerFeedback" />
+		<@f.errors path="markerFeedback" class="alert-error"/>
 		<#assign markerFeedback = status.actualValue />
 		<p>
 			<strong>Feedback for <@fmt.p markingUncompletedCommand.markerFeedback?size "submission" /></strong> will be rejected and returned to the ${previousStageRole}.
 		</p>
 		<#list markerFeedback as mf>
-			<input type="hidden" name="markerFeedback" value="${mf.id}" />
+			<#if mf??>
+				<input type="hidden" name="markerFeedback" value="${mf.id}" />
+			</#if>
 		</#list>
 	</@spring.bind>
 
