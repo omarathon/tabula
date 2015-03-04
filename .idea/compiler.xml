@@ -41,7 +41,6 @@
         <module name="attendance" />
         <module name="common" />
         <module name="courses" />
-        <module name="functional-test" />
         <module name="groups" />
         <module name="profiles" />
         <module name="scheduling" />
@@ -64,3 +63,4 @@
     </bytecodeTargetLevel>
   </component>
 </project>
+

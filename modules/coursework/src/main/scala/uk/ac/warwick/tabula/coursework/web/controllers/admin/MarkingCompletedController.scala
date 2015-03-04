@@ -42,7 +42,7 @@ class MarkingCompletedController extends CourseworkController {
 
 	// shouldn't ever be called as a GET - if it is, just redirect back to the submission list
 	@RequestMapping(method = Array(GET))
-	def get(@PathVariable assignment: Assignment, form: MarkingCompletedCommand) = RedirectBack(assignment, form)
+	def get(@PathVariable assignment: Assignment, @ModelAttribute("markingCompletedCommand") form: MarkingCompletedCommand) = RedirectBack(assignment, form)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
 	def showForm(
