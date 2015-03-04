@@ -48,7 +48,7 @@
 			</#if>
 		</#list>
 	</#local>
-	<i class="use-popover icon-fixed-width ${class}" data-content="${renderedTitle}" data-html="true"></i>
+	<i class="use-popover icon-fixed-width ${class}" data-content="${renderedTitle?replace('\"', '')}" data-html="true"></i>
 </#macro>
 
 <#macro attendanceLabel pointMap point>
