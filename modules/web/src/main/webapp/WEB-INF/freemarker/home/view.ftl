@@ -24,6 +24,13 @@
 			</#if>
 		</li>
 
+		<#if features.exams && canAdmin>
+			<li>
+				<h2><a href="<@url page="/" context="/exams" />">Exam Management</a></h2>
+				<span class="hint">Manage exam marks</span>
+			</li>
+		</#if>
+
 		<#if features.smallGroupTeaching>
 			<li><h2><a href="<@url page="/" context="/groups" />">Small Group Teaching</a></h2>
 				<#if user.staff>
