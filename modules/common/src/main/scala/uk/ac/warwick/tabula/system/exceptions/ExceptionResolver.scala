@@ -112,14 +112,12 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 		catch { case throwable: Throwable => handle(throwable, None, None); throw throwable }
 
 	private def handle(exception: Throwable, request: Option[HttpServletRequest], response: Option[HttpServletResponse]) = {
-		logger.info(s"Handling exception ${exception.getClass.getName} (${exception.getMessage})")
-
 		val token = ExceptionTokens.newToken
 
 		val interestingException = ExceptionUtils.getInterestingThrowable(exception, Array(classOf[ServletException]))
 
-		if (interestingException != null) {
-			logger.info(s"Handling exception ${interestingException.getClass.getName} (${interestingException.getMessage})")
+		if (logger.isDebugEnabled && interestingException != null) {
+			logger.debug(s"Handling exception ${interestingException.getClass.getName} (${interestingException.getMessage})")
 		}
 
 		val mav = Mav(defaultView,

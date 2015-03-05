@@ -18,7 +18,7 @@ class DeleteMarkingWorkflowCommand(val department: Department, val markingWorkfl
 	
 	override def applyInternal() {
 		transactional() {
-			department.markingWorkflows.remove(markingWorkflow)
+			department.removeMarkingWorkflow(markingWorkflow)
 		}
 	}
 	

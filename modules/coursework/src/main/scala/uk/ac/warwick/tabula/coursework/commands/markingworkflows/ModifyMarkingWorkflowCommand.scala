@@ -76,7 +76,7 @@ trait MarkingWorkflowCommandValidation extends SelfValidating {
 
 		rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty")
 
-		if (department.markingWorkflows.asScala.exists(sameName)) {
+		if (department.markingWorkflows.exists(sameName)) {
 			errors.rejectValue("name", "name.duplicate.markingWorkflow", Array(this.name), null)
 		}
 
