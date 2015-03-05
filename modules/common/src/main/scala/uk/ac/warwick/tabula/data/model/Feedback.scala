@@ -152,6 +152,8 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	def adjustmentComments: String = latestAdjustment.map(_.comments).orNull
 	def adjustmentReason: String = latestAdjustment.map(_.reason).orNull
 
+	def latestPrivateAdjustment: Option[Mark] = marks.asScala.headOption
+
 	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
 	@JoinColumn(name = "first_marker_feedback")
 	var firstMarkerFeedback: MarkerFeedback = _

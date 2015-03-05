@@ -150,3 +150,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro uploadExamToSits exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/upload-to-sits"/></#macro>
 <#macro examFeedbackAdjustment exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/feedback/adjustments"/></#macro>
 <#macro examFeedbackAdjustmentForm exam studentid><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/feedback/adjustments/${studentid}"/></#macro>
+<#macro examBulkAdjustment exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/feedback/bulk-adjustment"/></#macro>
+<#macro examBulkAdjustmentTemplate exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/feedback/bulk-adjustment/template"/></#macro>
