@@ -53,10 +53,10 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 		notification.created = new DateTime(2014, DateTimeConstants.NOVEMBER, 15, 9, 18, 27, 0)
 
 		val unrecorded = Seq(
-			new User("cuscav")
+			Fixtures.student(userId = "cuscav")
 		)
 
-		notification.attendanceMonitoringService.findUnrecordedUsers(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns (unrecorded)
+		notification.attendanceMonitoringService.findUnrecordedStudents(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns (unrecorded)
 
 		notification.title should be ("1 student needs monitoring points recording")
 	}
@@ -69,10 +69,10 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 
 		val scheme = new AttendanceMonitoringScheme
 		val unrecorded = Seq(
-			new User("cuscav"), new User("cusebr")
+			Fixtures.student(userId = "cuscav"), Fixtures.student(userId = "cusebr")
 		)
 
-		notification.attendanceMonitoringService.findUnrecordedUsers(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns (unrecorded)
+		notification.attendanceMonitoringService.findUnrecordedStudents(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns (unrecorded)
 
 		notification.title should be ("2 students need monitoring points recording")
 	}

@@ -86,7 +86,7 @@ class AttendanceMonitoringUnrecordedStudentsNotification
 	override final def urlTitle = "record attendance for these students"
 
 	override def title = {
-		val studentsCount = unrecordedUsers.size
+		val studentsCount = unrecordedStudents.size
 
 		s"$studentsCount ${if (studentsCount == 1) "student needs" else "students need"} monitoring points recording"
 	}
@@ -94,20 +94,21 @@ class AttendanceMonitoringUnrecordedStudentsNotification
 	final def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/attendancemonitoring/attendance_monitoring_unrecorded_students_notification.ftl"
 
 	@transient
-	final lazy val unrecordedUsers = {
-		attendanceMonitoringService.findUnrecordedUsers(department, academicYear, referenceDate.toLocalDate).sortBy(u => (u.getLastName, u.getFirstName))
+	final lazy val unrecordedStudents = {
+		attendanceMonitoringService.findUnrecordedStudents(department, academicYear, referenceDate.toLocalDate)
+			.sortBy(u => (u.lastName, u.firstName))
 	}
 
 	override def content: FreemarkerModel = FreemarkerModel(FreemarkerTemplate, Map(
 		"department" -> department,
 		"academicYear" -> academicYear,
-		"users" -> unrecordedUsers,
-		"truncatedUsers" -> unrecordedUsers.slice(0, 10)
+		"students" -> unrecordedStudents,
+		"truncatedStudents" -> unrecordedStudents.slice(0, 10)
 	))
 
 	@transient
 	override def recipients: Seq[User] =
-		if (unrecordedUsers.size > 0) {
+		if (unrecordedStudents.size > 0) {
 			// department.owners is not populated correctly if department not fetched directly
 			moduleAndDepartmentService.getDepartmentById(department.id).get.owners.users
 		} else {

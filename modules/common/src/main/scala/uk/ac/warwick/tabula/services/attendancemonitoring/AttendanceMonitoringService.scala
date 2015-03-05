@@ -94,7 +94,7 @@ trait AttendanceMonitoringService {
 	def getCheckpointTotals(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal]
 	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
-	def findUnrecordedUsers(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[User]
+	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[StudentMember]
 }
 
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService with TaskBenchmarking {
@@ -223,7 +223,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 			val beginDate = beginDates.min
 			val schemes = findSchemesForStudent(student.universityId, student.userId, departmentOption, academicYear)
 			schemes.flatMap(_.points.asScala).filter(p =>
-				p.endDate.isAfter(beginDate)
+				p.applies(beginDate)
 			)
 		} else {
 			Seq()
@@ -233,7 +233,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def listStudentsPoints(studentData: AttendanceMonitoringStudentData, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
 		val schemes = findSchemesForStudent(studentData.universityId, studentData.userId, Option(department), academicYear)
 		schemes.flatMap(_.points.asScala).filter(p =>
-			p.endDate.isAfter(studentData.scdBeginDate)
+			p.applies(studentData.scdBeginDate)
 		)
 	}
 
@@ -402,8 +402,8 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint] =
 		attendanceMonitoringDao.findUnrecordedPoints(department, academicYear, endDate)
 
-	def findUnrecordedUsers(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[User] =
-		attendanceMonitoringDao.findUnrecordedUsers(department, academicYear, endDate)
+	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[StudentMember] =
+		attendanceMonitoringDao.findUnrecordedStudents(department, academicYear, endDate)
 }
 
 trait AttendanceMonitoringMembershipHelpers {

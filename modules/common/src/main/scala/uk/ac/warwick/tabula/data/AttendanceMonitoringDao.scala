@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.services.TermService
-import uk.ac.warwick.userlookup.User
 
 abstract class SchemeMembershipItemType(val value: String)
 case object SchemeMembershipStaticType extends SchemeMembershipItemType("static")
@@ -107,7 +106,7 @@ trait AttendanceMonitoringDao {
 	def getCheckpointTotals(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal]
 	def getAllCheckpointTotals(department: Department): Seq[AttendanceMonitoringCheckpointTotal]
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
-	def findUnrecordedUsers(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[User]
+	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[StudentMember]
 }
 
 
@@ -495,7 +494,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 		}
 	}
 
-	def findUnrecordedUsers(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[User] = {
+	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[StudentMember] = {
 		val relevantPoints = session.newCriteria[AttendanceMonitoringPoint]
 			.createAlias("scheme", "scheme")
 			.add(is("scheme.department", department))
@@ -510,12 +509,17 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 				.add(safeIn("point", relevantPoints))
 				.seq.groupBy(_.point).withDefaultValue(Seq())
 
-			relevantPoints.flatMap(point => {
-				// every user that should have a checkpoint for this point
-				val users = point.scheme.members.users
+			relevantPoints.filterNot { _.scheme.members.isEmpty }.flatMap(point => {
+				// every student that should have a checkpoint for this point
+				val students = session.newCriteria[StudentMember]
+					.add(safeIn("universityId", point.scheme.members.members))
+					.seq
+
 				// filter to users that don't have a checkpoint for this point
-				users.filter(user =>
-					!checkpointsByPoint(point).exists(_.student.universityId == user.getWarwickId)
+				students.filter(student =>
+					!checkpointsByPoint(point).exists(_.student.universityId == student.universityId)
+				).filter(student =>
+					point.applies(student)
 				)
 			}).distinct
 		}
