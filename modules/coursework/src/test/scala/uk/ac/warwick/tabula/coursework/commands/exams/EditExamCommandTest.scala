@@ -1,13 +1,21 @@
 package uk.ac.warwick.tabula.coursework.commands.exams
 
+import uk.ac.warwick.tabula.commands.{HasAcademicYear, SpecifiesGroupType}
 import uk.ac.warwick.tabula.exams.commands._
-import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class EditExamCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends EditExamCommandState with AssessmentServiceComponent {
-		val assessmentService = mock[AssessmentService]
+	trait CommandTestSupport extends EditExamCommandState
+		with AssessmentServiceComponent
+		with UserLookupComponent
+		with HasAcademicYear
+		with SpecifiesGroupType
+		with AssessmentMembershipServiceComponent {
+			val assessmentService = mock[AssessmentService]
+			val assessmentMembershipService = mock[AssessmentMembershipService]
+			val userLookup = mock[UserLookupService]
 	}
 
 	trait Fixture {

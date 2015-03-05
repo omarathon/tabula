@@ -102,10 +102,8 @@ trait ExamValidation extends SelfValidating {
 trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGroupType {
 	self: ExamState with HasAcademicYear with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
-	// start complicated membership stuff
-
 	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroup]] = Option(exam).map { _.upstreamAssessmentGroups }
-	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = None //Option(exam).map { _.members }
+	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = None
 
 	def updateAssessmentGroups() {
 		assessmentGroups = upstreamGroups.asScala.flatMap ( ug => {
@@ -117,5 +115,5 @@ trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGrou
 		}).distinct.asJava
 	}
 
-	// end of complicated membership stuff
+
 }

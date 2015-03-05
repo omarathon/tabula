@@ -22,7 +22,7 @@
 
 		<div class="submit-buttons form-actions">
 			<input type="submit" value="Create" class="btn btn-primary">
-			<a class="btn" href="<@routes.depthome module=module />">Cancel</a>
+			<a class="btn" href="<@routes.departmentHomeWithYear module=module academicYear=academicYear />">Cancel</a>
 		</div>
 	</@f.form>
 
