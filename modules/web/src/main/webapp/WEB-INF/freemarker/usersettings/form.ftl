@@ -90,6 +90,11 @@
 				<@f.checkbox path="smallGroupEventAttendanceReminderEnabled" />
 				Small group attendance
 			</@form.label>
+
+			<@form.label checkbox=true clazz="radio-aligned">
+				<@f.checkbox path="finaliseFeedbackNotificationEnabled" />
+				Coursework marking workflow "send to administrator"
+			</@form.label>
 		</@form.field>
 	</@form.row>
 
