@@ -91,6 +91,18 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 		mav.toModel("latePenalty") should be (3)
 	}}
 
+	@Test def openEndedNoProposedPenalty() { new PGStudentFixture {
+		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)
+		assignment.openEnded = true
+
+		val mav = controller.showForm(command, assignment, thisStudent)
+		mav.viewName should be ("admin/assignments/feedback/adjustments")
+		mav.toModel("daysLate") should be (Some(0))
+		mav.toModel("marksSubtracted") should be (Some(0))
+		mav.toModel("proposedAdjustment") should be (None)
+		mav.toModel("latePenalty") should be (3)
+	}}
+
 	@Test def foundationCoursePenalty() { new FoundationStudentFixture {
 		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)

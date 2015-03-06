@@ -169,6 +169,9 @@ object MarkingWorkflow {
 		val studentsGroup = markerMap.find{case(markerUserId, group) => group.includesUser(student)}
 		studentsGroup.map{ case (markerUserId, _) => markerUserId }
 	}
+
+	implicit val defaultOrdering = Ordering.by { workflow: MarkingWorkflow => workflow.name }
+
 }
 
 trait AssignmentMarkerMap {

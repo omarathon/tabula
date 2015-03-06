@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Describable, Description, SelfValidating}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.UserSettings
+import uk.ac.warwick.tabula.data.model.notifications.coursework.FinaliseFeedbackNotificationSettings
 import uk.ac.warwick.tabula.data.model.notifications.groups.reminders.SmallGroupEventAttendanceReminderNotificationSettings
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -33,6 +34,9 @@ class UserSettingsCommand(val user: CurrentUser, val settings: UserSettings) ext
 
 	lazy val smallGroupEventAttendanceReminderSettings = new SmallGroupEventAttendanceReminderNotificationSettings(settings.notificationSettings("SmallGroupEventAttendanceReminder"))
 	var smallGroupEventAttendanceReminderEnabled = smallGroupEventAttendanceReminderSettings.enabled.value
+
+	lazy val finaliseFeedbackNotificationSettings = new FinaliseFeedbackNotificationSettings(settings.notificationSettings("FinaliseFeedback"))
+	var finaliseFeedbackNotificationEnabled = finaliseFeedbackNotificationSettings.enabled.value
 		
 	override def applyInternal() = transactional() {
 		settings.alertsSubmission = alertsSubmission
@@ -40,6 +44,7 @@ class UserSettingsCommand(val user: CurrentUser, val settings: UserSettings) ext
 		settings.bulkEmailSeparator = bulkEmailSeparator
 		settings.profilesDefaultView = profilesDefaultView
 		smallGroupEventAttendanceReminderSettings.enabled.value = smallGroupEventAttendanceReminderEnabled
+		finaliseFeedbackNotificationSettings.enabled.value = finaliseFeedbackNotificationEnabled
 
 		userSettingsService.save(user, settings)
 		settings

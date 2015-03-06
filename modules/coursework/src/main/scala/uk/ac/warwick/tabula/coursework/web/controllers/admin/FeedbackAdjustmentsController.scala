@@ -81,8 +81,13 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 		val latePenaltyPerDay = FeedbackAdjustmentsController.LatePenaltyPerDay(courseType.getOrElse(CourseType.UG))
 		val marksSubtracted = daysLate.map(latePenaltyPerDay * _)
 
-		val proposedAdjustment = for(am <- command.feedback.actualMark; ms <- marksSubtracted)
-			yield Math.max(0, am - ms)
+		val proposedAdjustment = {
+			if (assignment.openEnded) None
+			else {
+				for(am <- command.feedback.actualMark; ms <- marksSubtracted)
+				yield Math.max(0, am - ms)
+			}
+		}
 
 		Mav("admin/assignments/feedback/adjustments", Map(
 			"daysLate" -> daysLate,
