@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands.exams
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.{HasAcademicYear, SpecifiesGroupType}
+import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.exams.commands.{AddExamCommandInternal, ExamState, ExamValidation}
 import uk.ac.warwick.tabula.services._
 
@@ -29,8 +30,6 @@ class AddExamCommandTest extends TestBase with Mockito {
 
 			override val service = mock[AssessmentService]
 		}
-
-		validator.service.getExamByNameYearModule("exam1", academicYear ,module) returns Seq(Fixtures.exam("exam1"))
 	}
 
 	@Test def apply { new Fixture {
@@ -74,23 +73,15 @@ class AddExamCommandTest extends TestBase with Mockito {
 
 		validator.service.getExamByNameYearModule(name, academicYear ,module) returns Seq(Fixtures.exam(name))
 
+		there was one(validator.service).getExamByNameYearModule(name, academicYear ,module)
+		there was atMostOne(validator.service).getExamByNameYearModule(any[String], any[AcademicYear] ,any[Module])
+
 		val errors = new BindException(validator, "command")
 		validator.validate(errors)
 
 		errors.getErrorCount should be (1)
+		errors.getFieldErrorCount("name") should be (1)
 	}}
 
-	@Test def dontRejectIfDuplicateNameInDifferentAcademicYear { new Fixture {
 
-		def name = "exam1"
-		validator.name = name
-
-		validator.service.getExamByNameYearModule(name, academicYear ,module) returns Seq()
-
-		val errors = new BindException(validator, "command")
-		validator.validate(errors)
-
-		errors.getErrorCount should be (0)
-
-	}}
 }
