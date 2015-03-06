@@ -45,7 +45,7 @@ class BulkAdjustmentController extends ExamsController {
 		@Valid @ModelAttribute("command") cmd: Appliable[Seq[Mark]], errors: Errors,
 		@PathVariable exam: Exam
 	) = {
-		if (errors.hasFieldErrors("defaultReason") || errors.hasFieldErrors("defaultComments")) {
+		if (errors.hasFieldErrors("defaultReason") || errors.hasFieldErrors("defaultComment")) {
 			upload(cmd, errors)
 		} else {
 			cmd.apply()

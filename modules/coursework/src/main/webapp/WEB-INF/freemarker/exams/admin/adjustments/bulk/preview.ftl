@@ -44,6 +44,11 @@
 			<input type="hidden" name="comments[${universityId}]" value="${command.comments[universityId]!""}" />
 		</#list>
 
+		<@form.labelled_row "privateAdjustment" "Hide from student">
+			<@f.checkbox path="privateAdjustment" />
+			<@fmt.help_popover id="privateAdjustmentHelp" title="Hide from student" content="If checked these adjustments will not be visible to students" />
+		</@form.labelled_row>
+
 		<#if command.requiresDefaultReason || command.requiresDefaultComments>
 			<p>Some of the adjustments do not have a reason or comment. You need to provide them:</p>
 

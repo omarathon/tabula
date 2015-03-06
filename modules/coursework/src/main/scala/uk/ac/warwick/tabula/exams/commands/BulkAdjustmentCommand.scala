@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.MarkType.PrivateAdjustment
+import uk.ac.warwick.tabula.data.model.MarkType.{Adjustment, PrivateAdjustment}
 import uk.ac.warwick.tabula.data.model.{Assessment, FileAttachment, Mark}
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -52,7 +52,10 @@ class BulkAdjustmentCommandInternal(val assessment: Assessment, val gradeGenerat
 				val feedback = feedbackMap(universityId)
 				val mark = feedback.addMark(
 					user.apparentUser.getUserId,
-					PrivateAdjustment,
+					privateAdjustment match {
+						case true => PrivateAdjustment
+						case false => Adjustment
+					},
 					marks.asScala(universityId).toInt,
 					grades.asScala.get(universityId),
 					reasons.asScala.get(universityId) match {
@@ -215,6 +218,7 @@ trait BulkAdjustmentCommandState {
 	var reasons: JMap[UniversityId, String] = JHashMap()
 	var comments: JMap[UniversityId, String] = JHashMap()
 
+	var privateAdjustment = true
 	var defaultReason: String = _
 	var defaultComment: String = _
 
