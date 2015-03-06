@@ -129,6 +129,8 @@ class AbstractIndexServiceTest extends TestBase {
 		protected def toDocuments(item: Item): Seq[Document] = {
 			val doc = new Document()
 			doc.add( plainStringField(IdField, item.name ) )
+			doc.add( docValuesStringField(IdField, item.name ) )
+
 			doc.add( dateField(UpdatedDateField, item.date) )
 			doc.add( docValuesField(UpdatedDateField, item.date.getMillis) )
 			Seq(doc)
