@@ -62,8 +62,8 @@ trait EditExamPermissions extends RequiresPermissionsChecking with PermissionsCh
 trait EditExamCommandState extends ExamState {
 
 	def exam: Exam
-	def module: Module = exam.module
-	def academicYear: AcademicYear = exam.academicYear
+	override def module: Module = exam.module
+	override def academicYear: AcademicYear = exam.academicYear
 }
 
 trait EditExamCommandDescription extends Describable[Exam] {

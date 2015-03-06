@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.exams.commands
 
 import org.springframework.validation.Errors
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
@@ -17,7 +18,7 @@ object AddExamCommand  {
 		new AddExamCommandInternal(module, academicYear)
 			with ComposableCommand[Exam]
 			with AddExamPermissions
-			with AddExamCommandState
+			with ExamState
 			with AddExamCommandDescription
 			with ExamValidation
 			with UpdatesStudentMembership
@@ -28,12 +29,13 @@ object AddExamCommand  {
 			with SpecifiesGroupType
 			with ModifiesExamMembership {
 
+
 		}
 }
 
 class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
 	extends CommandInternal[Exam]
-	with AddExamCommandState
+	with ExamState
 	with UpdatesStudentMembership
 	with ModifiesExamMembership {
 
@@ -58,7 +60,7 @@ class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
 
 trait AddExamPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: AddExamCommandState =>
+	self: ExamState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.Assignment.Create, module)
@@ -71,15 +73,13 @@ trait ExamState {
 	// bind variables
 	var name: String = _
 	def exam: Exam = null
-}
-
-trait AddExamCommandState extends ExamState {
 	def module: Module
 	def academicYear: AcademicYear
 }
 
+
 trait AddExamCommandDescription extends Describable[Exam] {
-	self: AddExamCommandState =>
+	self: ExamState =>
 
 	def describe(d: Description) {
 		d.module(module)
@@ -90,13 +90,19 @@ trait ExamValidation extends SelfValidating {
 
 	self: ExamState =>
 
+	def service = Wire.auto[AssessmentService]
+
 	override def validate(errors: Errors) {
 
 		if (!name.hasText) {
 			errors.rejectValue("name", "exam.name.empty")
+		} else {
+			val duplicates = service.getExamByNameYearModule(name, academicYear, module).filterNot { existing => existing eq exam }
+			for (duplicate <- duplicates.headOption) {
+				errors.rejectValue("name", "name.duplicate.exam", Array(name), "")
+			}
 		}
 	}
-
 }
 
 trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGroupType {

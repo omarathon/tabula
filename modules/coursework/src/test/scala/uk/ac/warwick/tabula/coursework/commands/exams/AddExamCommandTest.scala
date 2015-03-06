@@ -3,12 +3,12 @@ package uk.ac.warwick.tabula.coursework.commands.exams
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.{HasAcademicYear, SpecifiesGroupType}
-import uk.ac.warwick.tabula.exams.commands.{AddExamCommandInternal, AddExamCommandState, ExamValidation}
+import uk.ac.warwick.tabula.exams.commands.{AddExamCommandInternal, ExamState, ExamValidation}
 import uk.ac.warwick.tabula.services._
 
 class AddExamCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends AddExamCommandState with AssessmentServiceComponent
+	trait CommandTestSupport extends ExamState with AssessmentServiceComponent
 		with UserLookupComponent
 		with HasAcademicYear
 		with SpecifiesGroupType
@@ -23,11 +23,14 @@ class AddExamCommandTest extends TestBase with Mockito {
 		val academicYear = new AcademicYear(2014)
 		val command = new AddExamCommandInternal(module, academicYear) with CommandTestSupport
 
-		val validator = new ExamValidation with AddExamCommandState {
+		val validator = new ExamValidation with ExamState {
 			def module = command.module
 			def academicYear = command.academicYear
+
+			override val service = mock[AssessmentService]
 		}
 
+		validator.service.getExamByNameYearModule("exam1", academicYear ,module) returns Seq(Fixtures.exam("exam1"))
 	}
 
 	@Test def apply { new Fixture {
@@ -53,11 +56,41 @@ class AddExamCommandTest extends TestBase with Mockito {
 
 	@Test def validateValid { new Fixture {
 
-		validator.name = "ab123"
+		def name = "ab123"
+		validator.name = name
+
+		validator.service.getExamByNameYearModule(name, academicYear ,module) returns Seq()
 
 		val errors = new BindException(validator, "command")
 		validator.validate(errors)
 
 		errors.getErrorCount should be (0)
+	}}
+
+	@Test def rejectIfDuplicateName { new Fixture {
+
+		def name = "exam1"
+		validator.name = name
+
+		validator.service.getExamByNameYearModule(name, academicYear ,module) returns Seq(Fixtures.exam(name))
+
+		val errors = new BindException(validator, "command")
+		validator.validate(errors)
+
+		errors.getErrorCount should be (1)
+	}}
+
+	@Test def dontRejectIfDuplicateNameInDifferentAcademicYear { new Fixture {
+
+		def name = "exam1"
+		validator.name = name
+
+		validator.service.getExamByNameYearModule(name, academicYear ,module) returns Seq()
+
+		val errors = new BindException(validator, "command")
+		validator.validate(errors)
+
+		errors.getErrorCount should be (0)
+
 	}}
 }

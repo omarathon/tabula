@@ -6,8 +6,8 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.forms.FormField
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.FormField
 
 trait AssessmentDaoComponent {
 	val assessmentDao: AssessmentDao
@@ -32,6 +32,8 @@ trait AssessmentDao {
 	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
+
+	def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam]
 
 	def getAssignments(department: Department, year: AcademicYear): Seq[Assignment]
 
@@ -86,6 +88,13 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module) =
 		session.newQuery[Assignment]("from Assignment where name=:name and academicYear=:year and module=:module and deleted=0")
+			.setString("name", name)
+			.setParameter("year", year)
+			.setEntity("module", module)
+			.seq
+
+	def getExamByNameYearModule(name: String, year: AcademicYear, module: Module) =
+		session.newQuery[Exam]("from Exam where name=:name and academicYear=:year and module=:module")
 			.setString("name", name)
 			.setParameter("year", year)
 			.setEntity("module", module)

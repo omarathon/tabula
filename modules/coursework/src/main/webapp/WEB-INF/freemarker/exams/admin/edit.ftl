@@ -3,9 +3,6 @@
 
 	<#import "*/sits_groups.ftl" as sits_groups />
 
-	<#if errors??>${errors.errorCount}${errors}</#if>
-
-
 	<h1>Edit exam for <@fmt.module_name exam.module /></h1>
 
 	<#assign updateExamUrl><@routes.editExam exam /></#assign>

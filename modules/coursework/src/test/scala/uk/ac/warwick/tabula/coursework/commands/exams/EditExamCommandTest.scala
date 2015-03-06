@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.exams
 
+import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.{HasAcademicYear, SpecifiesGroupType}
 import uk.ac.warwick.tabula.exams.commands._
 import uk.ac.warwick.tabula.services._
@@ -29,6 +30,7 @@ class EditExamCommandTest extends TestBase with Mockito {
 
 		val validator = new ExamValidation with EditExamCommandState {
 				override def exam = command.exam
+				override val service = mock[AssessmentService]
 		}
 	}
 
@@ -42,5 +44,32 @@ class EditExamCommandTest extends TestBase with Mockito {
 		examSaved.academicYear.getStoreValue should be(2014)
 
 		there was one (command.assessmentService).save(exam)
+	}}
+
+	@Test def rejectIfDuplicateName { new Fixture {
+
+		def name = "exam1"
+		validator.name = name
+
+		validator.service.getExamByNameYearModule(name, academicYear ,module) returns Seq(Fixtures.exam(name))
+
+		val errors = new BindException(validator, "command")
+		validator.validate(errors)
+
+		errors.getErrorCount should be (1)
+	}}
+
+	@Test def dontRejectIfDuplicateNameInDifferentAcademicYear { new Fixture {
+
+		def name = "exam1"
+		validator.name = name
+
+		validator.service.getExamByNameYearModule(name, academicYear ,module) returns Seq()
+
+		val errors = new BindException(validator, "command")
+		validator.validate(errors)
+
+		errors.getErrorCount should be (0)
+
 	}}
 }
