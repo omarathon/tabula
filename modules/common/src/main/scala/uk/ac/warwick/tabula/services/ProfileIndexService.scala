@@ -203,6 +203,9 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		}
 
 		doc add dateField(UpdatedDateField, item.lastUpdatedDate)
+		// Index date as a DocValue so we can do efficient sorts on it.
+		doc add docValuesField(UpdatedDateField, item.lastUpdatedDate.getMillis)
+
 		Seq(doc)
 	}
 

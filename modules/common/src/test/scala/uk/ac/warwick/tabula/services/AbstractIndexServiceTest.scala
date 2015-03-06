@@ -130,6 +130,7 @@ class AbstractIndexServiceTest extends TestBase {
 			val doc = new Document()
 			doc.add( plainStringField(IdField, item.name ) )
 			doc.add( dateField(UpdatedDateField, item.date) )
+			doc.add( docValuesField(UpdatedDateField, item.date.getMillis) )
 			Seq(doc)
 		}
 
