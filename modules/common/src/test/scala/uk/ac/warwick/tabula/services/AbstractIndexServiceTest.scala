@@ -108,7 +108,7 @@ class AbstractIndexServiceTest extends TestBase {
 		val MaxBatchSize: Int = 1000
 		val IncrementalBatchSize: Int = 1000
 
-		val analyzer: Analyzer = new StandardAnalyzer(IndexService.TabulaLuceneVersion)
+		val analyzer: Analyzer = new StandardAnalyzer
 		val UpdatedDateField: String = "date"
 		val IdField: String = "name"
 

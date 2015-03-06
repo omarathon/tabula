@@ -9,12 +9,10 @@ import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search._
 import org.apache.lucene.store.{Directory, FSDirectory}
-import org.apache.lucene.util.Version
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.springframework.beans.factory.annotation._
 import org.springframework.beans.factory.InitializingBean
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Closeables._
@@ -26,7 +24,6 @@ import java.util.concurrent.TimeUnit
 import org.springframework.beans.factory.DisposableBean
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.util.queue.Queue
 import language.implicitConversions
 
 trait CommonQueryMethods[A] extends TaskBenchmarking { self: AbstractIndexService[A] =>
@@ -87,13 +84,6 @@ trait OpensLuceneDirectory {
 	protected def openDirectory(): Directory
 }
 
-object IndexService {
-	final val TabulaLuceneVersion = Version.LUCENE_47
-	final val AuditEventIndexLuceneVersion = TabulaLuceneVersion
-	final val NotificationIndexLuceneVersion = TabulaLuceneVersion
-	final val ProfileIndexLuceneVersion = TabulaLuceneVersion
-}
-
 abstract class AbstractIndexService[A]
 		extends CommonQueryMethods[A]
 			with QueryHelpers[A]
@@ -147,7 +137,7 @@ abstract class AbstractIndexService[A]
 	def guardMultipleIndexes(work: => Unit) = this.synchronized(work)
 
 	// QueryParser isn't thread safe, hence why this is a def
-	def parser = new QueryParser(IndexService.TabulaLuceneVersion, "", analyzer)
+	def parser = new QueryParser("", analyzer)
 
 
 	override def afterPropertiesSet() {
@@ -174,7 +164,7 @@ abstract class AbstractIndexService[A]
 		executor.shutdown()
 	}
 
-	protected override def openDirectory(): Directory = FSDirectory.open(indexPath)
+	protected override def openDirectory(): Directory = FSDirectory.open(indexPath.toPath)
 
 	/**
 	 * Incremental index. Can be run often.
@@ -230,7 +220,7 @@ abstract class AbstractIndexService[A]
 
 	protected def doIndexItems(items: TraversableOnce[A], isIncremental: Boolean) {
 		logger.debug("Writing to the index at " + indexPath + " with analyzer " + indexAnalyzer)
-		val writerConfig = new IndexWriterConfig(IndexService.TabulaLuceneVersion, indexAnalyzer)
+		val writerConfig = new IndexWriterConfig(indexAnalyzer)
 		configureIndexWriter(writerConfig)
 		closeThis(new IndexWriter(openDirectory(), writerConfig)) { writer =>
 			var i = 0

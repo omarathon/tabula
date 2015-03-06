@@ -18,7 +18,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import AuditEventIndexService._
 import org.apache.lucene.index.IndexWriterConfig
-import org.apache.lucene.index.sorter.{NumericDocValuesSorter, Sorter, SortingMergePolicy}
+import org.apache.lucene.index.SortingMergePolicy
 
 object AuditEventIndexService {
 	type PagedAuditEvents = PagingSearchResultItems[AuditEvent]
@@ -302,7 +302,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 
 	override val analyzer = {
 		val token = new KeywordAnalyzer()
-		val whitespace: Analyzer = new WhitespaceAnalyzer(IndexService.AuditEventIndexLuceneVersion)
+		val whitespace: Analyzer = new WhitespaceAnalyzer
 
 		val tokenListMappings = tokenListFields.map(field => field -> whitespace)
 		//val tokenMappings = tokenFields.map(field=> (field -> token))
@@ -326,8 +326,8 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	 * search query can more efficiently look by the same sort
 	 */
 	override def configureIndexWriter(config: IndexWriterConfig) {
-		val sorter: Sorter = new NumericDocValuesSorter(UpdatedDateField, false)
-		val sortingMergePolicy = new SortingMergePolicy(config.getMergePolicy, sorter)
+		val sort: Sort = new Sort(new SortedNumericSortField(UpdatedDateField, SortField.Type.LONG))
+		val sortingMergePolicy = new SortingMergePolicy(config.getMergePolicy, sort)
 		config.setMergePolicy(sortingMergePolicy)
 	}
 

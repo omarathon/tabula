@@ -6,10 +6,9 @@ import org.apache.lucene.queryparser.classic.MultiFieldQueryParser
 import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search.{BooleanQuery, PhraseQuery, Query, TermQuery, WildcardQuery}
 import org.apache.lucene.queryparser.classic.QueryParser.Operator
-import org.apache.lucene.util.Version
 
-class SynonymAwareWildcardMultiFieldQueryParser(matchVersion: Version, fields: Traversable[String], analyzer: Analyzer)
-	extends MultiFieldQueryParser(matchVersion, fields.toArray[String], analyzer) {
+class SynonymAwareWildcardMultiFieldQueryParser(fields: Traversable[String], analyzer: Analyzer)
+	extends MultiFieldQueryParser(fields.toArray[String], analyzer) {
 
 	setDefaultOperator(Operator.AND)
 
@@ -49,7 +48,7 @@ class SynonymAwareWildcardMultiFieldQueryParser(matchVersion: Version, fields: T
 							// This happens with DelimitByCharacterFilter for names with apostrophes
 							// If it starts to happen anywhere else, we may need to review whether this is still the right place to wildcard
 							val clauses = query.getClauses.toSeq
-							if (!clauses.isEmpty) {
+							if (clauses.nonEmpty) {
 								// mutate the last term
 								val lastClause = clauses.last
 								val lastQuery = lastClause.getQuery.asInstanceOf[TermQuery]

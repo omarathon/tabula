@@ -2,13 +2,11 @@ package uk.ac.warwick.tabula.lucene
 
 import uk.ac.warwick.tabula.TestBase
 import org.apache.lucene.analysis.standard.StandardTokenizer
-import java.io.Reader
 import org.apache.lucene.analysis.Analyzer
 import org.apache.lucene.analysis.TokenStream
 import org.apache.lucene.analysis.Analyzer.TokenStreamComponents
 import java.io.StringReader
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
-import uk.ac.warwick.tabula.services.IndexService
 
 class SurnamePunctuationFilterTest extends TestBase {
 	
@@ -44,8 +42,8 @@ class SurnamePunctuationFilterTest extends TestBase {
 
 class SurnamePunctuationFilterAnalyzer extends Analyzer {
 	
-	override def createComponents(fieldName: String, reader: Reader) = {
-		val source = new StandardTokenizer(IndexService.TabulaLuceneVersion, reader)
+	override def createComponents(fieldName: String) = {
+		val source = new StandardTokenizer
 		val result: TokenStream = new SurnamePunctuationFilter(source)
 		
 		new TokenStreamComponents(source, result)
