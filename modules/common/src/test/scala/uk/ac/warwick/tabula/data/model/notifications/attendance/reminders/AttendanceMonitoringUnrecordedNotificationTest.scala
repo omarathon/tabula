@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.attendance.reminders
 
 import org.joda.time.{DateTime, DateTimeConstants}
+import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.services.TermServiceImpl
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
@@ -53,7 +54,13 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 		notification.created = new DateTime(2014, DateTimeConstants.NOVEMBER, 15, 9, 18, 27, 0)
 
 		val unrecorded = Seq(
-			Fixtures.student(userId = "cuscav")
+			AttendanceMonitoringStudentData(
+				firstName = "Mat",
+				lastName = "Mannion",
+				universityId = "0672089",
+				userId = "cuscav",
+				scdBeginDate = DateTime.now.minusYears(2).toLocalDate
+			)
 		)
 
 		notification.attendanceMonitoringService.findUnrecordedStudents(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns (unrecorded)
@@ -67,9 +74,21 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 		notification.termService = new TermServiceImpl
 		notification.created = new DateTime(2014, DateTimeConstants.NOVEMBER, 15, 9, 18, 27, 0)
 
-		val scheme = new AttendanceMonitoringScheme
 		val unrecorded = Seq(
-			Fixtures.student(userId = "cuscav"), Fixtures.student(userId = "cusebr")
+			AttendanceMonitoringStudentData(
+				firstName = "Mat",
+				lastName = "Mannion",
+				universityId = "0672089",
+				userId = "cuscav",
+				scdBeginDate = DateTime.now.minusYears(2).toLocalDate
+			),
+			AttendanceMonitoringStudentData(
+				firstName = "Nick",
+				lastName = "Howes",
+				universityId = "0672088",
+				userId = "cusebr",
+				scdBeginDate = DateTime.now.minusYears(2).toLocalDate
+			)
 		)
 
 		notification.attendanceMonitoringService.findUnrecordedStudents(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns (unrecorded)
