@@ -60,6 +60,9 @@ class AddExamCommandTest extends TestBase with Mockito {
 
 		validator.service.getExamByNameYearModule(name, academicYear ,module) returns Seq()
 
+		there was one(validator.service).getExamByNameYearModule(name, academicYear ,module)
+		there was atMostOne(validator.service).getExamByNameYearModule(any[String], any[AcademicYear] ,any[Module])
+
 		val errors = new BindException(validator, "command")
 		validator.validate(errors)
 
