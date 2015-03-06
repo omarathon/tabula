@@ -9,6 +9,7 @@ import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search._
 import org.apache.lucene.store.{Directory, FSDirectory}
+import org.apache.lucene.util.BytesRef
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.springframework.beans.factory.annotation._
@@ -491,6 +492,8 @@ trait FieldGenerators {
 		val storage = if (isStored) Store.YES else Store.NO
 		new StringField(name, value, storage)
 	}
+
+	protected def docValuesStringField(name: String, value: String) = new SortedDocValuesField(name, new BytesRef(value))
 
 	protected def tokenisedStringField(name: String, value: String, isStored: Boolean = true) = {
 		val storage = if (isStored) Store.YES else Store.NO
