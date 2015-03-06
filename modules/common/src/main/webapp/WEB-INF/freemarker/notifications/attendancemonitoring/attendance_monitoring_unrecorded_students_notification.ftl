@@ -1,6 +1,6 @@
-${users?size} <#if users?size == 1>student<#else>students</#if> in ${department.name} need attendance recording:
+${students?size} <#if students?size == 1>student<#else>students</#if> in ${department.name} need attendance recording:
 
-<#list truncatedUsers as user>
-${user.fullName}
+<#list truncatedStudents as user>
+- ${user.fullName}
 </#list>
-<#if truncatedUsers?size < users?size>...and ${users?size - truncatedUsers?size} more students.</#if>
+<#if truncatedStudents?size < students?size>...and ${students?size - truncatedStudents?size} more students.</#if>

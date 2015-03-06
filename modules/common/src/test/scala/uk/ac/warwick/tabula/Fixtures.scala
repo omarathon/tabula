@@ -208,6 +208,8 @@ object Fixtures extends Mockito {
 			case MemberUserType.Staff => new StaffMember
 			case MemberUserType.Other => new OtherMember
 		}
+		member.firstName = universityId
+		member.lastName = userType.toString
 		member.universityId = universityId
 		member.userId = userId
 		member.userType = userType
