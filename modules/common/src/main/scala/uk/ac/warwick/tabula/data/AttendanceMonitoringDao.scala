@@ -106,12 +106,12 @@ trait AttendanceMonitoringDao {
 	def getCheckpointTotals(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal]
 	def getAllCheckpointTotals(department: Department): Seq[AttendanceMonitoringCheckpointTotal]
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
-	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[StudentMember]
+	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringStudentData]
 }
 
 
 @Repository
-class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
+class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms with AttendanceMonitoringStudentDataFetcher {
 
 	def flush() = session.flush()
 
@@ -494,7 +494,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 		}
 	}
 
-	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[StudentMember] = {
+	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringStudentData] = {
 		val relevantPoints = session.newCriteria[AttendanceMonitoringPoint]
 			.createAlias("scheme", "scheme")
 			.add(is("scheme.department", department))
@@ -511,17 +511,58 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms {
 
 			relevantPoints.filterNot { _.scheme.members.isEmpty }.flatMap(point => {
 				// every student that should have a checkpoint for this point
-				val students = session.newCriteria[StudentMember]
-					.add(safeIn("universityId", point.scheme.members.members))
-					.seq
+				val students = getAttendanceMonitoringDataForStudents(point.scheme.members.members, academicYear)
 
 				// filter to users that don't have a checkpoint for this point
 				students.filter(student =>
 					!checkpointsByPoint(point).exists(_.student.universityId == student.universityId)
 				).filter(student =>
-					point.applies(student)
+					point.applies(student.scdBeginDate)
 				)
 			}).distinct
 		}
+	}
+}
+
+case class AttendanceMonitoringStudentData(
+	firstName: String,
+	lastName: String,
+	universityId: String,
+	userId: String,
+	scdBeginDate: LocalDate
+) {
+	def fullName = s"$firstName $lastName"
+}
+
+trait AttendanceMonitoringStudentDataFetcher {
+	self: Daoisms =>
+
+	import org.hibernate.criterion.Projections._
+
+	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear) = {
+		val projections =
+			Projections.projectionList()
+				.add(property("firstName"))
+				.add(property("lastName"))
+				.add(groupProperty("universityId"))
+				.add(property("userId"))
+				.add(min("studentCourseDetails.beginDate"))
+
+		session.newCriteria[StudentMember]
+			.createAlias("studentCourseDetails","studentCourseDetails")
+			.createAlias("studentCourseDetails.studentCourseYearDetails","studentCourseYearDetails")
+			.add(isNull("studentCourseDetails.missingFromImportSince"))
+			.add(is("studentCourseYearDetails.academicYear", academicYear))
+			.add(safeIn("universityId", universityIds))
+			.project[Array[java.lang.Object]](projections).seq.map {
+				case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate) =>
+					AttendanceMonitoringStudentData(
+						firstName,
+						lastName,
+						universityId,
+						userId,
+						scdBeginDate
+					)
+			}
 	}
 }
