@@ -542,10 +542,10 @@ trait AttendanceMonitoringStudentDataFetcher {
 	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear) = {
 		val projections =
 			Projections.projectionList()
-				.add(property("firstName"))
-				.add(property("lastName"))
+				.add(max("firstName"))
+				.add(max("lastName"))
 				.add(groupProperty("universityId"))
-				.add(property("userId"))
+				.add(max("userId"))
 				.add(min("studentCourseDetails.beginDate"))
 
 		session.newCriteria[StudentMember]
