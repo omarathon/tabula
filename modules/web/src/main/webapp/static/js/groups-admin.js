@@ -83,6 +83,7 @@ $(function() {
         e.preventDefault();
         var $this = $(this);
         var $form = $this.closest("form");
+        $form.removeClass('dirty');
         var updateTargetId = $this.data("update-target");
 
         var randomNumber = Math.floor(Math.random() * 10000000);
