@@ -99,7 +99,7 @@ trait ExamValidation extends SelfValidating {
 		} else {
 			val duplicates = service.getExamByNameYearModule(name, academicYear, module).filterNot { existing => existing eq exam }
 			for (duplicate <- duplicates.headOption) {
-				errors.rejectValue("name", "name.duplicate.exam", Array(name), "")
+				errors.rejectValue("name", "exam.name.duplicate", Array(name), "")
 			}
 		}
 	}
