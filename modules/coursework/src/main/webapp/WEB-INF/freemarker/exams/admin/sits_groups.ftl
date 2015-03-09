@@ -16,10 +16,8 @@
 			</tr>
 			</thead>
 			<tbody>
-				<#assign slectedIds = filterIds(command.upstreamGroups) >
 				<#list command.availableUpstreamGroups as available>
 					<#local isLinked = available.isLinked(command.assessmentGroups) />
-				<#-- <@f.hidden id="upstreamGroups${available_index}" name="upstreamGroups[${available_index}]"  value="${available.id}" cssClass="upstreamGroups" /> -->
 				<tr>
 					<td>
 						<input
@@ -27,10 +25,9 @@
 							id="chk-${available.id}"
 							name=""
 							value="${available.id}" class="upstreamGroups"
-							${slectedIds?seq_contains(available.id)?string(" checked","")}
+							${isLinked?string(" checked","")}
 						>
 					</td>
-
 					<td><label for="chk-${available.id}">${available.name}<#if isLinked> <span class="label label-success">Linked</span></#if></label></td>
 					<td>${available.memberCount}</td>
 					<td>${available.group.assessmentGroup}</td>
@@ -50,13 +47,3 @@
 	</div>
 	</#if>
 </#macro>
-
-<#function filterIds things>
-	<#local result = []>
-	<#list things as thing>
-		<#local result = result + [thing.id]>
-	</#list>
-	<#return result>
-</#function>
-
-

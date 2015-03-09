@@ -9,15 +9,15 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConverters._
+
 
 object AddExamCommand  {
 	def apply(module: Module, academicYear: AcademicYear) =
 		new AddExamCommandInternal(module, academicYear)
 			with ComposableCommand[Exam]
 			with AddExamPermissions
-			with AddExamCommandState
+			with ExamState
 			with AddExamCommandDescription
 			with ExamValidation
 			with UpdatesStudentMembership
@@ -26,14 +26,12 @@ object AddExamCommand  {
 			with HasAcademicYear
 			with AutowiringUserLookupComponent
 			with SpecifiesGroupType
-			with ModifiesExamMembership {
-
-		}
+			with ModifiesExamMembership
 }
 
 class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
 	extends CommandInternal[Exam]
-	with AddExamCommandState
+	with ExamState
 	with UpdatesStudentMembership
 	with ModifiesExamMembership {
 
@@ -48,7 +46,7 @@ class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
 
 		exam.assessmentGroups.clear()
 		exam.assessmentGroups.addAll(assessmentGroups)
-		for (group <- exam.assessmentGroups if group.exam == null) {
+		for (group <- exam.assessmentGroups.asScala if group.exam == null) {
 			group.exam = exam
 		}
 		assessmentService.save(exam)
@@ -58,7 +56,7 @@ class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
 
 trait AddExamPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: AddExamCommandState =>
+	self: ExamState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.Assignment.Create, module)
@@ -71,15 +69,13 @@ trait ExamState {
 	// bind variables
 	var name: String = _
 	def exam: Exam = null
-}
-
-trait AddExamCommandState extends ExamState {
 	def module: Module
 	def academicYear: AcademicYear
 }
 
+
 trait AddExamCommandDescription extends Describable[Exam] {
-	self: AddExamCommandState =>
+	self: ExamState =>
 
 	def describe(d: Description) {
 		d.module(module)
@@ -88,24 +84,26 @@ trait AddExamCommandDescription extends Describable[Exam] {
 
 trait ExamValidation extends SelfValidating {
 
-	self: ExamState =>
+	self: ExamState with AssessmentServiceComponent =>
 
 	override def validate(errors: Errors) {
 
 		if (!name.hasText) {
 			errors.rejectValue("name", "exam.name.empty")
+		} else {
+			val duplicates = assessmentService.getExamByNameYearModule(name, academicYear, module).filterNot { existing => existing eq exam }
+			for (duplicate <- duplicates.headOption) {
+				errors.rejectValue("name", "exam.name.duplicate", Array(name), "")
+			}
 		}
 	}
-
 }
 
 trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGroupType {
 	self: ExamState with HasAcademicYear with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
-	// start complicated membership stuff
-
 	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroup]] = Option(exam).map { _.upstreamAssessmentGroups }
-	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = None //Option(exam).map { _.members }
+	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = None
 
 	def updateAssessmentGroups() {
 		assessmentGroups = upstreamGroups.asScala.flatMap ( ug => {
@@ -116,6 +114,4 @@ trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGrou
 			assessmentMembershipService.getAssessmentGroup(template) orElse Some(template)
 		}).distinct.asJava
 	}
-
-	// end of complicated membership stuff
 }
