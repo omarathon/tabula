@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 import scala.collection.JavaConverters._
 
+
 object AddExamCommand  {
 	def apply(module: Module, academicYear: AcademicYear) =
 		new AddExamCommandInternal(module, academicYear)
@@ -25,10 +26,7 @@ object AddExamCommand  {
 			with HasAcademicYear
 			with AutowiringUserLookupComponent
 			with SpecifiesGroupType
-			with ModifiesExamMembership {
-
-
-		}
+			with ModifiesExamMembership
 }
 
 class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
@@ -116,6 +114,4 @@ trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGrou
 			assessmentMembershipService.getAssessmentGroup(template) orElse Some(template)
 		}).distinct.asJava
 	}
-
-
 }
