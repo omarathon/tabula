@@ -123,7 +123,7 @@ class AssessmentDaoTest extends PersistenceTestBase {
 			}
 		}
 	}
-ere
+
 	@Test def getAssignments {
 		transactional { tx =>
 			new Fixture {
