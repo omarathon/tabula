@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConversions.{asScalaBuffer, seqAsJavaList}
+import scala.collection.JavaConverters._
 
 object EditExamCommand {
 	def apply(exam: Exam) =
@@ -41,7 +41,7 @@ class EditExamCommandInternal(override val exam: Exam)
 
 		exam.assessmentGroups.clear()
 		exam.assessmentGroups.addAll(assessmentGroups)
-		for (group <- exam.assessmentGroups if group.exam == null) {
+		for (group <- exam.assessmentGroups.asScala if group.exam == null) {
 			group.exam = exam
 		}
 
@@ -83,9 +83,8 @@ trait PopulateEditExamCommand {
 
 	def populateGroups(exam: Exam) {
 		assessmentGroups = exam.assessmentGroups
-		upstreamGroups.addAll(availableUpstreamGroups filter { ug =>
-			assessmentGroups.exists( ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence )
-		})
+		upstreamGroups.addAll(availableUpstreamGroups.filter { ug =>
+			assessmentGroups.asScala.exists(ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence)
+		}.asJavaCollection)
 	}
-
 }
