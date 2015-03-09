@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
 import scala.reflect._
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
@@ -67,13 +67,13 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		// admin on the sub-department
 		val subDepartmentAdminCommand = GrantRoleCommand(subDept)
 		subDepartmentAdminCommand.roleDefinition = DepartmentalAdministratorRoleDefinition
-		subDepartmentAdminCommand.usercodes.addAll(Seq(Fixtures.TestAdmin3))
+		subDepartmentAdminCommand.usercodes.addAll(Seq(Fixtures.TestAdmin3).asJava)
 		subDepartmentAdminCommand.apply()
 
 		// admin on the sub-department;
 		val subSubDepartmentAdminCommand = GrantRoleCommand(subSubDept)
 		subSubDepartmentAdminCommand.roleDefinition = DepartmentalAdministratorRoleDefinition
-		subSubDepartmentAdminCommand.usercodes.addAll(Seq(Fixtures.TestAdmin4))
+		subSubDepartmentAdminCommand.usercodes.addAll(Seq(Fixtures.TestAdmin4).asJava)
 		subSubDepartmentAdminCommand.apply()
 
 
@@ -126,8 +126,8 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				for (route <- routes) {
 					val sets = monitoringPointDao.findMonitoringPointSets(route)
 					for (set <- sets) {
-						for (point <- set.points) {
-							for (checkpoint <- point.checkpoints) session.delete(checkpoint)
+						for (point <- set.points.asScala) {
+							for (checkpoint <- point.checkpoints.asScala) session.delete(checkpoint)
 							session.delete(point)
 						}
 						session.delete(set)
@@ -135,7 +135,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				}
 
 				for (scheme <- schemes) {
-					for (point <- scheme.points){
+					for (point <- scheme.points.asScala){
 						for (checkpoint <- attendanceMonitoringDao.getAllCheckpoints(point)){
 							session.delete(checkpoint)
 						}
@@ -177,9 +177,9 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 				val modules = dept.modules
 
-				for (module <- modules) {
-					for (assignment <- module.assignments) {
-						for (feedback <- assignment.feedbacks) {
+				for (module <- modules.asScala) {
+					for (assignment <- module.assignments.asScala) {
+						for (feedback <- assignment.feedbacks.asScala) {
 							for (feedbackForSits <- feedbackForSitsService.getByFeedback(feedback)) {
 								session.delete(feedbackForSits)
 							}
@@ -187,16 +187,18 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 					}
 				}
 
-				modules.foreach(invalidateAndDeletePermissions[Module])
-				modules.foreach(session.delete)
+				modules.asScala.foreach(invalidateAndDeletePermissions[Module])
+				modules.asScala.foreach(session.delete)
 
 				dept.modules.clear()
 
-				for (feedbackTemplate <- dept.feedbackTemplates) session.delete(feedbackTemplate)
+				for (feedbackTemplate <- dept.feedbackTemplates.asScala) session.delete(feedbackTemplate)
 				dept.feedbackTemplates.clear()
 
-				for (markingWorkflow <- dept.markingWorkflows) session.delete(markingWorkflow)
-				dept.markingWorkflows.clear()
+				for (markingWorkflow <- dept.markingWorkflows) {
+					dept.removeMarkingWorkflow(markingWorkflow)
+					session.delete(markingWorkflow)
+				}
 
 				routes.foreach(invalidateAndDeletePermissions[Route])
 				routes.foreach(session.delete)
@@ -212,8 +214,8 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 			}
 		}
 		def recursivelyGetChildren(department:Department): Set[Department] = {
-			val descendents = department.children flatMap { recursivelyGetChildren }
-			descendents.toSet ++ department.children
+			val descendents = department.children.asScala flatMap { recursivelyGetChildren }
+			descendents.toSet ++ department.children.asScala
 		}
 
 		val department = newDepartmentFrom(Fixtures.TestDepartment, moduleAndDepartmentService)

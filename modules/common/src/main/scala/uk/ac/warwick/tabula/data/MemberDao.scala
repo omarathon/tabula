@@ -11,14 +11,6 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 import collection.JavaConverters._
 
-case class AttendanceMonitoringStudentData(
-	firstName: String,
-	lastName: String,
-	universityId: String,
-	userId: String,
-	scdBeginDate: LocalDate
-)
-
 trait MemberDaoComponent {
 	val memberDao: MemberDao
 }
@@ -67,7 +59,7 @@ trait MemberDao {
 }
 
 @Repository
-class MemberDaoImpl extends MemberDao with Daoisms with Logging {
+class MemberDaoImpl extends MemberDao with Daoisms with Logging with AttendanceMonitoringStudentDataFetcher {
 	import org.hibernate.criterion.Order._
 	import org.hibernate.criterion.Projections._
 	import org.hibernate.criterion.Restrictions._
@@ -305,34 +297,10 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 	def findAllStudentDataByRestrictions(restrictions: Iterable[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {
 		val idCriteria = session.newCriteria[StudentMember]
 		restrictions.foreach { _.apply(idCriteria) }
-		val studentProjections = Projections.projectionList()
-			.add(property("universityId"))
-			.add(property("userId"))
-			.add(property("firstName"))
-			.add(property("lastName"))
-		val studentResults = idCriteria.project[Array[java.lang.Object]](studentProjections).seq.map(r =>
-			(r(0).asInstanceOf[String], (r(1).asInstanceOf[String], r(2).asInstanceOf[String], r(3).asInstanceOf[String]))
-		).toMap
 
-		val beginDateProjections = Projections.projectionList()
-		beginDateProjections.add(groupProperty("universityId"))
-		beginDateProjections.add(min("studentCourseDetails.beginDate"))
+		val universityIds = idCriteria.project[String](property("universityId")).seq
 
-		session.newCriteria[StudentMember]
-			.createAlias("studentCourseDetails","studentCourseDetails")
-			.createAlias("studentCourseDetails.studentCourseYearDetails","studentCourseYearDetails")
-			.add(isNull("studentCourseDetails.missingFromImportSince"))
-			.add(is("studentCourseYearDetails.academicYear", academicYear))
-			.add(safeIn("universityId", studentResults.keys.toSeq))
-			.project[Array[java.lang.Object]](beginDateProjections).seq.map(r =>
-				AttendanceMonitoringStudentData(
-					studentResults(r(0).asInstanceOf[String])._2,
-					studentResults(r(0).asInstanceOf[String])._3,
-					r(0).asInstanceOf[String],
-					studentResults(r(0).asInstanceOf[String])._1,
-					r(1).asInstanceOf[LocalDate]
-				)
-			)
+		getAttendanceMonitoringDataForStudents(universityIds, academicYear)
 	}
 
 	def findStudentsByRestrictions(
@@ -446,4 +414,3 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				.executeUpdate()
 	}
 }
-

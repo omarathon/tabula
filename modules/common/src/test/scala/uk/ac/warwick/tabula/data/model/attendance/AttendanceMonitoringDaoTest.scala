@@ -13,7 +13,10 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 	val department = Fixtures.department("its")
 
 	val student1 = Fixtures.student("1234","1234")
+	student1.mostSignificantCourse.beginDate = DateTime.now.minusYears(2).toLocalDate
+
 	val student2 = Fixtures.student("2345","2345")
+	student2.mostSignificantCourse.beginDate = DateTime.now.minusYears(2).toLocalDate
 
 	val userLookup = new MockUserLookup
 	userLookup.registerUserObjects(
@@ -131,7 +134,7 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 		point2student2checkpoint.updatedDate = DateTime.now
 		session.save(point2student2checkpoint)
 
-		val users = attendanceMonitoringDao.findUnrecordedUsers(department, academicYear, new LocalDate(2014, 10, 4))
+		val users = attendanceMonitoringDao.findUnrecordedStudents(department, academicYear, new LocalDate(2014, 10, 4))
 		users.size should be (2)
 	}}
 
