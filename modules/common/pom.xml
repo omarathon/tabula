@@ -451,6 +451,13 @@
 			<version>${org.apache.lucene.version}</version>
 		</dependency>
 
+		<!-- Only needed when reading Lucene 4 indexes -->
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-backward-codecs</artifactId>
+			<version>${org.apache.lucene.version}</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.apache.tiles</groupId>
 			<artifactId>tiles-api</artifactId>
