@@ -26,7 +26,10 @@ class AddMarkerFeedbackController extends CourseworkController {
 								 @PathVariable("assignment") assignment: Assignment,
 								 @PathVariable("marker") marker: User,
 								 @ModelAttribute cmd: AddMarkerFeedbackCommand): Mav = {
-		Mav("admin/assignments/markerfeedback/form").crumbs(
+		Mav("admin/assignments/markerfeedback/form",
+			"isProxying" -> cmd.isProxying,
+			"proxyingAs" -> marker
+		).crumbs(
 			Breadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment, marker)), "")
 		)
 	}
@@ -43,7 +46,10 @@ class AddMarkerFeedbackController extends CourseworkController {
 		} else {
 			cmd.postExtractValidation(errors)
 			cmd.processStudents()
-			Mav("admin/assignments/markerfeedback/preview").crumbs(
+			Mav("admin/assignments/markerfeedback/preview",
+				"isProxying" -> cmd.isProxying,
+				"proxyingAs" -> marker
+			).crumbs(
 				Breadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment, marker)), "")
 			)
 		}

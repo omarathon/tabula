@@ -32,7 +32,7 @@ object DownloadMarkersSubmissionsCommand {
 }
 
 class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assignment, val marker: User, val submitter: CurrentUser)
-	extends CommandInternal[RenderableZip] with HasCallback[RenderableZip] {
+	extends CommandInternal[RenderableZip] with HasCallback[RenderableZip] with CanProxy {
 
 	self: ZipServiceComponent with AssessmentServiceComponent with StateServiceComponent =>
 

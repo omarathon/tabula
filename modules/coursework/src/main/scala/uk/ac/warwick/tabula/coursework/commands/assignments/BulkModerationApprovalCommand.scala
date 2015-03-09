@@ -28,7 +28,8 @@ object BulkModerationApprovalCommand {
 }
 
 class BulkModerationApprovalCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
-	extends CommandInternal[Unit] with SelfValidating with BulkModerationApprovalState with BindListener with UserAware {
+	extends CommandInternal[Unit] with SelfValidating with BulkModerationApprovalState with BindListener with UserAware
+	with CanProxy {
 
 	self: StateServiceComponent with FeedbackServiceComponent with FinaliseFeedbackComponent =>
 

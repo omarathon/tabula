@@ -32,7 +32,7 @@ object MarkingCompletedCommand {
 }
 
 abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User, val submitter: CurrentUser)
-	extends CommandInternal[Unit] with SelfValidating with UserAware with MarkingCompletedState with ReleasedState with BindListener with NextMarkerFeedback {
+	extends CommandInternal[Unit] with SelfValidating with UserAware with MarkingCompletedState with ReleasedState with BindListener with NextMarkerFeedback with CanProxy {
 
 	self: StateServiceComponent with FeedbackServiceComponent with FinaliseFeedbackComponent =>
 

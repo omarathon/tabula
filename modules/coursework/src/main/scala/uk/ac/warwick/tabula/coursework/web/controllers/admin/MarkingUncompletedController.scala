@@ -10,14 +10,14 @@ import org.springframework.validation.Errors
 import javax.validation.Valid
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.coursework.commands.assignments.{MarkingUncompletedState, MarkingUncompletedCommand}
+import uk.ac.warwick.tabula.coursework.commands.assignments.{CanProxy, MarkingUncompletedState, MarkingUncompletedCommand}
 import uk.ac.warwick.userlookup.User
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/marking-uncompleted"))
 class MarkingUncompletedController extends CourseworkController {
 
-	type MarkingUncompletedCommand = Appliable[Unit] with MarkingUncompletedState
+	type MarkingUncompletedCommand = Appliable[Unit] with MarkingUncompletedState with CanProxy
 
 	validatesSelf[SelfValidating]
 
@@ -53,7 +53,9 @@ class MarkingUncompletedController extends CourseworkController {
 			"assignment" -> assignment,
 			"formAction" -> Routes.admin.assignment.markerFeedback.uncomplete(assignment, marker, previousStageRole.getOrElse("Marker")),
 			"marker" -> form.user,
-			"previousStageRole" -> previousStageRole
+			"previousStageRole" -> previousStageRole,
+			"isProxying" -> form.isProxying,
+			"proxyingAs" -> marker
 		).crumbs(
 			Breadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment, marker)), "")
 		)

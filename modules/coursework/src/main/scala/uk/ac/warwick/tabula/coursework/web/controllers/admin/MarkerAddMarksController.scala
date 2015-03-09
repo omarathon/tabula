@@ -7,7 +7,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.assignments.{MarkerAddMarksCommand, PostExtractValidation}
+import uk.ac.warwick.tabula.coursework.commands.assignments.{CanProxy, MarkerAddMarksCommand, PostExtractValidation}
 import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.tabula.coursework.web.Routes
@@ -24,7 +24,7 @@ class MarkerAddMarksController extends CourseworkController {
 	@Autowired var assignmentService: AssessmentService = _
 	@Autowired var userLookup: UserLookupService = _
 
-	type MarkerAddMarksCommand = Appliable[List[MarkerFeedback]] with PostExtractValidation
+	type MarkerAddMarksCommand = Appliable[List[MarkerFeedback]] with PostExtractValidation with CanProxy
 
 	@ModelAttribute("markerAddMarksCommand") def command(
 		@PathVariable module: Module,
@@ -65,7 +65,9 @@ class MarkerAddMarksController extends CourseworkController {
 
 		Mav("admin/assignments/markerfeedback/marksform",
 			"marksToDisplay" -> marksToDisplay,
-			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
+			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation,
+			"isProxying" -> cmd.isProxying,
+			"proxyingAs" -> marker
 		).crumbs(
 			Breadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment, marker)), "")
 		)
@@ -96,7 +98,10 @@ class MarkerAddMarksController extends CourseworkController {
 		if (errors.hasErrors) viewMarkUploadForm(module, assignment, marker, cmd, errors)
 		else {
 			bindAndValidate(assignment, cmd, errors)
-			Mav("admin/assignments/markerfeedback/markspreview")
+			Mav("admin/assignments/markerfeedback/markspreview",
+				"isProxying" -> cmd.isProxying,
+				"proxyingAs" -> marker
+			)
 		}
 	}
 

@@ -37,7 +37,7 @@ object ListMarkerFeedbackCommand  {
 }
 
 class ListMarkerFeedbackCommand(val assignment: Assignment, val module: Module, val marker: User, val submitter: CurrentUser)
-	extends CommandInternal[Seq[MarkerFeedbackStage]] {
+	extends CommandInternal[Seq[MarkerFeedbackStage]] with CanProxy {
 
 	self: UserLookupComponent =>
 
@@ -88,4 +88,12 @@ trait ListMarkerFeedbackCommandState {
 	def module: Module
 	def marker:User
 	def submitter: CurrentUser
+}
+
+trait CanProxy {
+
+	val marker: User
+	val submitter: CurrentUser
+
+	def isProxying = marker != submitter.apparentUser
 }

@@ -7,7 +7,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{UserAware, Appliable, SelfValidating}
-import uk.ac.warwick.tabula.coursework.commands.assignments.{NextMarkerFeedback, MarkingCompletedState, MarkingCompletedCommand}
+import uk.ac.warwick.tabula.coursework.commands.assignments.{CanProxy, NextMarkerFeedback, MarkingCompletedState, MarkingCompletedCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.Transactions._
@@ -22,6 +22,7 @@ class MarkingCompletedController extends CourseworkController {
 
 	validatesSelf[SelfValidating]
 	type MarkingCompletedCommand = Appliable[Unit] with MarkingCompletedState with UserAware with NextMarkerFeedback
+		with CanProxy
 
 	@ModelAttribute("markingCompletedCommand")
 	def command(
@@ -73,7 +74,9 @@ class MarkingCompletedController extends CourseworkController {
 			"onlineMarking" -> form.onlineMarking,
 			"marker" -> form.user,
 			"isUserALaterMarker" -> isUserALaterMarker,
-			"nextStageRole" -> nextStageRole
+			"nextStageRole" -> nextStageRole,
+			"isProxying" -> form.isProxying,
+			"proxyingAs" -> marker
 		).crumbs(
 			Breadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment, marker)), "")
 		)

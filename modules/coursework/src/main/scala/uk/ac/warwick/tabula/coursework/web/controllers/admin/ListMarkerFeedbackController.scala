@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.MarkingMethod.ModeratedMarking
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
-import uk.ac.warwick.tabula.coursework.commands.assignments.{MarkerFeedbackStage, ListMarkerFeedbackCommand}
+import uk.ac.warwick.tabula.coursework.commands.assignments.{CanProxy, MarkerFeedbackStage, ListMarkerFeedbackCommand}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.userlookup.User
@@ -25,7 +25,10 @@ class ListMarkerFeedbackController extends CourseworkController {
 		ListMarkerFeedbackCommand(assignment, module, marker, submitter)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def list(@ModelAttribute("command") command: Appliable[Seq[MarkerFeedbackStage]], @PathVariable assignment: Assignment, @PathVariable marker: User): Mav = {
+	def list(
+						@ModelAttribute("command") command: Appliable[Seq[MarkerFeedbackStage]] with CanProxy,
+						@PathVariable assignment: Assignment,
+						@PathVariable marker: User): Mav = {
 
 		if(assignment.markingWorkflow == null) {
 			Mav("errors/no_workflow", "assignmentUrl" -> Routes.admin.assignment.submissionsandfeedback.summary(assignment))
@@ -57,7 +60,9 @@ class ListMarkerFeedbackController extends CourseworkController {
 					items.student.getUserId -> assignment.markingWorkflow.onlineMarkingUrl(assignment, marker, items.student.getUserId)
 				}.toMap,
 				"marker" -> marker,
-				"unsubmittedStudents" -> unsubmittedStudents
+				"unsubmittedStudents" -> unsubmittedStudents,
+				"isProxying" -> command.isProxying,
+				"proxyingAs" -> marker
 			)
 		}
 	}

@@ -34,7 +34,8 @@ abstract class MarkingUncompletedCommand(val module: Module, val assignment: Ass
 	with MarkingUncompletedState
 	with ReleasedState
 	with BindListener
-	with Logging {
+	with Logging
+	with CanProxy {
 
 	self: StateServiceComponent with FeedbackServiceComponent =>
 
