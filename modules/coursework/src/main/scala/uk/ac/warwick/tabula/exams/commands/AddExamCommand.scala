@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.exams.commands
 
 import org.springframework.validation.Errors
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
@@ -10,7 +9,6 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConverters._
 
 object AddExamCommand  {
@@ -50,7 +48,7 @@ class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
 
 		exam.assessmentGroups.clear()
 		exam.assessmentGroups.addAll(assessmentGroups)
-		for (group <- exam.assessmentGroups if group.exam == null) {
+		for (group <- exam.assessmentGroups.asScala if group.exam == null) {
 			group.exam = exam
 		}
 		assessmentService.save(exam)
@@ -88,16 +86,14 @@ trait AddExamCommandDescription extends Describable[Exam] {
 
 trait ExamValidation extends SelfValidating {
 
-	self: ExamState =>
-
-	def service = Wire.auto[AssessmentService]
+	self: ExamState with AssessmentServiceComponent =>
 
 	override def validate(errors: Errors) {
 
 		if (!name.hasText) {
 			errors.rejectValue("name", "exam.name.empty")
 		} else {
-			val duplicates = service.getExamByNameYearModule(name, academicYear, module).filterNot { existing => existing eq exam }
+			val duplicates = assessmentService.getExamByNameYearModule(name, academicYear, module).filterNot { existing => existing eq exam }
 			for (duplicate <- duplicates.headOption) {
 				errors.rejectValue("name", "exam.name.duplicate", Array(name), "")
 			}
