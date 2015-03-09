@@ -4,31 +4,32 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.{HasAcademicYear, SpecifiesGroupType}
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.exams.commands.{AddExamCommandInternal, ExamState, ExamValidation}
+import uk.ac.warwick.tabula.exams.commands._
 import uk.ac.warwick.tabula.services._
 
 class AddExamCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends ExamState with AssessmentServiceComponent
+	trait CommandTestSupport extends ExamState
+		with AssessmentServiceComponent
 		with UserLookupComponent
 		with HasAcademicYear
 		with SpecifiesGroupType
 		with AssessmentMembershipServiceComponent {
-		val assessmentService = mock[AssessmentService]
-		val userLookup = new MockUserLookup
-		var assessmentMembershipService = mock[AssessmentMembershipService]
-	}
+			val assessmentService = mock[AssessmentService]
+			val userLookup = new MockUserLookup
+			var assessmentMembershipService = mock[AssessmentMembershipService]
+		}
 
 	trait Fixture {
 		val module = Fixtures.module("ab123", "Test module")
 		val academicYear = new AcademicYear(2014)
 		val command = new AddExamCommandInternal(module, academicYear) with CommandTestSupport
 
-		val validator = new ExamValidation with ExamState {
+		val validator = new ExamValidation with ExamState with AssessmentServiceComponent{
 			def module = command.module
 			def academicYear = command.academicYear
 
-			override val service = mock[AssessmentService]
+			override val assessmentService = mock[AssessmentService]
 		}
 	}
 
@@ -58,10 +59,10 @@ class AddExamCommandTest extends TestBase with Mockito {
 		def name = "ab123"
 		validator.name = name
 
-		validator.service.getExamByNameYearModule(name, academicYear ,module) returns Seq()
+		validator.assessmentService.getExamByNameYearModule(name, academicYear ,module) returns Seq()
 
-		there was one(validator.service).getExamByNameYearModule(name, academicYear ,module)
-		there was atMostOne(validator.service).getExamByNameYearModule(any[String], any[AcademicYear] ,any[Module])
+		there was one(validator.assessmentService).getExamByNameYearModule(name, academicYear ,module)
+		there was atMostOne(validator.assessmentService).getExamByNameYearModule(any[String], any[AcademicYear] ,any[Module])
 
 		val errors = new BindException(validator, "command")
 		validator.validate(errors)
@@ -74,10 +75,10 @@ class AddExamCommandTest extends TestBase with Mockito {
 		def name = "exam1"
 		validator.name = name
 
-		validator.service.getExamByNameYearModule(name, academicYear ,module) returns Seq(Fixtures.exam(name))
+		validator.assessmentService.getExamByNameYearModule(name, academicYear ,module) returns Seq(Fixtures.exam(name))
 
-		there was one(validator.service).getExamByNameYearModule(name, academicYear ,module)
-		there was atMostOne(validator.service).getExamByNameYearModule(any[String], any[AcademicYear] ,any[Module])
+		there was one(validator.assessmentService).getExamByNameYearModule(name, academicYear ,module)
+		there was atMostOne(validator.assessmentService).getExamByNameYearModule(any[String], any[AcademicYear] ,any[Module])
 
 		val errors = new BindException(validator, "command")
 		validator.validate(errors)
@@ -85,6 +86,4 @@ class AddExamCommandTest extends TestBase with Mockito {
 		errors.getErrorCount should be (1)
 		errors.getFieldErrorCount("name") should be (1)
 	}}
-
-
 }

@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.coursework.commands.exams
 
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.{HasAcademicYear, SpecifiesGroupType}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.exams.commands._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class EditExamCommandTest extends TestBase with Mockito {
 
@@ -16,9 +16,9 @@ class EditExamCommandTest extends TestBase with Mockito {
 		with SpecifiesGroupType
 		with AssessmentMembershipServiceComponent {
 			val assessmentService = mock[AssessmentService]
+			val userLookup = new MockUserLookup
 			val assessmentMembershipService = mock[AssessmentMembershipService]
-			val userLookup = mock[UserLookupService]
-	}
+		}
 
 	trait Fixture {
 		val module = Fixtures.module("ab123", "Test module")
@@ -29,9 +29,9 @@ class EditExamCommandTest extends TestBase with Mockito {
 
 		val command = new EditExamCommandInternal(exam) with CommandTestSupport
 
-		val validator = new ExamValidation with EditExamCommandState {
+		val validator = new ExamValidation with EditExamCommandState with AssessmentServiceComponent {
 				override def exam = command.exam
-				override val service = mock[AssessmentService]
+				override val assessmentService = mock[AssessmentService]
 		}
 	}
 
@@ -52,16 +52,14 @@ class EditExamCommandTest extends TestBase with Mockito {
 		def name = "exam1"
 		validator.name = name
 
-		validator.service.getExamByNameYearModule(name, academicYear ,module) returns Seq(Fixtures.exam(name))
+		validator.assessmentService.getExamByNameYearModule(name, academicYear ,module) returns Seq(Fixtures.exam(name))
 
-		there was one(validator.service).getExamByNameYearModule(name, academicYear ,module)
-		there was atMostOne(validator.service).getExamByNameYearModule(any[String], any[AcademicYear] ,any[Module])
+		there was one(validator.assessmentService).getExamByNameYearModule(name, academicYear ,module)
+		there was atMostOne(validator.assessmentService).getExamByNameYearModule(any[String], any[AcademicYear] ,any[Module])
 
 		val errors = new BindException(validator, "command")
 		validator.validate(errors)
 
 		errors.getErrorCount should be (1)
 	}}
-
-
 }
