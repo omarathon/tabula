@@ -458,7 +458,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 <#macro help_popover id title="" content="">
 	<a class="use-popover"
 	   id="popover-${id}"
-	   <#if title?has_content>data-foo="bar" data-title="${title}"</#if>
+	   <#if title?has_content> data-title="${title}"</#if>
 	   data-content="${content}"
 	>
 		<i class="icon-question-sign"></i>

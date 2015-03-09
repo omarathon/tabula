@@ -4,6 +4,7 @@ import org.springframework.validation.{BindException, BindingResult, Errors}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.coursework.commands.feedback.AssignmentFeedbackAdjustmentCommand
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MarkType.{Adjustment, PrivateAdjustment}
 import uk.ac.warwick.tabula.data.model.{Assessment, FileAttachment, Mark}
@@ -154,16 +155,16 @@ trait BulkAdjustmentValidation extends SelfValidating {
 					errors.rejectValue(s"marks[$universityId]", "actualMark.range")
 			}
 			reasons.asScala.get(universityId) match {
-				case Some(reason) if reason.hasText && reason.length > 600 =>
-					errors.rejectValue(s"reasons[$universityId]", "Your reason must be less than 600 characters")
+				case Some(reason) if reason.hasText && reason.length > AssignmentFeedbackAdjustmentCommand.REASON_SIZE_LIMIT =>
+					errors.rejectValue(s"reasons[$universityId]", "feedback.adjustment.reason.tooBig")
 				case _ =>
 			}
 		})
 
 		if (confirmStep) {
 			if (requiresDefaultReason) {
-				if (defaultReason.hasText && defaultReason.length > 600) {
-					errors.rejectValue("defaultReason", "Your reason must be less than 600 characters")
+				if (defaultReason.hasText && defaultReason.length > AssignmentFeedbackAdjustmentCommand.REASON_SIZE_LIMIT) {
+					errors.rejectValue("defaultReason", "feedback.adjustment.reason.tooBig")
 				}
 				if (!defaultReason.hasText) {
 					errors.rejectValue("defaultReason", "feedback.adjustment.reason.empty.bulk")
