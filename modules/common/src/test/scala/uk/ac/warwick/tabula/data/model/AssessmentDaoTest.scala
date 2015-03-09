@@ -63,21 +63,21 @@ class AssessmentDaoTest extends PersistenceTestBase {
 		val examModule = Fixtures.module("abc123")
 		session.save(examModule)
 
-		val exam1 = Fixtures.exam("exam1")
-		exam1.module = examModule
-		exam1.academicYear = new AcademicYear(2013)
+		val exam1_2013 = Fixtures.exam("exam1")
+		exam1_2013.module = examModule
+		exam1_2013.academicYear = new AcademicYear(2013)
 
-		val exam2 = Fixtures.exam("exam1")
-		exam2.module = examModule
-		exam2.academicYear = new AcademicYear(2014)
+		val exam2_2014 = Fixtures.exam("exam1")
+		exam2_2014.module = examModule
+		exam2_2014.academicYear = new AcademicYear(2014)
 
-		val exam3 = Fixtures.exam("exam1")
-		exam3.module = examModule
-		exam3.academicYear = new AcademicYear(2015)
+		val exam3_2015 = Fixtures.exam("exam1")
+		exam3_2015.module = examModule
+		exam3_2015.academicYear = new AcademicYear(2015)
 
-		session.save(exam1)
-		session.save(exam2)
-		session.save(exam3)
+		session.save(exam1_2013)
+		session.save(exam2_2014)
+		session.save(exam3_2015)
 
 		session.flush()
 		session.clear()
@@ -142,9 +142,9 @@ class AssessmentDaoTest extends PersistenceTestBase {
 			new Fixture {
 				val exams = dao.getExamByNameYearModule("exam1", new AcademicYear(2014), examModule)
 				exams.size should be (1)
-				exams.contains(exam1) should be (false)
-				exams.contains(exam2) should be (true)
-				exams.contains(exam3) should be (false)
+				exams.contains(exam1_2013) should be (false)
+				exams.contains(exam2_2014) should be (true)
+				exams.contains(exam3_2015) should be (false)
 			}
 		}
 	}
