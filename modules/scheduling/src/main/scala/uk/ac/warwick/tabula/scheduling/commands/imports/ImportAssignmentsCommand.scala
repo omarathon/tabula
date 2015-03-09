@@ -150,6 +150,8 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
 	def doGradeBoundaries() {
 		transactional() {
+			val boundaries = assignmentImporter.getAllGradeBoundaries
+			boundaries.groupBy(_.marksCode).keys.foreach(assignmentMembershipService.deleteGradeBoundaries)
 			for (gradeBoundary <- logSize(assignmentImporter.getAllGradeBoundaries)) {
 				assignmentMembershipService.save(gradeBoundary)
 			}
