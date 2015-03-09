@@ -22,8 +22,8 @@ object BulkAdjustmentCommand {
 	val ReasonHeader = "Reason"
 	val CommentsHeader = "Comments"
 
-	def apply(assessment: Assessment, gradeGenerator: GeneratesGradesFromMarks, user: CurrentUser) =
-		new BulkAdjustmentCommandInternal(assessment, gradeGenerator, user)
+	def apply(assessment: Assessment, gradeGenerator: GeneratesGradesFromMarks, spreadsheetHelper: SpreadsheetHelpers, user: CurrentUser) =
+		new BulkAdjustmentCommandInternal(assessment, gradeGenerator, spreadsheetHelper, user)
 			with AutowiringFeedbackServiceComponent
 			with ComposableCommand[Seq[Mark]]
 			with BulkAdjustmentCommandBindListener
@@ -34,7 +34,8 @@ object BulkAdjustmentCommand {
 }
 
 
-class BulkAdjustmentCommandInternal(val assessment: Assessment, val gradeGenerator: GeneratesGradesFromMarks, val user: CurrentUser) extends CommandInternal[Seq[Mark]] {
+class BulkAdjustmentCommandInternal(val assessment: Assessment, val gradeGenerator: GeneratesGradesFromMarks, val spreadsheetHelper: SpreadsheetHelpers, val user: CurrentUser)
+	extends CommandInternal[Seq[Mark]] {
 
 	self: BulkAdjustmentCommandState with FeedbackServiceComponent with BulkAdjustmentValidation =>
 
@@ -102,8 +103,8 @@ trait BulkAdjustmentCommandBindListener extends BindListener {
 		}
 	}
 
-	def extractDataFromFile(file: FileAttachment, result: BindingResult) = {
-		val rowData = SpreadsheetHelpers.parseXSSFExcelFile(file.dataStream)
+	private def extractDataFromFile(file: FileAttachment, result: BindingResult) = {
+		val rowData = spreadsheetHelper.parseXSSFExcelFile(file.dataStream)
 
 		val (rowsToValidate, badRows) = rowData.partition(row => {
 			row.get(BulkAdjustmentCommand.StudentIdHeader.toLowerCase) match {
@@ -205,6 +206,7 @@ trait BulkAdjustmentCommandState {
 
 	def assessment: Assessment
 	def gradeGenerator: GeneratesGradesFromMarks
+	def spreadsheetHelper: SpreadsheetHelpers
 	def user: CurrentUser
 
 	lazy val feedbackMap = assessment.allFeedback.groupBy(_.universityId).mapValues(_.head)

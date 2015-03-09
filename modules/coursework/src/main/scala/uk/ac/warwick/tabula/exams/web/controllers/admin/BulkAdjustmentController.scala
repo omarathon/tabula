@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.model.{Mark, Module, Exam}
 import uk.ac.warwick.tabula.exams.commands.{BulkAdjustmentTemplateCommand, BulkAdjustmentCommand}
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
+import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Controller
@@ -21,7 +22,12 @@ class BulkAdjustmentController extends ExamsController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable exam: Exam) =
-		BulkAdjustmentCommand(mandatory(exam), GenerateGradesFromMarkCommand(mandatory(module), mandatory(exam)), user)
+		BulkAdjustmentCommand(
+			mandatory(exam),
+			GenerateGradesFromMarkCommand(mandatory(module), mandatory(exam)),
+			SpreadsheetHelpers,
+			user
+		)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form = {
