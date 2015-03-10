@@ -102,6 +102,48 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 		}
 	}
 
+	/**
+	 * TAB-3388
+	 */
+	it should "change seat number to null where it is ambiguous" in {
+		new Fixture {
+			val hi900_30 = {
+				val g = new UpstreamAssessmentGroup
+				g.moduleCode = "HI900-30"
+				g.occurrence = "A"
+				g.assessmentGroup = "A"
+				g.academicYear = AcademicYear.parse("13/14")
+				g
+			}
+
+			val registrations = Seq(
+				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100001/1", "10", "A", "HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100003/1", "3", "A", "HI100-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "HI100-30", "A")
+			)
+
+			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq(hi900_30)
+
+			command.doGroupMembers()
+
+			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
+				Seq(
+					UpstreamModuleRegistration("13/14","0100001/1",null,"A","HI33M-30","A"),
+					UpstreamModuleRegistration("13/14","0100001/2","2","A","HI33M-30","A")
+				)
+			))
+
+			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(
+				Seq(
+					UpstreamModuleRegistration("13/14","0100003/1","3","A","HI100-30","A"),
+					UpstreamModuleRegistration("13/14","0100002/1","2","A","HI100-30","A")
+				)
+			))
+		}
+	}
+
 	/** Matches on an UpstreamAssessmentGroup's module code. */
 	def hasModuleCode(code: String) = CustomHamcrestMatchers.hasProperty('moduleCode, code)
 

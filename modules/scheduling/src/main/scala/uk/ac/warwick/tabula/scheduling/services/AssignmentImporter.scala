@@ -286,7 +286,7 @@ object AssignmentImporter {
 						on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- module choices confirmed
 
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
-						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = sms.ayr_code and wss.wss_modc = sms.mod_code
+						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = sms.ayr_code and wss.wss_modc = sms.mod_code and wss.wss_seat is not null
 
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
@@ -314,7 +314,7 @@ object AssignmentImporter {
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code and ssn.ssn_mrgs = 'CON' -- confirmed module choices
 
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
-						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code
+						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code and wss.wss_seat is not null
 
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
@@ -341,7 +341,7 @@ object AssignmentImporter {
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
 
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
-						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code
+						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code and wss.wss_seat is not null
 
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
