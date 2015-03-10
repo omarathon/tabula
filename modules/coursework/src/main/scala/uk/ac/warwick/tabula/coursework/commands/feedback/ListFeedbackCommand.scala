@@ -17,12 +17,12 @@ class ListFeedbackCommand(val module: Module, val assignment: Assignment) extend
 	var userLookup = Wire[UserLookupService]
 	
 	override def applyInternal() = {
-	 ListFeedbackResult(
+		ListFeedbackResult(
 			auditIndexService.feedbackDownloads(assignment).map(userIdToUser),
 		  auditIndexService.latestOnlineFeedbackViews(assignment).map(userIdToUser),
 		  auditIndexService.latestOnlineFeedbackAdded(assignment).map(warwickIdToUser),
 			auditIndexService.latestGenericFeedbackAdded(assignment)
-	 )
+	 	)
 	}
 
 	def userIdToUser(tuple: (String, DateTime)) = tuple match {

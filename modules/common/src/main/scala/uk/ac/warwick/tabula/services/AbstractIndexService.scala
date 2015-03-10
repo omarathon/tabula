@@ -1,6 +1,11 @@
 package uk.ac.warwick.tabula.services
 
 import java.io.{Closeable, File, FileNotFoundException}
+import com.fasterxml.jackson.databind.ObjectMapper
+import dispatch.classic.thread.ThreadSafeHttpClient
+import dispatch.classic.{url, thread, Http}
+import org.apache.http.client.params.{CookiePolicy, ClientPNames}
+import org.apache.http.entity.{ContentType, ByteArrayEntity}
 import org.apache.lucene.analysis._
 import org.apache.lucene.document.Field._
 import org.apache.lucene.document._
@@ -14,6 +19,9 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.springframework.beans.factory.annotation._
 import org.springframework.beans.factory.InitializingBean
+import uk.ac.warwick.sso.client.SSOConfiguration
+import uk.ac.warwick.sso.client.trusted.{TrustedApplication, SSOConfigTrustedApplicationsManager}
+import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Closeables._
@@ -26,6 +34,7 @@ import org.springframework.beans.factory.DisposableBean
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import language.implicitConversions
+import scala.util.parsing.json.JSON
 
 trait CommonQueryMethods[A] extends TaskBenchmarking { self: AbstractIndexService[A] =>
 
@@ -109,6 +118,11 @@ abstract class AbstractIndexService[A]
 
 	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
 	@Value("${tabula.yearZero}") var yearZero: Int = _
+	@Value("${module.context}") var moduleContext: String = _
+	@Autowired var features: Features = _
+	@Autowired var objectMapper: ObjectMapper = _
+
+	def searchOverHttp = features.searchOnApiComponent && moduleContext != "/api"
 
 	final val IndexReopenPeriodInSeconds = 20
 
@@ -334,6 +348,8 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 	 */
 	var searcherLifetimeManager: SearcherLifetimeManager = _
 
+	def searchOverHttp: Boolean
+
 	/**
 	 * Find the newest item that was indexed, by searching by
 	 * UpdatedDateField and sorting in descending date order.
@@ -394,26 +410,78 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 		if (searcherLifetimeManager != null) searcherLifetimeManager.prune(new PruneByAge(ageInSeconds))
 	}
 
-	def search(query: Query, max: Int, sort: Sort = null, offset: Int = 0): RichSearchResults = doSearch(query, Some(max), sort, offset)
 	def search(query: Query): RichSearchResults = doSearch(query, None, null, 0)
 	def search(query: Query, sort: Sort): RichSearchResults = doSearch(query, None, sort, 0)
+	def search(query: Query, max: Int, sort: Sort = null, offset: Int = 0): RichSearchResults = doSearch(query, Some(max), sort, offset)
+
 	def search(query: Query, max: Int, sort: Sort, last: Option[ScoreDoc], token: Option[Long]): PagingSearchResult =
 		doPagingSearch(query, Option(max), Option(sort), last, token)
 
-	private def doSearch(query: Query, max: Option[Int], sort: Sort, offset: Int): RichSearchResults = {
-		initialiseSearching()
-		if (searcherManager == null) {
-			logger.warn("Tried to search but no searcher manager is available")
-			Seq.empty
-		} else acquireSearcher { searcher =>
-			logger.debug("Running search for query: " + query)
+	lazy val http: Http = new Http with thread.Safety {
+		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
+			getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
+		}
+	}
 
-			val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
-			val results =
-				if (sort == null) searcher.search(query, null, offset + maxResults)
-				else if (searcher.getIndexReader.maxDoc <= 0) new TopDocs(0, Array(), 0f)
-				else searcher.search(query, null, offset + maxResults, sort)
-			transformResults(searcher, results, offset, maxResults)
+	lazy val currentApplication = new SSOConfigTrustedApplicationsManager(SSOConfiguration.getConfig).getCurrentApplication
+
+	private def doSearch(query: Query, max: Option[Int], sort: Sort, offset: Int): RichSearchResults = {
+		if (searchOverHttp) {
+			// Convert the request to JSON
+			val requestMap =
+				Map(
+					"queryString" -> query.toString,
+					"offset" -> offset
+				) ++
+				max.map { m => Map("max" -> m) }.getOrElse(Map()) ++
+				Option(sort).map { s => Map("sort" -> s.getSort.map { sortField =>
+					Map(
+						"field" -> sortField.getField,
+						"type" -> sortField.getType.name(),
+						"reverse" -> sortField.getReverse
+					)
+				}) }.getOrElse(Map())
+
+			val requestBody = new ByteArrayEntity(objectMapper.writeValueAsBytes(requestMap), ContentType.APPLICATION_JSON)
+
+			def handler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
+				req >- { (json) =>
+					Seq.empty[Document]
+					//					JSON.parseFull(json) match {
+					////						case Some(locations: Seq[Map[String, Any]] @unchecked) => locations.flatMap(WAI2GoLocation.fromProperties)
+					//						case _ => Nil
+					//					}
+				}
+			}
+
+			val endpoint = "https://augustus.warwick.ac.uk/api/v1/index/audit"
+			val encryptedCertificate = currentApplication.encode("tabula", endpoint)
+
+			val req =
+				(url(endpoint) <:< Map(
+					TrustedApplication.HEADER_CERTIFICATE -> encryptedCertificate.getCertificate,
+					TrustedApplication.HEADER_PROVIDER_ID -> encryptedCertificate.getProviderID,
+					TrustedApplication.HEADER_SIGNATURE -> encryptedCertificate.getSignature
+				)).copy(body = Some(requestBody))
+
+			http.when(_ == 200)(req >:+ handler)
+
+			???
+		} else {
+			initialiseSearching()
+			if (searcherManager == null) {
+				logger.warn("Tried to search but no searcher manager is available")
+				Seq.empty
+			} else acquireSearcher { searcher =>
+				logger.debug("Running search for query: " + query)
+
+				val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
+				val results =
+					if (sort == null) searcher.search(query, null, offset + maxResults)
+					else if (searcher.getIndexReader.maxDoc <= 0) new TopDocs(0, Array(), 0f)
+					else searcher.search(query, null, offset + maxResults, sort)
+				transformResults(searcher, results, offset, maxResults)
+			}
 		}
 	}
 
