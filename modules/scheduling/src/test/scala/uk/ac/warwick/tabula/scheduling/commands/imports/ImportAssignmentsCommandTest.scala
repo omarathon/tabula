@@ -84,15 +84,16 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
 			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
 				Seq(
-					UpstreamModuleRegistration("13/14","0100001/1","1","A","HI33M-30","A"),
-					UpstreamModuleRegistration("13/14","0100001/2","2","A","HI33M-30","A")
+					registrations(1),
+					registrations(0)
 				)
 			))
 
 			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(
 				Seq(
-					UpstreamModuleRegistration("13/14","0100003/1","3","A","HI100-30","A"),
-					UpstreamModuleRegistration("13/14","0100002/1","2","A","HI100-30","A")
+					registrations(3),
+					registrations(2)
+
 				)
 			))
 
@@ -130,15 +131,15 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
 			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
 				Seq(
-					UpstreamModuleRegistration("13/14","0100001/1",null,"A","HI33M-30","A"),
-					UpstreamModuleRegistration("13/14","0100001/2","2","A","HI33M-30","A")
+					registrations(2),
+					UpstreamModuleRegistration("13/14","0100001/1",null,"A","HI33M-30","A")
 				)
 			))
 
 			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(
 				Seq(
-					UpstreamModuleRegistration("13/14","0100003/1","3","A","HI100-30","A"),
-					UpstreamModuleRegistration("13/14","0100002/1","2","A","HI100-30","A")
+					registrations(4),
+					registrations(3)
 				)
 			))
 		}
