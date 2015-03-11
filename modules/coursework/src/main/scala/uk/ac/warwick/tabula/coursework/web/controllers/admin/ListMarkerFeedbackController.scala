@@ -37,8 +37,8 @@ class ListMarkerFeedbackController extends CourseworkController {
 			val feedbackItems = markerFeedback.flatMap(_.feedbackItems)
 			val unsubmittedStudents = {
 				val markersStudents = assignment.markingWorkflow.getMarkersStudents(assignment, marker)
-				val feedbackIds = feedbackItems.map(_.student.getWarwickId)
-				markersStudents.filterNot(student => feedbackIds.contains(student.getWarwickId))
+				val markersSubmissions = assignment.getMarkersSubmissions(marker).map(_.universityId)
+				markersStudents.filterNot(student => markersSubmissions.contains(student.getWarwickId))
 			}
 			val feedbackCounts: Seq[Int] = feedbackItems.map(_.feedbacks.size)
 			val maxFeedbackCount = feedbackCounts.foldLeft(0)(_ max _)
