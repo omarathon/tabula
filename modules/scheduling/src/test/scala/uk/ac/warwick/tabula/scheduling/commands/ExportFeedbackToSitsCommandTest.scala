@@ -57,7 +57,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 	}
 
 	trait EnvironmentMarkAndGradeAdjusted extends EnvironmentMarkAdjusted {
-		feedback.latestAdjustment.map(_.grade = Some("A-"))
+		feedback.latestPrivateAdjustment.map(_.grade = Some("A-"))
 	}
 
 	@Test def testUploadFeedbackToSitsMarkAndGradeAdjusted() = withUser("0070790", "cusdx") {

@@ -48,9 +48,10 @@ sealed abstract class MarkType(val code: String, val description: String) {
 
 object MarkType {
 	case object Adjustment extends MarkType("adjustment", "Adjustment")
+	case object PrivateAdjustment extends MarkType("private", "Private Adjustment")
 
 	// manual collection - keep in sync with the case objects above
-	val members = Seq(Adjustment)
+	val members = Seq(Adjustment, PrivateAdjustment)
 
 	def fromCode(code: String) =
 		if (code == null) null

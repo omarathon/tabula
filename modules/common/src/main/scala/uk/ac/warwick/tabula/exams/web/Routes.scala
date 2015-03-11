@@ -24,7 +24,7 @@ object Routes {
 
 		object exam {
 			def apply(exam: Exam) =
-				context + "/exams/admin/module/%s/%s/exams/%s" format(
+				context + "/admin/module/%s/%s/exams/%s" format(
 					encoded(exam.module.code),
 					encoded(exam.academicYear.startYear.toString),
 					encoded(exam.id)
