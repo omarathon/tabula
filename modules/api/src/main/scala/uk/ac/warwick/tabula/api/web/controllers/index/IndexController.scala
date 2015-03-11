@@ -23,6 +23,8 @@ import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
 
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
+import scala.pickling.Defaults._
+import scala.pickling.json._
 
 import IndexController._
 
@@ -146,6 +148,7 @@ trait SearchLuceneIndexPermissions extends RequiresPermissionsChecking with Perm
 @JsonAutoDetect
 class SearchIndexRequest[A <: SearchLuceneIndexState] extends JsonApiRequest[A] {
 	@BeanProperty var queryString: String = _
+	@BeanProperty var queryPickled: String = _
 	@BeanProperty var sort: JList[JMap[String, _]] = JArrayList()
 	@BeanProperty var max: Int = -1
 	@BeanProperty var offset: Int = 0
@@ -157,6 +160,10 @@ class SearchIndexRequest[A <: SearchLuceneIndexState] extends JsonApiRequest[A] 
 			} catch {
 				case e: ParseException => errors.rejectValue("query", "typeMismatch")
 			}
+		}
+
+		queryPickled.maybeText.foreach { queryPickled =>
+			state.query = JSONPickle(queryPickled).unpickle[Query]
 		}
 
 		if (max >= 0) {

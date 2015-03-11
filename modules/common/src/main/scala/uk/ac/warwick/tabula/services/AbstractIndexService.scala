@@ -5,12 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dispatch.classic.thread.ThreadSafeHttpClient
 import dispatch.classic.{url, thread, Http}
 import org.apache.http.client.params.{CookiePolicy, ClientPNames}
-import org.apache.http.entity.{ContentType, ByteArrayEntity}
 import org.apache.lucene.analysis._
 import org.apache.lucene.document.Field._
 import org.apache.lucene.document._
 import org.apache.lucene.index._
-import org.apache.lucene.queryparser.classic.{QueryParserBase, QueryParser}
+import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search._
 import org.apache.lucene.store.{Directory, FSDirectory}
@@ -20,7 +19,7 @@ import org.joda.time.Duration
 import org.springframework.beans.factory.annotation._
 import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.sso.client.SSOConfiguration
-import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, TrustedApplication, SSOConfigTrustedApplicationsManager}
+import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, SSOConfigTrustedApplicationsManager}
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.JavaImports._
@@ -34,7 +33,8 @@ import org.springframework.beans.factory.DisposableBean
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import language.implicitConversions
-import scala.util.Try
+import scala.pickling.Defaults._
+import scala.pickling.json._
 import scala.util.parsing.json.JSON
 import scala.collection.JavaConverters._
 
@@ -573,7 +573,7 @@ trait HttpSearching {
 		// Convert the request to JSON
 		val requestMap =
 			Map(
-				"queryString" -> query.toString,
+				"queryPickled" -> query.pickle.value,
 				"offset" -> offset
 			) ++
 				max.map { m => Map("max" -> m) }.getOrElse(Map()) ++
