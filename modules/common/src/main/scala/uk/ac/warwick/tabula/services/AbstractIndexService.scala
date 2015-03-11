@@ -553,7 +553,7 @@ trait NumericRangeQueryParsing {
 }
 
 trait HttpSearching {
-	self: FieldGenerators with RichSearchResultsCreator =>
+	self: FieldGenerators with RichSearchResultsCreator with Logging =>
 
 	def apiIndexName: String
 
@@ -589,6 +589,8 @@ trait HttpSearching {
 						"reverse" -> sortField.getReverse
 					)
 				}) }.getOrElse(Map())
+
+		if (debugEnabled) logger.debug(requestMap)
 
 		def handler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 			req >- { (json) =>
