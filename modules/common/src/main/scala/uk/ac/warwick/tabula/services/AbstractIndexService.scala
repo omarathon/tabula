@@ -152,7 +152,7 @@ abstract class AbstractIndexService[A]
 	def guardMultipleIndexes(work: => Unit) = this.synchronized(work)
 
 	// QueryParser isn't thread safe, hence why this is a def
-	def parser = new NumericRangeQueryParser(Seq(UpdatedDateField), "", analyzer)
+	def parser: QueryParser with NumericRangeQueryParsing = new NumericRangeQueryParser(Seq(UpdatedDateField), "", analyzer)
 
 
 	override def afterPropertiesSet() {
@@ -480,7 +480,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 					"Content-Type" -> "application/json"
 				) << objectMapper.writeValueAsBytes(requestMap)
 
-			http.when(_ != 500)(req >:+ handler)
+			http.when(_ == 200)(req >:+ handler)
 		} else {
 			initialiseSearching()
 			if (searcherManager == null) {
@@ -591,7 +591,14 @@ trait FieldGenerators {
 	protected def booleanField(name: String, value: Boolean) = new TextField(name, value.toString, Store.YES)
 }
 
-class NumericRangeQueryParser(numericFields: Seq[String], delegate: QueryParser) extends QueryParserBase {
+class NumericRangeQueryParser(val numericFields: Seq[String], field: String, analyzer: Analyzer)
+	extends QueryParser(field, analyzer)
+		with NumericRangeQueryParsing
+
+trait NumericRangeQueryParsing {
+	self: QueryParser =>
+
+	def numericFields: Seq[String]
 
 	override def newRangeQuery(field: String, part1: String, part2: String, startInclusive: Boolean, endInclusive: Boolean): Query =
 		if (numericFields.contains(field)) {
@@ -600,9 +607,6 @@ class NumericRangeQueryParser(numericFields: Seq[String], delegate: QueryParser)
 
 			NumericRangeQuery.newLongRange(field, min.orNull[java.lang.Long], max.orNull[java.lang.Long], startInclusive, endInclusive)
 		} else {
-			delegate.newRangeQuery(field, part1, part2, startInclusive, endInclusive)
+			self.newRangeQuery(field, part1, part2, startInclusive, endInclusive)
 		}
-
-
-
 }
