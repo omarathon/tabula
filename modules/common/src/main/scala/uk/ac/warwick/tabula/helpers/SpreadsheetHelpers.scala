@@ -19,7 +19,11 @@ import org.apache.poi.hssf.util.CellReference
 import scala.collection.JavaConverters._
 import org.xml.sax.InputSource
 
-object SpreadsheetHelpers {
+trait SpreadsheetHelpers {
+	def parseXSSFExcelFile(file: InputStream, simpleHeaders: Boolean = true): Seq[Map[String, String]]
+}
+
+object SpreadsheetHelpers extends SpreadsheetHelpers {
 	
 	val MaxDepartmentNameLength = 31 - 11
 
@@ -101,11 +105,11 @@ object SpreadsheetHelpers {
 		if (total == 0)
 			addStringCell("N/A", row)
 		else
-			addNumericCell((num / total), row, percentageCellStyle(workbook))
+			addNumericCell(num / total, row, percentageCellStyle(workbook))
 	}
 
 	def formatWorksheet(sheet: XSSFSheet, cols: Int) {
-		(0 to cols).map(sheet.autoSizeColumn(_))
+		(0 to cols).map(sheet.autoSizeColumn)
 	}
 	
 	/**
@@ -114,8 +118,8 @@ object SpreadsheetHelpers {
 	 * - lower-case all headers
 	 * - trim the header and remove all non-ascii characters
 	 */
-	def parseXSSFExcelFile(file: InputStream, simpleHeaders: Boolean = true) = {
-		val pkg = OPCPackage.open(file);
+	def parseXSSFExcelFile(file: InputStream, simpleHeaders: Boolean = true): Seq[Map[String, String]] = {
+		val pkg = OPCPackage.open(file)
 		val sst = new ReadOnlySharedStringsTable(pkg)
 		val reader = new XSSFReader(pkg)
 		val styles = reader.getStylesTable
@@ -156,12 +160,12 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
 
 	def startRow(row: Int) = {
 		logger.debug("startRow: " + row.toString)
-		isParsingHeader = (row == 0)
+		isParsingHeader = row == 0
 		currentRow = scala.collection.mutable.Map[String, String]()
 	}
 	
 	def formatHeader(rawValue: String) = {
-		if (simpleHeaders) rawValue.trim().toLowerCase().replaceAll("[^\\x00-\\x7F]", "")
+		if (simpleHeaders) rawValue.trim().toLowerCase.replaceAll("[^\\x00-\\x7F]", "")
 		else rawValue
 	}
 
@@ -172,8 +176,8 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
 		else if (columnMap.contains(col)) currentRow(columnMap(col)) = formattedValue
 	}
 
-	def endRow = {
-		if (!isParsingHeader && !currentRow.isEmpty) 
+	def endRow() = {
+		if (!isParsingHeader && currentRow.nonEmpty)
 			rows += currentRow.toMap
 	}
 }

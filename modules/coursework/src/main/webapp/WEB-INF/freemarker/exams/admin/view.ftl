@@ -77,8 +77,8 @@
 					<#assign feedback = mapGet(feedbackMap, student) />
 					<td>${feedback.actualMark!""}</td>
 					<td>${feedback.actualGrade!""}</td>
-					<td>${feedback.adjustedMark!""}</td>
-					<td>${feedback.adjustedGrade!""}</td>
+					<td>${(feedback.latestPrivateAdjustment.mark)!""}</td>
+					<td>${(feedback.latestPrivateAdjustment.grade)!""}</td>
 					<#if hasSitsStatus>
 						<#assign sitsStatus = mapGet(sitsStatusMap, feedback) />
 						<#assign sitsClass>

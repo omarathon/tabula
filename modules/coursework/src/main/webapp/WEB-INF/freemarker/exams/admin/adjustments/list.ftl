@@ -31,7 +31,12 @@
 </#macro>
 
 <#escape x as x?html>
-	<h1>Feedback adjustment</h1>
+	<#if studentInfo?size gt 0>
+		<div class="pull-right">
+			<a href="<@routes.examBulkAdjustment exam />" class="btn"><i class="icon-sort"></i> Adjust in bulk</a>
+		</div>
+	</#if>
+	<h1 class="with-settings">Mark adjustment</h1>
 	<h5><span class="muted">for</span> ${exam.name} (${exam.module.code?upper_case})</h5>
 
 	<div id="profile-modal" class="modal fade profile-subset"></div>

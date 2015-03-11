@@ -297,13 +297,7 @@
 							<#list gradeValidation.populated?keys as feedback>
 								<tr>
 									<td>${feedback.universityId}</td>
-									<td>
-										<#if feedback.adjustedMark??>
-											${feedback.adjustedMark!}
-										<#else>
-											${feedback.actualMark!}
-										</#if>
-									</td>
+									<td>${(feedback.latestMark.mark)!}</td>
 									<td>${mapGet(gradeValidation.populated, feedback)}</td>
 								</tr>
 							</#list>
@@ -322,20 +316,8 @@
 							<#list gradeValidation.invalid?keys as feedback>
 								<tr>
 									<td>${feedback.universityId}</td>
-									<td>
-										<#if feedback.adjustedMark??>
-											${feedback.adjustedMark!}
-										<#else>
-											${feedback.actualMark!}
-										</#if>
-									</td>
-									<td>
-										<#if feedback.adjustedGrade??>
-											${feedback.adjustedGrade!}
-										<#else>
-											${feedback.actualGrade!}
-										</#if>
-									</td>
+									<td>${(feedback.latestMark.mark)!}</td>
+									<td>${(feedback.latestMark.grade)!}</td>
 									<td>${mapGet(gradeValidation.invalid, feedback)}</td>
 								</tr>
 							</#list>
@@ -364,13 +346,7 @@
 							<#list gradeValidation.populated?keys as feedback>
 								<tr>
 									<td>${feedback.universityId}</td>
-									<td>
-										<#if feedback.adjustedMark??>
-											${feedback.adjustedMark!}
-										<#else>
-											${feedback.actualMark!}
-										</#if>
-									</td>
+									<td>${(feedback.latestMark.mark)!}</td>
 									<td></td>
 									<td></td>
 								</tr>
@@ -378,20 +354,8 @@
 							<#list gradeValidation.invalid?keys as feedback>
 								<tr>
 									<td>${feedback.universityId}</td>
-									<td>
-										<#if feedback.adjustedMark??>
-											${feedback.adjustedMark!}
-										<#else>
-											${feedback.actualMark!}
-										</#if>
-									</td>
-									<td>
-										<#if feedback.adjustedGrade??>
-											${feedback.adjustedGrade!}
-										<#else>
-											${feedback.actualGrade!}
-										</#if>
-									</td>
+									<td>${(feedback.latestMark.mark)!}</td>
+									<td>${(feedback.latestMark.grade)!}</td>
 									<td>${mapGet(gradeValidation.invalid, feedback)}</td>
 								</tr>
 							</#list>
