@@ -26,7 +26,7 @@ class SSOMaintenanceModeListenerTest extends TestBase with Mockito {
 	
 	observer.afterPropertiesSet()
 	
-	there was(one(queue).addListener("MaintenanceMode", observer))
+	verify(queue, times(1)).addListener("MaintenanceMode", observer)
 	
 	@Test def defaults {
 		cache.isDatabaseEnabled() should be (true)

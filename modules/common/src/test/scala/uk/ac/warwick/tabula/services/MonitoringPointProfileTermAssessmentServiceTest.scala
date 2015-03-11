@@ -104,7 +104,7 @@ class MonitoringPointProfileTermAssessmentServiceTest extends TestBase with Mock
 		service.getCheckpointsForSubmission(submission).size should be (1)
 
 		service.updateCheckpointsForSubmission(submission)
-		there was one (service.monitoringPointService).saveOrUpdateCheckpointByUsercode(student, assignmentThisYearPoint, AttendanceState.Attended, student.userId, autocreated = true)
+		verify(service.monitoringPointService, times(1)).saveOrUpdateCheckpointByUsercode(student, assignmentThisYearPoint, AttendanceState.Attended, student.userId, autocreated = true)
 	}}
 
 	@Test
@@ -117,7 +117,7 @@ class MonitoringPointProfileTermAssessmentServiceTest extends TestBase with Mock
 		service.getCheckpointsForSubmission(submission).size should be (1)
 
 		service.updateCheckpointsForSubmission(submission)
-		there was one (service.monitoringPointService).saveOrUpdateCheckpointByUsercode(student, assignmentThisYearPoint, AttendanceState.Attended, student.userId, autocreated = true)
+		verify(service.monitoringPointService, times(1)).saveOrUpdateCheckpointByUsercode(student, assignmentThisYearPoint, AttendanceState.Attended, student.userId, autocreated = true)
 	}}
 
 	@Test

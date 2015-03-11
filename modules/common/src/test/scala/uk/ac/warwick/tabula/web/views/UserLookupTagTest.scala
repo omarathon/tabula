@@ -41,7 +41,7 @@ class UserLookupTagTest extends TestBase with Mockito {
 				
 		tag.execute(env, params, null, body)
 		
-		there was one(body).render(writer)
+		verify(body, times(1)).render(writer)
 		
 		DeepUnwrap.unwrap(env.getCurrentNamespace().get("returned_user")) should be (userLookup.getUserByUserId("cuscav"))
 	}
@@ -67,7 +67,7 @@ class UserLookupTagTest extends TestBase with Mockito {
 				
 		tag.execute(env, params, null, body)
 		
-		there was one(body).render(writer)
+		verify(body, times(1)).render(writer)
 		
 		DeepUnwrap.unwrap(env.getCurrentNamespace().get("missing_ids")) should be (Seq())
 		DeepUnwrap.unwrap(env.getCurrentNamespace().get("returned_users")) should be (Map(
@@ -95,7 +95,7 @@ class UserLookupTagTest extends TestBase with Mockito {
 
 		tag.execute(env, params, null, body)
 
-		there was one(body).render(writer)
+		verify(body, times(1)).render(writer)
 
 		DeepUnwrap.unwrap(env.getCurrentNamespace().get("returned_user")) should be (userLookup.getUserByUserId("cuscav"))
 	}
@@ -123,7 +123,7 @@ class UserLookupTagTest extends TestBase with Mockito {
 
 		tag.execute(env, params, null, body)
 
-		there was one(body).render(writer)
+		verify(body, times(1)).render(writer)
 
 		DeepUnwrap.unwrap(env.getCurrentNamespace().get("missing_ids")) should be (Seq())
 		DeepUnwrap.unwrap(env.getCurrentNamespace().get("returned_users")) should be (Map(

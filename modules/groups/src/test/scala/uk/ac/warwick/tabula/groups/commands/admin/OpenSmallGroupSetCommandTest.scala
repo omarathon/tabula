@@ -86,8 +86,8 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
 		val checker = mock[PermissionsChecking]
 		perms.permissionsCheck(checker)
-		there was one(checker).PermissionCheck(Permissions.SmallGroups.Update, set1)
-		there was one(checker).PermissionCheck(Permissions.SmallGroups.Update, set2)
+		verify(checker, times(1)).PermissionCheck(Permissions.SmallGroups.Update, set1)
+		verify(checker, times(1)).PermissionCheck(Permissions.SmallGroups.Update, set2)
 	}
 
 	@Test
@@ -101,7 +101,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		}
 		val description = mock[Description]
 		audit.describe(description)
-		there was one(description).smallGroupSetCollection(sets)
+		verify(description, times(1)).smallGroupSetCollection(sets)
 	}
 
 	trait NotificationFixture {

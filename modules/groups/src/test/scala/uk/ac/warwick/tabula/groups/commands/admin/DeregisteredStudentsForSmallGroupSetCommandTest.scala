@@ -102,8 +102,8 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
 		results.head.student.asUser should be (user4)
 		results.head.group should be (group2)
 
-		there was one (command.smallGroupService).removeUserFromGroup(user4, group2)
-		there was no (command.smallGroupService).removeUserFromGroup(user3, group2)
+		verify(command.smallGroupService, times(1)).removeUserFromGroup(user4, group2)
+		verify(command.smallGroupService, times(0)).removeUserFromGroup(user3, group2)
 	}}
 
 	@Test def permissions { new Fixture {
@@ -116,7 +116,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.SmallGroups.Update, set)
+		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Update, set)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoModule {

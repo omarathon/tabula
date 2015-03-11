@@ -41,7 +41,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
 		set.defaultWeekRanges should be (Seq(WeekRange(1, 10)))
 		set.defaultLocation should be (NamedLocation("The park"))
 
-		there was one (command.smallGroupService).saveOrUpdate(set)
+		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 	}}
 
 	@Test def resetExistingEvents { new CommandFixture {
@@ -81,7 +81,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
 		event3.weekRanges should be (Seq(WeekRange(1, 10)))
 		event3.location should be (NamedLocation("The park"))
 
-		there was one (command.smallGroupService).saveOrUpdate(set)
+		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 	}}
 
 	@Test def permissions { new Fixture {
@@ -94,7 +94,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.SmallGroups.Update, set)
+		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Update, set)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoModule {

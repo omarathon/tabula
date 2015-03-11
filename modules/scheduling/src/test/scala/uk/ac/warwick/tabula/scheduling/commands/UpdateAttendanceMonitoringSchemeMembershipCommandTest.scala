@@ -36,7 +36,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 	def featureTest() { new Fixture {
 		cmd.features.attendanceMonitoringAcademicYear2014 = false
 		cmd.applyInternal()
-		there was no (cmd.attendanceMonitoringService).listSchemesForMembershipUpdate
+		verify(cmd.attendanceMonitoringService, times(0)).listSchemesForMembershipUpdate
 		deserializeFilterCalled should be {false}
 	}}
 
@@ -68,11 +68,11 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 
 		val schemes = cmd.applyInternal()
 		deserializeFilterCalled should be {true}
-		there was one (cmd.attendanceMonitoringService).saveOrUpdate(scheme1)
-		there was one (cmd.attendanceMonitoringService).saveOrUpdate(scheme2)
+		verify(cmd.attendanceMonitoringService, times(1)).saveOrUpdate(scheme1)
+		verify(cmd.attendanceMonitoringService, times(1)).saveOrUpdate(scheme2)
 		schemes.contains(scheme1) should be {true}
 		schemes.contains(scheme2) should be {true}
-		there was one (cmd.attendanceMonitoringService).updateCheckpointTotal(student, dept, AcademicYear(2014))
+		verify(cmd.attendanceMonitoringService, times(1)).updateCheckpointTotal(student, dept, AcademicYear(2014))
 	}}
 
 	@Test
@@ -98,12 +98,12 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 
 		val schemes = cmd.applyInternal()
 		deserializeFilterCalled should be {true}
-		there was one (cmd.attendanceMonitoringService).saveOrUpdate(scheme1)
-		there was one (cmd.attendanceMonitoringService).saveOrUpdate(scheme2)
+		verify(cmd.attendanceMonitoringService, times(1)).saveOrUpdate(scheme1)
+		verify(cmd.attendanceMonitoringService, times(1)).saveOrUpdate(scheme2)
 		schemes.contains(scheme1) should be {true}
 		schemes.contains(scheme2) should be {true}
-		there was one (cmd.attendanceMonitoringService).updateCheckpointTotal(student, dept1, AcademicYear(2014))
-		there was one (cmd.attendanceMonitoringService).updateCheckpointTotal(student, dept2, AcademicYear(2014))
+		verify(cmd.attendanceMonitoringService, times(1)).updateCheckpointTotal(student, dept1, AcademicYear(2014))
+		verify(cmd.attendanceMonitoringService, times(1)).updateCheckpointTotal(student, dept2, AcademicYear(2014))
 	}}
 
 }

@@ -45,8 +45,8 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 			cmd.approved = true
 			cmd.applyInternal()
 			meetingRecord.isApproved should be {true}
-			there was one(cmd.meetingRecordDao).saveOrUpdate(proposedApproval)
-			there was one(cmd.monitoringPointMeetingRelationshipTermService).updateCheckpointsForMeeting(meetingRecord)
+			verify(cmd.meetingRecordDao, times(1)).saveOrUpdate(proposedApproval)
+			verify(cmd.monitoringPointMeetingRelationshipTermService, times(1)).updateCheckpointsForMeeting(meetingRecord)
 		}
 	}
 
@@ -56,8 +56,8 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 			cmd.approved = false
 			cmd.applyInternal()
 			meetingRecord.isApproved should be {false}
-			there was one(cmd.meetingRecordDao).saveOrUpdate(proposedApproval)
-			there was one(cmd.monitoringPointMeetingRelationshipTermService).updateCheckpointsForMeeting(meetingRecord)
+			verify(cmd.meetingRecordDao, times(1)).saveOrUpdate(proposedApproval)
+			verify(cmd.monitoringPointMeetingRelationshipTermService, times(1)).updateCheckpointsForMeeting(meetingRecord)
 		}
 	}
 

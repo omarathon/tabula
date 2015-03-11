@@ -38,7 +38,7 @@ class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 	@Test def apply { new CommandFixture {
 		command.applyInternal() should be (customRole)
 
-		there was one (command.permissionsService).delete(customRole)
+		verify(command.permissionsService, times(1)).delete(customRole)
 	}}
 
 	@Test def permissions { new Fixture {
@@ -50,7 +50,7 @@ class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.RolesAndPermissions.Delete, customRole)
+		verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.Delete, customRole)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def noDepartment { new Fixture {

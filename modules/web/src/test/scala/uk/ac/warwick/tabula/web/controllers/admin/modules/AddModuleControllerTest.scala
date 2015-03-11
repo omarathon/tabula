@@ -44,7 +44,7 @@ class AddModuleControllerTest extends TestBase with Mockito {
 		val mav = controller.submit(command, errors, department)
 		mav.viewName should be (s"redirect:${Routes.admin.module(module)}")
 
-		there was one (command).apply()
+		verify(command, times(1)).apply()
 	}
 
 	@Test def submitValidationError {
@@ -58,7 +58,7 @@ class AddModuleControllerTest extends TestBase with Mockito {
 		mav.viewName should be ("admin/modules/add/form")
 		mav.toModel("department") should be (department)
 
-		there was atMost(0) (command).apply()
+		verify(command, times(0)).apply()
 	}
 
 }

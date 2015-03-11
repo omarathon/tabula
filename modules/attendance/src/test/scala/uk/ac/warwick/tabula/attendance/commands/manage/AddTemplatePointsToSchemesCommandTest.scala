@@ -73,8 +73,8 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 		new Fixture {
 			val newPoints = command.applyInternal()
 			newPoints.size should be (6)
-			there was one (command.thisScheduledNotificationService).removeInvalidNotifications(department)
-			there was atLeastOne (command.thisScheduledNotificationService).push(Matchers.any[ScheduledNotification[Department]])
+			verify(command.thisScheduledNotificationService, times(1)).removeInvalidNotifications(department)
+			verify(command.thisScheduledNotificationService, atLeast(1)).push(Matchers.any[ScheduledNotification[Department]])
 		}
 	}
 

@@ -39,7 +39,7 @@ class AddExamCommandTest extends TestBase with Mockito {
 		val exam = command.applyInternal()
 		exam.name should be ("Some exam")
 
-		there was one (command.assessmentService).save(exam)
+		verify(command.assessmentService, times(1)).save(exam)
 	}}
 
 	@Test def rejectEmptyCode { new Fixture {
@@ -61,8 +61,8 @@ class AddExamCommandTest extends TestBase with Mockito {
 
 		validator.assessmentService.getExamByNameYearModule(name, academicYear ,module) returns Seq()
 
-		there was one(validator.assessmentService).getExamByNameYearModule(name, academicYear ,module)
-		there was atMostOne(validator.assessmentService).getExamByNameYearModule(any[String], any[AcademicYear] ,any[Module])
+		verify(validator.assessmentService, times(1)).getExamByNameYearModule(name, academicYear ,module)
+		verify(validator.assessmentService, atMost(1)).getExamByNameYearModule(any[String], any[AcademicYear] ,any[Module])
 
 		val errors = new BindException(validator, "command")
 		validator.validate(errors)
@@ -77,8 +77,8 @@ class AddExamCommandTest extends TestBase with Mockito {
 
 		validator.assessmentService.getExamByNameYearModule(name, academicYear ,module) returns Seq(Fixtures.exam(name))
 
-		there was one(validator.assessmentService).getExamByNameYearModule(name, academicYear ,module)
-		there was atMostOne(validator.assessmentService).getExamByNameYearModule(any[String], any[AcademicYear] ,any[Module])
+		verify(validator.assessmentService, times(1)).getExamByNameYearModule(name, academicYear ,module)
+		verify(validator.assessmentService, atMost(1)).getExamByNameYearModule(any[String], any[AcademicYear] ,any[Module])
 
 		val errors = new BindException(validator, "command")
 		validator.validate(errors)

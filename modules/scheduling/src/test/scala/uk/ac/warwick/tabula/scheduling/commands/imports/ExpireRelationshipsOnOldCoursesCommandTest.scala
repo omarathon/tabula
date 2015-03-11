@@ -80,14 +80,14 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 	@Test
 	def apply(): Unit = new ApplyFixture with StudentWithOneCurrentOneEndedCourse {
 		command.applyInternal()
-		there was one (command.relationshipService).endStudentRelationships(Seq(relationshipOnEndedCourse))
+		verify(command.relationshipService, times(1)).endStudentRelationships(Seq(relationshipOnEndedCourse))
 	}
 
 	@Test
 	def applyAlreadyExpired(): Unit = new ApplyFixture with StudentWithOneCurrentOneEndedCourse {
 		relationshipOnEndedCourse.endDate = DateTime.now.minusDays(1)
 		command.applyInternal()
-		there was one (command.relationshipService).endStudentRelationships(Seq())
+		verify(command.relationshipService, times(1)).endStudentRelationships(Seq())
 	}
 
 }

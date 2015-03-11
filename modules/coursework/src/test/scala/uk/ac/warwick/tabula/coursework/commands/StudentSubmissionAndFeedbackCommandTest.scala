@@ -75,7 +75,7 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheckAny(Seq(CheckablePermission(Permissions.Submission.Create, Some(command.assignment))))
+		verify(checking, times(1)).PermissionCheckAny(Seq(CheckablePermission(Permissions.Submission.Create, Some(command.assignment))))
 	}}
 
 	@Test def memberPermissions {
@@ -92,8 +92,8 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.Submission.Read, m)
-		there was one(checking).PermissionCheck(Permissions.Feedback.Read, m)
+		verify(checking, times(1)).PermissionCheck(Permissions.Submission.Read, m)
+		verify(checking, times(1)).PermissionCheck(Permissions.Feedback.Read, m)
 	}
 
 }

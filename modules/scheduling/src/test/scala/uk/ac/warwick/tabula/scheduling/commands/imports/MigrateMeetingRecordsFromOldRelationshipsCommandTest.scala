@@ -85,7 +85,7 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandTest extends TestBase with
 	@Test
 	def apply(): Unit = new ApplyFixture with StudentWithOneCurrentOneEndedCourse {
 		command.applyInternal()
-		there was one (command.meetingRecordService).migrate(relationshipOnEndedCourse, relationshipOnCurrentCourse)
+		verify(command.meetingRecordService, times(1)).migrate(relationshipOnEndedCourse, relationshipOnCurrentCourse)
 	}
 
 }

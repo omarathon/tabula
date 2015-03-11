@@ -33,7 +33,7 @@ class MasqueradeControllerTest extends TestBase with Mockito {
 		val response = mock[HttpServletResponse]
 
 		controller.submit(command, new BindException(command, "command"), response).viewName should be (s"redirect:${Routes.admin.masquerade}")
-		there was one (response).addCookie(cookie)
+		verify(response, times(1)).addCookie(cookie)
 	}
 
 }

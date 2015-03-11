@@ -45,7 +45,7 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 		new Fixture {
 			commandInternal.applyInternal() should be (testRelationshipType)
 
-			there was one(commandInternal.relationshipService).delete(testRelationshipType)
+			verify(commandInternal.relationshipService, times(1)).delete(testRelationshipType)
 		}
 	}
 
@@ -59,7 +59,7 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 
 			val description = mock[Description]
 			describable.describe(description)
-			there was one(description).properties(
+			verify(description, times(1)).properties(
 				"id" -> "trtId",
 				"urlPart" -> "trt-url",
 				"description" -> "trt role description"
@@ -75,7 +75,7 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			}
 			val checking = mock[PermissionsChecking]
 			perms.permissionsCheck(checking)
-			there was one(checking).PermissionCheck(Permissions.StudentRelationshipType.Manage)
+			verify(checking, times(1)).PermissionCheck(Permissions.StudentRelationshipType.Manage)
 		}
 	}
 	

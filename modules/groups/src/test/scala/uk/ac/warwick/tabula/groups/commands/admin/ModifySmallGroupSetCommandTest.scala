@@ -52,7 +52,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		set.academicYear should be (AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		set.members should not be (null)
 
-		there was one (command.smallGroupService).saveOrUpdate(set)
+		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 	}}
 
 	@Test def createAutoLinkToSits { new CreateCommandFixture {
@@ -75,7 +75,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		set.members should not be (null)
 		set.assessmentGroups.size() should be (2)
 
-		there was one (command.smallGroupService).saveOrUpdate(set)
+		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 	}}
 
 	@Test def edit { new EditCommandFixture {
@@ -90,7 +90,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		set.academicYear should be (AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		set.members should not be (null)
 
-		there was one (command.smallGroupService).saveOrUpdate(set)
+		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 	}}
 
 	@Test def createPermissions { new Fixture {
@@ -102,7 +102,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.SmallGroups.Create, module)
+		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Create, module)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def createNoDepartment {
@@ -125,7 +125,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.SmallGroups.Update, set)
+		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Update, set)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def editNoDepartment {

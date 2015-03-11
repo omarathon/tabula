@@ -42,7 +42,7 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		result.meetingRecord.lastUpdatedDate.isAfter(result.meetingRecord.creationDate) should be (true)
 		result.isRescheduled should be (false)
 
-		there was one(mockMeetingRecordService).saveOrUpdate(scheduledMeetingRecord)
+		verify(mockMeetingRecordService, times(1)).saveOrUpdate(scheduledMeetingRecord)
 
 	}}
 
@@ -71,7 +71,7 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		result.meetingRecord.meetingDate should be (newMeetingDate)
 		result.isRescheduled should be (true)
 
-		there was one(mockMeetingRecordService).saveOrUpdate(scheduledMeetingRecord)
+		verify(mockMeetingRecordService, times(1)).saveOrUpdate(scheduledMeetingRecord)
 
 	}}
 

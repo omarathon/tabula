@@ -60,7 +60,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 	def allStudents() { new Fixture {
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq()
 		state.allStudents
-		there was one (state.profileService).findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]])
+		verify(state.profileService, times(1)).findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]])
 	}}
 
 	@Test

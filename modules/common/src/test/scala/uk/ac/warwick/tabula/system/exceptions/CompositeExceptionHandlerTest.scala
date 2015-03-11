@@ -15,8 +15,8 @@ class CompositeExceptionHandlerTest extends TestBase with Mockito {
 		val context = ExceptionContext("1", new RuntimeException("An egg cracked"), Some(testRequest("https://tabula.warwick.ac.uk/web/power/flight?super=magic")))
 		
 		handler.exception(context)
-		there was one (listener1).exception(context)
-		there was one (listener2).exception(context)
+		verify(listener1, times(1)).exception(context)
+		verify(listener2, times(1)).exception(context)
 	}
 
 }
