@@ -26,7 +26,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 		command.assignmentMembershipService = membershipService
 		command.moduleAndDepartmentService = moduleService
 
-		moduleService.getModuleByCode(any[String]) returns (None) // Not necessary for this to work
+		moduleService.getModuleByCode(any[String]) returns None // Not necessary for this to work
 		membershipService.replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamModuleRegistration]]) answers { args =>
 			val uag = args.asInstanceOf[Array[_]](0).asInstanceOf[UpstreamAssessmentGroup]
 			uag.id = "seenGroupId"
@@ -45,12 +45,12 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
 	it should "process all collections" in {
 		new Fixture {
-			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns (Nil)
+			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Nil
 
 			val registrations = Seq(
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "HI33M-30", "A"),
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "HI100-30", "A"),
-				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "HI101-30", "A")
+				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI100-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI101-30", "A")
 			)
 			command.doGroupMembers()
 			there were three(membershipService).replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamModuleRegistration]])
@@ -72,27 +72,27 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 			}
 
 			val registrations = Seq(
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "HI33M-30", "A"),
-				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "HI33M-30", "A"),
-				UpstreamModuleRegistration("13/14", "0100003/1", "3", "A", "HI100-30", "A"),
-				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "HI100-30", "A")
+				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100003/1", "3", "A", "A01", "HI100-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI100-30", "A")
 			)
 
-			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns (Seq(hi900_30))
+			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq(hi900_30)
 
 			command.doGroupMembers()
 
 			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
 				Seq(
-					UpstreamModuleRegistration("13/14","0100001/1","1","A","HI33M-30","A"),
-					UpstreamModuleRegistration("13/14","0100001/2","2","A","HI33M-30","A")
+					UpstreamModuleRegistration("13/14","0100001/1","1","A","A01","HI33M-30","A"),
+					UpstreamModuleRegistration("13/14","0100001/2","2","A","A01","HI33M-30","A")
 				)
 			))
 
 			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(
 				Seq(
-					UpstreamModuleRegistration("13/14","0100003/1","3","A","HI100-30","A"),
-					UpstreamModuleRegistration("13/14","0100002/1","2","A","HI100-30","A")
+					UpstreamModuleRegistration("13/14","0100003/1","3","A","A01","HI100-30","A"),
+					UpstreamModuleRegistration("13/14","0100002/1","2","A","A01","HI100-30","A")
 				)
 			))
 
@@ -117,11 +117,11 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 			}
 
 			val registrations = Seq(
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "HI33M-30", "A"),
-				UpstreamModuleRegistration("13/14", "0100001/1", "10", "A", "HI33M-30", "A"),
-				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "HI33M-30", "A"),
-				UpstreamModuleRegistration("13/14", "0100003/1", "3", "A", "HI100-30", "A"),
-				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "HI100-30", "A")
+				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01","HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100001/1", "10", "A","A01", "HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01","HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100003/1", "3", "A", "A01","HI100-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01","HI100-30", "A")
 			)
 
 			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq(hi900_30)
@@ -130,15 +130,15 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
 			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
 				Seq(
-					UpstreamModuleRegistration("13/14","0100001/1",null,"A","HI33M-30","A"),
-					UpstreamModuleRegistration("13/14","0100001/2","2","A","HI33M-30","A")
+					UpstreamModuleRegistration("13/14","0100001/1",null,"A","A01","HI33M-30","A"),
+					UpstreamModuleRegistration("13/14","0100001/2","2","A","A01","HI33M-30","A")
 				)
 			))
 
 			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(
 				Seq(
-					UpstreamModuleRegistration("13/14","0100003/1","3","A","HI100-30","A"),
-					UpstreamModuleRegistration("13/14","0100002/1","2","A","HI100-30","A")
+					UpstreamModuleRegistration("13/14","0100003/1","3","A","A01","HI100-30","A"),
+					UpstreamModuleRegistration("13/14","0100002/1","2","A","A01","HI100-30","A")
 				)
 			))
 		}

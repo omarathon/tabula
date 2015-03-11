@@ -165,6 +165,7 @@ trait AddAssignmentsCommandOnBind extends BindListener {
 				this.academicYear = academicYear
 				this.occurrence = item.occurrence
 				this.moduleCode = item.upstreamAssignment.moduleCode
+				this.sequence = item.upstreamAssignment.sequence
 				this.assessmentGroup = item.upstreamAssignment.assessmentGroup
 			})
 		}

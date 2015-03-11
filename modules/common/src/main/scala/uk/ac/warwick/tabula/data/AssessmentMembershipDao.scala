@@ -118,6 +118,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 		.add(is("academicYear", group.academicYear))
 		.add(is("moduleCode", group.moduleCode))
 		.add(is("occurrence", group.occurrence))
+		.add(is("sequence", group.sequence))
 		.uniqueResult
 
 	def find(group: AssessmentGroup): Option[AssessmentGroup] = {
@@ -171,6 +172,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 		session.newCriteria[AssessmentComponent]
 			.add(is("moduleCode", group.moduleCode))
 			.add(is("assessmentGroup", group.assessmentGroup))
+			.add(is("sequence", group.sequence))
 			.uniqueResult
 	}
 
@@ -226,6 +228,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 			.add(is("academicYear", academicYear))
 			.add(is("moduleCode", component.moduleCode))
 			.add(is("assessmentGroup", component.assessmentGroup))
+			.add(is("sequence", component.sequence))
 			.seq
 	}
 

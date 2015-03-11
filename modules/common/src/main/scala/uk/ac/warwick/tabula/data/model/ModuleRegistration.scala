@@ -52,6 +52,9 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var occurrence: String = null
 
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
+	var sequence: String = null
+
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
 	var agreedMark: java.math.BigDecimal = null
 
@@ -84,13 +87,14 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 /**
  * Holds data about an individual student's registration on a single module.
  */
-case class UpstreamModuleRegistration(year: String, sprCode: String, seatNumber: String, occurrence: String, moduleCode: String, assessmentGroup: String) {
+case class UpstreamModuleRegistration(year: String, sprCode: String, seatNumber: String, occurrence: String, sequence: String, moduleCode: String, assessmentGroup: String) {
 
 	def universityId = SprCode.getUniversityId(sprCode)
 
 	def differentGroup(other: UpstreamModuleRegistration) =
 		year != other.year ||
 			occurrence != other.occurrence ||
+			sequence != other.sequence ||
 			moduleCode != other.moduleCode ||
 			assessmentGroup != other.assessmentGroup
 
@@ -102,6 +106,7 @@ case class UpstreamModuleRegistration(year: String, sprCode: String, seatNumber:
 		g.academicYear = AcademicYear.parse(year)
 		g.moduleCode = moduleCode
 		g.assessmentGroup = assessmentGroup
+		g.sequence = sequence
 		// for the NONE group, override occurrence to also be NONE, because we create a single UpstreamAssessmentGroup
 		// for each module with group=NONE and occurrence=NONE, and all unallocated students go in there together.
 		g.occurrence =

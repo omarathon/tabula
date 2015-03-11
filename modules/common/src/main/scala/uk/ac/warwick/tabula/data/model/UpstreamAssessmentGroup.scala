@@ -27,6 +27,7 @@ class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
 	var moduleCode: String = _
 	var assessmentGroup: String = _
 	var occurrence: String = _
+	var sequence: String = _
 
 	@Basic @Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)

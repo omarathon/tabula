@@ -16,6 +16,7 @@ class UpstreamAssessmentGroupCreationFixtureCommandInternal extends CommandInter
 	 var moduleCode: String = _
 	 var assessmentGroup = "A"
 	 var occurrence = "A"
+	 var sequence = "A01"
 	 var universityIds: JList[String] = JArrayList()
 
 	 def applyInternal() = transactional() {
@@ -23,6 +24,7 @@ class UpstreamAssessmentGroupCreationFixtureCommandInternal extends CommandInter
 		 group.moduleCode = moduleCode
 		 group.occurrence = occurrence
 		 group.assessmentGroup = assessmentGroup
+		 group.sequence = sequence
 		 group.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 		 group.members.knownType.staticUserIds = universityIds.asScala
 
