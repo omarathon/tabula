@@ -35,7 +35,7 @@ class EditExamCommandTest extends TestBase with Mockito {
 		}
 	}
 
-	@Test def apply { new Fixture {
+	@Test def apply() { new Fixture {
 		command.name = "Exam 2"
 
 		val examSaved = command.applyInternal()
@@ -47,19 +47,18 @@ class EditExamCommandTest extends TestBase with Mockito {
 		verify(command.assessmentService, times(1)).save(exam)
 	}}
 
-	@Test def rejectIfDuplicateName { new Fixture {
+	@Test def rejectIfDuplicateName() { new Fixture {
 
 		def name = "exam1"
 		validator.name = name
 
 		validator.assessmentService.getExamByNameYearModule(name, academicYear ,module) returns Seq(Fixtures.exam(name))
 
-		verify(validator.assessmentService, times(1)).getExamByNameYearModule(name, academicYear ,module)
-		verify(validator.assessmentService, atMost(1)).getExamByNameYearModule(any[String], any[AcademicYear] ,any[Module])
-
 		val errors = new BindException(validator, "command")
 		validator.validate(errors)
 
 		errors.getErrorCount should be (1)
+		verify(validator.assessmentService, times(1)).getExamByNameYearModule(name, academicYear ,module)
+		verify(validator.assessmentService, atMost(1)).getExamByNameYearModule(any[String], any[AcademicYear] ,any[Module])
 	}}
 }
