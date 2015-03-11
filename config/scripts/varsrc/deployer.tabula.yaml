@@ -1,9 +1,24 @@
 --- !ruby/object:Deployment 
 apaches: 
 - !ruby/object:Apache 
-  name: tabula
+  name: tabula-web
   port_balancer: !ruby/object:HAProxySocketBalancer
-    balanced_group: jboss_pair
+    balanced_group: tabula-web
+    balanced_servers:
+    - "primary"
+    - "secondary"
+    current_instance:
+    - "primary"
+    - "secondary"
+    haproxy: !ruby/object:HAProxy::SocketReader
+      path: "/var/run/haproxy.stat"
+  apache_dir: "/usr/local/apache"
+  restart_command: "echo 'not restarting apache' "
+  state: balanced
+- !ruby/object:Apache 
+  name: tabula-api
+  port_balancer: !ruby/object:HAProxySocketBalancer
+    balanced_group: tabula-api
     balanced_servers:
     - "primary"
     - "secondary"
@@ -47,7 +62,7 @@ scheduler_instance: !ruby/object:Tomcat
   requests: 
      /scheduling/test/up: 200
 instances:
-  tabula:
+  tabula-web:
   - !ruby/object:Tomcat
     deployment_state: old
     name: tabula-primary
@@ -58,6 +73,7 @@ instances:
     stop_command: "/usr/sbin/svcadm disable -s tomcat:"
     excluded_war_names:
     - scheduling
+    - api
     test_path: /web/test/up
     requests: 
        /web/test/up: 200
@@ -65,7 +81,6 @@ instances:
        /profiles/test/up: 200
        /groups/test/up: 200
        /attendance/test/up: 200
-       /api/test/up: 200
   - !ruby/object:Tomcat
     deployment_state: old
     name: tabula-secondary
@@ -76,6 +91,7 @@ instances:
     stop_command: "/usr/sbin/svcadm disable -s tomcat:"
     excluded_war_names:
     - scheduling
+    - api
     test_path: /web/test/up
     requests: 
        /web/test/up: 200
@@ -83,6 +99,32 @@ instances:
        /profiles/test/up: 200
        /groups/test/up: 200
        /attendance/test/up: 200
+  tabula-api:
+  - !ruby/object:Tomcat
+    deployment_state: old
+    name: tabula-api-primary
+    haproxy_name: primary
+    port: "8380"
+    state: running
+    mode: smf
+    stop_command: "/usr/sbin/svcadm disable -s tomcat:"
+    war_names:
+    - api
+    test_path: /api/test/up
+    requests: 
+       /api/test/up: 200
+  - !ruby/object:Tomcat
+    deployment_state: old
+    name: tabula-api-secondary
+    haproxy_name: secondary
+    port: "8480"
+    state: running
+    mode: smf
+    stop_command: "/usr/sbin/svcadm disable -s tomcat:"
+    war_names:
+    - api
+    test_path: /api/test/up
+    requests: 
        /api/test/up: 200
 lockfile: /tmp/tabula_deploy.running
 notification_emails: n.howes@warwick.ac.uk
