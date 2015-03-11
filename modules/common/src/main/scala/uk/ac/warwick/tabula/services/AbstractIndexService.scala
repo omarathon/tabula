@@ -20,7 +20,7 @@ import org.joda.time.Duration
 import org.springframework.beans.factory.annotation._
 import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.sso.client.SSOConfiguration
-import uk.ac.warwick.sso.client.trusted.{TrustedApplication, SSOConfigTrustedApplicationsManager}
+import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, TrustedApplication, SSOConfigTrustedApplicationsManager}
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.JavaImports._
@@ -34,7 +34,9 @@ import org.springframework.beans.factory.DisposableBean
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import language.implicitConversions
+import scala.util.Try
 import scala.util.parsing.json.JSON
+import scala.collection.JavaConverters._
 
 trait CommonQueryMethods[A] extends TaskBenchmarking { self: AbstractIndexService[A] =>
 
@@ -98,6 +100,7 @@ abstract class AbstractIndexService[A]
 		extends CommonQueryMethods[A]
 			with QueryHelpers[A]
 			with SearchHelpers[A]
+			with HttpSearching
 			with FieldGenerators
 			with RichSearchResultsCreator
 			with OpensLuceneDirectory
@@ -120,7 +123,6 @@ abstract class AbstractIndexService[A]
 	@Value("${tabula.yearZero}") var yearZero: Int = _
 	@Value("${module.context}") var moduleContext: String = _
 	@Autowired var features: Features = _
-	@Autowired var objectMapper: ObjectMapper = _
 
 	def searchOverHttp = features.searchOnApiComponent && moduleContext != "/api"
 
@@ -177,6 +179,7 @@ abstract class AbstractIndexService[A]
 
 	override def destroy() {
 		executor.shutdown()
+		http.shutdown()
 	}
 
 	protected override def openDirectory(): Directory = FSDirectory.open(indexPath.toPath)
@@ -417,70 +420,9 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 	def search(query: Query, max: Int, sort: Sort, last: Option[ScoreDoc], token: Option[Long]): PagingSearchResult =
 		doPagingSearch(query, Option(max), Option(sort), last, token)
 
-	lazy val http: Http = new Http with thread.Safety {
-		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
-		}
-	}
-
-	lazy val currentApplication = new SSOConfigTrustedApplicationsManager(SSOConfiguration.getConfig).getCurrentApplication
-
 	private def doSearch(query: Query, max: Option[Int], sort: Sort, offset: Int): RichSearchResults = {
 		if (searchOverHttp) {
-			// Convert the request to JSON
-			val requestMap =
-				Map(
-					"queryString" -> query.toString,
-					"offset" -> offset
-				) ++
-				max.map { m => Map("max" -> m) }.getOrElse(Map()) ++
-				Option(sort).map { s => Map("sort" -> s.getSort.map { sortField =>
-					Map(
-						"field" -> sortField.getField,
-						"type" -> sortField.getType.name(),
-						"reverse" -> sortField.getReverse
-					)
-				}) }.getOrElse(Map())
-
-			def handler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
-				req >- { (json) =>
-					JSON.parseFull(json) match {
-						case Some(json: Map[String, Any] @unchecked) =>
-							json.get("results") match {
-								case Some(docs: Seq[Map[String, Any]] @unchecked) =>
-									docs.map { fields =>
-										val doc = new Document
-
-										fields.foreach { case (key, value) =>
-											doc.add(value match {
-												case s: String => plainStringField(key, s)
-												case d: Double => doubleField(key, d)
-												case n: Number => new LongField(key, n.longValue(), Store.YES)
-												case o => throw new IllegalArgumentException("Unexpected field type: " + o.getClass.getName)
-											})
-										}
-
-										doc
-									}
-								case _ => Nil
-							}
-						case _ => Nil
-					}
-				}
-			}
-
-			val endpoint = "https://augustus.warwick.ac.uk/api/v1/index/audit"
-			val encryptedCertificate = currentApplication.encode("tabula-search-api-user", endpoint)
-
-			val req =
-				url(endpoint) <:< Map(
-					TrustedApplication.HEADER_CERTIFICATE -> encryptedCertificate.getCertificate,
-					TrustedApplication.HEADER_PROVIDER_ID -> encryptedCertificate.getProviderID,
-					TrustedApplication.HEADER_SIGNATURE -> encryptedCertificate.getSignature,
-					"Content-Type" -> "application/json"
-				) << objectMapper.writeValueAsBytes(requestMap)
-
-			http.when(_ == 200)(req >:+ handler)
+			performSearchOverHttp(query, max, sort, offset)
 		} else {
 			initialiseSearching()
 			if (searcherManager == null) {
@@ -499,7 +441,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 		}
 	}
 
-	private def acquireSearcher[A](work: IndexSearcher => A): A = {
+	private def acquireSearcher[T](work: IndexSearcher => T): T = {
 		val searcher = searcherManager.acquire
 		try work(searcher)
 		finally searcherManager.release(searcher)
@@ -609,4 +551,77 @@ trait NumericRangeQueryParsing {
 		} else {
 			self.newRangeQuery(field, part1, part2, startInclusive, endInclusive)
 		}
+}
+
+trait HttpSearching {
+	self: FieldGenerators with RichSearchResultsCreator =>
+
+	def apiIndexName: String
+
+	@Autowired var objectMapper: ObjectMapper = _
+	@Value("${toplevel.url}") var toplevelUrl: String = _
+
+	lazy val http: Http = new Http with thread.Safety {
+		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
+			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
+		}
+	}
+
+	lazy val currentApplication = new SSOConfigTrustedApplicationsManager(SSOConfiguration.getConfig).getCurrentApplication
+
+	def performSearchOverHttp(query: Query, max: Option[Int], sort: Sort, offset: Int): RichSearchResults = {
+		// Convert the request to JSON
+		val requestMap =
+			Map(
+				"queryString" -> query.toString,
+				"offset" -> offset
+			) ++
+				max.map { m => Map("max" -> m) }.getOrElse(Map()) ++
+				Option(sort).map { s => Map("sort" -> s.getSort.map { sortField =>
+					Map(
+						"field" -> sortField.getField,
+						"type" -> sortField.getType.name(),
+						"reverse" -> sortField.getReverse
+					)
+				}) }.getOrElse(Map())
+
+		def handler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
+			req >- { (json) =>
+				JSON.parseFull(json) match {
+					case Some(json: Map[String, Any] @unchecked) =>
+						json.get("results") match {
+							case Some(docs: Seq[Map[String, Any]] @unchecked) =>
+								docs.map { fields =>
+									val doc = new Document
+
+									fields.foreach { case (key, value) =>
+										doc.add(value match {
+											case s: String => plainStringField(key, s)
+											case d: Double => doubleField(key, d)
+											case n: Number => new LongField(key, n.longValue(), Store.YES)
+											case o => throw new IllegalArgumentException("Unexpected field type: " + o.getClass.getName)
+										})
+									}
+
+									doc
+								}
+							case _ => Nil
+						}
+					case _ => Nil
+				}
+			}
+		}
+
+		val endpoint = s"$toplevelUrl/api/v1/index/$apiIndexName"
+
+		val trustedAppHeaders =
+			TrustedApplicationUtils.getRequestHeaders(currentApplication, "tabula-search-api-user", endpoint)
+				.asScala.map { header => header.getName -> header.getValue }
+				.toMap
+
+		val req =
+			url(endpoint) <:< (trustedAppHeaders ++ Map("Content-Type" -> "application/json")) << objectMapper.writeValueAsBytes(requestMap)
+
+		http.when(_ == 200)(req >:+ handler)
+	}
 }

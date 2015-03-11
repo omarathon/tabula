@@ -36,6 +36,8 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 		indexer = new AuditEventIndexService
 		indexer.service = service
 		indexer.indexPath = TEMP_DIR
+		indexer.features = new FeaturesImpl
+		indexer.features.searchOnApiComponent = false
 		indexer.afterPropertiesSet
 		service.dialect = new HSQLDialect()
 	}

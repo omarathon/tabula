@@ -120,6 +120,8 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 @Component
 class ProfileIndexService extends AbstractIndexService[Member] with ProfileQueryMethods with Logging {
 
+	final val apiIndexName = "profile"
+
 	// largest batch of items we'll load in at once.
 	final override val MaxBatchSize = 100000
 

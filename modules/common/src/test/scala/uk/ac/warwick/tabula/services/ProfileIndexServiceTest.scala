@@ -13,7 +13,7 @@ import org.junit.{After, Before}
 import org.springframework.transaction.annotation.Transactional
 import org.scalatest.concurrent.AsyncAssertions
 
-import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures, Mockito}
+import uk.ac.warwick.tabula.{FeaturesImpl, PersistenceTestBase, Fixtures, Mockito}
 import uk.ac.warwick.tabula.data.MemberDaoImpl
 import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.data.model.StudentMember
@@ -33,6 +33,8 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 		dao.sessionFactory = sessionFactory
 		indexer.dao = dao
 		indexer.indexPath = TEMP_DIR
+		indexer.features = new FeaturesImpl
+		indexer.features.searchOnApiComponent = false
 		indexer.searcherManager = null
 		indexer.afterPropertiesSet()
 	}
