@@ -51,7 +51,7 @@ class EmailingExceptionHandlerTest extends TestBase with Mockito {
 			
 			handler.exception(context)
 			
-			there was one(mailSender).send(mimeMessage)
+			verify(mailSender, times(1)).send(mimeMessage)
 			
 			val text = mimeMessage.getContent match {
 				case string: String => string

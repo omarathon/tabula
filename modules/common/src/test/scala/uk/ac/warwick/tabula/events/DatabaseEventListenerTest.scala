@@ -32,13 +32,13 @@ class DatabaseEventListenerTest extends TestBase with Mockito {
 		)
 		
 		listener.beforeCommand(event)
-		there was one(auditEventService).save(event, "before")
+		verify(auditEventService, times(1)).save(event, "before")
 		
 		listener.afterCommand(event, Fixtures.assignment("my assignment"))
-		there was one(auditEventService).save(event, "after")
+		verify(auditEventService, times(1)).save(event, "after")
 		
 		listener.onException(event, new ItemNotFoundException)
-		there was one(auditEventService).save(event, "error")
+		verify(auditEventService, times(1)).save(event, "error")
 	}
 	
 	@Test def maintenanceMode {
@@ -50,21 +50,21 @@ class DatabaseEventListenerTest extends TestBase with Mockito {
 		)
 		
 		listener.beforeCommand(event)
-		there was no(auditEventService).save(event, "before")
+		verify(auditEventService, times(0)).save(event, "before")
 		
 		listener.afterCommand(event, Fixtures.assignment("my assignment"))
-		there was no(auditEventService).save(event, "after")
+		verify(auditEventService, times(0)).save(event, "after")
 		
 		listener.onException(event, new ItemNotFoundException)
-		there was no(auditEventService).save(event, "error")
+		verify(auditEventService, times(0)).save(event, "error")
 		
 		// Ho ho ho, magic time - observation deck!
 		maintenanceModeService.disable
 		
 		// That should flush the 3 events to the db
-		there was one(auditEventService).save(event, "before")
-		there was one(auditEventService).save(event, "after")
-		there was one(auditEventService).save(event, "error")
+		verify(auditEventService, times(1)).save(event, "before")
+		verify(auditEventService, times(1)).save(event, "after")
+		verify(auditEventService, times(1)).save(event, "error")
 	}
 
 }

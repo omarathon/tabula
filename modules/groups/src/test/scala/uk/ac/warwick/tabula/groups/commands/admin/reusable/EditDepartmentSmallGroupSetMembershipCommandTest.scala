@@ -124,7 +124,7 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.SmallGroups.Update, set)
+		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Update, set)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {

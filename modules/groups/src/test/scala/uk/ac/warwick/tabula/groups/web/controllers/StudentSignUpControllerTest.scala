@@ -25,7 +25,7 @@ class StudentSignUpControllerTest extends TestBase with Mockito {
 		val controller = new StudentSignUpController
 		val command = mock[Appliable[SmallGroupSet]]
 		controller.signUp(command, new BindException(command, "command")).viewName should be("redirect:/groups/")
-		there was one(command).apply
+		verify(command, times(1)).apply
 	}
 
 	@Test
@@ -45,6 +45,6 @@ class StudentSignUpControllerTest extends TestBase with Mockito {
 		val controller = new StudentUnSignUpController
 		val command = mock[Appliable[SmallGroupSet]]
 		controller.signUp(command, new BindException(command, "command")).viewName should be("redirect:/groups/")
-		there was one(command).apply
+		verify(command, times(1)).apply
 	}
 }

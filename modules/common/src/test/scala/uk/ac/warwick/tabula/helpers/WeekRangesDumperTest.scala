@@ -38,7 +38,7 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 			dumper.departmentService.getDepartmentByCode(null) returns None
 			dumper.getWeekRangesAsJSON(null) // don't need a formatter as we're not returning any rows
 
-			there was one(dumper.termService).getAcademicWeeksBetween(TEST_TIME.minusYears(2), TEST_TIME.plusYears(2))
+			verify(dumper.termService, times(1)).getAcademicWeeksBetween(TEST_TIME.minusYears(2), TEST_TIME.plusYears(2))
 	}}}
 
 	@Test

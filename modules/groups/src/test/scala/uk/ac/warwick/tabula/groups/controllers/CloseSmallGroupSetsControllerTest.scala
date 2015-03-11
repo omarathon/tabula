@@ -83,7 +83,7 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
 
 		model.applyCommand(new User)
 
-		there was one(mockCommand).apply()
+		verify(mockCommand, times(1)).apply()
 	}
 
 

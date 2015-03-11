@@ -21,7 +21,7 @@ class ViewModuleRegistrationsCommandTest extends TestBase with Mockito {
 
 		val checking = mock[PermissionsChecking]
 		perms.permissionsCheck(checking)
-		there was one(checking).PermissionCheck(Profiles.Read.ModuleRegistration.Core, scd)
+		verify(checking, times(1)).PermissionCheck(Profiles.Read.ModuleRegistration.Core, scd)
 	}
 
 	@Test

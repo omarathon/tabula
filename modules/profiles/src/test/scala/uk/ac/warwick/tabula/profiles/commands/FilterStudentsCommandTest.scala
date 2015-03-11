@@ -76,7 +76,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 		val expectedRestrictions = Seq()
 
-		there was one(command.profileService).findStudentsByRestrictions(
+		verify(command.profileService, times(1)).findStudentsByRestrictions(
 			isEq(department),
 			anArgThat(seqToStringMatches(expectedRestrictions)),
 			anArgThat(seqToStringMatches(Seq(ScalaOrder.asc("lastName"), ScalaOrder.asc("firstName")))),
@@ -141,7 +141,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 			modRestriction
 		) ++ command.latestStudentCourseYearDetailsForYearRestrictions(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 
-		there was one(command.profileService).findStudentsByRestrictions(
+		verify(command.profileService, times(1)).findStudentsByRestrictions(
 			isEq(department),
 			anArgThat(seqToStringMatches(expectedRestrictions)),
 			anArgThat(seqToStringMatches(Seq(ScalaOrder.asc("lastName"), ScalaOrder.asc("firstName")))),
@@ -170,7 +170,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 			ScalaOrder.asc("firstName")
 		)
 
-		there was one(command.profileService).findStudentsByRestrictions(
+		verify(command.profileService, times(1)).findStudentsByRestrictions(
 			isEq(department),
 			anArgThat(seqToStringMatches(expectedRestrictions)),
 			anArgThat(seqToStringMatches(expectedOrders)),

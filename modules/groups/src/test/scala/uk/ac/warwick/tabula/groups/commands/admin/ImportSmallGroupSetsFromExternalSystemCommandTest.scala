@@ -179,8 +179,8 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 	@Test def apply { new CommandFixture with FixtureWithSingleSeminarForYear {
 		val sets = command.applyInternal()
 
-		there was one (command.smallGroupService).saveOrUpdate(any[SmallGroupSet])
-		there were two (command.smallGroupService).saveOrUpdate(any[SmallGroup])
+		verify(command.smallGroupService, times(1)).saveOrUpdate(any[SmallGroupSet])
+		verify(command.smallGroupService, times(2)).saveOrUpdate(any[SmallGroup])
 
 		sets.size should be (1)
 
@@ -254,21 +254,21 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.SmallGroups.ImportFromExternalSystem, department)
+		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.ImportFromExternalSystem, department)
 	}}
 
 	@Test def noPermissions { new PermissionsFixture with DepartmentalAdministratorPermissions {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.SmallGroups.ImportFromExternalSystem, department)
+		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.ImportFromExternalSystem, department)
 	}}
 
 	@Test def moduleManagerPermissions { new PermissionsFixture with ModuleManagerPermissions {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheckAll(Permissions.SmallGroups.ImportFromExternalSystem, Seq(module1, module2))
+		verify(checking, times(1)).PermissionCheckAll(Permissions.SmallGroups.ImportFromExternalSystem, Seq(module1, module2))
 	}}
 
 	@Test def description {

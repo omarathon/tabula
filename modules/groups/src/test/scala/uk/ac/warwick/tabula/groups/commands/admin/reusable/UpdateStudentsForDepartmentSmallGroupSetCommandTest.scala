@@ -93,7 +93,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
 		set.members.knownType.excludedUserIds should be (Seq("0000004"))
 		set.memberQuery should be ("sprStatuses=C")
 
-		there was one (command.smallGroupService).saveOrUpdate(set)
+		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 	}}
 
 	@Test def dontLinkToSits { new CommandFixture {
@@ -113,7 +113,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
 		set.members.knownType.excludedUserIds should be ('empty)
 		set.memberQuery should be ('empty)
 
-		there was one (command.smallGroupService).saveOrUpdate(set)
+		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 	}}
 
 	@Test def autoDeregistration { new CommandFixture {
@@ -146,7 +146,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
 		groupA.students.knownType.includedUserIds should be (Seq("0000001", "0000002"))
 		groupB.students.knownType.includedUserIds should be (Seq("0000003")) // 4 has been removed
 
-		there was one (command.smallGroupService).saveOrUpdate(set)
+		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 	}}
 
 	@Test def permissions { new Fixture {
@@ -159,7 +159,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.SmallGroups.Update, set)
+		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Update, set)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {

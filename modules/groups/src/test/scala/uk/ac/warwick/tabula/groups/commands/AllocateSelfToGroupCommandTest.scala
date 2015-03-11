@@ -80,7 +80,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 		perms.group = testGroup
 		val permissionsChecking = mock[PermissionsChecking]
 		perms.permissionsCheck(permissionsChecking)
-		there was one(permissionsChecking).PermissionCheck(Permissions.SmallGroups.AllocateSelf,testGroup.groupSet)
+		verify(permissionsChecking, times(1)).PermissionCheck(Permissions.SmallGroups.AllocateSelf,testGroup.groupSet)
 	}}
 
 	private trait ValidatorFixture extends Fixture{
@@ -108,7 +108,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 
 		signUpValidator.validate(errors)
 
-		there was no (errors).reject(any[String])
+		verify(errors, times(0)).reject(any[String])
 
 
 		testGroup.maxGroupSize = 0
@@ -116,7 +116,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 		testGroup should be ('full)
 
 		signUpValidator.validate(errors)
-		there was one (errors).reject("smallGroup.full")
+		verify(errors, times(1)).reject("smallGroup.full")
 	}}
 
 	@Test
@@ -124,12 +124,12 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 
 		signUpValidator.validate(errors)
 
-		there was no (errors).reject(any[String])
+		verify(errors, times(0)).reject(any[String])
 
 		testGroupSet.openForSignups = false
 
 		signUpValidator.validate(errors)
-		there was one (errors).reject("smallGroup.closed")
+		verify(errors, times(1)).reject("smallGroup.closed")
 	}}
 
 	@Test
@@ -137,12 +137,12 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 
 		signUpValidator.validate(errors)
 
-		there was no (errors).reject(any[String])
+		verify(errors, times(0)).reject(any[String])
 
 		testGroupSet.allocationMethod = Manual
 
 		signUpValidator.validate(errors)
-		there was one (errors).reject("smallGroup.notStudentSignUp")
+		verify(errors, times(1)).reject("smallGroup.notStudentSignUp")
 	}}
 
 	@Test
@@ -150,13 +150,13 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 
 		unsignUpValidator.validate(errors)
 
-		there was no (errors).reject(any[String])
+		verify(errors, times(0)).reject(any[String])
 
 
 		testGroupSet.allowSelfGroupSwitching = false
 
 		unsignUpValidator.validate(errors)
-		there was one (errors).reject("smallGroup.noSwitching")
+		verify(errors, times(1)).reject("smallGroup.noSwitching")
 	}}
 
 	@Test
@@ -164,12 +164,12 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 
 		unsignUpValidator.validate(errors)
 
-		there was no (errors).reject(any[String])
+		verify(errors, times(0)).reject(any[String])
 
 		testGroupSet.openForSignups = false
 
 		unsignUpValidator.validate(errors)
-		there was one (errors).reject("smallGroup.closed")
+		verify(errors, times(1)).reject("smallGroup.closed")
 	}}
 
 	@Test
@@ -177,12 +177,12 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 
 		unsignUpValidator.validate(errors)
 
-		there was no (errors).reject(any[String])
+		verify(errors, times(0)).reject(any[String])
 
 		testGroupSet.allocationMethod = Manual
 
 		unsignUpValidator.validate(errors)
-		there was one (errors).reject("smallGroup.notStudentSignUp")
+		verify(errors, times(1)).reject("smallGroup.notStudentSignUp")
 	}}
 
 

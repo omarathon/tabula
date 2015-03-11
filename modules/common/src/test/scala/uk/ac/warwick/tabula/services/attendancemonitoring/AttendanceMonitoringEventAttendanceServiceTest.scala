@@ -99,7 +99,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 	def updatesCheckpoint() { new Fixture {
 		service.getCheckpoints(Seq(attendance)).size should be (1)
 		service.updateCheckpoints(Seq(attendance))
-		there was one (service.attendanceMonitoringService).setAttendance(student, Map(smallGroupPoint -> AttendanceState.Attended), attendance.updatedBy, autocreated = true)
+		verify(service.attendanceMonitoringService, times(1)).setAttendance(student, Map(smallGroupPoint -> AttendanceState.Attended), attendance.updatedBy, autocreated = true)
 	}}
 
 	@Test
@@ -118,7 +118,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 		service.getCheckpoints(Seq(attendance)).size should be (1)
 
 		service.updateCheckpoints(Seq(attendance))
-		there was one (service.attendanceMonitoringService).setAttendance(student, Map(smallGroupPoint -> AttendanceState.Attended), attendance.updatedBy, autocreated = true)
+		verify(service.attendanceMonitoringService, times(1)).setAttendance(student, Map(smallGroupPoint -> AttendanceState.Attended), attendance.updatedBy, autocreated = true)
 	}}
 
 	@Test
@@ -129,7 +129,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 		service.getCheckpoints(Seq(attendance)).size should be (1)
 
 		service.updateCheckpoints(Seq(attendance))
-		there was one (service.attendanceMonitoringService).setAttendance(student, Map(smallGroupPoint -> AttendanceState.Attended), attendance.updatedBy, autocreated = true)
+		verify(service.attendanceMonitoringService, times(1)).setAttendance(student, Map(smallGroupPoint -> AttendanceState.Attended), attendance.updatedBy, autocreated = true)
 	}}
 
 	@Test

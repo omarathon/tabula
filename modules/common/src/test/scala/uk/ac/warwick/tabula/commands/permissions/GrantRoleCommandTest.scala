@@ -53,9 +53,9 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		grantedRole.users.knownType.includesUserId("cuscao") should be (false)
 		grantedRole.scope should be (department)
 
-		there was one (command.permissionsService).saveOrUpdate(any[GrantedRole[Department]])
-		there was atLeastOne (command.permissionsService).clearCachesForUser(("cuscav", classTag[Department]))
-		there was atLeastOne (command.permissionsService).clearCachesForUser(("cusebr", classTag[Department]))
+		verify(command.permissionsService, times(1)).saveOrUpdate(any[GrantedRole[Department]])
+		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cuscav", classTag[Department]))
+		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cusebr", classTag[Department]))
 	}}
 	
 	@Test def itWorksWithExisting { new Fixture {
@@ -80,9 +80,9 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		grantedRole.users.knownType.includesUserId("cuscao") should be (true)
 		grantedRole.scope should be (department)
 
-		there was one (command.permissionsService).saveOrUpdate(existing)
-		there was atLeastOne (command.permissionsService).clearCachesForUser(("cuscav", classTag[Department]))
-		there was atLeastOne (command.permissionsService).clearCachesForUser(("cusebr", classTag[Department]))
+		verify(command.permissionsService, times(1)).saveOrUpdate(existing)
+		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cuscav", classTag[Department]))
+		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cusebr", classTag[Department]))
 	}}
 	
 	@Test def validatePasses { withUser("cuscav", "0672089") { new Fixture {

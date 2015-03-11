@@ -185,7 +185,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 		command.monitoringPointService.saveOrUpdateCheckpointByMember(student4, point2, AttendanceState.Attended, agentMember) returns student4Point
 
 		command.applyInternal() should be (Seq(student4Point))
-		there was one (command.monitoringPointService).deleteCheckpoint(student1, point1)
+		verify(command.monitoringPointService, times(1)).deleteCheckpoint(student1, point1)
 	}}
 
 	trait ValidationFixture extends AgentPointRecordWorld
@@ -199,7 +199,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 
 		errors.hasErrors should be (false)
 		// TAB-2025
-		there was no(command.termService).getTermFromAcademicWeek(any[Int], any[AcademicYear], any[Boolean])
+		verify(command.termService, times(0)).getTermFromAcademicWeek(any[Int], any[AcademicYear], any[Boolean])
 	}}
 
 	@Test def rejectPointNotInSet() { new ValidationFixture {
@@ -259,8 +259,8 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
-		there was one(checking).PermissionCheck(Permissions.Profiles.StudentRelationship.Read(tutorType), agentMember)
-		there was one(checking).PermissionCheckAll(Permissions.MonitoringPoints.Record, allStudents)
+		verify(checking, times(1)).PermissionCheck(Permissions.Profiles.StudentRelationship.Read(tutorType), agentMember)
+		verify(checking, times(1)).PermissionCheckAll(Permissions.MonitoringPoints.Record, allStudents)
 	}}
 
 	@Test

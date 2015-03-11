@@ -175,7 +175,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.SmallGroups.Allocate, set)
+		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Allocate, set)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {

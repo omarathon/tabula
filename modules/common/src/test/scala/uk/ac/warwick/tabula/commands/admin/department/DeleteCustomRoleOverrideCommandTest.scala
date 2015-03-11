@@ -47,7 +47,7 @@ class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
 		command.applyInternal() should be (roleOverride)
 		customRole.overrides.asScala should be ('empty)
 
-		there was one (command.permissionsService).saveOrUpdate(customRole)
+		verify(command.permissionsService, times(1)).saveOrUpdate(customRole)
 	}}
 
 	@Test def permissions { new Fixture {
@@ -63,7 +63,7 @@ class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.RolesAndPermissions.Delete, roleOverride)
+		verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.Delete, roleOverride)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def noDepartment { new Fixture {

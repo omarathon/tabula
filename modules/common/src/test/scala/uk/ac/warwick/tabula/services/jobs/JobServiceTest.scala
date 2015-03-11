@@ -13,7 +13,7 @@ class JobServiceTest extends TestBase with Mockito {
 		service.jobs = Array(new TestingJob)
 		jobDao.findOutstandingInstance(any[JobInstanceImpl]) returns None
 		val inst = service.add(None, TestingJob("job"))
-		there was one(jobDao).saveJob(inst)
+		verify(jobDao, times(1)).saveJob(inst)
 	}
 	
 	@Test def run() = withUser("cuscav") {
@@ -26,13 +26,13 @@ class JobServiceTest extends TestBase with Mockito {
 		service.jobs = Array(job)
 		
 		val inst = service.add(Some(currentUser), TestingJob("job", 50))
-		there was one(jobDao).saveJob(inst)
+		verify(jobDao, times(1)).saveJob(inst)
 		
 		jobDao.findOutstandingInstances(10) returns Seq(inst)
 
 		service.run()
 		
-		there was atLeastOne(jobDao).update(inst)
+		verify(jobDao, atLeast(1)).update(inst)
 		
 		inst.finished should be {true}
 		inst.progress should be (100)
@@ -55,13 +55,13 @@ class JobServiceTest extends TestBase with Mockito {
 		service.jobs = Array(job)
 		
 		val inst = service.add(Some(currentUser), TestingJob("job"))
-		there was one(jobDao).saveJob(inst)
+		verify(jobDao, times(1)).saveJob(inst)
 		
 		jobDao.findOutstandingInstances(10) returns Seq(inst)
 		
 		service.kill(inst)
 		
-		there was atLeastOne(jobDao).update(inst)
+		verify(jobDao, atLeast(1)).update(inst)
 		
 		inst.progress should be (0)
 		inst.status should be ("Killed")

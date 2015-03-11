@@ -33,7 +33,7 @@ class DismissHiddenIntroCommandTest extends TestBase with Mockito {
 		
 		settings.hiddenIntros should be (Seq("hash"))
 		
-		there was one (service).save(user, settings)
+		verify(service, times(1)).save(user, settings)
 	}
 	
 	@Test def dismissExisting {
@@ -48,7 +48,7 @@ class DismissHiddenIntroCommandTest extends TestBase with Mockito {
 		
 		settings.hiddenIntros should be (Seq("hash", "otherhash"))
 		
-		there was one (service).save(user, settings)
+		verify(service, times(1)).save(user, settings)
 	}
 	
 	@Test def undismissExisting {
@@ -63,7 +63,7 @@ class DismissHiddenIntroCommandTest extends TestBase with Mockito {
 		
 		settings.hiddenIntros should be (Seq("otherhash"))
 		
-		there was one (service).save(user, settings)
+		verify(service, times(1)).save(user, settings)
 	}
 	
 	@Test def undismissNonExisting {
@@ -78,7 +78,7 @@ class DismissHiddenIntroCommandTest extends TestBase with Mockito {
 		
 		settings.hiddenIntros should be (Seq("otherhash"))
 		
-		there was one (service).save(user, settings)
+		verify(service, times(1)).save(user, settings)
 	}
 
 }

@@ -33,7 +33,7 @@ class AddCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 		created.canDelegateThisRolesPermissions.booleanValue() should be (true)
 		created.department should be (department)
 
-		there was one (command.permissionsService).saveOrUpdate(created)
+		verify(command.permissionsService, times(1)).saveOrUpdate(created)
 	}}
 
 	@Test def permissions {
@@ -44,7 +44,7 @@ class AddCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.RolesAndPermissions.Create, command.department)
+		verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.Create, command.department)
 	}
 
 	@Test(expected = classOf[ItemNotFoundException]) def noDepartment {

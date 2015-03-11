@@ -59,9 +59,9 @@ class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 		)
 		result.size should be (1)
 		result.head should be (missedCheckpoint)
-		there was one (service.attendanceMonitoringDao).removeCheckpoints(Seq(authorisedCheckpoint))
-		there was one (service.attendanceMonitoringDao).saveOrUpdateCheckpoints(Seq(missedCheckpoint))
-		there was one (service.attendanceMonitoringDao).saveOrUpdate(any[AttendanceMonitoringCheckpointTotal])
+		verify(service.attendanceMonitoringDao, times(1)).removeCheckpoints(Seq(authorisedCheckpoint))
+		verify(service.attendanceMonitoringDao, times(1)).saveOrUpdateCheckpoints(Seq(missedCheckpoint))
+		verify(service.attendanceMonitoringDao, times(1)).saveOrUpdate(any[AttendanceMonitoringCheckpointTotal])
 	}}}
 
 	@Test
@@ -79,7 +79,7 @@ class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 			department,
 			AcademicYear(2014)
 		)
-		there was one (service.attendanceMonitoringDao).saveOrUpdate(result)
+		verify(service.attendanceMonitoringDao, times(1)).saveOrUpdate(result)
 		result.attended should be (1)
 		result.unauthorised should be (1)
 		result.authorised should be (1)

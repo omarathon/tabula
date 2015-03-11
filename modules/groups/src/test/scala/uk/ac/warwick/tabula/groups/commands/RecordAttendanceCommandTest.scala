@@ -49,8 +49,8 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		command.studentsState.put("1234567", AttendanceState.Attended)
 		command.applyInternal()
 
-		there was no(command.userLookup).getUsersByUserIds(Seq("abcde").asJava)
-		there was one(command.smallGroupService).saveOrUpdateAttendance("1234567", event, week, AttendanceState.Attended, currentUser)
+		verify(command.userLookup, times(0)).getUsersByUserIds(Seq("abcde").asJava)
+		verify(command.smallGroupService, times(1)).saveOrUpdateAttendance("1234567", event, week, AttendanceState.Attended, currentUser)
 	}
 	
 	trait Fixture {

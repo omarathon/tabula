@@ -25,7 +25,7 @@ class ScheduledMeetingRecordMissedCommandTest  extends TestBase with Mockito {
 		command.missedReason = missedReason
 		val scheduledMeeting = command.applyInternal()
 
-		there was one(mockMeetingRecordService).saveOrUpdate(scheduledMeetingRecord)
+		verify(mockMeetingRecordService, times(1)).saveOrUpdate(scheduledMeetingRecord)
 		scheduledMeeting.missed should be (true)
 		scheduledMeeting.missedReason should be (missedReason)
 

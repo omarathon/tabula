@@ -52,7 +52,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
 		))
 		
 		val result = cmd.applyInternal
-		there was no (securityService).can(isA[CurrentUser], isA[Permission], isA[PermissionsTarget])
+		verify(securityService, times(0)).can(isA[CurrentUser], isA[Permission], isA[PermissionsTarget])
 		
 		result.canDo should be (false)
 		result.permissions should be (Seq(pd1, pd2))

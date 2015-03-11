@@ -106,9 +106,9 @@ class SortRoutesCommandTest extends TestBase with Mockito {
 		ugDepartment.routes.asScala.toSet should be (Set(route1, route3, route4, route5))
 		pgDepartment.routes.asScala.toSet should be (Set(route2, route6, route7))
 
-		there was one (command.moduleAndDepartmentService).save(department)
-		there was one (command.moduleAndDepartmentService).save(ugDepartment)
-		there was one (command.moduleAndDepartmentService).save(pgDepartment)
+		verify(command.moduleAndDepartmentService, times(1)).save(department)
+		verify(command.moduleAndDepartmentService, times(1)).save(ugDepartment)
+		verify(command.moduleAndDepartmentService, times(1)).save(pgDepartment)
 	}}
 
 	trait ValidationFixture extends SortRoutesWorld {
@@ -170,7 +170,7 @@ class SortRoutesCommandTest extends TestBase with Mockito {
 
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
-		there was one(checking).PermissionCheck(Permissions.Department.ArrangeRoutesAndModules, dept)
+		verify(checking, times(1)).PermissionCheck(Permissions.Department.ArrangeRoutesAndModules, dept)
 	}
 
 	@Test
