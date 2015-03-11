@@ -71,7 +71,7 @@ trait QueryHelpers[A] { self: AbstractIndexService[A] =>
 	def termQuery(name: String, value: String) = new TermQuery(new Term(name, value))
 	def term(pair: (String, String)) = new TermQuery(new Term(pair._1, pair._2))
 
-	def dateRange(min: DateTime, max: DateTime) = NumericRangeQuery.newLongRange(UpdatedDateField, min.getMillis, max.getMillis, true, true)
+	def dateRange(min: DateTime, max: Option[DateTime] = None) = NumericRangeQuery.newLongRange(UpdatedDateField, min.getMillis, max.map { _.getMillis: java.lang.Long }.orNull, true, true)
 	def dateSort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, false))
 	def reverseDateSort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, true))
 }

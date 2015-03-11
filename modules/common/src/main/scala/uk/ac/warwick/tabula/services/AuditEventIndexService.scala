@@ -57,7 +57,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 	private def assignmentRangeRestriction(assignment: Assignment, referenceDate: Option[DateTime]) = referenceDate match {
 		case Some(createdDate) => all(
 			termQuery("assignment", assignment.id),
-			dateRange(createdDate, DateTime.now)
+			dateRange(createdDate)
 		)
 		case _ => termQuery("assignment", assignment.id)
 	}
