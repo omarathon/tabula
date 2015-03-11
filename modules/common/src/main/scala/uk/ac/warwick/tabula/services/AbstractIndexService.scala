@@ -10,7 +10,7 @@ import org.apache.lucene.analysis._
 import org.apache.lucene.document.Field._
 import org.apache.lucene.document._
 import org.apache.lucene.index._
-import org.apache.lucene.queryparser.classic.QueryParser
+import org.apache.lucene.queryparser.classic.{QueryParserBase, QueryParser}
 import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search._
 import org.apache.lucene.store.{Directory, FSDirectory}
@@ -152,7 +152,7 @@ abstract class AbstractIndexService[A]
 	def guardMultipleIndexes(work: => Unit) = this.synchronized(work)
 
 	// QueryParser isn't thread safe, hence why this is a def
-	def parser = new QueryParser("", analyzer)
+	def parser = new NumericRangeQueryParser(Seq(UpdatedDateField), "", analyzer)
 
 
 	override def afterPropertiesSet() {
@@ -442,31 +442,45 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 					)
 				}) }.getOrElse(Map())
 
-			val requestBody = new ByteArrayEntity(objectMapper.writeValueAsBytes(requestMap), ContentType.APPLICATION_JSON)
-
 			def handler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 				req >- { (json) =>
-					Seq.empty[Document]
-					//					JSON.parseFull(json) match {
-					////						case Some(locations: Seq[Map[String, Any]] @unchecked) => locations.flatMap(WAI2GoLocation.fromProperties)
-					//						case _ => Nil
-					//					}
+					JSON.parseFull(json) match {
+						case Some(json: Map[String, Any] @unchecked) =>
+							json.get("results") match {
+								case Some(docs: Seq[Map[String, Any]] @unchecked) =>
+									docs.map { fields =>
+										val doc = new Document
+
+										fields.foreach { case (key, value) =>
+											doc.add(value match {
+												case s: String => plainStringField(key, s)
+												case d: Double => doubleField(key, d)
+												case n: Number => new LongField(key, n.longValue(), Store.YES)
+												case o => throw new IllegalArgumentException("Unexpected field type: " + o.getClass.getName)
+											})
+										}
+
+										doc
+									}
+								case _ => Nil
+							}
+						case _ => Nil
+					}
 				}
 			}
 
 			val endpoint = "https://augustus.warwick.ac.uk/api/v1/index/audit"
-			val encryptedCertificate = currentApplication.encode("tabula", endpoint)
+			val encryptedCertificate = currentApplication.encode("tabula-search-api-user", endpoint)
 
 			val req =
-				(url(endpoint) <:< Map(
+				url(endpoint) <:< Map(
 					TrustedApplication.HEADER_CERTIFICATE -> encryptedCertificate.getCertificate,
 					TrustedApplication.HEADER_PROVIDER_ID -> encryptedCertificate.getProviderID,
-					TrustedApplication.HEADER_SIGNATURE -> encryptedCertificate.getSignature
-				)).copy(body = Some(requestBody))
+					TrustedApplication.HEADER_SIGNATURE -> encryptedCertificate.getSignature,
+					"Content-Type" -> "application/json"
+				) << objectMapper.writeValueAsBytes(requestMap)
 
-			http.when(_ == 200)(req >:+ handler)
-
-			???
+			http.when(_ != 500)(req >:+ handler)
 		} else {
 			initialiseSearching()
 			if (searcherManager == null) {
@@ -575,4 +589,20 @@ trait FieldGenerators {
 	protected def doubleField(name: String, value: Double) = new DoubleField(name, value, Store.YES)
 
 	protected def booleanField(name: String, value: Boolean) = new TextField(name, value.toString, Store.YES)
+}
+
+class NumericRangeQueryParser(numericFields: Seq[String], delegate: QueryParser) extends QueryParserBase {
+
+	override def newRangeQuery(field: String, part1: String, part2: String, startInclusive: Boolean, endInclusive: Boolean): Query =
+		if (numericFields.contains(field)) {
+			val min: Option[java.lang.Long] = Option(part1).map(_.toLong)
+			val max: Option[java.lang.Long] = Option(part2).map(_.toLong)
+
+			NumericRangeQuery.newLongRange(field, min.orNull[java.lang.Long], max.orNull[java.lang.Long], startInclusive, endInclusive)
+		} else {
+			delegate.newRangeQuery(field, part1, part2, startInclusive, endInclusive)
+		}
+
+
+
 }
