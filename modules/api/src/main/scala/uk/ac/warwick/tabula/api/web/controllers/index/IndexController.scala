@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.api.web.controllers.index
 
+import java.io.{ObjectInputStream, ByteArrayInputStream}
 import javax.servlet.http.HttpServletResponse
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.apache.lucene.queryparser.classic.ParseException
-import org.apache.lucene.search.{SortField, Sort, Query}
+import org.apache.lucene.search.{LuceneQuerySerializer, SortField, Sort, Query}
+import org.bouncycastle.util.encoders.Base64
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -23,8 +25,6 @@ import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
 
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
-import scala.pickling.Defaults._
-import scala.pickling.json._
 
 import IndexController._
 
@@ -148,10 +148,13 @@ trait SearchLuceneIndexPermissions extends RequiresPermissionsChecking with Perm
 @JsonAutoDetect
 class SearchIndexRequest[A <: SearchLuceneIndexState] extends JsonApiRequest[A] {
 	@BeanProperty var queryString: String = _
-	@BeanProperty var queryPickled: String = _
+	@BeanProperty var querySerialized: String = _
 	@BeanProperty var sort: JList[JMap[String, _]] = JArrayList()
 	@BeanProperty var max: Int = -1
 	@BeanProperty var offset: Int = 0
+
+	@transient
+	lazy val serializer = new LuceneQuerySerializer
 
 	override def copyTo(state: A, errors: Errors) {
 		queryString.maybeText.foreach { queryString =>
@@ -162,8 +165,11 @@ class SearchIndexRequest[A <: SearchLuceneIndexState] extends JsonApiRequest[A] 
 			}
 		}
 
-		queryPickled.maybeText.foreach { queryPickled =>
-			state.query = JSONPickle(queryPickled).unpickle[Query]
+		querySerialized.maybeText.foreach { querySerialized =>
+			val bis: ByteArrayInputStream = new ByteArrayInputStream(Base64.decode(querySerialized))
+			val ois: ObjectInputStream = new ObjectInputStream(bis)
+			state.query = serializer.readQuery(ois)
+			ois.close
 		}
 
 		if (max >= 0) {

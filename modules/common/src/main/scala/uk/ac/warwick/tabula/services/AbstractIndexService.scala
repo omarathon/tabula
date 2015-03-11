@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import java.io.{Closeable, File, FileNotFoundException}
+import java.io._
 import com.fasterxml.jackson.databind.ObjectMapper
 import dispatch.classic.thread.ThreadSafeHttpClient
 import dispatch.classic.{url, thread, Http}
@@ -14,6 +14,7 @@ import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search._
 import org.apache.lucene.store.{Directory, FSDirectory}
 import org.apache.lucene.util.BytesRef
+import org.bouncycastle.util.encoders.Base64
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.springframework.beans.factory.annotation._
@@ -33,8 +34,6 @@ import org.springframework.beans.factory.DisposableBean
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import language.implicitConversions
-import scala.pickling.Defaults._
-import scala.pickling.json._
 import scala.util.parsing.json.JSON
 import scala.collection.JavaConverters._
 
@@ -568,12 +567,18 @@ trait HttpSearching {
 	}
 
 	lazy val currentApplication = new SSOConfigTrustedApplicationsManager(SSOConfiguration.getConfig).getCurrentApplication
+	lazy val serializer = new LuceneQuerySerializer
 
 	def performSearchOverHttp(query: Query, max: Option[Int], sort: Sort, offset: Int): RichSearchResults = {
+		val bos: ByteArrayOutputStream = new ByteArrayOutputStream
+		val oos: ObjectOutputStream = new ObjectOutputStream(bos)
+		serializer.writeQuery(oos, query)
+		oos.close
+
 		// Convert the request to JSON
 		val requestMap =
 			Map(
-				"queryPickled" -> query.pickle.value,
+				"querySerialized" -> new String(Base64.encode(bos.toByteArray), "UTF-8"),
 				"offset" -> offset
 			) ++
 				max.map { m => Map("max" -> m) }.getOrElse(Map()) ++
