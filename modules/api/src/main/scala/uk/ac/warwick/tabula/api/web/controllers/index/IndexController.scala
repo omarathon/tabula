@@ -47,7 +47,7 @@ trait SearchLuceneIndexApi {
 	def command(): SearchIndexCommand =
 		SearchLuceneIndexCommand(indexService)
 
-	@RequestMapping(method = Array(GET), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
+	@RequestMapping(method = Array(GET, POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
 	def search(@RequestBody request: SearchIndexRequest[SearchLuceneIndexState], @ModelAttribute("searchCommand") command: SearchIndexCommand, errors: Errors)(implicit response: HttpServletResponse) = {
 		request.copyTo(command, errors)
 		command.validate(errors)

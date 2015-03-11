@@ -267,6 +267,8 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
  */
 @Component
 class AuditEventIndexService extends AbstractIndexService[AuditEvent] with AuditEventQueryMethods {
+	final val apiIndexName = "audit"
+
 	// largest batch of event items we'll load in at once.
 	final override val MaxBatchSize = 100000
 

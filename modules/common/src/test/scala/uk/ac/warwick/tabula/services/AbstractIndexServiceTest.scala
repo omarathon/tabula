@@ -105,12 +105,15 @@ class AbstractIndexServiceTest extends TestBase {
 		* Indexes a simple case class with a name and a date field.
 		*/
 	class MockIndexService extends AbstractIndexService[Item] with RAMDirectoryOverride {
+		val apiIndexName = "mock"
 		val MaxBatchSize: Int = 1000
 		val IncrementalBatchSize: Int = 1000
 
 		val analyzer: Analyzer = new StandardAnalyzer
 		val UpdatedDateField: String = "date"
 		val IdField: String = "name"
+
+		override val searchOverHttp = false
 
 		protected def listNewerThan(startDate: DateTime, batchSize: Int): Seq[Item] = ???
 		protected def getUpdatedDate(item: Item): DateTime = item.date

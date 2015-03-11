@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
+import uk.ac.warwick.tabula.{FeaturesImpl, Mockito, Fixtures, TestBase}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.{HeronDefeatedNotification, Heron, Notification, NotificationPriority, HeronWarningNotification}
 import org.apache.lucene.store.RAMDirectory
@@ -18,6 +18,8 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 		private val directory = new RAMDirectory()
 		protected override def openDirectory() = directory
 	}
+	service.features = new FeaturesImpl
+	service.features.searchOnApiComponent = false
 
 	val dao = smartMock[NotificationDao]
 	service.dao = dao

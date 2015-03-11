@@ -6,9 +6,11 @@ import org.apache.lucene.queryparser.classic.MultiFieldQueryParser
 import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search.{BooleanQuery, PhraseQuery, Query, TermQuery, WildcardQuery}
 import org.apache.lucene.queryparser.classic.QueryParser.Operator
+import uk.ac.warwick.tabula.services.NumericRangeQueryParsing
 
-class SynonymAwareWildcardMultiFieldQueryParser(fields: Traversable[String], analyzer: Analyzer)
-	extends MultiFieldQueryParser(fields.toArray[String], analyzer) {
+class SynonymAwareWildcardMultiFieldQueryParser(val numericFields: Seq[String], fields: Traversable[String], analyzer: Analyzer)
+	extends MultiFieldQueryParser(fields.toArray[String], analyzer)
+		with NumericRangeQueryParsing {
 
 	setDefaultOperator(Operator.AND)
 

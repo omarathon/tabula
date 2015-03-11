@@ -260,6 +260,7 @@
 		p:encoding="UTF-8" p:forceEncoding="true" />
 
 	<bean id="oAuthFilter" class="uk.ac.warwick.sso.client.oauth.OAuthFilter" />
+	<bean id="trustedApplicationFilter" class="uk.ac.warwick.sso.client.trusted.TrustedApplicationFilter" />
 
 	<bean id="priorityTaskExecutionService" class="uk.ac.warwick.util.concurrency.TaskExecutionService" destroy-method="shutdown">
 		<constructor-arg value="4" type="int" />
@@ -301,6 +302,7 @@
 		<mapping name="sso">
 			<filter ref="ssoClientFilter" />
 			<filter ref="oAuthFilter" />
+			<filter ref="trustedApplicationFilter" />
 			<url-pattern>/*</url-pattern>
 			<excluded-url-pattern>/static/*</excluded-url-pattern>
 			<excluded-url-pattern>/favicon.ico</excluded-url-pattern>

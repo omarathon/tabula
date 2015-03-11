@@ -25,7 +25,8 @@ class ContextProfileInitializerTest extends TestBase {
 		val initializer = new ContextProfileInitializer
 		initializer.testConfig = mockProperties(
 			"spring.profiles.active" -> "production",
-			"web.enabled" -> "false"
+			"web.enabled" -> "false",
+			"api.enabled" -> "false"
 		)
 		val profiles = initializer.resolve
 		profiles should (
