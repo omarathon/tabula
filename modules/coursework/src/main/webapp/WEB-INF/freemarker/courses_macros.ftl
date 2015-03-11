@@ -64,7 +64,7 @@
 	</script>
 </#macro>
 
-<#macro marksForm assignment templateUrl formUrl commandName cancelUrl generateUrl>
+<#macro marksForm assignment templateUrl formUrl commandName cancelUrl generateUrl seatOrderMap="" showAddButton=true>
 	<div id="batch-feedback-form">
 		<h1>Submit marks for ${assignment.name}</h1>
 		<ul id="marks-tabs" class="nav nav-tabs">
@@ -101,33 +101,42 @@
 				</@f.form>
 			</div>
 			<div class="tab-pane " id="webform">
-				<p>
-					Click the add button below to enter marks for a student.
-				</p>
-				<table class="hide">
-					<tbody class="row-markup">
-					<tr class="mark-row">
-						<td>
-							<div class="input-prepend input-append">
-								<span class="add-on"><i class="icon-user"></i></span>
-								<input class="universityId span2" name="universityId" type="text" />
-							</div>
-						</td>
-						<td><input name="actualMark" type="text" /></td>
-						<td>
-							<input class="grade input-small" name="actualGrade" type="text"/>
-							<#if isGradeValidation>
-								<select name="actualGrade" class="input-small" disabled style="display:none;"></select>
+				<#if showAddButton>
+					<p>
+						Click the add button below to enter marks for a student.
+					</p>
+
+					<table class="hide">
+						<tbody class="row-markup">
+						<tr class="mark-row">
+							<#if seatOrderMap?has_content>
+								<td></td>
 							</#if>
-						</td>
-					</tr>
-					</tbody>
-				</table>
+							<td>
+								<div class="input-prepend input-append">
+									<span class="add-on"><i class="icon-user"></i></span>
+									<input class="universityId span2" name="universityId" type="text" />
+								</div>
+							</td>
+							<td><input name="actualMark" type="text" /></td>
+							<td>
+								<input class="grade input-small" name="actualGrade" type="text"/>
+								<#if isGradeValidation>
+									<select name="actualGrade" class="input-small" disabled style="display:none;"></select>
+								</#if>
+							</td>
+						</tr>
+						</tbody>
+					</table>
+				</#if>
 				<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="${formUrl}" commandName="${commandName}">
 					<div class="fix-area">
 						<input name="isfile" value="false" type="hidden"/>
 						<table class="marksUploadTable">
 							<tr class="mark-header">
+								<#if seatOrderMap?has_content>
+									<th>Seat order</th>
+								</#if>
 								<th>University ID</th>
 								<th>Marks</th>
 								<th>Grade <#if isGradeValidation><@fmt.help_popover id="auto-grade-help" content="The grade is automatically calculated from the SITS mark scheme" /></#if></th>
@@ -135,6 +144,13 @@
 							<#if marksToDisplay??>
 								<#list marksToDisplay as markItem>
 									<tr class="mark-row">
+										<#if seatOrderMap?has_content>
+											<#if mapGet(seatOrderMap, markItem.universityId)??>
+												<td>${mapGet(seatOrderMap, markItem.universityId)}</td>
+											<#else>
+												<td></td>
+											</#if>
+										</#if>
 										<td>
 											<div class="input-prepend input-append">
 												<span class="add-on"><i class="icon-user"></i></span>
@@ -152,7 +168,9 @@
 								</#list>
 							</#if>
 						</table>
-						<br /><button class="add-additional-marks btn"><i class="icon-plus"></i> Add</button>
+						<#if showAddButton>
+							<br /><button class="add-additional-marks btn"><i class="icon-plus"></i> Add</button>
+						</#if>
 						<div class="submit-buttons fix-footer">
 							<input type="submit" class="btn btn-primary" value="Save">
 							or <a href="${cancelUrl}" class="btn">Cancel</a>

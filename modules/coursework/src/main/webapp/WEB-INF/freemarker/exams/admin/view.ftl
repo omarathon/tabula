@@ -62,10 +62,11 @@
 	</thead>
 	<tbody>
 		<#list students as student>
+			<#assign hasSeatOrder = mapGet(seatOrderMap, student)?? />
 			<#assign hasFeedback = mapGet(feedbackMap, student)?? />
 			<#assign hasSitsStatus = hasFeedback && mapGet(sitsStatusMap, mapGet(feedbackMap, student))?? />
 			<tr>
-				<td>${student_index + 1}</td>
+				<td><#if hasSeatOrder>${mapGet(seatOrderMap, student)}</#if></td>
 				<td>
 					<#if module.department.showStudentName>
 						${student.fullName} <@pl.profile_link student.warwickId />

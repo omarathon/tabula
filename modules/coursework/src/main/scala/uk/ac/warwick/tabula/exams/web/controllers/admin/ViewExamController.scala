@@ -25,6 +25,7 @@ class ViewExamController extends ExamsController {
 		val result = cmd.apply()
 		Mav("exams/admin/view",
 			"students" -> result.students,
+			"seatOrderMap" -> result.seatOrderMap,
 			"feedbackMap" -> result.feedbackMap,
 			"sitsStatusMap" -> result.sitsStatusMap
 		).crumbs(
