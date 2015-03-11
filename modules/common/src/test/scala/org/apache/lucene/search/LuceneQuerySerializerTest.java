@@ -101,6 +101,7 @@ public class LuceneQuerySerializerTest {
 		queryTest(NumericRangeQuery.newIntRange("foo", 5, 2, 3, false, false));
 		queryTest(NumericRangeQuery.newLongRange("foo", 10, 1l, 2l, true, true));
 		queryTest(NumericRangeQuery.newLongRange("foo", 5, 2l, 3l, false, false));
+		queryTest(NumericRangeQuery.newLongRange("foo", 5, 2l, null, true, true));
 		queryTest(NumericRangeQuery.newFloatRange("foo", 10, 1f, 2f, true, true));
 		queryTest(NumericRangeQuery.newFloatRange("foo", 5, 2f, 3f, false, false));
 		queryTest(NumericRangeQuery.newDoubleRange("foo", 10, 1d, 2d, true, true));

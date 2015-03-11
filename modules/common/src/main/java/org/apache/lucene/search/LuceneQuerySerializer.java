@@ -510,13 +510,13 @@ public class LuceneQuerySerializer {
 			NumericRangeQuery query;
 
 			if ("INT".equals(dataType)) {
-				query = NumericRangeQuery.newIntRange(field, precisionStep, min.intValue(), max.intValue(), includeMin, includeMax);
+				query = NumericRangeQuery.newIntRange(field, precisionStep, min == null ? null : min.intValue(), max == null ? null : max.intValue(), includeMin, includeMax);
 			} else if ("LONG".equals(dataType)) {
-				query = NumericRangeQuery.newLongRange(field, precisionStep, min.longValue(), max.longValue(), includeMin, includeMax);
+				query = NumericRangeQuery.newLongRange(field, precisionStep, min == null ? null : min.longValue(), max == null ? null : max.longValue(), includeMin, includeMax);
 			} else if ("FLOAT".equals(dataType)) {
-				query = NumericRangeQuery.newFloatRange(field, precisionStep, min.floatValue(), max.floatValue(), includeMin, includeMax);
+				query = NumericRangeQuery.newFloatRange(field, precisionStep, min == null ? null : min.floatValue(), max == null ? null : max.floatValue(), includeMin, includeMax);
 			} else if ("DOUBLE".equals(dataType)) {
-				query = NumericRangeQuery.newDoubleRange(field, precisionStep, min.doubleValue(), max.doubleValue(), includeMin, includeMax);
+				query = NumericRangeQuery.newDoubleRange(field, precisionStep, min == null ? null : min.doubleValue(), max == null ? null : max.doubleValue(), includeMin, includeMax);
 			} else {
 				throw new RuntimeException("Unsupported dataType " + dataType);
 			}
