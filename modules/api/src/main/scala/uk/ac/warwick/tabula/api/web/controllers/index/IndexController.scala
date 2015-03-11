@@ -105,8 +105,6 @@ object SearchLuceneIndexCommand {
 
 class SearchLuceneIndexCommandInternal(val indexService: AbstractIndexService[_]) extends CommandInternal[RichSearchResults] with SearchLuceneIndexState {
 	override protected def applyInternal(): RichSearchResults = {
-		println(query)
-
 		if (max.nonEmpty) {
 			indexService.search(query, max.get, sort.orNull, offset.getOrElse(0))
 		} else {
