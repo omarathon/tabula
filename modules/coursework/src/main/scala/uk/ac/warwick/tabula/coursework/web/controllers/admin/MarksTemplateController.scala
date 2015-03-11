@@ -10,8 +10,7 @@ import uk.ac.warwick.tabula.coursework.commands.feedback.MarksTemplateCommand._
 import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateMarksTemplateCommand, GenerateOwnMarksTemplateCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.data.model.{Exam, Assignment, Module}
-import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
@@ -66,25 +65,5 @@ class CurrentAssignmentMarkerMarksTemplateController extends CourseworkControlle
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
 		Redirect(Routes.admin.assignment.markerFeedback.marksTemplate(assignment, currentUser.apparentUser))
-	}
-}
-
-@Controller
-@RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/marks-template"))
-class ExamMarksTemplateController extends ExamsController {
-
-	var examMembershipService = Wire[AssessmentMembershipService]
-
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @PathVariable exam: Exam) =
-		GenerateMarksTemplateCommand(
-			mandatory(module),
-			mandatory(exam),
-			examMembershipService.determineMembershipUsers(exam).map(_.getWarwickId)
-		)
-
-	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable exam: Exam) = {
-		new ExcelView(safeAssessmentName(exam) + " marks.xlsx", cmd.apply())
 	}
 }
