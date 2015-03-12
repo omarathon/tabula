@@ -93,7 +93,7 @@
 
 			<@form.label checkbox=true clazz="radio-aligned">
 				<@f.checkbox path="finaliseFeedbackNotificationEnabled" />
-				Coursework marking workflow "send to administrator"
+				Coursework submissions which have been marked
 			</@form.label>
 		</@form.field>
 	</@form.row>

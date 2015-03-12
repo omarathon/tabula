@@ -64,7 +64,7 @@
 	</script>
 </#macro>
 
-<#macro marksForm assignment templateUrl formUrl commandName cancelUrl generateUrl seatNumberMap="" showAddButton=true>
+<#macro marksForm assignment templateUrl formUrl commandName cancelUrl generateUrl seatOrderMap="" showAddButton=true>
 	<div id="batch-feedback-form">
 		<h1>Submit marks for ${assignment.name}</h1>
 		<ul id="marks-tabs" class="nav nav-tabs">
@@ -109,7 +109,7 @@
 					<table class="hide">
 						<tbody class="row-markup">
 						<tr class="mark-row">
-							<#if seatNumberMap?has_content>
+							<#if seatOrderMap?has_content>
 								<td></td>
 							</#if>
 							<td>
@@ -134,8 +134,8 @@
 						<input name="isfile" value="false" type="hidden"/>
 						<table class="marksUploadTable">
 							<tr class="mark-header">
-								<#if seatNumberMap?has_content>
-									<th>Seat number</th>
+								<#if seatOrderMap?has_content>
+									<th>Seat order</th>
 								</#if>
 								<th>University ID</th>
 								<th>Marks</th>
@@ -144,9 +144,9 @@
 							<#if marksToDisplay??>
 								<#list marksToDisplay as markItem>
 									<tr class="mark-row">
-										<#if seatNumberMap?has_content>
-											<#if mapGet(seatNumberMap, markItem.universityId)??>
-												<td>${mapGet(seatNumberMap, markItem.universityId)}</td>
+										<#if seatOrderMap?has_content>
+											<#if mapGet(seatOrderMap, markItem.universityId)??>
+												<td>${mapGet(seatOrderMap, markItem.universityId)}</td>
 											<#else>
 												<td></td>
 											</#if>
@@ -315,7 +315,7 @@
 							<#list gradeValidation.populated?keys as feedback>
 								<tr>
 									<td>${feedback.universityId}</td>
-									<td>${(feedback.latestMark.mark)!}</td>
+									<td>${(feedback.latestMark)!}</td>
 									<td>${mapGet(gradeValidation.populated, feedback)}</td>
 								</tr>
 							</#list>
@@ -334,8 +334,8 @@
 							<#list gradeValidation.invalid?keys as feedback>
 								<tr>
 									<td>${feedback.universityId}</td>
-									<td>${(feedback.latestMark.mark)!}</td>
-									<td>${(feedback.latestMark.grade)!}</td>
+									<td>${(feedback.latestMark)!}</td>
+									<td>${(feedback.latestGrade)!}</td>
 									<td>${mapGet(gradeValidation.invalid, feedback)}</td>
 								</tr>
 							</#list>
@@ -364,7 +364,7 @@
 							<#list gradeValidation.populated?keys as feedback>
 								<tr>
 									<td>${feedback.universityId}</td>
-									<td>${(feedback.latestMark.mark)!}</td>
+									<td>${(feedback.latestMark)!}</td>
 									<td></td>
 									<td></td>
 								</tr>
@@ -372,8 +372,8 @@
 							<#list gradeValidation.invalid?keys as feedback>
 								<tr>
 									<td>${feedback.universityId}</td>
-									<td>${(feedback.latestMark.mark)!}</td>
-									<td>${(feedback.latestMark.grade)!}</td>
+									<td>${(feedback.latestMark)!}</td>
+									<td>${(feedback.latestGrade)!}</td>
 									<td>${mapGet(gradeValidation.invalid, feedback)}</td>
 								</tr>
 							</#list>
