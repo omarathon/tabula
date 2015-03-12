@@ -52,7 +52,7 @@ class ExamsAddMarksController extends ExamsController {
 
 		crumbed(Mav("exams/admin/marks/marksform",
 			"marksToDisplay" -> marksToDisplay,
-			"seatOrderMap" -> members.map(m => m._1.getWarwickId -> m._2).toMap,
+			"seatNumberMap" -> members.map(m => m._1.getWarwickId -> m._2).toMap,
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
 		), module, academicYear)
 

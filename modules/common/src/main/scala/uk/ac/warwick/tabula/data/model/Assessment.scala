@@ -37,7 +37,7 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 			_.toUpstreamAssessmentGroup(academicYear)
 		}
 
-	// Gets a breakdown of the membership for this assessment. Note that this cannot be sorted by seat order
+	// Gets a breakdown of the membership for this assessment. Note that this cannot be sorted by seat number
 	def membershipInfo: AssessmentMembershipInfo = assessmentMembershipService.determineMembership(this)
 
 	def collectMarks: JBoolean

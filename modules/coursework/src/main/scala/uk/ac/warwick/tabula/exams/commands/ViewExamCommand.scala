@@ -10,7 +10,7 @@ import uk.ac.warwick.userlookup.User
 
 case class ViewExamCommandResult(
 	students: Seq[User],
-	seatOrderMap: Map[User, Option[Int]],
+	seatNumberMap: Map[User, Option[Int]],
 	feedbackMap: Map[User, Option[ExamFeedback]],
 	sitsStatusMap: Map[Feedback, Option[FeedbackForSits]]
 )
