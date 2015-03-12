@@ -84,16 +84,15 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
 			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
 				Seq(
-					registrations(1),
-					registrations(0)
+					registrations(0),
+					registrations(1)
 				)
 			))
 
 			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(
 				Seq(
-					registrations(3),
-					registrations(2)
-
+					registrations(2),
+					registrations(3)
 				)
 			))
 
@@ -106,12 +105,13 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 	/**
 	 * TAB-3388
 	 */
-	it should "change seat number to null where it is ambiguous" in {
+	it should "cope with different seat numbers for different sequences" in {
 		new Fixture {
 			val hi900_30 = {
 				val g = new UpstreamAssessmentGroup
 				g.moduleCode = "HI900-30"
 				g.occurrence = "A"
+				g.sequence = "A01"
 				g.assessmentGroup = "A"
 				g.academicYear = AcademicYear.parse("13/14")
 				g
@@ -119,8 +119,8 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
 			val registrations = Seq(
 				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01","HI33M-30", "A"),
-				UpstreamModuleRegistration("13/14", "0100001/1", "10", "A","A01", "HI33M-30", "A"),
 				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01","HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100001/1", "10", "A","A02", "HI33M-30", "A"),
 				UpstreamModuleRegistration("13/14", "0100003/1", "3", "A", "A01","HI100-30", "A"),
 				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01","HI100-30", "A")
 			)
@@ -131,15 +131,21 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
 			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
 				Seq(
-					registrations(2),
-					UpstreamModuleRegistration("13/14","0100001/1",null,"A", "A01", "HI33M-30","A")
+					registrations(0),
+					registrations(1)
+				)
+			))
+
+			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
+				Seq(
+					registrations(2)
 				)
 			))
 
 			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(
 				Seq(
-					registrations(4),
-					registrations(3)
+					registrations(3),
+					registrations(4)
 				)
 			))
 		}
