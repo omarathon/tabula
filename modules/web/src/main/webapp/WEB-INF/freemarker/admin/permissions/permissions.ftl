@@ -1,7 +1,7 @@
 <#compress><#escape x as x?html>
 
 <#import "*/permissions_macros.ftl" as pm />
-<#assign perms_url></#assign>
+<#assign perms_url = info.requestedUri />
 
 <div class="permissions-page">
 	<#-- Permissions parents -->
