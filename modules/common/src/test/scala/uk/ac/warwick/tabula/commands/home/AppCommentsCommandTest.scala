@@ -73,7 +73,7 @@ class AppCommentsCommandTest extends TestBase with Mockito {
 		cmd.message = "I'm coming for you"
 			
 		cmd.applyInternal
-		there was one(mailSender).send(mimeMessage)
+		verify(mailSender, times(1)).send(mimeMessage)
 		
 		mimeMessage.getRecipients(RecipientType.TO).map {_.toString} should be (Array(adminEmail))
 		mimeMessage.getFrom().map {_.toString} should be (Array(adminEmail))
@@ -102,7 +102,7 @@ class AppCommentsCommandTest extends TestBase with Mockito {
 		cmd.resolution = "New years"
 			
 		cmd.applyInternal
-		there was one(mailSender).send(mimeMessage)
+		verify(mailSender, times(1)).send(mimeMessage)
 		
 		mimeMessage.getRecipients(RecipientType.TO).map {_.toString} should be (Array(adminEmail))
 		mimeMessage.getFrom().map {_.toString} should be (Array(adminEmail))

@@ -44,9 +44,9 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 		grantedPerm.overrideType should be (GrantedPermission.Allow)
 		grantedPerm.scope should be (department)
 
-		there was one (command.permissionsService).saveOrUpdate(any[GrantedPermission[Department]])
-		there was atLeastOne (command.permissionsService).clearCachesForUser(("cuscav", classTag[Department]))
-		there was atLeastOne (command.permissionsService).clearCachesForUser(("cusebr", classTag[Department]))
+		verify(command.permissionsService, times(1)).saveOrUpdate(any[GrantedPermission[Department]])
+		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cuscav", classTag[Department]))
+		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cusebr", classTag[Department]))
 	}}
 	
 	@Test def itWorksWithExisting { new Fixture {
@@ -73,9 +73,9 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 		grantedPerm.overrideType should be (GrantedPermission.Allow)
 		grantedPerm.scope should be (department)
 
-		there was one (command.permissionsService).saveOrUpdate(existing)
-		there was atLeastOne (command.permissionsService).clearCachesForUser(("cuscav", classTag[Department]))
-		there was atLeastOne (command.permissionsService).clearCachesForUser(("cusebr", classTag[Department]))
+		verify(command.permissionsService, times(1)).saveOrUpdate(existing)
+		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cuscav", classTag[Department]))
+		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cusebr", classTag[Department]))
 	}}
 	
 	@Test def validatePasses { withUser("cuscav", "0672089") { new Fixture {

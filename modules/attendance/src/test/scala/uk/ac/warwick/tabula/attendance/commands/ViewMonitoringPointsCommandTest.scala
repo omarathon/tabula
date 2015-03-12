@@ -100,7 +100,7 @@ class ViewMonitoringPointsCommandTest extends TestBase with Mockito {
 	@Test
 	def onBindStudentsPopulated() { new RouteManagerCommand {
 		command.onBind(null)
-		there was one (command.profileService).findAllStudentsByRestrictions(Matchers.eq(dept), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]])
+		verify(command.profileService, times(1)).findAllStudentsByRestrictions(Matchers.eq(dept), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]])
 	}}
 
 }

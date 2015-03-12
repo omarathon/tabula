@@ -35,7 +35,7 @@ class GenericFeedbackControllerTest extends TestBase with Mockito {
 
 			val mav = controller.submit(assignment, command, errors)
 
-			there was one(command).apply()
+			verify(command, times(1)).apply()
 
 			mav.viewName should be ("ajax_success")
 		}

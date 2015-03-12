@@ -43,7 +43,7 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
 		mockAssignmentMembershipService.gradesForMark(upstreamAssessmentComponent, 100) returns Seq(gb)
 		val result = command.applyInternal()
 		result should be (Map(studentUser.getWarwickId -> Seq(gb)))
-		there was one (mockAssignmentMembershipService).gradesForMark(upstreamAssessmentComponent, 100)
+		verify(mockAssignmentMembershipService, times(1)).gradesForMark(upstreamAssessmentComponent, 100)
 	}
 
 	@Test
@@ -83,7 +83,7 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
 		mockAssignmentMembershipService.gradesForMark(upstreamAssessmentComponent, 100) returns Seq()
 		val result = command.applyInternal()
 		result should be (Map(studentUser.getWarwickId -> Seq()))
-		there was one (mockAssignmentMembershipService).gradesForMark(upstreamAssessmentComponent, 100)
+		verify(mockAssignmentMembershipService, times(1)).gradesForMark(upstreamAssessmentComponent, 100)
 	}
 
 }

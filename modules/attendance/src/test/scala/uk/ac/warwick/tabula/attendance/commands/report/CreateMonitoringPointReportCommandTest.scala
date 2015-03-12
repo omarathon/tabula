@@ -58,7 +58,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 		reports(1).reporter should be ("IN0672089")
 		reports(1).student should be (student2)
 
-		there were two (command.monitoringPointService).saveOrUpdate(any[MonitoringPointReport])
+		verify(command.monitoringPointService, times(2)).saveOrUpdate(any[MonitoringPointReport])
 	}}
 
 	@Test def permissions {
@@ -70,7 +70,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.MonitoringPoints.Report, command.department)
+		verify(checking, times(1)).PermissionCheck(Permissions.MonitoringPoints.Report, command.department)
 	}
 
 	@Test(expected = classOf[ItemNotFoundException]) def noDepartment {

@@ -40,14 +40,14 @@ class ViewStudentPersonalTimetableCommandTest extends TestBase with Mockito{
 	@Test
 	def fetchesEventsFromEventSource(){
 		command.applyInternal()
-		there was one(studentTimetableEventSource).eventsFor(testStudent, user, TimetableEvent.Context.Student)
+		verify(studentTimetableEventSource, times(1)).eventsFor(testStudent, user, TimetableEvent.Context.Student)
 	}
 
 	@Test
 	def transformsEventsIntoOccurrences(){
 
 		command.applyInternal()
-		there was one (command.eventOccurrenceService).fromTimetableEvent(event, new Interval(command.start.toDateTimeAtStartOfDay, command.end.toDateTimeAtStartOfDay))
+		verify(command.eventOccurrenceService, times(1)).fromTimetableEvent(event, new Interval(command.start.toDateTimeAtStartOfDay, command.end.toDateTimeAtStartOfDay))
 	}
 
 	@Test
@@ -64,7 +64,7 @@ class ViewStudentPersonalTimetableCommandTest extends TestBase with Mockito{
 
 		val checking = mock[PermissionsChecking]
 		perms.permissionsCheck(checking)
-		there was one(checking).PermissionCheck(Permissions.Profiles.Read.Timetable, testStudent)
+		verify(checking, times(1)).PermissionCheck(Permissions.Profiles.Read.Timetable, testStudent)
 	}
 
 	@Test

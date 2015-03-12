@@ -86,7 +86,7 @@ class ComposableCommandTest extends TestBase with Mockito{
 		val mockChecking = mock[PermissionsChecking]
 		perms.permissionsCheck(mockChecking)
 
-		there was one(mockChecking).PermissionCheck(GodMode)
+		verify(mockChecking, times(1)).PermissionCheck(GodMode)
 
 		// now try again with the magic name, to show that state in HelloCommand is visible to HelloCommandPermisions
 		val noPerms = new HelloCommandPermissions with HelloCommand {
@@ -95,7 +95,7 @@ class ComposableCommandTest extends TestBase with Mockito{
 		val mockChecking2 = mock[PermissionsChecking]
 		noPerms.permissionsCheck(mockChecking2)
 
-		there was no(mockChecking2).PermissionCheck(GodMode)
+		verify(mockChecking2, times(0)).PermissionCheck(GodMode)
 	}
 
 	@Test def CanTestNotificationIndependently(){

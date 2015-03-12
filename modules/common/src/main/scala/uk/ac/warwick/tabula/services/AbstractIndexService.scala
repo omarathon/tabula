@@ -1,6 +1,10 @@
 package uk.ac.warwick.tabula.services
 
-import java.io.{Closeable, File, FileNotFoundException}
+import java.io._
+import com.fasterxml.jackson.databind.ObjectMapper
+import dispatch.classic.thread.ThreadSafeHttpClient
+import dispatch.classic.{url, thread, Http}
+import org.apache.http.client.params.{CookiePolicy, ClientPNames}
 import org.apache.lucene.analysis._
 import org.apache.lucene.document.Field._
 import org.apache.lucene.document._
@@ -10,10 +14,14 @@ import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search._
 import org.apache.lucene.store.{Directory, FSDirectory}
 import org.apache.lucene.util.BytesRef
+import org.bouncycastle.util.encoders.Base64
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.springframework.beans.factory.annotation._
 import org.springframework.beans.factory.InitializingBean
+import uk.ac.warwick.sso.client.SSOConfiguration
+import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, SSOConfigTrustedApplicationsManager}
+import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Closeables._
@@ -26,6 +34,8 @@ import org.springframework.beans.factory.DisposableBean
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import language.implicitConversions
+import scala.util.parsing.json.JSON
+import scala.collection.JavaConverters._
 
 trait CommonQueryMethods[A] extends TaskBenchmarking { self: AbstractIndexService[A] =>
 
@@ -60,7 +70,7 @@ trait QueryHelpers[A] { self: AbstractIndexService[A] =>
 	def termQuery(name: String, value: String) = new TermQuery(new Term(name, value))
 	def term(pair: (String, String)) = new TermQuery(new Term(pair._1, pair._2))
 
-	def dateRange(min: DateTime, max: DateTime) = NumericRangeQuery.newLongRange(UpdatedDateField, min.getMillis, max.getMillis, true, true)
+	def dateRange(min: DateTime, max: Option[DateTime] = None) = NumericRangeQuery.newLongRange(UpdatedDateField, min.getMillis, max.map { _.getMillis: java.lang.Long }.orNull, true, true)
 	def dateSort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, false))
 	def reverseDateSort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, true))
 }
@@ -89,6 +99,7 @@ abstract class AbstractIndexService[A]
 		extends CommonQueryMethods[A]
 			with QueryHelpers[A]
 			with SearchHelpers[A]
+			with HttpSearching
 			with FieldGenerators
 			with RichSearchResultsCreator
 			with OpensLuceneDirectory
@@ -109,6 +120,10 @@ abstract class AbstractIndexService[A]
 
 	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
 	@Value("${tabula.yearZero}") var yearZero: Int = _
+	@Value("${module.context}") var moduleContext: String = _
+	@Autowired var features: Features = _
+
+	def searchOverHttp = features.searchOnApiComponent && moduleContext != "/api"
 
 	final val IndexReopenPeriodInSeconds = 20
 
@@ -138,7 +153,7 @@ abstract class AbstractIndexService[A]
 	def guardMultipleIndexes(work: => Unit) = this.synchronized(work)
 
 	// QueryParser isn't thread safe, hence why this is a def
-	def parser = new QueryParser("", analyzer)
+	def parser: QueryParser with NumericRangeQueryParsing = new NumericRangeQueryParser(Seq(UpdatedDateField), "", analyzer)
 
 
 	override def afterPropertiesSet() {
@@ -163,6 +178,7 @@ abstract class AbstractIndexService[A]
 
 	override def destroy() {
 		executor.shutdown()
+		http.shutdown()
 	}
 
 	protected override def openDirectory(): Directory = FSDirectory.open(indexPath.toPath)
@@ -334,6 +350,8 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 	 */
 	var searcherLifetimeManager: SearcherLifetimeManager = _
 
+	def searchOverHttp: Boolean
+
 	/**
 	 * Find the newest item that was indexed, by searching by
 	 * UpdatedDateField and sorting in descending date order.
@@ -394,30 +412,35 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 		if (searcherLifetimeManager != null) searcherLifetimeManager.prune(new PruneByAge(ageInSeconds))
 	}
 
-	def search(query: Query, max: Int, sort: Sort = null, offset: Int = 0): RichSearchResults = doSearch(query, Some(max), sort, offset)
 	def search(query: Query): RichSearchResults = doSearch(query, None, null, 0)
 	def search(query: Query, sort: Sort): RichSearchResults = doSearch(query, None, sort, 0)
+	def search(query: Query, max: Int, sort: Sort = null, offset: Int = 0): RichSearchResults = doSearch(query, Some(max), sort, offset)
+
 	def search(query: Query, max: Int, sort: Sort, last: Option[ScoreDoc], token: Option[Long]): PagingSearchResult =
 		doPagingSearch(query, Option(max), Option(sort), last, token)
 
 	private def doSearch(query: Query, max: Option[Int], sort: Sort, offset: Int): RichSearchResults = {
-		initialiseSearching()
-		if (searcherManager == null) {
-			logger.warn("Tried to search but no searcher manager is available")
-			Seq.empty
-		} else acquireSearcher { searcher =>
-			logger.debug("Running search for query: " + query)
+		if (searchOverHttp) {
+			performSearchOverHttp(query, max, sort, offset)
+		} else {
+			initialiseSearching()
+			if (searcherManager == null) {
+				logger.warn("Tried to search but no searcher manager is available")
+				Seq.empty
+			} else acquireSearcher { searcher =>
+				logger.debug("Running search for query: " + query)
 
-			val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
-			val results =
-				if (sort == null) searcher.search(query, null, offset + maxResults)
-				else if (searcher.getIndexReader.maxDoc <= 0) new TopDocs(0, Array(), 0f)
-				else searcher.search(query, null, offset + maxResults, sort)
-			transformResults(searcher, results, offset, maxResults)
+				val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
+				val results =
+					if (sort == null) searcher.search(query, null, offset + maxResults)
+					else if (searcher.getIndexReader.maxDoc <= 0) new TopDocs(0, Array(), 0f)
+					else searcher.search(query, null, offset + maxResults, sort)
+				transformResults(searcher, results, offset, maxResults)
+			}
 		}
 	}
 
-	private def acquireSearcher[A](work: IndexSearcher => A): A = {
+	private def acquireSearcher[T](work: IndexSearcher => T): T = {
 		val searcher = searcherManager.acquire
 		try work(searcher)
 		finally searcherManager.release(searcher)
@@ -507,4 +530,105 @@ trait FieldGenerators {
 	protected def doubleField(name: String, value: Double) = new DoubleField(name, value, Store.YES)
 
 	protected def booleanField(name: String, value: Boolean) = new TextField(name, value.toString, Store.YES)
+}
+
+class NumericRangeQueryParser(val numericFields: Seq[String], field: String, analyzer: Analyzer)
+	extends QueryParser(field, analyzer)
+		with NumericRangeQueryParsing
+
+trait NumericRangeQueryParsing {
+	self: QueryParser =>
+
+	def numericFields: Seq[String]
+
+	override def newRangeQuery(field: String, part1: String, part2: String, startInclusive: Boolean, endInclusive: Boolean): Query =
+		if (numericFields.contains(field)) {
+			val min: Option[java.lang.Long] = Option(part1).map(_.toLong)
+			val max: Option[java.lang.Long] = Option(part2).map(_.toLong)
+
+			NumericRangeQuery.newLongRange(field, min.orNull[java.lang.Long], max.orNull[java.lang.Long], startInclusive, endInclusive)
+		} else {
+			self.newRangeQuery(field, part1, part2, startInclusive, endInclusive)
+		}
+}
+
+trait HttpSearching {
+	self: FieldGenerators with RichSearchResultsCreator with Logging =>
+
+	def apiIndexName: String
+
+	@Autowired var objectMapper: ObjectMapper = _
+	@Value("${toplevel.url}") var toplevelUrl: String = _
+
+	lazy val http: Http = new Http with thread.Safety {
+		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
+			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
+		}
+	}
+
+	lazy val currentApplication = new SSOConfigTrustedApplicationsManager(SSOConfiguration.getConfig).getCurrentApplication
+	lazy val serializer = new LuceneQuerySerializer
+
+	def performSearchOverHttp(query: Query, max: Option[Int], sort: Sort, offset: Int): RichSearchResults = {
+		val bos: ByteArrayOutputStream = new ByteArrayOutputStream
+		val oos: ObjectOutputStream = new ObjectOutputStream(bos)
+		serializer.writeQuery(oos, query)
+		oos.close
+
+		// Convert the request to JSON
+		val requestMap =
+			Map(
+				"querySerialized" -> new String(Base64.encode(bos.toByteArray), "UTF-8"),
+				"offset" -> offset
+			) ++
+				max.map { m => Map("max" -> m) }.getOrElse(Map()) ++
+				Option(sort).map { s => Map("sort" -> s.getSort.map { sortField =>
+					Map(
+						"field" -> sortField.getField,
+						"type" -> sortField.getType.name(),
+						"reverse" -> sortField.getReverse
+					)
+				}) }.getOrElse(Map())
+
+		if (debugEnabled) logger.debug(requestMap)
+
+		def handler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
+			req >- { (json) =>
+				JSON.parseFull(json) match {
+					case Some(json: Map[String, Any] @unchecked) =>
+						json.get("results") match {
+							case Some(docs: Seq[Map[String, Any]] @unchecked) =>
+								docs.map { fields =>
+									val doc = new Document
+
+									fields.foreach { case (key, value) =>
+										doc.add(value match {
+											case s: String => plainStringField(key, s)
+											case d: Double => doubleField(key, d)
+											case n: Number => new LongField(key, n.longValue(), Store.YES)
+											case o => throw new IllegalArgumentException("Unexpected field type: " + o.getClass.getName)
+										})
+									}
+
+									doc
+								}
+							case _ => Nil
+						}
+					case _ => Nil
+				}
+			}
+		}
+
+		val endpoint = s"$toplevelUrl/api/v1/index/$apiIndexName"
+
+		val trustedAppHeaders =
+			TrustedApplicationUtils.getRequestHeaders(currentApplication, "tabula-search-api-user", endpoint)
+				.asScala.map { header => header.getName -> header.getValue }
+				.toMap
+
+		val req =
+			url(endpoint) <:< (trustedAppHeaders ++ Map("Content-Type" -> "application/json")) << objectMapper.writeValueAsBytes(requestMap)
+
+		http.when(_ == 200)(req >:+ handler)
+	}
 }

@@ -42,7 +42,7 @@
 <table class="table table-bordered table-striped table-condensed feedback-table">
 	<thead>
 		<tr>
-			<th class="sortable">Seat order</th>
+			<th class="sortable">Seat number</th>
 			<th class="sortable">Student</th>
 			<th colspan="2">Original</th>
 			<th colspan="2">Adjusted</th>
@@ -62,10 +62,11 @@
 	</thead>
 	<tbody>
 		<#list students as student>
+			<#assign hasSeatNumber = mapGet(seatNumberMap, student)?? />
 			<#assign hasFeedback = mapGet(feedbackMap, student)?? />
 			<#assign hasSitsStatus = hasFeedback && mapGet(sitsStatusMap, mapGet(feedbackMap, student))?? />
 			<tr>
-				<td>${student_index + 1}</td>
+				<td><#if hasSeatNumber>${mapGet(seatNumberMap, student)}</#if></td>
 				<td>
 					<#if module.department.showStudentName>
 						${student.fullName} <@pl.profile_link student.warwickId />

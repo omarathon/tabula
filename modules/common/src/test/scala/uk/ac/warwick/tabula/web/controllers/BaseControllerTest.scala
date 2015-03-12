@@ -91,11 +91,11 @@ class BaseControllerTest extends TestBase with Mockito {
 		
 		controller.showDeletedItems
 		controller.preRequest
-		there was no(mockSession).enableFilter("notDeleted")
+		verify(mockSession, times(0)).enableFilter("notDeleted")
 		
 		controller.hideDeletedItems
 		controller.preRequest
-		there was one(mockSession).enableFilter("notDeleted")
+		verify(mockSession, times(1)).enableFilter("notDeleted")
 	}
 
 }

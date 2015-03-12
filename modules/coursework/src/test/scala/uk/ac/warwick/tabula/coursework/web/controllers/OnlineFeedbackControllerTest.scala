@@ -82,7 +82,7 @@ class OnlineFeedbackFormControllerTest extends TestBase with Mockito {
 			val errors = mock[Errors]
 			when(errors.hasErrors) thenReturn false
 			val mav = controller.submit(command, errors)
-			there was one(command).apply()
+			verify(command, times(1)).apply()
 			mav.viewName should be ("ajax_success")
 			mav.map("renderLayout") should be("none")
 		}

@@ -242,7 +242,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentCourseYearDetails.modeOfAttendance.code should be ("P")
 			studentCourseYearDetails.yearOfStudy should be (3)
 
-			there was one(importCommandFactory.studentCourseYearDetailsDao).saveOrUpdate(any[StudentCourseYearDetails])
+			verify(importCommandFactory.studentCourseYearDetailsDao, times(1)).saveOrUpdate(any[StudentCourseYearDetails])
 		}
 	}
 
@@ -268,7 +268,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentCourseDetails.freshStudentCourseYearDetails.size should be (1)
 
-			there was one(importCommandFactory.studentCourseDetailsDao).saveOrUpdate(any[StudentCourseDetails])
+			verify(importCommandFactory.studentCourseDetailsDao, times(1)).saveOrUpdate(any[StudentCourseDetails])
 		}
 	}
 
@@ -343,9 +343,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 				case _ => false should be {true}
 			}
 
-			there was one(rowCommand.fileDao).savePermanent(any[FileAttachment])
-			there was no(rowCommand.fileDao).saveTemporary(any[FileAttachment])
-			there was one(memberDao).saveOrUpdate(any[Member])
+			verify(rowCommand.fileDao, times(1)).savePermanent(any[FileAttachment])
+			verify(rowCommand.fileDao, times(0)).saveTemporary(any[FileAttachment])
+			verify(memberDao, times(1)).saveOrUpdate(any[Member])
 		}
 	}
 
@@ -423,9 +423,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 				case _ => false should be {true}
 			}
 
-			there was one(rowCommand.fileDao).savePermanent(any[FileAttachment])
-			there was no(rowCommand.fileDao).saveTemporary(any[FileAttachment])
-			there was one(memberDao).saveOrUpdate(any[Member])
+			verify(rowCommand.fileDao, times(1)).savePermanent(any[FileAttachment])
+			verify(rowCommand.fileDao, times(0)).saveTemporary(any[FileAttachment])
+			verify(memberDao, times(1)).saveOrUpdate(any[Member])
 		}
 	}
 
@@ -446,9 +446,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 				case _ => false should be {true}
 			}
 
-			there was one(rowCommand.fileDao).savePermanent(any[FileAttachment])
-			there was no(rowCommand.fileDao).saveTemporary(any[FileAttachment])
-			there was one(memberDao).saveOrUpdate(any[Member])
+			verify(rowCommand.fileDao, times(1)).savePermanent(any[FileAttachment])
+			verify(rowCommand.fileDao, times(0)).saveTemporary(any[FileAttachment])
+			verify(memberDao, times(1)).saveOrUpdate(any[Member])
 		}
 	}
 
@@ -478,7 +478,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentMember.freshStudentCourseDetails.size should not be 0
 
-			there was no(relationshipService).replaceStudentRelationships(tutorRelationshipType, studentMember.mostSignificantCourseDetails.get, Seq(existingStaffMember))
+			verify(relationshipService, times(0)).replaceStudentRelationships(tutorRelationshipType, studentMember.mostSignificantCourseDetails.get, Seq(existingStaffMember))
 		}
 	}
 
@@ -510,7 +510,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentMember.mostSignificantCourseDetails should not be null
 
-			there was one(relationshipService).replaceStudentRelationships(tutorRelationshipType, studentMember.mostSignificantCourseDetails.get, Seq(existingStaffMember))
+			verify(relationshipService, times(1)).replaceStudentRelationships(tutorRelationshipType, studentMember.mostSignificantCourseDetails.get, Seq(existingStaffMember))
 		}
 	}
 

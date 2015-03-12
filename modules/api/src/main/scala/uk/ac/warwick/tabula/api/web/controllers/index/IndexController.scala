@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.api.web.controllers.index
 
+import java.io.{ObjectInputStream, ByteArrayInputStream}
 import javax.servlet.http.HttpServletResponse
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.apache.lucene.queryparser.classic.ParseException
-import org.apache.lucene.search.{SortField, Sort, Query}
+import org.apache.lucene.search.{LuceneQuerySerializer, SortField, Sort, Query}
+import org.bouncycastle.util.encoders.Base64
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -47,7 +49,7 @@ trait SearchLuceneIndexApi {
 	def command(): SearchIndexCommand =
 		SearchLuceneIndexCommand(indexService)
 
-	@RequestMapping(method = Array(GET), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
+	@RequestMapping(method = Array(GET, POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
 	def search(@RequestBody request: SearchIndexRequest[SearchLuceneIndexState], @ModelAttribute("searchCommand") command: SearchIndexCommand, errors: Errors)(implicit response: HttpServletResponse) = {
 		request.copyTo(command, errors)
 		command.validate(errors)
@@ -146,9 +148,13 @@ trait SearchLuceneIndexPermissions extends RequiresPermissionsChecking with Perm
 @JsonAutoDetect
 class SearchIndexRequest[A <: SearchLuceneIndexState] extends JsonApiRequest[A] {
 	@BeanProperty var queryString: String = _
+	@BeanProperty var querySerialized: String = _
 	@BeanProperty var sort: JList[JMap[String, _]] = JArrayList()
 	@BeanProperty var max: Int = -1
 	@BeanProperty var offset: Int = 0
+
+	@transient
+	lazy val serializer = new LuceneQuerySerializer
 
 	override def copyTo(state: A, errors: Errors) {
 		queryString.maybeText.foreach { queryString =>
@@ -157,6 +163,13 @@ class SearchIndexRequest[A <: SearchLuceneIndexState] extends JsonApiRequest[A] 
 			} catch {
 				case e: ParseException => errors.rejectValue("query", "typeMismatch")
 			}
+		}
+
+		querySerialized.maybeText.foreach { querySerialized =>
+			val bis: ByteArrayInputStream = new ByteArrayInputStream(Base64.decode(querySerialized))
+			val ois: ObjectInputStream = new ObjectInputStream(bis)
+			state.query = serializer.readQuery(ois)
+			ois.close
 		}
 
 		if (max >= 0) {

@@ -50,11 +50,11 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 	def commandApply() {
 		new Fixture {
 			val feedbackGraphs = command.applyInternal()
-			there was one(command.feedbackService).getAssignmentFeedbackByUniId(assignment, "user1")
-			there was one(command.feedbackService).getAssignmentFeedbackByUniId(assignment, "user2")
+			verify(command.feedbackService, times(1)).getAssignmentFeedbackByUniId(assignment, "user1")
+			verify(command.feedbackService, times(1)).getAssignmentFeedbackByUniId(assignment, "user2")
 
-			there was one(command.submissionService).getSubmissionByUniId(assignment, "user1")
-			there was one(command.submissionService).getSubmissionByUniId(assignment, "user2")
+			verify(command.submissionService, times(1)).getSubmissionByUniId(assignment, "user1")
+			verify(command.submissionService, times(1)).getSubmissionByUniId(assignment, "user2")
 
 			val graph1 = feedbackGraphs(0)
 			graph1.student should be(user1)

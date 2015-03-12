@@ -53,7 +53,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI101-30", "A")
 			)
 			command.doGroupMembers()
-			there were three(membershipService).replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamModuleRegistration]])
+			verify(membershipService, times(3)).replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamModuleRegistration]])
 		}
 	}
 
@@ -82,22 +82,23 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
 			command.doGroupMembers()
 
-			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
+			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
 				Seq(
-					UpstreamModuleRegistration("13/14","0100001/1","1","A","A01","HI33M-30","A"),
-					UpstreamModuleRegistration("13/14","0100001/2","2","A","A01","HI33M-30","A")
+					registrations(1),
+					registrations(0)
 				)
 			))
 
-			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(
+			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(
 				Seq(
-					UpstreamModuleRegistration("13/14","0100003/1","3","A","A01","HI100-30","A"),
-					UpstreamModuleRegistration("13/14","0100002/1","2","A","A01","HI100-30","A")
+					registrations(3),
+					registrations(2)
+
 				)
 			))
 
 			// The bug is that we don't update any group we don't have moduleregistrations for.
-			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI900-30")), isEq(Nil))
+			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI900-30")), isEq(Nil))
 
 		}
 	}
@@ -128,17 +129,17 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
 			command.doGroupMembers()
 
-			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
+			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
 				Seq(
-					UpstreamModuleRegistration("13/14","0100001/1",null,"A","A01","HI33M-30","A"),
-					UpstreamModuleRegistration("13/14","0100001/2","2","A","A01","HI33M-30","A")
+					registrations(2),
+					UpstreamModuleRegistration("13/14","0100001/1",null,"A", "A01", "HI33M-30","A")
 				)
 			))
 
-			there was one(membershipService).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(
+			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(
 				Seq(
-					UpstreamModuleRegistration("13/14","0100003/1","3","A","A01","HI100-30","A"),
-					UpstreamModuleRegistration("13/14","0100002/1","2","A","A01","HI100-30","A")
+					registrations(4),
+					registrations(3)
 				)
 			))
 		}

@@ -46,7 +46,7 @@ class EditCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 		customRole.baseRoleDefinition should be (ModuleManagerRoleDefinition)
 		customRole.department should be (department)
 
-		there was one (command.permissionsService).saveOrUpdate(customRole)
+		verify(command.permissionsService, times(1)).saveOrUpdate(customRole)
 	}}
 
 	@Test def permissions { new Fixture {
@@ -58,7 +58,7 @@ class EditCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.RolesAndPermissions.Update, customRole)
+		verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.Update, customRole)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def noDepartment { new Fixture {

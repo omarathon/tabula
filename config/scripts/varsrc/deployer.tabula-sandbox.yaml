@@ -3,7 +3,7 @@ apaches:
 - !ruby/object:Apache 
   name: tabula-sandbox
   port_balancer: !ruby/object:HAProxySocketBalancer
-    balanced_group: jboss_pair
+    balanced_group: tabula-web
     balanced_servers:
     - "primary"
     - "secondary"

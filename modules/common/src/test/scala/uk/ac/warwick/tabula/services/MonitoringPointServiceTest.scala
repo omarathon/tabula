@@ -45,8 +45,8 @@ class MonitoringPointServiceTest extends TestBase with Mockito {
 		new CheckpointFixture {
 			service.monitoringPointDao.getCheckpoint(point1, member1) returns Option(passedCheckpoint)
 			service.deleteCheckpoint(member1, point1)
-			there was one (service.monitoringPointDao).deleteCheckpoint(passedCheckpoint)
-			there was no (service.monitoringPointDao).deleteCheckpoint(missedCheckpoint)
+			verify(service.monitoringPointDao, times(1)).deleteCheckpoint(passedCheckpoint)
+			verify(service.monitoringPointDao, times(0)).deleteCheckpoint(missedCheckpoint)
 		}
 	}
 
@@ -55,8 +55,8 @@ class MonitoringPointServiceTest extends TestBase with Mockito {
 		new CheckpointFixture {
 			service.monitoringPointDao.getCheckpoint(point1, member2) returns None
 			service.deleteCheckpoint(member2, point1)
-			there was no (service.monitoringPointDao).deleteCheckpoint(passedCheckpoint)
-			there was no (service.monitoringPointDao).deleteCheckpoint(missedCheckpoint)
+			verify(service.monitoringPointDao, times(0)).deleteCheckpoint(passedCheckpoint)
+			verify(service.monitoringPointDao, times(0)).deleteCheckpoint(missedCheckpoint)
 		}
 	}
 

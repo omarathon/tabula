@@ -92,7 +92,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 		new Fixture {
 
 			commandInternal.applyInternal()
-			there was one(commandInternal.moduleAndDepartmentService).save(testDepartment)
+			verify(commandInternal.moduleAndDepartmentService, times(1)).save(testDepartment)
 		}
 	}
 
@@ -106,7 +106,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 
 			val description = mock[Description]
 			describable.describe(description)
-			there was one(description).department(testDepartment)
+			verify(description, times(1)).department(testDepartment)
 		}
 	}
 
@@ -118,7 +118,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 			}
 			val checking = mock[PermissionsChecking]
 			perms.permissionsCheck(checking)
-			there was one(checking).PermissionCheck(Permissions.Department.ManageDisplaySettings, testDepartment)
+			verify(checking, times(1)).PermissionCheck(Permissions.Department.ManageDisplaySettings, testDepartment)
 		}
 	}
 

@@ -70,6 +70,8 @@ trait NotificationQueryMethods { self: NotificationIndexServiceImpl =>
 class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotification] with NotificationIndexService with NotificationQueryMethods {
 	override val loggerName = classOf[NotificationIndexService].getName
 
+	final val apiIndexName = "notification"
+
 	var dao = Wire[NotificationDao]
 	var userLookup = Wire[UserLookupService]
 

@@ -88,8 +88,8 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 
 			val feedback = command.apply()
 
-			there was one(command.zipService).invalidateIndividualFeedbackZip(existingFeedback)
-			there was one(command.zipService).invalidateFeedbackZip(assignment)
+			verify(command.zipService, times(1)).invalidateIndividualFeedbackZip(existingFeedback)
+			verify(command.zipService, times(1)).invalidateFeedbackZip(assignment)
 		}
 	}
 

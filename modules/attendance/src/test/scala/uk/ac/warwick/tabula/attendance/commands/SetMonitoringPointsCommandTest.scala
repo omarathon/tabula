@@ -112,7 +112,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		command.validate(errors)
 		errors.hasFieldErrors should be (false)
 		// TAB-2025
-		there was no(command.termService).getTermFromAcademicWeek(any[Int], any[AcademicYear], any[Boolean])
+		verify(command.termService, times(0)).getTermFromAcademicWeek(any[Int], any[AcademicYear], any[Boolean])
 	}}
 
 	@Test def validateNoSuchPointForStudent() { new Fixture {

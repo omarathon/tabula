@@ -50,7 +50,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 
 	// QueryParser isn't thread safe, hence why this is a def
 	// Overrides AbstractIndexService when used in ProfileIndexService
-	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(nameFields, analyzer)
+	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(Seq(UpdatedDateField), nameFields, analyzer)
 
 	def findWithQuery(
 		query: String,
@@ -119,6 +119,8 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 
 @Component
 class ProfileIndexService extends AbstractIndexService[Member] with ProfileQueryMethods with Logging {
+
+	final val apiIndexName = "profile"
 
 	// largest batch of items we'll load in at once.
 	final override val MaxBatchSize = 100000

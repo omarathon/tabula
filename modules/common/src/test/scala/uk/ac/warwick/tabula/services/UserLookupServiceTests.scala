@@ -14,8 +14,8 @@ class UserLookupServiceTests extends TestBase with Mockito {
 		swappable.delegate = lookup2
 		swappable.getUserByUserId("b")
 
-		there was one(lookup1).getUserByUserId("a")
-		there was one(lookup2).getUserByUserId("b")
+		verify(lookup1, times(1)).getUserByUserId("a")
+		verify(lookup2, times(1)).getUserByUserId("b")
 	}
 
 	/*

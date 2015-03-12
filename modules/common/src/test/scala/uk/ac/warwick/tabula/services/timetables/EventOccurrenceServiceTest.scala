@@ -60,9 +60,9 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 
 		// verify that the academicYear used to calculate the intersection and the occurrence dates
 		// is the year from the event, not the current year
-		there was one(occurrenceService.weekToDateConverter).intersectsWeek(intervalIncludingOccurrence,week1,year)
-		there was one(occurrenceService.weekToDateConverter).toLocalDatetime(week1,DayOfWeek.Monday,tenAm,year)
-		there was one(occurrenceService.weekToDateConverter).toLocalDatetime(week1,DayOfWeek.Monday,tenThirty,year)
+		verify(occurrenceService.weekToDateConverter, times(1)).intersectsWeek(intervalIncludingOccurrence,week1,year)
+		verify(occurrenceService.weekToDateConverter, times(1)).toLocalDatetime(week1,DayOfWeek.Monday,tenAm,year)
+		verify(occurrenceService.weekToDateConverter, times(1)).toLocalDatetime(week1,DayOfWeek.Monday,tenThirty,year)
 
 	}
 

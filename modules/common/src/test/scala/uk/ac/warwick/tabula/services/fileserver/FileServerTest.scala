@@ -190,7 +190,7 @@ class FileServerTest extends TestBase with Mockito {
 			server.serve(file)(req, res)
 		}
 
-		there was one(res).setDateHeader("Expires", time.plus(period).getMillis)
+		verify(res, times(1)).setDateHeader("Expires", time.plus(period).getMillis)
 	}
 
 }

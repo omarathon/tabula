@@ -10,6 +10,7 @@ import uk.ac.warwick.userlookup.User
 
 case class ViewExamCommandResult(
 	students: Seq[User],
+	seatNumberMap: Map[User, Option[Int]],
 	feedbackMap: Map[User, Option[ExamFeedback]],
 	sitsStatusMap: Map[Feedback, Option[FeedbackForSits]]
 )
@@ -33,10 +34,11 @@ class ViewExamCommandInternal(val module: Module, val academicYear: AcademicYear
 	self: FeedbackServiceComponent with AssessmentMembershipServiceComponent with FeedbackForSitsServiceComponent =>
 
 	override def applyInternal() = {
-		val studentUsers = assessmentMembershipService.determineMembershipUsers(exam)
+		val studentSeats = assessmentMembershipService.determineMembershipUsersWithOrder(exam)
+		val studentUsers = studentSeats.map(_._1)
 		val feedbackMap = feedbackService.getExamFeedbackMap(exam, studentUsers).mapValues(Option(_)).withDefaultValue(None)
 		val sitsStatusMap = feedbackForSitsService.getByFeedbacks(feedbackMap.values.flatten.toSeq).mapValues(Option(_)).withDefaultValue(None)
-		ViewExamCommandResult(studentUsers, feedbackMap, sitsStatusMap)
+		ViewExamCommandResult(studentUsers, studentSeats.toMap, feedbackMap, sitsStatusMap)
 	}
 
 }

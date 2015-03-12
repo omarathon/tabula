@@ -38,7 +38,7 @@ class PermissionTagTest extends TestBase with Mockito {
 		
 		tag.execute(env, params, null, body)
 		
-		there was one(body).render(writer)
+		verify(body, times(1)).render(writer)
 	}
 	
 	@Test def cannot = withUser("cuscav") {
@@ -62,6 +62,6 @@ class PermissionTagTest extends TestBase with Mockito {
 		
 		tag.execute(env, params, null, body)
 		
-		there was no(body).render(writer)
+		verify(body, times(0)).render(writer)
 	}
 }

@@ -114,6 +114,7 @@ abstract class Features {
 	@Value("${features.queueFeedbackForSits:false}") var queueFeedbackForSits = defaults.queueFeedbackForSits
 	@Value("${features.scheduling.exportFeedbackToSits:false}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
 	@Value("${features.exams:false}") var exams = defaults.exams
+	@Value("${features.searchOnApiComponent:true}") var searchOnApiComponent = defaults.searchOnApiComponent
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -149,6 +150,7 @@ class FeaturesMessage {
 	@BeanProperty var activityStreams = true
 	@BeanProperty var masqueradersCanWrite = false
 	@BeanProperty var masqueradeElevatedPermissions = false
+	@BeanProperty var searchOnApiComponent = true
 
 	@BeanProperty var collectRatings = true
 	@BeanProperty var submissions = true
@@ -217,6 +219,7 @@ class FeaturesMessage {
 	@BeanProperty var schedulingSanityCheckFilesystem = true
 	@BeanProperty var schedulingExportAttendanceToSits = true
 	@BeanProperty var schedulingExportFeedbackToSits = false
+
 	@BeanProperty var exams = false
 
 	@BeanProperty var reports = true

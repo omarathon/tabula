@@ -85,7 +85,7 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 		group1.students.users.toSet should be (Set(user1, user2))
 		group2.students.users.toSet should be (Set(user3, user4, user5))
 
-		there was one (command.smallGroupService).saveOrUpdate(set)
+		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 
 		command.members.remove(user2)
 		command.members.remove(user3)
@@ -102,7 +102,7 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 		group2.students.users.toSet should be (Set(user5))
 
 		// Two now, because it includes the one from before
-		there were two (command.smallGroupService).saveOrUpdate(set)
+		verify(command.smallGroupService, times(2)).saveOrUpdate(set)
 	}}
 
 	private trait ValidationFixture extends Fixture {

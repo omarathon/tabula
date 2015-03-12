@@ -80,8 +80,8 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 			departmentStudentGroupMembershipHelper.findBy(user) returns Seq(departmentGroup)
 
 			service.findSmallGroupsByStudent(user) should be(Seq(group, group2))
-			there was one (studentGroupMembershipHelper).findBy(user)
-			there was one (departmentStudentGroupMembershipHelper).findBy(user)
+			verify(studentGroupMembershipHelper, times(1)).findBy(user)
+			verify(departmentStudentGroupMembershipHelper, times(1)).findBy(user)
 		}
 	}
 

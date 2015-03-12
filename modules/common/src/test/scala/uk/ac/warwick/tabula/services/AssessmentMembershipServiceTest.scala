@@ -62,7 +62,7 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
 		excludedGroup.excludesUser(user) returns (true)
 
 		service.isStudentMember(user, Nil, Some(excludedGroup)) should be (false)
-		there was no (excludedGroup).includesUser(user) // we quit early
+		verify(excludedGroup, times(0)).includesUser(user) // we quit early
 
 		val includedGroup = mock[UnspecifiedTypeUserGroup]
 		includedGroup.excludesUser(user) returns (false)

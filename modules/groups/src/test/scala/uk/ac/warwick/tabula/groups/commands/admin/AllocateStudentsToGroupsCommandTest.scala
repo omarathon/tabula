@@ -157,8 +157,8 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 
 		command.applyInternal() should be(set)
 
-		there was one(command.smallGroupService).saveOrUpdate(group1)
-		there was one(command.smallGroupService).saveOrUpdate(group2)
+		verify(command.smallGroupService, times(1)).saveOrUpdate(group1)
+		verify(command.smallGroupService, times(1)).saveOrUpdate(group2)
 
 		group1.students.asInstanceOf[UserGroup].includedUserIds should be(Seq("0200202", "0672088"))
 		group2.students.asInstanceOf[UserGroup].includedUserIds should be(Seq("8888888", "0672089"))
@@ -298,7 +298,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.SmallGroups.Allocate, set)
+		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Allocate, set)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {

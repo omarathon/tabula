@@ -92,8 +92,8 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 		points.size should be (command.pointsToEdit.size)
 		scheme.points.size should be (1)
 		scheme2.points.size should be (1)
-		there was one (command.thisScheduledNotificationService).removeInvalidNotifications(department)
-		there was atLeastOne (command.thisScheduledNotificationService).push(Matchers.any[ScheduledNotification[Department]])
+		verify(command.thisScheduledNotificationService, times(1)).removeInvalidNotifications(department)
+		verify(command.thisScheduledNotificationService, atLeast(1)).push(Matchers.any[ScheduledNotification[Department]])
 	}}
 
 	@Test

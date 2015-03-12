@@ -42,8 +42,8 @@ class RoleServiceTest extends TestBase with Mockito {
 
 		val isSysadminRole = service.getRolesFor(currentUser, null) exists { _ == Sysadmin() }
 
-		there was one(provider1).getRolesFor(currentUser, null)
-		there were no(provider2).getRolesFor(currentUser, null)
+		verify(provider1, times(1)).getRolesFor(currentUser, null)
+		verify(provider2, times(0)).getRolesFor(currentUser, null)
 
 		isSysadminRole should be (true)
 	}
@@ -69,13 +69,13 @@ class RoleServiceTest extends TestBase with Mockito {
 
 		(service.getRolesFor(currentUser, module) exists { _ == DepartmentalAdministrator(dept) }) should be (true)
 
-		there was one(provider1).getRolesFor(currentUser, null)
-		there was one(provider4).getRolesFor(currentUser, null)
+		verify(provider1, times(1)).getRolesFor(currentUser, null)
+		verify(provider4, times(1)).getRolesFor(currentUser, null)
 
-		there was no(provider2).getRolesFor(currentUser, dept) // We don't bubble up on this one because it's not exhaustive
-		there was one(provider2).getRolesFor(currentUser, module)
-		there was one(provider3).getRolesFor(currentUser, dept)
-		there was one(provider3).getRolesFor(currentUser, module)
+		verify(provider2, times(0)).getRolesFor(currentUser, dept) // We don't bubble up on this one because it's not exhaustive
+		verify(provider2, times(1)).getRolesFor(currentUser, module)
+		verify(provider3, times(1)).getRolesFor(currentUser, dept)
+		verify(provider3, times(1)).getRolesFor(currentUser, module)
 	}
 
 	@Test def exhaustiveGetRoles() = withUser("cuscav", "0672089") {
@@ -164,10 +164,10 @@ class RoleServiceTest extends TestBase with Mockito {
 			_ == PermissionDefinition(Permissions.Module.Create, Some(dept), GrantedPermission.Allow)
 		}) should be (true)
 
-		there was no(provider1).getPermissionsFor(currentUser, dept) // We don't bubble up on this one because it's not exhaustive
-		there was one(provider1).getPermissionsFor(currentUser, module)
-		there was one(provider2).getPermissionsFor(currentUser, dept)
-		there was one(provider2).getPermissionsFor(currentUser, module)
+		verify(provider1, times(0)).getPermissionsFor(currentUser, dept) // We don't bubble up on this one because it's not exhaustive
+		verify(provider1, times(1)).getPermissionsFor(currentUser, module)
+		verify(provider2, times(1)).getPermissionsFor(currentUser, dept)
+		verify(provider2, times(1)).getPermissionsFor(currentUser, module)
 	}
 
 	@Test def dontCheckAllParents() = withUser("cuscav", "0672089") {

@@ -30,7 +30,7 @@ class FunctionalContextTest extends TestBase with FunctionalContextTesting with 
 
 			val service = Wire[StringService]
 			service.resolve("egg") should be("chicken")
-			there was one(service).resolve("egg")
+			verify(service, times(1)).resolve("egg")
 		}
 
 		// Check that the context is all gone away after inContext.
