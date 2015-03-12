@@ -80,6 +80,7 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 			.append(cats, that.cats)
 			.append(academicYear, that.academicYear)
 			.append(occurrence, that.occurrence)
+			.append(sequence, that.sequence)
 			.build()
 
 }

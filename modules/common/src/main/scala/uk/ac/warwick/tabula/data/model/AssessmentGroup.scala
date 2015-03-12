@@ -71,7 +71,8 @@ class AssessmentGroup extends GeneratedId {
 
 			val props = entityInfo ++ Seq(
 				"assessmentComponent" -> assessmentComponent.id,
-				"occurrence" -> occurrence
+				"occurrence" -> occurrence,
+				"sequence" -> assessmentComponent.sequence
 			)
 
 			ToString.forObject(this, props : _*)
