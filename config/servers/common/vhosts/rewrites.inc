@@ -37,6 +37,10 @@ RewriteRule ^/exams/(.*)$ http://127.0.0.1:${proxy:port}/courses/exams/$1 [QSA,P
 RewriteCond %{REQUEST_URI} ^/scheduling/(.*)
 RewriteRule (.*) http://127.0.0.1:${scheduler:port}$1 [QSA,P,L]
 
+# Rewrite API to the API instances
+RewriteCond %{REQUEST_URI} ^/api/v1/(.*)
+RewriteRule (.*) http://127.0.0.1:${api:port}$1 [QSA,P,L]
+
 # Rewrite everything that isn't in a module to the web module
 RewriteCond %{REQUEST_URI} !^/exams/(.*)
 RewriteCond %{REQUEST_URI} !^/coursework/(.*)
@@ -45,7 +49,6 @@ RewriteCond %{REQUEST_URI} !^/profiles/(.*)
 RewriteCond %{REQUEST_URI} !^/scheduling/(.*)
 RewriteCond %{REQUEST_URI} !^/groups/(.*)
 RewriteCond %{REQUEST_URI} !^/attendance/(.*)
-RewriteCond %{REQUEST_URI} !^/api/v1/(.*)
 RewriteCond %{REQUEST_URI} !^/errordocuments/(.*)
 RewriteRule (.*) http://127.0.0.1:${proxy:port}/web$1 [QSA,P,L]
 

@@ -30,7 +30,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 		command.applyInternal() should be (set)
 		set.deleted.booleanValue() should be (true)
 
-		there was one (command.smallGroupService).saveOrUpdate(set)
+		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 	}}
 
 	@Test def permissions { new Fixture {
@@ -44,7 +44,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.SmallGroups.Delete, set)
+		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Delete, set)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {

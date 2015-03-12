@@ -1,10 +1,13 @@
 package uk.ac.warwick.tabula.exams.commands
 
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.Exam
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
+import scala.collection.JavaConverters._
 
 object EditExamCommand {
 	def apply(exam: Exam) =
@@ -16,15 +19,32 @@ object EditExamCommand {
 			with PopulateEditExamCommand
 			with ExamValidation
 			with AutowiringAssessmentServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
+			with UpdatesStudentMembership
+			with ModifiesExamMembership
+			with HasAcademicYear
+			with AutowiringUserLookupComponent
+			with SpecifiesGroupType
 }
 
-class EditExamCommandInternal(val exam: Exam)
-	extends CommandInternal[Exam] with EditExamCommandState {
+class EditExamCommandInternal(override val exam: Exam)
+	extends CommandInternal[Exam]
+	with EditExamCommandState
+	with UpdatesStudentMembership
+	with ModifiesExamMembership {
 
-	self: AssessmentServiceComponent =>
+	self: AssessmentServiceComponent with UserLookupComponent  with HasAcademicYear with SpecifiesGroupType
+		with AssessmentMembershipServiceComponent =>
 
 	override def applyInternal() = {
 		exam.name = name
+
+		exam.assessmentGroups.clear()
+		exam.assessmentGroups.addAll(assessmentGroups)
+		for (group <- exam.assessmentGroups.asScala if group.exam == null) {
+			group.exam = exam
+		}
+
 		assessmentService.save(exam)
 		exam
 	}
@@ -42,7 +62,8 @@ trait EditExamPermissions extends RequiresPermissionsChecking with PermissionsCh
 trait EditExamCommandState extends ExamState {
 
 	def exam: Exam
-
+	override def module: Module = exam.module
+	override def academicYear: AcademicYear = exam.academicYear
 }
 
 trait EditExamCommandDescription extends Describable[Exam] {
@@ -56,6 +77,14 @@ trait EditExamCommandDescription extends Describable[Exam] {
 
 trait PopulateEditExamCommand {
 
-	self: EditExamCommandState =>
+	self: EditExamCommandState with UpdatesStudentMembership =>
 	name = exam.name
+	assessmentGroups = exam.assessmentGroups
+
+	def populateGroups(exam: Exam) {
+		assessmentGroups = exam.assessmentGroups
+		upstreamGroups.addAll(availableUpstreamGroups.filter { ug =>
+			assessmentGroups.asScala.exists(ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence)
+		}.asJavaCollection)
+	}
 }

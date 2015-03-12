@@ -118,7 +118,7 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 		service.getCheckpointsForAttendance(Seq(attendance)).size should be (1)
 
 		service.updateCheckpointsForAttendance(Seq(attendance))
-		there was one (service.monitoringPointService).saveOrUpdateCheckpointByUsercode(student, groupThisYearPoint, AttendanceState.Attended, attendance.updatedBy, autocreated = true)
+		verify(service.monitoringPointService, times(1)).saveOrUpdateCheckpointByUsercode(student, groupThisYearPoint, AttendanceState.Attended, attendance.updatedBy, autocreated = true)
 	}}
 
 	@Test
@@ -140,7 +140,7 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 		service.getCheckpointsForAttendance(Seq(attendance)).size should be (1)
 
 		service.updateCheckpointsForAttendance(Seq(attendance))
-		there was one (service.monitoringPointService).saveOrUpdateCheckpointByUsercode(student, groupThisYearPoint, AttendanceState.Attended, attendance.updatedBy, autocreated = true)
+		verify(service.monitoringPointService, times(1)).saveOrUpdateCheckpointByUsercode(student, groupThisYearPoint, AttendanceState.Attended, attendance.updatedBy, autocreated = true)
 	}}
 
 	@Test
@@ -152,7 +152,7 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 		service.getCheckpointsForAttendance(Seq(attendance)).size should be (1)
 
 		service.updateCheckpointsForAttendance(Seq(attendance))
-		there was one (service.monitoringPointService).saveOrUpdateCheckpointByUsercode(student, groupThisYearPoint, AttendanceState.Attended, attendance.updatedBy, autocreated = true)
+		verify(service.monitoringPointService, times(1)).saveOrUpdateCheckpointByUsercode(student, groupThisYearPoint, AttendanceState.Attended, attendance.updatedBy, autocreated = true)
 	}}
 
 	@Test

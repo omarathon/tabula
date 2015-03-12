@@ -60,6 +60,6 @@ class DeleteMeetingRecordCommandTest extends TestBase with Mockito {
 
 		cmd.applyInternal()
 
-		there was one(mockMeetingRecordService).purge(meeting)
+		verify(mockMeetingRecordService, times(1)).purge(meeting)
 	}}
 }

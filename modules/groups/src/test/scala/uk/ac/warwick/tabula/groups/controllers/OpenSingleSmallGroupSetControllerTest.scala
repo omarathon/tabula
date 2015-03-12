@@ -32,7 +32,7 @@ class OpenSingleSmallGroupSetControllerTest extends TestBase with Mockito {
 	def submitCallsApply() {
 		val mockCommand = mock[Appliable[Seq[SmallGroupSet]]]
 		controller.submit(mockCommand)
-		there was one(mockCommand).apply()
+		verify(mockCommand, times(1)).apply()
 	}
 
 	@Test

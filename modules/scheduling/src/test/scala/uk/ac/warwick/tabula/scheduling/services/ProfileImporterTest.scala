@@ -149,10 +149,10 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		member.photo should not be (null)
 		member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 
-		there was one(fileDao).savePermanent(any[FileAttachment])
-		there was no(fileDao).saveTemporary(any[FileAttachment])
+		verify(fileDao, times(1)).savePermanent(any[FileAttachment])
+		verify(fileDao, times(0)).saveTemporary(any[FileAttachment])
 
-		there was one(memberDao).saveOrUpdate(any[Member])
+		verify(memberDao, times(1)).saveOrUpdate(any[Member])
 	}
 
 }

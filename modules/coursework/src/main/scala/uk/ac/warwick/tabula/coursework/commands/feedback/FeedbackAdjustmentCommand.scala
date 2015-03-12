@@ -18,7 +18,7 @@ object FeedbackAdjustmentCommand {
 
 	final val REASON_SIZE_LIMIT = 600
 
-	def apply(assignment: Assignment, student:User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+	def apply(assignment: Assessment, student:User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
 		new FeedbackAdjustmentCommandInternal(assignment, student, submitter, gradeGenerator)
 			with ComposableCommand[Feedback]
 			with FeedbackAdjustmentCommandPermissions
@@ -31,24 +31,48 @@ object FeedbackAdjustmentCommand {
 			with QueuesFeedbackForSits
 }
 
-class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
-	extends CommandInternal[Feedback] with FeedbackAdjustmentCommandState with SubmissionState {
+object AssignmentFeedbackAdjustmentCommand {
+
+	final val REASON_SIZE_LIMIT = 600
+
+	def apply(thisAssignment: Assignment, student:User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		new FeedbackAdjustmentCommandInternal(thisAssignment, student, submitter, gradeGenerator)
+			with ComposableCommand[Feedback]
+			with FeedbackAdjustmentCommandPermissions
+			with FeedbackAdjustmentCommandDescription
+			with FeedbackAdjustmentCommandValidation
+			with FeedbackAdjustmentNotifier
+			with AutowiringFeedbackServiceComponent
+			with AutowiringZipServiceComponent
+			with AutowiringFeedbackForSitsServiceComponent
+			with QueuesFeedbackForSits
+			with SubmissionState {
+				override val submission = thisAssignment.findSubmission(student.getWarwickId)
+				override val assignment = thisAssignment
+			}
+}
+
+class FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student:User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
+	extends CommandInternal[Feedback] with FeedbackAdjustmentCommandState {
 
 	self: FeedbackServiceComponent with ZipServiceComponent with QueuesFeedbackForSits =>
 
-	val submission = assignment.findSubmission(student.getWarwickId)
-	val feedback = assignment.findFeedback(student.getWarwickId)
+	val feedback = assessment.findFeedback(student.getWarwickId)
 		.getOrElse(throw new ItemNotFoundException("Can't adjust for non-existent feedback"))
 	copyFrom(feedback)
-	lazy val canBeUploadedToSits = assignment.assessmentGroups.asScala.map(_.toUpstreamAssessmentGroup(assignment.academicYear)).exists(_.exists(_.members.includesUser(student)))
+	lazy val canBeUploadedToSits = assessment.assessmentGroups.asScala.map(_.toUpstreamAssessmentGroup(assessment.academicYear)).exists(_.exists(_.members.includesUser(student)))
 
 	def applyInternal() = {
 		val newMark = copyTo(feedback)
 
-		// if we are updating existing feedback then invalidate any cached feedback zips
-		if(feedback.id != null) {
-			zipService.invalidateIndividualFeedbackZip(feedback)
-			zipService.invalidateFeedbackZip(assignment)
+		assessment match {
+			case assignment: Assignment =>
+				// if we are updating existing feedback then invalidate any cached feedback zips
+				if(feedback.id != null) {
+					zipService.invalidateIndividualFeedbackZip(feedback)
+					zipService.invalidateFeedbackZip(assignment)
+				}
+			case _ =>
 		}
 
 		feedback.updatedDate = DateTime.now
@@ -60,7 +84,7 @@ class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:
 
 	def copyFrom(feedback: Feedback) {
 		// mark and grade
-		if (assignment.collectMarks) {
+		if (assessment.collectMarks) {
 			actualMark = feedback.actualMark.map(_.toString).orNull
 			actualGrade = feedback.actualGrade.orNull
 			adjustedMark = feedback.adjustedMark.map(_.toString).orNull
@@ -72,7 +96,7 @@ class FeedbackAdjustmentCommandInternal(val assignment: Assignment, val student:
 
 	def copyTo(feedback: Feedback): Option[Mark] = {
 		// save mark and grade
-		if (assignment.collectMarks) {
+		if (assessment.collectMarks) {
 			Some(
 				feedback.addMark(submitter.userId, MarkType.Adjustment, adjustedMark.toInt, adjustedGrade.maybeText, reason, comments)
 			)
@@ -102,10 +126,12 @@ trait FeedbackAdjustmentCommandValidation extends SelfValidating {
 				case _ @ (_: NumberFormatException | _: IllegalArgumentException) =>
 					errors.rejectValue("adjustedMark", "actualMark.format")
 			}
+		} else {
+			errors.rejectValue("adjustedMark", "actualMark.range")
 		}
 
 		// validate grade is department setting is true
-		if (!errors.hasErrors && adjustedGrade.hasText && assignment.module.adminDepartment.assignmentGradeValidation) {
+		if (!errors.hasErrors && adjustedGrade.hasText && assessment.module.adminDepartment.assignmentGradeValidation) {
 			val validGrades = gradeGenerator.applyForMarks(Map(student.getWarwickId -> adjustedMark.toInt))(student.getWarwickId)
 			if (validGrades.nonEmpty && !validGrades.exists(_.grade == adjustedGrade)) {
 				errors.rejectValue("adjustedGrade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
@@ -115,10 +141,9 @@ trait FeedbackAdjustmentCommandValidation extends SelfValidating {
 }
 
 trait FeedbackAdjustmentCommandState {
-	val assignment: Assignment
+	val assessment: Assessment
 	val student: User
 	val feedback: Feedback
-	val submission: Option[Submission]
 	val gradeGenerator: GeneratesGradesFromMarks
 
 	var adjustedMark: String = _
@@ -137,16 +162,16 @@ trait FeedbackAdjustmentCommandState {
 trait FeedbackAdjustmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: FeedbackAdjustmentCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.Update, mandatory(assignment))
+		p.PermissionCheck(Permissions.Feedback.Update, mandatory(assessment))
 	}
 }
 
 trait FeedbackAdjustmentCommandDescription extends Describable[Feedback] {
 	self: FeedbackAdjustmentCommandState =>
 	def describe(d: Description) {
-		d.assignment(assignment)
+		d.assessment(assessment)
 		d.studentIds(Seq(student.getUserId))
-		d.property("adjustmentReason", comments)
+		d.property("adjustmentReason", reason)
 		d.property("adjustmentComments", comments)
 	}
 }
@@ -162,7 +187,7 @@ trait FeedbackAdjustmentNotifier extends Notifies[Feedback, Feedback] {
 				} else {
 					Nil
 				}
-				val adminsNotifications = if (assignment.hasWorkflow) {
+				val adminsNotifications = if (assessment.hasWorkflow) {
 					Seq(Notification.init(new FeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
 				} else {
 					Nil

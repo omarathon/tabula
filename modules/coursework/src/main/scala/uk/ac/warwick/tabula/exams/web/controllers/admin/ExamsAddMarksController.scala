@@ -42,15 +42,17 @@ class ExamsAddMarksController extends ExamsController {
 		@PathVariable academicYear: AcademicYear,
 		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
 	) = {
-		val members = examMembershipService.determineMembershipUsers(exam)
+		val members = examMembershipService.determineMembershipUsersWithOrder(exam)
 
-		val marksToDisplay = members.map { member =>
+		val marksToDisplay = members.map { memberPair =>
+			val member = memberPair._1
 			val feedback = feedbackService.getStudentFeedback(exam, member.getWarwickId)
 			noteMarkItem(member, feedback)
 		}
 
 		crumbed(Mav("exams/admin/marks/marksform",
 			"marksToDisplay" -> marksToDisplay,
+			"seatNumberMap" -> members.map(m => m._1.getWarwickId -> m._2).toMap,
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
 		), module, academicYear)
 

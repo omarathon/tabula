@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
-import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{FeedbackReturnedNotifier, ReleasedState}
 import uk.ac.warwick.tabula.system.BindListener
@@ -35,26 +34,28 @@ abstract class MarkingUncompletedCommand(val module: Module, val assignment: Ass
 	with MarkingUncompletedState
 	with ReleasedState
 	with BindListener
-	with Logging {
+	with Logging
+	with CanProxy {
 
 	self: StateServiceComponent with FeedbackServiceComponent =>
 
 	override def onBind(result: BindingResult) {
 		// do not update previously released feedback
-		markerFeedback = markerFeedback.asScala.filterNot(_.feedback.released)
+		markerFeedback = Option(markerFeedback).map(mfs =>
+			mfs.asScala.filterNot(mf => mf != null && mf.feedback.released)).orNull.asJava
 	}
 
 	def validate(errors: Errors) {
 		if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
-		if (markerFeedback.isEmpty) errors.rejectValue("markerFeedback", "markers.finishMarking.noStudents")
+		if (markerFeedback == null || markerFeedback.isEmpty || !markerFeedback.asScala.exists(_ != null)) errors.rejectValue("markerFeedback", "markers.finishMarking.noStudents")
 	}
 
 	def applyInternal() {
 		// set the previous feedback to ReleasedForMarking
-		newReleasedFeedback = markerFeedback.flatMap(getSubsequentFeedback)
-		newReleasedFeedback.foreach(stateService.updateStateUnsafe(_, MarkingState.ReleasedForMarking))
+		newReleasedFeedback = markerFeedback.asScala.flatMap(getSubsequentFeedback).asJava
+		newReleasedFeedback.asScala.foreach(stateService.updateStateUnsafe(_, MarkingState.ReleasedForMarking))
 		// delete the returned feedback
-		markerFeedback.foreach(feedbackService.delete)
+		markerFeedback.asScala.foreach(feedbackService.delete)
 	}
 
 	def getSubsequentFeedback(markerFeedback: MarkerFeedback) = markerFeedback.getFeedbackPosition match {
@@ -81,7 +82,7 @@ trait MarkingUncompletedDescription extends Describable[Unit] {
 
 	override def describe(d: Description) {
 		d.assignment(assignment)
-			.property("students" -> markerFeedback.map(_.feedback.universityId))
+			.property("students" -> markerFeedback.asScala.map(_.feedback.universityId))
 	}
 
 	override def describeResult(d: Description){
@@ -108,7 +109,7 @@ trait MarkerReturnedNotifier extends FeedbackReturnedNotifier[Unit] {
 	this: MarkingUncompletedState with ReleasedState with UserAware with Logging =>
 
 	// take the workflow position from the first item being returned.
-	val position = markerFeedback.headOption.map(_.getFeedbackPosition) match {
+	val position = markerFeedback.asScala.headOption.map(_.getFeedbackPosition) match {
 		case None => 3
 		case Some(ThirdFeedback) => 2
 		case Some(SecondFeedback) => 1
@@ -139,14 +140,14 @@ abstract class AdminMarkingUncompletedCommand(module: Module, assignment: Assign
 	var students: JList[String] = JArrayList()
 
 	override def onBind(result: BindingResult) {
-		val parentFeedback = students.flatMap(assignment.findFeedback(_))
-		markerFeedback = parentFeedback.filterNot(f => f.released || f.isPlaceholder).flatMap(_.getAllCompletedMarkerFeedback.lastOption)
+		val parentFeedback = students.asScala.flatMap(assignment.findFeedback)
+		markerFeedback = parentFeedback.filterNot(f => f.released || f.isPlaceholder).flatMap(_.getAllCompletedMarkerFeedback.lastOption).asJava
 	}
 
 	override def applyInternal() {
 		// set the last markerfeedback to ReleasedForMarking
 		newReleasedFeedback = markerFeedback
-		newReleasedFeedback.foreach(stateService.updateStateUnsafe(_, MarkingState.ReleasedForMarking))
+		newReleasedFeedback.asScala.foreach(stateService.updateStateUnsafe(_, MarkingState.ReleasedForMarking))
 	}
 
 }

@@ -31,14 +31,14 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 	@Test
 	def firstRequestIsPassedThrough(){new Fixture {
 		cache.getTimetableForStudent(studentId) should be (Success(studentEvents))
-		there was one (delegate).getTimetableForStudent(studentId)
+		verify(delegate, times(1)).getTimetableForStudent(studentId)
 	}}
 
 	@Test
 	def repeatedRequestsAreCached(){new Fixture {
 		cache.getTimetableForStudent(studentId) should be (Success(studentEvents))
 		cache.getTimetableForStudent(studentId) should be (Success(studentEvents))
-		there was one(delegate).getTimetableForStudent(studentId)
+		verify(delegate, times(1)).getTimetableForStudent(studentId)
 	}}
 
 	@Test
@@ -53,8 +53,8 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		cache.getTimetableForStudent(studentId)  should be(Success(studentEvents))
 		cache.getTimetableForStaff(studentId)  should be(Success(staffEvents))
 		cache.getTimetableForStaff(studentId)  should be(Success(staffEvents))
-		there was one (delegate).getTimetableForStudent(studentId)
-		there was one (delegate).getTimetableForStaff(studentId)
+		verify(delegate, times(1)).getTimetableForStudent(studentId)
+		verify(delegate, times(1)).getTimetableForStaff(studentId)
 
 	}}
 

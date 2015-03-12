@@ -50,7 +50,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 
 	// QueryParser isn't thread safe, hence why this is a def
 	// Overrides AbstractIndexService when used in ProfileIndexService
-	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(IndexService.ProfileIndexLuceneVersion, nameFields, analyzer)
+	override def parser = new SynonymAwareWildcardMultiFieldQueryParser(Seq(UpdatedDateField), nameFields, analyzer)
 
 	def findWithQuery(
 		query: String,
@@ -120,6 +120,8 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 @Component
 class ProfileIndexService extends AbstractIndexService[Member] with ProfileQueryMethods with Logging {
 
+	final val apiIndexName = "profile"
+
 	// largest batch of items we'll load in at once.
 	final override val MaxBatchSize = 100000
 
@@ -150,7 +152,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		val nameAnalyzer = new ProfileAnalyzer(forIndexing)
 		val nameMappings = nameFields.map(field => field -> nameAnalyzer)
 
-		val whitespaceAnalyzer = new WhitespaceAnalyzer(IndexService.ProfileIndexLuceneVersion)
+		val whitespaceAnalyzer = new WhitespaceAnalyzer
 		val whitespaceMappings = whitespaceDelimitedFields.map(field => field -> whitespaceAnalyzer)
 
 		val mappings = (nameMappings ++ whitespaceMappings).toMap[String, Analyzer].asJava
@@ -203,6 +205,9 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		}
 
 		doc add dateField(UpdatedDateField, item.lastUpdatedDate)
+		// Index date as a DocValue so we can do efficient sorts on it.
+		doc add docValuesField(UpdatedDateField, item.lastUpdatedDate.getMillis)
+
 		Seq(doc)
 	}
 
@@ -230,13 +235,14 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 
 class ProfileAnalyzer(val indexing: Boolean) extends Analyzer {
 
-	val StopWords = StopFilter.makeStopSet(IndexService.ProfileIndexLuceneVersion,
+	val StopWords = StopFilter.makeStopSet(
 			"whois", "who", "email", "address", "room", "e-mail",
 			"mail", "phone", "extension", "ext", "homepage", "tel",
-			"mobile", "mob")
+			"mobile", "mob"
+	)
 
-	override def createComponents(fieldName: String, reader: Reader) = {
-		val source = new StandardTokenizer(IndexService.ProfileIndexLuceneVersion, reader)
+	override def createComponents(fieldName: String) = {
+		val source = new StandardTokenizer
 
 		// Filter stack
 		var result: TokenStream = new DelimitByCharacterFilter(source, '&')
@@ -244,12 +250,10 @@ class ProfileAnalyzer(val indexing: Boolean) extends Analyzer {
 			if (indexing) new SurnamePunctuationFilter(result)
 			else new DelimitByCharacterFilter(result, '\'')
 
-		def standard(delegate: TokenFilter) = new StandardFilter(IndexService.ProfileIndexLuceneVersion, delegate)
-
-		result = new StandardFilter(IndexService.ProfileIndexLuceneVersion, result)
-		result = new LowerCaseFilter(IndexService.ProfileIndexLuceneVersion, result)
+		result = new StandardFilter(result)
+		result = new LowerCaseFilter(result)
 		result = new ASCIIFoldingFilter(result)
-		result = new StopFilter(IndexService.ProfileIndexLuceneVersion, result, StopWords)
+		result = new StopFilter(result, StopWords)
 
 		new TokenStreamComponents(source, result)
 	}

@@ -12,7 +12,11 @@
 	}
 </style>
 
-<h1>User settings for ${user.firstName}</h1>
+<h1 class="with-settings">User settings for ${user.firstName}</h1>
+
+<#if success!false>
+	<div class="alert alert-success">Your preferred settings have been updated.</div>
+</#if>
 <@f.form method="post" class="form-horizontal" action="${url('/settings')}" commandName="userSettingsCommand">
 	
 
@@ -85,6 +89,11 @@
 			<@form.label checkbox=true clazz="radio-aligned">
 				<@f.checkbox path="smallGroupEventAttendanceReminderEnabled" />
 				Small group attendance
+			</@form.label>
+
+			<@form.label checkbox=true clazz="radio-aligned">
+				<@f.checkbox path="finaliseFeedbackNotificationEnabled" />
+				Coursework submissions which have been marked
 			</@form.label>
 		</@form.field>
 	</@form.row>

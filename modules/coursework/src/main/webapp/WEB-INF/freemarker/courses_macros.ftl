@@ -1,7 +1,15 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#import "*/modal_macros.ftl" as modal />
 
-<#macro autoGradeOnline gradePath gradeLabel markPath markingId>
+<#macro autoGradeOnline gradePath gradeLabel markPath markingId assessment="" isExam=false>
+	<#if !assessment?has_content>
+		<#local assessment = command.assignment/>
+	</#if>
+	<#if isExam>
+		<#local generateUrl><@routes.generateExamGradesForMarks assessment /></#local>
+	<#else>
+		<#local generateUrl><@routes.generateGradesForMarks assessment /></#local>
+	</#if>
 	<@form.label path="${gradePath}">${gradeLabel}</@form.label>
 	<@form.field>
 		<@f.input path="${gradePath}" cssClass="input-small auto-grade" id="auto-grade-${markingId}" />
@@ -27,7 +35,7 @@
 						data['selected'] = {};
 						data['selected']['${markingId}'] = ($select.is(':visible')) ? $select.val() : $gradeInput.val();
 					}
-					currentRequest = $.ajax('<@routes.generateGradesForMarks command.assignment />',{
+					currentRequest = $.ajax('${generateUrl}',{
 						'type': 'POST',
 						'data': data,
 						success: function(data) {
@@ -56,7 +64,7 @@
 	</script>
 </#macro>
 
-<#macro marksForm assignment templateUrl formUrl commandName cancelUrl generateUrl>
+<#macro marksForm assignment templateUrl formUrl commandName cancelUrl generateUrl seatOrderMap="" showAddButton=true>
 	<div id="batch-feedback-form">
 		<h1>Submit marks for ${assignment.name}</h1>
 		<ul id="marks-tabs" class="nav nav-tabs">
@@ -93,33 +101,42 @@
 				</@f.form>
 			</div>
 			<div class="tab-pane " id="webform">
-				<p>
-					Click the add button below to enter marks for a student.
-				</p>
-				<table class="hide">
-					<tbody class="row-markup">
-					<tr class="mark-row">
-						<td>
-							<div class="input-prepend input-append">
-								<span class="add-on"><i class="icon-user"></i></span>
-								<input class="universityId span2" name="universityId" type="text" />
-							</div>
-						</td>
-						<td><input name="actualMark" type="text" /></td>
-						<td>
-							<input class="grade input-small" name="actualGrade" type="text"/>
-							<#if isGradeValidation>
-								<select name="actualGrade" class="input-small" disabled style="display:none;"></select>
+				<#if showAddButton>
+					<p>
+						Click the add button below to enter marks for a student.
+					</p>
+
+					<table class="hide">
+						<tbody class="row-markup">
+						<tr class="mark-row">
+							<#if seatOrderMap?has_content>
+								<td></td>
 							</#if>
-						</td>
-					</tr>
-					</tbody>
-				</table>
+							<td>
+								<div class="input-prepend input-append">
+									<span class="add-on"><i class="icon-user"></i></span>
+									<input class="universityId span2" name="universityId" type="text" />
+								</div>
+							</td>
+							<td><input name="actualMark" type="text" /></td>
+							<td>
+								<input class="grade input-small" name="actualGrade" type="text"/>
+								<#if isGradeValidation>
+									<select name="actualGrade" class="input-small" disabled style="display:none;"></select>
+								</#if>
+							</td>
+						</tr>
+						</tbody>
+					</table>
+				</#if>
 				<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="${formUrl}" commandName="${commandName}">
 					<div class="fix-area">
 						<input name="isfile" value="false" type="hidden"/>
 						<table class="marksUploadTable">
 							<tr class="mark-header">
+								<#if seatOrderMap?has_content>
+									<th>Seat order</th>
+								</#if>
 								<th>University ID</th>
 								<th>Marks</th>
 								<th>Grade <#if isGradeValidation><@fmt.help_popover id="auto-grade-help" content="The grade is automatically calculated from the SITS mark scheme" /></#if></th>
@@ -127,6 +144,13 @@
 							<#if marksToDisplay??>
 								<#list marksToDisplay as markItem>
 									<tr class="mark-row">
+										<#if seatOrderMap?has_content>
+											<#if mapGet(seatOrderMap, markItem.universityId)??>
+												<td>${mapGet(seatOrderMap, markItem.universityId)}</td>
+											<#else>
+												<td></td>
+											</#if>
+										</#if>
 										<td>
 											<div class="input-prepend input-append">
 												<span class="add-on"><i class="icon-user"></i></span>
@@ -144,7 +168,9 @@
 								</#list>
 							</#if>
 						</table>
-						<br /><button class="add-additional-marks btn"><i class="icon-plus"></i> Add</button>
+						<#if showAddButton>
+							<br /><button class="add-additional-marks btn"><i class="icon-plus"></i> Add</button>
+						</#if>
 						<div class="submit-buttons fix-footer">
 							<input type="submit" class="btn btn-primary" value="Save">
 							or <a href="${cancelUrl}" class="btn">Cancel</a>
@@ -289,13 +315,7 @@
 							<#list gradeValidation.populated?keys as feedback>
 								<tr>
 									<td>${feedback.universityId}</td>
-									<td>
-										<#if feedback.adjustedMark??>
-											${feedback.adjustedMark!}
-										<#else>
-											${feedback.actualMark!}
-										</#if>
-									</td>
+									<td>${(feedback.latestMark)!}</td>
 									<td>${mapGet(gradeValidation.populated, feedback)}</td>
 								</tr>
 							</#list>
@@ -314,20 +334,8 @@
 							<#list gradeValidation.invalid?keys as feedback>
 								<tr>
 									<td>${feedback.universityId}</td>
-									<td>
-										<#if feedback.adjustedMark??>
-											${feedback.adjustedMark!}
-										<#else>
-											${feedback.actualMark!}
-										</#if>
-									</td>
-									<td>
-										<#if feedback.adjustedGrade??>
-											${feedback.adjustedGrade!}
-										<#else>
-											${feedback.actualGrade!}
-										</#if>
-									</td>
+									<td>${(feedback.latestMark)!}</td>
+									<td>${(feedback.latestGrade)!}</td>
 									<td>${mapGet(gradeValidation.invalid, feedback)}</td>
 								</tr>
 							</#list>
@@ -356,13 +364,7 @@
 							<#list gradeValidation.populated?keys as feedback>
 								<tr>
 									<td>${feedback.universityId}</td>
-									<td>
-										<#if feedback.adjustedMark??>
-											${feedback.adjustedMark!}
-										<#else>
-											${feedback.actualMark!}
-										</#if>
-									</td>
+									<td>${(feedback.latestMark)!}</td>
 									<td></td>
 									<td></td>
 								</tr>
@@ -370,20 +372,8 @@
 							<#list gradeValidation.invalid?keys as feedback>
 								<tr>
 									<td>${feedback.universityId}</td>
-									<td>
-										<#if feedback.adjustedMark??>
-											${feedback.adjustedMark!}
-										<#else>
-											${feedback.actualMark!}
-										</#if>
-									</td>
-									<td>
-										<#if feedback.adjustedGrade??>
-											${feedback.adjustedGrade!}
-										<#else>
-											${feedback.actualGrade!}
-										</#if>
-									</td>
+									<td>${(feedback.latestMark)!}</td>
+									<td>${(feedback.latestGrade)!}</td>
 									<td>${mapGet(gradeValidation.invalid, feedback)}</td>
 								</tr>
 							</#list>

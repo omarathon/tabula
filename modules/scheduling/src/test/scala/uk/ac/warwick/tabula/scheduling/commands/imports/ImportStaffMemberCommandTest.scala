@@ -69,10 +69,10 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 			member.timetableHash should not be (null)
 
-			there was one(fileDao).savePermanent(any[FileAttachment])
-			there was no(fileDao).saveTemporary(any[FileAttachment])
+			verify(fileDao, times(1)).savePermanent(any[FileAttachment])
+			verify(fileDao, times(0)).saveTemporary(any[FileAttachment])
 
-			there was one(memberDao).saveOrUpdate(any[Member])
+			verify(memberDao, times(1)).saveOrUpdate(any[Member])
 		}
 	}
 
@@ -105,10 +105,10 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 			member.timetableHash should be (existingTimetableHash)
 
-			there was one(fileDao).savePermanent(any[FileAttachment])
-			there was no(fileDao).saveTemporary(any[FileAttachment])
+			verify(fileDao, times(1)).savePermanent(any[FileAttachment])
+			verify(fileDao, times(0)).saveTemporary(any[FileAttachment])
 
-			there was one(memberDao).saveOrUpdate(existing)
+			verify(memberDao, times(1)).saveOrUpdate(existing)
 		}
 	}
 

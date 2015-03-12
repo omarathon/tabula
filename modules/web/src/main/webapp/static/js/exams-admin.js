@@ -9,6 +9,43 @@ exports.zebraStripeExams = function($module) {
 	$module.find('.assignment-info').filter(':visible:even').addClass('alt-row');
 };
 
+exports.prepareAjaxForm = function($form, callback) {
+	var $container = $form.closest('.content-container');
+	var contentId = $container.attr('data-contentid');
+	var $row = $('tr.item-container[data-contentid='+contentId+']');
+	$form.ajaxForm({
+		iframe: true,
+		statusCode: {
+			403: function(jqXHR) {
+				$container.html("<p class='text-error'><i class='icon-warning-sign'></i> Sorry, you don't have permission to see that. Have you signed out of Tabula?</p><p class='text-error'>Refresh the page and try again. If it remains a problem, please let us know using the comments link on the edge of the page.</p>");
+				$container.trigger('tabula.expandingTable.contentChanged');
+			}
+		},
+		success: function(response) {
+			var result;
+
+			if (response.indexOf('id="dev"') >= 0) {
+				// for debugging freemarker...
+				result = $(response).find('#column-1-content');
+			} else {
+				result = callback(response);
+			}
+
+			if (!result || /^\s*$/.test(result)) {
+				// reset if empty
+				$row.trigger('tabula.expandingTable.toggle');
+				$container.html("<p>No data is currently available.</p>");
+				$row.find('.status-col dt .unsaved').remove();
+				$container.removeData('loaded');
+			} else {
+				$container.html(result);
+				$container.trigger('tabula.expandingTable.contentChanged');
+			}
+		},
+		error: function(){alert("There has been an error. Please reload and try again.");}
+	});
+};
+
 window.Exams = jQuery.extend(window.Exams, exports);
 
 $(function(){

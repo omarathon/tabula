@@ -113,7 +113,7 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 		group.userLookup.getUsersByUserIds(JArrayList("test")) returns JHashMap("test" -> test)
 
 		group.users should be(Seq(test))
-		there was one(group.userLookup).getUsersByUserIds(any[JList[String]])
+		verify(group.userLookup, times(1)).getUsersByUserIds(any[JList[String]])
 	}
 
 	@Test
@@ -125,7 +125,7 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 		group.userLookup.getUsersByWarwickUniIds(Seq("test")) returns Map("test" -> test)
 
 		group.users should be(Seq(test))
-		there was one(group.userLookup).getUsersByWarwickUniIds(any[Seq[String]])
+		verify(group.userLookup, times(1)).getUsersByWarwickUniIds(any[Seq[String]])
 	}
 
 	@Test
@@ -137,7 +137,7 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 		group.userLookup.getUsersByUserIds(JArrayList("test")) returns JHashMap("test" -> test)
 
 		group.excludes should be(Seq(test))
-		there was one(group.userLookup).getUsersByUserIds(any[JList[String]])
+		verify(group.userLookup, times(1)).getUsersByUserIds(any[JList[String]])
 	}
 
 	@Test
@@ -149,6 +149,6 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 		group.userLookup.getUsersByWarwickUniIds(Seq("test")) returns Map("test" -> test)
 
 		group.excludes should be(Seq(test))
-		there was one(group.userLookup).getUsersByWarwickUniIds(any[Seq[String]])
+		verify(group.userLookup, times(1)).getUsersByWarwickUniIds(any[Seq[String]])
 	}
 }

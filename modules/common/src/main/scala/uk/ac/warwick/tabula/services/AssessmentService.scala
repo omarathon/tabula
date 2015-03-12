@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.services
 
+import org.joda.time.DateTime
 import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.tabula.data.{AssessmentDaoComponent, AutowiringAssessmentDaoComponent}
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.spring.Wire
-import org.joda.time.DateTime
 
 trait AssessmentServiceComponent {
 	def assessmentService: AssessmentService
@@ -30,6 +30,7 @@ trait AssessmentService {
 	def deleteFormField(field: FormField) : Unit
 
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
+	def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam]
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment]
 	def getAssignmentsWithFeedback(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
@@ -73,6 +74,9 @@ abstract class AbstractAssessmentService extends AssessmentService {
 
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment] =
 		assessmentDao.getAssignmentByNameYearModule(name, year, module)
+
+	def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam] =
+		assessmentDao.getExamByNameYearModule(name, year, module)
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] = assessmentDao.getAssignmentsWithFeedback(universityId)
 

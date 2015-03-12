@@ -1,14 +1,10 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin.markingworkflows
 
-import scala.collection.JavaConversions._
 import org.springframework.web.bind.annotation._
 import org.springframework.stereotype.Controller
-import org.hibernate.criterion.Restrictions
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.MarkingWorkflow
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MarkingWorkflowDao
 import uk.ac.warwick.tabula.commands.ReadOnly
@@ -37,17 +33,13 @@ class ListMarkingWorkflowController extends CourseworkController {
 }
 
 object ListMarkingWorkflowController {
-	class Form(val department: Department) extends Command[Seq[Map[String, Any]]] with ReadOnly with Unaudited with Daoisms {
+	class Form(val department: Department) extends Command[Seq[Map[String, Any]]] with ReadOnly with Unaudited {
 		PermissionCheck(Permissions.MarkingWorkflow.Read, department)
 	
 		var dao = Wire.auto[MarkingWorkflowDao]
 
 		def applyInternal() = {
-			val markingWorkflows = session.newCriteria[MarkingWorkflow]
-				.add(is("department", department))
-				.list
-		  
-			for (markingWorkflow <- markingWorkflows) yield {
+			department.markingWorkflows.map { markingWorkflow =>
 				val assignments = dao.getAssignmentsUsingMarkingWorkflow(markingWorkflow)
 				Map(
 					"markingWorkflow" -> markingWorkflow,

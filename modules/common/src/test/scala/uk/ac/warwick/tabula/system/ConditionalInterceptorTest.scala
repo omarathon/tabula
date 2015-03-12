@@ -18,13 +18,13 @@ class ConditionalInterceptorTest extends TestBase with Mockito {
 	
 	@Test def nonMatching {		
 		interceptor.preHandle(servletRequest)
-		there was one(delegate).preHandle(servletRequest)
+		verify(delegate, times(1)).preHandle(servletRequest)
 		
 		interceptor.postHandle(servletRequest, null)
-		there was one(delegate).postHandle(servletRequest, null)
+		verify(delegate, times(1)).postHandle(servletRequest, null)
 		
 		interceptor.afterCompletion(servletRequest, null)
-		there was one(delegate).afterCompletion(servletRequest, null)
+		verify(delegate, times(1)).afterCompletion(servletRequest, null)
 	}
 	
 	@Test def matching {
@@ -32,13 +32,13 @@ class ConditionalInterceptorTest extends TestBase with Mockito {
 		request.setRequestURI("/tabula/sysadmin/home")
 		
 		interceptor.preHandle(servletRequest)
-		there was no(delegate).preHandle(servletRequest)
+		verify(delegate, times(0)).preHandle(servletRequest)
 		
 		interceptor.postHandle(servletRequest, null)
-		there was no(delegate).postHandle(servletRequest, null)
+		verify(delegate, times(0)).postHandle(servletRequest, null)
 		
 		interceptor.afterCompletion(servletRequest, null)
-		there was no(delegate).afterCompletion(servletRequest, null)
+		verify(delegate, times(0)).afterCompletion(servletRequest, null)
 	}
 
 }

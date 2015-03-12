@@ -36,7 +36,7 @@ class ListStudentRelationshipTypesCommandTest extends TestBase with Mockito {
 
 			commandInternal.applyInternal() should be (allTypes)
 
-			there was one(commandInternal.relationshipService).allStudentRelationshipTypes
+			verify(commandInternal.relationshipService, times(1)).allStudentRelationshipTypes
 		}
 	}
 	
@@ -46,7 +46,7 @@ class ListStudentRelationshipTypesCommandTest extends TestBase with Mockito {
 			val perms = new ListStudentRelationshipTypesCommandPermissions() {}
 			val checking = mock[PermissionsChecking]
 			perms.permissionsCheck(checking)
-			there was one(checking).PermissionCheck(Permissions.StudentRelationshipType.Read)
+			verify(checking, times(1)).PermissionCheck(Permissions.StudentRelationshipType.Read)
 		}
 	}
 

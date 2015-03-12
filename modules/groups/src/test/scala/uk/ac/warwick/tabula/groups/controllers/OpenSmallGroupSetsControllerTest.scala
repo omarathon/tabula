@@ -83,7 +83,7 @@ class OpenSmallGroupSetsControllerTest extends TestBase with Mockito {
 
 		model.applyCommand(new User)
 
-		there was one(mockCommand).apply()
+		verify(mockCommand, times(1)).apply()
 	}
 
 	@Test
@@ -99,7 +99,7 @@ class OpenSmallGroupSetsControllerTest extends TestBase with Mockito {
 								
 				controller.submit(viewModel, department)
 
-				there was one(viewModel).applyCommand(apparentUser)
+				verify(viewModel, times(1)).applyCommand(apparentUser)
 			}
 		}
 	}

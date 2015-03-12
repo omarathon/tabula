@@ -40,7 +40,7 @@ class ConvertScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 	def apply() { new Fixture {
 		val newMeetingRecord = command.applyInternal()
 
-		there was one(mockMeetingRecordService).purge(scheduledMeetingRecord)
+		verify(mockMeetingRecordService, times(1)).purge(scheduledMeetingRecord)
 	}}
 
 	trait ConvertScheduledMeetingRecordCommandSupport extends FileAttachmentServiceComponent {

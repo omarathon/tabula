@@ -14,8 +14,8 @@ import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.Errors
 
 
-class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: User, submitter: CurrentUser)
-	extends UploadFeedbackCommand[List[MarkerFeedback]](module, assignment, marker)  {
+class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: User, val submitter: CurrentUser)
+	extends UploadFeedbackCommand[List[MarkerFeedback]](module, assignment, marker) with CanProxy {
 	
 	PermissionCheck(Permissions.Feedback.Create, assignment)
 	if(submitter.apparentUser != marker) {

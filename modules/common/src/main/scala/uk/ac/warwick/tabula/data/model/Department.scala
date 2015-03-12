@@ -68,16 +68,19 @@ class Department extends GeneratedId
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
-	var feedbackTemplates:JList[FeedbackTemplate] = JArrayList()
+	var feedbackTemplates: JList[FeedbackTemplate] = JArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
-	var markingWorkflows:JList[MarkingWorkflow] = JArrayList()
+	private val _markingWorkflows: JSet[MarkingWorkflow] = JHashSet()
+	def markingWorkflows = _markingWorkflows.asScala.toSeq.sorted
+	def addMarkingWorkflow(markingWorkflow: MarkingWorkflow) = _markingWorkflows.add(markingWorkflow)
+	def removeMarkingWorkflow(markingWorkflow: MarkingWorkflow) = _markingWorkflows.remove(markingWorkflow)
 
 	// TAB-2388 Disable orphanRemoval as Module Managers were unintentionally being removed in certain circumstances
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
 	@BatchSize(size=200)
-	var customRoleDefinitions:JList[CustomRoleDefinition] = JArrayList()
+	var customRoleDefinitions: JList[CustomRoleDefinition] = JArrayList()
 
 	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse false
 	def collectFeedbackRatings_= (collect: Boolean) = settings += (Settings.CollectFeedbackRatings -> collect)

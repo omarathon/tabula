@@ -37,7 +37,7 @@ class EditDepartmentControllerTest extends TestBase with Mockito {
 
 		controller.submit(command, errors).viewName should be (s"redirect:${Routes.admin.department(department)}")
 
-		there was one (command).apply()
+		verify(command, times(1)).apply()
 	}
 
 	@Test def validation {
@@ -47,7 +47,7 @@ class EditDepartmentControllerTest extends TestBase with Mockito {
 
 		controller.submit(command, errors).viewName should be("admin/department/edit/form")
 
-		there was atMost(0) (command).apply()
+		verify(command, times(0)).apply()
 	}
 
 }

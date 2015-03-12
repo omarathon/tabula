@@ -58,6 +58,7 @@ trait AssessmentMembershipService {
 	def determineMembership(assessment: Assessment): AssessmentMembershipInfo
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User]
 	def determineMembershipUsers(assessment: Assessment): Seq[User]
+	def determineMembershipUsersWithOrder(exam: Exam): Seq[(User, Option[Int])]
 	def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[String]
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean
@@ -237,11 +238,16 @@ trait AssessmentMembershipMethods extends Logging {
 	 */
 	def determineMembershipUsers(assessment: Assessment): Seq[User] = assessment match {
 		case a: Assignment => determineMembershipUsers(a.upstreamAssessmentGroups, Option(a.members))
-		case e: Exam => determineSitsMembership(e.upstreamAssessmentGroups)
+		case e: Exam => determineSitsMembership(e.upstreamAssessmentGroups).map(_.memberId).map(userLookup.getUserByWarwickUniId)
 	}
 
+	def determineMembershipUsersWithOrder(exam: Exam): Seq[(User, Option[Int])] =
+		exam.upstreamAssessmentGroups.flatMap(_.sortedMembers).distinct.sortBy(_.position)
+			.map(m => userLookup.getUserByWarwickUniId(m.memberId) -> m.position)
+
 	private def determineSitsMembership(upstream: Seq[UpstreamAssessmentGroup]) =
-		upstream.flatMap(_.sortedMembers).distinct.sortBy(_.position).map(_.memberId).map(userLookup.getUserByWarwickUniId)
+		upstream.flatMap(_.sortedMembers).distinct.sortBy(_.position)
+
 
 	def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[String] = {
 		others.foreach { g => assert(g.universityIds) }

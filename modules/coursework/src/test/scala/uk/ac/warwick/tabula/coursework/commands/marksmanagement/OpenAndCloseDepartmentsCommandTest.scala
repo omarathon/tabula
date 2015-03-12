@@ -86,7 +86,7 @@ class OpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
 		val command = new OpenAndCloseDepartmentsCommandPermissions with CommandTestSupport
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
-		there was one(checking).PermissionCheck(Permissions.Marks.MarksManagement)
+		verify(checking, times(1)).PermissionCheck(Permissions.Marks.MarksManagement)
 	}
 
 	@Test

@@ -43,7 +43,7 @@ class AttendanceMonitoringServiceListenerTest extends TestBase with Mockito {
 			listener.profileService.getMemberByUniversityIdStaleOrFresh(uniId) returns None
 			listener.moduleAndDepartmentService.getDepartmentByCode(deptCode) returns Option(department)
 			listener.onReceive(new AttendanceMonitoringServiceUpdateCheckpointTotalMessage(uniId, deptCode, null))
-			there was no (listener.attendanceMonitoringService).updateCheckpointTotal(any[StudentMember], any[Department], any[AcademicYear])
+			verify(listener.attendanceMonitoringService, times(0)).updateCheckpointTotal(any[StudentMember], any[Department], any[AcademicYear])
 		}
 
 		new TestSupport {
@@ -51,7 +51,7 @@ class AttendanceMonitoringServiceListenerTest extends TestBase with Mockito {
 			listener.profileService.getMemberByUniversityIdStaleOrFresh(uniId) returns Option(staffMember)
 			listener.moduleAndDepartmentService.getDepartmentByCode(deptCode) returns Option(department)
 			listener.onReceive(new AttendanceMonitoringServiceUpdateCheckpointTotalMessage(uniId, deptCode, null))
-			there was no (listener.attendanceMonitoringService).updateCheckpointTotal(any[StudentMember], any[Department], any[AcademicYear])
+			verify(listener.attendanceMonitoringService, times(0)).updateCheckpointTotal(any[StudentMember], any[Department], any[AcademicYear])
 		}
 	}
 
@@ -62,7 +62,7 @@ class AttendanceMonitoringServiceListenerTest extends TestBase with Mockito {
 			listener.moduleAndDepartmentService.getDepartmentByCode(deptCode) returns None
 			listener.moduleAndDepartmentService.getDepartmentById(deptCode) returns None
 			listener.onReceive(new AttendanceMonitoringServiceUpdateCheckpointTotalMessage(uniId, deptCode, null))
-			there was no (listener.attendanceMonitoringService).updateCheckpointTotal(any[StudentMember], any[Department], any[AcademicYear])
+			verify(listener.attendanceMonitoringService, times(0)).updateCheckpointTotal(any[StudentMember], any[Department], any[AcademicYear])
 		}
 	}
 
@@ -72,7 +72,7 @@ class AttendanceMonitoringServiceListenerTest extends TestBase with Mockito {
 			listener.profileService.getMemberByUniversityIdStaleOrFresh(uniId) returns Option(student)
 			listener.moduleAndDepartmentService.getDepartmentByCode(deptCode) returns Option(department)
 			listener.onReceive(new AttendanceMonitoringServiceUpdateCheckpointTotalMessage(uniId, deptCode, "year"))
-			there was no (listener.attendanceMonitoringService).updateCheckpointTotal(any[StudentMember], any[Department], any[AcademicYear])
+			verify(listener.attendanceMonitoringService, times(0)).updateCheckpointTotal(any[StudentMember], any[Department], any[AcademicYear])
 		}
 	}
 
@@ -82,7 +82,7 @@ class AttendanceMonitoringServiceListenerTest extends TestBase with Mockito {
 			listener.profileService.getMemberByUniversityIdStaleOrFresh(uniId) returns Option(student)
 			listener.moduleAndDepartmentService.getDepartmentByCode(deptCode) returns Option(department)
 			listener.onReceive(new AttendanceMonitoringServiceUpdateCheckpointTotalMessage(uniId, deptCode, "2014"))
-			there was one (listener.attendanceMonitoringService).updateCheckpointTotal(student, department, AcademicYear(2014))
+			verify(listener.attendanceMonitoringService, times(1)).updateCheckpointTotal(student, department, AcademicYear(2014))
 		}
 	}
 

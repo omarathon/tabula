@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.coursework.commands.assignments.CanProxy
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
@@ -29,7 +30,7 @@ class DownloadMarkersFeedbackForPositionCommand(val module: Module,
 																								val marker:User,
 																								val submitter: CurrentUser,
 																								val position: FeedbackPosition)
-	extends CommandInternal[RenderableZip] with HasCallback[RenderableZip] {
+	extends CommandInternal[RenderableZip] with HasCallback[RenderableZip] with CanProxy {
 
 	self: ZipServiceComponent =>
 

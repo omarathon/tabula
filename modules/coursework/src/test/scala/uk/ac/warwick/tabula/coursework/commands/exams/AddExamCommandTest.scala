@@ -1,38 +1,48 @@
 package uk.ac.warwick.tabula.coursework.commands.exams
 
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.exams.commands.{AddExamCommandInternal, AddExamCommandState, ExamValidation}
-import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent}
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.commands.{HasAcademicYear, SpecifiesGroupType}
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.exams.commands._
+import uk.ac.warwick.tabula.services._
 
 class AddExamCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends AddExamCommandState with AssessmentServiceComponent {
-		val assessmentService = mock[AssessmentService]
-	}
+	trait CommandTestSupport extends ExamState
+		with AssessmentServiceComponent
+		with UserLookupComponent
+		with HasAcademicYear
+		with SpecifiesGroupType
+		with AssessmentMembershipServiceComponent {
+			val assessmentService = mock[AssessmentService]
+			val userLookup = new MockUserLookup
+			var assessmentMembershipService = mock[AssessmentMembershipService]
+		}
 
 	trait Fixture {
 		val module = Fixtures.module("ab123", "Test module")
 		val academicYear = new AcademicYear(2014)
 		val command = new AddExamCommandInternal(module, academicYear) with CommandTestSupport
 
-		val validator = new ExamValidation with AddExamCommandState {
+		val validator = new ExamValidation with ExamState with AssessmentServiceComponent{
 			def module = command.module
 			def academicYear = command.academicYear
-		}
 
+			override val assessmentService = mock[AssessmentService]
+		}
 	}
 
-	@Test def apply { new Fixture {
+	@Test def apply() { new Fixture {
 		command.name = "Some exam"
 
 		val exam = command.applyInternal()
 		exam.name should be ("Some exam")
 
-		there was one (command.assessmentService).save(exam)
+		verify(command.assessmentService, times(1)).save(exam)
 	}}
 
-	@Test def rejectEmptyCode { new Fixture {
+	@Test def rejectEmptyCode() { new Fixture {
 
 		validator.name = "    "
 
@@ -44,13 +54,34 @@ class AddExamCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getCodes should contain ("exam.name.empty")
 	}}
 
-	@Test def validateValid { new Fixture {
+	@Test def validateValid() { new Fixture {
 
-		validator.name = "ab123"
+		def name = "ab123"
+		validator.name = name
+
+		validator.assessmentService.getExamByNameYearModule(name, academicYear ,module) returns Seq()
 
 		val errors = new BindException(validator, "command")
 		validator.validate(errors)
 
 		errors.getErrorCount should be (0)
+		verify(validator.assessmentService, times(1)).getExamByNameYearModule(name, academicYear ,module)
+		verify(validator.assessmentService, atMost(1)).getExamByNameYearModule(any[String], any[AcademicYear], any[Module])
+	}}
+
+	@Test def rejectIfDuplicateName() { new Fixture {
+
+		def name = "exam1"
+		validator.name = name
+
+		validator.assessmentService.getExamByNameYearModule(name, academicYear ,module) returns Seq(Fixtures.exam(name))
+
+		val errors = new BindException(validator, "command")
+		validator.validate(errors)
+
+		errors.getErrorCount should be (1)
+		errors.getFieldErrorCount("name") should be (1)
+		verify(validator.assessmentService, times(1)).getExamByNameYearModule(name, academicYear ,module)
+		verify(validator.assessmentService, atMost(1)).getExamByNameYearModule(any[String], any[AcademicYear], any[Module])
 	}}
 }

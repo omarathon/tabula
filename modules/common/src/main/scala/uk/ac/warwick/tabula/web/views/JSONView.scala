@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 
 class JSONView(var json: Any) extends View {
-	var objectMapper = Wire.auto[ObjectMapper]
+	var objectMapper = Wire[ObjectMapper]
 
 	override def getContentType() = "application/json"
 

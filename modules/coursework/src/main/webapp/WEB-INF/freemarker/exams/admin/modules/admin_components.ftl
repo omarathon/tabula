@@ -95,7 +95,7 @@
 									action_descr='edit exam properties'
 									href=edit_url
 								>
-									<i class="icon-wrench"></i> Edit properties
+									<i class="icon-fixed-width icon-wrench"></i> Edit properties
 								</@fmt.permission_button>
 							</li>
 
@@ -109,7 +109,31 @@
 									action_descr='add marks'
 									href=marks_url
 								>
-									<i class="icon-check"></i> Add marks
+									<i class="icon-fixed-width icon-check"></i> Add marks
+								</@fmt.permission_button>
+							</li>
+
+							<li>
+								<#local adjust_url><@routes.examFeedbackAdjustment exam /></#local>
+								<@fmt.permission_button
+									permission='Feedback.Update'
+									scope=exam
+									action_descr='adjust marks'
+									href=adjust_url
+								>
+									<i class="icon-fixed-width icon-sort"></i> Adjustments
+								</@fmt.permission_button>
+							</li>
+
+							<li>
+								<#local upload_url><@routes.uploadExamToSits exam /></#local>
+								<@fmt.permission_button
+									permission='Marks.Create'
+									scope=exam
+									action_descr='add marks'
+									href=upload_url
+								>
+									<i class="icon-upload icon-fixed-width"></i> Upload to SITS
 								</@fmt.permission_button>
 							</li>
 						</ul>

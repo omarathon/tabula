@@ -169,6 +169,9 @@ object MarkingWorkflow {
 		val studentsGroup = markerMap.find{case(markerUserId, group) => group.includesUser(student)}
 		studentsGroup.map{ case (markerUserId, _) => markerUserId }
 	}
+
+	implicit val defaultOrdering = Ordering.by { workflow: MarkingWorkflow => workflow.name.toLowerCase() }
+
 }
 
 trait AssignmentMarkerMap {
@@ -188,14 +191,14 @@ trait AssignmentMarkerMap {
 			(
 				assignment.markingWorkflow.hasThirdMarker &&
 					submission.isReleasedToThirdMarker &&
-					getStudentsThirdMarker(assignment, submission.universityId).exists(_ == marker.getUserId)
+					getStudentsThirdMarker(assignment, submission.universityId).contains(marker.getUserId)
 			) || (
 				assignment.markingWorkflow.hasSecondMarker &&
 					submission.isReleasedToSecondMarker &&
-					getStudentsSecondMarker(assignment, submission.universityId).exists(_ == marker.getUserId)
+					getStudentsSecondMarker(assignment, submission.universityId).contains( marker.getUserId)
 			) || (
 				submission.isReleasedForMarking &&
-					getStudentsFirstMarker(assignment, submission.universityId).exists(_ == marker.getUserId)
+					getStudentsFirstMarker(assignment, submission.universityId).contains(marker.getUserId)
 			)
 		)
 	}

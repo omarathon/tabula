@@ -83,7 +83,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 		service.getCheckpoints(submission).size should be (1)
 
 		service.updateCheckpoints(submission)
-		there was one (service.attendanceMonitoringService).setAttendance(student, Map(assignmentPoint -> AttendanceState.Attended), student.userId, autocreated = true)
+		verify(service.attendanceMonitoringService, times(1)).setAttendance(student, Map(assignmentPoint -> AttendanceState.Attended), student.userId, autocreated = true)
 	}}
 
 	@Test
@@ -95,7 +95,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 		service.getCheckpoints(submission).size should be (1)
 
 		service.updateCheckpoints(submission)
-		there was one (service.attendanceMonitoringService).setAttendance(student, Map(assignmentPoint -> AttendanceState.Attended), student.userId, autocreated = true)
+		verify(service.attendanceMonitoringService, times(1)).setAttendance(student, Map(assignmentPoint -> AttendanceState.Attended), student.userId, autocreated = true)
 	}}
 
 	@Test

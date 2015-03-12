@@ -61,7 +61,7 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
 		val attendanceNote = command.applyInternal()
 		attendanceNote.note should be (theNote)
 		attendanceNote.absenceType should be(anAbsenceType)
-		there was one (command.attendanceMonitoringService).saveOrUpdate(attendanceNote)
+		verify(command.attendanceMonitoringService, times(1)).saveOrUpdate(attendanceNote)
 	}}
 
 	@Test

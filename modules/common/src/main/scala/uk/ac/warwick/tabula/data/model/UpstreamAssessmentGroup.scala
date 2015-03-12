@@ -37,7 +37,7 @@ class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
 	var members: UserGroup = UserGroup.ofUniversityIds
 
 	// UpstreamAssessmentGroups only ever use the static users in the UserGroup
-	// you can access this directly to get a list of members by seatOrder
+	// you can access this directly to get a list of members by seatNumber
 	def sortedMembers = members.sortedStaticMembers
 
 	override def preSave(newRecord: Boolean) {

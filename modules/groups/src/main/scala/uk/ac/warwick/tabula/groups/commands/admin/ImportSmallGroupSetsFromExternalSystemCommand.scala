@@ -72,7 +72,7 @@ trait ImportSmallGroupSetsFromExternalSystemPermissionsRestrictedState {
 	lazy val canManageDepartment = securityService.can(user, RequiredPermission, department)
 	lazy val modulesWithPermission = moduleAndDepartmentService.modulesWithPermission(user, RequiredPermission, department)
 
-	lazy val modules =
+	lazy val modules: Iterable[Module] =
 		if (canManageDepartment) department.modules.asScala
 		else modulesWithPermission
 }

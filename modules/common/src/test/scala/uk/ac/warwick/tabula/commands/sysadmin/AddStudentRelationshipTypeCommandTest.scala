@@ -60,7 +60,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 	def commandApplyInvokesSaveOnRelationshipService() {
 		new Fixture {
 			val newType = commandInternal.applyInternal()
-			there was one(commandInternal.relationshipService).saveOrUpdate(newType)
+			verify(commandInternal.relationshipService, times(1)).saveOrUpdate(newType)
 		}
 	}
 
@@ -77,7 +77,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 
 			val description = mock[Description]
 			describable.describe(description)
-			there was one(description).properties(
+			verify(description, times(1)).properties(
 				"id" -> "theId",
 				"urlPart" -> "theUrlPart",
 				"description" -> "role description"
@@ -91,7 +91,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			val perms = new AddStudentRelationshipTypeCommandPermissions() {}
 			val checking = mock[PermissionsChecking]
 			perms.permissionsCheck(checking)
-			there was one(checking).PermissionCheck(Permissions.StudentRelationshipType.Manage)
+			verify(checking, times(1)).PermissionCheck(Permissions.StudentRelationshipType.Manage)
 		}
 	}
 	

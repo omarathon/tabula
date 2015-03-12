@@ -63,7 +63,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
 
 		set.groups.asScala should be (groups)
 
-		there was one (command.smallGroupService).saveOrUpdate(set)
+		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 	}}
 
 	@Test def edit { new CommandWithExistingFixture {
@@ -82,7 +82,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
 
 		set.groups.asScala should be (groups)
 
-		there was one (command.smallGroupService).saveOrUpdate(set)
+		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 	}}
 
 	@Test def permissions { new Fixture {
@@ -95,7 +95,7 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.SmallGroups.Update, set)
+		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Update, set)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {

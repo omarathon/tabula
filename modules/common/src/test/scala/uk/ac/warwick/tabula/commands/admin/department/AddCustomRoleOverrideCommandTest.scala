@@ -44,7 +44,7 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
 		created.overrideType should be (RoleOverride.Allow)
 		created.customRoleDefinition should be (customRole)
 
-		there was one (command.permissionsService).saveOrUpdate(customRole)
+		verify(command.permissionsService, times(1)).saveOrUpdate(customRole)
 	}}
 
 	@Test def permissions { new Fixture {
@@ -58,7 +58,7 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.RolesAndPermissions.Create, customRole)
+		verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.Create, customRole)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def noDepartment { new Fixture {

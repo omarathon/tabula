@@ -41,10 +41,11 @@ class UserSettingsController extends BaseController {
 	}
 	
 	@RequestMapping(value = Array("/settings"), method = Array(GET, HEAD))
-	def viewSettings(user: CurrentUser, @ModelAttribute("userSettingsCommand") command: UserSettingsCommand, errors:Errors) = {
+	def viewSettings(user: CurrentUser, @ModelAttribute("userSettingsCommand") command: UserSettingsCommand, errors:Errors, success: Boolean = false) = {
 		Mav("usersettings/form",
-			"isCourseworkModuleManager" -> !moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments).isEmpty,
-			"isDepartmentalAdmin" -> !moduleService.departmentsWithPermission(user, Permissions.Module.ManageAssignments).isEmpty
+			"isCourseworkModuleManager" -> moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments).nonEmpty,
+			"isDepartmentalAdmin" -> moduleService.departmentsWithPermission(user, Permissions.Module.ManageAssignments).nonEmpty,
+			"success" -> success
 		)
 	}
 
@@ -55,7 +56,7 @@ class UserSettingsController extends BaseController {
 		}
 		else{
 			command.apply()
-			Redirect("/home")
+			viewSettings(user, command, errors, success = true)
 		}
 	}
 

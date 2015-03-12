@@ -23,7 +23,7 @@ class GenericFeedbackCommandTest extends TestBase with Mockito {
 		new Fixture {
 			assignment.genericFeedback should be("")
 			val result = command.applyInternal()
-			there was one(command.assessmentService).save(assignment)
+			verify(command.assessmentService, times(1)).save(assignment)
 			assignment.genericFeedback should be(heronRant)
 		}
 	}

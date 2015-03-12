@@ -108,35 +108,35 @@ class AdminDepartmentHomeCommandTest extends TestBase with Mockito with Function
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.Module.Administer, department)
+		verify(checking, times(1)).PermissionCheck(Permissions.Module.Administer, department)
 	}}
 
 	@Test def permissionsForDeptAdmin { new DeptAdminFixture {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheck(Permissions.Module.Administer, department)
+		verify(checking, times(1)).PermissionCheck(Permissions.Module.Administer, department)
 	}}
 
 	@Test def permissionsForModuleManager { new ModuleManagerFixture {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheckAll(Permissions.Module.Administer, Set(mod1, mod3))
+		verify(checking, times(1)).PermissionCheckAll(Permissions.Module.Administer, Set(mod1, mod3))
 	}}
 
 	@Test def permissionsForRouteManager { new RouteManagerFixture {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheckAll(Permissions.Route.Administer, Set(route1, route3))
+		verify(checking, times(1)).PermissionCheckAll(Permissions.Route.Administer, Set(route1, route3))
 	}}
 
 	@Test def permissionsForModuleAndRouteManager { new ModuleAndRouteManagerFixture {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		there was one(checking).PermissionCheckAll(Permissions.Module.Administer, Set(mod1, mod3))
+		verify(checking, times(1)).PermissionCheckAll(Permissions.Module.Administer, Set(mod1, mod3))
 	}}
 
 	import AdminDepartmentHomeCommandTest.MinimalCommandContext

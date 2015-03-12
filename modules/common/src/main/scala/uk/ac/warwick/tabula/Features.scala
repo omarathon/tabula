@@ -111,9 +111,10 @@ abstract class Features {
 	@Value("${features.masqueradeElevatedPermissions:false}") var masqueradeElevatedPermissions = defaults.masqueradeElevatedPermissions
 	@Value("${features.profiles.autoGroupDeregistration:false}") var autoGroupDeregistration = defaults.autoGroupDeregistration
 	@Value("${features.reports:true}") var reports = defaults.reports
-	@Value("${features.queueFeedbackForSits:false}") var queueFeedbackForSits = defaults.queueFeedbackForSits
-	@Value("${features.scheduling.exportFeedbackToSits:false}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
+	@Value("${features.queueFeedbackForSits:true}") var queueFeedbackForSits = defaults.queueFeedbackForSits
+	@Value("${features.scheduling.exportFeedbackToSits:true}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
 	@Value("${features.exams:false}") var exams = defaults.exams
+	@Value("${features.searchOnApiComponent:true}") var searchOnApiComponent = defaults.searchOnApiComponent
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -149,6 +150,7 @@ class FeaturesMessage {
 	@BeanProperty var activityStreams = true
 	@BeanProperty var masqueradersCanWrite = false
 	@BeanProperty var masqueradeElevatedPermissions = false
+	@BeanProperty var searchOnApiComponent = true
 
 	@BeanProperty var collectRatings = true
 	@BeanProperty var submissions = true
@@ -166,7 +168,7 @@ class FeaturesMessage {
 	@BeanProperty var dissertationFilter = true
 	@BeanProperty var disabilityRenderingInExtensions = true
 	@BeanProperty var newSeenSecondMarkingWorkflows = true
-	@BeanProperty var queueFeedbackForSits = false
+	@BeanProperty var queueFeedbackForSits = true
 
 	@BeanProperty var profiles = true
 	@BeanProperty var meetingRecordApproval = true
@@ -216,7 +218,8 @@ class FeaturesMessage {
 	@BeanProperty var schedulingCleanupUnreferencedFiles = true
 	@BeanProperty var schedulingSanityCheckFilesystem = true
 	@BeanProperty var schedulingExportAttendanceToSits = true
-	@BeanProperty var schedulingExportFeedbackToSits = false
+	@BeanProperty var schedulingExportFeedbackToSits = true
+
 	@BeanProperty var exams = false
 
 	@BeanProperty var reports = true

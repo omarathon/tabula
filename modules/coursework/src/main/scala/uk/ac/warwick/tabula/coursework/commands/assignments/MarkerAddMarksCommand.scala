@@ -30,7 +30,7 @@ object MarkerAddMarksCommand {
 }
 
 class MarkerAddMarksCommandInternal(val module: Module, val assignment: Assignment, val marker: User, val submitter: CurrentUser, val firstMarker: Boolean, val gradeGenerator: GeneratesGradesFromMarks)
-	extends CommandInternal[List[MarkerFeedback]] {
+	extends CommandInternal[List[MarkerFeedback]] with CanProxy {
 
 	self: MarkerAddMarksCommandState with FeedbackServiceComponent =>
 

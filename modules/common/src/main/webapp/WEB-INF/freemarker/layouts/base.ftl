@@ -30,6 +30,11 @@
 					Masquerading as <strong>${user.apparentUser.fullName}</strong>. <a href="<@url page="/masquerade?returnTo=${info.requestedUri}" context="/admin"/>">Change</a>
 				</div>
 			</#if>
+			<#if isProxying!false && proxyingAs??>
+				<div id="proxy-notice" class="sysadmin-only-content">
+					Proxying as <strong>${proxyingAs.fullName}</strong>.
+				</div>
+			</#if>
 			<#-- Change this to header-medium or header-large as necessary - large is for homepages only -->
 			<div id="header" class="<#if jumbotron?? && jumbotron>header-medium<#else>header-small</#if>" data-type="image">
 				<div id="masthead">

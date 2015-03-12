@@ -46,8 +46,8 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			command.archive = true
 			val newAssignment = command.applyInternal().get(0)
 
-			there was one(command.assessmentService).save(assignment)
-			there was one(command.assessmentService).save(newAssignment)
+			verify(command.assessmentService, times(1)).save(assignment)
+			verify(command.assessmentService, times(1)).save(newAssignment)
 		}
 	}
 

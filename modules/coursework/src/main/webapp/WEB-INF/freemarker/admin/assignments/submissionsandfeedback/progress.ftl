@@ -195,7 +195,12 @@
 									</#if>
 
 									<@stage student.stages['FirstMarking']> <#compress>
-										<#if firstMarker?default("")?length gt 0>(<#noescape>${firstMarker}</#noescape>)</#if>
+										<#if firstMarker?default("")?length gt 0>
+											(<#noescape>${firstMarker}</#noescape>)
+											<#if can.do("Assignment.MarkOnBehalf", assignment)>
+												- <a href="<@routes.listmarkersubmissions assignment submission.firstMarker />">Proxy as this marker</a>
+											</#if>
+										</#if>
 									</#compress></@stage>
 								</#if>
 
@@ -207,7 +212,11 @@
 									</#if>
 
 									<@stage student.stages['SecondMarking']> <#compress>
-										<#if secondMarker?default("")?length gt 0>(<#noescape>${secondMarker}</#noescape>)</#if>
+										<#if secondMarker?default("")?length gt 0>
+											(<#noescape>${secondMarker}</#noescape>)
+											<#if can.do("Assignment.MarkOnBehalf", assignment)>
+												- <a href="<@routes.listmarkersubmissions assignment submission.secondMarker />">Proxy as this marker</a>									</#if>
+										</#if>
 									</#compress></@stage>
 								</#if>
 
@@ -219,7 +228,12 @@
 									</#if>
 
 									<@stage student.stages['Moderation']> <#compress>
-										<#if secondMarker?default("")?length gt 0>(<#noescape>${secondMarker}</#noescape>)</#if>
+										<#if secondMarker?default("")?length gt 0>
+											(<#noescape>${secondMarker}</#noescape>)
+											<#if can.do("Assignment.MarkOnBehalf", assignment)>
+												- <a href="<@routes.listmarkersubmissions assignment submission.secondMarker />">Proxy as this moderator</a>
+											</#if>
+										</#if>
 									</#compress></@stage>
 								</#if>
 
@@ -231,7 +245,12 @@
 									</#if>
 
 									<@stage student.stages['FinaliseSeenSecondMarking']> <#compress>
-										<#if firstMarker?default("")?length gt 0>(<#noescape>${firstMarker}</#noescape>)</#if>
+										<#if firstMarker?default("")?length gt 0>
+											(<#noescape>${firstMarker}</#noescape>)
+											<#if can.do("Assignment.MarkOnBehalf", assignment)>
+												- <a href="<@routes.listmarkersubmissions assignment submission.firstMarker />">Proxy as this marker</a>
+											</#if>
+										</#if>
 									</#compress></@stage>
 								</#if>
 

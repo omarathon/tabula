@@ -67,7 +67,7 @@ class EditDepartmentCommandTest extends TestBase  with FunctionalContextTesting 
 		dept.allowExtensionRequests should be (false)
 		dept.autoGroupDeregistration should be (true)
 
-		there was one(command.moduleAndDepartmentService).save(dept)
+		verify(command.moduleAndDepartmentService, times(1)).save(dept)
 	}}}
 
 	@Test def validateNoErrors() { new Fixture {

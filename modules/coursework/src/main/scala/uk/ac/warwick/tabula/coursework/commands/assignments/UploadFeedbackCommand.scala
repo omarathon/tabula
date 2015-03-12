@@ -73,7 +73,7 @@ class ExtractFeedbackZip(cmd: UploadFeedbackCommand[_]) extends Command[Unit] {
  * so we could check that this is no longer being accessed by anyone, and then
  * remove all the code in here that handles it, to simplify it a little.
  */
-abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assignment, val submitter: User)
+abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assignment, val marker: User)
 	extends Command[A] with Daoisms with Logging with BindListener {
 	
 	// Permissions checks delegated to implementing classes FOR THE MOMENT
@@ -241,7 +241,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 					f.name = filenameOf(name)
 					f.uploadedData = new ZipEntryInputStream(zip, entry)
 					f.uploadedDataLength = entry.getSize
-					f.uploadedBy = submitter.getUserId
+					f.uploadedBy = marker.getUserId
 					fileDao.saveTemporary(f)
 					(name, f)
 				}

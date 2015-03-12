@@ -47,10 +47,10 @@ class MaintenanceModeCommandTest extends TestBase with Mockito {
 		
 		cmd.applyInternal
 		
-		there was one(service).message_=(Some("Sound the alarm"))
-		there was one(service).until_=(Some(dt))
-		there was one(service).enable
-		there was one(queue).send(isA[MaintenanceModeMessage])
+		verify(service, times(1)).message_=(Some("Sound the alarm"))
+		verify(service, times(1)).until_=(Some(dt))
+		verify(service, times(1)).enable
+		verify(queue, times(1)).send(isA[MaintenanceModeMessage])
 	}
 	
 	@Test def disable {
@@ -69,10 +69,10 @@ class MaintenanceModeCommandTest extends TestBase with Mockito {
 		cmd.applyInternal
 		
 		// even though it was set in the command, we re-set to None
-		there was one(service).message_=(None)
-		there was one(service).until_=(None)
-		there was one(service).disable
-		there was one(queue).send(isA[MaintenanceModeMessage])
+		verify(service, times(1)).message_=(None)
+		verify(service, times(1)).until_=(None)
+		verify(service, times(1)).disable
+		verify(queue, times(1)).send(isA[MaintenanceModeMessage])
 	}
 
 }

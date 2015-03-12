@@ -15,9 +15,8 @@ import org.springframework.stereotype.Service
 import org.hibernate.ObjectNotFoundException
 import javax.persistence.DiscriminatorValue
 import org.apache.lucene.search._
-import org.apache.lucene.index.{IndexWriterConfig, Term}
+import org.apache.lucene.index.{SortingMergePolicy, IndexWriterConfig, Term}
 import uk.ac.warwick.tabula.JavaImports._
-import org.apache.lucene.index.sorter.{SortingMergePolicy, NumericDocValuesSorter, Sorter}
 
 class RecipientNotification(val notification: Notification[_,_], val recipient: User) {
 	def id = s"${notification.id}-${recipient.getUserId}"
@@ -71,6 +70,8 @@ trait NotificationQueryMethods { self: NotificationIndexServiceImpl =>
 class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotification] with NotificationIndexService with NotificationQueryMethods {
 	override val loggerName = classOf[NotificationIndexService].getName
 
+	final val apiIndexName = "notification"
+
 	var dao = Wire[NotificationDao]
 	var userLookup = Wire[UserLookupService]
 
@@ -82,7 +83,7 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 	override val IncrementalBatchSize: Int = 5000
 	override val MaxBatchSize: Int = 1000000
 
-	private def createAnalyzer = new StandardAnalyzer(IndexService.NotificationIndexLuceneVersion)
+	private def createAnalyzer = new StandardAnalyzer
 
 	protected def toNotification(doc: Document): Option[Notification[_,_]] =
 		for {
@@ -145,8 +146,8 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 	 * search query can more efficiently look by the same sort
 	 */
 	override def configureIndexWriter(config: IndexWriterConfig) {
-		val sorter: Sorter = new NumericDocValuesSorter(UpdatedDateField, false)
-		val sortingMergePolicy = new SortingMergePolicy(config.getMergePolicy, sorter)
+		val sort: Sort = new Sort(new SortedNumericSortField(UpdatedDateField, SortField.Type.LONG))
+		val sortingMergePolicy = new SortingMergePolicy(config.getMergePolicy, sort)
 		config.setMergePolicy(sortingMergePolicy)
 	}
 

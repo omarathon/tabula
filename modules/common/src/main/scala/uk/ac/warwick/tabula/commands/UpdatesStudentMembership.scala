@@ -1,18 +1,18 @@
 package uk.ac.warwick.tabula.commands
 
-import scala.collection.JavaConverters._
-
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services._
-import scala.collection.mutable.ListBuffer
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 trait UpdatesStudentMembership {
-	self: CurrentSITSAcademicYear with SpecifiesGroupType with UserLookupComponent with AssessmentMembershipServiceComponent =>
+	self: HasAcademicYear with SpecifiesGroupType with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
 	// needs a module to determine the possible options from SITS
 	def module: Module

@@ -34,7 +34,7 @@ class ArchiveAssignmentsTest  extends TestBase with Mockito {
 
 			assignment.archived = false
 			command.applyInternal()
-			there was one(command.assessmentService).save(assignment)
+			verify(command.assessmentService, times(1)).save(assignment)
 			assignment.archived.booleanValue should be(true)
 
 		}

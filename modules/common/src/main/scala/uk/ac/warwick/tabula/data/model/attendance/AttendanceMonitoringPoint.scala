@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model.attendance
 
 import org.joda.time.{LocalDate, DateTime}
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
-import uk.ac.warwick.tabula.data.model.{GeneratedId, Assignment, Module, MeetingFormat, StudentRelationshipType, HasSettings}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{AssessmentService, ModuleAndDepartmentService, RelationshipService}
 import uk.ac.warwick.tabula.JavaImports._
@@ -105,6 +105,20 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 		}
 		newPoint
 	}
+
+	def applies(student: StudentMember): Boolean = {
+		val beginDates = student.freshStudentCourseDetails.filter(_.freshStudentCourseYearDetails.exists(_.academicYear == scheme.academicYear)).map(_.beginDate)
+		if (beginDates.nonEmpty) {
+			// do not remove; import needed for sorting
+			// should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+			import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+			applies(beginDates.min)
+		} else {
+			false
+		}
+	}
+
+	def applies(beginDate: LocalDate): Boolean = endDate.isAfter(beginDate)
 }
 
 trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehaviour {

@@ -1,7 +1,7 @@
 <#if user.loggedIn && user.firstName??>
-<h1 class="with-settings">Hello, ${user.firstName}</h1>
+	<h1 class="with-settings">Hello, ${user.firstName}</h1>
 <#else>
-<h1 class="with-settings">Hello</h1>
+	<h1 class="with-settings">Hello</h1>
 </#if>
 
 <p class="lead muted">
@@ -14,5 +14,35 @@
 		You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
 		to see a personalised view.
 	</p>
+	</#if>
+<#else>
+	<#macro link_to_department department>
+	<a href="<@routes.departmentHomeWithYearNoModule department currentAcademicYear />">
+		Go to the ${department.name} admin page
+	</a>
+	</#macro>
+
+	<#if nonempty(ownedModuleDepartments)>
+		<h2>My managed <@fmt.p number=ownedModuleDepartments?size singular="module" shownumber=false /></h2>
+
+		<ul class="links">
+			<#list ownedModuleDepartments as department>
+				<li>
+					<@link_to_department department />
+				</li>
+			</#list>
+		</ul>
+	</#if>
+
+	<#if nonempty(ownedDepartments)>
+		<h2>My department-wide <@fmt.p number=ownedDepartments?size singular="responsibility" plural="responsibilities" shownumber=false /></h2>
+
+		<ul class="links">
+			<#list ownedDepartments as department>
+				<li>
+					<@link_to_department department />
+				</li>
+			</#list>
+		</ul>
 	</#if>
 </#if>

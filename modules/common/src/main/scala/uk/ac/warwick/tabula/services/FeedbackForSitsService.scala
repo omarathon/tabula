@@ -60,8 +60,8 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 			saveOrUpdate(feedbackForSits)
 
 			if (validatedFeedback.populated.nonEmpty) {
-				if (feedback.latestAdjustment.isDefined) {
-					feedback.latestAdjustment.map(m => {
+				if (feedback.latestPrivateAdjustment.isDefined) {
+					feedback.latestPrivateAdjustment.map(m => {
 						m.grade = Some(validatedFeedback.populated(feedback))
 						feedbackForSitsDao.saveOrUpdate(m)
 					})
@@ -89,7 +89,7 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 
 		val parsedFeedbacks = feedbacks.groupBy(f => {
 			Seq(f.adjustedGrade, f.actualGrade).flatten.headOption match {
-				case Some(grade) if getRelevantMark(f).isEmpty => "invalid" // a grade without a mark is invalid
+				case Some(grade) if f.latestMark.isEmpty => "invalid" // a grade without a mark is invalid
 				case Some(grade) =>
 					if (validGrades(f.universityId).nonEmpty && !validGrades(f.universityId).exists(_.grade == grade))
 						"invalid"

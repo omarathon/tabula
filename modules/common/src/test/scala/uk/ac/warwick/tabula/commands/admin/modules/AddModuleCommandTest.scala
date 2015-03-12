@@ -32,7 +32,7 @@ class AddModuleCommandTest extends TestBase with Mockito {
 		module.code should be ("cs205") // sanitised
 		module.name should be ("Introduction to module creation")
 
-		there was one (command.moduleAndDepartmentService).saveOrUpdate(module)
+		verify(command.moduleAndDepartmentService, times(1)).saveOrUpdate(module)
 	}}
 
 	trait ValidationFixture {
@@ -117,7 +117,7 @@ class AddModuleCommandTest extends TestBase with Mockito {
 
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
-		there was one(checking).PermissionCheck(Permissions.Module.Create, dept)
+		verify(checking, times(1)).PermissionCheck(Permissions.Module.Create, dept)
 	}
 
 	@Test
