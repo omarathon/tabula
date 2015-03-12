@@ -123,7 +123,7 @@ abstract class AbstractIndexService[A]
 	@Value("${module.context}") var moduleContext: String = _
 	@Autowired var features: Features = _
 
-	def searchOverHttp = features.searchOnApiComponent && moduleContext != "/api"
+	def searchOverHttp = features.searchOnApiComponent && moduleContext != "/api" && moduleContext != "/scheduling" && Option(SSOConfiguration.getConfig).nonEmpty
 
 	final val IndexReopenPeriodInSeconds = 20
 
