@@ -122,6 +122,9 @@ class Department extends GeneratedId
 	def studentsCanScheduleMeetings = getBooleanSetting(Settings.StudentsCanScheduleMeetings, default = true)
 	def studentsCanScheduleMeetings_=(canDo: Boolean) { settings += (Settings.StudentsCanScheduleMeetings -> canDo) }
 
+	def uploadMarksToSits = getBooleanSetting(Settings.UploadMarksToSits, default = false)
+	def uploadMarksToSits_=(enabled: Boolean) { settings += (Settings.UploadMarksToSits -> enabled) }
+
 	def canUploadMarksToSitsForYear(year: AcademicYear, module: Module): Boolean = {
 		if (module.degreeType != DegreeType.Undergraduate && module.degreeType != DegreeType.Postgraduate) {
 			logger.warn(s"Can't upload marks for module $module since degreeType ${module.degreeType} can't be identified as UG or PG")
@@ -426,6 +429,8 @@ object Department {
     val AutoGroupDeregistration = "autoGroupDeregistration"
 
 		val StudentsCanScheduleMeetings = "studentsCanScheduleMeetings"
+
+		val UploadMarksToSits = "uploadMarksToSits"
 
 		val CanUploadMarksToSitsForYearUg = "canUploadMarksToSitsForYearUG"
 		val CanUploadMarksToSitsForYearPg = "canUploadMarksToSitsForYearPG"

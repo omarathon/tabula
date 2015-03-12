@@ -268,7 +268,7 @@
 						</@fmt.permission_button>
 					</li>
 
-					<#if features.queueFeedbackForSits>
+					<#if features.queueFeedbackForSits && department.uploadMarksToSits>
 						<li>
 							<#assign uploadToSitsUrl><@routes.uploadToSits assignment /></#assign>
 							<@fmt.permission_button

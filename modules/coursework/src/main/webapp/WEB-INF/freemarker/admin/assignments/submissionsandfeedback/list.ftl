@@ -31,7 +31,7 @@
 
 	<#assign module=assignment.module />
 	<#assign department=module.department />
-	<#assign queueSitsUploadEnabled=features.queueFeedbackForSits />
+	<#assign queueSitsUploadEnabled=(features.queueFeedbackForSits && department.uploadMarksToSits) />
 
 	<div class="fix-header pad-when-fixed">
 		<#include "_filter.ftl" />
