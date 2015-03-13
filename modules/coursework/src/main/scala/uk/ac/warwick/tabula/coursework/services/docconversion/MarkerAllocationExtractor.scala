@@ -34,15 +34,17 @@ class MarkerAllocationExtractor() {
 	@transient var userLookup = Wire[UserLookupService]
 
 	def extractMarkersFromSpreadsheet(file: InputStream, workflow: MarkingWorkflow) = {
+
+		val allUsercodes = workflow.firstMarkers.knownType.members ++  workflow.secondMarkers.knownType.members
+		val allMarkers = allUsercodes.map(userLookup.getUserByUserId).map(_.getWarwickId)
+
 		val rowData = SpreadsheetHelpers.parseXSSFExcelFile(file)
 		rowData
-			.map(parseRow(_, workflow))
+			.map(parseRow(_, workflow, allMarkers))
 			.groupBy(_.position)
 	}
 
-	def parseRow(rowData: Map[String, String], workflow: MarkingWorkflow): ParsedRow = {
-
-		lazy val allMarkers = workflow.firstMarkers.knownType.members ++  workflow.secondMarkers.knownType.members
+	def parseRow(rowData: Map[String, String], workflow: MarkingWorkflow, allMarkers: Seq[String]): ParsedRow = {
 
 		def getUser(id: String): Option[User] = {
 			val user = userLookup.getUserByWarwickUniId(id)
