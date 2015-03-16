@@ -118,7 +118,9 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 		.add(is("academicYear", group.academicYear))
 		.add(is("moduleCode", group.moduleCode))
 		.add(is("occurrence", group.occurrence))
-		.uniqueResult
+		// if there are more than one matching group take the first (several may exist as part of the deploy for TAB-3389
+		.seq
+		.headOption
 
 	def find(group: AssessmentGroup): Option[AssessmentGroup] = {
 		if (group.assignment == null && group.smallGroupSet == null) None
