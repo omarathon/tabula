@@ -23,23 +23,29 @@ class StudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarker {
 
 	override def studentsChooseMarker = true
 
-	def getStudentsFirstMarker(assignment: Assignment, universityId: String): Option[String] =
-		assignment.markerSelectField.flatMap { field =>
+	def getStudentsFirstMarker(assessment: Assessment, universityId: String): Option[String] = assessment match {
+		case exam:Exam => None
+		case assignment:Assignment => assignment.markerSelectField.flatMap { field =>
 			val submission = submissionService.getSubmissionByUniId(assignment, universityId)
 			submission.flatMap(_.getValue(field).map(_.value))
 		}
+	}
 
-	def getMarkersStudents(assignment: Assignment, user: User) =
-		getSubmissions(assignment, user).map(s => userLookupService.getUserByWarwickUniId(s.universityId))
+	def getMarkersStudents(assessment: Assessment, user: User) = assessment match {
+		case assignment: Assignment => getSubmissions(assignment, user).map(s => userLookupService.getUserByWarwickUniId(s.universityId))
+		case _ => Nil
+	}
+
 
 	def getSubmissions(assignment: Assignment, user: User) = assignment.markerSelectField.map { markerField =>
-		val releasedSubmission = assignment.submissions.asScala.filter(_.isReleasedForMarking)
-		releasedSubmission.filter(submission => {
-			submission.getValue(markerField) match {
-				case Some(subValue) => user.getUserId == subValue.value
-				case None => false
-			}
-		})
-	}.getOrElse(Nil)
+			val releasedSubmission = assignment.submissions.asScala.filter(s => assignment.isReleasedForMarking(s.universityId))
+			releasedSubmission.filter(submission => {
+				submission.getValue(markerField) match {
+					case Some(subValue) => user.getUserId == subValue.value
+					case None => false
+				}
+			})
+		}.getOrElse(Nil)
+
 
 }

@@ -48,6 +48,18 @@ class Exam
 	var feedbacks: JList[ExamFeedback] = JArrayList()
 	override def allFeedback = feedbacks.asScala
 
+	@ManyToOne(fetch = LAZY)
+	@JoinColumn(name = "workflow_id")
+	var markingWorkflow: MarkingWorkflow = _
+
+	@OneToMany(mappedBy = "assessment", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
+	@BatchSize(size = 200)
+	var firstMarkers: JList[FirstMarkersMap] = JArrayList()
+
+	@OneToMany(mappedBy = "assessment", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
+	@BatchSize(size = 200)
+	var secondMarkers: JList[SecondMarkersMap] = JArrayList()
+
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
 	@OneToMany(mappedBy = "exam", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)

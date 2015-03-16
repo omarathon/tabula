@@ -62,7 +62,7 @@ trait AssessmentService {
 }
 
 abstract class AbstractAssessmentService extends AssessmentService {
-	self: AssessmentDaoComponent with AssignmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent =>
+	self: AssessmentDaoComponent with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent =>
 
 	def getAssignmentById(id: String): Option[Assignment] = assessmentDao.getAssignmentById(id)
 	def getExamById(id: String): Option[Exam] = assessmentDao.getExamById(id)
@@ -136,12 +136,12 @@ abstract class AbstractAssessmentService extends AssessmentService {
 		assessmentDao.getExamsByModules(modules, academicYear)
 }
 
-trait AssignmentServiceUserGroupHelpers {
+trait AssessmentServiceUserGroupHelpers {
 	val firstMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow]
 	val secondMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow]
 }
 
-trait AssignmentServiceUserGroupHelpersImpl extends AssignmentServiceUserGroupHelpers {
+trait AssessmentServiceUserGroupHelpersImpl extends AssessmentServiceUserGroupHelpers {
 	val firstMarkerHelper = new UserGroupMembershipHelper[MarkingWorkflow]("_firstMarkers")
 	val secondMarkerHelper = new UserGroupMembershipHelper[MarkingWorkflow]("_secondMarkers")
 }
@@ -151,5 +151,5 @@ class AssessmentServiceImpl
 	extends AbstractAssessmentService
 	with AutowiringAssessmentDaoComponent
 	with AutowiringMarkingWorkflowServiceComponent
-	with AssignmentServiceUserGroupHelpersImpl
+	with AssessmentServiceUserGroupHelpersImpl
 

@@ -28,14 +28,14 @@ class FirstMarkersMap extends MarkerMap {
 	// as it only looks for the property on the concrete class
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "assignment_id")
-	var assignment: Assignment = _
+	var assessment: Assessment = _
 
 }
 
 object FirstMarkersMap {
 	def apply(assignment: Assignment, marker_id: String, students: UserGroup) = {
 		val map = new FirstMarkersMap
-		map.assignment = assignment
+		map.assessment = assignment
 		map.marker_id = marker_id
 		map.students = students
 		map
@@ -50,14 +50,14 @@ class SecondMarkersMap extends MarkerMap {
 	// See comment in FirstMarkersMap
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "assignment_id")
-	var assignment: Assignment = _
+	var assessment: Assessment = _
 
 }
 
 object SecondMarkersMap {
 	def apply(assignment: Assignment, marker_id: String, students: UserGroup) = {
 		val map = new SecondMarkersMap
-		map.assignment = assignment
+		map.assessment = assignment
 		map.marker_id = marker_id
 		map.students = students
 		map

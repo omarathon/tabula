@@ -57,7 +57,7 @@ class ListMarkerFeedbackController extends CourseworkController {
 				"thirdMarkerRoleName" -> assignment.markingWorkflow.thirdMarkerRoleName,
 				"isModeration" -> isModeration,
 				"onlineMarkingUrls" -> feedbackItems.map{ items =>
-					items.student.getUserId -> assignment.markingWorkflow.onlineMarkingUrl(assignment, marker, items.student.getUserId)
+					items.student.getUserId -> assignment.markingWorkflow.courseworkMarkingUrl(assignment, marker, items.student.getUserId)
 				}.toMap,
 				"marker" -> marker,
 				"unsubmittedStudents" -> unsubmittedStudents,
