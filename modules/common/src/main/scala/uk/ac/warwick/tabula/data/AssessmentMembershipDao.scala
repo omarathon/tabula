@@ -119,10 +119,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 		.add(is("moduleCode", group.moduleCode))
 		.add(is("occurrence", group.occurrence))
 		// if there are more than one matching group take the first (several may exist as part of the deploy for TAB-3389
-		.setFirstResult(0)
-		.setMaxResults(1)
-		.list
-		.asScala
+		.seq
 		.headOption
 
 	def find(group: AssessmentGroup): Option[AssessmentGroup] = {
