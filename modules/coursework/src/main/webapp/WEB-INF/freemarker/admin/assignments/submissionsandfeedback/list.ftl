@@ -265,7 +265,6 @@
 								<#if student.coursework.enhancedFeedback?? && !student.coursework.enhancedFeedback.feedback.placeholder>
 									<@fmt.date date=student.coursework.enhancedFeedback.feedback.updatedDate seconds=true capitalise=true shortMonth=true split=true />
 								</#if>
-
 							</td>
 
 							 <#if assignment.collectMarks>

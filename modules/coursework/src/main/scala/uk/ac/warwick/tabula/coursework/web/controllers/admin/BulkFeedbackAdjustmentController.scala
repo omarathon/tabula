@@ -47,9 +47,9 @@ class BulkFeedbackAdjustmentController extends CourseworkController {
 
 	@RequestMapping(method = Array(POST), params = Array("confirmStep=true"))
 	def confirm(
-							 @Valid @ModelAttribute("command") cmd: Appliable[Seq[Mark]], errors: Errors,
-							 @PathVariable assignment: Assignment
-							 ) = {
+		 @Valid @ModelAttribute("command") cmd: Appliable[Seq[Mark]], errors: Errors,
+		 @PathVariable assignment: Assignment
+	) = {
 		if (errors.hasFieldErrors("defaultReason") || errors.hasFieldErrors("defaultComment")) {
 			upload(cmd, errors)
 		} else {
