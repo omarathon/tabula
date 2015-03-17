@@ -32,7 +32,7 @@
 
 	<#assign module=assignment.module />
 	<#assign department=module.department />
-	<#assign queueSitsUploadEnabled=(features.queueFeedbackForSits && department.uploadMarksToSits) />
+	<#assign queueSitsUploadEnabled=features.queueFeedbackForSits />
 
 	<div class="fix-header pad-when-fixed">
 		<#include "_filter.ftl" />
@@ -328,12 +328,14 @@
 										</#compress>
 									</#if>
 								</#compress></@stage>
-								<#if feedback.adjustmentReason??>
+								<#if feedback.hasPublicOrPrivateAdjustments>
 									<div>
-										<i class="icon-ok"></i> Marks adjusted :
-										<#if feedback.adjustedMark??>${feedback.adjustedMark}</#if><#if feedback.adjustedGrade??>,</#if>
-										<#if feedback.adjustedGrade??> grade ${feedback.adjustedGrade}</#if>
-										 - Reason for adjustment: ${feedback.adjustmentReason!''}
+										<i class="icon-ok"></i> Marks adjusted:
+										<#if feedback.latestMark??>${feedback.latestMark}</#if><#if feedback.latestGrade??>,</#if>
+										<#if feedback.latestGrade??> grade ${feedback.latestGrade}</#if>
+										<#if feedback.latestPublicOrPrivateAdjustment?? && feedback.latestPublicOrPrivateAdjustment.reason??>
+										 - Reason for adjustment: ${feedback.latestPublicOrPrivateAdjustment.reason!''}
+										</#if>
 									</div>
 								</#if>
 							</#if>

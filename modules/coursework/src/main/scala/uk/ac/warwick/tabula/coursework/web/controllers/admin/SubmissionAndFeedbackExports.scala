@@ -369,9 +369,9 @@ trait SubmissionAndFeedbackExport {
 
 	protected def adjustmentData(student: Student): Map[String, Any] = {
 		val feedback = student.coursework.enhancedFeedback.map(_.feedback)
-		feedback.filter(_.hasAdjustments).map( feedback => {
-			feedback.adjustedMark.map("mark" -> _).toMap ++
-			feedback.adjustedGrade.map("grade" -> _).toMap ++
+		feedback.filter(_.hasPublicOrPrivateAdjustments).map( feedback => {
+			feedback.latestMark.map("mark" -> _).toMap ++
+			feedback.latestGrade.map("grade" -> _).toMap ++
 			Map("reason" -> feedback.adjustmentReason)
 		}).getOrElse(Map())
 	}

@@ -154,7 +154,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 			uploadedFeedbacks.head.status should be(Successful)
 			uploadedFeedbacks.head.feedback.actualMark should be(Some(73))
 			uploadedFeedbacks.head.feedback.actualGrade should be(Some("B"))
-			uploadedFeedbacks.head.feedback.adjustedMark should be(Some(78))
+			uploadedFeedbacks.head.feedback.latestMark should be(Some(78))
 			uploadedFeedbacks.head.feedback.adjustedGrade should be(Some("A-"))
 		}
 	}

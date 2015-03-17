@@ -32,8 +32,8 @@ class StudentFeedbackAdjustmentNotification
 	}
 
 	def whatAdjusted = {
-		val mark = feedback.adjustedMark.map(m => "mark")
-		val grade = feedback.adjustedGrade.map(g => "grade")
+		val mark = feedback.latestMark.map(m => "mark")
+		val grade = feedback.latestGrade.map(g => "grade")
 		(mark ++ grade).mkString(" and ")
 	}
 

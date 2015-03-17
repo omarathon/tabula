@@ -265,22 +265,23 @@
 								<#if student.coursework.enhancedFeedback?? && !student.coursework.enhancedFeedback.feedback.placeholder>
 									<@fmt.date date=student.coursework.enhancedFeedback.feedback.updatedDate seconds=true capitalise=true shortMonth=true split=true />
 								</#if>
+
 							</td>
 
 							 <#if assignment.collectMarks>
 								<td class="mark">
 								 <#if student.coursework.enhancedFeedback??>
 								 	${(student.coursework.enhancedFeedback.feedback.actualMark)!''}
-									<#if student.coursework.enhancedFeedback.feedback.adjustedMark??>
-										 (Adjusted to - ${student.coursework.enhancedFeedback.feedback.adjustedMark})
+									<#if student.coursework.enhancedFeedback.feedback.hasPublicOrPrivateAdjustments>
+										 (Adjusted to - ${student.coursework.enhancedFeedback.feedback.latestMark})
 									</#if>
 								 </#if>
 								</td>
 								<td class="grade">
 									<#if student.coursework.enhancedFeedback??>
 										${(student.coursework.enhancedFeedback.feedback.actualGrade)!''}
-										<#if student.coursework.enhancedFeedback.feedback.adjustedGrade??>
-											(Adjusted to - ${student.coursework.enhancedFeedback.feedback.adjustedGrade})
+										<#if student.coursework.enhancedFeedback.feedback.hasPublicOrPrivateAdjustments && student.coursework.enhancedFeedback.feedback.latestGrade??>
+											(Adjusted to - ${student.coursework.enhancedFeedback.feedback.latestGrade})
 										</#if>
 									</#if>
 								</td>
