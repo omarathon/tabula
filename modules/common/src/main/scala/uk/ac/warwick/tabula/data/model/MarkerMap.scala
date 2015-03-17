@@ -28,14 +28,21 @@ class FirstMarkersMap extends MarkerMap {
 	// as it only looks for the property on the concrete class
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "assignment_id")
-	var assessment: Assessment = _
+	var assignment: Assignment = _
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "exam_id")
+	var exam: Exam = _
 
 }
 
 object FirstMarkersMap {
-	def apply(assignment: Assignment, marker_id: String, students: UserGroup) = {
+	def apply(assessment: Assessment, marker_id: String, students: UserGroup) = {
 		val map = new FirstMarkersMap
-		map.assessment = assignment
+		assessment match {
+			case exam: Exam => map.exam = exam
+			case assignment: Assignment => 	map.assignment = assignment
+		}
 		map.marker_id = marker_id
 		map.students = students
 		map
@@ -47,17 +54,23 @@ object FirstMarkersMap {
 @DiscriminatorValue("second")
 class SecondMarkersMap extends MarkerMap {
 
-	// See comment in FirstMarkersMap
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "assignment_id")
-	var assessment: Assessment = _
+	var assignment: Assignment = _
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "exam_id")
+	var exam: Exam = _
 
 }
 
 object SecondMarkersMap {
-	def apply(assignment: Assignment, marker_id: String, students: UserGroup) = {
+	def apply(assessment: Assessment, marker_id: String, students: UserGroup) = {
 		val map = new SecondMarkersMap
-		map.assessment = assignment
+		assessment match {
+			case exam: Exam => map.exam = exam
+			case assignment: Assignment => 	map.assignment = assignment
+		}
 		map.marker_id = marker_id
 		map.students = students
 		map

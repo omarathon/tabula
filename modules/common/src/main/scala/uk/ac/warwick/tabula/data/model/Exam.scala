@@ -52,11 +52,11 @@ class Exam
 	@JoinColumn(name = "workflow_id")
 	var markingWorkflow: MarkingWorkflow = _
 
-	@OneToMany(mappedBy = "assessment", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
+	@OneToMany(mappedBy = "exam", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
 	@BatchSize(size = 200)
 	var firstMarkers: JList[FirstMarkersMap] = JArrayList()
 
-	@OneToMany(mappedBy = "assessment", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
+	@OneToMany(mappedBy = "exam", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
 	@BatchSize(size = 200)
 	var secondMarkers: JList[SecondMarkersMap] = JArrayList()
 

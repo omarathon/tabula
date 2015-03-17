@@ -26,7 +26,7 @@ class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 		testAssignment.markingWorkflow.userLookup = userLookupService
 
 		val markerMap = new FirstMarkersMap {
-			assessment = testAssignment
+			assignment = testAssignment
 			marker_id = marker1.getUserId
 			students = Fixtures.userGroup(student1)
 		}
