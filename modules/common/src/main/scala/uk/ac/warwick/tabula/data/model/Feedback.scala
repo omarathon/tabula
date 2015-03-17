@@ -164,7 +164,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	}
 
 	def studentViewableRawGrade: Option[String] = {
-		if (hasPrivateAdjustments) latestPrivateAdjustment.map(_.grade)
+		if (hasPrivateAdjustments) latestPrivateAdjustment.map(_.grade).flatten
 		else actualGrade
 	}
 

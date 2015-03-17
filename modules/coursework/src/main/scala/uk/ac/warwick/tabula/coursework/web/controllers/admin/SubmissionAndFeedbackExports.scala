@@ -372,7 +372,7 @@ trait SubmissionAndFeedbackExport {
 		feedback.filter(_.hasPublicOrPrivateAdjustments).map( feedback => {
 			feedback.latestMark.map("mark" -> _).toMap ++
 			feedback.latestGrade.map("grade" -> _).toMap ++
-			Map("reason" -> feedback.adjustmentReason)
+			Map("reason" -> feedback.latestPublicOrPrivateAdjustment.map(_.reason))
 		}).getOrElse(Map())
 	}
 
