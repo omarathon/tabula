@@ -110,7 +110,7 @@ class AssessmentMembershipServiceImpl
 
 		//TODO - remove this
 		logger.info("Setting %d members in group %s" format (registrations.map(_.universityId).size, template.toString))
-		
+
 		getUpstreamAssessmentGroup(template).map { group =>
 			group.members.knownType.replaceStaticUsers(registrations)
 			group
