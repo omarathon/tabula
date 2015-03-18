@@ -97,6 +97,10 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 		})
 
 		if (!staticIncludeUsers.isEmpty()) {
+
+			//TODO-RITCHIE - remove this
+			logger.info(s"Clearing ${staticUserIds.length} users from group ${id} ")
+
 			staticIncludeUsers.clear()
 			// TAB-3343 - force deletions before inserts
 			optionalSession.foreach { _.flush() }
