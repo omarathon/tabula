@@ -107,6 +107,10 @@ class AssessmentMembershipServiceImpl
 
 	def replaceMembers(template: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]) = {
 		if (debugEnabled) debugReplace(template, registrations.map(_.universityId))
+
+		//TODO - remove this
+		logger.info("Setting %d members in group %s" format (registrations.map(_.universityId).size, template.toString))
+		
 		getUpstreamAssessmentGroup(template).map { group =>
 			group.members.knownType.replaceStaticUsers(registrations)
 			group
