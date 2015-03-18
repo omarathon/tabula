@@ -79,16 +79,14 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 
 	def validateAndPopulateFeedback(feedbacks: Seq[Feedback], gradeGenerator: GeneratesGradesFromMarks): ValidateAndPopulateFeedbackResult = {
 
-		def getRelevantMark(f: Feedback) = Seq(f.latestMark, f.actualMark).flatten.headOption
-
-		val studentsMarks = (for (f <- feedbacks; mark <- getRelevantMark(f)) yield {
+		val studentsMarks = (for (f <- feedbacks; mark <- f.latestMark) yield {
 			f.universityId -> mark
 		}).toMap
 
 		val validGrades = gradeGenerator.applyForMarks(studentsMarks)
 
 		val parsedFeedbacks = feedbacks.groupBy(f => {
-			Seq(f.latestGrade, f.actualGrade).flatten.headOption match {
+			f.latestGrade match {
 				case Some(grade) if f.latestMark.isEmpty => "invalid" // a grade without a mark is invalid
 				case Some(grade) =>
 					if (validGrades(f.universityId).nonEmpty && !validGrades(f.universityId).exists(_.grade == grade))

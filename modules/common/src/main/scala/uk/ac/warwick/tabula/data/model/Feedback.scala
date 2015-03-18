@@ -170,7 +170,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 
 	def hasPrivateAdjustments = latestPrivateAdjustment.isDefined
 	def hasNonPrivateAdjustments = latestNonPrivateAdjustment.isDefined
-	def hasPrivateOrNonPrivateAdjustments = hasNonPrivateAdjustments || hasPrivateAdjustments
+	def hasPrivateOrNonPrivateAdjustments = marks.asScala.nonEmpty
 
 	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
 	@JoinColumn(name = "first_marker_feedback")

@@ -33,7 +33,7 @@
 		<div class="alert">
 			<p>
 				<strong>${viewableFeedback.reason}</strong> - An adjustment has been made to your final mark. The
-				mark shown above will contribute to your final module mark....
+				mark shown above will contribute to your final module mark.
 			</p>
 			<#if viewableFeedback.comments??><p>${viewableFeedback.comments}</p></#if>
 			<p>Your marks before adjustment were:</p>
