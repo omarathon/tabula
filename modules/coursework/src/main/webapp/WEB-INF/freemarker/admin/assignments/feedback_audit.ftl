@@ -26,7 +26,7 @@
 		<#assign feedback = auditData.feedback />
 		<#assign isSelf = false />
 
-		<#if feedback.hasPublicOrPrivateAdjustments??>
+		<#if feedback.hasPrivateOrNonPrivateAdjustments??>
 			<div class="well">
 				<div class="feedback-summary-heading">
 					<h3>Adjustments</h3>

@@ -90,7 +90,7 @@ class FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student:
 			adjustedMark = feedback.latestMark.map(_.toString).orNull
 			adjustedGrade = feedback.latestGrade.getOrElse("")
 
-			feedback.latestPublicOrPrivateAdjustment match {
+			feedback.latestPrivateOrNonPrivateAdjustment match {
 				case Some(adjustment) => {
 					reason = adjustment.reason
 					comments = adjustment.comments

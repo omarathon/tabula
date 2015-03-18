@@ -271,7 +271,7 @@
 								<td class="mark">
 								 <#if student.coursework.enhancedFeedback??>
 								 	${(student.coursework.enhancedFeedback.feedback.actualMark)!''}
-									<#if student.coursework.enhancedFeedback.feedback.hasPublicOrPrivateAdjustments>
+									<#if student.coursework.enhancedFeedback.feedback.hasPrivateOrNonPrivateAdjustments>
 										 (Adjusted to - ${student.coursework.enhancedFeedback.feedback.latestMark})
 									</#if>
 								 </#if>
@@ -279,7 +279,7 @@
 								<td class="grade">
 									<#if student.coursework.enhancedFeedback??>
 										${(student.coursework.enhancedFeedback.feedback.actualGrade)!''}
-										<#if student.coursework.enhancedFeedback.feedback.hasPublicOrPrivateAdjustments && student.coursework.enhancedFeedback.feedback.latestGrade??>
+										<#if student.coursework.enhancedFeedback.feedback.hasPrivateOrNonPrivateAdjustments && student.coursework.enhancedFeedback.feedback.latestGrade??>
 											(Adjusted to - ${student.coursework.enhancedFeedback.feedback.latestGrade})
 										</#if>
 									</#if>

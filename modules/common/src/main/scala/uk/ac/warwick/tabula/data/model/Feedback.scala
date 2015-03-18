@@ -145,15 +145,15 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	def latestGrade: Option[String] =
 		(Stream(agreedGrade) ++ marks.asScala.toStream.map(m => Option(m.grade).flatten) ++ Stream(actualGrade)).flatten.headOption
 
-	def latestPublicAdjustment: Option[Mark] = marks.asScala.find(_.markType == MarkType.Adjustment)
+	def latestNonPrivateAdjustment: Option[Mark] = marks.asScala.find(_.markType == MarkType.Adjustment)
 	def latestPrivateAdjustment: Option[Mark] = marks.asScala.find(_.markType == MarkType.PrivateAdjustment)
-	def latestPublicOrPrivateAdjustment: Option[Mark] = marks.asScala.headOption
+	def latestPrivateOrNonPrivateAdjustment: Option[Mark] = marks.asScala.headOption
 
 	def adminViewableAdjustments: Seq[Mark] = marks.asScala
 
 	// students can see the audit of non-private adjustments, back until the last private adjustment
 	def studentViewableAdjustments: Seq[Mark] = {
-		if (hasPublicAdjustments) {
+		if (hasNonPrivateAdjustments) {
 			marks.asScala.takeWhile(mark => mark.markType != MarkType.PrivateAdjustment)
 		} else Seq()
 	}
@@ -169,8 +169,8 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	}
 
 	def hasPrivateAdjustments = latestPrivateAdjustment.isDefined
-	def hasPublicAdjustments = latestPublicAdjustment.isDefined
-	def hasPublicOrPrivateAdjustments = hasPublicAdjustments || hasPrivateAdjustments
+	def hasNonPrivateAdjustments = latestNonPrivateAdjustment.isDefined
+	def hasPrivateOrNonPrivateAdjustments = hasNonPrivateAdjustments || hasPrivateAdjustments
 
 	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
 	@JoinColumn(name = "first_marker_feedback")

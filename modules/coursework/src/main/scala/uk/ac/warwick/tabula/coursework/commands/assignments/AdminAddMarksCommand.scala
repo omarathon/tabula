@@ -109,7 +109,7 @@ trait AdminAddMarksCommandValidation extends ValidatesMarkItem {
 				if (markChanged || gradeChanged){
 					mark.isModified = true
 					mark.isPublished = feedback.released
-					mark.hasAdjustment = feedback.hasPublicOrPrivateAdjustments
+					mark.hasAdjustment = feedback.hasPrivateOrNonPrivateAdjustments
 				}
 			case None =>
 		}
