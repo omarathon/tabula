@@ -54,7 +54,7 @@ class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
 			.append(sequence, other.sequence)
 			.isEquals
 
-	override def toString = "%s %s g:%s o:%s" format (moduleCode, academicYear, assessmentGroup, occurrence)
+	override def toString = "%s %s g:%s o:%s s:%s" format (moduleCode, academicYear, assessmentGroup, occurrence, sequence)
 	
 	def memberCount = members.members.size
 }
