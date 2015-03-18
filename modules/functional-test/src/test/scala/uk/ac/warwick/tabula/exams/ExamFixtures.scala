@@ -11,7 +11,7 @@ class ExamFixtures extends BrowserTest {
 
 	def as[T](user: LoginDetails)(fn: => T) = {
 		currentUser = user
-		signIn as(user) to (Path("/admin"))
+		signIn as(user) to (Path("/exams"))
 
 		fn
 	}

@@ -1,14 +1,10 @@
 package uk.ac.warwick.tabula.exams
 
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.BrowserTest
-import uk.ac.warwick.tabula.admin.AdminFixtures
 
-class ExamAdminTest extends BrowserTest with AdminFixtures with GivenWhenThen {
+class ExamAdminTest extends ExamFixtures with GivenWhenThen {
 
 	"Department admin" should "be offered a link to their department" in as(P.Admin1) {
-
-		go to (Path("/exams"))
 
 		pageTitle should be("Tabula - Exams Management")
 		click on linkText("Go to the Test Services admin page")
