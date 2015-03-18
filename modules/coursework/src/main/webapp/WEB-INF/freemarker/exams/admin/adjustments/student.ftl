@@ -60,7 +60,7 @@
 		</#if>
 	</@form.row>
 
-	<#if features.queueFeedbackForSits && command.canBeUploadedToSits>
+	<#if features.queueFeedbackForSits && exam.module.department.uploadMarksToSits && command.canBeUploadedToSits>
 		<@courses_macros.uploadToSits assignment=exam verb="Adjusting" withValidation=false/>
 	</#if>
 
