@@ -9,30 +9,38 @@
 
 <#if feedback.hasMarkOrGrade>
 	<div class="mark-and-grade">
-		<#if feedback.adjustedMark??>
-			<h3>Adjusted mark: ${feedback.adjustedMark}</h3>
-		<#elseif feedback.actualMark??>
-			<h3>Mark: ${feedback.actualMark}</h3>
+		<#if feedback.hasNonPrivateAdjustments && feedback.latestMark??>
+			<h3>Adjusted mark: ${feedback.latestMark}</h3>
+		<#elseif feedback.latestMark??>
+			<h3>Mark: ${feedback.latestMark}</h3>
 		</#if>
-		<#if feedback.adjustedGrade??>
-			<h3>Adjusted grade: ${feedback.adjustedGrade}</h3>
-		<#elseif feedback.actualGrade??>
-			<h3>Grade: ${feedback.actualGrade}</h3>
+		<#if feedback.hasNonPrivateAdjustments && feedback.latestGrade??>
+			<h3>Adjusted grade: ${feedback.latestGrade}</h3>
+		<#elseif feedback.latestGrade??>
+			<h3>Grade: ${feedback.latestGrade}</h3>
 		</#if>
 	</div>
 
-	<#if feedback.hasAdjustments>
-		<div class="alert">
-			<p>
-				<strong>${feedback.adjustmentReason}</strong> - An adjustment has been made to your final mark. The
-				mark shown above will contribute to your final module mark.
-			</p>
-			<#if feedback.adjustmentComments??><p>${feedback.adjustmentComments}</p></#if>
-			<p>Your marks before adjustment were:</p>
-			<#if feedback.actualMark??><div>Mark: ${feedback.actualMark}</div></#if>
-			<#if feedback.actualGrade??><div>Grade: ${feedback.actualGrade}</div></#if>
-		</div>
-	</#if>
+	<#list feedback.studentViewableAdjustments as viewableFeedback>
+		<#if viewableFeedback??>
+			<div class="alert">
+				<p>
+					<strong>${viewableFeedback.reason}</strong> - An adjustment has been made to your final mark. The
+					mark shown above will contribute to your final module mark.
+				</p>
+				<#if viewableFeedback.comments??><p>${viewableFeedback.comments}</p></#if>
+				<p>Your marks before adjustment were:</p>
+
+				<#if viewableFeedback_has_next>
+					<#if feedback.studentViewableAdjustments[viewableFeedback_index +1].mark??><div>Mark: ${feedback.studentViewableAdjustments[viewableFeedback_index +1].mark}</div></#if>
+					<#if feedback.studentViewableAdjustments[viewableFeedback_index +1].grade??><div>Grade: ${feedback.studentViewableAdjustments[viewableFeedback_index +1].grade}</div></#if>
+				<#else>
+					<div>Mark: ${feedback.studentViewableRawMark}</div>
+					<#if feedback.studentViewableRawGrade??><div>Grade: ${feedback.studentViewableRawGrade}</div></#if>
+				</#if>
+			</div>
+		</#if>
+	</#list>
 </#if>
 
 <#if assignment.genericFeedback??>

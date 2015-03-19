@@ -49,8 +49,8 @@ class BulkAdjustmentTemplateCommandInternal(val assessment: Assessment) extends 
 			row.createCell(0).setCellValue(f.universityId)
 			row.createCell(1).setCellValue(f.actualMark.map(_.toString).getOrElse(""))
 			row.createCell(2).setCellValue(f.actualGrade.getOrElse(""))
-			row.createCell(3).setCellValue(f.latestPrivateAdjustment.map(_.mark.toString).getOrElse(""))
-			row.createCell(4).setCellValue(f.latestPrivateAdjustment.flatMap(_.grade.map(_.toString)).getOrElse(""))
+			row.createCell(3).setCellValue(f.latestPrivateOrNonPrivateAdjustment.map(_.mark.toString).getOrElse(""))
+			row.createCell(4).setCellValue(f.latestPrivateOrNonPrivateAdjustment.flatMap(_.grade.map(_.toString)).getOrElse(""))
 		})
 
 		val style = workbook.createCellStyle
