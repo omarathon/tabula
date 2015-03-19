@@ -4,6 +4,24 @@
 <h1>${exam.name} (${module.code?upper_case})</h1>
 
 <div class="btn-toolbar">
+
+	<#if exam.hasWorkflow>
+		<#assign markers_url><@routes.examAssignMarkers exam /></#assign>
+		<@fmt.permission_button
+			permission='Assignment.Update'
+			scope=exam.module
+			action_descr='assign markers'
+			href=markers_url
+			classes="btn">
+			<i class="icon-user"></i> Assign markers
+		</@fmt.permission_button>
+	<#else>
+		<a disabled="disabled" class="btn use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Marking workflow is not enabled for this exam">
+			<i class="icon-user"></i>
+			Assign markers
+		</a>
+	</#if>
+
 	<#assign marks_url><@routes.examAddMarks exam /></#assign>
 	<@fmt.permission_button
 		permission='Marks.Create'

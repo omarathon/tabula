@@ -54,7 +54,7 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 
 	def collectMarks: JBoolean
 
-	def hasWorkflow: Boolean
+	def hasWorkflow = markingWorkflow != null
 
 	def isReleasedForMarking(universityId: String): Boolean =
 		allFeedback.find(_.universityId == universityId) match {

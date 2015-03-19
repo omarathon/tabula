@@ -39,6 +39,9 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
 	@JoinColumn(name = "department_id")
 	var department: Department = null
 
+	// Not all marking workflows are suitable for exams
+	def validForExams: Boolean = false
+
 	def permissionsParents = Option(department).toStream
 
 	def courseworkMarkingUrl(assignment: Assignment, marker: User, studentId: String) =

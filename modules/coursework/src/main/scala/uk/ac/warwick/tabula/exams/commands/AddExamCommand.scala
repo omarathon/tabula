@@ -71,6 +71,7 @@ trait ExamState {
 	def exam: Exam = null
 	def module: Module
 	def academicYear: AcademicYear
+	var markingWorkflow: MarkingWorkflow = _
 }
 
 

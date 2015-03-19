@@ -20,4 +20,5 @@ class FirstMarkerOnlyWorkflow extends MarkingWorkflow with NoSecondMarker with A
 
 	override def getStudentsSecondMarker(assessment: Assessment, universityId: String) = None
 
+	override def validForExams = true
 }

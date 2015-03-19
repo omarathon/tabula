@@ -38,7 +38,7 @@ class EditExamCommandInternal(override val exam: Exam)
 
 	override def applyInternal() = {
 		exam.name = name
-
+		exam.markingWorkflow = markingWorkflow
 		exam.assessmentGroups.clear()
 		exam.assessmentGroups.addAll(assessmentGroups)
 		for (group <- exam.assessmentGroups.asScala if group.exam == null) {
@@ -80,6 +80,7 @@ trait PopulateEditExamCommand {
 	self: EditExamCommandState with UpdatesStudentMembership =>
 	name = exam.name
 	assessmentGroups = exam.assessmentGroups
+	markingWorkflow = exam.markingWorkflow
 
 	def populateGroups(exam: Exam) {
 		assessmentGroups = exam.assessmentGroups

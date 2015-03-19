@@ -30,9 +30,12 @@ object Routes {
 					encoded(exam.academicYear.startYear.toString),
 					encoded(exam.id)
 				)
+
+			object assignMarkers {
+				def apply(exam: Exam) = admin.exam(exam) + "/assign-markers"
+			}
 		}
 
-		// TODO-TAB3052 - May not need all of these. delete redundant ones
 		private def markerroot(exam: Exam, marker: User) = admin.exam(exam) + s"/marker/${marker.getWarwickId}"
 
 		object markerFeedback {

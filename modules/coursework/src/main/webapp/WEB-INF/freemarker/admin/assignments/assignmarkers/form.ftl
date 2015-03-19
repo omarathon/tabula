@@ -112,7 +112,7 @@
 <#escape x as x?html>
 	<h1>Assign students to markers</h1>
 	<h4><span class="muted">for</span>
-	${assignment.name}</h4>
+	${assessment.name}</h4>
 	<div class="btn-toolbar">
 		<div class="pull-right">
 			<div class="btn-group mode-nav">
@@ -120,7 +120,7 @@
 				<button data-selector="small-groups" class="btn mode">Import small groups</button>
 			</div>
 			<div class="btn-group hide back-nav">
-				<a href="<@routes.assignMarkers assignment />" class="btn">
+				<a href="${assignMarkersURL}" class="btn">
 					<i class="icon-reply"></i>
 					Return to drag and drop
 				</a>
@@ -128,7 +128,7 @@
 		</div>
 	</div>
 	<div class="clearfix"></div>
-	<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/assign-markers')}" commandName="command">
+	<@f.form method="post" enctype="multipart/form-data" action="${url(assignMarkersURL)}" commandName="command">
 		<div class="fix-area">
 			<div id="assign-markers" class="tabbable">
 				<ul class="nav nav-tabs">
@@ -202,7 +202,7 @@
 			$(this).remove();
 			$('.back-nav').show();
 			if(selector === "small-groups") {
-				$('#small-groups').load('<@routes.assignMarkersSmallGroups assignment />')
+				$('#small-groups').load('${assignMarkersURL}')
 			}
 			$('#'+selector).fadeIn(300);
 		});

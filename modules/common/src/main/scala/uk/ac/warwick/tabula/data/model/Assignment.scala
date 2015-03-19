@@ -646,8 +646,6 @@ class Assignment
 	// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
 	def mustReleaseForMarking = hasWorkflow
 
-	def hasWorkflow = markingWorkflow != null
-
 	def needsFeedbackPublishing = {
 		if (openEnded || !collectSubmissions || archived) {
 			false

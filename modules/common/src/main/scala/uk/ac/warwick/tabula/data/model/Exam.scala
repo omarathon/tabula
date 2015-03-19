@@ -98,9 +98,6 @@ class Exam
 	@transient
 	override val collectMarks: JBoolean = true
 
-	@transient
-	override val hasWorkflow = false
-
 	override def permissionsParents = Option(module).toStream
 
 	override def toEntityReference = new ExamEntityReference().put(this)
