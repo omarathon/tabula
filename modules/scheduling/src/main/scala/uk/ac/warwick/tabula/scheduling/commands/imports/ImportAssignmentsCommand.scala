@@ -134,8 +134,16 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	def save(group: Seq[UpstreamModuleRegistration]): Option[UpstreamAssessmentGroup] = {
 		group.headOption.map { head =>
 			val assessmentGroup = head.toUpstreamAssignmentGroup
-			// TAB-3284 - there shouldn't be any duplicates any more
-			assignmentMembershipService.replaceMembers(assessmentGroup, group)
+			// TAB-3388 change seat number to null if there is ambiguity - this shouldn't be down to sequence anymore
+			val fixedGroup = group.groupBy(m => (m.year, m.sprCode, m.occurrence, m.sequence, m.moduleCode, m.assessmentGroup)).mapValues(regs =>
+				if (regs.size > 1) {
+					val r = regs.head
+					UpstreamModuleRegistration(r.year, r.sprCode, null, r.occurrence, r.sequence, r.moduleCode, r.assessmentGroup)
+				} else {
+					regs.head
+				}
+			).values.toSeq
+			assignmentMembershipService.replaceMembers(assessmentGroup, fixedGroup)
 		}
 	}
 
