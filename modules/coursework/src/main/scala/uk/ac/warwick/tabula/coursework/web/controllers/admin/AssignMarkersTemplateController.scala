@@ -22,3 +22,18 @@ class AssignMarkersTemplateController {
 	}
 
 }
+
+@Controller
+@RequestMapping(value=Array("/exams/admin/module/{module}/exams/{exam}/assign-markers/template"))
+class ExamAssignMarkersTemplateController {
+
+
+	@ModelAttribute("command")
+	def command(@PathVariable("assignment") assignment: Assignment) = AssignMarkersTemplateCommand(assignment)
+
+	@RequestMapping
+	def getTemplate(@Valid @ModelAttribute("command") cmd: Appliable[ExcelView]) = {
+		cmd.apply()
+	}
+
+}

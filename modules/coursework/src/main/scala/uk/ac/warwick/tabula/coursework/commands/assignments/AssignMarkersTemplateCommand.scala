@@ -4,7 +4,7 @@ import org.apache.poi.ss.util.{CellRangeAddressList, WorkbookUtil}
 import org.apache.poi.xssf.usermodel._
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands.{CommandInternal, Unaudited, ReadOnly, ComposableCommand}
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Assessment
 import uk.ac.warwick.tabula.permissions.Permissions
 
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, AutowiringAssessmentMembershipServiceComponent}
@@ -14,8 +14,8 @@ import uk.ac.warwick.userlookup.User
 
 
 object AssignMarkersTemplateCommand {
-	def apply(assignment: Assignment) =
-		new AssignMarkersTemplateCommandInternal(assignment)
+	def apply(assessment: Assessment) =
+		new AssignMarkersTemplateCommandInternal(assessment)
 			with ComposableCommand[ExcelView]
 			with AssignMarkersTemplateCommandState
 			with AssignMarkersTemplateCommandPermissions
@@ -23,15 +23,15 @@ object AssignMarkersTemplateCommand {
 			with Unaudited
 }
 
-class AssignMarkersTemplateCommandInternal(val assignment:Assignment) extends CommandInternal[ExcelView]
+class AssignMarkersTemplateCommandInternal(val assessment: Assessment) extends CommandInternal[ExcelView]
 	with AutowiringAssessmentMembershipServiceComponent
 	with AutowiringUserLookupComponent {
 
-	val students = assessmentMembershipService.determineMembershipUsers(assignment)
+	val students = assessmentMembershipService.determineMembershipUsers(assessment)
 
 	def applyInternal() = {
 		val workbook = generateWorkbook
-		new ExcelView("Allocation for " + assignment.name + ".xlsx", workbook)
+		new ExcelView("Allocation for " + assessment.name + ".xlsx", workbook)
 	}
 
 	case class AllocationInfo (
@@ -52,7 +52,7 @@ class AssignMarkersTemplateCommandInternal(val assignment:Assignment) extends Co
 	}
 
 	private def addAllocationSheets(workbook: XSSFWorkbook) = {
-		val workflow = Option(assignment.markingWorkflow).getOrElse(throw new ItemNotFoundException(s"No workflow exists for ${assignment.name}"))
+		val workflow = Option(assessment.markingWorkflow).getOrElse(throw new ItemNotFoundException(s"No workflow exists for ${assessment.name}"))
 		val style = workbook.createCellStyle
 		val format = workbook.createDataFormat
 		// using an @ sets text format (from BuiltinFormats.class)
@@ -64,7 +64,7 @@ class AssignMarkersTemplateCommandInternal(val assignment:Assignment) extends Co
 				workflow.firstMarkers.users,
 				roleName,
 				workbook.createSheet(roleName),
-				(user: User) => workflow.getStudentsFirstMarker(assignment, user.getWarwickId).map(userLookup.getUserByUserId)
+				(user: User) => workflow.getStudentsFirstMarker(assessment, user.getWarwickId).map(userLookup.getUserByUserId)
 			)
 		}
 		val secondMarkerAllocation = workflow.secondMarkerRoleName.map( name => {
@@ -73,7 +73,7 @@ class AssignMarkersTemplateCommandInternal(val assignment:Assignment) extends Co
 				workflow.secondMarkers.users,
 				roleName,
 				workbook.createSheet(roleName),
-				(user: User) => workflow.getStudentsSecondMarker(assignment, user.getWarwickId).map(userLookup.getUserByUserId)
+				(user: User) => workflow.getStudentsSecondMarker(assessment, user.getWarwickId).map(userLookup.getUserByUserId)
 			)
 		})
 
@@ -133,13 +133,13 @@ class AssignMarkersTemplateCommandInternal(val assignment:Assignment) extends Co
 }
 
 trait AssignMarkersTemplateCommandState {
-	val assignment: Assignment
+	val assessment: Assessment
 }
 
 trait AssignMarkersTemplateCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self : AssignMarkersTemplateCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Assignment.Update, assignment)
+		p.PermissionCheck(Permissions.Assignment.Update, assessment.module)
 	}
 }
