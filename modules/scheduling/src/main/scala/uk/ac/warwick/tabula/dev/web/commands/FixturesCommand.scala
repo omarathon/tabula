@@ -1,26 +1,25 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
-import scala.reflect._
-import scala.collection.JavaConverters._
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.data._
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.services.{FeedbackForSitsService, SmallGroupService, ModuleAndDepartmentService, RelationshipService}
-import uk.ac.warwick.tabula.system.permissions.Public
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformationCommand
-import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
-import uk.ac.warwick.tabula.roles.{UserAccessMgrRoleDefinition, DepartmentalAdministratorRoleDefinition}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.DateTime
 import org.hibernate.criterion.Restrictions
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
-import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
+import org.joda.time.DateTime
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.{Command, Description}
+import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupAllocationMethod, SmallGroupFormat, SmallGroupSet}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, UserAccessMgrRoleDefinition}
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformationCommand
+import uk.ac.warwick.tabula.scheduling.services.{DepartmentInfo, ModuleInfo}
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.services.{FeedbackForSitsService, ModuleAndDepartmentService, RelationshipService, SmallGroupService}
+import uk.ac.warwick.tabula.system.permissions.Public
+
+import scala.collection.JavaConverters._
+import scala.reflect._
 
 /** This command is intentionally Public. It only exists on dev and is designed,
   * in essence, to blitz a department and set up some sample data in it.

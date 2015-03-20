@@ -31,7 +31,8 @@
 							permission='Assignment.Create'
 							scope=module
 							action_descr='create a new exam'
-							href=create_url>
+							href=create_url
+							classes='createNewExamButton'>
 							<i class="icon-plus"></i> Create new exam
 						</@fmt.permission_button>
 					</li>

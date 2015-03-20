@@ -15,5 +15,4 @@ class ExamFixtures extends BrowserTest {
 
 		fn
 	}
-
 }
