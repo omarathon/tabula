@@ -153,7 +153,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 
 	// students can see the audit of non-private adjustments, back until the last private adjustment
 	def studentViewableAdjustments: Seq[Mark] = {
-		if (hasNonPrivateAdjustments) {
+		if (latestNonPrivateAdjustment.isDefined) {
 			marks.asScala.takeWhile(mark => mark.markType != MarkType.PrivateAdjustment)
 		} else Seq()
 	}
@@ -169,7 +169,6 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	}
 
 	def hasPrivateAdjustments = latestPrivateAdjustment.isDefined
-	def hasNonPrivateAdjustments = latestNonPrivateAdjustment.isDefined
 	def hasPrivateOrNonPrivateAdjustments = marks.asScala.nonEmpty
 
 	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)

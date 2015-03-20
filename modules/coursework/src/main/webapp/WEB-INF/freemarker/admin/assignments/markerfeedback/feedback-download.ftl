@@ -16,12 +16,12 @@
 
 <#if feedback.hasMarkOrGrade>
 	<div class="mark-and-grade">
-		<#if feedback.hasNonPrivateAdjustments?? && feedback.latestMark??>
+		<#if feedback.studentViewableAdjustments?has_content && feedback.latestMark??>
 			<h3>Adjusted mark: ${feedback.latestMark}</h3>
 		<#elseif feedback.latestMark??>
 			<h3>Mark: ${feedback.latestMark}</h3>
 		</#if>
-		<#if feedback.hasNonPrivateAdjustments?? && feedback.latestGrade??>
+		<#if feedback.studentViewableAdjustments?has_content && feedback.latestGrade??>
 			<h3>Adjusted grade: ${feedback.latestGrade}</h3>
 		<#elseif feedback.latestGrade??>
 			<h3>Grade: ${feedback.latestGrade}</h3>
