@@ -23,7 +23,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 			def session = mockSession
 		}
 		command.assignmentImporter = importer
-		command.assignmentMembershipService = membershipService
+		command.assessmentMembershipService = membershipService
 		command.moduleAndDepartmentService = moduleService
 
 		moduleService.getModuleByCode(any[String]) returns None // Not necessary for this to work

@@ -52,9 +52,6 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var occurrence: String = null
 
-	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
-	var sequence: String = null
-
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
 	var agreedMark: java.math.BigDecimal = null
 
@@ -80,7 +77,6 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 			.append(cats, that.cats)
 			.append(academicYear, that.academicYear)
 			.append(occurrence, that.occurrence)
-			.append(sequence, that.sequence)
 			.build()
 
 }
@@ -92,17 +88,38 @@ case class UpstreamModuleRegistration(year: String, sprCode: String, seatNumber:
 
 	def universityId = SprCode.getUniversityId(sprCode)
 
+	// Assessment group membership doesn't vary by sequence
 	def differentGroup(other: UpstreamModuleRegistration) =
 		year != other.year ||
 			occurrence != other.occurrence ||
-			sequence != other.sequence ||
 			moduleCode != other.moduleCode ||
 			assessmentGroup != other.assessmentGroup
 
 	/**
-	 * Returns an UpstreamAssessmentGroup matching the group attributes.
+	 * Returns UpstreamAssessmentGroups matching the group attributes.
 	 */
-	def toUpstreamAssignmentGroup = {
+	def toUpstreamAssessmentGroups(sequences: Seq[String]) = {
+		sequences.map(sequence => {
+			val g = new UpstreamAssessmentGroup
+			g.academicYear = AcademicYear.parse(year)
+			g.moduleCode = moduleCode
+			g.assessmentGroup = assessmentGroup
+			g.sequence = sequence
+			// for the NONE group, override occurrence to also be NONE, because we create a single UpstreamAssessmentGroup
+			// for each module with group=NONE and occurrence=NONE, and all unallocated students go in there together.
+			g.occurrence =
+				if (assessmentGroup == AssessmentComponent.NoneAssessmentGroup)
+					AssessmentComponent.NoneAssessmentGroup
+				else
+					occurrence
+			g
+		})
+	}
+
+	/**
+	 * Returns an UpstreamAssessmentGroup matching the group attributes, including sequence.
+	 */
+	def toExactUpstreamAssessmentGroup = {
 		val g = new UpstreamAssessmentGroup
 		g.academicYear = AcademicYear.parse(year)
 		g.moduleCode = moduleCode

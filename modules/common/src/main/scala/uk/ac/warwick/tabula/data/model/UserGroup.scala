@@ -1,19 +1,17 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.CascadeType._
+import javax.persistence._
 
 import org.hibernate.annotations.Type
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import javax.persistence._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.helpers.StringUtils._
-
-import scala.util.Try
 
 /**
  * Wherever a group of users is referenced in the app, it will be
@@ -78,7 +76,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 			group
 		})
 
-		if (!staticIncludeUsers.isEmpty()) {
+		if (!staticIncludeUsers.isEmpty) {
 			staticIncludeUsers.clear()
 			// TAB-3343 - force deletions before inserts
 			optionalSession.foreach { _.flush() }
@@ -92,18 +90,20 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 			val m = new OrderedGroupMember
 			m.memberId = member.universityId
 			m.userGroup = this
-			m.position = Try(member.seatNumber.toInt).toOption
+			m.position = None
 			m
 		})
+		val distinctNewMembers = newMembers.groupBy(m => (m.memberId, m.userGroup)).mapValues(_.head).values.toSeq
 
-		if (!staticIncludeUsers.isEmpty()) {
+		if (!staticIncludeUsers.isEmpty) {
 
 			staticIncludeUsers.clear()
 			// TAB-3343 - force deletions before inserts
 			optionalSession.foreach { _.flush() }
 		}
 
-		staticIncludeUsers.addAll(newMembers.asJava)
+		staticIncludeUsers.addAll(distinctNewMembers.asJava)
+		optionalSession.foreach { s => distinctNewMembers.foreach(s.save) }
 	}
 
 	def excludedUserIds: Seq[String] = excludeUsers.asScala
