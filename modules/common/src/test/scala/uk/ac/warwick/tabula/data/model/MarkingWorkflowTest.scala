@@ -167,7 +167,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		f4.secondMarkerFeedback = Fixtures.markerFeedback(f4)
 
 		workflow.markingMethod should be(ModeratedMarking)
-		workflow.courseworkMarkingUrl(assignment, currentUser.apparentUser, sub4.userId) should be("/coursework/admin/module/heron101/assignments/1/marker/1234567/feedback/online/moderation")
+		workflow.courseworkMarkingUrl(assignment, currentUser.apparentUser, sub4.universityId) should be("/coursework/admin/module/heron101/assignments/1/marker/1234567/feedback/online/moderation")
 
 		workflow.firstMarkerRoleName should be("Marker")
 		workflow.hasSecondMarker should be(true)
