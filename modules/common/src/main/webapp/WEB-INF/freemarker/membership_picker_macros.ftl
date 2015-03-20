@@ -117,7 +117,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				<a
 					data-href="<@routes.withdrawnStudents command.set />"
 					class="btn select-withdrawn member-action use-tooltip"
-					title="Select permanantly withdrawn students" data-loading-text="Loading&hellip;"
+					title="Select permanently withdrawn students" data-loading-text="Loading&hellip;"
 				>
 					Select PWD students
 				</a>

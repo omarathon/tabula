@@ -1,0 +1,88 @@
+--- !ruby/object:Deployment 
+apaches: 
+- !ruby/object:Apache 
+  name: tabula-eng-test
+  port_balancer: !ruby/object:HAProxySocketBalancer
+    balanced_group: tabula-web
+    balanced_servers:
+    - "primary"
+    - "secondary"
+    current_instance:
+    - "primary"
+    - "secondary"
+    haproxy: !ruby/object:HAProxy::SocketReader
+      path: "/var/run/haproxy.stat"
+  apache_dir: "/usr/local/apache"
+  restart_command: "echo 'not restarting apache' "
+  state: balanced
+build_status: starting
+app: "tabula"
+war_names:
+- scheduling
+- api
+- attendance
+- courses
+- groups
+- profiles
+- web
+checkout_base: "/var/src/checkout"
+archive_dir: "/var/src/archive"
+branch: "develop"
+build_user: "build"
+builder: !ruby/object:MavenBuilder
+  skipTests: true
+  goal: "-Dscalastyle.skip=true clean install"
+build_artifacts: {
+  "errordocuments.tar.gz"  : "/usr/local/apache/htdocs/errordocuments" }
+scheduler_instance: !ruby/object:Tomcat
+  deployment_state: old
+  name: tabula-scheduler
+  port: "8280"
+  state: running
+  mode: smf
+  stop_command: "/usr/sbin/svcadm disable -s tomcat:"
+  war_names:
+  - scheduling
+  test_path: /scheduling/test/up
+  requests: 
+     /scheduling/test/up: 200
+instances:
+  tabula-eng-test:
+  - !ruby/object:Tomcat
+    deployment_state: old
+    name: tabula-primary
+    haproxy_name: primary
+    port: "8080"
+    state: running
+    mode: smf
+    stop_command: "/usr/sbin/svcadm disable -s tomcat:"
+    excluded_war_names:
+    - scheduling
+    test_path: /web/test/up
+    requests: 
+       /web/test/up: 200
+       /courses/test/up: 200
+       /profiles/test/up: 200
+       /groups/test/up: 200
+       /attendance/test/up: 200
+       /api/test/up: 200
+  - !ruby/object:Tomcat
+    deployment_state: old
+    name: tabula-secondary
+    haproxy_name: secondary
+    port: "8180"
+    state: running
+    mode: smf
+    stop_command: "/usr/sbin/svcadm disable -s tomcat:"
+    excluded_war_names:
+    - scheduling
+    test_path: /web/test/up
+    requests: 
+       /web/test/up: 200
+       /courses/test/up: 200
+       /profiles/test/up: 200
+       /groups/test/up: 200
+       /attendance/test/up: 200
+       /api/test/up: 200
+lockfile: /tmp/tabula_deploy.running
+notification_emails: m.mannion@warwick.ac.uk

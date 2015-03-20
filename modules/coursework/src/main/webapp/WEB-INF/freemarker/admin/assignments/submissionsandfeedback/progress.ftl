@@ -328,12 +328,14 @@
 										</#compress>
 									</#if>
 								</#compress></@stage>
-								<#if feedback.adjustmentReason??>
+								<#if feedback.hasPrivateOrNonPrivateAdjustments>
 									<div>
-										<i class="icon-ok"></i> Marks adjusted :
-										<#if feedback.adjustedMark??>${feedback.adjustedMark}</#if><#if feedback.adjustedGrade??>,</#if>
-										<#if feedback.adjustedGrade??> grade ${feedback.adjustedGrade}</#if>
-										 - Reason for adjustment: ${feedback.adjustmentReason!''}
+										<i class="icon-ok"></i> Marks adjusted:
+										<#if feedback.latestMark??>${feedback.latestMark}</#if><#if feedback.latestGrade??>,</#if>
+										<#if feedback.latestGrade??> grade ${feedback.latestGrade}</#if>
+										<#if feedback.latestPrivateOrNonPrivateAdjustment?? && feedback.latestPrivateOrNonPrivateAdjustment.reason??>
+										 - Reason for adjustment: ${feedback.latestPrivateOrNonPrivateAdjustment.reason!''}
+										</#if>
 									</div>
 								</#if>
 							</#if>

@@ -13,7 +13,6 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 import scala.collection.JavaConverters._
 
-
 trait FeedbackAttachments {
 
 	// Do not remove
@@ -113,6 +112,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	var actualMark: Option[Int] = None
+
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var actualGrade: Option[String] = None
 
@@ -145,14 +145,31 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	def latestGrade: Option[String] =
 		(Stream(agreedGrade) ++ marks.asScala.toStream.map(m => Option(m.grade).flatten) ++ Stream(actualGrade)).flatten.headOption
 
-	def latestAdjustment: Option[Mark] = marks.asScala.find(_.markType == MarkType.Adjustment)
-	def hasAdjustments = latestAdjustment.isDefined
-	def adjustedMark: Option[Int] = latestAdjustment.map(_.mark)
-	def adjustedGrade: Option[String] = latestAdjustment.map(_.grade).flatten
-	def adjustmentComments: String = latestAdjustment.map(_.comments).orNull
-	def adjustmentReason: String = latestAdjustment.map(_.reason).orNull
+	def latestNonPrivateAdjustment: Option[Mark] = marks.asScala.find(_.markType == MarkType.Adjustment)
+	def latestPrivateAdjustment: Option[Mark] = marks.asScala.find(_.markType == MarkType.PrivateAdjustment)
+	def latestPrivateOrNonPrivateAdjustment: Option[Mark] = marks.asScala.headOption
 
-	def latestPrivateAdjustment: Option[Mark] = marks.asScala.headOption
+	def adminViewableAdjustments: Seq[Mark] = marks.asScala
+
+	// students can see the audit of non-private adjustments, back until the last private adjustment
+	def studentViewableAdjustments: Seq[Mark] = {
+		if (latestNonPrivateAdjustment.isDefined) {
+			marks.asScala.takeWhile(mark => mark.markType != MarkType.PrivateAdjustment)
+		} else Seq()
+	}
+
+	def studentViewableRawMark: Option[Int] = {
+		if (hasPrivateAdjustments) latestPrivateAdjustment.map(_.mark)
+		else actualMark
+	}
+
+	def studentViewableRawGrade: Option[String] = {
+		if (hasPrivateAdjustments) latestPrivateAdjustment.map(_.grade).flatten
+		else actualGrade
+	}
+
+	def hasPrivateAdjustments = latestPrivateAdjustment.isDefined
+	def hasPrivateOrNonPrivateAdjustments = marks.asScala.nonEmpty
 
 	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
 	@JoinColumn(name = "first_marker_feedback")

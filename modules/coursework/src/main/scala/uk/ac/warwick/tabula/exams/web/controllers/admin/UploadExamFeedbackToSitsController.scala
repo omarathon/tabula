@@ -5,13 +5,13 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.coursework.commands.UploadFeedbackToSitsCommand
 import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Exam, Feedback, Module}
 import uk.ac.warwick.tabula.exams.web.Routes
+import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 
 @Controller
 @RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/upload-to-sits"))
-class UploadExamFeedbackToSitsController extends CourseworkController {
+class UploadExamFeedbackToSitsController extends ExamsController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable exam: Exam) =
