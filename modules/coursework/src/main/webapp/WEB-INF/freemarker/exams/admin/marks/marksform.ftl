@@ -10,6 +10,6 @@
 	commandName = "adminAddMarksCommand"
 	cancelUrl = cancelUrl
 	generateUrl = generateUrl
-	seatOrderMap = seatNumberMap
+	seatNumberMap = seatNumberMap
 	showAddButton = false
 />
