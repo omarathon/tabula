@@ -4,11 +4,11 @@ import org.openqa.selenium.By
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.{BeforeAndAfterEach, GivenWhenThen}
 
-class AddExamsTest extends ExamFixtures
+class AdministerExamsTest extends ExamFixtures
 	with GivenWhenThen
 	with BeforeAndAfterEach {
 
-	"Department admin" should "be offered a link to their department" in as(P.Admin1) {
+	"Department admin" should "be able to create and edit exams" in as(P.Admin1) {
 
 			Given("The exams home page")
 			pageTitle should be("Tabula - Exams Management")
@@ -18,9 +18,11 @@ class AddExamsTest extends ExamFixtures
 			pageSource contains "Test Services" should be {true}
 
 			And("By default none will be shown until clicking the 'Show' button")
+
+			Then("I click on the show button")
 			click on (linkText("Show"))
 
-			Then("The the user should be able to select the 'Create new exam' option from the 'Manage' dropdown")
+			Then("The user should be able to select the 'Create new exam' option from the 'Manage' dropdown")
 			var info = getModuleInfo("XXX01")
 			click on info.findElement(By.className("module-manage-button")).findElement(By.partialLinkText("Manage"))
 
@@ -39,6 +41,7 @@ class AddExamsTest extends ExamFixtures
 			submit()
 
 			Then("The user should be returned to the department module page")
+		// url contain (/bla/de/
 			pageSource contains "Test Services" should be {true}
 			pageSource contains "XXX01" should be {true}
 
@@ -47,6 +50,35 @@ class AddExamsTest extends ExamFixtures
 			click on info
 			eventually {
 				pageSource contains "Module-XXX01-Exam1" should be {true}
+			}
+
+			Then("The user can select to edit the exam")
+			click on info.findElement(By.className("assignment-buttons")).findElement(By.partialLinkText("Actions"))
+
+			val editNewExam = info.findElement(By.partialLinkText("Edit properties"))
+			eventually {
+				editNewExam.isDisplayed should be {true}
+			}
+			click on editNewExam
+
+			Then("This should show the edit exam page")
+			pageSource contains "Edit exam for" should be {true}
+			pageSource contains "XXX01" should be {true}
+
+			Then("The user should be able to modify a name and create the exam")
+			textField("name").value = "Module-XXX01-Exam1-edited"
+			submit()
+
+			Then("The user should be returned to the department module page")
+			// url contain (/bla/de/
+			pageSource contains "Test Services" should be {true}
+			pageSource contains "XXX01" should be {true}
+
+			Then("Clicking on the module XXX01 should reveal the new exam")
+			info = getModuleInfo("XXX01")
+			click on info
+			eventually {
+				pageSource contains "Module-XXX01-Exam1-edited" should be {true}
 			}
 	}
 
