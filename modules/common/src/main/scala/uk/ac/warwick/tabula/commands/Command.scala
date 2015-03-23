@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.{CannotPerformWriteOperationException, Main
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, RequiresPermissionsChecking, PermissionsChecking}
 import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
-import org.apache.log4j.Logger
+import org.slf4j.{LoggerFactory, Logger}
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.helpers.Promises
@@ -160,7 +160,7 @@ abstract class PromisingCommand[A] extends Command[A] with Promise[A] {
 
 object Command {
 	val MillisToSlowlog = 5000
-	val slowLogger = Logger.getLogger("uk.ac.warwick.tabula.Command.SLOW_LOG")
+	val slowLogger = LoggerFactory.getLogger("uk.ac.warwick.tabula.Command.SLOW_LOG")
 	
 	// TODO this will break if we start doing stuff in parallols
 	private val threadLocal = new ThreadLocal[Option[uk.ac.warwick.util.core.StopWatch]] {

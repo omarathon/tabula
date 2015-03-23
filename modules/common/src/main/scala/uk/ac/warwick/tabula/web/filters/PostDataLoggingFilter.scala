@@ -16,7 +16,7 @@ import scala.collection.mutable
 import javax.servlet.{ServletInputStream, Filter, FilterChain}
 import javax.servlet.http.{HttpServletRequestWrapper, HttpServletRequest, HttpServletResponse}
 
-import org.apache.log4j.Logger
+import org.slf4j.{LoggerFactory, Logger}
 
 import uk.ac.warwick.util.web.filter.AbstractHttpFilter
 import uk.ac.warwick.tabula.helpers.{Logging, Runnable}
@@ -34,7 +34,7 @@ class PostDataLoggingFilter extends AbstractHttpFilter with Filter with Logging 
 
 	import PostDataLoggingFilter._
 
-	@transient lazy val postLogger = Logger.getLogger("POST_LOGGER")
+	@transient lazy val postLogger = LoggerFactory.getLogger("POST_LOGGER")
 
 	val executionService = new TaskExecutionService
 

@@ -72,7 +72,7 @@ trait TurnitinMethods { self: Session =>
 			"create_session" -> "1") { request =>
 				request >:+ { (headers, request) =>
 					logger.debug("Login request")
-					logger.debug(headers)
+					logger.debug(headers.toString)
 					request <> { (node) => TurnitinResponse.fromXml(node) }
 				}
 			}
@@ -132,7 +132,7 @@ trait TurnitinMethods { self: Session =>
 			"ufn" -> userFirstName,
 			"uln" -> userLastName,
 			"create_session" -> "1")
-		logger.debug(response)
+		logger.debug(response.toString)
 	}
 
 	/**

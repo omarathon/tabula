@@ -35,7 +35,7 @@ tabula/
 │   ├── tabula-ds.xml
 │   └── web.xml
 ├── lib/
-│   ├── log4j.xml
+│   ├── logback.xml
 │   ├── ojdbc6.jar
 │   ├── tabula.properties
 │   └── tabula-sso-config.xml
@@ -75,9 +75,9 @@ This is just copied from the `conf` directory in the Tomcat 8 install. I couldn'
 
 You can get this from http://pkg.elab.warwick.ac.uk/oracle.com/ojdbc6.jar
 
-### `lib/log4j.xml`
+### `lib/logback.xml`
 
-Log4J config. An alternative would be to package up a `log4j.properties` with the WARs, but that wouldn't allow us to change config per-server.
+Logback config. An alternative would be to package this up with the WARs, but that wouldn't allow us to change config per-server.
 
 ### `lib/tabula.properties`
 

@@ -1,19 +1,17 @@
 package uk.ac.warwick.tabula.helpers
-import org.apache.log4j.Logger
+import org.slf4j.{LoggerFactory, Logger}
 import Stopwatches._
-import org.apache.log4j.Priority
 import scala.reflect.ClassTag
-import org.apache.log4j.Level
 
 trait Logging {
 	@transient val loggerName = this.getClass.getName
-	@transient lazy val logger = Logger.getLogger(loggerName)
+	@transient lazy val logger = LoggerFactory.getLogger(loggerName)
 	@transient lazy val debugEnabled = logger.isDebugEnabled
 
-	@transient val Error = Level.ERROR
-	@transient val Warn = Level.WARN
-	@transient val Info = Level.INFO
-	@transient val Debug = Level.DEBUG
+	@transient val Error = Logging.Level.Error
+	@transient val Warn = Logging.Level.Warn
+	@transient val Info = Logging.Level.Info
+	@transient val Debug = Logging.Level.Debug
 
 	/**
 	 * Logs a debug message, with the given arguments inserted into the
@@ -28,8 +26,8 @@ trait Logging {
 	 * Returns the collection so you can wrap it with this without having
 	 * to break out into a variable.
 	 */
-	def logSize[A](seq: Seq[A], level: Priority = Info)(implicit tag: ClassTag[A]) = {
-		logger.log(level, "Collection of " + tag.runtimeClass.getSimpleName + "s: " + seq.size)
+	def logSize[A](seq: Seq[A], level: Logging.Level = Info)(implicit tag: ClassTag[A]) = {
+		log(logger, level, "Collection of " + tag.runtimeClass.getSimpleName + "s: " + seq.size)
 		seq
 	}
 
@@ -48,7 +46,7 @@ trait Logging {
 	 */
 	def benchmark[A](
 		description: String,
-		level: Priority = Info,
+		level: Logging.Level = Info,
 		minMillis: Int = 0,
 		stopWatch: uk.ac.warwick.util.core.StopWatch = StopWatch(),
 		logger: Logger = this.logger
@@ -62,7 +60,7 @@ trait Logging {
 	 */
 	def timed[A](
 		description: String,
-		level: Priority = Info,
+		level: Logging.Level = Info,
 		minMillis: Int = 0,
 		stopWatch: uk.ac.warwick.util.core.StopWatch = StopWatch(),
 		logger: Logger = this.logger
@@ -72,7 +70,7 @@ trait Logging {
 				fn(stopWatch)
 			} finally {
 				if (stopWatch.getTotalTimeMillis > minMillis) {
-					logger.log(level, stopWatch.prettyPrint)
+					log(logger, level, stopWatch.prettyPrint)
 				}
 			}
 		} else {
@@ -96,8 +94,23 @@ trait Logging {
 		}
 	}
 
+	private def log(logger: Logger, level: Logging.Level, message: => String) = level match {
+		case Error => if (logger.isErrorEnabled()) logger.error(message)
+		case Warn => if (logger.isWarnEnabled()) logger.warn(message)
+		case Info => if (logger.isInfoEnabled()) logger.info(message)
+		case Debug => if (logger.isDebugEnabled()) logger.debug(message)
+	}
+
 }
 
 object Logging {
 	var benchmarking = true
+
+	sealed abstract trait Level
+	object Level {
+		case object Error extends Level
+		case object Warn extends Level
+		case object Info extends Level
+		case object Debug extends Level
+	}
 }

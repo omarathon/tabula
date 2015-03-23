@@ -220,8 +220,8 @@
 
 		<dependency>
 			<groupId>uk.ac.warwick.sso</groupId>
-			<artifactId>sso-client</artifactId>
-			<version>2.3</version>
+			<artifactId>sso-client_spring4</artifactId>
+			<version>2.4</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-codec</artifactId>

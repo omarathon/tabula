@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.services.MaintenanceModeEnabledException
 import uk.ac.warwick.tabula.services.MaintenanceModeServiceImpl
-import uk.ac.warwick.tabula.events.Log4JEventListener
+import uk.ac.warwick.tabula.events.SLF4JEventListener
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.events.EventHandling
 
@@ -22,7 +22,7 @@ class CommandTest extends TestBase {
 		
 		val cmd = Spell6Command() 
 		cmd.maintenanceMode = mmService
-		cmd.listener = new Log4JEventListener
+		cmd.listener = new SLF4JEventListener
 		
 		cmd.apply() should be (true)
 	}
@@ -46,7 +46,7 @@ class CommandTest extends TestBase {
 		
 		val cmd = CastFlameSpellCommand()
 		cmd.maintenanceMode = mmService
-		cmd.listener = new Log4JEventListener
+		cmd.listener = new SLF4JEventListener
 		
 		cmd.apply() should be (true)
 	}
