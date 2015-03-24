@@ -5,7 +5,7 @@
 </li>
 </#macro>
 
-<#macro assignStudents studentList markerList class name markerMapName>
+<#macro assignStudents studentList markerList class name markerMapName cancelUrl>
 <div class="tabula-dnd" data-scroll="true">
 	<p>Drag students onto a marker to allocate them. Select multiple students by dragging a box around them.
 		You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key and drag to add to a selection.</p>
@@ -104,7 +104,7 @@
 </div>
 <div class="submit-buttons">
 	<input type="submit" name="dragAndDrop" class="btn btn-primary" value="Save">
-	<a href="<@routes.depthome module />" class="btn">Cancel</a>
+	<a href="${cancelUrl}" class="btn">Cancel</a>
 </div>
 </#macro>
 
@@ -143,6 +143,7 @@
 							"first-markers"
 							firstMarkerRoleName
 							"firstMarkerMapping"
+							cancelUrl
 						/>
 					</div>
 					<#if hasSecondMarker>
@@ -153,6 +154,7 @@
 								"second-markers"
 								secondMarkerRoleName
 								"secondMarkerMapping"
+								cancelUrl
 							/>
 						</div>
 					</#if>
@@ -183,7 +185,7 @@
 				</ol>
 				<div class="fix-footer submit-buttons">
 					<input type="submit" name="uploadSpreadsheet" class="btn btn-primary" value="Upload">
-					<a href="<@routes.depthome module />" class="btn">Cancel</a>
+					<a href="${cancelUrl}" class="btn">Cancel</a>
 				</div>
 			</div>
 			<div id="small-groups" class="hide tabbable">

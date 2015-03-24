@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserLookupService}
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.AcademicYear
 
 object AssignMarkersController {
 
@@ -106,7 +107,8 @@ class AssignmentAssignMarkersController extends CourseworkController {
 			"assignMarkersURL" -> CourseworkRoutes.admin.assignment.assignMarkers(assignment),
 			"hasSecondMarker" -> assignment.markingWorkflow.hasSecondMarker,
 			"firstMarkerUnassignedStudents" -> firstMarkerUnassignedStudents,
-			"secondMarkerUnassignedStudents" -> secondMarkerUnassignedStudents
+			"secondMarkerUnassignedStudents" -> secondMarkerUnassignedStudents,
+			"cancelUrl" -> CourseworkRoutes.admin.module(module)
 		).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 	}
 
@@ -134,7 +136,7 @@ class AssignmentAssignMarkersController extends CourseworkController {
 }
 
 @Controller
-@RequestMapping(value = Array("/exams/admin/module/{module}/exams/{exam}/assign-markers"))
+@RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/assign-markers"))
 class ExamAssignMarkersController extends ExamsController {
 
 	import AssignMarkersController._
@@ -171,7 +173,8 @@ class ExamAssignMarkersController extends ExamsController {
 						@ModelAttribute("firstMarkers") firstMarkers: Seq[Marker],
 						@ModelAttribute("secondMarkers") secondMarkers: Seq[Marker],
 						@PathVariable module: Module,
-						@PathVariable exam: Exam
+						@PathVariable exam: Exam,
+						@PathVariable academicYear: AcademicYear
 						) = {
 		val members = assessmentMembershipService.determineMembershipUsers(exam).map{
 			new Student(_, module)
@@ -185,7 +188,8 @@ class ExamAssignMarkersController extends ExamsController {
 			"assignMarkersURL" -> ExamRoutes.admin.exam.assignMarkers(exam),
 			"hasSecondMarker" -> exam.markingWorkflow.hasSecondMarker,
 			"firstMarkerUnassignedStudents" -> firstMarkerUnassignedStudents,
-			"secondMarkerUnassignedStudents" -> secondMarkerUnassignedStudents
+			"secondMarkerUnassignedStudents" -> secondMarkerUnassignedStudents,
+			"cancelUrl" -> ExamRoutes.admin.module(module, academicYear)
 		).crumbs(Breadcrumbs.Department(module.adminDepartment, exam.academicYear), Breadcrumbs.Module(module, exam.academicYear))
 	}
 
