@@ -64,7 +64,7 @@ class ExamEditMarkingWorkflowController extends ExamsController {
 			form(cmd)
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin.markingWorkflow.list(cmd.department))
+			Redirect(uk.ac.warwick.tabula.exams.web.Routes.admin.markingWorkflow.list(cmd.department))
 		}
 	}
 
