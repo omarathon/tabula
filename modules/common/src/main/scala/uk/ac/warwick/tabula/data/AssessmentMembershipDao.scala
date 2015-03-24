@@ -124,8 +124,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 			.add(is("moduleCode", group.moduleCode))
 			.add(is("occurrence", group.occurrence))
 			.add(is("sequence", group.sequence))
-			.seq
-			.headOption
+			.uniqueResult
 
 	def find(group: AssessmentGroup): Option[AssessmentGroup] = {
 		if (group.assignment == null && group.smallGroupSet == null) None
