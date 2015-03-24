@@ -241,6 +241,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 			.add(is("academicYear", academicYear))
 			.add(is("moduleCode", component.moduleCode))
 			.add(is("assessmentGroup", component.assessmentGroup))
+			.add(is("sequence", component.sequence))
 			.seq
 	}
 
