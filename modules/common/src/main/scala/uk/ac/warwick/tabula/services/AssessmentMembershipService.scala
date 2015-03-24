@@ -33,6 +33,7 @@ trait AssessmentMembershipService {
 	 */
 	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
 	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
+	def getAssessmentComponents(moduleCode: String): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
@@ -42,8 +43,9 @@ trait AssessmentMembershipService {
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
 
 	def save(assignment: AssessmentComponent): AssessmentComponent
-	def save(group: UpstreamAssessmentGroup)
-	def replaceMembers(group: UpstreamAssessmentGroup, universityIds: Seq[UpstreamModuleRegistration]): UpstreamAssessmentGroup
+	def save(group: UpstreamAssessmentGroup): Unit
+	def replaceMembers(group: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]): UpstreamAssessmentGroup
+	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit
 
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
@@ -107,6 +109,7 @@ class AssessmentMembershipServiceImpl
 
 	def replaceMembers(template: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]) = {
 		if (debugEnabled) debugReplace(template, registrations.map(_.universityId))
+
 		getUpstreamAssessmentGroup(template).map { group =>
 			group.members.knownType.replaceStaticUsers(registrations)
 			group
@@ -119,6 +122,9 @@ class AssessmentMembershipServiceImpl
 	private def debugReplace(template: UpstreamAssessmentGroup, universityIds: Seq[String]) {
 		logger.debug("Setting %d members in group %s" format (universityIds.size, template.toString))
 	}
+
+	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]) =
+		dao.updateSeatNumbers(group, seatNumberMap)
 
 	/**
 	 * Tries to find an identical AssessmentComponent in the database, based on the
@@ -146,6 +152,11 @@ class AssessmentMembershipServiceImpl
 	 * Gets assessment components for this module.
 	 */
 	def getAssessmentComponents(module: Module) = dao.getAssessmentComponents(module)
+
+	/**
+	 * Gets assessment components by SITS module code
+	 */
+	def getAssessmentComponents(moduleCode: String) = dao.getAssessmentComponents(moduleCode)
 
 	/**
 	 * Gets assessment components for this department.
@@ -253,7 +264,7 @@ trait AssessmentMembershipMethods extends Logging {
 		others.foreach { g => assert(g.universityIds) }
 		for (group <- upstream) assert(group.members.universityIds)
 
-		val sitsUsers = upstream.flatMap { _.members.members }.distinct.toSeq
+		val sitsUsers = upstream.flatMap { _.members.members }.distinct
 
 		val includes = others.map(_.knownType.members).getOrElse(Nil)
 		val excludes = others.map(_.knownType.excludedUserIds).getOrElse(Nil)
