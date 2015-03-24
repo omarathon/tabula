@@ -140,6 +140,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 			ag.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 			ag.assessmentGroup = "A"
 			ag.occurrence = "A"
+			ag.sequence = "A01"
 			ag
 		}
 	
