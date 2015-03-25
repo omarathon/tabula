@@ -52,5 +52,4 @@ class AddExamController extends ExamsController {
 	def upstreamGroupBinder(binder: WebDataBinder) {
 		binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
 	}
-
 }
