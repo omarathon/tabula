@@ -94,7 +94,7 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 					else
 						"valid"
 				case None =>
-					if (validGrades.get(f.universityId).isDefined && validGrades(f.universityId).exists(_.isDefault))
+					if (f.module.adminDepartment.assignmentGradeValidation && validGrades.get(f.universityId).isDefined && validGrades(f.universityId).exists(_.isDefault))
 						"populated"
 					else
 						"invalid"
