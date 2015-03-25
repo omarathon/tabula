@@ -5,13 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, PermissionDeniedException}
 
 import scala.collection.JavaConverters._
 
@@ -90,6 +90,8 @@ class ExamsAdminDepartmentHomeController extends ExamsController {
 			"department" -> dept,
 			"modules" -> result,
 			"examMap" -> cmd.modulesAndExams
+		).crumbs(
+				Breadcrumbs.Department(dept, academicYear)
 		)
 	}
 }
