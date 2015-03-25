@@ -33,7 +33,10 @@ class EditExamController extends ExamsController {
 			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
 			"assessmentGroups" -> cmd.assessmentGroups
-		)
+		).crumbs(
+				Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear),
+				Breadcrumbs.Module(cmd.module, cmd.academicYear)
+			)
 	}
 
 	@RequestMapping(method = Array(POST))
