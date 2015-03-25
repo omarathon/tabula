@@ -1,40 +1,26 @@
 package uk.ac.warwick.tabula.system.exceptions
 
-import org.apache.log4j._
-import java.io.StringWriter
-import org.junit.After
-import org.junit.Before
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.services.MaintenanceModeEnabledException
+import uk.org.lidalia.slf4jtest.TestLoggerFactory
+import uk.org.lidalia.slf4jext.Level
 
 class LoggingExceptionHandlerTest extends TestBase {
 
+	val testLogger = TestLoggerFactory.getTestLogger(classOf[LoggingExceptionHandler].getName)
 	val handler = new LoggingExceptionHandler
 	val lineSeparator = System.getProperty("line.separator")
-
-	var writer: StringWriter = _
-	var appender: Appender = _
-
-	@Before def setup {
-		writer = new StringWriter
-
-		appender = new WriterAppender(new SimpleLayout, writer)
-		handler.logger.addAppender(appender)
-		handler.logger.setLevel(Level.DEBUG)
-	}
-
-	@After def tearDown {
-		if (appender != null) handler.logger.removeAppender(appender)
-		handler.logger.setLevel(null)
-	}
 
 	@Test def userError {
 		val context = ExceptionContext("1", new ItemNotFoundException("An egg cracked"), Some(testRequest("https://tabula.warwick.ac.uk/web/power/flight?super=magic")))
 
 		handler.exception(context)
 
-		writer.getBuffer.toString.trim.split(lineSeparator).head should be ("DEBUG - User error")
+		val logEvent = testLogger.getLoggingEvents.asScala.last
+		logEvent.getMessage.split(lineSeparator).head should be ("User error")
+		logEvent.getLevel should be (Level.DEBUG)
 	}
 
 	@Test def handledException {
@@ -42,7 +28,9 @@ class LoggingExceptionHandlerTest extends TestBase {
 
 		handler.exception(context)
 
-		writer.getBuffer.toString.trim.split(lineSeparator).head should be ("DEBUG - Handled exception")
+		val logEvent = testLogger.getLoggingEvents.asScala.last
+		logEvent.getMessage.split(lineSeparator).head should be ("Handled exception")
+		logEvent.getLevel should be (Level.DEBUG)
 	}
 
 	@Test def normalException {
@@ -50,7 +38,9 @@ class LoggingExceptionHandlerTest extends TestBase {
 
 		handler.exception(context)
 
-		writer.getBuffer.toString.trim.split(lineSeparator).head should be ("ERROR - Exception 1")
+		val logEvent = testLogger.getLoggingEvents.asScala.last
+		logEvent.getMessage.split(lineSeparator).head should be ("Exception 1")
+		logEvent.getLevel should be (Level.ERROR)
 	}
 
 }

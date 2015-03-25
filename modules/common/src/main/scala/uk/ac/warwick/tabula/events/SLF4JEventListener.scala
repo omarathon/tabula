@@ -1,15 +1,11 @@
 package uk.ac.warwick.tabula.events
 
-import org.apache.log4j.Logger
-import uk.ac.warwick.tabula.commands.Describable
-import uk.ac.warwick.tabula.commands.DescriptionImpl
-import uk.ac.warwick.tabula.RequestInfo
-import uk.ac.warwick.tabula.commands.Description
+import org.slf4j.LoggerFactory
 
-class Log4JEventListener extends EventListener {
+class SLF4JEventListener extends EventListener {
 	import EventDescription._
 
-	val logger = Logger.getLogger("uk.ac.warwick.tabula.AUDIT")
+	val logger = LoggerFactory.getLogger("uk.ac.warwick.tabula.AUDIT")
 
 	override def beforeCommand(event: Event) {
 		val s = generateMessage(event, "pre-event")
