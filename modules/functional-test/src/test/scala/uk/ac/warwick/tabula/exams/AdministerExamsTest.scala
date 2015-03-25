@@ -18,7 +18,6 @@ class AdministerExamsTest extends ExamFixtures
 			pageSource contains "Test Services" should be {true}
 
 			And("By default none will be shown until clicking the 'Show' button")
-
 			Then("I click on the show button")
 			click on (linkText("Show"))
 
@@ -33,6 +32,7 @@ class AdministerExamsTest extends ExamFixtures
 			click on createNewExam
 
 			Then("This should show the create exam page")
+			currentUrl should include("/admin/module/xxx01/2014/exams/new")
 			pageSource contains "Create exam for" should be {true}
 			pageSource contains "XXX01" should be {true}
 
@@ -41,7 +41,7 @@ class AdministerExamsTest extends ExamFixtures
 			submit()
 
 			Then("The user should be returned to the department module page")
-		// url contain (/bla/de/
+			currentUrl should include("/admin/department/xxx/2014")
 			pageSource contains "Test Services" should be {true}
 			pageSource contains "XXX01" should be {true}
 
@@ -62,6 +62,7 @@ class AdministerExamsTest extends ExamFixtures
 			click on editNewExam
 
 			Then("This should show the edit exam page")
+			currentUrl should include("/edit")
 			pageSource contains "Edit exam for" should be {true}
 			pageSource contains "XXX01" should be {true}
 
@@ -70,7 +71,7 @@ class AdministerExamsTest extends ExamFixtures
 			submit()
 
 			Then("The user should be returned to the department module page")
-			// url contain (/bla/de/
+			currentUrl should include("/admin/department/xxx/2014")
 			pageSource contains "Test Services" should be {true}
 			pageSource contains "XXX01" should be {true}
 
