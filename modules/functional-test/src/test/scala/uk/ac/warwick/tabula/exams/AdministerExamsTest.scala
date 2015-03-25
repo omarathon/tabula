@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.exams
 
 import org.openqa.selenium.By
+import org.scalatest.GivenWhenThen
 import org.scalatest.exceptions.TestFailedException
-import org.scalatest.{BeforeAndAfterEach, GivenWhenThen}
 
 class AdministerExamsTest extends ExamFixtures
-	with GivenWhenThen
-	with BeforeAndAfterEach {
+	with GivenWhenThen {
 
 	"Department admin" should "be able to create and edit exams" in as(P.Admin1) {
 
