@@ -272,8 +272,11 @@
 										<#if queueSitsUploadEnabled>
 											<#if enhancedFeedback.feedbackForSits??>
 												<#assign feedbackSitsStatus=enhancedFeedback.feedbackForSits.status />
-												<#if feedbackSitsStatus.code == "failed">
-													<span class="label label-important">${feedbackSitsStatus.description}</span>
+												<#assign sitsWarning = (feedbackSitsStatus.actualMarkLastUploaded!0) != (feedback.latestMark!0) || (feedbackSitsStatus.actualGradeLastUploaded!"") != (feedback.latestGrade!"") />
+												<#if feedbackSitsStatus.code == "failed" || sitsWarning >
+													<span class="label label-important use-tooltip" <#if sitsWarning>title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again."</#if>>
+														${feedbackSitsStatus.description}
+													</span>
 												<#elseif feedbackSitsStatus.code == "successful">
 													<span class="label label-success">${feedbackSitsStatus.description}</span>
 												<#else>
