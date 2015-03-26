@@ -60,6 +60,8 @@ class Exam
 	@BatchSize(size = 200)
 	var secondMarkers: JList[SecondMarkersMap] = JArrayList()
 
+	var released: JBoolean = _
+
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
 	@OneToMany(mappedBy = "exam", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)

@@ -16,9 +16,27 @@
 			<i class="icon-user"></i> Assign markers
 		</@fmt.permission_button>
 	<#else>
-		<a disabled="disabled" class="btn use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Marking workflow is not enabled for this exam">
+		<a class="btn disabled use-tooltip" data-container="body" title="Marking workflow is not enabled for this exam">
 			<i class="icon-user"></i>
 			Assign markers
+		</a>
+	</#if>
+
+	<#if !exam.released>
+		<#assign releaseForMarking_url><@routes.examReleaseForMarking exam /></#assign>
+		<@fmt.permission_button
+			permission='Submission.ReleaseForMarking'
+			scope=exam
+			action_descr='release for marking'
+			classes='btn'
+			href=releaseForMarking_url
+			id="release-submissions-button">
+			<i class="icon-inbox"></i> Release for marking
+		</@fmt.permission_button>
+	<#else>
+		<a class="btn disabled use-tooltip" data-container="body" title="This exam has already been released for marking">
+			<i class="icon-inbox"></i>
+			Release for marking
 		</a>
 	</#if>
 
@@ -38,6 +56,7 @@
 		permission='Feedback.Update'
 		scope=exam
 		action_descr='adjust marks'
+		tooltip='Adjust marks'
 		href=adjust_url
 		classes='btn'
 	>

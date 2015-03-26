@@ -157,3 +157,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro examBulkAdjustment exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/feedback/bulk-adjustment"/></#macro>
 <#macro examBulkAdjustmentTemplate exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/feedback/bulk-adjustment/template"/></#macro>
 <#macro examAssignMarkers exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/assign-markers" /></#macro>
+<#macro examReleaseForMarking exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/release-for-marking" /></#macro>
