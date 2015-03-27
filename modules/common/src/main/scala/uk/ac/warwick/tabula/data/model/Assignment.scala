@@ -504,26 +504,6 @@ class Assignment
 
 	def newExtensionsCanBeRequested: Boolean = !isClosed && extensionsPossible
 
-	def isMarker(user: User) = isFirstMarker(user) || isSecondMarker(user)
-
-	def isFirstMarker(user: User): Boolean = {
-		if (markingWorkflow != null)
-			markingWorkflow.firstMarkers.includesUser(user)
-		else false
-	}
-
-	def isSecondMarker(user: User): Boolean = {
-		if (markingWorkflow != null)
-			markingWorkflow.secondMarkers.includesUser(user)
-		else false
-	}
-
-	def isThirdMarker(user: User): Boolean = {
-		if (markingWorkflow != null)
-			markingWorkflow.thirdMarkers.includesUser(user)
-		else false
-	}
-
 	def getMarkerFeedback(uniId: String, user: User, feedbackPosition: FeedbackPosition): Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.universityId == uniId)
 		parentFeedback.flatMap {

@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentMembershipInfo}
 import collection.JavaConverters._
+import uk.ac.warwick.userlookup.User
 
 trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 
@@ -55,6 +56,27 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 	def collectMarks: JBoolean
 
 	def hasWorkflow = markingWorkflow != null
+
+	def isMarker(user: User) = isFirstMarker(user) || isSecondMarker(user)
+
+	def isFirstMarker(user: User): Boolean = {
+		if (markingWorkflow != null)
+			markingWorkflow.firstMarkers.includesUser(user)
+		else false
+	}
+
+	def isSecondMarker(user: User): Boolean = {
+		if (markingWorkflow != null)
+			markingWorkflow.secondMarkers.includesUser(user)
+		else false
+	}
+
+	def isThirdMarker(user: User): Boolean = {
+		if (markingWorkflow != null)
+			markingWorkflow.thirdMarkers.includesUser(user)
+		else false
+	}
+
 
 	def isReleasedForMarking(universityId: String): Boolean =
 		allFeedback.find(_.universityId == universityId) match {
