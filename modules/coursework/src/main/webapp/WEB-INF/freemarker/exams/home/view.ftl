@@ -34,6 +34,10 @@
 		</ul>
 	</#if>
 
+	<#if nonempty(examsForMarking)>
+		<#include "_markers.ftl" />
+	</#if>
+
 	<#if nonempty(ownedDepartments)>
 		<h2>My department-wide <@fmt.p number=ownedDepartments?size singular="responsibility" plural="responsibilities" shownumber=false /></h2>
 

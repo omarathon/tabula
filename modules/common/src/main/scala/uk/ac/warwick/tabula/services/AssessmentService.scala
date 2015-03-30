@@ -59,6 +59,8 @@ trait AssessmentService {
 
 	def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]]
 
+	def getExamsWhereMarker(user: User): Seq[Exam]
+
 }
 
 abstract class AbstractAssessmentService extends AssessmentService {
@@ -134,6 +136,13 @@ abstract class AbstractAssessmentService extends AssessmentService {
 
 	def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]] =
 		assessmentDao.getExamsByModules(modules, academicYear)
+
+	def getExamsWhereMarker(user: User): Seq[Exam] = {
+		(firstMarkerHelper.findBy(user) ++ secondMarkerHelper.findBy(user))
+			.distinct
+			.flatMap(markingWorkflowService.getExamsUsingMarkingWorkflow)
+			.filterNot { e => e.deleted}
+	}
 }
 
 trait AssessmentServiceUserGroupHelpers {

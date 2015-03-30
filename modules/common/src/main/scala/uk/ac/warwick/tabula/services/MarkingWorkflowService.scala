@@ -3,10 +3,9 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.MarkingWorkflow
+import uk.ac.warwick.tabula.data.model.{Exam, MarkingWorkflow, Assignment}
 import uk.ac.warwick.tabula.data.AutowiringMarkingWorkflowDaoComponent
 import uk.ac.warwick.tabula.data.MarkingWorkflowDaoComponent
-import uk.ac.warwick.tabula.data.model.Assignment
 
 trait MarkingWorkflowServiceComponent {
 	def markingWorkflowService: MarkingWorkflowService
@@ -21,6 +20,11 @@ trait MarkingWorkflowService {
 	
 	/** All assignments using this marking workflow. */
 	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Assignment]
+
+	/** All exams using this marking workflow. */
+	def getExamsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Exam]
+
+
 }
 
 abstract class AbstractMarkingWorkflowService extends MarkingWorkflowService {
@@ -31,6 +35,9 @@ abstract class AbstractMarkingWorkflowService extends MarkingWorkflowService {
 	
 	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow) = 
 		markingWorkflowDao.getAssignmentsUsingMarkingWorkflow(markingWorkflow)
+
+	def getExamsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow) =
+		markingWorkflowDao.getExamsUsingMarkingWorkflow(markingWorkflow)
 }
 
 @Service("markingWorkflowService")
