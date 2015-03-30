@@ -204,7 +204,7 @@
 			$(this).remove();
 			$('.back-nav').show();
 			if(selector === "small-groups") {
-				$('#small-groups').load('${assignMarkersURL}')
+				$('#small-groups').load('<@routes.assignMarkersSmallGroups assessment />')
 			}
 			$('#'+selector).fadeIn(300);
 		});
