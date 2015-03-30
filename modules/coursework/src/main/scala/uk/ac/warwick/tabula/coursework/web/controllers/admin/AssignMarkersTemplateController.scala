@@ -24,7 +24,7 @@ class AssignMarkersTemplateController {
 }
 
 @Controller
-@RequestMapping(value=Array("/exams/admin/module/{module}/exams/{exam}/assign-markers/template"))
+@RequestMapping(value=Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/assign-markers/template"))
 class ExamAssignMarkersTemplateController {
 
 

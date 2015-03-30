@@ -128,8 +128,11 @@ class AssignmentAssignMarkersController extends CourseworkController {
 							 @ModelAttribute("command") cmd: Appliable[Assignment],
 							 errors: Errors) = {
 			Mav("admin/assignments/assignmarkers/upload-preview",
+				"assessment" -> assignment,
+				"assignMarkersURL" -> CourseworkRoutes.admin.assignment.assignMarkers(assignment),
 				"firstMarkerRole" -> assignment.markingWorkflow.firstMarkerRoleName,
-				"secondMarkerRole" -> assignment.markingWorkflow.secondMarkerRoleName.getOrElse("Second marker")
+				"secondMarkerRole" -> assignment.markingWorkflow.secondMarkerRoleName.getOrElse("Second marker"),
+				"cancelUrl" -> CourseworkRoutes.admin.module(module)
 			)
 	}
 
@@ -206,11 +209,15 @@ class ExamAssignMarkersController extends ExamsController {
 	@RequestMapping(method = Array(POST), params = Array("uploadSpreadsheet"))
 	def doUpload(@PathVariable module: Module,
 							 @PathVariable(value = "exam") exam: Exam,
+							 @PathVariable academicYear: AcademicYear,
 							 @ModelAttribute("command") cmd: Appliable[Exam],
 							 errors: Errors) = {
 		Mav("admin/assignments/assignmarkers/upload-preview",
+			"assessment" -> exam,
+			"assignMarkersURL" -> ExamRoutes.admin.exam.assignMarkers(exam),
 			"firstMarkerRole" -> exam.markingWorkflow.firstMarkerRoleName,
-			"secondMarkerRole" -> exam.markingWorkflow.secondMarkerRoleName.getOrElse("Second marker")
+			"secondMarkerRole" -> exam.markingWorkflow.secondMarkerRoleName.getOrElse("Second marker"),
+			"cancelUrl" -> ExamRoutes.admin.module(module, academicYear)
 		)
 	}
 
