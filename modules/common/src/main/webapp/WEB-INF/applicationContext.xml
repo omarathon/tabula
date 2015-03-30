@@ -39,7 +39,7 @@
 	<bean id="defaultEventListener" class="uk.ac.warwick.tabula.events.CompositeEventListener" abstract="true">
 		<constructor-arg index="0">
 			<list>
-				<bean class="uk.ac.warwick.tabula.events.Log4JEventListener" />
+				<bean class="uk.ac.warwick.tabula.events.SLF4JEventListener" />
 				<bean class="uk.ac.warwick.tabula.events.DatabaseEventListener" />
 			</list>
 		</constructor-arg>

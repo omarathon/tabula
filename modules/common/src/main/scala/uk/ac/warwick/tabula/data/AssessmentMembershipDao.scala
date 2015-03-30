@@ -46,6 +46,7 @@ trait AssessmentMembershipDao {
 	 */
 	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
 	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
+	def getAssessmentComponents(moduleCode: String): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
@@ -54,6 +55,8 @@ trait AssessmentMembershipDao {
 	 */
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
+
+	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit
 
 	def countPublishedFeedback(assignment: Assignment): Int
 	def countFullFeedback(assignment: Assignment): Int
@@ -108,19 +111,20 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 	 * Tries to find an identical AssessmentComponent in the database, based on the
 	 * fact that moduleCode and sequence uniquely identify the assignment.
 	 */
-	def find(assignment: AssessmentComponent): Option[AssessmentComponent] = session.newCriteria[AssessmentComponent]
-		.add(is("moduleCode", assignment.moduleCode))
-		.add(is("sequence", assignment.sequence))
-		.uniqueResult
+	def find(assignment: AssessmentComponent): Option[AssessmentComponent] =
+		session.newCriteria[AssessmentComponent]
+			.add(is("moduleCode", assignment.moduleCode))
+			.add(is("sequence", assignment.sequence))
+			.uniqueResult
 
-	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = session.newCriteria[UpstreamAssessmentGroup]
-		.add(is("assessmentGroup", group.assessmentGroup))
-		.add(is("academicYear", group.academicYear))
-		.add(is("moduleCode", group.moduleCode))
-		.add(is("occurrence", group.occurrence))
-		// if there are more than one matching group take the first (several may exist as part of the deploy for TAB-3389
-		.seq
-		.headOption
+	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] =
+		session.newCriteria[UpstreamAssessmentGroup]
+			.add(is("assessmentGroup", group.assessmentGroup))
+			.add(is("academicYear", group.academicYear))
+			.add(is("moduleCode", group.moduleCode))
+			.add(is("occurrence", group.occurrence))
+			.add(is("sequence", group.sequence))
+			.uniqueResult
 
 	def find(group: AssessmentGroup): Option[AssessmentGroup] = {
 		if (group.assignment == null && group.smallGroupSet == null) None
@@ -207,6 +211,15 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 		}
 	}
 
+	/** Just gets components of type Assignment for this SITS module code, not all components. */
+	def getAssessmentComponents(moduleCode: String) = {
+		session.newCriteria[AssessmentComponent]
+			.add(is("moduleCode", moduleCode))
+			.add(is("inUse", true))
+			.addOrder(Order.asc("sequence"))
+			.seq
+	}
+
 	def countPublishedFeedback(assignment: Assignment): Int = {
 		session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = 1""")
 			.setString("assignmentId", assignment.id)
@@ -228,6 +241,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 			.add(is("academicYear", academicYear))
 			.add(is("moduleCode", component.moduleCode))
 			.add(is("assessmentGroup", component.assessmentGroup))
+			.add(is("sequence", component.sequence))
 			.seq
 	}
 
@@ -236,6 +250,15 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 			.add(not(safeIn("id", ids)))
 			.add(safeIn("academicYear", academicYears))
 			.seq
+
+	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit = {
+		group.sortedMembers.foreach(member => {
+			seatNumberMap.get(member.memberId).foreach(seatNumber => {
+				member.position = Option(seatNumber)
+				session.save(member)
+			})
+		})
+	}
 
 	def save(gb: GradeBoundary): Unit = {
 		session.saveOrUpdate(gb)

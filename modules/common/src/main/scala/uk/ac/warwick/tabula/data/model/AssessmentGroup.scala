@@ -55,6 +55,7 @@ class AssessmentGroup extends GeneratedId {
 			template.academicYear = academicYear
 			template.assessmentGroup = assessmentComponent.assessmentGroup
 			template.moduleCode = assessmentComponent.moduleCode
+			template.sequence = assessmentComponent.sequence
 			template.occurrence = occurrence
 			membershipService.getUpstreamAssessmentGroup(template)
 		}
@@ -70,7 +71,8 @@ class AssessmentGroup extends GeneratedId {
 
 			val props = entityInfo ++ Seq(
 				"assessmentComponent" -> assessmentComponent.id,
-				"occurrence" -> occurrence
+				"occurrence" -> occurrence,
+				"sequence" -> assessmentComponent.sequence
 			)
 
 			ToString.forObject(this, props : _*)

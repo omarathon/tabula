@@ -1,30 +1,23 @@
 package uk.ac.warwick.tabula.coursework.services.turnitin
 
 import java.io.File
+
+import dispatch.classic.Request.toRequestVerbs
+import dispatch.classic._
+import dispatch.classic.thread.ThreadSafeHttpClient
 import org.apache.commons.io.FilenameUtils.getExtension
-import org.apache.http.HttpRequest
-import org.apache.http.HttpResponse
+import org.apache.http.{HttpRequest, HttpResponse}
+import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.apache.http.impl.client.DefaultRedirectStrategy
 import org.apache.http.protocol.HttpContext
-import org.springframework.beans.factory.DisposableBean
-import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.factory.{DisposableBean, InitializingBean}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import dispatch.classic._
-import dispatch.classic.Request.toRequestVerbs
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.CurrentUser
-import org.apache.http.cookie.CookieSpec
-import org.apache.commons.httpclient.cookie.IgnoreCookiesSpec
-import org.apache.http.cookie.CookieSpecRegistry
-import org.apache.http.client.params.ClientPNames
-import org.apache.http.client.params.CookiePolicy
-import uk.ac.warwick.tabula.data.model.Assignment
-import scala.util.matching.Regex
-import dispatch.classic.thread.ThreadSafeHttpClient
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
+import uk.ac.warwick.tabula.helpers.Logging
 
-case class FileData(val file: File, val name: String)
+case class FileData(file: File, name: String)
 
 object Turnitin {
 	/**
@@ -50,7 +43,7 @@ object Turnitin {
     
     def classNameFor(assignment: Assignment) = {
         val module = assignment.module
-        ClassName(module.code.toUpperCase() + " - " + module.name)
+        ClassName(module.code.toUpperCase + " - " + module.name)
     }
     
     def assignmentNameFor(assignment: Assignment) = {
@@ -100,7 +93,7 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 			setRedirectStrategy(new DefaultRedirectStrategy {
 				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
 			})
-			getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
+			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
 		}	
 	}
 
@@ -116,7 +109,7 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 	
 	def login(email:String, firstName:String, lastName:String): Option[Session] = {
 		val session = new Session(this, null)
-		val userEmail = if (email == null || email.isEmpty()) firstName + lastName + "@turnitin.warwick.ac.uk" else email
+		val userEmail = if (email == null || email.isEmpty) firstName + lastName + "@turnitin.warwick.ac.uk" else email
 			
 		session.userEmail = userEmail
 		session.userFirstName = firstName

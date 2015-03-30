@@ -36,6 +36,11 @@ class EditExamController extends ExamsController {
 			"department" -> module.adminDepartment,
 			"markingWorkflows" -> module.adminDepartment.markingWorkflows.filter(_.validForExams)
 		)
+			"assessmentGroups" -> cmd.assessmentGroups
+		).crumbs(
+				Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear),
+				Breadcrumbs.Module(cmd.module, cmd.academicYear)
+			)
 	}
 
 	@RequestMapping(method = Array(POST))

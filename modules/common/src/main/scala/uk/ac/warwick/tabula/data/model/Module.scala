@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 
-import org.hibernate.annotations.{Type, BatchSize}
+import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -69,6 +69,10 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 	@BatchSize(size=100)
 	@OrderBy("closeDate")
 	var assignments: JList[Assignment] = JArrayList()
+
+	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@BatchSize(size=100)
+	var exams: JList[Exam] = JArrayList()
 
 	def hasLiveAssignments = Option(assignments) match {
 		case Some(a) => a.asScala.exists(_.isAlive)

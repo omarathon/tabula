@@ -67,14 +67,14 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 		   unnecessarily - but we could change this query to filter it
 		   down a bit more. */
 		tuples should be (Seq(
-			("CH115-30","A","A"),
-			("CH115-30",NONE,NONE),
-			("CH120-15","A","A"),
-			("CH120-15",NONE,NONE),
-			("CH130-15","A","A"),
-			("CH130-15",NONE,NONE),
-			("CH130-20","A","A"),
-			("CH130-20",NONE,NONE)
+			("CH115-30","A","A","A01"),
+			("CH115-30",NONE,NONE,NONE),
+			("CH120-15","A","A","A01"),
+			("CH120-15",NONE,NONE,NONE),
+			("CH130-15","A","A","A01"),
+			("CH130-15",NONE,NONE,NONE),
+			("CH130-20","A","A","A01"),
+			("CH130-20",NONE,NONE,NONE)
 		))
 
 	}}
@@ -97,7 +97,7 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 	private def sorted(components: Seq[AssessmentComponent])(implicit ev: ClassTag[AssessmentComponent]) = components sortBy asTuple
 
 	// Converting to tuples for easier sorting/comparing
-	private def asTuple(group: UpstreamAssessmentGroup) = (group.moduleCode, group.assessmentGroup, group.occurrence)
+	private def asTuple(group: UpstreamAssessmentGroup) = (group.moduleCode, group.assessmentGroup, group.occurrence, group.sequence)
 	private def sorted(groups: Seq[UpstreamAssessmentGroup]) = groups sortBy asTuple
 
 }

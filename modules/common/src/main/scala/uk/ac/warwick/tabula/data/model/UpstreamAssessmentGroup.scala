@@ -27,6 +27,7 @@ class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
 	var moduleCode: String = _
 	var assessmentGroup: String = _
 	var occurrence: String = _
+	var sequence: String = _
 
 	@Basic @Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
@@ -50,9 +51,10 @@ class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
 			.append(assessmentGroup, other.assessmentGroup)
 			.append(occurrence, other.occurrence)
 			.append(academicYear, other.academicYear)
-			.isEquals()
+			.append(sequence, other.sequence)
+			.isEquals
 
-	override def toString = "%s %s g:%s o:%s" format (moduleCode, academicYear, assessmentGroup, occurrence)
+	override def toString = "%s %s g:%s o:%s s:%s" format (moduleCode, academicYear, assessmentGroup, occurrence, sequence)
 	
 	def memberCount = members.members.size
 }

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.helpers
 
-import org.apache.log4j.Logger
+import org.slf4j.{LoggerFactory, Logger}
 
 import scala.collection.mutable
 import uk.ac.warwick.tabula.EarlyRequestInfo
@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.EarlyRequestInfo
 trait RequestLevelCaching[A, B] {
 
 	// Don't extend Logging, because we want a custom logger name
-	@transient private lazy val requestLevelCachingLogger = Logger.getLogger(classOf[RequestLevelCaching[A, B]])
+	@transient private lazy val requestLevelCachingLogger = LoggerFactory.getLogger(classOf[RequestLevelCaching[A, B]])
 
 	// Uses EarlyRequestInfo which is available before the full RequestInfo, since we need some caching
 	// for permissions lookups to create the CurrentUser.

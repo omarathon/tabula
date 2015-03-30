@@ -181,7 +181,7 @@
 				</exclusion>
 				<exclusion>
 					<groupId>uk.ac.warwick.sso</groupId>
-					<artifactId>sso-client</artifactId>
+					<artifactId>sso-client_spring4</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

@@ -36,7 +36,7 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 	def allFeedback: Seq[Feedback]
 
 	// feedback that has been been through the marking process (not placeholders for marker feedback)
-	def fullFeedback = allFeedback.filterNot(_.isPlaceholder).toSeq
+	def fullFeedback = allFeedback.filterNot(_.isPlaceholder)
 
 	// returns feedback for a specified student
 	def findFeedback(uniId: String) = allFeedback.find(_.universityId == uniId)
