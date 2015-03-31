@@ -43,6 +43,7 @@ class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
 		exam.name = name
 		exam.module = module
 		exam.academicYear = academicYear
+		exam.released = false
 
 		exam.assessmentGroups.clear()
 		exam.assessmentGroups.addAll(assessmentGroups)
