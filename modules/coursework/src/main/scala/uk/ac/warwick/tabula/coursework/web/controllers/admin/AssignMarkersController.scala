@@ -104,6 +104,7 @@ class AssignmentAssignMarkersController extends CourseworkController {
 
 		Mav("admin/assignments/assignmarkers/form",
 			"assessment" -> assignment,
+			"isExam" -> false,
 			"assignMarkersURL" -> CourseworkRoutes.admin.assignment.assignMarkers(assignment),
 			"hasSecondMarker" -> assignment.markingWorkflow.hasSecondMarker,
 			"firstMarkerUnassignedStudents" -> firstMarkerUnassignedStudents,
@@ -129,6 +130,7 @@ class AssignmentAssignMarkersController extends CourseworkController {
 							 errors: Errors) = {
 			Mav("admin/assignments/assignmarkers/upload-preview",
 				"assessment" -> assignment,
+				"isExam" -> false,
 				"assignMarkersURL" -> CourseworkRoutes.admin.assignment.assignMarkers(assignment),
 				"firstMarkerRole" -> assignment.markingWorkflow.firstMarkerRoleName,
 				"secondMarkerRole" -> assignment.markingWorkflow.secondMarkerRoleName.getOrElse("Second marker"),
@@ -188,6 +190,7 @@ class ExamAssignMarkersController extends ExamsController {
 
 		Mav("admin/assignments/assignmarkers/form",
 			"assessment" -> exam,
+			"isExam" -> true,
 			"assignMarkersURL" -> ExamRoutes.admin.exam.assignMarkers(exam),
 			"hasSecondMarker" -> exam.markingWorkflow.hasSecondMarker,
 			"firstMarkerUnassignedStudents" -> firstMarkerUnassignedStudents,
@@ -214,6 +217,7 @@ class ExamAssignMarkersController extends ExamsController {
 							 errors: Errors) = {
 		Mav("admin/assignments/assignmarkers/upload-preview",
 			"assessment" -> exam,
+			"isExam" -> true,
 			"assignMarkersURL" -> ExamRoutes.admin.exam.assignMarkers(exam),
 			"firstMarkerRole" -> exam.markingWorkflow.firstMarkerRoleName,
 			"secondMarkerRole" -> exam.markingWorkflow.secondMarkerRoleName.getOrElse("Second marker"),
