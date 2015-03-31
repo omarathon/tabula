@@ -35,7 +35,7 @@ class AddExamController extends ExamsController {
 			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
 			"assessmentGroups" -> cmd.assessmentGroups,
 			"department" -> module.adminDepartment,
-			"markingWorkflows" -> module.adminDepartment.markingWorkflows.filter(_.validForExams))
+			"markingWorkflows" -> module.adminDepartment.markingWorkflows.filter(_.validForExams),
 			"assessmentGroups" -> cmd.assessmentGroups
 		).crumbs(
 				Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear),
