@@ -47,12 +47,10 @@ trait MonitoringPointReportCreateApi {
 		command.validate(errors)
 
 		if (errors.hasErrors) {
-			response.setStatus(HttpStatus.BAD_REQUEST.value())
-
-			Mav(new JSONErrorView(errors, Map("success" -> false, "status" -> HttpStatus.BAD_REQUEST.value())))
+			Mav(new JSONErrorView(errors))
 		} else {
 			val result = command.apply()
-			Mav(new JSONView(Map("success" -> true) ++ toJson(request, result)))
+			Mav(new JSONView(Map("success" -> true, "status" -> "ok") ++ toJson(request, result)))
 		}
 	}
 
@@ -76,7 +74,11 @@ class CreateMonitoringPointReportRequest extends JsonApiRequest[CreateMonitoring
 		state.academicYear = academicYear
 		state.missedPoints = missedPoints.asScala.flatMap { case (sprCode, missed) =>
 			profileService.getMemberByUniversityId(SprCode.getUniversityId(sprCode)) match {
-				case Some(student: StudentMember) => Some(student -> missed.intValue())
+				case Some(student: StudentMember) => {
+					Some(student -> missed.intValue())
+
+					// TODO validate that the student doesn't have any points recorded for this academic year
+				}
 				case _ => errors.rejectValue("missedPoints", "invalid"); None
 			}
 		}.toMap

@@ -2,10 +2,10 @@ package uk.ac.warwick.tabula.system.exceptions
 
 import java.io.IOException
 
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Required
+import org.springframework.http.HttpStatus
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.servlet.HandlerExceptionResolver
 import org.springframework.web.servlet.ModelAndView
 import javax.servlet.http.HttpServletRequest
@@ -14,21 +14,16 @@ import javax.servlet.ServletException
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.Ordered
+import uk.ac.warwick.tabula.helpers.HttpServletRequestUtils._
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.ControllerViews
-import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.util.core.ExceptionUtils
 import org.springframework.beans.TypeMismatchException
-import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.system.{CurrentUserInterceptor, RequestInfoInterceptor}
-import uk.ac.warwick.tabula.PermissionsError
 import org.springframework.web.multipart.MultipartException
-import org.apache.http.HttpStatus
 import org.springframework.web.bind.MissingServletRequestParameterException
-import uk.ac.warwick.tabula.ParameterMissingException
 import org.springframework.web.HttpRequestMethodNotSupportedException
-import org.springframework.web.servlet.mvc.condition.{ConsumesRequestCondition, ProducesRequestCondition}
-import org.springframework.http.MediaType
 import uk.ac.warwick.tabula.web.views.JSONView
 
 /**
@@ -53,7 +48,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 *
 	 * Doesn't check subclasses, the exception class has to match exactly.
 	 */
-	@Required var viewMappings: JMap[String, String] = Map[String, String]()
+	@Required var viewMappings: JMap[String, String] = JHashMap[String, String]()
 
 	override def resolveException(request: HttpServletRequest, response: HttpServletResponse, obj: Any, e: Exception): ModelAndView = {
 		val interceptors = List(userInterceptor, infoInterceptor)
@@ -64,7 +59,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 
 	override def requestInfo = RequestInfo.fromThread
 
-	private def ajax = requestInfo.map { _.ajax }.getOrElse(false)
+	private def ajax = requestInfo.exists { _.ajax }
 
 	/**
 	 * Resolve an exception outside of a request. Doesn't return a model/view.
@@ -76,7 +71,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 * happens beyond Spring's grasp.
 	 */
 	def doResolve(e: Throwable, request: Option[HttpServletRequest] = None, response: Option[HttpServletResponse] = None): Mav = {
-		def loggedIn = requestInfo.map { _.user.loggedIn }.getOrElse(false)
+		def loggedIn = requestInfo.exists { _.user.loggedIn }
 		def isAjaxRequest = request.isDefined && ("XMLHttpRequest" == request.get.getHeader("X-Requested-With"))
 
 		e match {
@@ -89,8 +84,11 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 			// Handle missing servlet param exceptions as 400
 			case missingParam: MissingServletRequestParameterException => handle(new ParameterMissingException(missingParam), request, response)
 
+			// Handle missing request body
+			case missingBody: HttpMessageNotReadableException => handle(new RequestBodyMissingException(missingBody), request, response)
+
 			// TAB-411 also redirect to signin for submit permission denied if not logged in (and not ajax request)
-			case permDenied: PermissionsError if (!loggedIn && !isAjaxRequest) => RedirectToSignin()
+			case permDenied: PermissionsError if !loggedIn && !isAjaxRequest && !request.exists { _.isJsonRequest } => RedirectToSignin()
 
 			case e: IOException if ExceptionHandler.isClientAbortException(e) => Mav(null.asInstanceOf[String])
 
@@ -136,32 +134,25 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 		}
 
 		viewMappings.get(interestingException.getClass.getName) match {
-			case view: String => { mav.viewName = view }
+			case view: String => mav.viewName = view
 			case null => //keep defaultView
 		}
 
-		val statusCode = interestingException match {
-			case error: UserError => error.statusCode
-			case _ => HttpStatus.SC_INTERNAL_SERVER_ERROR
+		val httpStatus = interestingException match {
+			case error: UserError => error.httpStatus
+			case _ => HttpStatus.INTERNAL_SERVER_ERROR
 		}
 
-		response.foreach { _.setStatus(statusCode) }
+		response.foreach { _.setStatus(httpStatus.value()) }
 
 		request.foreach { request =>
-			def convertToJSON() {
+			if (request.isJsonRequest) {
 				mav.viewName = null
 				mav.view = new JSONView(Map(
 					"success" -> false,
-					"status" -> statusCode,
-					"errors" -> Array(interestingException.getMessage)
+					"status" -> httpStatus.getReasonPhrase.toLowerCase.replace(' ', '_'),
+					"errors" -> Array(Map("message" -> interestingException.getMessage))
 				))
-			}
-
-			if (new ConsumesRequestCondition("application/json").getMatchingCondition(request) != null) convertToJSON()
-			else new ProducesRequestCondition("text/html", "application/json", "text/json").getMatchingCondition(request) match {
-				case null => // None matching
-				case condition if condition.getExpressions.exists(_.getMediaType == MediaType.TEXT_HTML) => // Want HTML
-				case _ => convertToJSON()
 			}
 		}
 

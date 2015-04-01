@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException, PermissionDeniedException, SubmitPermissionDeniedException}
 
 import scala.collection.mutable
-import scala.reflect.ClassTag
+import scala.reflect._
 
 /**
  * Trait that allows classes to call ActionCheck() in their inline definitions
@@ -58,79 +58,79 @@ trait PermissionsCheckingMethods extends Logging {
 	def mustBeLinked(module: Module, department: Department) =
 		if (mandatory(module).adminDepartment.id != mandatory(department).id) {
 			logger.info("Not displaying module as it doesn't belong to specified department")
-			throw new ItemNotFoundException(module)
+			throw new ItemNotFoundException(module, "Not displaying module as it doesn't belong to specified department")
 		}
 
 	def mustBeLinked(assessment: Assessment, module: Module) =
 		if (mandatory(assessment).module.id != mandatory(module).id) {
 			logger.info("Not displaying assessment as it doesn't belong to specified module")
-			throw new ItemNotFoundException(assessment)
+			throw new ItemNotFoundException(assessment, "Not displaying assessment as it doesn't belong to specified module")
 		}
 	
 	def mustBeLinked(set: SmallGroupSet, module: Module) =
 		if (mandatory(mandatory(set).module).id != mandatory(module).id) {
 			logger.info("Not displaying small group set as it doesn't belong to specified module")
-			throw new ItemNotFoundException(set)
+			throw new ItemNotFoundException(set, "Not displaying small group set as it doesn't belong to specified module")
 		}
 
 	def mustBeLinked(group: SmallGroup, set: SmallGroupSet) =
 		if (mandatory(mandatory(group).groupSet).id != mandatory(set).id) {
 			logger.info("Not displaying small group as it doesn't belong to specified set")
-			throw new ItemNotFoundException(group)
+			throw new ItemNotFoundException(group, "Not displaying small group as it doesn't belong to specified set")
 		}
 
 	def mustBeLinked(event: SmallGroupEvent, group: SmallGroup) =
 		if (mandatory(mandatory(event).group).id != mandatory(group).id) {
 			logger.info("Not displaying small group event as it doesn't belong to specified group")
-			throw new ItemNotFoundException(event)
+			throw new ItemNotFoundException(event, "Not displaying small group event as it doesn't belong to specified group")
 		}
 
 	def mustBeLinked(set: DepartmentSmallGroupSet, department: Department) =
 		if (mandatory(mandatory(set).department).id != mandatory(department).id) {
 			logger.info("Not displaying department small group set as it doesn't belong to specified department")
-			throw new ItemNotFoundException(set)
+			throw new ItemNotFoundException(set, "Not displaying department small group set as it doesn't belong to specified department")
 		}
 
 	def mustBeLinked(feedback: AssignmentFeedback, assignment: Assignment) =
 		if (mandatory(feedback).assignment.id != mandatory(assignment).id) {
 			logger.info("Not displaying feedback as it doesn't belong to specified assignment")
-			throw new ItemNotFoundException(feedback)
+			throw new ItemNotFoundException(feedback, "Not displaying feedback as it doesn't belong to specified assignment")
 		}
 
 	def mustBeLinked(markingWorkflow: MarkingWorkflow, department: Department) =
 		if (mandatory(markingWorkflow).department.id != mandatory(department.id)) {
 			logger.info("Not displaying marking workflow as it doesn't belong to specified department")
-			throw new ItemNotFoundException(markingWorkflow)
+			throw new ItemNotFoundException(markingWorkflow, "Not displaying marking workflow as it doesn't belong to specified department")
 		}
 
 	def mustBeLinked(template: FeedbackTemplate, department: Department) =
 		if (mandatory(template).department.id != mandatory(department.id)) {
 			logger.info("Not displaying feedback template as it doesn't belong to specified department")
-			throw new ItemNotFoundException(template)
+			throw new ItemNotFoundException(template, "Not displaying feedback template as it doesn't belong to specified department")
 		}
 
   def mustBeLinked(submission: Submission, assignment: Assignment) =
     if (mandatory(submission).assignment.id != mandatory(assignment).id) {
       logger.info("Not displaying submission as it doesn't belong to specified assignment")
-      throw new ItemNotFoundException(submission)
+      throw new ItemNotFoundException(submission, "Not displaying submission as it doesn't belong to specified assignment")
     }
 
 	def mustBeLinked(memberNote: MemberNote, member: Member) =
 		if (mandatory(memberNote).member.id != mandatory(member).id) {
 			logger.info("Not displaying member note as it doesn't belong to specified member")
-			throw new ItemNotFoundException(memberNote)
+			throw new ItemNotFoundException(memberNote, "Not displaying member note as it doesn't belong to specified member")
 		}
 
 	def mustBeLinked(customRoleDefinition: CustomRoleDefinition, department: Department) =
 		if (mandatory(customRoleDefinition).department.id != mandatory(department).id) {
 			logger.info("Not displaying custom role definition as it doesn't belong to specified department")
-			throw new ItemNotFoundException(customRoleDefinition)
+			throw new ItemNotFoundException(customRoleDefinition, "Not displaying custom role definition as it doesn't belong to specified department")
 		}
 
 	def mustBeLinked(roleOverride: RoleOverride, customRoleDefinition: CustomRoleDefinition) =
 		if (mandatory(roleOverride).customRoleDefinition.id != mandatory(customRoleDefinition).id) {
 			logger.info("Not displaying role override as it doesn't belong to specified role definition")
-			throw new ItemNotFoundException(roleOverride)
+			throw new ItemNotFoundException(roleOverride, "Not displaying role override as it doesn't belong to specified role definition")
 		}
 
 	/**
@@ -140,7 +140,7 @@ trait PermissionsCheckingMethods extends Logging {
 	 */
 	def mandatory[A : ClassTag](something: A): A = something match {
 		case thing: A => thing
-		case _ => throw new ItemNotFoundException()
+		case _ => throw new ItemNotFoundException((), "Item not found of type " + classTag[A].runtimeClass.getSimpleName)
 	}
 	/**
 	 * Pass in an Option and receive either the actual value, or
@@ -148,11 +148,11 @@ trait PermissionsCheckingMethods extends Logging {
 	 */
 	def mandatory[A : ClassTag](option: Option[A]): A = option match {
 		case Some(thing: A) => thing
-		case _ => throw new ItemNotFoundException()
+		case _ => throw new ItemNotFoundException((), "Item not found of type " + classTag[A].runtimeClass.getSimpleName)
 	}
 
 	def notDeleted[A <: CanBeDeleted](entity: A): A =
-		if (entity.deleted) throw new ItemNotFoundException()
+		if (entity.deleted) throw new ItemNotFoundException(entity, "Item is deleted: " + entity)
 		else entity
 
 	/**

@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.web.views
 
+import org.springframework.http.HttpStatus
+
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.JavaImports._
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
@@ -15,6 +17,8 @@ class JSONErrorView(val errors: Errors, val additionalData: Map[String, _]) exte
 
 	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse) = {
 		response.setContentType(getContentType)
+		response.setStatus(HttpStatus.BAD_REQUEST.value())
+
 		val out = response.getWriter
 		val errorList = errors.getFieldErrors
 		val errorMap = Map() ++ (errorList map (error => (error.getField, getMessage(error.getCode, error.getArguments: _*))))
@@ -23,7 +27,8 @@ class JSONErrorView(val errors: Errors, val additionalData: Map[String, _]) exte
 		val fieldErrors = errors.getFieldErrors.map { error => FieldError(error.getCode, error.getField, getMessage(error.getCode, error.getArguments: _*)) }.toArray
 
 		val errorJson = Map(
-			"status" -> "error",
+			"success" -> false,
+			"status" -> "bad_request",
 			"result" -> errorMap,
 			"errors" -> (globalErrors ++ fieldErrors)
 		)
