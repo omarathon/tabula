@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula
 import java.io.{InputStream, File, StringReader}
 import java.util.concurrent.TimeUnit
 import org.scalatest.Matchers
-import uk.org.lidalia.slf4jtest.TestLoggerFactoryResetRule
+import uk.org.lidalia.slf4jtest.TestLoggerFactory
 
 import scala.collection.JavaConversions._
 import scala.collection.GenSeq
@@ -54,8 +54,8 @@ abstract class TestBase extends JUnitSuite with Matchers with AssertionsForJUnit
 	val minuteTimeout = new Timeout(60000, TimeUnit.MILLISECONDS)
 	@Rule def timeoutRule = minuteTimeout
 
-	// Clear TestLogger after tests, or we get memory madness
-	@Rule def testLoggerFactoryResetRule = new TestLoggerFactoryResetRule()
+	// Clear TestLogger before tests, or we get memory madBrowserness
+	TestLoggerFactory.clear()
 
 	Transactions.enabled = false
 

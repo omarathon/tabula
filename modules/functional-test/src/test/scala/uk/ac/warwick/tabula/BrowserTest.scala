@@ -19,7 +19,7 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.time.SpanSugar
 import com.gargoylesoftware.htmlunit.BrowserVersion
 import uk.ac.warwick.userlookup.UserLookup
-import uk.org.lidalia.slf4jtest.TestLoggerFactoryResetRule
+import uk.org.lidalia.slf4jtest.TestLoggerFactory
 import scala.util.Try
 import scala.util.Success
 import org.joda.time.DateTime
@@ -40,8 +40,8 @@ abstract class BrowserTest
 	with WebsignonMethods
 	with UserKnowledge {
 
-	// Clear TestLogger after tests, or we get memory madness
-	@Rule def testLoggerFactoryResetRule = new TestLoggerFactoryResetRule()
+	// Clear TestLogger before tests, or we get memory madness
+	TestLoggerFactory.clear()
 
 	// Shorthand to expose properties to test classes
 	val P = FunctionalTestProperties
