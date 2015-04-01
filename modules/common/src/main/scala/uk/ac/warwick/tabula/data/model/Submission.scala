@@ -101,9 +101,9 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 		assignment.module.code + " - " + name + " - " + attachment.name
 	}
 
-	def isReleasedForMarking: Boolean = assignment.isReleasedForMarking(this)
-	def isReleasedToSecondMarker: Boolean = assignment.isReleasedToSecondMarker(this)
-	def isReleasedToThirdMarker: Boolean = assignment.isReleasedToThirdMarker(this)
+	def isReleasedForMarking = assignment.isReleasedForMarking(universityId)
+	def isReleasedToSecondMarker = assignment.isReleasedToSecondMarker(universityId)
+	def isReleasedToThirdMarker = assignment.isReleasedToThirdMarker(universityId)
 
 	def toEntityReference = new SubmissionEntityReference().put(this)
 }

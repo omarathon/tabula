@@ -232,19 +232,9 @@ class Assignment
 	@BatchSize(size = 200)
 	var firstMarkers: JList[FirstMarkersMap] = JArrayList()
 
-	/** Map between first markers and the students assigned to them */
-	def firstMarkerMap: Map[String, UserGroup] = Option(firstMarkers).map { markers => markers.asScala.map {
-		markerMap => markerMap.marker_id -> markerMap.students
-	}.toMap }.getOrElse(Map())
-
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
 	@BatchSize(size = 200)
 	var secondMarkers: JList[SecondMarkersMap] = JArrayList()
-
-	/** Map between second markers and the students assigned to them */
-	def secondMarkerMap: Map[String, UserGroup] = Option(secondMarkers).map { markers => markers.asScala.map {
-		markerMap => markerMap.marker_id -> markerMap.students
-	}.toMap }.getOrElse(Map())
 
 	def setAllFileTypesAllowed() {
 		fileExtensions = Nil
@@ -514,44 +504,6 @@ class Assignment
 
 	def newExtensionsCanBeRequested: Boolean = !isClosed && extensionsPossible
 
-	def isMarker(user: User) = isFirstMarker(user) || isSecondMarker(user)
-
-	def isFirstMarker(user: User): Boolean = {
-		if (markingWorkflow != null)
-			markingWorkflow.firstMarkers.includesUser(user)
-		else false
-	}
-
-	def isSecondMarker(user: User): Boolean = {
-		if (markingWorkflow != null)
-			markingWorkflow.secondMarkers.includesUser(user)
-		else false
-	}
-
-	def isThirdMarker(user: User): Boolean = {
-		if (markingWorkflow != null)
-			markingWorkflow.thirdMarkers.includesUser(user)
-		else false
-	}
-
-	def isReleasedForMarking(submission: Submission): Boolean =
-		feedbacks.find(_.universityId == submission.universityId) match {
-			case Some(f) => f.firstMarkerFeedback != null
-			case _ => false
-		}
-
-	def isReleasedToSecondMarker(submission: Submission): Boolean =
-		feedbacks.find(_.universityId == submission.universityId) match {
-			case Some(f) => f.secondMarkerFeedback != null
-			case _ => false
-		}
-
-	def isReleasedToThirdMarker(submission: Submission): Boolean =
-		feedbacks.find(_.universityId == submission.universityId) match {
-			case Some(f) => f.thirdMarkerFeedback != null
-			case _ => false
-		}
-
 	def getMarkerFeedback(uniId: String, user: User, feedbackPosition: FeedbackPosition): Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.universityId == uniId)
 		parentFeedback.flatMap {
@@ -673,8 +625,6 @@ class Assignment
 	// later we may do more complex checks to see if this particular markingWorkflow requires that feedback is released manually
 	// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
 	def mustReleaseForMarking = hasWorkflow
-
-	def hasWorkflow = markingWorkflow != null
 
 	def needsFeedbackPublishing = {
 		if (openEnded || !collectSubmissions || archived) {

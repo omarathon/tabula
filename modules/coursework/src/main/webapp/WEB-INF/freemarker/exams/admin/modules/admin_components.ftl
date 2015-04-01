@@ -21,7 +21,7 @@
 			  <ul class="dropdown-menu pull-right">
 			  		<#if can_manage>
 						<li><a href="<@routes.moduleperms module />">
-							<i class="icon-user"></i> Edit module permissions
+							<i class="icon-fixed-width icon-sort"></i> Edit module permissions
 						</a></li>
 					</#if>
 
@@ -32,7 +32,7 @@
 							scope=module
 							action_descr='create a new exam'
 							href=create_url>
-							<i class="icon-plus"></i> Create new exam
+							<i class="icon-fixed-width icon-plus"></i> Create new exam
 						</@fmt.permission_button>
 					</li>
 			  </ul>
@@ -125,12 +125,36 @@
 								</@fmt.permission_button>
 							</li>
 
+							<#if exam.hasWorkflow>
+								<#if !exam.markingWorkflow.studentsChooseMarker>
+									<li>
+										<#assign markers_url><@routes.examAssignMarkers exam /></#assign>
+										<@fmt.permission_button
+										permission='Assignment.Update'
+										scope=exam
+										action_descr='assign markers'
+										href=markers_url>
+											<i class="icon-fixed-width icon-sort"></i> Assign markers
+										</@fmt.permission_button>
+									</li>
+								<#else>
+									<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Marking workflow requires students to choose marker"><i class="icon-fixed-width icon-sort"></i> Assign markers</a></li>
+								</#if>
+							<#else>
+								<li class="disabled">
+									<a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Marking workflow is not enabled for this exam">
+										<i class="icon-fixed-width icon-sort"></i>
+										Assign markers
+									</a>
+								</li>
+							</#if>
+
 							<li>
 								<#local upload_url><@routes.uploadExamToSits exam /></#local>
 								<@fmt.permission_button
 									permission='Marks.Create'
 									scope=exam
-									action_descr='add marks'
+									action_descr='upload to SITS'
 									href=upload_url
 								>
 									<i class="icon-upload icon-fixed-width"></i> Upload to SITS

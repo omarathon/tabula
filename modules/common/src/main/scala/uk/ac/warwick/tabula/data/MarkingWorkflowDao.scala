@@ -20,6 +20,9 @@ trait MarkingWorkflowDao {
 	/** All assignments using this marking workflow. */
 	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Assignment]
 
+	/** All exams using this marking workflow. */
+	def getExamsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Exam]
+
 }
 
 @Repository
@@ -29,6 +32,11 @@ class MarkingWorkflowDaoImpl extends MarkingWorkflowDao with Daoisms {
 	
 	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Assignment] =
 		session.newCriteria[Assignment]
+			.add(is("markingWorkflow", markingWorkflow))
+			.seq
+
+	def getExamsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Exam] =
+		session.newCriteria[Exam]
 			.add(is("markingWorkflow", markingWorkflow))
 			.seq
 
