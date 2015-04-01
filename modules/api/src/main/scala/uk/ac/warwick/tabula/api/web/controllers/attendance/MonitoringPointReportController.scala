@@ -29,7 +29,7 @@ object MonitoringPointReportController {
 }
 
 @Controller
-@RequestMapping(Array("/v1/attendance/report/{department}"))
+@RequestMapping(Array("/v1/department/{department}/monitoring-point-reports"))
 class MonitoringPointReportController extends ApiController
 	with MonitoringPointReportCreateApi
 
