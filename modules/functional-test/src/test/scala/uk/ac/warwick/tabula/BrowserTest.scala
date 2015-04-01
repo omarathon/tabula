@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula
 
+import org.junit.Rule
 import org.scalatest._
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.junit._
@@ -18,6 +19,7 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.time.SpanSugar
 import com.gargoylesoftware.htmlunit.BrowserVersion
 import uk.ac.warwick.userlookup.UserLookup
+import uk.org.lidalia.slf4jtest.TestLoggerFactoryResetRule
 import scala.util.Try
 import scala.util.Success
 import org.joda.time.DateTime
@@ -37,6 +39,9 @@ abstract class BrowserTest
 	with WebBrowser
 	with WebsignonMethods
 	with UserKnowledge {
+
+	// Clear TestLogger after tests, or we get memory madness
+	@Rule def testLoggerFactoryResetRule = new TestLoggerFactoryResetRule()
 
 	// Shorthand to expose properties to test classes
 	val P = FunctionalTestProperties
