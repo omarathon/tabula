@@ -7,7 +7,7 @@ import uk.ac.warwick.spring.Wire
 
 @Entity
 @DiscriminatorValue(value="FirstMarkerOnly")
-class FirstMarkerOnlyWorkflow extends MarkingWorkflow with NoSecondMarker with AssignmentMarkerMap {
+class FirstMarkerOnlyWorkflow extends MarkingWorkflow with NoSecondMarker with AssessmentMarkerMap {
 
 	def this(dept: Department) = {
 		this()
@@ -18,6 +18,7 @@ class FirstMarkerOnlyWorkflow extends MarkingWorkflow with NoSecondMarker with A
 
 	def markingMethod = FirstMarkerOnly
 
-	override def getStudentsSecondMarker(assignment: Assignment, universityId: String) = None
+	override def getStudentsSecondMarker(assessment: Assessment, universityId: String) = None
 
+	override def validForExams = true
 }

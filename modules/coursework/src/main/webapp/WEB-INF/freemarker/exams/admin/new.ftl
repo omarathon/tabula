@@ -10,15 +10,7 @@
 
 	<@f.form id="newExamForm" method="post" action="${createExamUrl}" commandName="command" cssClass="form-horizontal">
 
-		<@form.labelled_row "name" "Exam name">
-			<@f.input path="name" cssClass="text" />
-		</@form.labelled_row>
-
-		<@form.labelled_row "" "Academic year">
-		<span class="uneditable-value">${academicYear.toString} <span class="hint">(can't be changed)</span></span>
-		</@form.labelled_row>
-
-		<@sits_groups.exams_sits_groups command />
+		<#include "_common_fields.ftl" />
 
 		<div class="submit-buttons form-actions">
 			<input type="submit" value="Create" class="btn btn-primary">

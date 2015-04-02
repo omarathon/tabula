@@ -5,7 +5,7 @@
 </li>
 </#macro>
 
-<#macro assignStudents studentList markerList class name markerMapName>
+<#macro assignStudents studentList markerList class name markerMapName cancelUrl>
 <div class="tabula-dnd" data-scroll="true">
 	<p>Drag students onto a marker to allocate them. Select multiple students by dragging a box around them.
 		You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key and drag to add to a selection.</p>
@@ -104,15 +104,21 @@
 </div>
 <div class="submit-buttons">
 	<input type="submit" name="dragAndDrop" class="btn btn-primary" value="Save">
-	<a href="<@routes.depthome module />" class="btn">Cancel</a>
+	<a href="${cancelUrl}" class="btn">Cancel</a>
 </div>
 </#macro>
 
 
 <#escape x as x?html>
+	<#if isExam>
+		<#assign assignMarkersSmallGroups><@routes.examAssignMarkersSmallGroups assessment/></#assign>
+	<#else>
+		<#assign assignMarkersSmallGroups><@routes.assignMarkersSmallGroups assessment/></#assign>
+	</#if>
+
 	<h1>Assign students to markers</h1>
 	<h4><span class="muted">for</span>
-	${assignment.name}</h4>
+	${assessment.name}</h4>
 	<div class="btn-toolbar">
 		<div class="pull-right">
 			<div class="btn-group mode-nav">
@@ -120,7 +126,7 @@
 				<button data-selector="small-groups" class="btn mode">Import small groups</button>
 			</div>
 			<div class="btn-group hide back-nav">
-				<a href="<@routes.assignMarkers assignment />" class="btn">
+				<a href="${assignMarkersURL}" class="btn">
 					<i class="icon-reply"></i>
 					Return to drag and drop
 				</a>
@@ -128,7 +134,7 @@
 		</div>
 	</div>
 	<div class="clearfix"></div>
-	<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/assign-markers')}" commandName="command">
+	<@f.form method="post" enctype="multipart/form-data" action="${url(assignMarkersURL)}" commandName="command">
 		<div class="fix-area">
 			<div id="assign-markers" class="tabbable">
 				<ul class="nav nav-tabs">
@@ -143,6 +149,7 @@
 							"first-markers"
 							firstMarkerRoleName
 							"firstMarkerMapping"
+							cancelUrl
 						/>
 					</div>
 					<#if hasSecondMarker>
@@ -153,6 +160,7 @@
 								"second-markers"
 								secondMarkerRoleName
 								"secondMarkerMapping"
+								cancelUrl
 							/>
 						</div>
 					</#if>
@@ -183,7 +191,7 @@
 				</ol>
 				<div class="fix-footer submit-buttons">
 					<input type="submit" name="uploadSpreadsheet" class="btn btn-primary" value="Upload">
-					<a href="<@routes.depthome module />" class="btn">Cancel</a>
+					<a href="${cancelUrl}" class="btn">Cancel</a>
 				</div>
 			</div>
 			<div id="small-groups" class="hide tabbable">
@@ -202,7 +210,7 @@
 			$(this).remove();
 			$('.back-nav').show();
 			if(selector === "small-groups") {
-				$('#small-groups').load('<@routes.assignMarkersSmallGroups assignment />')
+				$('#small-groups').load('${assignMarkersSmallGroups}')
 			}
 			$('#'+selector).fadeIn(300);
 		});

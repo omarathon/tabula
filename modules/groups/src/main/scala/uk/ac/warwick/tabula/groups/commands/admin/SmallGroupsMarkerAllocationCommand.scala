@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.groups.commands.admin
 
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.Assessment
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
@@ -11,8 +11,8 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object SmallGroupsMarkerAllocationCommand {
-	def apply(assignment: Assignment) =
-		new SmallGroupsMarkerAllocationCommandInternal(assignment)
+	def apply(assessment: Assessment) =
+		new SmallGroupsMarkerAllocationCommandInternal(assessment)
 			with ComposableCommand[Seq[SetAllocation]]
 			with SmallGroupsMarkerAllocationCommandPermissions
 			with AutowiringSmallGroupServiceComponent
@@ -23,17 +23,17 @@ object SmallGroupsMarkerAllocationCommand {
 case class SetAllocation(set: SmallGroupSet, firstMarkerGroups: Seq[GroupAllocation], secondMarkerGroups: Seq[GroupAllocation])
 case class GroupAllocation(name: String, tutors: Seq[User], students: Seq[User])
 
-class SmallGroupsMarkerAllocationCommandInternal(val assignment: Assignment)
+class SmallGroupsMarkerAllocationCommandInternal(val assessment: Assessment)
 	extends CommandInternal[Seq[SetAllocation]]	with SmallGroupsMarkerAllocationCommandState with Logging {
 
 	self : SmallGroupServiceComponent with AssessmentMembershipServiceComponent =>
 
-	val module = assignment.module
-	val academicYear = assignment.academicYear
+	val module = assessment.module
+	val academicYear = assessment.academicYear
 
 	def applyInternal() = {
 		val sets = smallGroupService.getSmallGroupSets(module, academicYear)
-		val validStudents = assessmentMembershipService.determineMembershipUsers(assignment)
+		val validStudents = assessmentMembershipService.determineMembershipUsers(assessment)
 
 		val setAllocations = sets.map(set => {
 			def getGroupAllocations(markers: Seq[User]) = set.groups.asScala.map(group => {
@@ -47,8 +47,8 @@ class SmallGroupsMarkerAllocationCommandInternal(val assignment: Assignment)
 
 			SetAllocation(
 				set,
-				getGroupAllocations(assignment.markingWorkflow.firstMarkers.users),
-				getGroupAllocations(assignment.markingWorkflow.secondMarkers.users)
+				getGroupAllocations(assessment.markingWorkflow.firstMarkers.users),
+				getGroupAllocations(assessment.markingWorkflow.secondMarkers.users)
 			)
 		})
 
@@ -56,7 +56,7 @@ class SmallGroupsMarkerAllocationCommandInternal(val assignment: Assignment)
 		setAllocations.filterNot( s =>
 			s.firstMarkerGroups.isEmpty ||
 			s.firstMarkerGroups.exists(_.tutors.isEmpty) ||
-			(assignment.markingWorkflow.hasSecondMarker && (
+			(assessment.markingWorkflow.hasSecondMarker && (
 				s.secondMarkerGroups.isEmpty ||
 				s.secondMarkerGroups.exists(_.tutors.isEmpty)
 			))
@@ -65,12 +65,12 @@ class SmallGroupsMarkerAllocationCommandInternal(val assignment: Assignment)
 }
 
 trait SmallGroupsMarkerAllocationCommandState {
-	val assignment: Assignment
+	val assessment: Assessment
 }
 
 trait SmallGroupsMarkerAllocationCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: SmallGroupsMarkerAllocationCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.SmallGroups.ReadMembership, mandatory(assignment))
+		p.PermissionCheck(Permissions.SmallGroups.ReadMembership, mandatory(assessment))
 	}
 }

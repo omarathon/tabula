@@ -6,13 +6,14 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.{CurrentSITSAcademicYear, TaskBenchmarking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.services.{AssessmentService, ModuleAndDepartmentService}
 
 @Controller
 @RequestMapping(Array("/exams"))
 class ExamsHomeController extends ExamsController with CurrentSITSAcademicYear with TaskBenchmarking {
 
 	@Autowired var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	@Autowired var assessmentService = Wire[AssessmentService]
 
 	@RequestMapping
 	def examsHome = {
@@ -24,8 +25,13 @@ class ExamsHomeController extends ExamsController with CurrentSITSAcademicYear w
 			moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.ManageAssignments)
 		}
 
+		val examsForMarking = benchmarkTask("Get exams for marking") {
+			assessmentService.getExamsWhereMarker(user.apparentUser).sortBy(_.module.code)
+		}
+
 		Mav("exams/home/view",
 			"currentAcademicYear" -> academicYear,
+			"examsForMarking" -> examsForMarking,
 			"ownedDepartments" -> ownedDepartments,
 			"ownedModuleDepartments" -> ownedModules.map { _.adminDepartment }
 		)

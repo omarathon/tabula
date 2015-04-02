@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import scala.collection.JavaConverters._
 
 object OnlineFeedbackCommand {
 	def apply(module: Module, assignment: Assignment, submitter: CurrentUser) =
@@ -80,17 +81,14 @@ abstract class OnlineMarkerFeedbackCommand(
 
 	def applyInternal() = {
 
-		val submissions = Option(assignment.markingWorkflow) match {
-			case Some(mw) => mw.getSubmissions(assignment, marker)
-			case _ => Seq()
-		}
+		val students = Option(assignment.markingWorkflow).map(_.getMarkersStudents(assignment, marker)).getOrElse(Nil)
 
-		submissions.filter(_.isReleasedForMarking).map { submission =>			
-			val student = userLookup.getUserByWarwickUniId(submission.universityId)
-			val hasSubmission = true
-			val feedback = feedbackService.getAssignmentFeedbackByUniId(assignment, submission.universityId)
+		students.filter(s => assignment.isReleasedForMarking(s.getWarwickId)).map { student =>
+
+			val hasSubmission = assignment.submissions.asScala.exists(_.universityId == student.getWarwickId)
+			val feedback = feedbackService.getAssignmentFeedbackByUniId(assignment, student.getWarwickId)
 			// get all the feedbacks for this user and pick the most recent
-			val markerFeedback = assignment.getAllMarkerFeedbacks(submission.universityId, marker).headOption
+			val markerFeedback = assignment.getAllMarkerFeedbacks(student.getWarwickId, marker).headOption
 
 			val hasUncompletedFeedback = markerFeedback.exists(_.hasContent)
 			// the current feedback for the marker is completed or if the parent feedback isn't a placeholder then marking is completed
@@ -101,7 +99,15 @@ abstract class OnlineMarkerFeedbackCommand(
 				case Some(f) => f.released.booleanValue
 				case None => false
 			}
-			new StudentFeedbackGraph(student, hasSubmission, hasUncompletedFeedback, hasPublishedFeedback, hasCompletedFeedback, hasRejectedFeedback)
+
+			new StudentFeedbackGraph(
+				student,
+				hasSubmission,
+				hasUncompletedFeedback,
+				hasPublishedFeedback,
+				hasCompletedFeedback,
+				hasRejectedFeedback
+			)
 		}
 	}
 }

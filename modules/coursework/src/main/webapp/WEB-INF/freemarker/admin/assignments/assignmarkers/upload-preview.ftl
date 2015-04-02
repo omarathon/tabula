@@ -1,18 +1,17 @@
 <#escape x as x?html>
 
 <#assign hasRows = command.sheetFirstMarkers?has_content || command.sheetSecondMarkers?has_content />
-<#assign formDestination><@routes.assignMarkers assignment /></#assign>
 
-<@f.form method="post" action=formDestination commandName="command">
+<@f.form method="post" action=assignMarkersURL commandName="command">
 
 	<h1>Spreadsheet upload of marker assignment</h1>
-	<h4><span class="muted">for</span> ${assignment.name}</h4>
+	<h4><span class="muted">for</span> ${assessment.name}</h4>
 
 	<div class="submit-buttons">
 		<#if hasRows>
 			<button type="submit" name="finaliseSpreadsheet" class="btn btn-primary">Continue</button>
 		</#if>
-		<a class="btn" href="<@routes.depthome module />">Cancel</a>
+		<a href="${cancelUrl}" class="btn">Cancel</a>
 	</div>
 
 
@@ -122,7 +121,7 @@
 		<#if hasRows>
 			<button type="submit" name="finaliseSpreadsheet" class="btn btn-primary">Continue</button>
 		</#if>
-		<a class="btn" href="<@routes.depthome module />">Cancel</a>
+		<a href="${cancelUrl}" class="btn">Cancel</a>
 	</div>
 
 </@f.form>

@@ -61,6 +61,7 @@ trait AssessmentMembershipService {
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User]
 	def determineMembershipUsers(assessment: Assessment): Seq[User]
 	def determineMembershipUsersWithOrder(exam: Exam): Seq[(User, Option[Int])]
+	def determineMembershipUsersWithOrderForMarker(exam: Exam, marker: User): Seq[(User, Option[Int])]
 	def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[String]
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean
@@ -255,6 +256,13 @@ trait AssessmentMembershipMethods extends Logging {
 	def determineMembershipUsersWithOrder(exam: Exam): Seq[(User, Option[Int])] =
 		exam.upstreamAssessmentGroups.flatMap(_.sortedMembers).distinct.sortBy(_.position)
 			.map(m => userLookup.getUserByWarwickUniId(m.memberId) -> m.position)
+
+	def determineMembershipUsersWithOrderForMarker(exam: Exam, marker:User): Seq[(User, Option[Int])] =
+		if (!exam.released || exam.markingWorkflow == null) Seq()
+		else {
+			val markersStudents = exam.markingWorkflow.getMarkersStudents(exam, marker)
+			determineMembershipUsersWithOrder(exam).filter(s => markersStudents.contains(s._1))
+		}
 
 	private def determineSitsMembership(upstream: Seq[UpstreamAssessmentGroup]) =
 		upstream.flatMap(_.sortedMembers).distinct.sortBy(_.position)

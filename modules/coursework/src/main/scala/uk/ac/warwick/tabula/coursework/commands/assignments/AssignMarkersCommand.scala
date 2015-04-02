@@ -18,9 +18,9 @@ import uk.ac.warwick.tabula.data.{AutowiringUserGroupDaoComponent, UserGroupDaoC
 
 
 object AssignMarkersCommand {
-	def apply(module: Module, assignment: Assignment) =
-		new AssignMarkersCommand(module, assignment)
-		with ComposableCommand[Assignment]
+	def apply(module: Module, assessment: Assessment) =
+		new AssignMarkersCommand(module, assessment)
+		with ComposableCommand[Assessment]
 		with AssignMarkersPermission
 		with AssignMarkersDescription
 		with AssignMarkersCommandState
@@ -28,20 +28,20 @@ object AssignMarkersCommand {
 		with AutowiringUserGroupDaoComponent
 }
 
-class AssignMarkersCommand(val module: Module, val assignment: Assignment)
-	extends CommandInternal[Assignment] with BindListener {
+class AssignMarkersCommand(val module: Module, val assessment: Assessment)
+	extends CommandInternal[Assessment] with BindListener {
 
 	self: AssignMarkersCommandState with AssessmentServiceComponent with UserGroupDaoComponent =>
 
 	var alloctaionExtractor = Wire[MarkerAllocationExtractor]
 	var file: UploadedFile = new UploadedFile
 
-	var firstMarkerMapping : JMap[String, JList[String]] = assignment.markingWorkflow.firstMarkers.knownType.members.map({ marker =>
+	var firstMarkerMapping : JMap[String, JList[String]] = assessment.markingWorkflow.firstMarkers.knownType.members.map({ marker =>
 		val list : JList[String] = JArrayList()
 		(marker, list)
 	}).toMap.asJava
 
-	var secondMarkerMapping : JMap[String, JList[String]] = assignment.markingWorkflow.secondMarkers.knownType.members.map({ marker =>
+	var secondMarkerMapping : JMap[String, JList[String]] = assessment.markingWorkflow.secondMarkers.knownType.members.map({ marker =>
 		val list : JList[String] = JArrayList()
 		(marker, list)
 	}).toMap.asJava
@@ -54,34 +54,38 @@ class AssignMarkersCommand(val module: Module, val assignment: Assignment)
 
 	def applyInternal() = {
 
-		if (assignment.firstMarkers != null) {
-			assignment.firstMarkers.clear()
+		if (assessment.firstMarkers != null) {
+			assessment.firstMarkers.clear()
 		} else {
-			assignment.firstMarkers = JArrayList()
+			assessment.firstMarkers = JArrayList()
 		}
 
-		assignment.firstMarkers.addAll(firstMarkerMapping.asScala.map { case (markerId, studentIds) =>
+		assessment.firstMarkers.addAll(firstMarkerMapping.asScala.map { case (markerId, studentIds) =>
 			val group = UserGroup.ofUsercodes
 			group.includedUserIds = studentIds.asScala
 			userGroupDao.saveOrUpdate(group)
-			FirstMarkersMap(assignment, markerId, group)
+			FirstMarkersMap(assessment, markerId, group)
 		}.toSeq.asJava)
 
-		if (assignment.secondMarkers != null) {
-			assignment.secondMarkers.clear()
+		if (assessment.secondMarkers != null) {
+			assessment.secondMarkers.clear()
 		} else {
-			assignment.secondMarkers = JArrayList()
+			assessment.secondMarkers = JArrayList()
 		}
 
-		assignment.secondMarkers.addAll(secondMarkerMapping.asScala.map { case (markerId, studentIds) =>
+		assessment.secondMarkers.addAll(secondMarkerMapping.asScala.map { case (markerId, studentIds) =>
 			val group = UserGroup.ofUsercodes
 			group.includedUserIds = studentIds.asScala
 			userGroupDao.saveOrUpdate(group)
-			SecondMarkersMap(assignment, markerId, group)
+			SecondMarkersMap(assessment, markerId, group)
 		}.toSeq.asJava)
 
-		assessmentService.save(assignment)
-		assignment
+		assessment match {
+			case assignment: Assignment => assessmentService.save(assignment)
+			case exam: Exam => assessmentService.save(exam)
+		}
+
+		assessment
 	}
 
 	def extractDataFromFile(file: FileAttachment, result: BindingResult) = {
@@ -95,11 +99,10 @@ class AssignMarkersCommand(val module: Module, val assignment: Assignment)
 				.toSeq
 		}
 
-
 		sheetFirstMarkers = rowData.get(FirstMarker).map(rowsToMarkerMap).getOrElse(Nil)
 		sheetSecondMarkers = rowData.get(SecondMarker).map(rowsToMarkerMap).getOrElse(Nil)
 		sheetErrors = rowData.values.flatten.filterNot(_.errors.isEmpty).toSeq
-		unallocatedStudents = rowData.get(NoMarker).getOrElse(Nil).filter(_.errors.isEmpty).flatMap(_.student)
+		unallocatedStudents = rowData.getOrElse(NoMarker, Nil).filter(_.errors.isEmpty).flatMap(_.student)
 	}
 
 	def validateUploadedFile(result: BindingResult) {
@@ -132,25 +135,25 @@ trait AssignMarkersPermission extends RequiresPermissionsChecking with Permissio
 	self: AssignMarkersCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Assignment.Update, assignment)
+		p.PermissionCheck(Permissions.Assignment.Update, module)
 	}
 
 }
 
-trait AssignMarkersDescription extends Describable[Assignment] {
+trait AssignMarkersDescription extends Describable[Assessment] {
 
 	self: AssignMarkersCommandState =>
 
 	override lazy val eventName = "AssignMarkers"
 
 	override def describe(d: Description) {
-		d.assignment(assignment)
+		d.assessment(assessment)
 	}
 
 }
 
 trait AssignMarkersCommandState {
 	def module: Module
-	def assignment: Assignment
-	def workflow = assignment.markingWorkflow
+	def assessment: Assessment
+	def workflow = assessment.markingWorkflow
 }

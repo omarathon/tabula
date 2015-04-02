@@ -7,7 +7,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, UpstreamGroup, UpstreamGroupPropertyEditor}
-import uk.ac.warwick.tabula.data.model.Exam
+import uk.ac.warwick.tabula.data.model.{Module, Exam}
 import uk.ac.warwick.tabula.exams.commands.{EditExamCommand, EditExamCommandState, ModifiesExamMembership, PopulateEditExamCommand}
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
@@ -25,13 +25,16 @@ class EditExamController extends ExamsController {
 		@PathVariable("exam") exam : Exam) = EditExamCommand(mandatory(exam))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@ModelAttribute("command") cmd: EditExamCommand) = {
+	def showForm(@ModelAttribute("command") cmd: EditExamCommand, @PathVariable("module") module: Module) = {
 		cmd.populateGroups(cmd.exam)
 		cmd.afterBind()
 
 		Mav("exams/admin/edit",
 			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
+			"assessmentGroups" -> cmd.assessmentGroups,
+			"department" -> module.adminDepartment,
+			"markingWorkflows" -> module.adminDepartment.markingWorkflows.filter(_.validForExams),
 			"assessmentGroups" -> cmd.assessmentGroups
 		).crumbs(
 				Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear),
@@ -42,11 +45,12 @@ class EditExamController extends ExamsController {
 	@RequestMapping(method = Array(POST))
 	def submit(
 			@Valid @ModelAttribute("command") cmd: EditExamCommand,
+			@PathVariable("module") module: Module,
 			errors: Errors
 	) = {
 			cmd.afterBind()
 			if (errors.hasErrors) {
-				showForm(cmd)
+				showForm(cmd, module)
 			} else {
 				cmd.apply()
 				Redirect(Routes.admin.module(cmd.exam.module, cmd.exam.academicYear))
