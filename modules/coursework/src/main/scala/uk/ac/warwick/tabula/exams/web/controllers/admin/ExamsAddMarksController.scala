@@ -10,9 +10,9 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.{AdminAddMarksComman
 import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.tabula.exams.web.Routes
-import uk.ac.warwick.tabula.data.model.{Exam, Feedback, Module}
+import uk.ac.warwick.tabula.data.model.{MarkingWorkflow, Exam, Feedback, Module}
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, FeedbackService}
+import uk.ac.warwick.tabula.services.{UserLookupService, AssessmentMembershipService, FeedbackService}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
@@ -22,6 +22,7 @@ class ExamsAddMarksController extends ExamsController {
 
 	@Autowired var feedbackService: FeedbackService = _
 	@Autowired var examMembershipService: AssessmentMembershipService = _
+	@Autowired var userLookup: UserLookupService = _
 
 	type AdminAddMarksCommand = Appliable[Seq[Feedback]] with PostExtractValidation
 
@@ -50,9 +51,16 @@ class ExamsAddMarksController extends ExamsController {
 			noteMarkItem(member, feedback)
 		}
 
+		val studentMarkerMap = members.map(m =>
+			MarkingWorkflow.getMarkerFromAssessmentMap(userLookup, m._1.getWarwickId, exam.firstMarkerMap) match {
+				case Some(markerId) => m._1.getWarwickId -> userLookup.getUserByUserId(markerId).getFullName
+				case None => m._1.getWarwickId -> None
+			}).toMap
+
 		crumbed(Mav("exams/admin/marks/marksform",
 			"marksToDisplay" -> marksToDisplay,
 			"seatNumberMap" -> members.map(m => m._1.getWarwickId -> m._2).toMap,
+			"studentMarkerMap" -> studentMarkerMap,
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
 		), module, academicYear)
 
