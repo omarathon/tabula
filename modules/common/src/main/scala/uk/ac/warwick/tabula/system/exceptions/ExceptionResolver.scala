@@ -143,6 +143,11 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 			case _ => HttpStatus.INTERNAL_SERVER_ERROR
 		}
 
+		val statusReason = interestingException match {
+			case error: UserError => error.httpStatusReason
+			case _ => httpStatus.getReasonPhrase
+		}
+
 		response.foreach { _.setStatus(httpStatus.value()) }
 
 		request.foreach { request =>
@@ -150,7 +155,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 				mav.viewName = null
 				mav.view = new JSONView(Map(
 					"success" -> false,
-					"status" -> httpStatus.getReasonPhrase.toLowerCase.replace(' ', '_'),
+					"status" -> statusReason.toLowerCase.replace(' ', '_'),
 					"errors" -> Array(Map("message" -> interestingException.getMessage))
 				))
 			}
