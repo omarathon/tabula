@@ -14,7 +14,7 @@
 
 	<div class="submit-buttons">
 		<input class="btn btn-warn" type="submit" value="Confirm">
-		<a class="btn" href="<@routes.viewExam exam />">Cancel</a>
+		<a class="btn" href="<@routes.moduleHomeWithYear exam.module exam.academicYear />">Cancel</a>
 	</div>
 
 </@f.form>
