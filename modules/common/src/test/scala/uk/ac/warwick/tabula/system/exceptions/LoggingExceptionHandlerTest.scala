@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.system.exceptions
 
+import org.junit.After
+
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.{TestLoggerFactory, TestBase, ItemNotFoundException}
 import uk.ac.warwick.tabula.services.MaintenanceModeEnabledException
-import uk.org.lidalia.slf4jtest.TestLoggerFactory
-import uk.org.lidalia.slf4jext.Level
+import ch.qos.logback.classic.Level
 
 class LoggingExceptionHandlerTest extends TestBase {
 
@@ -18,7 +18,7 @@ class LoggingExceptionHandlerTest extends TestBase {
 
 		handler.exception(context)
 
-		val logEvent = testLogger.getLoggingEvents.asScala.last
+		val logEvent = TestLoggerFactory.retrieveEvents(testLogger).last
 		logEvent.getMessage.split(lineSeparator).head should be ("User error")
 		logEvent.getLevel should be (Level.DEBUG)
 	}
@@ -28,7 +28,7 @@ class LoggingExceptionHandlerTest extends TestBase {
 
 		handler.exception(context)
 
-		val logEvent = testLogger.getLoggingEvents.asScala.last
+		val logEvent = TestLoggerFactory.retrieveEvents(testLogger).last
 		logEvent.getMessage.split(lineSeparator).head should be ("Handled exception")
 		logEvent.getLevel should be (Level.DEBUG)
 	}
@@ -38,7 +38,7 @@ class LoggingExceptionHandlerTest extends TestBase {
 
 		handler.exception(context)
 
-		val logEvent = testLogger.getLoggingEvents.asScala.last
+		val logEvent = TestLoggerFactory.retrieveEvents(testLogger).last
 		logEvent.getMessage.split(lineSeparator).head should be ("Exception 1")
 		logEvent.getLevel should be (Level.ERROR)
 	}

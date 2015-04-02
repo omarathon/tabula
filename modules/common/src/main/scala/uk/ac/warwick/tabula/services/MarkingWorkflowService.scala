@@ -23,8 +23,6 @@ trait MarkingWorkflowService {
 
 	/** All exams using this marking workflow. */
 	def getExamsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Exam]
-
-
 }
 
 abstract class AbstractMarkingWorkflowService extends MarkingWorkflowService {

@@ -20,9 +20,9 @@
 		</@f.select>
 	<div class="help-block">
 		<#if disabled>
-			<span class="warning">You cannot change the marking workflow for this assignment as it already has submissions.</span>
+			<span class="warning">You cannot change the marking workflow for this exam.</span>
 		<#else>
-			Marking workflows define how and by whom the assignment will be marked. They are set up for the department by a Departmental Administrator <#if can.do("MarkingWorkflow.Manage", department)><a href="<@routes.markingworkflowlist department />">here</a></#if>.
+			Marking workflows define how and by whom the exam will be marked. They are set up for the department by a Departmental Administrator <#if can.do("MarkingWorkflow.Manage", department)><a href="<@routes.markingworkflowlist department />">here</a></#if>.
 		</#if>
 	</div>
 	</@form.labelled_row>

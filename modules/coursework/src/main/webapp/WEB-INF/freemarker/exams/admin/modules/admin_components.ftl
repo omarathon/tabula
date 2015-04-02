@@ -149,6 +149,26 @@
 								</li>
 							</#if>
 
+							<#if !exam.released>
+							<li>
+								<#assign releaseForMarking_url><@routes.examReleaseForMarking exam /></#assign>
+								<@fmt.permission_button
+								permission='Submission.ReleaseForMarking'
+								scope=exam
+								action_descr='release for marking'
+								href=releaseForMarking_url>
+									<i class="icon-inbox icon-fixed-width"></i> Release for marking
+								</@fmt.permission_button>
+							</li>
+							<#else>
+							<li class="disabled">
+								<a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="This exam has already been released for marking">
+									<i class="icon-inbox icon-fixed-width"></i>
+									Release for marking
+								</a>
+							</li>
+							</#if>
+
 							<li>
 								<#local upload_url><@routes.uploadExamToSits exam /></#local>
 								<@fmt.permission_button

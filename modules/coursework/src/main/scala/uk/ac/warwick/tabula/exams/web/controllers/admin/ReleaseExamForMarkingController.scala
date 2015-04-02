@@ -29,7 +29,7 @@ class ReleaseExamForMarkingController extends ExamsController {
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable exam: Exam) = {
 		cmd.apply()
-		Redirect(Routes.admin.exam(exam))
+		Redirect(Routes.admin.module(exam.module, exam.academicYear))
 	}
 
 }

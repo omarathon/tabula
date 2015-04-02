@@ -3,15 +3,14 @@ package uk.ac.warwick.tabula.web.filters
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.Future
 
+import ch.qos.logback.classic.Level
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.ByteArrayBody
 import org.springframework.mock.web.{MockFilterChain, MockHttpServletResponse, MockHttpServletRequest}
 import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.sso.client.SSOClientFilter
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.{TestLoggerFactory, TestBase}
 import org.apache.http.entity.{StringEntity, ContentType}
-import uk.org.lidalia.slf4jtest.TestLoggerFactory
-import uk.org.lidalia.slf4jtest.LoggingEvent._
 
 import scala.collection.JavaConverters._
 
@@ -57,21 +56,22 @@ class PostDataLoggingFilterTest extends TestBase {
 
 	@Test def doFilterGet {
 		filter.doFilter(request, response, chain)
-		testLogger.getLoggingEvents.asScala should be ('empty)
+		TestLoggerFactory.retrieveEvents(testLogger) should be ('empty)
 	}
 
 	@Test def doFilterPut {
 		request.setMethod("PUT")
 		request.addParameter("query", "acomudashun")
 		filter.doFilter(request, response, chain)
-		testLogger.getLoggingEvents.asScala should be ('empty)
+		TestLoggerFactory.retrieveEvents(testLogger) should be ('empty)
 	}
 
 	@Test def doFilterPost {
 		request.setMethod("POST")
 		request.addParameter("query", "acomudashun")
 		filter.doFilter(request, response, chain)
-		testLogger.getLoggingEvents.asScala should be (Seq(info("userId= multipart=false /url.php query=acomudashun")))
+		val events = TestLoggerFactory.retrieveEvents(testLogger).map(e => (e.getLevel, e.getMessage))
+		events should be (Seq((Level.INFO, "userId= multipart=false /url.php query=acomudashun")))
 	}
 
 	@Test(timeout = 1000) def doFilterMultipart {
@@ -102,7 +102,8 @@ class PostDataLoggingFilterTest extends TestBase {
 
 		// Should only log the text fields, skip the binary parts
 		// Need to use getAllLoggingEvents because it happens on another thread
-		testLogger.getAllLoggingEvents.asScala should contain (info("userId= multipart=true /url.php confirm=yes"))
+		val events = TestLoggerFactory.retrieveEvents(testLogger).map(e => (e.getLevel, e.getMessage))
+		events should contain ((Level.INFO, "userId= multipart=true /url.php confirm=yes"))
 	}
 
 	@Test(timeout = 1000) def doFilterJson: Unit = {
@@ -128,6 +129,7 @@ class PostDataLoggingFilterTest extends TestBase {
 
 		// Should only log the text fields, skip the binary parts
 		// Need to use getAllLoggingEvents because it happens on another thread
-		testLogger.getAllLoggingEvents.asScala should contain (info(s"userId= multipart=false /url.php requestBody=$json"))
+		val events = TestLoggerFactory.retrieveEvents(testLogger).map(e => (e.getLevel, e.getMessage))
+		events should contain ((Level.INFO, s"userId= multipart=false /url.php requestBody=$json"))
 	}
 }

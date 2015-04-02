@@ -53,6 +53,11 @@ abstract class TestBase extends JUnitSuite with Matchers with AssertionsForJUnit
 	val minuteTimeout = new Timeout(60000, TimeUnit.MILLISECONDS)
 	@Rule def timeoutRule = minuteTimeout
 
+	@After
+	def tearDownTestLoggers: Unit = {
+		TestLoggerFactory.tearDown()
+	}
+
 	Transactions.enabled = false
 
 	// IntelliJ tests via JUnit only half-fill this property, so set it here.
