@@ -77,17 +77,8 @@ object CourseworkFilters {
 	
 	case object SubmissionNotDownloaded extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions not downloaded by staff"
-<<<<<<< Updated upstream
 		def predicate(item: Student) = item.coursework.enhancedSubmission.exists(!_.downloaded)
-		def applies(assignment: Assignment) = true
-=======
-		def predicate(item: Student) = { 
-			(item.coursework.enhancedSubmission map { item => 
-				!item.downloaded
-			}) getOrElse(false)
-		}
 		def applies(assignment: Assignment) = assignment.collectSubmissions
->>>>>>> Stashed changes
 	}
 	
 	case object SubmittedBetweenDates extends CourseworkFilter {
@@ -340,34 +331,16 @@ object CourseworkFilters {
 	}
 	
 	case object FeedbackNotReleased extends ParameterlessCourseworkFilter {
-<<<<<<< Updated upstream
-		def getDescription = "feedbacks not published"
+		def getDescription = "students with unpublished feedback"
 		def predicate(item: Student) =
 			item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.feedback.released)
-=======
-		def getDescription = "students with unpublished feedback"
-		def predicate(item: Student) = { 
-			(item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) map { item =>
-				!item.feedback.released
-			}) getOrElse(false)
-		}
->>>>>>> Stashed changes
 		def applies(assignment: Assignment) = true
 	}
 	
 	case object FeedbackNotDownloaded extends ParameterlessCourseworkFilter {
-<<<<<<< Updated upstream
-		def getDescription = "feedbacks not downloaded by students"
+		def getDescription = "students who haven't downloaded their feedback"
 		def predicate(item: Student) =
 			item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.downloaded)
-=======
-		def getDescription = "students who haven't downloaded their feedback"
-		def predicate(item: Student) = { 
-			(item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) map { item =>
-				!item.downloaded
-			}) getOrElse(false)
-		}
->>>>>>> Stashed changes
 		def applies(assignment: Assignment) = true
 	}
 	

@@ -4,10 +4,6 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.spring.Wire
 import org.springframework.stereotype.Service
-<<<<<<< Updated upstream
-import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
-=======
->>>>>>> Stashed changes
 import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
 import uk.ac.warwick.tabula.data.model.MarkingMethod.{ModeratedMarking, SeenSecondMarking}
 import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand.WorkflowItems
