@@ -35,7 +35,9 @@
 						$('.progress').removeClass('active progress-striped')
 					} else {
 						$('.progress .bar').width(data.progress + "%");
-						$('.report-progress').html(data.status);
+						if (data.status) {
+							$('.report-progress').html(data.status);
+						}
 						setTimeout(updateProgress, 5 * 1000);
 					}
 				});
