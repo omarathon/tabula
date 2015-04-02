@@ -20,7 +20,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 	val thisMarkingWorkflowService = smartMock[MarkingWorkflowService]
 
 	val assignmentService = new AbstractAssessmentService with AssessmentDaoComponent
-		with AssignmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent {
+		with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent {
 		val assessmentDao = thisAssignmentDao
 		val firstMarkerHelper = thisFirstMarkerHelper
 		val secondMarkerHelper = thisSecondMarkerHelper

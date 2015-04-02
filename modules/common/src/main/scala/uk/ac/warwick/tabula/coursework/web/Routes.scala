@@ -40,6 +40,10 @@ object Routes {
 
 			private def markerroot(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}"
 
+			object assignMarkers {
+				def apply(assignment: Assignment) = assignmentroot(assignment) + "/assign-markers"
+			}
+
 			object markerFeedback {
 				def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/list"
 				object complete {
@@ -113,7 +117,7 @@ object Routes {
 
 			def create(module: Module) = context + "/admin/module/%s/assignments/new" format encoded(module.code)
 
-			private def assignmentroot(assignment: Assignment) = context + "/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), assignment.id)
+			private def assignmentroot(assignment: Assignment) = context + "/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), encoded(assignment.id))
 
 			def edit(assignment: Assignment) = assignmentroot(assignment) + "/edit"
 
@@ -129,6 +133,7 @@ object Routes {
 
 			object turnitin {
 				def status(assignment: Assignment) = assignmentroot(assignment) + "/turnitin"
+				def report(submission: Submission, attachment: FileAttachment) = assignmentroot(submission.assignment) + "/turnitin-report/%s".format (encoded(attachment.id))
 			}
 
 			object extension {

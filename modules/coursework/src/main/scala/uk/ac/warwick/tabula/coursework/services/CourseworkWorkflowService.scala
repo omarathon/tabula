@@ -4,10 +4,10 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.spring.Wire
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
-import scala.collection.immutable.ListMap
 import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
 import uk.ac.warwick.tabula.data.model.MarkingMethod.{ModeratedMarking, SeenSecondMarking}
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand.WorkflowItems
+import uk.ac.warwick.tabula.WorkflowStageHealth._
 
 @Service
 class CourseworkWorkflowService {
@@ -223,7 +223,7 @@ object CourseworkWorkflowStages {
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
 			val hasSubmission = coursework.enhancedSubmission.exists(_.submission.isReleasedToThirdMarker)
 			coursework.enhancedFeedback match {
-				case Some(item) if hasSubmission &&  item.feedback.retrieveThirdMarkerFeedback.state != Rejected =>
+				case Some(item) if hasSubmission && item.feedback.retrieveThirdMarkerFeedback.state != Rejected =>
 					if (item.feedback.retrieveThirdMarkerFeedback.state == MarkingCompleted )
 						StageProgress(
 							FinaliseSeenSecondMarking,

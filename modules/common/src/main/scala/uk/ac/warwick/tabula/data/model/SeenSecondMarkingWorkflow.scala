@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.MarkingMethod.SeenSecondMarking
 
 @Entity
 @DiscriminatorValue(value="SeenSecondMarkingNew")
-class SeenSecondMarkingWorkflow extends MarkingWorkflow with AssignmentMarkerMap {
+class SeenSecondMarkingWorkflow extends MarkingWorkflow with AssessmentMarkerMap {
 
 	def this(dept: Department) = {
 		this()
@@ -24,6 +24,6 @@ class SeenSecondMarkingWorkflow extends MarkingWorkflow with AssignmentMarkerMap
 
 	override def thirdMarkers = this.firstMarkers
 
-	def getStudentsThirdMarker(assignment: Assignment, universityId: UniversityId): Option[String] =
-		MarkingWorkflow.getMarkerFromAssignmentMap(userLookup, universityId, assignment.firstMarkerMap)
+	def getStudentsThirdMarker(assessment: Assessment, universityId: UniversityId): Option[String] =
+		MarkingWorkflow.getMarkerFromAssessmentMap(userLookup, universityId, assessment.firstMarkerMap)
 }

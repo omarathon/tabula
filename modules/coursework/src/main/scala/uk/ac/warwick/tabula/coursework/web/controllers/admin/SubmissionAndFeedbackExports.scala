@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import uk.ac.warwick.tabula.coursework.commands.assignments._
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.util.csv.CSVLineWriter
 import scala.collection.immutable.ListMap
@@ -266,7 +267,7 @@ trait SubmissionAndFeedbackExport {
 		"open-date" -> assignment.openDate,
 		"open-ended" -> assignment.openEnded,
 		"close-date" -> (if (assignment.openEnded) "" else assignment.closeDate),
-		"submissions-zip-url" -> (topLevelUrl + "/coursework" + Routes.admin.assignment.submissionsZip(assignment))
+		"submissions-zip-url" -> (topLevelUrl + Routes.admin.assignment.submissionsZip(assignment))
 	)
 	
 	protected def identityData(item: Student): Map[String, Any] = Map(

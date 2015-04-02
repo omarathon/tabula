@@ -8,6 +8,12 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.AuditEventIndexService
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
+import ListSubmissionsCommand._
+
+object ListSubmissionsCommand {
+	case class SubmissionListItem(submission: Submission, downloaded: Boolean)
+}
+
 class ListSubmissionsCommand(val module: Module, val assignment: Assignment) extends Command[Seq[SubmissionListItem]] with Unaudited with ReadOnly {
 
 	mustBeLinked(mandatory(assignment), mandatory(module))
@@ -27,5 +33,3 @@ class ListSubmissionsCommand(val module: Module, val assignment: Assignment) ext
 	}
 
 }
-
-case class SubmissionListItem(submission: Submission, downloaded: Boolean)

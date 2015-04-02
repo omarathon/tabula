@@ -55,9 +55,7 @@ trait SearchLuceneIndexApi {
 		command.validate(errors)
 
 		if (errors.hasErrors) {
-			response.setStatus(HttpStatus.BAD_REQUEST.value())
-
-			Mav(new JSONErrorView(errors, Map("success" -> false, "status" -> HttpStatus.BAD_REQUEST.value())))
+			Mav(new JSONErrorView(errors))
 		} else {
 			val result = command.apply()
 			Mav(new JSONView(Map("success" -> true) ++ toJson(request, result)))

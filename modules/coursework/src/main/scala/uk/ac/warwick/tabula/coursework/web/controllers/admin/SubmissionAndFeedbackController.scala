@@ -3,7 +3,8 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.coursework.commands.assignments._
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
@@ -11,20 +12,7 @@ import uk.ac.warwick.tabula.services.AuditEventIndexService
 import java.io.StringWriter
 import uk.ac.warwick.util.csv.GoodCsvDocument
 import uk.ac.warwick.tabula.web.views.CSVView
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.util.csv.CSVLineWriter
-import scala.collection.immutable.ListMap
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.DateFormats
-import org.joda.time.ReadableInstant
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import scala.xml._
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import org.apache.poi.xssf.usermodel.XSSFSheet
-import org.apache.poi.ss.util.WorkbookUtil
-import org.apache.commons.lang3.text.WordUtils
 import uk.ac.warwick.tabula.web.views.ExcelView
-import org.apache.poi.hssf.usermodel.HSSFDataFormat
 import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.tabula.coursework.helpers.{CourseworkFilter, CourseworkFilters}

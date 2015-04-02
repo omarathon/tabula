@@ -61,6 +61,7 @@ trait AssessmentMembershipService {
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User]
 	def determineMembershipUsers(assessment: Assessment): Seq[User]
 	def determineMembershipUsersWithOrder(exam: Exam): Seq[(User, Option[Int])]
+	def determineMembershipUsersWithOrderForMarker(exam: Exam, marker: User): Seq[(User, Option[Int])]
 	def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[String]
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean
@@ -194,17 +195,13 @@ class AssessmentMembershipServiceImpl
 
 }
 
-
-
 class AssessmentMembershipInfo(val items: Seq[MembershipItem]) {
-
-	def	sitsCount = items.count(_.itemType == SitsType)
-	def	totalCount = items.filterNot(_.itemType == ExcludeType).size
-	def includeCount = items.count(_.itemType == IncludeType)
-	def excludeCount = items.count(_.itemType == ExcludeType)
-	def usedIncludeCount = items.count(i => i.itemType == IncludeType && !i.extraneous)
-	def usedExcludeCount = items.count(i => i.itemType == ExcludeType && !i.extraneous)
-
+	val	sitsCount = items.count(_.itemType == SitsType)
+	val	totalCount = items.filterNot(_.itemType == ExcludeType).size
+	val includeCount = items.count(_.itemType == IncludeType)
+	val excludeCount = items.count(_.itemType == ExcludeType)
+	val usedIncludeCount = items.count(i => i.itemType == IncludeType && !i.extraneous)
+	val usedExcludeCount = items.count(i => i.itemType == ExcludeType && !i.extraneous)
 }
 
 trait AssessmentMembershipMethods extends Logging {
@@ -255,6 +252,13 @@ trait AssessmentMembershipMethods extends Logging {
 	def determineMembershipUsersWithOrder(exam: Exam): Seq[(User, Option[Int])] =
 		exam.upstreamAssessmentGroups.flatMap(_.sortedMembers).distinct.sortBy(_.position)
 			.map(m => userLookup.getUserByWarwickUniId(m.memberId) -> m.position)
+
+	def determineMembershipUsersWithOrderForMarker(exam: Exam, marker:User): Seq[(User, Option[Int])] =
+		if (!exam.released || exam.markingWorkflow == null) Seq()
+		else {
+			val markersStudents = exam.markingWorkflow.getMarkersStudents(exam, marker)
+			determineMembershipUsersWithOrder(exam).filter(s => markersStudents.contains(s._1))
+		}
 
 	private def determineSitsMembership(upstream: Seq[UpstreamAssessmentGroup]) =
 		upstream.flatMap(_.sortedMembers).distinct.sortBy(_.position)

@@ -4,6 +4,42 @@
 <h1>${exam.name} (${module.code?upper_case})</h1>
 
 <div class="btn-toolbar">
+
+	<#if exam.hasWorkflow>
+		<#assign markers_url><@routes.examAssignMarkers exam /></#assign>
+		<@fmt.permission_button
+			permission='Assignment.Update'
+			scope=exam.module
+			action_descr='assign markers'
+			href=markers_url
+			classes="btn">
+			<i class="icon-user"></i> Assign markers
+		</@fmt.permission_button>
+	<#else>
+		<a class="btn disabled use-tooltip" data-container="body" title="Marking workflow is not enabled for this exam">
+			<i class="icon-user"></i>
+			Assign markers
+		</a>
+	</#if>
+
+	<#if !exam.released>
+		<#assign releaseForMarking_url><@routes.examReleaseForMarking exam /></#assign>
+		<@fmt.permission_button
+			permission='Submission.ReleaseForMarking'
+			scope=exam
+			action_descr='release for marking'
+			classes='btn'
+			href=releaseForMarking_url
+			id="release-submissions-button">
+			<i class="icon-inbox"></i> Release for marking
+		</@fmt.permission_button>
+	<#else>
+		<a class="btn disabled use-tooltip" data-container="body" title="This exam has already been released for marking">
+			<i class="icon-inbox"></i>
+			Release for marking
+		</a>
+	</#if>
+
 	<#assign marks_url><@routes.examAddMarks exam /></#assign>
 	<@fmt.permission_button
 		permission='Marks.Create'
@@ -20,6 +56,7 @@
 		permission='Feedback.Update'
 		scope=exam
 		action_descr='adjust marks'
+		tooltip='Adjust marks'
 		href=adjust_url
 		classes='btn'
 	>

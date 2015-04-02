@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.MarkingMethod.SeenSecondMarkingLegacy
 
 @Entity
 @DiscriminatorValue(value="SeenSecondMarking")
-class SeenSecondMarkingLegacyWorkflow extends MarkingWorkflow with NoThirdMarker with AssignmentMarkerMap {
+class SeenSecondMarkingLegacyWorkflow extends MarkingWorkflow with NoThirdMarker with AssessmentMarkerMap {
 
 	def this(dept: Department) = {
 		this()

@@ -1,13 +1,11 @@
 package uk.ac.warwick.tabula.events
 
+import org.junit.After
 import uk.ac.warwick.tabula.commands.DescriptionImpl
 import uk.ac.warwick.tabula.commands.NullCommand
-import uk.ac.warwick.tabula.TestBase
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.{TestLoggerFactory, TestBase}
 
 import org.joda.time.DateTime
-import uk.org.lidalia.slf4jtest.TestLoggerFactory
-import uk.org.lidalia.slf4jtest.LoggingEvent._
 
 class SLF4JEventLoggingTest extends TestBase {
 
@@ -25,7 +23,7 @@ class SLF4JEventLoggingTest extends TestBase {
 		val event = new Event("1235", command.eventName, null, null, description.allProperties, new DateTime)
 		
 		listener.afterCommand(event, null)
-		testLogger.getLoggingEvents.asScala should be (Seq(info("event=Null mykey=jibberjabber")))
+		TestLoggerFactory.retrieveEvents(testLogger).map(_.getMessage) should be (Seq("event=Null mykey=jibberjabber"))
 	}
 	
 }

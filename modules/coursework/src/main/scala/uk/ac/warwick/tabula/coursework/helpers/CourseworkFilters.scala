@@ -6,12 +6,9 @@ import org.springframework.validation.ValidationUtils
 
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.CaseObjectEqualityFixes
-import uk.ac.warwick.tabula.coursework.commands.assignments.Student
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand.Student
 import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.MarkingMethod
-import uk.ac.warwick.tabula.data.model.MarkingState
-import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 
 /**
@@ -23,7 +20,7 @@ import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
  * point offering a filter for Unsubmitted students).
  */
 sealed abstract class CourseworkFilter extends CaseObjectEqualityFixes[CourseworkFilter] {
-	def getName = CourseworkFilters.shortName(getClass.asInstanceOf[Class[_ <: CourseworkFilter]])
+	def getName = CourseworkFilters.shortName(getClass)
 	def getDescription: String
 	def predicate(parameters: Map[String, String])(student: Student): Boolean
 	def applies(assignment: Assignment): Boolean
@@ -41,10 +38,10 @@ abstract class ParameterlessCourseworkFilter extends CourseworkFilter {
 object CourseworkFilters {
 	private val ObjectClassPrefix = CourseworkFilters.getClass.getName
 	lazy val AllFilters = Seq(
-		AllStudents, Submitted, SubmittedBetweenDates, OnTime, Late, WithExtension, WithinExtension, WithWordCount,SubmissionNotDownloaded, Unsubmitted,
-		NotReleasedForMarking, NotMarked, MarkedByFirst, MarkedBySecond,
-		CheckedForPlagiarism, NotCheckedForPlagiarism, MarkedPlagiarised, WithOverlapPercentage,
-		NoFeedback, FeedbackNotReleased, FeedbackNotDownloaded
+		AllStudents, Submitted, SubmittedBetweenDates, OnTime, Late, WithExtension, WithinExtension, WithWordCount,
+		SubmissionNotDownloaded, Unsubmitted, NotReleasedForMarking, NotMarked, MarkedByFirst, MarkedBySecond,
+		CheckedForPlagiarism, NotCheckedForPlagiarism, MarkedPlagiarised, WithOverlapPercentage, NoFeedback,
+		FeedbackNotReleased, FeedbackNotDownloaded
 	)
 	
 	/**
@@ -60,8 +57,10 @@ object CourseworkFilters {
 			val clz = Class.forName(ObjectClassPrefix + name.replace('.', '$') + "$")
 			clz.getDeclaredField("MODULE$").get(null).asInstanceOf[CourseworkFilter]
 		} catch {
-			case e: ClassNotFoundException => throw new IllegalArgumentException("Filter " + name + " not recognised")
-			case e: ClassCastException => throw new IllegalArgumentException("Filter " + name + " is not an endpoint of the hierarchy")
+			case e: ClassNotFoundException =>
+				throw new IllegalArgumentException("Filter " + name + " not recognised")
+			case e: ClassCastException =>
+				throw new IllegalArgumentException("Filter " + name + " is not an endpoint of the hierarchy")
 		}
 	}
 	
@@ -78,12 +77,8 @@ object CourseworkFilters {
 	
 	case object SubmissionNotDownloaded extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions not downloaded by staff"
-		def predicate(item: Student) = { 
-			(item.coursework.enhancedSubmission map { item => 
-				!item.downloaded
-			}) getOrElse(false)
-		}
-		def applies(assignment: Assignment) = true
+		def predicate(item: Student) = item.coursework.enhancedSubmission.exists(!_.downloaded)
+		def applies(assignment: Assignment) = assignment.collectSubmissions
 	}
 	
 	case object SubmittedBetweenDates extends CourseworkFilter {
@@ -103,8 +98,8 @@ object CourseworkFilters {
 				dt != null && 
 				(dt == start || dt.isAfter(start)) &&
 				(dt == end || dt.isBefore(end))
-			
-			(item.coursework.enhancedSubmission map { item => betweenDates(item.submission.submittedDate) }) getOrElse(false)
+
+			item.coursework.enhancedSubmission.exists(item => betweenDates(item.submission.submittedDate))
 		}
 		def validate(parameters: Map[String, String], fieldName: String = "filterParameters")(errors: Errors) {
 			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "%s[startDate]".format(fieldName), "NotEmpty")
@@ -126,17 +121,15 @@ object CourseworkFilters {
 	
 	case object OnTime extends ParameterlessCourseworkFilter {
 		def getDescription = "students who submitted on time"
-		def predicate(item: Student) = {
-			(item.coursework.enhancedSubmission map { item => !item.submission.isLate && !item.submission.isAuthorisedLate }) getOrElse(false)
-		}
+		def predicate(item: Student) =
+			item.coursework.enhancedSubmission.exists(item => !item.submission.isLate && !item.submission.isAuthorisedLate)
 		def applies(assignment: Assignment) = assignment.collectSubmissions
 	}
 	
 	case object Late extends ParameterlessCourseworkFilter {
 		def getDescription = "students who submitted late"
-		def predicate(item: Student) = {
-			(item.coursework.enhancedSubmission map { item => item.submission.isLate && !item.submission.isAuthorisedLate }) getOrElse(false)
-		}
+		def predicate(item: Student) =
+			item.coursework.enhancedSubmission.exists(item => item.submission.isLate && !item.submission.isAuthorisedLate)
 		def applies(assignment: Assignment) = assignment.collectSubmissions
 	}
 	
@@ -151,7 +144,7 @@ object CourseworkFilters {
 	case object WithinExtension extends ParameterlessCourseworkFilter {
 		def getDescription = "students who submitted within extension"
 		def predicate(item: Student) = {
-			(item.coursework.enhancedSubmission map { item => item.submission.isAuthorisedLate }) getOrElse(false)
+			item.coursework.enhancedSubmission.exists(_.submission.isAuthorisedLate)
 		}
 		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.allowExtensions
 	}
@@ -171,16 +164,13 @@ object CourseworkFilters {
 			val min = toInt(parameters("minWords")).get
 			val max = toInt(parameters("maxWords")).get
 			
-			(item.coursework.enhancedSubmission flatMap { item => 
+			item.coursework.enhancedSubmission.flatMap(item => {
 				val submission = item.submission
 				val assignment = submission.assignment
-				
-				assignment.wordCountField flatMap { field =>
-					submission.valuesByFieldName.get(field.name) flatMap { toInt(_) }
-				} map { words => 
-					(words >= min && words <= max)
-				}
-			}) getOrElse(false)
+				assignment.wordCountField
+					.flatMap(field => submission.valuesByFieldName.get(field.name).flatMap(toInt))
+					.map(words => words >= min && words <= max)
+			}).getOrElse(false)
 		}
 		def validate(parameters: Map[String, String], fieldName: String = "filterParameters")(errors: Errors) {
 			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "%s[minWords]".format(fieldName), "NotEmpty")
@@ -226,43 +216,32 @@ object CourseworkFilters {
 	
 	case object NotReleasedForMarking extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions that have not been released for marking"
-		def predicate(item: Student) = {
-			(item.coursework.enhancedSubmission map { item => !item.submission.isReleasedForMarking }) getOrElse(false)
-		}
+		def predicate(item: Student) = item.coursework.enhancedSubmission.exists(!_.submission.isReleasedForMarking)
 		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.markingWorkflow != null
 	}
 	
 	case object NotMarked extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions not marked"
-		def predicate(item: Student) = {
-			(item.coursework.enhancedSubmission map { item => 
-				val releasedForMarking = item.submission.isReleasedForMarking
-				val hasFirstMarker = item.submission.assignment.getStudentsFirstMarker(item.submission).isDefined
-				releasedForMarking && hasFirstMarker
-			}) getOrElse(false)
-		}
+		def predicate(item: Student) = item.coursework.enhancedSubmission.exists(item => {
+			val releasedForMarking = item.submission.isReleasedForMarking
+			val hasFirstMarker = item.submission.assignment.getStudentsFirstMarker(item.submission).isDefined
+			releasedForMarking && hasFirstMarker
+		})
 		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.markingWorkflow != null
 	}
 	
 	case object MarkedByFirst extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions marked by first marker"
-		def predicate(item: Student) = {
-			(item.coursework.enhancedFeedback map {
-				_.feedback.retrieveFirstMarkerFeedback.state == MarkingCompleted
-			}).getOrElse(false)
-		}
+		def predicate(item: Student) =
+			item.coursework.enhancedFeedback.exists(_.feedback.retrieveFirstMarkerFeedback.state == MarkingCompleted)
 		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.markingWorkflow != null
 	}
 	
 	case object MarkedBySecond extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions marked by second marker"
-			
-		def predicate(item: Student) = {
-			(item.coursework.enhancedFeedback map { item =>
-				item.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted
-			}).getOrElse(false)
-		}
-		
+		def predicate(item: Student) =
+			item.coursework.enhancedFeedback.exists(_.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted)
+
 		// Only applies to seen second marking
 		def applies(assignment: Assignment) = 
 			assignment.collectSubmissions && 
@@ -272,31 +251,24 @@ object CourseworkFilters {
 	
 	case object CheckedForPlagiarism extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions checked for plagiarism"
-		def predicate(item: Student) = {
-			(item.coursework.enhancedSubmission map { item => 
-				item.submission.hasOriginalityReport.booleanValue()
-			}) getOrElse(false)
-		}
-		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
+		def predicate(item: Student) =
+			item.coursework.enhancedSubmission.exists(_.submission.hasOriginalityReport.booleanValue)
+		def applies(assignment: Assignment) =
+			assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
 	}
 	
 	case object NotCheckedForPlagiarism extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions not checked for plagiarism"
-		def predicate(item: Student) = {
-			(item.coursework.enhancedSubmission map { item => 
-				!item.submission.hasOriginalityReport.booleanValue()
-			}) getOrElse(false)
-		}
-		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
+		def predicate(item: Student) =
+			item.coursework.enhancedSubmission.exists(!_.submission.hasOriginalityReport.booleanValue)
+		def applies(assignment: Assignment) =
+			assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
 	}
 	
 	case object MarkedPlagiarised extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions marked as plagiarised"
-		def predicate(item: Student) = { 
-			(item.coursework.enhancedSubmission map { item => 
-				item.submission.suspectPlagiarised.booleanValue
-			}) getOrElse(false)
-		}
+		def predicate(item: Student) =
+			item.coursework.enhancedSubmission.exists(_.submission.suspectPlagiarised.booleanValue)
 		def applies(assignment: Assignment) = assignment.collectSubmissions
 	}
 	
@@ -314,15 +286,16 @@ object CourseworkFilters {
 		def predicate(parameters: Map[String, String])(item: Student) = {
 			val min = toInt(parameters("minOverlap")).get
 			val max = toInt(parameters("maxOverlap")).get
-			
-			(item.coursework.enhancedSubmission map { item => 
-				item.submission.allAttachments flatMap { 
-					a => Option(a.originalityReport) flatMap { _.overlap } 
-				} map { overlap => 
-					(overlap >= min && overlap <= max)
-				} exists { b => b }
-			}) getOrElse(false)
+
+			item.coursework.enhancedSubmission.exists(item => {
+				item.submission.allAttachments
+					.flatMap(a=> Option(a.originalityReport))
+					.flatMap(_.overlap)
+					.map(overlap=> overlap >= min && overlap <= max)
+					.exists(b => b)
+			})
 		}
+
 		def validate(parameters: Map[String, String], fieldName: String = "filterParameters")(errors: Errors) {
 			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "%s[minOverlap]".format(fieldName), "NotEmpty")
 			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "%s[maxOverlap]".format(fieldName), "NotEmpty")
@@ -350,7 +323,7 @@ object CourseworkFilters {
 	}
 	
 	case object NoFeedback extends ParameterlessCourseworkFilter {
-		def getDescription = "submissions with no feedback"
+		def getDescription = "students with no feedback"
 		def predicate(item: Student) = {
 			!item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).isDefined
 		}
@@ -358,22 +331,16 @@ object CourseworkFilters {
 	}
 	
 	case object FeedbackNotReleased extends ParameterlessCourseworkFilter {
-		def getDescription = "feedbacks not published"
-		def predicate(item: Student) = { 
-			(item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) map { item =>
-				!item.feedback.released
-			}) getOrElse(false)
-		}
+		def getDescription = "students with unpublished feedback"
+		def predicate(item: Student) =
+			item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.feedback.released)
 		def applies(assignment: Assignment) = true
 	}
 	
 	case object FeedbackNotDownloaded extends ParameterlessCourseworkFilter {
-		def getDescription = "feedbacks not downloaded by students"
-		def predicate(item: Student) = { 
-			(item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) map { item =>
-				!item.downloaded
-			}) getOrElse(false)
-		}
+		def getDescription = "students who haven't downloaded their feedback"
+		def predicate(item: Student) =
+			item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.downloaded)
 		def applies(assignment: Assignment) = true
 	}
 	

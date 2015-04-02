@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.exceptions.UserError
 import uk.ac.warwick.tabula.data.model.Assignment
-import org.apache.http.HttpStatus
+import org.springframework.http.HttpStatus
 
 /**
  * Trait for matching any kind of permissions exception; mostly to force login for users who aren't logged in
@@ -29,7 +29,7 @@ class PermissionDeniedException(
 	val permission: Permission,
 	val scope: Any,
 	cause: Throwable = null) extends RuntimeException(s"${user} can't perform ${permission} on ${scope match { case Some(o) => o; case _ => scope }}", cause) with UserError with PermissionsError {
-	override val statusCode = HttpStatus.SC_FORBIDDEN
+	override val httpStatus = HttpStatus.FORBIDDEN
 }
 	
 /**
@@ -38,5 +38,5 @@ class PermissionDeniedException(
  * exception resolver can send it off to a specific error page.
  */
 class SubmitPermissionDeniedException(user: CurrentUser, assignment: Assignment) extends RuntimeException(s"${user} can't submit assignment ${assignment}") with UserError with PermissionsError {
-	override val statusCode = HttpStatus.SC_FORBIDDEN
+	override val httpStatus = HttpStatus.FORBIDDEN
 }

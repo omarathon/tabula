@@ -28,11 +28,14 @@ class AddExamController extends ExamsController {
 		 @PathVariable("academicYear") academicYear : AcademicYear) = AddExamCommand(mandatory(module), mandatory(academicYear))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@ModelAttribute("command") cmd: AddExamCommand) = {
+	def showForm(@ModelAttribute("command") cmd: AddExamCommand, @PathVariable("module") module: Module) = {
 		cmd.afterBind()
 		Mav("exams/admin/new",
 			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
+			"assessmentGroups" -> cmd.assessmentGroups,
+			"department" -> module.adminDepartment,
+			"markingWorkflows" -> module.adminDepartment.markingWorkflows.filter(_.validForExams),
 			"assessmentGroups" -> cmd.assessmentGroups
 		).crumbs(
 				Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear),
@@ -42,10 +45,12 @@ class AddExamController extends ExamsController {
 
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: AddExamCommand, errors: Errors) = {
+	def submit(@Valid @ModelAttribute("command") cmd: AddExamCommand,
+						 @PathVariable("module") module: Module,
+						 errors: Errors) = {
 		cmd.afterBind()
 		if (errors.hasErrors) {
-			showForm(cmd)
+			showForm(cmd, module)
 		} else {
 			cmd.apply()
 			Redirect(Routes.admin.module(cmd.module, cmd.academicYear))
@@ -56,4 +61,5 @@ class AddExamController extends ExamsController {
 	def upstreamGroupBinder(binder: WebDataBinder) {
 		binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
 	}
+
 }
