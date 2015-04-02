@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands._
@@ -46,17 +45,6 @@ class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assi
 			val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(submission.universityId, marker)
 			markerFeedback.exists(mf => mf.state != MarkingCompleted)
 		}
-
-		// update the state to downloaded for any marker feedback that exists.
-		filteredSubmissions.foreach( s =>
-			assignment.feedbacks
-			.find(f => f.universityId == s.universityId)
-			.map(f => f.firstMarkerFeedback)
-			.foreach(mf =>
-				if(mf != null && mf.state == ReleasedForMarking)
-					stateService.updateState(mf, InProgress)
-			)
-		)
 
 		val zip = zipService.getSomeSubmissionsZip(filteredSubmissions)
 		val renderable = new RenderableZip(zip)
