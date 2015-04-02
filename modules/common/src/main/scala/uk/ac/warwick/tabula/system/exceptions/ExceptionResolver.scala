@@ -78,8 +78,8 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 			// Handle unresolvable @PathVariables as a page not found (404). HFC-408
 			case typeMismatch: TypeMismatchException => handle(new ItemNotFoundException(typeMismatch), request, response)
 
-			// Handle request method not supported as a 404
-			case methodNotSupported: HttpRequestMethodNotSupportedException => handle(new ItemNotFoundException(methodNotSupported), request, response)
+			// Handle request method not supported as a 405
+			case methodNotSupported: HttpRequestMethodNotSupportedException => handle(new MethodNotSupportedException(methodNotSupported), request, response)
 
 			// Handle missing servlet param exceptions as 400
 			case missingParam: MissingServletRequestParameterException => handle(new ParameterMissingException(missingParam), request, response)

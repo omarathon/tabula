@@ -21,6 +21,7 @@
 		</rollingPolicy>
 	</appender>
 
+	<!--
 	<appender name="DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${catalina.base}/logs/debug.log</file>
 		<append>true</append>
@@ -34,6 +35,7 @@
 			<maxHistory>${max.retention.days}</maxHistory>
 		</rollingPolicy>
 	</appender>
+	-->
 
 	<appender name="AUDIT" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${catalina.base}/logs/audit.log</file>
@@ -133,10 +135,9 @@
 	<logger name="org.ajax4jsf.cache" level="WARN" />
 	<logger name="org.rhq" level="WARN" />
 
-	<root level="DEBUG">
+	<root level="INFO">
 		<appender-ref ref="CONSOLE" />
 		<appender-ref ref="FILE" />
-		<appender-ref ref="DEBUG" />
 	</root>
 
 </configuration>

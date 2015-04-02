@@ -22,6 +22,7 @@ object JsonObjectMapperFactory {
 		val mapper = new ObjectMapper
 		mapper.registerModule(DefaultScalaModule)
 		mapper.registerModule(new JodaModule)
+		mapper.enable(SerializationFeature.INDENT_OUTPUT)
 		mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
 		mapper
 	}

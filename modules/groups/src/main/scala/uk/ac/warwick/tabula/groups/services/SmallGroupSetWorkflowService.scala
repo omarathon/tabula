@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.{WorkflowProgress, WorkflowStages, WorkflowStage}
+import uk.ac.warwick.tabula.WorkflowStageHealth._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet}
 
 @Service

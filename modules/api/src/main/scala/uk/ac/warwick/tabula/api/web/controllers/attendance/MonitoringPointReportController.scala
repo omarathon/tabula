@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.api.web.controllers.attendance
 
-import javax.servlet.http.HttpServletResponse
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect
-import org.springframework.http.{HttpStatus, MediaType}
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{RequestBody, PathVariable, ModelAttribute, RequestMapping}
@@ -26,6 +24,12 @@ import MonitoringPointReportController._
 
 object MonitoringPointReportController {
 	type CreateMonitoringPointReportCommand = Appliable[Seq[MonitoringPointReport]] with CreateMonitoringPointReportCommandState with SelfValidating
+
+	def toJson(request: CreateMonitoringPointReportRequest, result: Seq[MonitoringPointReport]) = Map(
+		"academicYear" -> request.academicYear,
+		"period" -> request.period,
+		"missedPoints" -> result.map { report => (report.student.universityId) -> report.missed }.toMap
+	)
 }
 
 @Controller
@@ -42,8 +46,10 @@ trait MonitoringPointReportCreateApi {
 		CreateMonitoringPointReportCommand(department, user)
 
 	@RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-	def create(@RequestBody request: CreateMonitoringPointReportRequest, @ModelAttribute("createCommand") command: CreateMonitoringPointReportCommand, errors: Errors)(implicit response: HttpServletResponse) = {
+	def create(@RequestBody request: CreateMonitoringPointReportRequest, @ModelAttribute("createCommand") command: CreateMonitoringPointReportCommand, errors: Errors) = {
 		request.copyTo(command, errors)
+
+		globalValidator.validate(command, errors)
 		command.validate(errors)
 
 		if (errors.hasErrors) {
@@ -53,13 +59,6 @@ trait MonitoringPointReportCreateApi {
 			Mav(new JSONView(Map("success" -> true, "status" -> "ok") ++ toJson(request, result)))
 		}
 	}
-
-	def toJson(request: CreateMonitoringPointReportRequest, result: Seq[MonitoringPointReport]) = Map(
-		"academicYear" -> request.academicYear,
-		"period" -> request.period,
-		"missedPoints" -> result.map { report => (report.student.universityId) -> report.missed }.toMap
-	)
-
 }
 
 @JsonAutoDetect

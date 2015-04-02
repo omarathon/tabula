@@ -19,20 +19,31 @@ abstract class WorkflowStage {
 }
 
 sealed abstract class WorkflowStageHealth(val cssClass: String)
+object WorkflowStageHealth {
+	case object Good extends WorkflowStageHealth("success")
+	case object Warning extends WorkflowStageHealth("warning")
+	case object Danger extends WorkflowStageHealth("danger")
+
+	// lame manual collection. Keep in sync with the case objects above
+	val members = Set(Good, Warning, Danger)
+
+	def fromCssClass(cssClass: String) =
+		if (cssClass == null) null
+		else members.find{_.cssClass == cssClass} match {
+			case Some(caseObject) => caseObject
+			case None => throw new IllegalArgumentException()
+		}
+}
 
 object WorkflowStages {
 	case class StageProgress(
 		stage: WorkflowStage,
 		started: Boolean,
 		messageCode: String,
-		health: WorkflowStageHealth=Good,
+		health: WorkflowStageHealth=WorkflowStageHealth.Good,
 		completed: Boolean=false,
 		preconditionsMet: Boolean=false
 	)
-
-	case object Good extends WorkflowStageHealth("success")
-	case object Warning extends WorkflowStageHealth("warning")
-	case object Danger extends WorkflowStageHealth("danger")
 
 	def toMap(progresses: Seq[StageProgress]) = {
 		val builder = ListMap.newBuilder[String, StageProgress]

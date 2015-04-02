@@ -6,7 +6,7 @@ import org.springframework.validation.ValidationUtils
 
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.CaseObjectEqualityFixes
-import uk.ac.warwick.tabula.coursework.commands.assignments.Student
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand.Student
 import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
@@ -77,8 +77,17 @@ object CourseworkFilters {
 	
 	case object SubmissionNotDownloaded extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions not downloaded by staff"
+<<<<<<< Updated upstream
 		def predicate(item: Student) = item.coursework.enhancedSubmission.exists(!_.downloaded)
 		def applies(assignment: Assignment) = true
+=======
+		def predicate(item: Student) = { 
+			(item.coursework.enhancedSubmission map { item => 
+				!item.downloaded
+			}) getOrElse(false)
+		}
+		def applies(assignment: Assignment) = assignment.collectSubmissions
+>>>>>>> Stashed changes
 	}
 	
 	case object SubmittedBetweenDates extends CourseworkFilter {
@@ -323,7 +332,7 @@ object CourseworkFilters {
 	}
 	
 	case object NoFeedback extends ParameterlessCourseworkFilter {
-		def getDescription = "submissions with no feedback"
+		def getDescription = "students with no feedback"
 		def predicate(item: Student) = {
 			!item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).isDefined
 		}
@@ -331,16 +340,34 @@ object CourseworkFilters {
 	}
 	
 	case object FeedbackNotReleased extends ParameterlessCourseworkFilter {
+<<<<<<< Updated upstream
 		def getDescription = "feedbacks not published"
 		def predicate(item: Student) =
 			item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.feedback.released)
+=======
+		def getDescription = "students with unpublished feedback"
+		def predicate(item: Student) = { 
+			(item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) map { item =>
+				!item.feedback.released
+			}) getOrElse(false)
+		}
+>>>>>>> Stashed changes
 		def applies(assignment: Assignment) = true
 	}
 	
 	case object FeedbackNotDownloaded extends ParameterlessCourseworkFilter {
+<<<<<<< Updated upstream
 		def getDescription = "feedbacks not downloaded by students"
 		def predicate(item: Student) =
 			item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.downloaded)
+=======
+		def getDescription = "students who haven't downloaded their feedback"
+		def predicate(item: Student) = { 
+			(item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) map { item =>
+				!item.downloaded
+			}) getOrElse(false)
+		}
+>>>>>>> Stashed changes
 		def applies(assignment: Assignment) = true
 	}
 	
