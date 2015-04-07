@@ -141,7 +141,6 @@
 								<#if studentMarkerMap?has_content>
 									<th>Marker</th>
 								</#if>
-
 								<th>Marks</th>
 								<th>Grade <#if isGradeValidation><@fmt.help_popover id="auto-grade-help" content="The grade is automatically calculated from the SITS mark scheme" /></#if></th>
 							</tr>
@@ -155,14 +154,12 @@
 												<td></td>
 											</#if>
 										</#if>
-
 										<td>
 											<div class="input-prepend input-append">
 												<span class="add-on"><i class="icon-user"></i></span>
 												<input class="universityId span2" value="${markItem.universityId}" name="marks[${markItem_index}].universityId" type="text" readonly="readonly" />
 											</div>
 										</td>
-
 										<#if studentMarkerMap?has_content>
 											<#if mapGet(studentMarkerMap, markItem.universityId)??>
 												<td>${mapGet(studentMarkerMap, markItem.universityId)}</td>
@@ -170,7 +167,6 @@
 												<td></td>
 											</#if>
 										</#if>
-
 										<td><input name="marks[${markItem_index}].actualMark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" /></td>
 										<td>
 											<input name="marks[${markItem_index}].actualGrade" class="grade input-small" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" />
