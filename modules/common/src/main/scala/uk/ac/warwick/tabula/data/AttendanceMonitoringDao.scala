@@ -529,7 +529,9 @@ case class AttendanceMonitoringStudentData(
 	lastName: String,
 	universityId: String,
 	userId: String,
-	scdBeginDate: LocalDate
+	scdBeginDate: LocalDate,
+	routeCode: String,
+	routeName: String
 ) {
 	def fullName = s"$firstName $lastName"
 }
@@ -547,21 +549,26 @@ trait AttendanceMonitoringStudentDataFetcher {
 				.add(groupProperty("universityId"))
 				.add(max("userId"))
 				.add(min("studentCourseDetails.beginDate"))
+				.add(max("route.code"))
+				.add(max("route.name"))
 
 		session.newCriteria[StudentMember]
 			.createAlias("studentCourseDetails","studentCourseDetails")
 			.createAlias("studentCourseDetails.studentCourseYearDetails","studentCourseYearDetails")
+			.createAlias("studentCourseDetails.route","route")
 			.add(isNull("studentCourseDetails.missingFromImportSince"))
 			.add(is("studentCourseYearDetails.academicYear", academicYear))
 			.add(safeIn("universityId", universityIds))
 			.project[Array[java.lang.Object]](projections).seq.map {
-				case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate) =>
+				case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String) =>
 					AttendanceMonitoringStudentData(
 						firstName,
 						lastName,
 						universityId,
 						userId,
-						scdBeginDate
+						scdBeginDate,
+						routeCode,
+						routeName
 					)
 			}
 	}
