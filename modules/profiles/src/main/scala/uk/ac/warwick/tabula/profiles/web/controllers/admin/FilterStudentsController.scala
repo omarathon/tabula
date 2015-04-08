@@ -1,43 +1,39 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.admin
 
-import org.joda.time.DateTime
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.profiles.commands.FilterStudentsCommand
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.Appliable
 import javax.validation.Valid
+
+import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.commands.{Appliable, CurrentSITSAcademicYear, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.profiles.commands.{FilterStudentsCommand, FilterStudentsResults}
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
-import uk.ac.warwick.tabula.profiles.commands.FilterStudentsResults
 
 @Controller
 @RequestMapping(value=Array("/department/{department}/students"))
-class FilterStudentsController extends ProfilesController {
+class FilterStudentsController extends ProfilesController with CurrentSITSAcademicYear {
 	
 	validatesSelf[SelfValidating]
 	
 	@ModelAttribute("filterStudentsCommand")
 	def command(@PathVariable department: Department) =
-		FilterStudentsCommand(department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		FilterStudentsCommand(department, academicYear)
 		
 	@RequestMapping
 	def filter(@Valid @ModelAttribute("filterStudentsCommand") cmd: Appliable[FilterStudentsResults], errors: Errors, @PathVariable department: Department) = {
-		if (errors.hasErrors()) {
+		if (errors.hasErrors) {
 			Mav("profile/filter/filter").noLayout()
 		}
 		else {
 			val results = cmd.apply()
-			
-			if (ajax) Mav("profile/filter/results", "students" -> results.students, "totalResults" -> results.totalResults).noLayout()
-			else Mav("profile/filter/filter",
+			val modelMap = Map(
 				"students" -> results.students,
-				"totalResults" -> results.totalResults
+				"totalResults" -> results.totalResults,
+				"academicYear" -> academicYear
 			)
+			if (ajax) Mav("profile/filter/results", modelMap).noLayout()
+			else Mav("profile/filter/filter", modelMap)
 		}
 	}
 
