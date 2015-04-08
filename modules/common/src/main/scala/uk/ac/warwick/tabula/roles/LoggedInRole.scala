@@ -11,7 +11,8 @@ case object LoggedInRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	override def description = "Logged in"
 
 	GrantsGlobalPermission(
-		Notification.Dismiss // TAB-1959
+		Notification.Dismiss, // TAB-1959
+		Module.ViewTimetable
 	)
 
 	GrantsScopelessPermission(

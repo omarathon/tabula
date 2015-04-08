@@ -168,6 +168,8 @@ object Permissions {
 		case object Create extends Permission("Add a module")
 		case object Update extends Permission("Edit a module")
 		case object Delete extends Permission("Remove a module")
+
+		case object ViewTimetable extends Permission("View a module's timetable")
 	}
 
 	object Route {
