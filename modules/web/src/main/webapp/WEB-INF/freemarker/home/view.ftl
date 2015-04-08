@@ -24,7 +24,7 @@
 			</#if>
 		</li>
 
-		<#if features.exams && canAdmin>
+		<#if features.exams && canViewExams>
 			<li>
 				<h2><a href="<@url page="/" context="/exams" />">Exam Management</a></h2>
 				<span class="hint">Manage exam marks</span>

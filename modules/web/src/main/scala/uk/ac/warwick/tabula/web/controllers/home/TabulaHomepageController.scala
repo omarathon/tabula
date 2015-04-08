@@ -31,12 +31,15 @@ import uk.ac.warwick.tabula.web.controllers._
 			user.isStaff ||
 			user.isStudent ||
 			permissionsService.getAllPermissionDefinitionsFor(user, Permissions.Profiles.ViewSearchResults).nonEmpty
+
+		val canViewExams = user.isStaff && moduleService.getDepartmentByCode(user.apparentUser.getDepartmentCode).exists(_.uploadMarksToSits)
 		
 	  Mav("home/view",
 	  	"ajax" -> ajax,
 			"canAdmin" -> canAdmin,
 			"canDeptAdmin" -> canDeptAdmin,
 			"canViewProfiles" -> canViewProfiles,
+			"canViewExams" -> canViewExams,
 			"jumbotron" -> true
 		).noLayoutIf(ajax) // All hail our new Jumbotron overlords
 	}
