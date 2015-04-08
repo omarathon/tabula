@@ -183,6 +183,10 @@
 				</#if>
 
 			</div>
+
+			<#if filterFormAddOn?has_content>
+				<#include filterFormAddOn />
+			</#if>
 		</@f.form>
 	</div>
 
@@ -246,7 +250,7 @@
 			} else {
 				$('.clear-all-filters').removeAttr("disabled");
 			}
-		}
+		};
 
 		var doRequest = function($form, preventPageReset) {
 			if (typeof history.pushState !== 'undefined')
@@ -282,9 +286,9 @@
 		};
 		window.doRequest = doRequest;
 
-		$('#${filterCommandName} input').on('change', function(e) {
+		$('#${filterCommandName} .student-filter').on('change', function(e) {
 			// Load the new results
-			var $input = $(this);
+			var $input = $(e.target);
 
 			if ($input.is('.prevent-reload')) return;
 
