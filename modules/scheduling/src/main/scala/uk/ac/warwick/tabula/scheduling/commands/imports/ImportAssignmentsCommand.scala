@@ -42,9 +42,9 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
 	def applyInternal() {
 		benchmark("ImportAssessment") {
-			doAssignments()
+			//doAssignments()
 			logger.debug("Imported AssessmentComponents. Importing assessment groups...")
-			doGroups()
+			//doGroups()
 			doGroupMembers()
 			logger.debug("Imported assessment groups. Importing grade boundaries...")
 			doGradeBoundaries()
@@ -120,12 +120,19 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 			}
 
 			// Empty groups that we haven't seen for academic years
-			assessmentMembershipService.getUpstreamAssessmentGroupsNotIn(
+			val groupsToEmpty = assessmentMembershipService.getUpstreamAssessmentGroupsNotIn(
 				ids = notEmptyGroupIds.filter { _.hasText }.toSeq,
 				academicYears = assignmentImporter.yearsToImport
-			).foreach { emptyGroup =>
+			)
+			logger.info(s"${groupsToEmpty.size} groups needs emptying")
+			count = 0
+			groupsToEmpty.foreach { emptyGroup =>
 				transactional() {
 					assessmentMembershipService.replaceMembers(emptyGroup, Nil)
+					count += 1
+					if (count % 100 == 0) {
+						logger.info("Emptied " + count + " groups")
+					}
 				}
 			}
 

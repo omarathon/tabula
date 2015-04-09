@@ -84,7 +84,13 @@ object Daoisms extends HelperRestrictions {
 	 * better with Scala's generics support.
 	 */
 	implicit class NiceQueryCreator(session: Session) {
-		def newCriteria[A: ClassTag] = new ScalaCriteria[A](session.createCriteria(classTag[A].runtimeClass))
+		def newCriteria[A: ClassTag] =
+			new ScalaCriteria[A](
+				session.createCriteria(
+					classTag[A]
+						.runtimeClass
+				)
+			)
 		def newQuery[A](hql: String) = new ScalaQuery[A](session.createQuery(hql))
 	}
 
