@@ -582,11 +582,15 @@ class Assignment
 	 * Optionally returns the first marker for the given submission
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
-	def getStudentsFirstMarker(submission: Submission): Option[String] =
-		Option(markingWorkflow) flatMap {_.getStudentsFirstMarker(this, submission.universityId)}
+	def getStudentsFirstMarker(universityId: String): Option[User] =
+		Option(markingWorkflow)
+			.flatMap(_.getStudentsFirstMarker(this, universityId))
+			.map(id => userLookup.getUserByUserId(id))
 
-	def getStudentsSecondMarker(submission: Submission): Option[String] =
-		Option(markingWorkflow) flatMap {_.getStudentsSecondMarker(this, submission.universityId)}
+	def getStudentsSecondMarker(universityId: String): Option[User] =
+		Option(markingWorkflow)
+			.flatMap(_.getStudentsSecondMarker(this, universityId))
+			.map(id => userLookup.getUserByUserId(id))
 
 	/**
 	 * Optionally returns the submissions that are to be marked by the given user

@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.helpers
 
+import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 import org.joda.time.DateTime
@@ -60,8 +62,10 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			feedbackDownloaded: Boolean=false,
 			onlineFeedbackViewed: Boolean=false,
 			extension: Option[Extension]=None,
-			withinExtension: Boolean=false) =
+			withinExtension: Boolean=false,
+			student:User=null) =
 		WorkflowItems(
+			student=student,
 			enhancedSubmission=submission map { s => SubmissionListItem(s, submissionDownloaded) },
 			enhancedFeedback=feedback map { f => FeedbackListItem(f, feedbackDownloaded, onlineFeedbackViewed, new FeedbackForSits) },
 			enhancedExtension=extension map { e => ExtensionListItem(e, withinExtension) }
@@ -74,13 +78,15 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			feedbackDownloaded: Boolean=false,
 			onlineFeedbackViewed: Boolean=false,
 			extension: Option[Extension]=None,
-			withinExtension: Boolean=false) =
+			withinExtension: Boolean=false,
+			assignment:Assignment=null) =
 		Student(
 			user=null,
 			progress=null,
 			nextStage=None,
 			stages=ListMap.empty,
-			coursework=workflowItems(submission, submissionDownloaded, feedback, feedbackDownloaded, onlineFeedbackViewed, extension, withinExtension)
+			coursework=workflowItems(submission, submissionDownloaded, feedback, feedbackDownloaded, onlineFeedbackViewed, extension, withinExtension),
+			assignment=assignment
 		)
 
 	class SampleFilteringCommand(elems: (String, String)*) {
@@ -500,7 +506,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
 
-		submission.isReleasedForMarking should be {false}
+		assignment.isReleasedForMarking(submission.universityId) should be {false}
 
 		filter.predicate(student(submission=Option(submission))) should be {true}
 
@@ -508,7 +514,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val feedback = Fixtures.assignmentFeedback("0672089")
 		assignment.feedbacks.add(feedback)
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
-		submission.isReleasedForMarking should be {true}
+		assignment.isReleasedForMarking(submission.universityId) should be {true}
 
 		filter.predicate(student(submission=Option(submission))) should be {false}
 	}
@@ -542,7 +548,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		submission.assignment = assignment
 		when(workflow.submissionService.getSubmissionByUniId(assignment, "0672089")) thenReturn Option(submission)
 
-		submission.isReleasedForMarking should be {false}
+		assignment.isReleasedForMarking(submission.universityId) should be {false}
 
 		filter.predicate(student(submission=Option(submission))) should be {false}
 
@@ -550,7 +556,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val feedback = Fixtures.assignmentFeedback("0672089")
 		assignment.feedbacks.add(feedback)
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
-		submission.isReleasedForMarking should be {true}
+		assignment.isReleasedForMarking(submission.universityId) should be {true}
 
 		val f = new MarkerSelectField
 		f.name = Assignment.defaultMarkerSelectorName
@@ -593,7 +599,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val feedback = Fixtures.assignmentFeedback("0672089")
 		assignment.feedbacks.add(feedback)
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
-		submission.isReleasedToSecondMarker should be {false}
+		assignment.isReleasedToSecondMarker(submission.universityId) should be {false}
 
 		filter.predicate(student(feedback=Option(feedback))) should be {false}
 
@@ -601,7 +607,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(feedback=Option(feedback))) should be {true}
 
 		feedback.secondMarkerFeedback = Fixtures.markerFeedback(feedback)
-		submission.isReleasedToSecondMarker should be {true}
+		assignment.isReleasedToSecondMarker(submission.universityId) should be {true}
 
 		filter.predicate(student(feedback=Option(feedback))) should be {true}
 	}

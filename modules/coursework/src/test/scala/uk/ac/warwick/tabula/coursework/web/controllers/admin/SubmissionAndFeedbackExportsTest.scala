@@ -4,7 +4,6 @@ import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model._
 import scala.collection.immutable.ListMap
 import uk.ac.warwick.userlookup.User
-import scala.xml
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.coursework.commands.assignments.Student
 import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
@@ -42,20 +41,26 @@ class SubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 	)
 	plagiarisedFile.submission = submission1
 
+	val student66 = newUser("1234566")
+	val student67 = newUser("1234567")
+
 	val items = Seq(
-		Student(newUser("1234566"), null, None, ListMap(),
-			WorkflowItems(
-				enhancedSubmission = Some(SubmissionListItem(submission1, false)),
+
+		Student(student66, null, None, ListMap(),
+			WorkflowItems (
+				student66,
+				enhancedSubmission = Some(SubmissionListItem(submission1, downloaded=false)),
 				enhancedFeedback = None,
 				enhancedExtension = None
-			)
+			), assignment
 		),
-		Student(newUser("1234567"), null, None, ListMap(),
-			WorkflowItems(
+		Student(student67, null, None, ListMap(),
+			WorkflowItems (
+				student67,
 				enhancedSubmission = None,
 				enhancedFeedback = None,
 				enhancedExtension = None
-			)
+			), assignment
 		)
 	)
 

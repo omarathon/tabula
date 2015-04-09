@@ -9,6 +9,8 @@
 	<#if command.submission??>
 		<#assign submission = command.submission />
 		<#include "_submission_summary.ftl">
+	<#else>
+		<#include "_unsubmitted_notice.ftl">
 	</#if>
 
 	<#if isCompleted>
