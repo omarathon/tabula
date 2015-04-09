@@ -119,20 +119,20 @@
 					<td>${(feedback.latestPrivateOrNonPrivateAdjustment.grade)!""}</td>
 					<#if hasSitsStatus>
 						<#assign sitsStatus = mapGet(sitsStatusMap, feedback) />
-						<#assign sitsWarning = (sitsStatus.actualMarkLastUploaded!0) != (feedback.latestMark!0) || (sitsStatus.actualGradeLastUploaded!"") != (feedback.latestGrade!"") />
+						<#assign sitsWarning = sitsStatus.dateOfUpload?has_content && sitsStatus.status.code != "uploadNotAttempted" && (
+							(sitsStatus.actualMarkLastUploaded!0) != (feedback.latestMark!0) || (sitsStatus.actualGradeLastUploaded!"") != (feedback.latestGrade!"")
+						) />
 						<#assign sitsClass>
 							<#if sitsStatus.status.code == "failed" || sitsWarning >
 								label-important
 							<#elseif sitsStatus.status.code == "successful">
 								label-success
-							<#elseif sitsStatus.status.code == "uploadNotAttempted">
-								label-important
 							<#else>
 								label-info
 							</#if>
 						</#assign>
 						<td><span class="label ${sitsClass} use-tooltip" <#if sitsWarning>title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again."</#if>>
-							${sitsStatus.status.description}
+							${sitsStatus.status.description}<#if sitsWarning>  (!)</#if>
 						</span></td>
 						<td data-sortby="${(sitsStatus.dateOfUpload.millis?c)!""}"><#if sitsStatus.dateOfUpload??><@fmt.date sitsStatus.dateOfUpload /></#if></td>
 						<td>${sitsStatus.actualMarkLastUploaded!""}</td>

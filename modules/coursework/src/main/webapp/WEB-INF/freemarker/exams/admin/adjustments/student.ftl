@@ -70,10 +70,6 @@
 		</#if>
 	</@form.row>
 
-	<#if features.queueFeedbackForSits && exam.module.department.uploadMarksToSits && command.canBeUploadedToSits>
-		<@courses_macros.uploadToSits assignment=exam verb="Adjusting" withValidation=false/>
-	</#if>
-
 	<div class="submit-buttons">
 		<input class="btn btn-primary" type="submit" value="Save">
 		<a class="btn discard-changes" href="">Cancel</a>
