@@ -5,7 +5,7 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
+import uk.ac.warwick.tabula.{MockUserLookup, Mockito, Fixtures, TestBase}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, Extension, MarkerSelectField, WordCountField}
 import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
@@ -27,6 +27,12 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 	val assignment = Fixtures.assignment("Programming Test")
 	assignment.module = module
 	module.adminDepartment = department
+
+	val mockUserLookup = new MockUserLookup
+	mockUserLookup.registerUserObjects(
+		new User("cuscav") { setWarwickId("0672089"); setFoundUser(true); setVerified(true); }
+	)
+	assignment.userLookup = mockUserLookup
 
 	@Test def of() {
 		CourseworkFilters.of("NotReleasedForMarking") match {
@@ -77,9 +83,10 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			onlineFeedbackViewed: Boolean=false,
 			extension: Option[Extension]=None,
 			withinExtension: Boolean=false,
-			assignment:Assignment=null) =
+			assignment:Assignment=null,
+			user:User=Fixtures.user()) =
 		Student(
-			user=null,
+			user=user,
 			progress=null,
 			nextStage=None,
 			stages=ListMap.empty,
@@ -111,8 +118,8 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
 
 			errors.getErrorCount should be (2)
-			errors.getFieldErrors.asScala(0).getField should be ("filter[startDate]")
-			errors.getFieldErrors.asScala(0).getCodes should contain ("NotEmpty")
+			errors.getFieldErrors.asScala.head.getField should be ("filter[startDate]")
+			errors.getFieldErrors.asScala.head.getCodes should contain ("NotEmpty")
 			errors.getFieldErrors.asScala(1).getField should be ("filter[endDate]")
 			errors.getFieldErrors.asScala(1).getCodes should contain ("NotEmpty")
 		}
@@ -129,8 +136,8 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
 
 			errors.getErrorCount should be (1)
-			errors.getFieldErrors.asScala(0).getField should be ("filter[endDate]")
-			errors.getFieldErrors.asScala(0).getCode should be ("filters.SubmittedBetweenDates.end.beforeStart")
+			errors.getFieldErrors.asScala.head.getField should be ("filter[endDate]")
+			errors.getFieldErrors.asScala.head.getCode should be ("filters.SubmittedBetweenDates.end.beforeStart")
 		}
 
 		{
@@ -371,8 +378,8 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
 
 			errors.getErrorCount should be (2)
-			errors.getFieldErrors.asScala(0).getField should be ("filter[minWords]")
-			errors.getFieldErrors.asScala(0).getCodes should contain ("NotEmpty")
+			errors.getFieldErrors.asScala.head.getField should be ("filter[minWords]")
+			errors.getFieldErrors.asScala.head.getCodes should contain ("NotEmpty")
 			errors.getFieldErrors.asScala(1).getField should be ("filter[maxWords]")
 			errors.getFieldErrors.asScala(1).getCodes should contain ("NotEmpty")
 		}
@@ -386,8 +393,8 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
 
 			errors.getErrorCount should be (1)
-			errors.getFieldErrors.asScala(0).getField should be ("filter[maxWords]")
-			errors.getFieldErrors.asScala(0).getCodes should contain ("typeMismatch")
+			errors.getFieldErrors.asScala.head.getField should be ("filter[maxWords]")
+			errors.getFieldErrors.asScala.head.getCodes should contain ("typeMismatch")
 		}
 
 		{
@@ -399,8 +406,8 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
 
 			errors.getErrorCount should be (3)
-			errors.getFieldErrors.asScala(0).getField should be ("filter[maxWords]")
-			errors.getFieldErrors.asScala(0).getCodes should contain ("filters.WithWordCount.max.lessThanMin")
+			errors.getFieldErrors.asScala.head.getField should be ("filter[maxWords]")
+			errors.getFieldErrors.asScala.head.getCodes should contain ("filters.WithWordCount.max.lessThanMin")
 			errors.getFieldErrors.asScala(1).getField should be ("filter[minWords]")
 			errors.getFieldErrors.asScala(1).getCodes should contain ("filters.WithWordCount.min.lessThanZero")
 			errors.getFieldErrors.asScala(2).getField should be ("filter[maxWords]")
@@ -498,15 +505,13 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		assignment.collectSubmissions = true
 		filter.applies(assignment) should be {true}
 
-		// Valid only where a submission exists and is not released for marking
-		filter.predicate(student(submission=None)) should be {false}
-
+		val s = Fixtures.user("0672089", "cuscav")
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
 
 		assignment.isReleasedForMarking(submission.universityId) should be {false}
 
-		filter.predicate(student(submission=Option(submission))) should be {true}
+		filter.predicate(student(user=s, submission=Option(submission), assignment=assignment)) should be {true}
 
 		// Release for marking, no longer fits
 		val feedback = Fixtures.assignmentFeedback("0672089")
@@ -514,7 +519,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
 		assignment.isReleasedForMarking(submission.universityId) should be {true}
 
-		filter.predicate(student(submission=Option(submission))) should be {false}
+		filter.predicate(student(user=s, submission=Option(submission), assignment=assignment)) should be {false}
 	}
 
 	@Test def NotMarked() {
@@ -540,15 +545,16 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.applies(assignment) should be {true}
 
 		// Valid only where a submission exists, has been released for marking, and has a first marker
-		filter.predicate(student(submission=None)) should be {false}
+		filter.predicate(student(submission=None, assignment=assignment)) should be {false}
 
+		val s = Fixtures.user("0672089", "cuscav")
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
 		when(workflow.submissionService.getSubmissionByUniId(assignment, "0672089")) thenReturn Option(submission)
 
 		assignment.isReleasedForMarking(submission.universityId) should be {false}
 
-		filter.predicate(student(submission=Option(submission))) should be {false}
+		filter.predicate(student(user=s, submission=Option(submission), assignment=assignment)) should be {false}
 
 		// Release for marking and make sure it has a first marker
 		val feedback = Fixtures.assignmentFeedback("0672089")
@@ -565,7 +571,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		v.value = "cusmab"
 		submission.values.add(v)
 
-		filter.predicate(student(submission=Option(submission))) should be {true}
+		filter.predicate(student(user=s, submission=Option(submission), assignment=assignment)) should be {true}
 	}
 
 	@Test def MarkedByFirst() {
@@ -714,8 +720,8 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
 
 			errors.getErrorCount should be (2)
-			errors.getFieldErrors.asScala(0).getField should be ("filter[minOverlap]")
-			errors.getFieldErrors.asScala(0).getCodes should contain ("NotEmpty")
+			errors.getFieldErrors.asScala.head.getField should be ("filter[minOverlap]")
+			errors.getFieldErrors.asScala.head.getCodes should contain ("NotEmpty")
 			errors.getFieldErrors.asScala(1).getField should be ("filter[maxOverlap]")
 			errors.getFieldErrors.asScala(1).getCodes should contain ("NotEmpty")
 		}
@@ -729,8 +735,8 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
 
 			errors.getErrorCount should be (1)
-			errors.getFieldErrors.asScala(0).getField should be ("filter[maxOverlap]")
-			errors.getFieldErrors.asScala(0).getCodes should contain ("typeMismatch")
+			errors.getFieldErrors.asScala.head.getField should be ("filter[maxOverlap]")
+			errors.getFieldErrors.asScala.head.getCodes should contain ("typeMismatch")
 		}
 
 		{
@@ -742,8 +748,8 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			filter.validate(cmd.filter.asScala.toMap, "filter")(errors)
 
 			errors.getErrorCount should be (3)
-			errors.getFieldErrors.asScala(0).getField should be ("filter[maxOverlap]")
-			errors.getFieldErrors.asScala(0).getCodes should contain ("filters.WithOverlapPercentage.max.lessThanMin")
+			errors.getFieldErrors.asScala.head.getField should be ("filter[maxOverlap]")
+			errors.getFieldErrors.asScala.head.getCodes should contain ("filters.WithOverlapPercentage.max.lessThanMin")
 			errors.getFieldErrors.asScala(1).getField should be ("filter[minOverlap]")
 			errors.getFieldErrors.asScala(1).getCodes should contain ("filters.WithOverlapPercentage.min.notInRange")
 			errors.getFieldErrors.asScala(2).getField should be ("filter[maxOverlap]")

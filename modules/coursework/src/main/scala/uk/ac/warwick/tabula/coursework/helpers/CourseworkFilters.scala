@@ -216,7 +216,7 @@ object CourseworkFilters {
 	
 	case object NotReleasedForMarking extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions that have not been released for marking"
-		def predicate(student: Student) = student.assignment.isReleasedForMarking(student.user.getWarwickId)
+		def predicate(student: Student) = !student.assignment.isReleasedForMarking(student.user.getWarwickId)
 		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.markingWorkflow != null
 	}
 	
