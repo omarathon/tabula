@@ -25,11 +25,19 @@ class AddExamCommandTest extends TestBase with Mockito {
 		val academicYear = new AcademicYear(2014)
 		val command = new AddExamCommandInternal(module, academicYear) with CommandTestSupport
 
-		val validator = new ExamValidation with ExamState with AssessmentServiceComponent{
+		val validator = new ExamValidation with ExamState with AssessmentServiceComponent
+			with UserLookupComponent with HasAcademicYear with SpecifiesGroupType
+			with AssessmentMembershipServiceComponent {
+
 			def module = command.module
 			def academicYear = command.academicYear
 
 			override val assessmentService = mock[AssessmentService]
+			override val assessmentMembershipService = mock[AssessmentMembershipService]
+			override val userLookup = mock[UserLookupService]
+			override def existingGroups = None
+			override def existingMembers = None
+			override def updateAssessmentGroups = List()
 		}
 	}
 
