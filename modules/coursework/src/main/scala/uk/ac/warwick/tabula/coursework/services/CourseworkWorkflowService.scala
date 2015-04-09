@@ -140,13 +140,14 @@ object CourseworkWorkflowStages {
 	
 	case object ReleaseForMarking extends CourseworkWorkflowStage {
 		def actionCode = "workflow.ReleaseForMarking.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedSubmission match {
-			case Some(item) if item.submission.isReleasedForMarking =>
+		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
+			if (assignment.isReleasedForMarking(coursework.student.getWarwickId)) {
 				StageProgress(ReleaseForMarking, started = true, messageCode = "workflow.ReleaseForMarking.released", health = Good, completed = true)
-			case Some(_) => StageProgress(ReleaseForMarking, started = false, messageCode = "workflow.ReleaseForMarking.notReleased")
-			case _ => StageProgress(ReleaseForMarking, started = false, messageCode = "workflow.ReleaseForMarking.notReleased")
+			} else {
+				StageProgress(ReleaseForMarking, started = false, messageCode = "workflow.ReleaseForMarking.notReleased")
+			}
 		}
-		override def preconditions = Seq(Seq(Submission))
+		override def preconditions = Seq()
 	}
 	
 	case object FirstMarking extends CourseworkWorkflowStage {
@@ -159,15 +160,15 @@ object CourseworkWorkflowStages {
 					StageProgress(FirstMarking, started = true, messageCode = "workflow.FirstMarking.notMarked", health = Warning, completed = false)
 			case _ => StageProgress(FirstMarking, started = false, messageCode = "workflow.FirstMarking.notMarked")
 		}
-		override def preconditions = Seq(Seq(Submission, ReleaseForMarking))
+		override def preconditions = Seq(Seq(ReleaseForMarking))
 	}
 
 	case object SecondMarking extends CourseworkWorkflowStage {
 		def actionCode = "workflow.SecondMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
-			val hasSubmission = coursework.enhancedSubmission.exists(_.submission.isReleasedToSecondMarker)
+			val released = assignment.isReleasedToSecondMarker(coursework.student.getWarwickId)
 			coursework.enhancedFeedback match {
-				case Some(item) if hasSubmission && item.feedback.retrieveSecondMarkerFeedback.state != Rejected =>
+				case Some(item) if released && item.feedback.retrieveSecondMarkerFeedback.state != Rejected =>
 					if (item.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted)
 						StageProgress(
 							SecondMarking,
@@ -187,15 +188,15 @@ object CourseworkWorkflowStages {
 				case _ => StageProgress(SecondMarking, started = false, messageCode = "workflow.SecondMarking.notMarked")
 			}
 		}
-		override def preconditions = Seq(Seq(Submission, ReleaseForMarking, FirstMarking))
+		override def preconditions = Seq(Seq(ReleaseForMarking, FirstMarking))
 	}
 
 	case object Moderation extends CourseworkWorkflowStage {
 		def actionCode = "workflow.ModeratedMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
-			val hasSubmission = coursework.enhancedSubmission.exists(_.submission.isReleasedToSecondMarker)
+			val released = assignment.isReleasedToSecondMarker(coursework.student.getWarwickId)
 			coursework.enhancedFeedback match {
-				case Some(item) if hasSubmission && item.feedback.retrieveSecondMarkerFeedback.state != Rejected =>
+				case Some(item) if released && item.feedback.retrieveSecondMarkerFeedback.state != Rejected =>
 					if (item.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted)
 						StageProgress(
 							Moderation,
@@ -215,15 +216,15 @@ object CourseworkWorkflowStages {
 				case _ => StageProgress(Moderation, started = false, messageCode = "workflow.ModeratedMarking.notMarked")
 			}
 		}
-		override def preconditions = Seq(Seq(Submission, ReleaseForMarking, FirstMarking))
+		override def preconditions = Seq(Seq(ReleaseForMarking, FirstMarking))
 	}
 
 	case object FinaliseSeenSecondMarking extends CourseworkWorkflowStage {
 		def actionCode = "workflow.FinaliseSeenSecondMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
-			val hasSubmission = coursework.enhancedSubmission.exists(_.submission.isReleasedToThirdMarker)
+			val released = assignment.isReleasedToThirdMarker(coursework.student.getWarwickId)
 			coursework.enhancedFeedback match {
-				case Some(item) if hasSubmission && item.feedback.retrieveThirdMarkerFeedback.state != Rejected =>
+				case Some(item) if released && item.feedback.retrieveThirdMarkerFeedback.state != Rejected =>
 					if (item.feedback.retrieveThirdMarkerFeedback.state == MarkingCompleted )
 						StageProgress(
 							FinaliseSeenSecondMarking,
@@ -243,7 +244,7 @@ object CourseworkWorkflowStages {
 				case _ => StageProgress(FinaliseSeenSecondMarking, started = false, messageCode = "workflow.FinaliseSeenSecondMarking.notFinalised")
 			}
 		}
-		override def preconditions = Seq(Seq(Submission, ReleaseForMarking, FirstMarking, SecondMarking))
+		override def preconditions = Seq(Seq(ReleaseForMarking, FirstMarking, SecondMarking))
 	}
 
 

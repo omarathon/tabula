@@ -13,73 +13,97 @@
 	<#list items as item>
 
 		<#assign u = item.student />
-		<#local thisFeedback = item.currentFeedback />
 
-		<#local nextMarkerAction>Send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if></#local>
+		<#if item.currentFeedback??>
+			<#local thisFeedback = item.currentFeedback />
+			<#local nextMarkerAction>Send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if></#local>
 
-		<#assign progressClass>
-			<#if thisFeedback.state.toString == "InProgress">
-				in-progress
-			<#elseif thisFeedback.state.toString == "MarkingCompleted">
-				marking-completed
-			</#if>
-		</#assign>
-
-		<tr class="item-container ${progressClass}"
-			data-contentid="${markingId(u)}"
-			data-markingurl="${onlineMarkingUrls[u.userId]}"
-			data-nextmarkeraction="${nextMarkerAction}">
-			<td class="check-col">
-				<@form.selector_check_row "markerFeedback" thisFeedback.id />
-			</td>
-
-			<#if assignment.module.department.showStudentName>
-				<td class="student-col toggle-cell"><h6 class="toggle-icon">${item.student.firstName}</h6></td>
-				<td class="student-col toggle-cell"><h6>${item.student.lastName} <@pl.profile_link item.student.warwickId! /></h6></td>
-				<#assign toggleIcon = "" />
-			<#else>
-				<#assign toggleIcon = "toggle-icon" />
-			</#if>
-			<td class="student-col toggle-cell"><h6 class="${toggleIcon}">${item.student.warwickId!}</h6></td>
-
-			<#if isModeration && item.previousFeedback??>
-				<#local previousFeedback = item.previousFeedback />
-				<td class="toggle-cell">${previousFeedback.mark!""}</td>
-				<td class="toggle-cell">${previousFeedback.markerUser.fullName}</td>
-			</#if>
-
-			<td class="status-col toggle-cell content-cell">
-				<dl style="margin: 0; border-bottom: 0;">
-					<dt>
-						<#if thisFeedback.state.toString == "ReleasedForMarking">
-							<span class="label label-warning">Ready for marking</span>
-						<#elseif thisFeedback.state.toString == "InProgress">
-							<span class="label label-info">In Progress</span>
-						<#elseif thisFeedback.state.toString == "MarkingCompleted">
-							<span class="label label-success">Marking completed</span>
-						<#elseif thisFeedback.state.toString == "Rejected">
-							<span class="label label-important">Rejected</span>
-						</#if>
-					</dt>
-					<dd style="display: none;" class="table-content-container" data-contentid="${markingId(u)}">
-						<div id="content-${markingId(u)}" class="content-container" data-contentid="${markingId(u)}">
-							<p>No data is currently available. Please check that you are signed in.</p>
-						</div>
-					</dd>
-				</dl>
-			</td>
-			<td class="action-col toggle-cell">
-				<#if thisFeedback.state.toString == "ReleasedForMarking">
-					Submission needs marking
-				<#elseif thisFeedback.state.toString == "InProgress">
-					${nextMarkerAction}
-				<#elseif thisFeedback.state.toString == "Rejected">
-					Review feedback and re-send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if>
+			<#assign progressClass>
+				<#if thisFeedback.state.toString == "InProgress">
+					in-progress
 				<#elseif thisFeedback.state.toString == "MarkingCompleted">
-					No action required.<#if item.nextMarker?has_content> Sent to ${nextRoleName} (${item.nextMarker.fullName})</#if>
+					marking-completed
 				</#if>
-			</td>
-		</tr>
+			</#assign>
+
+			<tr class="item-container ${progressClass}"
+				data-contentid="${markingId(u)}"
+				data-markingurl="${onlineMarkingUrls[u.userId]}"
+				data-nextmarkeraction="${nextMarkerAction}">
+				<td class="check-col">
+					<@form.selector_check_row "markerFeedback" thisFeedback.id />
+				</td>
+
+				<#if assignment.module.department.showStudentName>
+					<td class="student-col toggle-cell"><h6 class="toggle-icon">${item.student.firstName}</h6></td>
+					<td class="student-col toggle-cell"><h6>${item.student.lastName} <@pl.profile_link item.student.warwickId! /></h6></td>
+					<#assign toggleIcon = "" />
+				<#else>
+					<#assign toggleIcon = "toggle-icon" />
+				</#if>
+				<td class="student-col toggle-cell"><h6 class="${toggleIcon}">${item.student.warwickId!}</h6></td>
+
+				<#if isModeration && item.previousFeedback??>
+					<#local previousFeedback = item.previousFeedback />
+					<td class="toggle-cell">${previousFeedback.mark!""}</td>
+					<td class="toggle-cell">${previousFeedback.markerUser.fullName}</td>
+				</#if>
+
+				<td class="status-col toggle-cell content-cell">
+					<dl style="margin: 0; border-bottom: 0;">
+						<dt>
+							<#if thisFeedback.state.toString == "ReleasedForMarking">
+								<span class="label label-warning">Ready for marking</span>
+							<#elseif thisFeedback.state.toString == "InProgress">
+								<span class="label label-info">In Progress</span>
+							<#elseif thisFeedback.state.toString == "MarkingCompleted">
+								<span class="label label-success">Marking completed</span>
+							<#elseif thisFeedback.state.toString == "Rejected">
+								<span class="label label-important">Rejected</span>
+							</#if>
+						</dt>
+						<dd style="display: none;" class="table-content-container" data-contentid="${markingId(u)}">
+							<div id="content-${markingId(u)}" class="content-container" data-contentid="${markingId(u)}">
+								<p>No data is currently available. Please check that you are signed in.</p>
+							</div>
+						</dd>
+					</dl>
+				</td>
+				<td class="action-col toggle-cell">
+					<#if thisFeedback.state.toString == "ReleasedForMarking">
+						Submission needs marking
+					<#elseif thisFeedback.state.toString == "InProgress">
+						${nextMarkerAction}
+					<#elseif thisFeedback.state.toString == "Rejected">
+						Review feedback and re-send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if>
+					<#elseif thisFeedback.state.toString == "MarkingCompleted">
+						No action required.<#if item.nextMarker?has_content> Sent to ${nextRoleName} (${item.nextMarker.fullName})</#if>
+					</#if>
+				</td>
+			</tr>
+		<#else>
+			<tr>
+				<td class="check-col"></td>
+				<#if assignment.module.department.showStudentName>
+					<td class="student-col"><h6 class="toggle-icon">${u.firstName}</h6></td>
+					<td class="student-col"><h6>${u.lastName} <@pl.profile_link u.warwickId! /></h6></td>
+					<#assign toggleIcon = "" />
+				<#else>
+					<#assign toggleIcon = "toggle-icon" />
+				</#if>
+				<td class="student-col"><h6 class="${toggleIcon}">${u.warwickId!}</h6></td>
+				<#if isModeration>
+					<td></td>
+					<td></td>
+				</#if>
+				<td class="status-col">
+					<span class="label label-important">Not released</span>
+				</td>
+				<td class="action-col">
+					No action required. Waiting for submission to be released.
+				</td>
+			</tr>
+		</#if>
 	</#list>
 </#macro>
 
@@ -215,31 +239,6 @@
 						<th class="status-col">Next action</th>
 					</tr></thead>
 					<tbody>
-						<#if stage_index == 0>
-							<#list unsubmittedStudents as student>
-								<tr>
-									<td class="check-col"></td>
-									<#if assignment.module.department.showStudentName>
-										<td class="student-col"><h6 class="toggle-icon">${student.firstName}</h6></td>
-										<td class="student-col"><h6>${student.lastName} <@pl.profile_link student.warwickId! /></h6></td>
-										<#assign toggleIcon = "" />
-									<#else>
-										<#assign toggleIcon = "toggle-icon" />
-									</#if>
-									<td class="student-col"><h6 class="${toggleIcon}">${student.warwickId!}</h6></td>
-									<#if isModeration>
-										<td></td>
-										<td></td>
-									</#if>
-									<td class="status-col">
-										<span class="label label-important">Not released</span>
-									</td>
-									<td class="action-col">
-										No action required. Waiting for submission to be released.
-									</td>
-								</tr>
-							</#list>
-						</#if>
 						<@listMarkerFeedback stage.feedbackItems stage.nextRoleName isModeration />
 					</tbody>
 				</table>

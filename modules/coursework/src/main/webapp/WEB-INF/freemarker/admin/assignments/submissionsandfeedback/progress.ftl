@@ -65,17 +65,13 @@
 				<#local studentDetails><span data-profile="${student.user.warwickId!}"><#if department.showStudentName>${student.user.fullName}<#else>${student.user.warwickId!}</#if></span></#local>
 				<#local firstMarker="first marker" />
 				<#local secondMarker="second marker" />
-
-				<#if student.coursework.enhancedSubmission??>
-					<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission?? && student.coursework.enhancedSubmission.submission.assignment??>
-						<#if student.coursework.enhancedSubmission.submission.firstMarker?has_content>
-							<#local firstMarker><span data-profile="${student.coursework.enhancedSubmission.submission.firstMarker.warwickId!}">${student.coursework.enhancedSubmission.submission.firstMarker.fullName}</span></#local>
-						</#if>
-
-						<#if student.coursework.enhancedSubmission.submission.secondMarker?has_content>
-							<#local secondMarker><span data-profile="${student.coursework.enhancedSubmission.submission.secondMarker.warwickId!}">${student.coursework.enhancedSubmission.submission.secondMarker.fullName}</span></#local>
-						</#if>
-					</#if>
+				<#assign fm = assignment.getStudentsFirstMarker(student.user.warwickId) />
+				<#if fm?has_content>
+					<#local firstMarker><span data-profile="${fm.warwickId!}">${fm.fullName}</span></#local>
+				</#if>
+				<#assign sm = assignment.getStudentsSecondMarker(student.user.warwickId) />
+				<#if sm?has_content>
+					<#local secondMarker><span data-profile="${sm.warwickId!}">${sm.fullName}</span></#local>
 				</#if>
 
 				<#local text><@spring.message code=actionCode /></#local>
@@ -173,7 +169,7 @@
 								<h3>Marking</h3>
 
 								<div class="labels">
-									<#if submission?? && submission.assignment?? && submission.releasedForMarking>
+									<#if assignment.isReleasedForMarking(student.user.warwickId)>
 										<span class="label label-success">Markable</span>
 									</#if>
 								</div>
@@ -188,67 +184,66 @@
 								<@stage student.stages['ReleaseForMarking'] />
 
 								<#if student.stages?keys?seq_contains('FirstMarking')>
-									<#if submission?? && submission.assignment??>
-										<#if submission.firstMarker?has_content>
-											<#local firstMarker><span data-profile="${submission.firstMarker.warwickId!}">${submission.firstMarker.fullName}</span></#local>
-										</#if>
+
+									<#assign fm = assignment.getStudentsFirstMarker(student.user.warwickId) />
+									<#if fm?has_content>
+										<#local firstMarker><span data-profile="${fm.warwickId!}">${fm.fullName}</span></#local>
 									</#if>
 
 									<@stage student.stages['FirstMarking']> <#compress>
 										<#if firstMarker?default("")?length gt 0>
 											(<#noescape>${firstMarker}</#noescape>)
 											<#if can.do("Assignment.MarkOnBehalf", assignment)>
-												- <a href="<@routes.listmarkersubmissions assignment submission.firstMarker />">Proxy as this marker</a>
+												- <a href="<@routes.listmarkersubmissions assignment fm />">Proxy as this marker</a>
 											</#if>
 										</#if>
 									</#compress></@stage>
 								</#if>
 
 								<#if student.stages?keys?seq_contains('SecondMarking')>
-									<#if submission?? && submission.assignment??>
-										<#if submission.secondMarker?has_content>
-											<#local secondMarker><span data-profile="${submission.secondMarker.warwickId!}">${submission.secondMarker.fullName}</span></#local>
-										</#if>
+
+									<#assign sm = assignment.getStudentsSecondMarker(student.user.warwickId) />
+									<#if sm?has_content>
+										<#local secondMarker><span data-profile="${sm.warwickId!}">${sm.fullName}</span></#local>
 									</#if>
 
 									<@stage student.stages['SecondMarking']> <#compress>
 										<#if secondMarker?default("")?length gt 0>
 											(<#noescape>${secondMarker}</#noescape>)
 											<#if can.do("Assignment.MarkOnBehalf", assignment)>
-												- <a href="<@routes.listmarkersubmissions assignment submission.secondMarker />">Proxy as this marker</a>									</#if>
+												- <a href="<@routes.listmarkersubmissions assignment sm />">Proxy as this marker</a>
+											</#if>
 										</#if>
 									</#compress></@stage>
 								</#if>
 
 								<#if student.stages?keys?seq_contains('Moderation')>
-									<#if submission?? && submission.assignment??>
-										<#if submission.secondMarker?has_content>
-											<#local secondMarker><span data-profile="${submission.secondMarker.warwickId!}">${submission.secondMarker.fullName}</span></#local>
-										</#if>
+									<#assign sm = assignment.getStudentsSecondMarker(student.user.warwickId) />
+									<#if sm?has_content>
+										<#local secondMarker><span data-profile="${sm.warwickId!}">${sm.fullName}</span></#local>
 									</#if>
 
 									<@stage student.stages['Moderation']> <#compress>
 										<#if secondMarker?default("")?length gt 0>
 											(<#noescape>${secondMarker}</#noescape>)
 											<#if can.do("Assignment.MarkOnBehalf", assignment)>
-												- <a href="<@routes.listmarkersubmissions assignment submission.secondMarker />">Proxy as this moderator</a>
+												- <a href="<@routes.listmarkersubmissions assignment sm />">Proxy as this moderator</a>
 											</#if>
 										</#if>
 									</#compress></@stage>
 								</#if>
 
 								<#if student.stages?keys?seq_contains('FinaliseSeenSecondMarking')>
-									<#if submission?? && submission.assignment??>
-										<#if submission.firstMarker?has_content>
-											<#local firstMarker><span data-profile="${submission.firstMarker.warwickId!}">${submission.firstMarker.fullName}</span></#local>
-										</#if>
+									<#assign fm = assignment.getStudentsFirstMarker(student.user.warwickId) />
+									<#if fm?has_content>
+										<#local firstMarker><span data-profile="${fm.warwickId!}">${fm.fullName}</span></#local>
 									</#if>
 
 									<@stage student.stages['FinaliseSeenSecondMarking']> <#compress>
 										<#if firstMarker?default("")?length gt 0>
 											(<#noescape>${firstMarker}</#noescape>)
 											<#if can.do("Assignment.MarkOnBehalf", assignment)>
-												- <a href="<@routes.listmarkersubmissions assignment submission.firstMarker />">Proxy as this marker</a>
+												- <a href="<@routes.listmarkersubmissions assignment fm />">Proxy as this marker</a>
 											</#if>
 										</#if>
 									</#compress></@stage>
@@ -391,7 +386,7 @@
 
 				<#macro row student>
 					<tr data-contentid="${student.user.warwickId!}" class="itemContainer<#if !student.coursework.enhancedSubmission??> awaiting-submission</#if>"<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission.suspectPlagiarised> data-plagiarised="true"</#if>>
-						<td class="check-col"><#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??><input type="checkbox" class="collection-checkbox" name="students" value="${student.user.warwickId!}"></#if></td>
+						<td class="check-col"><input type="checkbox" class="collection-checkbox" name="students" value="${student.user.warwickId!}"></td>
 						<#if department.showStudentName>
 							<td class="student-col toggle-cell">
 								<h6 class="toggle-icon" data-profile="${student.user.warwickId!}">${student.user.firstName}</h6>
