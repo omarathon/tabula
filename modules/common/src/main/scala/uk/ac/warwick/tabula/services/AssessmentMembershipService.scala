@@ -195,17 +195,13 @@ class AssessmentMembershipServiceImpl
 
 }
 
-
-
 class AssessmentMembershipInfo(val items: Seq[MembershipItem]) {
-
-	def	sitsCount = items.count(_.itemType == SitsType)
-	def	totalCount = items.filterNot(_.itemType == ExcludeType).size
-	def includeCount = items.count(_.itemType == IncludeType)
-	def excludeCount = items.count(_.itemType == ExcludeType)
-	def usedIncludeCount = items.count(i => i.itemType == IncludeType && !i.extraneous)
-	def usedExcludeCount = items.count(i => i.itemType == ExcludeType && !i.extraneous)
-
+	val	sitsCount = items.count(_.itemType == SitsType)
+	val	totalCount = items.filterNot(_.itemType == ExcludeType).size
+	val includeCount = items.count(_.itemType == IncludeType)
+	val excludeCount = items.count(_.itemType == ExcludeType)
+	val usedIncludeCount = items.count(i => i.itemType == IncludeType && !i.extraneous)
+	val usedExcludeCount = items.count(i => i.itemType == ExcludeType && !i.extraneous)
 }
 
 trait AssessmentMembershipMethods extends Logging {

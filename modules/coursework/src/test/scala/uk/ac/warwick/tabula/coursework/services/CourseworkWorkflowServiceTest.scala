@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.coursework.services
-import uk.ac.warwick.tabula.{WorkflowStages, Fixtures, TestBase, Features}
-import uk.ac.warwick.tabula.coursework.commands.assignments.ExtensionListItem
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
-import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
+
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand.SubmissionListItem
 import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.data.model.Submission
@@ -104,6 +104,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		// lines were getting a bit long...
 		import CourseworkWorkflowStages._
 		import WorkflowStages._
+		import WorkflowStageHealth._
 		
 		{
 			val p = service.progress(assignment)(workflowItems(feedback=None))

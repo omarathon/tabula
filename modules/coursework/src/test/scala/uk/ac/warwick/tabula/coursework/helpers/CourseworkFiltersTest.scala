@@ -15,10 +15,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, NotInvestigated, SuspectPlagiarised}
-import uk.ac.warwick.tabula.coursework.commands.assignments.Student
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
-import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
-import uk.ac.warwick.tabula.coursework.commands.assignments.ExtensionListItem
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand.SubmissionListItem
 import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
 
 // scalastyle:off magic.number

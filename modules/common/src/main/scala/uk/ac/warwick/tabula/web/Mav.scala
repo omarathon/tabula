@@ -160,4 +160,5 @@ object Mav {
 	def apply(view: View, objects: (String, _)*) = new Mav(view).addObjects(objects: _*)
 	def apply(view: View, objects: Map[String, _]) = new Mav(view).addObjects(objects)
 
+	def empty() = new Mav()
 }

@@ -6,7 +6,7 @@ import org.springframework.validation.ValidationUtils
 
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.CaseObjectEqualityFixes
-import uk.ac.warwick.tabula.coursework.commands.assignments.Student
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand.Student
 import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
@@ -78,7 +78,7 @@ object CourseworkFilters {
 	case object SubmissionNotDownloaded extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions not downloaded by staff"
 		def predicate(item: Student) = item.coursework.enhancedSubmission.exists(!_.downloaded)
-		def applies(assignment: Assignment) = true
+		def applies(assignment: Assignment) = assignment.collectSubmissions
 	}
 	
 	case object SubmittedBetweenDates extends CourseworkFilter {
@@ -324,7 +324,7 @@ object CourseworkFilters {
 	}
 	
 	case object NoFeedback extends ParameterlessCourseworkFilter {
-		def getDescription = "submissions with no feedback"
+		def getDescription = "students with no feedback"
 		def predicate(item: Student) = {
 			!item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).isDefined
 		}
@@ -332,14 +332,14 @@ object CourseworkFilters {
 	}
 	
 	case object FeedbackNotReleased extends ParameterlessCourseworkFilter {
-		def getDescription = "feedbacks not published"
+		def getDescription = "students with unpublished feedback"
 		def predicate(item: Student) =
 			item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.feedback.released)
 		def applies(assignment: Assignment) = true
 	}
 	
 	case object FeedbackNotDownloaded extends ParameterlessCourseworkFilter {
-		def getDescription = "feedbacks not downloaded by students"
+		def getDescription = "students who haven't downloaded their feedback"
 		def predicate(item: Student) =
 			item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.downloaded)
 		def applies(assignment: Assignment) = true

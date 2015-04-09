@@ -49,4 +49,10 @@
 			</#list>
 		</ul>
 	</#if>
+
+	<#if !ownedModuleDepartments?has_content && !examsForMarking?has_content && !ownedDepartments?has_content >
+		<p>
+			You do not currently have permission to manage or mark any exams.
+		</p>
+	</#if>
 </#if>

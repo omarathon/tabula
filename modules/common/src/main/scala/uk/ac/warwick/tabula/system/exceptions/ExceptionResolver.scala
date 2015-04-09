@@ -78,8 +78,8 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 			// Handle unresolvable @PathVariables as a page not found (404). HFC-408
 			case typeMismatch: TypeMismatchException => handle(new ItemNotFoundException(typeMismatch), request, response)
 
-			// Handle request method not supported as a 404
-			case methodNotSupported: HttpRequestMethodNotSupportedException => handle(new ItemNotFoundException(methodNotSupported), request, response)
+			// Handle request method not supported as a 405
+			case methodNotSupported: HttpRequestMethodNotSupportedException => handle(new MethodNotSupportedException(methodNotSupported), request, response)
 
 			// Handle missing servlet param exceptions as 400
 			case missingParam: MissingServletRequestParameterException => handle(new ParameterMissingException(missingParam), request, response)
@@ -143,6 +143,11 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 			case _ => HttpStatus.INTERNAL_SERVER_ERROR
 		}
 
+		val statusReason = interestingException match {
+			case error: UserError => error.httpStatusReason
+			case _ => httpStatus.getReasonPhrase
+		}
+
 		response.foreach { _.setStatus(httpStatus.value()) }
 
 		request.foreach { request =>
@@ -150,7 +155,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 				mav.viewName = null
 				mav.view = new JSONView(Map(
 					"success" -> false,
-					"status" -> httpStatus.getReasonPhrase.toLowerCase.replace(' ', '_'),
+					"status" -> statusReason.toLowerCase.replace(' ', '_'),
 					"errors" -> Array(Map("message" -> interestingException.getMessage))
 				))
 			}

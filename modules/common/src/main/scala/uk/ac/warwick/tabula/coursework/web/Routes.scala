@@ -117,7 +117,7 @@ object Routes {
 
 			def create(module: Module) = context + "/admin/module/%s/assignments/new" format encoded(module.code)
 
-			private def assignmentroot(assignment: Assignment) = context + "/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), assignment.id)
+			private def assignmentroot(assignment: Assignment) = context + "/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), encoded(assignment.id))
 
 			def edit(assignment: Assignment) = assignmentroot(assignment) + "/edit"
 
@@ -133,6 +133,7 @@ object Routes {
 
 			object turnitin {
 				def status(assignment: Assignment) = assignmentroot(assignment) + "/turnitin"
+				def report(submission: Submission, attachment: FileAttachment) = assignmentroot(submission.assignment) + "/turnitin-report/%s".format (encoded(attachment.id))
 			}
 
 			object extension {

@@ -24,7 +24,8 @@ object DateFormats {
 	 * make a formatter with no seconds but still having a timezone.
 	 */
 	final val IsoDateTime = ISODateTimeFormat.dateTimeNoMillis
-	
+	final val IsoDate = ISODateTimeFormat.date
+
 	/** Date-time format used in Formsbuilder-style CSV export */
 	final val CSVDateTime = DateTimeFormat.forPattern(CSVDateTimePattern)
 

@@ -8,4 +8,5 @@ import org.springframework.http.HttpStatus
  */
 trait UserError {
 	val httpStatus: HttpStatus
+	def httpStatusReason = httpStatus.getReasonPhrase
 }

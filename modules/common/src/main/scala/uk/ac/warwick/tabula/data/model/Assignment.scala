@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
+import scala.beans.BeanProperty
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.reflect._
@@ -691,20 +692,22 @@ case class SubmissionsReport(assignment: Assignment) {
 }
 
 /**
- * One stop shop for setting default boolean values for assignment properties
+ * One stop shop for setting default boolean values for assignment properties.
+ *
+ * Includes @BeanProperty to allow JSON binding
  */
 trait BooleanAssignmentProperties {
-	var openEnded: JBoolean = false
-	var collectMarks: JBoolean = true
-	var collectSubmissions: JBoolean = true
-	var restrictSubmissions: JBoolean = false
-	var allowLateSubmissions: JBoolean = true
-	var allowResubmission: JBoolean = true
-	var displayPlagiarismNotice: JBoolean = true
-	var allowExtensions: JBoolean = true
-	var summative: JBoolean = true
-	var dissertation: JBoolean = false
-	var includeInFeedbackReportWithoutSubmissions: JBoolean = false
+	@BeanProperty var openEnded: JBoolean = false
+	@BeanProperty var collectMarks: JBoolean = true
+	@BeanProperty var collectSubmissions: JBoolean = true
+	@BeanProperty var restrictSubmissions: JBoolean = false
+	@BeanProperty var allowLateSubmissions: JBoolean = true
+	@BeanProperty var allowResubmission: JBoolean = true
+	@BeanProperty var displayPlagiarismNotice: JBoolean = true
+	@BeanProperty var allowExtensions: JBoolean = true
+	@BeanProperty var summative: JBoolean = true
+	@BeanProperty var dissertation: JBoolean = false
+	@BeanProperty var includeInFeedbackReportWithoutSubmissions: JBoolean = false
 
 	def copyBooleansTo(assignment: Assignment) {
 		assignment.openEnded = openEnded

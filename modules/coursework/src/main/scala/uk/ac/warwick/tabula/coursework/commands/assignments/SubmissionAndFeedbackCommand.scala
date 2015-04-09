@@ -23,12 +23,52 @@ import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.coursework.commands.feedback.ListFeedbackCommand
 import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
 
+import ListSubmissionsCommand.SubmissionListItem
+import SubmissionAndFeedbackCommand._
+
 object SubmissionAndFeedbackCommand {
 	def apply(module: Module, assignment: Assignment) =
 		new SubmissionAndFeedbackCommand(module, assignment)
 		with AutowiringAssessmentMembershipServiceComponent
 		with AutowiringUserLookupComponent
 		with AutowiringFeedbackForSitsServiceComponent
+
+	case class SubmissionAndFeedbackResults (
+		students:Seq[Student],
+		whoDownloaded: Seq[(User, DateTime)],
+		stillToDownload: Seq[Student],
+		hasPublishedFeedback: Boolean,
+		hasOriginalityReport: Boolean,
+		mustReleaseForMarking: Boolean
+	)
+
+	// Simple object holder
+	case class Student (
+		user: User,
+		progress: Progress,
+		nextStage: Option[WorkflowStage],
+		stages: ListMap[String, WorkflowStages.StageProgress],
+		coursework: WorkflowItems,
+		assignment:Assignment
+	)
+
+	case class WorkflowItems (
+		student: User,
+		enhancedSubmission: Option[SubmissionListItem],
+		enhancedFeedback: Option[FeedbackListItem],
+		enhancedExtension: Option[ExtensionListItem]
+	)
+
+	case class Progress (
+		percentage: Int,
+		t: String,
+		messageCode: String
+	)
+
+	case class ExtensionListItem (
+		extension: Extension,
+		within: Boolean
+	)
 }
 
 abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment)
@@ -197,40 +237,3 @@ abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: 
 		Option(filter) foreach { _.validate(filterParameters.asScala.toMap)(errors) }
 	}
 }
-
-case class SubmissionAndFeedbackResults (
-	students:Seq[Student],
-	whoDownloaded: Seq[(User, DateTime)],
-	stillToDownload: Seq[Student],
-	hasPublishedFeedback: Boolean,
-	hasOriginalityReport: Boolean,
-	mustReleaseForMarking: Boolean
-)
-
-// Simple object holder
-case class Student (
-	user: User,
-	progress: Progress,
-	nextStage: Option[WorkflowStage],
-	stages: ListMap[String, WorkflowStages.StageProgress],
-	coursework: WorkflowItems,
-	assignment: Assignment
-)
-
-case class WorkflowItems (
-	student: User,
-	enhancedSubmission: Option[SubmissionListItem],
-	enhancedFeedback: Option[FeedbackListItem],
-	enhancedExtension: Option[ExtensionListItem]
-)
-
-case class Progress (
-	percentage: Int,
-	t: String,
-	messageCode: String
-)
-
-case class ExtensionListItem (
-	extension: Extension,
-	within: Boolean
-)
