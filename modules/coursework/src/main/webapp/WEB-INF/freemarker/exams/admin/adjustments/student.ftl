@@ -10,6 +10,16 @@
 
 <div class="content feedback-adjustment feedback-summary">
 
+<#if command.feedback?? && command.feedback.latestPrivateOrNonPrivateAdjustment?has_content>
+	<div class="well">
+		<h3>Latest adjustment</h3>
+		<p>
+			Adjusted mark - ${command.feedback.latestPrivateOrNonPrivateAdjustment.mark!}<br>
+			Adjusted grade - ${command.feedback.latestPrivateOrNonPrivateAdjustment.grade!}<br>
+		</p>
+	</div>
+</#if>
+
 <#assign submit_url>
 	<@routes.examFeedbackAdjustmentForm exam markingId(command.student) />
 </#assign>
