@@ -154,7 +154,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 			// 0100001/1 set to 1 (duplicate seat number)
 			verify(membershipService, times(1)).updateSeatNumbers(anArgThat(hasModuleCode("HI33M-30")), isEq(
 				Map(
-					"0100001/1" -> 1
+					"0100001" -> 1
 				)
 			))
 		}
