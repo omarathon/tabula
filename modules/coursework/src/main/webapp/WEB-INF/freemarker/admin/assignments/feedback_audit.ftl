@@ -52,6 +52,14 @@
 									</#if>
 								</div>
 							</div>
+							<div class="mark-grade" >
+								<div>
+									<div class="mg-label">Adjustment made: </div>
+									<div>
+										<span><@fmt.date adminViewableFeedback.uploadedDate /></span>
+									</div>
+								</div>
+							</div>
 							<#if adminViewableFeedback.reason?has_content>
 								<div class="mark-grade" >
 									<div>
