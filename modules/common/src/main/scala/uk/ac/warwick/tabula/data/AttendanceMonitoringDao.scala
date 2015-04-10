@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.FetchMode
 import org.hibernate.criterion.Projections._
 import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.{Order, Projections, Restrictions}
@@ -100,6 +101,7 @@ trait AttendanceMonitoringDao {
 	def hasRecordedCheckpoints(points: Seq[AttendanceMonitoringPoint]): Boolean
 	def removeCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit
 	def saveOrUpdateCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit
+	def getAllAttendance(studentId: String): Seq[AttendanceMonitoringCheckpoint]
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
 	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear, withFlush: Boolean = false): Option[AttendanceMonitoringCheckpointTotal]
@@ -406,6 +408,16 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 
 	def saveOrUpdateCheckpoints(checkpoints: Seq[AttendanceMonitoringCheckpoint]): Unit =
 		checkpoints.foreach(session.saveOrUpdate)
+
+	def getAllAttendance(studentId: String): Seq[AttendanceMonitoringCheckpoint] = {
+		session.newCriteria[AttendanceMonitoringCheckpoint]
+			.createAlias("point", "point") // Don't use the alias, but only return checkpoints with associated points
+			.createAlias("point.scheme", "scheme")
+			.setFetchMode("point", FetchMode.JOIN) // Eagerly get the point
+			.setFetchMode("point.scheme", FetchMode.JOIN) // Eagerly get the scheme
+			.add(is("student.universityId", studentId))
+			.seq
+	}
 
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote] = {
 		session.newCriteria[AttendanceMonitoringNote]

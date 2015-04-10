@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.jobs.reports
 
-import java.io.ByteArrayInputStream
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.reports.profiles.ProfileExportSingleCommand
 import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.{StudentMember, FileAttachment}
 import uk.ac.warwick.tabula.jobs.{Job, JobPrototype}
 import uk.ac.warwick.tabula.services.jobs.JobInstance
-import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringZipServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringFileAttachmentServiceComponent, AutowiringZipServiceComponent}
 
 import scala.collection.JavaConverters._
 
@@ -28,7 +27,8 @@ object ProfileExportJob {
 }
 
 @Component
-class ProfileExportJob extends Job with AutowiringZipServiceComponent with AutowiringFileAttachmentServiceComponent {
+class ProfileExportJob extends Job with AutowiringZipServiceComponent
+	with AutowiringFileAttachmentServiceComponent with AutowiringProfileServiceComponent {
 
 	val identifier = ProfileExportJob.identifier
 
@@ -41,23 +41,23 @@ class ProfileExportJob extends Job with AutowiringZipServiceComponent with Autow
 		implicit private val _job: JobInstance = job
 
 		def run(): Unit = {
-			val students = job.getStrings(ProfileExportJob.StudentKey)
+			val studentIDs = job.getStrings(ProfileExportJob.StudentKey)
+			val students = profileService.getAllMembersWithUniversityIds(studentIDs).flatMap{
+				case student: StudentMember => Some(student)
+				case _ => None
+			}
+			val academicYear = AcademicYear.parse(job.getString(ProfileExportJob.AcademicYearKey))
 
 			updateProgress(0)
 
-			val results: Map[String, Seq[FileAttachment]] = students.zipWithIndex.map{case(universityId, index) =>
-				updateStatus(ProfileExportJob.status(universityId))
+			val results: Map[String, Seq[FileAttachment]] = students.zipWithIndex.map{case(student, index) =>
+				updateStatus(ProfileExportJob.status(student.universityId))
 
-				// TAB-3428 - do something useful
-				Thread.sleep(10000)
-				val attachment = new FileAttachment
-				attachment.setName(s"$universityId.txt")
-				attachment.uploadedData = new ByteArrayInputStream(s"Profile for $universityId".getBytes)
-				fileDao.saveTemporary(attachment)
-				val result = (universityId, Seq(attachment))
+				val result = ProfileExportSingleCommand(student, academicYear).apply()
 
 				updateProgress(((index + 1).toFloat / students.size.toFloat * 100).toInt)
-				result
+
+				student.universityId -> result
 			}.toMap
 
 			updateProgress(100)
