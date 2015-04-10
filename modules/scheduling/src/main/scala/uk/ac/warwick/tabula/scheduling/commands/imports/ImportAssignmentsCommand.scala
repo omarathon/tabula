@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.SprCode
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
@@ -170,7 +171,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 							))
 							None
 						} else {
-							Option((sprCode, studentRegistrations.head.seatNumber.toInt))
+							Option((SprCode.getUniversityId(sprCode), studentRegistrations.head.seatNumber.toInt))
 						}
 					}
 					assessmentMembershipService.updateSeatNumbers(group, seatMap)
