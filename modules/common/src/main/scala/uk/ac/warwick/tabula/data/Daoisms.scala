@@ -125,7 +125,10 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 				session
 			}
 
-	protected def session = optionalSession.orNull
+	protected def session = optionalSession.getOrElse({
+		logger.error("Trying to access session, but it is null")
+		null
+	})
 
 	protected def optionalSessionWithoutFreshFilters =
 		_sessionFactory.flatMap { sf => Try(sf.getCurrentSession).toOption }

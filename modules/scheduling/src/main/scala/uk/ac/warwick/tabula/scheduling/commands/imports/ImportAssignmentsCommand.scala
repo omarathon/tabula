@@ -120,10 +120,12 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 			}
 
 			// Empty groups that we haven't seen for academic years
-			val groupsToEmpty = assessmentMembershipService.getUpstreamAssessmentGroupsNotIn(
-				ids = notEmptyGroupIds.filter { _.hasText }.toSeq,
-				academicYears = assignmentImporter.yearsToImport
-			)
+			val groupsToEmpty = transactional() {
+				assessmentMembershipService.getUpstreamAssessmentGroupsNotIn(
+					ids = notEmptyGroupIds.filter { _.hasText }.toSeq,
+					academicYears = assignmentImporter.yearsToImport
+				)
+			}
 			logger.info(s"${groupsToEmpty.size} groups needs emptying")
 			count = 0
 			groupsToEmpty.foreach { emptyGroup =>
