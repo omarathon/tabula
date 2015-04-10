@@ -28,29 +28,28 @@ class AddExamController extends ExamsController {
 		 @PathVariable("academicYear") academicYear : AcademicYear) = AddExamCommand(mandatory(module), mandatory(academicYear))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@ModelAttribute("command") cmd: AddExamCommand, @PathVariable("module") module: Module) = {
+	def showForm(@ModelAttribute("command") cmd: AddExamCommand) = {
 		cmd.afterBind()
 		Mav("exams/admin/new",
 			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
 			"assessmentGroups" -> cmd.assessmentGroups,
-			"department" -> module.adminDepartment,
-			"markingWorkflows" -> module.adminDepartment.markingWorkflows.filter(_.validForExams),
-			"assessmentGroups" -> cmd.assessmentGroups
+			"department" -> cmd.module.adminDepartment,
+			"markingWorkflows" -> cmd.module.adminDepartment.markingWorkflows.filter(_.validForExams)
 		).crumbs(
 				Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear),
 				Breadcrumbs.Module(cmd.module, cmd.academicYear)
 		)
 	}
 
-
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: AddExamCommand,
-						 @PathVariable("module") module: Module,
-						 errors: Errors) = {
+	def submit(
+		@Valid @ModelAttribute("command") cmd: AddExamCommand,
+		errors: Errors
+	) = {
 		cmd.afterBind()
 		if (errors.hasErrors) {
-			showForm(cmd, module)
+			showForm(cmd)
 		} else {
 			cmd.apply()
 			Redirect(Routes.admin.module(cmd.module, cmd.academicYear))
