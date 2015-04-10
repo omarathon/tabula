@@ -65,11 +65,11 @@
 				<#local studentDetails><span data-profile="${student.user.warwickId!}"><#if department.showStudentName>${student.user.fullName}<#else>${student.user.warwickId!}</#if></span></#local>
 				<#local firstMarker="first marker" />
 				<#local secondMarker="second marker" />
-				<#assign fm = assignment.getStudentsFirstMarker(student.user.warwickId) />
+				<#assign fm = assignment.getStudentsFirstMarker(student.user.warwickId)!"" />
 				<#if fm?has_content>
 					<#local firstMarker><span data-profile="${fm.warwickId!}">${fm.fullName}</span></#local>
 				</#if>
-				<#assign sm = assignment.getStudentsSecondMarker(student.user.warwickId) />
+				<#assign sm = assignment.getStudentsSecondMarker(student.user.warwickId)!"" />
 				<#if sm?has_content>
 					<#local secondMarker><span data-profile="${sm.warwickId!}">${sm.fullName}</span></#local>
 				</#if>
@@ -185,7 +185,7 @@
 
 								<#if student.stages?keys?seq_contains('FirstMarking')>
 
-									<#assign fm = assignment.getStudentsFirstMarker(student.user.warwickId) />
+									<#assign fm = assignment.getStudentsFirstMarker(student.user.warwickId)!"" />
 									<#if fm?has_content>
 										<#local firstMarker><span data-profile="${fm.warwickId!}">${fm.fullName}</span></#local>
 									</#if>
@@ -202,7 +202,7 @@
 
 								<#if student.stages?keys?seq_contains('SecondMarking')>
 
-									<#assign sm = assignment.getStudentsSecondMarker(student.user.warwickId) />
+									<#assign sm = assignment.getStudentsSecondMarker(student.user.warwickId)!"" />
 									<#if sm?has_content>
 										<#local secondMarker><span data-profile="${sm.warwickId!}">${sm.fullName}</span></#local>
 									</#if>
@@ -218,7 +218,7 @@
 								</#if>
 
 								<#if student.stages?keys?seq_contains('Moderation')>
-									<#assign sm = assignment.getStudentsSecondMarker(student.user.warwickId) />
+									<#assign sm = assignment.getStudentsSecondMarker(student.user.warwickId)!"" />
 									<#if sm?has_content>
 										<#local secondMarker><span data-profile="${sm.warwickId!}">${sm.fullName}</span></#local>
 									</#if>
@@ -234,7 +234,7 @@
 								</#if>
 
 								<#if student.stages?keys?seq_contains('FinaliseSeenSecondMarking')>
-									<#assign fm = assignment.getStudentsFirstMarker(student.user.warwickId) />
+									<#assign fm = assignment.getStudentsFirstMarker(student.user.warwickId)!"" />
 									<#if fm?has_content>
 										<#local firstMarker><span data-profile="${fm.warwickId!}">${fm.fullName}</span></#local>
 									</#if>
