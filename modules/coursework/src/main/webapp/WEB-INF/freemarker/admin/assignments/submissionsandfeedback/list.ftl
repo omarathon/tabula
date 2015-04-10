@@ -217,12 +217,12 @@
 							</#if>
 							<#if assignment.markingWorkflow??>
 								<td>
-									<#if assignment.getStudentsFirstMarker(student.user.warwickId)?has_content>
+									<#if (assignment.getStudentsFirstMarker(student.user.warwickId)!"")?has_content>
 										${assignment.getStudentsFirstMarker(student.user.warwickId).fullName}
 									</#if>
 								</td>
 								<td>
-									<#if assignment.getStudentsSecondMarker(student.user.warwickId)?has_content>
+									<#if (assignment.getStudentsSecondMarker(student.user.warwickId)!"")?has_content>
 										${assignment.getStudentsSecondMarker(student.user.warwickId).fullName}
 									</#if>
 								</td>
