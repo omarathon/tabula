@@ -51,7 +51,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 	}
 
 	/**
-	 * Check that validation allows either mark or grade to be non-empty
+	 * Check that validation disallows grade to be non-empty when mark is empty
 	 */
 	@Transactional @Test
 	def gradeButEmptyMarkField() {
@@ -94,7 +94,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 			marks5.actualGrade = ""
 
 			validator.postExtractValidation(errors)
-			validator.marks.count(_.isValid) should be (1)
+			validator.marks.count(_.isValid) should be (0)
 		}
 	}
 

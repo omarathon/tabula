@@ -59,6 +59,9 @@ trait ValidatesMarkItem {
 					errors.rejectValue("actualMark", "actualMark.format")
 					hasErrors = true
 			}
+		} else if (mark.actualGrade.hasText) {
+			errors.rejectValue("actualMark", "NotEmpty")
+			hasErrors = true
 		}
 
 		// validate grade is department setting is true
