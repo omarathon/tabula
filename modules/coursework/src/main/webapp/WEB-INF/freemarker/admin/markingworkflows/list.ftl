@@ -1,6 +1,13 @@
 <h1>Marking workflows<#if isExams> available for exams</#if></h1>
 
-<p>Marking workflows can be created here and then used by one or more assignments to define how marking is done for that assignment.</p>
+<#if isExams>
+	<#assign assessmentType='exam'/>
+<#else>
+	<#assign assessmentType='assignment'/>
+</#if>
+
+<p>You can create marking workflows here and then
+	use them with one or more ${assessmentType}s to define how marking is done for that ${assessmentType}.</p>
 
 <#if !markingWorkflowInfo?has_content>
 <p>
