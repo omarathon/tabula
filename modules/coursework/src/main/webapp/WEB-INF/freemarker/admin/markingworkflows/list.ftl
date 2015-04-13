@@ -1,4 +1,4 @@
-<h1>Marking workflows</h1>
+<h1>Marking workflows<#if isExams> available for exams</#if></h1>
 
 <p>Marking workflows can be created here and then used by one or more assignments to define how marking is done for that assignment.</p>
 
