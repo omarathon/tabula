@@ -51,14 +51,16 @@ class AddMarksCommandTest extends TestBase with Mockito {
 	}
 
 	/**
-	 * Check that validation disallows grade to be non-empty when mark is empty
+	 * Check that validation disallows grade to be non-empty when mark is empty,
+	 * if grade validation is set.
 	 */
 	@Transactional @Test
-	def gradeButEmptyMarkField() {
+	def gradeButEmptyMarkFieldGradeValidation() {
 		withUser("cusebr") {
 			val currentUser = RequestInfo.fromThread.get.user
 			val validator = new PostExtractValidation with AdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with AdminAddMarksCommandValidation {
 				val module: Module = thisAssignment.module
+				module.adminDepartment.assignmentGradeValidation = true
 				val assessment: Assignment = thisAssignment
 				val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
 				val userLookup: UserLookupService = smartMock[UserLookupService]
@@ -95,6 +97,56 @@ class AddMarksCommandTest extends TestBase with Mockito {
 
 			validator.postExtractValidation(errors)
 			validator.marks.count(_.isValid) should be (0)
+		}
+	}
+
+	/**
+	 * Check that validation allows grade to be non-empty when mark is empty,
+	 * if grade validation is not set.
+	 */
+	@Transactional @Test
+	def gradeButEmptyMarkFieldNoGradeValidation() {
+		withUser("cusebr") {
+			val currentUser = RequestInfo.fromThread.get.user
+			val validator = new PostExtractValidation with AdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with AdminAddMarksCommandValidation {
+				val module: Module = thisAssignment.module
+				module.adminDepartment.assignmentGradeValidation = false
+				val assessment: Assignment = thisAssignment
+				val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
+				val userLookup: UserLookupService = smartMock[UserLookupService]
+				val submitter: CurrentUser = null
+			}
+			validator.userLookup.getUserByWarwickUniId("0672088") answers { id =>
+				currentUser.apparentUser
+			}
+
+			val errors = new BindException(validator, "command")
+
+			val marks1 = validator.marks.get(0)
+			marks1.universityId = "0672088"
+			marks1.actualMark = ""
+			marks1.actualGrade = "EXCELLENT"
+
+			val marks2 = validator.marks.get(1)
+			marks2.universityId = "55555"
+			marks2.actualMark = "65"
+
+			val marks3 = validator.marks.get(2)
+			marks3.universityId = "1235"
+			marks3.actualMark = "A"
+
+			val marks4 = validator.marks.get(3)
+			marks4.universityId = ""
+			marks4.actualMark = "80"
+			marks4.actualGrade = "EXCELLENT"
+
+			val marks5 = validator.marks.get(4)
+			marks5.universityId = "0672088"
+			marks5.actualMark = ""
+			marks5.actualGrade = ""
+
+			validator.postExtractValidation(errors)
+			validator.marks.count(_.isValid) should be (1)
 		}
 	}
 

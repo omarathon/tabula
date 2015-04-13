@@ -59,8 +59,8 @@ trait ValidatesMarkItem {
 					errors.rejectValue("actualMark", "actualMark.format")
 					hasErrors = true
 			}
-		} else if (mark.actualGrade.hasText) {
-			errors.rejectValue("actualMark", "NotEmpty")
+		} else if (module.adminDepartment.assignmentGradeValidation && mark.actualGrade.hasText) {
+			errors.rejectValue("actualMark", "actualMark.validateGrade.adjustedGrade")
 			hasErrors = true
 		}
 
