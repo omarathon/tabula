@@ -57,7 +57,7 @@ trait AssessmentMembershipDao {
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
-	def emptyMembers(academicYears: Seq[AcademicYear]): Int
+	def emptyMembers(academicYears: Seq[AcademicYear], ignore:Seq[String]): Int
 	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit
 
 	def countPublishedFeedback(assignment: Assignment): Int
@@ -253,13 +253,15 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			.add(safeIn("academicYear", academicYears))
 			.seq
 
-	def emptyMembers(academicYears: Seq[AcademicYear]) = {
+	def emptyMembers(academicYears: Seq[AcademicYear], ignore:Seq[String]) = {
 		assert(academicYears.nonEmpty, "Can only empty UAGs when academic years are specified")
+		val ignoreClause = if (ignore.nonEmpty) "and id not in (:ignore)" else ""
 		session.createSQLQuery(
 			s"""delete from usergroupstatic where group_id in (
-					select membersgroup_id from UpstreamAssessmentGroup where academicyear in (:academicYears)
+					select membersgroup_id from UpstreamAssessmentGroup where academicyear in :academicYears $ignoreClause
 			)""")
 			.setParameterList("academicYears", academicYears.map(_.startYear).asJava)
+			.setParameterList("ignore", ignore.asJava)
 			.executeUpdate
 	}
 

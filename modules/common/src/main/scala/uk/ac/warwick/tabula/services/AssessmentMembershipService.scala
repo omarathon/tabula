@@ -44,8 +44,8 @@ trait AssessmentMembershipService {
 
 	def save(assignment: AssessmentComponent): AssessmentComponent
 	def save(group: UpstreamAssessmentGroup): Unit
-	// empty the usergroups for all assessmentgroups in the specified academic years.
-	def emptyMembers(academicYears: Seq[AcademicYear]): Int
+	// empty the usergroups for all assessmentgroups in the specified academic years. Skip any groups specified in ignore
+	def emptyMembers(academicYears: Seq[AcademicYear], ignore:Seq[String]): Int
 	def replaceMembers(group: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]): UpstreamAssessmentGroup
 	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit
 
@@ -110,8 +110,8 @@ class AssessmentMembershipServiceImpl
 		(autoEnrolled ++ manuallyEnrolled).distinct
 	}
 
-	def emptyMembers(academicYears: Seq[AcademicYear]) =
-		dao.emptyMembers(academicYears: Seq[AcademicYear])
+	def emptyMembers(academicYears: Seq[AcademicYear], ignore:Seq[String]) =
+		dao.emptyMembers(academicYears: Seq[AcademicYear], ignore:Seq[String])
 
 	def replaceMembers(template: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]) = {
 		if (debugEnabled) debugReplace(template, registrations.map(_.universityId))

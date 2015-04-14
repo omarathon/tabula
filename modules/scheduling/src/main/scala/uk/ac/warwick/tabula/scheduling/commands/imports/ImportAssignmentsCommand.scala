@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{Daoisms, SessionComponent}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
 import uk.ac.warwick.tabula.services._
@@ -42,7 +43,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
 	def applyInternal() {
 		benchmark("ImportAssessment") {
-			doAssignments()
+//			doAssignments()
 			logger.debug("Imported AssessmentComponents. Importing assessment groups...")
 			doGroups()
 			doGroupMembers()
@@ -92,12 +93,6 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 			var registrations = List[UpstreamModuleRegistration]()
 			var notEmptyGroupIds = Set[String]()
 
-			transactional() {
-				logger.info("Emptying members for all groups")
-				val numEmptied = assessmentMembershipService.emptyMembers(assignmentImporter.yearsToImport)
-				logger.info(s"Emptied users from $numEmptied groups")
-			}
-
 			var count = 0
 			assignmentImporter.allMembers { r =>
 				if (registrations.nonEmpty && r.differentGroup(registrations.head)) {
@@ -123,6 +118,14 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 					save(registrations)
 						.foreach { uag => notEmptyGroupIds = notEmptyGroupIds + uag.id }
 				}
+			}
+
+			// empty unseen groups
+			transactional() {
+				val dontEmpty = notEmptyGroupIds.filter { _.hasText }.toSeq
+				logger.info("Emptying members for unseen groups")
+				val numEmptied = assessmentMembershipService.emptyMembers(assignmentImporter.yearsToImport, dontEmpty)
+				logger.info(s"Emptied users from $numEmptied groups")
 			}
 
 		}
