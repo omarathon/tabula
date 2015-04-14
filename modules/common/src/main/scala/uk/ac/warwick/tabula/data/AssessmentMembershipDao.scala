@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model._
 import org.hibernate.criterion.{Order, Restrictions}
@@ -56,6 +57,7 @@ trait AssessmentMembershipDao {
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
 
+	def emptyMembers(academicYears: Seq[AcademicYear]): Int
 	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit
 
 	def countPublishedFeedback(assignment: Assignment): Int
@@ -76,7 +78,7 @@ trait AssessmentMembershipDao {
 }
 
 @Repository
-class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
+class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms with Logging {
 
 	def getSITSEnrolledAssignments(user: User): Seq[Assignment] =
 		session.newQuery[Assignment]("""select a
@@ -250,6 +252,16 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 			.add(not(safeIn("id", ids)))
 			.add(safeIn("academicYear", academicYears))
 			.seq
+
+	def emptyMembers(academicYears: Seq[AcademicYear]) = {
+		assert(academicYears.nonEmpty, "Can only empty UAGs when academic years are specified")
+		session.createSQLQuery(
+			s"""delete from usergroupstatic where group_id in (
+					select membersgroup_id from UpstreamAssessmentGroup where academicyear in (:academicYears)
+			)""")
+			.setParameterList("academicYears", academicYears.map(_.startYear).asJava)
+			.executeUpdate
+	}
 
 	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit = {
 		group.sortedMembers.foreach(member => {
