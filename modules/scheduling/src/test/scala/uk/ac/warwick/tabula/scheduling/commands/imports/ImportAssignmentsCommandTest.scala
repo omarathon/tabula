@@ -117,6 +117,9 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 				)
 			))
 
+			// The bug is that we don't update any group we don't have moduleregistrations for.
+			verify(membershipService, times(0)).replaceMembers(anArgThat(hasModuleCode("HI900-30")), isEq(Nil))
+
 		}
 	}
 
