@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model._
 import org.hibernate.criterion.{Order, Restrictions}
@@ -255,26 +256,25 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 	def emptyMembers(academicYears: Seq[AcademicYear], ignore:Seq[String]) = {
 		assert(academicYears.nonEmpty, "Can only empty UAGs when academic years are specified")
 
-		val partitionedIgnoreIdsWithIndex = ignore.grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
-		val ignoreClause = if(ignore.nonEmpty) {
-			"and (" + partitionedIgnoreIdsWithIndex.map {
-				case (ids, index) => s"id not in (:ignoreBatch${index.toString})"
-			}.mkString(" or ") + ")"
+		val baseQuery = s"""delete from usergroupstatic where group_id in (
+			select membersgroup_id from UpstreamAssessmentGroup where academicyear in :academicYears
+		)"""
+
+		if (ignore.nonEmpty) {
+			val partitionedIgnoreIds = ignore.grouped(Daoisms.MaxInClauseCount)
+			partitionedIgnoreIds.map(ignoreBatch => {
+				transactional() {
+					session.createSQLQuery(s"$baseQuery and id not in (:ignore)")
+						.setParameterList("academicYears", academicYears.map(_.startYear).asJava)
+						.setParameterList("ignore", ignoreBatch.asJava)
+						.executeUpdate
+				}
+			}).sum
 		} else {
-			""
+			session.createSQLQuery(s"$baseQuery")
+				.setParameterList("academicYears", academicYears.map(_.startYear).asJava)
+				.executeUpdate
 		}
-
-		val query = session.createSQLQuery(
-			s"""delete from usergroupstatic where group_id in (
-					select membersgroup_id from UpstreamAssessmentGroup where academicyear in :academicYears $ignoreClause
-			)""")
-			.setParameterList("academicYears", academicYears.map(_.startYear).asJava)
-
-		partitionedIgnoreIdsWithIndex.foreach {
-			case (ids, index) => query.setParameterList(s"ignoreBatch${index.toString}", ids.asJava)
-		}
-
-		query.executeUpdate
 	}
 
 	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit = {
