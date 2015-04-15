@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model._
 import org.hibernate.criterion.{Order, Restrictions}
@@ -55,9 +56,9 @@ trait AssessmentMembershipDao {
 	 * assessment group code, which most of the time is just 1.
 	 */
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
-	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
-	def emptyMembers(academicYears: Seq[AcademicYear], ignore:Seq[String]): Int
+	def emptyMembers(groupsToEmpty:Seq[String]): Int
 	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit
 
 	def countPublishedFeedback(assignment: Assignment): Int
@@ -78,7 +79,7 @@ trait AssessmentMembershipDao {
 }
 
 @Repository
-class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
+class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms with Logging {
 
 	def getSITSEnrolledAssignments(user: User): Seq[Assignment] =
 		session.newQuery[Assignment]("""select a
@@ -247,34 +248,29 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 			.seq
 	}
 
-	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
+	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] =
 		session.newCriteria[UpstreamAssessmentGroup]
 			.add(not(safeIn("id", ids)))
 			.add(safeIn("academicYear", academicYears))
 			.seq
+			.map(_.id)
 
-	def emptyMembers(academicYears: Seq[AcademicYear], ignore:Seq[String]) = {
-		assert(academicYears.nonEmpty, "Can only empty UAGs when academic years are specified")
+	def emptyMembers(groupsToEmpty:Seq[String]) = {
+		var count = 0
+		val partitionedIds = groupsToEmpty.grouped(Daoisms.MaxInClauseCount)
+		partitionedIds.map(batch => {
+			val numDeleted = transactional() {
+				session.createSQLQuery(s"""delete from usergroupstatic where group_id in (
+						select membersgroup_id from UpstreamAssessmentGroup where id in (:batch)
+					)""")
+					.setParameterList("batch", batch.asJava)
+					.executeUpdate
+			}
+			count += 1000
+			logger.info(s"Emptied $count groups")
+			numDeleted
+		}).sum
 
-		val baseQuery = s"""delete from usergroupstatic where group_id in (
-			select membersgroup_id from UpstreamAssessmentGroup where academicyear in :academicYears
-		)"""
-
-		if (ignore.nonEmpty) {
-			val partitionedIgnoreIds = ignore.grouped(Daoisms.MaxInClauseCount)
-			partitionedIgnoreIds.map(ignoreBatch => {
-				transactional() {
-					session.createSQLQuery(s"$baseQuery and id not in (:ignore)")
-						.setParameterList("academicYears", academicYears.map(_.startYear).asJava)
-						.setParameterList("ignore", ignoreBatch.asJava)
-						.executeUpdate
-				}
-			}).sum
-		} else {
-			session.createSQLQuery(s"$baseQuery")
-				.setParameterList("academicYears", academicYears.map(_.startYear).asJava)
-				.executeUpdate
-		}
 	}
 
 	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit = {
