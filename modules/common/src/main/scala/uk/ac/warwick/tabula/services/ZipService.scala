@@ -180,7 +180,12 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 
 	def getProfileExportZip(results: Map[String, Seq[FileAttachment]]): File = {
 		createUnnamedZip(results.map{case(uniId, files) =>
-			ZipFolderItem(uniId, files.map(f => ZipFileItem(f.name, f.dataStream, f.actualDataLength)))
+			ZipFolderItem(uniId, files.zipWithIndex.map{case(file, index) =>
+				if (index == 0)
+					ZipFileItem(file.name, file.dataStream, file.actualDataLength)
+				else
+					ZipFileItem(file.id + "-" + file.name, file.dataStream, file.actualDataLength)
+			})
 		}.toSeq)
 	}
 }

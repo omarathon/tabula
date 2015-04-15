@@ -1,14 +1,12 @@
 package uk.ac.warwick.tabula.jobs.reports
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.reports.profiles.ProfileExportSingleCommand
-import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.{StudentMember, FileAttachment}
+import uk.ac.warwick.tabula.data.model.{FileAttachment, StudentMember}
 import uk.ac.warwick.tabula.jobs.{Job, JobPrototype}
 import uk.ac.warwick.tabula.services.jobs.JobInstance
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringFileAttachmentServiceComponent, AutowiringZipServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringProfileServiceComponent, AutowiringZipServiceComponent}
 
 import scala.collection.JavaConverters._
 
@@ -32,9 +30,6 @@ class ProfileExportJob extends Job with AutowiringZipServiceComponent
 
 	val identifier = ProfileExportJob.identifier
 
-	// TODO remove this
-	@Autowired var fileDao: FileDao = _
-
 	override def run(implicit job: JobInstance): Unit = new Runner(job).run()
 
 	class Runner(job: JobInstance) {
@@ -53,7 +48,7 @@ class ProfileExportJob extends Job with AutowiringZipServiceComponent
 			val results: Map[String, Seq[FileAttachment]] = students.zipWithIndex.map{case(student, index) =>
 				updateStatus(ProfileExportJob.status(student.universityId))
 
-				val result = ProfileExportSingleCommand(student, academicYear).apply()
+				val result = ProfileExportSingleCommand(student, academicYear, job.user).apply()
 
 				updateProgress(((index + 1).toFloat / students.size.toFloat * 100).toInt)
 
