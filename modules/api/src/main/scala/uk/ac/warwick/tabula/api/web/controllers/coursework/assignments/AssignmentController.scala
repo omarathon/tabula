@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.api.web.controllers.coursework.assignments
 
+import javax.validation.Valid
+
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
@@ -7,7 +9,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{DateFormats, WorkflowStageHealth}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand
 import uk.ac.warwick.tabula.coursework.helpers.{CourseworkFilters, CourseworkFilter}
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
@@ -29,12 +31,14 @@ class AssignmentController extends ApiController
 trait GetAssignmentApi {
 	self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
 
+	validatesSelf[SelfValidating]
+
 	@ModelAttribute("getCommand")
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
 		SubmissionAndFeedbackCommand(module, assignment)
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def list(@ModelAttribute("getCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment) = {
+	def list(@Valid @ModelAttribute("getCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment) = {
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else {

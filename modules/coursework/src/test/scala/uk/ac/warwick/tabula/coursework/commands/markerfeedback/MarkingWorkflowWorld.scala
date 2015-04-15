@@ -40,6 +40,7 @@ trait MarkingWorkflowWorld extends TestHelpers {
 	markingWorkflow.secondMarkers = makeUserGroup("cuslat", "cuday")
 	markingWorkflow.userLookup = mockUserLookup
 	assignment.markingWorkflow = markingWorkflow
+	assignment.userLookup = mockUserLookup
 
 	val firstMarkers: JList[FirstMarkersMap] = JArrayList()
 	firstMarkers.addAll(Seq(
@@ -106,6 +107,7 @@ trait MarkingWorkflowWorld extends TestHelpers {
 	def makeUserGroup(users: String*): UserGroup = {
 		val ug = UserGroup.ofUsercodes
 		ug.includedUserIds = users
+		ug.userLookup = mockUserLookup
 		ug
 	}
 }

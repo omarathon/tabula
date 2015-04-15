@@ -35,6 +35,19 @@
 
 </#if>
 
+<#if command.feedback?? && command.feedback.latestPrivateOrNonPrivateAdjustment?has_content>
+	<div class="well">
+		<h3>Latest adjustment</h3>
+		<p>
+			Adjusted mark - ${command.feedback.latestPrivateOrNonPrivateAdjustment.mark!}<br>
+			Adjusted grade - ${command.feedback.latestPrivateOrNonPrivateAdjustment.grade!}<br>
+			<#if command.feedback.latestPrivateOrNonPrivateAdjustment.markType.code == "private">
+				This is a private adjustment that is not visible to the student
+			</#if>
+		</p>
+	</div>
+</#if>
+
 <#assign submit_url>
 	<@routes.feedbackAdjustmentForm assignment markingId(command.student) />
 </#assign>

@@ -169,7 +169,7 @@ class ExcelBuilder(val items: Seq[Student], val assignment: Assignment, val modu
 	}
 	
 	def formatWorksheet(sheet: XSSFSheet) = {
-	    (0 to headers.size) map sheet.autoSizeColumn
+	    (0 to headers.size) foreach sheet.autoSizeColumn
 	}
 	
 	// trim the assignment name down to 20 characters. Excel sheet names must be 31 chars or less so
@@ -290,7 +290,7 @@ trait SubmissionAndFeedbackExport {
 		case Some(item) => Map(
 			"late" -> item.submission.isLate, 
 			"within-extension" -> item.submission.isAuthorisedLate, 
-			"markable" -> (if (item.submission.id.hasText) item.submission.isReleasedForMarking else "")
+			"markable" -> assignment.isReleasedForMarking(item.submission.universityId)
 		)
 		case _ => student.coursework.enhancedExtension match {
 			case Some(item) =>

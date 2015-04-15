@@ -255,7 +255,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 		group.sortedMembers.foreach(member => {
 			seatNumberMap.get(member.memberId).foreach(seatNumber => {
 				member.position = Option(seatNumber)
-				session.save(member)
+				session.saveOrUpdate(member)
 			})
 		})
 	}

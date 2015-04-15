@@ -40,16 +40,13 @@ class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
 
 	override def applyInternal() = {
 		val exam = new Exam
-		exam.name = name
-		exam.module = module
+
+		this.copyTo(exam)
+
 		exam.academicYear = academicYear
+		exam.module = module
 		exam.released = false
 
-		exam.assessmentGroups.clear()
-		exam.assessmentGroups.addAll(assessmentGroups)
-		for (group <- exam.assessmentGroups.asScala if group.exam == null) {
-			group.exam = exam
-		}
 		assessmentService.save(exam)
 		exam
 	}
@@ -65,7 +62,11 @@ trait AddExamPermissions extends RequiresPermissionsChecking with PermissionsChe
 
 }
 
-trait ExamState {
+trait ExamState extends UpdatesStudentMembership {
+
+	self: AssessmentServiceComponent with UserLookupComponent with HasAcademicYear with SpecifiesGroupType
+		with AssessmentMembershipServiceComponent =>
+
 	val updateStudentMembershipGroupIsUniversityIds:Boolean=false
 	// bind variables
 	var name: String = _
@@ -73,6 +74,18 @@ trait ExamState {
 	def module: Module
 	def academicYear: AcademicYear
 	var markingWorkflow: MarkingWorkflow = _
+
+	def copyTo(exam: Exam){
+		exam.name = name
+		exam.markingWorkflow = markingWorkflow
+
+		exam.assessmentGroups.clear()
+		exam.assessmentGroups.addAll(assessmentGroups)
+		for (group <- assessmentGroups.asScala if group.exam == null) {
+			group.exam = exam
+		}
+	}
+
 }
 
 

@@ -16,6 +16,8 @@
 	<#if command.submission?? && !markingStage>
 		<#assign submission = command.submission />
 		<#include "_submission_summary.ftl">
+	<#elseif !markingStage>
+		<#include "_unsubmitted_notice.ftl">
 	</#if>
 	<#if (isMarking!false) && (isRejected!false)>
 		<#include "_rejection_summary.ftl">

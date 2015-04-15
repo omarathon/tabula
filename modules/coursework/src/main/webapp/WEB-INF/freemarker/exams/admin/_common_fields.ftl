@@ -9,22 +9,30 @@
 	</span>
 </@form.labelled_row>
 
-<#if features.markingWorkflows && markingWorkflows?has_content>
-	<#assign disabled = !(canUpdateMarkingWorkflow!true)>
+<#if features.markingWorkflows>
 	<@form.labelled_row "markingWorkflow" "Marking workflow">
-		<@f.select path="markingWorkflow" disabled=disabled>
-			<@f.option value="" label="None"/>
-			<#list markingWorkflows as markingWorkflow>
-				<@f.option value="${markingWorkflow.id}" label="${markingWorkflow.name} (${markingWorkflow.markingMethod.description})"/>
-			</#list>
-		</@f.select>
-	<div class="help-block">
-		<#if disabled>
-			<span class="warning">You cannot change the marking workflow for this exam.</span>
+		<#assign disabled = !(canUpdateMarkingWorkflow!true)>
+		<#if markingWorkflows?has_content>
+				<@f.select path="markingWorkflow" disabled=disabled>
+					<@f.option value="" label="None"/>
+					<#list markingWorkflows as markingWorkflow>
+						<@f.option value="${markingWorkflow.id}" label="${markingWorkflow.name} (${markingWorkflow.markingMethod.description})"/>
+					</#list>
+				</@f.select>
 		<#else>
-			Marking workflows define how and by whom the exam will be marked. They are set up for the department by a Departmental Administrator <#if can.do("MarkingWorkflow.Manage", department)><a href="<@routes.markingworkflowlist department />">here</a></#if>.
+			<p>
+				<span class="uneditable-value">
+					There are no appropriate workflows available. Only single marker workflows can be used for exams.
+				</span>
+			</p>
 		</#if>
-	</div>
+		<div class="help-block">
+			<#if disabled>
+				<span class="warning">You cannot change the marking workflow for this exam.</span>
+			<#else>
+				Marking workflows define how and by whom the exam will be marked. They are set up for the department by a Departmental Administrator <#if can.do("MarkingWorkflow.Manage", department)><a href="<@routes.markingworkflowlist department />">here</a></#if>.
+			</#if>
+		</div>
 	</@form.labelled_row>
 </#if>
 
