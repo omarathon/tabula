@@ -63,6 +63,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
 		val hi900_30 = {
 			val g = new UpstreamAssessmentGroup
+			g.id = "hi900_30"
 			g.moduleCode = "HI900-30"
 			g.occurrence = "A"
 			g.assessmentGroup = "A"
@@ -99,7 +100,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI100-30", "A")
 			)
 
-			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq(hi900_30)
+			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
 
 			command.doGroupMembers()
 
@@ -135,7 +136,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 				UpstreamModuleRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A")
 			)
 
-			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq(hi900_30)
+			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
 
 			command.doGroupMembers()
 
