@@ -254,14 +254,27 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 
 	def emptyMembers(academicYears: Seq[AcademicYear], ignore:Seq[String]) = {
 		assert(academicYears.nonEmpty, "Can only empty UAGs when academic years are specified")
-		val ignoreClause = if (ignore.nonEmpty) "and id not in (:ignore)" else ""
-		session.createSQLQuery(
+
+		val partitionedIgnoreIdsWithIndex = ignore.grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
+		val ignoreClause = if(ignore.nonEmpty) {
+			"and (" + partitionedIgnoreIdsWithIndex.map {
+				case (ids, index) => s"id not in (:ignoreBatch${index.toString})"
+			}.mkString(" or ") + ")"
+		} else {
+			""
+		}
+
+		val query = session.createSQLQuery(
 			s"""delete from usergroupstatic where group_id in (
 					select membersgroup_id from UpstreamAssessmentGroup where academicyear in :academicYears $ignoreClause
 			)""")
 			.setParameterList("academicYears", academicYears.map(_.startYear).asJava)
-			.setParameterList("ignore", ignore.asJava)
-			.executeUpdate
+
+		partitionedIgnoreIdsWithIndex.foreach {
+			case (ids, index) => query.setParameterList(s"ignoreBatch${index.toString}", ids.asJava)
+		}
+
+		query.executeUpdate
 	}
 
 	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit = {
