@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model._
 import org.hibernate.criterion.{Order, Restrictions}
@@ -78,7 +77,7 @@ trait AssessmentMembershipDao {
 }
 
 @Repository
-class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms with Logging {
+class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 
 	def getSITSEnrolledAssignments(user: User): Seq[Assignment] =
 		session.newQuery[Assignment]("""select a
