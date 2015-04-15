@@ -43,7 +43,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
 	def applyInternal() {
 		benchmark("ImportAssessment") {
-//			doAssignments()
+			doAssignments()
 			logger.debug("Imported AssessmentComponents. Importing assessment groups...")
 			doGroups()
 			doGroupMembers()
