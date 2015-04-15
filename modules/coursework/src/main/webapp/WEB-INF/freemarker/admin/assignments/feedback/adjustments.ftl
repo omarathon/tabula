@@ -19,15 +19,15 @@
 	<#assign submission = command.submission />
 	<#include "_submission_summary.ftl">
 
-	<#if command.actualGrade?? || command.actualMark??>
+	<#if command.feedback?? && (command.feedback.actualGrade?has_content || command.feedback.actualMark?has_content)>
 		<div class="well">
 			<h3>Feedback</h3>
 			<p>
-				<#if command.actualMark??>
-					Original mark - ${command.actualMark}<br>
+				<#if command.feedback.actualMark??>
+					Original mark - ${command.feedback.actualMark}<br>
 				</#if>
-				<#if command.actualGrade??>
-					Original grade - ${command.actualGrade}<br>
+				<#if command.feedback.actualGrade??>
+					Original grade - ${command.feedback.actualGrade}<br>
 				</#if>
 			</p>
 		</div>
