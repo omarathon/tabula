@@ -4,6 +4,42 @@
 <h1>${exam.name} (${module.code?upper_case})</h1>
 
 <div class="btn-toolbar">
+
+	<#if exam.hasWorkflow>
+		<#assign markers_url><@routes.examAssignMarkers exam /></#assign>
+		<@fmt.permission_button
+			permission='Assignment.Update'
+			scope=exam.module
+			action_descr='assign markers'
+			href=markers_url
+			classes="btn">
+			<i class="icon-user"></i> Assign markers
+		</@fmt.permission_button>
+	<#else>
+		<a class="btn disabled use-tooltip" data-container="body" title="Marking workflow is not enabled for this exam">
+			<i class="icon-user"></i>
+			Assign markers
+		</a>
+	</#if>
+
+	<#if !exam.released>
+		<#assign releaseForMarking_url><@routes.examReleaseForMarking exam /></#assign>
+		<@fmt.permission_button
+			permission='Submission.ReleaseForMarking'
+			scope=exam
+			action_descr='release for marking'
+			classes='btn'
+			href=releaseForMarking_url
+			id="release-submissions-button">
+			<i class="icon-inbox"></i> Release for marking
+		</@fmt.permission_button>
+	<#else>
+		<a class="btn disabled use-tooltip" data-container="body" title="This exam has already been released for marking">
+			<i class="icon-inbox"></i>
+			Release for marking
+		</a>
+	</#if>
+
 	<#assign marks_url><@routes.examAddMarks exam /></#assign>
 	<@fmt.permission_button
 		permission='Marks.Create'
@@ -20,6 +56,7 @@
 		permission='Feedback.Update'
 		scope=exam
 		action_descr='adjust marks'
+		tooltip='Adjust marks'
 		href=adjust_url
 		classes='btn'
 	>
@@ -78,20 +115,25 @@
 					<#assign feedback = mapGet(feedbackMap, student) />
 					<td>${feedback.actualMark!""}</td>
 					<td>${feedback.actualGrade!""}</td>
-					<td>${(feedback.latestPrivateAdjustment.mark)!""}</td>
-					<td>${(feedback.latestPrivateAdjustment.grade)!""}</td>
+					<td>${(feedback.latestPrivateOrNonPrivateAdjustment.mark)!""}</td>
+					<td>${(feedback.latestPrivateOrNonPrivateAdjustment.grade)!""}</td>
 					<#if hasSitsStatus>
 						<#assign sitsStatus = mapGet(sitsStatusMap, feedback) />
+						<#assign sitsWarning = sitsStatus.dateOfUpload?has_content && sitsStatus.status.code != "uploadNotAttempted" && (
+							(sitsStatus.actualMarkLastUploaded!0) != (feedback.latestMark!0) || (sitsStatus.actualGradeLastUploaded!"") != (feedback.latestGrade!"")
+						) />
 						<#assign sitsClass>
-							<#if sitsStatus.status.code == "failed">
+							<#if sitsStatus.status.code == "failed" || sitsWarning >
 								label-important
 							<#elseif sitsStatus.status.code == "successful">
 								label-success
-							<#elseif sitsStatus.status.code == "uploadNotAttempted">
+							<#else>
 								label-info
 							</#if>
 						</#assign>
-						<td><span class="label ${sitsClass}">${sitsStatus.status.description}</span></td>
+						<td><span class="label ${sitsClass} use-tooltip" <#if sitsWarning>title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again."</#if>>
+							${sitsStatus.status.description}<#if sitsWarning>  (!)</#if>
+						</span></td>
 						<td data-sortby="${(sitsStatus.dateOfUpload.millis?c)!""}"><#if sitsStatus.dateOfUpload??><@fmt.date sitsStatus.dateOfUpload /></#if></td>
 						<td>${sitsStatus.actualMarkLastUploaded!""}</td>
 						<td>${sitsStatus.actualGradeLastUploaded!""}</td>

@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.helpers.RequestLevelCache
 class RequestInfo(
 	val user: CurrentUser,
 	val requestedUri: Uri,
-	val requestParameters: Map[String, List[String]],
+	val requestParameters: Map[String, Seq[String]],
 	val ajax: Boolean = false,
 	val maintenance: Boolean = false,
 	val requestLevelCache: RequestLevelCache = new RequestLevelCache)

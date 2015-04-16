@@ -72,12 +72,12 @@
 		</div>
 		<div class="submit-buttons form-actions">
 			<button type="submit" name="smallGroupImport" class="btn btn-primary">Save</button>
-			<a class="btn" href="<@routes.courseworkDeptHome assignment.module />">Cancel</a>
+			<a class="btn" href="<@routes.courseworkDeptHome assessment.module />">Cancel</a>
 		</div>
 	<#else>
 		<div>
 			Not enough tutors are set up as markers in the workflow for Small Group sets for
-			<@fmt.module_name module=assignment.module withFormatting=false /> in ${assignment.academicYear.toString}.
+			<@fmt.module_name module=assessment.module withFormatting=false /> in ${assessment.academicYear.toString}.
 			You need to make sure that every Small Group has tutors who are also markers.
 		</div>
 	</#if>

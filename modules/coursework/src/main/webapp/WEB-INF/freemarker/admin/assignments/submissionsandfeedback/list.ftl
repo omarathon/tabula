@@ -31,7 +31,7 @@
 
 	<#assign module=assignment.module />
 	<#assign department=module.department />
-	<#assign queueSitsUploadEnabled=features.queueFeedbackForSits />
+	<#assign queueSitsUploadEnabled=(features.queueFeedbackForSits && department.uploadMarksToSits) />
 
 	<div class="fix-header pad-when-fixed">
 		<#include "_filter.ftl" />
@@ -155,7 +155,7 @@
 						<#local lateness><@sd.lateness submission /></#local>
 
 						<tr class="itemContainer<#if !enhancedSubmission??> awaiting-submission</#if>" <#if enhancedSubmission?? && submission.suspectPlagiarised> data-plagiarised="true" </#if> >
-							<td><#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??><@form.selector_check_row "students" student.user.warwickId /></#if></td>
+							<td><@form.selector_check_row "students" student.user.warwickId /></td>
 							<td class="id">
 							<#if module.department.showStudentName>
 								${student.user.fullName} <@pl.profile_link student.user.warwickId />
@@ -190,17 +190,15 @@
 								</#if>
 							</td>
 							<td class="submission-status">
+								<#-- Markable - ignore placeholder submissions -->
+								<#if assignment.isReleasedForMarking(student.user.warwickId)>
+									<span class="label label-success">Markable</span>
+								</#if>
 								<#if submission??>
 									<#-- Downloaded -->
 									<#if enhancedSubmission.downloaded>
 										<span class="label label-success">Downloaded</span>
 									</#if>
-
-									<#-- Markable - ignore placeholder submissions -->
-									<#if submission.assignment?? && submission.releasedForMarking>
-										<span class="label label-success">Markable</span>
-									</#if>
-
 									<#-- Plagiarised -->
 									<#if submission.suspectPlagiarised>
 										<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised"></i>
@@ -219,13 +217,13 @@
 							</#if>
 							<#if assignment.markingWorkflow??>
 								<td>
-									<#if submission?? && submission.assignment?? && submission.firstMarker?has_content>
-										${submission.firstMarker.fullName}
+									<#if (assignment.getStudentsFirstMarker(student.user.warwickId)!"")?has_content>
+										${assignment.getStudentsFirstMarker(student.user.warwickId).fullName}
 									</#if>
 								</td>
 								<td>
-									<#if submission?? && submission.assignment?? && submission.secondMarker?has_content>
-										${submission.secondMarker.fullName}
+									<#if (assignment.getStudentsSecondMarker(student.user.warwickId)!"")?has_content>
+										${assignment.getStudentsSecondMarker(student.user.warwickId).fullName}
 									</#if>
 								</td>
 							</#if>
@@ -271,16 +269,16 @@
 								<td class="mark">
 								 <#if student.coursework.enhancedFeedback??>
 								 	${(student.coursework.enhancedFeedback.feedback.actualMark)!''}
-									<#if student.coursework.enhancedFeedback.feedback.adjustedMark??>
-										 (Adjusted to - ${student.coursework.enhancedFeedback.feedback.adjustedMark})
+									<#if student.coursework.enhancedFeedback.feedback.hasPrivateOrNonPrivateAdjustments>
+										 (Adjusted to - ${student.coursework.enhancedFeedback.feedback.latestMark})
 									</#if>
 								 </#if>
 								</td>
 								<td class="grade">
 									<#if student.coursework.enhancedFeedback??>
 										${(student.coursework.enhancedFeedback.feedback.actualGrade)!''}
-										<#if student.coursework.enhancedFeedback.feedback.adjustedGrade??>
-											(Adjusted to - ${student.coursework.enhancedFeedback.feedback.adjustedGrade})
+										<#if student.coursework.enhancedFeedback.feedback.hasPrivateOrNonPrivateAdjustments && student.coursework.enhancedFeedback.feedback.latestGrade??>
+											(Adjusted to - ${student.coursework.enhancedFeedback.feedback.latestGrade})
 										</#if>
 									</#if>
 								</td>
@@ -308,8 +306,13 @@
 									<#if queueSitsUploadEnabled>
 										<#if student.coursework.enhancedFeedback.feedbackForSits??>
 											<#assign feedbackSitsStatus=student.coursework.enhancedFeedback.feedbackForSits.status />
-											<#if feedbackSitsStatus.code == "failed">
-												<span class="label label-important">${feedbackSitsStatus.description}</span>
+											<#assign sitsWarning = feedbackSitsStatus.dateOfUpload?has_content && feedbackSitsStatus.status.code != "uploadNotAttempted" && (
+												(feedbackSitsStatus.actualMarkLastUploaded!0) != (student.coursework.enhancedFeedback.feedback.latestMark!0) || (feedbackSitsStatus.actualGradeLastUploaded!"") != (student.coursework.enhancedFeedback.feedback.latestGrade!"")
+											) />
+											<#if feedbackSitsStatus.code == "failed" || sitsWarning >
+												<span class="label label-important use-tooltip" <#if sitsWarning>title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again."</#if>>
+													${feedbackSitsStatus.description}
+												</span>
 											<#elseif feedbackSitsStatus.code == "successful">
 												<span class="label label-success">${feedbackSitsStatus.description}</span>
 											<#else>

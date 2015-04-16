@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.SprCode
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
@@ -11,6 +12,8 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+
+import scala.util.Try
 
 object ImportAssignmentsCommand {
 	def apply() = new ComposableCommand[Unit]
@@ -33,7 +36,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	}
 
 	var assignmentImporter = Wire[AssignmentImporter]
-	var assignmentMembershipService = Wire[AssessmentMembershipService]
+	var assessmentMembershipService = Wire[AssessmentMembershipService]
 	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 	
 	val ImportGroupSize = 100
@@ -62,7 +65,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 					}
 
 					modules.get(assignment.moduleCodeBasic.toLowerCase).foreach(module => assignment.module = module)
-					assignmentMembershipService.save(assignment)
+					assessmentMembershipService.save(assignment)
 				}
 			}
 		}
@@ -86,43 +89,49 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	 * things into memory at once.
 	 */
 	def doGroupMembers() {
-		transactional() {
-			benchmark("Import all group members") {
-				var registrations = List[UpstreamModuleRegistration]()
-				var notEmptyGroupIds = Set[String]()
+		benchmark("Import all group members") {
+			var registrations = List[UpstreamModuleRegistration]()
+			var notEmptyGroupIds = Set[String]()
 
-				var count = 0
-				assignmentImporter.allMembers { r =>
-					if (registrations.nonEmpty && r.differentGroup(registrations.head)) {
-						// This element r is for a new group, so save this group and start afresh
+			var count = 0
+			assignmentImporter.allMembers { r =>
+				if (registrations.nonEmpty && r.differentGroup(registrations.head)) {
+					// This element r is for a new group, so save this group and start afresh
+					transactional() {
 						save(registrations)
 							.foreach { uag => notEmptyGroupIds = notEmptyGroupIds + uag.id }
+					}
+					registrations = Nil
+				}
+				registrations = registrations :+ r
 
-						registrations = Nil
-					}
-					registrations = registrations :+ r
-					count += 1
-					if (count % 1000 == 0) {
-						logger.info("Processed " + count + " group members")
-					}
+				count += 1
+				if (count % 1000 == 0) {
+					logger.info("Processed " + count + " group members")
 				}
 
-				// TAB-1265 Don't forget the very last bunch.
-				if (registrations.nonEmpty) {
+			}
+
+			// TAB-1265 Don't forget the very last bunch.
+			if (registrations.nonEmpty) {
+				transactional() {
 					save(registrations)
 						.foreach { uag => notEmptyGroupIds = notEmptyGroupIds + uag.id }
 				}
-
-				// Empty groups that we haven't seen for academic years
-				assignmentMembershipService.getUpstreamAssessmentGroupsNotIn(
-					ids = notEmptyGroupIds.filter { _.hasText }.toSeq,
-					academicYears = assignmentImporter.yearsToImport
-				).foreach { emptyGroup =>
-					assignmentMembershipService.replaceMembers(emptyGroup, Nil)
-				}
-
-				logger.info("Processed all " + count + " group members")
 			}
+
+			// empty unseen groups - this is done in transactional batches
+
+			val groupsToEmpty = assessmentMembershipService.getUpstreamAssessmentGroupsNotIn (
+				ids = notEmptyGroupIds.filter { _.hasText }.toSeq,
+				academicYears = assignmentImporter.yearsToImport
+			)
+
+			logger.info("Emptying members for unseen groups")
+			val numEmptied = assessmentMembershipService.emptyMembers(groupsToEmpty)
+			logger.info(s"Emptied $numEmptied users from ${groupsToEmpty.size} unseen groups")
+
+
 		}
 	}
 
@@ -130,21 +139,38 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	 * This sequence of ModuleRegistrations represents the members of an assessment
 	 * group, so save them (and reconcile it with any existing members we have in the
 	 * database).
+	 * The students in a group does NOT vary by sequence, so the memebership should be set on ALL the groups (ignoring seat number).
+	 * Then seat the appropriate seat numbers based on the sequence.
 	 */
-	def save(group: Seq[UpstreamModuleRegistration]): Option[UpstreamAssessmentGroup] = {
-		group.headOption.map { head =>
-			val assessmentGroup = head.toUpstreamAssignmentGroup
-			// TAB-3388 change seat number to null if there is ambiguity
-			val fixedGroup = group.groupBy(m => (m.year, m.sprCode, m.occurrence, m.moduleCode, m.assessmentGroup)).mapValues(regs =>
-				if (regs.size > 1) {
-					val r = regs.head
-					UpstreamModuleRegistration(r.year, r.sprCode, null, r.occurrence, r.moduleCode, r.assessmentGroup)
-				} else {
-					regs.head
+	def save(registrations: Seq[UpstreamModuleRegistration]): Seq[UpstreamAssessmentGroup] = {
+		registrations.headOption.map { head =>
+			val assessmentComponents = assessmentMembershipService.getAssessmentComponents(head.moduleCode).filter(_.assessmentGroup == head.assessmentGroup)
+			val assessmentGroups = head.toUpstreamAssessmentGroups(assessmentComponents.map(_.sequence).distinct)
+				.map(assessmentGroup => assessmentMembershipService.replaceMembers(assessmentGroup, registrations))
+
+			// Now sort out seat number/s
+			val withSeats = registrations.filter(r => r.sequence != null && Try(r.seatNumber.toInt).isSuccess)
+			assessmentGroups.foreach(group => {
+				// Find the registations for this exact group (including sequence)
+				val theseRegistrations = withSeats.filter(_.toExactUpstreamAssessmentGroup.isEquivalentTo(group))
+				if (theseRegistrations.nonEmpty) {
+					val seatMap = theseRegistrations.groupBy(_.sprCode).flatMap{case(sprCode, studentRegistrations) =>
+						if (studentRegistrations.map(_.seatNumber).distinct.size > 1) {
+							logger.warn("Found multiple seat numbers (%s) for %s for Assessment Group %s. Seat number will be null".format(
+								studentRegistrations.map(_.seatNumber).mkString(", "),
+								sprCode,
+								group.toString
+							))
+							None
+						} else {
+							Option((SprCode.getUniversityId(sprCode), studentRegistrations.head.seatNumber.toInt))
+						}
+					}
+					assessmentMembershipService.updateSeatNumbers(group, seatMap)
 				}
-			).values.toSeq
-			assignmentMembershipService.replaceMembers(assessmentGroup, fixedGroup)
-		}
+			})
+			assessmentGroups
+		}.getOrElse(Seq())
 	}
 
 	
@@ -152,7 +178,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 		logger.debug("Importing " + groups.size + " assessment groups")
 		benchmark("Import " + groups.size + " groups") {
 			for (group <- groups) {
-				assignmentMembershipService.save(group)
+				assessmentMembershipService.save(group)
 			}
 		}
 	}
@@ -160,9 +186,9 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	def doGradeBoundaries() {
 		transactional() {
 			val boundaries = assignmentImporter.getAllGradeBoundaries
-			boundaries.groupBy(_.marksCode).keys.foreach(assignmentMembershipService.deleteGradeBoundaries)
+			boundaries.groupBy(_.marksCode).keys.foreach(assessmentMembershipService.deleteGradeBoundaries)
 			for (gradeBoundary <- logSize(assignmentImporter.getAllGradeBoundaries)) {
-				assignmentMembershipService.save(gradeBoundary)
+				assessmentMembershipService.save(gradeBoundary)
 			}
 		}
 	}

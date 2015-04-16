@@ -78,9 +78,9 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 	
 	def isForUser(user: User) = universityId == user.getWarwickId || userId == user.getUserId
 
-	def firstMarker:Option[User] = assignment.getStudentsFirstMarker(this).map(id => userLookup.getUserByUserId(id))
+	def firstMarker:Option[User] = assignment.getStudentsFirstMarker(universityId)
 
-	def secondMarker:Option[User] = assignment.getStudentsSecondMarker(this).map(id => userLookup.getUserByUserId(id))
+	def secondMarker:Option[User] = assignment.getStudentsSecondMarker(universityId)
 
 	def valuesByFieldName = (values map { v => (v.name, v.value) }).toMap
 
@@ -100,10 +100,6 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 	def zipFilename(attachment: FileAttachment, name: String) = {
 		assignment.module.code + " - " + name + " - " + attachment.name
 	}
-
-	def isReleasedForMarking: Boolean = assignment.isReleasedForMarking(this)
-	def isReleasedToSecondMarker: Boolean = assignment.isReleasedToSecondMarker(this)
-	def isReleasedToThirdMarker: Boolean = assignment.isReleasedToThirdMarker(this)
 
 	def toEntityReference = new SubmissionEntityReference().put(this)
 }

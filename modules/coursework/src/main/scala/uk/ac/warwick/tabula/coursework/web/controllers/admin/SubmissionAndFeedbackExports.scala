@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import uk.ac.warwick.tabula.coursework.commands.assignments._
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.util.csv.CSVLineWriter
 import scala.collection.immutable.ListMap
@@ -168,7 +169,7 @@ class ExcelBuilder(val items: Seq[Student], val assignment: Assignment, val modu
 	}
 	
 	def formatWorksheet(sheet: XSSFSheet) = {
-	    (0 to headers.size) map sheet.autoSizeColumn
+	    (0 to headers.size) foreach sheet.autoSizeColumn
 	}
 	
 	// trim the assignment name down to 20 characters. Excel sheet names must be 31 chars or less so
@@ -266,7 +267,7 @@ trait SubmissionAndFeedbackExport {
 		"open-date" -> assignment.openDate,
 		"open-ended" -> assignment.openEnded,
 		"close-date" -> (if (assignment.openEnded) "" else assignment.closeDate),
-		"submissions-zip-url" -> (topLevelUrl + "/coursework" + Routes.admin.assignment.submissionsZip(assignment))
+		"submissions-zip-url" -> (topLevelUrl + Routes.admin.assignment.submissionsZip(assignment))
 	)
 	
 	protected def identityData(item: Student): Map[String, Any] = Map(
@@ -289,7 +290,7 @@ trait SubmissionAndFeedbackExport {
 		case Some(item) => Map(
 			"late" -> item.submission.isLate, 
 			"within-extension" -> item.submission.isAuthorisedLate, 
-			"markable" -> (if (item.submission.id.hasText) item.submission.isReleasedForMarking else "")
+			"markable" -> assignment.isReleasedForMarking(item.submission.universityId)
 		)
 		case _ => student.coursework.enhancedExtension match {
 			case Some(item) =>
@@ -369,10 +370,10 @@ trait SubmissionAndFeedbackExport {
 
 	protected def adjustmentData(student: Student): Map[String, Any] = {
 		val feedback = student.coursework.enhancedFeedback.map(_.feedback)
-		feedback.filter(_.hasAdjustments).map( feedback => {
-			feedback.adjustedMark.map("mark" -> _).toMap ++
-			feedback.adjustedGrade.map("grade" -> _).toMap ++
-			Map("reason" -> feedback.adjustmentReason)
+		feedback.filter(_.hasPrivateOrNonPrivateAdjustments).map( feedback => {
+			feedback.latestMark.map("mark" -> _).toMap ++
+			feedback.latestGrade.map("grade" -> _).toMap ++
+			Map("reason" -> feedback.latestPrivateOrNonPrivateAdjustment.map(_.reason))
 		}).getOrElse(Map())
 	}
 

@@ -36,9 +36,7 @@ class CreateMonitoringPointReportController extends AttendanceController {
 		command.validate(errors)
 
 		if (errors.hasErrors) {
-			response.setStatus(HttpStatus.BAD_REQUEST.value())
-
-			Mav(new JSONErrorView(errors, Map("success" -> false, "status" -> HttpStatus.BAD_REQUEST.value())))
+			Mav(new JSONErrorView(errors))
 		} else {
 			Mav(new JSONView(Map(
 				"success" -> true,

@@ -590,7 +590,7 @@ trait HttpSearching {
 					)
 				}) }.getOrElse(Map())
 
-		if (debugEnabled) logger.debug(requestMap)
+		if (debugEnabled) logger.debug(requestMap.toString)
 
 		def handler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 			req >- { (json) =>

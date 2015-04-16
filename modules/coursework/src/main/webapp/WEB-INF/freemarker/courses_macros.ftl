@@ -64,7 +64,7 @@
 	</script>
 </#macro>
 
-<#macro marksForm assignment templateUrl formUrl commandName cancelUrl generateUrl seatOrderMap="" showAddButton=true>
+<#macro marksForm assignment templateUrl formUrl commandName cancelUrl generateUrl seatNumberMap="" showAddButton=true>
 	<div id="batch-feedback-form">
 		<h1>Submit marks for ${assignment.name}</h1>
 		<ul id="marks-tabs" class="nav nav-tabs">
@@ -109,7 +109,7 @@
 					<table class="hide">
 						<tbody class="row-markup">
 						<tr class="mark-row">
-							<#if seatOrderMap?has_content>
+							<#if seatNumberMap?has_content>
 								<td></td>
 							</#if>
 							<td>
@@ -134,19 +134,22 @@
 						<input name="isfile" value="false" type="hidden"/>
 						<table class="marksUploadTable">
 							<tr class="mark-header">
-								<#if seatOrderMap?has_content>
+								<#if seatNumberMap?has_content>
 									<th>Seat order</th>
 								</#if>
 								<th>University ID</th>
+								<#if studentMarkerMap?has_content>
+									<th>Marker</th>
+								</#if>
 								<th>Marks</th>
 								<th>Grade <#if isGradeValidation><@fmt.help_popover id="auto-grade-help" content="The grade is automatically calculated from the SITS mark scheme" /></#if></th>
 							</tr>
 							<#if marksToDisplay??>
 								<#list marksToDisplay as markItem>
 									<tr class="mark-row">
-										<#if seatOrderMap?has_content>
-											<#if mapGet(seatOrderMap, markItem.universityId)??>
-												<td>${mapGet(seatOrderMap, markItem.universityId)}</td>
+										<#if seatNumberMap?has_content>
+											<#if mapGet(seatNumberMap, markItem.universityId)??>
+												<td>${mapGet(seatNumberMap, markItem.universityId)}</td>
 											<#else>
 												<td></td>
 											</#if>
@@ -157,6 +160,13 @@
 												<input class="universityId span2" value="${markItem.universityId}" name="marks[${markItem_index}].universityId" type="text" readonly="readonly" />
 											</div>
 										</td>
+										<#if studentMarkerMap?has_content>
+											<#if mapGet(studentMarkerMap, markItem.universityId)??>
+												<td>${mapGet(studentMarkerMap, markItem.universityId)}</td>
+											<#else>
+												<td></td>
+											</#if>
+										</#if>
 										<td><input name="marks[${markItem_index}].actualMark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" /></td>
 										<td>
 											<input name="marks[${markItem_index}].actualGrade" class="grade input-small" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" />

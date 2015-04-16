@@ -59,10 +59,12 @@ trait AssessmentService {
 
 	def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]]
 
+	def getExamsWhereMarker(user: User): Seq[Exam]
+
 }
 
 abstract class AbstractAssessmentService extends AssessmentService {
-	self: AssessmentDaoComponent with AssignmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent =>
+	self: AssessmentDaoComponent with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent =>
 
 	def getAssignmentById(id: String): Option[Assignment] = assessmentDao.getAssignmentById(id)
 	def getExamById(id: String): Option[Exam] = assessmentDao.getExamById(id)
@@ -134,14 +136,21 @@ abstract class AbstractAssessmentService extends AssessmentService {
 
 	def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]] =
 		assessmentDao.getExamsByModules(modules, academicYear)
+
+	def getExamsWhereMarker(user: User): Seq[Exam] = {
+		(firstMarkerHelper.findBy(user) ++ secondMarkerHelper.findBy(user))
+			.distinct
+			.flatMap(markingWorkflowService.getExamsUsingMarkingWorkflow)
+			.filterNot { e => e.deleted}
+	}
 }
 
-trait AssignmentServiceUserGroupHelpers {
+trait AssessmentServiceUserGroupHelpers {
 	val firstMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow]
 	val secondMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow]
 }
 
-trait AssignmentServiceUserGroupHelpersImpl extends AssignmentServiceUserGroupHelpers {
+trait AssessmentServiceUserGroupHelpersImpl extends AssessmentServiceUserGroupHelpers {
 	val firstMarkerHelper = new UserGroupMembershipHelper[MarkingWorkflow]("_firstMarkers")
 	val secondMarkerHelper = new UserGroupMembershipHelper[MarkingWorkflow]("_secondMarkers")
 }
@@ -151,5 +160,5 @@ class AssessmentServiceImpl
 	extends AbstractAssessmentService
 	with AutowiringAssessmentDaoComponent
 	with AutowiringMarkingWorkflowServiceComponent
-	with AssignmentServiceUserGroupHelpersImpl
+	with AssessmentServiceUserGroupHelpersImpl
 

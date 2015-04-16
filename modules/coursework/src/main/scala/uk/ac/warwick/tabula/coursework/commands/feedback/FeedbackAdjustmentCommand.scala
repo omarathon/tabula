@@ -59,7 +59,7 @@ class FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student:
 
 	val feedback = assessment.findFeedback(student.getWarwickId)
 		.getOrElse(throw new ItemNotFoundException("Can't adjust for non-existent feedback"))
-	copyFrom(feedback)
+
 	lazy val canBeUploadedToSits = assessment.assessmentGroups.asScala.map(_.toUpstreamAssessmentGroup(assessment.academicYear)).exists(_.exists(_.members.includesUser(student)))
 
 	def applyInternal() = {
@@ -80,18 +80,6 @@ class FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student:
 		newMark.foreach(feedbackService.saveOrUpdate)
 		if (sendToSits) queueFeedback(feedback, submitter, gradeGenerator)
 		feedback
-	}
-
-	def copyFrom(feedback: Feedback) {
-		// mark and grade
-		if (assessment.collectMarks) {
-			actualMark = feedback.actualMark.map(_.toString).orNull
-			actualGrade = feedback.actualGrade.orNull
-			adjustedMark = feedback.adjustedMark.map(_.toString).orNull
-			adjustedGrade = feedback.adjustedGrade.getOrElse("")
-			reason = feedback.adjustmentReason
-			comments = feedback.adjustmentComments
-		}
 	}
 
 	def copyTo(feedback: Feedback): Option[Mark] = {

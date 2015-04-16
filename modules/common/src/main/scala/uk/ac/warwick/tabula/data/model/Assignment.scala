@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
+import scala.beans.BeanProperty
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.reflect._
@@ -232,19 +233,9 @@ class Assignment
 	@BatchSize(size = 200)
 	var firstMarkers: JList[FirstMarkersMap] = JArrayList()
 
-	/** Map between first markers and the students assigned to them */
-	def firstMarkerMap: Map[String, UserGroup] = Option(firstMarkers).map { markers => markers.asScala.map {
-		markerMap => markerMap.marker_id -> markerMap.students
-	}.toMap }.getOrElse(Map())
-
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
 	@BatchSize(size = 200)
 	var secondMarkers: JList[SecondMarkersMap] = JArrayList()
-
-	/** Map between second markers and the students assigned to them */
-	def secondMarkerMap: Map[String, UserGroup] = Option(secondMarkers).map { markers => markers.asScala.map {
-		markerMap => markerMap.marker_id -> markerMap.students
-	}.toMap }.getOrElse(Map())
 
 	def setAllFileTypesAllowed() {
 		fileExtensions = Nil
@@ -514,44 +505,6 @@ class Assignment
 
 	def newExtensionsCanBeRequested: Boolean = !isClosed && extensionsPossible
 
-	def isMarker(user: User) = isFirstMarker(user) || isSecondMarker(user)
-
-	def isFirstMarker(user: User): Boolean = {
-		if (markingWorkflow != null)
-			markingWorkflow.firstMarkers.includesUser(user)
-		else false
-	}
-
-	def isSecondMarker(user: User): Boolean = {
-		if (markingWorkflow != null)
-			markingWorkflow.secondMarkers.includesUser(user)
-		else false
-	}
-
-	def isThirdMarker(user: User): Boolean = {
-		if (markingWorkflow != null)
-			markingWorkflow.thirdMarkers.includesUser(user)
-		else false
-	}
-
-	def isReleasedForMarking(submission: Submission): Boolean =
-		feedbacks.find(_.universityId == submission.universityId) match {
-			case Some(f) => f.firstMarkerFeedback != null
-			case _ => false
-		}
-
-	def isReleasedToSecondMarker(submission: Submission): Boolean =
-		feedbacks.find(_.universityId == submission.universityId) match {
-			case Some(f) => f.secondMarkerFeedback != null
-			case _ => false
-		}
-
-	def isReleasedToThirdMarker(submission: Submission): Boolean =
-		feedbacks.find(_.universityId == submission.universityId) match {
-			case Some(f) => f.thirdMarkerFeedback != null
-			case _ => false
-		}
-
 	def getMarkerFeedback(uniId: String, user: User, feedbackPosition: FeedbackPosition): Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.universityId == uniId)
 		parentFeedback.flatMap {
@@ -627,14 +580,22 @@ class Assignment
 	}
 
 	/**
-	 * Optionally returns the first marker for the given submission
+	 * Optionally returns the first marker for the given student ID
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
-	def getStudentsFirstMarker(submission: Submission): Option[String] =
-		Option(markingWorkflow) flatMap {_.getStudentsFirstMarker(this, submission.universityId)}
+	def getStudentsFirstMarker(universityId: String): Option[User] =
+		Option(markingWorkflow)
+			.flatMap(_.getStudentsFirstMarker(this, universityId))
+			.map(id => userLookup.getUserByUserId(id))
 
-	def getStudentsSecondMarker(submission: Submission): Option[String] =
-		Option(markingWorkflow) flatMap {_.getStudentsSecondMarker(this, submission.universityId)}
+	/**
+	 * Optionally returns the second marker for the given student ID
+	 * Returns none if this assignment doesn't have a valid marking workflow attached
+	 */
+	def getStudentsSecondMarker(universityId: String): Option[User] =
+		Option(markingWorkflow)
+			.flatMap(_.getStudentsSecondMarker(this, universityId))
+			.map(id => userLookup.getUserByUserId(id))
 
 	/**
 	 * Optionally returns the submissions that are to be marked by the given user
@@ -673,8 +634,6 @@ class Assignment
 	// later we may do more complex checks to see if this particular markingWorkflow requires that feedback is released manually
 	// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
 	def mustReleaseForMarking = hasWorkflow
-
-	def hasWorkflow = markingWorkflow != null
 
 	def needsFeedbackPublishing = {
 		if (openEnded || !collectSubmissions || archived) {
@@ -737,20 +696,22 @@ case class SubmissionsReport(assignment: Assignment) {
 }
 
 /**
- * One stop shop for setting default boolean values for assignment properties
+ * One stop shop for setting default boolean values for assignment properties.
+ *
+ * Includes @BeanProperty to allow JSON binding
  */
 trait BooleanAssignmentProperties {
-	var openEnded: JBoolean = false
-	var collectMarks: JBoolean = true
-	var collectSubmissions: JBoolean = true
-	var restrictSubmissions: JBoolean = false
-	var allowLateSubmissions: JBoolean = true
-	var allowResubmission: JBoolean = true
-	var displayPlagiarismNotice: JBoolean = true
-	var allowExtensions: JBoolean = true
-	var summative: JBoolean = true
-	var dissertation: JBoolean = false
-	var includeInFeedbackReportWithoutSubmissions: JBoolean = false
+	@BeanProperty var openEnded: JBoolean = false
+	@BeanProperty var collectMarks: JBoolean = true
+	@BeanProperty var collectSubmissions: JBoolean = true
+	@BeanProperty var restrictSubmissions: JBoolean = false
+	@BeanProperty var allowLateSubmissions: JBoolean = true
+	@BeanProperty var allowResubmission: JBoolean = true
+	@BeanProperty var displayPlagiarismNotice: JBoolean = true
+	@BeanProperty var allowExtensions: JBoolean = true
+	@BeanProperty var summative: JBoolean = true
+	@BeanProperty var dissertation: JBoolean = false
+	@BeanProperty var includeInFeedbackReportWithoutSubmissions: JBoolean = false
 
 	def copyBooleansTo(assignment: Assignment) {
 		assignment.openEnded = openEnded

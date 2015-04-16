@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.permissions.Permissions._
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{Assessment, Assignment}
 import uk.ac.warwick.tabula.JavaImports
 
-case class Marker(assignment: Assignment) extends BuiltInRole(MarkerRoleDefinition, assignment)
+case class Marker(assessment: Assessment) extends BuiltInRole(MarkerRoleDefinition, assessment)
 
 case object MarkerRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	

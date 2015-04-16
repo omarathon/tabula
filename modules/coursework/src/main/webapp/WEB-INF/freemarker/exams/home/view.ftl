@@ -34,6 +34,10 @@
 		</ul>
 	</#if>
 
+	<#if nonempty(examsForMarking)>
+		<#include "_markers.ftl" />
+	</#if>
+
 	<#if nonempty(ownedDepartments)>
 		<h2>My department-wide <@fmt.p number=ownedDepartments?size singular="responsibility" plural="responsibilities" shownumber=false /></h2>
 
@@ -44,5 +48,11 @@
 				</li>
 			</#list>
 		</ul>
+	</#if>
+
+	<#if !ownedModuleDepartments?has_content && !examsForMarking?has_content && !ownedDepartments?has_content >
+		<p>
+			You do not currently have permission to manage or mark any exams.
+		</p>
 	</#if>
 </#if>

@@ -4,11 +4,9 @@ import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model._
 import scala.collection.immutable.ListMap
 import uk.ac.warwick.userlookup.User
-import scala.xml
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.coursework.commands.assignments.Student
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
-import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand.SubmissionListItem
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
@@ -42,20 +40,26 @@ class SubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 	)
 	plagiarisedFile.submission = submission1
 
+	val student66 = newUser("1234566")
+	val student67 = newUser("1234567")
+
 	val items = Seq(
-		Student(newUser("1234566"), null, None, ListMap(),
-			WorkflowItems(
-				enhancedSubmission = Some(SubmissionListItem(submission1, false)),
+
+		Student(student66, null, None, ListMap(),
+			WorkflowItems (
+				student66,
+				enhancedSubmission = Some(SubmissionListItem(submission1, downloaded=false)),
 				enhancedFeedback = None,
 				enhancedExtension = None
-			)
+			), assignment
 		),
-		Student(newUser("1234567"), null, None, ListMap(),
-			WorkflowItems(
+		Student(student67, null, None, ListMap(),
+			WorkflowItems (
+				student67,
 				enhancedSubmission = None,
 				enhancedFeedback = None,
 				enhancedExtension = None
-			)
+			), assignment
 		)
 	)
 
@@ -77,7 +81,7 @@ class SubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 		<assignment open-ended="false"
 								open-date="2012-04-01T00:00:00+01:00"
 								close-date="2012-06-01T00:00:00+01:00" id="123" module-code="IN101"
-								submissions-zip-url={"https://example.com/coursework" + Routes.admin.assignment.submissionsZip(assignment)}>
+								submissions-zip-url={"https://example.com/coursework/admin/module/IN101/assignments/123/submissions.zip"}>
 			<generic-feedback/>
 			<students>
 				<student university-id="1234566">

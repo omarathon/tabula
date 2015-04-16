@@ -5,7 +5,7 @@
 	<#local marker = info.marker />
 	<#local numSubmissions = info.numSubmissions!0 />
 	<#assign time_remaining=durationFormatter(assignment.closeDate) />
-	
+
 	<#if numSubmissions==0 || !info.isFeedbacksToManage>
 		<#local class="disabled use-tooltip" />
 		<#local href="" />
@@ -19,9 +19,12 @@
 			<@routes.listmarkersubmissions assignment=assignment marker=marker/>
 		</#local>
 	</#if>
-	<#if assignment.closed>
+	<#if assignment.closed || assignment.openEnded>
 		<div class="alert alert-success deadline">
-			Assignment closed: <strong><@fmt.date date=assignment.closeDate /> (${time_remaining})</strong>
+			<#if !assignment.openEnded>
+				Assignment closed: <strong><@fmt.date date=assignment.closeDate /> (${time_remaining})</strong>
+			<#else>Open-ended assignment (no close date)
+			</#if>
 			<div class="pull-right btn-group">
 				<a class="btn btn-primary ${class}" href="${href}" data-title="${title}" data-container="body">Mark</a>
 			</div>

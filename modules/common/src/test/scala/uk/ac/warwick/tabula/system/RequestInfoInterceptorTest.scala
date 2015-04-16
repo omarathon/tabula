@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.system
+
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.helpers.HttpServletRequestUtils
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.util.web.Uri
 import uk.ac.warwick.tabula.CurrentUser
@@ -69,8 +71,8 @@ class RequestInfoInterceptorTest extends TestBase with Mockito {
 		req.setParameter("one", Array("two", "three"))
 		req.setParameter("yes", Array[String]())
 		req.setParameter("i", "love")
-		req.addHeader(RequestInfoInterceptor.AjaxHeader, "XMLHttpRequest")
-		req.addHeader(RequestInfoInterceptor.XRequestedUriHeader, "https://tabula.warwick.ac.uk/yes/its/me?i=love")
+		req.addHeader(HttpServletRequestUtils.AjaxHeader, "XMLHttpRequest")
+		req.addHeader(HttpServletRequestUtils.XRequestedUriHeader, "https://tabula.warwick.ac.uk/yes/its/me?i=love")
 		
 		val resp = new MockHttpServletResponse
 		

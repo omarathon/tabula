@@ -33,12 +33,20 @@ class AddExamController extends ExamsController {
 		Mav("exams/admin/new",
 			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
-			"assessmentGroups" -> cmd.assessmentGroups)
+			"assessmentGroups" -> cmd.assessmentGroups,
+			"department" -> cmd.module.adminDepartment,
+			"markingWorkflows" -> cmd.module.adminDepartment.markingWorkflows.filter(_.validForExams)
+		).crumbs(
+				Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear),
+				Breadcrumbs.Module(cmd.module, cmd.academicYear)
+		)
 	}
 
-
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: AddExamCommand, errors: Errors) = {
+	def submit(
+		@Valid @ModelAttribute("command") cmd: AddExamCommand,
+		errors: Errors
+	) = {
 		cmd.afterBind()
 		if (errors.hasErrors) {
 			showForm(cmd)

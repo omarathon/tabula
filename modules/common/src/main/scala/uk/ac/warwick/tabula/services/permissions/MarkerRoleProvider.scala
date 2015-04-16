@@ -12,13 +12,13 @@ import uk.ac.warwick.tabula.roles.{Marker, MarkerRoleDefinition, Role}
 import uk.ac.warwick.tabula.services.AssessmentService
 
 @Component
-class MarkerRoleProvider extends RoleProvider with TaskBenchmarking with RequestLevelCaching[(CurrentUser, String), Seq[Assignment]] {
+class MarkerRoleProvider extends RoleProvider with TaskBenchmarking with RequestLevelCaching[(CurrentUser, String), Seq[Assessment]] {
 
 	val assignmentService = promise { Wire[AssessmentService] }
 	
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for MarkerRoleProvider") {
-		def getRoles(assignmentsForMarker: Stream[Assignment]) = assignmentsForMarker.map{ assignment =>
-			customRoleFor(assignment.module.adminDepartment)(MarkerRoleDefinition, assignment).getOrElse(Marker(assignment))
+		def getRoles(assessmentsForMarker: Stream[Assessment]) = assessmentsForMarker.map{ assessment =>
+			customRoleFor(assessment.module.adminDepartment)(MarkerRoleDefinition, assessment).getOrElse(Marker(assessment))
 		} 
 		
 		scope match {
@@ -32,8 +32,8 @@ class MarkerRoleProvider extends RoleProvider with TaskBenchmarking with Request
 					assignmentService.get.getAssignmentsByModuleAndMarker(module, user).toStream
 				}.toStream)
 
-			case assignment: Assignment if assignment.isMarker(user.apparentUser) =>
-				getRoles(Stream(assignment))
+			case assessment: Assessment if assessment.isMarker(user.apparentUser) =>
+				getRoles(Stream(assessment))
 
 			// We don't need to check for the marker role on any other scopes
 			case _ => Stream.empty

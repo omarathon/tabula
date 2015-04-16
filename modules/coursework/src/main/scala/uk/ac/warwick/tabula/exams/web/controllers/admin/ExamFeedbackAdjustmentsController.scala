@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.coursework.commands.feedback._
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 
 @Controller
 @RequestMapping(Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/feedback/adjustments"))
-class ExamFeedbackAdjustmentsListController extends CourseworkController {
+class ExamFeedbackAdjustmentsListController extends ExamsController {
 
 	type FeedbackAdjustmentListCommand = Appliable[Seq[StudentInfo]]
 
@@ -35,15 +35,15 @@ class ExamFeedbackAdjustmentsListController extends CourseworkController {
 			"noFeedbackStudentInfo" -> noFeedbackStudentInfo,
 			"isGradeValidation" -> exam.module.adminDepartment.assignmentGradeValidation
 		).crumbs(
-			Breadcrumbs.Department(exam.module.adminDepartment),
-			Breadcrumbs.Module(exam.module)
+				Breadcrumbs.Department(exam.module.adminDepartment, exam.academicYear),
+				Breadcrumbs.Module(exam.module, exam.academicYear)
 		)
 	}
 }
 
 @Controller
 @RequestMapping(Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/feedback/adjustments/{student}"))
-class ExamFeedbackAdjustmentsController extends CourseworkController with AutowiringProfileServiceComponent {
+class ExamFeedbackAdjustmentsController extends ExamsController with AutowiringProfileServiceComponent {
 
 	validatesSelf[SelfValidating]
 

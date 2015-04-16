@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.groups.services
 import uk.ac.warwick.tabula.data.model.{UserGroup, UnspecifiedTypeUserGroup}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.WorkflowStageHealth._
 import uk.ac.warwick.tabula.services.{UserGroupCacheManager, AssessmentMembershipService}
 import scala.collection.immutable.ListMap
 

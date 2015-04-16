@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.coursework.services
-import uk.ac.warwick.tabula.{WorkflowStages, Fixtures, TestBase, Features}
-import uk.ac.warwick.tabula.coursework.commands.assignments.ExtensionListItem
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
-import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
+
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand.SubmissionListItem
 import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackListItem
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.userlookup.User
 import scala.collection.immutable.ListMap
 import uk.ac.warwick.tabula.data.model.FileAttachment
 
@@ -23,6 +24,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 	service.features = Features.empty
 	
 	private def workflowItems(
+			student:User = null,
 			submission: Option[Submission]=None,
 			submissionDownloaded: Boolean=false,
 			feedback: Option[Feedback]=None,
@@ -31,6 +33,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 			extension: Option[Extension]=None,
 			withinExtension: Boolean=false) =
 		WorkflowItems(
+			student,
 			enhancedSubmission=submission map { s => SubmissionListItem(s, submissionDownloaded) }, 
 			enhancedFeedback=feedback map { f => FeedbackListItem(f, feedbackDownloaded, onlineFeedbackViewed, null) },
 			enhancedExtension=extension map { e => ExtensionListItem(e, withinExtension) }
@@ -101,6 +104,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		// lines were getting a bit long...
 		import CourseworkWorkflowStages._
 		import WorkflowStages._
+		import WorkflowStageHealth._
 		
 		{
 			val p = service.progress(assignment)(workflowItems(feedback=None))

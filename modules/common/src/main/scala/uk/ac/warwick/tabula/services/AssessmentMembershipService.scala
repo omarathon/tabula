@@ -33,6 +33,7 @@ trait AssessmentMembershipService {
 	 */
 	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
 	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
+	def getAssessmentComponents(moduleCode: String): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
@@ -42,10 +43,13 @@ trait AssessmentMembershipService {
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
 
 	def save(assignment: AssessmentComponent): AssessmentComponent
-	def save(group: UpstreamAssessmentGroup)
-	def replaceMembers(group: UpstreamAssessmentGroup, universityIds: Seq[UpstreamModuleRegistration]): UpstreamAssessmentGroup
+	def save(group: UpstreamAssessmentGroup): Unit
+	// empty the usergroups for all assessmentgroups in the specified academic years. Skip any groups specified in ignore
+	def emptyMembers(groupsToEmpty:Seq[String]): Int
+	def replaceMembers(group: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]): UpstreamAssessmentGroup
+	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit
 
-	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
 	def getEnrolledAssignments(user: User): Seq[Assignment]
 
@@ -59,6 +63,7 @@ trait AssessmentMembershipService {
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User]
 	def determineMembershipUsers(assessment: Assessment): Seq[User]
 	def determineMembershipUsersWithOrder(exam: Exam): Seq[(User, Option[Int])]
+	def determineMembershipUsersWithOrderForMarker(exam: Exam, marker: User): Seq[(User, Option[Int])]
 	def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[String]
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean
@@ -105,8 +110,12 @@ class AssessmentMembershipServiceImpl
 		(autoEnrolled ++ manuallyEnrolled).distinct
 	}
 
+	def emptyMembers(groupsToEmpty:Seq[String]) =
+		dao.emptyMembers(groupsToEmpty:Seq[String])
+
 	def replaceMembers(template: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]) = {
 		if (debugEnabled) debugReplace(template, registrations.map(_.universityId))
+
 		getUpstreamAssessmentGroup(template).map { group =>
 			group.members.knownType.replaceStaticUsers(registrations)
 			group
@@ -119,6 +128,9 @@ class AssessmentMembershipServiceImpl
 	private def debugReplace(template: UpstreamAssessmentGroup, universityIds: Seq[String]) {
 		logger.debug("Setting %d members in group %s" format (universityIds.size, template.toString))
 	}
+
+	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]) =
+		dao.updateSeatNumbers(group, seatNumberMap)
 
 	/**
 	 * Tries to find an identical AssessmentComponent in the database, based on the
@@ -148,6 +160,11 @@ class AssessmentMembershipServiceImpl
 	def getAssessmentComponents(module: Module) = dao.getAssessmentComponents(module)
 
 	/**
+	 * Gets assessment components by SITS module code
+	 */
+	def getAssessmentComponents(moduleCode: String) = dao.getAssessmentComponents(moduleCode)
+
+	/**
 	 * Gets assessment components for this department.
 	 */
 	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean) = dao.getAssessmentComponents(department, includeSubDepartments)
@@ -159,7 +176,7 @@ class AssessmentMembershipServiceImpl
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] =
 		dao.getUpstreamAssessmentGroups(component, academicYear)
 
-	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
+	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] =
 		dao.getUpstreamAssessmentGroupsNotIn(ids, academicYears)
 
 	def save(gb: GradeBoundary): Unit = {
@@ -183,17 +200,13 @@ class AssessmentMembershipServiceImpl
 
 }
 
-
-
 class AssessmentMembershipInfo(val items: Seq[MembershipItem]) {
-
-	def	sitsCount = items.count(_.itemType == SitsType)
-	def	totalCount = items.filterNot(_.itemType == ExcludeType).size
-	def includeCount = items.count(_.itemType == IncludeType)
-	def excludeCount = items.count(_.itemType == ExcludeType)
-	def usedIncludeCount = items.count(i => i.itemType == IncludeType && !i.extraneous)
-	def usedExcludeCount = items.count(i => i.itemType == ExcludeType && !i.extraneous)
-
+	val	sitsCount = items.count(_.itemType == SitsType)
+	val	totalCount = items.filterNot(_.itemType == ExcludeType).size
+	val includeCount = items.count(_.itemType == IncludeType)
+	val excludeCount = items.count(_.itemType == ExcludeType)
+	val usedIncludeCount = items.count(i => i.itemType == IncludeType && !i.extraneous)
+	val usedExcludeCount = items.count(i => i.itemType == ExcludeType && !i.extraneous)
 }
 
 trait AssessmentMembershipMethods extends Logging {
@@ -245,6 +258,13 @@ trait AssessmentMembershipMethods extends Logging {
 		exam.upstreamAssessmentGroups.flatMap(_.sortedMembers).distinct.sortBy(_.position)
 			.map(m => userLookup.getUserByWarwickUniId(m.memberId) -> m.position)
 
+	def determineMembershipUsersWithOrderForMarker(exam: Exam, marker:User): Seq[(User, Option[Int])] =
+		if (!exam.released || exam.markingWorkflow == null) Seq()
+		else {
+			val markersStudents = exam.markingWorkflow.getMarkersStudents(exam, marker)
+			determineMembershipUsersWithOrder(exam).filter(s => markersStudents.contains(s._1))
+		}
+
 	private def determineSitsMembership(upstream: Seq[UpstreamAssessmentGroup]) =
 		upstream.flatMap(_.sortedMembers).distinct.sortBy(_.position)
 
@@ -253,7 +273,7 @@ trait AssessmentMembershipMethods extends Logging {
 		others.foreach { g => assert(g.universityIds) }
 		for (group <- upstream) assert(group.members.universityIds)
 
-		val sitsUsers = upstream.flatMap { _.members.members }.distinct.toSeq
+		val sitsUsers = upstream.flatMap { _.members.members }.distinct
 
 		val includes = others.map(_.knownType.members).getOrElse(Nil)
 		val excludes = others.map(_.knownType.excludedUserIds).getOrElse(Nil)

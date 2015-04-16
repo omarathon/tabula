@@ -37,16 +37,12 @@ class EditExamCommandInternal(override val exam: Exam)
 		with AssessmentMembershipServiceComponent =>
 
 	override def applyInternal() = {
-		exam.name = name
 
-		exam.assessmentGroups.clear()
-		exam.assessmentGroups.addAll(assessmentGroups)
-		for (group <- exam.assessmentGroups.asScala if group.exam == null) {
-			group.exam = exam
-		}
+		this.copyTo(exam)
 
 		assessmentService.save(exam)
 		exam
+
 	}
 }
 
@@ -61,6 +57,9 @@ trait EditExamPermissions extends RequiresPermissionsChecking with PermissionsCh
 
 trait EditExamCommandState extends ExamState {
 
+	self: AssessmentServiceComponent with UserLookupComponent with HasAcademicYear with SpecifiesGroupType
+		with AssessmentMembershipServiceComponent =>
+
 	def exam: Exam
 	override def module: Module = exam.module
 	override def academicYear: AcademicYear = exam.academicYear
@@ -68,7 +67,8 @@ trait EditExamCommandState extends ExamState {
 
 trait EditExamCommandDescription extends Describable[Exam] {
 
-	self: EditExamCommandState =>
+	self: EditExamCommandState with AssessmentServiceComponent with UserLookupComponent with HasAcademicYear with SpecifiesGroupType
+		with AssessmentMembershipServiceComponent =>
 
 	def describe(d: Description) {
 		d.exam(exam)
@@ -80,6 +80,7 @@ trait PopulateEditExamCommand {
 	self: EditExamCommandState with UpdatesStudentMembership =>
 	name = exam.name
 	assessmentGroups = exam.assessmentGroups
+	markingWorkflow = exam.markingWorkflow
 
 	def populateGroups(exam: Exam) {
 		assessmentGroups = exam.assessmentGroups

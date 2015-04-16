@@ -1,16 +1,18 @@
 package uk.ac.warwick.tabula.web.filters
 
-import java.io.{ByteArrayOutputStream, StringWriter}
+import java.io.ByteArrayOutputStream
 import java.util.concurrent.Future
 
+import ch.qos.logback.classic.Level
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.ByteArrayBody
-import org.apache.log4j.{PatternLayout, Level, WriterAppender}
 import org.springframework.mock.web.{MockFilterChain, MockHttpServletResponse, MockHttpServletRequest}
 import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.sso.client.SSOClientFilter
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.{TestLoggerFactory, TestBase}
 import org.apache.http.entity.{StringEntity, ContentType}
+
+import scala.collection.JavaConverters._
 
 class PostDataLoggingFilterTest extends TestBase {
 	val request = new MockHttpServletRequest
@@ -20,11 +22,8 @@ class PostDataLoggingFilterTest extends TestBase {
 
 	request.setRequestURI("/url.php")
 
-	// Capture POST_LOGGER output into a StringWriter.
-	val writer = new StringWriter()
-	val appender = new WriterAppender(new PatternLayout("%c - %m%n"), writer)
-	filter.postLogger.setLevel(Level.INFO)
-	filter.postLogger.addAppender(appender)
+	// Capture POST_LOGGER output
+	val testLogger = TestLoggerFactory.getTestLogger("POST_LOGGER")
 
 	private def withSsoUser(user:String)(fn: =>Unit): Unit = {
 		withUser(user) {
@@ -57,21 +56,22 @@ class PostDataLoggingFilterTest extends TestBase {
 
 	@Test def doFilterGet {
 		filter.doFilter(request, response, chain)
-		assert(writer.toString === "")
+		TestLoggerFactory.retrieveEvents(testLogger) should be ('empty)
 	}
 
 	@Test def doFilterPut {
 		request.setMethod("PUT")
 		request.addParameter("query", "acomudashun")
 		filter.doFilter(request, response, chain)
-		assert(writer.toString === "")
+		TestLoggerFactory.retrieveEvents(testLogger) should be ('empty)
 	}
 
 	@Test def doFilterPost {
 		request.setMethod("POST")
 		request.addParameter("query", "acomudashun")
 		filter.doFilter(request, response, chain)
-		assert(writer.toString === "POST_LOGGER - userId= multipart=false /url.php query=acomudashun\n")
+		val events = TestLoggerFactory.retrieveEvents(testLogger).map(e => (e.getLevel, e.getMessage))
+		events should be (Seq((Level.INFO, "userId= multipart=false /url.php query=acomudashun")))
 	}
 
 	@Test(timeout = 1000) def doFilterMultipart {
@@ -101,7 +101,9 @@ class PostDataLoggingFilterTest extends TestBase {
 		future.get()
 
 		// Should only log the text fields, skip the binary parts
-		assert(writer.toString === "POST_LOGGER - userId= multipart=true /url.php confirm=yes\n")
+		// Need to use getAllLoggingEvents because it happens on another thread
+		val events = TestLoggerFactory.retrieveEvents(testLogger).map(e => (e.getLevel, e.getMessage))
+		events should contain ((Level.INFO, "userId= multipart=true /url.php confirm=yes"))
 	}
 
 	@Test(timeout = 1000) def doFilterJson: Unit = {
@@ -126,6 +128,8 @@ class PostDataLoggingFilterTest extends TestBase {
 		future.get()
 
 		// Should only log the text fields, skip the binary parts
-		assert(writer.toString === s"POST_LOGGER - userId= multipart=false /url.php requestBody=$json\n")
+		// Need to use getAllLoggingEvents because it happens on another thread
+		val events = TestLoggerFactory.retrieveEvents(testLogger).map(e => (e.getLevel, e.getMessage))
+		events should contain ((Level.INFO, s"userId= multipart=false /url.php requestBody=$json"))
 	}
 }

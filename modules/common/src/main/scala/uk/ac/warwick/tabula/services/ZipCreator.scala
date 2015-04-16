@@ -4,7 +4,7 @@ import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
-import org.apache.http.HttpStatus
+import org.springframework.http.HttpStatus
 import uk.ac.warwick.tabula.system.exceptions.UserError
 
 import scala.collection.mutable.ListBuffer
@@ -184,6 +184,6 @@ object ZipCreator {
 	val MaxFileLength = 100
 }
 
-class ZipRequestTooLargeError extends java.lang.RuntimeException() with UserError {
-	override val statusCode = HttpStatus.SC_REQUEST_TOO_LONG
+class ZipRequestTooLargeError extends java.lang.RuntimeException("Files too large to compress") with UserError {
+	override val httpStatus = HttpStatus.PAYLOAD_TOO_LARGE
 }

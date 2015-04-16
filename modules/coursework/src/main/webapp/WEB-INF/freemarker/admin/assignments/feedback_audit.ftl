@@ -26,46 +26,58 @@
 		<#assign feedback = auditData.feedback />
 		<#assign isSelf = false />
 
-		<#if feedback.hasAdjustments??>
+		<#if feedback.hasPrivateOrNonPrivateAdjustments??>
 			<div class="well">
 				<div class="feedback-summary-heading">
 					<h3>Adjustments</h3>
 				</div>
 				<div class="feedback-summary">
 					<div class="feedback-details">
-						<div class="mark-grade" >
-							<div>
-								<#if feedback.adjustedMark?has_content>
-									<div class="mg-label">Adjusted Mark:</div>
-									<div>
-										<span class="mark">${feedback.adjustedMark!""}</span>
-										<span>%</span>
-									</div>
-								</#if>
-								<#if feedback.adjustedGrade?has_content>
-									<div class="mg-label" >Adjusted Grade:</div>
-									<div>
-										<span class="grade">${feedback.adjustedGrade!""}</span>
-									</div>
-								</#if>
-							</div>
-						</div>
-						<#if feedback.adjustmentReason?has_content>
+						<#list feedback.adminViewableAdjustments as adminViewableFeedback>
+							<div class="adjustment alert alert-info">
 							<div class="mark-grade" >
 								<div>
-									<div class="mg-label">Reason for adjustment: </div>
+									<#if adminViewableFeedback.mark?has_content>
+										<div class="mg-label">Adjusted Mark:</div>
+										<div>
+											<span class="mark">${adminViewableFeedback.mark!""}</span>
+											<span>%</span>
+										</div>
+									</#if>
+									<#if adminViewableFeedback.grade?has_content>
+										<div class="mg-label" >Adjusted Grade:</div>
+										<div>
+											<span class="grade">${adminViewableFeedback.grade!""}</span>
+										</div>
+									</#if>
+								</div>
+							</div>
+							<div class="mark-grade" >
+								<div>
+									<div class="mg-label">Adjustment made: </div>
 									<div>
-										<span>${feedback.adjustmentReason!""}</span>
+										<span><@fmt.date adminViewableFeedback.uploadedDate /></span>
 									</div>
 								</div>
 							</div>
-						</#if>
-						<#if feedback.adjustmentComments?has_content>
-							<div class="feedback-comments">
-								<h5>Adjustment comments</h5>
-								<p>${feedback.adjustmentComments!""}</p>
+							<#if adminViewableFeedback.reason?has_content>
+								<div class="mark-grade" >
+									<div>
+										<div class="mg-label">Reason for adjustment: </div>
+										<div>
+											<span>${adminViewableFeedback.reason!""}</span>
+										</div>
+									</div>
+								</div>
+							</#if>
+							<#if adminViewableFeedback.comments?has_content>
+								<div class="feedback-comments">
+									<h5>Adjustment comments</h5>
+									<p>${adminViewableFeedback.comments!""}</p>
+								</div>
+							</#if>
 							</div>
-						</#if>
+						</#list>
 					</div>
 				</div>
 			</div>

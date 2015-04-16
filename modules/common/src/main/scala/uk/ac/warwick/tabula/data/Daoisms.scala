@@ -84,7 +84,13 @@ object Daoisms extends HelperRestrictions {
 	 * better with Scala's generics support.
 	 */
 	implicit class NiceQueryCreator(session: Session) {
-		def newCriteria[A: ClassTag] = new ScalaCriteria[A](session.createCriteria(classTag[A].runtimeClass))
+		def newCriteria[A: ClassTag] =
+			new ScalaCriteria[A](
+				session.createCriteria(
+					classTag[A]
+						.runtimeClass
+				)
+			)
 		def newQuery[A](hql: String) = new ScalaQuery[A](session.createQuery(hql))
 	}
 
@@ -119,7 +125,10 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 				session
 			}
 
-	protected def session = optionalSession.orNull
+	protected def session = optionalSession.getOrElse({
+		logger.error("Trying to access session, but it is null")
+		null
+	})
 
 	protected def optionalSessionWithoutFreshFilters =
 		_sessionFactory.flatMap { sf => Try(sf.getCurrentSession).toOption }

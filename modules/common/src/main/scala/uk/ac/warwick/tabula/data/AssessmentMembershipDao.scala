@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.data
 
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model._
 import org.hibernate.criterion.{Order, Restrictions}
@@ -46,6 +48,7 @@ trait AssessmentMembershipDao {
 	 */
 	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
 	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
+	def getAssessmentComponents(moduleCode: String): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
@@ -53,7 +56,10 @@ trait AssessmentMembershipDao {
 	 * assessment group code, which most of the time is just 1.
 	 */
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
-	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
+
+	def emptyMembers(groupsToEmpty:Seq[String]): Int
+	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit
 
 	def countPublishedFeedback(assignment: Assignment): Int
 	def countFullFeedback(assignment: Assignment): Int
@@ -73,7 +79,7 @@ trait AssessmentMembershipDao {
 }
 
 @Repository
-class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
+class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms with Logging {
 
 	def getSITSEnrolledAssignments(user: User): Seq[Assignment] =
 		session.newQuery[Assignment]("""select a
@@ -108,17 +114,20 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 	 * Tries to find an identical AssessmentComponent in the database, based on the
 	 * fact that moduleCode and sequence uniquely identify the assignment.
 	 */
-	def find(assignment: AssessmentComponent): Option[AssessmentComponent] = session.newCriteria[AssessmentComponent]
-		.add(is("moduleCode", assignment.moduleCode))
-		.add(is("sequence", assignment.sequence))
-		.uniqueResult
+	def find(assignment: AssessmentComponent): Option[AssessmentComponent] =
+		session.newCriteria[AssessmentComponent]
+			.add(is("moduleCode", assignment.moduleCode))
+			.add(is("sequence", assignment.sequence))
+			.uniqueResult
 
-	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = session.newCriteria[UpstreamAssessmentGroup]
-		.add(is("assessmentGroup", group.assessmentGroup))
-		.add(is("academicYear", group.academicYear))
-		.add(is("moduleCode", group.moduleCode))
-		.add(is("occurrence", group.occurrence))
-		.uniqueResult
+	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] =
+		session.newCriteria[UpstreamAssessmentGroup]
+			.add(is("assessmentGroup", group.assessmentGroup))
+			.add(is("academicYear", group.academicYear))
+			.add(is("moduleCode", group.moduleCode))
+			.add(is("occurrence", group.occurrence))
+			.add(is("sequence", group.sequence))
+			.uniqueResult
 
 	def find(group: AssessmentGroup): Option[AssessmentGroup] = {
 		if (group.assignment == null && group.smallGroupSet == null) None
@@ -205,6 +214,15 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 		}
 	}
 
+	/** Just gets components of type Assignment for this SITS module code, not all components. */
+	def getAssessmentComponents(moduleCode: String) = {
+		session.newCriteria[AssessmentComponent]
+			.add(is("moduleCode", moduleCode))
+			.add(is("inUse", true))
+			.addOrder(Order.asc("sequence"))
+			.seq
+	}
+
 	def countPublishedFeedback(assignment: Assignment): Int = {
 		session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = 1""")
 			.setString("assignmentId", assignment.id)
@@ -226,14 +244,43 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms {
 			.add(is("academicYear", academicYear))
 			.add(is("moduleCode", component.moduleCode))
 			.add(is("assessmentGroup", component.assessmentGroup))
+			.add(is("sequence", component.sequence))
 			.seq
 	}
 
-	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
+	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] =
 		session.newCriteria[UpstreamAssessmentGroup]
 			.add(not(safeIn("id", ids)))
 			.add(safeIn("academicYear", academicYears))
 			.seq
+			.map(_.id)
+
+	def emptyMembers(groupsToEmpty:Seq[String]) = {
+		var count = 0
+		val partitionedIds = groupsToEmpty.grouped(Daoisms.MaxInClauseCount)
+		partitionedIds.map(batch => {
+			val numDeleted = transactional() {
+				session.createSQLQuery(s"""delete from usergroupstatic where group_id in (
+						select membersgroup_id from UpstreamAssessmentGroup where id in (:batch)
+					)""")
+					.setParameterList("batch", batch.asJava)
+					.executeUpdate
+			}
+			count += 1000
+			logger.info(s"Emptied $count groups")
+			numDeleted
+		}).sum
+
+	}
+
+	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit = {
+		group.sortedMembers.foreach(member => {
+			seatNumberMap.get(member.memberId).foreach(seatNumber => {
+				member.position = Option(seatNumber)
+				session.saveOrUpdate(member)
+			})
+		})
+	}
 
 	def save(gb: GradeBoundary): Unit = {
 		session.saveOrUpdate(gb)

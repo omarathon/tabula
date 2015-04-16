@@ -3,14 +3,9 @@ package uk.ac.warwick.tabula.system
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import uk.ac.warwick.sso.client.SSOClientFilter
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.services.SecurityService
+import uk.ac.warwick.tabula.helpers.HttpServletRequestUtils._
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.util.web.Uri
-import collection.JavaConversions._
-import collection.JavaConverters._
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
 
@@ -56,14 +51,12 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 	}
 
 	override def afterCompletion(request: HttpServletRequest, response: HttpServletResponse, handler: Object, ex: Exception) {
-		RequestInfo.close
+		RequestInfo.close()
 	}
 
 }
 
 object RequestInfoInterceptor {
-	val AjaxHeader = "X-Requested-With"
-	val XRequestedUriHeader = "X-Requested-Uri"
 	val RequestInfoAttribute = "APP_REQUEST_INFO_ATTRIBUTE"
 	  
 	def newRequestInfo(request: HttpServletRequest, isMaintenance: Boolean = false) = {
@@ -72,9 +65,9 @@ object RequestInfoInterceptor {
 
 		new RequestInfo(
 			user = getUser(request),
-			requestedUri = getRequestedUri(request),
-			requestParameters = getParameters(request),
-			ajax = isAjax(request),
+			requestedUri = request.requestedUri,
+			requestParameters = request.requestParameters,
+			ajax = request.isAjaxRequest,
 			maintenance = isMaintenance,
 			requestLevelCache = cache)
 	}
@@ -84,30 +77,4 @@ object RequestInfoInterceptor {
 		case _ => null
 	}
 
-	private def isAjax(implicit request: HttpServletRequest) = hasXHRHeader || hasAJAXParam
-
-	private def hasXHRHeader(implicit request: HttpServletRequest) = request.getHeader(AjaxHeader) match {
-		case "XMLHttpRequest" => true
-		case _ => false
-	}
-
-	private def hasAJAXParam(implicit request: HttpServletRequest) = request.getParameter("ajax") match {
-		case s: String => true
-		case _ => false
-	}
-
-	private def getRequestedUri(request: HttpServletRequest) = Uri.parse(request.getHeader(XRequestedUriHeader) match {
-		case string: String => string
-		case _ => request.getRequestURL.toString
-	})
-	
-	private def getParameters(request: HttpServletRequest) = {
-		val params: Map[String, List[String]] = 
-			for ((key, value) <- request.getParameterMap().toMap)
-				yield (key, value) match {
-					case (key: String, values: Array[String]) => (key, values.toList)
-				}
-				
-		params.toMap
-	}
 }

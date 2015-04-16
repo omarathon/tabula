@@ -44,13 +44,13 @@ class BulkAdjustmentTemplateCommandInternal(val assessment: Assessment) extends 
 		header.createCell(8).setCellValue(BulkAdjustmentCommand.CommentsHeader)
 
 		val memberOrder = assessmentMembershipService.determineMembershipUsers(assessment).zipWithIndex.toMap.map{case(user, order) => user.getWarwickId -> order}
-		assessment.fullFeedback.sortBy(f => memberOrder(f.universityId)).foreach(f => {
+		assessment.fullFeedback.sortBy(f => memberOrder.getOrElse(f.universityId, 10000)).foreach(f => {
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
 			row.createCell(0).setCellValue(f.universityId)
 			row.createCell(1).setCellValue(f.actualMark.map(_.toString).getOrElse(""))
 			row.createCell(2).setCellValue(f.actualGrade.getOrElse(""))
-			row.createCell(3).setCellValue(f.latestPrivateAdjustment.map(_.mark.toString).getOrElse(""))
-			row.createCell(4).setCellValue(f.latestPrivateAdjustment.flatMap(_.grade.map(_.toString)).getOrElse(""))
+			row.createCell(3).setCellValue(f.latestPrivateOrNonPrivateAdjustment.map(_.mark.toString).getOrElse(""))
+			row.createCell(4).setCellValue(f.latestPrivateOrNonPrivateAdjustment.flatMap(_.grade.map(_.toString)).getOrElse(""))
 		})
 
 		val style = workbook.createCellStyle

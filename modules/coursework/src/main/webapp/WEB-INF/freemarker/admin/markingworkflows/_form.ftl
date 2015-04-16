@@ -36,40 +36,41 @@ Common form fields.
 
 	<@f.select disabled=isDisabled path="markingMethod">
 		<option <#if !command.markingMethod?has_content>selected="selected"</#if> value=""></option>
-		<option value="StudentsChooseMarker"
-			<#if ((command.markingMethod.toString)!"") = "StudentsChooseMarker">selected="selected"</#if>
-			data-firstrolename="Marker"
-			data-firstrolename=""
-		>
-			Students choose marker
-		</option>
-		<#if features.newSeenSecondMarkingWorkflows || ((command.markingMethod.toString)!"") == "SeenSecondMarking">
-			<option value="SeenSecondMarking" class="uses-second-markers"
-					<#if ((command.markingMethod.toString)!"") = "SeenSecondMarking">selected="selected"</#if>
-					data-firstrolename="First marker"
-					data-secondrolename="Second marker"
-					>
-				Seen second marking
+		<#if !isExams>
+			<option value="StudentsChooseMarker"
+				<#if ((command.markingMethod.toString)!"") = "StudentsChooseMarker">selected="selected"</#if>
+				data-firstrolename="Marker"
+				data-firstrolename=""
+			>
+				Students choose marker
+			</option>
+			<#if features.newSeenSecondMarkingWorkflows || ((command.markingMethod.toString)!"") == "SeenSecondMarking">
+				<option value="SeenSecondMarking" class="uses-second-markers"
+						<#if ((command.markingMethod.toString)!"") = "SeenSecondMarking">selected="selected"</#if>
+						data-firstrolename="First marker"
+						data-secondrolename="Second marker"
+						>
+					Seen second marking
+				</option>
+			</#if>
+			<#if !features.newSeenSecondMarkingWorkflows || ((command.markingMethod.toString)!"") == "SeenSecondMarkingLegacy">
+				<option value="SeenSecondMarkingLegacy" class="uses-second-markers"
+						<#if ((command.markingMethod.toString)!"") = "SeenSecondMarkingLegacy">selected="selected"</#if>
+						data-firstrolename="First marker"
+						data-secondrolename="Second marker"
+						>
+					Seen second marking <#if features.newSeenSecondMarkingWorkflows>(legacy)</#if>
+				</option>
+			</#if>
+
+			<option value="ModeratedMarking" class="uses-second-markers"
+				<#if ((command.markingMethod.toString)!"") = "ModeratedMarking">selected="selected"</#if>
+				data-firstrolename="Marker"
+				data-secondrolename="Moderator"
+			>
+				Moderated marking
 			</option>
 		</#if>
-		<#if !features.newSeenSecondMarkingWorkflows || ((command.markingMethod.toString)!"") == "SeenSecondMarkingLegacy">
-			<option value="SeenSecondMarkingLegacy" class="uses-second-markers"
-					<#if ((command.markingMethod.toString)!"") = "SeenSecondMarkingLegacy">selected="selected"</#if>
-					data-firstrolename="First marker"
-					data-secondrolename="Second marker"
-					>
-				Seen second marking <#if features.newSeenSecondMarkingWorkflows>(legacy)</#if>
-			</option>
-		</#if>
-
-
-		<option value="ModeratedMarking" class="uses-second-markers"
-			<#if ((command.markingMethod.toString)!"") = "ModeratedMarking">selected="selected"</#if>
-			data-firstrolename="Marker"
-			data-secondrolename="Moderator"
-		>
-			Moderated marking
-		</option>
 		<option value="FirstMarkerOnly"
 			<#if ((command.markingMethod.toString)!"") = "FirstMarkerOnly">selected="selected"</#if>
 			data-firstrolename="Marker"

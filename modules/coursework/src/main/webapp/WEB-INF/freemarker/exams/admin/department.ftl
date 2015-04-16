@@ -71,6 +71,15 @@
 						<i class="icon-envelope icon-fixed-width"></i> Notification settings
 					</@fmt.permission_button>
 				</li>
+				<#if features.markingWorkflows>
+					<li class="divider"></li>
+					<li>
+						<#assign markingflow_url><@routes.markingworkflowlist department /></#assign>
+						<@fmt.permission_button permission='MarkingWorkflow.Read' scope=department action_descr='manage marking workflows' href=markingflow_url>
+							<i class="icon-check icon-fixed-width"></i> Marking workflows
+						</@fmt.permission_button>
+					</li>
+				</#if>
 			</ul>
 		</div>
 	</#if>

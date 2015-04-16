@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 case class MarkerFeedbackItem (
 	student: User,
-	submission: Submission,
+	submission: Option[Submission],
 	feedbacks: Seq[MarkerFeedback],
 	nextMarker: Option[User]
 ) {
@@ -42,26 +42,25 @@ class ListMarkerFeedbackCommand(val assignment: Assignment, val module: Module, 
 	self: UserLookupComponent =>
 
 	def applyInternal() = {
-		val submissions = assignment.getMarkersSubmissions(marker)
+		val students = assignment.markingWorkflow.getMarkersStudents(assignment, marker)
 		val workflow = assignment.markingWorkflow
 
-		val feedbackItems = submissions.map(submission => {
-			val student = userLookup.getUserByWarwickUniId(submission.universityId)
-			val feedbacks = assignment.getAllMarkerFeedbacks(submission.universityId, marker).reverse
+		val feedbackItems = students.map(student => {
+			// all non transiant marker feedback items
+			val feedbacks = assignment.getAllMarkerFeedbacks(student.getWarwickId, marker).filterNot(_.state == null).reverse
+			val submission = assignment.findSubmission(student.getWarwickId)
 			val position = feedbacks.lastOption.map(_.getFeedbackPosition)
-			val nextMarker = workflow.getNextMarker(position, assignment, submission.universityId)
+			val nextMarker = workflow.getNextMarker(position, assignment, student.getWarwickId)
 			MarkerFeedbackItem(student, submission, feedbacks, nextMarker)
-		}).filterNot(_.feedbacks.isEmpty)
+		})
 
 		feedbackItems
-			.groupBy(_.feedbacks.lastOption.map(_.getFeedbackPosition))
-			.flatMap { case (position, items) =>
-				position.map(p => {
-					val roleName = workflow.getRoleNameForPosition(p)
-					val nextRoleName = workflow.getRoleNameForNextPosition(p).toLowerCase
-					val previousRoleName = workflow.getRoleNameForPreviousPosition(p).map(_.toLowerCase)
-					MarkerFeedbackStage(roleName, nextRoleName, previousRoleName, p, items)
-				})
+			.groupBy(_.feedbacks.lastOption.map(_.getFeedbackPosition).getOrElse(FirstFeedback))
+			.map { case (position, items) =>
+					val roleName = workflow.getRoleNameForPosition(position)
+					val nextRoleName = workflow.getRoleNameForNextPosition(position).toLowerCase
+					val previousRoleName = workflow.getRoleNameForPreviousPosition(position).map(_.toLowerCase)
+					MarkerFeedbackStage(roleName, nextRoleName, previousRoleName, position, items)
 			}
 			.toSeq
 			.sortBy(_.position)

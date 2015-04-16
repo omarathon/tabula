@@ -20,7 +20,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 	val thisMarkingWorkflowService = smartMock[MarkingWorkflowService]
 
 	val assignmentService = new AbstractAssessmentService with AssessmentDaoComponent
-		with AssignmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent {
+		with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent {
 		val assessmentDao = thisAssignmentDao
 		val firstMarkerHelper = thisFirstMarkerHelper
 		val secondMarkerHelper = thisSecondMarkerHelper
@@ -359,6 +359,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		group.moduleCode = "LA155-10"
 		group.occurrence = "A"
 		group.assessmentGroup = "A"
+		group.sequence = "A01"
 		group.academicYear = new AcademicYear(2010)
 
 		group.members.sessionFactory = sessionFactory
@@ -685,18 +686,21 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     upstreamAg1.assessmentGroup = "A"
     upstreamAg1.academicYear = year
     upstreamAg1.occurrence = "A"
+		upstreamAg1.sequence = "A01"
 
     val upstreamAg2 = new UpstreamAssessmentGroup
     upstreamAg2.moduleCode = "ch101"
     upstreamAg2.assessmentGroup = "B"
     upstreamAg2.academicYear = year
     upstreamAg2.occurrence = "B"
+		upstreamAg2.sequence = "A02"
 
     val upstreamAg3 = new UpstreamAssessmentGroup
     upstreamAg3.moduleCode = "ch101"
     upstreamAg3.assessmentGroup = "C"
     upstreamAg3.academicYear = year
     upstreamAg3.occurrence = "C"
+		upstreamAg3.sequence = "A03"
 
 		upstreamAg1.members.sessionFactory = sessionFactory
     upstreamAg1.members.staticUserIds = Seq("0000001", "0000002")

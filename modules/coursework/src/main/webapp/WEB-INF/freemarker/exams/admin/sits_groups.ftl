@@ -18,24 +18,24 @@
 			<tbody>
 				<#list command.availableUpstreamGroups as available>
 					<#local isLinked = available.isLinked(command.assessmentGroups) />
-				<tr>
-					<td>
-						<input
-							type="checkbox"
-							id="chk-${available.id}"
-							name=""
-							value="${available.id}" class="upstreamGroups"
-							${isLinked?string(" checked","")}
-						>
-					</td>
-					<td><label for="chk-${available.id}">${available.name}<#if isLinked> <span class="label label-success">Linked</span></#if></label></td>
-					<td>${available.memberCount}</td>
-					<td>${available.group.assessmentGroup}</td>
-					<td>${available.cats!'-'}</td>
-					<td>${available.occurrence}</td>
-					<td>${available.sequence}</td>
-					<td>${available.assessmentType!'A'}</td>
-				</tr>
+					<tr>
+						<td>
+							<input
+								type="checkbox"
+								id="chk-${available.id}"
+								name=""
+								value="${available.id}" class="upstreamGroups"
+								${isLinked?string(" checked","")}
+							>
+						</td>
+						<td><label for="chk-${available.id}">${available.name}<#if isLinked> <span class="label label-success">Linked</span></#if></label></td>
+						<td>${available.memberCount}</td>
+						<td>${available.group.assessmentGroup}</td>
+						<td>${available.cats!'-'}</td>
+						<td>${available.occurrence}</td>
+						<td>${available.sequence}</td>
+						<td>${available.assessmentType!'A'}</td>
+					</tr>
 				</#list>
 			</tbody>
 		</table>

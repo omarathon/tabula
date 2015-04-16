@@ -39,7 +39,7 @@ class RequestBenchmarkingInterceptor extends HandlerInterceptorAdapter with Task
 				stopwatch.stop()
 				
 				if (stopwatch.getTotalTimeMillis > Command.MillisToSlowlog) {
-					Command.slowLogger.log(Warn, stopwatch.prettyPrint)
+					Command.slowLogger.warn(stopwatch.prettyPrint)
 				}
 				
 				Command.endStopwatching

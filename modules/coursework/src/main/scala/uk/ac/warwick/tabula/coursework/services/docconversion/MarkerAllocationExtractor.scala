@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 
 object MarkerAllocationExtractor {
-	case class Error(field:String, rowData: Map[String, String], code:String)
+	case class Error(field:String, rowData: Map[String, String], code:String, codeArgument:String="")
 	val AcceptedFileExtensions = Seq(".xlsx")
 
 	sealed trait MarkerPosition
@@ -26,6 +26,10 @@ object MarkerAllocationExtractor {
 		errors: Seq[Error],
 		position: MarkerPosition
 	)
+
+	case class Markers (firstMarkers:Seq[String], secondMarkers:Seq[String]) {
+		def allMarkers = firstMarkers ++ secondMarkers
+	}
 }
 
 @Service
@@ -34,15 +38,19 @@ class MarkerAllocationExtractor() {
 	@transient var userLookup = Wire[UserLookupService]
 
 	def extractMarkersFromSpreadsheet(file: InputStream, workflow: MarkingWorkflow) = {
+
+		val firstMarkers = workflow.firstMarkers.knownType.members.map(userLookup.getUserByUserId).map(_.getWarwickId)
+		val secondMarkers = workflow.secondMarkers.knownType.members.map(userLookup.getUserByUserId).map(_.getWarwickId)
+
 		val rowData = SpreadsheetHelpers.parseXSSFExcelFile(file)
 		rowData
-			.map(parseRow(_, workflow))
+			.map(parseRow(_, workflow, Markers(firstMarkers, secondMarkers)))
 			.groupBy(_.position)
 	}
 
-	def parseRow(rowData: Map[String, String], workflow: MarkingWorkflow): ParsedRow = {
-
-		lazy val allMarkers = workflow.firstMarkers.knownType.members ++  workflow.secondMarkers.knownType.members
+	def parseRow(rowData: Map[String, String],
+							 workflow: MarkingWorkflow,
+							 markers: Markers): ParsedRow = {
 
 		def getUser(id: String): Option[User] = {
 			val user = userLookup.getUserByWarwickUniId(id)
@@ -61,11 +69,14 @@ class MarkerAllocationExtractor() {
 			}
 		}
 
-		def parseMarker: Either[MarkerAllocationExtractor.Error, Option[User]] = {
+		def parseMarker(validMarkers: Seq[String], allMarkers: Seq[String], roleName: String) = {
 			rowData.get("agent_id") match {
 				case Some(markerId) if markerId.hasText =>
-					if (!allMarkers.contains(markerId)) {
-						Left(Error("marker_id", rowData, "workflow.allocateMarkers.notMarker"))
+					if (!validMarkers.contains(markerId)) {
+						if(allMarkers.contains(markerId))
+							Left(Error("marker_id", rowData, "workflow.allocateMarkers.wrongRole", roleName))
+						else
+							Left(Error("marker_id", rowData, "workflow.allocateMarkers.notMarker"))
 					} else {
 						getUser(markerId)
 							.map(user => Right(Some(user)))
@@ -83,10 +94,15 @@ class MarkerAllocationExtractor() {
 			else NoMarker
 		}
 
+		val position = parsePosition
 		val student = parseStudent
-		val marker = parseMarker
+		val marker = position match {
+			case FirstMarker => parseMarker(markers.firstMarkers, markers.allMarkers, workflow.firstMarkerRoleName)
+			case SecondMarker => parseMarker(markers.secondMarkers, markers.allMarkers, workflow.secondMarkerRoleName.getOrElse(""))
+			case _ => Left(Error("marker_id", rowData, "workflow.allocateMarkers.unableToWorkOutRole"))
+		}
 		val errors = Seq(student, marker).flatMap(_.left.toOption)
-		ParsedRow(marker.right.toOption.flatten, student.right.toOption, errors, parsePosition)
+		ParsedRow(marker.right.toOption.flatten, student.right.toOption, errors, position)
 	}
 }
 

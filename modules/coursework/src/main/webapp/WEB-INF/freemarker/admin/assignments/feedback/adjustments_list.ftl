@@ -33,6 +33,11 @@
 </#macro>
 
 <#escape x as x?html>
+	<#if studentInfo?size gt 0>
+		<div class="pull-right">
+			<a href="<@routes.feedbackBulkAdjustment assignment />" class="btn"><i class="icon-sort"></i> Adjust in bulk</a>
+		</div>
+	</#if>
 	<h1>Feedback adjustment</h1>
 	<h5><span class="muted">for</span> ${assignment.name} (${assignment.module.code?upper_case})</h5>
 

@@ -35,11 +35,7 @@ class ListMarkerFeedbackController extends CourseworkController {
 		} else {
 			val markerFeedback = command.apply()
 			val feedbackItems = markerFeedback.flatMap(_.feedbackItems)
-			val unsubmittedStudents = {
-				val markersStudents = assignment.markingWorkflow.getMarkersStudents(assignment, marker)
-				val markersSubmissions = assignment.getMarkersSubmissions(marker).map(_.universityId)
-				markersStudents.filterNot(student => markersSubmissions.contains(student.getWarwickId))
-			}
+			val unsubmittedStudents = feedbackItems.filter(_.submission.isEmpty).map(_.student)
 			val feedbackCounts: Seq[Int] = feedbackItems.map(_.feedbacks.size)
 			val maxFeedbackCount = feedbackCounts.foldLeft(0)(_ max _)
 			val hasFirstMarkerFeedback = maxFeedbackCount > 1
@@ -57,7 +53,7 @@ class ListMarkerFeedbackController extends CourseworkController {
 				"thirdMarkerRoleName" -> assignment.markingWorkflow.thirdMarkerRoleName,
 				"isModeration" -> isModeration,
 				"onlineMarkingUrls" -> feedbackItems.map{ items =>
-					items.student.getUserId -> assignment.markingWorkflow.onlineMarkingUrl(assignment, marker, items.student.getUserId)
+					items.student.getUserId -> assignment.markingWorkflow.courseworkMarkingUrl(assignment, marker, items.student.getWarwickId)
 				}.toMap,
 				"marker" -> marker,
 				"unsubmittedStudents" -> unsubmittedStudents,
