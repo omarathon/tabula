@@ -20,7 +20,8 @@
 		h1 { font-size: 20px; color: #7030a0; font-weight: bold; }
 		h2 { font-size: 18px; color: #7030a0; font-weight: bold; }
 		h3 { font-size: 14px; color: #000000; font-weight: bold; }
-		table { border-collapse: collapse; width: 100%; }
+		p { margin-top: 0; }
+		table { border-collapse: collapse; width: 100%; margin-bottom: 1em; }
 		th { border: 1px solid black; padding: 8px 8px; font-size: 12px; font-weight: bold; background: #e5dfec; }
 		td { border: 1px solid black; padding: 8px 8px; font-size: 10px; font-weight: bold; background: #f2f2f2; width: 1px; white-space: nowrap; vertical-align: top; }
 		td + td { font-size: 10px; font-weight: normal; background: white; width: auto; white-space: normal; }
@@ -29,7 +30,7 @@
 		div.cover h1 { padding-top: 200px; }
 
 		div.summary, div.term, div.state, div.department, div.assignments, div.small-groups, div.meetings { page-break-after: always; }
-		div.point, div.summary-department, div.event, div.assignment { page-break-inside: avoid; }
+		table, div.point, div.summary-department, div.event, div.assignment { page-break-inside: avoid; }
 	</style>
 </head>
 <body>
@@ -296,7 +297,7 @@
 						</tr>
 						<tr>
 							<td>Description</td>
-							<td><#noescape>${meeting.description}</#noescape></td>
+							<td><#noescape>${meeting.description!""}</#noescape></td>
 						</tr>
 					</tbody>
 				</table>
