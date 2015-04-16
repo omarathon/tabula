@@ -32,6 +32,9 @@ object ProfileExportSingleCommand {
 			with AutowiringMonitoringPointServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringUserLookupComponent
+			with AutowiringAssessmentServiceComponent
+			with AutowiringRelationshipServiceComponent
+			with AutowiringMeetingRecordServiceComponent
 			with ComposableCommand[Seq[FileAttachment]]
 			with ProfileExportSingleDescription
 			with ProfileExportSinglePermissions
@@ -43,10 +46,13 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 	extends CommandInternal[Seq[FileAttachment]] with TaskBenchmarking {
 
 	self: FreemarkerXHTMLPDFGeneratorComponent with AttendanceMonitoringServiceComponent
-		with MonitoringPointServiceComponent
+		with MonitoringPointServiceComponent with AssessmentServiceComponent
+		with RelationshipServiceComponent with MeetingRecordServiceComponent
 		with TermServiceComponent with UserLookupComponent =>
 
 	var fileDao = Wire.auto[FileDao]
+
+	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 	case class PointData(
 		departmentName: String,
@@ -62,6 +68,22 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		attendanceNote: Option[AttendanceNote]
 	)
 
+	case class AssignmentData(
+		module: String,
+		name: String,
+		submissionDeadline: String,
+		submissionDate: String
+	)
+
+	case class MeetingData(
+		relationshipType: String,
+		agent: String,
+		meetingDate: String,
+		title: String,
+		format: String,
+		description: String
+	)
+
 	override def applyInternal() = {
 		// Get point data
 		val pointData = if (academicYear.startYear < 2014) {
@@ -71,8 +93,42 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		}
 
 		// Get coursework
+		val assignmentData = benchmarkTask("assignmentData") {
+			assessmentService.getAssignmentsWithSubmission(student.universityId)
+				.filter(_.academicYear == academicYear)
+				.sortBy(_.closeDate)
+				.flatMap(assignment => {
+					assignment.findSubmission(student.universityId).map(submission => {
+						AssignmentData(
+							assignment.module.code.toUpperCase,
+							assignment.name,
+							Option(assignment.submissionDeadline(submission)).map(_.toString(ProfileExportSingleCommand.TimeFormat)).getOrElse(""),
+							submission.submittedDate.toString(ProfileExportSingleCommand.TimeFormat)
+						)
+					})
+				})
+		}
+
 		// Get small groups
+
+
 		// Get meetings
+		val startOfYear = termService.getTermFromAcademicWeekIncludingVacations(1, academicYear).getStartDate
+		val endOfYear = termService.getTermFromAcademicWeek(1, academicYear + 1).getStartDate
+		val meetingData = benchmarkTask("meetingData") {
+			relationshipService.getAllPastAndPresentRelationships(student).flatMap(meetingRecordService.list)
+				.filter(m => m.meetingDate.isAfter(startOfYear) && m.meetingDate.isBefore(endOfYear) && m.isApproved)
+				.sortBy(_.meetingDate)
+				.map(meeting => MeetingData(
+					meeting.relationship.relationshipType.agentRole.capitalize,
+					meeting.relationship.agentName,
+					meeting.meetingDate.toString(ProfileExportSingleCommand.TimeFormat),
+					meeting.title,
+					meeting.format.description,
+					meeting.description
+				))
+		}
+
 
 		// Build model
 		val summary = pointData
@@ -95,7 +151,9 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 				"academicYear" -> academicYear,
 				"user" -> user,
 				"summary" -> summary,
-				"groupedPoints" -> groupedPoints
+				"groupedPoints" -> groupedPoints,
+				"assignmentData" -> assignmentData,
+				"meetingData" -> meetingData.groupBy(_.relationshipType)
 			),
 			tempOutputStream
 		)

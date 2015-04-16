@@ -28,8 +28,8 @@
 		div.cover { page-break-after: always; text-align: center; }
 		div.cover h1 { padding-top: 200px; }
 
-		div.summary, div.term, div.state, div.department { page-break-after: always; }
-		div.point, div.summary-department { page-break-inside: avoid; }
+		div.summary, div.term, div.state, div.department, div.assignments, div.meetings { page-break-after: always; }
+		div.point, div.summary-department, div.assignment { page-break-inside: avoid; }
 	</style>
 </head>
 <body>
@@ -191,6 +191,72 @@
 			</div>
 		</div>
 	</#list>
+
+	<#-- ASSIGNMENTS -->
+	<div class="assignments">
+		<h1>Assignment submissions</h1>
+		<#if !assignmentData?has_content><p><em>No assignments found.</em></p></#if>
+		<#list assignmentData as assignment>
+			<div class="assignment">
+				<h3>${assignment.module} ${assignment.name}</h3>
+			</div>
+			<table>
+				<tbody>
+					<tr>
+						<td>Submission deadline</td>
+						<td>${assignment.submissionDeadline}</td>
+					</tr>
+					<tr>
+						<td>Submission date</td>
+						<td>${assignment.submissionDate}</td>
+					</tr>
+				</tbody>
+			</table>
+		</#list>
+	</div>
+
+	<#-- MEETINGS -->
+	<div class="meetings">
+		<h1>Meeting records</h1>
+		<#if !meetingData?keys?has_content><p><em>No meetings found.</em></p></#if>
+		<#list meetingData?keys as relationshipType>
+			<div class="assignment">
+				<h3>${relationshipType} meetings</h3>
+			</div>
+			<#list meetingData[relationshipType] as meeting>
+				<table>
+					<thead>
+						<tr>
+							<th>Criteria</th>
+							<th>Details</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>${relationshipType}</td>
+							<td>${meeting.agent}</td>
+						</tr>
+						<tr>
+							<td>Meeting date</td>
+							<td>${meeting.meetingDate}</td>
+						</tr>
+						<tr>
+							<td>Title</td>
+							<td>${meeting.title}</td>
+						</tr>
+						<tr>
+							<td>Format</td>
+							<td>${meeting.format}</td>
+						</tr>
+						<tr>
+							<td>Description</td>
+							<td><#noescape>${meeting.description}</#noescape></td>
+						</tr>
+					</tbody>
+				</table>
+			</#list>
+		</#list>
+	</div>
 </body>
 </html>
 </#escape>
