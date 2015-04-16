@@ -75,6 +75,12 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		// Get meetings
 
 		// Build model
+		val summary = pointData
+			.groupBy(_.departmentName).mapValues(_
+			.groupBy(_.term).mapValues(_
+			.groupBy(_.state).mapValues(_
+			.size)))
+
 		val groupedPoints = pointData
 			.groupBy(_.departmentName).mapValues(_
 			.groupBy(_.state).mapValues(_
@@ -88,6 +94,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 				"student" -> student,
 				"academicYear" -> academicYear,
 				"user" -> user,
+				"summary" -> summary,
 				"groupedPoints" -> groupedPoints
 			),
 			tempOutputStream

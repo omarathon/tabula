@@ -28,11 +28,13 @@
 		div.cover { page-break-after: always; text-align: center; }
 		div.cover h1 { padding-top: 200px; }
 
-		div.term, div.state, div.department { page-break-after: always; }
-		div.point { page-break-inside: avoid; }
+		div.summary, div.term, div.state, div.department { page-break-after: always; }
+		div.point, div.summary-department { page-break-inside: avoid; }
 	</style>
 </head>
 <body>
+	<#assign terms = ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] />
+
 	<#-- COVER SHEET -->
 	<div class="cover">
 		<h1 style="font-size: 24px;">Profile export</h1>
@@ -47,6 +49,42 @@
 			falls outside the capabilities of this automated report generation and should be added by the reporter as an addendum.
 			Neither Warwick University IT Services nor anybody employed by Warwick University IT Services can be held responsible for information held outside of the Tabula system.
 		</p>
+	</div>
+
+	<#-- SUMMARY -->
+	<div class="summary">
+		<h1>Attendance Summary</h1>
+		<#list summary?keys?sort as department>
+			<div class="summary-department">
+				<h3>Monitoring points for ${department}</h3>
+				<table>
+					<thead>
+						<tr>
+							<th>Term</th>
+							<th>Attended</th>
+							<th>Missed</th>
+							<th>Authorised Absence</th>
+						</tr>
+					</thead>
+					<tbody>
+						<#list terms as term>
+							<tr>
+								<td>${term}</td>
+								<#if summary[department][term]??>
+									<td>${summary[department][term]["attended"]!0}</td>
+									<td>${summary[department][term]["unauthorised"]!0}</td>
+									<td>${summary[department][term]["authorised"]!0}</td>
+								<#else>
+									<td>0</td>
+									<td>0</td>
+									<td>0</td>
+								</#if>
+							</tr>
+						</#list>
+					</tbody>
+				</table>
+			</div>
+		</#list>
 	</div>
 
 	<#-- POINTS -->
@@ -125,7 +163,6 @@
 			</#list>
 		</div>
 	</#macro>
-	<#assign terms = ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] />
 	<#list groupedPoints?keys?sort as department>
 		<div class="department">
 			<h1>Monitoring points for ${department}</h1>
