@@ -35,6 +35,7 @@ object ProfileExportSingleCommand {
 			with AutowiringAssessmentServiceComponent
 			with AutowiringRelationshipServiceComponent
 			with AutowiringMeetingRecordServiceComponent
+			with AutowiringSmallGroupServiceComponent
 			with ComposableCommand[Seq[FileAttachment]]
 			with ProfileExportSingleDescription
 			with ProfileExportSinglePermissions
@@ -48,6 +49,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 	self: FreemarkerXHTMLPDFGeneratorComponent with AttendanceMonitoringServiceComponent
 		with MonitoringPointServiceComponent with AssessmentServiceComponent
 		with RelationshipServiceComponent with MeetingRecordServiceComponent
+		with SmallGroupServiceComponent
 		with TermServiceComponent with UserLookupComponent =>
 
 	var fileDao = Wire.auto[FileDao]
@@ -75,6 +77,19 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		submissionDate: String
 	)
 
+	case class SmallGroupData(
+		eventId: String,
+		title: String,
+		day: String,
+		location: String,
+		tutors: String,
+		week: String,
+		state: String,
+		recordedBy: User,
+		recordedDate: String,
+		attendanceNote: Option[AttendanceNote]
+	)
+
 	case class MeetingData(
 		relationshipType: String,
 		agent: String,
@@ -86,10 +101,12 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 
 	override def applyInternal() = {
 		// Get point data
-		val pointData = if (academicYear.startYear < 2014) {
-			getOldPointData
-		} else {
-			getPointData
+		val pointData = benchmarkTask("pointData") {
+			if (academicYear.startYear < 2014) {
+				getOldPointData
+			} else {
+				getPointData
+			}
 		}
 
 		// Get coursework
@@ -110,7 +127,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		}
 
 		// Get small groups
-
+		val smallGroupData = benchmarkTask("smallGroupData") { getSmallGroupData }
 
 		// Get meetings
 		val startOfYear = termService.getTermFromAcademicWeekIncludingVacations(1, academicYear).getStartDate
@@ -153,6 +170,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 				"summary" -> summary,
 				"groupedPoints" -> groupedPoints,
 				"assignmentData" -> assignmentData,
+				"smallGroupData" -> smallGroupData.groupBy(_.eventId),
 				"meetingData" -> meetingData.groupBy(_.relationshipType)
 			),
 			tempOutputStream
@@ -166,7 +184,9 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		fileDao.saveTemporary(pdfFileAttachment)
 
 		// Return results
-		Seq(pdfFileAttachment) ++ pointData.flatMap(_.attendanceNote.flatMap(note => Option(note.attachment)))
+		Seq(pdfFileAttachment) ++
+			pointData.flatMap(_.attendanceNote.flatMap(note => Option(note.attachment))) ++
+			smallGroupData.flatMap(_.attendanceNote.flatMap(note => Option(note.attachment)))
 	}
 
 	private def getOldPointData: Seq[PointData] = {
@@ -314,6 +334,34 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 			case _ =>
 				"None"
 		}
+	}
+
+	private def getSmallGroupData: Seq[SmallGroupData] = {
+		val allAttendance = benchmarkTask("smallGroupService.findAttendanceForStudentInModulesInWeeks") {
+			smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 52, Seq())
+		}
+		val users = benchmarkTask("userLookup.getUsersByUserIds") {
+			userLookup.getUsersByUserIds(allAttendance.map(_.updatedBy).asJava).asScala
+		}
+		val attendanceNotes = smallGroupService.findAttendanceNotes(Seq(student.universityId), allAttendance.map(_.occurrence))
+
+		allAttendance.map(attendance => SmallGroupData(
+			attendance.occurrence.event.id,
+			Seq(
+				Option(attendance.occurrence.event.group.groupSet.module.code.toUpperCase),
+				Option(attendance.occurrence.event.group.groupSet.name),
+				Option(attendance.occurrence.event.group.name),
+				Option(attendance.occurrence.event.title)
+			).flatten.mkString(", "),
+			attendance.occurrence.event.day.name,
+			Option(attendance.occurrence.event.location).map(_.name).getOrElse(""),
+			attendance.occurrence.event.tutors.users.map(_.getFullName).mkString(", "),
+			attendance.occurrence.week.toString,
+			attendance.state.description,
+			users(attendance.updatedBy),
+			attendance.updatedDate.toString(ProfileExportSingleCommand.TimeFormat),
+			attendanceNotes.find(_.occurrence == attendance.occurrence)
+		))
 	}
 
 }

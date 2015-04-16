@@ -28,8 +28,8 @@
 		div.cover { page-break-after: always; text-align: center; }
 		div.cover h1 { padding-top: 200px; }
 
-		div.summary, div.term, div.state, div.department, div.assignments, div.meetings { page-break-after: always; }
-		div.point, div.summary-department, div.assignment { page-break-inside: avoid; }
+		div.summary, div.term, div.state, div.department, div.assignments, div.small-groups, div.meetings { page-break-after: always; }
+		div.point, div.summary-department, div.event, div.assignment { page-break-inside: avoid; }
 	</style>
 </head>
 <body>
@@ -54,6 +54,7 @@
 	<#-- SUMMARY -->
 	<div class="summary">
 		<h1>Attendance Summary</h1>
+		<#if !summary?keys?has_content><p><em>No monitoring points found.</em></p></#if>
 		<#list summary?keys?sort as department>
 			<div class="summary-department">
 				<h3>Monitoring points for ${department}</h3>
@@ -212,6 +213,51 @@
 					</tr>
 				</tbody>
 			</table>
+		</#list>
+	</div>
+
+	<#-- SMALL GROUP ATTENDANCE -->
+	<div class="small-groups">
+		<h1>Small group event attendance</h1>
+		<#if !smallGroupData?keys?has_content><p><em>No small group event attendance found.</em></p></#if>
+		<#list smallGroupData?keys as eventId>
+			<div class="event">
+				<h3>${smallGroupData[eventId]?first.title}</h3>
+				<p>
+					${smallGroupData[eventId]?first.day}s
+					<#if smallGroupData[eventId]?first.tutors?has_content><br />Tutors: ${smallGroupData[eventId]?first.tutors}</#if>
+					<#if smallGroupData[eventId]?first.location?has_content><br />Location: ${smallGroupData[eventId]?first.location}</#if>
+				</p>
+				<table>
+					<thead>
+						<tr>
+							<th>Week</th>
+							<th>Attendance</th>
+							<th>Attendance note</th>
+						</tr>
+					</thead>
+					<tbody>
+						<#list smallGroupData[eventId]?sort_by("week") as attendance>
+							<tr>
+								<td>${attendance.week}</td>
+								<td>${attendance.state}</td>
+								<#if attendance.attendanceNote?has_content>
+									<td>
+										<p>Reason: ${attendance.attendanceNote.absenceType.description}</p>
+										Comments: <br/>
+										<#noescape>${attendance.attendanceNote.escapedNote}</#noescape>
+										<#if attendance.attendanceNote.attachment?has_content>
+											<p>Attachment: ${attendance.attendanceNote.attachment.id}-${attendance.attendanceNote.attachment.name}</p>
+										</#if>
+									</td>
+								<#else>
+									<td>None</td>
+								</#if>
+							</tr>
+						</#list>
+					</tbody>
+				</table>
+			</div>
 		</#list>
 	</div>
 
