@@ -122,10 +122,12 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
 			// empty unseen groups - this is done in transactional batches
 
-			val groupsToEmpty = assessmentMembershipService.getUpstreamAssessmentGroupsNotIn (
-				ids = notEmptyGroupIds.filter { _.hasText }.toSeq,
-				academicYears = assignmentImporter.yearsToImport
-			)
+			val groupsToEmpty = transactional() {
+				assessmentMembershipService.getUpstreamAssessmentGroupsNotIn (
+					ids = notEmptyGroupIds.filter { _.hasText }.toSeq,
+					academicYears = assignmentImporter.yearsToImport
+				)
+			}
 
 			logger.info("Emptying members for unseen groups")
 			val numEmptied = assessmentMembershipService.emptyMembers(groupsToEmpty)
