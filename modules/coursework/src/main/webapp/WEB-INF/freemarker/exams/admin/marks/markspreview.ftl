@@ -7,7 +7,12 @@
 <#assign hasErrors=status.errors.allErrors?size gt 0 />
 </@spring.bind>
 
-<#assign formUrl><@routes.examAddMarks exam /></#assign>
+<#if marker??>
+	<#assign formUrl><@routes.examMarkerAddMarks exam marker /></#assign>
+<#else>
+	<#assign formUrl><@routes.examAddMarks exam /></#assign>
+</#if>
+
 <div class="fix-area">
 	<@f.form method="post" action="${formUrl}" commandName=commandName>
 	
@@ -118,7 +123,12 @@
 	<div class="submit-buttons fix-footer">
 		<input type="hidden" name="confirm" value="true">
 		<input class="btn btn-primary" type="submit" value="Confirm">
-		<a class="btn" href="<@routes.departmentHomeWithYear module=exam.module academicYear=exam.academicYear/>">Cancel</a>
+		<#if marker??>
+			<a class="btn" href="<@routes.home />">Cancel</a>
+		<#else>
+			<a class="btn" href="<@routes.departmentHomeWithYear module=exam.module academicYear=exam.academicYear/>">Cancel</a>
+		</#if>
+
 	</div>
 	</@f.form>
 </div>
