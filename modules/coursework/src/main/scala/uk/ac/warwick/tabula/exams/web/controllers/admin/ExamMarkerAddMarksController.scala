@@ -27,10 +27,12 @@ class ExamMarkerAddMarksController extends ExamsController {
 	type ExamMarkerAddMarksCommand = Appliable[Seq[Feedback]] with PostExtractValidation
 
 	@ModelAttribute("adminAddMarksCommand")
-	def command(@PathVariable module: Module,
-							@PathVariable exam: Exam,
-							@PathVariable marker: User,
-							user: CurrentUser): ExamMarkerAddMarksCommand =
+	def command(
+		@PathVariable module: Module,
+		@PathVariable exam: Exam,
+		@PathVariable marker: User,
+		user: CurrentUser
+	): ExamMarkerAddMarksCommand =
 		ExamMarkerAddMarksCommand(mandatory(module), mandatory(exam), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(exam)))
 
 	// Add the common breadcrumbs to the model.
@@ -106,8 +108,8 @@ class ExamMarkerAddMarksController extends ExamsController {
 		@ModelAttribute("adminAddMarksCommand") cmd: ExamMarkerAddMarksCommand, errors: Errors
 	) = {
 		bindAndValidate(module, cmd, errors)
-		cmd.apply()
-		Redirect(Routes.home)
+		val feedbacks = cmd.apply()
+		Redirect(Routes.home, "marked" -> feedbacks.count(_.latestMark.isDefined))
 	}
 
 	private def bindAndValidate(module: Module, cmd: ExamMarkerAddMarksCommand, errors: Errors) {
