@@ -21,6 +21,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro relationshipPhoto profile relationship><@_u page="/view/photo/${relationship.agent}.jpg"/></#macro>
 
 <#macro filter_students department><@_u page="/department/${department.code}/students" /></#macro>
+<#macro department_timetables department><@_u page="/department/${department.code}/timetables" /></#macro>
 
 <#macro relationship_students relationshipType><@_u page="/${relationshipType.urlPart}/students" /></#macro>
 <#macro relationship_agents department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}" /></#macro>

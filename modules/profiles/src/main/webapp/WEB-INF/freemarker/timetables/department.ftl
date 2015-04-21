@@ -1,0 +1,333 @@
+<#escape x as x?html>
+<@fmt.deptheader "Timetables" "for" department routes "department_timetables" />
+
+<#assign submitUrl><@routes.department_timetables department /></#assign>
+<@f.form commandName="command" action=submitUrl method="POST" cssClass="form-inline">
+	<@f.hidden path="from" />
+	<@f.hidden path="to" />
+
+	<div class="student-filter btn-group-group well well-small">
+		<button type="button" class="clear-all-filters btn btn-link">
+			<span class="icon-stack">
+				<i class="icon-filter"></i>
+				<i class="icon-ban-circle icon-stack-base"></i>
+			</span>
+		</button>
+
+		<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
+			<@spring.bind path=path>
+				<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
+					<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+						<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
+						<span class="caret"></span>
+					</a>
+					<div class="dropdown-menu filter-list">
+						<button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
+						<ul>
+							<#if customPicker?has_content>
+								<li>
+									<#noescape>${customPicker}</#noescape>
+								</li>
+							</#if>
+							<#if allItems?has_content>
+								<#list allItems as item>
+									<#local isValid = (allItems?size == validItems?size)!true />
+									<#if !isValid>
+										<#list validItems as validItem>
+											<#if ((validItem.id)!0) == ((item.id)!0)>
+												<#local isValid = true />
+											</#if>
+										</#list>
+									</#if>
+									<li class="check-list-item" data-natural-sort="${item_index}">
+										<label class="checkbox <#if !isValid>disabled</#if>">
+											<#nested item isValid/>
+										</label>
+									</li>
+								</#list>
+							<#else>
+								<li><small class="muted" style="padding-left: 5px;">N/A for this department</small></li>
+							</#if>
+						</ul>
+					</div>
+				</div>
+			</@spring.bind>
+		</#macro>
+
+		<#macro current_filter_value path placeholder><#compress>
+			<@spring.bind path=path>
+				<#if status.actualValue?has_content>
+					<#list status.actualValue as item><#nested item /><#if item_has_next>, </#if></#list>
+				<#else>
+				${placeholder}
+				</#if>
+			</@spring.bind>
+		</#compress></#macro>
+
+		<#function contains_by_code collection item>
+			<#list collection as c>
+				<#if c.code == item.code>
+					<#return true />
+				</#if>
+			</#list>
+			<#return false />
+		</#function>
+
+		<#assign placeholder = "Choose modules" />
+		<#assign modulesCustomPicker>
+			<div class="module-search input-append">
+				<input class="module-search-query module prevent-reload" type="text" value="" placeholder="Search for a module" />
+				<span class="add-on"><i class="icon-search"></i></span>
+			</div>
+		</#assign>
+		<#assign currentfilter><@current_filter_value "modules" placeholder; module>${module.code?upper_case}</@current_filter_value></#assign>
+		<@filter path="modules" placeholder=placeholder currentFilter=currentfilter allItems=command.allModules customPicker=modulesCustomPicker; module>
+			<input type="checkbox" name="${status.expression}" value="${module.code}"  data-short-value="${module.code?upper_case}"
+				${contains_by_code(command.modules, module)?string('checked','')}
+			>
+			<@fmt.module_name module false />
+		</@filter>
+	</div>
+</@f.form>
+
+<div class="calendar" data-viewname="month"></div>
+
+<style type="text/css">
+	@import url("<@url resource="/static/css/fullcalendar.css" />");
+	@import url("<@url resource="/static/css/fullcalendar-custom.css" />");
+
+	.fc-event.allday {
+		font-weight: bold;
+		color: white !important;
+		border-color: #185c54 !important;
+		font-size: .95em;
+	}
+</style>
+
+<@script "/static/js/fullcalendar.js" />
+<script type="text/javascript">
+	// TIMETABLE STUFF
+	jQuery(function($) {
+		var $form = $('#command');
+
+		function getEvents($container){
+			return function (start, end, callback){
+				var complete = false;
+				setTimeout(function() {
+					if (!complete) $container.fadeTo('fast', 0.3);
+				}, 300);
+				$('#from').val(start.getTime()/1000);
+				$('#to').val(end.getTime()/1000);
+				$.ajax({
+					url:'${submitUrl}',
+					type: 'POST',
+					// make the from/to params compatible with what FullCalendar sends if you just specify a URL
+					// as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
+					data: $form.serialize(),
+					success:function(data){
+						// TAB-3008 - Change times to Europe/London
+						$.each(data, function(i, event){
+							event.start = moment(moment.unix(event.start).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
+							event.end = moment(moment.unix(event.end).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
+						});
+						callback(data);
+					},
+					complete: function() {
+						complete = true;
+						$container.fadeTo('fast', 1);
+					}
+				});
+			};
+		}
+		function onViewUpdate(view,element){
+			$('.popover').hide();
+		}
+
+		function createCalendar(container, defaultViewName){
+			var showWeekends = (defaultViewName == "month");
+			var cal = $(container).fullCalendar({
+				events: getEvents($(container)),
+				defaultView: defaultViewName,
+				allDaySlot: true,
+				slotMinutes: 60,
+				firstHour: 0,
+				firstDay: 1, // monday
+				timeFormat: {
+					agendaWeek: '', // don't display time on event
+					// for all other views
+					'': 'HH:mm{ - HH:mm}'   //  17:00 - 18:30
+				},
+				defaultEventMinutes: 30,
+				weekends: showWeekends,
+				viewRender: onViewUpdate,
+				header: {
+					left:   'title',
+					center: 'month,agendaWeek,agendaDay',
+					right:  'today prev,next'
+				},
+				eventAfterRender: function(event, element, view) {
+					if (event.allDay) $(element).addClass('allday');
+					$(element).tabulaPopover({html:true, container:"#container", placement: 'bottom', title:event.title, content:event.description.replace(/\n/g, '<br>')})
+				}
+			});
+		}
+
+		var $calendar = $(".calendar");
+		createCalendar($calendar, $calendar.data('viewname'));
+
+		var prependClearLink = function($list) {
+			if (!$list.find('input:checked').length) {
+				$list.find('.clear-this-filter').remove();
+			} else {
+				if (!$list.find('.clear-this-filter').length) {
+					$list.find('> ul').prepend(
+							$('<li />').addClass('clear-this-filter')
+								.append(
+									$('<button />').attr('type', 'button')
+										.addClass('btn btn-link')
+										.html('<i class="icon-ban-circle"></i> Clear selected items')
+										.on('click', function(e) {
+											$list.find('input:checked').each(function() {
+												var $checkbox = $(this);
+												$checkbox.prop('checked', false);
+												updateFilter($checkbox);
+											});
+
+											doRequest($list.closest('form'));
+										})
+							).append($('<hr />'))
+					);
+				}
+			}
+		};
+
+		var updateFilter = function($el) {
+			// Update the filter content
+			var $list = $el.closest('ul');
+			var shortValues = $list.find(':checked').map(function() { return $(this).data('short-value'); }).get();
+			var $fsv = $el.closest('.btn-group').find('.filter-short-values');
+			if (shortValues.length) {
+				$el.closest('.btn-group').removeClass('empty-filter');
+				$fsv.html($fsv.data("prefix") + shortValues.join(', '));
+			} else {
+				$el.closest('.btn-group').addClass('empty-filter');
+				$fsv.html($fsv.data('placeholder'));
+			}
+
+			updateClearAllButton($el);
+		};
+
+		var updateClearAllButton = function($el) {
+			var $filterList = $el.closest(".student-filter");
+
+			if ($filterList.find(".empty-filter").length == $filterList.find(".btn-group").length) {
+				$('.clear-all-filters').attr("disabled", "disabled");
+			} else {
+				$('.clear-all-filters').removeAttr("disabled");
+			}
+		};
+
+		var doRequest = function() {
+			if (typeof history.pushState !== 'undefined')
+				history.pushState(null, null, $form.attr('action') + '?' + $form.serialize());
+
+			$calendar.fullCalendar('refetchEvents');
+		};
+		window.doRequest = doRequest;
+
+		$('#command input').on('change', function(e) {
+			// Load the new results
+			var $input = $(this);
+
+			if ($input.is('.prevent-reload')) return;
+
+			doRequest();
+			updateFilter($input);
+		});
+
+		// Re-order elements inside the dropdown when opened
+		$('.filter-list').closest('.btn-group').find('.dropdown-toggle').on('click.dropdown.data-api', function(e) {
+			var $this = $(this);
+			if (!$this.closest('.btn-group').hasClass('open')) {
+				// Re-order before it's opened!
+				var $list = $this.closest('.btn-group').find('.filter-list');
+				var items = $list.find('li.check-list-item').get();
+
+				items.sort(function(a, b) {
+					var aChecked = $(a).find('input').is(':checked');
+					var bChecked = $(b).find('input').is(':checked');
+
+					if (aChecked && !bChecked) return -1;
+					else if (!aChecked && bChecked) return 1;
+					else return $(a).data('natural-sort') - $(b).data('natural-sort');
+				});
+
+				$.each(items, function(item, el) {
+					$list.find('> ul').append(el);
+				});
+
+				prependClearLink($list);
+			}
+		});
+
+		$('.clear-all-filters').on('click', function() {
+			$('.filter-list').each(function() {
+				var $list = $(this);
+
+				$list.find('input:checked').each(function() {
+					var $checkbox = $(this);
+					$checkbox.prop('checked', false);
+					updateFilter($checkbox);
+				});
+
+				prependClearLink($list);
+			});
+
+			doRequest();
+		});
+
+		var updateFilterFromPicker = function($picker, name, value, shortValue) {
+			if (value === undefined || value.length === 0)
+				return;
+
+			shortValue = shortValue || value;
+
+			var $ul = $picker.closest('ul');
+
+			var $li = $ul.find('input[value="' + value + '"]').closest('li');
+			if ($li.length) {
+				$li.find('input').prop('checked', true);
+				if ($ul.find('li.check-list-item:first').find('input').val() !== value) {
+					$li.insertBefore($ul.find('li.check-list-item:first'));
+				}
+			} else {
+				$('<li/>').addClass('check-list-item').append(
+					$('<label/>').addClass('checkbox').append(
+							$('<input/>').attr({
+								'type':'checkbox',
+								'name':name,
+								'value':value,
+								'checked':true
+							}).data('short-value', shortValue)
+					).append(
+							$picker.val()
+					)
+				).insertBefore($ul.find('li.check-list-item:first'));
+			}
+
+			doRequest();
+			updateFilter($picker);
+		};
+
+		$('.module-search-query').on('change', function(){
+			var $picker = $(this);
+			if ($picker.data('modulecode') === undefined || $picker.data('modulecode').length === 0)
+				return;
+
+			updateFilterFromPicker($picker, 'modules', $picker.data('modulecode'), $picker.data('modulecode').toUpperCase());
+
+			$picker.data('modulecode','').val('');
+		}).modulePicker({});
+	});
+</script>
+</#escape>
