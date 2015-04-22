@@ -16,6 +16,12 @@
 	</p>
 	</#if>
 <#else>
+	<#if ((marked!0) > 0)>
+		<div class="alert alert-success">
+			<@fmt.p marked "exam mark" /> successfully received.
+		</div>
+	</#if>
+
 	<#macro link_to_department department>
 	<a href="<@routes.departmentHomeWithYearNoModule department currentAcademicYear />">
 		Go to the ${department.name} admin page
