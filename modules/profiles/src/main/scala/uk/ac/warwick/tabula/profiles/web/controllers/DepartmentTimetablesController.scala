@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.timetables.ViewModuleTimetableCommandFactoryImpl
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
-import uk.ac.warwick.tabula.profiles.commands.{DepartmentTimetablesCommand, DepartmentTimetablesCommandRequest, ViewStudentPersonalTimetableCommandFactoryImpl}
+import uk.ac.warwick.tabula.profiles.commands.{ViewStaffPersonalTimetableCommandFactoryImpl, DepartmentTimetablesCommand, DepartmentTimetablesCommandRequest, ViewStudentPersonalTimetableCommandFactoryImpl}
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables._
@@ -52,11 +52,16 @@ class DepartmentTimetablesController extends ProfilesController
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department) = {
 		DepartmentTimetablesCommand(
-			department,
+			mandatory(department),
 			user,
 			new ViewModuleTimetableCommandFactoryImpl(timetableFetchingService),
 			new ViewStudentPersonalTimetableCommandFactoryImpl(
 				studentTimetableEventSource,
+				scheduledMeetingEventSource,
+				user
+			),
+			new ViewStaffPersonalTimetableCommandFactoryImpl(
+				staffTimetableEventSource,
 				scheduledMeetingEventSource,
 				user
 			)

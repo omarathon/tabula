@@ -98,6 +98,21 @@
 			>
 			${student.fullName} (${student.universityId})
 		</@filter>
+
+		<#assign placeholder = "Choose staff" />
+		<#assign staffCustomPicker>
+			<div class="staff-search input-append">
+				<input class="staff-search-query staff prevent-reload" type="text" value="" placeholder="Search for staff" data-include-groups="false" data-include-email="false" data-members-only="true" data-universityid="true" />
+				<span class="add-on"><i class="icon-search"></i></span>
+			</div>
+		</#assign>
+		<#assign currentfilter><@current_filter_value "staffMembers" placeholder; staffMember>${staffMember.universityId}</@current_filter_value></#assign>
+		<@filter path="staff" placeholder=placeholder currentFilter=currentfilter allItems=command.staffMembers customPicker=staffCustomPicker; staffMember>
+			<input type="checkbox" name="${status.expression}" value="${staffMember.universityId}"  data-short-value="${staffMember.universityId}"
+				${command.staff?seq_contains(staffMember.universityId)?string('checked','')}
+			>
+			${staffMember.fullName} (${staffMember.universityId})
+		</@filter>
 	</div>
 </@f.form>
 
@@ -367,6 +382,16 @@
 				return;
 
 			updateFilterFromPicker($picker, 'students', $picker.val(), $picker.val(), $picker.data('fullname') + ' (' + $picker.val() + ')');
+
+			$picker.data('fullname','').val('').data('flexiPicker').richResultField.edit();
+		}).flexiPicker({});
+
+		$('.staff-search-query').on('change', function(){
+			var $picker = $(this);
+			if ($picker.data('fullname') === undefined || $picker.data('fullname').length === 0)
+				return;
+
+			updateFilterFromPicker($picker, 'staff', $picker.val(), $picker.val(), $picker.data('fullname') + ' (' + $picker.val() + ')');
 
 			$picker.data('fullname','').val('').data('flexiPicker').richResultField.edit();
 		}).flexiPicker({});
