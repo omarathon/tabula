@@ -29,25 +29,21 @@
 									<#noescape>${customPicker}</#noescape>
 								</li>
 							</#if>
-							<#if allItems?has_content>
-								<#list allItems as item>
-									<#local isValid = (allItems?size == validItems?size)!true />
-									<#if !isValid>
-										<#list validItems as validItem>
-											<#if ((validItem.id)!0) == ((item.id)!0)>
-												<#local isValid = true />
-											</#if>
-										</#list>
-									</#if>
-									<li class="check-list-item" data-natural-sort="${item_index}">
-										<label class="checkbox <#if !isValid>disabled</#if>">
-											<#nested item isValid/>
-										</label>
-									</li>
-								</#list>
-							<#else>
-								<li><small class="muted" style="padding-left: 5px;">N/A for this department</small></li>
-							</#if>
+							<#list allItems as item>
+								<#local isValid = (allItems?size == validItems?size)!true />
+								<#if !isValid>
+									<#list validItems as validItem>
+										<#if ((validItem.id)!0) == ((item.id)!0)>
+											<#local isValid = true />
+										</#if>
+									</#list>
+								</#if>
+								<li class="check-list-item" data-natural-sort="${item_index}">
+									<label class="checkbox <#if !isValid>disabled</#if>">
+										<#nested item isValid/>
+									</label>
+								</li>
+							</#list>
 						</ul>
 					</div>
 				</div>
@@ -87,8 +83,25 @@
 			>
 			<@fmt.module_name module false />
 		</@filter>
+
+		<#assign placeholder = "Choose students" />
+		<#assign studentsCustomPicker>
+			<div class="student-search input-append">
+				<input class="student-search-query student prevent-reload" type="text" value="" placeholder="Search for a student" data-include-groups="false" data-include-email="false" data-members-only="true" data-universityid="true" />
+				<span class="add-on"><i class="icon-search"></i></span>
+			</div>
+		</#assign>
+		<#assign currentfilter><@current_filter_value "studentMembers" placeholder; student>${student.universityId}</@current_filter_value></#assign>
+		<@filter path="students" placeholder=placeholder currentFilter=currentfilter allItems=command.studentMembers customPicker=studentsCustomPicker; student>
+			<input type="checkbox" name="${status.expression}" value="${student.universityId}"  data-short-value="${student.universityId}"
+				${command.students?seq_contains(student.universityId)?string('checked','')}
+			>
+			${student.fullName} (${student.universityId})
+		</@filter>
 	</div>
 </@f.form>
+
+<div class="alert alert-error" style="display: none;"></div>
 
 <div class="calendar" data-viewname="month"></div>
 
@@ -125,12 +138,21 @@
 					// as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
 					data: $form.serialize(),
 					success:function(data){
+						var events = data.events, errorDiv = $('div.alert-error');
 						// TAB-3008 - Change times to Europe/London
-						$.each(data, function(i, event){
+						$.each(events, function(i, event){
 							event.start = moment(moment.unix(event.start).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
 							event.end = moment(moment.unix(event.end).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
 						});
-						callback(data);
+						if (data.errors.length > 0) {
+							errorDiv.empty().show();
+							$.each(data.errors, function(i, error) {
+								errorDiv.append(error).append('<br />');
+							});
+						} else {
+							errorDiv.hide();
+						}
+						callback(events);
 					},
 					complete: function() {
 						complete = true;
@@ -235,7 +257,7 @@
 		};
 		window.doRequest = doRequest;
 
-		$('#command input').on('change', function(e) {
+		$form.on('change', 'input', function(e) {
 			// Load the new results
 			var $input = $(this);
 
@@ -286,9 +308,13 @@
 			doRequest();
 		});
 
-		var updateFilterFromPicker = function($picker, name, value, shortValue) {
+		var updateFilterFromPicker = function($picker, name, value, shortValue, labelText) {
 			if (value === undefined || value.length === 0)
 				return;
+
+			if (labelText === undefined || labelText.length === 0) {
+				labelText = $picker.val();
+			}
 
 			shortValue = shortValue || value;
 
@@ -301,18 +327,24 @@
 					$li.insertBefore($ul.find('li.check-list-item:first'));
 				}
 			} else {
-				$('<li/>').addClass('check-list-item').append(
+				var $newLI = $('<li/>').addClass('check-list-item').append(
 					$('<label/>').addClass('checkbox').append(
-							$('<input/>').attr({
-								'type':'checkbox',
-								'name':name,
-								'value':value,
-								'checked':true
-							}).data('short-value', shortValue)
+						$('<input/>').attr({
+							'type':'checkbox',
+							'name':name,
+							'value':value,
+							'checked':true
+						}).data('short-value', shortValue)
 					).append(
-							$picker.val()
+						" " + labelText
 					)
-				).insertBefore($ul.find('li.check-list-item:first'));
+				);
+				var firstLI = $ul.find('li.check-list-item:first');
+				if (firstLI.length > 0) {
+					$newLI.insertBefore($ul.find('li.check-list-item:first'))
+				} else {
+					$ul.append($newLI);
+				}
 			}
 
 			doRequest();
@@ -328,6 +360,16 @@
 
 			$picker.data('modulecode','').val('');
 		}).modulePicker({});
+
+		$('.student-search-query').on('change', function(){
+			var $picker = $(this);
+			if ($picker.data('fullname') === undefined || $picker.data('fullname').length === 0)
+				return;
+
+			updateFilterFromPicker($picker, 'students', $picker.val(), $picker.val(), $picker.data('fullname') + ' (' + $picker.val() + ')');
+
+			$picker.data('fullname','').val('').data('flexiPicker').richResultField.edit();
+		}).flexiPicker({});
 	});
 </script>
 </#escape>

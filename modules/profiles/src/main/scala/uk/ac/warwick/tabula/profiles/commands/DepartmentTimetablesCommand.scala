@@ -4,47 +4,81 @@ import org.joda.time.{DateTime, Interval, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.timetables.ViewModuleTimetableCommandFactory
-import uk.ac.warwick.tabula.data.model.{Module, Department}
+import uk.ac.warwick.tabula.data.model.{Department, Module, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
-import collection.JavaConverters._
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException, PermissionDeniedException}
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.util.{Failure, Success}
 
 object DepartmentTimetablesCommand {
-	def apply(department: Department, moduleTimetableCommandFactory: ViewModuleTimetableCommandFactory) =
-		new DepartmentTimetablesCommandInternal(department, moduleTimetableCommandFactory)
-			with ComposableCommand[Seq[EventOccurrence]]
-			with ReadOnly with Unaudited
-			with DepartmentTimetablesPermissions
-			with DepartmentTimetablesCommandState
-			with DepartmentTimetablesCommandRequest
-			with AutowiringTermBasedEventOccurrenceServiceComponent
+	def apply(
+		department: Department,
+		user: CurrentUser,
+		moduleTimetableCommandFactory: ViewModuleTimetableCommandFactory,
+		studentPersonalTimetableCommandFactory: ViewStudentPersonalTimetableCommandFactory
+	) =	new DepartmentTimetablesCommandInternal(
+		department,
+		user,
+		moduleTimetableCommandFactory,
+		studentPersonalTimetableCommandFactory
+	) with ComposableCommand[(Seq[EventOccurrence], Seq[String])]
+		with AutowiringTermBasedEventOccurrenceServiceComponent
+		with AutowiringProfileServiceComponent
+		with AutowiringSecurityServiceComponent
+		with ReadOnly with Unaudited
+		with DepartmentTimetablesPermissions
+		with DepartmentTimetablesCommandState
+		with DepartmentTimetablesCommandRequest
+
 }
 
 
-class DepartmentTimetablesCommandInternal(val department: Department, val moduleTimetableCommandFactory: ViewModuleTimetableCommandFactory)
-	extends CommandInternal[Seq[EventOccurrence]] {
+class DepartmentTimetablesCommandInternal(
+	val department: Department,
+	user: CurrentUser,
+	moduleTimetableCommandFactory: ViewModuleTimetableCommandFactory,
+	studentPersonalTimetableCommandFactory: ViewStudentPersonalTimetableCommandFactory
+)	extends CommandInternal[(Seq[EventOccurrence], Seq[String])] {
 
-	self: DepartmentTimetablesCommandRequest with EventOccurrenceServiceComponent =>
+	self: DepartmentTimetablesCommandRequest with EventOccurrenceServiceComponent with SecurityServiceComponent =>
 
 	override def applyInternal() = {
-		val moduleCommands = modules.asScala.map(moduleTimetableCommandFactory.apply)
-		val moduleEvents = moduleCommands.flatMap(cmd => cmd.apply() match {
+		val errors: mutable.Buffer[String] = mutable.Buffer()
+		val moduleCommands = modules.asScala.map(module => module -> moduleTimetableCommandFactory.apply(module))
+		val moduleEvents = moduleCommands.flatMap{case(module, cmd) => cmd.apply() match {
 			case Success(events) =>
 				events
 			case Failure(t) =>
+				errors.append(s"Unable to load timetable for ${module.code.toUpperCase}")
 				Seq()
-		}).distinct
+		}}.distinct
 
-		val allEvents = moduleEvents
+		errors.appendAll(students.asScala.filter(student => studentMembers.find(_.universityId == student).isEmpty).map(student =>
+			s"Could not find a student with a University ID of $student"
+		))
+		val studentCommands = studentMembers.map(student => student -> studentPersonalTimetableCommandFactory.apply(student))
+		val studentEvents = studentCommands.flatMap{case(student, cmd) =>
+			try {
+				permittedByChecks(securityService, user, cmd)
+				Some(cmd.apply())
+			} catch {
+				case e @ (_ : ItemNotFoundException | _ : PermissionDeniedException) =>
+					errors.append(s"You do not have permission to view the timetable of ${student.fullName.getOrElse("")} (${student.universityId})")
+					None
+			}
+		}.flatten.distinct
 
-		val occurrences = allEvents.flatMap(eventsToOccurrences)
+		val occurrences = moduleEvents.flatMap(eventsToOccurrences) ++ studentEvents
 
 		// Converter to make localDates sortable
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-		occurrences.sortBy(_.start)
+		(occurrences.sortBy(_.start), errors.toSeq)
 	}
 
 	private def eventsToOccurrences: TimetableEvent => Seq[EventOccurrence] =
@@ -68,9 +102,15 @@ trait DepartmentTimetablesCommandState {
 
 trait DepartmentTimetablesCommandRequest extends PermissionsCheckingMethods {
 
-	self: DepartmentTimetablesCommandState =>
+	self: DepartmentTimetablesCommandState with ProfileServiceComponent =>
 
 	var modules: JList[Module] = JArrayList()
+	var students: JList[String] = JArrayList()
+	lazy val studentMembers: Seq[StudentMember] = profileService.getAllMembersWithUniversityIds(students.asScala).flatMap{
+		case student: StudentMember => Option(student)
+		case _ => None
+	}
+
 	var from: JLong = LocalDate.now.minusMonths(1).toDateTimeAtStartOfDay.getMillis
 	var to: JLong = LocalDate.now.plusMonths(1).toDateTimeAtStartOfDay.getMillis
 	def start = new DateTime(from * 1000).toLocalDate

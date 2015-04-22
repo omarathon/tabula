@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 
 // Do not remove
 // Should be import uk.ac.warwick.tabula.helpers.DateTimeOrdering
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering
 
 trait PersonalTimetableCommandState {
 	var start: LocalDate = LocalDate.now.minusMonths(12)
@@ -86,7 +85,7 @@ object ViewStudentPersonalTimetableCommand {
 		scheduledMeetingEventSource: ScheduledMeetingEventSource,
 		student: StudentMember,
 		currentUser: CurrentUser
-	): Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState =
+	) =
 		new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource, scheduledMeetingEventSource, student, currentUser)
 			with ComposableCommand[Seq[EventOccurrence]]
 			with ViewStudentTimetablePermissions
@@ -115,6 +114,23 @@ object PublicStudentPersonalTimetableCommand {
 			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
 			with ViewStudentPersonalTimetableCommandState
+}
+
+trait ViewStudentPersonalTimetableCommandFactory {
+	def apply(student: StudentMember): ComposableCommand[Seq[EventOccurrence]]
+}
+class ViewStudentPersonalTimetableCommandFactoryImpl(
+	studentTimetableEventSource: StudentTimetableEventSource,
+	scheduledMeetingEventSource: ScheduledMeetingEventSource,
+	currentUser: CurrentUser
+) extends ViewStudentPersonalTimetableCommandFactory {
+	def apply(student: StudentMember) =
+		ViewStudentPersonalTimetableCommand(
+			studentTimetableEventSource,
+			scheduledMeetingEventSource,
+			student,
+			currentUser
+		)
 }
 
 
