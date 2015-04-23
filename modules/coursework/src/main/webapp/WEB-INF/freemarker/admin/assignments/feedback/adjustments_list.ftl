@@ -118,6 +118,8 @@
 						var comment = $target.data('comment');
 						$markInput.val(mark);
 						$commentsTextarea.val(comment);
+						// simulate a keyup to trigger and grade validation
+						$markInput.keyup();
 						e.preventDefault();
 					});
 
