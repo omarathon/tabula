@@ -5,7 +5,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.FileDao
+import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent, FileDao}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointType, MonitoringPoint, MonitoringPointType}
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, FileAttachment, StudentMember}
@@ -36,6 +36,7 @@ object ProfileExportSingleCommand {
 			with AutowiringRelationshipServiceComponent
 			with AutowiringMeetingRecordServiceComponent
 			with AutowiringSmallGroupServiceComponent
+			with AutowiringFileDaoComponent
 			with ComposableCommand[Seq[FileAttachment]]
 			with ProfileExportSingleDescription
 			with ProfileExportSinglePermissions
@@ -50,9 +51,8 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		with MonitoringPointServiceComponent with AssessmentServiceComponent
 		with RelationshipServiceComponent with MeetingRecordServiceComponent
 		with SmallGroupServiceComponent
-		with TermServiceComponent with UserLookupComponent =>
-
-	var fileDao = Wire.auto[FileDao]
+		with TermServiceComponent with UserLookupComponent
+		with FileDaoComponent =>
 
 	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
