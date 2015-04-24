@@ -74,6 +74,24 @@
 	>
 		<i class="icon-upload"></i> Upload to SITS
 	</@fmt.permission_button>
+
+	<div class="btn-group">
+		<a class="btn dropdown-toggle" data-toggle="dropdown">
+			Save As
+			<span class="caret"></span>
+		</a>
+		<ul class="dropdown-menu">
+			<li>
+				<a class="long-running form-post include-filter" title="Export submissions info as XLSX, for advanced users." href="<@url page='/coursework/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.xlsx'/>">Excel</a>
+			</li>
+			<li>
+				<a class="long-running form-post include-filter" title="Export submissions info as CSV, for advanced users." href="<@url page='/coursework/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.csv'/>">Text (CSV)</a>
+			</li>
+			<li>
+				<a class="long-running form-post include-filter" title="Export submissions info as XML, for advanced users." href="<@url page='/coursework/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.xml'/>">Text (XML)</a>
+			</li>
+		</ul>
+	</div>
 </div>
 
 <table class="table table-bordered table-striped table-condensed feedback-table">
