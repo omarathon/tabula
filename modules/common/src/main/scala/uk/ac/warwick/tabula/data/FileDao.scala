@@ -23,6 +23,14 @@ import uk.ac.warwick.util.files.hash.FileHasher
 import uk.ac.warwick.spring.Wire
 import java.io.FileInputStream
 
+trait FileDaoComponent {
+	val fileDao: FileDao
+}
+
+trait AutowiringFileDaoComponent extends FileDaoComponent {
+	val fileDao = Wire[FileDao]
+}
+
 @Repository
 class FileDao extends Daoisms with InitializingBean with Logging {
 
