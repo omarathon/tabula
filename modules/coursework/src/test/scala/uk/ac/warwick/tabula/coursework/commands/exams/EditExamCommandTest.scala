@@ -29,9 +29,15 @@ class EditExamCommandTest extends TestBase with Mockito {
 
 		val command = new EditExamCommandInternal(exam) with CommandTestSupport
 
-		val validator = new ExamValidation with EditExamCommandState with AssessmentServiceComponent {
+		val validator = new ExamValidation with EditExamCommandState with AssessmentServiceComponent with UserLookupComponent with HasAcademicYear with SpecifiesGroupType
+			with AssessmentMembershipServiceComponent {
 				override def exam = command.exam
 				override val assessmentService = mock[AssessmentService]
+				override val assessmentMembershipService = mock[AssessmentMembershipService]
+				override val userLookup = mock[UserLookupService]
+				override def existingGroups = None
+				override def existingMembers = None
+				override def updateAssessmentGroups = List()
 		}
 	}
 

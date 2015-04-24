@@ -47,13 +47,13 @@
 						<tr class="no-top-border">
 							<#if error.field == "student_id">
 								<td colspan="2">
-									<@spring.message code=error.code />
+									<@spring.message code=error.code arguments=error.codeArgument />
 								</td>
 								<td colspan="2"></td>
 							<#else>
 								<td colspan="2"></td>
 								<td colspan="2">
-									<@spring.message code=error.code />
+									<@spring.message code=error.code arguments=error.codeArgument />
 								</td>
 							</#if>
 						</tr>

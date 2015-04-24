@@ -42,7 +42,7 @@
 	</td>
 	<td class="duration-col duration-col-department-wide toggle-cell">
 	</td>
-	<td class="deadline-col <#if graph.hasApprovedExtension>approved<#else>very-subtle</#if>"><#if graph.deadline?has_content><@fmt.date date=graph.deadline /></#if></td>
+	<td data-datesort="${graph.deadline.millis?c!''}" class="deadline-col <#if graph.hasApprovedExtension>approved<#else>very-subtle</#if>"><#if graph.deadline?has_content><@fmt.date date=graph.deadline /></#if></td>
 </tr>
 </#macro>
 
@@ -78,28 +78,38 @@
 			<th class="deadline-col">Submission Deadline</th>
 		</tr>
 		</thead>
-
 		<tbody>
 			<#list extensionGraphs as extensionGraph>
 				<#-- only show rows the user can do something with -->
 				<#if (extensionGraph.extension?has_content && can.do("Extension.Update", department)) || can.do("Extension.Create", department)>
 					<@row extensionGraph />
 				</#if>
-
 			</#list>
-
 		</tbody>
 	</table>
 
 	<script type="text/javascript">
 		(function($) {
+			// add a custom parser for the date column
+			$.tablesorter.addParser({
+				id: 'customdate',
+				is: function(s, table, cell, $cell){return false; /*return false so this parser is not auto detected*/},
+				format: function(s, table, cell, cellIndex) {
+					var $cell = $(cell);
+					return $cell.attr('data-datesort') || s;
+				},
+				parsed: false,
+				type: 'numeric'
+			});
+
 			$('.expanding-table').expandingTable({
 				contentUrlFunction: function($row) { return $row.data('detailurl'); },
 				useIframe: true,
 				tableSorterOptions: {
 					sortList: [[1, 0], [0, 0]],
 					headers: {
-						5: { sorter: false }
+						5: { sorter: false },
+						6: { sorter: 'customdate' }
 					}
 				},
 				preventContentIdInUrl: true

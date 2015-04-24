@@ -24,13 +24,15 @@ class ExamMarkerAddMarksController extends ExamsController {
 	@Autowired var feedbackService: FeedbackService = _
 	@Autowired var examMembershipService: AssessmentMembershipService = _
 
-	type AdminAddMarksCommand = Appliable[Seq[Feedback]] with PostExtractValidation
+	type ExamMarkerAddMarksCommand = Appliable[Seq[Feedback]] with PostExtractValidation
 
 	@ModelAttribute("adminAddMarksCommand")
-	def command(@PathVariable module: Module,
-							@PathVariable exam: Exam,
-							@PathVariable marker: User,
-							user: CurrentUser): AdminAddMarksCommand =
+	def command(
+		@PathVariable module: Module,
+		@PathVariable exam: Exam,
+		@PathVariable marker: User,
+		user: CurrentUser
+	): ExamMarkerAddMarksCommand =
 		ExamMarkerAddMarksCommand(mandatory(module), mandatory(exam), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(exam)))
 
 	// Add the common breadcrumbs to the model.
@@ -45,7 +47,7 @@ class ExamMarkerAddMarksController extends ExamsController {
 		@PathVariable exam: Exam,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable marker: User,
-		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
+		@ModelAttribute("adminAddMarksCommand") cmd: ExamMarkerAddMarksCommand, errors: Errors
 	) = {
 		val members = examMembershipService.determineMembershipUsersWithOrderForMarker(exam, marker)
 
@@ -88,7 +90,7 @@ class ExamMarkerAddMarksController extends ExamsController {
 		@PathVariable exam: Exam,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable marker: User,
-		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
+		@ModelAttribute("adminAddMarksCommand") cmd: ExamMarkerAddMarksCommand, errors: Errors
 	) = {
 		if (errors.hasErrors) viewMarkUploadForm(module, exam, academicYear, marker, cmd, errors)
 		else {
@@ -103,14 +105,14 @@ class ExamMarkerAddMarksController extends ExamsController {
 		@PathVariable exam: Exam,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable marker: User,
-		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
+		@ModelAttribute("adminAddMarksCommand") cmd: ExamMarkerAddMarksCommand, errors: Errors
 	) = {
 		bindAndValidate(module, cmd, errors)
-		cmd.apply()
-		Redirect(Routes.admin.module(module, academicYear))
+		val feedbacks = cmd.apply()
+		Redirect(Routes.home, "marked" -> feedbacks.count(_.latestMark.isDefined))
 	}
 
-	private def bindAndValidate(module: Module, cmd: AdminAddMarksCommand, errors: Errors) {
+	private def bindAndValidate(module: Module, cmd: ExamMarkerAddMarksCommand, errors: Errors) {
 		cmd.postExtractValidation(errors)
 	}
 

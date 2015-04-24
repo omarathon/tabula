@@ -23,9 +23,8 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 
 	def canUpdateMarkingWorkflow = {
 		Option(assignment.markingWorkflow) match {
-			// if students can choose the marker and submissions exist then the markingWorkflow cannot be updated
-			case Some(scheme) if scheme.studentsChooseMarker => assignment.submissions.size() == 0
-			case Some(scheme) => true
+			// submissions exist then the markingWorkflow cannot be updated
+			case Some(scheme) => assignment.submissions.size() == 0
 			case None => true
 		}
 	}

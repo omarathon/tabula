@@ -183,7 +183,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 			}
 
 			val feedbackNotifications =
-				if (assignment.dissertation) // No feedback deadling for dissertations
+				if (assignment.dissertation) // No feedback deadline for dissertations
 					Seq()
 				else {
 					val daysToSend = Seq(-7, -1, 0)

@@ -552,7 +552,7 @@ $(function() {
 					$row.addClass("marking-completed");
 					$actionContainer.html('No action required.');
 				}
-				else if(!$statusContainer.find('.marked').length) {
+				else if(nextMarkerAction != undefined && !$statusContainer.find('.marked').length) {
 					$statusContainer.find('.label-warning').remove(); // remove existing label before adding another
 					if(!$row.hasClass("in-progress")) {
 						$statusContainer.append($('<span class="label label-info">In Progress</span>'));

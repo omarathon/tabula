@@ -217,7 +217,9 @@ trait ImportSmallGroupSetsFromExternalSystemValidation extends SelfValidating {
 	self: ImportSmallGroupSetsFromExternalSystemCommandState =>
 
 	def validate(errors: Errors): Unit = {
-
+		if (academicYear == null) {
+			errors.rejectValue("academicYear", "NotEmpty")
+		}
 	}
 }
 

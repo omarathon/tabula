@@ -16,6 +16,12 @@
 	</p>
 	</#if>
 <#else>
+	<#if ((marked!0) > 0)>
+		<div class="alert alert-success">
+			<@fmt.p marked "exam mark" /> successfully received.
+		</div>
+	</#if>
+
 	<#macro link_to_department department>
 	<a href="<@routes.departmentHomeWithYearNoModule department currentAcademicYear />">
 		Go to the ${department.name} admin page
@@ -48,5 +54,11 @@
 				</li>
 			</#list>
 		</ul>
+	</#if>
+
+	<#if !ownedModuleDepartments?has_content && !examsForMarking?has_content && !ownedDepartments?has_content >
+		<p>
+			You do not currently have permission to manage or mark any exams.
+		</p>
 	</#if>
 </#if>

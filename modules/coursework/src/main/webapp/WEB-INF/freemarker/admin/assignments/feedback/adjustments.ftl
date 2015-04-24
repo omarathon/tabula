@@ -19,20 +19,33 @@
 	<#assign submission = command.submission />
 	<#include "_submission_summary.ftl">
 
-	<#if command.actualGrade?? || command.actualMark??>
+	<#if command.feedback?? && (command.feedback.actualGrade?has_content || command.feedback.actualMark?has_content)>
 		<div class="well">
 			<h3>Feedback</h3>
 			<p>
-				<#if command.actualMark??>
-					Original mark - ${command.actualMark}<br>
+				<#if command.feedback.actualMark??>
+					Original mark - ${command.feedback.actualMark}<br>
 				</#if>
-				<#if command.actualGrade??>
-					Original grade - ${command.actualGrade}<br>
+				<#if command.feedback.actualGrade??>
+					Original grade - ${command.feedback.actualGrade}<br>
 				</#if>
 			</p>
 		</div>
 	</#if>
 
+</#if>
+
+<#if command.feedback?? && command.feedback.latestPrivateOrNonPrivateAdjustment?has_content>
+	<div class="well">
+		<h3>Latest adjustment</h3>
+		<p>
+			Adjusted mark - ${command.feedback.latestPrivateOrNonPrivateAdjustment.mark!}<br>
+			Adjusted grade - ${command.feedback.latestPrivateOrNonPrivateAdjustment.grade!}<br>
+			<#if command.feedback.latestPrivateOrNonPrivateAdjustment.markType.code == "private">
+				This is a private adjustment that is not visible to the student
+			</#if>
+		</p>
+	</div>
 </#if>
 
 <#assign submit_url>

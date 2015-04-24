@@ -419,6 +419,12 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 			</#if> >
 			<i class="icon-envelope-alt"></i> ${title}
 		</a>
+		<a data-content="There is a known issue with sending emails to long lists of students. If the 'Email these students' button doesn't work try right-clicking on the button, choosing 'Copy email address' and pasting this into your email client directly."
+		   data-html="true"
+		   data-trigger="hover"
+		   class="use-popover tabulaPopover-init"
+		   title=""
+		   href="#"><i class="icon-question-sign"></i></a>
 	</#if>
 </#macro>
 

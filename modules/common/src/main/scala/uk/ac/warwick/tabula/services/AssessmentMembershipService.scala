@@ -44,10 +44,12 @@ trait AssessmentMembershipService {
 
 	def save(assignment: AssessmentComponent): AssessmentComponent
 	def save(group: UpstreamAssessmentGroup): Unit
+	// empty the usergroups for all assessmentgroups in the specified academic years. Skip any groups specified in ignore
+	def emptyMembers(groupsToEmpty:Seq[String]): Int
 	def replaceMembers(group: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]): UpstreamAssessmentGroup
 	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit
 
-	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
 	def getEnrolledAssignments(user: User): Seq[Assignment]
 
@@ -107,6 +109,9 @@ class AssessmentMembershipServiceImpl
 
 		(autoEnrolled ++ manuallyEnrolled).distinct
 	}
+
+	def emptyMembers(groupsToEmpty:Seq[String]) =
+		dao.emptyMembers(groupsToEmpty:Seq[String])
 
 	def replaceMembers(template: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]) = {
 		if (debugEnabled) debugReplace(template, registrations.map(_.universityId))
@@ -171,7 +176,7 @@ class AssessmentMembershipServiceImpl
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] =
 		dao.getUpstreamAssessmentGroups(component, academicYear)
 
-	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[UpstreamAssessmentGroup] =
+	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] =
 		dao.getUpstreamAssessmentGroupsNotIn(ids, academicYears)
 
 	def save(gb: GradeBoundary): Unit = {

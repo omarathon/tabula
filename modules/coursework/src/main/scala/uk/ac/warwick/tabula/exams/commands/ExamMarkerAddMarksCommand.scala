@@ -2,15 +2,14 @@ package uk.ac.warwick.tabula.exams.commands
 
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.coursework.commands.assignments._
 import uk.ac.warwick.tabula.coursework.services.docconversion.AutowiringMarksExtractorComponent
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
+import uk.ac.warwick.tabula.data.model.notifications.exams.ExamMarkedNotification
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-
-import uk.ac.warwick.tabula.coursework.commands.assignments._
 
 object ExamMarkerAddMarksCommand {
 	def apply(module: Module, assessment: Assessment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
@@ -22,7 +21,7 @@ object ExamMarkerAddMarksCommand {
 			with MarkerAddMarksDescription
 			with MarkerAddMarksPermissions
 			with AdminAddMarksCommandValidation
-			with AdminAddMarksNotifications
+			with MarkerAddMarksNotifications
 			with AdminAddMarksCommandState
 			with PostExtractValidation
 			with AddMarksCommandBindListener
@@ -43,16 +42,16 @@ trait MarkerAddMarksDescription extends Describable[Seq[Feedback]] {
 	}
 }
 
-trait AdminAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
+trait MarkerAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
 	
 	self: AdminAddMarksCommandState =>
 	
-	def emit(updatedFeedback: Seq[Feedback]) = updatedReleasedFeedback.flatMap { feedback => HibernateHelpers.initialiseAndUnproxy(feedback) match {
-		case assignmentFeedback: AssignmentFeedback =>
-			Option(Notification.init(new FeedbackChangeNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
-		case _ =>
-			None
-	}}
+	def emit(updatedFeedback: Seq[Feedback]) = updatedFeedback.headOption.flatMap { feedback => HibernateHelpers.initialiseAndUnproxy(feedback) match {
+		case examFeedback: ExamFeedback =>
+			Option(Notification.init(new ExamMarkedNotification, submitter.apparentUser, examFeedback, examFeedback.exam))
+			case _ => None
+	}}.map(Seq(_)).getOrElse(Seq())
+
 }
 
 trait MarkerAddMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

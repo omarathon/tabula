@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.SprCode
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
@@ -119,17 +120,20 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 				}
 			}
 
-			// Empty groups that we haven't seen for academic years
-			assessmentMembershipService.getUpstreamAssessmentGroupsNotIn(
-				ids = notEmptyGroupIds.filter { _.hasText }.toSeq,
-				academicYears = assignmentImporter.yearsToImport
-			).foreach { emptyGroup =>
-				transactional() {
-					assessmentMembershipService.replaceMembers(emptyGroup, Nil)
-				}
+			// empty unseen groups - this is done in transactional batches
+
+			val groupsToEmpty = transactional() {
+				assessmentMembershipService.getUpstreamAssessmentGroupsNotIn (
+					ids = notEmptyGroupIds.filter { _.hasText }.toSeq,
+					academicYears = assignmentImporter.yearsToImport
+				)
 			}
 
-			logger.info("Processed all " + count + " group members")
+			logger.info("Emptying members for unseen groups")
+			val numEmptied = assessmentMembershipService.emptyMembers(groupsToEmpty)
+			logger.info(s"Emptied $numEmptied users from ${groupsToEmpty.size} unseen groups")
+
+
 		}
 	}
 
@@ -161,7 +165,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 							))
 							None
 						} else {
-							Option((sprCode, studentRegistrations.head.seatNumber.toInt))
+							Option((SprCode.getUniversityId(sprCode), studentRegistrations.head.seatNumber.toInt))
 						}
 					}
 					assessmentMembershipService.updateSeatNumbers(group, seatMap)

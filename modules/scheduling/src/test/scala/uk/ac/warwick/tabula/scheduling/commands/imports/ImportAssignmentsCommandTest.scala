@@ -63,6 +63,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
 		val hi900_30 = {
 			val g = new UpstreamAssessmentGroup
+			g.id = "hi900_30"
 			g.moduleCode = "HI900-30"
 			g.occurrence = "A"
 			g.assessmentGroup = "A"
@@ -99,7 +100,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI100-30", "A")
 			)
 
-			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq(hi900_30)
+			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
 
 			command.doGroupMembers()
 
@@ -118,7 +119,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 			))
 
 			// The bug is that we don't update any group we don't have moduleregistrations for.
-			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI900-30")), isEq(Nil))
+			verify(membershipService, times(0)).replaceMembers(anArgThat(hasModuleCode("HI900-30")), isEq(Nil))
 
 		}
 	}
@@ -135,7 +136,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 				UpstreamModuleRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A")
 			)
 
-			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq(hi900_30)
+			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
 
 			command.doGroupMembers()
 
@@ -154,7 +155,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 			// 0100001/1 set to 1 (duplicate seat number)
 			verify(membershipService, times(1)).updateSeatNumbers(anArgThat(hasModuleCode("HI33M-30")), isEq(
 				Map(
-					"0100001/1" -> 1
+					"0100001" -> 1
 				)
 			))
 		}
