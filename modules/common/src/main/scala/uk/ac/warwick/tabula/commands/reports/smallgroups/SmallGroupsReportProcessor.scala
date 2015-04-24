@@ -58,6 +58,8 @@ class SmallGroupsReportProcessorInternal(val department: Department, val academi
 				properties.get("lastName"),
 				properties.get("universityId"),
 				null,
+				null,
+				null,
 				null
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))

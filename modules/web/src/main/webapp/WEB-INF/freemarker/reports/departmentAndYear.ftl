@@ -16,6 +16,12 @@
 	</ul>
 </#if>
 
+<h2>Profiles</h2>
+
+<ul>
+	<li><h3><a href="<@routes.reports.profileExport department academicYear />">Export profiles</a></h3></li>
+</ul>
+
 <h2>Small group teaching</h2>
 
 <ul>
@@ -25,5 +31,6 @@
 	<li><h3><a href="<@routes.reports.missedSmallGroups department academicYear />">Missed event attendance</a></h3></li>
 	<li><h3><a href="<@routes.reports.missedSmallGroupsByModule department academicYear />">Missed event attendance by module</a></h3></li>
 </ul>
+
 
 </#escape>
