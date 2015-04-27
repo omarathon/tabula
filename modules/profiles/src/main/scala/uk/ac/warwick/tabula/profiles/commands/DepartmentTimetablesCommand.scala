@@ -4,13 +4,13 @@ import org.joda.time.{DateTime, Interval, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.timetables.ViewModuleTimetableCommandFactory
-import uk.ac.warwick.tabula.data.model.{StaffMember, Department, Module, StudentMember}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
-import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException, PermissionDeniedException}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException, PermissionDeniedException}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -19,12 +19,14 @@ import scala.util.{Failure, Success}
 object DepartmentTimetablesCommand {
 	def apply(
 		department: Department,
+		academicYear: AcademicYear,
 		user: CurrentUser,
 		moduleTimetableCommandFactory: ViewModuleTimetableCommandFactory,
 		studentPersonalTimetableCommandFactory: ViewStudentPersonalTimetableCommandFactory,
 		staffPersonalTimetableCommandFactory: ViewStaffPersonalTimetableCommandFactory
 	) =	new DepartmentTimetablesCommandInternal(
 		department,
+		academicYear,
 		user,
 		moduleTimetableCommandFactory,
 		studentPersonalTimetableCommandFactory,
@@ -33,6 +35,7 @@ object DepartmentTimetablesCommand {
 		with AutowiringTermBasedEventOccurrenceServiceComponent
 		with AutowiringProfileServiceComponent
 		with AutowiringSecurityServiceComponent
+		with AutowiringModuleAndDepartmentServiceComponent
 		with ReadOnly with Unaudited
 		with DepartmentTimetablesPermissions
 		with DepartmentTimetablesCommandState
@@ -43,17 +46,24 @@ object DepartmentTimetablesCommand {
 
 class DepartmentTimetablesCommandInternal(
 	val department: Department,
+	academicYear: AcademicYear,
 	user: CurrentUser,
 	moduleTimetableCommandFactory: ViewModuleTimetableCommandFactory,
 	studentPersonalTimetableCommandFactory: ViewStudentPersonalTimetableCommandFactory,
 	staffPersonalTimetableCommandFactory: ViewStaffPersonalTimetableCommandFactory
 )	extends CommandInternal[(Seq[EventOccurrence], Seq[String])] {
 
-	self: DepartmentTimetablesCommandRequest with EventOccurrenceServiceComponent with SecurityServiceComponent =>
+	self: DepartmentTimetablesCommandRequest with EventOccurrenceServiceComponent with SecurityServiceComponent with ModuleAndDepartmentServiceComponent =>
 
 	override def applyInternal() = {
 		val errors: mutable.Buffer[String] = mutable.Buffer()
-		val moduleCommands = modules.asScala.map(module => module -> moduleTimetableCommandFactory.apply(module))
+
+		val queryModules = (
+			modules.asScala ++
+				moduleAndDepartmentService.findModulesByRoutes(routes.asScala, academicYear) ++
+				moduleAndDepartmentService.findModulesByYearOfStudy(department, yearsOfStudy.asScala, academicYear)
+			).distinct
+		val moduleCommands = queryModules.map(module => module -> moduleTimetableCommandFactory.apply(module))
 		val moduleEvents = moduleCommands.flatMap{case(module, cmd) => cmd.apply() match {
 			case Success(events) =>
 				events
@@ -123,6 +133,8 @@ trait DepartmentTimetablesCommandRequest extends PermissionsCheckingMethods {
 	self: DepartmentTimetablesCommandState with ProfileServiceComponent =>
 
 	var modules: JList[Module] = JArrayList()
+	var routes: JList[Route] = JArrayList()
+	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var students: JList[String] = JArrayList()
 	lazy val studentMembers: Seq[StudentMember] = profileService.getAllMembersWithUniversityIds(students.asScala).flatMap{
 		case student: StudentMember => Option(student)
@@ -146,4 +158,14 @@ trait DepartmentTimetablesCommandRequest extends PermissionsCheckingMethods {
 		case Nil => modulesForDepartmentAndSubDepartments(mandatory(department.rootDepartment))
 		case someModules => someModules
 	}) ++ modules.asScala).distinct.sorted
+
+	private def routesForDepartmentAndSubDepartments(department: Department): Seq[Route] =
+		(department.routes.asScala ++ department.children.asScala.flatMap { routesForDepartmentAndSubDepartments }).sorted
+
+	lazy val allRoutes: Seq[Route] = ((routesForDepartmentAndSubDepartments(mandatory(department)) match {
+		case Nil => routesForDepartmentAndSubDepartments(mandatory(department.rootDepartment))
+		case someRoutes => someRoutes
+	}) ++ routes.asScala).distinct.sorted(Route.DegreeTypeOrdering)
+
+	lazy val allYearsOfStudy: Seq[Int] = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
 }

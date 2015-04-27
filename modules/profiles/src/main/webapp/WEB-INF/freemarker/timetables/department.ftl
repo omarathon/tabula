@@ -69,7 +69,7 @@
 			<#return false />
 		</#function>
 
-		<#assign placeholder = "Choose modules" />
+		<#assign placeholder = "Module" />
 		<#assign modulesCustomPicker>
 			<div class="module-search input-append">
 				<input class="module-search-query module prevent-reload" type="text" value="" placeholder="Search for a module" />
@@ -84,7 +84,31 @@
 			<@fmt.module_name module false />
 		</@filter>
 
-		<#assign placeholder = "Choose students" />
+		<#assign placeholder = "Route" />
+		<#assign routesCustomPicker>
+			<div class="route-search input-append">
+				<input class="route-search-query route prevent-reload" type="text" value="" placeholder="Search for a route" />
+				<span class="add-on"><i class="icon-search"></i></span>
+			</div>
+		</#assign>
+		<#assign currentfilter><@current_filter_value "routes" placeholder; route>${route.code?upper_case}</@current_filter_value></#assign>
+		<@filter path="routes" placeholder=placeholder currentFilter=currentfilter allItems=command.allRoutes customPicker=routesCustomPicker; route>
+			<input type="checkbox" name="${status.expression}" value="${route.code}"  data-short-value="${route.code?upper_case}"
+				${contains_by_code(command.routes, route)?string('checked','')}
+			>
+			<@fmt.route_name route false />
+		</@filter>
+
+		<#assign placeholder = "Year of study" />
+		<#assign currentfilter><@current_filter_value "yearsOfStudy" placeholder; year>${year}</@current_filter_value></#assign>
+		<@filter "yearsOfStudy" placeholder currentfilter command.allYearsOfStudy command.allYearsOfStudy "Year "; yearOfStudy>
+			<input type="checkbox" name="${status.expression}" value="${yearOfStudy}" data-short-value="${yearOfStudy}"
+				${command.yearsOfStudy?seq_contains(yearOfStudy)?string('checked','')}
+			>
+			${yearOfStudy}
+		</@filter>
+
+		<#assign placeholder = "Student" />
 		<#assign studentsCustomPicker>
 			<div class="student-search input-append">
 				<input class="student-search-query student prevent-reload" type="text" value="" placeholder="Search for a student" data-include-groups="false" data-include-email="false" data-members-only="true" data-universityid="true" />
@@ -99,7 +123,7 @@
 			${student.fullName} (${student.universityId})
 		</@filter>
 
-		<#assign placeholder = "Choose staff" />
+		<#assign placeholder = "Staff" />
 		<#assign staffCustomPicker>
 			<div class="staff-search input-append">
 				<input class="staff-search-query staff prevent-reload" type="text" value="" placeholder="Search for staff" data-include-groups="false" data-include-email="false" data-members-only="true" data-universityid="true" />
@@ -375,6 +399,16 @@
 
 			$picker.data('modulecode','').val('');
 		}).modulePicker({});
+
+		$('.route-search-query').on('change', function(){
+			var $picker = $(this);
+			if ($picker.data('routecode') === undefined || $picker.data('routecode').length === 0)
+				return;
+
+			updateFilterFromPicker($picker, 'routes', $picker.data('routecode'), $picker.data('routecode').toUpperCase());
+
+			$picker.data('routecode','').val('');
+		}).routePicker({});
 
 		$('.student-search-query').on('change', function(){
 			var $picker = $(this);

@@ -2,11 +2,11 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.timetables.ViewModuleTimetableCommandFactoryImpl
+import uk.ac.warwick.tabula.commands.{Appliable, CurrentSITSAcademicYear}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
-import uk.ac.warwick.tabula.profiles.commands.{ViewStaffPersonalTimetableCommandFactoryImpl, DepartmentTimetablesCommand, DepartmentTimetablesCommandRequest, ViewStudentPersonalTimetableCommandFactoryImpl}
+import uk.ac.warwick.tabula.profiles.commands.{DepartmentTimetablesCommand, DepartmentTimetablesCommandRequest, ViewStaffPersonalTimetableCommandFactoryImpl, ViewStudentPersonalTimetableCommandFactoryImpl}
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables._
@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.web.views.JSONView
 @RequestMapping(Array("/department/{department}/timetables"))
 class DepartmentTimetablesController extends ProfilesController
 	with AutowiringScientiaConfigurationComponent with SystemClockComponent
-	with AutowiringUserLookupComponent {
+	with AutowiringUserLookupComponent with CurrentSITSAcademicYear {
 
 	val timetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)
 
@@ -53,6 +53,7 @@ class DepartmentTimetablesController extends ProfilesController
 	def command(@PathVariable department: Department) = {
 		DepartmentTimetablesCommand(
 			mandatory(department),
+			academicYear,
 			user,
 			new ViewModuleTimetableCommandFactoryImpl(timetableFetchingService),
 			new ViewStudentPersonalTimetableCommandFactoryImpl(
