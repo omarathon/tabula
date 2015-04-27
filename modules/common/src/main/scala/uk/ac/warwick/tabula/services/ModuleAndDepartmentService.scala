@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import scala.reflect._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.data.DepartmentDao
 import uk.ac.warwick.tabula.data.ModuleDao
 import uk.ac.warwick.tabula.data.Transactions._
@@ -150,6 +150,11 @@ class ModuleAndDepartmentService extends Logging {
 	def findModulesNamedLike(query: String): Seq[Module] =
 		moduleDao.findModulesNamedLike(query)
 
+	def findModulesByRoutes(routes: Seq[Route], academicYear: AcademicYear): Seq[Module] =
+		moduleDao.findByRoutes(routes, academicYear)
+
+	def findModulesByYearOfStudy(department: Department, yearsOfStudy: Seq[Integer], academicYear: AcademicYear): Seq[Module] =
+		moduleDao.findByYearOfStudy(department, yearsOfStudy, academicYear)
 }
 
 trait ModuleAndDepartmentServiceComponent {
