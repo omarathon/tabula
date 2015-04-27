@@ -45,6 +45,7 @@ trait GetModuleTimetableApi {
 				"status" -> "ok",
 				"events" -> events.map { event => Map(
 					"uid" -> event.uid,
+					"name" -> event.name,
 					"title" -> event.title,
 					"description" -> event.description,
 					"eventType" -> event.eventType.displayName,
