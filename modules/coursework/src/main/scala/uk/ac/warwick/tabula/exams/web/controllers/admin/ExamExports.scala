@@ -7,20 +7,20 @@ import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand.Student
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.commands.ViewExamCommandResult
+import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.csv.CSVLineWriter
 
 import scala.xml.{Elem, Null, UnprefixedAttribute}
 
 trait ExamExports {
 
-class CSVBuilder(val students:Seq[Student], val results:ViewExamCommandResult, val exam: Exam, val module: Module, val academicYear: AcademicYear)
-		extends CSVLineWriter[Student] with ExamHeaderInformation with ItemData with formatContent{
+class CSVBuilder(val students:Seq[User], val results:ViewExamCommandResult, val exam: Exam, val module: Module, val academicYear: AcademicYear)
+		extends CSVLineWriter[User] with ExamHeaderInformation with ItemData with formatContent{
 
-		def getNoOfColumns(item:Student) = headers.size
-		def getColumn(item:Student, i:Int) = formatData(getItemData(item, results, module).get(headers(i)))
+		def getNoOfColumns(item:User) = headers.size
+		def getColumn(item:User, i:Int) = formatData(getItemData(item, results, module).get(headers(i)))
 	}
 }
 
@@ -75,7 +75,7 @@ trait ExamHeaderInformation {
 }
 
 trait ItemData extends ExamHeaderInformation {
-	def getItemData(student: Student,  results:ViewExamCommandResult, module: Module) = {
+	def getItemData(student: User,  results:ViewExamCommandResult, module: Module) = {
 
 		val feedback:ExamFeedback = studentFeedback(results, student)
 		val hasFeedback = studentHasFeedback(results, student)
@@ -83,7 +83,7 @@ trait ItemData extends ExamHeaderInformation {
 
 		var data:Map[String, Any] = Map();
 
-		data += (SEAT_NUMBER -> results.seatNumberMap.get(student.user))
+		data += (SEAT_NUMBER -> results.seatNumberMap.get(student))
 		data += (STUDENT -> studentName(module, student))
 		if (hasFeedback) {
 			data += (ORIGINAL_MARK -> feedback.actualMark.get)
@@ -101,32 +101,32 @@ trait ItemData extends ExamHeaderInformation {
 		data
 	}
 
-	def studentName(module: Module, student: Student): String = {
+	def studentName(module: Module, student: User): String = {
 		if (module.adminDepartment.showStudentName) {
-			return student.user.getFullName
+			return student.getFullName
 		} else {
-			return student.user.getWarwickId
+			return student.getWarwickId
 		}
 	}
 
-	def studentHasFeedback(results:ViewExamCommandResult, student:Student): Boolean = {
-		!results.feedbackMap.get(student.user).isEmpty
+	def studentHasFeedback(results:ViewExamCommandResult, student:User): Boolean = {
+		!results.feedbackMap.get(student).isEmpty
 	}
 
-	def studentFeedback(results:ViewExamCommandResult, student:Student): ExamFeedback = {
+	def studentFeedback(results:ViewExamCommandResult, student:User): ExamFeedback = {
 		if (studentHasFeedback(results, student)) {
-			return results.feedbackMap.get(student.user).get.get
+			return results.feedbackMap.get(student).get.get
 		} else {
 			return new ExamFeedback
 		}
 	}
 
-	def studentHasSitsFeedack(results:ViewExamCommandResult, student:Student) : Boolean = {
+	def studentHasSitsFeedack(results:ViewExamCommandResult, student:User) : Boolean = {
 		val feedback = studentFeedback(results, student)
 		studentHasFeedback(results, student) && results.sitsStatusMap.get(feedback).size > 0
 	}
 
-	def studentSitsFeedback(results:ViewExamCommandResult, student:Student) : FeedbackForSits = {
+	def studentSitsFeedback(results:ViewExamCommandResult, student:User) : FeedbackForSits = {
 		val feedback = studentFeedback(results, student)
 		if (studentHasSitsFeedack(results, student)) {
 			return results.sitsStatusMap.get(feedback).get.get
@@ -137,7 +137,7 @@ trait ItemData extends ExamHeaderInformation {
 }
 
 
-class XMLBuilder(val students:Seq[Student], val results:ViewExamCommandResult, val exam: Exam, val module: Module, val academicYear: AcademicYear)
+class XMLBuilder(val students:Seq[User], val results:ViewExamCommandResult, val exam: Exam, val module: Module, val academicYear: AcademicYear)
 	extends ItemData with formatContent {
 
 	// Pimp XML elements to allow a map mutator for attributes
@@ -162,16 +162,16 @@ class XMLBuilder(val students:Seq[Student], val results:ViewExamCommandResult, v
 		</exam>
 	}
 
-	def studentXML(student: Student) = {
+	def studentXML(student: User) = {
 
 		val feedback:ExamFeedback = studentFeedback(results, student)
 		val hasFeedback = studentHasFeedback(results, student)
 		val hasSitsStatus = studentHasSitsFeedack(results, student)
 		val sitsStatus = studentSitsFeedback(results, student)
 		<student>
-			<university-number>{ student.user.getWarwickId }</university-number>
-			<student-name>{if (module.adminDepartment.showStudentName){ student.user.getFullName } }</student-name>
-			<seat-number>{ results.seatNumberMap.get(student.user).get.getOrElse("") }</seat-number>
+			<university-number>{ student.getWarwickId }</university-number>
+			<student-name>{if (module.adminDepartment.showStudentName){ student.getFullName } }</student-name>
+			<seat-number>{ results.seatNumberMap.get(student).get.getOrElse("") }</seat-number>
 			<original-mark>{if (hasFeedback) {feedback.actualMark.getOrElse("")} }</original-mark>
 			<original-grade>{if (hasFeedback) {feedback.actualGrade.getOrElse("")} }</original-grade>
 			<adjusted-mark>{if (hasFeedback) {feedback.latestPrivateOrNonPrivateAdjustment.get.mark} }</adjusted-mark>
@@ -184,7 +184,7 @@ class XMLBuilder(val students:Seq[Student], val results:ViewExamCommandResult, v
 	}
 }
 
-class ExcelBuilder(val students: Seq[Student], val results:ViewExamCommandResult, val module: Module)
+class ExcelBuilder(val students: Seq[User], val results:ViewExamCommandResult, val module: Module)
 	extends ExamHeaderInformation with ItemData with formatContent {
 
 	def toXLSX = {
@@ -211,7 +211,7 @@ class ExcelBuilder(val students: Seq[Student], val results:ViewExamCommandResult
 		sheet
 	}
 
-	def addRow(sheet: XSSFSheet)(student: Student) {
+	def addRow(sheet: XSSFSheet)(student: User) {
 		val plainCellStyle = {
 			val cs = sheet.getWorkbook.createCellStyle()
 			cs.setDataFormat(HSSFDataFormat.getBuiltinFormat("@"))
