@@ -12,8 +12,6 @@ import uk.ac.warwick.tabula.exams.commands.ViewExamCommandResult
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.csv.CSVLineWriter
 
-import scala.xml.{Elem, Null, UnprefixedAttribute}
-
 trait ExamExports {
 
 class CSVBuilder(val students:Seq[User], val results:ViewExamCommandResult, val exam: Exam, val module: Module, val academicYear: AcademicYear)
@@ -139,15 +137,7 @@ trait ItemData extends ExamHeaderInformation {
 
 class XMLBuilder(val students:Seq[User], val results:ViewExamCommandResult, val exam: Exam, val module: Module, val academicYear: AcademicYear)
 	extends ItemData with formatContent {
-
-	// Pimp XML elements to allow a map mutator for attributes
-	implicit class PimpedElement(elem: Elem) {
-		def %(attrs:Map[String,Any]) = {
-			val seq = for( (n,v) <- attrs ) yield new UnprefixedAttribute(n, toXMLString(Some(v)), Null)
-			(elem /: seq) ( _ % _ )
-		}
-	}
-
+	
 	def toXML  = {
 		<exam>
 			<name>{exam.name}</name>
