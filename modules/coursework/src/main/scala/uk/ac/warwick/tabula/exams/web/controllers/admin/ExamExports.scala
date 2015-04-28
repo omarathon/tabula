@@ -137,7 +137,7 @@ trait ItemData extends ExamHeaderInformation {
 
 class XMLBuilder(val students:Seq[User], val results:ViewExamCommandResult, val exam: Exam, val module: Module, val academicYear: AcademicYear)
 	extends ItemData with formatContent {
-	
+
 	def toXML  = {
 		<exam>
 			<name>{exam.name}</name>
@@ -188,7 +188,7 @@ class ExcelBuilder(val students: Seq[User], val results:ViewExamCommandResult, v
 	}
 
 	def generateNewSheet(workbook: XSSFWorkbook) = {
-		val sheet = workbook.createSheet(module.code.toUpperCase + " - " + safeAssignmentName)
+		val sheet = workbook.createSheet(module.code.toUpperCase + " - " + safeExamName)
 
 		def formatHeader(header: String) =
 			WordUtils.capitalizeFully(header.replace('-', ' '))
@@ -213,7 +213,7 @@ class ExcelBuilder(val students: Seq[User], val results:ViewExamCommandResult, v
 			case (header, index) =>
 				val cell = row.createCell(index)
 
-				if (index == 0) {
+				if (index == 1) {
 					// University IDs have leading zeros and Excel would normally remove them.
 					// Set a manual data format to remove this possibility
 					cell.setCellStyle(plainCellStyle)
@@ -235,5 +235,5 @@ class ExcelBuilder(val students: Seq[User], val results:ViewExamCommandResult, v
 	}
 
 	// util to replace unsafe characters with spaces
-	val safeAssignmentName = WorkbookUtil.createSafeSheetName(trimmedModuleName)
+	val safeExamName = WorkbookUtil.createSafeSheetName(trimmedModuleName)
 }
