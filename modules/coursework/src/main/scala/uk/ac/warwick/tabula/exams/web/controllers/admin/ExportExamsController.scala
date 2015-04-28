@@ -16,7 +16,7 @@ import scala.collection.mutable
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/{academicYear}/exams/{exam}"))
-class ExportExamsController extends ExamsController with ExamExports with requestData {
+class ExportExamsController extends ExamsController with ExamExports with ExportExamsRequestData {
 
 	@RequestMapping(Array("/export.csv"))
 	def csv (
@@ -63,7 +63,7 @@ class ExportExamsController extends ExamsController with ExamExports with reques
 	}
 }
 
-trait requestData {
+trait ExportExamsRequestData {
 
 	def getData(module: Module, exam: Exam, academicYear: AcademicYear) : (ViewExamCommandResult, mutable.MutableList[Student]) = {
 
