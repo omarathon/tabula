@@ -71,19 +71,19 @@ class AssignmentAssignMarkersController extends CourseworkController {
 		AssignMarkersCommand(module, assignment)
 
 	@ModelAttribute("firstMarkerRoleName")
-	def firstMarkerRoleName(@PathVariable assignment: Assignment): String = assignment.markingWorkflow.firstMarkerRoleName
+	def firstMarkerRoleName(@PathVariable assignment: Assignment): String = mandatory(assignment.markingWorkflow).firstMarkerRoleName
 
 	@ModelAttribute("secondMarkerRoleName")
-	def secondMarkerRoleName(@PathVariable assignment: Assignment): Option[String] = assignment.markingWorkflow.secondMarkerRoleName
+	def secondMarkerRoleName(@PathVariable assignment: Assignment): Option[String] = mandatory(assignment.markingWorkflow).secondMarkerRoleName
 
 	@ModelAttribute("firstMarkers")
 	def firstMarkers(@PathVariable module: Module, @PathVariable assignment: Assignment): Seq[Marker] =
-		retrieveMarkers(module, assignment, assignment.markingWorkflow.firstMarkers.knownType.members, assignment.firstMarkerMap, userLookup)
+		retrieveMarkers(module, assignment, mandatory(assignment.markingWorkflow).firstMarkers.knownType.members, assignment.firstMarkerMap, userLookup)
 
 	@ModelAttribute("secondMarkers")
 	def secondMarkers(@PathVariable module: Module, @PathVariable assignment: Assignment): Seq[Marker] =
-		assignment.markingWorkflow.hasSecondMarker match {
-			case true => retrieveMarkers(module, assignment, assignment.markingWorkflow.secondMarkers.knownType.members, assignment.secondMarkerMap, userLookup)
+		mandatory(assignment.markingWorkflow).hasSecondMarker match {
+			case true => retrieveMarkers(module, assignment, mandatory(assignment.markingWorkflow).secondMarkers.knownType.members, assignment.secondMarkerMap, userLookup)
 			case false => Seq()
 		}
 

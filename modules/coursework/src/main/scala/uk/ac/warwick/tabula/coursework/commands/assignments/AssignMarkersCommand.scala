@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkerAllocationExtractor
 import uk.ac.warwick.tabula.coursework.services.docconversion.MarkerAllocationExtractor.{NoMarker, SecondMarker, FirstMarker, ParsedRow}
@@ -36,12 +37,13 @@ class AssignMarkersCommand(val module: Module, val assessment: Assessment)
 	var alloctaionExtractor = Wire[MarkerAllocationExtractor]
 	var file: UploadedFile = new UploadedFile
 
-	var firstMarkerMapping : JMap[String, JList[String]] = assessment.markingWorkflow.firstMarkers.knownType.members.map({ marker =>
+	val markingWorflow = Option(assessment.markingWorkflow).getOrElse(throw new ItemNotFoundException())
+	var firstMarkerMapping : JMap[String, JList[String]] = markingWorflow.firstMarkers.knownType.members.map({ marker =>
 		val list : JList[String] = JArrayList()
 		(marker, list)
 	}).toMap.asJava
 
-	var secondMarkerMapping : JMap[String, JList[String]] = assessment.markingWorkflow.secondMarkers.knownType.members.map({ marker =>
+	var secondMarkerMapping : JMap[String, JList[String]] = markingWorflow.secondMarkers.knownType.members.map({ marker =>
 		val list : JList[String] = JArrayList()
 		(marker, list)
 	}).toMap.asJava
