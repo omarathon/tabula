@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.{ScalaRestriction, AliasAndJoinType}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.commands.{FiltersStudents, CommandInternal, ReadOnly, Unaudited, ComposableCommand}
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
@@ -66,7 +67,15 @@ abstract class FilterStudentsCommand(val department: Department, val year: Acade
 	}
 }
 
-trait FilterStudentsState extends FiltersStudents {
+trait FilterStudentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: FilterStudentsState =>
+
+	def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.Profiles.Search, department)
+	}
+}
+
+trait FilterStudentsState extends ProfileFilterExtras {
 	override def department: Department
 
 	var studentsPerPage = FiltersStudents.DefaultStudentsPerPage
@@ -85,10 +94,34 @@ trait FilterStudentsState extends FiltersStudents {
 	var hasBeenFiltered = false
 }
 
-trait FilterStudentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: FilterStudentsState =>
+trait ProfileFilterExtras extends FiltersStudents {
 
-	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.Search, department)
+	final val HAS_ADMIN_NOTE = "Has administrative note"
+
+	override lazy val allOtherCriteria: Seq[String] = Seq(
+		"Tier 4 only",
+		"Visiting",
+		"Enrolled for year or course completed",
+		HAS_ADMIN_NOTE
+	)
+
+	override def getAliasPaths(table: String) = {
+		(FiltersStudents.AliasPaths ++ Map(
+			"memberNotes" -> Seq(
+				"memberNotes" -> AliasAndJoinType("memberNotes")
+			)
+		))(table)
+	}
+
+	override def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] = {
+		super.buildRestrictions(year) ++ Seq(hasAdminNoteRestriction).flatten
+	}
+
+	def hasAdminNoteRestriction: Option[ScalaRestriction] = otherCriteria.contains(HAS_ADMIN_NOTE) match {
+		case false => None
+		case true => ScalaRestriction.notEmpty(
+			"memberNotes",
+			getAliasPaths("memberNotes"): _*
+		)
 	}
 }
