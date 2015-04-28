@@ -82,13 +82,13 @@
 		</a>
 		<ul class="dropdown-menu">
 			<li>
-				<a class="long-running form-post include-filter" title="Export submissions info as XLSX, for advanced users." href="<@url page='/coursework/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.xlsx'/>">Excel</a>
+				<a class="long-running form-post include-filter" title="Export exam info as XLSX, for advanced users." href="<@routes.examExportExcel module exam />">Excel</a>
 			</li>
 			<li>
-				<a class="long-running form-post include-filter" title="Export submissions info as CSV, for advanced users." href="<@url page='/coursework/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.csv'/>">Text (CSV)</a>
+				<a class="long-running form-post include-filter" title="Export exam info as CSV, for advanced users." href="<@routes.examExportCSV module exam />">Text (CSV)</a>
 			</li>
 			<li>
-				<a class="long-running form-post include-filter" title="Export submissions info as XML, for advanced users." href="<@url page='/coursework/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.xml'/>">Text (XML)</a>
+				<a class="long-running form-post include-filter" title="Export exam info as XML, for advanced users." href="<@routes.examExportXML module exam />">Text (XML)</a>
 			</li>
 		</ul>
 	</div>
