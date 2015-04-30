@@ -12,7 +12,7 @@ exports.createButtonGroup = function(id){
 
     var clonedButtons = $('.recordCheckpointForm div.forCloning div.btn-group')
     	.clone(true)
-    	.insertAfter($this)
+    	.insertAfter($this);
 
     var activeButton = clonedButtons
         .find('button').filter(function(){
@@ -103,19 +103,25 @@ exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
 		});
 	};
 
-    $('#recordAttendance').on('click', 'div.btn-group button', function(e){
-        var $this = $(this);
-        if ($this.is('.disabled')) {
-        	e.stopPropagation();
-        	e.preventDefault();
-        	return false;
-        } else {
-	        $this.closest('div.pull-right').find('option').filter(function(){
-	            return $(this).val() == $this.data('state');
-	        }).prop('selected', true);
+	$('#recordAttendance').on('click', 'div.btn-group button', function(e, isBulkAction){
+		var $this = $(this);
+		if ($this.is('.disabled')) {
+			e.stopPropagation();
+			e.preventDefault();
+			return false;
+		} else {
+			var state = $this.data('state');
+			$this.closest('div.pull-right').find('option').filter(function(){
+				return $(this).val() == state;
+			}).prop('selected', true);
 			var noteButton = $this.closest('div.pull-right').find('a.attendance-note');
 			noteButton.attr('href', setArgOnUrl(noteButton.attr('href'), 'state', $this.data('state')));
-	    }
+
+			// if the row has no note and authorised was clicked then open the attendance note popup
+			if(!isBulkAction && state === "authorised" && !noteButton.hasClass("edit")) {
+				noteButton.click();
+			}
+		}
 
 		if (enableCheckForCheckpoints) {
 			checkForCheckpoints();
@@ -144,8 +150,14 @@ $(function(){
 		$(this).find('.btn-group button').each(function(i){
 			$(this).on('click', function(){
 				$('.attendees .item-info').each(function(){
-					$(this).find('button').eq(i).trigger('click');
+					$(this).find('button').eq(i).trigger('click', ['bulkAction']);
 				})
+				// if the bulk authorised was clicked then open the bulk attendance note popup
+				if (i === 2) {
+					var $bulkNote = $('.bulk-attendance-note');
+					$bulkNote.attr('href', setArgOnUrl($bulkNote.attr('href'), 'isAuto', 'true'));
+					$bulkNote.click();
+				}
 			});
 		});
 	}).end().find('a.meetings').on('click', function(e){

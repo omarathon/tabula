@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.CurrentUser
 import org.joda.time.DateTime
 import org.springframework.validation.{Errors, BindingResult}
 import uk.ac.warwick.tabula.system.BindListener
-import java.lang.IllegalArgumentException
 
 object EditAttendanceNoteCommand {
 	 def apply(student: StudentMember, point: AttendanceMonitoringPoint, user: CurrentUser, customStateStringOption: Option[String]) =
@@ -53,9 +52,9 @@ abstract class EditAttendanceNoteCommand(
 			})
 
 			val pointsCheckpointsMap = attendanceMonitoringService.getCheckpoints(Seq(point), student)
-			if (!pointsCheckpointsMap.isEmpty) checkpoint = pointsCheckpointsMap.head._2
+			if (pointsCheckpointsMap.nonEmpty) checkpoint = pointsCheckpointsMap.head._2
 
-			customStateStringOption.map(stateString => {
+			customStateStringOption.foreach(stateString => {
 				try {
 					customState = AttendanceState.fromCode(stateString)
 				} catch {

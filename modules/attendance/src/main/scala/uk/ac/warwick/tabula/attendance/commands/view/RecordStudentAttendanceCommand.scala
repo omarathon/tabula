@@ -74,6 +74,11 @@ trait RecordStudentAttendanceValidation extends SelfValidating {
 				else if (state == AttendanceState.Attended) errors.rejectValue("", "monitoringCheckpoint.attended.beforeStart")
 			}
 
+			// check that a note exists for authorised absences
+			if (state == AttendanceState.MissedAuthorised && attendanceMonitoringService.getAttendanceNote(student, point).isEmpty) {
+				errors.rejectValue("", "monitoringCheckpoint.missedAuthorised.noNote")
+			}
+
 			errors.popNestedPath()
 		}
 	}

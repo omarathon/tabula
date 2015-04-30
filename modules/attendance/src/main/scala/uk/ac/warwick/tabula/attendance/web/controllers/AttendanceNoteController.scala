@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
+import uk.ac.warwick.tabula.data.model.{StudentMember, AbsenceType}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.commands.{ApplyWithCallback, PopulateOnForm, Appliab
 import uk.ac.warwick.tabula.attendance.web.Routes
 import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.attendance.commands.note.{AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
+import uk.ac.warwick.tabula.attendance.commands.note.{BulkAttendanceNoteCommand, AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
 import uk.ac.warwick.tabula.services.fileserver.{RenderableFile, FileServer}
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 
@@ -151,6 +151,63 @@ class EditAttendanceNoteController extends AttendanceController {
 		} else {
 			cmd.apply()
 			Redirect(Routes.View.student(student.homeDepartment, academicYear, student))
+		}
+	}
+
+}
+
+@Controller
+@RequestMapping(Array("/note/{academicYear}/bulk/{point}/edit"))
+class BulkEditAttendanceNoteController extends AttendanceController {
+
+	validatesSelf[SelfValidating]
+
+	@ModelAttribute("command")
+	def command(
+		@PathVariable academicYear: AcademicYear,
+		@PathVariable point: AttendanceMonitoringPoint
+	) = BulkAttendanceNoteCommand(point, user)
+
+
+	private def form(
+		cmd: Appliable[Seq[AttendanceMonitoringNote]] with PopulateOnForm,
+		academicYear: AcademicYear,
+		isAuto: Boolean = false
+	) = {
+		val mav = Mav("note/bulk_note",
+			"allAbsenceTypes" -> AbsenceType.values,
+			"isModal" -> ajax,
+			"isAuto" -> isAuto
+		)
+		if(ajax)
+			mav.noLayout()
+		else
+			mav.noNavigation()
+	}
+
+	@RequestMapping(method=Array(GET, HEAD, POST))
+	def getIframe(
+		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringNote]] with PopulateOnForm,
+		@PathVariable academicYear: AcademicYear,
+		@PathVariable point: AttendanceMonitoringPoint,
+		@RequestParam(value="isAuto", required=false) isAuto: Boolean
+	) = {
+		cmd.populate()
+		form(cmd, academicYear, isAuto)
+	}
+
+	@RequestMapping(method=Array(GET, HEAD, POST), params=Array("isSave"))
+	def submitIframe(
+		@Valid @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringNote]] with PopulateOnForm,
+		errors: Errors,
+		@PathVariable academicYear: AcademicYear,
+		@PathVariable point: AttendanceMonitoringPoint
+	) = {
+		if (errors.hasErrors) {
+			form(cmd, academicYear)
+		} else {
+			cmd.apply()
+			Mav("note/bulk_note", "success" -> true, "allAbsenceTypes" -> AbsenceType.values)
 		}
 	}
 
