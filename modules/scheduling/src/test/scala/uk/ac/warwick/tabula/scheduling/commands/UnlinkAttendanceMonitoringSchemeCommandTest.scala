@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.scheduling.commands
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
-import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent}
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, TermService, TermServiceComponent}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.util.termdates.TermImpl
 
@@ -21,10 +21,17 @@ class UnlinkAttendanceMonitoringSchemeCommandTest extends TestBase with Mockito 
 
 		val dept1 = Fixtures.department("its")
 
+		val userLookup = new MockUserLookup
+		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
+			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
+			case ug: UserGroup => ug.userLookup = userLookup
+		}
+
 		val dept1scheme1 = new AttendanceMonitoringScheme
 		dept1scheme1.department = dept1
 		dept1scheme1.academicYear = AcademicYear(2014)
 		dept1scheme1.members = UserGroup.ofUniversityIds
+		wireUserLookup(dept1scheme1.members)
 		dept1scheme1.members.staticUserIds = Seq(student1.userId, student2.userId)
 		dept1scheme1.members.includedUserIds = Seq(student3.userId)
 		dept1scheme1.members.excludedUserIds = Seq(student2.userId)
