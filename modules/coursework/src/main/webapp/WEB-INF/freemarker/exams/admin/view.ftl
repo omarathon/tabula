@@ -74,6 +74,24 @@
 	>
 		<i class="icon-upload"></i> Upload to SITS
 	</@fmt.permission_button>
+
+	<div class="btn-group">
+		<a class="btn dropdown-toggle" data-toggle="dropdown">
+			Save As
+			<span class="caret"></span>
+		</a>
+		<ul class="dropdown-menu">
+			<li>
+				<a class="long-running form-post include-filter" title="Export exam info as XLSX, for advanced users." href="<@routes.examExportExcel module exam />">Excel</a>
+			</li>
+			<li>
+				<a class="long-running form-post include-filter" title="Export exam info as CSV, for advanced users." href="<@routes.examExportCSV module exam />">Text (CSV)</a>
+			</li>
+			<li>
+				<a class="long-running form-post include-filter" title="Export exam info as XML, for advanced users." href="<@routes.examExportXML module exam />">Text (XML)</a>
+			</li>
+		</ul>
+	</div>
 </div>
 
 <table class="table table-bordered table-striped table-condensed feedback-table">

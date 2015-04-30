@@ -177,6 +177,17 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 		memberNote.attachments.asScala.map { (attachment) =>
 			ZipFileItem(attachment.name, attachment.dataStream, attachment.actualDataLength)
 		}
+
+	def getProfileExportZip(results: Map[String, Seq[FileAttachment]]): File = {
+		createUnnamedZip(results.map{case(uniId, files) =>
+			ZipFolderItem(uniId, files.zipWithIndex.map{case(file, index) =>
+				if (index == 0)
+					ZipFileItem(file.name, file.dataStream, file.actualDataLength)
+				else
+					ZipFileItem(file.id + "-" + file.name, file.dataStream, file.actualDataLength)
+			})
+		}.toSeq)
+	}
 }
 
 trait ZipServiceComponent {

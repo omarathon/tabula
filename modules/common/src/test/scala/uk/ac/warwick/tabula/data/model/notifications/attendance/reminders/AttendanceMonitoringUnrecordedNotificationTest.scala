@@ -2,12 +2,12 @@ package uk.ac.warwick.tabula.data.model.notifications.attendance.reminders
 
 import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
+import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.services.TermServiceImpl
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
-import uk.ac.warwick.tabula.{AcademicYear, Mockito, Fixtures, TestBase}
-import uk.ac.warwick.tabula.data.model.Notification
-import uk.ac.warwick.userlookup.{User, AnonymousUser}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.userlookup.AnonymousUser
 
 class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mockito {
 
@@ -25,7 +25,7 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 			Fixtures.attendanceMonitoringPoint(scheme)
 		)
 
-		notification.attendanceMonitoringService.findUnrecordedPoints(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns (unrecorded)
+		notification.attendanceMonitoringService.findUnrecordedPoints(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns unrecorded
 
 		notification.title should be ("1 monitoring point needs recording")
 	}
@@ -42,7 +42,7 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 			Fixtures.attendanceMonitoringPoint(scheme, startWeek = 2, endWeek = 4)
 		)
 
-		notification.attendanceMonitoringService.findUnrecordedPoints(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns (unrecorded)
+		notification.attendanceMonitoringService.findUnrecordedPoints(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns unrecorded
 
 		notification.title should be ("2 monitoring points need recording")
 	}
@@ -59,11 +59,13 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 				lastName = "Mannion",
 				universityId = "0672089",
 				userId = "cuscav",
-				scdBeginDate = DateTime.now.minusYears(2).toLocalDate
+				scdBeginDate = DateTime.now.minusYears(2).toLocalDate,
+				null,
+				null
 			)
 		)
 
-		notification.attendanceMonitoringService.findUnrecordedStudents(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns (unrecorded)
+		notification.attendanceMonitoringService.findUnrecordedStudents(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns unrecorded
 
 		notification.title should be ("1 student needs monitoring points recording")
 	}
@@ -80,18 +82,22 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 				lastName = "Mannion",
 				universityId = "0672089",
 				userId = "cuscav",
-				scdBeginDate = DateTime.now.minusYears(2).toLocalDate
+				scdBeginDate = DateTime.now.minusYears(2).toLocalDate,
+				null,
+				null
 			),
 			AttendanceMonitoringStudentData(
 				firstName = "Nick",
 				lastName = "Howes",
 				universityId = "0672088",
 				userId = "cusebr",
-				scdBeginDate = DateTime.now.minusYears(2).toLocalDate
+				scdBeginDate = DateTime.now.minusYears(2).toLocalDate,
+				null,
+				null
 			)
 		)
 
-		notification.attendanceMonitoringService.findUnrecordedStudents(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns (unrecorded)
+		notification.attendanceMonitoringService.findUnrecordedStudents(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns unrecorded
 
 		notification.title should be ("2 students need monitoring points recording")
 	}

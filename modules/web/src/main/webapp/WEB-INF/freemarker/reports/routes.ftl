@@ -55,3 +55,8 @@
 <#macro missedSmallGroupsByModuleDownloadCsv department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/bymodule/download.csv" /></#macro>
 <#macro missedSmallGroupsByModuleDownloadXlsx department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/bymodule/download.xlsx" /></#macro>
 <#macro missedSmallGroupsByModuleDownloadXml department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/bymodule/download.xml" /></#macro>
+
+<#macro profileExport department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export" /></#macro>
+<#macro profileExportReport department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report" /></#macro>
+<#macro profileExportReportProgress department academicYear jobId><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report?jobId=${jobId}" /></#macro>
+<#macro profileExportReportZip department academicYear jobId><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report/zip?jobId=${jobId}" /></#macro>

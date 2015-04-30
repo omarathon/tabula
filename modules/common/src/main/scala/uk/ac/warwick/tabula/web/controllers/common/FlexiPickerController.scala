@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -83,7 +84,7 @@ object FlexiPickerController {
 				val matched = EmailPattern.findAllIn(query.trim).matchData.toList
 
 				if (matched.length>0) {
-					val firstMatch = matched(0)
+					val firstMatch = matched.head
 					val builder : Map[String, String] = Map("type" -> "email", "address" -> firstMatch.group(2))
 
 					if (firstMatch.group(1) != null) {
@@ -120,18 +121,25 @@ object FlexiPickerController {
 			var users: List[User] = List[User]()
 			if (exact) {
 				if (terms.length == 1) {
-					val user = userLookup.getUserByUserId(terms(0))
+					val user =
+						if (UniversityId.isValid(terms(0)))
+							userLookup.getUserByWarwickUniId(terms(0))
+						else
+							userLookup.getUserByUserId(terms(0))
 					if (user.isFoundUser) {
 						users = users :+ user
 					}
 				}
 			}
 			else if (terms.length == 1) {
-				val user = userLookup.getUserByUserId(terms(0))
+				val user =
+					if (UniversityId.isValid(terms(0)))
+						userLookup.getUserByWarwickUniId(terms(0))
+					else
+						userLookup.getUserByUserId(terms(0))
 				if (user.isFoundUser) {
 					users = users :+ user
-				}
-				else {
+				}	else {
 					users  = users ++  userLookup.findUsersWithFilter(item("sn" , terms(0)))
 					if (users.size < EnoughResults) {
 						users ++= userLookup.findUsersWithFilter(item("givenName", terms(0)))

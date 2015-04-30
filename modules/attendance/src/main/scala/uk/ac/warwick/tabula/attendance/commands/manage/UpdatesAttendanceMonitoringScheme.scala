@@ -21,7 +21,7 @@ trait UpdatesAttendanceMonitoringScheme extends Logging {
 			case _ => None
 		}.map(s => s.universityId -> s).toMap
 
-		schemes.groupBy(s => (s.department, s.academicYear)).map{case((department, academicYear), groupedSchemes) =>
+		schemes.groupBy(s => (s.department, s.academicYear)).foreach{case((department, academicYear), groupedSchemes) =>
 			attendanceMonitoringService.updateCheckpointTotalsAsync(
 				groupedSchemes.flatMap(_.members.members).distinct.flatMap(allStudents.get),
 				department,
@@ -30,7 +30,7 @@ trait UpdatesAttendanceMonitoringScheme extends Logging {
 		}
 
 		// Custom scheduled notifications
-		schemes.groupBy(_.department).map{case(department, _) =>
+		schemes.groupBy(_.department).foreach{case(department, _) =>
 
 			thisScheduledNotificationService.removeInvalidNotifications(department)
 

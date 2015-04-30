@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups._
 
@@ -149,6 +150,12 @@ class DepartmentEntityReference extends EntityReference[Department] {
 
 @Entity @DiscriminatorValue(value="exam")
 class ExamEntityReference extends EntityReference[Exam] {
+	@ManyToOne
+	var entity: Entity = null
+}
+
+@Entity @DiscriminatorValue(value="attendanceMonitoringScheme")
+class AttendanceMonitoringSchemeEntityReference extends EntityReference[AttendanceMonitoringScheme] {
 	@ManyToOne
 	var entity: Entity = null
 }

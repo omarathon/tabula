@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfigurationComponent, ScientiaHttpTimetableFetchingService, ModuleTimetableFetchingServiceComponent}
+import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfigurationComponent, ModuleTimetableFetchingService, ModuleTimetableFetchingServiceComponent, ScientiaHttpTimetableFetchingService}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
@@ -24,6 +24,25 @@ object ViewModuleTimetableCommand {
 			// Only include Scientia events for now. If we ever include from other sources, they should be opt-in via params
 			val timetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)
 		}
+
+	// Re-usable service
+	def apply(module: Module, service: ModuleTimetableFetchingService) =
+		new ViewModuleTimetableCommandInternal(module)
+			with ComposableCommand[Try[Seq[TimetableEvent]]]
+			with ViewModuleTimetablePermissions
+			with ViewModuleTimetableValidation
+			with Unaudited with ReadOnly
+			with ModuleTimetableFetchingServiceComponent {
+			// Only include Scientia events for now. If we ever include from other sources, they should be opt-in via params
+			val timetableFetchingService = service
+		}
+}
+
+trait ViewModuleTimetableCommandFactory {
+	def apply(module: Module): ComposableCommand[Try[Seq[TimetableEvent]]]
+}
+class ViewModuleTimetableCommandFactoryImpl(service: ModuleTimetableFetchingService) extends ViewModuleTimetableCommandFactory {
+	def apply(module: Module) = ViewModuleTimetableCommand(module, service)
 }
 
 abstract class ViewModuleTimetableCommandInternal(val module: Module)

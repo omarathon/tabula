@@ -76,9 +76,13 @@
 			</#if>
 			
 			<#if searchDepartments??>
-			<#list searchDepartments as dept>
-				<h2><a href="<@routes.filter_students dept />">All students in ${dept.name}</a></h2>
-			</#list>
+				<#list searchDepartments as dept>
+					<h2>${dept.name}</h2>
+					<ul>
+						<li><a href="<@routes.filter_students dept />">All students in ${dept.name}</a></li>
+						<li><a href="<@routes.department_timetables dept />">Timetables for ${dept.name}</a></li>
+					</ul>
+				</#list>
 			</#if>
 		</div>
 		

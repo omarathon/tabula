@@ -84,6 +84,7 @@ trait AttendanceMonitoringService {
 		activeCheckpoints: Seq[AttendanceMonitoringCheckpoint]
 	): Seq[AttendanceMonitoringCheckpoint]
 	def hasRecordedCheckpoints(points: Seq[AttendanceMonitoringPoint]): Boolean
+	def getAllAttendance(studentId: String): Seq[AttendanceMonitoringCheckpoint]
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
 	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint]
@@ -95,6 +96,7 @@ trait AttendanceMonitoringService {
 	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
 	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringStudentData]
+	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]]
 }
 
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService with TaskBenchmarking {
@@ -278,6 +280,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def hasRecordedCheckpoints(points: Seq[AttendanceMonitoringPoint]): Boolean =
 		attendanceMonitoringDao.hasRecordedCheckpoints(points)
 
+	def getAllAttendance(studentId: String): Seq[AttendanceMonitoringCheckpoint] =
+		attendanceMonitoringDao.getAllAttendance(studentId)
+
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote] = {
 		attendanceMonitoringDao.getAttendanceNote(student, point)
 	}
@@ -404,6 +409,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringStudentData] =
 		attendanceMonitoringDao.findUnrecordedStudents(department, academicYear, endDate)
+
+	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]] =
+		attendanceMonitoringDao.findSchemesLinkedToSITSByDepartment(academicYear)
 }
 
 trait AttendanceMonitoringMembershipHelpers {

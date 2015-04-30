@@ -125,6 +125,7 @@ var FlexiPicker = function (options) {
 	this.includeEmail = options.includeEmail || false;
 	this.tabulaMembersOnly = options.tabulaMembersOnly || false;
 	this.prefixGroups = options.prefixGroups || '';
+	this.universityId = options.universityId || false;
 
 	this.richResultField = new RichResultField($element[0]);
 
@@ -155,6 +156,7 @@ var FlexiPicker = function (options) {
 				i = $(that.options.item);
 				i.attr('data-value', item.value);
 				i.attr('data-type', item.type);
+				i.attr('data-fullname', item.name);
 				i.find('span.title').html(that.highlighter(item.title));
 				i.find('span.type').html(item.type);
 				i.find('i').addClass('icon-' + self.iconMappings[item.type]);
@@ -190,6 +192,7 @@ var FlexiPicker = function (options) {
 		var desc = this.$menu.find('.active .description').text();
 		if (desc) { text = text + ' (' + desc + ')'; }
 		self.richResultField.storeText(text);
+		this.$element.data('fullname', this.$menu.find('.active').data('fullname'));
 		return oldSelect.call($typeahead);
 	};
 
@@ -205,6 +208,21 @@ var FlexiPicker = function (options) {
 			}
 		});
 	}
+
+	// The Bootstrap Typeahead always appends the drop-down to directly after the input
+	// Replace the show method so that the drop-down is added to the body
+	$typeahead.show = function () {
+		var pos = $.extend({}, this.$element.offset(), {
+			height: this.$element[0].offsetHeight
+		});
+
+		this.$menu.appendTo($('body')).show().css({
+			top: pos.top + pos.height, left: pos.left
+		});
+
+		this.shown = true;
+		return this;
+	};
 };
 
 // Extract the value from a chosen value with type.
@@ -256,6 +274,7 @@ FlexiPicker.prototype.search = function (query, options) {
 			includeGroups: this.includeGroups,
 			includeEmail: this.includeEmail,
 			tabulaMembersOnly: this.tabulaMembersOnly,
+			universityId: this.universityId,
 			query: query,
 			exact: options.exact // if true, only returns 100% matches.
 		},
@@ -292,7 +311,8 @@ $.fn.flexiPicker = function (options) {
 			includeEmail: $this.data('include-email'),
 			includeUsers: $this.data('include-users') !== false,
 			tabulaMembersOnly: $this.data('members-only'),
-			prefixGroups: $this.data('prefix-groups') || ''
+			prefixGroups: $this.data('prefix-groups') || '',
+			universityId: $this.data('universityid')
 		};
 		$.extend(allOptions, options || {});
 		$this.data('flexi-picker', new FlexiPicker(allOptions));

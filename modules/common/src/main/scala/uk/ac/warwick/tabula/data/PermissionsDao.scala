@@ -2,16 +2,15 @@ package uk.ac.warwick.tabula.data
 
 import org.hibernate.criterion._
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.permissions._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.roles.{RoleDefinition, BuiltInRoleDefinition}
-import uk.ac.warwick.tabula.permissions.Permission
-import scala.reflect.ClassTag
-import uk.ac.warwick.userlookup.User
-import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
-import org.hibernate.criterion.Restrictions._
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.permissions._
+import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget}
+import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, RoleDefinition}
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
+import scala.reflect.ClassTag
 
 trait PermissionsDao {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
@@ -51,7 +50,6 @@ trait PermissionsDao {
 @Repository
 class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 	import Restrictions._
-	import Order._
 	
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition) = session.saveOrUpdate(roleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_]) = session.saveOrUpdate(permission)
@@ -66,7 +64,7 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 	
 	def getGrantedRolesById[A <: PermissionsTarget: ClassTag](ids: Seq[String]) = 
 		if (ids.isEmpty) Nil
-		else session.newCriteria[GrantedRole[A]]
+		else session.newCriteria[GrantedRole[A]](GrantedRole.classObject[A])
 					 .add(in("id", ids.asJava))
 					 .seq
 					 
@@ -77,7 +75,7 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 					 .seq
 	
 	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](scope: A) = canDefineRoleSeq(scope) {
-		session.newCriteria[GrantedRole[A]]
+		session.newCriteria[GrantedRole[A]](GrantedRole.classObject[A])
 					 .add(is("scope", scope))
 					 .seq
 	}
@@ -89,14 +87,15 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 	}
 					 
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, customRoleDefinition: CustomRoleDefinition) = canDefineRole(scope) { 
-		session.newCriteria[GrantedRole[A]]
+		session.newCriteria[GrantedRole[A]](GrantedRole.classObject[A])
 					 .add(is("scope", scope))
 					 .add(is("customRoleDefinition", customRoleDefinition))
 					 .seq.headOption
 	}
 					 
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, builtInRoleDefinition: BuiltInRoleDefinition) = canDefineRole(scope) {
-		session.newCriteria[GrantedRole[A]]
+		// TAB-2959
+		session.newCriteria[GrantedRole[A]](GrantedRole.classObject[A])
 					 .add(is("scope", scope))
 					 .add(is("builtInRoleDefinition", builtInRoleDefinition))
 					 .seq.headOption
@@ -147,14 +146,14 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 						and :universityId not in elements(r._users.excludeUsers))
 					)
 		""")
-			.setString("universityId", user.getWarwickId())
-			.setString("userId", user.getUserId())
+			.setString("universityId", user.getWarwickId)
+			.setString("userId", user.getUserId)
 			.seq
 	
 	def getGrantedRolesForWebgroups[A <: PermissionsTarget: ClassTag](groupNames: Seq[String]) = {
-		if (!groupNames.isEmpty) {
+		if (groupNames.nonEmpty) {
 			val c =
-				session.newCriteria[GrantedRole[A]]
+				session.newCriteria[GrantedRole[A]](GrantedRole.classObject[A])
 				.createAlias("_users", "users")
 				.add(safeIn("users.baseWebgroup", groupNames))
 
@@ -183,8 +182,8 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 						and :universityId not in elements(r._users.excludeUsers))
 					)
 		""")
-			.setString("universityId", user.getWarwickId())
-			.setString("userId", user.getUserId())
+			.setString("universityId", user.getWarwickId)
+			.setString("userId", user.getUserId)
 			.seq
 	
 	

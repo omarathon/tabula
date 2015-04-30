@@ -91,6 +91,10 @@ object Daoisms extends HelperRestrictions {
 						.runtimeClass
 				)
 			)
+		def newCriteria[A: ClassTag](clazz: Class[_]) =
+			new ScalaCriteria[A](
+				session.createCriteria(clazz)
+			)
 		def newQuery[A](hql: String) = new ScalaQuery[A](session.createQuery(hql))
 	}
 

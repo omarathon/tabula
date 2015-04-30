@@ -45,4 +45,15 @@ object ReportsBreadcrumbs {
 			val url = Some(Routes.reports.SmallGroups.missed(department, academicYear))
 		}
 	}
+
+	object Profiles {
+		case class Home(department: model.Department, academicYear: AcademicYear) extends Abstract {
+			val title = "Profiles"
+			val url = Some(Routes.reports.Profiles.home(department, academicYear))
+		}
+		case class Export(department: model.Department, academicYear: AcademicYear) extends Abstract {
+			val title = "Export"
+			val url = Some(Routes.reports.Profiles.export(department, academicYear))
+		}
+	}
 }

@@ -94,6 +94,9 @@ object ScalaRestriction {
 
 	def lt(property: String, value: Any, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		Some(addAliases(new ScalaRestriction(Restrictions.lt(property, value)), aliases: _*))
+
+	def notEmpty(property: String, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
+		Some(addAliases(new ScalaRestriction(Restrictions.isNotEmpty(property)), aliases: _*))
 }
 
 trait Aliasable {
