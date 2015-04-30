@@ -386,7 +386,7 @@
 				</h4>
 			</div>
 			<div class="span2">
-				<#if setItem.canViewMembers && ((group.students.size)!0) gt 0>
+				<#if can.do('SmallGroups.ReadMembership', group) && setItem.canViewMembers && ((group.students.size)!0) gt 0>
 					<a href="<@routes.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
 						<@fmt.p (group.students.size)!0 "student" "students" />
 					</a>
@@ -620,7 +620,7 @@
 									</#if>									
 										<h4 class="name">
 											${group.name!""}
-											<#if setItem.canViewMembers >
+											<#if can.do('SmallGroups.ReadMembership', group) && setItem.canViewMembers >
 												<a href="<@routes.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
 													<small><@fmt.p (group.students.size)!0 "student" "students" /></small>
 												</a>

@@ -98,8 +98,11 @@
 
 	<#macro pagination currentPage totalResults resultsPerPage extra_classes="">
 		<#local totalPages = (totalResults / resultsPerPage)?ceiling />
-		<div class="pagination pagination-right ${extra_classes}">
-			<ul>
+		<div class="pagination pagination-right ${extra_classes}" style="margin-top: 0;">
+			<#if can.do("Department.Reports", department) >
+				<a href="<@routes.exportProfiles department academicYear filterStudentsCommand.serializeFilter />" class="btn btn-small" style="vertical-align: top;">Export profiles</a>
+			</#if>
+			<ul style="margin-top: 0;">
 				<#if currentPage lte 1>
 					<li class="disabled"><span>&laquo;</span></li>
 				<#else>
@@ -158,7 +161,7 @@
 
 	<script type="text/javascript">
 		jQuery(function($) {
-			$('.pagination a').on('click', function(e) {
+			$('.pagination ul a').on('click', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 

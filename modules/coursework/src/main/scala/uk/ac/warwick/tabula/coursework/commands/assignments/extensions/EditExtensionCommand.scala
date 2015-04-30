@@ -122,18 +122,21 @@ trait EditExtensionCommandScheduledNotification extends SchedulesNotifications[E
 				}
 			}
 
-			val feedbackNotifications = {
-				val daysToSend = Seq(-7, -1, 0)
-				val proposedTimes = for (day <- daysToSend) yield extension.feedbackDeadline.plusDays(day)
+			val feedbackNotifications =
+				if (assignment.dissertation)
+					Seq()
+				else {
+					val daysToSend = Seq(-7, -1, 0)
+					val proposedTimes = for (day <- daysToSend) yield extension.feedbackDeadline.plusDays(day)
 
-				// Filter out all times that are in the past. This should only generate ScheduledNotifications for the future.
-				val allTimes = proposedTimes.filter(_.isAfterNow)
+					// Filter out all times that are in the past. This should only generate ScheduledNotifications for the future.
+					val allTimes = proposedTimes.filter(_.isAfterNow)
 
-				allTimes.map {
-					when =>
-						new ScheduledNotification[Extension]("FeedbackDueExtension", extension, when)
+					allTimes.map {
+						when =>
+							new ScheduledNotification[Extension]("FeedbackDueExtension", extension, when)
+					}
 				}
-			}
 
 			submissionNotifications ++ feedbackNotifications
 		} else {

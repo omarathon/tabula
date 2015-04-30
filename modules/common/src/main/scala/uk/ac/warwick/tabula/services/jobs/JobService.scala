@@ -2,10 +2,19 @@ package uk.ac.warwick.tabula.services.jobs
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.events.JobNotificationHandling
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.jobs.{FailedJobException, Job, JobPrototype, ObsoleteJobException}
+
+trait JobServiceComponent {
+	def jobService: JobService
+}
+
+trait AutowiringJobServiceComponent extends JobServiceComponent {
+	var jobService = Wire[JobService]
+}
 
 @Service
 class JobService extends HasJobDao with Logging with JobNotificationHandling {
@@ -66,7 +75,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 		}
 		
 		val instance = JobInstanceImpl.fromPrototype(prototype)
-		user map { u =>
+		user foreach { u =>
 			instance.realUser = u.realId
 			instance.apparentUser = u.apparentId
 		}

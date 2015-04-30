@@ -220,7 +220,7 @@ class FeaturesMessage {
 	@BeanProperty var schedulingExportAttendanceToSits = true
 	@BeanProperty var schedulingExportFeedbackToSits = true
 
-	@BeanProperty var exams = false
+	@BeanProperty var exams = true
 
 	@BeanProperty var reports = true
 }

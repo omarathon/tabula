@@ -1,24 +1,17 @@
 package uk.ac.warwick.tabula.services.jobs
 
-import scala.collection.mutable
+import javax.persistence.{Column, Entity}
+
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.hibernate.annotations.Type
 import org.joda.time.DateTime
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Lob
-import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.data.PostLoadBehaviour
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.jobs.JobPrototype
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.userlookup.UserLookupInterface
-import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.tabula.system.CurrentUserInterceptor
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.{CurrentUser, ToString}
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.GeneratedId
-import uk.ac.warwick.tabula.ToString
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.jobs.JobPrototype
+import uk.ac.warwick.tabula.system.CurrentUserInterceptor
+import uk.ac.warwick.userlookup.{AnonymousUser, UserLookupInterface}
 
 object JobInstanceImpl {
 	def fromPrototype(prototype: JobPrototype) = {
