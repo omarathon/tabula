@@ -12,7 +12,7 @@ import collection.JavaConverters._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipStaticType, SchemeMembershipItem}
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.data.model.StudentMember
 
 object AddStudentsToSchemeCommand {
@@ -21,6 +21,7 @@ object AddStudentsToSchemeCommand {
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringProfileServiceComponent
 			with AutowiringSecurityServiceComponent
+			with AutowiringTermServiceComponent
 			with ComposableCommand[AttendanceMonitoringScheme]
 			with AddStudentsToSchemeValidation
 			with AddStudentsToSchemeDescription
@@ -32,10 +33,10 @@ object AddStudentsToSchemeCommand {
 class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme, val user: CurrentUser)
 	extends CommandInternal[AttendanceMonitoringScheme] with TaskBenchmarking with UpdatesAttendanceMonitoringScheme {
 
-	self: AddStudentsToSchemeCommandState with AttendanceMonitoringServiceComponent	with ProfileServiceComponent =>
+	self: AddStudentsToSchemeCommandState with AttendanceMonitoringServiceComponent	with ProfileServiceComponent with TermServiceComponent =>
 
 	override def applyInternal() = {
-		if (doFind && linkToSits) {
+		if (doFind && linkToSits && !AcademicYear.isSITSInFlux(DateTime.now, termService)) {
 			scheme.members.staticUserIds = staticStudentIds.asScala
 			scheme.members.includedUserIds = includedStudentIds.asScala
 			scheme.members.excludedUserIds = excludedStudentIds.asScala

@@ -109,6 +109,7 @@ trait AttendanceMonitoringDao {
 	def getAllCheckpointTotals(department: Department): Seq[AttendanceMonitoringCheckpointTotal]
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
 	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringStudentData]
+	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]]
 }
 
 
@@ -533,6 +534,14 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 				)
 			}).distinct
 		}
+	}
+
+	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]] = {
+		session.newCriteria[AttendanceMonitoringScheme]
+			.add(is("academicYear", academicYear))
+			.add(isNotNull("memberQuery"))
+			.seq
+			.groupBy(_.department)
 	}
 }
 

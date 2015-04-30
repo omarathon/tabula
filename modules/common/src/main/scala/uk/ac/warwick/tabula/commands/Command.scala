@@ -1,22 +1,21 @@
 package uk.ac.warwick.tabula.commands
 
+import org.slf4j.LoggerFactory
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.HibernateHelpers
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.events.{NotificationHandling, EventHandling, Event, EventDescription}
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, RequestInfo, JavaImports}
-import uk.ac.warwick.tabula.services.{CannotPerformWriteOperationException, MaintenanceModeService}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, RequiresPermissionsChecking, PermissionsChecking}
-import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
-import org.slf4j.{LoggerFactory, Logger}
-import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.helpers.Promise
-import uk.ac.warwick.tabula.helpers.Promises
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.HibernateHelpers
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance._
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
+import uk.ac.warwick.tabula.events.{Event, EventDescription, EventHandling, NotificationHandling}
+import uk.ac.warwick.tabula.helpers.{Logging, Promise, Promises}
+import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
+import uk.ac.warwick.tabula.services.{CannotPerformWriteOperationException, MaintenanceModeService}
+import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, JavaImports, RequestInfo}
+import uk.ac.warwick.userlookup.User
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -87,16 +86,16 @@ trait Command[A] extends Describable[A] with Appliable[A]
 		with JavaImports with EventHandling with NotificationHandling with PermissionsChecking with TaskBenchmarking with AutowiringFeaturesComponent {
 
 	var maintenanceMode = Wire[MaintenanceModeService]
-	
-	import uk.ac.warwick.tabula.system.NoBind
 
 	final def apply(): A = {
 		if (EventHandling.enabled) {
 			if (readOnlyCheck(this)) {
 				recordEvent(this) {
-					notify(this) {
-						benchmark() {
-							applyInternal()
+					transactional() {
+						notify(this) {
+							benchmark() {
+								applyInternal()
+							}
 						}
 					}
 				}

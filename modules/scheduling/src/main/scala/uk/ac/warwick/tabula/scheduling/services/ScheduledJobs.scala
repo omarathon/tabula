@@ -1,16 +1,17 @@
 package uk.ac.warwick.tabula.scheduling.services
 
+import org.joda.time.DateTime
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.scheduling.commands._
 import uk.ac.warwick.tabula.scheduling.commands.imports._
-import uk.ac.warwick.tabula.services.{EmailNotificationService, ScheduledNotificationService, NotificationIndexService, AuditEventIndexService, MaintenanceModeService, ProfileIndexService}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.Features
+import uk.ac.warwick.tabula.{AcademicYear, Features}
 
 /**
  * The scheduled jobs don't particularly have to all be in one class,
@@ -32,6 +33,7 @@ class ScheduledJobs {
 	var notificationIndexService = Wire[NotificationIndexService]
 	var notificationEmailService = Wire[EmailNotificationService]
 	var scheduledNotificationService = Wire[ScheduledNotificationService]
+	var termService = Wire[TermService]
 
 	def maintenanceGuard[A](fn: => A) = if (!maintenanceModeService.enabled) fn
 
@@ -131,7 +133,14 @@ class ScheduledJobs {
 	@Scheduled(cron = "0 0 4 * * *") // 4am
 	def updateAttendanceMonitoringSchemeMembership(): Unit =
 		if (features.attendanceMonitoringAcademicYear2014) maintenanceGuard {
-			exceptionResolver.reportExceptions { UpdateAttendanceMonitoringSchemeMembershipCommand().apply() }
+			exceptionResolver.reportExceptions {
+				UpdateAttendanceMonitoringSchemeMembershipCommand().apply()
+			}
+			exceptionResolver.reportExceptions {
+				if (AcademicYear.isSITSInFlux(DateTime.now, termService)) {
+					UnlinkAttendanceMonitoringSchemeCommand().apply()
+				}
+			}
 		}
 
 	@Scheduled(fixedDelay = 5 * 60 * 1000) // every 5 minutes, non-concurrent

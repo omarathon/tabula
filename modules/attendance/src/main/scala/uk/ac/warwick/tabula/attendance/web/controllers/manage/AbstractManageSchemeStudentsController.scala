@@ -2,17 +2,20 @@ package uk.ac.warwick.tabula.attendance.web.controllers.manage
 
 import javax.validation.Valid
 
+import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.commands.manage._
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 
 import scala.collection.JavaConverters._
 
-abstract class AbstractManageSchemeStudentsController extends AttendanceController {
+abstract class AbstractManageSchemeStudentsController extends AttendanceController with AutowiringTermServiceComponent {
 
 	validatesSelf[SelfValidating]
 
@@ -73,6 +76,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 			"summaryString" -> summaryString(findStudentsForSchemeCommandResult, editMembershipCommandResult),
 			"expandFind" -> expandFind,
 			"expandManual" -> expandManual,
+			"SITSInFlux" -> AcademicYear.isSITSInFlux(DateTime.now, termService),
 			"returnTo" -> getReturnTo(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear))
 		).crumbs(
 				Breadcrumbs.Manage.Home,
