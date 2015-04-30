@@ -96,7 +96,8 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 	}
 					 
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, builtInRoleDefinition: BuiltInRoleDefinition) = canDefineRole(scope) {
-		session.newCriteria[GrantedRole[A]]
+		// TAB-2959
+		session.newCriteria[GrantedRole[A]](GrantedRole.classObject[A])
 					 .add(is("scope", scope))
 					 .add(is("builtInRoleDefinition", builtInRoleDefinition))
 					 .seq.headOption

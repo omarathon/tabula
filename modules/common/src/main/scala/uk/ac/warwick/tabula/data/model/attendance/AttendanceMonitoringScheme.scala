@@ -16,7 +16,9 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.JavaConverters._
 
 @Entity
-class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with Serializable {
+class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with Serializable with ToEntityReference {
+
+	override type Entity = AttendanceMonitoringScheme
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
 	@transient var attendanceMonitoringService = Wire.option[AttendanceMonitoringService with AttendanceMonitoringMembershipHelpers]
@@ -81,6 +83,7 @@ class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with
 			points.asScala.exists { point => service.countCheckpointsForPoint(point) > 0}
 		}
 
+	override def toEntityReference: EntityReference[Entity] = new AttendanceMonitoringSchemeEntityReference().put(this)
 }
 
 
