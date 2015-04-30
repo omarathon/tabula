@@ -7,7 +7,7 @@ import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointIdConverter
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceState}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceMonitoringScheme, AttendanceState}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
 import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
@@ -118,6 +118,7 @@ class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 	def beforeStartDateButAuthorised() { new Fixture {
 		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, Option(thisDepartment), thisAcademicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq(autumnTerm.getTermTypeAsString)
+		validator.attendanceMonitoringService.getAttendanceNote(thisStudent, point1) returns Some(new AttendanceMonitoringNote)
 		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 
 		point1.startDate = DateTime.now.plusDays(2).toLocalDate
@@ -127,6 +128,23 @@ class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 
 		errors.hasErrors should be {false}
 		errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {false}
+	}}
+
+	@Test
+	def authorisedWithNoNote() { new Fixture {
+		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, Option(thisDepartment), thisAcademicYear) returns Seq(point1, point2)
+		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq(autumnTerm.getTermTypeAsString)
+		validator.attendanceMonitoringService.getAttendanceNote(thisStudent, point1) returns None
+		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
+
+		point1.startDate = DateTime.now.plusDays(2).toLocalDate
+		validator.checkpointMap = JHashMap()
+		validator.checkpointMap.put(point1, AttendanceState.MissedAuthorised)
+		validator.validate(errors)
+
+		errors.hasErrors should be {true}
+		errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {true}
+
 	}}
 
 }
