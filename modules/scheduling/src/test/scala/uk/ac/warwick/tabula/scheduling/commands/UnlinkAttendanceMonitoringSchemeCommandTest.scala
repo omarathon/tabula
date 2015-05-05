@@ -24,6 +24,7 @@ class UnlinkAttendanceMonitoringSchemeCommandTest extends TestBase with Mockito 
 		val dept1scheme1 = new AttendanceMonitoringScheme
 		dept1scheme1.department = dept1
 		dept1scheme1.academicYear = AcademicYear(2014)
+		dept1scheme1.attendanceMonitoringService = None
 		val ug = UserGroup.ofUniversityIds
 		ug.staticUserIds = Seq(student1.userId, student2.userId)
 		ug.includedUserIds = Seq(student3.userId)
