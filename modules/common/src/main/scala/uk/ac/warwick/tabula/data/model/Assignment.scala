@@ -392,7 +392,8 @@ class Assignment
 	}.updatedDate
 
 	def addField(field: AssignmentFormField) {
-		if (field.context == null) throw new IllegalArgumentException("Field with name " + field.name + " has no context specified")
+		if (field.context == null)
+			throw new IllegalArgumentException("Field with name " + field.name + " has no context specified")
 		if (fields.exists(_.name == field.name)) throw new IllegalArgumentException("Field with name " + field.name + " already exists")
 		field.assignment = this
 		field.position = fields.count(_.context == field.context)
