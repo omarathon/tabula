@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.scheduling.commands
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.commands.MemberOrUser
-import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
-import uk.ac.warwick.tabula.services.{UserGroupCacheManager, TermService, TermServiceComponent}
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent}
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.util.termdates.TermImpl
 

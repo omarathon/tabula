@@ -33,10 +33,18 @@ class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
 	extends CommandInternal[Exam]
 	with ExamState
 	with UpdatesStudentMembership
-	with ModifiesExamMembership {
+	with ModifiesExamMembership
+	with PopulateOnForm {
 
 	self: AssessmentServiceComponent with UserLookupComponent  with HasAcademicYear with SpecifiesGroupType
-	with AssessmentMembershipServiceComponent =>
+		with AssessmentMembershipServiceComponent =>
+
+	override def populate(): Unit = {
+		if (availableUpstreamGroups.size == 1) {
+			name = availableUpstreamGroups.head.name
+			upstreamGroups.add(new UpstreamGroup(availableUpstreamGroups.head.assessmentComponent, availableUpstreamGroups.head.group))
+		}
+	}
 
 	override def applyInternal() = {
 		val exam = new Exam
@@ -128,5 +136,21 @@ trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGrou
 			template.exam = exam
 			assessmentMembershipService.getAssessmentGroup(template) orElse Some(template)
 		}).distinct.asJava
+	}
+
+	// TAB-3507 - Filter to show type E only
+	override lazy val availableUpstreamGroups: Seq[UpstreamGroup] = {
+		val allAssessmentComponents = assessmentMembershipService.getAssessmentComponents(module)
+		val examAssessmentComponents = {
+			if (allAssessmentComponents.exists(_.assessmentType == AssessmentType.Exam)) {
+				allAssessmentComponents.filter(_.assessmentType == AssessmentType.Exam)
+			} else {
+				allAssessmentComponents
+			}
+		}
+		for {
+			ua <- examAssessmentComponents
+			uag <- assessmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
+		} yield new UpstreamGroup(ua, uag)
 	}
 }
