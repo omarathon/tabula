@@ -146,6 +146,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro examMarkerAddMarks exam marker><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/marker/${marker.warwickId}/marks" /></#macro>
 <#macro generateExamGradesForMarks exam><@_u page="/admin/module/${exam.module.code}/exams/${exam.id}/generate-grade"/></#macro>
 <#macro examMarkstemplate exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/marks-template" /></#macro>
+<#macro examMarkerMarksTemplate exam marker><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/marker/${marker.warwickId}/marks-template" /></#macro>
 <#macro createExam module academicYear><@_u page="/admin/module/${module.code}/${academicYear.startYear?c}/exams/new" /></#macro>
 <#macro editExam exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/edit" /></#macro>
 <#macro moduleHomeWithYear module academicYear><@_u page="/admin/module/${module.code}/${academicYear.startYear?c}" /></#macro>
