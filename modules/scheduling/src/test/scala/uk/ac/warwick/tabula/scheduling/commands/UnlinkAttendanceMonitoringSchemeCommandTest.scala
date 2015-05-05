@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent}
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.util.termdates.TermImpl
 
@@ -21,17 +21,13 @@ class UnlinkAttendanceMonitoringSchemeCommandTest extends TestBase with Mockito 
 
 		val dept1 = Fixtures.department("its")
 
+		val dept1scheme1 = new AttendanceMonitoringScheme
+		dept1scheme1.department = dept1
+		dept1scheme1.academicYear = AcademicYear(2014)
 		val ug = UserGroup.ofUniversityIds
 		ug.staticUserIds = Seq(student1.userId, student2.userId)
 		ug.includedUserIds = Seq(student3.userId)
 		ug.excludedUserIds = Seq(student2.userId)
-		val uli = smartMock[UserLookupServiceImpl]
-		uli.profileService = smartMock[ProfileService]
-		ug.userLookup = uli
-
-		val dept1scheme1 = new AttendanceMonitoringScheme
-		dept1scheme1.department = dept1
-		dept1scheme1.academicYear = AcademicYear(2014)
 		dept1scheme1.members = ug
 		dept1scheme1.memberQuery = "some-filter"
 
