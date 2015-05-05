@@ -121,9 +121,10 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	</#if>
 </#macro>
 
-<#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false includeTime=true><#--
+<#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false includeTime=true stripHtml=false><#--
 	--><#noescape><#--
-		-->${dateBuilder(date, seconds, at, timezone, capitalise, relative, split, shortMonth, includeTime)}<#--
+		--><#local result = dateBuilder(date, seconds, at, timezone, capitalise, relative, split, shortMonth, includeTime) /><#--
+		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
 	--></#noescape><#--
 --></#macro>
 
