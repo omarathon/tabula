@@ -117,7 +117,12 @@
 								</button>
 							</div>
 							<#if features.attendanceMonitoringNote>
-								<a style="visibility: hidden" class="btn"><i class="icon-edit"></i></a>
+								<#assign students = command.checkpointMap?keys?sort_by("lastName") />
+								<a class="btn use-tooltip attendance-note bulk-attendance-note"
+								   title="Add an attendance note for all students"
+								   href="<@routes.bulkNoteEdit academicYear.startYear?c command.templatePoint students/>">
+									<i class="icon-edit"></i>
+								</a>
 							</#if>
 							<i class="icon-fixed-width"></i>
 						</div>

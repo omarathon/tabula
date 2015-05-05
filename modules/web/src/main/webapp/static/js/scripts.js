@@ -1167,13 +1167,25 @@
 				if ($f.find(".attendance-note-success").length > 0) {
 					// Save successful
 					var linkId = $f.find(".attendance-note-success").data('linkid')
-						, state = $f.find(".attendance-note-success").data('state');
-					var link = $(linkId).attr('data-original-title', state + ' attendance note');
-					if (state === 'Edit') {
-						link.addClass('edit');
+						, state = $f.find(".attendance-note-success").data('state')
+						, $links;
+
+					if(linkId === "bulk") {
+						$links = $('#recordAttendance a.attendance-note');
 					} else {
-						link.removeClass('edit');
+						$links = $(linkId);
 					}
+
+					$links.each(function(i, link){
+						var $link = $(link);
+						$link.attr('data-original-title', state + ' attendance note');
+						if (state === 'Edit') {
+							$link.addClass('edit');
+						} else {
+							$link.removeClass('edit');
+						}
+					});
+
 					$m.modal("hide");
 				} else {
 					$m.find('.modal-body').slideDown();
@@ -1197,7 +1209,7 @@
 				$(this).off('load', attendanceNoteIframeHandler);
 			};
 
-			var attendanceNoteClickHandler = function(href){
+			var attendanceNoteClickHandler = function(href, $target){
 				var $m = $('#attendance-note-modal');
 				if($m.length  === 0) {
 					$m = $('<div />').attr({
@@ -1218,6 +1230,8 @@
 					$m.find('form.double-submit-protection .spinnable').spin('small');
 				});
 
+				var $icon = $target.find('i');
+				$icon.removeClass("icon-edit").addClass("icon-spinner icon-spin");
 				$.get(href, function(data){
 					$m.html(data);
 					$m.find('.modal-body').empty();
@@ -1226,12 +1240,18 @@
 						.on('load', attendanceNoteIframeHandler)
 						.attr('src', addArgToUrl(href, 'isIframe', 'true'))
 						.appendTo($m.find('.modal-body'));
+					$icon.removeClass("icon-spinner icon-spin").addClass("icon-edit");
 				});
 			};
 
 			$('#recordAttendance').on('click', 'a.btn.attendance-note', function(event){
 				event.preventDefault();
-				attendanceNoteClickHandler($(this).attr('href'));
+				attendanceNoteClickHandler($(this).attr('href'), $(this));
+			});
+
+			$('.recordCheckpointForm .fix-area').on('click', 'a.btn.attendance-note', function(event){
+				event.preventDefault();
+				attendanceNoteClickHandler($(this).attr('href'), $(this));
 			});
 
 			// Popovers are created on click so binding directly to A tags won't work
