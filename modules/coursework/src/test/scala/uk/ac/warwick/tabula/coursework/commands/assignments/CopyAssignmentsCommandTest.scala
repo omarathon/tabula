@@ -1,16 +1,19 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import uk.ac.warwick.tabula.data.model.forms.{WordCountField, MarkerSelectField}
+
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{UpstreamAssessmentGroup, AssessmentGroup, Assignment}
+import uk.ac.warwick.tabula.data.model.{StudentsChooseMarkerWorkflow, UpstreamAssessmentGroup, AssessmentGroup, Assignment}
 import org.joda.time.DateTime
+import collection.JavaConverters._
 
 class CopyAssignmentsCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends AssessmentServiceComponent with AssessmentMembershipServiceComponent {
-		val assessmentService = mock[AssessmentService]
-		val assessmentMembershipService = mock[AssessmentMembershipService]
+		val assessmentService = smartMock[AssessmentService]
+		val assessmentMembershipService = smartMock[AssessmentMembershipService]
 		def apply(): Seq[Assignment] = Seq()
 	}
 
@@ -36,6 +39,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 		assignment.displayPlagiarismNotice = true
 		assignment.allowExtensions = true
 		assignment.summative = false
+		assignment.assignmentService = smartMock[AssessmentService]
 	}
 
 	@Test
@@ -60,21 +64,21 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 				command.archive = true
 				val newAssignment = command.applyInternal().get(0)
 
-				assignment.archived.booleanValue should be(true)
+				assignment.archived.booleanValue should be {true}
 				newAssignment.academicYear.toString should be("13/14")
 				newAssignment.module should be(module)
 				newAssignment.name should be("Test")
 				newAssignment.openDate should be(new DateTime(2014, 8, 22, 0, 0))
 				newAssignment.closeDate should be(new DateTime(2014, 8, 22, 0, 0).plusDays(30))
-				newAssignment.openEnded.booleanValue should be(false)
-				newAssignment.collectMarks.booleanValue should be(true)
-				newAssignment.collectSubmissions.booleanValue should be(true)
-				newAssignment.restrictSubmissions.booleanValue should be(true)
-				newAssignment.allowLateSubmissions.booleanValue should be(true)
-				newAssignment.allowResubmission.booleanValue should be(false)
-				newAssignment.displayPlagiarismNotice.booleanValue should be(true)
-				newAssignment.allowExtensions.booleanValue should be(true)
-				newAssignment.summative.booleanValue should be(false)
+				newAssignment.openEnded.booleanValue should be {false}
+				newAssignment.collectMarks.booleanValue should be {true}
+				newAssignment.collectSubmissions.booleanValue should be {true}
+				newAssignment.restrictSubmissions.booleanValue should be {true}
+				newAssignment.allowLateSubmissions.booleanValue should be {true}
+				newAssignment.allowResubmission.booleanValue should be {false}
+				newAssignment.displayPlagiarismNotice.booleanValue should be {true}
+				newAssignment.allowExtensions.booleanValue should be {true}
+				newAssignment.summative.booleanValue should be {false}
 			}
 		}
 	}
@@ -151,9 +155,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			findCommentField(newAssignment).get.value should be ("")
 			findFileField(newAssignment).get.attachmentLimit should be (1)
 			findFileField(newAssignment).get.attachmentTypes should be (Nil)
-			findWordCountField(newAssignment).max should be(null)
-			findWordCountField(newAssignment).min should be(null)
-			findWordCountField(newAssignment).conventions should be(null)
+			findWordCountField(newAssignment).isEmpty should be {true}
 		}
 	}
 
@@ -162,9 +164,13 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 		new Fixture with FindAssignmentFields {
 
 			val heronRant = "Words describing the evil nature of Herons will not count towards the final word count. Herons are scum. Hate them!"
-			findWordCountField(assignment).max = 5000
-			findWordCountField(assignment).min = 4500
-			findWordCountField(assignment).conventions = heronRant
+			val wordCountField = new WordCountField
+			wordCountField.assignment = assignment
+			wordCountField.name = Assignment.defaultWordCountName
+			wordCountField.max = 5000
+			wordCountField.min = 4500
+			wordCountField.conventions = heronRant
+			assignment.addField(wordCountField)
 			val extremeHeronRant = heronRant.replace("Hate them", "Spit at them!")
 			findCommentField(assignment).get.value = extremeHeronRant
 			findFileField(assignment).get.attachmentLimit = 9999
@@ -176,9 +182,31 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			findCommentField(newAssignment).get.value should be (extremeHeronRant)
 			findFileField(newAssignment).get.attachmentLimit should be (9999)
 			findFileField(newAssignment).get.attachmentTypes should be (Seq(".hateherons"))
-			findWordCountField(newAssignment).max should be(5000)
-			findWordCountField(newAssignment).min should be(4500)
-			findWordCountField(newAssignment).conventions should be(heronRant)
+			findWordCountField(newAssignment).get.max should be(5000)
+			findWordCountField(newAssignment).get.min should be(4500)
+			findWordCountField(newAssignment).get.conventions should be(heronRant)
+		}
+	}
+
+	// TAB-3521
+	@Test
+	def copyMarkerField() {
+		new Fixture with FindAssignmentFields {
+			val studentChooseWorkflow = new StudentsChooseMarkerWorkflow
+			assignment.markingWorkflow = studentChooseWorkflow
+			assignment.addField(new MarkerSelectField)
+			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
+			command.assignments = Seq(assignment)
+
+			val newAssignment = command.applyInternal().get(0)
+			newAssignment.fields.asScala.exists{
+				case f: MarkerSelectField => true
+					case _ => false
+			} should be {true}
+			newAssignment.fields.asScala.exists{
+				case f: WordCountField => true
+				case _ => false
+			} should be {false}
 		}
 	}
 
