@@ -1,15 +1,16 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import collection.JavaConversions._
-import beans.BeanProperty
-import uk.ac.warwick.tabula.services.ZipService
-import uk.ac.warwick.tabula.JavaImports._
-import javax.validation.constraints.{ Max, Min }
-import uk.ac.warwick.tabula.data.model._
+import javax.validation.constraints.{Max, Min}
+
 import org.hibernate.validator.constraints.Length
-import uk.ac.warwick.tabula.data.model.forms.{MarkerSelectField, CommentField, FileField, WordCountField }
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.{CommentField, FileField, MarkerSelectField, WordCountField}
+import uk.ac.warwick.tabula.services.ZipService
+
+import scala.collection.JavaConversions._
 
 /**
  * Bound as the value of a Map on a parent form object, to store multiple sets of
@@ -71,7 +72,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 
 		// implicitly fix missing bounds
 		(Option(wordCountMin), Option(wordCountMax)) match {
-			case (Some(min), Some(max)) if (max <= min) => errors.rejectValue("wordCountMax", "assignment.wordCount.outOfRange")
+			case (Some(min), Some(max)) if max <= min => errors.rejectValue("wordCountMax", "assignment.wordCount.outOfRange")
 			case (Some(min), None) => wordCountMax = Assignment.MaximumWordCount
 			case (None, Some(max)) => wordCountMin = 0
 			case _ => // It's All Good
@@ -93,14 +94,16 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 			file.attachmentTypes = fileAttachmentTypes
 		}
 
-		val wordCount = findWordCountField(assignment)
 		if (wordCountMax != null) {
+			val wordCount = findWordCountField(assignment).getOrElse{
+				val newField = new WordCountField()
+				newField.name = Assignment.defaultWordCountName
+				assignment.addField(newField)
+				newField
+			}
 			wordCount.min = wordCountMin
 			wordCount.max = wordCountMax
 			wordCount.conventions = wordCountConventions
-		} else {
-			// none set, so remove field
-			assignment.removeField(wordCount)
 		}
 	}
 
@@ -125,10 +128,11 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 			fileAttachmentTypes = file.attachmentTypes
 		}
 
-		val wordCount = findWordCountField(assignment)
-		wordCountMin = wordCount.min
-		wordCountMax = wordCount.max
-		wordCountConventions = wordCount.conventions
+		for (wordCount <- findWordCountField(assignment)) {
+			wordCountMin = wordCount.min
+			wordCountMax = wordCount.max
+			wordCountConventions = wordCount.conventions
+		}
 	}
 
 	/**
@@ -166,11 +170,6 @@ trait FindAssignmentFields {
 		assignment.findFieldOfType[CommentField](Assignment.defaultCommentFieldName)
 
 	protected def findWordCountField(assignment: Assignment) = {
-		assignment.findFieldOfType[WordCountField](Assignment.defaultWordCountName) getOrElse({
-			val newField = new WordCountField()
-			newField.name = Assignment.defaultWordCountName
-			assignment.addField(newField)
-			newField
-		})
+		assignment.findFieldOfType[WordCountField](Assignment.defaultWordCountName)
 	}
 }
