@@ -27,5 +27,8 @@
 				<@components.originalityReport attachment />
 			</#if>
 		</#list>
+
+		<br />
+		Due date: <@fmt.date date=submission.deadline capitalise=true shortMonth=true />
 	</div>
 </div>
