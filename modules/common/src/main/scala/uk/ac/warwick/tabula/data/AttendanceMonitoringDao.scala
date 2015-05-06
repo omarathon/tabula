@@ -110,6 +110,7 @@ trait AttendanceMonitoringDao {
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
 	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringStudentData]
 	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]]
+	def resetTotalsForStudentsNotInAScheme(department: Department, academicYear: AcademicYear): Unit
 }
 
 
@@ -542,6 +543,28 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 			.add(isNotNull("memberQuery"))
 			.seq
 			.groupBy(_.department)
+	}
+
+	def resetTotalsForStudentsNotInAScheme(department: Department, academicYear: AcademicYear): Unit = {
+		session.flush()
+		val usersInAScheme = listSchemes(department, academicYear).flatMap(_.members.members).distinct
+		val totals = session.newCriteria[AttendanceMonitoringCheckpointTotal]
+			.add(not(safeIn("student.universityId", usersInAScheme)))
+			.add(is("department", department))
+			.add(is("academicYear", academicYear))
+			.add(or(
+				gt("attended", 0),
+				gt("authorised", 0),
+				gt("unauthorised", 0),
+				gt("unrecorded", 0)
+			))
+			.seq
+
+		totals.foreach(total => {
+			total.reset()
+			saveOrUpdate(total)
+		})
+
 	}
 }
 

@@ -76,6 +76,14 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 				})
 			}
 
+			benchmark("resetCheckpointTotals") {
+				schemesToUpdate.groupBy(s => (s.department, s.academicYear)).foreach{case((dept, academicYear), _) =>
+					transactional() {
+						attendanceMonitoringService.resetTotalsForStudentsNotInAScheme(dept, academicYear)
+					}
+				}
+			}
+
 			schemesToUpdate
 		} else {
 			Seq()
