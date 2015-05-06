@@ -106,7 +106,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		
 		// Blitz the test department
 		transactional() {
-			moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code) map { dept =>
+			moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code) foreach { dept =>
 				val routes: Seq[Route] = routeDao.findByDepartment(dept)
 
 				val schemes = attendanceMonitoringDao.listAllSchemes(dept)
@@ -210,8 +210,14 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 				invalidateAndDeletePermissions[Department](dept)
 				session.delete(dept)
+
+				session.flush()
+				assert(moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code).isEmpty)
 			}
 		}
+
+		session.flush()
+
 		def recursivelyGetChildren(department:Department): Set[Department] = {
 			val descendents = department.children.asScala flatMap { recursivelyGetChildren }
 			descendents.toSet ++ department.children.asScala
@@ -256,7 +262,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				 session.delete(module)
 			}
 			val module4 = moduleAndDepartmentService.getModuleByCode(Fixtures.TestModule4.code)
-			module4 map session.delete
+			module4 foreach session.delete
 		}
 
 		transactional() {
