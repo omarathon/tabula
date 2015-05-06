@@ -87,7 +87,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 				usercodes.foreach { u =>
 					click on cssSelector(s"$table .pickedUser")
 					enter(u)
-					val typeahead = cssSelector(s"$table .typeahead .active a")
+					val typeahead = cssSelector(".typeahead .active a")
 					eventuallyAjax {
 						find(typeahead) should not be None
 					}

@@ -8,7 +8,7 @@ class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixture
 	def withRoleInElement[T](permittedUser: String, parentElement:String, fixtureAdmins:Seq[String])(fn: => T) =
 		as(P.Sysadmin) { withGodModeEnabled {
 
-			def usercodes = findAll(cssSelector(s"${parentElement} .user .muted")).toList.map(_.underlying.getText.trim)
+			def usercodes = findAll(cssSelector(s"$parentElement .user .muted")).toList.map(_.underlying.getText.trim)
 
 			def normalAdmins = {
 				fixtureAdmins.foreach(usercode=>usercodes should contain (usercode))
@@ -24,14 +24,14 @@ class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixture
 
 			Then("I should see the test department")
 				val testDeptLink = find(linkText("Test Services"))
-				testDeptLink should not be (None)
+				testDeptLink should not be None
 
 			When("I click on the test department")
 				click on testDeptLink.get
 
 			Then("I should see a link to admins")
 				val adminsLink = find(linkText("View department admins"))
-				adminsLink should not be (None)
+				adminsLink should not be None
 
 			When("I click the permissions link")
 				click on adminsLink.get
@@ -43,31 +43,31 @@ class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixture
 				onlyNormalAdmins
 
 			When("I enter a usercode in the picker")
-				click on cssSelector(s"${parentElement} .pickedUser")
+				click on cssSelector(s"$parentElement .pickedUser")
 				enter(permittedUser)
 
 			Then("I should get a result back")
-				val typeahead = cssSelector(s"${parentElement} .typeahead .active a")
+				val typeahead = cssSelector(".typeahead .active a")
 				eventuallyAjax {
-					find(typeahead) should not be (None)
+					find(typeahead) should not be None
 				}
 
 			And("The picker result should match the entry")
-				textField(cssSelector(s"${parentElement} .pickedUser")).value should be (permittedUser)
+				textField(cssSelector(s"$parentElement .pickedUser")).value should be (permittedUser)
 
 			When("I pick the matching user")
 				click on typeahead
 
 			Then("It should stay in the picker (confirming HTMLUnit hasn't introduced a regression)")
-				textField(cssSelector(s"${parentElement} .pickedUser")).value should be (permittedUser)
+				textField(cssSelector(s"$parentElement .pickedUser")).value should be (permittedUser)
 
 			And("The usercode should be injected into the form correctly")
-				val injected = find(cssSelector(s"${parentElement} .add-permissions [name=usercodes]"))
-				injected should not be (None)
+				val injected = find(cssSelector(s"$parentElement .add-permissions [name=usercodes]"))
+				injected should not be None
 				injected.get.underlying.getAttribute("value").trim should be (permittedUser)
 
 			When("I submit the form")
-				find(cssSelector(s"${parentElement} form.add-permissions")).get.underlying.submit()
+				find(cssSelector(s"$parentElement form.add-permissions")).get.underlying.submit()
 
 			Then("I should see the old and new entries")
 				usercodes.size should be (fixtureAdmins.size + 1)
@@ -75,8 +75,8 @@ class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixture
 				usercodes should contain (permittedUser)
 
 			When("I remove the new entry")
-				val removable = find(cssSelector(s"${parentElement} .remove-permissions [name=usercodes][value=${permittedUser}]"))
-				removable should not be (None)
+				val removable = find(cssSelector(s"$parentElement .remove-permissions [name=usercodes][value=$permittedUser]"))
+				removable should not be None
 				removable.get.underlying.submit()
 
 			Then("There should only be the normal admins left")

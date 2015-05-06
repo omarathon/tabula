@@ -8,7 +8,7 @@ import org.scalatest.GivenWhenThen
 // test isn't expecting. HTMLUnit ignores them.
 class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with GivenWhenThen {
 
-	private def usercodes(parentElement: String) = findAll(cssSelector(s"${parentElement} .user .muted")).toList.map(_.underlying.getText.trim)
+	private def usercodes(parentElement: String) = findAll(cssSelector(s"$parentElement .user .muted")).toList.map(_.underlying.getText.trim)
 
 	private def noNewUsersListed(parentElement: String, expectedCount: Int) {
 		usercodes(parentElement).size should be (expectedCount)
@@ -27,13 +27,13 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 		click on linkText("Go to the Test Services admin page")
 
 		Then("I should be able to click on the Manage button")
-		val toolbar = findAll(className("dept-toolbar")).next.underlying
-		click on (toolbar.findElement(By.partialLinkText("Manage")))
+		val toolbar = findAll(className("dept-toolbar")).next().underlying
+		click on toolbar.findElement(By.partialLinkText("Manage"))
 
 		And("I should see the permissions menu option")
 		val managersLink = toolbar.findElement(By.partialLinkText("Edit departmental permissions"))
 		eventually {
-			managersLink.isDisplayed should be (true)
+			managersLink.isDisplayed should be {true}
 		}
 
 		When("I click the permissions link")
@@ -53,27 +53,27 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 		gotoPermissionsScreen(parentElement, preExistingCount)
 		
 		When("I enter a usercode in the picker")
-		click on cssSelector(s"${parentElement} .pickedUser")
+		click on cssSelector(s"$parentElement .pickedUser")
 		enter(permittedUser.usercode)
 
 		Then("I should get a result back")
-		val typeahead = cssSelector(s"${parentElement} .typeahead .active a")
+		val typeahead = cssSelector(".typeahead .active a")
 		eventuallyAjax {
-			find(typeahead) should not be (None)
+			find(typeahead) should not be None
 		}
 
 		And("The picker result should match the entry")
-		textField(cssSelector(s"${parentElement} .pickedUser")).value should be (permittedUser.usercode)
+		textField(cssSelector(s"$parentElement .pickedUser")).value should be (permittedUser.usercode)
 
 		When("I pick the matching user")
 		click on typeahead
 
 		Then("It should stay in the picker (confirming HTMLUnit hasn't introduced a regression)")
-		textField(cssSelector(s"${parentElement} .pickedUser")).value should be (permittedUser.usercode)
+		textField(cssSelector(s"$parentElement .pickedUser")).value should be (permittedUser.usercode)
 
 		And("The usercode should be injected into the form correctly")
-		val injected = find(cssSelector(s"${parentElement} .add-permissions [name=usercodes]"))
-		injected should not be (None)
+		val injected = find(cssSelector(s"$parentElement .add-permissions [name=usercodes]"))
+		injected should not be None
 		injected.get.underlying.getAttribute("value").trim should be (permittedUser.usercode)
 	}
 
@@ -82,7 +82,7 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 			gotoPermissionsScreenAndPickUser(parentElement, permittedUser, preExistingCount)
 
 			When("I submit the form")
-			find(cssSelector(s"${parentElement} form.add-permissions")).get.underlying.submit()
+			find(cssSelector(s"$parentElement form.add-permissions")).get.underlying.submit()
 
 			Then("I should see the new entry")
 			({
@@ -94,8 +94,8 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 			nowhereElse(parentElement)
 
 			When("I remove the new entry")
-			val removable = find(cssSelector(s"${parentElement} .remove-permissions [name=usercodes][value=${permittedUser.usercode}]"))
-			removable should not be (None)
+			val removable = find(cssSelector(s"$parentElement .remove-permissions [name=usercodes][value=${permittedUser.usercode}]"))
+			removable should not be None
 			removable.get.underlying.submit()
 
 			Then("There should be no users listed")
@@ -112,7 +112,7 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 			gotoPermissionsScreen(parentElement, preExistingCount)
 
 			Then("The button should be disabled")
-			find(cssSelector(s"${parentElement} .actions button")).get.underlying.getAttribute("class").indexOf("disabled") should not be (-1)
+			find(cssSelector(s"$parentElement .actions button")).get.underlying.getAttribute("class").indexOf("disabled") should not be (-1)
 
 			fn
 		}
@@ -159,8 +159,8 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 			findAll(linkText("Go to the Test Services admin page")).size should be (0)
 
 			// no direct access
-			go to (Path("/admin/department/xxx/permissions"))
-			pageSource.contains(s"Sorry ${P.ModuleManager1.usercode}, you don't have permission to see that.") should be (true)
+			go to Path("/admin/department/xxx/permissions")
+			pageSource.contains(s"Sorry ${P.ModuleManager1.usercode}, you don't have permission to see that.") should be {true}
 		}
 
 	}
