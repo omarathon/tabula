@@ -5,7 +5,7 @@ import java.math
 import org.hibernate.{Session, SessionFactory}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceMonitoringScheme, AttendanceState, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.services.MonitoringPointService
@@ -362,6 +362,27 @@ object Fixtures extends Mockito {
 		checkpoint.student = student
 		checkpoint.state = state
 		checkpoint
+	}
+
+	def attendanceMonitoringCheckpointTotal(
+		student: StudentMember,
+		department: Department,
+		academicYear: AcademicYear,
+		attended: Int = 0,
+		authorised: Int = 0,
+		unauthorised: Int = 0,
+		unrecorded: Int = 0
+	) = {
+		val total = new AttendanceMonitoringCheckpointTotal
+		total.student = student
+		total.department = department
+		total.academicYear = academicYear
+		total.attended = attended
+		total.authorised = authorised
+		total.unauthorised = unauthorised
+		total.unrecorded = unrecorded
+		total.updatedDate = DateTime.now
+		total
 	}
 
 	def routeTeachingInformation(route: Route, departments: Seq[Department]): Seq[RouteTeachingInformation] = {
