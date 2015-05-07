@@ -16,7 +16,7 @@ import scala.util.{Failure, Success, Try}
  * N.B. To run this test, you must set a system property (in tabula.properties)to tell tabula
  * to use a local proxy for the scientia timetabling service; i.e.
  *
- * scientia.base.url=https://yourhost.warwick.ac.uk/scheduling/stubTimetable
+ * scientia.base.url=https://yourhost.warwick.ac.uk/scheduling/stubTimetable/
  *
  * You should _not_ need to have your IP address added to the Syllabus+ whitelist, unless you want to
  * view timetable data for real production users.
