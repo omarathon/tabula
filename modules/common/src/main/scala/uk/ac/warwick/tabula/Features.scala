@@ -113,7 +113,7 @@ abstract class Features {
 	@Value("${features.reports:true}") var reports = defaults.reports
 	@Value("${features.queueFeedbackForSits:true}") var queueFeedbackForSits = defaults.queueFeedbackForSits
 	@Value("${features.scheduling.exportFeedbackToSits:true}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
-	@Value("${features.exams:false}") var exams = defaults.exams
+	@Value("${features.exams:true}") var exams = defaults.exams
 	@Value("${features.searchOnApiComponent:true}") var searchOnApiComponent = defaults.searchOnApiComponent
 
 	private val bean = new BeanWrapperImpl(this)
