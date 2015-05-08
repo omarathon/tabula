@@ -206,23 +206,19 @@ object Permissions {
 		case object Publish extends Permission("Release feedback to a student")
 		case object Rate extends Permission("Rate feedback received")
 
-		case object Create extends Permission("Add feedback")
+		case object Manage extends Permission("Manage feedback")
 		case object Read extends Permission("View feedback")
-		case object Update extends Permission("Edit feedback")
-		case object Delete extends Permission("Remove feedback")
+		case object DownloadMarksTemplate extends Permission("Download a marks template for all marks")
 		case object UploadToSits extends ScopelessPermission("Upload feedback to SITS")
+	}
+	
+	object MarkerFeedback {
+		case object Manage extends Permission("Manage marker feedback")
+		case object DownloadMarksTemplate extends Permission("Download a marks template for own marks")
 	}
 
 	object Marks {
 		case object MarksManagement extends ScopelessPermission("Marks management across all departments")
-
-		case object DownloadTemplate extends Permission("Download a marks template for all marks")
-		case object DownloadOwnTemplate extends Permission("Download a marks template for own marks")
-
-		case object Create extends Permission("Add marks")
-		case object Read extends Permission("View marks")
-		case object Update extends Permission("Edit marks")
-		case object Delete extends Permission("Remove marks")
 	}
 
 	object Extension {

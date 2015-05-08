@@ -50,6 +50,6 @@ trait FeedbackAdjustmentListCommandState {
 trait FeedbackAdjustmentListCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: FeedbackAdjustmentListCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.Update, mandatory(assessment))
+		p.PermissionCheck(Permissions.Feedback.Manage, mandatory(assessment))
 	}
 }

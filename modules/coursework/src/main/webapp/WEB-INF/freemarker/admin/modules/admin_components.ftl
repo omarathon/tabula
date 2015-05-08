@@ -298,7 +298,7 @@
 								<li>
 									<#assign marks_url><@routes.addMarks assignment /></#assign>
 									<@fmt.permission_button
-									permission='Marks.Create'
+									permission='Feedback.Manage'
 									scope=assignment
 									action_descr='add marks'
 									href=marks_url>
@@ -311,7 +311,7 @@
 							<li>
 								<#assign feedback_url><@routes.addFeedback assignment /></#assign>
 								<@fmt.permission_button
-								permission='Feedback.Create'
+								permission='Feedback.Manage'
 								scope=assignment
 								action_descr='upload feedback'
 								classes='feedback-link'

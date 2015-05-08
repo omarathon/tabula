@@ -185,7 +185,7 @@ trait BulkAdjustmentPermissions extends RequiresPermissionsChecking with Permiss
 	self: BulkAdjustmentCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.Update, mandatory(assessment))
+		p.PermissionCheck(Permissions.Feedback.Manage, mandatory(assessment))
 	}
 
 }

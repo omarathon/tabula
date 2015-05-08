@@ -26,17 +26,12 @@ case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
 		// No Submission.Create() here for obvious reasons!
 		Submission.Update,
 
-		Marks.Create,
-		Marks.Update,
-		Marks.Delete,
-
 		Extension.Create,
 		Extension.Update,
 		Extension.Delete,
 
-		Feedback.Create,
-		Feedback.Update,
-		Feedback.Delete,
+		Feedback.Manage,
+		MarkerFeedback.Manage,
 
 		SmallGroups.Create,
 		SmallGroupEvents.Register,

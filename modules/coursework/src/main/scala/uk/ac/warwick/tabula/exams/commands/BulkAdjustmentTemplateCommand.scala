@@ -70,7 +70,7 @@ trait BulkAdjustmentTemplatePermissions extends RequiresPermissionsChecking with
 	self: BulkAdjustmentTemplateCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.Update, mandatory(assessment))
+		p.PermissionCheck(Permissions.Feedback.Manage, mandatory(assessment))
 	}
 
 }

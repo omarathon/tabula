@@ -72,7 +72,7 @@ trait FinaliseFeedbackPermissions extends RequiresPermissionsChecking with Permi
 	self: FinaliseFeedbackCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.Create, mandatory(assignment))
+		p.PermissionCheck(Permissions.MarkerFeedback.Manage, mandatory(assignment))
 	}
 }
 

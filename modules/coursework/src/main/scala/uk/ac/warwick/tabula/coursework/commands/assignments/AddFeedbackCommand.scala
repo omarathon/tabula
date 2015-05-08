@@ -16,7 +16,7 @@ import org.springframework.validation.Errors
 class AddFeedbackCommand(module: Module, assignment: Assignment, marker: User, currentUser: CurrentUser)
 	extends UploadFeedbackCommand[Seq[Feedback]](module, assignment, marker) with Notifies[Seq[Feedback], Feedback] {
 
-	PermissionCheck(Permissions.Feedback.Create, assignment)
+	PermissionCheck(Permissions.Feedback.Manage, assignment)
 
 	override def applyInternal(): Seq[Feedback] = transactional() {
 
