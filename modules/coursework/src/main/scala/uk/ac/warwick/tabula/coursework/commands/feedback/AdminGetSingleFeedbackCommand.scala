@@ -66,7 +66,7 @@ class AdminGetSingleFeedbackFileCommand(module: Module, assignment: Assignment, 
 class AdminGetSingleMarkerFeedbackCommand(module: Module, assignment: Assignment, markerFeedback: MarkerFeedback) extends Command[RenderableZip] with ReadOnly {
 
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Feedback.Create, assignment)
+	PermissionCheck(Permissions.MarkerFeedback.Manage, assignment)
 
 	var zipService = Wire.auto[ZipService]
 

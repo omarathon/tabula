@@ -149,7 +149,7 @@ trait AdminAddMarksPermissions extends RequiresPermissionsChecking with Permissi
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assessment, module)
-		p.PermissionCheck(Permissions.Marks.Create, assessment)
+		p.PermissionCheck(Permissions.Feedback.Manage, assessment)
 	}
 
 }

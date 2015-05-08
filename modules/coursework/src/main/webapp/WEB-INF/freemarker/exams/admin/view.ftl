@@ -42,7 +42,7 @@
 
 	<#assign marks_url><@routes.examAddMarks exam /></#assign>
 	<@fmt.permission_button
-		permission='Marks.Create'
+		permission='Feedback.Manage'
 		scope=exam
 		action_descr='add marks'
 		href=marks_url
@@ -53,7 +53,7 @@
 
 	<#assign adjust_url><@routes.examFeedbackAdjustment exam /></#assign>
 	<@fmt.permission_button
-		permission='Feedback.Update'
+		permission='Feedback.Manage'
 		scope=exam
 		action_descr='adjust marks'
 		tooltip='Adjust marks'

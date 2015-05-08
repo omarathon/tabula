@@ -21,9 +21,6 @@ case object ModuleAuditorRoleDefinition extends BuiltInRoleDefinition {
 		Submission.ViewPlagiarismStatus,
 		Submission.Read,
 		
-		Marks.DownloadTemplate,
-		Marks.Read,
-		
 		Extension.Read,
 
 		Feedback.Read,

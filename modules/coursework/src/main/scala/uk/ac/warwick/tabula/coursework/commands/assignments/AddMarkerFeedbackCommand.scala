@@ -17,7 +17,7 @@ import org.springframework.validation.Errors
 class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: User, val submitter: CurrentUser)
 	extends UploadFeedbackCommand[List[MarkerFeedback]](module, assignment, marker) with CanProxy {
 	
-	PermissionCheck(Permissions.Feedback.Create, assignment)
+	PermissionCheck(Permissions.MarkerFeedback.Manage, assignment)
 	if(submitter.apparentUser != marker) {
 		PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
 	}

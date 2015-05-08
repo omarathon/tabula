@@ -179,7 +179,7 @@
 						<li>
 							<#assign onlinefeedback_url><@routes.genericfeedback assignment /></#assign>
 							<@fmt.permission_button
-							permission='Feedback.Update'
+							permission='Feedback.Manage'
 							scope=assignment
 							action_descr='add general feedback for all students'
 							tooltip='Add general feedback that will be sent to all students'
@@ -201,7 +201,7 @@
 						<li>
 							<#assign marks_url><@routes.addMarks assignment /></#assign>
 							<@fmt.permission_button
-							permission='Marks.Create'
+							permission='Feedback.Manage'
 							scope=assignment
 							action_descr='add marks'
 							href=marks_url>
@@ -221,7 +221,7 @@
 						<li>
 							<#assign feedback_url><@routes.addFeedback assignment /></#assign>
 							<@fmt.permission_button
-							permission='Feedback.Create'
+							permission='Feedback.Manage'
 							scope=assignment
 							action_descr='upload feedback'
 							classes='feedback-link'
@@ -233,7 +233,7 @@
 					<li class="must-have-selected">
 						<#assign onlinefeedback_url><@routes.feedbackAdjustment assignment /></#assign>
 						<@fmt.permission_button
-							permission='Feedback.Update'
+							permission='Feedback.Manage'
 							scope=assignment
 							action_descr='make adjustments to feedback'
 							classes='form-post'
@@ -263,7 +263,7 @@
 					</#if>
 					<li class="must-have-selected">
 						<#assign deletefeedback_url><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
-						<@fmt.permission_button permission='Feedback.Delete' scope=assignment action_descr='delete feedback' classes="form-post" href=deletefeedback_url tooltip='Delete feedback'>
+						<@fmt.permission_button permission='Feedback.Manage' scope=assignment action_descr='delete feedback' classes="form-post" href=deletefeedback_url tooltip='Delete feedback'>
 							<i class="icon-remove icon-fixed-width"></i> Delete feedback
 						</@fmt.permission_button>
 					</li>
