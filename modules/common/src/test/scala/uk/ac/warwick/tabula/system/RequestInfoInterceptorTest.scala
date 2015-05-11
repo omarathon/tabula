@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.system
 
 import org.springframework.mock.web.{MockHttpServletRequest, MockHttpServletResponse}
-import uk.ac.warwick.tabula.{CurrentUser, Mockito, RequestInfo, TestBase}
 import uk.ac.warwick.tabula.helpers.HttpServletRequestUtils
 import uk.ac.warwick.tabula.services.{EmergencyMessageService, MaintenanceModeService}
+import uk.ac.warwick.tabula.{CurrentUser, Mockito, RequestInfo, TestBase}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.web.Uri
 
