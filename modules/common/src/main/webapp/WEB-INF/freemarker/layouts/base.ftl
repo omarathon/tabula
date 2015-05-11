@@ -25,7 +25,6 @@
 					</@f.form>
 				</div>
 			</#if>
-			<div id="test">Emergency Info is ${info.hasEmergencyMessage?c}</div>
 			<#if (info.hasEmergencyMessage)!false>
 				<div id="emergency-message" class="sysadmin-only-content">${info.emergencyMessage}</div>
 			</#if>

@@ -449,6 +449,7 @@
 					<list>
 						<value>uk.ac.warwick.tabula.FeaturesMessage</value>
 						<value>uk.ac.warwick.tabula.services.MaintenanceModeMessage</value>
+						<value>uk.ac.warwick.tabula.services.EmergencyMessage</value>
 						<value>uk.ac.warwick.tabula.services.permissions.PermissionsCacheBusterMessage</value>
 						<value>uk.ac.warwick.tabula.services.HibernateStatisticsMessage</value>
 						<value>uk.ac.warwick.tabula.services.UserGroupMembershipHelperCacheBusterMessage</value>
@@ -462,6 +463,7 @@
 	<!-- Listeners for settingsSyncTopic -->
 	<bean class="uk.ac.warwick.tabula.FeatureFlagListener" />
 	<bean class="uk.ac.warwick.tabula.services.MaintenanceModeListener" />
+	<bean class="uk.ac.warwick.tabula.services.EmergencyMessageListener" />
 	<bean class="uk.ac.warwick.tabula.services.SSOMaintenanceModeListener" />
 	<bean class="uk.ac.warwick.tabula.services.UserGroupMembershipHelperCacheService" />
 	<bean class="uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceListener" />
