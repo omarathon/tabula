@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.commands.{Command, ReadOnly, SelfValidating, Unaudited}
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.{MaintenanceModeMessage, MaintenanceModeService}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{EmergencyMessage, EmergencyMessageService}
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.util.queue.Queue
 
-class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Unit] with ReadOnly with Unaudited with SelfValidating {
+class EmergencyMessageCommand(service: EmergencyMessageService) extends Command[Unit] with ReadOnly with Unaudited with SelfValidating {
 
-	PermissionCheck(Permissions.ManageMaintenanceMode)
+	PermissionCheck(Permissions.ManageEmergencyMessage)
 
 	val DefaultMaintenanceMinutes = 30
 
@@ -40,7 +40,7 @@ class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Un
 		if (enable) service.enable
 		else service.disable
 
-		queue.send(new MaintenanceModeMessage(service))
+		queue.send(new EmergencyMessage(service))
 	}
 
 	def validate(errors: Errors) {
@@ -49,21 +49,22 @@ class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Un
 }
 
 @Controller
-@RequestMapping(Array("/sysadmin/maintenance"))
-class MaintenanceModeController extends BaseSysadminController {
-	var service = Wire.auto[MaintenanceModeService]
+@RequestMapping(Array("/sysadmin/emergencymessage"))
+class EmergencyMessageController extends BaseSysadminController {
+
+	var service = Wire.auto[EmergencyMessageService]
 
 	validatesSelf[MaintenanceModeCommand]
 
-	@ModelAttribute def cmd = new MaintenanceModeCommand(service)
+	@ModelAttribute def cmd = new EmergencyMessageCommand(service)
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(form: MaintenanceModeCommand, errors: Errors) =
-		Mav("sysadmin/maintenance").crumbs(Breadcrumbs.Current("Sysadmin maintenance mode"))
+	def showForm(form: EmergencyMessageCommand, errors: Errors) =
+		Mav("sysadmin/emergency-message").crumbs(Breadcrumbs.Current("Sysadmin emergency message"))
 			.noLayoutIf(ajax)
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid form: MaintenanceModeCommand, errors: Errors) = {
+	def submit(@Valid form: EmergencyMessageCommand, errors: Errors) = {
 		if (errors.hasErrors)
 			showForm(form, errors)
 		else {

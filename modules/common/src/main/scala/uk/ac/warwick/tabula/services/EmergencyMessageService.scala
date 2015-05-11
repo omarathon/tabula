@@ -17,32 +17,32 @@ import uk.ac.warwick.util.queue.conversion.ItemType
 
 import scala.beans.BeanProperty
 
-trait MaintenanceStatus {
+trait EmergencyMessageStatus {
 	def enabled: Boolean
 	def until: Option[DateTime]
 	def message: Option[String]
 }
 
-trait MaintenanceModeService extends MaintenanceStatus {
+trait EmergencyMessageService extends EmergencyMessageStatus {
 
-	/** Enable maintenance mode. **/
+	/** Enable emergency message. **/
 	def enable
 
-	/** Disable maintenance mode. **/
+	/** Disable emergency message. **/
 	def disable
 
-	/** Returns whether maintenance mode is enabled. */
+	/** Returns whether emergency message is enabled. */
 	def enabled: Boolean
 
 	/**
 	 * An EventSource to which you can attach a listener to find
-	 * out when maintenance mode goes on and off.
+	 * out when emergency message goes on and off.
 	 */
 	val changingState: Reactor.EventSource[Boolean]
 
 	/**
 	 * Returns an Exception object suitable for throwing when trying
-	 * to do an unsupported op while in maintenance mode. Only returns
+	 * to do an unsupported op while in emergency message. Only returns
 	 * it; you need to throw it yourself. Like a dog!
 	 */
 	def exception(callee: Describable[_]): Exception
@@ -50,7 +50,7 @@ trait MaintenanceModeService extends MaintenanceStatus {
 	var until: Option[DateTime]
 	var message: Option[String]
 	
-	def update(message: MaintenanceModeMessage) = {		
+	def update(message: EmergencyMessage) = {
 		this.message = Option(message.message)
 		this.until = message.until match {
 			case -1 => None
@@ -65,21 +65,21 @@ trait MaintenanceModeService extends MaintenanceStatus {
 }
 
 @Service
-class MaintenanceModeServiceImpl extends MaintenanceModeService with Logging {
+class EmergencyMessageServiceImpl extends EmergencyMessageService with Logging {
 	@Value("${environment.standby}") var _enabled: Boolean = _
 
 	def enabled: Boolean = _enabled
 	var until: Option[DateTime] = None
 	var message: Option[String] = None
 
-	// for other classes to listen to changes to maintenance mode.
+	// for other classes to listen to changes to emergency messahe.
 	val changingState = Reactor.EventSource[Boolean]
 
 	def exception(callee: Describable[_]) = {
 		val m = EventDescription.generateMessage(Event.fromDescribable(callee))
-		logger.info("[Maintenance Reject] " + m)
+		logger.info("[Emergency Message Reject] " + m)
 		
-		new MaintenanceModeEnabledException(until, message)
+		new MaintenanceMessageServiceEnabledException(until, message)
 	}
 
 	private def notEnabled = new IllegalStateException("Maintenance not enabled")
@@ -101,13 +101,13 @@ class MaintenanceModeServiceImpl extends MaintenanceModeService with Logging {
 
 /**
  * Exception thrown when a command tries to run during
- * maintenance mode, and it's not readonly. The view handler
+ * emergency message, and it's not readonly. The view handler
  * should handle this exception specially, showing a nice message.
  *
  * Holds onto some info about the maintenance, since error views are
  * only provided with the thrown exception.
  */
-class MaintenanceModeEnabledException(val until: Option[DateTime], val message: Option[String])
+class MaintenanceMessageServiceEnabledException(val until: Option[DateTime], val message: Option[String])
 	extends RuntimeException
 	with HandledException {
 
@@ -115,12 +115,15 @@ class MaintenanceModeEnabledException(val until: Option[DateTime], val message: 
 
 }
 
-@ItemType("MaintenanceMode")
-@JsonAutoDetect
-class MaintenanceModeMessage {
-	// Warning: If you make this more complicated, you may break the Jackson auto-JSON stuff for the MaintenanceModeController
+class CannotPerformWriteOperationException(callee: Describable[_])
+	extends RuntimeException with HandledException
 
-	def this(status: MaintenanceStatus) {
+@ItemType("EmergencyMessage")
+@JsonAutoDetect
+class EmergencyMessage {
+	// Warning: If you make this more complicated, you may break the Jackson auto-JSON stuff for the EmergencyMessageController
+
+	def this(status: EmergencyMessageStatus) {
 		this()
 
 		val bean = new BeanWrapperImpl(this)
@@ -136,21 +139,21 @@ class MaintenanceModeMessage {
 	@BeanProperty var message: String = _
 }
 
-class MaintenanceModeListener extends QueueListener with InitializingBean with Logging {
+class EmergencyMessageListener extends QueueListener with InitializingBean with Logging {
 
 		var queue = Wire.named[Queue]("settingsSyncTopic")
-		var service = Wire.auto[MaintenanceModeService]
+		var service = Wire.auto[EmergencyMessageService]
 
 		override def isListeningToQueue = true
 		override def onReceive(item: Any) {
 				item match {
-						case copy: MaintenanceModeMessage => service.update(copy)
+						case copy: EmergencyMessage => service.update(copy)
 						case _ =>
 				}
 		}
 		
 		override def afterPropertiesSet = {
-				queue.addListener(classOf[MaintenanceModeMessage].getAnnotation(classOf[ItemType]).value, this)
+				queue.addListener(classOf[EmergencyMessage].getAnnotation(classOf[ItemType]).value, this)
 		}
 	
 }

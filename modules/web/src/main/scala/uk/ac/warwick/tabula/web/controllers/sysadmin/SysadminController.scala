@@ -1,21 +1,20 @@
 package uk.ac.warwick.tabula.web.controllers.sysadmin
 
+import javax.servlet.http.HttpServletResponse
+import javax.validation.Valid
+
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.RequestMapping
-import javax.servlet.http.HttpServletResponse
+import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.commands.sysadmin.GodModeCommand
-import uk.ac.warwick.tabula.services.MaintenanceModeService
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.services.{EmergencyMessageService, MaintenanceModeService, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.web.Cookies._
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.userlookup.UserLookupInterface
-import javax.validation.Valid
-import uk.ac.warwick.tabula.validators.WithinYears
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -40,12 +39,17 @@ class BlankForm {
 class SysadminController extends BaseSysadminController {
 
 	var maintenanceService = Wire.auto[MaintenanceModeService]
+	var emergencyMessageService = Wire.auto[EmergencyMessageService]
 
 	@ModelAttribute("blankForm") def blankForm = new BlankForm
 
 	@RequestMapping
-	def home = Mav("sysadmin/home").crumbs(Breadcrumbs.Current("Sysadmin")).addObjects("maintenanceModeService" -> maintenanceService)
-
+	def home = Mav("sysadmin/home")
+		.crumbs(Breadcrumbs.Current("Sysadmin"))
+		.addObjects(
+			"maintenanceModeService" -> maintenanceService,
+			"emergencyMessageService" -> emergencyMessageService
+		)
 }
 
 @Controller

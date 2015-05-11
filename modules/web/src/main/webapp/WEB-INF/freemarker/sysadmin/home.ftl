@@ -107,6 +107,14 @@
 
 <p><a href="<@url page="/sysadmin/maintenance"/>">Update settings</a></p>
 
+<h4>Emergency message</h4>
+<#if emergencyMessageService.enabled>
+	<p>Currently <strong>enabled</strong>.</p>
+<#else>
+	<p>Disabled.</p>
+</#if>
+<p><a href="<@url page="/sysadmin/emergencymessage"/>">Update settings</a></p>
+
 <p>
 	<@f.form method="post" action="${url('/sysadmin/jobs/create-test','/scheduling')}">
 		<input class="btn" type="submit" value="Create test job">

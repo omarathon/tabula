@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.permissions
 
+import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
 import uk.ac.warwick.tabula.CaseObjectEqualityFixes
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
-import org.apache.commons.lang3.builder.HashCodeBuilder
-import org.apache.commons.lang3.builder.EqualsBuilder
+
 import scala.reflect.ClassTag
 
 sealed abstract class Permission(val description: String) extends CaseObjectEqualityFixes[Permission] {
@@ -134,6 +134,7 @@ object Permissions {
 
 	case object GodMode extends ScopelessPermission("Enable god mode")
 	case object ManageMaintenanceMode extends ScopelessPermission("Manage maintenance mode settings")
+	case object ManageEmergencyMessage extends ScopelessPermission("Manage emergency message")
 	case object ImportSystemData extends ScopelessPermission("Import data from other systems")
 	case object ReplicaSyncing extends ScopelessPermission("Manually run replica syncing")
 	case object ViewAuditLog extends ScopelessPermission("View and search the audit log")

@@ -19,6 +19,10 @@
 
 		<p>Don't worry if you're trying to submit an assignment. Any assignment deadlines which occur while Tabula is unavailable will be extended, or alternative provision made, so you can submit your assignment without being penalised. Either the Web Team or you Assignment Tutor will contact you via email to explain what you should do next.</p>
 
+		<#if exception.messageOrEmpty != "">
+			<p>${exception.messageOrEmpty}</p>
+		</#if>
+
 		<p>Need more help? Please contact <a href="mailto:webteam@warwick.ac.uk">webteam@warwick.ac.uk</a></p>
 	</div>
 </div>
