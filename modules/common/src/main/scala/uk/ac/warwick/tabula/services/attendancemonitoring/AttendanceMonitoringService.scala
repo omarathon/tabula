@@ -96,6 +96,9 @@ trait AttendanceMonitoringService {
 	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
 	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringStudentData]
+	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]]
+	def resetTotalsForStudentsNotInAScheme(department: Department, academicYear: AcademicYear): Unit
+	def resetTotalsForStudentsNotInASchemeAsync(department: Department, academicYear: AcademicYear): Unit
 }
 
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService with TaskBenchmarking {
@@ -408,6 +411,20 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringStudentData] =
 		attendanceMonitoringDao.findUnrecordedStudents(department, academicYear, endDate)
+
+	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]] =
+		attendanceMonitoringDao.findSchemesLinkedToSITSByDepartment(academicYear)
+
+	def resetTotalsForStudentsNotInAScheme(department: Department, academicYear: AcademicYear): Unit =
+		attendanceMonitoringDao.resetTotalsForStudentsNotInAScheme(department, academicYear)
+
+	def resetTotalsForStudentsNotInASchemeAsync(department: Department, academicYear: AcademicYear): Unit = {
+		attendanceMonitoringDao.flush()
+		queue.send(new AttendanceMonitoringServiceResetCheckpointTotalMessage(
+			department.code,
+			academicYear.startYear.toString
+		))
+	}
 }
 
 trait AttendanceMonitoringMembershipHelpers {
@@ -434,29 +451,37 @@ class AttendanceMonitoringServiceListener extends QueueListener with Initializin
 	var queue = Wire.named[Queue]("settingsSyncTopic")
 	@Autowired var env: Environment = _
 
-	private def convertArgsAndUpdate(universityId: String, departmentCode: String, academicStartYear: String) = transactional() {
+	private def convertStudent(universityId: String): Option[StudentMember] = {
 		val memberConverter = new MemberUniversityIdConverter
 		memberConverter.service = profileService
-		val studentOption = memberConverter.convertRight(universityId) match {
+		memberConverter.convertRight(universityId) match {
 			case student: StudentMember => Option(student)
 			case _ => None
 		}
+	}
 
+	private def convertDepartment(departmentCode: String): Option[Department] = {
 		val departmentConverter = new DepartmentCodeConverter
 		departmentConverter.service = moduleAndDepartmentService
-		val departmentOption = departmentConverter.convertRight(departmentCode) match {
+		departmentConverter.convertRight(departmentCode) match {
 			case department: Department => Option(department)
 			case _ => None
 		}
+	}
 
-		val academicYearOption = {
-			try {
-				Option(AcademicYear(academicStartYear.toInt))
-			} catch {
-				case e: NumberFormatException =>
-					None
-			}
+	private def convertAcademicYear(academicStartYear: String): Option[AcademicYear] = {
+		try {
+			Option(AcademicYear(academicStartYear.toInt))
+		} catch {
+			case e: NumberFormatException =>
+				None
 		}
+	}
+
+	private def handleUpdate(universityId: String, departmentCode: String, academicStartYear: String) = transactional() {
+		val studentOption = convertStudent(universityId)
+		val departmentOption = convertDepartment(departmentCode)
+		val academicYearOption = convertAcademicYear(academicStartYear)
 		if (studentOption.isEmpty) {
 			logger.warn(s"Could not find student $universityId to update checkpoint total")
 		} else if (departmentOption.isEmpty) {
@@ -469,18 +494,34 @@ class AttendanceMonitoringServiceListener extends QueueListener with Initializin
 		}
 	}
 
+	private def handleReset(departmentCode: String, academicStartYear: String) = transactional() {
+		val departmentOption = convertDepartment(departmentCode)
+		val academicYearOption = convertAcademicYear(academicStartYear)
+		if (departmentOption.isEmpty) {
+			logger.warn(s"Could not find department $departmentCode to reset checkpoint total")
+		} else if (academicYearOption.isEmpty) {
+			logger.warn(s"Could not find academic year $academicStartYear to reset checkpoint total")
+		} else {
+			logger.debug(s"Resetting checkpoint totals from message for $departmentCode for $academicStartYear")
+			attendanceMonitoringService.resetTotalsForStudentsNotInAScheme(departmentOption.get, academicYearOption.get)
+		}
+	}
+
 	override def isListeningToQueue = env.acceptsProfiles("dev", "scheduling")
 	override def onReceive(item: Any) {
 		logger.debug(s"Synchronising item $item")
 		item match {
 			case msg: AttendanceMonitoringServiceUpdateCheckpointTotalMessage =>
-				convertArgsAndUpdate(msg.getUniversityId, msg.getDepartmentCode, msg.getAcademicStartYear)
+				handleUpdate(msg.getUniversityId, msg.getDepartmentCode, msg.getAcademicStartYear)
+			case msg: AttendanceMonitoringServiceResetCheckpointTotalMessage =>
+				handleReset(msg.getDepartmentCode, msg.getAcademicStartYear)
 			case _ =>
 		}
 	}
 
 	override def afterPropertiesSet() {
 		queue.addListener(classOf[AttendanceMonitoringServiceUpdateCheckpointTotalMessage].getAnnotation(classOf[ItemType]).value, this)
+		queue.addListener(classOf[AttendanceMonitoringServiceResetCheckpointTotalMessage].getAnnotation(classOf[ItemType]).value, this)
 	}
 }
 
@@ -496,6 +537,20 @@ class AttendanceMonitoringServiceUpdateCheckpointTotalMessage {
 	}
 
 	@BeanProperty var universityId: String = _
+	@BeanProperty var departmentCode: String = _
+	@BeanProperty var academicStartYear: String = _
+}
+
+@ItemType("AttendanceMonitoringServiceResetCheckpointTotal")
+@JsonAutoDetect
+class AttendanceMonitoringServiceResetCheckpointTotalMessage {
+
+	def this(thisDepartmentCode: String, thisAcademicStartYear: String) {
+		this()
+		departmentCode = thisDepartmentCode
+		academicStartYear = thisAcademicStartYear
+	}
+
 	@BeanProperty var departmentCode: String = _
 	@BeanProperty var academicStartYear: String = _
 }

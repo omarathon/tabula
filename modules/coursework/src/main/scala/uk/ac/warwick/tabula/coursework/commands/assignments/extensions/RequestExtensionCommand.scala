@@ -97,7 +97,8 @@ trait RequestExtensionCommandValidation extends SelfValidating {
 		if (!reason.hasText){
 			errors.rejectValue("reason", "extension.reason.provideReasons")
 		}
-		if (!assignment.newExtensionsCanBeRequested) {
+		val hasValidExtension = assignment.findExtension(submitter.apparentUser.getWarwickId).exists(extension => extension.approved && extension.expiryDate.isAfterNow)
+		if (!hasValidExtension && !assignment.newExtensionsCanBeRequested) {
 			errors.reject("assignment.extensionRequests.disallowed")
 		}
 	}

@@ -134,7 +134,7 @@
 										scope=exam
 										action_descr='assign markers'
 										href=markers_url>
-											<i class="icon-fixed-width icon-sort"></i> Assign markers
+											<i class="icon-fixed-width icon-user"></i> Assign markers
 										</@fmt.permission_button>
 									</li>
 								<#else>

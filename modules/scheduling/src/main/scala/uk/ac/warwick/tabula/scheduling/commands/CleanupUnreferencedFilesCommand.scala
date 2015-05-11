@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.permissions._
  * Go through each synced file on the filesystem and delete any file where there isn't
  * a corresponding FileAttachment in the database.
  *
- * This will ignore any files created in the last 6 hours, so we can ensure that if
+ * This will ignore any files created in the last 28 days, so we can ensure that if
  * there is any lag between syncing the database that the files aren't deleted before the
  * relevant database record can be synced across.
  */
@@ -32,7 +32,7 @@ class CleanupUnreferencedFilesCommand extends Command[Unit] with ReadOnly {
 	var dataDir = Wire[String]("${base.data.dir}")
 
 	val startTime = DateTime.now
-	val syncBuffer = startTime.minusHours(6)
+	val syncBuffer = startTime.minusDays(28)
 
 	// Get a list of all IDs in the database for us to check against, stripping hyphens (since we do that when we check)
 	lazy val ids = fileDao.getAllFileIds() map { _.replace("-", "") }
@@ -79,7 +79,7 @@ class CleanupUnreferencedFilesCommand extends Command[Unit] with ReadOnly {
 			}
 		}).flatten
 
-		val stats = (files.size - deleted.size, deleted.size)
+		val stats = (files.length - deleted.length, deleted.length)
 
 		// Sub-buckets
 		val buckets = directory.listFiles(filter { _.isDirectory }).toSeq

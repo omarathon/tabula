@@ -121,6 +121,7 @@
 <#macro noteView academicYearString student point returnTo=""><@_u page="/note/${academicYearString}/${student.universityId}/${point.id}/?returnTo=${returnTo}" /></#macro>
 <#macro groupsNoteView student occurrence returnTo=""><@_u context="/groups" page="/note/${student.universityId}/${occurrence.id}/?returnTo=${returnTo}" /></#macro>
 <#macro noteEdit academicYearString student point><@_u page="/note/${academicYearString}/${student.universityId}/${point.id}/edit"/></#macro>
+<#macro bulkNoteEdit academicYearString point students><@_u page="/note/${academicYearString}/bulk/${point.id}/edit"/><#list students as student><#if student_index ==0>?<#else>&</#if>students=${student.universityId}</#list></#macro>
 
 <#macro profileHome><@_u page="/profile"/></#macro>
 <#macro profileYears student><@_u page="/profile/${student.universityId}"/></#macro>

@@ -111,7 +111,7 @@ object Routes {
 		def students(department: Department, academicYear: AcademicYear) =
 			context + "/view/%s/%s/students" format(encoded(department.code), encoded(academicYear.startYear.toString))
 		def studentsUnrecorded(department: Department, academicYear: AcademicYear) =
-			context + "/view/%s/%s/students?otherCriteria=Unrecorded" format(encoded(department.code), encoded(academicYear.startYear.toString))
+			context + "/view/%s/%s/students?hasBeenFiltered=true&otherCriteria=Unrecorded" format(encoded(department.code), encoded(academicYear.startYear.toString))
 		def student(department: Department, academicYear: AcademicYear, student: StudentMember) =
 			context + "/view/%s/%s/students/%s" format(
 				encoded(department.code),

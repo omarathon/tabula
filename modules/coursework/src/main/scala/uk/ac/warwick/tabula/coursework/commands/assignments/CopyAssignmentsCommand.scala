@@ -1,14 +1,15 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import scala.collection.JavaConverters._
+import org.joda.time.{DateTime, Duration}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Module, Assignment, Department}
+import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Assignment, Department, Module}
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.{Duration, DateTime}
+
+import scala.collection.JavaConverters._
 
 object CopyAssignmentsCommand {
 	def apply(department: Department, modules: Seq[Module]) =
@@ -47,6 +48,7 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 
 	def copy(assignment: Assignment) : Assignment = {
 		val newAssignment = new Assignment()
+		newAssignment.assignmentService = assignment.assignmentService // Used in testing
 		newAssignment.academicYear = academicYear
 		newAssignment.archived = false
 
@@ -74,18 +76,10 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 
 		newAssignment.addDefaultFields()
 
-		for (field <- findCommentField(assignment); newField <- findCommentField(newAssignment)) newField.value = field.value
-
-		for (field <- findFileField(assignment); newField <- findFileField(newAssignment)) {
-			newField.attachmentLimit = field.attachmentLimit
-			newField.attachmentTypes = field.attachmentTypes
-		}
-
-		val field = findWordCountField(assignment)
-		val newField = findWordCountField(newAssignment)
-		newField.max = field.max
-		newField.min = field.min
-		newField.conventions = field.conventions
+		newAssignment.addFields(assignment.fields.asScala.sortBy(_.position).map(field => {
+			newAssignment.findField(field.name).foreach(newAssignment.removeField)
+			field.duplicate(newAssignment)
+		}):_*)
 
 		// TAB-1175 Guess SITS links
 		assignment.assessmentGroups.asScala

@@ -1,15 +1,25 @@
 package uk.ac.warwick.tabula.exams.commands
 
 import org.apache.poi.ss.usermodel.{ComparisonOperator, IndexedColors}
-import org.apache.poi.ss.util.{CellRangeAddress, WorkbookUtil}
+import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.coursework.commands.feedback.MarksTemplateCommand
-import uk.ac.warwick.tabula.data.model.{Exam, Assessment, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{Exam, Module}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, FeedbackServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
+
+object GenerateOwnExamMarksTemplateCommand {
+	def apply(module: Module, exam: Exam, members: Seq[(User, Option[Int])]) =
+		new GenerateExamMarksTemplateCommandInternal(module, exam, members)
+			with AutowiringFeedbackServiceComponent
+			with ComposableCommand[XSSFWorkbook]
+			with GenerateOwnMarksTemplatePermissions
+			with GenerateMarksTemplateCommandState
+			with Unaudited with ReadOnly
+}
 
 object GenerateExamMarksTemplateCommand {
 	def apply(module: Module, exam: Exam, members: Seq[(User, Option[Int])]) =
@@ -91,6 +101,18 @@ trait GenerateAllMarksTemplatePermissions extends RequiresPermissionsChecking wi
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.Marks.DownloadTemplate, exam)
+	}
+
+}
+
+trait GenerateOwnMarksTemplatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+
+	self: GenerateMarksTemplateCommandState =>
+
+	mustBeLinked(exam, module)
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.Marks.DownloadOwnTemplate, exam)
 	}
 
 }

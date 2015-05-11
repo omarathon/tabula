@@ -42,4 +42,11 @@ class AttendanceMonitoringCheckpointTotal extends GeneratedId {
 	@Column(name = "updated_date")
 	var updatedDate: DateTime = _
 
+	def reset(): Unit = {
+		unrecorded = 0
+		authorised = 0
+		unauthorised = 0
+		attended = 0
+	}
+
 }

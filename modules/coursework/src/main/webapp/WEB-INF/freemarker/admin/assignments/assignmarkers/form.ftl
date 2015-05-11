@@ -118,7 +118,8 @@
 
 	<h1>Assign students to markers</h1>
 	<h4><span class="muted">for</span>
-	${assessment.name}</h4>
+		${assessment.name}
+	</h4>
 	<div class="btn-toolbar">
 		<div class="pull-right">
 			<div class="btn-group mode-nav">
@@ -217,7 +218,7 @@
 	});
 
 	$("#small-groups").on('click', 'button[name=smallGroupImport]', function(e){
-		var $setSelector = $('.set-selector')
+		var $setSelector = $('.set-selector');
 		var set = $setSelector.val();
 		if (set === "") {
 			var $controls = $setSelector.closest(".controls");
@@ -225,9 +226,7 @@
 			$controls.append('<span class="error help-inline">You must choose a small group set</span>');
 			e.preventDefault();
 		}
-	});
-
-	$("#small-groups").on("change", ".set-selector", function(e) {
+	}).on("change", ".set-selector", function(e) {
 		var $target = $(e.target);
 		var set = $target.val();
 		if (set === "") {
@@ -244,9 +243,7 @@
 		$set.find("input").prop('disabled', false);
 
 		$(".marker-selector").trigger('change');
-	})
-
-	$("#small-groups").on("change", ".marker-selector", function(e) {
+	}).on("change", ".marker-selector", function(e) {
 		var $target = $(e.target);
 		var newMarker = $target.val();
 		var $group = $target.closest(".group");
@@ -257,7 +254,7 @@
 		// work out how many students are already assigned to this marker so we can increment the binding correctly
 		var $markersExistingStudents = $("input[name^="+roleBinding+"\\["+newMarker+"\\]]", $roleContainer);
 		$inputs.each(function(index) {
-			var newIndex = $markersExistingStudents.size() + index
+			var newIndex = $markersExistingStudents.size() + index;
 			var $this = $(this);
 			var name = $this.attr("name");
 			// update the hidden input that will bind the chosen marker to the student

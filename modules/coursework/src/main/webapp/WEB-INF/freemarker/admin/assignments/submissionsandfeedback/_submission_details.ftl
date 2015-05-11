@@ -13,7 +13,7 @@
 
 <#macro extensionLateness extension submission><#compress>
 	<#if extension?has_content && extension.expiryDate?? && submission.late>
-		${durationFormatter(extension.expiryDate, submission.submittedDate)} after extended deadline (<@fmt.date date=extension.expiryDate capitalise=false shortMonth=true />)
+		<@fmt.p submission.workingDaysLate "working day" /> late, ${durationFormatter(extension.expiryDate, submission.submittedDate)} after extended deadline (<@fmt.date date=extension.expiryDate capitalise=false shortMonth=true stripHtml=true />)
 	</#if>
 </#compress></#macro>
 

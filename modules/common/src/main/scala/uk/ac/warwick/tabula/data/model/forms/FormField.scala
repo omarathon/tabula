@@ -6,7 +6,7 @@ import org.hibernate.annotations.Type
 import org.springframework.validation.Errors
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{Exam, AbstractBasicUserType, GeneratedId, Assignment}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserLookupService
@@ -143,6 +143,8 @@ abstract class AssignmentFormField extends FormField {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "assignment_id")
 	var assignment: Assignment = _
+
+	def duplicate(newAssignment: Assignment): AssignmentFormField
 }
 
 @Entity
@@ -151,11 +153,29 @@ class CommentField extends AssignmentFormField with SimpleValue[String] with For
 	override def isReadOnly = true
 
 	def formattedHtml: String = formattedHtml(Option(value))
+
+	override def duplicate(newAssignment: Assignment) = {
+		val newField = new CommentField
+		newField.assignment = newAssignment
+		newField.name = Assignment.defaultCommentFieldName
+		newField.context = this.context
+		newField.value = this.value
+		newField
+	}
 }
 
 @Entity
 @DiscriminatorValue("text")
 class TextField extends AssignmentFormField with SimpleValue[String] {
+
+	override def duplicate(newAssignment: Assignment) = {
+		val newField = new TextField
+		newField.assignment = newAssignment
+		newField.context = this.context
+		newField.name = this.name
+		newField
+	}
+
 }
 
 @Entity
@@ -185,11 +205,32 @@ class WordCountField extends AssignmentFormField {
 			case _ => errors.rejectValue("value", "assignment.submit.wordCount.missing") // value was null or wrong type
 		}
 	}
+
+	override def duplicate(newAssignment: Assignment) = {
+		val newField = new WordCountField
+		newField.assignment = newAssignment
+		newField.name = Assignment.defaultWordCountName
+		newField.max = this.max
+		newField.min = this.min
+		newField.conventions = this.conventions
+		newField
+	}
+
 }
 
 @Entity
 @DiscriminatorValue("textarea")
-class TextareaField extends AssignmentFormField with SimpleValue[String] {}
+class TextareaField extends AssignmentFormField with SimpleValue[String] {
+
+	override def duplicate(newAssignment: Assignment) = {
+		val newField = new TextareaField
+		newField.assignment = newAssignment
+		newField.context = this.context
+		newField.name = this.name
+		newField
+	}
+
+}
 
 @Entity
 @DiscriminatorValue("checkbox")
@@ -224,6 +265,13 @@ class MarkerSelectField extends AssignmentFormField with SimpleValue[String] {
 					case _ =>
 				}
 		}
+	}
+
+	override def duplicate(newAssignment: Assignment) = {
+		val newField = new MarkerSelectField
+		newField.assignment = newAssignment
+		newField.name = Assignment.defaultMarkerSelectorName
+		newField
 	}
 }
 
@@ -265,6 +313,16 @@ class FileField extends AssignmentFormField {
 					}
 				}
 		}
+	}
+
+	override def duplicate(newAssignment: Assignment) = {
+		val newField = new FileField
+		newField.assignment = newAssignment
+		newField.name = Assignment.defaultUploadName
+		newField.context = this.context
+		newField.attachmentLimit = this.attachmentLimit
+		newField.attachmentTypes = this.attachmentTypes
+		newField
 	}
 }
 

@@ -146,6 +146,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro examMarkerAddMarks exam marker><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/marker/${marker.warwickId}/marks" /></#macro>
 <#macro generateExamGradesForMarks exam><@_u page="/admin/module/${exam.module.code}/exams/${exam.id}/generate-grade"/></#macro>
 <#macro examMarkstemplate exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/marks-template" /></#macro>
+<#macro examMarkerMarksTemplate exam marker><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/marker/${marker.warwickId}/marks-template" /></#macro>
 <#macro createExam module academicYear><@_u page="/admin/module/${module.code}/${academicYear.startYear?c}/exams/new" /></#macro>
 <#macro editExam exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/edit" /></#macro>
 <#macro moduleHomeWithYear module academicYear><@_u page="/admin/module/${module.code}/${academicYear.startYear?c}" /></#macro>
@@ -160,3 +161,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro examAssignMarkers exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/assign-markers" /></#macro>
 <#macro examReleaseForMarking exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/release-for-marking" /></#macro>
 <#macro examAssignMarkersSmallGroups exam><@url context="/groups" page="/admin/marker-allocation/exam/${exam.id}" /></#macro>
+<#macro examExportExcel module exam><@url page="/coursework/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.xlsx" /></#macro>
+<#macro examExportCSV module exam><@url page="/coursework/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.csv" /></#macro>
+<#macro examExportXML module exam><@url page="/coursework/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.xml" /></#macro>

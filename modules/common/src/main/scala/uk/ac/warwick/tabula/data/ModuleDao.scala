@@ -4,7 +4,8 @@ import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.{Order, Projections}
 import org.joda.time.DateTime.now
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.{ModuleTeachingInformation, Assignment, Module}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model._
 
 trait ModuleDao {
 	def allModules: Seq[Module]
@@ -18,7 +19,8 @@ trait ModuleDao {
 	def stampMissingFromImport(newStaleModuleCodes: Seq[String])
 	def hasAssignments(module: Module): Boolean
 	def findModulesNamedLike(query: String): Seq[Module]
-
+	def findByRoutes(routes: Seq[Route], academicYear: AcademicYear): Seq[Module]
+	def findByYearOfStudy(department: Department, yearsOfStudy: Seq[Integer], academicYear: AcademicYear): Seq[Module]
 }
 
 @Repository
@@ -88,6 +90,68 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 			)
 			.addOrder(Order.asc("code"))
 			.setMaxResults(20).seq
+	}
+
+	def findByRoutes(routes: Seq[Route], academicYear: AcademicYear): Seq[Module] = {
+		if (routes.isEmpty) {
+			Seq()
+		} else {
+			session.newQuery[Module](
+				"""
+					select module from
+						Module as module,
+						ModuleRegistration as registration,
+						StudentCourseDetails as scd,
+						Route as route,
+						StudentMember as student
+					where
+						module.id = registration.module.id
+						and scd = registration.studentCourseDetails
+						and scd.route.id = route.id
+						and student.mostSignificantCourse = scd
+						and route in (:routes)
+						and registration.academicYear = :academicYear
+				""")
+				.setParameterList("routes", routes)
+				.setParameter("academicYear", academicYear)
+				.seq
+		}
+	}
+
+	def findByYearOfStudy(department: Department, yearsOfStudy: Seq[Integer], academicYear: AcademicYear): Seq[Module] = {
+		if (yearsOfStudy.isEmpty) {
+			Seq()
+		} else {
+			session.newQuery[Module](
+				"""
+					select module from
+						Module as module,
+						ModuleRegistration as registration,
+						StudentCourseDetails as scd,
+						StudentCourseYearDetails as scyd,
+						StudentMember as student,
+						Route as route
+					where
+						module.id = registration.module.id
+						and scd = registration.studentCourseDetails
+						and scyd.studentCourseDetails = scd
+						and student.mostSignificantCourse = scd
+						and scd.route.id = route.id
+						and scyd.yearOfStudy in (:yearsOfStudy)
+						and registration.academicYear = :academicYear
+						and scyd.academicYear = :academicYear
+						and (
+							student.homeDepartment = :department
+			 				or scd.department = :department
+							or scyd.enrolmentDepartment = :department
+			 				or route.adminDepartment = :department
+						)
+				""")
+				.setParameter("department", department)
+				.setParameterList("yearsOfStudy", yearsOfStudy)
+				.setParameter("academicYear", academicYear)
+				.seq
+		}
 	}
 
 }

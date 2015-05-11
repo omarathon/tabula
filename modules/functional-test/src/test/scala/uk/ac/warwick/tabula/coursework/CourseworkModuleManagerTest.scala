@@ -10,7 +10,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 
 	private def changedUsers(implicit currentElement: String): Set[String] = {
 		// get the currrently saved set of users with permissions on the role
-		val currentUsers = findAll(cssSelector(s"${currentElement} .user .muted")).toList.map(u => u.underlying.getText.trim).toSet
+		val currentUsers = findAll(cssSelector(s"$currentElement .user .muted")).toList.map(u => u.underlying.getText.trim).toSet
 
 		// see what's changed, reset state and return the changes
 		val changes = currentUsers.union(lastUsers).filterNot(currentUsers.intersect(lastUsers))
@@ -25,13 +25,13 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 		findAll(className("module-info")).size should be (3)
 
 		Then("I should be able to click on the Manage button")
-		val modInfo = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == "XXX01").next.underlying
-		click on (modInfo.findElement(By.partialLinkText("Manage")))
+		val modInfo = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == "XXX01").next().underlying
+		click on modInfo.findElement(By.partialLinkText("Manage"))
 
 		And("I should see the permissions menu option")
 		val managersLink = modInfo.findElement(By.partialLinkText("Edit module permissions"))
 		eventually {
-			managersLink.isDisplayed should be (true)
+			managersLink.isDisplayed should be {true}
 		}
 
 		When("I click the permissions link")
@@ -51,47 +51,47 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 			changedUsers
 
 		When("I enter a usercode in the tutor picker")
-			click on cssSelector(s"${parentElement} .pickedUser")
+			click on cssSelector(s"$parentElement .pickedUser")
 			enter(usersToBeAdded.head)
 
 		Then("I should get a result back")
-			val typeahead = cssSelector(s"${parentElement} .typeahead .active a")
+			val typeahead = cssSelector(".typeahead .active a")
 			eventuallyAjax {
-				find(typeahead) should not be (None)
+				find(typeahead) should not be None
 			}
 
 		And("The picker result should match the entry")
-			textField(cssSelector(s"${parentElement} .pickedUser")).value should be (usersToBeAdded.head)
+			textField(cssSelector(s"$parentElement .pickedUser")).value should be (usersToBeAdded.head)
 
 		When("I pick the matching user")
 			click on typeahead
 
 		Then("It should stay in the picker (confirming HTMLUnit hasn't introduced a regression)")
-			textField(cssSelector(s"${parentElement} .pickedUser")).value should be (usersToBeAdded.head)
+			textField(cssSelector(s"$parentElement .pickedUser")).value should be (usersToBeAdded.head)
 
 		And("The usercode should be injected into the form correctly")
 		({
-			val user = cssSelector(s"${parentElement} .add-permissions [name=usercodes]")
+			val user = cssSelector(s"$parentElement .add-permissions [name=usercodes]")
 			find(user) should not be (None)
 			find(user).get.underlying.getAttribute("value").trim should be (usersToBeAdded.head)
 		})
 
 		When("I submit the form")
-			find(cssSelector(s"${parentElement} form.add-permissions")).get.underlying.submit()
+			find(cssSelector(s"$parentElement form.add-permissions")).get.underlying.submit()
 
 		Then("I should see the new entry")
 			withClue(pageSource) { changedUsers should be (Set(usersToBeAdded.head)) }
 
 		When("I add another entry")
 		({
-			click on cssSelector(s"${parentElement} .pickedUser")
+			click on cssSelector(s"$parentElement .pickedUser")
 			enter(usersToBeAdded.last)
-			val typeahead = cssSelector(s"${parentElement} .typeahead .active a")
+			val typeahead = cssSelector(".typeahead .active a")
 			eventuallyAjax {
 				find(typeahead) should not be (None)
 			}
 			click on typeahead
-			find(cssSelector(s"${parentElement} form.add-permissions")).get.underlying.submit()
+			find(cssSelector(s"$parentElement form.add-permissions")).get.underlying.submit()
 		})
 
 		Then("I should see both users")
@@ -113,7 +113,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 
 			When("I should see at least one user that I can remove")
 			changedUsers
-			lastUsers.size should be >= (1)
+			lastUsers.size should be >= 1
 
 			When("I remove the first entry")
 			({
@@ -140,13 +140,13 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 				findAll(className("module-info")).size should be (1)
 
 				When("I click on the Manage button")
-				val modInfo = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == "XXX01").next.underlying
-				click on (modInfo.findElement(By.partialLinkText("Manage")))
+				val modInfo = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == "XXX01").next().underlying
+				click on modInfo.findElement(By.partialLinkText("Manage"))
 
 				Then("I should see the permissions menu option")
 				val managersLink = modInfo.findElement(By.partialLinkText("Edit module permissions"))
 				eventually {
-					managersLink.isDisplayed should be (true)
+					managersLink.isDisplayed should be {true}
 				}
 			}
 		}
@@ -165,7 +165,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 
 			When("I should see at least one user that I can remove")
 			changedUsers
-			lastUsers.size should be >= (1)
+			lastUsers.size should be >= 1
 
 			When("I remove the first entry")
 			({

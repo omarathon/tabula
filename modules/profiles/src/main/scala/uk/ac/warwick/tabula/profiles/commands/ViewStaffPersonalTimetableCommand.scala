@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 
 // Do not remove
 // Should be import uk.ac.warwick.tabula.helpers.DateTimeOrdering
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering
 
 trait ViewStaffPersonalTimetableCommandState extends PersonalTimetableCommandState {
 	val staff: StaffMember
@@ -80,8 +79,7 @@ object ViewStaffPersonalTimetableCommand {
 		scheduledMeetingEventSource: ScheduledMeetingEventSource,
 		staff: StaffMember,
 		currentUser: CurrentUser
-	): Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState =
-		new ViewStaffPersonalTimetableCommandImpl(staffTimetableEventSource, scheduledMeetingEventSource, staff, currentUser)
+	) = new ViewStaffPersonalTimetableCommandImpl(staffTimetableEventSource, scheduledMeetingEventSource, staff, currentUser)
 			with ComposableCommand[Seq[EventOccurrence]]
 			with ViewStaffTimetablePermissions
 			with ReadOnly with Unaudited
@@ -109,4 +107,21 @@ object PublicStaffPersonalTimetableCommand {
 			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
 			with ViewStaffPersonalTimetableCommandState
+}
+
+trait ViewStaffPersonalTimetableCommandFactory {
+	def apply(staffMember: StaffMember): ComposableCommand[Seq[EventOccurrence]]
+}
+class ViewStaffPersonalTimetableCommandFactoryImpl(
+	staffTimetableEventSource: StaffTimetableEventSource,
+	scheduledMeetingEventSource: ScheduledMeetingEventSource,
+	currentUser: CurrentUser
+) extends ViewStaffPersonalTimetableCommandFactory {
+	def apply(staffMember: StaffMember) =
+		ViewStaffPersonalTimetableCommand(
+			staffTimetableEventSource,
+			scheduledMeetingEventSource,
+			staffMember,
+			currentUser
+		)
 }

@@ -8,7 +8,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, UpstreamGroup, UpstreamGroupPropertyEditor}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Exam, Module}
 import uk.ac.warwick.tabula.exams.commands.{AddExamCommand, ExamState, ModifiesExamMembership}
 import uk.ac.warwick.tabula.exams.web.Routes
@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 @RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/new"))
 class AddExamController extends ExamsController {
 
-	type AddExamCommand = Appliable[Exam] with ExamState with ModifiesExamMembership
+	type AddExamCommand = Appliable[Exam] with ExamState with ModifiesExamMembership with PopulateOnForm
 
 	validatesSelf[SelfValidating]
 
@@ -29,7 +29,12 @@ class AddExamController extends ExamsController {
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@ModelAttribute("command") cmd: AddExamCommand) = {
+		cmd.populate()
 		cmd.afterBind()
+		render(cmd)
+	}
+
+	private def render(cmd: AddExamCommand) = {
 		Mav("exams/admin/new",
 			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
@@ -37,8 +42,8 @@ class AddExamController extends ExamsController {
 			"department" -> cmd.module.adminDepartment,
 			"markingWorkflows" -> cmd.module.adminDepartment.markingWorkflows.filter(_.validForExams)
 		).crumbs(
-				Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear),
-				Breadcrumbs.Module(cmd.module, cmd.academicYear)
+			Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear),
+			Breadcrumbs.Module(cmd.module, cmd.academicYear)
 		)
 	}
 
@@ -49,7 +54,7 @@ class AddExamController extends ExamsController {
 	) = {
 		cmd.afterBind()
 		if (errors.hasErrors) {
-			showForm(cmd)
+			render(cmd)
 		} else {
 			cmd.apply()
 			Redirect(Routes.admin.module(cmd.module, cmd.academicYear))
