@@ -48,7 +48,7 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 
 	override def validate(errors: Errors) {
 		if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
-		if (markerFeedback.isEmpty) errors.rejectValue("students", "markerFeedback.finishMarking.noStudents")
+		if (markerFeedback.isEmpty) errors.rejectValue("markerFeedback", "markerFeedback.finishMarking.noStudents")
 	}
 
 	override def applyInternal() {
