@@ -38,7 +38,7 @@ trait UploadFeedbackToSitsPermissions extends RequiresPermissionsChecking with P
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(mandatory(assessment), mandatory(module))
-		p.PermissionCheck(Permissions.Feedback.Publish, assessment)
+		p.PermissionCheck(Permissions.AssignmentFeedback.Publish, assessment)
 	}
 
 }

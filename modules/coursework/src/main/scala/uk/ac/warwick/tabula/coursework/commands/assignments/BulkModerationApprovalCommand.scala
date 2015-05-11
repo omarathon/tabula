@@ -65,7 +65,7 @@ class BulkModerationApprovalCommandInternal(val assignment: Assignment, val mark
 trait BulkModerationApprovalPermissions extends RequiresPermissionsChecking {
 	self: BulkModerationApprovalState =>
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.Manage, assignment)
+		p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
 		if(submitter.apparentUser != marker) {
 			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
 		}

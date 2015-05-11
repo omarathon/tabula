@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.permissions
 
+import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
 import uk.ac.warwick.tabula.CaseObjectEqualityFixes
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
-import org.apache.commons.lang3.builder.HashCodeBuilder
-import org.apache.commons.lang3.builder.EqualsBuilder
+
 import scala.reflect.ClassTag
 
 sealed abstract class Permission(val description: String) extends CaseObjectEqualityFixes[Permission] {
@@ -202,23 +202,34 @@ object Permissions {
 		case object Delete extends Permission("Remove a coursework submission")
 	}
 
-	object Feedback {
+	object AssignmentFeedback {
 		case object Publish extends Permission("Release feedback to a student")
 		case object Rate extends Permission("Rate feedback received")
 
 		case object Manage extends Permission("Manage feedback")
 		case object Read extends Permission("View feedback")
 		case object DownloadMarksTemplate extends Permission("Download a marks template for all marks")
-		case object UploadToSits extends ScopelessPermission("Upload feedback to SITS")
 	}
 	
-	object MarkerFeedback {
+	object AssignmentMarkerFeedback {
+		case object Manage extends Permission("Manage marker feedback")
+		case object DownloadMarksTemplate extends Permission("Download a marks template for own marks")
+	}
+
+	object ExamFeedback {
+		case object Manage extends Permission("Manage feedback")
+		case object Read extends Permission("View feedback")
+		case object DownloadMarksTemplate extends Permission("Download a marks template for all marks")
+	}
+
+	object ExamMarkerFeedback {
 		case object Manage extends Permission("Manage marker feedback")
 		case object DownloadMarksTemplate extends Permission("Download a marks template for own marks")
 	}
 
 	object Marks {
 		case object MarksManagement extends ScopelessPermission("Marks management across all departments")
+		case object UploadToSits extends ScopelessPermission("Upload marks to SITS")
 	}
 
 	object Extension {

@@ -2,7 +2,8 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Assessment, Feedback}
+import uk.ac.warwick.tabula.data.HibernateHelpers
+import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, Exam, Feedback}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -50,6 +51,11 @@ trait FeedbackAdjustmentListCommandState {
 trait FeedbackAdjustmentListCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: FeedbackAdjustmentListCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.Manage, mandatory(assessment))
+		HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
+			case assignment: Assignment =>
+				p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
+			case exam: Exam =>
+				p.PermissionCheck(Permissions.ExamFeedback.Manage, exam)
+		}
 	}
 }

@@ -119,7 +119,7 @@ trait OnlineFeedbackPermissions extends RequiresPermissionsChecking {
 
 	def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assignment, module)
-		p.PermissionCheck(Permissions.Feedback.Read, assignment)
+		p.PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
 		if(submitter.apparentUser != marker) {
 			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
 		}

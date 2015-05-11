@@ -24,7 +24,7 @@ class DownloadSelectedFeedbackCommand(
 		extends Command[RenderableZip] with ReadOnly with ApplyWithCallback[RenderableZip] {
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Feedback.Read, assignment)
+	PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
 	
 	var assignmentService = Wire.auto[AssessmentService]
 	var zipService = Wire.auto[ZipService]

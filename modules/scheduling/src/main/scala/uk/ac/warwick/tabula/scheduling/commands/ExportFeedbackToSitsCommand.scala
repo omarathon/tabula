@@ -87,7 +87,7 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 
 trait ExportFeedbackToSitsCommandPermissions extends RequiresPermissionsChecking {
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.UploadToSits)
+		p.PermissionCheck(Permissions.Marks.UploadToSits)
 	}
 }
 
