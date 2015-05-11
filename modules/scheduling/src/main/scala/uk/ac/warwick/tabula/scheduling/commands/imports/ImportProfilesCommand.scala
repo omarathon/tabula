@@ -221,6 +221,8 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				if (!expireCommandErrors.hasErrors) {
 					logger.info(s"Expiring old relationships for ${student.universityId}")
 					expireCommand.apply()
+				} else {
+					logger.info(s"Skipping expiry of relationships for ${student.universityId} - ${expireCommandErrors.getMessage}")
 				}
 				val migrateCommand = MigrateMeetingRecordsFromOldRelationshipsCommand(student)
 				val migrateCommandErrors = new BindException(migrateCommand, "migrateCommand")

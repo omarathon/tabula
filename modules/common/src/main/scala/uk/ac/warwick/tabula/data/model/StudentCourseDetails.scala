@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
 
 object StudentCourseDetails {
 	final val FreshCourseDetailsOnlyFilter = "freshStudentCourseDetailsOnly"
+	final val GracePeriodInMonths = 3
 }
 
 @FilterDefs(Array(
@@ -191,6 +192,10 @@ class StudentCourseDetails
 	def hasAccreditedPriorLearning = accreditedPriorLearning.nonEmpty
 
 	def isEnded = endDate != null && endDate.isBefore(DateTime.now.toLocalDate)
+
+	// we won't automatically expire a relationship if it is within the "grace period"
+	def isWithinGracePeriod = endDate != null &&
+		endDate.toDateTimeAtStartOfDay.plusMonths(StudentCourseDetails.GracePeriodInMonths).isAfterNow
 
 }
 
