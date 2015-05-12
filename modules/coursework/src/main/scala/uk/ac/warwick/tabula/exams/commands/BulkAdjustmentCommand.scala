@@ -5,15 +5,17 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.coursework.commands.feedback.AssignmentFeedbackAdjustmentCommand
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MarkType.{Adjustment, PrivateAdjustment}
-import uk.ac.warwick.tabula.data.model.{Assessment, FileAttachment, Mark}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, FeedbackServiceComponent, GeneratesGradesFromMarks}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.helpers.StringUtils._
+
 import scala.collection.JavaConverters._
 
 object BulkAdjustmentCommand {
@@ -185,7 +187,12 @@ trait BulkAdjustmentPermissions extends RequiresPermissionsChecking with Permiss
 	self: BulkAdjustmentCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.Manage, mandatory(assessment))
+		HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
+			case assignment: Assignment =>
+				p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
+			case exam: Exam =>
+				p.PermissionCheck(Permissions.ExamFeedback.Manage, exam)
+		}
 	}
 
 }

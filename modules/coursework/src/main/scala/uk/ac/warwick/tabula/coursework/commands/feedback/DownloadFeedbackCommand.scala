@@ -18,10 +18,10 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 
 	student match {
 		case Some(student: StudentMember) => PermissionCheckAny(
-			Seq(CheckablePermission(Permissions.Feedback.Read, feedback),
-				CheckablePermission(Permissions.Feedback.Read, student))
+			Seq(CheckablePermission(Permissions.AssignmentFeedback.Read, feedback),
+				CheckablePermission(Permissions.AssignmentFeedback.Read, student))
 		)
-		case _ => PermissionCheck(Permissions.Feedback.Read, feedback)
+		case _ => PermissionCheck(Permissions.AssignmentFeedback.Read, feedback)
 	}
 
 	var zip = Wire.auto[ZipService]

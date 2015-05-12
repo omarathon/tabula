@@ -13,8 +13,8 @@ case object FeedbackRecipientRoleDefinition extends UnassignableBuiltInRoleDefin
 	override def description = "Feedback Recipient"
 	
 	GrantsScopedPermission( 
-		Feedback.Read,
-		Feedback.Rate
+		AssignmentFeedback.Read,
+		AssignmentFeedback.Rate
 	)
 
 }

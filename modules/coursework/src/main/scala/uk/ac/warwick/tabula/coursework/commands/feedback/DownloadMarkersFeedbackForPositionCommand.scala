@@ -59,7 +59,7 @@ trait DownloadMarkersFeedbackForPositionPermissions extends RequiresPermissionsC
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		mustBeLinked(assignment, module)
-		p.PermissionCheck(Permissions.MarkerFeedback.Manage, assignment)
+		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
 		if(submitter.apparentUser != marker) {
 			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
 		}

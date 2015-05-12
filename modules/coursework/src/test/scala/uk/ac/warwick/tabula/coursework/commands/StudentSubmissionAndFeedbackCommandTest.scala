@@ -93,7 +93,7 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.Submission.Read, m)
-		verify(checking, times(1)).PermissionCheck(Permissions.Feedback.Read, m)
+		verify(checking, times(1)).PermissionCheck(Permissions.AssignmentFeedback.Read, m)
 	}
 
 }

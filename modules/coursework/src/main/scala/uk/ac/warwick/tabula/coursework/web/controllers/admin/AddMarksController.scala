@@ -46,7 +46,7 @@ class AddMarksController extends CourseworkController {
 
 		if(assignment.hasWorkflow) {
 			logger.error(s"Can't add marks to an assignment with a workflow - ${assignment.id}")
-			throw new PermissionDeniedException(user, Permissions.Feedback.Manage, assignment)
+			throw new PermissionDeniedException(user, Permissions.AssignmentFeedback.Manage, assignment)
 		}
 
 		val members = assignmentMembershipService.determineMembershipUsers(assignment)

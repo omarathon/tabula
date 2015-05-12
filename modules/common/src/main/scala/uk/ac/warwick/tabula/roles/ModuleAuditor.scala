@@ -23,7 +23,8 @@ case object ModuleAuditorRoleDefinition extends BuiltInRoleDefinition {
 		
 		Extension.Read,
 
-		Feedback.Read,
+		AssignmentFeedback.Read,
+		ExamFeedback.Read,
 		
 		SmallGroups.Read,
 		SmallGroups.ReadMembership,

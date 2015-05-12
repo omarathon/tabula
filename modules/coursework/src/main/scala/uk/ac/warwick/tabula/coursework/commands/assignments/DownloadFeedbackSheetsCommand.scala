@@ -19,7 +19,7 @@ class DownloadFeedbackSheetsCommand(val module: Module, val assignment: Assignme
 	with ReadOnly with ApplyWithCallback[RenderableZip] with Logging {
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Feedback.Read, assignment)
+	PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
 
 	var members: Seq[User] = _
 

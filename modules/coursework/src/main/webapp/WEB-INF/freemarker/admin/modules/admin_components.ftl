@@ -298,7 +298,7 @@
 								<li>
 									<#assign marks_url><@routes.addMarks assignment /></#assign>
 									<@fmt.permission_button
-									permission='Feedback.Manage'
+									permission='AssignmentFeedback.Manage'
 									scope=assignment
 									action_descr='add marks'
 									href=marks_url>
@@ -311,7 +311,7 @@
 							<li>
 								<#assign feedback_url><@routes.addFeedback assignment /></#assign>
 								<@fmt.permission_button
-								permission='Feedback.Manage'
+								permission='AssignmentFeedback.Manage'
 								scope=assignment
 								action_descr='upload feedback'
 								classes='feedback-link'
@@ -324,7 +324,7 @@
 						<#if assignment.canPublishFeedback>
 							<li>
 								<#assign publishfeedbackurl><@url page="/coursework/admin/module/${module.code}/assignments/${assignment.id}/publish" /></#assign>
-								<@fmt.permission_button permission='Feedback.Publish' scope=module action_descr='release feedback to students' href=publishfeedbackurl data_attr='data-container=body'>
+								<@fmt.permission_button permission='AssignmentFeedback.Publish' scope=module action_descr='release feedback to students' href=publishfeedbackurl data_attr='data-container=body'>
 									<i class="icon-envelope-alt"></i> Publish feedback
 								</@fmt.permission_button>
 							</li>

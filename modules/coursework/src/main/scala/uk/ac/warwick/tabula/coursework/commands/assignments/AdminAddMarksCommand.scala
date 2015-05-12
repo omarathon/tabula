@@ -149,7 +149,12 @@ trait AdminAddMarksPermissions extends RequiresPermissionsChecking with Permissi
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assessment, module)
-		p.PermissionCheck(Permissions.Feedback.Manage, assessment)
+		HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
+			case assignment: Assignment =>
+				p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
+			case exam: Exam =>
+				p.PermissionCheck(Permissions.ExamFeedback.Manage, exam)
+		}
 	}
 
 }

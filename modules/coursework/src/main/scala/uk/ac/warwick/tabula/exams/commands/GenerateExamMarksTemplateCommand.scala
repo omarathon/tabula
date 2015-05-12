@@ -100,7 +100,7 @@ trait GenerateAllMarksTemplatePermissions extends RequiresPermissionsChecking wi
 	mustBeLinked(exam, module)
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.DownloadMarksTemplate, exam)
+		p.PermissionCheck(Permissions.ExamFeedback.DownloadMarksTemplate, exam)
 	}
 
 }
@@ -112,7 +112,7 @@ trait GenerateOwnMarksTemplatePermissions extends RequiresPermissionsChecking wi
 	mustBeLinked(exam, module)
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MarkerFeedback.DownloadMarksTemplate, exam)
+		p.PermissionCheck(Permissions.ExamMarkerFeedback.DownloadMarksTemplate, exam)
 	}
 
 }

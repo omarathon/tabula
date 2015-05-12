@@ -119,7 +119,7 @@ trait StudentMemberSubmissionAndFeedbackCommandPermissions extends RequiresPermi
 		mustBeLinked(mandatory(assignment), mandatory(module))
 
 		p.PermissionCheck(Permissions.Submission.Read, mandatory(studentMember))
-		p.PermissionCheck(Permissions.Feedback.Read, mandatory(studentMember))
+		p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(studentMember))
 	}
 }
 
@@ -132,7 +132,7 @@ trait CurrentUserSubmissionAndFeedbackCommandPermissions extends RequiresPermiss
 		var perms = collection.mutable.MutableList[CheckablePermission]()
 
 		submission.foreach { submission => perms += CheckablePermission(Permissions.Submission.Read, Some(submission)) }
-		feedback.foreach { feedback => perms += CheckablePermission(Permissions.Feedback.Read, Some(feedback)) }
+		feedback.foreach { feedback => perms += CheckablePermission(Permissions.AssignmentFeedback.Read, Some(feedback)) }
 
 		perms += CheckablePermission(Permissions.Submission.Create, Some(assignment))
 
