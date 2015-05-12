@@ -1,9 +1,12 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationship}
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, AutowiringRelationshipServiceComponent, MeetingRecordServiceComponent, RelationshipServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object MigrateMeetingRecordsFromOldRelationshipsCommand {
 	def apply(student: StudentMember) =
@@ -12,7 +15,7 @@ object MigrateMeetingRecordsFromOldRelationshipsCommand {
 			with AutowiringMeetingRecordServiceComponent
 			with ComposableCommand[Unit]
 			with MigrateMeetingRecordsFromOldRelationshipsValidation
-			with ExpireRelationshipsOnOldCoursesPermissions
+			with MigrateMeetingRecordsFromOldRelationshipsPermissions
 			with MigrateMeetingRecordsFromOldRelationshipsCommandState
 			with Unaudited
 }
@@ -40,9 +43,27 @@ trait MigrateMeetingRecordsFromOldRelationshipsValidation extends SelfValidating
 
 }
 
-trait MigrateMeetingRecordsFromOldRelationshipsCommandState extends ExpireRelationshipsOnOldCoursesCommandState {
+trait MigrateMeetingRecordsFromOldRelationshipsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+
+	self: MigrateMeetingRecordsFromOldRelationshipsCommandState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.ImportSystemData)
+	}
+
+}
+
+trait MigrateMeetingRecordsFromOldRelationshipsCommandState {
 
 	self: MeetingRecordServiceComponent with RelationshipServiceComponent =>
+
+	def student: StudentMember
+
+	lazy val personalTutorRelationshipType = relationshipService.getStudentRelationshipTypeByUrlPart("tutor").getOrElse(
+		throw new ItemNotFoundException("Could not find personal tutor relationship type")
+	)
+
+	lazy val studentRelationships = relationshipService.getRelationships(personalTutorRelationshipType, student)
 
 	lazy val migrations: Map[StudentRelationship, StudentRelationship] = {
 		studentRelationships.groupBy(_.agent).flatMap{case(agent, agentRelationships) =>

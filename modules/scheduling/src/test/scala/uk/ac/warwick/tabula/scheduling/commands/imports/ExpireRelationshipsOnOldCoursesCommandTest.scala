@@ -16,7 +16,7 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 	trait TestSupport extends RelationshipServiceComponent with ExpireRelationshipsOnOldCoursesCommandState {
 		override val student = thisStudent
 		override val relationshipService = smartMock[RelationshipService]
-
+		relationshipService.allStudentRelationshipTypes returns Seq(tutorRelationshipType)
 		relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns Option(tutorRelationshipType)
 	}
 	
@@ -34,6 +34,18 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 		testObject.relationshipService.getRelationships(tutorRelationshipType, thisStudent) returns Seq(relationshipOnCurrentCourse, relationshipOnEndedCourse)
 	}
 
+	trait StudentWithOnlyEndedCourse extends Fixture {
+		val endedCourse = thisStudent.freshStudentCourseDetails.head
+		endedCourse.endDate = DateTime.now.minusMonths(12).toLocalDate
+		val currentCourse = Fixtures.studentCourseDetails(thisStudent, null)
+		currentCourse.endDate = DateTime.now.minusMonths(1).toLocalDate
+		thisStudent.attachStudentCourseDetails(currentCourse)
+		val relationshipOnCurrentCourse = StudentRelationship(agent, tutorRelationshipType, currentCourse)
+		val relationshipOnEndedCourse = StudentRelationship(agent, tutorRelationshipType, endedCourse)
+		testObject.relationshipService.getRelationships(tutorRelationshipType, thisStudent) returns Seq(relationshipOnCurrentCourse, relationshipOnEndedCourse)
+	}
+
+
 	trait ValidationFixture extends Fixture {
 		val validator = new ExpireRelationshipsOnOldCoursesValidation with TestSupport
 		val errors = new BindException(validator, "command")
@@ -50,16 +62,13 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 	@Test
 	def validateNoCurrentRelationships(): Unit = new ValidationFixture {
 		thisStudent.freshStudentCourseDetails.head.endDate = DateTime.now.minusDays(1).toLocalDate
-		validator.relationshipService.findCurrentRelationships(tutorRelationshipType, thisStudent) returns Seq()
+		testObject.relationshipService.getRelationships(tutorRelationshipType, thisStudent) returns Seq()
 		validator.validate(errors)
 		errors.hasErrors should be {true}
 	}
 
-	
-
 	@Test
 	def validateAlreadyExpired(): Unit = new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
-		validator.relationshipService.findCurrentRelationships(tutorRelationshipType, thisStudent) returns Seq(relationshipOnCurrentCourse)
 		relationshipOnEndedCourse.endDate = DateTime.now.minusDays(1)
 		validator.validate(errors)
 		errors.hasErrors should be {true}
@@ -67,7 +76,19 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 
 	@Test
 	def validateHasExpired(): Unit = new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
-		validator.relationshipService.findCurrentRelationships(tutorRelationshipType, thisStudent) returns Seq(relationshipOnCurrentCourse)
+		validator.validate(errors)
+		errors.hasErrors should be {false}
+	}
+
+	@Test
+	def noCurrentRelationshipAndNotPastGracePeriod(): Unit = new ValidationFixture with StudentWithOnlyEndedCourse {
+		validator.validate(errors)
+		errors.hasErrors should be {true}
+	}
+
+	@Test
+	def noCurrentRelationshipButPastGracePeriod(): Unit = new ValidationFixture with StudentWithOnlyEndedCourse {
+		currentCourse.endDate = DateTime.now.minusMonths(3).toLocalDate
 		validator.validate(errors)
 		errors.hasErrors should be {false}
 	}
