@@ -21,11 +21,11 @@ class DownloadSubmissionsCommandTest extends TestBase with Mockito {
 		userDatabase find {_.getWarwickId == id} getOrElse new AnonymousUser()
 	}
 
-	@Test def test() {
+	@Test def test() = withUser("cusfal") {
 		val assignment = new Assignment
 		assignment.module = new Module(code = "ph105", adminDepartment = new Department)
 
-		val cmd = new DownloadSubmissionsCommand(assignment.module, assignment)
+		val cmd = new DownloadSubmissionsCommand(assignment.module, assignment, currentUser)
 
 		val submissions = JArrayList(
 			newSubmission(cmd.assignment),
@@ -40,15 +40,13 @@ class DownloadSubmissionsCommandTest extends TestBase with Mockito {
 
 		cmd.submissions = submissions
 
-		cmd.callback = { zip =>
-			val stream = new ZipInputStream(new FileInputStream(zip.file.get))
-			val items = Zips.map(stream) { item =>
-				item.getName
-			}
-			items.size should be (0)
+		cmd.applyInternal().isLeft should be {true}
+		val zip = cmd.applyInternal().left.toOption.get
+		val stream = new ZipInputStream(new FileInputStream(zip.file.get))
+		val items = Zips.map(stream) { item =>
+			item.getName
 		}
-
-		cmd.applyInternal()
+		items.size should be (0)
 	}
 
 

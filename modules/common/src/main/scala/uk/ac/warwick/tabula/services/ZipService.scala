@@ -115,14 +115,14 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	 * Get a zip containing these submissions. If there is more than one submission
 	 * for a user, the zip _might_ work but look weird.
 	 */
-	def getSomeSubmissionsZip(submissions: Seq[Submission]): File =
-		createUnnamedZip(submissions flatMap getSubmissionZipItems)
+	def getSomeSubmissionsZip(submissions: Seq[Submission], progressCallback: (Int, Int) => Unit = {(_,_) => }): File =
+		createUnnamedZip(submissions flatMap getSubmissionZipItems, progressCallback)
 
 	/**
 		* Get a zip containing these feedbacks.
 	*/
-	def getSomeFeedbacksZip(feedbacks: Seq[Feedback]): File =
-		createUnnamedZip(feedbacks flatMap getFeedbackZipItems)
+	def getSomeFeedbacksZip(feedbacks: Seq[Feedback], progressCallback: (Int, Int) => Unit = {(_,_) => }): File =
+		createUnnamedZip(feedbacks flatMap getFeedbackZipItems, progressCallback)
 
 	/**
 	 * Get a zip containing these marker feedbacks.

@@ -74,9 +74,9 @@ trait ZipCreator extends Logging {
 	 * Create a new Zip with a randomly generated name.
 	 */
 	@throws[ZipRequestTooLargeError]("if the items are too large to be zipped")
-	def createUnnamedZip(items: Seq[ZipItem]) = {
+	def createUnnamedZip(items: Seq[ZipItem], progressCallback: (Int, Int) => Unit = {(_,_) => }) = {
 		val file = unusedFile
-		writeToFile(file, items)
+		writeToFile(file, items, progressCallback)
 		file
 	}
 
@@ -86,7 +86,7 @@ trait ZipCreator extends Logging {
 	private val CompressionLevel = Deflater.BEST_COMPRESSION
 
 	@throws[ZipRequestTooLargeError]("if the items are too large to be zipped")
-	private def writeToFile(file: File, items: Seq[ZipItem]) = {
+	private def writeToFile(file: File, items: Seq[ZipItem], progressCallback: (Int, Int) => Unit = {(_,_) => }) = {
 		if (isOverSizeLimit(items)) throw new ZipRequestTooLargeError
 
 		file.getParentFile.mkdirs
@@ -94,7 +94,7 @@ trait ZipCreator extends Logging {
 			zip.setLevel(CompressionLevel)
 			// HFC-70 Windows compatible, but fixes filenames in good apps like 7-zip 
 			zip.setCreateUnicodeExtraFields(UnicodeExtraFieldPolicy.NOT_ENCODEABLE)
-			writeItems(items, zip)
+			writeItems(items, zip, progressCallback)
 		}
 	}
 	
@@ -117,15 +117,16 @@ trait ZipCreator extends Logging {
 
 	private def fileForName(name: String) = new File(zipDir, name + ".zip")
 
-	private def writeItems(items: Seq[ZipItem], zip: ZipArchiveOutputStream) {
+	private def writeItems(items: Seq[ZipItem], zip: ZipArchiveOutputStream, progressCallback: (Int, Int) => Unit = {(_,_) => }) {
 		def writeFolder(basePath: String, items: Seq[ZipItem]) {
-			for (item <- items) item match {
+			items.zipWithIndex.foreach{ case(item, index) => item match {
 				case file: ZipFileItem =>
 					zip.putArchiveEntry(new ZipArchiveEntry(basePath + trunc(file.name, MaxFileLength)))
 					copy(file.input, zip)
 					zip.closeArchiveEntry()
+					progressCallback(index, items.size)
 				case folder: ZipFolderItem => writeFolder(basePath + trunc(folder.name, MaxFolderLength) + "/", folder.items)
-			}
+			}}
 		}
 		writeFolder("", items)
 	}

@@ -72,13 +72,19 @@ class DownloadAllFeedbackController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
 
-	@ModelAttribute def selectedFeedbacksCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
-		new DownloadSelectedFeedbackCommand(module, assignment)
+	@ModelAttribute("command")
+	def selectedFeedbacksCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
+		new DownloadSelectedFeedbackCommand(module, assignment, user)
 
 	@RequestMapping
-	def getSelected(command: DownloadSelectedFeedbackCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		command.apply { renderable =>
-			fileServer.serve(renderable)
+	def getSelected(@ModelAttribute("command") command: DownloadSelectedFeedbackCommand, @PathVariable("assignment") assignment: Assignment)
+		(implicit request: HttpServletRequest, response: HttpServletResponse): Mav = {
+		command.apply() match {
+			case Left(renderable) =>
+				fileServer.serve(renderable)
+				Mav("")
+			case Right(jobInstance) =>
+				Redirect(Routes.zipFileJob(jobInstance), "returnTo" -> Routes.admin.assignment.submissionsandfeedback(assignment))
 		}
 	}
 }
