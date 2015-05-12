@@ -69,7 +69,7 @@ class EmergencyMessageServiceImpl extends EmergencyMessageService with Logging {
 		val m = EventDescription.generateMessage(Event.fromDescribable(callee))
 		logger.info("[Emergency Message Reject] " + m)
 		
-		new MaintenanceMessageServiceEnabledException(message)
+		new EmergencyMessageServiceEnabledException(message)
 	}
 
 	private def notEnabled = new IllegalStateException("Maintenance not enabled")
@@ -97,7 +97,7 @@ class EmergencyMessageServiceImpl extends EmergencyMessageService with Logging {
  * Holds onto some info about the maintenance, since error views are
  * only provided with the thrown exception.
  */
-class MaintenanceMessageServiceEnabledException(val message: Option[String])
+class EmergencyMessageServiceEnabledException(val message: Option[String])
 	extends RuntimeException
 	with HandledException {
 
