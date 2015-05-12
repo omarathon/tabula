@@ -380,7 +380,7 @@ $(function() {
 		});
 
 		var contentId = $container.attr('data-contentid');
-		var $row = $('tr.item-container[data-contentid='+contentId+']');
+		var $row = $('tr.item-container[data-contentid='+contentId+'], tr.itemContainer[data-contentid='+contentId+']');
 
 		var $expiryDateField = $form.find('.date-time-picker');
 		$expiryDateField.tabulaDateTimePicker();

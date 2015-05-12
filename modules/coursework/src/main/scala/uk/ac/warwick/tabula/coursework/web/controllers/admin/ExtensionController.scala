@@ -52,7 +52,7 @@ abstract class ExtensionController extends CourseworkController {
 		}
 	}
 	import scala.language.implicitConversions
-	implicit def asMap(e: Extension) = new ExtensionMap(e)
+	implicit def asMap(e: Extension): ExtensionMap = new ExtensionMap(e)
 }
 
 @Controller

@@ -56,7 +56,7 @@ trait ModifyExtensionCommandValidation extends SelfValidating {
 		}
 
 		if(expiryDate == null) {
-			if (action == ApprovalAction) {
+			if (action == ApprovalAction || action == UpdateApprovalAction) {
 				errors.rejectValue("expiryDate", "extension.requestedExpiryDate.provideExpiry")
 			}
 		} else if(expiryDate.isBefore(assignment.closeDate)) {

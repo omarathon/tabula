@@ -126,6 +126,10 @@ trait FeedbackAdjustmentCommandValidation extends SelfValidating {
 				errors.rejectValue("adjustedGrade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
 			}
 		}
+
+		if (!assessment.collectMarks) {
+			errors.rejectValue("adjustedMark", "actualMark.assessmentInvalid")
+		}
 	}
 }
 
