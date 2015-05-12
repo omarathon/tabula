@@ -230,18 +230,22 @@
 							</@fmt.permission_button>
 						</li>
 					</#if>
-					<li class="must-have-selected">
-						<#assign onlinefeedback_url><@routes.feedbackAdjustment assignment /></#assign>
-						<@fmt.permission_button
-							permission='AssignmentFeedback.Manage'
-							scope=assignment
-							action_descr='make adjustments to feedback'
-							classes='form-post'
-							tooltip='Apply penalties or make adjustments to mark and grade'
-							href=onlinefeedback_url>
-							<i class="icon-sort icon-fixed-width"></i> Adjustments
-						</@fmt.permission_button>
-					</li>
+					<#if assignment.collectMarks>
+						<li class="must-have-selected">
+							<#assign onlinefeedback_url><@routes.feedbackAdjustment assignment /></#assign>
+							<@fmt.permission_button
+								permission='AssignmentFeedback.Manage'
+								scope=assignment
+								action_descr='make adjustments to feedback'
+								classes='form-post'
+								tooltip='Apply penalties or make adjustments to mark and grade'
+								href=onlinefeedback_url>
+								<i class="icon-sort icon-fixed-width"></i> Adjustments
+							</@fmt.permission_button>
+						</li>
+					<#else>
+						<li class="disabled"><a class="use-tooltip" data-container="body" title="You cannot adjust marks on an assignment that does not collect marks"><i class="icon-sort icon-fixed-width"></i> Adjustments</a></li>
+					</#if>
 
 					<#-- Download / Publish / Delete always available -->
 					<li class="must-have-selected">

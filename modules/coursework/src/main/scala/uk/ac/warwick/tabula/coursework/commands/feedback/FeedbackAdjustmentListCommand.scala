@@ -30,16 +30,21 @@ class FeedbackAdjustmentListCommandInternal(val assessment: Assessment)
 	self: UserLookupComponent with AssessmentMembershipServiceComponent =>
 
 	def applyInternal() = {
-		val allFeedback = assessment.fullFeedback
-		val allStudents =
-			if (students.isEmpty) assessmentMembershipService.determineMembershipUsers(assessment)
-			else students.asScala.map(userLookup.getUserByWarwickUniId)
+		if (assessment.collectMarks) {
+			val allFeedback = assessment.fullFeedback
+			val allStudents =
+				if (students.isEmpty) assessmentMembershipService.determineMembershipUsers(assessment)
+				else students.asScala.map(userLookup.getUserByWarwickUniId)
 
-		val (hasFeedback, noFeedback) = allStudents.map { student =>
-			StudentInfo(student, allFeedback.find { _.universityId == student.getWarwickId })
-		}.partition { _.feedback.isDefined }
+			val (hasFeedback, noFeedback) = allStudents.map { student =>
+				StudentInfo(student, allFeedback.find { _.universityId == student.getWarwickId })
+			}.partition { _.feedback.isDefined }
 
-		hasFeedback ++ noFeedback
+			hasFeedback ++ noFeedback
+		} else {
+			Seq()
+		}
+
 	}
 }
 
