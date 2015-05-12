@@ -76,7 +76,7 @@ trait ExpireRelationshipsOnOldCoursesCommandState {
 	lazy val studentRelationships = relationshipTypes.flatMap(relationshipService.getRelationships(_, student))
 
 	def hasOnlyVeryOldRelationships(relationships: Seq[StudentRelationship]) =
-		relationships.forall(!_.studentCourseDetails.isWithinGracePeriod)
+		relationships.forall(rel => rel.studentCourseDetails.isEnded && !rel.studentCourseDetails.hasEndedRecently)
 
 	def hasCurrentRelationship(relationships: Seq[StudentRelationship]) =
 		relationships.exists(rel => rel.isCurrent && !rel.studentCourseDetails.isEnded)

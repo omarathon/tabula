@@ -193,8 +193,8 @@ class StudentCourseDetails
 
 	def isEnded = endDate != null && endDate.isBefore(DateTime.now.toLocalDate)
 
-	// we won't automatically expire a relationship if it is within the "grace period"
-	def isWithinGracePeriod = endDate != null &&
+	// we won't automatically expire a relationship if it ended recently
+	def hasEndedRecently = endDate != null &&
 		endDate.toDateTimeAtStartOfDay.plusMonths(StudentCourseDetails.GracePeriodInMonths).isAfterNow
 
 }
