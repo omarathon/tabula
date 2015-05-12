@@ -75,7 +75,7 @@ trait GenerateGradesFromMarkPermissions extends RequiresPermissionsChecking with
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assessment, module)
-		p.PermissionCheck(Permissions.MarkerFeedback.Manage, assessment)
+		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assessment)
 	}
 
 }

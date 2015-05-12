@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.roles
 
+import uk.ac.warwick.tabula.JavaImports
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.JavaImports
 
 case class ModuleAssistant(module: model.Module) extends BuiltInRole(ModuleAssistantRoleDefinition, module)
 
@@ -30,8 +29,10 @@ case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
 		Extension.Update,
 		Extension.Delete,
 
-		Feedback.Manage,
-		MarkerFeedback.Manage,
+		AssignmentFeedback.Manage,
+		AssignmentMarkerFeedback.Manage,
+		ExamFeedback.Manage,
+		ExamMarkerFeedback.Manage,
 
 		SmallGroups.Create,
 		SmallGroupEvents.Register,

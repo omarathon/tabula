@@ -33,7 +33,7 @@ class RateFeedbackCommand(val module: Module, val assignment: Assignment, val fe
 	}
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Feedback.Rate, feedback)
+	PermissionCheck(Permissions.AssignmentFeedback.Rate, feedback)
 
 	//	var rating:JInteger = _ 
 

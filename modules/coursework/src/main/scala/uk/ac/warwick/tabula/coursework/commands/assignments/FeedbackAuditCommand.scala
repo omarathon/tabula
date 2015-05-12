@@ -44,7 +44,7 @@ trait FeedbackAuditCommandPermissions extends RequiresPermissionsChecking with P
 	self: FeedbackAuditCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.Submission.Read, mandatory(assignment))
-		p.PermissionCheck(Permissions.Feedback.Read, mandatory(assignment))
+		p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(assignment))
 	}
 }
 

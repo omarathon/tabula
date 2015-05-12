@@ -60,7 +60,7 @@ trait MarkerAddMarksPermissions extends RequiresPermissionsChecking with Permiss
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assessment, module)
-		p.PermissionCheck(Permissions.MarkerFeedback.Manage, assessment)
+		p.PermissionCheck(Permissions.ExamMarkerFeedback.Manage, assessment)
 	}
 
 }

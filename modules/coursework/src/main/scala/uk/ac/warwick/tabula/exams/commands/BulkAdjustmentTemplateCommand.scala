@@ -2,7 +2,8 @@ package uk.ac.warwick.tabula.exams.commands
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.Assessment
+import uk.ac.warwick.tabula.data.HibernateHelpers
+import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, Exam}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -70,7 +71,12 @@ trait BulkAdjustmentTemplatePermissions extends RequiresPermissionsChecking with
 	self: BulkAdjustmentTemplateCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.Manage, mandatory(assessment))
+		HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
+			case assignment: Assignment =>
+				p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
+			case exam: Exam =>
+				p.PermissionCheck(Permissions.ExamFeedback.Manage, exam)
+		}
 	}
 
 }

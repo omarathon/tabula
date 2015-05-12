@@ -39,6 +39,6 @@ trait ViewOnlineFeedbackCommandPermissions extends RequiresPermissionsChecking w
 	self: ViewOnlineFeedbackCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.Read, mandatory(feedback))
+		p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(feedback))
 	}
 }

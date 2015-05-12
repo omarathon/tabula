@@ -104,7 +104,7 @@
 							<li>
 								<#local marks_url><@routes.examAddMarks exam /></#local>
 								<@fmt.permission_button
-									permission='Feedback.Manage'
+									permission='ExamFeedback.Manage'
 									scope=exam
 									action_descr='add marks'
 									href=marks_url
@@ -116,7 +116,7 @@
 							<li>
 								<#local adjust_url><@routes.examFeedbackAdjustment exam /></#local>
 								<@fmt.permission_button
-									permission='Feedback.Manage'
+									permission='ExamFeedback.Manage'
 									scope=exam
 									action_descr='adjust marks'
 									href=adjust_url
@@ -130,7 +130,7 @@
 									<li>
 										<#assign markers_url><@routes.examAssignMarkers exam /></#assign>
 										<@fmt.permission_button
-										permission='Assignment.Update'
+										permission='ExamFeedback.Manage'
 										scope=exam
 										action_descr='assign markers'
 										href=markers_url>
@@ -172,7 +172,7 @@
 							<li>
 								<#local upload_url><@routes.uploadExamToSits exam /></#local>
 								<@fmt.permission_button
-									permission='Feedback.UploadToSits'
+									permission='ExamFeedback.Manage'
 									scope=exam
 									action_descr='upload to SITS'
 									href=upload_url

@@ -33,7 +33,7 @@ trait FeedbackSummaryCommandState {
 trait FeedbackSummaryCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: FeedbackSummaryCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.Read, assignment)
+		p.PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
 	}
 }
 

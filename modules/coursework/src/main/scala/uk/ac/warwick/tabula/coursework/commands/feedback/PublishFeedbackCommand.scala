@@ -155,7 +155,7 @@ trait PublishFeedbackPermissions extends RequiresPermissionsChecking with Permis
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(mandatory(assignment), mandatory(module))
-		p.PermissionCheck(Permissions.Feedback.Publish, assignment)
+		p.PermissionCheck(Permissions.AssignmentFeedback.Publish, assignment)
 	}
 }
 

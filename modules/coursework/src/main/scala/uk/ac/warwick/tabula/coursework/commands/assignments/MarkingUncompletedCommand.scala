@@ -69,7 +69,7 @@ abstract class MarkingUncompletedCommand(val module: Module, val assignment: Ass
 trait MarkingUncompletedCommandPermissions extends RequiresPermissionsChecking {
 	self: MarkingUncompletedState =>
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MarkerFeedback.Manage, assignment)
+		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
 		if(submitter.apparentUser != marker) {
 			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
 		}
