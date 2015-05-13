@@ -15,15 +15,13 @@ abstract class ExtensionRequestRespondedNotification(val verbed: String) extends
 	def url = Routes.admin.assignment.extension.expandrow(assignment, student.getWarwickId)
 	def urlTitle = "review this extension request"
 
-	def contentMap = Map(
+	def content = FreemarkerModel("/WEB-INF/freemarker/emails/responded_extension_request.ftl", Map(
 		"studentName" -> student.getFullName,
 		"agentName" -> agent.getFullName,
 		"verbed" -> verbed,
 		"assignment" -> assignment,
 		"path" ->  url
-	)
-
-	def content = FreemarkerModel("/WEB-INF/freemarker/emails/responded_extension_request.ftl", contentMap)
+	))
 
 	def recipients = assignment.module.adminDepartment.extensionManagers.users.filterNot(_ == agent)
 
@@ -31,15 +29,7 @@ abstract class ExtensionRequestRespondedNotification(val verbed: String) extends
 
 @Entity
 @DiscriminatorValue("ExtensionRequestRespondedApprove")
-class ExtensionRequestRespondedApproveNotification extends ExtensionRequestRespondedNotification("approved") {
-	override def contentMap = {
-		val map = super.contentMap
-		val expiryDate = extension.expiryDate.getOrElse(
-			throw new IllegalArgumentException("Can't send an extension approval notification without an expiry date")
-		)
-		map + ("newExpiryDate" -> dateTimeFormatter.print(expiryDate))
-	}
-}
+class ExtensionRequestRespondedApproveNotification extends ExtensionRequestRespondedNotification("approved") {}
 
 @Entity
 @DiscriminatorValue("ExtensionRequestRespondedReject")
