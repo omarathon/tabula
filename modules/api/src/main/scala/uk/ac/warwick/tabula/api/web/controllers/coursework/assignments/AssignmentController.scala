@@ -129,7 +129,7 @@ trait AssignmentStudentToJsonConverter {
 					"id" -> extension.id,
 					"state" -> extension.state.description,
 					"expired" -> (extension.state == ExtensionState.Approved && !enhancedExtension.within),
-					"expiryDate" -> Option(extension.expiryDate).map(DateFormats.IsoDateTime.print).orNull,
+					"expiryDate" -> extension.expiryDate.map(DateFormats.IsoDateTime.print).orNull,
 					"requestedExpiryDate" -> Option(extension.requestedExpiryDate).map(DateFormats.IsoDateTime.print).orNull
 				)
 			}.orNull

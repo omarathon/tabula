@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.data.model.forms
 
+import uk.ac.warwick.tabula.data.model.forms.ExtensionState.Approved
+
 import scala.collection.JavaConversions._
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.{Days, DateTime}
@@ -46,8 +48,18 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var requestedExpiryDate: DateTime = _
+
 	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	var expiryDate: DateTime = _
+	@Column(name = "expiryDate")
+	private var _expiryDate: DateTime = _
+
+	def expiryDate_=(ed: DateTime) {_expiryDate = ed}
+
+	def expiryDate: Option[DateTime] = {
+		if (_expiryDate == null || state != Approved) None
+		else Some(_expiryDate)
+	}
+
 	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var requestedOn: DateTime = _
 	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
@@ -128,20 +140,19 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	lazy val workingDaysHelper = new WorkingDaysHelperImpl
 
 	// feedback deadline taking the extension into account
-	def feedbackDeadline = workingDaysHelper.datePlusWorkingDays(expiryDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays).toDateTime(expiryDate)
+	def feedbackDeadline = expiryDate.map(ed =>
+		workingDaysHelper.datePlusWorkingDays(ed.toLocalDate, Feedback.PublishDeadlineInWorkingDays).toDateTime(ed)
+	)
 
 	def toEntityReference = new ExtensionEntityReference().put(this)
 
-	def duration = if (expiryDate != null) Days.daysBetween(assignment.closeDate, expiryDate).getDays else 0
+	def duration = expiryDate.map(Days.daysBetween(assignment.closeDate, _).getDays).getOrElse(0)
 
 	def requestedExtraDuration = {
-		if (requestedExpiryDate != null && expiryDate != null)
-			Days.daysBetween(expiryDate, requestedExpiryDate).getDays
-
-		else if (requestedExpiryDate != null && expiryDate == null)
-			Days.daysBetween(assignment.closeDate, requestedExpiryDate).getDays
-
-		else 0
+		if (requestedExpiryDate != null) {
+			val from = expiryDate.getOrElse(assignment.closeDate)
+			Days.daysBetween(from, requestedExpiryDate).getDays
+		} else 0
 	}
 }
 
