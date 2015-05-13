@@ -1,22 +1,13 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import uk.ac.warwick.tabula.coursework.commands.assignments._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.util.csv.CSVLineWriter
-import scala.collection.immutable.ListMap
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.DateFormats
 import org.joda.time.ReadableInstant
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import scala.xml._
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import org.apache.poi.xssf.usermodel.XSSFSheet
-import org.apache.poi.ss.util.WorkbookUtil
-import org.apache.commons.lang3.text.WordUtils
-import org.apache.poi.hssf.usermodel.HSSFDataFormat
-import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
+import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.data.model._
+
+import scala.collection.JavaConverters._
+import scala.xml._
 
 object AdminHomeExports {
 	class XMLBuilder(val department: Department, val info: DepartmentHomeInformation) extends AdminHomeExport {
