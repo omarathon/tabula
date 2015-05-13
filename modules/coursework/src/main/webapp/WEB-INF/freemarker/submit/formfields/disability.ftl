@@ -5,6 +5,6 @@
 		<option value="false" <#if submitAssignmentCommand.useDisability?? && !submitAssignmentCommand.useDisability>selected</#if>>No</option>
 	</@f.select>
 	<div class="help-block">
-		Make the marker of this submission aware of your disability.
+		Make the marker of this submission aware of your disability and take it into consideration.
 	</div>
 </@form.labelled_row>

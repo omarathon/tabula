@@ -21,6 +21,8 @@ object AdminAddMarksCommand {
 			with AutowiringFeedbackServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringMarksExtractorComponent
+			with AutowiringSubmissionServiceComponent
+			with AutowiringProfileServiceComponent
 			with ComposableCommand[Seq[Feedback]]
 			with AdminAddMarksDescription
 			with AdminAddMarksPermissions
@@ -29,6 +31,7 @@ object AdminAddMarksCommand {
 			with AdminAddMarksCommandState
 			with PostExtractValidation
 			with AddMarksCommandBindListener
+			with FetchDisabilities
 }
 
 class AdminAddMarksCommandInternal(val module: Module, val assessment: Assessment, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)

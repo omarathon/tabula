@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.commands.{UserAware, Appliable}
-import uk.ac.warwick.tabula.coursework.commands.assignments.{FinaliseFeedbackComponent, FinaliseFeedbackCommand}
+import uk.ac.warwick.tabula.commands.{Appliable, UserAware}
+import uk.ac.warwick.tabula.coursework.commands.assignments.{FinaliseFeedbackCommand, FinaliseFeedbackComponent}
 import uk.ac.warwick.tabula.coursework.commands.feedback._
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected, ReleasedForMarking}
 import uk.ac.warwick.tabula.data.model._
@@ -10,8 +10,6 @@ import uk.ac.warwick.tabula.data.{SavedFormValueDao, SavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
-
-import scala.collection.JavaConverters._
 
 class OnlineModerationCommandTest extends TestBase with Mockito {
 	trait Fixture {
@@ -86,11 +84,13 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 	trait ModerationCommandSupport extends FeedbackServiceComponent with Appliable[MarkerFeedback]
 		with FileAttachmentServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy with OnlineFeedbackState
 		with OnlineFeedbackStudentState with CopyFromFormFields with WriteToFormFields with SavedFormValueDaoComponent
+		with ProfileServiceComponent
 	{
-		def feedbackService = mock[FeedbackService]
-		def fileAttachmentService = mock[FileAttachmentService]
-		def zipService = mock[ZipService]
-		def savedFormValueDao = mock[SavedFormValueDao]
+		def feedbackService = smartMock[FeedbackService]
+		def fileAttachmentService = smartMock[FileAttachmentService]
+		def zipService = smartMock[ZipService]
+		def savedFormValueDao = smartMock[SavedFormValueDao]
+		def profileService = smartMock[ProfileService]
 		def apply() = new MarkerFeedback()
 	}
 

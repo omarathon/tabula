@@ -105,7 +105,7 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 		assignment.module.code + " - " + name + " - " + attachment.name
 	}
 
-	def useDisability: Option[Boolean] = values.find(_.name == Submission.UseDisabilityFieldName).map(_.value.asInstanceOf[Boolean])
+	def useDisability: Boolean = values.find(_.name == Submission.UseDisabilityFieldName).exists(_.value.toBoolean)
 
 	def toEntityReference = new SubmissionEntityReference().put(this)
 }

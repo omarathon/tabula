@@ -1185,16 +1185,19 @@ h2 {
 	.cursor-pointer();
 }
 
-*[rel=tooltip], .cue-popover {
+*[rel=tooltip], #container .cue-popover {
+	span.label { cursor: help; }
 	cursor: help;
 	border-bottom: 1px dotted @grayLight;
 }
+
 
 .use-tooltip, .use-popover, .use-wide-popover, .use-introductory {
 	cursor: help;
 
 	&:link { cursor: auto; }
 }
+
 
 .profile-link {
   color: @tabulaGray;

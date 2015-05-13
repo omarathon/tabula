@@ -33,6 +33,7 @@ object OnlineModerationCommand {
 			with AutowiringZipServiceComponent
 			with AutowiringSavedFormValueDaoComponent
 			with AutowiringUserLookupComponent
+			with AutowiringProfileServiceComponent
 			with OnlineFeedbackFormDescription[MarkerFeedback] {
 				override lazy val eventName = "OnlineMarkerFeedback"
 			}

@@ -25,6 +25,7 @@ object OnlineFeedbackFormCommand {
 			with AutowiringFileAttachmentServiceComponent
 			with AutowiringZipServiceComponent
 			with AutowiringSavedFormValueDaoComponent
+			with AutowiringProfileServiceComponent
 			with OnlineFeedbackFormDescription[Feedback] {
 			override lazy val eventName = "OnlineFeedback"
 		}

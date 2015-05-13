@@ -174,14 +174,15 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 }
 
 trait OnlineFeedbackFormCommandTestSupport extends FileAttachmentServiceComponent with FeedbackServiceComponent
-	with ZipServiceComponent with SavedFormValueDaoComponent with Mockito {
+	with ZipServiceComponent with SavedFormValueDaoComponent with Mockito with ProfileServiceComponent {
 
 	this : OnlineFeedbackFormCommand =>
 
-	val fileAttachmentService = mock[FileAttachmentService]
-	val feedbackService = mock[FeedbackService]
-	val zipService = mock[ZipService]
-	val savedFormValueDao = mock[SavedFormValueDao]
+	val fileAttachmentService = smartMock[FileAttachmentService]
+	val feedbackService = smartMock[FeedbackService]
+	val zipService = smartMock[ZipService]
+	val savedFormValueDao = smartMock[SavedFormValueDao]
+	val profileService = smartMock[ProfileService]
 
 	def apply(): Feedback = this.applyInternal()
 }

@@ -46,6 +46,7 @@ object AssignmentFeedbackAdjustmentCommand {
 			with AutowiringFeedbackServiceComponent
 			with AutowiringZipServiceComponent
 			with AutowiringFeedbackForSitsServiceComponent
+			with AutowiringProfileServiceComponent
 			with QueuesFeedbackForSits
 			with SubmissionState {
 				override val submission = thisAssignment.findSubmission(student.getWarwickId)

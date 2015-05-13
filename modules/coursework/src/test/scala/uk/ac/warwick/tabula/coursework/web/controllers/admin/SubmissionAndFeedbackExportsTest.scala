@@ -51,7 +51,7 @@ class SubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 				enhancedSubmission = Some(SubmissionListItem(submission1, downloaded=false)),
 				enhancedFeedback = None,
 				enhancedExtension = None
-			), assignment
+			), assignment, None
 		),
 		Student(student67, null, None, ListMap(),
 			WorkflowItems (
@@ -59,7 +59,7 @@ class SubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 				enhancedSubmission = None,
 				enhancedFeedback = None,
 				enhancedExtension = None
-			), assignment
+			), assignment, None
 		)
 	)
 
