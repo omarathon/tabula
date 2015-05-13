@@ -1,15 +1,11 @@
 package uk.ac.warwick.tabula.system
 
-import org.springframework.mock.web.MockHttpServletRequest
-import org.springframework.mock.web.MockHttpServletResponse
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.RequestInfo
-import uk.ac.warwick.tabula.TestBase
+import org.springframework.mock.web.{MockHttpServletRequest, MockHttpServletResponse}
 import uk.ac.warwick.tabula.helpers.HttpServletRequestUtils
-import uk.ac.warwick.tabula.services.MaintenanceModeService
-import uk.ac.warwick.util.web.Uri
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.services.{EmergencyMessageService, MaintenanceModeService}
+import uk.ac.warwick.tabula.{CurrentUser, Mockito, RequestInfo, TestBase}
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.web.Uri
 
 // scalastyle:off magic.number
 class RequestInfoInterceptorTest extends TestBase with Mockito {
@@ -17,7 +13,9 @@ class RequestInfoInterceptorTest extends TestBase with Mockito {
 	val interceptor = new RequestInfoInterceptor
 	
 	val maintenanceModeService = mock[MaintenanceModeService]
+	val emergencyMessageService = mock[EmergencyMessageService]
 	interceptor.maintenance = maintenanceModeService
+	interceptor.emergencyMessage = emergencyMessageService
 	
 	@Test def fromExisting {
 		val req = new MockHttpServletRequest

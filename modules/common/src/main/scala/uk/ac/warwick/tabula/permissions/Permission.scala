@@ -134,6 +134,7 @@ object Permissions {
 
 	case object GodMode extends ScopelessPermission("Enable god mode")
 	case object ManageMaintenanceMode extends ScopelessPermission("Manage maintenance mode settings")
+	case object ManageEmergencyMessage extends ScopelessPermission("Manage emergency message")
 	case object ImportSystemData extends ScopelessPermission("Import data from other systems")
 	case object ReplicaSyncing extends ScopelessPermission("Manually run replica syncing")
 	case object ViewAuditLog extends ScopelessPermission("View and search the audit log")

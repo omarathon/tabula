@@ -1,11 +1,9 @@
 package uk.ac.warwick.tabula
 
-import uk.ac.warwick.util.web.Uri
-import org.springframework.web.context.request.RequestContextHolder
-import org.springframework.web.context.request.ServletRequestAttributes
+import org.springframework.web.context.request.{RequestAttributes, RequestContextHolder, ServletRequestAttributes}
 import org.springframework.web.servlet.HandlerMapping
-import org.springframework.web.context.request.RequestAttributes
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
+import uk.ac.warwick.util.web.Uri
 
 /**
  * Stores information about the current request, such as the
@@ -27,7 +25,10 @@ class RequestInfo(
 	val requestParameters: Map[String, Seq[String]],
 	val ajax: Boolean = false,
 	val maintenance: Boolean = false,
-	val requestLevelCache: RequestLevelCache = new RequestLevelCache)
+	val requestLevelCache: RequestLevelCache = new RequestLevelCache,
+	val hasEmergencyMessage: Boolean = false,
+	val emergencyMessage: String = ""
+	)
 	extends EarlyRequestInfo
 
 object RequestInfo {

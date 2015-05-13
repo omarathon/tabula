@@ -1016,6 +1016,14 @@ table {
 	form { display: inline; margin: 0; }
 }
 
+#emergency-message {
+	font-size: 140%;
+	padding: 0.3em;
+	text-align: center;
+	color: white;
+	.vertical-gradient(@tabulaRed, @tabulaRedDark);
+}
+
 #masquerade-notice {
 	font-size: 140%;
 	padding: 0.3em;
@@ -2084,11 +2092,14 @@ ul.nav-pills {
 }
 
 #maintenance-message {
-	text-align: center;
+	padding: 1em;
 	font-size: 16px;
 	line-height: 24px;
 	font-family: Bitter, Cambria, "Liberation Serif", Georgia, "Times New Roman", Times, serif;
 	margin-top: 30px;
+}
+#maintenance-message h2{
+	color: #239b92 !important;
 }
 
 .home-page-activity {
