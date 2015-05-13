@@ -10,11 +10,11 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.forms.{FormValue, SavedFormValue}
+import uk.ac.warwick.tabula.data.model.forms.{BooleanFormValue, FormValue, SavedFormValue}
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{SubmissionDueGeneralNotification, SubmissionDueWithExtensionNotification, SubmissionReceiptNotification, SubmissionReceivedNotification}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringCourseworkSubmissionService
-import uk.ac.warwick.tabula.services.{MonitoringPointProfileTermAssignmentService, SubmissionService, ZipService}
+import uk.ac.warwick.tabula.services.{ProfileService, MonitoringPointProfileTermAssignmentService, SubmissionService, ZipService}
 import uk.ac.warwick.tabula.system.BindListener
 
 import scala.collection.JavaConverters._
@@ -33,8 +33,10 @@ class SubmitAssignmentCommand(
 	var zipService = Wire.auto[ZipService]
 	var monitoringPointProfileTermAssignmentService = Wire.auto[MonitoringPointProfileTermAssignmentService]
 	var attendanceMonitoringCourseworkSubmissionService = Wire.auto[AttendanceMonitoringCourseworkSubmissionService]
+	var profileService = Wire[ProfileService]
 
 	var fields = buildEmptyFields
+	var useDisability: JBoolean = null
 
 	var plagiarismDeclaration: Boolean = false
 
@@ -100,20 +102,28 @@ class SubmitAssignmentCommand(
 		// If a submitted ID is not found in assignment, it's ignored.
 		assignment.submissionFields.foreach { field =>
 			errors.pushNestedPath("fields[%s]".format(field.id))
-			fields.asScala.get(field.id).map { field.validate(_, errors) }
+			fields.asScala.get(field.id).foreach { field.validate(_, errors) }
 			errors.popNestedPath()
+		}
+
+		if (profileService.getMemberByUser(user.apparentUser).exists{
+			case student: StudentMember => Option(student.disability).exists(_.reportable)
+			case _ => false
+		} && useDisability == null) {
+			errors.rejectValue("useDisability", "assignment.submit.chooseDisability")
 		}
 
 	}
 
 	override def applyInternal() = transactional() {
-		assignment.submissions.asScala.find(_.isForUser(user.apparentUser)).map { existingSubmission =>
+		assignment.submissions.asScala.find(_.isForUser(user.apparentUser)).foreach { existingSubmission =>
 			if (assignment.resubmittable(user.apparentUser)) {
 				service.delete(existingSubmission)
 			} else { // Validation should prevent ever reaching here.
 				throw new IllegalArgumentException("Submission already exists and can't overwrite it")
 			}
 		}
+		val submitterMember = profileService.getMemberByUser(user.apparentUser)
 
 		val submission = new Submission
 		submission.assignment = assignment
@@ -122,16 +132,32 @@ class SubmitAssignmentCommand(
 		submission.userId = user.apparentUser.getUserId
 		submission.universityId = user.apparentUser.getWarwickId
 
-		submission.values = fields.asScala.map {
+		val savedValues = fields.asScala.map {
 			case (_, submissionValue) =>
 				val value = new SavedFormValue()
 				value.name = submissionValue.field.name
 				value.submission = submission
 				submissionValue.persist(value)
 				value
-		}.toSet[SavedFormValue].asJava
+		}.toBuffer
 
-		// TAB-413 assert that we have at least one attachment
+		if (submitterMember.exists{
+			case student: StudentMember => Option(student.disability).exists(_.reportable)
+			case _ => false
+		} && useDisability != null) {
+			val useDisabilityValue = new BooleanFormValue(null)
+			useDisabilityValue.value = useDisability
+			val value = new SavedFormValue
+			value.name = Submission.UseDisabilityFieldName
+			value.submission = submission
+			useDisabilityValue.persist(value)
+			savedValues.append(value)
+		}
+
+		submission.values = savedValues.toSet[SavedFormValue].asJava
+
+
+			// TAB-413 assert that we have at least one attachment
 		Assert.isTrue(
 			submission.values.asScala.exists(value => Option(value.attachments).isDefined && !value.attachments.isEmpty),
 			"Submission must have at least one attachment"
