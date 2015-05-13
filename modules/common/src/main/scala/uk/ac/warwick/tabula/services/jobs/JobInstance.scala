@@ -25,7 +25,7 @@ trait JobInstance {
 	def setString(name: String, value: String) = propsMap = propsMap + (name -> value)
 
 	def getStrings(name: String): Seq[String] = propsMap(name) match {
-		case seq: Seq[String] => seq
+		case seq: Seq[String] @unchecked => seq
 		case jList => jList.asInstanceOf[JList[String]].asScala.toSeq
 	}
 	def setStrings(name: String, value: Seq[String]) = propsMap = propsMap + (name -> value.asJava)
