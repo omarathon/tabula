@@ -63,7 +63,7 @@ class RequestExtensionCommandInternal(val module: Module, val assignment:Assignm
 		if (extension.attachments != null) {
 			// delete attachments that have been removed
 			val matchingAttachments: mutable.Set[FileAttachment] = extension.attachments -- attachedFiles
-			matchingAttachments.foreach(delete(_))
+			matchingAttachments.foreach(delete)
 		}
 
 		if (!file.attached.isEmpty) {
@@ -97,7 +97,12 @@ trait RequestExtensionCommandValidation extends SelfValidating {
 		if (!reason.hasText){
 			errors.rejectValue("reason", "extension.reason.provideReasons")
 		}
-		val hasValidExtension = assignment.findExtension(submitter.apparentUser.getWarwickId).exists(extension => extension.approved && extension.expiryDate.isAfterNow)
+		val hasValidExtension = assignment
+			.findExtension(submitter.apparentUser.getWarwickId)
+			.filter(_.approved)
+			.flatMap(_.expiryDate)
+			.exists(_.isAfterNow)
+
 		if (!hasValidExtension && !assignment.newExtensionsCanBeRequested) {
 			errors.reject("assignment.extensionRequests.disallowed")
 		}
