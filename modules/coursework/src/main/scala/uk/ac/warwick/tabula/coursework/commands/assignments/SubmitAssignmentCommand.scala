@@ -106,7 +106,7 @@ class SubmitAssignmentCommand(
 			errors.popNestedPath()
 		}
 
-		if (profileService.getMemberByUser(user.apparentUser).exists{
+		if (features.disabilityOnSubmission && profileService.getMemberByUser(user.apparentUser).exists{
 			case student: StudentMember => Option(student.disability).exists(_.reportable)
 			case _ => false
 		} && useDisability == null) {
@@ -141,7 +141,7 @@ class SubmitAssignmentCommand(
 				value
 		}.toBuffer
 
-		if (submitterMember.exists{
+		if (features.disabilityOnSubmission && submitterMember.exists{
 			case student: StudentMember => Option(student.disability).exists(_.reportable)
 			case _ => false
 		} && useDisability != null) {

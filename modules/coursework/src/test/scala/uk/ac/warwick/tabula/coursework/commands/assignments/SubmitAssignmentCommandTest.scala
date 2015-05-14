@@ -23,6 +23,8 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 		val assignment = newActiveAssignment
 		val user = RequestInfo.fromThread.get.user
 		val cmd = new SubmitAssignmentCommand(assignment.module, assignment, user)
+		cmd.features = emptyFeatures
+		cmd.features.disabilityOnSubmission = true
 		cmd.profileService = smartMock[ProfileService]
 		cmd.profileService.getMemberByUser(user.apparentUser, disableFilter = false, eagerLoad = false) returns None
 
@@ -46,6 +48,8 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 		val assignment = newActiveAssignment
 		val user = RequestInfo.fromThread.get.user
 		val cmd = new SubmitAssignmentCommand(assignment.module, assignment, user)
+		cmd.features = emptyFeatures
+		cmd.features.disabilityOnSubmission = true
 		cmd.profileService = smartMock[ProfileService]
 		cmd.profileService.getMemberByUser(user.apparentUser, disableFilter = false, eagerLoad = false) returns None
 
@@ -89,6 +93,8 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 		// common reusable setup
 		trait Setup {
 			val cmd = new SubmitAssignmentCommand(assignment.module, assignment, user)
+			cmd.features = emptyFeatures
+			cmd.features.disabilityOnSubmission = true
 			// pre-tick the box
 			cmd.plagiarismDeclaration = true
 			var errors = new BindException(cmd, "command")
@@ -140,11 +146,13 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 		val assignment = newActiveAssignment
 		val user = RequestInfo.fromThread.get.user
 		val cmd = new SubmitAssignmentCommand(assignment.module, assignment, user)
+
 		val student = Fixtures.student(user.apparentUser.getWarwickId, user.apparentUser.getUserId)
 		student.disability = Fixtures.disability("Test")
 		cmd.profileService = smartMock[ProfileService]
 		cmd.profileService.getMemberByUser(user.apparentUser, disableFilter = false, eagerLoad = false) returns Option(student)
-
+		cmd.features = emptyFeatures
+		cmd.features.disabilityOnSubmission = true
 		cmd.plagiarismDeclaration = true
 
 		// no disability use selected

@@ -81,6 +81,7 @@ abstract class Features {
 	@Value("${features.profiles.scheduledMeetings:true}") var scheduledMeetings = defaults.scheduledMeetings
 	@Value("${features.disability.rendering.profiles:true}") var disabilityRenderingInProfiles = defaults.disabilityRenderingInProfiles
 	@Value("${features.disability.rendering.extensions:true}") var disabilityRenderingInExtensions = defaults.disabilityRenderingInExtensions
+	@Value("${features.disability.rendering.submissions:false}") var disabilityOnSubmission = defaults.disabilityOnSubmission
 	@Value("${features.includePastYears:true}") var includePastYears = defaults.includePastYears
 	@Value("${features.attendanceMonitoring.smallGroupPointType:true}")
 	var attendanceMonitoringSmallGroupPointType = defaults.attendanceMonitoringSmallGroupPointType
@@ -167,6 +168,7 @@ class FeaturesMessage {
 	@BeanProperty var summativeFilter = true
 	@BeanProperty var dissertationFilter = true
 	@BeanProperty var disabilityRenderingInExtensions = true
+	@BeanProperty var disabilityOnSubmission = false
 	@BeanProperty var newSeenSecondMarkingWorkflows = true
 	@BeanProperty var queueFeedbackForSits = true
 

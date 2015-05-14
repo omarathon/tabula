@@ -17,7 +17,7 @@
 			<span class="label label-info use-tooltip" title="No evidence of plagiarism was found" data-container="body">Plagiarism investigation completed</span>
 		</#if>
 
-		<#if features.disabilityRenderingInProfiles && command.disability??>
+		<#if features.disabilityOnSubmission && command.disability??>
 			<a class="use-popover cue-popover" id="popover-disability" data-html="true"
 			   data-original-title="Disability disclosed"
 			   data-container="body"
