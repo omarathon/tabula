@@ -36,10 +36,10 @@ class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assign
 	override def applyInternal() = {
 		if (students.isEmpty) throw new ItemNotFoundException
 
-		feedbacks = for (
-			uniId <- students;
+		feedbacks = (for (
+			uniId <- students.asScala;
 			feedback <- feedbackDao.getAssignmentFeedbackByUniId(assignment, uniId) // assignmentService.getSubmissionByUniId(assignment, uniId)
-		) yield feedback
+		) yield feedback).asJava
 
 
 		if (feedbacks.asScala.exists(_.assignment != assignment)) {
