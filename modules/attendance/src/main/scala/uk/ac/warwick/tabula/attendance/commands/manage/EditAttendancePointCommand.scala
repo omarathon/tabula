@@ -181,7 +181,10 @@ trait EditAttendancePointDescription extends Describable[Seq[AttendanceMonitorin
 	override lazy val eventName = "EditAttendancePoint"
 
 	override def describe(d: Description) {
-		d.attendanceMonitoringPoints(pointsToEdit)
+		d.attendanceMonitoringSchemes(schemesToEdit)
+	}
+	override def describeResult(d: Description, points: Seq[AttendanceMonitoringPoint]) {
+		d.attendanceMonitoringPoints(points, verbose = true)
 	}
 }
 

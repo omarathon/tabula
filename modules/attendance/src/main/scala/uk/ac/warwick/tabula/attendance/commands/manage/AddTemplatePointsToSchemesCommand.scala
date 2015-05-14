@@ -82,6 +82,9 @@ trait AddTemplatePointsToSchemesDescription extends Describable[Seq[AttendanceMo
 	override def describe(d: Description) {
 		schemes.asScala.foreach(d.attendanceMonitoringScheme)
 	}
+	override def describeResult(d: Description, points: Seq[AttendanceMonitoringPoint]) {
+		d.attendanceMonitoringPoints(points, verbose = true)
+	}
 }
 
 

@@ -164,6 +164,9 @@ trait CreateAttendancePointDescription extends Describable[Seq[AttendanceMonitor
 	override def describe(d: Description) {
 		d.attendanceMonitoringSchemes(schemes)
 	}
+	override def describeResult(d: Description, points: Seq[AttendanceMonitoringPoint]) {
+		d.attendanceMonitoringPoints(points, verbose = true)
+	}
 }
 
 trait CreateAttendancePointCommandState extends AttendancePointCommandState {

@@ -179,6 +179,9 @@ trait CreateNewAttendancePointsFromCopyDescription extends Describable[Seq[Atten
 	override def describe(d: Description) {
 		d.attendanceMonitoringSchemes(schemes)
 	}
+	override def describeResult(d: Description, points: Seq[AttendanceMonitoringPoint]) {
+		d.attendanceMonitoringPoints(points, verbose = true)
+	}
 }
 
 trait CreateNewAttendancePointsFromCopyCommandState extends FindPointsResultCommandState {

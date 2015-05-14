@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.helpers.{Logging, Promise, Promises}
 import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
 import uk.ac.warwick.tabula.services.{CannotPerformWriteOperationException, MaintenanceModeService}
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, JavaImports, RequestInfo}
+import uk.ac.warwick.tabula.{DateFormats, AutowiringFeaturesComponent, JavaImports, RequestInfo}
 import uk.ac.warwick.userlookup.User
 
 /**
@@ -452,8 +452,18 @@ abstract class Description {
 		property("attendanceMonitoringSchemes", schemes.map(_.id))
 	}
 
-	def attendanceMonitoringPoints(points: Seq[AttendanceMonitoringPoint]) = {
-		property("attendanceMonitoringPoint", points.map(_.id))
+	def attendanceMonitoringPoints(points: Seq[AttendanceMonitoringPoint], verbose: Boolean = false) = {
+		if (verbose) {
+			property("attendanceMonitoringPoint", points.map(point => Map(
+				"id" -> point.id,
+				"name" -> point.name,
+				"startDate" -> DateFormats.IsoDateTime.print(point.startDate),
+				"endDate" -> DateFormats.IsoDateTime.print(point.endDate),
+				"type" -> point.pointType.dbValue
+			)))
+		} else {
+			property("attendanceMonitoringPoint", points.map(_.id))
+		}
 		attendanceMonitoringSchemes(points.map(_.scheme))
 	}
 
