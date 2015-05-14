@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.coursework.commands
 
-import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.userlookup.User
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.userlookup.User
 
 class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 
@@ -26,6 +26,9 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 
 		val user = new User("cuscav")
 		user.setWarwickId("0672089")
+
+		val student = Fixtures.student(user.getWarwickId, user.getUserId)
+		student.disability = Fixtures.disability("Test")
 	}
 
 	private trait CommandFixture extends Fixture {
@@ -50,6 +53,7 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 
 		command.submissionService.getSubmissionByUniId(assignment, "0672089") returns Some(submission)
 		command.feedbackService.getAssignmentFeedbackByUniId(assignment, "0672089") returns Some(feedback)
+		command.profileService.getMemberByUser(user, disableFilter = false, eagerLoad = false) returns None
 
 		val info = command.applyInternal()
 		info.submission should be (Some(submission))
@@ -59,6 +63,35 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 		info.extensionRequested should be {false}
 		info.canSubmit should be {true}
 		info.canReSubmit should be {false}
+		info.hasDisability should be {false}
+	}}
+
+	@Test def applyWithDisability() { new CommandFixture {
+		val submission = Fixtures.submission()
+		submission.submitted = true
+
+		val feedback = Fixtures.assignmentFeedback()
+		feedback.released = true
+
+		val extension = Fixtures.extension("0672089", "cuscav")
+		extension.approve()
+		extension.expiryDate = DateTime.now.plusDays(5)
+
+		assignment.extensions.add(extension)
+
+		command.submissionService.getSubmissionByUniId(assignment, "0672089") returns Some(submission)
+		command.feedbackService.getAssignmentFeedbackByUniId(assignment, "0672089") returns Some(feedback)
+		command.profileService.getMemberByUser(user, disableFilter = false, eagerLoad = false) returns Option(student)
+
+		val info = command.applyInternal()
+		info.submission should be (Some(submission))
+		info.feedback should be (Some(feedback))
+		info.extension should be (Some(extension))
+		info.isExtended should be {true}
+		info.extensionRequested should be {false}
+		info.canSubmit should be {true}
+		info.canReSubmit should be {false}
+		info.hasDisability should be {true}
 	}}
 
 	@Test def currentUserPermissions() { withUser("cuscav", "0672089") {

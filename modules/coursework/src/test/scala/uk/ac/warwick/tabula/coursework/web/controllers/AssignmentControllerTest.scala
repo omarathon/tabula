@@ -50,6 +50,7 @@ class AssignmentControllerTest extends TestBase with Mockito {
 		withUser("cusebr", "0123456") {
 			new Fixtures {
 				val user = currentUser
+				profileService.getMemberByUser(user.apparentUser, disableFilter = false, eagerLoad = false) returns None
 				val mav = controller.view(infoCommand, form, errors)
 				withClue(mav) { mav.map should contain key "feedback" }
 			}
