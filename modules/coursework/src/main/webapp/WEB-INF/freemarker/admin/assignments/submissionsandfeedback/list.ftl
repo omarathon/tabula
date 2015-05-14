@@ -206,7 +206,7 @@
 										<i class="icon-ok-sign use-tooltip" title="Plagiarism investigation completed"></i>
 									</#if>
 								</#if>
-								<@sd.submission_status submission student.coursework.enhancedExtension student.coursework.enhancedFeedback />
+								<@sd.submission_status submission student.coursework.enhancedExtension student.coursework.enhancedFeedback student />
 							</td>
 							<#if assignment.wordCountField??>
 								<td class="word-count">

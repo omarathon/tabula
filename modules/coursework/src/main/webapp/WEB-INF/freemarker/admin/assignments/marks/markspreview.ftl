@@ -2,12 +2,15 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 
-	<#assign commandName="adminAddMarksCommand" />
-	<#assign verbed_your_noun="received your files"/>
-		
-	<@spring.bind path=commandName>
-	<#assign hasErrors=status.errors.allErrors?size gt 0 />
-	</@spring.bind>
+<#assign commandName="adminAddMarksCommand" />
+<#assign verbed_your_noun="received your files"/>
+
+<@spring.bind path=commandName>
+<#assign hasErrors=status.errors.allErrors?size gt 0 />
+</@spring.bind>
+
+<#assign disabilityMap = adminAddMarksCommand.fetchDisabilities />
+
 <div class="fix-area">
 	<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marks')}" commandName=commandName>
 	
@@ -94,6 +97,15 @@
 								</#if>
 								<#if item.hasAdjustment>
 									<span class="warning">This student's mark has already been adjusted. The adjusted mark may need to be amended.</span>
+								</#if>
+								<#if disabilityMap[item.universityId]??>
+									<#assign disability = disabilityMap[item.universityId] />
+									<a class="use-popover cue-popover" id="popover-disability" data-html="true"
+									   data-original-title="Disability disclosed"
+									   data-content="<p>This student has chosen to make the marker of this submission aware of their disability and for it to be taken it into consideration. This student has self-reported the following disability code:</p><div class='well'><h6>${disability.code}</h6><small>${(disability.sitsDefinition)!}</small></div>"
+											>
+										<span class="label label-info">Disability disclosed</span>
+									</a>
 								</#if>
 							</td>
 							<td>

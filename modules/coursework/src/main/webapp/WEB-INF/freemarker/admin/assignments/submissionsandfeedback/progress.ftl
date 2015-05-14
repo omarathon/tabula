@@ -116,7 +116,7 @@
 								<h3>Submission</h3>
 
 								<div class="labels">
-									<@sd.submission_status submission enhancedExtension enhancedFeedback />
+									<@sd.submission_status submission enhancedExtension enhancedFeedback student />
 								</div>
 
 								<#-- If the current action is in this section, then add the next action blowout here -->

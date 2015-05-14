@@ -565,7 +565,9 @@ trait StudentProperties extends RestrictedPhoneNumber {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "disability")
 	@Restricted(Array("Profiles.Read.Disability"))
-	var disability: Disability = _
+	private var _disability: Disability = _
+	def disability_=(d: Disability): Unit = { _disability = d }
+	def disability: Option[Disability] = Option(_disability)
 
 	@Column(name="tier4_visa_requirement")
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))

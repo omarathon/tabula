@@ -17,6 +17,10 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, SuspectPlagiarised}
 
+object Submission {
+	val UseDisabilityFieldName = "use-disability"
+}
+
 @Entity @Access(AccessType.FIELD)
 class Submission extends GeneratedId with PermissionsTarget with ToEntityReference with FeedbackReportGenerator {
 
@@ -100,6 +104,8 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 	def zipFilename(attachment: FileAttachment, name: String) = {
 		assignment.module.code + " - " + name + " - " + attachment.name
 	}
+
+	def useDisability: Boolean = values.find(_.name == Submission.UseDisabilityFieldName).exists(_.value.toBoolean)
 
 	def toEntityReference = new SubmissionEntityReference().put(this)
 }

@@ -47,7 +47,7 @@
 	</#compress></#if>
 </#compress></#macro>
 
-<#macro submission_status submission="" enhancedExtension="" enhancedFeedback="">
+<#macro submission_status submission="" enhancedExtension="" enhancedFeedback="" student="">
 	<#if submission?has_content>
 		<#if submission.late>
 			<#if enhancedExtension?has_content && enhancedExtension.extension.approved>
@@ -57,6 +57,14 @@
 			</#if>
 		<#elseif submission.authorisedLate>
 			<span class="label label-info use-tooltip" data-html="true" title="Extended until <@fmt.date date=enhancedExtension.extension.expiryDate capitalise=false shortMonth=true />" data-container="body">Within Extension</span>
+		</#if>
+		<#if features.disabilityOnSubmission && student.disability??>
+			<a class="use-popover cue-popover" id="popover-disability" data-html="true"
+			   data-original-title="Disability disclosed"
+			   data-content="<p>This student has chosen to make the marker of this submission aware of their disability and for it to be taken it into consideration. This student has self-reported the following disability code:</p><div class='well'><h6>${student.disability.code}</h6><small>${(student.disability.sitsDefinition)!}</small></div>"
+			>
+				<span class="label label-info">Disability disclosed</span>
+			</a>
 		</#if>
 	<#elseif !enhancedFeedback?has_content>
 		<span class="label label-info">Unsubmitted</span>

@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackPublishedNotification, FeedbackChangeNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
-import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, AutowiringSubmissionServiceComponent, FeedbackServiceComponent, SubmissionServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
@@ -23,7 +23,8 @@ object StudentSubmissionAndFeedbackCommand {
 		isExtended: Boolean,
 		extensionRequested: Boolean,
 		canSubmit: Boolean,
-		canReSubmit: Boolean
+		canReSubmit: Boolean,
+		hasDisability: Boolean
   )
 
 	def apply(module: Module, assignment: Assignment, member: Member, viewingUser: CurrentUser) =
@@ -31,6 +32,7 @@ object StudentSubmissionAndFeedbackCommand {
 			with StudentMemberSubmissionAndFeedbackCommandPermissions
 			with AutowiringFeedbackServiceComponent
 			with AutowiringSubmissionServiceComponent
+			with AutowiringProfileServiceComponent
 			with ComposableCommand[StudentSubmissionInformation]
 			with Unaudited with ReadOnly
 
@@ -40,6 +42,7 @@ object StudentSubmissionAndFeedbackCommand {
 			with CurrentUserSubmissionAndFeedbackNotificationCompletion
 			with AutowiringFeedbackServiceComponent
 			with AutowiringSubmissionServiceComponent
+			with AutowiringProfileServiceComponent
 			with ComposableCommand[StudentSubmissionInformation]
 			with Unaudited with ReadOnly
 }
@@ -77,17 +80,17 @@ trait CurrentUserSubmissionAndFeedbackCommandState extends StudentSubmissionAndF
 
 abstract class StudentMemberSubmissionAndFeedbackCommandInternal(module: Module, assignment: Assignment, val studentMember: Member, val currentUser: CurrentUser)
 	extends StudentSubmissionAndFeedbackCommandInternal(module, assignment) with StudentMemberSubmissionAndFeedbackCommandState {
-	self: FeedbackServiceComponent with SubmissionServiceComponent =>
+	self: FeedbackServiceComponent with SubmissionServiceComponent with ProfileServiceComponent =>
 }
 
 abstract class CurrentUserSubmissionAndFeedbackCommandInternal(module: Module, assignment: Assignment, val currentUser: CurrentUser)
 	extends StudentSubmissionAndFeedbackCommandInternal(module, assignment) with CurrentUserSubmissionAndFeedbackCommandState {
-	self: FeedbackServiceComponent with SubmissionServiceComponent =>
+	self: FeedbackServiceComponent with SubmissionServiceComponent with ProfileServiceComponent =>
 }
 
 abstract class StudentSubmissionAndFeedbackCommandInternal(val module: Module, val assignment: Assignment)
 	extends CommandInternal[StudentSubmissionInformation] with StudentSubmissionAndFeedbackCommandState {
-	self: FeedbackServiceComponent with SubmissionServiceComponent =>
+	self: FeedbackServiceComponent with SubmissionServiceComponent with ProfileServiceComponent =>
 
 	def applyInternal() = {
 		val extension = assignment.extensions.asScala.find(_.isForUser(studentUser))
@@ -106,7 +109,12 @@ abstract class StudentSubmissionAndFeedbackCommandInternal(val module: Module, v
 			extensionRequested = extension.isDefined && !extension.get.isManual,
 
 			canSubmit = assignment.submittable(studentUser),
-			canReSubmit = assignment.resubmittable(studentUser)
+			canReSubmit = assignment.resubmittable(studentUser),
+
+			hasDisability = profileService.getMemberByUser(studentUser).exists{
+				case student: StudentMember => student.disability.exists(_.reportable)
+				case _ => false
+			}
 		)
 	}
 
