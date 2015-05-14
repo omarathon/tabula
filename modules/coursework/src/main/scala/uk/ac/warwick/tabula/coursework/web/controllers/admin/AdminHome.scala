@@ -1,22 +1,17 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import scala.collection.JavaConversions._
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.coursework.commands.assignments._
-import uk.ac.warwick.tabula.coursework.commands.feedback._
+import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.system.permissions.Public
-import uk.ac.warwick.tabula.PermissionDeniedException
-import uk.ac.warwick.tabula.coursework.web.Routes
+
+import scala.collection.JavaConversions._
 
 /**
  * Screens for department and module admins.
@@ -44,15 +39,15 @@ class AdminDepartmentHomeController extends CourseworkController {
 		
 		Mav("admin/department",
 			"department" -> cmd.department,
-			"modules" -> info.modules,
-			"notices" -> info.notices)
+			"modules" -> info
+		)
 	}
 	
 	@RequestMapping(Array("/assignments.xml"))
 	def xml(cmd: AdminDepartmentHomeCommand, @PathVariable("dept") dept: Department) = {
 		val info = cmd.apply()
 		
-		new AdminHomeExports.XMLBuilder(dept, info).toXML
+		new AdminHomeExports.XMLBuilder(dept, DepartmentHomeInformation(info, cmd.gatherNotices(info))).toXML
 	}
 }
 
@@ -74,7 +69,7 @@ class AdminModuleHomeController extends CourseworkController {
 	}
 }
 
-class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[DepartmentHomeInformation] 
+class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[Seq[Module]]
 		with ReadOnly with Unaudited {
 	
 	var securityService = Wire.auto[SecurityService]
@@ -99,13 +94,10 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 		}
 	
 	def applyInternal() = {
-		val sortedModules = benchmarkTask("Sort modules") { modules.sortBy { (module) => (module.assignments.isEmpty, module.code) } }
-		val notices = benchmarkTask("Gather notices") { gatherNotices(modules) }
-		
-		new DepartmentHomeInformation(sortedModules, notices)
+		modules.sortBy { (module) => (module.assignments.isEmpty, module.code) }
 	}
 	
-	def gatherNotices(modules: Seq[Module]) = {
+	def gatherNotices(modules: Seq[Module]) = benchmarkTask("Gather notices") {
 		val unpublished = for ( 
 				module <- modules;
 				assignment <- module.assignments
