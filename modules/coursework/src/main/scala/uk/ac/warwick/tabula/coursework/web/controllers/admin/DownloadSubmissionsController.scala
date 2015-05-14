@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmissionsCommand
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadAttachmentCommand
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands.ApplyWithCallback
 import uk.ac.warwick.userlookup.{User, AnonymousUser}
@@ -27,13 +28,19 @@ class DownloadSubmissionsController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
 
-	@ModelAttribute def getSingleSubmissionCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
-		new DownloadSubmissionsCommand(module, assignment)
+	@ModelAttribute("command")
+	def getSingleSubmissionCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
+		new DownloadSubmissionsCommand(module, assignment, user)
 
 	@RequestMapping
-	def download(command: DownloadSubmissionsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
-		command.apply { renderable =>
-			fileServer.serve(renderable)
+	def download(@ModelAttribute("command") command: DownloadSubmissionsCommand, @PathVariable("assignment") assignment: Assignment)
+		(implicit request: HttpServletRequest, response: HttpServletResponse): Mav = {
+		command.apply() match {
+			case Left(renderable) =>
+				fileServer.serve(renderable)
+				Mav.empty()
+			case Right(jobInstance) =>
+				Redirect(Routes.zipFileJob(jobInstance), "returnTo" -> Routes.admin.assignment.submissionsandfeedback(assignment))
 		}
 	}
 }

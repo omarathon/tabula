@@ -38,7 +38,7 @@ abstract class ModifyExtensionCommand(val mod: Module, val ass: Assignment, uniI
 	}
 
 	def copyFrom(extension: Extension) = {
-		expiryDate = extension.expiryDate
+		expiryDate = extension.expiryDate.orNull
 		state = extension.state
 		reviewerComments = extension.reviewerComments
 	}

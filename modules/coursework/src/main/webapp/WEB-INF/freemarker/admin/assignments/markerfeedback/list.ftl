@@ -1,3 +1,4 @@
+<#import "../submissionsandfeedback/_submission_details.ftl" as sd />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/submission_components.ftl" as components />
 
@@ -11,9 +12,7 @@
 
 <#macro listMarkerFeedback items nextRoleName isModeration>
 	<#list items as item>
-
 		<#assign u = item.student />
-
 		<#if item.currentFeedback??>
 			<#local thisFeedback = item.currentFeedback />
 			<#local nextMarkerAction>Send to ${nextRoleName} <#if item.nextMarker?has_content>(${item.nextMarker.fullName})</#if></#local>
@@ -52,14 +51,21 @@
 				<td class="status-col toggle-cell content-cell">
 					<dl style="margin: 0; border-bottom: 0;">
 						<dt>
-							<#if thisFeedback.state.toString == "ReleasedForMarking">
-								<span class="label label-warning">Ready for marking</span>
-							<#elseif thisFeedback.state.toString == "InProgress">
-								<span class="label label-info">In Progress</span>
-							<#elseif thisFeedback.state.toString == "MarkingCompleted">
-								<span class="label label-success">Marking completed</span>
-							<#elseif thisFeedback.state.toString == "Rejected">
-								<span class="label label-important">Rejected</span>
+							<#if !item.submission?has_content>
+								<span class="label label-info">Unsubmitted</span>
+							<#else>
+								<#if item.submission.late>
+									<span class="label label-important use-tooltip" title="<@sd.lateness item.submission />" data-container="body">Late</span>
+								</#if>
+								<#if thisFeedback.state.toString == "ReleasedForMarking">
+									<span class="label label-warning">Ready for marking</span>
+								<#elseif thisFeedback.state.toString == "InProgress">
+									<span class="label label-info">In Progress</span>
+								<#elseif thisFeedback.state.toString == "MarkingCompleted">
+									<span class="label label-success">Marking completed</span>
+								<#elseif thisFeedback.state.toString == "Rejected">
+									<span class="label label-important">Rejected</span>
+								</#if>
 							</#if>
 						</dt>
 						<dd style="display: none;" class="table-content-container" data-contentid="${markingId(u)}">

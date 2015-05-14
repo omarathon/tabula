@@ -50,7 +50,7 @@ class ProfileExportJob extends Job with AutowiringZipServiceComponent
 
 				val result = ProfileExportSingleCommand(student, academicYear, job.user).apply()
 
-				updateProgress(((index + 1).toFloat / students.size.toFloat * 100).toInt)
+				updateProgress(index + 1, students.size)
 
 				student.universityId -> result
 			}.toMap

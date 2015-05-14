@@ -27,22 +27,14 @@ abstract class ExtensionController extends CourseworkController {
 	class ExtensionMap(extension: Extension) {
 		def asMap: Map[String, String] = {
 
-			def convertDateToString(date: DateTime) =
-				Option(date) match {
-					case Some(d: DateTime) => DateBuilder.format(d)
-					case _ => ""
-				}
+			def convertDateToString(date: Option[DateTime]) = date.map(DateBuilder.format).getOrElse("")
 
-			def convertDateToMillis(date: DateTime) =
-				Option(date) match {
-					case Some(d: DateTime) => d.getMillis.toString
-					case _ => null
-				}
+			def convertDateToMillis(date: Option[DateTime]) = date.map(_.getMillis.toString).orNull
 
 			Map(
 				"id" -> extension.universityId,
 				"status" -> extension.state.description,
-				"requestedExpiryDate" -> convertDateToString(extension.requestedExpiryDate),
+				"requestedExpiryDate" -> convertDateToString(Option(extension.requestedExpiryDate)),
 				"expiryDate" -> convertDateToString(extension.expiryDate),
 				"expiryDateMillis" -> convertDateToMillis(extension.expiryDate),
 				"extensionDuration" -> extension.duration.toString,

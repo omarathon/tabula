@@ -28,7 +28,7 @@ class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Ass
 
 		val assignmentMembership = Map() ++ (
 			for(assignmentUser <- assignmentUsers)
-				yield (assignmentUser.getWarwickId -> assignmentUser)
+				yield assignmentUser.getWarwickId -> assignmentUser
 		)
 
 		// all the users that aren't members of this assignment, but have submitted work to it
@@ -46,13 +46,13 @@ class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Ass
 			val hasRejectedExtension = extension exists (_.rejected)
 
 			// use real days not working days, for displayed duration, as markers need to know how late it *actually* would be after deadline
-			val duration = extension match {
-				case Some(e) if e.expiryDate != null => Days.daysBetween(assignment.closeDate, e.expiryDate).getDays
-			case _ => 0
-		}
+			val duration = extension.flatMap(_.expiryDate).map(Days.daysBetween(assignment.closeDate, _).getDays).getOrElse(0)
+
+			val requestedExtraDuration2 = extension.flatMap(_.expiryDate)
+
 			val requestedExtraDuration = extension match {
-				case Some(e) if e.requestedExpiryDate != null && e.expiryDate != null => Days.daysBetween(e.expiryDate, e.requestedExpiryDate).getDays
-				case Some(e) if e.requestedExpiryDate != null && e.expiryDate == null => Days.daysBetween(assignment.closeDate, e.requestedExpiryDate).getDays
+				case Some(e) =>
+					Days.daysBetween(e.expiryDate.getOrElse(assignment.closeDate), e.requestedExpiryDate).getDays
 				case _ => 0
 			}
 

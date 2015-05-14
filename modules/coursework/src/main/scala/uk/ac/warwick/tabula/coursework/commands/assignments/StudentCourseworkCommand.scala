@@ -84,7 +84,7 @@ trait StudentCourseworkCommandHelper
 						val isExtended = ass.isWithinExtension(user)
 
 						if (ass.openEnded) ass.openDate
-						else if (isExtended) (extension map { _.expiryDate }).get
+						else if (isExtended) extension.flatMap(_.expiryDate).getOrElse(ass.closeDate)
 						else ass.closeDate
 					}
 

@@ -37,7 +37,7 @@ abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignm
 		if(fields != null){
 			assignment.feedbackFields.foreach { field =>
 				errors.pushNestedPath("fields[%s]".format(field.id))
-				fields.asScala.get(field.id).foreach { field.validate(_, errors) }
+				fields.asScala.get(field.id).foreach(field.validate(_, errors))
 				errors.popNestedPath()
 			}
 		}
@@ -78,7 +78,7 @@ trait SubmissionState {
 			case Some(s) if s.isLate => "workflow.Submission.late"
 			case Some(_) => "workflow.Submission.onTime"
 			case None if !assignment.isClosed => "workflow.Submission.unsubmitted.withinDeadline"
-			case None if assignment.extensions.asScala.exists(e => e.universityId == student.getWarwickId && e.expiryDate.isBeforeNow)
+			case None if assignment.extensions.asScala.exists(e => e.universityId == student.getWarwickId && e.expiryDate.exists(_.isBeforeNow))
 				=> "workflow.Submission.unsubmitted.withinExtension"
 			case None => "workflow.Submission.unsubmitted.late"
 		}
