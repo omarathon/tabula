@@ -26,7 +26,11 @@ trait PropertyCopying extends Logging {
 			if (oldValue != newValue) {
 				logger.debug(s"Detected property change for $property: $oldValue -> $newValue; setting value")
 
-				destinationBean.setPropertyValue(property, newValue)
+				newValue match {
+					case Some(value) => destinationBean.setPropertyValue(property, value)
+					case None	=> destinationBean.setPropertyValue(property, null)
+					case _ => destinationBean.setPropertyValue(property, newValue)
+				}
 				true
 			} else false
 		}

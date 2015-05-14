@@ -404,7 +404,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			member match {
 				case stu: StudentMember =>
-					stu.disability should be (null)
+					stu.disability should be (None)
 					stu.freshStudentCourseDetails.size should be (1)
 					stu.freshStudentCourseDetails.head.freshStudentCourseYearDetails.size should be (1)
 					stu.mostSignificantCourse.sprCode should be ("0672089/2")
@@ -498,14 +498,14 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			memberDao.getByUniversityId("0070790") returns Some(existingStaffMember)
 			memberDao.getByUniversityId("0672089") returns Some(existing)
-			
+
 			importCommandFactory.relationshipService.findCurrentRelationships(tutorRelationshipType, existing) returns Nil
 
 			val member = rowCommand.applyInternal() match {
 				case stu: StudentMember => Some(stu)
 				case _ => None
 			}
-			
+
 			val studentMember = member.get
 
 			studentMember.mostSignificantCourseDetails should not be null
@@ -517,12 +517,12 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	@Test def testDisabilityHandling() {
 		new Environment {
 			var student = rowCommand.applyInternal().asInstanceOf[StudentMember]
-			student.disability should be (disabilityQ)
+			student.disability should be (Some(disabilityQ))
 
 			// override to test for attempted import of unknown disability
 			rs.getString("disability") returns "Mystery"
 			student = rowCommand.applyInternal().asInstanceOf[StudentMember]
-			student.disability should be (null)
+			student.disability should be (None)
 		}
 	}
 }
