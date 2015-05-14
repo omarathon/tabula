@@ -10,8 +10,6 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.{AssessmentService, ZipService}
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip
 import uk.ac.warwick.tabula.services.jobs.{JobInstance, JobService}
-
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
 /**
@@ -44,12 +42,12 @@ class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assign
 		) yield feedback
 
 
-		if (feedbacks.exists(_.assignment != assignment)) {
+		if (feedbacks.asScala.exists(_.assignment != assignment)) {
 				throw new IllegalStateException("Feedbacks don't match the assignment")
 		}
 
 		if (feedbacks.size() < FeedbackZipFileJob.minimumFeedbacks) {
-			val zip = zipService.getSomeFeedbacksZip(feedbacks)
+			val zip = zipService.getSomeFeedbacksZip(feedbacks.asScala)
 			val renderable = new RenderableZip(zip)
 			Left(renderable)
 		} else {
@@ -59,11 +57,11 @@ class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assign
 
 	override def describe(d: Description) = d
 		.assignment(assignment)
-		.studentIds(students)
+		.studentIds(students.asScala)
 
 	override def describeResult(d: Description) = d
 		.assignment(assignment)
-		.studentIds(students)
+		.studentIds(students.asScala)
 		.properties(
 			"feedbackCount" -> Option(feedbacks).map(_.size).getOrElse(0))
 }

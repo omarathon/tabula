@@ -82,7 +82,7 @@ class DownloadAllFeedbackController extends CourseworkController {
 		command.apply() match {
 			case Left(renderable) =>
 				fileServer.serve(renderable)
-				Mav("")
+				Mav.empty()
 			case Right(jobInstance) =>
 				Redirect(Routes.zipFileJob(jobInstance), "returnTo" -> Routes.admin.assignment.submissionsandfeedback(assignment))
 		}
