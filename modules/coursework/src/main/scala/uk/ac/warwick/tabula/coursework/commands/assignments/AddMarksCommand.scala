@@ -161,7 +161,7 @@ trait FetchDisabilities {
 						profileService.getMemberByUniversityId(markItem.universityId).flatMap {
 							case student: StudentMember => Option(student)
 							case _ => None
-						}.flatMap(s => Option(s.disability))
+						}.flatMap(_.disability)
 					} else {
 						None
 					}

@@ -107,7 +107,7 @@ class SubmitAssignmentCommand(
 		}
 
 		if (features.disabilityOnSubmission && profileService.getMemberByUser(user.apparentUser).exists{
-			case student: StudentMember => Option(student.disability).exists(_.reportable)
+			case student: StudentMember => student.disability.exists(_.reportable)
 			case _ => false
 		} && useDisability == null) {
 			errors.rejectValue("useDisability", "assignment.submit.chooseDisability")
@@ -142,7 +142,7 @@ class SubmitAssignmentCommand(
 		}.toBuffer
 
 		if (features.disabilityOnSubmission && submitterMember.exists{
-			case student: StudentMember => Option(student.disability).exists(_.reportable)
+			case student: StudentMember => student.disability.exists(_.reportable)
 			case _ => false
 		} && useDisability != null) {
 			val useDisabilityValue = new BooleanFormValue(null)

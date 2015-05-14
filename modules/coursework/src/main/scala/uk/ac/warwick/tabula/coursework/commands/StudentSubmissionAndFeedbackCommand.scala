@@ -112,7 +112,7 @@ abstract class StudentSubmissionAndFeedbackCommandInternal(val module: Module, v
 			canReSubmit = assignment.resubmittable(studentUser),
 
 			hasDisability = profileService.getMemberByUser(studentUser).exists{
-				case student: StudentMember => Option(student.disability).exists(_.reportable)
+				case student: StudentMember => student.disability.exists(_.reportable)
 				case _ => false
 			}
 		)

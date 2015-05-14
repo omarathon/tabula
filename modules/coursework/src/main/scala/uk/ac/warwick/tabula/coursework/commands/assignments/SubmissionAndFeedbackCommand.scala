@@ -210,7 +210,7 @@ abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: 
 						profileService.getMemberByUser(user).flatMap{
 							case student: StudentMember => Option(student)
 							case _ => None
-						}.flatMap(s => Option(s.disability))
+						}.flatMap(s => s.disability)
 					}	else {
 						None
 					}

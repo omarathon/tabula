@@ -89,7 +89,7 @@ trait SubmissionState {
 			profileService.getMemberByUniversityId(student.getWarwickId).flatMap {
 				case student: StudentMember => Option(student)
 				case _ => None
-			}.flatMap(s => Option(s.disability))
+			}.flatMap(s => s.disability)
 		} else {
 			None
 		}

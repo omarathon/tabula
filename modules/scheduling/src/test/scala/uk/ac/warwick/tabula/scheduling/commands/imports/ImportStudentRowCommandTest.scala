@@ -319,7 +319,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			member match {
 				case stu: StudentMember =>
-					stu.disability.code should be ("Q")
+					stu.disability.get.code should be ("Q")
 					stu.freshStudentCourseDetails.size should be (1)
 					stu.freshStudentCourseDetails.head.freshStudentCourseYearDetails.size should be (1)
 					stu.mostSignificantCourse.sprCode should be ("0672089/2")
