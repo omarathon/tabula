@@ -1,0 +1,45 @@
+package uk.ac.warwick.tabula.jobs.zips
+
+import org.springframework.stereotype.Component
+import uk.ac.warwick.tabula.jobs.JobPrototype
+import uk.ac.warwick.tabula.services.jobs.JobInstance
+import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, AutowiringZipServiceComponent}
+import collection.JavaConverters._
+
+object FeedbackZipFileJob {
+	val identifier = "feedback-zip-file"
+	val zipFileName = "feedbacks.zip"
+	val minimumFeedbacks = 10
+	val FeedbacksKey = "feedback"
+
+	def apply(feedbacks: Seq[String]) = JobPrototype(identifier, Map(
+		FeedbacksKey -> feedbacks.asJava
+	))
+}
+
+@Component
+class FeedbackZipFileJob extends ZipFileJob with AutowiringZipServiceComponent with AutowiringFeedbackServiceComponent {
+
+	override val identifier = FeedbackZipFileJob.identifier
+	override val zipFileName = FeedbackZipFileJob.zipFileName
+	override val itemDescription = "feedbacks"
+
+	override def run(implicit job: JobInstance): Unit = new Runner(job).run()
+
+	class Runner(job: JobInstance) {
+		implicit private val _job: JobInstance = job
+
+		def run(): Unit = {
+			val feedbacks = job.getStrings(FeedbackZipFileJob.FeedbacksKey).flatMap(feedbackService.getAssignmentFeedbackById)
+
+			updateProgress(0)
+			updateStatus("Initialising")
+
+			val zipFile = zipService.getSomeFeedbacksZip(feedbacks, updateZipProgress)
+			job.setString(ZipFileJob.ZipFilePathKey, zipFile.getPath)
+
+			updateProgress(100)
+			job.succeeded = true
+		}
+	}
+}

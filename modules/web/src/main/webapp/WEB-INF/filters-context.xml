@@ -9,6 +9,7 @@
 			<filter ref="forceLoginFilter" />
 			<url-pattern>/admin/*</url-pattern>
 			<url-pattern>/reports/*</url-pattern>
+			<url-pattern>/zips/*</url-pattern>
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 			<excluded-url-pattern>/test/*</excluded-url-pattern>
 		</mapping>
