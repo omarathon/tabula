@@ -124,6 +124,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		extension.assignment = assignment
 		extension.universityId = "1234567"
 		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
+		extension.approve()
 
 		val notification = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension)
 
@@ -143,6 +144,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		extension.assignment = assignment
 		extension.universityId = "1234567"
 		extension.expiryDate = new DateTime(2015, DateTimeConstants.JANUARY, 20, 17, 0, 0, 0)
+		extension.approve()
 
 		val notification = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension)
 

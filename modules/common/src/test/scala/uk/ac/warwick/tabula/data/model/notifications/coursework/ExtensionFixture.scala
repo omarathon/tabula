@@ -59,5 +59,6 @@ trait ExtensionFixture extends Mockito{
 	extension.reason = "My hands have turned to flippers. Like the ones that dolphins have. It makes writing and typing super hard. Pity me."
 	extension.reviewerComments = "That sounds awful. Have an extra month. By then you should be able to write as well as any Cetacea."
 	extension.assignment = assignment
+	extension.approve()
 	assignment.extensions add extension
 }
