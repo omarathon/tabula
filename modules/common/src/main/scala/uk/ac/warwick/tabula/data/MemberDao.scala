@@ -1,15 +1,16 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.FetchMode
-import org.hibernate.criterion.{DetachedCriteria, Projections, Property, Restrictions}
-import org.joda.time.{DateTime, LocalDate}
+import org.hibernate.criterion._
+import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, _}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
-import collection.JavaConverters._
+
+import scala.collection.JavaConverters._
 
 trait MemberDaoComponent {
 	val memberDao: MemberDao
@@ -55,6 +56,8 @@ trait MemberDao {
 
 	def getMemberByTimetableHash(timetableHash: String): Option[Member]
 	def setTimetableHash(member: Member, timetableHash: String)
+
+	def getIsAgent(usercode:String): Boolean
 
 }
 
@@ -412,5 +415,23 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging with AttendanceM
 				.setParameter("timetableHash", timetableHash)
 				.setParameter("universityId", member.universityId)
 				.executeUpdate()
+	}
+
+	def getIsAgent(usercode:String) : Boolean = {
+
+		val results = session.createSQLQuery( """
+			SELECT
+			  count(*)
+			FROM
+				studentrelationship r,
+				member m
+			WHERE
+	 			r.agent = m.universityid
+			AND
+				(r.end_date > sysdate or r.end_date is null)
+			AND
+			  m.USERID = :usercode """)
+			.setParameter("usercode", usercode).list()
+		results.get(0).toString.toInt > 0
 	}
 }

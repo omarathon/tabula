@@ -1,20 +1,13 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.FeaturesComponent
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.CommandInternal
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.AutowiringFeaturesComponent
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.system.permissions.Public
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.commands.{Command, CommandInternal, ReadOnly, TaskBenchmarking, Unaudited}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
-import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data.model.{Department, Member, StudentRelationshipType}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.profiles.web.controllers.AgentTrait
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.Public
+import uk.ac.warwick.tabula.{CurrentUser, FeaturesComponent}
 
 case class ProfilesHomeInformation(
 	smallGroups: Seq[SmallGroup] = Nil,
@@ -35,12 +28,12 @@ object ProfilesHomeCommand {
 }
 
 abstract class ProfilesHomeCommand(val user: CurrentUser, val currentMember: Option[Member])
-	extends CommandInternal[ProfilesHomeInformation] with TaskBenchmarking {
+	extends CommandInternal[ProfilesHomeInformation] with TaskBenchmarking with AgentTrait {
 
 	self: FeaturesComponent with SmallGroupServiceComponent with RelationshipServiceComponent with ModuleAndDepartmentServiceComponent with SecurityServiceComponent =>
 
 	override def applyInternal() = {
-		if (user.isStaff) {
+		if (user.isStaff || isAgent(user.userId)) {
 			val smallGroups =
 				if (features.smallGroupTeachingTutorView) benchmarkTask("Find all small groups with user as tutor") { 
 					smallGroupService.findSmallGroupsByTutor(user.apparentUser)
