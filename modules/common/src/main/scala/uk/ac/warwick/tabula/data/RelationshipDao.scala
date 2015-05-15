@@ -1,15 +1,12 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.FetchMode
-import org.hibernate.criterion.Order
-import org.hibernate.criterion.Restrictions
-import org.hibernate.criterion.Projections
+import org.hibernate.criterion.{Order, Projections, Restrictions}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, _}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.MemberStudentRelationship
 
 trait RelationshipDaoComponent {
 	val relationshipDao: RelationshipDao
@@ -46,14 +43,14 @@ trait RelationshipDao {
 	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
 	def getAllPastAndPresentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
-
+	def isAgent(usercode:String): Boolean
 }
 
 @Repository
 class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
-	import Restrictions._
 	import Order._
 	import Projections._
+	import Restrictions._
 
 	def allStudentRelationshipTypes: Seq[StudentRelationshipType] =
 		session.newCriteria[StudentRelationshipType]
@@ -310,5 +307,23 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 																	""")
 			.setEntity("relationshipType", relationshipType)
 			.uniqueResult.getOrElse(0)
+
+	def isAgent(usercode:String) : Boolean = {
+
+		val results = session.createSQLQuery( """
+			SELECT
+			  count(*)
+			FROM
+				studentrelationship r,
+				member m
+			WHERE
+	 			r.agent = m.universityid
+			AND
+				(r.end_date > sysdate or r.end_date is null)
+			AND
+			  m.USERID = :usercode """)
+			.setParameter("usercode", usercode).list()
+		results.get(0).toString.toInt > 0
+	}
 }
 

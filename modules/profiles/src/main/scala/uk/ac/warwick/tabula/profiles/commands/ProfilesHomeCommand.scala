@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands.{Command, CommandInternal, ReadOnly, TaskBe
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.{Department, Member, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.profiles.web.controllers.AgentTrait
+import uk.ac.warwick.tabula.profiles.web.controllers.ChecksAgent
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.{CurrentUser, FeaturesComponent}
@@ -28,7 +28,7 @@ object ProfilesHomeCommand {
 }
 
 abstract class ProfilesHomeCommand(val user: CurrentUser, val currentMember: Option[Member])
-	extends CommandInternal[ProfilesHomeInformation] with TaskBenchmarking with AgentTrait {
+	extends CommandInternal[ProfilesHomeInformation] with TaskBenchmarking with ChecksAgent {
 
 	self: FeaturesComponent with SmallGroupServiceComponent with RelationshipServiceComponent with ModuleAndDepartmentServiceComponent with SecurityServiceComponent =>
 

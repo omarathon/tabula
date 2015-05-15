@@ -57,7 +57,7 @@ trait MemberDao {
 	def getMemberByTimetableHash(timetableHash: String): Option[Member]
 	def setTimetableHash(member: Member, timetableHash: String)
 
-	def getIsAgent(usercode:String): Boolean
+
 
 }
 
@@ -415,23 +415,5 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging with AttendanceM
 				.setParameter("timetableHash", timetableHash)
 				.setParameter("universityId", member.universityId)
 				.executeUpdate()
-	}
-
-	def getIsAgent(usercode:String) : Boolean = {
-
-		val results = session.createSQLQuery( """
-			SELECT
-			  count(*)
-			FROM
-				studentrelationship r,
-				member m
-			WHERE
-	 			r.agent = m.universityid
-			AND
-				(r.end_date > sysdate or r.end_date is null)
-			AND
-			  m.USERID = :usercode """)
-			.setParameter("usercode", usercode).list()
-		results.get(0).toString.toInt > 0
 	}
 }

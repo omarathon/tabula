@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.profiles.commands.{ProfilesHomeCommand, ProfilesHome
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
-@Controller class HomeController extends ProfilesController with AgentTrait {
+@Controller class HomeController extends ProfilesController with ChecksAgent {
 	
 	var departmentService = Wire[ModuleAndDepartmentService]
 
@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
 	@RequestMapping(Array("/")) def home(@ModelAttribute("command") cmd: Appliable[ProfilesHomeInformation]) = {
 
-		if (!user.isPGR && isAgent(user.userId) && optionalCurrentMember.exists(_.userType == Student)) {
+		if (!user.isPGR && !isAgent(user.userId) && optionalCurrentMember.exists(_.userType == Student)) {
 			Redirect(Routes.profile.view(currentMember))
 		} else {
 			val info = cmd.apply()

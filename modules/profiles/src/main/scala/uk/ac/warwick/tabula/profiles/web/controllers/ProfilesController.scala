@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
-import uk.ac.warwick.tabula.data.AutowiringMemberDaoComponent
+import uk.ac.warwick.tabula.data.AutowiringRelationshipDaoComponent
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.web.ProfileBreadcrumbs
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringRelationshipServiceComponent}
@@ -47,9 +47,9 @@ trait CurrentMemberComponent {
 	def currentMember: Member
 }
 
-trait AgentTrait extends AutowiringMemberDaoComponent {
+trait ChecksAgent extends AutowiringRelationshipDaoComponent {
 
 	def isAgent(usercode:String):Boolean = {
-		memberDao.getIsAgent(usercode)
+		relationshipDao.isAgent(usercode)
 	}
 }
