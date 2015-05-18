@@ -1722,8 +1722,8 @@ a:hover {
 a img {
   border: none;
 }
-img[height],
-audio[height] {
+#main-content img[height],
+#main-content audio[height] {
   height: auto !important;
 }
 body:not(.is-tablet) video[height] {
