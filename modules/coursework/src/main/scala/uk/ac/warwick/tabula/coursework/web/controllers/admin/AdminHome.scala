@@ -3,13 +3,13 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
 
 import scala.collection.JavaConversions._
 
@@ -39,7 +39,7 @@ class AdminDepartmentHomeController extends CourseworkController {
 		
 		Mav("admin/department",
 			"department" -> cmd.department,
-			"modules" -> info
+			"modules" -> info.sortWith(_.code.toLowerCase < _.code.toLowerCase)
 		)
 	}
 	
