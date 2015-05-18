@@ -49,7 +49,7 @@ trait CurrentMemberComponent {
 
 trait ChecksAgent extends AutowiringRelationshipDaoComponent {
 
-	def isAgent(usercode:String):Boolean = {
-		relationshipDao.isAgent(usercode)
+	def isAgent(universityId:String):Boolean = {
+		relationshipDao.isAgent(universityId)
 	}
 }

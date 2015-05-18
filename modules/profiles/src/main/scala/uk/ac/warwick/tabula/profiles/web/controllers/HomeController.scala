@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
 	@RequestMapping(Array("/")) def home(@ModelAttribute("command") cmd: Appliable[ProfilesHomeInformation]) = {
 
-		if (!user.isPGR && !isAgent(user.userId) && optionalCurrentMember.exists(_.userType == Student)) {
+		if (!user.isPGR && !isAgent(user.universityId) && optionalCurrentMember.exists(_.userType == Student)) {
 			Redirect(Routes.profile.view(currentMember))
 		} else {
 			val info = cmd.apply()

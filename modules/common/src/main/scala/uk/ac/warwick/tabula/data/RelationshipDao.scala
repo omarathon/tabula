@@ -294,7 +294,6 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			.setEntity("relationshipType", relationshipType)
 			.seq.distinct
 
-
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number =
 		if (relationshipType == null) 0
 		else session.newQuery[Number]("""
@@ -308,22 +307,32 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			.setEntity("relationshipType", relationshipType)
 			.uniqueResult.getOrElse(0)
 
-	def isAgent(usercode:String) : Boolean = {
+	def isAgent(universityId:String) : Boolean =
+		session.newCriteria[MemberStudentRelationship]
+			.add(is("_agentMember.universityId", universityId))
+			.add( Restrictions.or(
+			Restrictions.isNull("endDate"),
+			Restrictions.ge("endDate", new DateTime())
+		))
+			.project[Number](rowCount()).uniqueResult.get.intValue() >0
 
-		val results = session.createSQLQuery( """
-			SELECT
-			  count(*)
-			FROM
-				studentrelationship r,
-				member m
-			WHERE
-	 			r.agent = m.universityid
-			AND
-				(r.end_date > sysdate or r.end_date is null)
-			AND
-			  m.USERID = :usercode """)
-			.setParameter("usercode", usercode).list()
-		results.get(0).toString.toInt > 0
-	}
+
+//	def isAgent(usercode:String) : Boolean = {
+//
+//		val results = session.createSQLQuery( """
+//			SELECT
+//			  count(*)
+//			FROM
+//				studentrelationship r,
+//				member m
+//			WHERE
+//	 			r.agent = m.universityid
+//			AND
+//				(r.end_date > sysdate or r.end_date is null)
+//			AND
+//			  m.USERID = :usercode """)
+//			.setParameter("usercode", usercode).list()
+//		results.get(0).toString.toInt > 0
+//	}
 }
 

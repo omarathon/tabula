@@ -33,7 +33,7 @@ abstract class ProfilesHomeCommand(val user: CurrentUser, val currentMember: Opt
 	self: FeaturesComponent with SmallGroupServiceComponent with RelationshipServiceComponent with ModuleAndDepartmentServiceComponent with SecurityServiceComponent =>
 
 	override def applyInternal() = {
-		if (user.isStaff || isAgent(user.userId)) {
+		if (user.isStaff || isAgent(user.universityId)) {
 			val smallGroups =
 				if (features.smallGroupTeachingTutorView) benchmarkTask("Find all small groups with user as tutor") { 
 					smallGroupService.findSmallGroupsByTutor(user.apparentUser)
