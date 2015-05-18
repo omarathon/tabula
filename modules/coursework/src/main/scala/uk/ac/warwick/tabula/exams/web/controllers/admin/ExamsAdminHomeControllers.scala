@@ -85,10 +85,10 @@ class ExamsAdminDepartmentHomeController extends ExamsController {
 	@RequestMapping
 	def adminDepartment(cmd: ExamsAdminDepartmentHomeCommand, @PathVariable dept: Department, @PathVariable academicYear: AcademicYear) = {
 		val result = cmd.apply()
-		
+
 		Mav("exams/admin/department",
 			"department" -> dept,
-			"modules" -> result,
+			"modules" -> result.sortWith(_.code.toLowerCase < _.code.toLowerCase),
 			"examMap" -> cmd.modulesAndExams
 		).crumbs(
 				Breadcrumbs.Department(dept, academicYear)
