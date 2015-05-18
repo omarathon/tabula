@@ -88,9 +88,9 @@ $(function(){
 
 	var biglistOptions = {
 		setup : function() {
-			var $container = this;
+			var $container = this, $outerContainer = $container.closest('div.well');
 			// #delete-selected-button won't work for >1 set of checkboxes on a page.
-			$('#download-selected-button, #delete-selected-button').click(function(event){
+			$('#download-selected-button, #delete-selected-button', $outerContainer).click(function(event){
 				event.preventDefault();
 
 				var $checkedBoxes = $(".collection-checkbox:checked", $container);
@@ -103,7 +103,7 @@ $(function(){
 				return false;
 			});
 
-			$('#mark-plagiarised-selected-button:not(.disabled)').click(function(event){
+			$('#mark-plagiarised-selected-button:not(.disabled)', $outerContainer).click(function(event){
 				event.preventDefault();
 
 				var $checkedBoxes = $(".collection-checkbox:checked", $container);
@@ -123,7 +123,7 @@ $(function(){
 				return false;
 			});
 
-			$('.form-post').click(function(event){
+			$('.form-post', $outerContainer).click(function(event){
 				event.preventDefault();
 				if(!$(this).hasClass("disabled")) {
 
