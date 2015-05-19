@@ -319,15 +319,10 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		orders: Seq[ScalaOrder] = Seq()
 	) = transactional(readOnly = true) {
 
-		val allRestrictions = affiliatedDepartmentsRestriction(department, restrictions)
+		val allRestrictions = affiliatedDepartmentsRestriction(department, restrictions) ++
+			department.filterRule.restriction(FiltersStudents.AliasPaths, Some(department))
 
-		if (department.hasParent) {
-			// TODO this sucks. Would be better if you could get ScalaRestrictions from a filter rule and add them to allRestrictions
-			memberDao.findStudentsByRestrictions(allRestrictions, orders, Int.MaxValue, 0)
-				.filter(studentDepartmentFilterMatches(department)).map(_.universityId)
-		}	else {
-			memberDao.findUniversityIdsByRestrictions(allRestrictions, orders)
-		}
+		memberDao.findUniversityIdsByRestrictions(allRestrictions, orders)
 	}
 
 	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {
