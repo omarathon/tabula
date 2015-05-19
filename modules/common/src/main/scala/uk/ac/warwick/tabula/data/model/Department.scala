@@ -1,28 +1,26 @@
 package uk.ac.warwick.tabula.data.model
 
+import javax.persistence._
+
+import org.hibernate.annotations.{BatchSize, Type}
+import org.hibernate.criterion.Restrictions._
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, WeekRange}
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, DepartmentGrantedRole}
+import uk.ac.warwick.tabula.data.{AliasAndJoinType, PostLoadBehaviour, ScalaRestriction}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ExtensionManagerRoleDefinition, RoleDefinition, SelectorBuiltInRoleDefinition}
+import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.xml.NodeSeq
-import javax.persistence._
-import org.hibernate.annotations.{Type, BatchSize}
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.PostLoadBehaviour
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, WeekRange}
-import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
-import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
-import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
-import uk.ac.warwick.tabula.roles.RoleDefinition
-import uk.ac.warwick.tabula.roles.SelectorBuiltInRoleDefinition
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Entity @Access(AccessType.FIELD)
 class Department extends GeneratedId
@@ -344,6 +342,7 @@ object Department {
 		def matches(member: Member, department: Option[Department]): Boolean
 		def getName = name // for Spring
 		def value = name
+		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction]
 	}
 
 	case object UndergraduateFilterRule extends FilterRule {
@@ -355,6 +354,9 @@ object Department {
 				case _ => false
 			}
 			case _ => false
+		}
+		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
+			ScalaRestriction.is("route.degreeType", DegreeType.Undergraduate, aliasPaths("route"):_*)
 		}
 	}
 
@@ -368,12 +370,18 @@ object Department {
 			}
 			case _ => false
 		}
+		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
+			ScalaRestriction.isNot("route.degreeType", DegreeType.Undergraduate, aliasPaths("route"):_*)
+		}
 	}
 
 	case object AllMembersFilterRule extends FilterRule {
 		val name = "All"
 		val courseTypes = CourseType.all
 		def matches(member: Member, department: Option[Department]) = true
+		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
+			None
+		}
 	}
 
 
@@ -384,14 +392,20 @@ object Department {
 			case s:StudentMember => s.mostSignificantCourseDetails.exists(_.latestStudentCourseYearDetails.yearOfStudy == year)
 			case _=>false
 		}
+		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
+			ScalaRestriction.is("latestStudentCourseYearDetails.yearOfStudy", year, aliasPaths("latestStudentCourseYearDetails"):_*)
+		}
 	}
 
 	case object DepartmentRoutesFilterRule extends FilterRule {
 		val name = "DepartmentRoutes"
 		val courseTypes = CourseType.all
 		def matches(member: Member, department: Option[Department]) = member match {
-			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.exists{r => department.exists(_ == r.adminDepartment)}
+			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.exists{r => department.contains(r.adminDepartment)}
 			case _ => false
+		}
+		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
+			department.flatMap(d => ScalaRestriction.is("route.adminDepartment", d, aliasPaths("route"):_*))
 		}
 	}
 
@@ -399,6 +413,10 @@ object Department {
 		val name = rules.map(_.name).mkString(",")
 		val courseTypes = CourseType.all
 		def matches(member:Member, department: Option[Department]) = rules.forall(_.matches(member, department))
+		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
+			val restrictions = rules.flatMap(_.restriction(aliasPaths, department))
+			ScalaRestriction.custom(conjunction(restrictions.map(_.underlying):_*), restrictions.flatMap(_.aliases.toSeq):_*)
+		}
 	}
 
 

@@ -171,42 +171,22 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		maxResults: Int = 50,
 		startResult: Int = 0
 	): (Int, Seq[StudentMember]) = transactional(readOnly = true) {
-		// If we're a sub/parent department then we have to fetch everyone, boo! Otherwise, we can use nice things
-		if (department.hasParent || department.hasChildren) {
-			val allRestrictions = ScalaRestriction.is(
-				"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
-				FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
-			) ++ restrictions
+		val allRestrictions = ScalaRestriction.is(
+			"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
+			FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
+		) ++ department.filterRule.restriction(FiltersStudents.AliasPaths, Some(department)) ++ restrictions
 
-			val filteredStudents = memberDao.findStudentsByRestrictions(allRestrictions, orders, Int.MaxValue, 0)
-				.filter(studentDepartmentFilterMatches(department))
+		val offsetStudents = memberDao.findStudentsByRestrictions(allRestrictions, orders, maxResults, startResult)
 
-			if (filteredStudents.isEmpty)
+		if (offsetStudents.nonEmpty) {
+			(startResult, offsetStudents)
+		} else {
+			// meh, have to hit DAO twice if no results for this offset, but at least this should be a rare occurrence
+			val unoffsetStudents = memberDao.findStudentsByRestrictions(allRestrictions, orders, maxResults, 0)
+			if (unoffsetStudents.isEmpty) {
 				(0, Seq())
-			else if (startResult > 0 && filteredStudents.size > maxResults) {
-				(startResult, filteredStudents.slice(startResult, startResult + maxResults))
 			} else {
-				// return the first page of results, notifying zero offset
-				(0, filteredStudents.take(maxResults))
-			}
-		}	else {
-			val allRestrictions = ScalaRestriction.is(
-				"studentCourseYearDetails.enrolmentDepartment", department,
-				FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
-			) ++ restrictions
-
-			val offsetStudents = memberDao.findStudentsByRestrictions(allRestrictions, orders, maxResults, startResult)
-
-			if (offsetStudents.nonEmpty) {
-				(startResult, offsetStudents)
-			} else {
-				// meh, have to hit DAO twice if no results for this offset, but at least this should be a rare occurrence
-				val unoffsetStudents = memberDao.findStudentsByRestrictions(allRestrictions, orders, maxResults, 0)
-				if (unoffsetStudents.isEmpty) {
-					(0, Seq())
-				} else {
-					(0, unoffsetStudents)
-				}
+				(0, unoffsetStudents)
 			}
 		}
 	}
@@ -374,16 +354,12 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	}
 
 	def countStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Int = transactional(readOnly = true) {
-		// Because of the implementation of sub-departments, unfortunately we can't get optimisations here.
-		if (department.hasParent) findAllStudentsByRestrictions(department, restrictions).size
-		else {
-			val allRestrictions = ScalaRestriction.is(
-				"studentCourseYearDetails.enrolmentDepartment", department,
-				FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
-			) ++ restrictions
+		val allRestrictions = ScalaRestriction.is(
+			"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
+			FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
+		) ++ department.filterRule.restriction(FiltersStudents.AliasPaths, Some(department)) ++ restrictions
 
-			memberDao.countStudentsByRestrictions(allRestrictions)
-		}
+		memberDao.countStudentsByRestrictions(allRestrictions)
 	}
 
 	def countStudentsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction]): Int = transactional(readOnly = true) {

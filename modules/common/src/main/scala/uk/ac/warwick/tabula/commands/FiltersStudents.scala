@@ -18,6 +18,10 @@ object FiltersStudents {
 			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
 			"mostSignificantCourse.studentCourseYearDetails" -> AliasAndJoinType("studentCourseYearDetails")
 		),
+		"latestStudentCourseYearDetails" -> Seq(
+			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
+			"mostSignificantCourse.latestStudentCourseYearDetails" -> AliasAndJoinType("latestStudentCourseYearDetails")
+		),
 		"moduleRegistration" -> Seq(
 			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
 			"mostSignificantCourse._moduleRegistrations" -> AliasAndJoinType("moduleRegistration")
