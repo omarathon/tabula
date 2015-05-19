@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
-import uk.ac.warwick.tabula.web.controllers.BaseController
-import uk.ac.warwick.tabula.profiles.web.ProfileBreadcrumbs
+import uk.ac.warwick.tabula.data.AutowiringRelationshipDaoComponent
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, AutowiringProfileServiceComponent}
+import uk.ac.warwick.tabula.profiles.web.ProfileBreadcrumbs
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringRelationshipServiceComponent}
+import uk.ac.warwick.tabula.web.controllers.BaseController
 
 abstract class ProfilesController extends BaseController with ProfileBreadcrumbs with CurrentMemberComponent
 	with AutowiringProfileServiceComponent with AutowiringRelationshipServiceComponent {
@@ -44,4 +45,11 @@ abstract class ProfilesController extends BaseController with ProfileBreadcrumbs
 trait CurrentMemberComponent {
 	def optionalCurrentMember: Option[Member]
 	def currentMember: Member
+}
+
+trait ChecksAgent extends AutowiringRelationshipDaoComponent {
+
+	def isAgent(universityId:String):Boolean = {
+		relationshipDao.isAgent(universityId)
+	}
 }
