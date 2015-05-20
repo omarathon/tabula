@@ -46,7 +46,7 @@ trait EmergencyMessageService extends EmergencyMessageStatus {
 	def exception(callee: Describable[_]): Exception
 
 	var message: Option[String]
-	
+
 	def update(message: EmergencyMessage) = {
 		this.message = Option(message.message)
 		if (message.enabled) this.enable
@@ -57,7 +57,7 @@ trait EmergencyMessageService extends EmergencyMessageStatus {
 
 @Service
 class EmergencyMessageServiceImpl extends EmergencyMessageService with Logging {
-	@Value("${environment.standby}") var _enabled: Boolean = _
+	var _enabled: Boolean = false
 
 	def enabled: Boolean = _enabled
 	var message: Option[String] = None
@@ -68,7 +68,7 @@ class EmergencyMessageServiceImpl extends EmergencyMessageService with Logging {
 	def exception(callee: Describable[_]) = {
 		val m = EventDescription.generateMessage(Event.fromDescribable(callee))
 		logger.info("[Emergency Message Reject] " + m)
-		
+
 		new EmergencyMessageServiceEnabledException(message)
 	}
 
@@ -129,19 +129,19 @@ class EmergencyMessage {
 
 class EmergencyMessageListener extends QueueListener with InitializingBean with Logging {
 
-		var queue = Wire.named[Queue]("settingsSyncTopic")
-		var service = Wire.auto[EmergencyMessageService]
+	var queue = Wire.named[Queue]("settingsSyncTopic")
+	var service = Wire.auto[EmergencyMessageService]
 
-		override def isListeningToQueue = true
-		override def onReceive(item: Any) {
-				item match {
-						case copy: EmergencyMessage => service.update(copy)
-						case _ =>
-				}
+	override def isListeningToQueue = true
+	override def onReceive(item: Any) {
+		item match {
+			case copy: EmergencyMessage => service.update(copy)
+			case _ =>
 		}
-		
-		override def afterPropertiesSet = {
-				queue.addListener(classOf[EmergencyMessage].getAnnotation(classOf[ItemType]).value, this)
-		}
-	
+	}
+
+	override def afterPropertiesSet = {
+		queue.addListener(classOf[EmergencyMessage].getAnnotation(classOf[ItemType]).value, this)
+	}
+
 }
