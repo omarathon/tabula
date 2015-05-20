@@ -20,11 +20,12 @@ case object ModuleAuditorRoleDefinition extends BuiltInRoleDefinition {
 		
 		Submission.ViewPlagiarismStatus,
 		Submission.Read,
-		
 		Extension.Read,
 
 		AssignmentFeedback.Read,
+		AssignmentFeedback.DownloadMarksTemplate,
 		ExamFeedback.Read,
+		ExamFeedback.DownloadMarksTemplate,
 		
 		SmallGroups.Read,
 		SmallGroups.ReadMembership,
