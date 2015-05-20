@@ -61,7 +61,7 @@ class FeedbackDueGeneralNotification
 	override final def title = "%s: Feedback for \"%s\" is due to be published".format(assignment.module.code.toUpperCase, assignment.name)
 
 	override final def recipients = {
-		if (assignment.needsFeedbackPublishing) {
+		if (assignment.needsFeedbackPublishingIgnoreExtensions) {
 			val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 			moduleAndDepartmentService.getModuleByCode(assignment.module.code)
 				.getOrElse(throw new IllegalStateException("No such module"))

@@ -88,7 +88,7 @@ $(function(){
 
 	var biglistOptions = {
 		setup : function() {
-			var $container = this, $outerContainer = $container.closest('div.well');
+			var $container = this, $outerContainer = $container.closest('div.form-post-container');
 			// #delete-selected-button won't work for >1 set of checkboxes on a page.
 			$('#download-selected-button, #delete-selected-button', $outerContainer).click(function(event){
 				event.preventDefault();
