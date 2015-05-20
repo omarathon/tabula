@@ -11,6 +11,7 @@ case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
 	override def description = "Module Assistant"
 
 	GeneratesSubRole(ModuleAuditorRoleDefinition)
+	GeneratesSubRole(MarkerRoleDefinition)
 
 	GrantsScopedPermission(
 		RolesAndPermissions.Read,

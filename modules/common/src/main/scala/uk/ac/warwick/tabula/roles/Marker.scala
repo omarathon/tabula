@@ -15,7 +15,7 @@ case object MarkerRoleDefinition extends UnassignableBuiltInRoleDefinition {
 		AssignmentMarkerFeedback.DownloadMarksTemplate,
 		AssignmentMarkerFeedback.Manage,
 		ExamFeedback.Read,
-		ExamFeedback.DownloadMarksTemplate,
+		ExamMarkerFeedback.DownloadMarksTemplate,
 		ExamMarkerFeedback.Manage,
 		Submission.Read,
 		Submission.ViewPlagiarismStatus
