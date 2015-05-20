@@ -59,6 +59,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 		session.newCriteria[RecipientNotificationInfo]
 			.createAlias("notification", "notification")
 			.setFetchMode("notification", FetchMode.JOIN)
+			.add(Restrictions.disjunction(is("emailSent", true), is("dismissed", false)))
 			.addOrder(Order.asc("emailSent"))
 			.addOrder(Order.desc("notification.created"))
 			.setFirstResult(start)
