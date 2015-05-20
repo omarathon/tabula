@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.system
 
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.helpers.HttpServletRequestUtils._
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
+import uk.ac.warwick.tabula.services.{EmergencyMessageService, MaintenanceModeService}
 
 /** Provides a limited interface of request-level things, which are required by some objects
 	* like CurrentUser before a full RequestInfo can be created.
@@ -29,10 +29,11 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 	import RequestInfoInterceptor._
   
 	@Autowired var maintenance: MaintenanceModeService = _
+	@Autowired var emergencyMessage: EmergencyMessageService = _
 
 	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
 		implicit val req = request
-		RequestInfo.open(fromAttributeElse(newRequestInfo(request, maintenance.enabled)))
+		RequestInfo.open(fromAttributeElse(newRequestInfo(request, maintenance.enabled, emergencyMessage)))
 		true
 	}
 
@@ -59,9 +60,14 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 object RequestInfoInterceptor {
 	val RequestInfoAttribute = "APP_REQUEST_INFO_ATTRIBUTE"
 	  
-	def newRequestInfo(request: HttpServletRequest, isMaintenance: Boolean = false) = {
+	def newRequestInfo(request: HttpServletRequest, isMaintenance: Boolean = false, emergencyMessageService: EmergencyMessageService) = {
 		// Transfer cache from an EarlyAccessInfo if one exists.
 		val cache = EarlyRequestInfo.fromThread map { _.requestLevelCache } getOrElse { new RequestLevelCache() }
+
+		var emergencyMessage = ""
+		if (emergencyMessageService.enabled) {
+			emergencyMessage = emergencyMessageService.message.get
+		}
 
 		new RequestInfo(
 			user = getUser(request),
@@ -69,7 +75,10 @@ object RequestInfoInterceptor {
 			requestParameters = request.requestParameters,
 			ajax = request.isAjaxRequest,
 			maintenance = isMaintenance,
-			requestLevelCache = cache)
+			requestLevelCache = cache,
+			hasEmergencyMessage = emergencyMessageService.enabled,
+			emergencyMessage = emergencyMessage
+		)
 	}
 
 	private def getUser(implicit request: HttpServletRequest) = request.getAttribute(CurrentUser.keyName) match {

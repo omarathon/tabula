@@ -103,6 +103,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 		val extension = Fixtures.extension()
 		extension.assignment = assignment
 		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
+		extension.approve()
 
 		val notification = Notification.init(new SubmissionDueWithExtensionNotification, new AnonymousUser, extension)
 		notification.title should be ("CS118: Your submission for \"5,000 word essay\" is due")
@@ -116,6 +117,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 		val extension = Fixtures.extension()
 		extension.assignment = assignment
 		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
+		extension.approve()
 
 		val notification = Notification.init(new SubmissionDueWithExtensionNotification, new AnonymousUser, extension)
 		notification.title should be ("CS118: Your submission for \"5,000 word essay\" is late")

@@ -1,23 +1,19 @@
 package uk.ac.warwick.tabula.web.controllers.sysadmin
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.util.queue.Queue
-import uk.ac.warwick.tabula.services.MaintenanceModeService
-import uk.ac.warwick.tabula.commands.SelfValidating
-import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.joda.time.DateTime
 import javax.validation.Valid
+
+import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.stereotype.Controller
+import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.services.MaintenanceModeMessage
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.commands.{Command, ReadOnly, SelfValidating, Unaudited}
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.{MaintenanceModeMessage, MaintenanceModeService}
 import uk.ac.warwick.tabula.validators.WithinYears
+import uk.ac.warwick.util.queue.Queue
 
 class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Unit] with ReadOnly with Unaudited with SelfValidating {
 
@@ -75,5 +71,4 @@ class MaintenanceModeController extends BaseSysadminController {
 			Redirect("/sysadmin")
 		}
 	}
-
 }

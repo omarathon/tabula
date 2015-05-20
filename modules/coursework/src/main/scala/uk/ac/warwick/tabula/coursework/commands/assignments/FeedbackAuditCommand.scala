@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.coursework.commands.feedback.SubmissionState
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Submission}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, AutowiringSubmissionServiceComponent, FeedbackServiceComponent, SubmissionServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
@@ -19,6 +19,7 @@ object FeedbackAuditCommand {
 			with FeedbackAuditCommandDescription
 			with AutowiringSubmissionServiceComponent
 			with AutowiringFeedbackServiceComponent
+			with AutowiringProfileServiceComponent
 			with SubmissionState
 }
 
@@ -44,7 +45,7 @@ trait FeedbackAuditCommandPermissions extends RequiresPermissionsChecking with P
 	self: FeedbackAuditCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.Submission.Read, mandatory(assignment))
-		p.PermissionCheck(Permissions.Feedback.Read, mandatory(assignment))
+		p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(assignment))
 	}
 }
 

@@ -17,7 +17,7 @@ abstract class ExtensionStudentNotification extends ExtensionNotification with S
 			"user" -> recipient,
 			"path" -> url,
 			"extension" -> extension,
-			"newExpiryDate" -> dateTimeFormatter.print(extension.expiryDate),
+			"newExpiryDate" -> dateTimeFormatter.print(extension.expiryDate.orNull),
 			"originalAssignmentDate" -> dateTimeFormatter.print(assignment.closeDate)
 	))
 }

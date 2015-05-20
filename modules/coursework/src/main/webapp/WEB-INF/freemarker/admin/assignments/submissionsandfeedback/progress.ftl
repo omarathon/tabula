@@ -6,7 +6,7 @@
 <div id="profile-modal" class="modal fade profile-subset"></div>
 <div id="feedback-modal" class="modal fade"></div>
 
-<div class="fixed-container">
+<div class="fixed-container form-post-container">
 	<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
 
 	<#if assignment.openEnded>
@@ -116,7 +116,7 @@
 								<h3>Submission</h3>
 
 								<div class="labels">
-									<@sd.submission_status submission enhancedExtension enhancedFeedback />
+									<@sd.submission_status submission enhancedExtension enhancedFeedback student />
 								</div>
 
 								<#-- If the current action is in this section, then add the next action blowout here -->

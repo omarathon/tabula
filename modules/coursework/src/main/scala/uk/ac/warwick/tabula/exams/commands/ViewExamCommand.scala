@@ -49,7 +49,7 @@ trait ViewExamPermissions extends RequiresPermissionsChecking with PermissionsCh
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		mustBeLinked(exam, module)
-		p.PermissionCheck(Permissions.Feedback.Create, exam)
+		p.PermissionCheck(Permissions.ExamFeedback.Manage, exam)
 	}
 
 }

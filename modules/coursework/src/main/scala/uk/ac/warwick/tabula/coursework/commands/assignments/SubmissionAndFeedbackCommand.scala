@@ -32,6 +32,7 @@ object SubmissionAndFeedbackCommand {
 		with AutowiringAssessmentMembershipServiceComponent
 		with AutowiringUserLookupComponent
 		with AutowiringFeedbackForSitsServiceComponent
+		with AutowiringProfileServiceComponent
 
 	case class SubmissionAndFeedbackResults (
 		students:Seq[Student],
@@ -49,7 +50,8 @@ object SubmissionAndFeedbackCommand {
 		nextStage: Option[WorkflowStage],
 		stages: ListMap[String, WorkflowStages.StageProgress],
 		coursework: WorkflowItems,
-		assignment:Assignment
+		assignment:Assignment,
+		disability: Option[Disability]
 	)
 
 	case class WorkflowItems (
@@ -74,7 +76,7 @@ object SubmissionAndFeedbackCommand {
 abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment)
 	extends Command[SubmissionAndFeedbackResults] with Unaudited with ReadOnly with SelfValidating {
 
-	self: AssessmentMembershipServiceComponent with UserLookupComponent with FeedbackForSitsServiceComponent =>
+	self: AssessmentMembershipServiceComponent with UserLookupComponent with FeedbackForSitsServiceComponent with ProfileServiceComponent =>
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Read, assignment)
@@ -158,7 +160,8 @@ abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: 
 					nextStage=progress.nextStage,
 					stages=progress.stages,
 					coursework=coursework,
-					assignment=assignment
+					assignment=assignment,
+					disability = None
 				)
 			}
 		}
@@ -201,7 +204,17 @@ abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: 
 				nextStage=progress.nextStage,
 				stages=progress.stages,
 				coursework=coursework,
-				assignment=assignment
+				assignment=assignment,
+				disability = {
+					if (enhancedSubmissionForUniId.exists(_.submission.useDisability)) {
+						profileService.getMemberByUser(user).flatMap{
+							case student: StudentMember => Option(student)
+							case _ => None
+						}.flatMap(s => s.disability)
+					}	else {
+						None
+					}
+				}
 			)
 		}}
 		

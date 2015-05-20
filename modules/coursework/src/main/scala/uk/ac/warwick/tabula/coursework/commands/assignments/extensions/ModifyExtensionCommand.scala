@@ -38,7 +38,7 @@ abstract class ModifyExtensionCommand(val mod: Module, val ass: Assignment, uniI
 	}
 
 	def copyFrom(extension: Extension) = {
-		expiryDate = extension.expiryDate
+		expiryDate = extension.expiryDate.orNull
 		state = extension.state
 		reviewerComments = extension.reviewerComments
 	}
@@ -56,7 +56,7 @@ trait ModifyExtensionCommandValidation extends SelfValidating {
 		}
 
 		if(expiryDate == null) {
-			if (action == ApprovalAction) {
+			if (action == ApprovalAction || action == UpdateApprovalAction) {
 				errors.rejectValue("expiryDate", "extension.requestedExpiryDate.provideExpiry")
 			}
 		} else if(expiryDate.isBefore(assignment.closeDate)) {

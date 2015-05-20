@@ -7,10 +7,10 @@ import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.coursework.services.docconversion.{MarkItem, MarksExtractorComponent}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Assessment, FileAttachment, Module}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{FoundUser, LazyLists, NoUser}
-import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, UserLookupComponent}
+import uk.ac.warwick.tabula.services.{SubmissionServiceComponent, ProfileServiceComponent, GeneratesGradesFromMarks, UserLookupComponent}
 import uk.ac.warwick.tabula.system.BindListener
 
 import scala.collection.JavaConversions._
@@ -147,4 +147,26 @@ trait AddMarksCommandState {
 	val validAttachmentStrings = Seq(".xlsx")
 	var file: UploadedFile = new UploadedFile
 	var marks: JList[MarkItem] = LazyLists.create()
+}
+
+trait FetchDisabilities {
+
+	self: AddMarksCommandState with ProfileServiceComponent with SubmissionServiceComponent =>
+
+	def fetchDisabilities: Map[String, Disability] = {
+		assessment match {
+			case assignment: Assignment =>
+				marks.map{ markItem => markItem.universityId -> {
+					if (submissionService.getSubmissionByUniId(assignment, markItem.universityId).exists(_.useDisability)) {
+						profileService.getMemberByUniversityId(markItem.universityId).flatMap {
+							case student: StudentMember => Option(student)
+							case _ => None
+						}.flatMap(_.disability)
+					} else {
+						None
+					}
+				}}.toMap.filterNot{case(_, option) => option.isEmpty}.mapValues(_.get)
+			case _ => Map()
+		}
+	}
 }

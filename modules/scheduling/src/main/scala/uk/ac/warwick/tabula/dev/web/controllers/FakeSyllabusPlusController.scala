@@ -1,17 +1,17 @@
 package uk.ac.warwick.tabula.dev.web.controllers
 
-import dispatch.classic.{url, thread, Http}
 import dispatch.classic.thread.ThreadSafeHttpClient
-import org.apache.http.client.params.{CookiePolicy, ClientPNames}
-import org.springframework.web.bind.annotation.{RequestMethod, RequestParam, PathVariable, RequestMapping}
-import java.io.Writer
+import dispatch.classic.{Http, thread, url}
+import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.springframework.stereotype.Controller
-import scala.collection.mutable
-import uk.ac.warwick.tabula.services.UserLookupService
+import org.springframework.web.bind.annotation.{PathVariable, RequestMapping, RequestMethod, RequestParam}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.UserLookupService
+
+import scala.collection.mutable
 import scala.util.{Success, Try}
-import uk.ac.warwick.tabula.AcademicYear
+import scala.xml.XML
 
 /**
  * Proxy student requests to Syllabus+, cacheing responses.
@@ -25,18 +25,20 @@ class FakeSyllabusPlusController extends Logging {
 
 	val userLookup:UserLookupService = Wire[UserLookupService]
 	val studentTimetables: mutable.Map[StudentYearKey, String] = mutable.Map.empty
+	val moduleTimetables: mutable.Map[ModuleYearKey, String] = mutable.Map.empty
 	val baseUri = "https://timetablingmanagement.warwick.ac.uk/xml"
 	def studentUri(year:String) = baseUri + year + "/?StudentXML"
+	def moduleUri(year:String) = baseUri + year + "/?ModuleXML"
 
 
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
+			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
 		}
 	}
 
-	@RequestMapping(Array("/stubTimetable/student{year}/"))
-	def getStudent(@RequestParam("p0") studentId: String, @PathVariable("year") year:String, output: Writer) {
+	@RequestMapping(value = Array("/stubTimetable/{year}"), params = Array("StudentXML"))
+	def getStudent(@RequestParam("p0") studentId: String, @PathVariable("year") year:String) = {
 		val xml = studentTimetables.getOrElseUpdate(StudentYearKey(studentId, year) , {
 			val req = url(studentUri(year)) <<? Map("p0" -> studentId)
 			import scala.language.postfixOps
@@ -51,7 +53,7 @@ class FakeSyllabusPlusController extends Logging {
 			}
 			xml
 		})
-		output.write(xml)
+		XML.loadString(xml)
 	}
 
 	// note that the "year" variable should be in the same format Syllabus+ uses
@@ -67,5 +69,32 @@ class FakeSyllabusPlusController extends Logging {
 		}
 	}
 
+	@RequestMapping(value = Array("/stubTimetable/{year}"), params = Array("ModuleXML"))
+	def getModule(@RequestParam("p0") moduleCode: String, @PathVariable("year") year:String) = {
+		val xml = moduleTimetables.getOrElseUpdate(ModuleYearKey(moduleCode, year) , {
+			val req = url(moduleUri(year)) <<? Map("p0" -> moduleCode)
+			import scala.language.postfixOps
+			val xml = Try(http.when(_==200)(req as_str)) match {
+				case Success(s)=>s
+				// If we get an error back, just return then XML for an empty list immediately,
+				// otherwise the XML handler in ScientiaHttpTimetableFetchingService
+				// will wait for the request keep-alive to time out (60s) before finally giving up.
+				// n.b. if we made this controller return a non-200 status code then we probably wouldn't have
+				// to do this.
+				case _	=>"<?xml version=\"1.0\" encoding=\"utf-8\"?><Data><Activities></Activities></Data>"
+			}
+			xml
+		})
+		XML.loadString(xml)
+	}
+
+	// note that the "year" variable should be in the same format Syllabus+ uses
+	// i.e. 1213 for academic year 2012-2013
+	@RequestMapping(method = Array(RequestMethod.POST), value = Array("/stubTimetable/module"))
+	def saveModule(@RequestParam moduleCode: String, @RequestParam year:String, @RequestParam content: String) {
+		moduleTimetables.put(ModuleYearKey(moduleCode, year), content)
+	}
+
 }
 case class StudentYearKey(studentId:String, year:String)
+case class ModuleYearKey(moduleCode:String, year:String)

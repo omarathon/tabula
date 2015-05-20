@@ -1716,18 +1716,14 @@ a:link {
 a:visited {
   color: #123e5a;
 }
-#main-content a:visited {
-  color: #5a123d;
-}
-a:hover,
-#main-content a:hover {
+a:hover {
   color: #3588bc;
 }
 a img {
   border: none;
 }
-img[height],
-audio[height] {
+#main-content img[height],
+#main-content audio[height] {
   height: auto !important;
 }
 body:not(.is-tablet) video[height] {

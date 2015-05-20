@@ -375,7 +375,7 @@ class SecurityServiceTest extends TestBase with Mockito {
 	 * name equal to each other in future. Sigh 
 	 */
 	@Test def equality() {
-		(Permissions.Module.Create == Permissions.Feedback.Create) should be {false}
+		(Permissions.Module.Create == Permissions.AssignmentFeedback.Manage) should be {false}
 		(Permissions.Module.Create == Permissions.Module.Create) should be {true}
 	}
 

@@ -1,21 +1,20 @@
 package uk.ac.warwick.tabula.services
 
-import org.springframework.stereotype.Service
-import org.springframework.beans.factory.annotation.Value
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.Reactor
-import uk.ac.warwick.tabula.system.exceptions.HandledException
-import uk.ac.warwick.util.queue.QueueListener
-import org.springframework.beans.factory.InitializingBean
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.spring.Wire
 import com.fasterxml.jackson.annotation.JsonAutoDetect
-import uk.ac.warwick.util.queue.conversion.ItemType
-import uk.ac.warwick.util.queue.Queue
-import uk.ac.warwick.tabula.commands.Describable
-import uk.ac.warwick.tabula.events.Event
-import uk.ac.warwick.tabula.events.EventDescription
+import org.joda.time.DateTime
 import org.springframework.beans.BeanWrapperImpl
+import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.Reactor
+import uk.ac.warwick.tabula.commands.Describable
+import uk.ac.warwick.tabula.events.{Event, EventDescription}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.system.exceptions.HandledException
+import uk.ac.warwick.util.queue.{Queue, QueueListener}
+import uk.ac.warwick.util.queue.conversion.ItemType
+
 import scala.beans.BeanProperty
 
 trait MaintenanceStatus {
@@ -115,9 +114,6 @@ class MaintenanceModeEnabledException(val until: Option[DateTime], val message: 
 	def getMessageOrEmpty = message.getOrElse("")
 
 }
-
-class CannotPerformWriteOperationException(callee: Describable[_])
-	extends RuntimeException with HandledException
 
 @ItemType("MaintenanceMode")
 @JsonAutoDetect

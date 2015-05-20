@@ -179,7 +179,7 @@
 						<li>
 							<#assign onlinefeedback_url><@routes.genericfeedback assignment /></#assign>
 							<@fmt.permission_button
-							permission='Feedback.Update'
+							permission='AssignmentFeedback.Manage'
 							scope=assignment
 							action_descr='add general feedback for all students'
 							tooltip='Add general feedback that will be sent to all students'
@@ -201,7 +201,7 @@
 						<li>
 							<#assign marks_url><@routes.addMarks assignment /></#assign>
 							<@fmt.permission_button
-							permission='Marks.Create'
+							permission='AssignmentFeedback.Manage'
 							scope=assignment
 							action_descr='add marks'
 							href=marks_url>
@@ -211,7 +211,7 @@
 						<li>
 							<#assign onlinefeedback_url><@routes.onlinefeedback assignment /></#assign>
 							<@fmt.permission_button
-							permission='Feedback.Read'
+							permission='AssignmentFeedback.Read'
 							scope=assignment
 							action_descr='manage online feedback'
 							href=onlinefeedback_url>
@@ -221,7 +221,7 @@
 						<li>
 							<#assign feedback_url><@routes.addFeedback assignment /></#assign>
 							<@fmt.permission_button
-							permission='Feedback.Create'
+							permission='AssignmentFeedback.Manage'
 							scope=assignment
 							action_descr='upload feedback'
 							classes='feedback-link'
@@ -230,18 +230,22 @@
 							</@fmt.permission_button>
 						</li>
 					</#if>
-					<li class="must-have-selected">
-						<#assign onlinefeedback_url><@routes.feedbackAdjustment assignment /></#assign>
-						<@fmt.permission_button
-							permission='Feedback.Update'
-							scope=assignment
-							action_descr='make adjustments to feedback'
-							classes='form-post'
-							tooltip='Apply penalties or make adjustments to mark and grade'
-							href=onlinefeedback_url>
-							<i class="icon-sort icon-fixed-width"></i> Adjustments
-						</@fmt.permission_button>
-					</li>
+					<#if assignment.collectMarks>
+						<li class="must-have-selected">
+							<#assign onlinefeedback_url><@routes.feedbackAdjustment assignment /></#assign>
+							<@fmt.permission_button
+								permission='AssignmentFeedback.Manage'
+								scope=assignment
+								action_descr='make adjustments to feedback'
+								classes='form-post'
+								tooltip='Apply penalties or make adjustments to mark and grade'
+								href=onlinefeedback_url>
+								<i class="icon-sort icon-fixed-width"></i> Adjustments
+							</@fmt.permission_button>
+						</li>
+					<#else>
+						<li class="disabled"><a class="use-tooltip" data-container="body" title="You cannot adjust marks on an assignment that does not collect marks"><i class="icon-sort icon-fixed-width"></i> Adjustments</a></li>
+					</#if>
 
 					<#-- Download / Publish / Delete always available -->
 					<li class="must-have-selected">
@@ -254,7 +258,7 @@
 					<#if assignment.canPublishFeedback>
 						<li>
 							<#assign publishfeedbackurl><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/publish'/></#assign>
-							<@fmt.permission_button permission='Feedback.Publish' scope=assignment type='a' action_descr='release feedback to students' tooltip="Release feedback to students" href=publishfeedbackurl>
+							<@fmt.permission_button permission='AssignmentFeedback.Publish' scope=assignment type='a' action_descr='release feedback to students' tooltip="Release feedback to students" href=publishfeedbackurl>
 								<i class="icon-share icon-fixed-width"></i> Publish feedback
 							</@fmt.permission_button>
 						</li>
@@ -263,7 +267,7 @@
 					</#if>
 					<li class="must-have-selected">
 						<#assign deletefeedback_url><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
-						<@fmt.permission_button permission='Feedback.Delete' scope=assignment action_descr='delete feedback' classes="form-post" href=deletefeedback_url tooltip='Delete feedback'>
+						<@fmt.permission_button permission='AssignmentFeedback.Manage' scope=assignment action_descr='delete feedback' classes="form-post" href=deletefeedback_url tooltip='Delete feedback'>
 							<i class="icon-remove icon-fixed-width"></i> Delete feedback
 						</@fmt.permission_button>
 					</li>
@@ -272,7 +276,7 @@
 						<li>
 							<#assign uploadToSitsUrl><@routes.uploadToSits assignment /></#assign>
 							<@fmt.permission_button
-								permission='Feedback.Publish'
+								permission='AssignmentFeedback.Publish'
 								scope=assignment
 								action_descr='upload feedback to SITS'
 								tooltip='Upload mark and grade to SITS'

@@ -1,17 +1,17 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
-import uk.ac.warwick.tabula.services.GeneratesGradesFromMarks
+import uk.ac.warwick.tabula.services.{ProfileServiceComponent, GeneratesGradesFromMarks}
 
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.data.model.{Submission, Assignment, Module}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.{Errors, BindingResult}
 import uk.ac.warwick.userlookup.User
 
 abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignment: Assignment, val student: User, val marker: User, val gradeGenerator: GeneratesGradesFromMarks)
-	extends OnlineFeedbackState with OnlineFeedbackStudentState with SubmissionState with BindListener with SelfValidating {
+	extends OnlineFeedbackState with OnlineFeedbackStudentState with SubmissionState with BindListener with SelfValidating with ProfileServiceComponent {
 
 	def submission = assignment.findSubmission(student.getWarwickId)
 
@@ -37,7 +37,7 @@ abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignm
 		if(fields != null){
 			assignment.feedbackFields.foreach { field =>
 				errors.pushNestedPath("fields[%s]".format(field.id))
-				fields.asScala.get(field.id).map { field.validate(_, errors) }
+				fields.asScala.get(field.id).foreach(field.validate(_, errors))
 				errors.popNestedPath()
 			}
 		}
@@ -65,6 +65,9 @@ abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignm
 }
 
 trait SubmissionState {
+
+	self: ProfileServiceComponent =>
+
 	def assignment: Assignment
 	def submission: Option[Submission]
 	def student: User
@@ -75,9 +78,20 @@ trait SubmissionState {
 			case Some(s) if s.isLate => "workflow.Submission.late"
 			case Some(_) => "workflow.Submission.onTime"
 			case None if !assignment.isClosed => "workflow.Submission.unsubmitted.withinDeadline"
-			case None if assignment.extensions.asScala.exists(e => e.universityId == student.getWarwickId && e.expiryDate.isBeforeNow)
+			case None if assignment.extensions.asScala.exists(e => e.universityId == student.getWarwickId && e.expiryDate.exists(_.isBeforeNow))
 				=> "workflow.Submission.unsubmitted.withinExtension"
 			case None => "workflow.Submission.unsubmitted.late"
+		}
+	}
+
+	def disability: Option[Disability] = {
+		if (submission.exists(s => s.useDisability)) {
+			profileService.getMemberByUniversityId(student.getWarwickId).flatMap {
+				case student: StudentMember => Option(student)
+				case _ => None
+			}.flatMap(s => s.disability)
+		} else {
+			None
 		}
 	}
 }

@@ -19,7 +19,7 @@ class DownloadMarkerFeedbackFilesCommand (val module: Module, val assignment: As
 
 		notDeleted(assignment)
 		mustBeLinked(assignment, module)
-		PermissionCheck(Permissions.Feedback.Read, markerFeedback.feedback)
+		PermissionCheck(Permissions.AssignmentFeedback.Read, markerFeedback.feedback)
 
 		var filename: String = _
 

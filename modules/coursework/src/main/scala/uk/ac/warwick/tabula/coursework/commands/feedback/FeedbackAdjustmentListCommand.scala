@@ -2,7 +2,8 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Assessment, Feedback}
+import uk.ac.warwick.tabula.data.HibernateHelpers
+import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, Exam, Feedback}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -29,16 +30,21 @@ class FeedbackAdjustmentListCommandInternal(val assessment: Assessment)
 	self: UserLookupComponent with AssessmentMembershipServiceComponent =>
 
 	def applyInternal() = {
-		val allFeedback = assessment.fullFeedback
-		val allStudents =
-			if (students.isEmpty) assessmentMembershipService.determineMembershipUsers(assessment)
-			else students.asScala.map(userLookup.getUserByWarwickUniId)
+		if (assessment.collectMarks) {
+			val allFeedback = assessment.fullFeedback
+			val allStudents =
+				if (students.isEmpty) assessmentMembershipService.determineMembershipUsers(assessment)
+				else students.asScala.map(userLookup.getUserByWarwickUniId)
 
-		val (hasFeedback, noFeedback) = allStudents.map { student =>
-			StudentInfo(student, allFeedback.find { _.universityId == student.getWarwickId })
-		}.partition { _.feedback.isDefined }
+			val (hasFeedback, noFeedback) = allStudents.map { student =>
+				StudentInfo(student, allFeedback.find { _.universityId == student.getWarwickId })
+			}.partition { _.feedback.isDefined }
 
-		hasFeedback ++ noFeedback
+			hasFeedback ++ noFeedback
+		} else {
+			Seq()
+		}
+
 	}
 }
 
@@ -50,6 +56,11 @@ trait FeedbackAdjustmentListCommandState {
 trait FeedbackAdjustmentListCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: FeedbackAdjustmentListCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.Update, mandatory(assessment))
+		HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
+			case assignment: Assignment =>
+				p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
+			case exam: Exam =>
+				p.PermissionCheck(Permissions.ExamFeedback.Manage, exam)
+		}
 	}
 }

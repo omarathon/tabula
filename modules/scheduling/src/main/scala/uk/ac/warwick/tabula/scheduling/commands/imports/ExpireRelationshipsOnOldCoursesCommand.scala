@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.{StudentRelationship, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -25,15 +24,13 @@ class ExpireRelationshipsOnOldCoursesCommandInternal(val student: StudentMember)
 	self: ExpireRelationshipsOnOldCoursesCommandState with RelationshipServiceComponent =>
 
 	override def applyInternal() = {
-		studentRelationships.groupBy(_.agent).map{ case(agent, agentRelationships) =>
-			if (agentRelationships.exists(rel => rel.isCurrent && !rel.studentCourseDetails.isEnded)) {
-				relationshipService.endStudentRelationships(
-					agentRelationships.filter(rel => rel.isCurrent && rel.studentCourseDetails.isEnded)
-				)
+		studentRelationships.groupBy(_.relationshipType).foreach { case(relType, relationships) =>
+			if (hasOnlyVeryOldRelationships(relationships) || hasCurrentRelationship(relationships)) {
+				val relationshipsToEnd = relationships.filter(rel => rel.isCurrent && rel.studentCourseDetails.isEnded)
+				relationshipService.endStudentRelationships(relationshipsToEnd)
 			}
 		}
 	}
-
 }
 
 trait ExpireRelationshipsOnOldCoursesValidation extends SelfValidating {
@@ -43,14 +40,13 @@ trait ExpireRelationshipsOnOldCoursesValidation extends SelfValidating {
 	override def validate(errors: Errors) {
 		if (!student.freshStudentCourseDetails.exists(_.isEnded)) {
 			errors.reject("No old courses for this student")
-		} else if (relationshipService.findCurrentRelationships(personalTutorRelationshipType, student).isEmpty) {
-			errors.reject("No current relationships for this student")
 		} else {
-			val hasExpirable = studentRelationships.groupBy(_.agent).exists{ case(agent, agentRels) =>
-				// Has a current relationship on a non-ended course
-				agentRels.exists(rel => rel.isCurrent && !rel.studentCourseDetails.isEnded) &&
-					// Has some relationships to expire
-					agentRels.exists(rel => rel.isCurrent && rel.studentCourseDetails.isEnded)
+			val hasExpirable = studentRelationships.groupBy(_.relationshipType).exists {
+				case(relType, relationships) =>
+					// Has a current relationship on a non-ended course or all the courses ended more than three months ago
+					(hasOnlyVeryOldRelationships(relationships) || hasCurrentRelationship(relationships)) &&
+						// Has some relationships to expire
+						relationships.exists(rel => rel.isCurrent && rel.studentCourseDetails.isEnded)
 			}
 			if (!hasExpirable) {
 				errors.reject("No relationships to expire")
@@ -76,8 +72,12 @@ trait ExpireRelationshipsOnOldCoursesCommandState {
 
 	def student: StudentMember
 
-	lazy val personalTutorRelationshipType = relationshipService.getStudentRelationshipTypeByUrlPart("tutor").getOrElse(
-		throw new ItemNotFoundException("Could not find personal tutor relationship type")
-	)
-	lazy val studentRelationships = relationshipService.getRelationships(personalTutorRelationshipType, student)
+	lazy val relationshipTypes = relationshipService.allStudentRelationshipTypes
+	lazy val studentRelationships = relationshipTypes.flatMap(relationshipService.getRelationships(_, student))
+
+	def hasOnlyVeryOldRelationships(relationships: Seq[StudentRelationship]) =
+		relationships.forall(rel => rel.studentCourseDetails.isEnded && !rel.studentCourseDetails.hasEndedRecently)
+
+	def hasCurrentRelationship(relationships: Seq[StudentRelationship]) =
+		relationships.exists(rel => rel.isCurrent && !rel.studentCourseDetails.isEnded)
 }

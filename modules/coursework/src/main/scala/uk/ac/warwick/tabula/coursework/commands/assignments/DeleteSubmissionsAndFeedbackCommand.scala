@@ -25,7 +25,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	extends Command[(Seq[Submission], Seq[Feedback])] with SelfValidating {
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Feedback.Delete, assignment)
+	PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
 	PermissionCheck(Permissions.Submission.Delete, assignment)
 
 	var submissionService = Wire.auto[SubmissionService]

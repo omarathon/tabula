@@ -73,6 +73,8 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 
 	def verb = "Remind"
 
+	def shouldSend: Boolean = assignment.collectSubmissions && !assignment.openEnded && !assignment.archived && !assignment.deleted
+
 }
 
 @Entity
@@ -86,7 +88,8 @@ class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] wi
 	def assignment = item.entity
 
 	def recipients = {
-		if (!assignment.collectSubmissions || assignment.openEnded || assignment.archived) Nil
+		if (!shouldSend)
+			Nil
 		else {
 			val submissions = assignment.submissions.asScala
 			val extensions = assignment.extensions.asScala.filter(_.approved) // TAB-2303
@@ -106,13 +109,16 @@ class SubmissionDueWithExtensionNotification extends Notification[Extension, Uni
 
 	def extension = item.entity
 
-	def deadline = extension.expiryDate
+	def deadline = extension.expiryDate.getOrElse(
+		throw new IllegalArgumentException("Can't send an SubmissionDueWithExtensionNotification without a deadline")
+	)
+
 	def assignment = extension.assignment
 
 	def recipients = {
 		val hasSubmitted = assignment.submissions.asScala.exists(_.universityId == extension.universityId)
 
-		if (hasSubmitted || !assignment.collectSubmissions || assignment.openEnded || assignment.archived) {
+		if (hasSubmitted || !shouldSend) {
 			Nil
 		} else {
 			Seq(userLookup.getUserByWarwickUniId(extension.universityId))

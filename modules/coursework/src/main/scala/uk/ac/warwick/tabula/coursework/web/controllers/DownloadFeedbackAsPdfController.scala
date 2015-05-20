@@ -32,7 +32,7 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
 
 		// We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
 		if (!user.loggedIn) {
-			throw new PermissionDeniedException(user, Permissions.Feedback.Read, assignment)
+			throw new PermissionDeniedException(user, Permissions.AssignmentFeedback.Read, assignment)
 		}
 
 		DownloadFeedbackAsPdfCommand(module, assignment, mandatory(feedbackService.getAssignmentFeedbackByUniId(assignment, student.universityId)), student)
@@ -70,8 +70,8 @@ trait DownloadFeedbackAsPdfPermissions extends RequiresPermissionsChecking with 
 		mustBeLinked(assignment, module)
 
 		p.PermissionCheckAny(
-			Seq(CheckablePermission(Permissions.Feedback.Read, student),
-				CheckablePermission(Permissions.Feedback.Read, feedback))
+			Seq(CheckablePermission(Permissions.AssignmentFeedback.Read, student),
+				CheckablePermission(Permissions.AssignmentFeedback.Read, feedback))
 		)
 	}
 }

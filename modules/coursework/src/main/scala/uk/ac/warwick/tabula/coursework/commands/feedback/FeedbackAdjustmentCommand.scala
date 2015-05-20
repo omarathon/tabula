@@ -4,15 +4,16 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.HibernateHelpers
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackAdjustmentNotification, StudentFeedbackAdjustmentNotification}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackAdjustmentNotification, StudentFeedbackAdjustmentNotification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
-import collection.JavaConverters._
+
+import scala.collection.JavaConverters._
 
 object FeedbackAdjustmentCommand {
 
@@ -45,6 +46,7 @@ object AssignmentFeedbackAdjustmentCommand {
 			with AutowiringFeedbackServiceComponent
 			with AutowiringZipServiceComponent
 			with AutowiringFeedbackForSitsServiceComponent
+			with AutowiringProfileServiceComponent
 			with QueuesFeedbackForSits
 			with SubmissionState {
 				override val submission = thisAssignment.findSubmission(student.getWarwickId)
@@ -125,6 +127,10 @@ trait FeedbackAdjustmentCommandValidation extends SelfValidating {
 				errors.rejectValue("adjustedGrade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
 			}
 		}
+
+		if (!assessment.collectMarks) {
+			errors.rejectValue("adjustedMark", "actualMark.assessmentInvalid")
+		}
 	}
 }
 
@@ -150,7 +156,12 @@ trait FeedbackAdjustmentCommandState {
 trait FeedbackAdjustmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: FeedbackAdjustmentCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Feedback.Update, mandatory(assessment))
+		HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
+			case assignment: Assignment =>
+				p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
+			case exam: Exam =>
+				p.PermissionCheck(Permissions.ExamFeedback.Manage, exam)
+		}
 	}
 }
 

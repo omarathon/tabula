@@ -25,6 +25,7 @@ object OnlineFeedbackFormCommand {
 			with AutowiringFileAttachmentServiceComponent
 			with AutowiringZipServiceComponent
 			with AutowiringSavedFormValueDaoComponent
+			with AutowiringProfileServiceComponent
 			with OnlineFeedbackFormDescription[Feedback] {
 			override lazy val eventName = "OnlineFeedback"
 		}
@@ -206,7 +207,7 @@ trait OnlineFeedbackFormPermissions extends RequiresPermissionsChecking {
 
 	def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assignment, module)
-		p.PermissionCheck(Permissions.Feedback.Create, assignment)
+		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
 		if(submitter.apparentUser != marker) {
 			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
 		}

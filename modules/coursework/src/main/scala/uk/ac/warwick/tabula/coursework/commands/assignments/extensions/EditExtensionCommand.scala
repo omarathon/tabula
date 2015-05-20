@@ -100,9 +100,13 @@ trait EditExtensionCommandScheduledNotification extends SchedulesNotifications[E
 	override def transformResult(extension: Extension) = Seq(extension)
 
 	override def scheduledNotifications(extension: Extension) = {
-		if (extension.isManual || extension.approved) {
+		val notifications = for (
+			extension <- Seq(extension) if extension.isManual || extension.approved;
+			expiryDate <- extension.expiryDate
+		) yield {
+
 			val assignment = extension.assignment
-			val dayOfDeadline = extension.expiryDate.withTime(0, 0, 0, 0)
+			val dayOfDeadline = expiryDate.withTime(0, 0, 0, 0)
 
 			val submissionNotifications = {
 				// skip the week late notification if late submission isn't possible
@@ -111,7 +115,7 @@ trait EditExtensionCommandScheduledNotification extends SchedulesNotifications[E
 				} else {
 					Seq(-7, -1, 1)
 				}
-				val surroundingTimes = for (day <- daysToSend) yield extension.expiryDate.plusDays(day)
+				val surroundingTimes = for (day <- daysToSend) yield expiryDate.plusDays(day)
 				val proposedTimes = Seq(dayOfDeadline) ++ surroundingTimes
 				// Filter out all times that are in the past. This should only generate ScheduledNotifications for the future.
 				val allTimes = proposedTimes.filter(_.isAfterNow)
@@ -127,7 +131,7 @@ trait EditExtensionCommandScheduledNotification extends SchedulesNotifications[E
 					Seq()
 				else {
 					val daysToSend = Seq(-7, -1, 0)
-					val proposedTimes = for (day <- daysToSend) yield extension.feedbackDeadline.plusDays(day)
+					val proposedTimes = for (day <- daysToSend; fd <- extension.feedbackDeadline) yield fd.plusDays(day)
 
 					// Filter out all times that are in the past. This should only generate ScheduledNotifications for the future.
 					val allTimes = proposedTimes.filter(_.isAfterNow)
@@ -139,9 +143,8 @@ trait EditExtensionCommandScheduledNotification extends SchedulesNotifications[E
 				}
 
 			submissionNotifications ++ feedbackNotifications
-		} else {
-			Seq()
 		}
+		notifications.flatten
 	}
 
 }

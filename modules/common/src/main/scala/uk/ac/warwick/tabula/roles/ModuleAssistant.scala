@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.roles
 
+import uk.ac.warwick.tabula.JavaImports
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.JavaImports
 
 case class ModuleAssistant(module: model.Module) extends BuiltInRole(ModuleAssistantRoleDefinition, module)
 
@@ -26,17 +25,14 @@ case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
 		// No Submission.Create() here for obvious reasons!
 		Submission.Update,
 
-		Marks.Create,
-		Marks.Update,
-		Marks.Delete,
-
 		Extension.Create,
 		Extension.Update,
 		Extension.Delete,
 
-		Feedback.Create,
-		Feedback.Update,
-		Feedback.Delete,
+		AssignmentFeedback.Manage,
+		AssignmentMarkerFeedback.Manage,
+		ExamFeedback.Manage,
+		ExamMarkerFeedback.Manage,
 
 		SmallGroups.Create,
 		SmallGroupEvents.Register,

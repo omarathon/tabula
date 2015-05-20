@@ -37,7 +37,7 @@ trait ReleaseExamForMarkingCommandPermissions extends RequiresPermissionsCheckin
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(mandatory(exam), mandatory(module))
-		p.PermissionCheck(Permissions.Feedback.Publish, exam)
+		p.PermissionCheck(Permissions.ExamFeedback.Manage, exam)
 	}
 
 }

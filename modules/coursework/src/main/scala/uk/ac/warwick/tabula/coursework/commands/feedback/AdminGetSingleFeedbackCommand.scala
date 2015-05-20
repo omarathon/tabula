@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
 
 class AdminGetSingleFeedbackCommand(module: Module, assignment: Assignment, feedback: Feedback) extends Command[RenderableZip] with ReadOnly {
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Feedback.Read, feedback)
+	PermissionCheck(Permissions.AssignmentFeedback.Read, feedback)
 	
 	var zipService = Wire.auto[ZipService]
 
@@ -31,7 +31,7 @@ class AdminGetSingleFeedbackCommand(module: Module, assignment: Assignment, feed
 
 class AdminGetSingleFeedbackFileCommand(module: Module, assignment: Assignment, feedback: Feedback) extends Command[Option[RenderableFile]] with ReadOnly {
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Feedback.Read, feedback)
+	PermissionCheck(Permissions.AssignmentFeedback.Read, feedback)
 	
 	var filename: String = _
 
@@ -66,7 +66,7 @@ class AdminGetSingleFeedbackFileCommand(module: Module, assignment: Assignment, 
 class AdminGetSingleMarkerFeedbackCommand(module: Module, assignment: Assignment, markerFeedback: MarkerFeedback) extends Command[RenderableZip] with ReadOnly {
 
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Feedback.Create, assignment)
+	PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
 
 	var zipService = Wire.auto[ZipService]
 

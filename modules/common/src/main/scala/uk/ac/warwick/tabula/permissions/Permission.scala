@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.permissions
 
+import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
 import uk.ac.warwick.tabula.CaseObjectEqualityFixes
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
-import org.apache.commons.lang3.builder.HashCodeBuilder
-import org.apache.commons.lang3.builder.EqualsBuilder
+
 import scala.reflect.ClassTag
 
 sealed abstract class Permission(val description: String) extends CaseObjectEqualityFixes[Permission] {
@@ -134,9 +134,11 @@ object Permissions {
 
 	case object GodMode extends ScopelessPermission("Enable god mode")
 	case object ManageMaintenanceMode extends ScopelessPermission("Manage maintenance mode settings")
+	case object ManageEmergencyMessage extends ScopelessPermission("Manage emergency message")
 	case object ImportSystemData extends ScopelessPermission("Import data from other systems")
 	case object ReplicaSyncing extends ScopelessPermission("Manually run replica syncing")
 	case object ViewAuditLog extends ScopelessPermission("View and search the audit log")
+	case object DownloadZipFromJob extends ScopelessPermission("Download ZIP file from Job")
 
 	// Masquerade no longer scopeless, can only masquerade as users who have a Member record against scope
 	case object Masquerade extends Permission("Masquerade as other users")
@@ -202,27 +204,34 @@ object Permissions {
 		case object Delete extends Permission("Remove a coursework submission")
 	}
 
-	object Feedback {
+	object AssignmentFeedback {
 		case object Publish extends Permission("Release feedback to a student")
 		case object Rate extends Permission("Rate feedback received")
 
-		case object Create extends Permission("Add feedback")
+		case object Manage extends Permission("Manage feedback")
 		case object Read extends Permission("View feedback")
-		case object Update extends Permission("Edit feedback")
-		case object Delete extends Permission("Remove feedback")
-		case object UploadToSits extends ScopelessPermission("Upload feedback to SITS")
+		case object DownloadMarksTemplate extends Permission("Download a marks template for all marks")
+	}
+	
+	object AssignmentMarkerFeedback {
+		case object Manage extends Permission("Manage marker feedback")
+		case object DownloadMarksTemplate extends Permission("Download a marks template for own marks")
+	}
+
+	object ExamFeedback {
+		case object Manage extends Permission("Manage feedback")
+		case object Read extends Permission("View feedback")
+		case object DownloadMarksTemplate extends Permission("Download a marks template for all marks")
+	}
+
+	object ExamMarkerFeedback {
+		case object Manage extends Permission("Manage marker feedback")
+		case object DownloadMarksTemplate extends Permission("Download a marks template for own marks")
 	}
 
 	object Marks {
 		case object MarksManagement extends ScopelessPermission("Marks management across all departments")
-
-		case object DownloadTemplate extends Permission("Download a marks template for all marks")
-		case object DownloadOwnTemplate extends Permission("Download a marks template for own marks")
-
-		case object Create extends Permission("Add marks")
-		case object Read extends Permission("View marks")
-		case object Update extends Permission("Edit marks")
-		case object Delete extends Permission("Remove marks")
+		case object UploadToSits extends ScopelessPermission("Upload marks to SITS")
 	}
 
 	object Extension {

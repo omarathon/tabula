@@ -410,4 +410,12 @@ object Fixtures extends Mockito {
 		fb
 	}
 
+	def disability(description: String, code: String = "") = {
+		val d = new Disability
+		d.sitsDefinition = description
+		d.tabulaDefinition = description
+		d.code = if (code.isEmpty) description.charAt(0).toString else code
+		d
+	}
+
 }

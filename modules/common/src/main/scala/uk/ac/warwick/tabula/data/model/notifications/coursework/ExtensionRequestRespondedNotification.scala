@@ -19,7 +19,6 @@ abstract class ExtensionRequestRespondedNotification(val verbed: String) extends
 		"studentName" -> student.getFullName,
 		"agentName" -> agent.getFullName,
 		"verbed" -> verbed,
-		"newExpiryDate" -> dateTimeFormatter.print(extension.expiryDate),
 		"assignment" -> assignment,
 		"path" ->  url
 	))

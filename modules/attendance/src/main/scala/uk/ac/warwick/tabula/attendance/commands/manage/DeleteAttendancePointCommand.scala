@@ -74,7 +74,10 @@ trait DeleteAttendancePointDescription extends Describable[Seq[AttendanceMonitor
 	override lazy val eventName = "DeleteAttendancePoint"
 
 	override def describe(d: Description) {
-		d.attendanceMonitoringPoints(pointsToDelete)
+		d.attendanceMonitoringSchemes(schemesToEdit)
+	}
+	override def describeResult(d: Description, points: Seq[AttendanceMonitoringPoint]) {
+		d.attendanceMonitoringPoints(points, verbose = true)
 	}
 }
 

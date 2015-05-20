@@ -106,7 +106,9 @@ class FeedbackDueExtensionNotification
 		}
 	}
 
-	override final def deadline = extension.feedbackDeadline.toLocalDate
+	override final def deadline = extension.feedbackDeadline.map(_.toLocalDate).getOrElse(
+		throw new IllegalArgumentException("Cannot send a FeedbackDueExtension for an extension without a feedbackDeadline")
+	)
 
 	override def content: FreemarkerModel = FreemarkerModel("/WEB-INF/freemarker/notifications/feedback_reminder_extension.ftl", Map(
 		"extension" -> extension,

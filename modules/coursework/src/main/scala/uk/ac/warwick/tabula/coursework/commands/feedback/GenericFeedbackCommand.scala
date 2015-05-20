@@ -34,7 +34,7 @@ trait GenericFeedbackPermissions extends RequiresPermissionsChecking {
 	this: GenericFeedbackState =>
 	def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assignment, module)
-		p.PermissionCheck(Permissions.Feedback.Create, assignment)
+		p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
 	}
 }
 

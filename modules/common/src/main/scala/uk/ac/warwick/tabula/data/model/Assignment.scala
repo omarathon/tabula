@@ -161,7 +161,7 @@ class Assignment
 	} else if (!hasExtensions || !extensions.exists(_.approved) || submissions.exists(s => !extensions.exists(e => e.isForUser(s.universityId, s.userId)))) {
 		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
 	} else {
-		Option(extensions.filter(_.approved).map(_.feedbackDeadline.toLocalDate).min)
+		Option(extensions.filter(_.approved).flatMap(_.feedbackDeadline).map(_.toLocalDate).min)
 	}
 
 	def feedbackDeadlineForSubmission(submission: Submission) = feedbackDeadline.map { wholeAssignmentDeadline =>
@@ -169,7 +169,7 @@ class Assignment
 		val extension = extensions.asScala.find { e => e.isForUser(submission.universityId, submission.userId) && e.approved }
 
 		val baseFeedbackDeadline =
-			extension.map { _.feedbackDeadline.toLocalDate }.getOrElse(wholeAssignmentDeadline)
+			extension.flatMap(_.feedbackDeadline).map(_.toLocalDate).getOrElse(wholeAssignmentDeadline)
 
 		// If the submission was late, allow 20 days from the submission day
 		if (submission.isLate)
@@ -304,7 +304,7 @@ class Assignment
 	def isWithinExtension(user: User, time: DateTime): Boolean = isWithinExtension(user.getWarwickId, user.getUserId, time)
 
 	def isWithinExtension(universityId: String, usercode: String, time: DateTime) =
-		extensions.exists(e => e.isForUser(universityId, usercode) && e.approved && e.expiryDate.isAfter(time))
+		extensions.exists(e => e.isForUser(universityId, usercode) && e.approved && e.expiryDate.exists(_.isAfter(time)))
 
 	/**
 	 * True if the specified user has been granted an extension and that extension has not expired now
@@ -323,14 +323,18 @@ class Assignment
 
 	def submissionDeadline(universityId: String, usercode: String): DateTime =
 		if (openEnded) null
-		else extensions.find(e => e.isForUser(universityId, usercode) && e.approved).fold(closeDate)(_.expiryDate)
+		else
+			extensions.find(e => e.isForUser(universityId, usercode) && e.approved).flatMap(_.expiryDate).getOrElse(closeDate)
 
 	/**
 	 * Deadline taking into account any approved extension
 	 */
 	def submissionDeadline(submission: Submission) =
 		if (openEnded) null
-		else extensions.find(e => e.isForUser(submission.universityId, submission.userId) && e.approved).fold(closeDate)(_.expiryDate)
+		else extensions
+			.find(e => e.isForUser(submission.universityId, submission.userId) && e.approved)
+			.flatMap(_.expiryDate)
+			.getOrElse(closeDate)
 
 	def workingDaysLate(submission: Submission) =
 		if (isLate(submission)) {

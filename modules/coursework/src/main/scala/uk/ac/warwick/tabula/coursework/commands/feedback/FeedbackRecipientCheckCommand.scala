@@ -39,7 +39,7 @@ case class RecipientCheckReport(
 class FeedbackRecipientCheckCommand(val module: Module, val assignment: Assignment) extends Command[RecipientCheckReport] with Unaudited with ReadOnly {
 	
 	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Feedback.Read, assignment)
+	PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
 
 	var feedbackService = Wire.auto[FeedbackService]
 

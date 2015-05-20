@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.web.controllers.TestControllerOverrides
-import uk.ac.warwick.tabula.services.{SubmissionService, SubmissionServiceComponent, FeedbackServiceComponent, FeedbackService}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.coursework.commands.{CurrentUserSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommandInternal}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.coursework.commands.StudentSubmissionAndFeedbackCommand._
@@ -30,10 +30,16 @@ class AssignmentControllerTest extends TestBase with Mockito {
 		val submissionService = smartMock[SubmissionService]
 		submissionService.getSubmissionByUniId(assignment, "0123456") returns None
 
-		val infoCommand = new StudentSubmissionAndFeedbackCommandInternal(module, assignment) with CurrentUserSubmissionAndFeedbackCommandState with FeedbackServiceComponent with SubmissionServiceComponent with Appliable[StudentSubmissionInformation] {
+		val profileService = smartMock[ProfileService]
+
+		val infoCommand = new StudentSubmissionAndFeedbackCommandInternal(module, assignment)
+			with CurrentUserSubmissionAndFeedbackCommandState with FeedbackServiceComponent with ProfileServiceComponent
+			with SubmissionServiceComponent with Appliable[StudentSubmissionInformation] {
+
 			def currentUser = user
 			def feedbackService = Fixtures.this.feedbackService
 			def submissionService = Fixtures.this.submissionService
+			def profileService = Fixtures.this.profileService
 
 			def apply() = applyInternal()
 		}
@@ -44,6 +50,7 @@ class AssignmentControllerTest extends TestBase with Mockito {
 		withUser("cusebr", "0123456") {
 			new Fixtures {
 				val user = currentUser
+				profileService.getMemberByUser(user.apparentUser, disableFilter = false, eagerLoad = false) returns None
 				val mav = controller.view(infoCommand, form, errors)
 				withClue(mav) { mav.map should contain key "feedback" }
 			}
