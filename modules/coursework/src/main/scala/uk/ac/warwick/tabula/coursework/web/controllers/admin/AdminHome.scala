@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
@@ -36,7 +37,7 @@ class AdminDepartmentHomeController extends CourseworkController {
 	@RequestMapping
 	def adminDepartment(cmd: AdminDepartmentHomeCommand) = {
 		val info = cmd.apply()
-		
+
 		Mav("admin/department",
 			"department" -> cmd.department,
 			"modules" -> info.sortWith(_.code.toLowerCase < _.code.toLowerCase)
