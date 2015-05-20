@@ -12,7 +12,7 @@ case object MarkerRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	
 	GrantsScopedPermission(
 		AssignmentFeedback.Read,
-		AssignmentFeedback.DownloadMarksTemplate,
+		AssignmentMarkerFeedback.DownloadMarksTemplate,
 		AssignmentMarkerFeedback.Manage,
 		ExamFeedback.Read,
 		ExamFeedback.DownloadMarksTemplate,
