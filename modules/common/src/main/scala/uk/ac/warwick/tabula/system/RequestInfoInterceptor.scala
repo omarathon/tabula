@@ -27,7 +27,7 @@ class EarlyRequestInfoInterceptor extends HandlerInterceptorAdapter {
 
 class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 	import RequestInfoInterceptor._
-  
+
 	@Autowired var maintenance: MaintenanceModeService = _
 	@Autowired var emergencyMessage: EmergencyMessageService = _
 
@@ -59,14 +59,14 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 
 object RequestInfoInterceptor {
 	val RequestInfoAttribute = "APP_REQUEST_INFO_ATTRIBUTE"
-	  
+
 	def newRequestInfo(request: HttpServletRequest, isMaintenance: Boolean = false, emergencyMessageService: EmergencyMessageService) = {
 		// Transfer cache from an EarlyAccessInfo if one exists.
 		val cache = EarlyRequestInfo.fromThread map { _.requestLevelCache } getOrElse { new RequestLevelCache() }
 
 		var emergencyMessage = ""
 		if (emergencyMessageService.enabled) {
-			emergencyMessage = emergencyMessageService.message.get
+			emergencyMessage = emergencyMessageService.message.getOrElse("")
 		}
 
 		new RequestInfo(
