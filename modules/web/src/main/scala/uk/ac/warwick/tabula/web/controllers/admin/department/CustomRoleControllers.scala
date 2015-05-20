@@ -39,7 +39,7 @@ trait CustomRoleControllerMethods extends AdminController {
 	}
 }
 
-@Controller @RequestMapping(Array("/admin/department/{department}/customroles", "/department/{department}/customroles/list"))
+@Controller @RequestMapping(Array("/admin/department/{department}/customroles", "/admin/department/{department}/customroles/list"))
 class ListCustomRolesController extends CustomRoleControllerMethods {
 	import ListCustomRolesCommand._
 
