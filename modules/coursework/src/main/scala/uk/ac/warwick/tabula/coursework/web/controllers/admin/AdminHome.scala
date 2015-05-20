@@ -36,7 +36,7 @@ class AdminDepartmentHomeController extends CourseworkController {
 	@RequestMapping
 	def adminDepartment(cmd: AdminDepartmentHomeCommand) = {
 		val info = cmd.apply()
-		
+
 		Mav("admin/department",
 			"department" -> cmd.department,
 			"modules" -> info.sortWith(_.code.toLowerCase < _.code.toLowerCase)

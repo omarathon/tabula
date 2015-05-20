@@ -6,7 +6,7 @@
 <div id="feedback-modal" class="modal fade"></div>
 <div id="profile-modal" class="modal fade profile-subset"></div>
 
-<div class="fixed-container">
+<div class="fixed-container form-post-container">
 	<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
 
 	<#if assignment.openEnded>
