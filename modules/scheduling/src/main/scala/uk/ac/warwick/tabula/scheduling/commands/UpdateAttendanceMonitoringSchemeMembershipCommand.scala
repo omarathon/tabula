@@ -40,7 +40,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 
 			logger.info(s"${schemesToUpdate.size} schemes need membership updating")
 
-			val studentsToUpdate = schemesToUpdate.flatMap { scheme => transactional() {
+			val studentsToUpdate = schemesToUpdate.flatMap { scheme => benchmark(s"Update scheme ${scheme.id} in transaction") { transactional() {
 				deserializeFilter(scheme.memberQuery)
 				val staticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments") {
 					profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
@@ -55,7 +55,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 
 				scheme.members.members.map((_, (scheme.department, scheme.academicYear)))
 
-			}
+			}}
 			}.groupBy(_._1).map { case (universityId, groupedStudentData) => universityId -> groupedStudentData.map(_._2).distinct}
 
 			logger.info(s"Updating ${studentsToUpdate.size} student checkpoint totals")
@@ -68,12 +68,12 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 					}
 				}
 
-				studentMembers.foreach(student => transactional() {
+				studentMembers.foreach(student => benchmark(s"updateCheckpointTotal for ${student.universityId} in transaction") { transactional() {
 					val studentDeptAndYears = studentsToUpdate(student.universityId)
 					studentDeptAndYears.foreach { case (dept, academicYear) =>
-						attendanceMonitoringService.updateCheckpointTotal(student, dept, academicYear)
+						attendanceMonitoringService.updateCheckpointTotalsAsync(student, dept, academicYear)
 					}
-				})
+				}})
 			}
 
 			benchmark("resetCheckpointTotals") {

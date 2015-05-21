@@ -106,7 +106,7 @@ abstract class Features {
 	@Value("${features.scheduling.cleanupUnreferencedFiles:true}") var schedulingCleanupUnreferencedFiles = defaults.schedulingCleanupUnreferencedFiles
 	@Value("${features.scheduling.sanityCheckFilesystem:true}") var schedulingSanityCheckFilesystem = defaults.schedulingSanityCheckFilesystem
 	@Value("${features.scheduling.exportAttendanceToSits:true}") var schedulingExportAttendanceToSits = defaults.schedulingExportAttendanceToSits
-	@Value("${features.scheduling.attendance.updateSchemes:false}") var schedulingAttendanceUpdateSchemes = defaults.schedulingAttendanceUpdateSchemes
+	@Value("${features.scheduling.attendance.updateSchemes:true}") var schedulingAttendanceUpdateSchemes = defaults.schedulingAttendanceUpdateSchemes
 	@Value("${features.attendanceMonitoring.academicYear2014:true}")	var attendanceMonitoringAcademicYear2014 = defaults.attendanceMonitoringAcademicYear2014
 	@Value("${features.smallGroupTeaching.crossModuleSmallGroups:true}") var smallGroupCrossModules = defaults.smallGroupCrossModules
 	@Value("${features.masqueradersCanWrite:false}") var masqueradersCanWrite = defaults.masqueradersCanWrite
@@ -222,7 +222,7 @@ class FeaturesMessage {
 	@BeanProperty var schedulingSanityCheckFilesystem = true
 	@BeanProperty var schedulingExportAttendanceToSits = true
 	@BeanProperty var schedulingExportFeedbackToSits = true
-	@BeanProperty var schedulingAttendanceUpdateSchemes = false
+	@BeanProperty var schedulingAttendanceUpdateSchemes = true
 
 	@BeanProperty var exams = true
 
