@@ -5,7 +5,7 @@ import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
-import uk.ac.warwick.tabula.data.model.{AllCompletedActionRequiredNotification, ActionRequiredNotification, FreemarkerModel, StudentMember}
+import uk.ac.warwick.tabula.data.model.{AllCompletedActionRequiredNotification, FreemarkerModel, StudentMember}
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 
 abstract class ExtensionRequestNotification
@@ -15,9 +15,6 @@ abstract class ExtensionRequestNotification
 	var relationshipService = Wire.auto[RelationshipService]
 	@transient
 	var profileService = Wire.auto[ProfileService]
-
-	def requestedExpiryDate = extension.requestedExpiryDate
-		.getOrElse(throw new IllegalArgumentException("ExtensionRequestNotifications must have a requested expiry date"))
 
 	def template: String
 
@@ -42,7 +39,7 @@ abstract class ExtensionRequestNotification
 	}).getOrElse(Map())
 
 	def content = FreemarkerModel(template, Map(
-		"requestedExpiryDate" -> dateTimeFormatter.print(requestedExpiryDate),
+		"requestedExpiryDate" -> dateTimeFormatter.print(extension.requestedExpiryDate.orNull),
 		"reasonForRequest" -> extension.reason,
 		"attachments" -> extension.attachments,
 		"assignment" -> assignment,
