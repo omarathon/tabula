@@ -95,13 +95,15 @@ class AssessmentMembershipServiceImpl
 
 		// TAB-1749 If we've been passed a non-primary usercode (e.g. WBS logins)
 		// then also get registrations for the primary usercode
-		val allManuallyEnrolled =
-			userLookup.getUserByWarwickUniId(user.getWarwickId) match {
+		val allManuallyEnrolled = {
+			val ssoUser = if (user.getWarwickId != null) userLookup.getUserByWarwickUniId(user.getWarwickId) else userLookup.getUserByUserId(user.getUserId)
+			ssoUser match {
 				case FoundUser(primaryUser) if primaryUser.getUserId != user.getUserId =>
 					assignmentManualMembershipHelper.findBy(primaryUser) ++ assignmentManualMembershipHelper.findBy(user)
 
 				case _ => assignmentManualMembershipHelper.findBy(user)
 			}
+		}
 
 		val manuallyEnrolled =
 			allManuallyEnrolled
