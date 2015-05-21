@@ -38,12 +38,12 @@ abstract class ModifyMarkingWorkflowCommand(val department: Department)
 		scheme.secondMarkers.knownType.includedUserIds = secondMarkers.asScala
 	}
 
-	def replaceFirstMarkers(markers: Seq[String]) {
+	def addFirstMarkers(markers: Seq[String]) {
 		val missingMarkers = markers.toSet -- firstMarkers.asScala.toSet
 		firstMarkers.addAll(missingMarkers.asJava)
 	}
 
-	def replaceSecondMarkers(markers: Seq[String]) {
+	def addSecondMarkers(markers: Seq[String]) {
 		val missingMarkers = markers.toSet -- secondMarkers.asScala.toSet
 		secondMarkers.addAll(missingMarkers.asJava)
 	}

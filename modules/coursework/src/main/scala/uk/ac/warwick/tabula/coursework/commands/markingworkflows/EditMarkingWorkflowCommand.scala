@@ -42,8 +42,8 @@ class EditMarkingWorkflowCommandInternal(department: Department, val markingWork
 trait EditMarkingWorkflowCommandState extends MarkingWorkflowCommandState {
 	def markingWorkflow: MarkingWorkflow
 	// methods for putting missing markers back into the model
-	def replaceFirstMarkers(markers: Seq[String])
-	def replaceSecondMarkers(markers: Seq[String])
+	def addFirstMarkers(markers: Seq[String])
+	def addSecondMarkers(markers: Seq[String])
 	def newFirstMarkers = firstMarkers.asScala.toSet
 	def newSecondMarkers = secondMarkers.asScala.toSet
 }
@@ -69,12 +69,12 @@ trait EditMarkingWorkflowCommandValidation extends MarkingWorkflowCommandValidat
 				else "markingWorkflow.markers.cannotRemoveMarkers"
 
 			if(removedFirstMarkers.nonEmpty) {
-				replaceFirstMarkers(removedFirstMarkers.toSeq)
+				addFirstMarkers(removedFirstMarkers.toSeq)
 				errors.rejectValue("firstMarkers", errorCode)
 
 			}
 			if(removedSecondMarkers.nonEmpty) {
-				replaceSecondMarkers(removedSecondMarkers.toSeq)
+				addSecondMarkers(removedSecondMarkers.toSeq)
 				errors.rejectValue("secondMarkers", errorCode)
 			}
 		}

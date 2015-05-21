@@ -31,13 +31,13 @@ class MarkingWorkflowDaoImpl extends MarkingWorkflowDao with Daoisms {
 	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Assignment] =
 		session.newCriteria[Assignment]
 			.add(is("markingWorkflow", markingWorkflow))
-			.add(isNot("deleted", true))
+			.add(is("deleted", false))
 			.seq
 
 	def getExamsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Exam] =
 		session.newCriteria[Exam]
 			.add(is("markingWorkflow", markingWorkflow))
-			.add(isNot("deleted", true))
+			.add(is("deleted", false))
 			.seq
 
 }
