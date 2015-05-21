@@ -23,7 +23,7 @@ class ImportStaffMemberCommand(member: MembershipInformation, ssoUser: User)
 //	this.teachingStaff = rs.getString("teaching_staff") == "Y"
 
 	def applyInternal(): Member = transactional() {
-		val memberExisting = memberDao.getByUniversityId(universityId)
+		val memberExisting = memberDao.getByUniversityIdStaleOrFresh(universityId)
 
 		logger.debug("Importing staff member " + universityId + " into " + memberExisting)
 
