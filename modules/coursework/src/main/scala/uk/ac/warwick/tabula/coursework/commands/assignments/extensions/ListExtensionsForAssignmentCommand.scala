@@ -48,13 +48,10 @@ class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Ass
 			// use real days not working days, for displayed duration, as markers need to know how late it *actually* would be after deadline
 			val duration = extension.flatMap(_.expiryDate).map(Days.daysBetween(assignment.closeDate, _).getDays).getOrElse(0)
 
-			val requestedExtraDuration2 = extension.flatMap(_.expiryDate)
+			val requestedExtraDuration = (for (e <- extension; requestedExpiryDate <- e.requestedExpiryDate) yield {
+				Days.daysBetween(e.expiryDate.getOrElse(assignment.closeDate), requestedExpiryDate).getDays
+			}).getOrElse(0)
 
-			val requestedExtraDuration = extension match {
-				case Some(e) =>
-					Days.daysBetween(e.expiryDate.getOrElse(assignment.closeDate), e.requestedExpiryDate).getDays
-				case _ => 0
-			}
 
 			new ExtensionGraph(universityId, user, assignment.submissionDeadline(user), isAwaitingReview, hasApprovedExtension, hasRejectedExtension, duration, requestedExtraDuration, extension)
 		}).toSeq
