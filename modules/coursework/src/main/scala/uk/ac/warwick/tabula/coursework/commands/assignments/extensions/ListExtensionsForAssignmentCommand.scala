@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.permissions._
@@ -32,7 +32,7 @@ class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Ass
 		)
 
 		// all the users that aren't members of this assignment, but have submitted work to it
-		val extensionsFromNonMembers = assignment.extensions.filterNot(x => assignmentMembership.contains(x.universityId))
+		val extensionsFromNonMembers = assignment.extensions.asScala.filterNot(x => assignmentMembership.contains(x.universityId))
 		val nonMembers = userLookup.getUsersByWarwickUniIds(extensionsFromNonMembers.map { _.universityId })
 
 		// build lookup of names from non members of the assignment that have submitted work plus members
@@ -40,7 +40,7 @@ class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Ass
 
 		(for ((universityId, user) <- students) yield {
 			// deconstruct the map, bleh
-			val extension = assignment.extensions.find(_.universityId == universityId)
+			val extension = assignment.extensions.asScala.find(_.universityId == universityId)
 			val isAwaitingReview = extension exists (_.awaitingReview)
 			val hasApprovedExtension = extension exists (_.approved)
 			val hasRejectedExtension = extension exists (_.rejected)
@@ -48,13 +48,10 @@ class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Ass
 			// use real days not working days, for displayed duration, as markers need to know how late it *actually* would be after deadline
 			val duration = extension.flatMap(_.expiryDate).map(Days.daysBetween(assignment.closeDate, _).getDays).getOrElse(0)
 
-			val requestedExtraDuration2 = extension.flatMap(_.expiryDate)
+			val requestedExtraDuration = (for (e <- extension; requestedExpiryDate <- e.requestedExpiryDate) yield {
+				Days.daysBetween(e.expiryDate.getOrElse(assignment.closeDate), requestedExpiryDate).getDays
+			}).getOrElse(0)
 
-			val requestedExtraDuration = extension match {
-				case Some(e) =>
-					Days.daysBetween(e.expiryDate.getOrElse(assignment.closeDate), e.requestedExpiryDate).getDays
-				case _ => 0
-			}
 
 			new ExtensionGraph(universityId, user, assignment.submissionDeadline(user), isAwaitingReview, hasApprovedExtension, hasRejectedExtension, duration, requestedExtraDuration, extension)
 		}).toSeq

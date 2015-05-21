@@ -16,6 +16,9 @@ abstract class ExtensionRequestNotification
 	@transient
 	var profileService = Wire.auto[ProfileService]
 
+	val requestedExpiryDate = extension.requestedExpiryDate
+		.getOrElse(throw new IllegalArgumentException("Can't create an ExtensionRequestNotification without a requested expiry date"))
+
 	def template: String
 
 	def url = Routes.admin.assignment.extension.expandrow(assignment, student.getWarwickId)
@@ -39,7 +42,7 @@ abstract class ExtensionRequestNotification
 	}).getOrElse(Map())
 
 	def content = FreemarkerModel(template, Map(
-		"requestedExpiryDate" -> dateTimeFormatter.print(extension.requestedExpiryDate),
+		"requestedExpiryDate" -> dateTimeFormatter.print(requestedExpiryDate),
 		"reasonForRequest" -> extension.reason,
 		"attachments" -> extension.attachments,
 		"assignment" -> assignment,
