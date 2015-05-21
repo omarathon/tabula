@@ -71,7 +71,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 				studentMembers.foreach(student => benchmark(s"updateCheckpointTotal for ${student.universityId} in transaction") { transactional() {
 					val studentDeptAndYears = studentsToUpdate(student.universityId)
 					studentDeptAndYears.foreach { case (dept, academicYear) =>
-						attendanceMonitoringService.updateCheckpointTotalsAsync(student, dept, academicYear)
+						attendanceMonitoringService.updateCheckpointTotalsAsync(Seq(student), dept, academicYear)
 					}
 				}})
 			}
