@@ -42,7 +42,7 @@ class ImportAlumniCommand(member: MembershipInformation, ssoUser: User, rs: Resu
 	// any initialisation code specific to alumni (e.g. setting alumni properties) can go here
 
 	def applyInternal(): Member = transactional() {
-		val memberExisting = memberDao.getByUniversityId(universityId)
+		val memberExisting = memberDao.getByUniversityIdStaleOrFresh(universityId)
 
 		logger.debug("Importing alumni member " + universityId + " into " + memberExisting)
 
