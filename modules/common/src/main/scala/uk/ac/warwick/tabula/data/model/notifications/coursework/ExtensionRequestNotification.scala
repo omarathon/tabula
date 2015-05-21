@@ -16,8 +16,8 @@ abstract class ExtensionRequestNotification
 	@transient
 	var profileService = Wire.auto[ProfileService]
 
-	val requestedExpiryDate = extension.requestedExpiryDate
-		.getOrElse(throw new IllegalArgumentException("Can't create an ExtensionRequestNotification without a requested expiry date"))
+	def requestedExpiryDate = extension.requestedExpiryDate
+		.getOrElse(throw new IllegalArgumentException("ExtensionRequestNotifications must have a requested expiry date"))
 
 	def template: String
 
