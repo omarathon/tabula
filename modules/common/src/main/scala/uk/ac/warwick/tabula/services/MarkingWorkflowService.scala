@@ -31,7 +31,7 @@ abstract class AbstractMarkingWorkflowService extends MarkingWorkflowService {
 			
 	def save(markingWorkflow: MarkingWorkflow) = markingWorkflowDao.save(markingWorkflow)
 	
-	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow) = 
+	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow) =
 		markingWorkflowDao.getAssignmentsUsingMarkingWorkflow(markingWorkflow)
 
 	def getExamsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow) =

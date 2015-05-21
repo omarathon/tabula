@@ -173,7 +173,7 @@ trait RequestExtensionCommandState {
 
 	def presetValues(extension: Extension) {
 		reason = extension.reason
-		requestedExpiryDate = extension.requestedExpiryDate
+		requestedExpiryDate = extension.requestedExpiryDate.orNull
 		attachedFiles = extension.attachments
 		modified = true
 		disabilityAdjustment = extension.disabilityAdjustment

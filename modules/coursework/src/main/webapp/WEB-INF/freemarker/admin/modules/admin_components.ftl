@@ -103,7 +103,7 @@
 						<#assign feedbackLabel><span class="label label-important use-tooltip" title="There have been submissions, but no feedback, and the default deadline has passed. Drill down to see if there is good reason, such as late submissions.">Feedback overdue</span></#assign>
 					</#if>
 				<#elseif workingDaysAway lte 5>
-					<#assign feedbackLabel><span class="label use-tooltip" title=""The default deadline for feedback is less than five working days away.">Feedback due soon</span></#assign>
+					<#assign feedbackLabel><span class="label use-tooltip" title="The default deadline for feedback is less than five working days away.">Feedback due soon</span></#assign>
 				</#if>
 
 				<#assign feedbackDeadline>

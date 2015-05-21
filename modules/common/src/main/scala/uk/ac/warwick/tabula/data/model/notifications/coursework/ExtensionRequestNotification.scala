@@ -5,7 +5,7 @@ import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
-import uk.ac.warwick.tabula.data.model.{AllCompletedActionRequiredNotification, ActionRequiredNotification, FreemarkerModel, StudentMember}
+import uk.ac.warwick.tabula.data.model.{AllCompletedActionRequiredNotification, FreemarkerModel, StudentMember}
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 
 abstract class ExtensionRequestNotification
@@ -39,7 +39,7 @@ abstract class ExtensionRequestNotification
 	}).getOrElse(Map())
 
 	def content = FreemarkerModel(template, Map(
-		"requestedExpiryDate" -> dateTimeFormatter.print(extension.requestedExpiryDate),
+		"requestedExpiryDate" -> dateTimeFormatter.print(extension.requestedExpiryDate.orNull),
 		"reasonForRequest" -> extension.reason,
 		"attachments" -> extension.attachments,
 		"assignment" -> assignment,

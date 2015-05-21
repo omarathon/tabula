@@ -1,19 +1,17 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
-import uk.ac.warwick.tabula.profiles.commands.ProfilesHomeCommand
+import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.ModelAttribute
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
-import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.profiles.web.Routes
-import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.data.model.MemberUserType._
-import uk.ac.warwick.tabula.profiles.commands.ProfilesHomeInformation
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.profiles.commands.{ProfilesHomeCommand, ProfilesHomeInformation, SearchProfilesCommand}
+import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
-@Controller class HomeController extends ProfilesController {
+@Controller class HomeController extends ProfilesController with ChecksAgent {
 	
 	var departmentService = Wire[ModuleAndDepartmentService]
 
@@ -24,7 +22,8 @@ import uk.ac.warwick.tabula.permissions.Permissions
 	def createCommand(user: CurrentUser) = ProfilesHomeCommand(user, optionalCurrentMember)
 
 	@RequestMapping(Array("/")) def home(@ModelAttribute("command") cmd: Appliable[ProfilesHomeInformation]) = {
-		if (!user.isPGR && optionalCurrentMember.exists(_.userType == Student)) {
+
+		if (!user.isPGR && !isAgent(user.universityId) && optionalCurrentMember.exists(_.userType == Student)) {
 			Redirect(Routes.profile.view(currentMember))
 		} else {
 			val info = cmd.apply()

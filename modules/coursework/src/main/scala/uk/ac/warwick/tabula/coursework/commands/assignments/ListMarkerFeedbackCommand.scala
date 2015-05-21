@@ -55,12 +55,14 @@ class ListMarkerFeedbackCommand(val assignment: Assignment, val module: Module, 
 		})
 
 		feedbackItems
-			.groupBy(_.feedbacks.lastOption.map(_.getFeedbackPosition).getOrElse(FirstFeedback))
-			.map { case (position, items) =>
-					val roleName = workflow.getRoleNameForPosition(position)
-					val nextRoleName = workflow.getRoleNameForNextPosition(position).toLowerCase
-					val previousRoleName = workflow.getRoleNameForPreviousPosition(position).map(_.toLowerCase)
-					MarkerFeedbackStage(roleName, nextRoleName, previousRoleName, position, items)
+			.groupBy(_.feedbacks.lastOption.map(_.getFeedbackPosition))
+			.flatMap { case (position, items) =>
+				position.map { p =>
+					val roleName = workflow.getRoleNameForPosition(p)
+					val nextRoleName = workflow.getRoleNameForNextPosition(p).toLowerCase
+					val previousRoleName = workflow.getRoleNameForPreviousPosition(p).map(_.toLowerCase)
+					MarkerFeedbackStage(roleName, nextRoleName, previousRoleName, p, items)
+				}
 			}
 			.toSeq
 			.sortBy(_.position)

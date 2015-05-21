@@ -1,14 +1,15 @@
 package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.{ResultSet, ResultSetMetaData}
+
 import org.joda.time.{DateTimeConstants, LocalDate}
-import uk.ac.warwick.tabula.{PersistenceTestBase, Mockito, _}
-import uk.ac.warwick.tabula.data.{FileDao, MemberDao}
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.Gender._
 import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.{FileDao, MemberDao}
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportCommandFactorySetup, ImportStaffMemberCommand, ImportStudentRowCommand}
+import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 // scalastyle:off magic.number
@@ -21,15 +22,15 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 
 		val rs = mock[ResultSet]
 		val md = mock[ResultSetMetaData]
-		rs.getMetaData() returns(md)
-		md.getColumnCount() returns(3)
-		md.getColumnName(1) returns("gender")
-		md.getColumnName(2) returns("year_of_study")
-		md.getColumnName(3) returns("spr_code")
+		rs.getMetaData returns md
+		md.getColumnCount returns 3
+		md.getColumnName(1) returns "gender"
+		md.getColumnName(2) returns "year_of_study"
+		md.getColumnName(3) returns "spr_code"
 
-		rs.getString("gender") returns("M")
-		rs.getInt("year_of_study") returns(3)
-		rs.getString("spr_code") returns("0672089/2")
+		rs.getString("gender") returns "M"
+		rs.getInt("year_of_study") returns 3
+		rs.getString("spr_code") returns "0672089/2"
 
 		val mm = MembershipMember(
 			universityId 			= "0672089",
@@ -47,7 +48,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 	}
 
 	// SITS names come uppercased - check that we reformat various names correctly.
-	@Test def forenameFormatting {
+	@Test def forenameFormatting() {
 		new Environment {
 			val names = Seq("Mathew James", "Anna-Lee", "Nick", "Krist\u00EDn")
 			val importer = new ProfileImporterImpl
@@ -67,7 +68,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 	}
 
 	// SITS names come uppercased - check that we reformat various names correctly.
-	@Test def surnameFormatting {
+	@Test def surnameFormatting() {
 		new Environment {
 			val names = Seq("d'Haenens Johansson", "O'Toole", "Calvo-Bado", "Biggins", "MacCallum", "McCartney",
 							"Mannion", "von Der Glockenspeil", "d'Howes", "di Stefano", "Mc Cauley", "J\u00F3hannesd\u00F3ttir")
@@ -88,7 +89,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 	}
 
 	// Test that if we have name formatting from SSO, we use that as long as the names match
-	@Test def takesSuggestions {
+	@Test def takesSuggestions() {
 		new Environment {
 			val importer = new ProfileImporterImpl
 
@@ -111,7 +112,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		}
 	}
 
-	@Test def importStaff {
+	@Test def importStaff() {
 		val blobBytes = Array[Byte](1,2,3,4,5)
 
 		val mac = MembershipInformation(MembershipMember(
@@ -131,7 +132,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		val fileDao = mock[FileDao]
 
 		val memberDao = mock[MemberDao]
-		memberDao.getByUniversityId("0672089") returns(None)
+		memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
 
 		val command = new ImportStaffMemberCommand(mac, new AnonymousUser)
 
@@ -146,7 +147,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		member.gender should be (Male)
 		member.firstName should be ("Mathew")
 		member.lastName should be ("Mannion")
-		member.photo should not be (null)
+		member.photo should not be null
 		member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 
 		verify(fileDao, times(1)).savePermanent(any[FileAttachment])
