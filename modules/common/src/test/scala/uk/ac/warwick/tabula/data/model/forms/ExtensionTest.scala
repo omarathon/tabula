@@ -7,7 +7,7 @@ import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
 
-class ExtechromwnsionTest extends PersistenceTestBase {
+class ExtensionTest extends PersistenceTestBase {
 
   @Test def testExtension {
 
