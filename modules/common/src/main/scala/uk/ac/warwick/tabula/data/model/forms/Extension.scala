@@ -47,6 +47,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	// TODO should there be a single def that returns the expiry date for approved/manual extensions, and requested expiry date otherwise?
 	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@Column(name = "requestedExpiryDate")
 	private var _requestedExpiryDate: DateTime = _
 	def requestedExpiryDate: Option[DateTime] = Option(_requestedExpiryDate)
 	def requestedExpiryDate_=(red: DateTime) {_requestedExpiryDate = red}
