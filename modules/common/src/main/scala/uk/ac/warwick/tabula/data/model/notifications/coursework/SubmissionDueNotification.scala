@@ -42,11 +42,7 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 
 	def urlTitle = "upload your submission"
 
-	def title = {
-		val titleEnding = if (daysLeft < 0) { "late" } else { "due" }
-
-		"%s: Your submission for \"%s\" is %s".format(moduleCode, assignment.name, titleEnding)
-	}
+	def title = s"$moduleCode: Your submission for \"${assignment.name}\" $timeStatement"
 
 	def timeStatement = if (daysLeft > 1){
 		s"is due in $daysLeft days"
