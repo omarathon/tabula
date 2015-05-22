@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.profiles.commands
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.{ScalaRestriction, AliasAndJoinType}
 import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.commands.{FiltersStudents, CommandInternal, ReadOnly, Unaudited, ComposableCommand}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -35,24 +35,25 @@ object FilterStudentsCommand {
 			with ReadOnly with Unaudited
 }
 
-abstract class FilterStudentsCommand(val department: Department, val year: AcademicYear) extends CommandInternal[FilterStudentsResults] with FilterStudentsState with BindListener {
+abstract class FilterStudentsCommand(val department: Department, val year: AcademicYear)
+	extends CommandInternal[FilterStudentsResults] with FilterStudentsState with BindListener with TaskBenchmarking {
 	self: ProfileServiceComponent =>
 
 	def applyInternal() = {
 		val restrictions = buildRestrictions(year)
 
-		val totalResults = profileService.countStudentsByRestrictions(
+		val totalResults = benchmarkTask("countStudentsByRestrictions") { profileService.countStudentsByRestrictions(
 			department = department,
 			restrictions = restrictions
-		)
+		)}
 
-		val (offset, students) = profileService.findStudentsByRestrictions(
+		val (offset, students) = benchmarkTask("findStudentsByRestrictions") { profileService.findStudentsByRestrictions(
 			department = department,
 			restrictions = restrictions,
 			orders = buildOrders(),
 			maxResults = studentsPerPage,
 			startResult = studentsPerPage * (page-1)
-		)
+		)}
 
 		if (offset == 0) page = 1
 
