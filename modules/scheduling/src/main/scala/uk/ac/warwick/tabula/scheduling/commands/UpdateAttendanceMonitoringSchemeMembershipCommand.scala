@@ -40,7 +40,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 
 			logger.info(s"${schemesToUpdate.size} schemes need membership updating")
 
-			val studentsToUpdate = schemesToUpdate.flatMap { scheme => benchmark(s"Update scheme ${scheme.id} in transaction") { transactional() {
+			val studentsToUpdate = schemesToUpdate.flatMap { scheme => benchmarkTask(s"Update scheme ${scheme.id} in transaction") { transactional() {
 				deserializeFilter(scheme.memberQuery)
 				val staticStudentIds = benchmarkTask("profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments") {
 					profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
@@ -68,7 +68,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 					}
 				}
 
-				studentMembers.foreach(student => benchmark(s"updateCheckpointTotal for ${student.universityId} in transaction") { transactional() {
+				studentMembers.foreach(student => benchmarkTask(s"updateCheckpointTotal for ${student.universityId} in transaction") { transactional() {
 					val studentDeptAndYears = studentsToUpdate(student.universityId)
 					studentDeptAndYears.foreach { case (dept, academicYear) =>
 						attendanceMonitoringService.updateCheckpointTotalsAsync(Seq(student), dept, academicYear)
