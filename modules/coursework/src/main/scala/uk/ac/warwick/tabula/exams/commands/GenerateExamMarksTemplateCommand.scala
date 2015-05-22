@@ -45,13 +45,6 @@ class GenerateExamMarksTemplateCommandInternal(val module: Module, val exam: Exa
 			val row = sheet.createRow(i + 1)
 			row.createCell(0).setCellValue(memberPair._2.map(_.toString).getOrElse(""))
 			row.createCell(1).setCellValue(memberPair._1.getWarwickId)
-			val marksCell = row.createCell(2)
-			val gradesCell = row.createCell(3)
-			val feedbacks = feedbackService.getStudentFeedback(exam, memberPair._1.getWarwickId)
-			feedbacks.foreach { feedback =>
-				feedback.actualMark.foreach(marksCell.setCellValue(_))
-				feedback.actualGrade.foreach(gradesCell.setCellValue)
-			}
 		}
 
 		// add conditional formatting for invalid marks
