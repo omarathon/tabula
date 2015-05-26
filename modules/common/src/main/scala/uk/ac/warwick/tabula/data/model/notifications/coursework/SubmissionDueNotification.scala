@@ -42,7 +42,7 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 
 	def urlTitle = "upload your submission"
 
-	def title = s"$moduleCode: Your submission for \"${assignment.name}\" $timeStatement"
+	def title = s"$moduleCode: Your submission for '${assignment.name}' $timeStatement"
 
 	def timeStatement = if (daysLeft > 1){
 		s"is due in $daysLeft days"
