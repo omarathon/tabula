@@ -25,7 +25,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 		}
 
 		val membershipService = smartMock[AssessmentMembershipService]
-		membershipService.determineMembershipUsers(assignment) returns(users)
+		membershipService.determineMembershipUsers(assignment) returns users
 		notification.membershipService = membershipService
 
 		notification.recipients should be (users)
@@ -35,7 +35,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 			val submission = new Submission
 			submission.universityId = "0133454"
 			assignment.addSubmission(submission)
-			notification.recipients should be(Seq(users(0)))
+			notification.recipients should be(Seq(users.head))
 		}
 
 		withClue("Shouldn't notify user with extension") { // A different class handles individual extensions
@@ -56,7 +56,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 			override def extension = anExtension
 		}
 		notification.userLookup = mock[UserLookupService]
-		notification.userLookup.getUserByWarwickUniId("0133454") returns (users(1))
+		notification.userLookup.getUserByWarwickUniId("0133454") returns users(1)
 		anExtension.assignment = assignment
 
 		withClue("Should only be sent to the one user who has an extension") {
@@ -74,7 +74,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 	private def membershipItem(uniId: String, usercode: String) = {
 		val user = new User(usercode)
 		user.setWarwickId(uniId)
-		MembershipItem(user, Some(uniId), Some(usercode), IncludeType, false)
+		MembershipItem(user, Some(uniId), Some(usercode), IncludeType, extraneous=false)
 	}
 
 	@Test def titleDueGeneral() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
@@ -83,7 +83,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 
 		val notification = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment)
-		notification.title should be ("CS118: Your submission for \"5,000 word essay\" is due")
+		notification.title should be ("CS118: Your submission for '5,000 word essay' is due tomorrow")
 	}
 
 	@Test def titleLateGeneral() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
@@ -92,7 +92,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 
 		val notification = Notification.init(new SubmissionDueGeneralNotification, new AnonymousUser, assignment)
-		notification.title should be ("CS118: Your submission for \"5,000 word essay\" is late")
+		notification.title should be ("CS118: Your submission for '5,000 word essay' is 2 days late")
 	}
 
 	@Test def titleDueExtension() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
@@ -106,7 +106,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 		extension.approve()
 
 		val notification = Notification.init(new SubmissionDueWithExtensionNotification, new AnonymousUser, extension)
-		notification.title should be ("CS118: Your submission for \"5,000 word essay\" is due")
+		notification.title should be ("CS118: Your submission for '5,000 word essay' is due today")
 	}
 
 	@Test def titleLateExtension() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) {
@@ -120,7 +120,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 		extension.approve()
 
 		val notification = Notification.init(new SubmissionDueWithExtensionNotification, new AnonymousUser, extension)
-		notification.title should be ("CS118: Your submission for \"5,000 word essay\" is late")
+		notification.title should be ("CS118: Your submission for '5,000 word essay' is 1 day late")
 	}
 
 }
