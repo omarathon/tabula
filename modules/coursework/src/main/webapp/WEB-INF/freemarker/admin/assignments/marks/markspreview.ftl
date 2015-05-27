@@ -98,7 +98,8 @@
 								<#if item.hasAdjustment>
 									<span class="warning">This student's mark has already been adjusted. The adjusted mark may need to be amended.</span>
 								</#if>
-								<#if disabilityMap[item.universityId]??>
+
+								<#if features.disabilityOnSubmission && disabilityMap[item.universityId]??>
 									<#assign disability = disabilityMap[item.universityId] />
 									<a class="use-popover cue-popover" id="popover-disability" data-html="true"
 									   data-original-title="Disability disclosed"
@@ -107,6 +108,7 @@
 										<span class="label label-info">Disability disclosed</span>
 									</a>
 								</#if>
+
 							</td>
 							<td>
 								<@spring.bind path="actualMark">
