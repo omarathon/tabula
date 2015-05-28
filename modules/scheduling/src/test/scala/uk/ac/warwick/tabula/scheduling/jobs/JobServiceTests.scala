@@ -1,11 +1,8 @@
 package uk.ac.warwick.tabula.scheduling.jobs
 
-import collection.mutable
 import uk.ac.warwick.tabula._
-import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.jobs.JobService
-import org.hibernate.Session
 import uk.ac.warwick.tabula.services.jobs.JobInstanceImpl
 import uk.ac.warwick.tabula.jobs.JobPrototype
 
@@ -16,6 +13,11 @@ class JobContextTests extends AppContextTestBase {
 	@Test def containsTurnitin {
 		jobService.jobs.size should (be > 1)
 		jobService.jobs map (_.identifier) should contain ("turnitin-submit")
+	}
+
+	@Test def containsTurnitinLti {
+		jobService.jobs.size should (be > 1)
+		jobService.jobs map (_.identifier) should contain ("turnitin-lti-submit")
 	}
 	
 	@Test def unknownJobType {
