@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.helpers.{FoundUser, LazyLists, NoUser}
 import uk.ac.warwick.tabula.services.{SubmissionServiceComponent, ProfileServiceComponent, GeneratesGradesFromMarks, UserLookupComponent}
 import uk.ac.warwick.tabula.system.BindListener
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 trait ValidatesMarkItem {
@@ -89,7 +89,7 @@ trait PostExtractValidation {
 		val uniIdsSoFar: mutable.Set[String] = mutable.Set()
 
 		if (marks != null && !marks.isEmpty) {
-			for (i <- 0 until marks.length) {
+			for (i <- 0 until marks.size()) {
 				val mark = marks.get(i)
 				val newPerson = if (mark.universityId != null){
 					uniIdsSoFar.add(mark.universityId)
@@ -104,6 +104,10 @@ trait PostExtractValidation {
 	}
 }
 
+object AddMarksCommandBindListener {
+	final val MAX_MARKS_ROWS: Int = 5000
+}
+
 trait AddMarksCommandBindListener extends BindListener {
 
 	self: AddMarksCommandState with MarksExtractorComponent =>
@@ -112,7 +116,7 @@ trait AddMarksCommandBindListener extends BindListener {
 		val fileNames = file.fileNames map (_.toLowerCase)
 		val invalidFiles = fileNames.filter(s => !validAttachmentStrings.exists(s.endsWith))
 
-		if (invalidFiles.size > 0) {
+		if (invalidFiles.nonEmpty) {
 			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
 			else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
 		}
@@ -121,13 +125,17 @@ trait AddMarksCommandBindListener extends BindListener {
 			transactional() {
 				file.onBind(result)
 				if (!file.attached.isEmpty) {
-					processFiles(file.attached)
+					processFiles(file.attached.asScala)
 				}
 
 				def processFiles(files: Seq[FileAttachment]) {
 					for (file <- files.filter(_.hasData)) {
 						try {
 							marks.addAll(marksExtractor.readXSSFExcelFile(file.dataStream))
+							if (marks.size() > AddMarksCommandBindListener.MAX_MARKS_ROWS) {
+								result.rejectValue("file", "file.tooManyRows", Array(AddMarksCommandBindListener.MAX_MARKS_ROWS.toString), "")
+								marks.clear()
+							}
 						} catch {
 							case e: InvalidFormatException =>
 								result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
@@ -156,7 +164,7 @@ trait FetchDisabilities {
 	def fetchDisabilities: Map[String, Disability] = {
 		assessment match {
 			case assignment: Assignment =>
-				marks.map{ markItem => markItem.universityId -> {
+				marks.asScala.map{ markItem => markItem.universityId -> {
 					if (submissionService.getSubmissionByUniId(assignment, markItem.universityId).exists(_.useDisability)) {
 						profileService.getMemberByUniversityId(markItem.universityId).flatMap {
 							case student: StudentMember => Option(student)
