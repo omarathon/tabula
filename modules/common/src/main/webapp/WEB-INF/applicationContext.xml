@@ -249,6 +249,7 @@
 			<list>
 				<bean class="uk.ac.warwick.tabula.system.MavReturnValueHandler" />
 				<bean class="uk.ac.warwick.tabula.system.XmlReturnValueHandler" />
+				<bean class="uk.ac.warwick.tabula.system.RenderableFileReturnValueHandler" />
 			</list>
 		</property>
 		<property name="customConverters" ref="customConverters" />
