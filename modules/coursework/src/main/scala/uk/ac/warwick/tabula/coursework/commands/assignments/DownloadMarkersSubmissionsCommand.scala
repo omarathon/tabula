@@ -20,7 +20,6 @@ object DownloadMarkersSubmissionsCommand {
 	def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser) =
 		new DownloadMarkersSubmissionsCommand(module, assignment, marker, submitter)
 		with ComposableCommand[RenderableZip]
-		with ApplyWithCallback[RenderableZip]
 		with AutowiringZipServiceComponent
 		with AutowiringAssessmentServiceComponent
 		with AutowiringStateServiceComponent
@@ -37,7 +36,8 @@ class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assi
 
 	override def applyInternal(): RenderableZip = {
 		val submissions = assignment.getMarkersSubmissions(marker)
-		
+
+		// TODO - Maybe we should do some validation here instead or disable the link if there are no submissions
 		if (submissions.isEmpty) throw new ItemNotFoundException
 
 		// do not download submissions where the marker has completed marking

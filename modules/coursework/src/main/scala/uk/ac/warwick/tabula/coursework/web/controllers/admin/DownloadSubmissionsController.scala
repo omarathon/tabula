@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.coursework.commands.assignments.{DownloadFeedbackSheetsCommand, DownloadAllSubmissionsCommand, DownloadSubmissionsCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.services.fileserver.{RenderableFile, RenderableZip, FileServer}
+import uk.ac.warwick.tabula.services.fileserver.{RenderableFile, RenderableZip}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService}
@@ -46,8 +46,6 @@ class DownloadSubmissionsController extends CourseworkController {
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/submissions.zip"))
 class DownloadMarkerSubmissionsController extends CourseworkController {
-
-	var fileServer = Wire.auto[FileServer]
 	
 	@ModelAttribute("command")
 	def getMarkersSubmissionCommand(
@@ -93,7 +91,6 @@ class DownloadAllSubmissionsController extends CourseworkController {
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions/download/{submission}/{filename}.zip"))
 class DownloadSingleSubmissionController extends CourseworkController {
 
-	var fileServer = Wire.auto[FileServer]
 	var userLookup = Wire[UserLookupService]
 	
 	@ModelAttribute def getSingleSubmissionCommand(
@@ -138,12 +135,12 @@ class DownloadFeedbackSheetsController extends CourseworkController {
 		new DownloadFeedbackSheetsCommand(module, assignment)
 
 	@RequestMapping(value = Array("/feedback-templates.zip"))
-	def downloadFeedbackTemplatesOnly(command: DownloadFeedbackSheetsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): RenderableFile = {
+	def downloadFeedbackTemplatesOnly(command: DownloadFeedbackSheetsCommand): RenderableFile = {
 		command.apply()
 	}
 
 	@RequestMapping(value = Array("/marker-templates.zip"))
-	def downloadMarkerFeedbackTemplates(command: DownloadFeedbackSheetsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): RenderableFile = {
+	def downloadMarkerFeedbackTemplates(command: DownloadFeedbackSheetsCommand): RenderableFile = {
 		val assignment = command.assignment
 
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser)

@@ -31,8 +31,6 @@ class RenderableFileReturnValueHandler extends HandlerMethodReturnValueHandler w
 class RenderableFileView(file: RenderableFile) extends View with StreamsFiles with AutowiringFeaturesComponent {
 	def getContentType: String = file.contentType
 	def render(model: JMap[String, _], in: HttpServletRequest, out: HttpServletResponse) {
-		implicit val request = in
-		implicit val response = out
-		stream(file)
+		stream(file, in, out)
 	}
 }
