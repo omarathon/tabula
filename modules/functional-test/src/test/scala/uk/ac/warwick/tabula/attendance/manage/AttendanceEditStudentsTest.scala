@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.attendance.manage
 
+import org.joda.time.{DateTimeConstants, DateTime}
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.FunctionalTestAcademicYear
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
@@ -7,6 +8,7 @@ import uk.ac.warwick.tabula.attendance.AttendanceFixture
 class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 
 	val thisAcademicYearString = FunctionalTestAcademicYear.current.startYear.toString
+	val isSitsInFlux = DateTime.now.getMonthOfYear >= DateTimeConstants.JUNE && DateTime.now.getMonthOfYear < DateTimeConstants.OCTOBER
 
 	"A Member of staff" should "be able to edit students on a scheme" in {
 		Given("I am logged in as Admin1")
@@ -54,8 +56,18 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 		pageSource should include("3 students on this scheme")
 		pageSource should include("(1 from SITS, plus 2 added manually)")
 
-		When("I choose to link to SITS")
-		click on cssSelector("input[name=linkToSits]")
+		// No linking to SITS between June and October
+		if (!isSitsInFlux) {
+
+			When("I choose to link to SITS")
+			click on cssSelector("input[name=linkToSits]")
+
+		} else {
+
+			findAll(cssSelector("input[name=linkToSits]")).size should be (0)
+
+		}
+
 		And("I save the scheme")
 		click on cssSelector("#main-content form input.btn.btn-primary")
 
@@ -70,26 +82,41 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 		eventually(currentUrl should endWith(s"students"))
 		pageSource should include("3 students on this scheme")
 
-		When("I reset both manually added students")
-		cssSelector("details.manually-added input[name=resetStudentIds]").findAllElements.foreach(input => click on input)
-		click on cssSelector("input[name=resetMembership]")
+		if (!isSitsInFlux) {
 
-		Then("Only the SITS students remain")
-		eventually {
-			findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be(2)
-			findAll(cssSelector("details.manually-added table.manage-student-table tbody tr")).size should be(0)
-		}
-		pageSource should include("2 students on this scheme")
+			When("I reset both manually added students")
+			cssSelector("details.manually-added input[name=resetStudentIds]").findAllElements.foreach(input => click on input)
+			click on cssSelector("input[name=resetMembership]")
 
-		When("I exclude the SITS students")
-		cssSelector("details.find-students input[name=excludeIds]").findAllElements.foreach(input => click on input)
-		click on cssSelector("input[name=manuallyExclude]")
+			Then("Only the SITS students remain")
+			eventually {
+				findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be(2)
+				findAll(cssSelector("details.manually-added table.manage-student-table tbody tr")).size should be(0)
+			}
+			pageSource should include("2 students on this scheme")
 
-		Then("No students remain")
-		eventually {
-			findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be(2)
-			findAll(cssSelector("details.find-students table.manage-student-table tbody tr.exclude")).size should be(2)
-			findAll(cssSelector("details.manually-added table.manage-student-table tbody tr")).size should be(2)
+			When("I exclude the SITS students")
+			cssSelector("details.find-students input[name=excludeIds]").findAllElements.foreach(input => click on input)
+			click on cssSelector("input[name=manuallyExclude]")
+
+			Then("No students remain")
+			eventually {
+				findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be(2)
+				findAll(cssSelector("details.find-students table.manage-student-table tbody tr.exclude")).size should be(2)
+				findAll(cssSelector("details.manually-added table.manage-student-table tbody tr")).size should be(2)
+			}
+
+		} else {
+
+			When("I reset all manually added students")
+			cssSelector("details.manually-added input[name=resetStudentIds]").findAllElements.foreach(input => click on input)
+			click on cssSelector("input[name=resetMembership]")
+
+			Then("No students remain")
+			eventually {
+				findAll(cssSelector("details.manually-added table.manage-student-table tbody tr")).size should be(0)
+			}
+
 		}
 
 		When("I save the scheme")
