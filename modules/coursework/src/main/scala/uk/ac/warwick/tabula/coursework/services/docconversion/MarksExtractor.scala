@@ -47,7 +47,7 @@ class MarksExtractor {
 			parser.parse(sheetSource)
 			sheet.close()
 		}
-		markItems
+		markItems.filterNot(markItem => markItem.universityId == null && markItem.actualMark == null && markItem.actualGrade == null)
 	}
 }
 

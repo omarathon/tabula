@@ -9,7 +9,9 @@
 <#assign hasErrors=status.errors.allErrors?size gt 0 />
 </@spring.bind>
 
-<#assign disabilityMap = adminAddMarksCommand.fetchDisabilities />
+<#if features.disabilityOnSubmission>
+	<#assign disabilityMap = adminAddMarksCommand.fetchDisabilities />
+</#if>
 
 <div class="fix-area">
 	<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marks')}" commandName=commandName>
