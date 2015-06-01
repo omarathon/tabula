@@ -26,7 +26,7 @@ class FileServer extends StreamsFiles with AutowiringFeaturesComponent {
 
 		out.addHeader("Content-Disposition", dispositionHeader)
 		
-		stream(file, request, out)
+		stream(file)
 	}
 }
 
@@ -39,7 +39,7 @@ trait StreamsFiles {
 
 	this: FeaturesComponent =>
 
-	def stream(file: RenderableFile, request: HttpServletRequest, out: HttpServletResponse) {
+	def stream(file: RenderableFile)(implicit request: HttpServletRequest, out: HttpServletResponse) {
 		val inStream = file.inputStream
 
 		out.addHeader("Content-Type", file.contentType)
