@@ -2,10 +2,13 @@ package uk.ac.warwick.tabula.exams.commands
 
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Exam, Module}
+import uk.ac.warwick.tabula.data.model.notifications.exams.ExamReleasedForMarkingNotification
+import uk.ac.warwick.tabula.data.model.{Notification, Exam, Module}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
+import scala.collection.JavaConverters._
 
 object ReleaseExamForMarkingCommand {
 	def apply(module: Module, exam: Exam, currentUser: CurrentUser) =
@@ -15,6 +18,7 @@ object ReleaseExamForMarkingCommand {
 			with ReleaseExamForMarkingCommandDescription
 			with ReleaseExamForMarkingCommandPermissions
 			with ReleaseExamForMarkingCommandState
+			with ExamReleasedNotifier
 }
 
 
@@ -22,6 +26,8 @@ class ReleaseExamForMarkingCommandInternal(val module: Module, val exam: Exam, c
 	extends CommandInternal[Exam] {
 
 	self: AssessmentServiceComponent =>
+
+	val user = currentUser.apparentUser
 
 	override def applyInternal() = {
 		exam.released = true
@@ -56,4 +62,22 @@ trait ReleaseExamForMarkingCommandDescription extends Describable[Exam] {
 trait ReleaseExamForMarkingCommandState {
 	def module: Module
 	def exam: Exam
+	def user: User
+}
+
+trait ExamReleasedNotifier extends Notifies[Exam, Exam] {
+
+	self : ReleaseExamForMarkingCommandState =>
+
+	def emit(result: Exam) = {
+		val notifications = exam.firstMarkers.asScala
+			.filterNot(map => map.students.isEmpty || map.marker_id == null) // don't notify markers with no assigned students
+			.map(map => {
+				val notification = Notification.init(new ExamReleasedForMarkingNotification, user, exam)
+				notification.recipientUserId = map.marker_id
+				notification
+			})
+
+		notifications
+	}
 }

@@ -86,4 +86,5 @@ trait GenerateGradesFromMarkCommandState {
 
 	// Bind variables
 	var studentMarks: JMap[String, String] = JHashMap()
+	var selected: JMap[String, String] = JHashMap()
 }

@@ -73,6 +73,12 @@ trait CreateMonitoringPointReportCommandValidation extends SelfValidating {
 
 		if (!errors.hasErrors) {
 			allStudents.foreach { student =>
+				if (student.mostSignificantCourseDetails.isEmpty) {
+					errors.rejectValue("missedPoints", "monitoringPointReport.student.noSCD", Array(student.universityId), "")
+				} else if (!student.mostSignificantCourseDetails.get.freshStudentCourseYearDetails.exists(_.academicYear == academicYear)) {
+					errors.rejectValue("missedPoints", "monitoringPointReport.student.noSCYD", Array(student.universityId, academicYear.toString), "")
+				}
+
 				val nonReported = monitoringPointService.findNonReportedTerms(Seq(student), academicYear)
 
 				if (!nonReported.contains(period)) {

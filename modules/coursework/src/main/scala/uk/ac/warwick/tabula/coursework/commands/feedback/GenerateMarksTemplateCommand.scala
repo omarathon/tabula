@@ -61,13 +61,6 @@ class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: A
 		for ((member, i) <- members.zipWithIndex) {
 			val row = sheet.createRow(i + 1)
 			row.createCell(0).setCellValue(member)
-			val marksCell = row.createCell(1)
-			val gradesCell = row.createCell(2)
-			val feedbacks = feedbackService.getStudentFeedback(assignment, member)
-			feedbacks.foreach { feedback =>
-				feedback.actualMark.foreach(marksCell.setCellValue(_))
-				feedback.actualGrade.foreach(gradesCell.setCellValue)
-			}
 		}
 
 		// add conditional formatting for invalid marks
