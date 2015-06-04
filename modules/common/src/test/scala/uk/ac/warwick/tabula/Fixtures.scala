@@ -42,7 +42,9 @@ object Fixtures extends Mockito {
 	}
 
 	def markerFeedback(parent: Feedback) = {
-		new MarkerFeedback(parent)
+		val mf = new MarkerFeedback(parent)
+		mf.state = MarkingState.ReleasedForMarking
+		mf
 	}
 
 	def department(code:String, name:String = null) = {
