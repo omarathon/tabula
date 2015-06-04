@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
+import javax.validation.constraints.NotNull
+
 import uk.ac.warwick.tabula.data.HibernateHelpers
 
 import scala.collection.JavaConversions._
@@ -63,6 +65,7 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var grade: Option[String] = None
 
+	@NotNull
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingStateUserType")
 	var state : MarkingState = _
 
