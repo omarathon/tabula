@@ -76,6 +76,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 		for (groups <- logSize(assignmentImporter.getAllAssessmentGroups).grouped(ImportGroupSize)) {
 			saveGroups(groups)
 			transactional() {
+				session.flush()
 				groups foreach session.evict
 			}
 		}
