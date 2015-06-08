@@ -29,6 +29,10 @@ class EditExamController extends ExamsController {
 		cmd.populateGroups(cmd.exam)
 		cmd.afterBind()
 
+		render(cmd)
+	}
+
+	private def render(cmd: EditExamCommand) = {
 		Mav("exams/admin/edit",
 			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
@@ -36,9 +40,9 @@ class EditExamController extends ExamsController {
 			"department" -> cmd.module.adminDepartment,
 			"markingWorkflows" -> cmd.module.adminDepartment.markingWorkflows.filter(_.validForExams)
 		).crumbs(
-				Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear),
-				Breadcrumbs.Module(cmd.module, cmd.academicYear)
-			)
+			Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear),
+			Breadcrumbs.Module(cmd.module, cmd.academicYear)
+		)
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -48,7 +52,7 @@ class EditExamController extends ExamsController {
 	) = {
 			cmd.afterBind()
 			if (errors.hasErrors) {
-				showForm(cmd)
+				render(cmd)
 			} else {
 				cmd.apply()
 				Redirect(Routes.admin.module(cmd.exam.module, cmd.exam.academicYear))

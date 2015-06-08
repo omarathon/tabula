@@ -101,6 +101,15 @@ under the License.
 		   memoryStoreEvictionPolicy="LFU"
 			/>
 
+  <cache name="Exam-_members"
+         maxElementsInMemory="5000"
+         maxElementsOnDisk="20000"
+         overflowToDisk="true"
+         diskPersistent="true"
+         diskSpoolBufferSizeMB="20"
+         memoryStoreEvictionPolicy="LFU"
+          />
+
 	<cache name="SmallGroupSet-_membersGroup"
 		   maxElementsInMemory="5000"
 		   maxElementsOnDisk="20000"
