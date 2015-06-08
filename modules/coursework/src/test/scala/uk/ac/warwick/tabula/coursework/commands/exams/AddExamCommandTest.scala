@@ -15,9 +15,9 @@ class AddExamCommandTest extends TestBase with Mockito {
 		with HasAcademicYear
 		with SpecifiesGroupType
 		with AssessmentMembershipServiceComponent {
-			val assessmentService = mock[AssessmentService]
+			val assessmentService = smartMock[AssessmentService]
 			val userLookup = new MockUserLookup
-			var assessmentMembershipService = mock[AssessmentMembershipService]
+			var assessmentMembershipService = smartMock[AssessmentMembershipService]
 		}
 
 	trait Fixture {
@@ -32,12 +32,12 @@ class AddExamCommandTest extends TestBase with Mockito {
 			def module = command.module
 			def academicYear = command.academicYear
 
-			override val assessmentService = mock[AssessmentService]
-			override val assessmentMembershipService = mock[AssessmentMembershipService]
-			override val userLookup = mock[UserLookupService]
+			override val assessmentService = smartMock[AssessmentService]
+			override val assessmentMembershipService = smartMock[AssessmentMembershipService]
+			override val userLookup = smartMock[UserLookupService]
 			override def existingGroups = None
 			override def existingMembers = None
-			override def updateAssessmentGroups = List()
+			override def updateAssessmentGroups() = List()
 		}
 	}
 

@@ -78,9 +78,11 @@ trait EditExamCommandDescription extends Describable[Exam] {
 trait PopulateEditExamCommand {
 
 	self: EditExamCommandState with UpdatesStudentMembership =>
+
 	name = exam.name
 	assessmentGroups = exam.assessmentGroups
 	markingWorkflow = exam.markingWorkflow
+	massAddUsers = exam.members.users.map(_.getWarwickId).mkString("\n")
 
 	def populateGroups(exam: Exam) {
 		assessmentGroups = exam.assessmentGroups

@@ -15,14 +15,14 @@ import uk.ac.warwick.util.csv.CSVLineWriter
 trait ExamExports {
 
 class CSVBuilder(val students:Seq[User], val results:ViewExamCommandResult, val exam: Exam, val module: Module, val academicYear: AcademicYear)
-		extends CSVLineWriter[User] with ExamHeaderInformation with ItemData with formatContent{
+		extends CSVLineWriter[User] with ExamHeaderInformation with ItemData with FormatsContent{
 
 		def getNoOfColumns(item:User) = headers.size
 		def getColumn(item:User, i:Int) = formatData(getItemData(item, results, module).get(headers(i)))
 	}
 }
 
-trait formatContent {
+trait FormatsContent {
 
 	protected def formatData(data: Option[Any]) = data match {
 		case Some(date: DateTime) => DateTimeFormat.forPattern("HH:mm:ss dd/MM/yyyy").print(date)
@@ -79,15 +79,15 @@ trait ItemData extends ExamHeaderInformation {
 		val hasFeedback = studentHasFeedback(results, student)
 		val hasSitsStatus = studentHasSitsFeedack(results, student)
 
-		var data:Map[String, Any] = Map();
+		var data:Map[String, Any] = Map()
 
 		data += (SEAT_NUMBER -> results.seatNumberMap.get(student))
 		data += (STUDENT -> studentName(module, student))
 		if (hasFeedback) {
 			data += (ORIGINAL_MARK -> feedback.actualMark.get)
-			data += (ORIGINAL_GRADE -> feedback.actualGrade.get)
-			data += (ADJUSTED_MARK -> feedback.latestPrivateOrNonPrivateAdjustment.get.mark)
-			data += (ADJUSTED_GRADE -> feedback.latestPrivateOrNonPrivateAdjustment.get.grade)
+			data += (ORIGINAL_GRADE -> feedback.actualGrade.getOrElse(""))
+			data += (ADJUSTED_MARK -> feedback.latestPrivateOrNonPrivateAdjustment.map(_.mark).getOrElse(""))
+			data += (ADJUSTED_GRADE -> feedback.latestPrivateOrNonPrivateAdjustment.flatMap(_.grade).getOrElse(""))
 			if (hasSitsStatus) {
 				val sitsStatus = studentSitsFeedback(results, student)
 				data += (SITS_UPLOAD_STATUS -> sitsStatus.status.description)
@@ -101,42 +101,40 @@ trait ItemData extends ExamHeaderInformation {
 
 	def studentName(module: Module, student: User): String = {
 		if (module.adminDepartment.showStudentName) {
-			return student.getFullName
+			student.getFullName
 		} else {
-			return student.getWarwickId
+			student.getWarwickId
 		}
 	}
 
-	def studentHasFeedback(results:ViewExamCommandResult, student:User): Boolean = {
-		!results.feedbackMap.get(student).isEmpty
-	}
+	def studentHasFeedback(results:ViewExamCommandResult, student:User): Boolean = results.feedbackMap.get(student).isDefined
 
 	def studentFeedback(results:ViewExamCommandResult, student:User): ExamFeedback = {
 		if (studentHasFeedback(results, student)) {
-			return results.feedbackMap.get(student).get.get
+			results.feedbackMap.get(student).get.get
 		} else {
-			return new ExamFeedback
+			new ExamFeedback
 		}
 	}
 
 	def studentHasSitsFeedack(results:ViewExamCommandResult, student:User) : Boolean = {
 		val feedback = studentFeedback(results, student)
-		studentHasFeedback(results, student) && results.sitsStatusMap.get(feedback).size > 0
+		studentHasFeedback(results, student) && results.sitsStatusMap.get(feedback).isDefined
 	}
 
 	def studentSitsFeedback(results:ViewExamCommandResult, student:User) : FeedbackForSits = {
 		val feedback = studentFeedback(results, student)
 		if (studentHasSitsFeedack(results, student)) {
-			return results.sitsStatusMap.get(feedback).get.get
+			results.sitsStatusMap.get(feedback).get.get
 		} else {
-			return new FeedbackForSits
+			new FeedbackForSits
 		}
 	}
 }
 
 
 class XMLBuilder(val students:Seq[User], val results:ViewExamCommandResult, val exam: Exam, val module: Module, val academicYear: AcademicYear)
-	extends ItemData with formatContent {
+	extends ItemData with FormatsContent {
 
 	def toXML  = {
 		<exam>
@@ -161,11 +159,11 @@ class XMLBuilder(val students:Seq[User], val results:ViewExamCommandResult, val 
 		<student>
 			<university-number>{ student.getWarwickId }</university-number>
 			<student-name>{if (module.adminDepartment.showStudentName){ student.getFullName } }</student-name>
-			<seat-number>{ results.seatNumberMap.get(student).get.getOrElse("") }</seat-number>
+			<seat-number>{ results.seatNumberMap.get(student).flatten.getOrElse("") }</seat-number>
 			<original-mark>{if (hasFeedback) {feedback.actualMark.getOrElse("")} }</original-mark>
 			<original-grade>{if (hasFeedback) {feedback.actualGrade.getOrElse("")} }</original-grade>
-			<adjusted-mark>{if (hasFeedback) {feedback.latestPrivateOrNonPrivateAdjustment.get.mark} }</adjusted-mark>
-			<adjusted-grade>{if (hasFeedback) {feedback.latestPrivateOrNonPrivateAdjustment.get.mark} }</adjusted-grade>
+			<adjusted-mark>{if (hasFeedback) {feedback.latestPrivateOrNonPrivateAdjustment.map(_.mark).getOrElse("")} }</adjusted-mark>
+			<adjusted-grade>{if (hasFeedback) {feedback.latestPrivateOrNonPrivateAdjustment.flatMap(_.grade).getOrElse("")} }</adjusted-grade>
 			<sits-upload-status>{if (hasSitsStatus) {sitsStatus.status.description} }</sits-upload-status>
 			<sits-upload-date>{if (hasSitsStatus) {sitsStatus.dateOfUpload} }</sits-upload-date>
 			<sits-upload-mark>{if (hasSitsStatus) {sitsStatus.actualMarkLastUploaded} }</sits-upload-mark>
@@ -175,7 +173,7 @@ class XMLBuilder(val students:Seq[User], val results:ViewExamCommandResult, val 
 }
 
 class ExcelBuilder(val students: Seq[User], val results:ViewExamCommandResult, val module: Module)
-	extends ExamHeaderInformation with ItemData with formatContent {
+	extends ExamHeaderInformation with ItemData with FormatsContent {
 
 	def toXLSX = {
 		val workbook = new XSSFWorkbook()
