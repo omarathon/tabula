@@ -140,10 +140,23 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var agreedGrade: Option[String] = None
 
-	def latestMark: Option[Int] =
-		(Stream(agreedMark) ++ marks.asScala.toStream.map(m => Option(m.mark)) ++ Stream(actualMark)).flatten.headOption
-	def latestGrade: Option[String] =
-		(Stream(agreedGrade) ++ marks.asScala.toStream.map(m => Option(m.grade).flatten) ++ Stream(actualGrade)).flatten.headOption
+	def latestMark: Option[Int] = {
+		if (agreedMark.isDefined)
+			agreedMark
+		else if (latestPrivateOrNonPrivateAdjustment.isDefined)
+			latestPrivateOrNonPrivateAdjustment.map(_.mark)
+		else
+			actualMark
+	}
+
+	def latestGrade: Option[String] = {
+		if (agreedGrade.isDefined)
+			agreedGrade
+		else if (latestPrivateOrNonPrivateAdjustment.isDefined)
+			latestPrivateOrNonPrivateAdjustment.flatMap(_.grade)
+		else
+			actualGrade
+	}
 
 	def latestNonPrivateAdjustment: Option[Mark] = marks.asScala.find(_.markType == MarkType.Adjustment)
 	def latestPrivateAdjustment: Option[Mark] = marks.asScala.find(_.markType == MarkType.PrivateAdjustment)
@@ -164,7 +177,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	}
 
 	def studentViewableRawGrade: Option[String] = {
-		if (hasPrivateAdjustments) latestPrivateAdjustment.map(_.grade).flatten
+		if (hasPrivateAdjustments) latestPrivateAdjustment.flatMap(_.grade)
 		else actualGrade
 	}
 
