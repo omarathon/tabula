@@ -37,7 +37,7 @@ class EditExamCommandTest extends TestBase with Mockito {
 				override val userLookup = mock[UserLookupService]
 				override def existingGroups = None
 				override def existingMembers = None
-				override def updateAssessmentGroups = List()
+				override def updateAssessmentGroups() = List()
 		}
 	}
 

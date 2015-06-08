@@ -83,7 +83,8 @@ trait ExamState extends UpdatesStudentMembership {
 	def academicYear: AcademicYear
 	var markingWorkflow: MarkingWorkflow = _
 
-	def copyTo(exam: Exam){
+	def copyTo(exam: Exam) {
+		exam.assessmentMembershipService = assessmentMembershipService
 		exam.name = name
 		exam.markingWorkflow = markingWorkflow
 
