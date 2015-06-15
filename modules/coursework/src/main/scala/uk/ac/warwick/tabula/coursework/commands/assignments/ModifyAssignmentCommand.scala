@@ -47,6 +47,8 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 	private var _prefilled: Boolean = _
 	def prefilled = _prefilled
 
+	var removeWorkflow: Boolean = false
+
 	// can be overridden in concrete implementations to provide additional validation
 	def contextSpecificValidation(errors: Errors)
 
@@ -90,6 +92,9 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		}
 
 		copySharedTo(assignment: Assignment)
+		if (removeWorkflow) {
+			assignment.markingWorkflow = null
+		}
 
 		if (assignment.members == null) assignment.members = UserGroup.ofUsercodes
 		assignment.members.copyFrom(members)
