@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.commands
 
 import java.io.File
-import scala.collection.JavaConversions._
+import uk.ac.warwick.tabula.services.{MaintenanceModeEnabledException, MaintenanceModeService}
+
 import scala.collection.JavaConverters._
 import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.spring.Wire
@@ -28,7 +29,8 @@ import uk.ac.warwick.tabula.RequestInfo
  * multipart/form-data encoding type on your form.
  */
 class UploadedFile extends BindListener {
-	var fileDao = Wire.auto[FileDao]
+	var fileDao = Wire[FileDao]
+	var maintenanceMode = Wire[MaintenanceModeService]
 
 	@NoBind var disallowedFilenames = commaSeparated(Wire[String]("${uploads.disallowedFilenames}"))
 	@NoBind var disallowedPrefixes = commaSeparated(Wire[String]("${uploads.disallowedPrefixes}"))
@@ -39,8 +41,8 @@ class UploadedFile extends BindListener {
 	// files that have been persisted - can be represented in forms by ID
 	var attached: JList[FileAttachment] = JArrayList()
 
-	def uploadedFileNames: Seq[String] = upload.map(_.getOriginalFilename).filterNot(_ == "")
-	def attachedFileNames: Seq[String] = attached.map(_.getName)
+	def uploadedFileNames: Seq[String] = upload.asScala.map(_.getOriginalFilename).filterNot(_ == "")
+	def attachedFileNames: Seq[String] = attached.asScala.map(_.getName)
 	def fileNames = uploadedFileNames ++ attachedFileNames
 
 	def isMissing = !isExists
@@ -54,16 +56,16 @@ class UploadedFile extends BindListener {
 	def attachedOrEmpty: JList[FileAttachment] = Option(attached).getOrElse(JArrayList())
 	def uploadOrEmpty: JList[MultipartFile] = permittedUploads
 
-	def hasAttachments = attached != null && !attached.isEmpty()
+	def hasAttachments = attached != null && !attached.isEmpty
 	def hasUploads = !permittedUploads.isEmpty
 	
 	/** Uploads excluding those that are empty or have bad names. */
 	def permittedUploads: JList[MultipartFile] = {
-		upload.filterNot { s => 
+		upload.asScala.filterNot { s =>
 			s.isEmpty || 
 			(disallowedFilenames contains s.getOriginalFilename) || 
-			(disallowedPrefixes exists (s.getOriginalFilename.startsWith))
-		}
+			(disallowedPrefixes exists s.getOriginalFilename.startsWith)
+		}.asJava
 	}
 		
 	def isUploaded = hasUploads
@@ -75,8 +77,12 @@ class UploadedFile extends BindListener {
 	 * command needs them. This method will throw an exception
 	 */
 	override def onBind(result: BindingResult) {
+
+		if (maintenanceMode.enabled) {
+			throw new MaintenanceModeEnabledException(maintenanceMode.until, maintenanceMode.message)
+		}
 		
-		val bindResult = for (item <- attached) yield {
+		val bindResult = for (item <- attached.asScala) yield {
 			if (item != null && !item.temporary) {
 				result.reject("binding.reSubmission")
 				false
@@ -89,9 +95,9 @@ class UploadedFile extends BindListener {
 			if (hasUploads) {
 				// convert MultipartFiles into FileAttachments
 				transactional() {
-					val newAttachments = for (item <- permittedUploads) yield {
+					val newAttachments = for (item <- permittedUploads.asScala) yield {
 						val a = new FileAttachment
-						a.name = new File(item.getOriginalFilename()).getName
+						a.name = new File(item.getOriginalFilename).getName
 						a.uploadedData = item.getInputStream
 						a.uploadedDataLength = item.getSize
 						RequestInfo.fromThread.foreach { info => a.uploadedBy = info.user.userId }
@@ -99,12 +105,12 @@ class UploadedFile extends BindListener {
 						a
 					}
 					// remove converted files from upload to avoid duplicates
-					upload.clear
-					attached.addAll(newAttachments)
+					upload.clear()
+					attached.addAll(newAttachments.asJava)
 				}
 			} else {
 				// sometimes we manually add FileAttachments with uploaded data to persist
-				for (item <- attached if item.uploadedData != null)
+				for (item <- attached.asScala if item.uploadedData != null)
 					fileDao.saveTemporary(item)
 			}
 		
