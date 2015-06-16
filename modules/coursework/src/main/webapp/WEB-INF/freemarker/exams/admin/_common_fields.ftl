@@ -37,3 +37,10 @@
 </#if>
 
 <@sits_groups.exams_sits_groups command />
+
+<@form.labelled_row "massAddUsers" "Additional students">
+	<textarea name="massAddUsers" rows="3" style="height: 100px;">${command.originalMassAddUsers!""}</textarea>
+	<div class="help-block">
+		Additional students registered for the exam. Add University IDs, one per line.
+	</div>
+</@form.labelled_row>

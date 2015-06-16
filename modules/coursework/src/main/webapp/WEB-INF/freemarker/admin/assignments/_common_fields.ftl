@@ -41,6 +41,27 @@ so that they can be passed around between requests.
 				Marking workflows define how and by whom the assignment will be marked. They are set up for the department by a Departmental Administrator <#if can.do("MarkingWorkflow.Manage", department)><a href="<@routes.markingworkflowlist department />">here</a></#if>.
 			</#if>
 		</div>
+		<#if disabled && command.markingWorkflow??>
+			<label class="checkbox">
+				<@f.checkbox path="removeWorkflow" id="removeWorkflow"/>
+				Remove marking workflow
+			</label>
+			<div class="alert alert-warning" id="removeWorkflowMessage" style="margin-bottom: 0; <#if !command.removeWorkflow>display: none;</#if>">
+				This cannot be undone. If you remove the marking workflow you will lose access to any existing marker feedback
+				 and will not be able to add another workflow or re-apply the current workflow.
+			</div>
+			<script>
+				jQuery(function($){
+					$('#removeWorkflow').on('change', function(){
+						if ($(this).is(':checked')) {
+							$('#removeWorkflowMessage').show();
+						} else {
+							$('#removeWorkflowMessage').hide();
+						}
+					})
+				})
+			</script>
+		</#if>
 	</@form.labelled_row>
 </#if>
 

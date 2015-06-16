@@ -40,6 +40,9 @@ trait UpdatesStudentMembership {
 	// These are first resolved to userIds and then added to includeUsers
 	@transient var massAddUsers: String = _
 
+	// retains the result of massAddUsers before it is cleared
+	@transient var originalMassAddUsers: String = _
+
 	/** bind property for changing assessment groups */
 	@transient var upstreamGroups: JList[UpstreamGroup] = JArrayList()
 
@@ -139,6 +142,7 @@ trait UpdatesStudentMembership {
 		}
 
 		// clear these local properties, as we've "moved" the data into members
+		originalMassAddUsers = massAddUsers
 		massAddUsers = ""
 		includeUsers = JArrayList()
 		excludeUsers = JArrayList()

@@ -2,11 +2,12 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.joda.time.DateTime
 import org.springframework.util.StringUtils
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Describable, Description}
 import uk.ac.warwick.tabula.coursework.services.docconversion.{AutowiringMarksExtractorComponent, MarkItem}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Module, _}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, _}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, AutowiringUserLookupComponent, FeedbackServiceComponent, GeneratesGradesFromMarks, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -38,15 +39,8 @@ class MarkerAddMarksCommandInternal(val module: Module, val assignment: Assignme
 
 		def saveFeedback(universityId: String, actualMark: String, actualGrade: String) = {
 
-			val parentFeedback = assignment.feedbacks.find(_.universityId == universityId).getOrElse({
-				val newFeedback = new AssignmentFeedback
-				newFeedback.assignment = assignment
-				newFeedback.uploaderId = marker.getUserId
-				newFeedback.universityId = universityId
-				newFeedback.released = false
-				newFeedback.createdDate = DateTime.now
-				newFeedback
-			})
+			// For markers a parent feedback should _always_ exist (created when released for marking)
+			val parentFeedback = assignment.feedbacks.find(_.universityId == universityId).get
 
 			// get marker feedback if it already exists - if not one is automatically created
 			val markerFeedback:MarkerFeedback = firstMarker match {
@@ -96,6 +90,25 @@ trait MarkerAddMarksCommandValidation extends ValidatesMarkItem {
 			case None =>
 		}
 	}
+
+	override def checkMarker(mark: MarkItem, errors: Errors, alreadyHasErrors: Boolean): Boolean = {
+		var hasErrors = alreadyHasErrors
+		assessment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId} match {
+			case Some(feedback) =>
+				val markerFeedback:MarkerFeedback = firstMarker match {
+					case true => feedback.retrieveFirstMarkerFeedback
+					case false => feedback.retrieveSecondMarkerFeedback
+				}
+				if (markerFeedback.getMarkerUsercode.isEmpty || markerFeedback.getMarkerUsercode.get != marker.getUserId) {
+					errors.rejectValue("universityId", "uniNumber.wrong.marker")
+					hasErrors = true
+				}
+			case None =>
+				errors.rejectValue("universityId", "uniNumber.wrong.marker")
+				hasErrors = true
+		}
+		hasErrors
+	}
 }
 
 trait MarkerAddMarksDescription extends Describable[List[MarkerFeedback]] {
@@ -128,4 +141,5 @@ trait MarkerAddMarksCommandState extends AddMarksCommandState {
 	def submitter: CurrentUser
 	def assignment: Assignment
 	override def assessment = assignment
+	def firstMarker: Boolean
 }

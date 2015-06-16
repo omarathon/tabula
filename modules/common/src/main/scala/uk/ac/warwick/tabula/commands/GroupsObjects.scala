@@ -33,7 +33,7 @@ trait GroupsObjectsWithFileUpload[A >: Null, B >: Null] extends GroupsObjects[A,
 		if (!result.hasErrors) {
 			transactional() {
 				file.onBind(result)
-				if (!file.attached.isEmpty()) {
+				if (!file.attached.isEmpty) {
 					processFiles(file.attached.asScala)
 				}
 

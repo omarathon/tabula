@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.exams.commands
 
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{UniversityId, AcademicYear}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -83,7 +83,8 @@ trait ExamState extends UpdatesStudentMembership {
 	def academicYear: AcademicYear
 	var markingWorkflow: MarkingWorkflow = _
 
-	def copyTo(exam: Exam){
+	def copyTo(exam: Exam) {
+		exam.assessmentMembershipService = assessmentMembershipService
 		exam.name = name
 		exam.markingWorkflow = markingWorkflow
 
@@ -92,6 +93,7 @@ trait ExamState extends UpdatesStudentMembership {
 		for (group <- assessmentGroups.asScala if group.exam == null) {
 			group.exam = exam
 		}
+		exam.members.copyFrom(members)
 	}
 
 }
@@ -107,7 +109,7 @@ trait AddExamCommandDescription extends Describable[Exam] {
 
 trait ExamValidation extends SelfValidating {
 
-	self: ExamState with AssessmentServiceComponent =>
+	self: ExamState with AssessmentServiceComponent with UserLookupComponent =>
 
 	override def validate(errors: Errors) {
 
@@ -119,6 +121,20 @@ trait ExamValidation extends SelfValidating {
 				errors.rejectValue("name", "exam.name.duplicate", Array(name), "")
 			}
 		}
+
+		def isValidUniID(userString: String) = {
+			UniversityId.isValid(userString) && userLookup.getUserByWarwickUniId(userString).isFoundUser
+		}
+
+		def isValidUserCode(userString: String) = {
+			val user = userLookup.getUserByUserId(userString)
+			user.isFoundUser && null != user.getWarwickId
+		}
+
+		val invalidUserStrings = massAddUsersEntries.filterNot(userString => isValidUniID(userString) || isValidUserCode(userString))
+		if (invalidUserStrings.nonEmpty) {
+			errors.rejectValue("massAddUsers", "userString.notfound.specified", Array(invalidUserStrings.mkString(", ")), "")
+		}
 	}
 }
 
@@ -126,7 +142,7 @@ trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGrou
 	self: ExamState with HasAcademicYear with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
 	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroup]] = Option(exam).map { _.upstreamAssessmentGroups }
-	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = None
+	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = None // Needs to be none as we're using massAddUsers for existing members
 
 	def updateAssessmentGroups() {
 		assessmentGroups = upstreamGroups.asScala.flatMap ( ug => {
@@ -153,4 +169,5 @@ trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGrou
 			uag <- assessmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
 		} yield new UpstreamGroup(ua, uag)
 	}
+
 }

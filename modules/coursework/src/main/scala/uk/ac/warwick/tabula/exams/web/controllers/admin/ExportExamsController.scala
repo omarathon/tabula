@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
 @Controller
-@RequestMapping(Array("/admin/module/{module}/{academicYear}/exams/{exam}"))
+@RequestMapping(Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}"))
 class ExportExamsController extends ExamsController with ExamExports  {
 
 	@RequestMapping(Array("/export.csv"))
@@ -23,7 +23,7 @@ class ExportExamsController extends ExamsController with ExamExports  {
 	) = {
 
 		val command = ViewExamCommand(module, academicYear, exam)
-		val results = command.apply();
+		val results = command.apply()
 		val writer = new StringWriter
 		val csvBuilder = new CSVBuilder(results.students, results, exam, module, academicYear)
 		val doc = new GoodCsvDocument(csvBuilder, null)
@@ -45,7 +45,7 @@ class ExportExamsController extends ExamsController with ExamExports  {
 	) = {
 
 		val command = ViewExamCommand(module, academicYear, exam)
-		val results = command.apply();
+		val results = command.apply()
 		new XMLBuilder(results.students, results, exam, module, academicYear).toXML
 	}
 
@@ -57,7 +57,7 @@ class ExportExamsController extends ExamsController with ExamExports  {
 	) = {
 
 		val command = ViewExamCommand(module, academicYear, exam)
-		val results = command.apply();
+		val results = command.apply()
 
 		val workbook = new ExcelBuilder(results.students, results, module).toXLSX
 		new ExcelView(module.code + "-" + exam.name + ".xlsx", workbook)

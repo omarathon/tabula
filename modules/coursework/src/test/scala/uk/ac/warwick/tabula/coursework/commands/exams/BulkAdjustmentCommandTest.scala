@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.{GradeBoundary, Assignment, FileAttachment, Assessment}
 import uk.ac.warwick.tabula.exams.commands.{BulkAdjustmentValidation, BulkAdjustmentCommand, BulkAdjustmentCommandState, BulkAdjustmentCommandBindListener}
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
-import uk.ac.warwick.tabula.services.GeneratesGradesFromMarks
+import uk.ac.warwick.tabula.services.{MaintenanceModeService, GeneratesGradesFromMarks}
 import uk.ac.warwick.tabula.{Fixtures, CurrentUser, Mockito, TestBase}
 
 class BulkAdjustmentCommandTest extends TestBase with Mockito {
@@ -28,6 +28,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
 			override def spreadsheetHelper = mockSpreadsheetHelper
 		}
 		val file = new UploadedFile
+		file.maintenanceMode = smartMock[MaintenanceModeService]
 		val attachment = new FileAttachment
 		attachment.name = "file.xlsx"
 		file.attached.add(attachment)

@@ -8,7 +8,9 @@ import org.hibernate.annotations.{Filter, FilterDef, BatchSize, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.forms._
+import uk.ac.warwick.tabula.services.UserGroupCacheManager
 
 import scala.collection.JavaConverters._
 
@@ -24,6 +26,7 @@ object Exam {
 class Exam
 	extends Assessment
 	with ToEntityReference
+	with PostLoadBehaviour
 	with Serializable {
 
 	type Entity = Exam
@@ -88,6 +91,31 @@ class Exam
 
 	override def addDefaultFields() {
 		addDefaultFeedbackFields()
+	}
+
+	// Used for ad-hoc students
+	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
+	@JoinColumn(name = "membersgroup_id")
+	private var _members: UserGroup = UserGroup.ofUsercodes
+
+	def members: UnspecifiedTypeUserGroup = {
+		Option(_members).map {
+			new UserGroupCacheManager(_, assessmentMembershipService.examManualMembershipHelper)
+		}.orNull
+	}
+
+	def members_=(group: UserGroup) {
+		_members = group
+	}
+
+	// TAB-1446 If hibernate sets members to null, make a new empty usergroup
+	override def postLoad() {
+		ensureMembersGroup
+	}
+
+	def ensureMembersGroup = {
+		if (_members == null) _members = UserGroup.ofUsercodes
+		_members
 	}
 
 	def requiresMarks: Int = {
