@@ -14,21 +14,21 @@ import collection.JavaConverters._
  * Generates a template spreadsheet for agent upload based on the POSTed values
  * rather than the persisted existing relationships
  */
-object TransientStudentRelationshipTemplateCommand {
+object OldTransientStudentRelationshipTemplateCommand {
 	def apply(department: Department, relationshipType: StudentRelationshipType) =
-		new TransientStudentRelationshipTemplateCommandInternal(department, relationshipType)
+		new OldTransientStudentRelationshipTemplateCommandInternal(department, relationshipType)
 			with AutowiringProfileServiceComponent
 			with ComposableCommand[ExcelView]
-			with TransientStudentRelationshipTemplatePermissions
-			with TransientStudentRelationshipTemplateCommandState
+			with OldTransientStudentRelationshipTemplatePermissions
+			with OldTransientStudentRelationshipTemplateCommandState
 			with ReadOnly with Unaudited
 }
 
 
-class TransientStudentRelationshipTemplateCommandInternal(val department: Department, val relationshipType: StudentRelationshipType)
+class OldTransientStudentRelationshipTemplateCommandInternal(val department: Department, val relationshipType: StudentRelationshipType)
 	extends CommandInternal[ExcelView] with GeneratesStudentRelationshipWorkbook {
 
-	self: TransientStudentRelationshipTemplateCommandState with ProfileServiceComponent =>
+	self: OldTransientStudentRelationshipTemplateCommandState with ProfileServiceComponent =>
 
 	override def applyInternal() = {
 		// Transform into a list of (Member, Seq[Member]) pairs
@@ -55,9 +55,9 @@ class TransientStudentRelationshipTemplateCommandInternal(val department: Depart
 
 }
 
-trait TransientStudentRelationshipTemplatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+trait OldTransientStudentRelationshipTemplatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: TransientStudentRelationshipTemplateCommandState =>
+	self: OldTransientStudentRelationshipTemplateCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
@@ -65,7 +65,7 @@ trait TransientStudentRelationshipTemplatePermissions extends RequiresPermission
 
 }
 
-trait TransientStudentRelationshipTemplateCommandState {
+trait OldTransientStudentRelationshipTemplateCommandState {
 	def department: Department
 	def relationshipType: StudentRelationshipType
 

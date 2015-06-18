@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-	<#assign formDestination><@routes.relationship_allocate department relationshipType /></#assign>
+	<#assign formDestination><@routes.relationship_allocate_old department relationshipType /></#assign>
 	<#assign mappingById=allocateStudentsToRelationshipCommand.mappingById />
 
 

@@ -126,4 +126,4 @@ object Aliasable {
 	}
 }
 
-case class AliasAndJoinType(alias: String, joinType: JoinType = JoinType.INNER_JOIN)
+case class AliasAndJoinType(alias: String, joinType: JoinType = JoinType.INNER_JOIN, withClause: Criterion = null)

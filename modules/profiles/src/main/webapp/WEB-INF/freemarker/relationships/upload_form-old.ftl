@@ -27,7 +27,7 @@
 		This will be prefilled with the names and University ID numbers of students and their ${relationshipType.agentRole} (if they have one) in ${department.name}. In Excel you may need to <a href="http://office.microsoft.com/en-gb/excel-help/what-is-protected-view-RZ101665538.aspx?CTT=1&section=7">exit protected view</a> to edit the spreadsheet.
 		<br /><br />
 		<div class="alert alert-info">
-			<p>This will include any changes made in the drag and drop tab. You can also <a href="<@routes.relationship_template department relationshipType />">download a template without these changes</a>.</p>
+			<p>This will include any changes made in the drag and drop tab. You can also <a href="<@routes.relationship_template_old department relationshipType />">download a template without these changes</a>.</p>
 			<p>Any students with multiple existing tutors will <strong>not</strong> be included in the spreadsheet, as only 1 tutor can be assigned per student using this method.</p>
 		</div>
 	</li>

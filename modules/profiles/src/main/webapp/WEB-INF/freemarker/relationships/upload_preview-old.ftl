@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-	<#assign formDestination><@routes.relationship_allocate department relationshipType /></#assign>
+	<#assign formDestination><@routes.relationship_allocate_old department relationshipType /></#assign>
 	<#assign mappingById=allocateStudentsToRelationshipCommand.mappingById />
 
 	<@spring.bind path="allocateStudentsToRelationshipCommand">
@@ -19,7 +19,7 @@
 				<button type="submit" class="btn btn-primary">Continue</button>
 			</#if>
 
-			<a class="btn" href="<@routes.relationship_allocate department relationshipType />">Cancel</a>
+			<a class="btn" href="<@routes.relationship_allocate_old department relationshipType />">Cancel</a>
 		</div>
 
 		<#if hasErrors>

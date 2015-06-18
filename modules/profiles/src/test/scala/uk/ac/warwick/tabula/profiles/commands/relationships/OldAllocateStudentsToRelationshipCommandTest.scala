@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.{MaintenanceModeService, RelationshipServic
 import uk.ac.warwick.tabula.data.model.{StudentRelationship, StudentRelationshipType}
 import org.springframework.validation.BindException
 
-class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
+class OldAllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 
 	EventHandling.enabled = false
 
@@ -68,7 +68,7 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 		val maintenanceModeService = mock[MaintenanceModeService]
 		maintenanceModeService.enabled returns false
 
-		val cmd = new AllocateStudentsToRelationshipCommand(department, relationshipType, currentUser)
+		val cmd = new OldAllocateStudentsToRelationshipCommand(department, relationshipType, currentUser)
 		cmd.relationshipService = relationshipService
 		cmd.profileService = profileService
 		cmd.maintenanceMode = maintenanceModeService

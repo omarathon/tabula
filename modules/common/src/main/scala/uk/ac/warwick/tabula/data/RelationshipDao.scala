@@ -2,9 +2,11 @@ package uk.ac.warwick.tabula.data
 
 import org.hibernate.FetchMode
 import org.hibernate.criterion.{Order, Projections, Restrictions}
+import org.hibernate.sql.JoinType
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.{StudentAssociationEntityData, StudentAssociationData}
 import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, _}
 import uk.ac.warwick.tabula.helpers.Logging
 
@@ -44,6 +46,14 @@ trait RelationshipDao {
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
 	def getAllPastAndPresentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 	def isAgent(usercode:String): Boolean
+	def getStudentAssociationData(restrictions: Iterable[ScalaRestriction]): Seq[StudentAssociationData]
+	def getStudentAssociationEntityData(
+		department: Department,
+		relationshipType: StudentRelationshipType,
+		studentData: Seq[StudentAssociationData],
+		additionalEntityIds: Seq[String]
+	): Seq[StudentAssociationEntityData]
+	def listCurrentRelationshipsWithAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
 }
 
 @Repository
@@ -313,7 +323,156 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			.add( Restrictions.or(
 			Restrictions.isNull("endDate"),
 			Restrictions.ge("endDate", new DateTime())
-		))
-			.project[Number](rowCount()).uniqueResult.get.intValue() >0
-}
+		)).project[Number](rowCount()).uniqueResult.get.intValue() > 0
 
+	def getStudentAssociationData(restrictions: Iterable[ScalaRestriction]): Seq[StudentAssociationData] = {
+		val criteria = session.newCriteria[StudentMember]
+		restrictions.foreach { _.apply(criteria) }
+		criteria.createAlias("mostSignificantCourse", "mostSignificantCourse")
+			.createAlias("mostSignificantCourse.course", "course")
+			.createAlias("mostSignificantCourse.route", "route", JoinType.LEFT_OUTER_JOIN)
+			.createAlias("mostSignificantCourse.studentCourseYearDetails", "scyd", JoinType.LEFT_OUTER_JOIN)
+			.addOrder(Order.asc("lastName"))
+			.addOrder(Order.asc("firstName"))
+			.project[Array[java.lang.Object]](Projections.projectionList()
+				.add(groupProperty("universityId"))
+				.add(groupProperty("firstName"))
+				.add(groupProperty("lastName"))
+				.add(groupProperty("course.code"))
+				.add(groupProperty("route.code"))
+				.add(max("scyd.yearOfStudy"))
+			)
+			.seq
+			.map(r => StudentAssociationData(
+				r(0).asInstanceOf[String],
+				Option(r(1)).map(_.asInstanceOf[String]).getOrElse(""),
+				Option(r(2)).map(_.asInstanceOf[String]).getOrElse(""),
+				CourseType.fromCourseCode(r(3).asInstanceOf[String]),
+				Option(r(4)).map(_.asInstanceOf[String]).getOrElse(""),
+				Option(r(5)).map(_.asInstanceOf[Int]).getOrElse(0)
+			))
+	}
+
+	def getStudentAssociationEntityData(
+		department: Department,
+		relationshipType: StudentRelationshipType,
+		studentData: Seq[StudentAssociationData],
+		additionalEntityIds: Seq[String]
+	): Seq[StudentAssociationEntityData] = {
+
+		case class StudentAssociationEntityDataSingle(
+			entityId: String,
+			displayName: String,
+			isHomeDepartment: Option[Boolean],
+			capacity: Option[Int],
+			student: StudentAssociationData
+		)
+
+		val memberAssociations = session.newCriteria[MemberStudentRelationship]
+			.createAlias("_agentMember", "member")
+			.createAlias("studentCourseDetails", "course")
+			.add(Restrictions.and(
+				Restrictions.eq("relationshipType", relationshipType),
+				Restrictions.or(
+					Restrictions.isNull("endDate"),
+					Restrictions.gt("endDate", DateTime.now)
+				)
+			))
+			.add(safeIn("course.student.universityId", studentData.map(_.universityId)))
+			.project[Array[java.lang.Object]](Projections.projectionList()
+				.add(property("member.universityId"))
+				.add(property("member.firstName"))
+				.add(property("member.lastName"))
+				.add(property("member.homeDepartment.id"))
+				.add(property("course.student.universityId"))
+			)
+			.seq
+			.map(r => StudentAssociationEntityDataSingle(
+				r(0).asInstanceOf[String],
+				Seq(r(1).asInstanceOf[String], r(2).asInstanceOf[String]).mkString(" "),
+				Option(r(3)).map(_.asInstanceOf[String] == department.id),
+				None,
+				studentData.find(_.universityId == r(4).asInstanceOf[String]).get
+			))
+
+		val externalAssociations = session.newCriteria[ExternalStudentRelationship]
+			.createAlias("studentCourseDetails", "course")
+			.add(Restrictions.and(
+				Restrictions.eq("relationshipType", relationshipType),
+				Restrictions.or(
+					Restrictions.isNull("endDate"),
+					Restrictions.gt("endDate", DateTime.now)
+				)
+			))
+			.add(safeIn("course.student.universityId", studentData.map(_.universityId)))
+			.project[Array[java.lang.Object]](Projections.projectionList()
+				.add(property("_agentName"))
+				.add(property("course.student.universityId"))
+			)
+			.seq
+			.map(r => StudentAssociationEntityDataSingle(
+				r(0).asInstanceOf[String],
+				r(0).asInstanceOf[String],
+				None,
+				None,
+				studentData.find(_.universityId == r(4).asInstanceOf[String]).get
+			))
+
+		val dbEntities = (memberAssociations ++ externalAssociations).groupBy(_.entityId).values.map(entityList => StudentAssociationEntityData(
+			entityList.head.entityId,
+			entityList.head.displayName,
+			entityList.head.isHomeDepartment,
+			entityList.head.capacity,
+			entityList.map(_.student)
+		)).toSeq
+
+		val additionalEntities = if (additionalEntityIds.isEmpty) {
+			Seq()
+		} else {
+			session.newCriteria[Member]
+				.add(safeIn("universityId", additionalEntityIds))
+				.project[Array[java.lang.Object]](Projections.projectionList()
+					.add(property("universityId"))
+					.add(property("firstName"))
+					.add(property("lastName"))
+					.add(property("homeDepartment.id"))
+				)
+				.seq
+				.map(r => StudentAssociationEntityData(
+					r(0).asInstanceOf[String],
+					Seq(r(1).asInstanceOf[String], r(2).asInstanceOf[String]).mkString(" "),
+					Option(r(3)).map(_.asInstanceOf[String] == department.id),
+					None,
+					Nil
+				))
+		}
+
+		dbEntities ++ additionalEntities
+	}
+
+	def listCurrentRelationshipsWithAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship] = {
+		val memberRelationships = session.newCriteria[MemberStudentRelationship]
+			.createAlias("studentCourseDetails", "studentCourseDetails")
+			.createAlias("studentCourseDetails.student", "student")
+			.setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
+			.add(is("_agentMember.universityId", agentId))
+			.add(is("relationshipType", relationshipType))
+			.add(Restrictions.or(
+				Restrictions.isNull("endDate"),
+				Restrictions.ge("endDate", new DateTime())
+			)).seq
+
+		val externalRelationships = session.newCriteria[ExternalStudentRelationship]
+			.createAlias("studentCourseDetails", "studentCourseDetails")
+			.createAlias("studentCourseDetails.student", "student")
+			.setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
+			.add(is("_agentName", agentId))
+			.add(is("relationshipType", relationshipType))
+			.add(Restrictions.or(
+				Restrictions.isNull("endDate"),
+				Restrictions.ge("endDate", new DateTime())
+			)).seq
+
+		memberRelationships ++ externalRelationships
+	}
+}

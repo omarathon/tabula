@@ -1,0 +1,77 @@
+@import "css3.less";
+@import "bootstrap/variables.less";
+
+#main-content .allocate-associations {
+	table.scrollable-tbody {
+		table-layout: fixed;
+
+		thead {
+			display: block;
+		}
+
+		tbody {
+			display: block;
+			overflow: auto;
+			width: 100%;
+			max-height: 450px;
+		}
+
+		.check {
+			width: 5px;
+			padding-right: 5px;
+		}
+
+		.single-name {
+			width: 150px;
+			&.sortable {
+				width: 135px;
+			}
+		}
+
+		.universityid {
+			width: 70px;
+			&.sortable {
+				width: 68px;
+			}
+		}
+
+		.full-name {
+			width: 260px;
+			&.sortable {
+				width: 245px;
+			}
+		}
+
+		.counter {
+			width: 85px;
+			&.sortable {
+				width: 70px;
+			}
+		}
+
+		.edit {
+			width: 36px;
+			padding-right: 5px;
+		}
+
+		.icon-edit {
+			.cursor-pointer()
+		}
+
+		button.btn-link {
+			padding: 0;
+			color: @tabulaRedDark;
+			.cursor-pointer();
+			.icon-remove {
+				margin-left: -4px;
+			}
+			&:hover {
+				text-decoration: none;
+			}
+		}
+	}
+}
+
+details .relationship-change-summary {
+	line-height: 2em;
+}

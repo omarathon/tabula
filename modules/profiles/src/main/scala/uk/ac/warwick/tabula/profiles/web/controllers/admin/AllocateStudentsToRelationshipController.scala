@@ -1,87 +1,130 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.admin
 
-import javax.validation.Valid
-
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.{Member, Department, StudentRelationshipType}
-import uk.ac.warwick.tabula.profiles.commands.relationships.{TransientStudentRelationshipTemplateCommand, AllocateStudentsToRelationshipCommand}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, StudentAssociationResult}
+import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
+import uk.ac.warwick.tabula.profiles.commands.relationships._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
-import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.ExcelView
 
-import scala.collection.JavaConverters._
-import scala.collection.immutable.ListMap
-
-/**
- * Allocates students to relationships in a department.
- */
 @Controller
 @RequestMapping(value=Array("/department/{department}/{relationshipType}/allocate"))
 class AllocateStudentsToRelationshipController extends ProfilesController {
-	
-	validatesSelf[AllocateStudentsToRelationshipCommand]
-	
-	@ModelAttribute
-	def command(@PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) = 
-		new AllocateStudentsToRelationshipCommand(department, relationshipType, user)
+
+	@ModelAttribute("commandActions")
+	def commandActions = FetchDepartmentRelationshipInformationCommand.Actions
+
+	@ModelAttribute("allocationTypes")
+	def allocationTypes = ExtractRelationshipsFromFileCommand.AllocationTypes
+
+	@ModelAttribute("command")
+	def command(@PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) =
+		FetchDepartmentRelationshipInformationCommand(mandatory(department), mandatory(relationshipType))
+
+	@ModelAttribute("uploadCommand")
+	def uploadCommand(@PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) =
+		ExtractRelationshipsFromFileCommand(mandatory(department), mandatory(relationshipType))
 
 	@RequestMapping
-	def showForm(cmd: AllocateStudentsToRelationshipCommand) = {
-		cmd.populate()
-		form(cmd)
-	}
-	
-	@RequestMapping(method=Array(POST), params=Array("action=refresh"))
-	def form(cmd: AllocateStudentsToRelationshipCommand) = {
-		cmd.sort()
-		Mav("relationships/allocate")
-	}
-	
-	@RequestMapping(method = Array(POST), params = Array("doPreviewSpreadsheetUpload", "action!=refresh"))
-	def previewFileUpload(@PathVariable("department") department: Department, @Valid cmd: AllocateStudentsToRelationshipCommand, errors: Errors): Mav = {
-		if (errors.hasErrors && errors.getFieldErrors.asScala.exists { _.getCode == "file.wrongtype.one" }) {
-			form(cmd)
-		} else {
-			Mav("relationships/upload_preview")
-		}
+	def home(@ModelAttribute("command") cmd: Appliable[StudentAssociationResult], @PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) = {
+		val results = cmd.apply()
+		Mav("relationships/allocate",
+			"unallocated" -> results.unallocated,
+			"allocated" -> results.allocated
+		)
 	}
 
-	@RequestMapping(method=Array(POST), params=Array("confirmed", "action!=refresh"))
-	def submit(@Valid cmd: AllocateStudentsToRelationshipCommand, errors: Errors): Mav = {
+}
+
+@Controller
+@RequestMapping(value=Array("/department/{department}/{relationshipType}/allocate/template"))
+class AllocateStudentsToRelationshipTemplateController extends ProfilesController {
+
+	@ModelAttribute("templateCommand")
+	def templateCommand(@PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) =
+		StudentRelationshipTemplateCommand(mandatory(department), mandatory(relationshipType))
+
+	@RequestMapping
+	def template(@ModelAttribute("templateCommand") cmd: Appliable[ExcelView]) = cmd.apply()
+
+}
+
+@Controller
+@RequestMapping(value=Array("/department/{department}/{relationshipType}/allocate/upload"))
+class AllocateStudentsToRelationshipUploadController extends ProfilesController {
+
+	validatesSelf[SelfValidating]
+
+	@ModelAttribute("command")
+	def command(@PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) =
+		ExtractRelationshipsFromFileCommand(mandatory(department), mandatory(relationshipType))
+
+	@ModelAttribute("templateCommand")
+	def templateCommand(@PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) =
+		StudentRelationshipTemplateCommand(mandatory(department), mandatory(relationshipType))
+
+	@ModelAttribute("allocationTypes")
+	def allocationTypes = ExtractRelationshipsFromFileCommand.AllocationTypes
+
+	@RequestMapping(method = Array(POST))
+	def home(
+		@ModelAttribute("command") cmd: Appliable[Seq[ExtractRelationshipsFromFileCommandRow]],
+		errors: Errors,
+		@PathVariable department: Department,
+		@PathVariable relationshipType: StudentRelationshipType
+	) = {
 		if (errors.hasErrors) {
-			form(cmd)
+			Mav("relationships/allocate_upload")
 		} else {
-			cmd.apply()
-			Redirect(Routes.relationships(cmd.department, cmd.relationshipType))
-		}
-	}
-
-	@RequestMapping(method=Array(POST), params=Array("action!=refresh"))
-	def seekConfirmation(@Valid cmd: AllocateStudentsToRelationshipCommand, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			form(cmd)
-		} else {
-
-			val changed = cmd.studentsWithTutorChanged.map { case (student, tutorInfo) => (student.universityId , tutorInfo.tutorsAfter.toSeq) }
-			val added = cmd.studentsWithTutorAdded.map { case (student, tutorInfo) => (student.universityId , tutorInfo.tutorsAfter.toSeq) }
-
-			Mav("relationships/seek_confirmation",
-				"studentNameMap" -> cmd.studentsWithTutorChangedOrAdded.map { case (student, tutorInfo) => (student.universityId, student.fullName)},
-				"changed" -> changed,
-				"added" -> added
+			val result = cmd.apply()
+			val validRows = result.filterNot(_.error.hasText).sortBy(_.studentId)
+			val invalidRows = result.filter(_.error.hasText).sortBy(_.studentId)
+			Mav("relationships/allocate_upload",
+				"validRows" -> validRows,
+				"invalidRows" -> invalidRows
 			)
 		}
 	}
 
-	@ModelAttribute("templateCommand")
-	def templateCommand(@PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) =
-		TransientStudentRelationshipTemplateCommand(department, relationshipType)
-
-	@RequestMapping(method=Array(POST), params=Array("template", "!action"))
+	@RequestMapping(method = Array(POST), params = Array("templateWithChanges"))
 	def template(@ModelAttribute("templateCommand") cmd: Appliable[ExcelView]) = cmd.apply()
+
+}
+
+@Controller
+@RequestMapping(value=Array("/department/{department}/{relationshipType}/allocate/preview"))
+class AllocateStudentsToRelationshipPreviewController extends ProfilesController {
+
+	validatesSelf[SelfValidating]
+
+	@ModelAttribute("command")
+	def command(@PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) =
+		AllocateStudentsToRelationshipCommand(mandatory(department), mandatory(relationshipType), user)
+
+	@ModelAttribute("allocationTypes")
+	def allocationTypes = ExtractRelationshipsFromFileCommand.AllocationTypes
+
+	@RequestMapping(method = Array(POST), params = Array("!confirm"))
+	def form(@ModelAttribute("command") cmd: Appliable[AllocateStudentsToRelationshipCommand.Result], @PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) = {
+		Mav("relationships/allocate_preview")
+	}
+
+	@RequestMapping(method = Array(POST), params = Array("confirm"))
+	def submit(
+		@ModelAttribute("command") cmd: Appliable[AllocateStudentsToRelationshipCommand.Result],
+		errors: Errors,
+		@PathVariable department: Department,
+		@PathVariable relationshipType: StudentRelationshipType
+	) = {
+		if (errors.hasErrors) {
+			form(cmd, department, relationshipType)
+		} else {
+			cmd.apply()
+			Redirect(Routes.relationships(department, relationshipType))
+		}
+	}
 
 }
