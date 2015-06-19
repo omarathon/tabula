@@ -1,25 +1,26 @@
 package uk.ac.warwick.tabula.groups.commands.admin.reusable
 
-import java.io.{FileInputStream, InputStream}
+import java.io.FileInputStream
 
 import org.springframework.validation.{BindException, BindingResult}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet}
-import uk.ac.warwick.tabula.data.model.{FileAttachment, UserGroup, UnspecifiedTypeUserGroup}
+import uk.ac.warwick.tabula.data.model.{FileAttachment, UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.groups.services.docconversion.{AllocateStudentItem, GroupsExtractor, GroupsExtractorComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{UserLookupComponent, UserGroupCacheManager, SmallGroupServiceComponent, SmallGroupService}
-import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
 
 class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends SmallGroupServiceComponent with AllocateStudentsToDepartmentalSmallGroupsSorting {
-		val smallGroupService = mock[SmallGroupService]
+		val smallGroupService = smartMock[SmallGroupService]
 	}
 
 	private trait Fixture {
@@ -37,31 +38,31 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 		wireUserLookup(set.members)
 
 		val user1 = new User("cuscav")
-		user1.setFoundUser(true)
+		user1.setFoundUser{true}
 		user1.setFirstName("Mathew")
 		user1.setLastName("Mannion")
 		user1.setWarwickId("0672089")
 
 		val user2 = new User("cusebr")
-		user2.setFoundUser(true)
+		user2.setFoundUser{true}
 		user2.setFirstName("Nick")
 		user2.setLastName("Howes")
 		user2.setWarwickId("0672088")
 
 		val user3 = new User("cusfal")
-		user3.setFoundUser(true)
+		user3.setFoundUser{true}
 		user3.setFirstName("Matthew")
 		user3.setLastName("Jones")
 		user3.setWarwickId("9293883")
 
 		val user4 = new User("curef")
-		user4.setFoundUser(true)
+		user4.setFoundUser{true}
 		user4.setFirstName("John")
 		user4.setLastName("Dale")
 		user4.setWarwickId("0200202")
 
 		val user5 = new User("cusmab")
-		user5.setFoundUser(true)
+		user5.setFoundUser{true}
 		user5.setFirstName("Steven")
 		user5.setLastName("Carpenter")
 		user5.setWarwickId("8888888")
@@ -129,7 +130,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 				with PopulateAllocateStudentsToDepartmentalSmallGroupsCommand
 	}
 
-	@Test def apply { new CommandFixture {
+	@Test def apply() { new CommandFixture {
 		command.unallocated should be(JList())
 		command.mapping should be(JMap(group1 -> JArrayList(), group2 -> JArrayList()))
 
@@ -163,17 +164,17 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 				with AllocateStudentsToDepartmentalSmallGroupsValidation
 	}
 
-	@Test def validatePasses { new ValidationFixture {
+	@Test def validatePasses() { new ValidationFixture {
 		command.populate()
 		command.sort()
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
-		errors.hasErrors should be (false)
+		errors.hasErrors should be {false}
 	}}
 
-	@Test def validateCantSubmitUnrelatedGroup { new ValidationFixture {
+	@Test def validateCantSubmitUnrelatedGroup() { new ValidationFixture {
 		command.populate()
 		command.sort()
 
@@ -186,7 +187,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
-		errors.hasErrors should be (true)
+		errors.hasErrors should be {true}
 		errors.getErrorCount should be (1)
 		errors.getGlobalError.getCodes should contain ("smallGroup.allocation.groups.invalid")
 	}}
@@ -202,11 +203,11 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 			val userLookup = FileUploadSupportFixture.this.userLookup
 		}
 
-		command.smallGroupService.getDepartmentSmallGroupById(group1.id) returns (Some(group1))
-		command.smallGroupService.getDepartmentSmallGroupById(group2.id) returns (Some(group2))
+		command.smallGroupService.getDepartmentSmallGroupById(group1.id) returns Some(group1)
+		command.smallGroupService.getDepartmentSmallGroupById(group2.id) returns Some(group2)
 	}
 
-	@Test def fileUploadSupport { new FileUploadSupportFixture {
+	@Test def fileUploadSupport() { new FileUploadSupportFixture {
 		command.populate()
 		command.sort()
 
@@ -216,22 +217,23 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 
 		val file = new UploadedFile
 		file.attached.add(attachment)
+		file.maintenanceMode = smartMock[MaintenanceModeService]
 		command.file = file
 
-		command.groupsExtractor.readXSSFExcelFile(any[FileInputStream]) returns (Seq(
+		command.groupsExtractor.readXSSFExcelFile(any[FileInputStream]) returns Seq(
 			new AllocateStudentItem(user1.getWarwickId, group1.id),
 			new AllocateStudentItem(user2.getWarwickId, group1.id),
 			new AllocateStudentItem(user3.getWarwickId, group2.id),
 			new AllocateStudentItem(user4.getWarwickId, group2.id),
 			new AllocateStudentItem(user5.getWarwickId, null)
-		).toList.asJava)
+		).toList.asJava
 
 		command.onBind(mock[BindingResult])
 
 		command.mapping should be(JMap(group1 -> JArrayList(user1, user2), group2 -> JArrayList(user3, user4)))
 	}}
 
-	@Test def validateUploadedFilePasses { new FileUploadSupportFixture {
+	@Test def validateUploadedFilePasses() { new FileUploadSupportFixture {
 		val attachment = new FileAttachment
 		attachment.file = createTemporaryFile()
 		attachment.name = "file.xlsx" // We only accept xlsx
@@ -243,10 +245,10 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 		val errors = new BindException(command, "command")
 		command.validateUploadedFile(errors)
 
-		errors.hasErrors should be (false)
+		errors.hasErrors should be {false}
 	}}
 
-	@Test def validateUploadedFileWrongExtension { new FileUploadSupportFixture {
+	@Test def validateUploadedFileWrongExtension() { new FileUploadSupportFixture {
 		val attachment = new FileAttachment
 		attachment.file = createTemporaryFile()
 		attachment.name = "file.xls" // We only accept xlsx
@@ -258,13 +260,13 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 		val errors = new BindException(command, "command")
 		command.validateUploadedFile(errors)
 
-		errors.hasErrors should be (true)
+		errors.hasErrors should be {true}
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("file")
 		errors.getFieldError.getCodes should contain ("file.wrongtype.one")
 	}}
 
-	@Test def permissions { new Fixture {
+	@Test def permissions() { new Fixture {
 		val (theDepartment, theSet) = (department, set)
 		val command = new AllocateStudentsToDepartmentalSmallGroupsPermissions with AllocateStudentsToDepartmentalSmallGroupsCommandState {
 			val department = theDepartment
@@ -278,7 +280,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Allocate, set)
 	}}
 
-	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {
+	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment() {
 		val command = new AllocateStudentsToDepartmentalSmallGroupsPermissions with AllocateStudentsToDepartmentalSmallGroupsCommandState {
 			val department = null
 			val set = new DepartmentSmallGroupSet
@@ -289,7 +291,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 		command.permissionsCheck(checking)
 	}
 
-	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
+	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet() {
 		val command = new AllocateStudentsToDepartmentalSmallGroupsPermissions with AllocateStudentsToDepartmentalSmallGroupsCommandState {
 			val department = Fixtures.department("in")
 			val set = null
@@ -300,7 +302,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 		command.permissionsCheck(checking)
 	}
 
-	@Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
+	@Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet() {
 		val command = new AllocateStudentsToDepartmentalSmallGroupsPermissions with AllocateStudentsToDepartmentalSmallGroupsCommandState {
 			val department = Fixtures.department("in")
 			department.id = "set id"
@@ -313,7 +315,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 		command.permissionsCheck(checking)
 	}
 
-	@Test def describe { new Fixture {
+	@Test def describe() { new Fixture {
 		val (dept, s) = (department, set)
 		val command = new AllocateStudentsToDepartmentalSmallGroupsDescription with AllocateStudentsToDepartmentalSmallGroupsCommandState {
 			override val eventName = "test"
@@ -331,7 +333,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 		))
 	}}
 
-	@Test def wires { new Fixture { withUser("cuscav") {
+	@Test def wires() { new Fixture { withUser("cuscav") {
 		val command = AllocateStudentsToDepartmentalSmallGroupsCommand(department, set, currentUser)
 
 		command should be (anInstanceOf[Appliable[Seq[DepartmentSmallGroup]]])

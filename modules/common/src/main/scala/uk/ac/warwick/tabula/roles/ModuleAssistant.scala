@@ -31,8 +31,10 @@ case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
 		Extension.Delete,
 
 		AssignmentFeedback.Manage,
+		AssignmentFeedback.DownloadMarksTemplate,
 		AssignmentMarkerFeedback.Manage,
 		ExamFeedback.Manage,
+		ExamFeedback.DownloadMarksTemplate,
 		ExamMarkerFeedback.Manage,
 
 		SmallGroups.Create,

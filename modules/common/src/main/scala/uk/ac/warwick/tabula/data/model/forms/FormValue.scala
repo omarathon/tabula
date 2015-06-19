@@ -3,6 +3,10 @@ package uk.ac.warwick.tabula.data.model.forms
 /**
  * represents a submitted value.
  */
+
+import org.hibernate.annotations.Cascade
+import org.hibernate.annotations.CascadeType
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.FileDao
@@ -13,7 +17,6 @@ import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.BindingResult
 import javax.persistence._
 import javax.persistence.FetchType._
-import javax.persistence.CascadeType._
 
 /**
  * Base object for binding an individual submitted field from an assignment
@@ -89,7 +92,8 @@ class SavedFormValue extends GeneratedId {
 	/**
 	 * Optional, only for file fields
 	 */
-	@OneToMany(mappedBy = "submissionValue", fetch = LAZY, cascade=Array(ALL))
+	@OneToMany(mappedBy = "submissionValue", fetch = LAZY)
+	@Cascade(Array(CascadeType.PERSIST, CascadeType.MERGE, CascadeType.SAVE_UPDATE, CascadeType.REFRESH))
 	var attachments: JSet[FileAttachment] = JSet()
 
 	def hasAttachments = attachments != null && !attachments.isEmpty

@@ -30,6 +30,7 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
 			absenceType = anAbsenceType
 			override val user = new CurrentUser(new User, new User)
 		}
+		command.file.maintenanceMode = smartMock[MaintenanceModeService]
 
 		val errors = new BindException(command, "command")
 
@@ -41,7 +42,7 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
 
 	@Test
 	def onBindNoExistingCheckpoints() { new Fixture {
-		command.attendanceMonitoringService.getAttendanceNote(command.student, command.point) returns (Option(command.attendanceNote))
+		command.attendanceMonitoringService.getAttendanceNote(command.student, command.point) returns Option(command.attendanceNote)
 		command.attendanceMonitoringService.getCheckpoints(Seq(command.point), command.student) returns Map()
 		command.onBind(errors)
 		command.checkpoint should be (null)
@@ -50,8 +51,8 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
 	@Test
 	def onBindExistingCheckpoints() { new Fixture {
 		val aCheckpoint = new AttendanceMonitoringCheckpoint
-		command.attendanceMonitoringService.getAttendanceNote(command.student, command.point) returns (Option(command.attendanceNote))
-		command.attendanceMonitoringService.getCheckpoints(Seq(command.point), command.student) returns (Map(command.point -> aCheckpoint))
+		command.attendanceMonitoringService.getAttendanceNote(command.student, command.point) returns Option(command.attendanceNote)
+		command.attendanceMonitoringService.getCheckpoints(Seq(command.point), command.student) returns Map(command.point -> aCheckpoint)
 		command.onBind(errors)
 		command.checkpoint should be (aCheckpoint)
 	}}
@@ -68,14 +69,14 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
 	def validateNullAbsenceType() { new Fixture {
 		validator.absenceType = null
 		validator.validate(errors)
-		errors.hasFieldErrors("absenceType") should be (true)
+		errors.hasFieldErrors("absenceType") should be {true}
 	}}
 
 	@Test
 	def validateValidAbsenceType() { new Fixture {
 		validator.absenceType = AbsenceType.Academic
 		validator.validate(errors)
-		errors.hasFieldErrors("absenceType") should be (false)
+		errors.hasFieldErrors("absenceType") should be {false}
 	}}
 
 }

@@ -21,13 +21,8 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 
 	this.copyFrom(assignment)
 
-	def canUpdateMarkingWorkflow = {
-		Option(assignment.markingWorkflow) match {
-			// submissions exist then the markingWorkflow cannot be updated
-			case Some(scheme) => assignment.submissions.size() == 0
-			case None => true
-		}
-	}
+	// submissions exist then the markingWorkflow cannot be updated
+	def canUpdateMarkingWorkflow = assignment.submissions.size() == 0
 
 	override def validate(errors: Errors) {
 		super.validate(errors)
@@ -77,9 +72,10 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 		desc.properties(
 			"name" -> name,
 			"openDate" -> openDate,
-			"closeDate" -> closeDate
+			"closeDate" -> closeDate,
+			"removeWorkflow" -> removeWorkflow
 		)
-		if (!unapprovedExtensions.isEmpty) {
+		if (unapprovedExtensions.nonEmpty) {
 			desc.property(
 				"studentExtensionRequestsAutoRejected" -> unapprovedExtensions.map(_.universityId)
 			)

@@ -22,6 +22,8 @@ trait ValidatesMarkItem {
 
 	def checkMarkUpdated(mark: MarkItem)
 
+	def checkMarker(mark: MarkItem, errors: Errors, hasErrors: Boolean): Boolean = hasErrors
+
 	def validateMarkItem(mark: MarkItem, errors: Errors, newPerson: Boolean) = {
 
 		var hasErrors = false
@@ -41,6 +43,7 @@ trait ValidatesMarkItem {
 						hasErrors = true
 				}
 				checkMarkUpdated(mark: MarkItem)
+				hasErrors = checkMarker(mark, errors, hasErrors)
 			}
 		} else {
 			errors.rejectValue("universityId", "NotEmpty")
