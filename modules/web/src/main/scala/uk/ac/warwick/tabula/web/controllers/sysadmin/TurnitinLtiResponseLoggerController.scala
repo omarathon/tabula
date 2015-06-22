@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 
 @Controller
 @RequestMapping(value = Array("/api/turnitin-response"))
-class TurnitinTesterResponseController extends BaseSysadminController with Logging {
+class TurnitinLtiResponseLoggerController extends BaseSysadminController with Logging {
 
 	@annotation.RequestMapping(method=Array(POST))
 	def inspectResponse()(implicit request: HttpServletRequest, response: HttpServletResponse) {
@@ -18,5 +18,13 @@ class TurnitinTesterResponseController extends BaseSysadminController with Loggi
 		logger.info("request body: " + IOUtils.toString(request.getInputStream))
 		logger.info("isJsonRequest: " + request.isJsonRequest)
 	}
+
+	@annotation.RequestMapping(method=Array(GET))
+	def inspectGetResponse()(implicit request: HttpServletRequest, response: HttpServletResponse) {
+
+		logger.info("request body from GET: " + IOUtils.toString(request.getInputStream))
+		logger.info("isJsonRequest from GET: " + request.isJsonRequest)
+	}
+
 
 }
