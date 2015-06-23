@@ -6,6 +6,8 @@ import org.joda.time.DateTime
 @Entity
 class FileAttachmentToken extends GeneratedId {
 
+	val DefaultTokenValidityMinutes = 30
+
 	@Column(name="fileattachment_id")
 	var fileAttachmentId: String = _
 
@@ -15,7 +17,7 @@ class FileAttachmentToken extends GeneratedId {
 
 	def init(fileAttachment: FileAttachment): Unit = {
 		this.fileAttachmentId = fileAttachment.id
-		this.expires = new DateTime().plusMinutes(30)
+		this.expires = new DateTime().plusMinutes(DefaultTokenValidityMinutes)
 	}
 
 }

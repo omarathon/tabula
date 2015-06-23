@@ -31,7 +31,7 @@ class DownloadAttachmentByTokenCommand(
 
 	override def describe(d: Description) = {
 		d.submission(submission)
-		d.fileAttachments(fileAttachment)
+		d.fileAttachments(Seq(fileAttachment))
 	}
 
 	override def describeResult(d: Description) {

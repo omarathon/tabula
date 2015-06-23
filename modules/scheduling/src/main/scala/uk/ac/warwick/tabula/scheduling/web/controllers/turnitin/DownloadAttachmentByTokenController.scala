@@ -42,7 +42,3 @@ class DownloadAttachmentByTokenController extends BaseController with Logging {
 		}
 	}
 }
-
-object DownloadAttachmentByTokenController {
-	//val HashParam = "hash"
-}
