@@ -72,6 +72,7 @@ class FetchDepartmentRelationshipInformationCommandInternal(val department: Depa
 	}
 
 	protected def fetchResult: StudentAssociationResult = {
+		updateDbAllocated()
 		val (allocated, newUnallocated) = processAllocated
 		val unallocated = processUnallocated(dbUnallocated ++ newUnallocated)
 
@@ -181,9 +182,9 @@ class FetchDepartmentRelationshipInformationCommandInternal(val department: Depa
 					dbAllocated.find(_.entityId == thisEntity.entityId).get.students.map(_.universityId).contains(s)
 				)
 				if (additions.containsKey(thisEntity.entityId)) {
-					additions.put(thisEntity.entityId, (studentIdsToAdd ++ additions.get(thisEntity.entityId).asScala).asJava)
+					additions.put(thisEntity.entityId, JArrayList(studentIdsToAdd ++ additions.get(thisEntity.entityId).asScala))
 				} else {
-					additions.put(thisEntity.entityId, studentIdsToAdd.asJava)
+					additions.put(thisEntity.entityId, JArrayList(studentIdsToAdd))
 				}
 				if (removals.containsKey(thisEntity.entityId)) {
 					studentGroups.head.foreach(s => removals.get(thisEntity.entityId).remove(s.universityId))
@@ -212,9 +213,9 @@ class FetchDepartmentRelationshipInformationCommandInternal(val department: Depa
 				// Only add to removals if the association exists in the DB
 				if (dbAllocated.find(_.entityId == entity.entityId).get.students.map(_.universityId).contains(student.universityId)) {
 					if (removals.containsKey(entity.entityId)) {
-						removals.put(entity.entityId, (Seq(student.universityId) ++ removals.get(entity.entityId).asScala).asJava)
+						removals.put(entity.entityId, JArrayList(Seq(student.universityId) ++ removals.get(entity.entityId).asScala))
 					} else {
-						removals.put(entity.entityId, Seq(student.universityId).asJava)
+						removals.put(entity.entityId, JArrayList(student.universityId))
 					}
 				}
 				if (additions.containsKey(entity.entityId)) {
@@ -231,9 +232,9 @@ class FetchDepartmentRelationshipInformationCommandInternal(val department: Depa
 				dbAllocated.find(_.entityId == entity.entityId).get.students.map(_.universityId).contains(s)
 			)
 			if (removals.containsKey(entity.entityId)) {
-				removals.put(entity.entityId, (studentIdsToRemove ++ removals.get(entity.entityId).asScala).asJava)
+				removals.put(entity.entityId, JArrayList(studentIdsToRemove ++ removals.get(entity.entityId).asScala))
 			} else {
-				removals.put(entity.entityId, studentIdsToRemove.asJava)
+				removals.put(entity.entityId, JArrayList(studentIdsToRemove))
 			}
 			if (additions.containsKey(entity.entityId)) {
 				entity.students.foreach(s => additions.get(entity.entityId).remove(s.universityId))
@@ -274,7 +275,7 @@ trait FetchDepartmentRelationshipInformationCommandState {
 	def department: Department
 	def relationshipType: StudentRelationshipType
 
-	lazy val dbUnallocated = relationshipService.getStudentAssociationDataWithoutRelationship(department, relationshipType)
+	lazy val dbUnallocated = relationshipService.getStudentAssociationDataWithoutRelationship(department, relationshipType, Seq())
 	var dbAllocated: Seq[StudentAssociationEntityData] = Seq()
 	def updateDbAllocated(): Unit = {
 		dbAllocated = relationshipService.getStudentAssociationEntityData(department, relationshipType, Option(additionalEntities).map(_.asScala).getOrElse(Seq()))

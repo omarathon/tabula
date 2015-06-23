@@ -66,7 +66,7 @@
 		</table>
 	</#macro>
 
-	<details>
+	<details class="removals">
 		<summary class="large-chevron collapsible">
 			<h3 class="relationship-change-summary" style="display: inline;">
 				<span class="emphasis">${command.renderRemovals?keys?size}</span>
@@ -78,7 +78,7 @@
 		<@student_table command.renderRemovals />
 	</details>
 
-	<details>
+	<details class="additions">
 		<summary class="large-chevron collapsible">
 			<h3 class="relationship-change-summary" style="display: inline;">
 				<span class="emphasis">${command.renderAdditions?keys?size}</span>

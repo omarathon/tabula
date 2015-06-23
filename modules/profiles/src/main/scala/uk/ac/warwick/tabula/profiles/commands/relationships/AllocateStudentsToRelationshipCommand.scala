@@ -129,7 +129,7 @@ trait AllocateStudentsToRelationshipCommandRequest {
 
 	var additionalEntities: JList[String] = JArrayList()
 
-	lazy val dbUnallocated = relationshipService.getStudentAssociationDataWithoutRelationship(department, relationshipType)
+	lazy val dbUnallocated = relationshipService.getStudentAssociationDataWithoutRelationship(department, relationshipType, Seq())
 	lazy val dbAllocated = relationshipService.getStudentAssociationEntityData(department, relationshipType, additionalEntities.asScala)
 	lazy val allStudents = dbUnallocated ++ dbAllocated.flatMap(_.students).distinct
 
@@ -195,7 +195,11 @@ trait AllocateStudentsToRelationshipNotifications extends Notifies[AllocateStude
 				val additionsByStudent = commandResult.addedRelationships.groupBy(_.studentMember)
 				val allStudents: Set[StudentMember] = (removalsByStudent.keySet ++ additionsByStudent.keySet).flatten
 				allStudents.map { student =>
-					val notification = Notification.init(new BulkStudentRelationshipNotification, user.apparentUser, additionsByStudent.getOrElse(Some(student), Seq()))
+					val notification = Notification.init(
+						new BulkStudentRelationshipNotification,
+						user.apparentUser,
+						additionsByStudent.getOrElse(Some(student), Seq()) ++ removalsByStudent.getOrElse(Some(student), Seq())
+					)
 					notification.profileService = profileService // the auto-wired version is no good for testing
 					notification.oldAgentIds.value = removalsByStudent.getOrElse(Some(student), Seq()).map(_.agent)
 					notification

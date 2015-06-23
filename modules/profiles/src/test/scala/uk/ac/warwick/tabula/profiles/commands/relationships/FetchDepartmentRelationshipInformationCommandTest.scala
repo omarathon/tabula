@@ -1,39 +1,54 @@
 package uk.ac.warwick.tabula.profiles.commands.relationships
 
-import uk.ac.warwick.tabula.commands.{StudentAssociationData, StudentAssociationEntityData}
+import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.commands.{StudentAssociationEntityData, StudentAssociationData}
 import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent, RelationshipService, RelationshipServiceComponent}
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 import scala.collection.JavaConverters._
 
+trait StudentAssociationFixture {
+	val student1 = StudentAssociationData("1", "", "", null, null, 0)
+	val student2 = StudentAssociationData("2", "", "", null, null, 0)
+	val student3 = StudentAssociationData("3", "", "", null, null, 0)
+	val student4 = StudentAssociationData("4", "", "", null, null, 0)
+	val student5 = StudentAssociationData("5", "", "", null, null, 0)
+	val student6 = StudentAssociationData("6", "", "", null, null, 0)
+	val student7 = StudentAssociationData("7", "", "", null, null, 0)
+	val student8 = StudentAssociationData("8", "Fred", "Jones", null, null, 0)
+	val student9 = StudentAssociationData("9", "Samuel Jones", "Partington Smyth", null, null, 0)
+	val student10 = StudentAssociationData("10", "", "", null, null, 0)
+	val student11 = StudentAssociationData("11", "", "", null, null, 0)
+
+	val mockDbUnallocated = Seq(student8, student9, student10, student11)
+
+	val mockDbAllocated = Seq(
+		StudentAssociationEntityData("1", "Fred", null, null, Seq()),
+		StudentAssociationEntityData("2", "Jeff", null, null, Seq(student1, student2)),
+		StudentAssociationEntityData("3", "Steve", null, null, Seq(student3, student4)),
+		StudentAssociationEntityData("4", null, null, null, Seq(student5, student6, student7))
+	)
+}
+
 class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mockito {
 
-	trait Fixture {
-		val student1 = StudentAssociationData("1", "", "", null, null, 0)
-		val student2 = StudentAssociationData("2", "", "", null, null, 0)
-		val student3 = StudentAssociationData("3", "", "", null, null, 0)
-		val student4 = StudentAssociationData("4", "", "", null, null, 0)
-		val student5 = StudentAssociationData("5", "", "", null, null, 0)
-		val student6 = StudentAssociationData("6", "", "", null, null, 0)
-		val student7 = StudentAssociationData("7", "", "", null, null, 0)
-		val student8 = StudentAssociationData("8", "Fred", "Jones", null, null, 0)
-		val student9 = StudentAssociationData("9", "Samuel Jones", "Partington Smyth", null, null, 0)
-		val student10 = StudentAssociationData("10", "", "", null, null, 0)
-		val student11 = StudentAssociationData("11", "", "", null, null, 0)
-
+	trait Fixture extends StudentAssociationFixture {
 		val command = new FetchDepartmentRelationshipInformationCommandInternal(null, null)
 			with FetchDepartmentRelationshipInformationCommandRequest with FetchDepartmentRelationshipInformationCommandState
 			with RelationshipServiceComponent with ProfileServiceComponent {
 
 			val relationshipService = smartMock[RelationshipService]
-			relationshipService.getStudentAssociationDataWithoutRelationship(null, null, Seq()) returns Seq(student8, student9, student10, student11)
-			relationshipService.getStudentAssociationEntityData(null, null, Seq()) returns Seq(
+			relationshipService.getStudentAssociationDataWithoutRelationship(null, null, Seq()) returns mockDbUnallocated
+			relationshipService.getStudentAssociationEntityData(null, null, Seq()) returns mockDbAllocated
+			val profileService = smartMock[ProfileService]
+			profileService.getAllMembersWithUserId("cusfal") returns Seq(Fixtures.staff("0770884", "cusfal"))
+			relationshipService.getStudentAssociationEntityData(null, null, Seq("0770884")) returns Seq(
 				StudentAssociationEntityData("1", null, null, null, Seq()),
 				StudentAssociationEntityData("2", null, null, null, Seq(student1, student2)),
 				StudentAssociationEntityData("3", null, null, null, Seq(student3, student4)),
-				StudentAssociationEntityData("4", null, null, null, Seq(student5, student6, student7))
+				StudentAssociationEntityData("4", null, null, null, Seq(student5, student6, student7)),
+				StudentAssociationEntityData("0770884", null, null, null, Seq())
 			)
-			val profileService = smartMock[ProfileService]
 		}
 	}
 
@@ -181,6 +196,71 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			command.removals.get("4").contains("5") should be {true}
 			command.removals.get("4").contains("6") should be {true}
 			command.removals.get("4").contains("7") should be {true}
+		}
+	}
+
+	@Test
+	def removeAndReAdd(): Unit = {
+		new Fixture {
+			// Remove
+			command.studentToRemove = "1"
+			command.entityToRemoveFrom = "2"
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.RemoveSingle
+			val result = command.applyInternal()
+			result.unallocated.size should be (5)
+			result.allocated.size should be (4)
+			result.allocated.flatMap(_.students).distinct.size should be (6)
+			result.allocated.find(_.entityId == "2").get.students.size should be (1)
+			command.removals.get("2").contains("1") should be {true}
+			// Re-add
+			command.allocate = Seq("1").asJava
+			command.entities = Seq("2").asJava
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeToSelected
+			val result2 = command.applyInternal()
+			result2.unallocated.size should be (4)
+			result2.allocated.size should be (4)
+			result2.allocated.flatMap(_.students).distinct.size should be (7)
+			result2.allocated.find(_.entityId == "2").get.students.size should be (2)
+			command.removals.get("2").contains("1") should be {false}
+			command.additions.get("2").contains("1") should be {false} // This is important, don't add already in the DB
+		}
+	}
+
+	@Test
+	def addAndReRemove(): Unit = {
+		new Fixture {
+			// Add
+			command.allocate = JArrayList("8")
+			command.entities = JArrayList("2")
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeToSelected
+			val result = command.applyInternal()
+			result.unallocated.size should be (3)
+			result.allocated.size should be (4)
+			result.allocated.flatMap(_.students).distinct.size should be (8)
+			result.allocated.find(_.entityId == "2").get.students.size should be (3)
+			command.additions.get("2").contains("8") should be {true}
+			// Re-remove
+			command.studentToRemove = "8"
+			command.entityToRemoveFrom = "2"
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.RemoveSingle
+			val result2 = command.applyInternal()
+			result2.unallocated.size should be (4)
+			result2.allocated.size should be (4)
+			result2.allocated.flatMap(_.students).distinct.size should be (7)
+			result2.allocated.find(_.entityId == "2").get.students.size should be (2)
+			command.removals.get("2").contains("8") should be {false}
+			command.additions.get("2").contains("8") should be {false} // This is important, don't remove not in the DB
+		}
+	}
+
+	@Test
+	def additionalAgents(): Unit = {
+		new Fixture {
+			command.additionalEntityUserIds = JArrayList("cusfal")
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.AddAdditionalEntities
+			val result = command.applyInternal()
+			result.unallocated.size should be (4)
+			result.allocated.size should be (5)
 		}
 	}
 
