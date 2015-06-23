@@ -12,10 +12,10 @@
 <#if features.markingWorkflows>
 	<@form.labelled_row "markingWorkflow" "Marking workflow">
 		<#assign disabled = !(canUpdateMarkingWorkflow!true)>
-		<#if markingWorkflows?has_content>
+		<#if command.allMarkingWorkflows?has_content>
 				<@f.select path="markingWorkflow" disabled=disabled>
 					<@f.option value="" label="None"/>
-					<#list markingWorkflows as markingWorkflow>
+					<#list command.allMarkingWorkflows as markingWorkflow>
 						<@f.option value="${markingWorkflow.id}" label="${markingWorkflow.name} (${markingWorkflow.markingMethod.description})"/>
 					</#list>
 				</@f.select>
