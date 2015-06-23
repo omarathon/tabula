@@ -5,8 +5,10 @@ import org.springframework.util.StringUtils
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Describable, Description}
+import uk.ac.warwick.tabula.coursework.services.CourseworkWorkflowService
 import uk.ac.warwick.tabula.coursework.services.docconversion.{AutowiringMarksExtractorComponent, MarkItem}
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.MarkingState.{ReleasedForMarking, InProgress}
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, _}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, AutowiringUserLookupComponent, FeedbackServiceComponent, GeneratesGradesFromMarks, UserLookupComponent}
@@ -33,7 +35,7 @@ object MarkerAddMarksCommand {
 class MarkerAddMarksCommandInternal(val module: Module, val assignment: Assignment, val marker: User, val submitter: CurrentUser, val firstMarker: Boolean, val gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[List[MarkerFeedback]] with CanProxy {
 
-	self: MarkerAddMarksCommandState with FeedbackServiceComponent =>
+	self: MarkerAddMarksCommandState with FeedbackServiceComponent  =>
 
 	override def applyInternal(): List[MarkerFeedback] = transactional() {
 
@@ -54,6 +56,10 @@ class MarkerAddMarksCommandInternal(val module: Module, val assignment: Assignme
 			}
 
 			markerFeedback.grade = Option(actualGrade)
+
+			if (markerFeedback.state == ReleasedForMarking) {
+				markerFeedback.state = InProgress
+			}
 
 			parentFeedback.updatedDate = DateTime.now
 
