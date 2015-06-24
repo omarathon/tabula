@@ -23,19 +23,18 @@ class DownloadFileByTokenControllerTest extends TestBase with MockitoSugar {
 	controller.fileServer.features = new FeaturesImpl
 	controller.fileServer.features.xSendfile = false
 
-
 	val attachment = new FileAttachment
-	attachment.id = "123456"
+	val attachmentId = "123"
 
 	val file = createTemporaryFile
-	FileCopyUtils.copy(new ByteArrayInputStream("yes".getBytes), new FileOutputStream(file))
+	FileCopyUtils.copy(new ByteArrayInputStream("some file content".getBytes), new FileOutputStream(file))
 	attachment.file = file
-	attachment.id = "123"
+	attachment.id = attachmentId
 
-	val submission1 = Fixtures.submissionWithId("0000001", id = attachment.id)
+	val submission1 = Fixtures.submissionWithId("0000001", id = attachmentId)
 	val submission2 = Fixtures.submissionWithId("0000002", id = "456")
 
-	val sv = new SavedFormValue()
+	val sv = new SavedFormValue
 	sv.name = "upload"
 	sv.submission = submission1
 
@@ -57,7 +56,7 @@ class DownloadFileByTokenControllerTest extends TestBase with MockitoSugar {
 		controller.serve(command)
 		
 		response.getStatus should be (HttpStatus.SC_OK)
-		response.getContentAsString should be ("yes")
+		response.getContentAsString should be ("some file content")
 	}
 
 	@Test
