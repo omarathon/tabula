@@ -1,0 +1,41 @@
+.id7-masthead {
+	background: url("../images/id7/masthead-logo-bleed-xs.svg") 0 0 no-repeat;
+}
+
+html.no-svg .id7-masthead,
+html.no-svgfilters .id7-masthead,
+html.no-smil .id7-masthead {
+	background: url("../images/id7/masthead-logo-bleed-xs.png") 0 0 no-repeat;
+}
+
+@media (min-width: 768px) {
+	.id7-masthead {
+		background: url("../images/id7/masthead-logo-bleed-sm.svg") 0 0 no-repeat;
+	}
+
+	html.no-svg .id7-masthead,
+	html.no-svgfilters .id7-masthead,
+	html.no-smil .id7-masthead {
+		background: url("../images/id7/masthead-logo-bleed-sm.png") 0 0 no-repeat;
+	}
+}
+
+a img.targetBlank {
+	background: url("../images/id7/newwindow.gif") right 3px no-repeat;
+}
+
+body :not(iframe)::-webkit-scrollbar-button:vertical:start:decrement {
+	background: url("../images/id7/scrollbar/scrollbar-up.png") no-repeat top left;
+}
+
+body :not(iframe)::-webkit-scrollbar-button:vertical:end:increment {
+	background: url("../images/id7/scrollbar/scrollbar-down.png") no-repeat bottom left;
+}
+
+body :not(iframe)::-webkit-scrollbar-button:horizontal:start:decrement {
+	background: url("../images/id7/scrollbar/scrollbar-left.png") no-repeat top left;
+}
+
+body :not(iframe)::-webkit-scrollbar-button:horizontal:end:increment {
+	background: url("../images/id7/scrollbar/scrollbar-right.png") no-repeat bottom right;
+}

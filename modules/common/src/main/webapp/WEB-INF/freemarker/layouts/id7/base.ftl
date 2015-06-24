@@ -18,6 +18,7 @@
 
 	<!-- ID7 -->
 	<@stylesheet "/static/css/id7.css" />
+	<@stylesheet "/static/css/id7-fixes.css" />
 
 	<!-- Default styling. You will probably want to replace with your own site.css -->
 	<@stylesheet "/static/css/id7-theme.css" />
