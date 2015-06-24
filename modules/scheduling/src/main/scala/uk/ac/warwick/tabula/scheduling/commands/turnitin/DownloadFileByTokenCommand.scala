@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.system.permissions.Public
 
-class DownloadAttachmentByTokenCommand(
+class DownloadFileByTokenCommand(
 		val submission: Submission,
 		val fileAttachment: FileAttachment,
 		val token: FileAttachmentToken )

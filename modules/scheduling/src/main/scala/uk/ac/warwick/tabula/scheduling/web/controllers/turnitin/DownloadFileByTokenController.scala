@@ -10,22 +10,22 @@ import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.scheduling.commands.turnitin.DownloadAttachmentByTokenCommand
+import uk.ac.warwick.tabula.scheduling.commands.turnitin.DownloadFileByTokenCommand
 import org.apache.http.HttpStatus
 
 @Controller
 @RequestMapping(value = Array("/turnitin/submission/{submission}/attachment/{fileAttachment}"))
-class DownloadAttachmentByTokenController extends BaseController with Logging {
+class DownloadFileByTokenController extends BaseController with Logging {
 	
 	var fileServer = Wire.auto[FileServer]
 
 	@ModelAttribute def command(@PathVariable("submission") submission: Submission,
 															@PathVariable("fileAttachment") fileAttachment: FileAttachment,
 															@RequestParam(value="token", required=true) token: FileAttachmentToken)
-	= new DownloadAttachmentByTokenCommand(submission, fileAttachment, token)
+	= new DownloadFileByTokenCommand(submission, fileAttachment, token)
 
 	@RequestMapping(method = Array(GET))
-	def serve(command: DownloadAttachmentByTokenCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+	def serve(command: DownloadFileByTokenCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		if (command.token.used) {
 			response.setStatus(HttpStatus.SC_BAD_REQUEST)
 			logger.error("Access token has already been used")
