@@ -20,8 +20,8 @@ class DownloadFileByTokenController extends BaseController with Logging {
 	var fileServer = Wire.auto[FileServer]
 
 	@ModelAttribute def command(@PathVariable("submission") submission: Submission,
-															@PathVariable("fileAttachment") fileAttachment: FileAttachment,
-															@RequestParam(value="token", required=true) token: FileAttachmentToken)
+		@PathVariable("fileAttachment") fileAttachment: FileAttachment,
+		@RequestParam(value="token", required=true) token: FileAttachmentToken)
 	= new DownloadFileByTokenCommand(submission, fileAttachment, token)
 
 	@RequestMapping(method = Array(GET))
