@@ -114,6 +114,13 @@ class FileAttachment extends GeneratedId {
 		newFile
 	}
 
+	def generateToken(): FileAttachmentToken = {
+		val token = new FileAttachmentToken
+		token.fileAttachmentId = this.id
+		token.expires = new DateTime().plusMinutes(FileAttachmentToken.DefaultTokenValidityMinutes)
+		token
+	}
+
 	/**
 	 * A stream to read the entirety of the data Blob, or null
 	 * if there is no Blob.
