@@ -10,14 +10,27 @@
 
 <div class="content feedback-adjustment feedback-summary">
 
-<#if command.feedback?? && command.feedback.latestPrivateOrNonPrivateAdjustment?has_content>
+<#if command.feedback??>
 	<div class="well">
-		<h3>Latest adjustment</h3>
+		<h3>Mark</h3>
 		<p>
-			Adjusted mark - ${command.feedback.latestPrivateOrNonPrivateAdjustment.mark!}<br>
-			Adjusted grade - ${command.feedback.latestPrivateOrNonPrivateAdjustment.grade!}<br>
+			<#if command.feedback.actualMark??>
+				Original mark - ${command.feedback.actualMark}%<br>
+			</#if>
+			<#if command.feedback.actualGrade??>
+				Original grade - ${command.feedback.actualGrade}<br>
+			</#if>
 		</p>
 	</div>
+	<#if command.feedback.latestPrivateOrNonPrivateAdjustment?has_content>
+		<div class="well">
+			<h3>Latest adjustment</h3>
+			<p>
+				Adjusted mark - ${command.feedback.latestPrivateOrNonPrivateAdjustment.mark!}<br>
+				Adjusted grade - ${command.feedback.latestPrivateOrNonPrivateAdjustment.grade!}<br>
+			</p>
+		</div>
+	</#if>
 </#if>
 
 <#assign submit_url>

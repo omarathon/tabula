@@ -125,11 +125,11 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 
 		session.newQuery[Assignment]("""select a from Assignment a
 				where a.module.adminDepartment = :dept
-				and a.name like :nameLike
+				and lower(a.name) like :nameLike
 				order by createdDate desc
 																 """)
 			.setParameter("dept", department)
-			.setString("nameLike", "%" + partialName + "%")
+			.setString("nameLike", "%" + partialName.toLowerCase + "%")
 			.setMaxResults(MaxAssignmentsByName).seq
 	}
 

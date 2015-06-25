@@ -17,7 +17,9 @@ class ViewProfileCommand(user: CurrentUser, profile: Member)
 	extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
 
 	private val viewingOwnProfile = user.apparentUser.getWarwickId == profile.universityId
-	private val viewerInSameDepartment = profile.touchedDepartments.map(_.code).contains(user.apparentUser.getDepartmentCode.toLowerCase)
+	private val viewerInSameDepartment = Option(user.apparentUser.getDepartmentCode)
+		.map(_.toLowerCase)
+		.exists(deptCode => profile.touchedDepartments.map(_.code).contains(deptCode))
 
 	if (!user.god && !viewingOwnProfile && (user.isStudent || profile.isStaff && !viewerInSameDepartment)) {
 		logger.info("Denying access for user " + user + " to view profile " + profile)

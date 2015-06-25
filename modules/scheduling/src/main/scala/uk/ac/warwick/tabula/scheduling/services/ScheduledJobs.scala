@@ -132,7 +132,7 @@ class ScheduledJobs {
 
 	@Scheduled(cron = "0 0 4 * * *") // 4am
 	def updateAttendanceMonitoringSchemeMembership(): Unit =
-		if (features.attendanceMonitoringAcademicYear2014) maintenanceGuard {
+		if (features.schedulingAttendanceUpdateSchemes) maintenanceGuard {
 			exceptionResolver.reportExceptions {
 				UpdateAttendanceMonitoringSchemeMembershipCommand().apply()
 			}

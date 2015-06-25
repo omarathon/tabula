@@ -43,21 +43,6 @@
 				<td>${(studentCourseDetails.award.name)!}</td>
 			</tr>
 		</#if>
-		<#if studentCourseDetails.courseYearLength??>
-			<tr>
-				<th>Length of course</th>
-				<td>
-					<#if studentCourseDetails.courseYearLength??>
-						${studentCourseDetails.courseYearLength} years
-					</#if>
-					<#if studentCourseDetails.modeOfAttendance??>
-						<#if studentCourseYearDetails.modeOfAttendance.code != "F">
-							(full-time equivalent)
-						</#if>
-					</#if>
-				</td>
-			</tr>
-		</#if>
 		<#if !isSelf && studentCourseDetails.statusOnCourse??>
 			<tr>
 				<th>Status on Course</th>

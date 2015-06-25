@@ -12,10 +12,10 @@
 <#if features.markingWorkflows>
 	<@form.labelled_row "markingWorkflow" "Marking workflow">
 		<#assign disabled = !(canUpdateMarkingWorkflow!true)>
-		<#if markingWorkflows?has_content>
+		<#if command.allMarkingWorkflows?has_content>
 				<@f.select path="markingWorkflow" disabled=disabled>
 					<@f.option value="" label="None"/>
-					<#list markingWorkflows as markingWorkflow>
+					<#list command.allMarkingWorkflows as markingWorkflow>
 						<@f.option value="${markingWorkflow.id}" label="${markingWorkflow.name} (${markingWorkflow.markingMethod.description})"/>
 					</#list>
 				</@f.select>
@@ -37,3 +37,10 @@
 </#if>
 
 <@sits_groups.exams_sits_groups command />
+
+<@form.labelled_row "massAddUsers" "Additional students">
+	<textarea name="massAddUsers" rows="3" style="height: 100px;">${command.originalMassAddUsers!""}</textarea>
+	<div class="help-block">
+		Additional students registered for the exam. Add University IDs, one per line.
+	</div>
+</@form.labelled_row>

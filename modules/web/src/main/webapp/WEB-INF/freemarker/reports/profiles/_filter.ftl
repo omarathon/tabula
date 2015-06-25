@@ -35,7 +35,7 @@
 					<td>${student.firstName}</td>
 					<td>${student.lastName}</td>
 					<td>${student.universityId}</td>
-					<td>${student.routeCode?upper_case} ${student.routeName}</td>
+					<td>${(student.routeCode!"")?upper_case} ${student.routeName!""}</td>
 				</tr>
 				</#list>
 			</tbody>

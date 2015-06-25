@@ -28,6 +28,14 @@ object Fixtures extends Mockito {
 		s
 	}
 
+	def submissionWithId(universityId: String = "0123456", userId: String = "cuspxp", id: String) = {
+		val s = new Submission
+		s.universityId = universityId
+		s.userId = userId
+		s.id = id
+		s
+	}
+
 	def assignmentFeedback(universityId: String = "0123456") = {
 		val f = new AssignmentFeedback
 		f.universityId = universityId
@@ -42,7 +50,9 @@ object Fixtures extends Mockito {
 	}
 
 	def markerFeedback(parent: Feedback) = {
-		new MarkerFeedback(parent)
+		val mf = new MarkerFeedback(parent)
+		mf.state = MarkingState.ReleasedForMarking
+		mf
 	}
 
 	def department(code:String, name:String = null) = {

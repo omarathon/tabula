@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateGradesFromMarkCommandState, GenerateGradesFromMarkCommand}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Exam, GradeBoundary, Assignment, Module}
 import uk.ac.warwick.tabula.JavaImports._
@@ -35,18 +35,15 @@ abstract class AbstractGenerateGradeFromMarkController extends CourseworkControl
 	}
 
 	@RequestMapping(value = Array("/multiple"), method= Array(POST))
-	def postMultiple(@ModelAttribute("command") cmd: Appliable[Map[String, Seq[GradeBoundary]]], @RequestParam(value = "selected", required = false) selected: JMap[String, String]) = {
+	def postMultiple(@ModelAttribute("command") cmd: Appliable[Map[String, Seq[GradeBoundary]]] with GenerateGradesFromMarkCommandState) = {
 		val result = cmd.apply()
 		val defaults = result.map{case(universityId, grades) => universityId -> {
-			if (selected == null) {
-				grades.find(_.isDefault)
-			} else {
-				selected.asScala.find(_._1 == universityId) match {
-					case Some((_, selectedGrade)) => grades.find(_.grade == selected)
-						case _ => grades.find(_.isDefault)
+				cmd.selected.asScala.find(_._1 == universityId) match {
+					case Some((_, selectedGrade)) => grades.find(_.grade == selectedGrade)
+					case _ => None
 				}
 			}
-		}}
+		}
 
 		Mav("admin/generatedGrades",
 			"result" -> result,

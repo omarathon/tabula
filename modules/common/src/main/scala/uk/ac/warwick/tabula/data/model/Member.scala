@@ -171,7 +171,7 @@ abstract class Member
 			case Some(name) => name
 		})
 		u.setEmail(email)
-		Option(homeDepartment) map { dept =>
+		Option(homeDepartment) foreach { dept =>
 			u.setDepartment(dept.name)
 			u.setDepartmentCode(dept.code.toUpperCase)
 		}
@@ -339,15 +339,18 @@ class StudentMember extends Member with StudentProperties {
 		// TAB-3007 We shouldn't swim downstream to the StudentCourseDetails or StudentCourseYearDetails for things here,
 		// rely on them swimming up.
 
-		// Allow swimming down only for *current* information
-		val mostSignificantCourse = mostSignificantCourseDetails
-		val latestStudentCourseYearDetails = mostSignificantCourseDetails.flatMap { scd => Option(scd.latestStudentCourseYearDetails) }
+		// TAB-3598 - Add study departments for any current course
+		val studyDepartments = freshStudentCourseDetails.filterNot(_.isEnded).flatMap { scd => Option(scd.department) }
 
-		val studyDepartment = mostSignificantCourse.flatMap { scd => Option(scd.department) }
+		// Cache the def result
+		val mostSignificantCourse = mostSignificantCourseDetails
+
+		// Allow swimming down only for *current* information
+		val latestStudentCourseYearDetails = mostSignificantCourse.flatMap { scd => Option(scd.latestStudentCourseYearDetails) }
 		val enrolmentDepartment = latestStudentCourseYearDetails.flatMap { scyd => Option(scyd.enrolmentDepartment) }
 
 		val departments: Stream[PermissionsTarget] =
-			Stream(Option(homeDepartment), studyDepartment, enrolmentDepartment).flatten.distinct.flatMap(_.subDepartmentsContaining(this))
+			(Stream(Option(homeDepartment), enrolmentDepartment).flatten ++ studyDepartments.toStream).distinct.flatMap(_.subDepartmentsContaining(this))
 
 		/*
 		 * FIXME TAB-2971 The small groups and modules from registrations here shouldn't be in permissionsParents, because

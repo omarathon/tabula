@@ -8,7 +8,7 @@ import collection.JavaConverters._
 
 object FeedbackZipFileJob {
 	val identifier = "feedback-zip-file"
-	val zipFileName = "feedbacks.zip"
+	val zipFileName = "feedback.zip"
 	val minimumFeedbacks = 10
 	val FeedbacksKey = "feedback"
 
@@ -22,7 +22,7 @@ class FeedbackZipFileJob extends ZipFileJob with AutowiringZipServiceComponent w
 
 	override val identifier = FeedbackZipFileJob.identifier
 	override val zipFileName = FeedbackZipFileJob.zipFileName
-	override val itemDescription = "feedbacks"
+	override val itemDescription = "feedback"
 
 	override def run(implicit job: JobInstance): Unit = new Runner(job).run()
 

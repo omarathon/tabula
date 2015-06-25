@@ -75,9 +75,9 @@
 			<div class="tab-pane active" id="upload">
 				<p>
 					You can upload marks in a spreadsheet, which must be saved as an .xlsx file (ie created in Microsoft Office 2007 or later).
-					The spreadsheet should have three column headings in the following order: <b>ID, Mark, Grade</b>.
+					The spreadsheet should have at least two column headings: <b>University ID</b> and <b>Mark</b>.
 					You can use this <a href="${templateUrl}" >generated spreadsheet</a> as a template.
-					Note that you can upload just marks, just grades or both.
+					Note that you can upload just marks, or marks and grades.
 				</p>
 				<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="${commandName}">
 					<input name="isfile" value="true" type="hidden"/>
@@ -118,7 +118,11 @@
 									<input class="universityId span2" name="universityId" type="text" />
 								</div>
 							</td>
-							<td><input name="actualMark" type="text" /></td>
+							<td>
+								<div class="input-append">
+									<input name="actualMark" type="text" />
+									<span class="add-on">%</span>
+								</div>
 							<td>
 								<input class="grade input-small" name="actualGrade" type="text"/>
 								<#if isGradeValidation>
@@ -167,7 +171,12 @@
 												<td></td>
 											</#if>
 										</#if>
-										<td><input name="marks[${markItem_index}].actualMark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" /></td>
+										<td>
+											<div class="input-append">
+												<input name="marks[${markItem_index}].actualMark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" />
+												<span class="add-on">%</span>
+											</div>
+										</td>
 										<td>
 											<input name="marks[${markItem_index}].actualGrade" class="grade input-small" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" />
 											<#if isGradeValidation>

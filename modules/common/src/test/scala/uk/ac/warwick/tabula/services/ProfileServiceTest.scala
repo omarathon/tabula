@@ -1,22 +1,20 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.helpers.Tap._
-import org.joda.time.DateTime
-import org.joda.time.DateTimeConstants
+import org.joda.time.{DateTime, DateTimeConstants}
 import org.junit.Before
-import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase, Fixtures, Mockito}
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.userlookup.User
 import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.Tap._
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, PersistenceTestBase}
+import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
 class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 	var profileService: ProfileService = _
 
-	@Before def setup: Unit = transactional { tx =>
+	@Before def setup(): Unit = transactional { tx =>
 		val thisMemberDao = new MemberDaoImpl
 		thisMemberDao.sessionFactory = sessionFactory
 		val thisStudentCourseDetailsDao = new StudentCourseDetailsDaoImpl
@@ -28,7 +26,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		}
 	}
 
-	@Test def crud = transactional { tx =>
+	@Test def crud() = transactional { tx =>
 		val m1 = Fixtures.student(universityId = "0000001", userId="student")
 		val m2 = Fixtures.student(universityId = "0000002", userId="student")
 
@@ -75,13 +73,13 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		profileService.getMemberByUser(new User("staff1"), disableFilter = false) should be (Some(m3))
 	}
 
-	@Test def listMembersUpdatedSince = transactional { tx =>
+	@Test def listMembersUpdatedSince() = transactional { tx =>
 
 		val dept1 = Fixtures.departmentWithId("in", "IT Services", "1")
 		val dept2 = Fixtures.departmentWithId("po", "Politics", "2")
 		session.saveOrUpdate(dept1)
 		session.saveOrUpdate(dept2)
-		session.flush
+		session.flush()
 
 		val m1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1)
 		m1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
@@ -100,7 +98,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		profileService.save(m3)
 		profileService.save(m4)
 
-		session.flush
+		session.flush()
 
 		profileService.listMembersUpdatedSince(new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0), 5) should be (Seq(m1, m2, m3, m4))
 		profileService.listMembersUpdatedSince(new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0), 1) should be (Seq(m1))
@@ -108,7 +106,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		profileService.listMembersUpdatedSince(new DateTime(2013, DateTimeConstants.FEBRUARY, 5, 0, 0, 0, 0), 5) should be (Seq())
 	}
 
-	@Test def getStudentsByRouteForAcademicYear = {
+	@Test def studentsByRouteForAcademicYear() = {
 		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
 			val memberDao = mock[MemberDao]
 			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
@@ -156,16 +154,16 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		studentsInFirstYear.size should be (2)
 		studentsInFirstYear.exists(
 			s => s.freshStudentCourseDetails.head.scjCode.equals(courseDetailsSecondYear.scjCode)
-		) should be (false)
+		) should be {false}
 
 		val studentsInSecondYear = service.getStudentsByRoute(testRoute, AcademicYear(2013))
 		studentsInSecondYear.size should be (2)
 		studentsInSecondYear.exists(
 			s => s.freshStudentCourseDetails.head.scjCode.equals(courseDetailsFirstYear.scjCode)
-		) should be (false)
+		) should be {false}
 	}
 
-	@Test def getStudentsByRouteWithdrawn = {
+	@Test def studentsByRouteWithdrawn() = {
 		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
 			val memberDao = mock[MemberDao]
 			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
@@ -212,7 +210,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 
 
-	@Test def getStudentsByRouteMostSignificantCourse = {
+	@Test def studentsByRouteMostSignificantCourse() = {
 		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
 			val memberDao = mock[MemberDao]
 			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
@@ -238,13 +236,13 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 		students.exists(
 			s => s.freshStudentCourseDetails.head.mostSignificant.equals(true)
-		) should be (true)
+		) should be {true}
 
 	}
 
 
 
-	@Test def getStudentsByRouteNotMostSignificantCourse = {
+	@Test def studentsByRouteNotMostSignificantCourse() = {
 		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
 			val memberDao = mock[MemberDao]
 			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
@@ -270,7 +268,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 		students.exists(
 			s => s.freshStudentCourseDetails.head.mostSignificant.equals(true)
-		) should be (false)
+		) should be {false}
 
 	}
 	trait MockFixture {
@@ -281,51 +279,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		}
 	}
 
-	trait SubDepartmentsFixture extends MockFixture {
-		val subDepartment = new Department
-		subDepartment.filterRule = Department.UndergraduateFilterRule
-		val otherSubDepartment = new Department
-		otherSubDepartment.filterRule = Department.PostgraduateFilterRule
-		val parentDepartment = new Department
-		parentDepartment.children = JHashSet(subDepartment, otherSubDepartment)
-		subDepartment.parent = parentDepartment
-		otherSubDepartment.parent = parentDepartment
-		val ugRoute = Fixtures.route("ug")
-		ugRoute.degreeType = DegreeType.Undergraduate
-		val pgRoute = Fixtures.route("pg")
-		pgRoute.degreeType = DegreeType.Postgraduate
-
-		val studentInSubDepartment = Fixtures.student(department=subDepartment)
-		studentInSubDepartment.mostSignificantCourseDetails.get.route = ugRoute
-		val studentInOtherSubDepartment = Fixtures.student(department=otherSubDepartment)
-		studentInOtherSubDepartment.mostSignificantCourseDetails.get.route = pgRoute
-	}
-
-	@Test def findStudentsInSubDepartment {
-		new SubDepartmentsFixture {
-			profileServiceWithMocks.memberDao.findStudentsByRestrictions(
-				any[Iterable[ScalaRestriction]], any[Iterable[ScalaOrder]], any[JInteger], any[JInteger]
-			) returns Seq(studentInSubDepartment, studentInOtherSubDepartment)
-
-			val (offset, students) = profileServiceWithMocks.findStudentsByRestrictions(subDepartment, Seq(), Seq(), Int.MaxValue, 0)
-			offset should be (0)
-			students.size should be (1)
-			students.head should be (studentInSubDepartment)
-		}
-	}
-
-	@Test def countStudentsInSubDepartment {
-		new SubDepartmentsFixture {
-			profileServiceWithMocks.memberDao.findStudentsByRestrictions(
-				any[Iterable[ScalaRestriction]], any[Iterable[ScalaOrder]], any[JInteger], any[JInteger]
-			) returns Seq(studentInSubDepartment, studentInOtherSubDepartment)
-
-			val count = profileServiceWithMocks.countStudentsByRestrictions(subDepartment, Seq())
-			count should be (1)
-		}
-	}
-
-	@Test def getDisability {
+	@Test def disability() {
 		new MockFixture {
 			val disabilityQ = new Disability
 			profileServiceWithMocks.memberDao.getDisability("Q") returns Some(disabilityQ)
@@ -337,7 +291,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 	}
 
 	@Transactional
-	@Test def regenerateEmptyTimetableHash {
+	@Test def regenerateEmptyTimetableHash() {
 		val member = Fixtures.student()
 		member.timetableHash should be (null)
 
@@ -347,11 +301,11 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		profileService.regenerateTimetableHash(member)
 		session.clear()
 
-		profileService.getMemberByUniversityId(member.universityId).get.timetableHash should not be (null)
+		profileService.getMemberByUniversityId(member.universityId).get.timetableHash should not be null
 	}
 
 	@Transactional
-	@Test def regenerateExistingTimetableHash {
+	@Test def regenerateExistingTimetableHash() {
 		val member = Fixtures.student()
 		val existingHash = "1234567"
 		member.timetableHash = existingHash
@@ -363,11 +317,11 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		profileService.regenerateTimetableHash(member)
 		session.clear()
 
-		profileService.getMemberByUniversityId(member.universityId).get.timetableHash should not be (null)
-		profileService.getMemberByUniversityId(member.universityId).get.timetableHash should not be (existingHash)
+		profileService.getMemberByUniversityId(member.universityId).get.timetableHash should not be null
+		profileService.getMemberByUniversityId(member.universityId).get.timetableHash should not be existingHash
 	}
 
-	@Test def getMemberByUser { transactional { tx =>
+	@Test def memberByUser() { transactional { tx =>
 		// TAB-2014
 		val m1 = Fixtures.student(universityId = "1000001", userId="student")
 		m1.email = "student@warwick.ac.uk"

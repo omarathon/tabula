@@ -14,7 +14,7 @@
 <@spring.bind path="studentsAsUsers">
 <@form.errors path="students" />
 <#assign students=status.actualValue />
-<p>Deleting submissions and feedbacks for <strong><@fmt.p students?size "student" /></strong>:</p>
+<p>Deleting submissions and feedback for <strong><@fmt.p students?size "student" /></strong>:</p>
 <ul>
 <#list students as student>
 <li>${student.fullName} (${student.warwickId!})</li>

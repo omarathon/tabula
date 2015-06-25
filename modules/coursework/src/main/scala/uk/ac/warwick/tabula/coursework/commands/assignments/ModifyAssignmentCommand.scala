@@ -47,6 +47,16 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 	private var _prefilled: Boolean = _
 	def prefilled = _prefilled
 
+	var removeWorkflow: Boolean = false
+
+	// TAB-3597
+	lazy val allMarkingWorkflows = assignment match {
+		case existing: Assignment if Option(existing.markingWorkflow).exists(_.department != module.adminDepartment) =>
+			module.adminDepartment.markingWorkflows ++ Seq(existing.markingWorkflow)
+		case _ =>
+			module.adminDepartment.markingWorkflows
+	}
+
 	// can be overridden in concrete implementations to provide additional validation
 	def contextSpecificValidation(errors: Errors)
 
@@ -90,6 +100,9 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		}
 
 		copySharedTo(assignment: Assignment)
+		if (removeWorkflow) {
+			assignment.markingWorkflow = null
+		}
 
 		if (assignment.members == null) assignment.members = UserGroup.ofUsercodes
 		assignment.members.copyFrom(members)

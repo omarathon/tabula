@@ -1,37 +1,14 @@
 package uk.ac.warwick.tabula.services.fileserver
 import org.springframework.stereotype.Service
-import java.io.InputStream
 import javax.servlet.http.HttpServletResponse
 import org.springframework.util.FileCopyUtils
 import javax.servlet.http.HttpServletRequest
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.Features
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
 @Service
-class FileServer {
-	var features = Wire[Features]
+class FileServer extends StreamsFiles with AutowiringFeaturesComponent {
 
-	def stream(file: RenderableFile)(implicit request: HttpServletRequest, out: HttpServletResponse) {
-		val inStream = file.inputStream
-		
-		out.addHeader("Content-Type", file.contentType)
-
-		handleCaching(file, request, out)
-
-		if (request.getMethod.toUpperCase != "HEAD") {
-			if (file.file.isDefined && features.xSendfile) {
-				out.addHeader("X-Sendfile", file.file.get.getAbsolutePath)
-			} else {
-				file.contentLength.foreach { length => out.addHeader("Content-Length", length.toString) }
-
-				Option(inStream).foreach { FileCopyUtils.copy(_, out.getOutputStream) }
-			}
-		} else {
-			file.contentLength.foreach { length => out.addHeader("Content-Length", length.toString) }
-		}
-	}
-	
 	/**
 	 * Serves a RenderableFile out to an HTTP response.
 	 */
@@ -43,13 +20,42 @@ class FileServer {
 		 * is to put it as the last part of the URL path.
 		 */
 		val dispositionHeader = fileName match {
-			case Some(fileName) => "attachment;filename=\"" + fileName + "\""
+			case Some(name) => "attachment;filename=\"" + name + "\""
 			case _ => "attachment"
 		}
 
 		out.addHeader("Content-Disposition", dispositionHeader)
 		
 		stream(file)
+	}
+}
+
+/**
+ * Sets up the appropriate response headers and streams a renderable file
+ *
+ * We don't support using the content disposition header here as it's an unreliable way of setting the filename
+ */
+trait StreamsFiles {
+
+	this: FeaturesComponent =>
+
+	def stream(file: RenderableFile)(implicit request: HttpServletRequest, out: HttpServletResponse) {
+		val inStream = file.inputStream
+
+		out.addHeader("Content-Type", file.contentType)
+
+		handleCaching(file, request, out)
+
+		if (request.getMethod.toUpperCase != "HEAD") {
+			if (file.file.isDefined && features.xSendfile) {
+				out.addHeader("X-Sendfile", file.file.get.getAbsolutePath)
+			} else {
+				file.contentLength.foreach { length => out.addHeader("Content-Length", length.toString) }
+				Option(inStream).foreach { FileCopyUtils.copy(_, out.getOutputStream) }
+			}
+		} else {
+			file.contentLength.foreach { length => out.addHeader("Content-Length", length.toString) }
+		}
 	}
 
 	// Very simplistic cache headers - needs turbocharging with TAB-929

@@ -2,11 +2,14 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import org.joda.time.DateTime
 import org.springframework.util.StringUtils
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Describable, Description}
+import uk.ac.warwick.tabula.coursework.services.CourseworkWorkflowService
 import uk.ac.warwick.tabula.coursework.services.docconversion.{AutowiringMarksExtractorComponent, MarkItem}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Module, _}
+import uk.ac.warwick.tabula.data.model.MarkingState.{ReleasedForMarking, InProgress}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, _}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, AutowiringUserLookupComponent, FeedbackServiceComponent, GeneratesGradesFromMarks, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -32,21 +35,14 @@ object MarkerAddMarksCommand {
 class MarkerAddMarksCommandInternal(val module: Module, val assignment: Assignment, val marker: User, val submitter: CurrentUser, val firstMarker: Boolean, val gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[List[MarkerFeedback]] with CanProxy {
 
-	self: MarkerAddMarksCommandState with FeedbackServiceComponent =>
+	self: MarkerAddMarksCommandState with FeedbackServiceComponent  =>
 
 	override def applyInternal(): List[MarkerFeedback] = transactional() {
 
 		def saveFeedback(universityId: String, actualMark: String, actualGrade: String) = {
 
-			val parentFeedback = assignment.feedbacks.find(_.universityId == universityId).getOrElse({
-				val newFeedback = new AssignmentFeedback
-				newFeedback.assignment = assignment
-				newFeedback.uploaderId = marker.getUserId
-				newFeedback.universityId = universityId
-				newFeedback.released = false
-				newFeedback.createdDate = DateTime.now
-				newFeedback
-			})
+			// For markers a parent feedback should _always_ exist (created when released for marking)
+			val parentFeedback = assignment.feedbacks.find(_.universityId == universityId).get
 
 			// get marker feedback if it already exists - if not one is automatically created
 			val markerFeedback:MarkerFeedback = firstMarker match {
@@ -60,6 +56,10 @@ class MarkerAddMarksCommandInternal(val module: Module, val assignment: Assignme
 			}
 
 			markerFeedback.grade = Option(actualGrade)
+
+			if (markerFeedback.state == ReleasedForMarking) {
+				markerFeedback.state = InProgress
+			}
 
 			parentFeedback.updatedDate = DateTime.now
 
@@ -96,6 +96,25 @@ trait MarkerAddMarksCommandValidation extends ValidatesMarkItem {
 			case None =>
 		}
 	}
+
+	override def checkMarker(mark: MarkItem, errors: Errors, alreadyHasErrors: Boolean): Boolean = {
+		var hasErrors = alreadyHasErrors
+		assessment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId} match {
+			case Some(feedback) =>
+				val markerFeedback:MarkerFeedback = firstMarker match {
+					case true => feedback.retrieveFirstMarkerFeedback
+					case false => feedback.retrieveSecondMarkerFeedback
+				}
+				if (markerFeedback.getMarkerUsercode.isEmpty || markerFeedback.getMarkerUsercode.get != marker.getUserId) {
+					errors.rejectValue("universityId", "uniNumber.wrong.marker")
+					hasErrors = true
+				}
+			case None =>
+				errors.rejectValue("universityId", "uniNumber.wrong.marker")
+				hasErrors = true
+		}
+		hasErrors
+	}
 }
 
 trait MarkerAddMarksDescription extends Describable[List[MarkerFeedback]] {
@@ -128,4 +147,5 @@ trait MarkerAddMarksCommandState extends AddMarksCommandState {
 	def submitter: CurrentUser
 	def assignment: Assignment
 	override def assessment = assignment
+	def firstMarker: Boolean
 }

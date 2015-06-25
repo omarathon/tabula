@@ -68,8 +68,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro listmarkersubmissions assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/list"/></#macro>
 <#macro downloadmarkersubmissions assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/submissions.zip"/></#macro>
-<#macro downloadfirstmarkerfeedback assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/firstmarker/feedbacks.zip"/></#macro>
-<#macro downloadsecondmarkerfeedback assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/secondmarker/feedbacks.zip"/></#macro>
+<#macro downloadfirstmarkerfeedback assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/firstmarker/feedback.zip"/></#macro>
+<#macro downloadsecondmarkerfeedback assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/secondmarker/feedback.zip"/></#macro>
 <#macro uploadmarkerfeedback assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/feedback"/></#macro>
 <#macro downloadMarkerFeedback assignment feedback marker><@_u page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/feedback/download/${feedback.id}/feedback-${feedback.feedback.universityId}.zip'/></#macro>
 <#macro markeraddmarks assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/marks"/></#macro>
@@ -160,7 +160,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro examBulkAdjustmentTemplate exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/feedback/bulk-adjustment/template"/></#macro>
 <#macro examAssignMarkers exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/assign-markers" /></#macro>
 <#macro examReleaseForMarking exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/release-for-marking" /></#macro>
-<#macro examAssignMarkersSmallGroups exam><@url context="/groups" page="/admin/marker-allocation/exam/${exam.id}" /></#macro>
-<#macro examExportExcel module exam><@url page="/coursework/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.xlsx" /></#macro>
-<#macro examExportCSV module exam><@url page="/coursework/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.csv" /></#macro>
-<#macro examExportXML module exam><@url page="/coursework/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.xml" /></#macro>
+<#macro examAssignMarkersSmallGroups exam><@_u context="/groups" page="/admin/marker-allocation/exam/${exam.id}" /></#macro>
+<#macro examExportExcel module exam><@_u page="/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.xlsx" /></#macro>
+<#macro examExportCSV module exam><@_u page="/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.csv" /></#macro>
+<#macro examExportXML module exam><@_u page="/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.xml" /></#macro>

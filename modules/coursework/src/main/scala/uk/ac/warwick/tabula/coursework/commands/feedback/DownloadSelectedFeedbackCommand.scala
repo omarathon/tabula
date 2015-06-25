@@ -43,7 +43,7 @@ class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assign
 
 
 		if (feedbacks.asScala.exists(_.assignment != assignment)) {
-				throw new IllegalStateException("Feedbacks don't match the assignment")
+				throw new IllegalStateException("Selected feedback doesn't match the assignment")
 		}
 
 		if (feedbacks.size() < FeedbackZipFileJob.minimumFeedbacks) {

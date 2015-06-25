@@ -34,7 +34,7 @@ abstract class ExtensionController extends CourseworkController {
 			Map(
 				"id" -> extension.universityId,
 				"status" -> extension.state.description,
-				"requestedExpiryDate" -> convertDateToString(Option(extension.requestedExpiryDate)),
+				"requestedExpiryDate" -> convertDateToString(extension.requestedExpiryDate),
 				"expiryDate" -> convertDateToString(extension.expiryDate),
 				"expiryDateMillis" -> convertDateToMillis(extension.expiryDate),
 				"extensionDuration" -> extension.duration.toString,

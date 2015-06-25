@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
-import org.hibernate.criterion.Restrictions
 import uk.ac.warwick.spring.Wire
 
 trait MarkingWorkflowDaoComponent {
@@ -33,11 +31,13 @@ class MarkingWorkflowDaoImpl extends MarkingWorkflowDao with Daoisms {
 	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Assignment] =
 		session.newCriteria[Assignment]
 			.add(is("markingWorkflow", markingWorkflow))
+			.add(is("deleted", false))
 			.seq
 
 	def getExamsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Exam] =
 		session.newCriteria[Exam]
 			.add(is("markingWorkflow", markingWorkflow))
+			.add(is("deleted", false))
 			.seq
 
 }

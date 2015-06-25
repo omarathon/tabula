@@ -28,7 +28,7 @@ object MonitoringPointReportController {
 	def toJson(request: CreateMonitoringPointReportRequest, result: Seq[MonitoringPointReport]) = Map(
 		"academicYear" -> request.academicYear,
 		"period" -> request.period,
-		"missedPoints" -> result.map { report => (report.student.universityId) -> report.missed }.toMap
+		"missedPoints" -> result.map { report => report.student.universityId -> report.missed }.toMap
 	)
 }
 
@@ -73,12 +73,11 @@ class CreateMonitoringPointReportRequest extends JsonApiRequest[CreateMonitoring
 		state.academicYear = academicYear
 		state.missedPoints = missedPoints.asScala.flatMap { case (sprCode, missed) =>
 			profileService.getMemberByUniversityId(SprCode.getUniversityId(sprCode)) match {
-				case Some(student: StudentMember) => {
+				case Some(student: StudentMember) =>
 					Some(student -> missed.intValue())
-
-					// TODO validate that the student doesn't have any points recorded for this academic year
-				}
-				case _ => errors.rejectValue("missedPoints", "invalid"); None
+				case _ =>
+					errors.rejectValue("missedPoints", "monitoringPointReport.student.notFound", Array(sprCode), "")
+					None
 			}
 		}.toMap
 

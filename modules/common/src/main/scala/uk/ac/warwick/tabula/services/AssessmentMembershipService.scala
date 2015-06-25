@@ -95,13 +95,15 @@ class AssessmentMembershipServiceImpl
 
 		// TAB-1749 If we've been passed a non-primary usercode (e.g. WBS logins)
 		// then also get registrations for the primary usercode
-		val allManuallyEnrolled =
-			userLookup.getUserByWarwickUniId(user.getWarwickId) match {
+		val allManuallyEnrolled = {
+			val ssoUser = if (user.getWarwickId != null) userLookup.getUserByWarwickUniId(user.getWarwickId) else userLookup.getUserByUserId(user.getUserId)
+			ssoUser match {
 				case FoundUser(primaryUser) if primaryUser.getUserId != user.getUserId =>
 					assignmentManualMembershipHelper.findBy(primaryUser) ++ assignmentManualMembershipHelper.findBy(user)
 
 				case _ => assignmentManualMembershipHelper.findBy(user)
 			}
+		}
 
 		val manuallyEnrolled =
 			allManuallyEnrolled
@@ -236,7 +238,7 @@ trait AssessmentMembershipMethods extends Logging {
 
 	def determineMembership(assessment: Assessment) : AssessmentMembershipInfo = assessment match {
 		case a: Assignment => determineMembership(a.upstreamAssessmentGroups, Option(a.members))
-		case e: Exam => determineMembership(e.upstreamAssessmentGroups, None)
+		case e: Exam => determineMembership(e.upstreamAssessmentGroups, Option(e.members))
 	}
 
 	/**
@@ -251,23 +253,24 @@ trait AssessmentMembershipMethods extends Logging {
 	 */
 	def determineMembershipUsers(assessment: Assessment): Seq[User] = assessment match {
 		case a: Assignment => determineMembershipUsers(a.upstreamAssessmentGroups, Option(a.members))
-		case e: Exam => determineSitsMembership(e.upstreamAssessmentGroups).map(_.memberId).map(userLookup.getUserByWarwickUniId)
+		case e: Exam => determineMembershipUsersWithOrder(e).map(_._1)
 	}
 
-	def determineMembershipUsersWithOrder(exam: Exam): Seq[(User, Option[Int])] =
-		exam.upstreamAssessmentGroups.flatMap(_.sortedMembers).distinct.sortBy(_.position)
-			.map(m => userLookup.getUserByWarwickUniId(m.memberId) -> m.position)
+	def determineMembershipUsersWithOrder(exam: Exam): Seq[(User, Option[Int])] = {
+		val sitsMembers = exam.upstreamAssessmentGroups.flatMap(_.sortedMembers).distinct.sortBy(_.position)
+		val sitsUniIds = sitsMembers.map(_.memberId)
+		val includesUniIds = Option(exam.members).map(_.users.map(_.getWarwickId).filterNot(sitsUniIds.contains)).getOrElse(Nil)
+		sitsMembers.map(m => userLookup.getUserByWarwickUniId(m.memberId) -> m.position) ++
+			includesUniIds.map(u => userLookup.getUserByWarwickUniId(u)).sortBy(u => (u.getLastName, u.getFirstName)).map(u => u -> None)
+	}
 
 	def determineMembershipUsersWithOrderForMarker(exam: Exam, marker:User): Seq[(User, Option[Int])] =
-		if (!exam.released || exam.markingWorkflow == null) Seq()
-		else {
+		if (!exam.released || exam.markingWorkflow == null) {
+			Seq()
+		} else {
 			val markersStudents = exam.markingWorkflow.getMarkersStudents(exam, marker)
 			determineMembershipUsersWithOrder(exam).filter(s => markersStudents.contains(s._1))
 		}
-
-	private def determineSitsMembership(upstream: Seq[UpstreamAssessmentGroup]) =
-		upstream.flatMap(_.sortedMembers).distinct.sortBy(_.position)
-
 
 	def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[String] = {
 		others.foreach { g => assert(g.universityIds) }

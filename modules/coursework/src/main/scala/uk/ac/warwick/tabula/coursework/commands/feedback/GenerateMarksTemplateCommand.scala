@@ -61,13 +61,6 @@ class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: A
 		for ((member, i) <- members.zipWithIndex) {
 			val row = sheet.createRow(i + 1)
 			row.createCell(0).setCellValue(member)
-			val marksCell = row.createCell(1)
-			val gradesCell = row.createCell(2)
-			val feedbacks = feedbackService.getStudentFeedback(assignment, member)
-			feedbacks.foreach { feedback =>
-				feedback.actualMark.foreach(marksCell.setCellValue(_))
-				feedback.actualGrade.foreach(gradesCell.setCellValue)
-			}
 		}
 
 		// add conditional formatting for invalid marks
@@ -81,7 +74,7 @@ class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: A
 
 		// add header row
 		val header = sheet.createRow(0)
-		header.createCell(0).setCellValue("ID")
+		header.createCell(0).setCellValue("University ID")
 		header.createCell(1).setCellValue("Mark")
 		// TODO could perhaps have it calculated based on the grade boundaries
 		header.createCell(2).setCellValue("Grade")

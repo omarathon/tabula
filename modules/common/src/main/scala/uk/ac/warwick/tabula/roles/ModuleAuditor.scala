@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.JavaImports
 
 case class ModuleAuditor(module: model.Module) extends BuiltInRole(ModuleAuditorRoleDefinition, module)
@@ -20,7 +19,6 @@ case object ModuleAuditorRoleDefinition extends BuiltInRoleDefinition {
 		
 		Submission.ViewPlagiarismStatus,
 		Submission.Read,
-		
 		Extension.Read,
 
 		AssignmentFeedback.Read,

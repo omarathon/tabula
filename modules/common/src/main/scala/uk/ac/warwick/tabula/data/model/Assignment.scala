@@ -648,6 +648,14 @@ class Assignment
 		}
 	}
 
+	def needsFeedbackPublishingIgnoreExtensions = {
+		if (openEnded || !collectSubmissions || archived) {
+			false
+		} else {
+			submissions.asScala.exists(s => !findExtension(s.universityId).exists(_.approved) && !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
+		}
+	}
+
 	def needsFeedbackPublishingFor(universityId: String) = {
 		if (openEnded || !collectSubmissions || archived) {
 			false

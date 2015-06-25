@@ -41,6 +41,9 @@ object ScalaRestriction {
 	def is(property: String, value: Any, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		Some(addAliases(new ScalaRestriction(Daoisms.is(property, value)), aliases: _*))
 
+	def isNot(property: String, value: Any, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
+		Some(addAliases(new ScalaRestriction(Daoisms.isNot(property, value)), aliases: _*))
+
 	def isIfTicked(property: String, value: Any, ticked: Boolean, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		if (!ticked) None
 		else Some(addAliases(new ScalaRestriction(Daoisms.is(property, value)), aliases: _*))
@@ -97,6 +100,9 @@ object ScalaRestriction {
 
 	def notEmpty(property: String, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		Some(addAliases(new ScalaRestriction(Restrictions.isNotEmpty(property)), aliases: _*))
+
+	def custom(criterion: Criterion, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
+		Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
 }
 
 trait Aliasable {
