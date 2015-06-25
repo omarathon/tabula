@@ -482,7 +482,7 @@
 	</script>
 	<#else>
 		<#if submissionAndFeedbackCommand.filter.name == 'AllStudents'>
-			<p>There are no submissions or feedbacks yet for this assignment.</p>
+			<p>There are no submissions or feedback yet for this assignment.</p>
 		<#else>
 			<#macro filterDescription filter filterParameters><#compress>
 				${filter.description}

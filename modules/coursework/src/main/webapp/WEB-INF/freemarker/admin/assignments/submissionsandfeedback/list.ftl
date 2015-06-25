@@ -51,7 +51,7 @@
 		</#function>
 
 		<#if hasSubmissionOrFeedback(students)?size = 0>
-			<p>There are no submissions or feedbacks yet for this assignment.</p>
+			<p>There are no submissions or feedback yet for this assignment.</p>
 		</#if>
 
 		<div class="submission-feedback-list">
