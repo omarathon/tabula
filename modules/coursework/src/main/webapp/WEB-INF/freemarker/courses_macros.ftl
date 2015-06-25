@@ -118,7 +118,11 @@
 									<input class="universityId span2" name="universityId" type="text" />
 								</div>
 							</td>
-							<td><input name="actualMark" type="text" /></td>
+							<td>
+								<div class="input-append">
+									<input name="actualMark" type="text" />
+									<span class="add-on">%</span>
+								</div>
 							<td>
 								<input class="grade input-small" name="actualGrade" type="text"/>
 								<#if isGradeValidation>
@@ -167,7 +171,12 @@
 												<td></td>
 											</#if>
 										</#if>
-										<td><input name="marks[${markItem_index}].actualMark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" /></td>
+										<td>
+											<div class="input-append">
+												<input name="marks[${markItem_index}].actualMark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" />
+												<span class="add-on">%</span>
+											</div>
+										</td>
 										<td>
 											<input name="marks[${markItem_index}].actualGrade" class="grade input-small" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" />
 											<#if isGradeValidation>

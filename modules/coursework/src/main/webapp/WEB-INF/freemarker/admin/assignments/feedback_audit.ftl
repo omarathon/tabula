@@ -40,7 +40,7 @@
 									<#if adminViewableFeedback.mark?has_content>
 										<div class="mg-label">Adjusted Mark:</div>
 										<div>
-											<span class="mark">${adminViewableFeedback.mark!""}</span>
+											<span class="mark">${adminViewableFeedback.mark!""}%</span>
 											<span>%</span>
 										</div>
 									</#if>

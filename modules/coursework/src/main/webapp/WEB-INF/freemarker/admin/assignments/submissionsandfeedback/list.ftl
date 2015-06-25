@@ -268,9 +268,9 @@
 							 <#if assignment.collectMarks>
 								<td class="mark">
 								 <#if student.coursework.enhancedFeedback??>
-								 	${(student.coursework.enhancedFeedback.feedback.actualMark)!''}
+								 	${(student.coursework.enhancedFeedback.feedback.actualMark)!''}%
 									<#if student.coursework.enhancedFeedback.feedback.hasPrivateOrNonPrivateAdjustments>
-										 (Adjusted to - ${student.coursework.enhancedFeedback.feedback.latestMark})
+										 (Adjusted to - ${student.coursework.enhancedFeedback.feedback.latestMark}%)
 									</#if>
 								 </#if>
 								</td>

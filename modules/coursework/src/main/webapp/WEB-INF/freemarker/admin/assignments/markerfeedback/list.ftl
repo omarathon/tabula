@@ -44,7 +44,7 @@
 
 				<#if isModeration && item.previousFeedback??>
 					<#local previousFeedback = item.previousFeedback />
-					<td class="toggle-cell">${previousFeedback.mark!""}</td>
+					<td class="toggle-cell">${previousFeedback.mark!""}%</td>
 					<td class="toggle-cell">${previousFeedback.markerUser.fullName}</td>
 				</#if>
 

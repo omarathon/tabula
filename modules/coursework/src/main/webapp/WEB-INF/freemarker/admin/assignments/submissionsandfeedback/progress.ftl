@@ -320,7 +320,7 @@
 									<#if feedback?? && feedback.hasMarkOrGrade>
 										: <#compress>
 											<#if feedback.hasMark>
-												${feedback.actualMark!''}<#if feedback.hasGrade>,</#if>
+												${feedback.actualMark!''}%<#if feedback.hasGrade>,</#if>
 											</#if>
 											<#if feedback.hasGrade>
 												grade ${feedback.actualGrade!''}
@@ -331,7 +331,7 @@
 								<#if feedback.hasPrivateOrNonPrivateAdjustments>
 									<div>
 										<i class="icon-ok"></i> Marks adjusted:
-										<#if feedback.latestMark??>${feedback.latestMark}</#if><#if feedback.latestGrade??>,</#if>
+										<#if feedback.latestMark??>${feedback.latestMark}%</#if><#if feedback.latestGrade??>,</#if>
 										<#if feedback.latestGrade??> grade ${feedback.latestGrade}</#if>
 										<#if feedback.latestPrivateOrNonPrivateAdjustment?? && feedback.latestPrivateOrNonPrivateAdjustment.reason??>
 										 - Reason for adjustment: ${feedback.latestPrivateOrNonPrivateAdjustment.reason!''}
