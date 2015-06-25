@@ -45,16 +45,13 @@ class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTa
 			columnMap(col) = formattedValue
 		} else if (columnMap.containsKey(col)) {
 			columnMap(col) match {
-				case "ID" => {
+				case "University ID" | "ID" =>
 					currentMarkItem.universityId = formattedValue
-				}
-				case "Mark" => {
+				case "Mark" =>
 					if(formattedValue.hasText)
 						currentMarkItem.actualMark = formattedValue
-				}
-				case "Grade" => {
+				case "Grade" =>
 					currentMarkItem.actualGrade = formattedValue
-				}
 				case _ => // ignore anything else
 			}
 		}

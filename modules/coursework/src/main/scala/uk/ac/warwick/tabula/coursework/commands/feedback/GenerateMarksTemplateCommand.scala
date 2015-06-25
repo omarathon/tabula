@@ -74,7 +74,7 @@ class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: A
 
 		// add header row
 		val header = sheet.createRow(0)
-		header.createCell(0).setCellValue("ID")
+		header.createCell(0).setCellValue("University ID")
 		header.createCell(1).setCellValue("Mark")
 		// TODO could perhaps have it calculated based on the grade boundaries
 		header.createCell(2).setCellValue("Grade")
