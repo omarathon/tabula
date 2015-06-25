@@ -28,12 +28,9 @@ class DownloadFileByTokenCommandInternal (
 
 	override def applyInternal() = {
 
-		val attachment = Option(new RenderableAttachment(fileAttachment))
-
-		fileFound = attachment.isDefined
+		val attachment = new RenderableAttachment(fileAttachment)
 		token.dateUsed = new DateTime()
-		attachment.get
-
+		attachment
 	}
 
 }
