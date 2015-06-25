@@ -210,7 +210,7 @@ object FlexiPickerController {
 
 
 		private def createItemFor(user: User): Map[String, String] = {
-			Map("type" -> "user", "name" -> user.getFullName, "department" -> user.getDepartment, "value" -> getValue(user))
+			Map("type" -> "user", "name" -> user.getFullName, "isStaff" -> user.isStaff.toString, "department" -> user.getDepartment, "value" -> getValue(user))
 		}
 
 		/** Return appropriate value for a user, either warwick ID or usercode. */
