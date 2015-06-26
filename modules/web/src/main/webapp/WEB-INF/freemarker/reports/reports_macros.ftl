@@ -1,7 +1,15 @@
+<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#macro reportLoader reportUrl>
 	<script>
 		window.ReportBuilder = {};
 	</script>
+	<@f.form method="get" action="" commandName="command" cssClass="form-inline double-submit-protection">
+		<label>Start date</label>
+		<@f.input id="startDate" path="startDate" cssClass="date-picker input-small" />
+		<label>End date</label>
+		<@f.input id="endDate" path="endDate" cssClass="date-picker input-small" />
+		<button type="submit" class="btn">Submit</button>
+	</@f.form>
 	<div class="loading">
 		<p><em>Building report&hellip;</em></p>
 	
@@ -46,6 +54,10 @@
 		jQuery(function($){
 			$.ajax('${reportUrl}', {
 				type: 'POST',
+				data: {
+					'startDate' : $('#startDate').val(),
+					'endDate' : $('#endDate').val()
+				},
 				success: function(data) {
 					clearTimeout(progressStepperTimeout);
 					var $mainContent = $('#main-content');

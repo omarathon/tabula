@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.reports
 
+import org.joda.time.{LocalDate, DateTime}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -18,4 +19,9 @@ trait ReportPermissions extends RequiresPermissionsChecking with PermissionsChec
 trait ReportCommandState {
 	def department: Department
 	def academicYear: AcademicYear
+}
+
+trait ReportCommandRequest {
+	var startDate: LocalDate = DateTime.now.minusWeeks(2).toLocalDate
+	var endDate: LocalDate = DateTime.now.plusWeeks(2).toLocalDate
 }

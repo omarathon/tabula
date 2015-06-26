@@ -28,7 +28,11 @@ abstract class AbstractAttendanceReportController extends ReportsController {
 		AttendanceReportProcessor(mandatory(department), mandatory(academicYear))
 
 	@RequestMapping(method = Array(GET))
-	def page(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
+	def page(
+		@ModelAttribute("command") cmd: Appliable[AllAttendanceReportCommandResult],
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear
+	) = {
 		Mav(s"reports/attendancemonitoring/$pageRenderPath").crumbs(
 			ReportsBreadcrumbs.Home.Department(department),
 			ReportsBreadcrumbs.Home.DepartmentForYear(department, academicYear),
@@ -69,7 +73,7 @@ abstract class AbstractAttendanceReportController extends ReportsController {
 				studentData.universityId -> pointMap.map{case(point, state) =>
 					point.id -> Option(state).map(_.dbValue).orNull
 				}
-			}.toMap,
+			},
 			"students" -> allStudents,
 			"points" -> allPoints
 		)))
