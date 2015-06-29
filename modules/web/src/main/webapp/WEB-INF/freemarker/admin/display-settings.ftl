@@ -231,11 +231,21 @@
 					</@form.field>
 					<script>
 						jQuery(function($){
-							$('#relationship-options input[name^=studentRelationshipDisplayed]').on('change', function(){
+							$('#relationship-options').find('input[name^=studentRelationshipDisplayed]').on('change', function(){
 								var $this = $(this);
-								var disableInput = !$this.is(':checked');
-								$this.closest('.studentRelationshipDisplayed').find('.studentRelationshipExpected input').prop('disabled', disableInput);
+								var disableInput = !$this.is(':checked'), $container = $this.closest('.studentRelationshipDisplayed').find('.studentRelationshipExpected');
+								$container.find('input').prop('disabled', disableInput);
+								if (disableInput) {
+									$container.hide();
+								} else {
+									$container.show();
+								}
+							}).each(function(){
+								if (!$(this).is(':checked')) {
+									$(this).closest('.studentRelationshipDisplayed').find('.studentRelationshipExpected').hide();
+								}
 							});
+
 						});
 					</script>
 				</@form.row>

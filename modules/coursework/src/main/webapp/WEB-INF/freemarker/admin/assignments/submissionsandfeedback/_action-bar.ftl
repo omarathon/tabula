@@ -250,7 +250,7 @@
 					<#-- Download / Publish / Delete always available -->
 					<li class="must-have-selected">
 						<a class="long-running use-tooltip form-post"
-							 href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>"
+							 href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedback.zip'/>"
 							 title="Download the feedback files for the selected students as a ZIP file."
 							 data-container="body"><i class="icon-download icon-fixed-width"></i> Download feedback
 						</a>

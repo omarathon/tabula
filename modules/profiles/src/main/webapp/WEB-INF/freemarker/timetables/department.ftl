@@ -142,7 +142,12 @@
 
 <div class="alert alert-error" style="display: none;"></div>
 
-<div class="calendar" data-viewname="month"></div>
+<div class="calendar-outer">
+	<div class="calendar-loading">
+		<i class="icon-spinner icon-spin"></i><em> Loading&hellip;</em>
+	</div>
+	<div class="calendar" data-viewname="month"></div>
+</div>
 
 <style type="text/css">
 	@import url("<@url resource="/static/css/fullcalendar.css" />");
@@ -153,6 +158,27 @@
 		color: white !important;
 		border-color: #185c54 !important;
 		font-size: .95em;
+	}
+
+	.calendar-outer {
+		position: relative;
+	}
+	.calendar {
+		background: white;
+		position: relative;
+		z-index: 1;
+	}
+	.calendar-loading {
+		position: absolute;
+		top: 50%;
+		font-size: 4em;
+		line-height: 4em;
+		margin-top: -2em;
+		left: 50%;
+		width: 400px;
+		margin-left: -200px;
+		text-align: center;
+		display: none;
 	}
 </style>
 
@@ -166,7 +192,10 @@
 			return function (start, end, callback){
 				var complete = false;
 				setTimeout(function() {
-					if (!complete) $container.fadeTo('fast', 0.3);
+					if (!complete) {
+						$('.calendar-loading').show();
+						$container.fadeTo('fast', 0.3);
+					}
 				}, 300);
 				$('#from').val(start.getTime()/1000);
 				$('#to').val(end.getTime()/1000);

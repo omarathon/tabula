@@ -49,6 +49,14 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 
 	var removeWorkflow: Boolean = false
 
+	// TAB-3597
+	lazy val allMarkingWorkflows = assignment match {
+		case existing: Assignment if Option(existing.markingWorkflow).exists(_.department != module.adminDepartment) =>
+			module.adminDepartment.markingWorkflows ++ Seq(existing.markingWorkflow)
+		case _ =>
+			module.adminDepartment.markingWorkflows
+	}
+
 	// can be overridden in concrete implementations to provide additional validation
 	def contextSpecificValidation(errors: Errors)
 

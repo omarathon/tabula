@@ -23,14 +23,14 @@ so that they can be passed around between requests.
 	</@form.labelled_row>
 </#if>
 
-<#if features.markingWorkflows && department.markingWorkflows?has_content>
+<#if features.markingWorkflows && command.allMarkingWorkflows?has_content>
 
 	<#assign disabled = !(canUpdateMarkingWorkflow!true)>
 
 	<@form.labelled_row "markingWorkflow" "Marking workflow">
 		<@f.select path="markingWorkflow" disabled=disabled>
 			<@f.option value="" label="None"/>
-			<#list department.markingWorkflows as markingWorkflow>
+			<#list command.allMarkingWorkflows as markingWorkflow>
 				<@f.option value="${markingWorkflow.id}" label="${markingWorkflow.name} (${markingWorkflow.markingMethod.description})"/>
 			</#list>
 		</@f.select>

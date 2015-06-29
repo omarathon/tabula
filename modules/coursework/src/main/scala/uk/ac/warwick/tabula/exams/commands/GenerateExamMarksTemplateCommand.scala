@@ -59,7 +59,7 @@ class GenerateExamMarksTemplateCommandInternal(val module: Module, val exam: Exa
 		// add header row
 		val header = sheet.createRow(0)
 		header.createCell(0).setCellValue("Seat number")
-		header.createCell(1).setCellValue("ID")
+		header.createCell(1).setCellValue("University ID")
 		header.createCell(2).setCellValue("Mark")
 		// TODO could perhaps have it calculated based on the grade boundaries
 		header.createCell(3).setCellValue("Grade")

@@ -24,7 +24,11 @@ abstract class AbstractSmallGroupsReportController extends ReportsController {
 		SmallGroupsReportProcessor(mandatory(department), mandatory(academicYear))
 
 	@RequestMapping(method = Array(GET))
-	def page(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
+	def page(
+		@ModelAttribute("command") cmd: Appliable[AllSmallGroupsReportCommandResult],
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear
+	) = {
 		Mav(s"reports/smallgroups/$pageRenderPath").crumbs(
 			ReportsBreadcrumbs.Home.Department(department),
 			ReportsBreadcrumbs.Home.DepartmentForYear(department, academicYear),

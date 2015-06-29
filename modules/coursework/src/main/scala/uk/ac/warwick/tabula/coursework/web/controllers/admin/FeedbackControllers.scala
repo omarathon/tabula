@@ -67,7 +67,7 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
 }
 
 @Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedbacks.zip"))
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback.zip"))
 class DownloadAllFeedbackController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
@@ -165,7 +165,7 @@ class DownloadMarkerFeebackFilesController extends BaseController {
 }
 
 @Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/{position}/feedbacks.zip"))
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/{position}/feedback.zip"))
 class DownloadFirstMarkersFeedbackController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]

@@ -44,7 +44,7 @@
 
 				<#if isModeration && item.previousFeedback??>
 					<#local previousFeedback = item.previousFeedback />
-					<td class="toggle-cell">${previousFeedback.mark!""}</td>
+					<td class="toggle-cell">${previousFeedback.mark!""}%</td>
 					<td class="toggle-cell">${previousFeedback.markerUser.fullName}</td>
 				</#if>
 
@@ -58,7 +58,11 @@
 									<span class="label label-important use-tooltip" title="<@sd.lateness item.submission />" data-container="body">Late</span>
 								</#if>
 								<#if thisFeedback.state.toString == "ReleasedForMarking">
-									<span class="label label-warning">Ready for marking</span>
+									<#if isModeration>
+										<span class="label label-warning">Ready for moderation</span>
+									<#else>
+										<span class="label label-warning">Ready for marking</span>
+									</#if>
 								<#elseif thisFeedback.state.toString == "InProgress">
 									<span class="label label-info">In Progress</span>
 								<#elseif thisFeedback.state.toString == "MarkingCompleted">
@@ -77,7 +81,11 @@
 				</td>
 				<td class="action-col toggle-cell">
 					<#if thisFeedback.state.toString == "ReleasedForMarking">
-						Submission needs marking
+						<#if isModeration>
+							Submission needs moderating
+						<#else>
+							Submission needs marking
+						</#if>
 					<#elseif thisFeedback.state.toString == "InProgress">
 						${nextMarkerAction}
 					<#elseif thisFeedback.state.toString == "Rejected">

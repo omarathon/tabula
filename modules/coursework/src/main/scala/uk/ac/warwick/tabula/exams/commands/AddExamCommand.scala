@@ -83,6 +83,14 @@ trait ExamState extends UpdatesStudentMembership {
 	def academicYear: AcademicYear
 	var markingWorkflow: MarkingWorkflow = _
 
+	// TAB-3597
+	lazy val allMarkingWorkflows = (exam match {
+		case existing: Exam if Option(existing.markingWorkflow).exists(_.department != module.adminDepartment) =>
+			module.adminDepartment.markingWorkflows ++ Seq(existing.markingWorkflow)
+		case _ =>
+			module.adminDepartment.markingWorkflows
+	}).filter(_.validForExams)
+
 	def copyTo(exam: Exam) {
 		exam.assessmentMembershipService = assessmentMembershipService
 		exam.name = name
