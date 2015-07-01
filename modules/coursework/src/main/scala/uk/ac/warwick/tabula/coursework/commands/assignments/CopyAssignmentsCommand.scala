@@ -73,6 +73,8 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 		newAssignment.feedbackTemplate = assignment.feedbackTemplate
 		newAssignment.markingWorkflow = assignment.markingWorkflow
 		newAssignment.includeInFeedbackReportWithoutSubmissions = assignment.includeInFeedbackReportWithoutSubmissions
+		newAssignment.automaticallyReleaseToMarkers = assignment.automaticallyReleaseToMarkers
+		newAssignment.automaticallySubmitToTurnitin = assignment.automaticallySubmitToTurnitin
 
 		newAssignment.addDefaultFields()
 

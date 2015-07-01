@@ -117,6 +117,7 @@ abstract class Features {
 	@Value("${features.scheduling.exportFeedbackToSits:true}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
 	@Value("${features.exams:true}") var exams = defaults.exams
 	@Value("${features.searchOnApiComponent:true}") var searchOnApiComponent = defaults.searchOnApiComponent
+	@Value("${features.scheduling.triggers:true}") var schedulingTriggers = defaults.schedulingTriggers
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -223,6 +224,7 @@ class FeaturesMessage {
 	@BeanProperty var schedulingExportAttendanceToSits = true
 	@BeanProperty var schedulingExportFeedbackToSits = true
 	@BeanProperty var schedulingAttendanceUpdateSchemes = true
+	@BeanProperty var schedulingTriggers = true
 
 	@BeanProperty var exams = true
 

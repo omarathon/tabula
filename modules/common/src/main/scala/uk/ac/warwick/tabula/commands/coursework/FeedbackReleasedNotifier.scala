@@ -1,12 +1,13 @@
-package uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications
+package uk.ac.warwick.tabula.commands.coursework
 
-import uk.ac.warwick.tabula.commands.{UserAware, Notifies}
-import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
-import uk.ac.warwick.tabula.data.model.{Notification, Assignment, MarkerFeedback}
-import uk.ac.warwick.tabula.services.UserLookupComponent
-import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JavaImports._
-import collection.JavaConverters._
+import uk.ac.warwick.tabula.commands.{Notifies, UserAware}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
+import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback, Notification}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.UserLookupComponent
+
+import scala.collection.JavaConverters._
 
 trait FeedbackReleasedNotifier[A] extends Notifies[A, Seq[MarkerFeedback]] {
 

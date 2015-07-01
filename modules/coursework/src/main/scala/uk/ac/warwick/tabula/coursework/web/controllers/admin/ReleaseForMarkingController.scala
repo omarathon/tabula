@@ -1,16 +1,17 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
+import javax.validation.Valid
+
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.coursework.assignments.{ReleaseForMarkingCommand, ReleaseForMarkingState}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.data.model.{Feedback, Module, Assignment}
-import uk.ac.warwick.tabula.coursework.commands.assignments.{ReleaseForMarkingState, ReleaseForMarkingCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.Transactions._
-import org.springframework.validation.Errors
-import javax.validation.Valid
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Module}
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/release-submissions"))

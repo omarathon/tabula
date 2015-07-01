@@ -1,21 +1,20 @@
-package uk.ac.warwick.tabula.coursework.commands.assignments
+package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
-import uk.ac.warwick.tabula.system.BindListener
-
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services._
 import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.data.model.Module
-import scala.collection.JavaConverters._
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{ReleasedState, FeedbackReleasedNotifier}
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.coursework.{ReleasedState, FeedbackReleasedNotifier}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
+import uk.ac.warwick.tabula.data.model.{Module, _}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object ReleaseForMarkingCommand {
 	def apply(module: Module, assignment: Assignment, user: User) =

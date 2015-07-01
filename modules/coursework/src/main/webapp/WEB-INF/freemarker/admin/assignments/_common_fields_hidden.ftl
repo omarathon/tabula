@@ -29,6 +29,8 @@ TODO a way to not have to do these, or at least way to make it obvious when this
 <@hiddenorfalse path="allowExtensions" />
 <@hiddenorfalse path="summative" />
 <@hiddenorfalse path="includeInFeedbackReportWithoutSubmissions" />
+<@hiddenorfalse path="automaticallyReleaseToMarkers" />
+<@hiddenorfalse path="automaticallySubmitToTurnitin" />
 <@f.hidden path="wordCountMin" />
 <@f.hidden path="wordCountMax" />
 <@f.hidden path="wordCountConventions" />

@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications
 
+import uk.ac.warwick.tabula.commands.coursework.ReleasedState
 import uk.ac.warwick.tabula.commands.{UserAware, Notifies}
 import uk.ac.warwick.tabula.data.model.{Assignment, Notification, MarkerFeedback}
 import uk.ac.warwick.tabula.data.model.notifications.coursework.ReturnToMarkerNotification

@@ -222,5 +222,7 @@ class CreateAssignmentRequest extends JsonApiRequest[AddAssignmentCommand]
 		state.summative = summative
 		state.dissertation = dissertation
 		state.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
+		state.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
+		state.automaticallySubmitToTurnitin = automaticallySubmitToTurnitin
 	}
 }
