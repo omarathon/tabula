@@ -20,6 +20,69 @@ case class TurnitinLtiResponse(
 		(xml.get \\ "lis_result_sourcedid").text
 	}
 
+
+	/**
+	 * Submission details is expected in the following format:
+	 *
+	{
+   "outcome_originalfile":{
+      "roles":[
+         "Learner",
+         "Instructor"
+      ],
+      "text":null,
+      "launch_url":"https://sandbox.turnitin.com/api/lti/1p0/download/orig/200503253?lang=en_us",
+      "label":"Download File in Original Format"
+   },
+   "outcome_grademark":{
+      "roles":[
+         "Instructor"
+      ],
+      "numeric":{
+         "score":null,
+         "max":null
+      },
+      "text":"--",
+      "launch_url":"https://sandbox.turnitin.com/api/lti/1p0/dv/grademark/200503253?lang=en_us",
+      "label":"Open GradeMark"
+   },
+   "outcome_pdffile":{
+      "roles":[
+         "Learner",
+         "Instructor"
+      ],
+      "text":null,
+      "launch_url":"https://sandbox.turnitin.com/api/lti/1p0/download/pdf/200503253?lang=en_us",
+      "label":"Download File in PDF Format"
+   },
+   "outcome_originalityreport":{
+      "text":"100%",
+      "roles":[
+         "Instructor"
+      ],
+      "numeric":{
+         "score":100,
+         "max":100
+      },
+      "label":"Open Originality Report",
+      "launch_url":"https://sandbox.turnitin.com/api/lti/1p0/dv/report/200503253?lang=en_us",
+      "breakdown":{
+         "publications_score":35,
+         "internet_score":100,
+         "submitted_works_score":100
+      }
+   },
+   "outcome_resubmit":{
+      "text":null,
+      "roles":[
+         "Learner"
+      ],
+      "label":"Resubmit File",
+      "launch_url":"https://sandbox.turnitin.com/api/lti/1p0/upload/resubmit/200503253?lang=en_us"
+   }
+}
+	 *
+	 */
 	def submissionInfo() = {
 
 		// TODO do this properly
@@ -30,32 +93,20 @@ case class TurnitinLtiResponse(
 						reports.get("breakdown") match {
 							case Some(breakdowns: Map[String, Double] @unchecked) =>
 								breakdowns.foreach { case (key, value) =>
-									logger.info("KEY: " + key)
-									logger.info("VALUE: " + value)
+									debug("KEY: " + key)
+									debug("VALUE: " + value)
 								}
-
-								val submittedWorksScore = breakdowns.get("submitted_works_score")
-								val internetScore = breakdowns.get("internet_score")
-
-//								new TurnitinLtiSubmissionInfo()
-//								submissionInfo.similarityScore = submittedWorksScore
-//								submissionInfo.webOverlap = internetScore
-
-
 								reports.get("numeric") match {
 									case Some(numerics: Map[String, Double] @unchecked) =>
 										numerics.foreach { case (key, value) =>
-											logger.info("NUMERICS KEY: " + key)
-											logger.info("NUMERICS VALUE: " + value)
+											debug("NUMERICS KEY: " + key)
+											debug("NUMERICS VALUE: " + value)
 										}
-										val numericsScore = numerics.get("score")
-										val numericsMax = numerics.get("max")
 									case _ => Nil
 								}
 								reports.get("text") match {
 									case Some(text: String) => {
-										logger.info("text : " + text)
-										val textScore = text
+										debug("text : " + text)
 									}
 									case _ => Nil
 								}
@@ -86,10 +137,6 @@ object TurnitinLtiResponse extends Logging {
 	}
 
 	def fromXml(xml: Elem) = {
-		logger.info(xml.text)
-		logger.info("status: " + (xml \\ "status").text)
-		logger.info("status message: " + (xml \\ "message").text)
-		logger.info("submission id: " + (xml \\ "lis_result_sourcedid").text)
 		new TurnitinLtiResponse((xml \\ "status").text.equals("fullsuccess"), statusMessage = Some((xml \\ "message").text), xml = Some(xml))
 	}
 

@@ -80,64 +80,28 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		http.shutdown()
 	}
 
-	override def afterPropertiesSet {
+	override def afterPropertiesSet {}
 
-	}
-
-	def getSubmissionDetails(turnitinSubmissionId: String, user: CurrentUser): TurnitinLtiResponse = doRequestAdvanced(
-		s"${apiSubmissionDetails}/${turnitinSubmissionId}", Map()) {
-		request =>
-			request >:+ {
-				(headers, request) =>
-					request >- {
-						(json) => {
-							val response = TurnitinLtiResponse.fromJson(json)
-							if (response.success) response.submissionInfo
-							//								else FailedresolveError(response)
-							response
-						}
-					}
-			}
-	}
-
-	def listEndpoints(turnitinAssignmentId: String, user: CurrentUser): TurnitinLtiResponse = doRequestAdvanced(
-		apiListEndpoints + "/" + turnitinAssignmentId, Map()) {
-		request =>
-			request >:+ {
-				(headers, request) =>
-					request >- {
-						(json) => {
-							val response = TurnitinLtiResponse.fromJson(json)
-							//								if (response.success) response.submissionInfo
-							//								else FailedresolveError(response)
-							response
-						}
-					}
-			}
-	}
-
-	def submitAssignment(assignmentId: AssignmentId, assignmentName: AssignmentName,
-											 classId: ClassId, className: ClassName, user: CurrentUser): TurnitinLtiResponse = {
+	def submitAssignment(assignment: Assignment, user: CurrentUser): TurnitinLtiResponse = {
 		doRequestAdvanced(
 			apiSubmitAssignment,
 			Map(
 				"roles" -> "Instructor",
-				"resource_link_id" -> assignmentId.value,
-				"resource_link_title" -> assignmentName.value,
-				"resource_link_description" -> assignmentName.value,
-				"context_id" -> classId.value,
-				"context_title" -> className.value,
+				"resource_link_id" -> TurnitinLtiService.assignmentIdFor(assignment).value,
+				"resource_link_title" -> TurnitinLtiService.assignmentNameFor(assignment).value,
+				"resource_link_description" -> TurnitinLtiService.assignmentNameFor(assignment).value,
+				"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
+				"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
+				// TODO callback url should be a property
 				"ext_resource_tool_placement_url" -> s"$topLevelUrl/api/turnitin-response",
 				"ext_outcomes_tool_placement_url" -> s"$topLevelUrl/api/tunitin-outcomes") ++ userParams(user.email, user.firstName, user.lastName)) {
 			request =>
-
-				// actually, expect a 302
+			// actually, expect a 302
 				request >:+ {
 					(headers, request) =>
 						request >- {
 							(html) => {
 								// listen to callback for actual response
-								// this response should be a redirect
 								val response = TurnitinLtiResponse.fromHtml(html.contains("Moved"), html)
 								if (!response.success) logger.error("Unexpected response submitting assignment to Turnitin")
 								response
@@ -158,26 +122,21 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				<message>Your file has been saved successfully.</message>
 			</response>
 	 */
-	def submitPaper(turnitinAssignmentId: String, paperUrl: String, userEmail: String,
+	def submitPaper(assignment: Assignment,	paperUrl: String,	userEmail: String, filename: String,
 									userFirstName: String, userLastName: String): TurnitinLtiResponse = doRequestAdvanced(
-		apiSubmitPaperEndpoint + "/" + turnitinAssignmentId,
 
+		apiSubmitPaperEndpoint + "/" + assignment.turnitinId,
 		Map(
-			"context_id" -> "TestModule-po206",
-			"context_title" -> "PO206 - Politics in the United Kingdom",
-
+			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
+			"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
 			"custom_xmlresponse" -> "1",
 
 			// or Instructor, but must supply an author user id, whatever the parameter for that is!!!
 			"roles" -> "Learner",
 			"custom_submission_url" -> paperUrl,
-			"custom_submission_title" -> "Paper title",
-			"custom_submission_filename" -> "testing123.doc"
+			"custom_submission_title" -> filename,
+			"custom_submission_filename" -> filename
 
-//			"ext_outcomes_tool_placement_url" -> s"$topLevelUrl/api/turnitin-response",
-//			"ext_outcome_tool_placement_url" -> s"$topLevelUrl/api/turnitin-response",
-//			"lis_outcome_service_url" -> s"$topLevelUrl/api/tunitin-response"
-//
 		)
 			++ userParams(userEmail, userFirstName, userLastName) ) {
 		request =>
@@ -194,6 +153,34 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 					}
 			}
 
+	}
+
+	def getSubmissionDetails(turnitinSubmissionId: String, user: CurrentUser): TurnitinLtiResponse = doRequestAdvanced(
+		s"${apiSubmissionDetails}/${turnitinSubmissionId}", Map()) {
+		request =>
+			request >:+ {
+				(headers, request) =>
+					request >- {
+						(json) => {
+							val response = TurnitinLtiResponse.fromJson(json)
+							if (response.success) response.submissionInfo
+							response
+						}
+					}
+			}
+	}
+
+	def listEndpoints(turnitinAssignmentId: String, user: CurrentUser): TurnitinLtiResponse = doRequestAdvanced(
+		apiListEndpoints + "/" + turnitinAssignmentId, Map()) {
+		request =>
+			request >:+ {
+				(headers, request) =>
+					request >- {
+						(json) => {
+							TurnitinLtiResponse.fromJson(json)
+						}
+					}
+			}
 	}
 
 	def userParams(email: String, firstName: String, lastName: String): Map[String, String] = {

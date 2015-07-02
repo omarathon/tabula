@@ -10,8 +10,7 @@ import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.coursework.services.turnitin.Turnitin._
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.jobs._
-import language.implicitConversions
-import uk.ac.warwick.tabula.services.turnitinlti.{AutowiringTurnitinLtiServiceComponent, TurnitinLtiService}
+import uk.ac.warwick.tabula.services.turnitinlti.AutowiringTurnitinLtiServiceComponent
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
@@ -52,26 +51,17 @@ class SubmitToTurnitinLtiJob extends Job
 			val id = job.getString("assignment")
 			assessmentService.getAssignmentById(id) getOrElse (throw obsoleteJob)
 		}}
-		val department = assignment.module.adminDepartment
 		val classId = classIdFor(assignment, api.classPrefix)
 		val assignmentId = assignmentIdFor(assignment)
-		val className = classNameFor(assignment)
 		val assignmentName = assignmentNameFor(assignment)
 
 		def run() {
 			updateStatus("Submitting to Turnitin...")
 			updateProgress(10) // update the progress bar
 
-			val classId = TurnitinLtiService.classIdFor(assignment, turnitinLtiService.classPrefix)
-			val assignmentId = TurnitinLtiService.assignmentIdFor(assignment)
-			val className = TurnitinLtiService.classNameFor(assignment)
-			val assignmentName = TurnitinLtiService.assignmentNameFor(assignment)
-
 			debug(s"Submitting assignment in ${classId.value}, ${assignmentId.value}")
 
-//			val userEmail = if (user.email == null || user.email.isEmpty) user.firstName + user.lastName + "@TurnitinLti.warwick.ac.uk" else user.email
-
-			val submitAssignmentResponse = turnitinLtiService.submitAssignment(assignmentId, assignmentName, classId, className, job.user)
+			val submitAssignmentResponse = turnitinLtiService.submitAssignment(assignment, job.user)
 
 			if (!submitAssignmentResponse.success){
 				throw new FailedJobException("Failed to submit assignment '" + assignment.name +"' - " + Some(submitAssignmentResponse.statusMessage))
@@ -88,21 +78,15 @@ class SubmitToTurnitinLtiJob extends Job
 						submission.allAttachments.foreach(attachment => {
 							 val token: FileAttachmentToken = getToken(attachment)
 
-	//						val attachmentAccessUrl = s"$topLevelUrl/scheduling/turnitin/submission/${submission.id}/attachment/${attachment.id}/test.doc?token=${token.id}"
-//							val attachmentAccessUrl = "https://files.warwick.ac.uk/sarahotoole/files/ab/test.doc"
-
 							val attachmentAccessUrl = Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)
-
 							// TODO we need to ensure we don't resubmit the same papers again.
 
-							// not actually the email firstname and lastname of the student, as per existing job...
-							// check that the response was successful
-							val submitResponse = turnitinLtiService.submitPaper(assignment.turnitinId, attachmentAccessUrl, s"${submission.userId}@TurnitinLti.warwick.ac.uk",
-																															submission.userId, "Student")
+							// not actually the email firstname and lastname of the student, as per existing job.
+							val submitResponse = turnitinLtiService.submitPaper(assignment, attachmentAccessUrl,
+										s"${submission.userId}@TurnitinLti.warwick.ac.uk",attachment.name, submission.userId, "Student")
 							// TODO keep track of failed uploads
 							debug("submitResponse: " + submitResponse)
 							if (!submitResponse.success) {
-								//throw new FailedJobException("Failed to upload '" + attachment.name +"' - " + submitResponse.message)
 								logger.warn("Failed to upload '" + attachment.name + "' - " + submitResponse.statusMessage)
 								includesFailedSubmissions = true
 							} else {
@@ -112,8 +96,8 @@ class SubmitToTurnitinLtiJob extends Job
 					})
 
 					allPapersSubmitted = true
-					// TODO need to go through each one, get results from Turnigin, then update the OriginalityReport
-					// TODO - set job as successful once we have a report for each submission
+					// TODO go through each one, get results from Turnitin, then update the OriginalityReport
+					// TODO set job as successful once we have a report for each submission
 					retries = WaitingRetries
 				}
 				retries += 1

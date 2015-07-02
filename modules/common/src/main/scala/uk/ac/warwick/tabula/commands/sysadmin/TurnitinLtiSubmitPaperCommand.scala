@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.springframework.validation.Errors
 import java.net.{MalformedURLException, URL}
+import uk.ac.warwick.tabula.data.model.Assignment
 
 object TurnitinLtiSubmitPaperCommand {
 	def apply(user: CurrentUser) =
@@ -33,7 +34,8 @@ class TurnitinLtiSubmitPaperCommandInternal(val user: CurrentUser) extends Comma
 
 		val userEmail = if (user.email == null || user.email.isEmpty) user.firstName + user.lastName + "@TurnitinLti.warwick.ac.uk" else user.email
 
-		turnitinLtiService.submitPaper(turnitinAssignmentId, paperUrl, userEmail, user.universityId, "SYSADMIN")
+		// TODO fix!
+		turnitinLtiService.submitPaper(assignment, paperUrl, userEmail, "test.doc", user.universityId, "SYSADMIN")
 
 	}
 
@@ -49,8 +51,8 @@ trait TurnitinLtiSubmitPaperValidation extends SelfValidating {
 	self: TurnitinLtiSubmitPaperCommandState =>
 
 	override def validate(errors: Errors) {
-		if (turnitinAssignmentId.isEmptyOrWhitespace) {
-			errors.rejectValue("turnitinAssignmentId", "turnitin.paper.empty")
+		if (assignment.turnitinId.isEmptyOrWhitespace) {
+			errors.rejectValue("assignment", "assignment.turnitinid.empty")
 		}
 		if (paperUrl.isEmptyOrWhitespace) {
 			errors.rejectValue("paperUrl", "turnitin.paperurl.empty")
@@ -72,5 +74,5 @@ trait TurnitinLtiSubmitPaperValidation extends SelfValidating {
 
 trait TurnitinLtiSubmitPaperCommandState {
 	var paperUrl: String = _
-	var turnitinAssignmentId: String = _
+	var assignment: Assignment = _
 }
