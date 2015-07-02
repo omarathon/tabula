@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import org.hibernate.ObjectNotFoundException
+import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
@@ -53,7 +54,7 @@ abstract class AbstractTriggerService extends TriggerService with Logging {
 
 				executeTrigger(trigger) match {
 					case Some(triggerResult) =>
-						trigger.completed = true
+						trigger.completedDate = DateTime.now
 						triggerDao.save(trigger)
 					case _ =>
 				}

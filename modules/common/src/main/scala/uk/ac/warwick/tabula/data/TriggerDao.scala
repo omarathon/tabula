@@ -27,7 +27,7 @@ class TriggerDaoImpl extends TriggerDao with Daoisms {
 
 	override def triggersToRun(limit: Int): Seq[Trigger[_  >: Null <: ToEntityReference, _]] = {
 		session.newCriteria[Trigger[_  >: Null <: ToEntityReference, _]]
-			.add(Restrictions.ne("completed", true))
+			.add(Restrictions.isNotNull("completedDate"))
 			.add(Restrictions.le("scheduledDate", DateTime.now))
 			.addOrder(Order.asc("scheduledDate"))
 			.setMaxResults(limit)

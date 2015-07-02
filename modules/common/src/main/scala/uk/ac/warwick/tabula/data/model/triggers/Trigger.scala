@@ -22,8 +22,8 @@ abstract class Trigger[A >: Null <: ToEntityReference, B] extends GeneratedId wi
 	@BeanProperty
 	var target: EntityReference[A] = null
 
-	@NotNull
-	var completed: Boolean = false
+	@Column(name="completed_date")
+	var completedDate: DateTime = null
 
 	def updateTarget(targetEntity: ToEntityReference): Unit = {
 		target = Option(targetEntity).map { e =>
