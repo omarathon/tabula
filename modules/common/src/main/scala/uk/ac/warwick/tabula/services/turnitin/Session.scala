@@ -1,14 +1,15 @@
-package uk.ac.warwick.tabula.coursework.services.turnitin
+package uk.ac.warwick.tabula.services.turnitin
+
+import java.io.IOException
 
 import dispatch.classic._
 import dispatch.classic.mime.Mime._
-import java.io.IOException
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.content.FileBody
+import org.xml.sax.SAXParseException
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.Products._
-import org.xml.sax.SAXParseException
 
 /**
  * Acquired from a call to Turnitin.login(), this will call Turnitin methods as a particular
@@ -70,14 +71,12 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 			logger.debug("Response: " + response)
 			response
 		} catch {
-			case e: IOException => {
+			case e: IOException =>
 				logger.error("Exception contacting Turnitin", e)
 				new TurnitinResponse(code = 9000, diagnostic = Some(e.getMessage))
-			}
-			case e: SAXParseException => {
+			case e: SAXParseException =>
 				logger.error("Unexpected response from Turnitin", e)
 				new TurnitinResponse(code = 9001, diagnostic = Some (e.getMessage))
-			}
 		}
 	}
 	
@@ -95,7 +94,7 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	
 	def calculateParameters(functionId: String, params: (String, String)*) = {
 		val parameters = (Map("fid" -> functionId) ++ commonParameters ++ params).filterNot(nullValue)
-		(parameters + md5hexparam(parameters))
+		parameters + md5hexparam(parameters)
 	}
 
 	/**
@@ -119,10 +118,9 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 				if (diagnostic) req >- { (text) => TurnitinResponse.fromDiagnostic(text) }
 				else transform(req))
 		} catch {
-			case e: IOException => {
+			case e: IOException =>
 				logger.error("Exception contacting Turnitin", e)
 				new TurnitinResponse(code = 9000, diagnostic = Some(e.getMessage))
-			}
 		}
 	}
 
@@ -152,7 +150,7 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 		"uln" -> userLastName,
 		"utp" -> "2",
 		"dis" -> "1", // disable emails
-		"src" -> turnitin.integrationId) ++ (subAccountParameter) ++ (sessionIdParameter)
+		"src" -> turnitin.integrationId) ++ subAccountParameter ++ sessionIdParameter
 
 	/** Optional sub-account ID */ 
 	private def subAccountParameter: Map[String, String] = 
@@ -170,7 +168,7 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	}
 
 	/** The md5 signature to add to the request parameter map. */
-	def md5hexparam(map: Map[String, String]) = ("md5" -> md5hex(map))
+	def md5hexparam(map: Map[String, String]) = "md5" -> md5hex(map)
 
 	/**
 	 * Sort parameters by key, concatenate all the values with

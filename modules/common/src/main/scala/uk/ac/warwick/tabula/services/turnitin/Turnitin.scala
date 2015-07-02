@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework.services.turnitin
+package uk.ac.warwick.tabula.services.turnitin
 
 import java.io.File
 
@@ -6,12 +6,12 @@ import dispatch.classic.Request.toRequestVerbs
 import dispatch.classic._
 import dispatch.classic.thread.ThreadSafeHttpClient
 import org.apache.commons.io.FilenameUtils.getExtension
-import org.apache.http.{HttpRequest, HttpResponse}
 import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.apache.http.impl.client.DefaultRedirectStrategy
 import org.apache.http.protocol.HttpContext
-import org.springframework.beans.factory.{DisposableBean, InitializingBean}
+import org.apache.http.{HttpRequest, HttpResponse}
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.{DisposableBean, InitializingBean}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
@@ -115,14 +115,13 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 		session.userFirstName = firstName
 		session.userLastName = lastName
 		session.login() match {
-			case Created(sessionId) if sessionId != "" => {
+			case Created(sessionId) if sessionId != "" =>
 				val session = new Session(this, sessionId)
 				session.userEmail = userEmail
 				session.userFirstName = firstName
 				session.userLastName = lastName
 				session.acquireUserId()
 				Some(session)
-			}
 			case _ => None
 		}
 	}

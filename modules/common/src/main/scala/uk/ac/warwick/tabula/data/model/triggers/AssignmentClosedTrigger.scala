@@ -3,10 +3,13 @@ package uk.ac.warwick.tabula.data.model.triggers
 import javax.persistence.{DiscriminatorValue, Entity, Inheritance, InheritanceType}
 
 import org.joda.time.DateTime
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.coursework.assignments.ReleaseForMarkingCommand
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, ToEntityReference}
+import uk.ac.warwick.tabula.jobs.coursework.SubmitToTurnitinJob
+import uk.ac.warwick.tabula.services.jobs.{JobService, AutowiringJobServiceComponent}
 import uk.ac.warwick.userlookup.AnonymousUser
 
 import scala.collection.JavaConverters._
@@ -23,9 +26,12 @@ object AssignmentClosedTrigger {
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue(value="AssignmentClosed")
-class AssignmentClosedTrigger	extends Trigger[Assignment, Seq[Feedback]] {
+class AssignmentClosedTrigger	extends Trigger[Assignment, Unit] {
 
-	override def apply(): Seq[Feedback] = transactional() {
+	@transient
+	var jobService = Wire[JobService]
+
+	override def apply() = transactional() {
 		val assignment = target.entity
 
 		if (assignment.isClosed) {
@@ -36,11 +42,9 @@ class AssignmentClosedTrigger	extends Trigger[Assignment, Seq[Feedback]] {
 				releaseToMarkersCommand.confirm = true
 				releaseToMarkersCommand.onBind(null)
 				releaseToMarkersCommand.apply()
-			} else {
-				Seq()
+			} else if (assignment.automaticallySubmitToTurnitin) {
+				jobService.add(None, SubmitToTurnitinJob(assignment))
 			}
-		} else {
-			Seq()
 		}
 
 	}

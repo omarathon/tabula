@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework.services.turnitin
+package uk.ac.warwick.tabula.services.turnitin
 
 import java.util.Properties
 import java.io.FileInputStream
