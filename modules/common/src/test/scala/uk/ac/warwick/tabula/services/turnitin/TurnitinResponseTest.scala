@@ -1,16 +1,15 @@
-package uk.ac.warwick.tabula.coursework.services.turnitin
+package uk.ac.warwick.tabula.services.turnitin
 
 import uk.ac.warwick.tabula.TestBase
 
 import scala.xml.XML
-import org.junit.Test
 
 class TurnitinResponseTest extends TestBase {
 
-	@Test def submissionsList = {
+	@Test def submissionsList() = {
 		val response = TurnitinResponse.fromXml( XML.loadString(PartlyScoredSubmissions) )
 		response.submissionsList.size should be (10)
-		response.submissionsList.filter( _.hasBeenChecked ).size should be (4)
+		response.submissionsList.count(_.hasBeenChecked) should be (4)
 	}
 	
 	val PartlyScoredSubmissions = """

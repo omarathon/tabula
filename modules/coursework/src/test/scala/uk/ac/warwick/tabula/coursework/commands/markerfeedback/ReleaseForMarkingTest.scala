@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
 import org.joda.time.DateTime
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.coursework.commands.assignments.ReleaseForMarkingCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.ReleaseForMarkingCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent, FeedbackService, FeedbackServiceComponent, StateService, StateServiceComponent}
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}

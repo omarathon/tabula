@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework.services.turnitin
+package uk.ac.warwick.tabula.services.turnitin
 
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.FileAttachment
@@ -7,13 +7,13 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 class TurnitinSubmissionInfoTest extends TestBase {
 
 	@Test
-	def matchingAttachments {
+	def matchingAttachments() {
 		val attachment = new FileAttachment
 		attachment.id = "12345"
 			
-		newSubmissionInfoWithTitle("12345").matches(attachment) should be(true)
-		newSubmissionInfoWithTitle("12346").matches(attachment) should be(false)
-		newSubmissionInfoWithTitle("what on earth is this").matches(attachment) should be(false)
+		newSubmissionInfoWithTitle("12345").matches(attachment) should be {true}
+		newSubmissionInfoWithTitle("12346").matches(attachment) should be {false}
+		newSubmissionInfoWithTitle("what on earth is this").matches(attachment) should be {false}
 	}
 
 	private def newSubmissionInfoWithTitle(title: String) =

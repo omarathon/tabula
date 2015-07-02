@@ -12,9 +12,10 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{BooleanFormValue, FormValue, SavedFormValue}
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{SubmissionDueGeneralNotification, SubmissionDueWithExtensionNotification, SubmissionReceiptNotification, SubmissionReceivedNotification}
+import uk.ac.warwick.tabula.data.model.triggers.{SubmissionAfterCloseDateTrigger, Trigger}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringCourseworkSubmissionService
-import uk.ac.warwick.tabula.services.{ProfileService, MonitoringPointProfileTermAssignmentService, SubmissionService, ZipService}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
 
 import scala.collection.JavaConverters._
@@ -24,7 +25,8 @@ class SubmitAssignmentCommand(
 	val assignment: Assignment,
 	val user: CurrentUser
 ) extends Command[Submission] with SelfValidating with BindListener
-	with Notifies[Submission, Submission] with CompletesNotifications[Submission] {
+	with Notifies[Submission, Submission] with CompletesNotifications[Submission]
+	with GeneratesTriggers[Submission] {
 
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Create, assignment)
@@ -118,6 +120,7 @@ class SubmitAssignmentCommand(
 	override def applyInternal() = transactional() {
 		assignment.submissions.asScala.find(_.isForUser(user.apparentUser)).foreach { existingSubmission =>
 			if (assignment.resubmittable(user.apparentUser)) {
+				triggerService.removeExistingTriggers(existingSubmission)
 				service.delete(existingSubmission)
 			} else { // Validation should prevent ever reaching here.
 				throw new IllegalArgumentException("Submission already exists and can't overwrite it")
@@ -203,5 +206,13 @@ class SubmitAssignmentCommand(
 				).getOrElse(Seq()),
 			user.apparentUser
 		)
+	}
+
+	override def generateTriggers(commandResult: Submission): Seq[Trigger[_ >: Null <: ToEntityReference, _]] = {
+		if (commandResult.isLate || commandResult.isAuthorisedLate) {
+			Seq(SubmissionAfterCloseDateTrigger(DateTime.now, commandResult))
+		} else {
+			Seq()
+		}
 	}
 }

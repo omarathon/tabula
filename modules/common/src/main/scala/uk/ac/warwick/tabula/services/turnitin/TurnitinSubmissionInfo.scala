@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework.services.turnitin
+package uk.ac.warwick.tabula.services.turnitin
 
 import uk.ac.warwick.tabula.data.model.FileAttachment
 

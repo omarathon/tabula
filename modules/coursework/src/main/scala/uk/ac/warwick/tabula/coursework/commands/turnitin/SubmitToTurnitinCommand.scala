@@ -1,18 +1,15 @@
 package uk.ac.warwick.tabula.coursework.commands.turnitin
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.coursework.services.turnitin._
-import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.jobs.JobService
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.jobs.SubmitToTurnitinJob
-import collection.JavaConversions._
-import org.apache.commons.io.FilenameUtils
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.services.turnitin.Turnitin
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.jobs.coursework.SubmitToTurnitinJob
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.jobs.JobInstance
+import uk.ac.warwick.tabula.services.jobs.{JobInstance, JobService}
+
+import scala.collection.JavaConverters._
 
 /**
  * Creates a job that submits the assignment to Turnitin.
@@ -24,12 +21,12 @@ class SubmitToTurnitinCommand(val module: Module, val assignment: Assignment, va
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.CheckForPlagiarism, assignment)
 
-	var jobService = Wire.auto[JobService]
+	var jobService = Wire[JobService]
 
 	def applyInternal() = jobService.add(Option(user), SubmitToTurnitinJob(assignment))
 
 	def describe(d: Description) = d.assignment(assignment)
 
-	def incompatibleFiles = assignment.submissions flatMap { _.allAttachments } filterNot Turnitin.validFileType
+	def incompatibleFiles = assignment.submissions.asScala.flatMap{ _.allAttachments }.filterNot(Turnitin.validFileType)
 
 }

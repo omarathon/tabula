@@ -1,17 +1,11 @@
-package uk.ac.warwick.tabula.coursework.services.turnitin
+package uk.ac.warwick.tabula.services.turnitin
 
-
-import collection.JavaConverters._
 import java.io.File
 
-import TurnitinDates._
-import TurnitinMethods._
-
-import dispatch.classic.Request
-
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.util.web._
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.services.turnitin.TurnitinDates._
+import uk.ac.warwick.tabula.services.turnitin.TurnitinMethods._
+import uk.ac.warwick.util.web._
 
 abstract class Response(val message: String) {
 	def successful: Boolean
@@ -72,7 +66,7 @@ trait TurnitinMethods { self: Session =>
 			"create_session" -> "1") { request =>
 				request >:+ { (headers, request) =>
 					logger.debug("Login request")
-					logger.debug(headers.toString)
+					logger.debug(headers.toString())
 					request <> { (node) => TurnitinResponse.fromXml(node) }
 				}
 			}
@@ -154,7 +148,7 @@ trait TurnitinMethods { self: Session =>
 	 */
 	def acquireUserId() {
 		if (userId == "") {
-		    userId = getUserId.getOrElse(throw new IllegalStateException("Failed to get userid"))
+		    userId = getUserId().getOrElse(throw new IllegalStateException("Failed to get userid"))
 		}
 	}
 

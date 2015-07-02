@@ -197,7 +197,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 		command.onBind(errors)
 		command.validate(errors)
 
-		errors.hasErrors should be (false)
+		errors.hasErrors should be {false}
 		// TAB-2025
 		verify(command.termService, times(0)).getTermFromAcademicWeek(any[Int], any[AcademicYear], any[Boolean])
 	}}
@@ -323,6 +323,7 @@ object AgentPointRecordCommandTest {
 		bean() { smartMock[NotificationService] }
 		bean() { smartMock[ScheduledNotificationService] }
 		bean() { smartMock[MaintenanceModeService] }
+		bean() { smartMock[TriggerService] }
 		bean() {
 			val permissionsService = mock[PermissionsService]
 			permissionsService.ensureUserGroupFor(anArgThat(anything), anArgThat(anything))(anArgThat(anything)) returns UserGroup.ofUsercodes

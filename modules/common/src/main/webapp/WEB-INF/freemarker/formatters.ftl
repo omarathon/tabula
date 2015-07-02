@@ -462,11 +462,12 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	<@bulk_email emails title subject />
 </#macro>
 
-<#macro help_popover id title="" content="">
+<#macro help_popover id title="" content="" html=false>
 	<a class="use-popover"
 	   id="popover-${id}"
 	   <#if title?has_content> data-title="${title}"</#if>
 	   data-content="${content}"
+	   <#if html>data-html="true"</#if>
 	>
 		<i class="icon-question-sign"></i>
 	</a>

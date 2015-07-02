@@ -1,24 +1,16 @@
 package uk.ac.warwick.tabula.helpers
 
-import java.io.IOException
-import java.io.File
-import java.io.FileOutputStream
-import java.net.URL
-import java.util.regex.Pattern
-import java.util.jar.JarFile
+import java.lang.reflect.Modifier
+import javax.persistence.DiscriminatorValue
+
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider
 import org.springframework.core.`type`.filter.AssignableTypeFilter
+import uk.ac.warwick.tabula.data.model.{Notification, StudentRelationshipType, ToEntityReference}
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsSelector, PermissionsTarget}
+import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, RoleDefinition, SelectorBuiltInRoleDefinition}
 
 import scala.collection.JavaConverters._
 import scala.reflect._
-import org.springframework.util.FileCopyUtils
-import com.google.common.base.Predicate
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
-import uk.ac.warwick.tabula.permissions.PermissionsSelector
-import uk.ac.warwick.tabula.data.model.{ToEntityReference, Notification, StudentRelationshipType}
-import javax.persistence.DiscriminatorValue
-import uk.ac.warwick.tabula.roles.{RoleDefinition, SelectorBuiltInRoleDefinition, BuiltInRoleDefinition}
-import java.lang.reflect.Modifier
 
 object ReflectionHelper extends Logging {
 	
@@ -52,7 +44,7 @@ object ReflectionHelper extends Logging {
 			val dots1: Int = shortName1.split('.').length
 			val dots2: Int = shortName2.split('.').length
 			
-			if (dots1 != dots2) (dots1 < dots2)
+			if (dots1 != dots2) dots1 < dots2
 			else shortName1 < shortName2
 		}
 
@@ -61,10 +53,10 @@ object ReflectionHelper extends Logging {
 			.sortWith(sortFn)
 			.map { clz =>
 				val constructor = clz.getConstructors()(0)
-				val params = constructor.getParameterTypes().map {
+				val params = constructor.getParameterTypes.map {
 					// FIXME hardcoded to the only type of permissions selector we have atm
-					case clz if clz == classOf[PermissionsSelector[StudentRelationshipType]] => PermissionsSelector.Any[StudentRelationshipType]
-					case clz => clz.newInstance().asInstanceOf[Object]
+					case clzInner if clzInner == classOf[PermissionsSelector[StudentRelationshipType]] => PermissionsSelector.Any[StudentRelationshipType]
+					case clzInner => clzInner.newInstance().asInstanceOf[Object]
 				}
 				
 				if (params.length == 0) constructor.newInstance().asInstanceOf[Permission]

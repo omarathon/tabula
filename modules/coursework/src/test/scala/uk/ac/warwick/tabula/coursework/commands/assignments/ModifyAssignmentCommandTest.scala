@@ -275,5 +275,6 @@ object ModifyAssignmentCommandTest {
 			sessionFactory
 		}
 		bean("dataSource"){mock[DataSource]}
+		bean(){mock[TriggerService]}
 	}
 }
