@@ -18,6 +18,8 @@ trait AutowriringTriggerDaoComponent extends TriggerDaoComponent{
 trait TriggerDao {
 	def triggersToRun(limit: Int): Seq[Trigger[_  >: Null <: ToEntityReference, _]]
 	def save(trigger: Trigger[_  >: Null <: ToEntityReference, _]): Unit
+	def getTriggers(entity: Any): Seq[Trigger[_  >: Null <: ToEntityReference, _]]
+	def delete(trigger: Trigger[_  >: Null <: ToEntityReference, _]): Unit
 }
 
 @Repository
@@ -35,5 +37,19 @@ class TriggerDaoImpl extends TriggerDao with Daoisms {
 	override def save(trigger: Trigger[_  >: Null <: ToEntityReference, _]): Unit = {
 		session.saveOrUpdate(trigger)
 	}
+
+	override def getTriggers(entity: Any) = {
+		val targetEntity = entity match {
+			case ref: ToEntityReference => ref.toEntityReference.entity
+			case _ => entity
+		}
+		session.newCriteria[Trigger[_  >: Null <: ToEntityReference, _]]
+			.createAlias("target", "target")
+			.add(Restrictions.eq("target.entity", targetEntity))
+			.addOrder(Order.asc("scheduledDate"))
+			.seq
+	}
+
+	override def delete(trigger: Trigger[_  >: Null <: ToEntityReference, _]) = session.delete(trigger)
 
 }

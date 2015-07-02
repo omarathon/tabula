@@ -20,7 +20,10 @@ abstract class AbstractTriggerService extends TriggerService with Logging {
 
 	val RunBatchSize = 10
 
-	def removeExistingTriggers(target: Any): Unit = {}
+	def removeExistingTriggers(target: Any): Unit = {
+		val exisitingTriggers = triggerDao.getTriggers(target)
+		exisitingTriggers.foreach(triggerDao.delete)
+	}
 
 	def push(trigger: Trigger[_ >: Null <: ToEntityReference, _]): Unit = {
 		triggerDao.save(trigger)

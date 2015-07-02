@@ -3,14 +3,8 @@ package uk.ac.warwick.tabula.data.model.triggers
 import javax.persistence.{DiscriminatorValue, Entity, Inheritance, InheritanceType}
 
 import org.joda.time.DateTime
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.coursework.assignments.ReleaseForMarkingCommand
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, ToEntityReference}
-import uk.ac.warwick.tabula.jobs.coursework.SubmitToTurnitinJob
-import uk.ac.warwick.tabula.services.jobs.{JobService, AutowiringJobServiceComponent}
-import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.tabula.data.model.{Assignment, ToEntityReference}
 
 import scala.collection.JavaConverters._
 
@@ -26,25 +20,13 @@ object AssignmentClosedTrigger {
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue(value="AssignmentClosed")
-class AssignmentClosedTrigger	extends Trigger[Assignment, Unit] {
+class AssignmentClosedTrigger	extends Trigger[Assignment, Unit] with HandlesAssignmentTrigger {
 
-	@transient
-	var jobService = Wire[JobService]
+	override def assignment = target.entity
 
 	override def apply() = transactional() {
-		val assignment = target.entity
-
 		if (assignment.isClosed) {
-			if (assignment.automaticallyReleaseToMarkers && assignment.hasWorkflow) {
-				val studentsWithSubmission = assignment.submissions.asScala.map(_.universityId)
-				val releaseToMarkersCommand = ReleaseForMarkingCommand(assignment.module, assignment, new AnonymousUser)
-				releaseToMarkersCommand.students = JArrayList(studentsWithSubmission)
-				releaseToMarkersCommand.confirm = true
-				releaseToMarkersCommand.onBind(null)
-				releaseToMarkersCommand.apply()
-			} else if (assignment.automaticallySubmitToTurnitin) {
-				jobService.add(None, SubmitToTurnitinJob(assignment))
-			}
+			handleAssignment(assignment.submissions.asScala.map(_.universityId))
 		}
 
 	}

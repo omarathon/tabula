@@ -222,7 +222,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 	}
 
 	override def generateTriggers(commandResult: Assignment): Seq[Trigger[_ >: Null <: ToEntityReference, _]] = {
-		if (commandResult.closeDate != null) {
+		if (commandResult.closeDate != null && commandResult.closeDate.isAfterNow) {
 			Seq(AssignmentClosedTrigger(commandResult.closeDate, commandResult))
 		} else {
 			Seq()
