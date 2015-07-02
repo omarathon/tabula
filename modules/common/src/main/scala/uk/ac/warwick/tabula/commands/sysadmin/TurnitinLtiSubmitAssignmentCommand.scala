@@ -30,15 +30,12 @@ class TurnitinLtiSubmitAssignmentCommandInternal(val user: CurrentUser) extends 
 
 	override def applyInternal() = transactional() {
 
-		val department = assignment.module.adminDepartment
 		val classId = TurnitinLtiService.classIdFor(assignment, turnitinLtiService.classPrefix)
 		val assignmentId = TurnitinLtiService.assignmentIdFor(assignment)
 		val className = TurnitinLtiService.classNameFor(assignment)
 		val assignmentName = TurnitinLtiService.assignmentNameFor(assignment)
 
 		debug(s"Submitting assignment in ${classId.value}, ${assignmentId.value}")
-
-		val userEmail = if (user.email == null || user.email.isEmpty) user.firstName + user.lastName + "@TurnitinLti.warwick.ac.uk" else user.email
 
 		turnitinLtiService.submitAssignment(assignmentId, assignmentName, classId, className, user)
 

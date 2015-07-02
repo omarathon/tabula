@@ -15,12 +15,14 @@ case class TurnitinLtiResponse(
 	val json: Option[String] = None,
 	val html: Option[String] = None,
 	val xml: Option[Elem] = None) extends Logging {
-//	def success = code <= 100
-//	def error = !success
 
-	lazy val submissionInfo = {
+	def turnitinSubmissionId(): String = {
+		(xml.get \\ "lis_result_sourcedid").text
+	}
 
-		// ugh
+	def submissionInfo() = {
+
+		// TODO do this properly
 			JSON.parseFull(json.get) match {
 			case Some(theJson: Map[String, Any] @unchecked) =>
 				theJson.get("outcome_originalityreport") match {
@@ -31,10 +33,14 @@ case class TurnitinLtiResponse(
 									logger.info("KEY: " + key)
 									logger.info("VALUE: " + value)
 								}
-								val publicationsScore = breakdowns.get("publications_score")
 
 								val submittedWorksScore = breakdowns.get("submitted_works_score")
 								val internetScore = breakdowns.get("internet_score")
+
+//								new TurnitinLtiSubmissionInfo()
+//								submissionInfo.similarityScore = submittedWorksScore
+//								submissionInfo.webOverlap = internetScore
+
 
 								reports.get("numeric") match {
 									case Some(numerics: Map[String, Double] @unchecked) =>
@@ -59,13 +65,7 @@ case class TurnitinLtiResponse(
 				}
 			case _ => Nil
 		}
-
-//		new TurnitinLtiSubmissionInfo(nume)
 	}
-//		yield {
-//			TurnitinLtiSubmissionInfo(null, null, publicationsScore, publicationsScore, publicationsScore, publicationsScore, publicationsScore, submittedWorksScore)
-//		}
-//	}
 
 }
 
@@ -76,24 +76,21 @@ object TurnitinLtiResponse extends Logging {
 	}
 
 	def fromJson(json: String) = {
-		//logger.info("Json response: " + json)
+		logger.info("Json response: " + json)
 		new TurnitinLtiResponse(true, json = Some(json))
 	}
 
-	def fromHtml(html: String) = {
+	def fromHtml(success: Boolean, html: String) = {
 		logger.info("html response: " + html)
-		new TurnitinLtiResponse(true, html = Some(html))
+		new TurnitinLtiResponse(success, html = Some(html))
 	}
 
-//	def fromXml(xml: String) = {
-//		logger.info("xml response: " + xml)
-//		new TurnitinLtiResponse(xml = Some(xml))
-//	}
-
 	def fromXml(xml: Elem) = {
+		logger.info(xml.text)
 		logger.info("status: " + (xml \\ "status").text)
 		logger.info("status message: " + (xml \\ "message").text)
-		new TurnitinLtiResponse((xml \\ "status").text.equals("success"), statusMessage = Some((xml \\ "message").text), xml = Some(xml))
+		logger.info("submission id: " + (xml \\ "lis_result_sourcedid").text)
+		new TurnitinLtiResponse((xml \\ "status").text.equals("fullsuccess"), statusMessage = Some((xml \\ "message").text), xml = Some(xml))
 	}
 
 }

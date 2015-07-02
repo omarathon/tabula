@@ -94,3 +94,11 @@ class OriginalityReportServiceImpl extends OriginalityReportService with Daoisms
 			.seq.headOption
 	}
 }
+
+trait OriginalityReportServiceComponent {
+	def originalityReportService: OriginalityReportService
+}
+
+trait AutowiringOriginalityReportServiceComponent extends OriginalityReportServiceComponent {
+	var originalityReportService = Wire[OriginalityReportService]
+}

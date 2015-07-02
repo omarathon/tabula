@@ -33,7 +33,7 @@ class TurnitinLtiSubmitPaperCommandInternal(val user: CurrentUser) extends Comma
 
 		val userEmail = if (user.email == null || user.email.isEmpty) user.firstName + user.lastName + "@TurnitinLti.warwick.ac.uk" else user.email
 
-		turnitinLtiService.submitPaper(turnitinAssignmentId, paperUrl, user)
+		turnitinLtiService.submitPaper(turnitinAssignmentId, paperUrl, userEmail, user.universityId, "SYSADMIN")
 
 	}
 
@@ -66,7 +66,6 @@ trait TurnitinLtiSubmitPaperValidation extends SelfValidating {
 				}
 			}
 		}
-
 	}
 
 }

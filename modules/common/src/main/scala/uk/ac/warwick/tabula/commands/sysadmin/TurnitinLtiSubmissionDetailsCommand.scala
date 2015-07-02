@@ -17,7 +17,7 @@ object TurnitinLtiSubmissionDetailsCommand {
 	def apply(user: CurrentUser) =
 		new TurnitinLtiSubmissionDetailsCommandInternal(user)
 				with TurnitinLtiSubmissionDetailsCommandPermissions
-				with ComposableCommand[Boolean]
+				with ComposableCommand[TurnitinLtiResponse]
 			with ReadOnly with Unaudited
 			with TurnitinLtiSubmissionDetailsCommandState
 			with TurnitinLtiSubmissionDetailsValidation
@@ -25,18 +25,14 @@ object TurnitinLtiSubmissionDetailsCommand {
 			with Logging
 }
 
-class TurnitinLtiSubmissionDetailsCommandInternal(val user: CurrentUser) extends CommandInternal[Boolean]{
+class TurnitinLtiSubmissionDetailsCommandInternal(val user: CurrentUser) extends  CommandInternal[TurnitinLtiResponse] {
 
 	self: TurnitinLtiSubmissionDetailsCommandState with TurnitinLtiServiceComponent with Logging =>
 
 	override def applyInternal() = transactional() {
 
-//		debug(s"Submitting assignment in ${classId.value}, ${assignmentId.value}")
-//
-		val userEmail = if (user.email == null || user.email.isEmpty) user.firstName + user.lastName + "@TurnitinLti.warwick.ac.uk" else user.email
-
 		turnitinLtiService.getSubmissionDetails(turnitinSubmissionId, user)
-		false
+
 	}
 
 }
@@ -58,6 +54,5 @@ trait TurnitinLtiSubmissionDetailsValidation extends SelfValidating {
 }
 
 trait TurnitinLtiSubmissionDetailsCommandState {
-//	var assignment: Assignment = _
 	var turnitinSubmissionId: String = _
 }

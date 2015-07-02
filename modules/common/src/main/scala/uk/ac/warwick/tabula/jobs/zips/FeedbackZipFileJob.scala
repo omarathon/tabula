@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.jobs.JobPrototype
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, AutowiringZipServiceComponent}
 import collection.JavaConverters._
+import uk.ac.warwick.tabula.data.Transactions._
 
 object FeedbackZipFileJob {
 	val identifier = "feedback-zip-file"
@@ -30,16 +31,18 @@ class FeedbackZipFileJob extends ZipFileJob with AutowiringZipServiceComponent w
 		implicit private val _job: JobInstance = job
 
 		def run(): Unit = {
-			val feedbacks = job.getStrings(FeedbackZipFileJob.FeedbacksKey).flatMap(feedbackService.getAssignmentFeedbackById)
+			 transactional() {
+				val feedbacks = job.getStrings(FeedbackZipFileJob.FeedbacksKey).flatMap(feedbackService.getAssignmentFeedbackById)
 
-			updateProgress(0)
-			updateStatus("Initialising")
+				updateProgress(0)
+				updateStatus("Initialising")
 
-			val zipFile = zipService.getSomeFeedbacksZip(feedbacks, updateZipProgress)
-			job.setString(ZipFileJob.ZipFilePathKey, zipFile.getPath)
+				val zipFile = zipService.getSomeFeedbacksZip(feedbacks, updateZipProgress)
+				job.setString(ZipFileJob.ZipFilePathKey, zipFile.getPath)
 
-			updateProgress(100)
-			job.succeeded = true
+				updateProgress(100)
+				job.succeeded = true
+			}
 		}
 	}
 }

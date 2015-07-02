@@ -107,25 +107,3 @@ class TurnitinLtiSubmissionDetailsController extends BaseSysadminController {
 			Redirect("/sysadmin/turnitinlti")
 		}
 }
-
-@Controller
-@RequestMapping(value = Array("/sysadmin/turnitinlti/viewreport"))
-class TurnitinLtiViewReportController extends BaseSysadminController {
-
-	validatesSelf[SelfValidating]
-
-	@ModelAttribute("turnitinLtiViewReportCommand")
-	def turnitinLtiViewReportCommand(user: CurrentUser) = TurnitinLtiViewReportCommand(user)
-
-	@annotation.RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("sysadmin/turnitinlti/view-report")
-
-	@annotation.RequestMapping(method=Array(POST))
-	def add(@Valid @ModelAttribute("turnitinLtiViewReportCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors) =
-		if (errors.hasErrors){
-			form()
-		} else {
-			cmd.apply()
-			Redirect("/sysadmin/turnitinlti")
-		}
-}

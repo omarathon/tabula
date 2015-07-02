@@ -17,7 +17,7 @@ object TurnitinLtiListEndpointsCommand {
 	def apply(user: CurrentUser) =
 		new TurnitinLtiListEndpointsCommandInternal(user)
 			with TurnitinLtiListEndpointsCommandPermissions
-			with ComposableCommand[Boolean]
+			with ComposableCommand[TurnitinLtiResponse]
 			with ReadOnly with Unaudited
 			with TurnitinLtiListEndpointsCommandState
 			with TurnitinLtiListEndpointsValidation
@@ -25,24 +25,12 @@ object TurnitinLtiListEndpointsCommand {
 			with Logging
 }
 
-class TurnitinLtiListEndpointsCommandInternal(val user: CurrentUser) extends CommandInternal[Boolean] {
+class TurnitinLtiListEndpointsCommandInternal(val user: CurrentUser) extends CommandInternal[TurnitinLtiResponse] {
 
 	self: TurnitinLtiListEndpointsCommandState with TurnitinLtiServiceComponent with Logging =>
 
 	override def applyInternal() = transactional() {
-
-//		val department = assignment.module.adminDepartment
-//		val classId = TurnitinLti.classIdFor(assignment, api.classPrefix)
-//		val assignmentId = TurnitinLti.assignmentIdFor(assignment)
-//		val className = TurnitinLti.classNameFor(assignment)
-//		val assignmentName = TurnitinLti.assignmentNameFor(assignment)
-//
-//		debug(s"Submitting assignment in ${classId.value}, ${assignmentId.value}")
-//
-		val userEmail = if (user.email == null || user.email.isEmpty) user.firstName + user.lastName + "@TurnitinLti.warwick.ac.uk" else user.email
-
 		turnitinLtiService.listEndpoints(turnitinAssignmentId, user)
-		false
 	}
 
 }

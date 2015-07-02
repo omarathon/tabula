@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.{FileAttachment, StudentMember}
 import uk.ac.warwick.tabula.jobs.{Job, JobPrototype}
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringProfileServiceComponent, AutowiringZipServiceComponent}
+import uk.ac.warwick.tabula.data.Transactions._
 
 import scala.collection.JavaConverters._
 
@@ -36,33 +37,35 @@ class ProfileExportJob extends Job with AutowiringZipServiceComponent
 		implicit private val _job: JobInstance = job
 
 		def run(): Unit = {
-			val studentIDs = job.getStrings(ProfileExportJob.StudentKey)
-			val students = profileService.getAllMembersWithUniversityIds(studentIDs).flatMap{
-				case student: StudentMember => Some(student)
-				case _ => None
+			transactional() {
+				val studentIDs = job.getStrings(ProfileExportJob.StudentKey)
+				val students = profileService.getAllMembersWithUniversityIds(studentIDs).flatMap{
+					case student: StudentMember => Some(student)
+					case _ => None
+				}
+				val academicYear = AcademicYear.parse(job.getString(ProfileExportJob.AcademicYearKey))
+
+				updateProgress(0)
+
+				val results: Map[String, Seq[FileAttachment]] = students.zipWithIndex.map{case(student, index) =>
+					updateStatus(ProfileExportJob.status(student.universityId))
+
+					val result = ProfileExportSingleCommand(student, academicYear, job.user).apply()
+
+					updateProgress(index + 1, students.size)
+
+					student.universityId -> result
+				}.toMap
+
+				updateProgress(100)
+
+				updateStatus(ProfileExportJob.BuildingZip)
+
+				val zipFile = zipService.getProfileExportZip(results)
+				job.setString(ProfileExportJob.ZipFilePathKey, zipFile.getPath)
+
+				job.succeeded = true
 			}
-			val academicYear = AcademicYear.parse(job.getString(ProfileExportJob.AcademicYearKey))
-
-			updateProgress(0)
-
-			val results: Map[String, Seq[FileAttachment]] = students.zipWithIndex.map{case(student, index) =>
-				updateStatus(ProfileExportJob.status(student.universityId))
-
-				val result = ProfileExportSingleCommand(student, academicYear, job.user).apply()
-
-				updateProgress(index + 1, students.size)
-
-				student.universityId -> result
-			}.toMap
-
-			updateProgress(100)
-
-			updateStatus(ProfileExportJob.BuildingZip)
-
-			val zipFile = zipService.getProfileExportZip(results)
-			job.setString(ProfileExportJob.ZipFilePathKey, zipFile.getPath)
-			
-			job.succeeded = true
 		}
 	}
 }
