@@ -31,15 +31,15 @@
 				   data-title="Tier 4 Filtering"
 				   data-placement="bottom"
 				   data-html="true"
-				   data-content="${introText}"><i class="icon-question-sign"></i></a>
+				   data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 			</#if>
 
 
 			<div class="student-filter btn-group-group well well-small">
 				<button type="button" class="clear-all-filters btn btn-link">
-					<span class="icon-stack">
-						<i class="icon-filter"></i>
-						<i class="icon-ban-circle icon-stack-base"></i>
+					<span class="icon-stack fa fa-stack">
+						<i class="icon-filter fa fa-filter"></i>
+						<i class="icon-ban-circle fa fa-ban icon-stack-base fa fa-stack-base"></i>
 					</span>
 				</button>
 
@@ -114,7 +114,7 @@
 				<#assign routesCustomPicker>
 					<div class="route-search input-append">
 						<input class="route-search-query route prevent-reload" type="text" value="" placeholder="Search for a route" />
-						<span class="add-on"><i class="icon-search"></i></span>
+						<span class="add-on"><i class="icon-search fa fa-search"></i></span>
 					</div>
 				</#assign>
 				<@filter path="routes" placeholder=placeholder currentFilter=currentfilter allItems=filterCommand.allRoutes validItems=filterCommand.visibleRoutes customPicker=routesCustomPicker; route, isValid>
@@ -149,7 +149,7 @@
 				<#assign modulesCustomPicker>
 					<div class="module-search input-append">
 						<input class="module-search-query module prevent-reload" type="text" value="" placeholder="Search for a module" />
-						<span class="add-on"><i class="icon-search"></i></span>
+						<span class="add-on"><i class="icon-search fa fa-search"></i></span>
 					</div>
 				</#assign>
 				<#assign currentfilter><@current_filter_value "modules" placeholder; module>${module.code?upper_case}</@current_filter_value></#assign>
@@ -209,7 +209,7 @@
 							.append(
 								$('<button />').attr('type', 'button')
 									.addClass('btn btn-link')
-									.html('<i class="icon-ban-circle"></i> Clear selected items')
+									.html('<i class="icon-ban-circle fa fa-ban"></i> Clear selected items')
 									.on('click', function(e) {
 										$list.find('input:checked').each(function() {
 											var $checkbox = $(this);
