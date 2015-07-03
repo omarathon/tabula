@@ -14,7 +14,10 @@ trait TriggerHandling {
 
 		cmd match {
 			case gt: GeneratesTriggers[A @unchecked] =>
-				triggerService.removeExistingTriggers(result)
+				result match {
+					case iterable: Iterable[_] => iterable.foreach(triggerService.removeExistingTriggers)
+					case single => triggerService.removeExistingTriggers(single)
+				}
 				gt.generateTriggers(result).foreach(triggerService.push)
 			case _ =>
 		}
