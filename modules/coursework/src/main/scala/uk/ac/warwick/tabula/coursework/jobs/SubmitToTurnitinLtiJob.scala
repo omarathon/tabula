@@ -79,7 +79,11 @@ class SubmitToTurnitinLtiJob extends Job
 							 val token: FileAttachmentToken = getToken(attachment)
 
 							val attachmentAccessUrl = Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)
+
+							// TODO remove submissions no longer in the assignment
+
 							// TODO we need to ensure we don't resubmit the same papers again.
+							// There is a resubmission endpoint which we can use
 
 							// not actually the email firstname and lastname of the student, as per existing job.
 							val submitResponse = turnitinLtiService.submitPaper(assignment, attachmentAccessUrl,

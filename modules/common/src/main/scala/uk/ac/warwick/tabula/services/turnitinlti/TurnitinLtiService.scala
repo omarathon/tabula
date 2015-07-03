@@ -55,6 +55,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 	/** Shared key as set up on the University of Warwick account's LTI settings */
 	@Value("${TurnitinLti.key}") var sharedSecretKey: String = null
 
+	// TODO only need the base url
 	@Value("${TurnitinLti.submitassignment.url}") var apiSubmitAssignment: String = _
 	@Value("${TurnitinLti.submitpaper.url}") var apiSubmitPaperEndpoint: String = _
 	@Value("${TurnitinLti.listendpoints.url}") var apiListEndpoints: String = _
