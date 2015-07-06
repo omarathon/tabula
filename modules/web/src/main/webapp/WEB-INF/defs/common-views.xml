@@ -4,11 +4,12 @@
 		"http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
 <tiles-definitions>
 
-	<!-- Standard ID6 layout. -->
+	<!-- Standard ID6 layout.
 	<definition name="base" template="/WEB-INF/freemarker/layouts/id6/base.ftl">
 		<put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
 		<put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
 	</definition>
+	-->
 
 	<!-- Standard ID7 layout.
 	<definition name="base" template="/WEB-INF/freemarker/layouts/id7/base.ftl">
@@ -17,14 +18,28 @@
 	</definition>
 	-->
 
+	<!-- Switchable layout. -->
+	<definition name="base" template="/WEB-INF/freemarker/layouts/base-id-switch.ftl">
+		<put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
+		<put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
+	</definition>
+
+
 	<!-- Bare layout - used for AJAX responses -->
 	<definition name="none" template="/WEB-INF/freemarker/layouts/none.ftl">
 		<put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
 		<put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
 	</definition>
 
-	<!-- Layout without navigation but including scripts and styles - used for iframes -->
+	<!-- Layout without navigation but including scripts and styles - used for iframes
 	<definition name="nonav" template="/WEB-INF/freemarker/layouts/id6/nonav.ftl">
+		<put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
+		<put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
+	</definition>
+	 -->
+
+	<!-- Switchable layout. -->
+	<definition name="nonav" template="/WEB-INF/freemarker/layouts/nonav-id-switch.ftl">
 		<put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
 		<put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
 	</definition>
