@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.{ImportCommandFactory, ImportRowTracker}
 import uk.ac.warwick.tabula.scheduling.services.{AccreditedPriorLearningImporter, MembershipInformation, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileIndexService, ProfileService, SmallGroupService, UserLookupService}
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.StudentMember
 
@@ -238,34 +238,33 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 		session.clear()
 	}
 
-	def refresh(member: Member) {
+	def refresh(universityId: String, userId: Option[String]) {
 		transactional() {
-			val warwickId = member.universityId
-			val user = userLookup.getUserByWarwickUniIdUncached(member.universityId, skipMemberLookup = true) match {
+			val user = userLookup.getUserByWarwickUniIdUncached(universityId, skipMemberLookup = true) match {
 				case FoundUser(u) => u
-				case _ => userLookup.getUserByUserId(member.userId)
+				case _ => userId.map(userLookup.getUserByUserId).getOrElse(new AnonymousUser)
 			}
 
 			val importCommandFactory = new ImportCommandFactory
 
-			profileImporter.membershipInfoForIndividual(member) match {
+			profileImporter.membershipInfoForIndividual(universityId) match {
 				case Some(membInfo: MembershipInformation) =>
 
 					// retrieve details for this student from SITS and store the information in Tabula
-					val importMemberCommands = profileImporter.getMemberDetails(List(membInfo), Map(warwickId -> user), importCommandFactory)
+					val importMemberCommands = profileImporter.getMemberDetails(List(membInfo), Map(universityId -> user), importCommandFactory)
 					if (importMemberCommands.isEmpty) logger.warn("Refreshing student " + membInfo.member.universityId + " but found no data to import.")
 					val members = importMemberCommands map { _.apply() }
 
 					// update missingFromSitsSince field in this student's member and course records:
-					updateMissingForIndividual(member, importCommandFactory.rowTracker)
+					updateMissingForIndividual(universityId, importCommandFactory.rowTracker)
 
 					session.flush()
 
 					updateVisa(importMemberCommands)
 
 					// re-import module registrations and delete old module and group registrations:
-					val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(warwickId -> user))
-					updateAccreditedPriorLearning(List(membInfo), Map(warwickId -> user))
+					val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(universityId -> user))
+					updateAccreditedPriorLearning(List(membInfo), Map(universityId -> user))
 					rationaliseRelationships(importMemberCommands)
 
 					// TAB-1435 refresh profile index
@@ -274,9 +273,15 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					for (thisMember <- members) session.evict(thisMember)
 					for (modReg <- newModuleRegistrations) session.evict(modReg)
 
-					logger.info("Data refreshed for " + member.universityId)
+					logger.info("Data refreshed for " + universityId)
 				case None => logger.warn("Student is no longer in uow_current_members in membership - not updating")
 			}
+		}
+	}
+
+	def updateMissingForIndividual(universityId: String, importRowTracker: ImportRowTracker): Unit = {
+		profileService.getMemberByUniversityIdStaleOrFresh(universityId).foreach { member =>
+			updateMissingForIndividual(member, importRowTracker)
 		}
 	}
 
