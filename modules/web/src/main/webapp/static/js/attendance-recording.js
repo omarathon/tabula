@@ -164,6 +164,10 @@ $(function(){
         e.preventDefault();
         $.get($(this).attr('href'), function(data){
             $('#meetings-modal .modal-body').html(data);
+			var $customHeader = $('#meetings-modal .modal-body').find('h3.modal-header').remove();
+			if ($customHeader.length > 0) {
+				$('#meetings-modal .modal-header h3').html($customHeader.html());
+			}
             $('#meetings-modal').modal("show");
             $('.use-popover').tabulaPopover({
                 trigger: 'click',
